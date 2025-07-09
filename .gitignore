@@ -1,0 +1,23 @@
+HELP.md
+.idea
+
+### VS Code ###
+.vscode/
+
+#log
+/logs
+*.log
+app_*.log.gz
+
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# .yml .properties
+*.yml
+*.properties
+
+# .github 디렉토리 내의 .yml 파일 예외 처리
+!.github/**/*.yml

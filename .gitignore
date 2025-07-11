@@ -21,3 +21,7 @@ app_*.log.gz
 
 # .github 디렉토리 내의 .yml 파일 예외 처리
 !.github/**/*.yml
+
+#Frontend
+node_modules
+dist

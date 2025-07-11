@@ -13,8 +13,8 @@ import me.bombom.api.v1.common.BaseEntity;
 @Entity
 @Getter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class Subscribe extends BaseEntity {
 
     @Id

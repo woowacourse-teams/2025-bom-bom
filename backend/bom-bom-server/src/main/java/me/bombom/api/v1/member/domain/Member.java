@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.bombom.api.v1.common.BaseEntity;
 import me.bombom.api.v1.member.enums.Gender;
+import org.hibernate.validator.constraints.UniqueElements;
 
 @Entity
 @Getter
@@ -29,6 +30,7 @@ public class Member extends BaseEntity {
     @Column(nullable = false, length = 30)
     private String email;
 
+    @UniqueElements
     @Column(unique = true)
     private String nickname;
 

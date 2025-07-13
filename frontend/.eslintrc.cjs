@@ -17,4 +17,9 @@ module.exports = {
   },
   plugins: ['jsx-a11y', 'n', 'promise', 'import', 'react-hooks', 'react'],
   parser: '@typescript-eslint/parser',
+  settings: {
+    react: {
+      version: 'detect',
+    },
+  },
 };

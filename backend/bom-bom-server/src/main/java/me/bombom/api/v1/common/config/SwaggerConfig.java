@@ -16,7 +16,8 @@ public class SwaggerConfig {
 
     private Info createInfo(){
         return new Info()
-                .title("봄봄 API")
-                .version("v1.0.0");
+                .title("봄봄 server API")
+                .version("v1.0.0")
+                .description("봄봄 서비스 공식 API 서버입니다.");
     }
 }

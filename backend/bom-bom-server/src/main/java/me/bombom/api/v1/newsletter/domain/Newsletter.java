@@ -17,7 +17,7 @@ import me.bombom.api.v1.common.BaseEntity;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class NewsLetter extends BaseEntity {
+public class Newsletter extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,4 +42,6 @@ public class NewsLetter extends BaseEntity {
     private String issueCycle;
 
     private Long categoryId;
+
+    private int subscribeCount;
 }

@@ -1,6 +1,7 @@
 package me.bombom.api.v1.newsletter.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
@@ -27,7 +28,7 @@ class NewsletterServiceTest {
     @Autowired
     private NewsletterDetailRepository newsletterDetailRepository;
 
-    List<Newsletter> newsletters;
+    private List<Newsletter> newsletters;
 
     @BeforeEach
     public void setup() {
@@ -59,7 +60,7 @@ class NewsletterServiceTest {
                     .imageUrl("https://cdn.bombom.me/img1.png")
                     .email("news@newspick.com")
                     .categoryId(1L)
-                    .detailId(1L)
+                    .detailId(newsletterDetails.get(0).getId())
                     .build(),
             Newsletter.builder()
                     .name("IT타임즈")
@@ -67,7 +68,7 @@ class NewsletterServiceTest {
                     .imageUrl("https://cdn.bombom.me/img2.png")
                     .email("editor@ittimes.io")
                     .categoryId(2L)
-                    .detailId(2L)
+                    .detailId(newsletterDetails.get(1).getId())
                     .build(),
             Newsletter.builder()
                     .name("비즈레터")
@@ -75,7 +76,7 @@ class NewsletterServiceTest {
                     .imageUrl("https://cdn.bombom.me/img3.png")
                     .email("biz@biz.com")
                     .categoryId(3L)
-                    .detailId(3L)
+                    .detailId(newsletterDetails.get(2).getId())
                     .build()
         );
         newsletterRepository.saveAll(newsletters);
@@ -87,6 +88,15 @@ class NewsletterServiceTest {
         List<NewsletterResponse> result = newsletterService.getNewsletters();
 
         //then
-        assertThat(result.size()).isEqualTo(newsletters.size());
+        assertAll(
+                () -> assertThat(result.size()).isEqualTo(newsletters.size()),
+                () -> assertThat(result)
+                    .extracting("newsletterId")
+                    .containsExactlyInAnyOrder(
+                            newsletters.get(0).getId(),
+                            newsletters.get(1).getId(),
+                            newsletters.get(2).getId()
+                    )
+        );
     }
 }

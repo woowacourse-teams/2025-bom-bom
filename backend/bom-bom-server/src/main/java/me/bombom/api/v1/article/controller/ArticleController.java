@@ -22,7 +22,7 @@ public class ArticleController {
             @PathVariable Long memberId,
             @RequestParam(required = false) LocalDate date,
             @RequestParam(required = false) String categoryName,
-            @RequestParam(required = false, defaultValue = "DESC") SortOption sortOption
+            @RequestParam(required = false, name = "sorted", defaultValue = "DESC") SortOption sortOption
     ) {
         return articleService.getArticles(memberId, date, categoryName, sortOption);
     }

@@ -25,12 +25,12 @@ public class WeeklyGoal extends BaseEntity {
     private Long id;
 
     @UniqueElements
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private Long memberId;
 
-    @Column(columnDefinition = "tinyint")
+    @Column(columnDefinition = "TINYINT", nullable = false)
     private int weeklyGoalCount;
 
-    @Column(columnDefinition = "tinyint")
+    @Column(columnDefinition = "TINYINT DEFAULT 0", nullable = false)
     private int currentCount;
 }

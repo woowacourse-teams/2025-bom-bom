@@ -6,16 +6,15 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:react-hooks/recommended',
     'plugin:jsx-a11y/recommended',
-    'plugin:n/recommended',
-    'plugin:promise/recommended',
     'plugin:import/recommended',
     'plugin:react/recommended',
+    'plugin:prettier/recommended',
   ],
   ignorePatterns: ['dist', '.eslintrc.js'],
   rules: {
     'react/react-in-jsx-scope': 'off',
   },
-  plugins: ['jsx-a11y', 'n', 'promise', 'import', 'react-hooks', 'react'],
+  plugins: ['jsx-a11y', 'import', 'react-hooks', 'react', 'prettier'],
   parser: '@typescript-eslint/parser',
   settings: {
     react: {

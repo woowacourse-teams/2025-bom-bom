@@ -51,9 +51,7 @@ class NewsletterServiceTest {
                     .subscribeCount(600)
                     .build()
             );
-
         newsletterDetailRepository.saveAll(newsletterDetails);
-
         newsletters = List.of(
             Newsletter.builder()
                     .name("뉴스픽")
@@ -80,7 +78,6 @@ class NewsletterServiceTest {
                     .detailId(3L)
                     .build()
         );
-
         newsletterRepository.saveAll(newsletters);
     }
 

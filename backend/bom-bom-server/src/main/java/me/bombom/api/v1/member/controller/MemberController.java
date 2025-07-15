@@ -2,7 +2,9 @@ package me.bombom.api.v1.member.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.member.dto.request.UpdateCurrentCountRequest;
 import me.bombom.api.v1.member.dto.request.UpdateWeeklyGoalRequest;
+import me.bombom.api.v1.member.dto.response.CurrentCountResponse;
 import me.bombom.api.v1.member.dto.response.WeeklyGoalResponse;
 import me.bombom.api.v1.member.service.MemberService;
 import org.springframework.http.HttpStatus;
@@ -23,5 +25,10 @@ public class MemberController {
     @PatchMapping("/me/reading/progress/week/goal")
     public WeeklyGoalResponse updateWeeklyGoal(@Valid @RequestBody UpdateWeeklyGoalRequest request){
         return memberService.updateWeeklyGoal(request);
+    }
+
+    @PatchMapping("/me/reading/progress/week/count")
+    public CurrentCountResponse updateCurrentCount(@Valid @RequestBody UpdateCurrentCountRequest request){
+        return memberService.updateCurrentCount(request);
     }
 }

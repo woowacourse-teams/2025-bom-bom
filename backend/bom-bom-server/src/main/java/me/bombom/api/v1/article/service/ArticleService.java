@@ -1,7 +1,6 @@
 package me.bombom.api.v1.article.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.dto.ArticleResponse;
@@ -35,7 +34,7 @@ public class ArticleService {
         validateExistMember(memberId);
         return articleRepository.findByMemberId(
                 memberId,
-                toStartOfDayDateTime(date),
+                date,
                 getCategoryIdByName(categoryName),
                 sortOption
         );
@@ -45,13 +44,6 @@ public class ArticleService {
         if (!memberRepository.existsById(memberId)) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND);
         }
-    }
-
-    private LocalDateTime toStartOfDayDateTime(LocalDate date) {
-        if (date == null) {
-            return null;
-        }
-        return date.atStartOfDay();
     }
 
     private Long getCategoryIdByName(String categoryName) {

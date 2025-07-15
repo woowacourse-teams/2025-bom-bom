@@ -2,7 +2,7 @@ package me.bombom.api.v1.article.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.dto.ArticleResponse;
@@ -16,7 +16,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     @Override
     public List<ArticleResponse> findByMemberId(
             Long memberId,
-            LocalDateTime date,
+            LocalDate date,
             Long categoryId,
             SortOption sortOption
     ) {
@@ -30,7 +30,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             WHERE a.memberId = :memberId
         """);
         if (date != null) {
-            jpql.append(" AND a.arrivedDateTime >= :date");
+            jpql.append(" AND a.arrivedDateTime >= :dateTime");
         }
         if (categoryId != null) {
             jpql.append(" AND n.categoryId = :categoryId");
@@ -41,7 +41,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 entityManager.createQuery(jpql.toString(), ArticleResponse.class);
         query.setParameter("memberId", memberId);
         if (date != null) {
-            query.setParameter("date", date);
+            query.setParameter("dateTime", date.atStartOfDay());
         }
         if (categoryId != null) {
             query.setParameter("categoryId", categoryId);

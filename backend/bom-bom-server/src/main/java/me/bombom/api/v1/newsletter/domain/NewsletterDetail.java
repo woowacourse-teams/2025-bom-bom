@@ -20,14 +20,16 @@ public class NewsletterDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length=512)
+    @Column(length=512, nullable = false)
     private String mainPageUrl;
 
-    @Column(length=512)
+    @Column(length=512, nullable = false)
     private String subscribeUrl;
 
+    @Column(nullable = false)
     private String issueCycle;
 
+    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
     private int subscribeCount;
 
     @Builder

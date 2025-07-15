@@ -24,9 +24,10 @@ public class Article extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
 
-    @Column(length = 512)
+    @Column(length = 512, nullable = false)
     private String articleUrl;
 
     @Column(length = 512)
@@ -35,13 +36,18 @@ public class Article extends BaseEntity {
     @Column(columnDefinition = "tinyint")
     private int expectedReadTime;
 
+    @Column(nullable = false)
     private String contentsSummary;
 
-    private boolean isRead;
+    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean isRead = false;
 
+    @Column(nullable = false)
     private Long memberId;
 
+    @Column(nullable = false)
     private Long newsletterId;
 
+    @Column(nullable = false)
     private LocalDateTime arrivedDateTime;
 }

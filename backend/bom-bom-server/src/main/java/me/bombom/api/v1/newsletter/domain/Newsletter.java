@@ -20,19 +20,23 @@ public class Newsletter extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private String description;
 
-    @Column(length = 512)
+    @Column(length = 512, nullable = false)
     private String imageUrl;
 
-    @Column(length = 30)
+    @Column(length = 30, nullable = false)
     private String email;
 
+    @Column(nullable = false)
     private Long categoryId;
 
+    @Column(nullable = false)
     private Long detailId;
 
     @Builder

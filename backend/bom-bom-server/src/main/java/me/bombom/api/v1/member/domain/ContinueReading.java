@@ -25,8 +25,9 @@ public class ContinueReading extends BaseEntity {
     private Long id;
 
     @UniqueElements
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private Long memberId;
 
+    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
     private int dayCount;
 }

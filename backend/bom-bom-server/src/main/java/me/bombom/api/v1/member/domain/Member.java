@@ -32,16 +32,18 @@ public class Member extends BaseEntity {
     private String email;
 
     @UniqueElements
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String nickname;
 
     @Column(length = 512)
-    private String profileUrl;
+    private String profileImageUrl;
 
     private LocalDateTime birthDate;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    private Long roleId;
+    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    private Long roleId = 0L;
 }

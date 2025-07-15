@@ -22,6 +22,6 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 20, nullable = false)
+    @Column(nullable = false, length = 20)
     private String authority;
 }

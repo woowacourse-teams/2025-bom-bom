@@ -25,7 +25,7 @@ public class ContinueReading extends BaseEntity {
     private Long id;
 
     @UniqueElements
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false, unique = true)
     private Long memberId;
 
     @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")

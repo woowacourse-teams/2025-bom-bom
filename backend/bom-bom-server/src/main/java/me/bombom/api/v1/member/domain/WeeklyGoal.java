@@ -5,18 +5,18 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import me.bombom.api.v1.common.BaseEntity;
 import org.hibernate.validator.constraints.UniqueElements;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class WeeklyGoal extends BaseEntity {
 
@@ -24,13 +24,29 @@ public class WeeklyGoal extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @UniqueElements
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false, unique = true)
     private Long memberId;
 
-    @Column(columnDefinition = "TINYINT", nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private int weeklyGoalCount;
 
-    @Column(columnDefinition = "TINYINT DEFAULT 0", nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT DEFAULT 0")
     private int currentCount;
+
+    @Builder
+    public WeeklyGoal(
+            Long id,
+            @NonNull Long memberId,
+            int weeklyGoalCount,
+            int currentCount
+    ) {
+        this.id = id;
+        this.memberId = memberId;
+        this.weeklyGoalCount = weeklyGoalCount;
+        this.currentCount = currentCount;
+    }
+
+    public void updateWeeklyGoalCount(int goalCount) {
+        this.weeklyGoalCount = goalCount;
+    }
 }

@@ -1,7 +1,7 @@
 package me.bombom.api.v1.newsletter.controller;
 
 import java.util.List;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.service.NewsletterService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/newsletters")
 public class NewsletterController {
 

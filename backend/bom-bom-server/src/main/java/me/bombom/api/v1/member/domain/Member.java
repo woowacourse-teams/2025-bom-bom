@@ -13,14 +13,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import me.bombom.api.v1.common.BaseEntity;
 import me.bombom.api.v1.member.enums.Gender;
 import org.hibernate.validator.constraints.UniqueElements;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends BaseEntity {
 
@@ -31,7 +30,6 @@ public class Member extends BaseEntity {
     @Column(nullable = false, length = 30)
     private String email;
 
-    @UniqueElements
     @Column(unique = true, nullable = false)
     private String nickname;
 
@@ -46,4 +44,23 @@ public class Member extends BaseEntity {
 
     @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
     private Long roleId = 0L;
+
+    @Builder
+    public Member(
+            Long id,
+            @NonNull String email,
+            @NonNull String nickname,
+            String profileImageUrl,
+            LocalDateTime birthDate,
+            @NonNull Gender gender,
+            @NonNull Long roleId
+    ) {
+        this.id = id;
+        this.email = email;
+        this.nickname = nickname;
+        this.profileImageUrl = profileImageUrl;
+        this.birthDate = birthDate;
+        this.gender = gender;
+        this.roleId = roleId;
+    }
 }

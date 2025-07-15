@@ -46,7 +46,7 @@ public class WeeklyGoal extends BaseEntity {
         this.currentCount = currentCount;
     }
 
-    public void updateWeeklyGoalCount(Integer goalCount) {
+    public void updateWeeklyGoalCount(int goalCount) {
         this.weeklyGoalCount = goalCount;
     }
 }

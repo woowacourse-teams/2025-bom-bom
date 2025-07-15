@@ -6,16 +6,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import me.bombom.api.v1.common.BaseEntity;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Newsletter extends BaseEntity {
 
@@ -25,23 +23,34 @@ public class Newsletter extends BaseEntity {
 
     private String name;
 
+    private String description;
+
     @Column(length = 512)
     private String imageUrl;
 
     @Column(length = 30)
     private String email;
 
-    private String description;
-
-    @Column(length=512)
-    private String mainUrl;
-
-    @Column(length=512)
-    private String subscribeUrl;
-
-    private String issueCycle;
-
     private Long categoryId;
 
-    private int subscribeCount;
+    private Long detailId;
+
+    @Builder
+    public Newsletter(
+            Long id,
+            @NonNull String name,
+            @NonNull String description,
+            @NonNull String imageUrl,
+            @NonNull String email,
+            @NonNull Long categoryId,
+            @NonNull Long detailId
+    ) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.email = email;
+        this.categoryId = categoryId;
+        this.detailId = detailId;
+    }
 }

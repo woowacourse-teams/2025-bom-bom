@@ -27,10 +27,10 @@ public class Newsletter extends BaseEntity {
     @Column(nullable = false)
     private String description;
 
-    @Column(length = 512, nullable = false)
+    @Column(nullable = false, length = 512)
     private String imageUrl;
 
-    @Column(length = 30, nullable = false)
+    @Column(nullable = false, length = 30)
     private String email;
 
     @Column(nullable = false)

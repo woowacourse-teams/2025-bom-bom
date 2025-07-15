@@ -7,16 +7,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import me.bombom.api.v1.common.BaseEntity;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Article extends BaseEntity {
 
@@ -27,7 +25,7 @@ public class Article extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(length = 512, nullable = false)
+    @Column(nullable = false, length = 512)
     private String articleUrl;
 
     @Column(length = 512)
@@ -50,4 +48,29 @@ public class Article extends BaseEntity {
 
     @Column(nullable = false)
     private LocalDateTime arrivedDateTime;
+
+    @Builder
+    public Article(
+            Long id,
+            @NonNull String title,
+            @NonNull String articleUrl,
+            @NonNull String thumbnailUrl,
+            int expectedReadTime,
+            @NonNull String contentsSummary,
+            boolean isRead,
+            @NonNull Long memberId,
+            @NonNull Long newsletterId,
+            @NonNull LocalDateTime arrivedDateTime
+            ) {
+        this.id = id;
+        this.title = title;
+        this.articleUrl = articleUrl;
+        this.thumbnailUrl = thumbnailUrl;
+        this.expectedReadTime = expectedReadTime;
+        this.contentsSummary = contentsSummary;
+        this.isRead = isRead;
+        this.memberId = memberId;
+        this.newsletterId = newsletterId;
+        this.arrivedDateTime = arrivedDateTime;
+    }
 }

@@ -24,13 +24,13 @@ public class WeeklyGoal extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false, unique = true)
     private Long memberId;
 
-    @Column(columnDefinition = "TINYINT", nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private int weeklyGoalCount;
 
-    @Column(columnDefinition = "TINYINT DEFAULT 0", nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT DEFAULT 0")
     private int currentCount;
 
     @Builder

@@ -19,7 +19,16 @@ export const Default: Story = {
   render: () => (
     <ThemeProvider theme={theme}>
       <Global styles={reset} />
-      <Header />
+      <Header activeNav="home" />
+    </ThemeProvider>
+  ),
+};
+
+export const Recommend: Story = {
+  render: () => (
+    <ThemeProvider theme={theme}>
+      <Global styles={reset} />
+      <Header activeNav="recommend" />
     </ThemeProvider>
   ),
 };

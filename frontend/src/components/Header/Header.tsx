@@ -2,7 +2,13 @@ import styled from '@emotion/styled';
 import compassIcon from '../../../public/assets/compass.svg';
 import homeIcon from '../../../public/assets/home.svg';
 
-export default function Header() {
+type NavType = 'home' | 'recommend';
+
+interface HeaderProps {
+  activeNav: NavType;
+}
+
+export default function Header({ activeNav = 'home' }: HeaderProps) {
   return (
     <HeaderContainer>
       <HeaderInner>
@@ -16,11 +22,11 @@ export default function Header() {
           </TitleBox>
         </Left>
         <Nav>
-          <NavButton active>
+          <NavButton active={activeNav === 'home'}>
             <NavIcon src={homeIcon} alt="home" />
             <p>오늘의 뉴스레터</p>
           </NavButton>
-          <NavButton>
+          <NavButton active={activeNav === 'recommend'}>
             <NavIcon src={compassIcon} alt="compass" />
             <p>뉴스레터 추천</p>
           </NavButton>

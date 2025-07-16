@@ -9,6 +9,7 @@ module.exports = {
     'plugin:import/recommended',
     'plugin:react/recommended',
     'plugin:prettier/recommended',
+    'plugin:storybook/recommended',
   ],
   ignorePatterns: ['dist', '.eslintrc.js'],
   rules: {

@@ -22,3 +22,5 @@ app_*.log.gz
 #Frontend
 node_modules
 dist
+*storybook.log
+storybook-static

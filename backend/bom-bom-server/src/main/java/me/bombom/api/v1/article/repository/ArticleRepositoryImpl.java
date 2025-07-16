@@ -57,7 +57,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         StringBuilder jpql = new StringBuilder("""
                 SELECT new me.bombom.api.v1.article.dto.ArticleResponse(
                         a.id, a.title, a.contentsSummary, a.arrivedDateTime, a.thumbnailUrl, a.expectedReadTime, a.isRead,
-                        new me.bombom.api.v1.newsletter.dto.TodayArticleNewsletterResponse(n.name, n.imageUrl, c.name))
+                        new me.bombom.api.v1.newsletter.dto.NewsletterSummaryResponse(n.name, n.imageUrl, c.name))
                 FROM Article a
                 JOIN Newsletter n ON n.id = a.newsletterId
                 JOIN Category c ON c.id = n.categoryId

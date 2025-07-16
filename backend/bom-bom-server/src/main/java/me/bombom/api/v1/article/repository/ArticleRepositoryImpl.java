@@ -79,8 +79,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
 
     private void appendDynamicWhereClause(LocalDate date, Long categoryId, StringBuilder jpql) {
         if (date != null) {
-            jpql.append(" AND a.arrivedDateTime >= :dateAtMinTime");
-            jpql.append(" AND a.arrivedDateTime <= :dateAtMaxTime");
+            jpql.append(" AND a.arrivedDateTime BETWEEN :dateAtMinTime AND :dateAtMaxTime");
         }
         if (categoryId != null) {
             jpql.append(" AND n.categoryId = :categoryId");

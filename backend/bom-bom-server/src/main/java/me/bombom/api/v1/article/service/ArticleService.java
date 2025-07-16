@@ -32,7 +32,7 @@ public class ArticleService {
             SortOption sortOption,
             Pageable pageable
     ) {
-        validateExistMember(memberId);
+        validateMemberExists(memberId);
         return articleRepository.findByMemberId(
                 memberId,
                 GetArticlesOptions.of(date, getCategoryIdByName(categoryName), sortOption),
@@ -40,7 +40,7 @@ public class ArticleService {
         );
     }
 
-    private void validateExistMember(Long memberId) {
+    private void validateMemberExists(Long memberId) {
         if (!memberRepository.existsById(memberId)) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND);
         }

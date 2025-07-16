@@ -4,12 +4,13 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.domain.WeeklyGoal;
-import me.bombom.api.v1.member.dto.request.UpdateWeeklyGoalRequest;
-import me.bombom.api.v1.member.dto.response.WeeklyGoalResponse;
+import me.bombom.api.v1.member.domain.WeeklyReading;
+import me.bombom.api.v1.member.dto.request.UpdateWeeklyCurrentCountRequest;
+import me.bombom.api.v1.member.dto.request.UpdateWeeklyGoalCountRequest;
+import me.bombom.api.v1.member.dto.response.WeeklyCurrentCountResponse;
+import me.bombom.api.v1.member.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.member.repository.WeeklyGoalRepository;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
+import me.bombom.api.v1.member.repository.WeeklyReadingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,14 +20,23 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final WeeklyGoalRepository weeklyGoalRepository;
+    private final WeeklyReadingRepository weeklyReadingRepository;
 
-    public WeeklyGoalResponse updateWeeklyGoal(UpdateWeeklyGoalRequest request) {
+    public WeeklyGoalCountResponse updateWeeklyGoalCount(UpdateWeeklyGoalCountRequest request) {
         Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        WeeklyGoal weeklyGoal = weeklyGoalRepository.findByMemberId(member.getId())
+        WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(member.getId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        weeklyGoal.updateWeeklyGoalCount(request.weeklyGoalCount());
-        return WeeklyGoalResponse.from(weeklyGoal);
+        weeklyReading.updateGoalCount(request.weeklyGoalCount());
+        return WeeklyGoalCountResponse.from(weeklyReading);
+    }
+
+    public WeeklyCurrentCountResponse updateWeeklyCurrentCount(UpdateWeeklyCurrentCountRequest request) {
+        Member member = memberRepository.findById(request.memberId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(member.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        weeklyReading.increaseCurrentCount(WeeklyReading.INCREASE_CURRENT_COUNT);
+        return WeeklyCurrentCountResponse.from(weeklyReading);
     }
 }

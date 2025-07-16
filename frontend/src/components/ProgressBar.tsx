@@ -23,6 +23,8 @@ const ProgressOverlay = styled.div`
 `;
 
 const ProgressGauge = styled.div<{ progressRate: number }>`
+  overflow: hidden;
+
   width: ${({ progressRate }) => `${progressRate}%`};
   height: 100%;
 

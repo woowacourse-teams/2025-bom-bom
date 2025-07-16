@@ -25,7 +25,7 @@ public class ArticleController {
             @RequestParam(required = false) LocalDate date,
             @RequestParam(required = false) String category,
             @RequestParam(required = false, name = "sorted", defaultValue = "DESC") SortOption sortOption,
-            @PageableDefault(size = 20) Pageable pageable
+            @PageableDefault Pageable pageable
     ) {
         return articleService.getArticles(
                 memberId,

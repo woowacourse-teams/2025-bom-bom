@@ -45,13 +45,13 @@ class ArticleServiceTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
     List<Category> categories;
     List<Newsletter> newsletters;
     List<Article> articles;
     Member member;
-
-    @Autowired
-    private MemberRepository memberRepository;
 
     @BeforeEach
     public void setup() {

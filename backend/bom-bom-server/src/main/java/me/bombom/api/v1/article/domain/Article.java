@@ -61,7 +61,7 @@ public class Article extends BaseEntity {
             @NonNull Long memberId,
             @NonNull Long newsletterId,
             @NonNull LocalDateTime arrivedDateTime
-            ) {
+    ) {
         this.id = id;
         this.title = title;
         this.articleUrl = articleUrl;

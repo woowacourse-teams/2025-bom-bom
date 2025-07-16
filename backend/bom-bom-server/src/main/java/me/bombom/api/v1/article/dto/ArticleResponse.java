@@ -1,7 +1,7 @@
 package me.bombom.api.v1.article.dto;
 
 import java.time.LocalDateTime;
-import me.bombom.api.v1.newsletter.dto.TodayArticleNewsletterResponse;
+import me.bombom.api.v1.newsletter.dto.NewsletterSummaryResponse;
 
 public record ArticleResponse(
         Long articleId,
@@ -11,6 +11,6 @@ public record ArticleResponse(
         String thumbnailUrl,
         int expectedReadTime,
         boolean isRead,
-        TodayArticleNewsletterResponse newsletter
+        NewsletterSummaryResponse newsletter
 ) {
 }

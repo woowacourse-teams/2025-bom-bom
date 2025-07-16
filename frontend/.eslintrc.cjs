@@ -1,6 +1,6 @@
 module.exports = {
   root: true,
-  env: { browser: true, es2020: true },
+  env: { browser: true, es2020: true, 'jest/globals': true },
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
@@ -16,7 +16,7 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'import/no-unresolved': 'off',
   },
-  plugins: ['jsx-a11y', 'import', 'react-hooks', 'react', 'prettier'],
+  plugins: ['jsx-a11y', 'import', 'react-hooks', 'react', 'prettier', 'jest'],
   parser: '@typescript-eslint/parser',
   settings: {
     react: {

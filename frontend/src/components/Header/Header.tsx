@@ -39,7 +39,6 @@ export default function Header() {
 
 const HeaderContainer = styled.header`
   background: ${({ theme }) => theme.colors.white};
-  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -52,7 +51,8 @@ const HeaderContainer = styled.header`
 `;
 
 const HeaderInner = styled.div`
-  width: 1280px;
+  width: 100%;
+  max-width: 1280px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -98,7 +98,6 @@ const Title = styled.div`
   );
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  line-height: 28px;
 `;
 
 const SubTitle = styled.div`

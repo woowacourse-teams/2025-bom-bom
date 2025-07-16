@@ -1,9 +1,6 @@
 HELP.md
 .idea
 
-### VS Code ###
-.vscode/
-
 #log
 /logs
 *.log

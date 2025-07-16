@@ -1,8 +1,7 @@
 package me.bombom.api.v1.article.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -162,12 +161,12 @@ class ArticleServiceTest {
 
         // then
         List<ArticleResponse> content = result.getContent();
-        assertAll(
-                () -> assertThat(result.getTotalElements()).isEqualTo(articles.size()),
-                () -> assertThat(content).hasSize(articles.size()),
-                () -> assertThat(content.get(0).arrivedDateTime()).isAfter(content.get(1).arrivedDateTime()),
-                () -> assertThat(content.get(1).arrivedDateTime()).isAfter(content.get(2).arrivedDateTime())
-        );
+        assertSoftly(softly -> {
+            softly.assertThat(result.getTotalElements()).isEqualTo(articles.size());
+            softly.assertThat(content).hasSize(articles.size());
+            softly.assertThat(content.get(0).arrivedDateTime()).isAfter(content.get(1).arrivedDateTime());
+            softly.assertThat(content.get(1).arrivedDateTime()).isAfter(content.get(2).arrivedDateTime());
+        });
     }
 
     @Test
@@ -186,12 +185,12 @@ class ArticleServiceTest {
 
         // then
         List<ArticleResponse> content = result.getContent();
-        assertAll(
-                () -> assertThat(result.getTotalElements()).isEqualTo(articles.size()),
-                () -> assertThat(content).hasSize(articles.size()),
-                () -> assertThat(content.get(0).arrivedDateTime()).isBefore(content.get(1).arrivedDateTime()),
-                () -> assertThat(content.get(1).arrivedDateTime()).isBefore(content.get(2).arrivedDateTime())
-        );
+        assertSoftly(softly -> {
+            softly.assertThat(result.getTotalElements()).isEqualTo(articles.size());
+            softly.assertThat(content).hasSize(articles.size());
+            softly.assertThat(content.get(0).arrivedDateTime()).isBefore(content.get(1).arrivedDateTime());
+            softly.assertThat(content.get(1).arrivedDateTime()).isBefore(content.get(2).arrivedDateTime());
+        });
     }
 
     @Test
@@ -210,13 +209,13 @@ class ArticleServiceTest {
         );
 
         // then
-        assertAll(
-                () -> assertThat(result.getTotalElements()).isEqualTo(1),
-                () -> assertThat(result.getContent()).hasSize(1),
-                () -> assertThat(result.getContent()).extracting("newsletter")
-                        .extracting("category")
-                        .containsExactly(category)
-        );
+        assertSoftly(softly -> {
+            softly.assertThat(result.getTotalElements()).isEqualTo(1);
+            softly.assertThat(result.getContent()).hasSize(1);
+            softly.assertThat(result.getContent()).extracting("newsletter")
+                    .extracting("category")
+                    .containsExactly(category);
+        });
     }
 
     @Test
@@ -234,10 +233,10 @@ class ArticleServiceTest {
         );
 
         // then - 하루 전 아티클 제외하고 3개
-        assertAll(
-                () -> assertThat(result.getTotalElements()).isEqualTo(articles.size() - 1),
-                () -> assertThat(result.getContent()).hasSize(articles.size() - 1)
-        );
+        assertSoftly(softly -> {
+            softly.assertThat(result.getTotalElements()).isEqualTo(articles.size() - 1);
+            softly.assertThat(result.getContent()).hasSize(articles.size() - 1);
+        });
     }
 
     @Test
@@ -287,17 +286,17 @@ class ArticleServiceTest {
         );
 
         // then
-        assertAll(
-                () -> assertThat(result.getTotalElements()).isEqualTo(4),
-                () -> assertThat(result.getTotalPages()).isEqualTo(2),
-                () -> assertThat(result.getContent()).hasSize(2),
-                () -> assertThat(result.getNumber()).isEqualTo(0),
-                () -> assertThat(result.getSize()).isEqualTo(2),
-                () -> assertThat(result.isFirst()).isTrue(),
-                () -> assertThat(result.isLast()).isFalse(),
-                () -> assertThat(result.hasNext()).isTrue(),
-                () -> assertThat(result.hasPrevious()).isFalse()
-        );
+        assertSoftly(softly -> {
+            softly.assertThat(result.getTotalElements()).isEqualTo(4);
+            softly.assertThat(result.getTotalPages()).isEqualTo(2);
+            softly.assertThat(result.getContent()).hasSize(2);
+            softly.assertThat(result.getNumber()).isEqualTo(0);
+            softly.assertThat(result.getSize()).isEqualTo(2);
+            softly.assertThat(result.isFirst()).isTrue();
+            softly.assertThat(result.isLast()).isFalse();
+            softly.assertThat(result.hasNext()).isTrue();
+            softly.assertThat(result.hasPrevious()).isFalse();
+        });
     }
 
     @Test
@@ -315,17 +314,17 @@ class ArticleServiceTest {
         );
 
         // then
-        assertAll(
-                () -> assertThat(result.getTotalElements()).isEqualTo(4),
-                () -> assertThat(result.getTotalPages()).isEqualTo(2),
-                () -> assertThat(result.getContent()).hasSize(2),
-                () -> assertThat(result.getNumber()).isEqualTo(1),
-                () -> assertThat(result.getSize()).isEqualTo(2),
-                () -> assertThat(result.isFirst()).isFalse(),
-                () -> assertThat(result.isLast()).isTrue(),
-                () -> assertThat(result.hasNext()).isFalse(),
-                () -> assertThat(result.hasPrevious()).isTrue()
-        );
+        assertSoftly(softly -> {
+            softly.assertThat(result.getTotalElements()).isEqualTo(4);
+            softly.assertThat(result.getTotalPages()).isEqualTo(2);
+            softly.assertThat(result.getContent()).hasSize(2);
+            softly.assertThat(result.getNumber()).isEqualTo(1);
+            softly.assertThat(result.getSize()).isEqualTo(2);
+            softly.assertThat(result.isFirst()).isFalse();
+            softly.assertThat(result.isLast()).isTrue();
+            softly.assertThat(result.hasNext()).isFalse();
+            softly.assertThat(result.hasPrevious()).isTrue();
+        });
     }
 
     @Test
@@ -343,13 +342,13 @@ class ArticleServiceTest {
         );
 
         // then
-        assertAll(
-                () -> assertThat(result.getTotalElements()).isEqualTo(4),
-                () -> assertThat(result.getContent()).hasSize(2),
-                () -> assertThat(result.getTotalPages()).isEqualTo(2),
-                () -> assertThat(result.getContent().get(0).arrivedDateTime())
-                        .isAfter(result.getContent().get(1).arrivedDateTime())
-        );
+        assertSoftly(softly -> {
+            softly.assertThat(result.getTotalElements()).isEqualTo(4);
+            softly.assertThat(result.getContent()).hasSize(2);
+            softly.assertThat(result.getTotalPages()).isEqualTo(2);
+            softly.assertThat(result.getContent().get(0).arrivedDateTime())
+                    .isAfter(result.getContent().get(1).arrivedDateTime());
+        });
     }
 
     @Test
@@ -367,12 +366,12 @@ class ArticleServiceTest {
         );
 
         // then
-        assertAll(
-                () -> assertThat(result.getTotalElements()).isEqualTo(4),
-                () -> assertThat(result.getContent()).hasSize(2),
-                () -> assertThat(result.getTotalPages()).isEqualTo(2),
-                () -> assertThat(result.getContent().get(0).arrivedDateTime())
-                        .isBefore(result.getContent().get(1).arrivedDateTime())
-        );
+        assertSoftly(softly -> {
+            softly.assertThat(result.getTotalElements()).isEqualTo(4);
+            softly.assertThat(result.getContent()).hasSize(2);
+            softly.assertThat(result.getTotalPages()).isEqualTo(2);
+            softly.assertThat(result.getContent().get(0).arrivedDateTime())
+                    .isBefore(result.getContent().get(1).arrivedDateTime());
+        });
     }
 }

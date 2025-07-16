@@ -3,6 +3,7 @@ package me.bombom.api.v1.article.service;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.dto.ArticleResponse;
+import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.enums.SortOption;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -34,12 +35,9 @@ public class ArticleService {
             Pageable pageable
     ) {
         validateExistMember(memberId);
-
         return articleRepository.findByMemberId(
                 memberId,
-                date,
-                getCategoryIdByName(categoryName),
-                sortOption,
+                GetArticlesOptions.of(date, getCategoryIdByName(categoryName), sortOption),
                 pageable
         );
     }

@@ -7,6 +7,7 @@ import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.dto.ArticleResponse;
+import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.enums.SortOption;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -20,21 +21,15 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     @Override
     public Page<ArticleResponse> findByMemberId(
             Long memberId,
-            LocalDate date,
-            Long categoryId,
-            SortOption sortOption,
+            GetArticlesOptions options,
             Pageable pageable
     ) {
-        Long total = getTotalCount(memberId, date, categoryId);
-        List<ArticleResponse> content = getArticleContents(memberId, date, categoryId, sortOption, pageable);
+        Long total = getTotalCount(memberId, options);
+        List<ArticleResponse> content = getArticleContents(memberId, options, pageable);
         return new PageImpl<>(content, pageable, total);
     }
 
-    private Long getTotalCount(
-            Long memberId,
-            LocalDate date,
-            Long categoryId
-    ) {
+    private Long getTotalCount(Long memberId, GetArticlesOptions options) {
         StringBuilder jpql = new StringBuilder("""
                 SELECT COUNT(a)
                 FROM Article a
@@ -42,23 +37,21 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 JOIN Category c ON c.id = n.categoryId
                 WHERE a.memberId = :memberId
         """);
-        appendDynamicWhereClause(date, categoryId, jpql);
+        appendDynamicWhereClause(options.date(), options.categoryId(), jpql);
 
         TypedQuery<Long> countQuery = entityManager.createQuery(jpql.toString(), Long.class);
         setQueryParameters(
                 countQuery,
                 memberId,
-                date,
-                categoryId
+                options.date(),
+                options.categoryId()
         );
         return countQuery.getSingleResult();
     }
 
     private List<ArticleResponse> getArticleContents(
             Long memberId,
-            LocalDate date,
-            Long categoryId,
-            SortOption sortOption,
+            GetArticlesOptions options,
             Pageable pageable
     ) {
         StringBuilder jpql = new StringBuilder("""
@@ -70,11 +63,11 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 JOIN Category c ON c.id = n.categoryId
                 WHERE a.memberId = :memberId
         """);
-        appendDynamicWhereClause(date, categoryId, jpql);
-        appendOrderByClause(sortOption, jpql);
+        appendDynamicWhereClause(options.date(), options.categoryId(), jpql);
+        appendOrderByClause(options.sort(), jpql);
 
         TypedQuery<ArticleResponse> query = entityManager.createQuery(jpql.toString(), ArticleResponse.class);
-        setQueryParameters(query, memberId, date, categoryId);
+        setQueryParameters(query, memberId, options.date(), options.categoryId());
 
         if (pageable.isPaged()) {
             query.setFirstResult((int) pageable.getOffset());
@@ -100,11 +93,11 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         }
     }
 
-    private static void appendOrderByClause(SortOption sortOption, StringBuilder jpql) {
+    private void appendOrderByClause(SortOption sortOption, StringBuilder jpql) {
         jpql.append(" ORDER BY a.arrivedDateTime ").append(sortOption.getValue());
     }
 
-    private static void appendDynamicWhereClause(LocalDate date, Long categoryId, StringBuilder jpql) {
+    private void appendDynamicWhereClause(LocalDate date, Long categoryId, StringBuilder jpql) {
         if (date != null) {
             jpql.append(" AND a.arrivedDateTime >= :dateAtMinTime");
             jpql.append(" AND a.arrivedDateTime <= :dateAtMaxTime");

@@ -5,16 +5,14 @@ import goalIcon from '../../../../public/assets/goal.svg';
 interface ReadingProgressBoxProps {
   label: string;
   rateCaption: string;
-  reachedCount: number;
-  totalCount: number;
+  progressRate: number;
   description: string;
 }
 
 function ReadingProgressBox({
   label,
   rateCaption,
-  reachedCount,
-  totalCount,
+  progressRate,
   description,
 }: ReadingProgressBoxProps) {
   return (
@@ -24,7 +22,7 @@ function ReadingProgressBox({
         <ProgressLabel>{label}</ProgressLabel>
         <ProgressRate>{rateCaption}</ProgressRate>
       </ProgressInfo>
-      <ProgressBar progressRate={(reachedCount / totalCount) * 100} />
+      <ProgressBar progressRate={progressRate} />
       <ProgressDescription>{description}</ProgressDescription>
     </Container>
   );

@@ -15,7 +15,9 @@ import me.bombom.api.v1.common.BaseEntity;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class WeeklyGoal extends BaseEntity {
+public class WeeklyReading extends BaseEntity {
+
+    public static final int INCREASE_CURRENT_COUNT = 1;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,26 +27,26 @@ public class WeeklyGoal extends BaseEntity {
     private Long memberId;
 
     @Column(nullable = false, columnDefinition = "TINYINT")
-    private int weeklyGoalCount;
+    private int goalCount;
 
     @Column(nullable = false, columnDefinition = "TINYINT DEFAULT 0")
     private int currentCount;
 
     @Builder
-    public WeeklyGoal(
+    public WeeklyReading(
             Long id,
             @NonNull Long memberId,
-            int weeklyGoalCount,
+            int goalCount,
             int currentCount
     ) {
         this.id = id;
         this.memberId = memberId;
-        this.weeklyGoalCount = weeklyGoalCount;
+        this.goalCount = goalCount;
         this.currentCount = currentCount;
     }
 
-    public void updateWeeklyGoalCount(int goalCount) {
-        this.weeklyGoalCount = goalCount;
+    public void updateGoalCount(int goalCount) {
+        this.goalCount = goalCount;
     }
 
     public void increaseCurrentCount(int increaseCount) {

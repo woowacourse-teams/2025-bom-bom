@@ -3,6 +3,7 @@ package me.bombom.api.v1.article.repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.dto.ArticleResponse;
@@ -21,27 +22,28 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             SortOption sortOption
     ) {
         StringBuilder jpql = new StringBuilder("""
-            SELECT new me.bombom.api.v1.article.dto.ArticleResponse(
-                a.id, a.title, a.contentsSummary, a.arrivedDateTime, a.thumbnailUrl, a.expectedReadTime, a.isRead,
-                new me.bombom.api.v1.newsletter.dto.TodayArticleNewsletterResponse(
-                    n.name, n.imageUrl, n.categoryId))
-            FROM Article a
-            JOIN Newsletter n ON n.id = a.newsletterId
-            WHERE a.memberId = :memberId
+                SELECT new me.bombom.api.v1.article.dto.ArticleResponse(
+                        a.id, a.title, a.contentsSummary, a.arrivedDateTime, a.thumbnailUrl, a.expectedReadTime, a.isRead,
+                        new me.bombom.api.v1.newsletter.dto.TodayArticleNewsletterResponse(n.name, n.imageUrl, c.name))
+                FROM Article a
+                JOIN Newsletter n ON n.id = a.newsletterId
+                JOIN Category c ON c.id = n.categoryId
+                WHERE a.memberId = :memberId
         """);
         if (date != null) {
-            jpql.append(" AND a.arrivedDateTime >= :dateTime");
+            jpql.append(" AND a.arrivedDateTime >= :dateAtMinTime");
+            jpql.append(" AND a.arrivedDateTime <= :dateAtMaxTime");
         }
         if (categoryId != null) {
             jpql.append(" AND n.categoryId = :categoryId");
         }
         jpql.append(" ORDER BY a.arrivedDateTime ").append(sortOption.getValue());
 
-        TypedQuery<ArticleResponse> query =
-                entityManager.createQuery(jpql.toString(), ArticleResponse.class);
+        TypedQuery<ArticleResponse> query = entityManager.createQuery(jpql.toString(), ArticleResponse.class);
         query.setParameter("memberId", memberId);
         if (date != null) {
-            query.setParameter("dateTime", date.atStartOfDay());
+            query.setParameter("dateAtMinTime", date.atTime(LocalTime.MIN));
+            query.setParameter("dateAtMaxTime", date.atTime(LocalTime.MAX));
         }
         if (categoryId != null) {
             query.setParameter("categoryId", categoryId);

@@ -2,6 +2,7 @@ import ReadingProgressBox from './ReadingProgressBox';
 import statusIcon from '../../../../public/assets/reading-status.svg';
 import streakIcon from '../../../../public/assets/streak.svg';
 import styled from '@emotion/styled';
+import { calculateRate } from '../../../utils/math';
 
 interface ReadingStatusCardProps {
   streakReadDay: number;
@@ -18,11 +19,13 @@ function ReadingStatusCard({
   weeklyReadCount,
   goalCount,
 }: ReadingStatusCardProps) {
+  const dailyProgressRate = calculateRate(todayReadCount, totalCount);
+  const weeklyProgressRate = calculateRate(weeklyReadCount, goalCount);
+
   const DAILY_PROGRESS_BOX = {
     label: '오늘의 진행률',
-    rateCaption: `${(todayReadCount / totalCount) * 100}%`,
-    reachedCount: todayReadCount,
-    totalCount,
+    rateCaption: `${dailyProgressRate}%`,
+    progressRate: dailyProgressRate,
     description:
       todayReadCount !== totalCount ? '목표까지 조금 더!' : '목표 달성!',
   };
@@ -30,8 +33,7 @@ function ReadingStatusCard({
   const WEEKLY_PROGRESS_BOX = {
     label: '주간 목표',
     rateCaption: `${weeklyReadCount} / ${goalCount}`,
-    reachedCount: weeklyReadCount,
-    totalCount: goalCount,
+    progressRate: weeklyProgressRate,
     description:
       weeklyReadCount !== goalCount
         ? `목표까지 ${goalCount - weeklyReadCount}개 남음`

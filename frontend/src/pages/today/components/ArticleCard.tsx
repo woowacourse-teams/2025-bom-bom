@@ -43,11 +43,10 @@ const Container = styled.div<{ isRead: boolean }>`
   align-items: center;
   gap: 12px;
 
-  width: 100%;
   padding: 20px;
 
   border-bottom: ${({ theme, isRead }) =>
-    isRead ? '' : `4px solid ${theme.colors.primary}}`};
+    `${isRead ? '0' : '4px'} solid ${theme.colors.primary}`};
   border-radius: 20px;
   box-sizing: border-box;
 

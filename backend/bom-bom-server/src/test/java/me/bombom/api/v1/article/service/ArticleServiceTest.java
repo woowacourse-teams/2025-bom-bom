@@ -127,31 +127,42 @@ class ArticleServiceTest {
                         .memberId(member.getId())
                         .newsletterId(newsletters.get(2).getId())
                         .arrivedDateTime(baseTime.minusMinutes(20))
+                        .build(),
+                Article.builder() //하루 전 아티클
+                        .title("2025년 패션 트렌드 미리보기")
+                        .articleUrl("https://example.com/articles/fashion-trend-2025")
+                        .thumbnailUrl("https://example.com/images/it-trend.png")
+                        .expectedReadTime(8)
+                        .contentsSummary("다가오는 패션 트렌드를 전망하고 주요 기술을 짚어봅니다.")
+                        .isRead(false)
+                        .memberId(member.getId())
+                        .newsletterId(newsletters.get(2).getId())
+                        .arrivedDateTime(baseTime.minusDays(1))
                         .build()
         );
         articleRepository.saveAll(articles);
     }
 
     @Test
-    void 오늘의_뉴스레터_조회_DESC_정렬_테스트() {
+    void 아티클_목록_조회_DESC_정렬_테스트() {
         //when
         List<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                baseTime.toLocalDate(),
+                null,
                 null,
                 SortOption.DESC
         );
 
         //then
         assertAll(
-                () -> assertThat(result).hasSize(newsletters.size()),
+                () -> assertThat(result).hasSize(articles.size()),
                 () -> assertThat(result.get(0).arrivedDateTime()).isAfter(result.get(1).arrivedDateTime()),
                 () -> assertThat(result.get(1).arrivedDateTime()).isAfter(result.get(2).arrivedDateTime())
         );
     }
 
     @Test
-    void 오늘의_뉴스레터_조회_ASC_정렬_테스트() {
+    void 아티클_목록_조회_ASC_정렬_테스트() {
         //when
         List<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
@@ -162,14 +173,14 @@ class ArticleServiceTest {
 
         //then
         assertAll(
-                () -> assertThat(result).hasSize(newsletters.size()),
+                () -> assertThat(result).hasSize(articles.size()),
                 () -> assertThat(result.get(0).arrivedDateTime()).isBefore(result.get(1).arrivedDateTime()),
                 () -> assertThat(result.get(1).arrivedDateTime()).isBefore(result.get(2).arrivedDateTime())
         );
     }
 
     @Test
-    void 전체_카테고리_조회_테스트() {
+    void 아티클_목록_조회_전체_카테고리_테스트() {
         //when
         List<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
@@ -180,6 +191,23 @@ class ArticleServiceTest {
 
         //then
         assertThat(result).hasSize(1);
+        assertThat(result).extracting("newsletter")
+                .extracting("category")
+                .containsExactly(categories.getFirst().getName());
+    }
+
+    @Test
+    void 아티클_목록_조회_지정한_날짜만_조회_테스트() {
+        //when
+        List<ArticleResponse> result = articleService.getArticles(
+                member.getId(),
+                baseTime.toLocalDate(),
+                null,
+                SortOption.DESC
+        );
+
+        //then
+        assertThat(result).hasSize(articles.size() - 1);
     }
 
     @Test

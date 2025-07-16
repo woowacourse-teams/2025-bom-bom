@@ -7,6 +7,7 @@ import reset from '../src/styles/reset.ts';
 
 const preview: Preview = {
   parameters: {
+    layout: 'centered',
     controls: {
       matchers: {
         color: /(background|color)$/i,

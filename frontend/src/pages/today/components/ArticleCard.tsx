@@ -38,6 +38,8 @@ function ArticleCard({ data }: ArticleCardProps) {
   );
 }
 
+export default ArticleCard;
+
 const Container = styled.div<{ isRead: boolean }>`
   display: flex;
   align-items: center;
@@ -115,5 +117,3 @@ const Thumbnail = styled.img`
 
   border-radius: 12px;
 `;
-
-export default ArticleCard;

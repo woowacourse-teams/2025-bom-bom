@@ -57,9 +57,10 @@ module.exports = {
     }),
   ],
   devServer: {
-    static: {
-      directory: path.join(__dirname, 'dist'), // 빌드된 파일을 이 경로에서 서빙
-    },
+    static: [
+      { directory: path.join(__dirname, 'dist') },
+      { directory: path.join(__dirname, 'public') },
+    ],
     port: 3000, // localhost:3000에서 실행
     open: true, // 서버 실행 시 브라우저 자동 열기
     hot: true, // HMR 사용

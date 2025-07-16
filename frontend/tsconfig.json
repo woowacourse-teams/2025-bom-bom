@@ -9,8 +9,9 @@
     "esModuleInterop": true,
     "jsxImportSource": "@emotion/react",
     "allowImportingTsExtensions": true,
-    "noEmit": true
+    "noEmit": true,
+    "types": ["./emotion.d.ts"]
   },
-  "include": ["./**/*.ts", "src/main.tsx"],
+  "include": ["./**/*.ts", "src"],
   "exclude": ["node_modules", "dist"]
 }

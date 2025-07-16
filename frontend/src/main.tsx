@@ -1,5 +1,8 @@
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
+import { StrictMode } from 'react';
+import reset from './styles/reset.ts';
+import { Global } from '@emotion/react';
 
 async function enableMocking() {
   const { worker } = await import('./mocks/browser');
@@ -10,5 +13,10 @@ async function enableMocking() {
 }
 
 enableMocking().then(() => {
-  createRoot(document.getElementById('root')!).render(<App />);
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <Global styles={reset} />
+      <App />
+    </StrictMode>,
+  );
 });

@@ -1,9 +1,6 @@
 HELP.md
 .idea
 
-### VS Code ###
-.vscode/
-
 #log
 /logs
 *.log
@@ -25,3 +22,5 @@ app_*.log.gz
 #Frontend
 node_modules
 dist
+*storybook.log
+storybook-static

@@ -1,7 +1,6 @@
 package me.bombom.api.v1.article.service;
 
 import java.time.LocalDate;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.dto.ArticleResponse;
 import me.bombom.api.v1.article.enums.SortOption;
@@ -11,6 +10,8 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,18 +26,21 @@ public class ArticleService {
 
     private final MemberRepository memberRepository;
 
-    public List<ArticleResponse> getArticles(
+    public Page<ArticleResponse> getArticles(
             Long memberId,
             LocalDate date,
             String categoryName,
-            SortOption sortOption
+            SortOption sortOption,
+            Pageable pageable
     ) {
         validateExistMember(memberId);
+
         return articleRepository.findByMemberId(
                 memberId,
                 date,
                 getCategoryIdByName(categoryName),
-                sortOption
+                sortOption,
+                pageable
         );
     }
 

@@ -77,6 +77,20 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         return query.getResultList();
     }
 
+    private void appendDynamicWhereClause(LocalDate date, Long categoryId, StringBuilder jpql) {
+        if (date != null) {
+            jpql.append(" AND a.arrivedDateTime >= :dateAtMinTime");
+            jpql.append(" AND a.arrivedDateTime <= :dateAtMaxTime");
+        }
+        if (categoryId != null) {
+            jpql.append(" AND n.categoryId = :categoryId");
+        }
+    }
+
+    private void appendOrderByClause(SortOption sortOption, StringBuilder jpql) {
+        jpql.append(" ORDER BY a.arrivedDateTime ").append(sortOption.getValue());
+    }
+
     private void setQueryParameters(
             TypedQuery<?> query,
             Long memberId,
@@ -90,20 +104,6 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         }
         if (categoryId != null) {
             query.setParameter("categoryId", categoryId);
-        }
-    }
-
-    private void appendOrderByClause(SortOption sortOption, StringBuilder jpql) {
-        jpql.append(" ORDER BY a.arrivedDateTime ").append(sortOption.getValue());
-    }
-
-    private void appendDynamicWhereClause(LocalDate date, Long categoryId, StringBuilder jpql) {
-        if (date != null) {
-            jpql.append(" AND a.arrivedDateTime >= :dateAtMinTime");
-            jpql.append(" AND a.arrivedDateTime <= :dateAtMaxTime");
-        }
-        if (categoryId != null) {
-            jpql.append(" AND n.categoryId = :categoryId");
         }
     }
 }

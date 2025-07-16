@@ -24,6 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @DataJpaTest
 @Import(ArticleService.class)
@@ -145,90 +148,231 @@ class ArticleServiceTest {
 
     @Test
     void 아티클_목록_조회_DESC_정렬_테스트() {
-        //when
-        List<ArticleResponse> result = articleService.getArticles(
+        // given
+        Pageable pageable = PageRequest.of(0, 10); // 충분한 크기로 전체 조회
+        
+        // when
+        Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
                 null,
                 null,
-                SortOption.DESC
+                SortOption.DESC,
+                pageable
         );
 
-        //then
+        // then
+        List<ArticleResponse> content = result.getContent();
         assertAll(
-                () -> assertThat(result).hasSize(articles.size()),
-                () -> assertThat(result.get(0).arrivedDateTime()).isAfter(result.get(1).arrivedDateTime()),
-                () -> assertThat(result.get(1).arrivedDateTime()).isAfter(result.get(2).arrivedDateTime())
+                () -> assertThat(result.getTotalElements()).isEqualTo(articles.size()),
+                () -> assertThat(content).hasSize(articles.size()),
+                () -> assertThat(content.get(0).arrivedDateTime()).isAfter(content.get(1).arrivedDateTime()),
+                () -> assertThat(content.get(1).arrivedDateTime()).isAfter(content.get(2).arrivedDateTime())
         );
     }
 
     @Test
     void 아티클_목록_조회_ASC_정렬_테스트() {
-        //when
-        List<ArticleResponse> result = articleService.getArticles(
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        
+        // when
+        Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
                 null,
                 null,
-                SortOption.ASC
+                SortOption.ASC,
+                pageable
         );
 
-        //then
+        // then
+        List<ArticleResponse> content = result.getContent();
         assertAll(
-                () -> assertThat(result).hasSize(articles.size()),
-                () -> assertThat(result.get(0).arrivedDateTime()).isBefore(result.get(1).arrivedDateTime()),
-                () -> assertThat(result.get(1).arrivedDateTime()).isBefore(result.get(2).arrivedDateTime())
+                () -> assertThat(result.getTotalElements()).isEqualTo(articles.size()),
+                () -> assertThat(content).hasSize(articles.size()),
+                () -> assertThat(content.get(0).arrivedDateTime()).isBefore(content.get(1).arrivedDateTime()),
+                () -> assertThat(content.get(1).arrivedDateTime()).isBefore(content.get(2).arrivedDateTime())
         );
     }
 
     @Test
-    void 아티클_목록_조회_전체_카테고리_테스트() {
-        //when
-        List<ArticleResponse> result = articleService.getArticles(
+    void 아티클_목록_조회_카테고리_필터링_테스트() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        String category = categories.getFirst().getName();
+
+        // when
+        Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
                 null,
-                categories.getFirst().getName(),
-                SortOption.DESC
+                category,
+                SortOption.DESC,
+                pageable
         );
 
-        //then
-        assertThat(result).hasSize(1);
-        assertThat(result).extracting("newsletter")
-                .extracting("category")
-                .containsExactly(categories.getFirst().getName());
+        // then
+        assertAll(
+                () -> assertThat(result.getTotalElements()).isEqualTo(1),
+                () -> assertThat(result.getContent()).hasSize(1),
+                () -> assertThat(result.getContent()).extracting("newsletter")
+                        .extracting("category")
+                        .containsExactly(category)
+        );
     }
 
     @Test
-    void 아티클_목록_조회_지정한_날짜만_조회_테스트() {
-        //when
-        List<ArticleResponse> result = articleService.getArticles(
+    void 아티클_목록_조회_날짜_필터링_테스트() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        
+        // when
+        Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
                 baseTime.toLocalDate(),
                 null,
-                SortOption.DESC
+                SortOption.DESC,
+                pageable
         );
 
-        //then
-        assertThat(result).hasSize(articles.size() - 1);
+        // then - 하루 전 아티클 제외하고 3개
+        assertAll(
+                () -> assertThat(result.getTotalElements()).isEqualTo(articles.size() - 1),
+                () -> assertThat(result.getContent()).hasSize(articles.size() - 1)
+        );
     }
 
     @Test
     void 아티클_목록_조회_멤버가_존재하지_않으면_예외() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 0L,
                 null,
                 categories.getFirst().getName(),
-                SortOption.DESC
+                SortOption.DESC,
+                pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
 
     @Test
     void 아티클_목록_조회_카테고리가_존재하지_않으면_예외() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        
+        // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 member.getId(),
                 null,
                 "Invalid Category",
-                SortOption.DESC
+                SortOption.DESC,
+                pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 아티클_목록_조회_페이징_첫번째_페이지_테스트() {
+        // given
+        Pageable firstPage = PageRequest.of(0, 2);
+        
+        // when
+        Page<ArticleResponse> result = articleService.getArticles(
+                member.getId(),
+                null,
+                null,
+                SortOption.DESC,
+                firstPage
+        );
+
+        // then
+        assertAll(
+                () -> assertThat(result.getTotalElements()).isEqualTo(4),
+                () -> assertThat(result.getTotalPages()).isEqualTo(2),
+                () -> assertThat(result.getContent()).hasSize(2),
+                () -> assertThat(result.getNumber()).isEqualTo(0),
+                () -> assertThat(result.getSize()).isEqualTo(2),
+                () -> assertThat(result.isFirst()).isTrue(),
+                () -> assertThat(result.isLast()).isFalse(),
+                () -> assertThat(result.hasNext()).isTrue(),
+                () -> assertThat(result.hasPrevious()).isFalse()
+        );
+    }
+
+    @Test
+    void 아티클_목록_조회_페이징_두번째_페이지_테스트() {
+        // given
+        Pageable secondPage = PageRequest.of(1, 2);
+        
+        // when
+        Page<ArticleResponse> result = articleService.getArticles(
+                member.getId(),
+                null,
+                null,
+                SortOption.DESC,
+                secondPage
+        );
+
+        // then
+        assertAll(
+                () -> assertThat(result.getTotalElements()).isEqualTo(4),
+                () -> assertThat(result.getTotalPages()).isEqualTo(2),
+                () -> assertThat(result.getContent()).hasSize(2),
+                () -> assertThat(result.getNumber()).isEqualTo(1),
+                () -> assertThat(result.getSize()).isEqualTo(2),
+                () -> assertThat(result.isFirst()).isFalse(),
+                () -> assertThat(result.isLast()).isTrue(),
+                () -> assertThat(result.hasNext()).isFalse(),
+                () -> assertThat(result.hasPrevious()).isTrue()
+        );
+    }
+
+    @Test
+    void 아티클_목록_조회_페이징_DESC_정렬_테스트() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        
+        // when
+        Page<ArticleResponse> result = articleService.getArticles(
+                member.getId(),
+                null,
+                null,
+                SortOption.DESC,
+                pageable
+        );
+
+        // then
+        assertAll(
+                () -> assertThat(result.getTotalElements()).isEqualTo(4),
+                () -> assertThat(result.getContent()).hasSize(2),
+                () -> assertThat(result.getTotalPages()).isEqualTo(2),
+                () -> assertThat(result.getContent().get(0).arrivedDateTime())
+                        .isAfter(result.getContent().get(1).arrivedDateTime())
+        );
+    }
+
+    @Test
+    void 아티클_목록_조회_페이징_ASC_정렬_테스트() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        
+        // when
+        Page<ArticleResponse> result = articleService.getArticles(
+                member.getId(),
+                null,
+                null,
+                SortOption.ASC,
+                pageable
+        );
+
+        // then
+        assertAll(
+                () -> assertThat(result.getTotalElements()).isEqualTo(4),
+                () -> assertThat(result.getContent()).hasSize(2),
+                () -> assertThat(result.getTotalPages()).isEqualTo(2),
+                () -> assertThat(result.getContent().get(0).arrivedDateTime())
+                        .isBefore(result.getContent().get(1).arrivedDateTime())
+        );
     }
 }

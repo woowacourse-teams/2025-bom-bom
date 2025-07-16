@@ -1,49 +1,16 @@
+const fontFamily =
+  'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"';
+
 const fonts = {
-  heading1: {
-    fontSize: '48px',
-    lineHeight: '60px',
-    fontWeight: '700',
-  },
-  heading2: {
-    fontSize: '34px',
-    lineHeight: '50px',
-    fontWeight: '700',
-  },
-  heading3: {
-    fontSize: '28px',
-    lineHeight: '38px',
-    fontWeight: '600',
-  },
-  heading4: {
-    fontSize: '24px',
-    lineHeight: '32px',
-    fontWeight: '600',
-  },
-  heading5: {
-    fontSize: '18px',
-    lineHeight: '24px',
-    fontWeight: '600',
-  },
-  heading6: {
-    fontSize: '16px',
-    lineHeight: '20px',
-    fontWeight: '600',
-  },
-  body1: {
-    fontSize: '16px',
-    lineHeight: '24px',
-    fontWeight: '400',
-  },
-  body2: {
-    fontSize: '14px',
-    lineHeight: '22px',
-    fontWeight: '400',
-  },
-  caption: {
-    fontSize: '12px',
-    lineHeight: '18px',
-    fontWeight: '400',
-  },
+  heading1: `700 48px/60px ${fontFamily}`,
+  heading2: `700 34px/50px ${fontFamily}`,
+  heading3: `700 28px/38px ${fontFamily}`,
+  heading4: `600 24px/32px ${fontFamily}`,
+  heading5: `600 18px/28px ${fontFamily}`,
+  heading6: `600 16px/24px ${fontFamily}`,
+  body1: `400 16px/24px ${fontFamily}`,
+  body2: `400 14px/22px ${fontFamily}`,
+  caption: `400 12px/18px ${fontFamily}`,
 };
 
 const colors = {

@@ -16,13 +16,16 @@ const Container = styled.div`
 
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 
   margin: 0;
   padding: 20px;
 
   background-color: #f0f0f0;
+
+  color: ${({ theme }) => theme.colors.primary};
+  font: ${({ theme }) => theme.fonts.heading1};
   font-family: Arial, sans-serif;
 `;
 

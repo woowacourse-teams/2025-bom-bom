@@ -5,6 +5,6 @@ import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface CustomArticleRepository { //TODO:이름 고민
+public interface CustomArticleRepository {
     Page<ArticleResponse> findByMemberId(Long memberId, GetArticlesOptions options, Pageable pageable);
 }

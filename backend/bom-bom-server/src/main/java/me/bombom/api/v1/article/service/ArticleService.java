@@ -22,9 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
-
     private final CategoryRepository categoryRepository;
-
     private final MemberRepository memberRepository;
 
     public Page<ArticleResponse> getArticles(

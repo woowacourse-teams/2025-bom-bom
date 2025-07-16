@@ -14,6 +14,7 @@ module.exports = {
   ignorePatterns: ['dist', '.eslintrc.js'],
   rules: {
     'react/react-in-jsx-scope': 'off',
+    'import/no-unresolved': 'off',
   },
   plugins: ['jsx-a11y', 'import', 'react-hooks', 'react', 'prettier'],
   parser: '@typescript-eslint/parser',

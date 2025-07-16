@@ -114,9 +114,9 @@ const Nav = styled.nav`
   display: flex;
   gap: 8px;
   align-items: center;
-  background: rgba(255, 255, 255, 0.5);
+  background: ${({ theme }) => theme.colors.white};
   border-radius: 14px;
-  padding: 4.5px;
+  padding: 4px;
 `;
 
 const NavButton = styled.button<{ active?: boolean }>`
@@ -140,7 +140,7 @@ const NavIcon = styled.img`
 const ProfileBox = styled.div`
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   padding: 8px 12px;
   border-radius: 12px;
   background: ${({ theme }) => theme.colors.white};

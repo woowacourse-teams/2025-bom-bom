@@ -61,7 +61,7 @@ function ReadingStatusCard({
     rateCaption: `${dailyProgressRate}%`,
     progressRate: dailyProgressRate,
     description:
-      todayReadCount !== totalCount ? '목표까지 조금 더!' : '목표 달성!',
+      todayReadCount < totalCount ? '목표까지 조금 더!' : '목표 달성!',
     icon: { source: goalIcon, alternativeText: '목표 아이콘' },
   };
 
@@ -70,7 +70,7 @@ function ReadingStatusCard({
     rateCaption: `${weeklyReadCount} / ${goalCount}`,
     progressRate: weeklyProgressRate,
     description:
-      weeklyReadCount !== goalCount
+      weeklyReadCount < goalCount
         ? `목표까지 ${goalCount - weeklyReadCount}개 남음`
         : '목표 달성!',
     icon: { source: goalIcon, alternativeText: '목표 아이콘' },

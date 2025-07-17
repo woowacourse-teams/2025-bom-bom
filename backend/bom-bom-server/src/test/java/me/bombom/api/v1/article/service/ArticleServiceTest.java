@@ -14,7 +14,6 @@ import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
@@ -59,96 +58,12 @@ class ArticleServiceTest {
     public void setup() {
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
-        categories = getCategories();
+        categories = TestFixture.createCategories();
         categoryRepository.saveAll(categories);
-        newsletters = List.of(
-                Newsletter.builder()
-                        .name("뉴스픽")
-                        .description("뉴스픽 요약 뉴스")
-                        .imageUrl("https://cdn.bombom.me/img1.png")
-                        .email("news@newspick.com")
-                        .categoryId(categories.get(0).getId())
-                        .detailId(1L)
-                        .build(),
-                Newsletter.builder()
-                        .name("IT타임즈")
-                        .description("IT 업계 트렌드")
-                        .imageUrl("https://cdn.bombom.me/img2.png")
-                        .email("editor@ittimes.io")
-                        .categoryId(categories.get(1).getId())
-                        .detailId(2L)
-                        .build(),
-                Newsletter.builder()
-                        .name("비즈레터")
-                        .description("비즈니스 뉴스 큐레이션")
-                        .imageUrl("https://cdn.bombom.me/img3.png")
-                        .email("biz@biz.com")
-                        .categoryId(categories.get(2).getId())
-                        .detailId(3L)
-                        .build()
-        );
+        newsletters = TestFixture.createNewsletters(categories);
         newsletterRepository.saveAll(newsletters);
-        articles = List.of(
-                Article.builder()
-                        .title("개발자 생산성을 높이는 도구들")
-                        .contents("<h1>개발자 생산성을 높이는 도구들</h1>")
-                        .thumbnailUrl("https://example.com/images/dev-tools.png")
-                        .expectedReadTime(5)
-                        .contentsSummary("생산성을 높이는 다양한 개발 도구들을 소개합니다.")
-                        .isRead(false)
-                        .memberId(member.getId())
-                        .newsletterId(newsletters.get(0).getId())
-                        .arrivedDateTime(baseTime.minusMinutes(5))
-                        .build(),
-                Article.builder()
-                        .title("AI가 바꾸는 일상의 풍경")
-                        .contents("<h1>AI가 바꾸는 일상의 풍경</h1>")
-                        .thumbnailUrl("https://example.com/images/ai-life.png")
-                        .expectedReadTime(7)
-                        .contentsSummary("AI 기술이 우리의 일상생활에 어떤 변화를 가져왔는지 정리했습니다.")
-                        .isRead(true)
-                        .memberId(member.getId())
-                        .newsletterId(newsletters.get(1).getId())
-                        .arrivedDateTime(baseTime.minusMinutes(10))
-                        .build(),
-                Article.builder()
-                        .title("2025년 IT 트렌드 미리보기")
-                        .contents("<h1>2025년 IT 트렌드 미리보기</h1>")
-                        .thumbnailUrl("https://example.com/images/it-trend.png")
-                        .expectedReadTime(4)
-                        .contentsSummary("다가오는 IT 트렌드를 전망하고 주요 기술을 짚어봅니다.")
-                        .isRead(false)
-                        .memberId(member.getId())
-                        .newsletterId(newsletters.get(2).getId())
-                        .arrivedDateTime(baseTime.minusMinutes(20))
-                        .build(),
-                Article.builder() // 하루 전 아티클
-                        .title("2025년 패션 트렌드 미리보기")
-                        .contents("<h1>2025년 패션 트렌드 미리보기</h1>")
-                        .thumbnailUrl("https://example.com/images/it-trend.png")
-                        .expectedReadTime(8)
-                        .contentsSummary("다가오는 패션 트렌드를 전망하고 주요 기술을 짚어봅니다.")
-                        .isRead(false)
-                        .memberId(member.getId())
-                        .newsletterId(newsletters.get(2).getId())
-                        .arrivedDateTime(baseTime.minusDays(1))
-                        .build()
-        );
+        articles = TestFixture.createArticles(member, newsletters);
         articleRepository.saveAll(articles);
-    }
-
-    private static List<Category> getCategories() {
-        return List.of(
-                Category.builder()
-                        .name("경제")
-                        .build(),
-                Category.builder()
-                        .name("테크")
-                        .build(),
-                Category.builder()
-                        .name("푸드")
-                        .build()
-        );
     }
 
     @Test
@@ -441,26 +356,9 @@ class ArticleServiceTest {
     @Test
     void 아티클_상세_조회_카테고리가_존재하지_않으면_예외() {
         // given
-        Newsletter newsletter = Newsletter.builder()
-                .name("테스트 뉴스레터")
-                .description("테스트 설명")
-                .imageUrl("https://example.com/test.png")
-                .email("test@example.com")
-                .categoryId(0L) // 존재하지 않는 카테고리 ID
-                .detailId(0L)
-                .build();
+        Newsletter newsletter = TestFixture.createNewsletter("테스트 뉴스레터", "test@example.com", 0L);
         newsletterRepository.save(newsletter);
-        Article article = Article.builder()
-                .title("테스트 아티클")
-                .contents("<p>테스트 내용</p>")
-                .thumbnailUrl("https://example.com/test.png")
-                .expectedReadTime(3)
-                .contentsSummary("테스트 요약")
-                .isRead(false)
-                .memberId(member.getId())
-                .newsletterId(newsletter.getId())
-                .arrivedDateTime(baseTime)
-                .build();
+        Article article = TestFixture.createArticle(member, newsletter, baseTime);
         articleRepository.save(article);
 
         // when & then
@@ -472,12 +370,7 @@ class ArticleServiceTest {
     @Test
     void 아티클_상세_조회_멤버가_이메일의_주인이_아니면_예외() {
         //given
-        Member member2 = Member.builder()
-                .email("email2")
-                .nickname("nickname2")
-                .gender(Gender.MALE)
-                .roleId(1L)
-                .build();
+        Member member2 = TestFixture.createMember("email2", "nickname2");
         memberRepository.save(member2);
 
         // when & then

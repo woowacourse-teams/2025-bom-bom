@@ -166,17 +166,16 @@ const ProfileImg = styled.img`
 `;
 
 const ProfileInfo = styled.div`
+  ${({ theme }) => theme.fonts.caption};
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 `;
 
-const ProfileName = styled.div`
-  ${({ theme }) => theme.fonts.caption};
-`;
+const ProfileName = styled.div``;
 
 const ProfileEmail = styled.div`
-  ${({ theme }) => theme.fonts.caption};
   display: flex;
   align-items: center;
   cursor: pointer;

@@ -62,26 +62,6 @@ function ReadingStatusCard({
   const dailyProgressRate = calculateRate(todayReadCount, totalCount);
   const weeklyProgressRate = calculateRate(weeklyReadCount, goalCount);
 
-  const DAILY_PROGRESS_PROPS = {
-    label: '오늘의 진행률',
-    rateString: `${dailyProgressRate}%`,
-    progressRate: dailyProgressRate,
-    description:
-      todayReadCount < totalCount ? '목표까지 조금 더!' : '목표 달성!',
-    icon: { source: goalIcon, alternativeText: '목표 아이콘' },
-  };
-
-  const WEEKLY_PROGRESS_PROPS = {
-    label: '주간 목표',
-    rateString: `${weeklyReadCount} / ${goalCount}`,
-    progressRate: weeklyProgressRate,
-    description:
-      weeklyReadCount < goalCount
-        ? `목표까지 ${goalCount - weeklyReadCount}개 남음`
-        : '목표 달성!',
-    icon: { source: goalIcon, alternativeText: '목표 아이콘' },
-  };
-
   return (
     <Container>
       <TitleWrapper>
@@ -100,8 +80,26 @@ function ReadingStatusCard({
         <StreakHelperText>Great Job!</StreakHelperText>
       </StreakWrapper>
 
-      <ReadingProgressBox {...DAILY_PROGRESS_PROPS} />
-      <ReadingProgressBox {...WEEKLY_PROGRESS_PROPS} />
+      <ReadingProgressBox
+        label="오늘의 진행률"
+        rateString={`${dailyProgressRate}%`}
+        progressRate={dailyProgressRate}
+        description={
+          todayReadCount < totalCount ? '목표까지 조금 더!' : '목표 달성!'
+        }
+        icon={{ source: goalIcon, alternativeText: '목표 아이콘' }}
+      />
+      <ReadingProgressBox
+        label="주간 목표"
+        rateString={`${weeklyReadCount} / ${goalCount}`}
+        progressRate={weeklyProgressRate}
+        description={
+          weeklyReadCount < goalCount
+            ? `목표까지 ${goalCount - weeklyReadCount}개 남음`
+            : '목표 달성!'
+        }
+        icon={{ source: goalIcon, alternativeText: '목표 아이콘' }}
+      />
     </Container>
   );
 }

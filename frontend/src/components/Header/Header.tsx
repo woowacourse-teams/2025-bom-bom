@@ -27,6 +27,7 @@ export default function Header({ activeNav = 'home' }: HeaderProps) {
             <SubTitle>당신의 하루에 찾아오는 작은 설렘</SubTitle>
           </TitleBox>
         </LogoWrapper>
+
         <Nav>
           <NavButton active={activeNav === 'home'}>
             <HomeIcon color={activeNav === 'home' ? 'white' : 'black'} />
@@ -39,6 +40,7 @@ export default function Header({ activeNav = 'home' }: HeaderProps) {
             <p>뉴스레터 추천</p>
           </NavButton>
         </Nav>
+
         <ProfileBox>
           <ProfileImg src={compassIcon} alt="profile" />
           <ProfileInfo>

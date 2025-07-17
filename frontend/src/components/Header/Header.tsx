@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import compassIcon from '../../../public/assets/compass.svg';
 import homeIcon from '../../../public/assets/home.svg';
+import copyIcon from '../../../public/assets/copy.svg';
 
 type NavType = 'home' | 'recommend';
 
@@ -9,6 +10,10 @@ interface HeaderProps {
 }
 
 export default function Header({ activeNav = 'home' }: HeaderProps) {
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText('test@bombom.news');
+  };
+
   return (
     <HeaderContainer>
       <HeaderInner>
@@ -35,7 +40,10 @@ export default function Header({ activeNav = 'home' }: HeaderProps) {
           <ProfileImg src={compassIcon} alt="profile" />
           <ProfileInfo>
             <ProfileName>김봄봄</ProfileName>
-            <ProfileEmail>test@bombom.news</ProfileEmail>
+            <ProfileEmail onClick={handleCopyEmail}>
+              <EmailText>test@bombom.news</EmailText>
+              <CopyIcon src={copyIcon} alt="copy" />
+            </ProfileEmail>
           </ProfileInfo>
         </ProfileBox>
       </HeaderInner>
@@ -137,6 +145,11 @@ const NavIcon = styled.img`
   height: 20px;
 `;
 
+const CopyIcon = styled.img`
+  width: 16px;
+  height: 16px;
+`;
+
 const ProfileBox = styled.div`
   display: flex;
   align-items: center;
@@ -163,5 +176,13 @@ const ProfileName = styled.div`
 `;
 
 const ProfileEmail = styled.div`
+  ${({ theme }) => theme.fonts.caption};
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 4px;
+`;
+
+const EmailText = styled.div`
   ${({ theme }) => theme.fonts.caption};
 `;

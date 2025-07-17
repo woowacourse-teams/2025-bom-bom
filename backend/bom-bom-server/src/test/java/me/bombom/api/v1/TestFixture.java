@@ -75,14 +75,14 @@ public final class TestFixture {
      */
     public static List<Article> createArticles(Member member, List<Newsletter> newsletters) {
         return List.of(
-                createArticle(member, newsletters.get(0), BASE_TIME.minusMinutes(5)),
-                createArticle(member, newsletters.get(1), BASE_TIME.minusMinutes(10)),
-                createArticle(member, newsletters.get(2), BASE_TIME.minusMinutes(20)),
-                createArticle(member, newsletters.get(2), BASE_TIME.minusDays(1))
+                createArticle(member.getId(), newsletters.get(0).getId(), BASE_TIME.minusMinutes(5)),
+                createArticle(member.getId(), newsletters.get(1).getId(), BASE_TIME.minusMinutes(10)),
+                createArticle(member.getId(), newsletters.get(2).getId(), BASE_TIME.minusMinutes(20)),
+                createArticle(member.getId(), newsletters.get(2).getId(), BASE_TIME.minusDays(1))
         );
     }
 
-    public static Article createArticle(Member member, Newsletter newsletter, LocalDateTime arrivedTime) {
+    public static Article createArticle(Long memberId, Long newsletterId, LocalDateTime arrivedTime) {
         return Article.builder()
                 .title("아티클")
                 .contents("<h1>아티클</h1>")
@@ -90,8 +90,8 @@ public final class TestFixture {
                 .expectedReadTime(5)
                 .contentsSummary("요약")
                 .isRead(false)
-                .memberId(member.getId())
-                .newsletterId(newsletter.getId())
+                .memberId(memberId)
+                .newsletterId(newsletterId)
                 .arrivedDateTime(arrivedTime)
                 .build();
     }

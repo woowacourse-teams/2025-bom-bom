@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
 import compassIcon from '../../../public/assets/compass.svg';
-import homeIcon from '../../../public/assets/home.svg';
 import copyIcon from '../../../public/assets/copy.svg';
+import CompassIcon from '../icons/CompassIcon';
+import HomeIcon from '../icons/HomeIcon';
 
 type NavType = 'home' | 'recommend';
 
@@ -19,7 +20,7 @@ export default function Header({ activeNav = 'home' }: HeaderProps) {
       <HeaderInner>
         <LogoWrapper>
           <LogoBox>
-            <LogoImg src={homeIcon} alt="logo" />
+            <HomeIcon />
           </LogoBox>
           <TitleBox>
             <Title>봄봄</Title>
@@ -28,11 +29,13 @@ export default function Header({ activeNav = 'home' }: HeaderProps) {
         </LogoWrapper>
         <Nav>
           <NavButton active={activeNav === 'home'}>
-            <NavIcon src={homeIcon} alt="home" />
+            <HomeIcon color={activeNav === 'home' ? 'white' : 'black'} />
             <p>오늘의 뉴스레터</p>
           </NavButton>
           <NavButton active={activeNav === 'recommend'}>
-            <NavIcon src={compassIcon} alt="compass" />
+            <CompassIcon
+              color={activeNav === 'recommend' ? 'white' : 'black'}
+            />
             <p>뉴스레터 추천</p>
           </NavButton>
         </Nav>
@@ -42,7 +45,7 @@ export default function Header({ activeNav = 'home' }: HeaderProps) {
             <ProfileName>김봄봄</ProfileName>
             <ProfileEmail onClick={handleCopyEmail}>
               <EmailText>test@bombom.news</EmailText>
-              <CopyIcon src={copyIcon} alt="copy" />
+              <img src={copyIcon} alt="copy" width={16} height={16} />
             </ProfileEmail>
           </ProfileInfo>
         </ProfileBox>
@@ -91,11 +94,6 @@ const LogoBox = styled.div`
   margin-right: 12px;
 `;
 
-const LogoImg = styled.img`
-  width: 20px;
-  height: 20px;
-`;
-
 const TitleBox = styled.div`
   display: flex;
   flex-direction: column;
@@ -138,16 +136,6 @@ const NavButton = styled.button<{ active?: boolean }>`
   color: ${({ active, theme }) =>
     active ? theme.colors.white : theme.colors.black};
   ${({ theme }) => theme.fonts.body2};
-`;
-
-const NavIcon = styled.img`
-  width: 20px;
-  height: 20px;
-`;
-
-const CopyIcon = styled.img`
-  width: 16px;
-  height: 16px;
 `;
 
 const ProfileBox = styled.div`

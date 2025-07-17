@@ -5,7 +5,7 @@ import { theme } from '../../styles/theme';
 import reset from '../../styles/reset';
 
 const meta: Meta<typeof Header> = {
-  title: 'Components/Header',
+  title: 'common/Header',
   component: Header,
   parameters: {
     layout: 'fullscreen',

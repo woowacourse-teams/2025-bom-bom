@@ -2,6 +2,7 @@ package me.bombom.api.v1.article.controller;
 
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
 import me.bombom.api.v1.article.enums.SortOption;
 import me.bombom.api.v1.article.service.ArticleService;
@@ -36,5 +37,10 @@ public class ArticleController {
                 sortOption,
                 pageable
         );
+    }
+
+    @GetMapping("/{id}")
+    public ArticleDetailResponse getArticleDetail(@PathVariable Long id, @RequestParam Long memberId) {
+        return articleService.getArticleDetail(id, memberId);
     }
 }

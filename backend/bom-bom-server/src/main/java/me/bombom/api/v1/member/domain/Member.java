@@ -8,25 +8,22 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import me.bombom.api.v1.common.BaseEntity;
 import me.bombom.api.v1.member.enums.Gender;
-import org.hibernate.validator.constraints.UniqueElements;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
         name = "member",
-        uniqueConstraints = {
-                @jakarta.persistence.UniqueConstraint(columnNames = {"provider", "providerId"})
-        }
+        uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "providerId"})
 )
 public class Member extends BaseEntity {
 

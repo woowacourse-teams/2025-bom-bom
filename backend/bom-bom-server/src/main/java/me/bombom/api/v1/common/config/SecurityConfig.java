@@ -26,12 +26,10 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(FrameOptionsConfig::disable))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll())
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                        )
+                .authorizeHttpRequests(auth -> auth.anyRequest()
+                        .permitAll())
+                .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService))
                         .successHandler(new OAuth2LoginSuccessHandler())
                 );
         return http.build();

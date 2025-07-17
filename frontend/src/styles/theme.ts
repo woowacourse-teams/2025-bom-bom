@@ -21,12 +21,12 @@ const fonts = {
   },
   heading5: {
     fontSize: '18px',
-    lineHeight: '28px',
+    lineHeight: '24px',
     fontWeight: '600',
   },
   heading6: {
     fontSize: '16px',
-    lineHeight: '24px',
+    lineHeight: '20px',
     fontWeight: '600',
   },
   body1: {

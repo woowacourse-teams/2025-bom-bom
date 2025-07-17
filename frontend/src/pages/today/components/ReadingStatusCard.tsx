@@ -1,8 +1,16 @@
-import ReadingProgressBox from './ReadingProgressBox';
 import statusIcon from '../../../../public/assets/reading-status.svg';
 import streakIcon from '../../../../public/assets/streak.svg';
+import goalIcon from '../../../../public/assets/goal.svg';
 import styled from '@emotion/styled';
 import { calculateRate } from '../../../utils/math';
+import ProgressBar from '../../../components/ProgressBar';
+
+interface ReadingProgressBoxProps {
+  label: string;
+  rateCaption: string;
+  progressRate: number;
+  description: string;
+}
 
 interface ReadingStatusCardProps {
   streakReadDay: number;
@@ -10,6 +18,25 @@ interface ReadingStatusCardProps {
   totalCount: number;
   weeklyReadCount: number;
   goalCount: number;
+}
+
+function ReadingProgressBox({
+  label,
+  rateCaption,
+  progressRate,
+  description,
+}: ReadingProgressBoxProps) {
+  return (
+    <ProgressContainer>
+      <ProgressInfo>
+        <img src={goalIcon} alt="목표 아이콘" />
+        <ProgressLabel>{label}</ProgressLabel>
+        <ProgressRate>{rateCaption}</ProgressRate>
+      </ProgressInfo>
+      <ProgressBar progressRate={progressRate} />
+      <ProgressDescription>{description}</ProgressDescription>
+    </ProgressContainer>
+  );
 }
 
 function ReadingStatusCard({
@@ -65,6 +92,38 @@ function ReadingStatusCard({
 }
 
 export default ReadingStatusCard;
+
+const ProgressContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  width: 100%;
+`;
+
+const ProgressInfo = styled.div`
+  display: flex;
+  gap: 6px;
+`;
+
+const ProgressLabel = styled.h3`
+  color: ${({ theme }) => theme.colors.textPrimary};
+  ${({ theme }) => theme.fonts.body2};
+  text-align: center;
+`;
+
+const ProgressRate = styled.span`
+  margin-left: auto;
+
+  color: ${({ theme }) => theme.colors.textPrimary};
+  ${({ theme }) => theme.fonts.body2};
+  text-align: center;
+`;
+
+const ProgressDescription = styled.p`
+  color: ${({ theme }) => theme.colors.textTertiary};
+  ${({ theme }) => theme.fonts.caption};
+`;
 
 const Container = styled.section`
   display: flex;

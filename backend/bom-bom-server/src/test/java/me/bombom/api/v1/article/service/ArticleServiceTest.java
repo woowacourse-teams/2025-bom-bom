@@ -1,5 +1,6 @@
 package me.bombom.api.v1.article.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -367,5 +368,26 @@ class ArticleServiceTest {
         assertThatThrownBy(() -> articleService.getArticleDetail(articles.getFirst().getId(), member2.getId()))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
+    }
+
+    @Test
+    void 다_읽음_갱신_아티클_읽음_갱신_성공_테스트() {
+        // given
+        Article article = TestFixture.createArticle(member.getId(), newsletters.getFirst().getId(), baseTime);
+        articleRepository.save(article);
+
+        //when
+        articleService.markAsRead(article.getId());
+
+        // then
+        assertThat(article.isRead()).isTrue();
+    }
+
+    @Test
+    void 다_읽음_갱신_아티클이_존재하지_않으면_예외() {
+        // when & then
+        assertThatThrownBy(() -> articleService.markAsRead(0L))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
 }

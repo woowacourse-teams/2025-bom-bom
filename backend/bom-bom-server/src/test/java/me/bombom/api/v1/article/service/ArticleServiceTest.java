@@ -14,6 +14,7 @@ import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
@@ -58,17 +59,7 @@ class ArticleServiceTest {
     public void setup() {
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
-        categories = List.of(
-                Category.builder()
-                        .name("경제")
-                        .build(),
-                Category.builder()
-                        .name("테크")
-                        .build(),
-                Category.builder()
-                        .name("푸드")
-                        .build()
-        );
+        categories = getCategories();
         categoryRepository.saveAll(categories);
         newsletters = List.of(
                 Newsletter.builder()
@@ -144,6 +135,20 @@ class ArticleServiceTest {
                         .build()
         );
         articleRepository.saveAll(articles);
+    }
+
+    private static List<Category> getCategories() {
+        return List.of(
+                Category.builder()
+                        .name("경제")
+                        .build(),
+                Category.builder()
+                        .name("테크")
+                        .build(),
+                Category.builder()
+                        .name("푸드")
+                        .build()
+        );
     }
 
     @Test
@@ -462,5 +467,22 @@ class ArticleServiceTest {
         assertThatThrownBy(() -> articleService.getArticleDetail(article.getId(), member.getId()))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 아티클_상세_조회_멤버가_이메일의_주인이_아니면_예외() {
+        //given
+        Member member2 = Member.builder()
+                .email("email2")
+                .nickname("nickname2")
+                .gender(Gender.MALE)
+                .roleId(1L)
+                .build();
+        memberRepository.save(member2);
+
+        // when & then
+        assertThatThrownBy(() -> articleService.getArticleDetail(articles.getFirst().getId(), member2.getId()))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
     }
 }

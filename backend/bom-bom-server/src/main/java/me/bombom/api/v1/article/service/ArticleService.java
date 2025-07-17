@@ -1,6 +1,7 @@
 package me.bombom.api.v1.article.service;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
@@ -49,6 +50,7 @@ public class ArticleService {
         validateMemberExists(memberId);
         Article article = articleRepository.findById(id)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        validateArticleOwner(article, memberId);
         Newsletter newsletter = newsletterRepository.findById(article.getNewsletterId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         Category category = categoryRepository.findById(newsletter.getCategoryId())
@@ -59,6 +61,12 @@ public class ArticleService {
     private void validateMemberExists(Long memberId) {
         if (!memberRepository.existsById(memberId)) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND);
+        }
+    }
+
+    private void validateArticleOwner(Article article, Long memberId) {
+        if (!Objects.equals(article.getMemberId(), memberId)) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
         }
     }
 

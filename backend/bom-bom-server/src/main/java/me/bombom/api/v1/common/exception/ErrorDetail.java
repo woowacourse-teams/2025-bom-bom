@@ -21,11 +21,16 @@ public enum ErrorDetail {
     INVALID_REQUEST_PARAMETER_VALIDATION(HttpStatus.BAD_REQUEST, "M008", "요청 파라미터 유효성이 맞지 않습니다."),
 
     /*
-    * I : 인증
+    * J : 인증
     */
-    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "I001", "로그인이 필요합니다."),
-    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "I002", "유효하지 않은 인증 정보입니다. 다시 로그인 해주세요."),
-    EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "I003", "유효하지 않은 인증 정보입니다. 다시 로그인 해주세요."),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "J001", "로그인이 필요합니다."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "J002", "유효하지 않은 인증 정보입니다. 다시 로그인 해주세요."),
+    EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "J003", "유효하지 않은 인증 정보입니다. 다시 로그인 해주세요."),
+
+    /*
+    * G : 인가
+     */
+    FORBIDDEN_RESOURCE(HttpStatus.FORBIDDEN, "A001", "접근 권한이 없는 리소스입니다."),
     ;
 
     private final HttpStatus status;

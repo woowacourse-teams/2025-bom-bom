@@ -1,6 +1,5 @@
 package me.bombom.api.v1.member.service;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -17,7 +16,6 @@ import me.bombom.api.v1.member.repository.ContinueReadingRepository;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.member.repository.TodayReadingRepository;
 import me.bombom.api.v1.member.repository.WeeklyReadingRepository;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +54,6 @@ public class MemberService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        return ReadingInformationResponse.from(continueReading, todayReading, weeklyReading);
+        return ReadingInformationResponse.of(continueReading, todayReading, weeklyReading);
     }
 }

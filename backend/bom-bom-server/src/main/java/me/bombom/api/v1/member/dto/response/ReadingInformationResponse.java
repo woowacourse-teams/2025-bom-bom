@@ -10,7 +10,7 @@ public record ReadingInformationResponse(
         WeeklyReadingResponse weekly
 ) {
 
-    public static ReadingInformationResponse from(
+    public static ReadingInformationResponse of(
             ContinueReading continueReading,
             TodayReading todayReading,
             WeeklyReading weeklyReading

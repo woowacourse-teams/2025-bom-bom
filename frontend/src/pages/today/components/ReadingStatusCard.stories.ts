@@ -12,39 +12,31 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     streakReadDay: 7,
-    todayReadCount: 3,
-    totalCount: 4,
-    weeklyReadCount: 4,
-    goalCount: 5,
+    today: { readCount: 3, totalCount: 4 },
+    weekly: { readCount: 4, goalCount: 5 },
   },
 };
 
 export const ReachedDailyGoal: Story = {
   args: {
     streakReadDay: 7,
-    todayReadCount: 4,
-    totalCount: 4,
-    weeklyReadCount: 4,
-    goalCount: 5,
+    today: { readCount: 4, totalCount: 4 },
+    weekly: { readCount: 4, goalCount: 5 },
   },
 };
 
 export const ReachedWeeklyGoal: Story = {
   args: {
     streakReadDay: 7,
-    todayReadCount: 3,
-    totalCount: 4,
-    weeklyReadCount: 5,
-    goalCount: 5,
+    today: { readCount: 3, totalCount: 4 },
+    weekly: { readCount: 5, goalCount: 5 },
   },
 };
 
 export const ReachedWholeGoal: Story = {
   args: {
     streakReadDay: 7,
-    todayReadCount: 4,
-    totalCount: 4,
-    weeklyReadCount: 5,
-    goalCount: 5,
+    today: { readCount: 4, totalCount: 4 },
+    weekly: { readCount: 5, goalCount: 5 },
   },
 };

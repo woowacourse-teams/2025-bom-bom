@@ -18,12 +18,20 @@ interface ReadingProgressBoxProps {
   icon: iconProps;
 }
 
+interface TodayReadingStatus {
+  readCount: number;
+  totalCount: number;
+}
+
+interface WeeklyReadingStatus {
+  readCount: number;
+  goalCount: number;
+}
+
 interface ReadingStatusCardProps {
   streakReadDay: number;
-  todayReadCount: number;
-  totalCount: number;
-  weeklyReadCount: number;
-  goalCount: number;
+  today: TodayReadingStatus;
+  weekly: WeeklyReadingStatus;
 }
 
 function ReadingProgressBox({
@@ -48,10 +56,8 @@ function ReadingProgressBox({
 
 function ReadingStatusCard({
   streakReadDay,
-  todayReadCount,
-  totalCount,
-  weeklyReadCount,
-  goalCount,
+  today: { readCount: todayReadCount, totalCount },
+  weekly: { readCount: weeklyReadCount, goalCount },
 }: ReadingStatusCardProps) {
   const dailyProgressRate = calculateRate(todayReadCount, totalCount);
   const weeklyProgressRate = calculateRate(weeklyReadCount, goalCount);

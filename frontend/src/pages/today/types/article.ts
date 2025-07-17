@@ -4,7 +4,7 @@ export type Article = {
   contentsSummary: string;
   arrivedDateTime: Date;
   thumbnailUrl: string;
-  expectedReadTime: string;
+  expectedReadTime: number;
   isRead: boolean;
   newsletter: {
     name: string;

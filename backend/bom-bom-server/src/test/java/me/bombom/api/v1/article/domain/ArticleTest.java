@@ -3,6 +3,7 @@ package me.bombom.api.v1.article.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
+import me.bombom.api.v1.TestFixture;
 import org.junit.jupiter.api.Test;
 
 class ArticleTest {
@@ -12,17 +13,7 @@ class ArticleTest {
     @Test
     void 아티클의_읽기_상태를_true로_바꿀_수_있다() {
         //given
-        Article article = Article.builder()
-                .title("테스트")
-                .contents("<h2>제목</h2>")
-                .thumbnailUrl("http://thumbnail.com")
-                .expectedReadTime(5)
-                .contentsSummary("요약")
-                .isRead(false)
-                .memberId(1L)
-                .newsletterId(1L)
-                .arrivedDateTime(baseTime)
-                .build();
+        Article article = TestFixture.createArticle(1L, 1L, baseTime);
 
         //when
         article.markAsRead();

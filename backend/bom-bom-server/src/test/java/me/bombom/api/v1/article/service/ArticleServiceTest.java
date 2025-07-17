@@ -341,7 +341,7 @@ class ArticleServiceTest {
         // given
         Newsletter newsletter = TestFixture.createNewsletter("테스트 뉴스레터", "test@example.com", 0L);
         newsletterRepository.save(newsletter);
-        Article article = TestFixture.createArticle(member, newsletter, baseTime);
+        Article article = TestFixture.createArticle(member.getId(), newsletter.getId(), baseTime);
         articleRepository.save(article);
 
         // when & then

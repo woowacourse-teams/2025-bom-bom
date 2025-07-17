@@ -21,9 +21,9 @@ public class ArticleController {
 
     private final ArticleService articleService;
 
-    @GetMapping("/{memberId}")
+    @GetMapping
     public Page<ArticleResponse> getArticles(
-            @PathVariable Long memberId,
+            @RequestParam Long memberId,
             @RequestParam(required = false) LocalDate date,
             @RequestParam(required = false) String category,
             @RequestParam(required = false, name = "sorted", defaultValue = "DESC") SortOption sortOption,

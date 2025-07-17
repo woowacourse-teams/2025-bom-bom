@@ -1,5 +1,6 @@
 package me.bombom.api.v1.article.controller;
 
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
@@ -35,13 +36,13 @@ public class ArticleController {
     }
 
     @GetMapping("/{id}")
-    public ArticleDetailResponse getArticleDetail(@PathVariable Long id, @RequestParam Long memberId) {
+    public ArticleDetailResponse getArticleDetail(@PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id, @RequestParam Long memberId) {
         return articleService.getArticleDetail(id, memberId);
     }
 
     @PatchMapping("/{id}/read")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateIsRead(@PathVariable Long id) {
+    public void updateIsRead(@PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id) {
         articleService.markAsRead(id);
     }
 }

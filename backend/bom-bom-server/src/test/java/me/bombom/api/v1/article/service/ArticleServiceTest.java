@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
+import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
 import me.bombom.api.v1.article.enums.SortOption;
 import me.bombom.api.v1.article.repository.ArticleRepository;
@@ -99,7 +100,7 @@ class ArticleServiceTest {
         articles = List.of(
                 Article.builder()
                         .title("개발자 생산성을 높이는 도구들")
-                        .articleUrl("https://example.com/articles/dev-tools")
+                        .contents("<h1>개발자 생산성을 높이는 도구들</h1>")
                         .thumbnailUrl("https://example.com/images/dev-tools.png")
                         .expectedReadTime(5)
                         .contentsSummary("생산성을 높이는 다양한 개발 도구들을 소개합니다.")
@@ -110,7 +111,7 @@ class ArticleServiceTest {
                         .build(),
                 Article.builder()
                         .title("AI가 바꾸는 일상의 풍경")
-                        .articleUrl("https://example.com/articles/ai-life")
+                        .contents("<h1>AI가 바꾸는 일상의 풍경</h1>")
                         .thumbnailUrl("https://example.com/images/ai-life.png")
                         .expectedReadTime(7)
                         .contentsSummary("AI 기술이 우리의 일상생활에 어떤 변화를 가져왔는지 정리했습니다.")
@@ -121,7 +122,7 @@ class ArticleServiceTest {
                         .build(),
                 Article.builder()
                         .title("2025년 IT 트렌드 미리보기")
-                        .articleUrl("https://example.com/articles/it-trend-2025")
+                        .contents("<h1>2025년 IT 트렌드 미리보기</h1>")
                         .thumbnailUrl("https://example.com/images/it-trend.png")
                         .expectedReadTime(4)
                         .contentsSummary("다가오는 IT 트렌드를 전망하고 주요 기술을 짚어봅니다.")
@@ -130,9 +131,9 @@ class ArticleServiceTest {
                         .newsletterId(newsletters.get(2).getId())
                         .arrivedDateTime(baseTime.minusMinutes(20))
                         .build(),
-                Article.builder() //하루 전 아티클
+                Article.builder() // 하루 전 아티클
                         .title("2025년 패션 트렌드 미리보기")
-                        .articleUrl("https://example.com/articles/fashion-trend-2025")
+                        .contents("<h1>2025년 패션 트렌드 미리보기</h1>")
                         .thumbnailUrl("https://example.com/images/it-trend.png")
                         .expectedReadTime(8)
                         .contentsSummary("다가오는 패션 트렌드를 전망하고 주요 기술을 짚어봅니다.")
@@ -373,5 +374,93 @@ class ArticleServiceTest {
             softly.assertThat(result.getContent().get(0).arrivedDateTime())
                     .isBefore(result.getContent().get(1).arrivedDateTime());
         });
+    }
+
+    @Test
+    void 아티클_상세_조회_성공_테스트() {
+        // given
+        Article article = articles.getFirst();
+        Newsletter newsletter = newsletters.getFirst();
+
+        // when
+        ArticleDetailResponse result = articleService.getArticleDetail(article.getId(), member.getId());
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.title()).isEqualTo(article.getTitle());
+            softly.assertThat(result.newsletter().name()).isEqualTo(newsletter.getName());
+        });
+    }
+
+    @Test
+    void 아티클_상세_조회_아티클이_존재하지_않으면_예외() {
+        // when & then
+        assertThatThrownBy(() -> articleService.getArticleDetail(0L, member.getId()))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 아티클_상세_조회_멤버가_존재하지_않으면_예외() {
+        // given
+        Article article = articles.getFirst();
+
+        // when & then
+        assertThatThrownBy(() -> articleService.getArticleDetail(article.getId(), 0L))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 아티클_상세_조회_뉴스레터가_존재하지_않으면_예외() {
+        // given
+        Article article = Article.builder()
+                .title("테스트 아티클")
+                .contents("<p>테스트 내용</p>")
+                .thumbnailUrl("https://example.com/test.png")
+                .expectedReadTime(3)
+                .contentsSummary("테스트 요약")
+                .isRead(false)
+                .memberId(member.getId())
+                .newsletterId(0L) // 존재하지 않는 뉴스레터 ID
+                .arrivedDateTime(baseTime)
+                .build();
+        articleRepository.save(article);
+
+        // when & then
+        assertThatThrownBy(() -> articleService.getArticleDetail(article.getId(), member.getId()))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 아티클_상세_조회_카테고리가_존재하지_않으면_예외() {
+        // given
+        Newsletter newsletter = Newsletter.builder()
+                .name("테스트 뉴스레터")
+                .description("테스트 설명")
+                .imageUrl("https://example.com/test.png")
+                .email("test@example.com")
+                .categoryId(0L) // 존재하지 않는 카테고리 ID
+                .detailId(0L)
+                .build();
+        newsletterRepository.save(newsletter);
+        Article article = Article.builder()
+                .title("테스트 아티클")
+                .contents("<p>테스트 내용</p>")
+                .thumbnailUrl("https://example.com/test.png")
+                .expectedReadTime(3)
+                .contentsSummary("테스트 요약")
+                .isRead(false)
+                .memberId(member.getId())
+                .newsletterId(newsletter.getId())
+                .arrivedDateTime(baseTime)
+                .build();
+        articleRepository.save(article);
+
+        // when & then
+        assertThatThrownBy(() -> articleService.getArticleDetail(article.getId(), member.getId()))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
 }

@@ -3,7 +3,10 @@ package me.bombom.api.v1;
 import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.article.domain.Article;
+import me.bombom.api.v1.member.domain.ContinueReading;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.domain.TodayReading;
+import me.bombom.api.v1.member.domain.WeeklyReading;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
@@ -19,6 +22,8 @@ public final class TestFixture {
      */
     public static Member normalMemberFixture(){
         return Member.builder()
+                .provider("provider")
+                .providerId("providerId")
                 .email("email")
                 .nickname("nickname")
                 .gender(Gender.FEMALE)
@@ -97,6 +102,36 @@ public final class TestFixture {
                 .memberId(member.getId())
                 .newsletterId(newsletter.getId())
                 .arrivedDateTime(arrivedTime)
+
+    /**
+     * ContinueReading
+     */
+    public static ContinueReading continueReadingFixture(Member member){
+        return ContinueReading.builder()
+                .memberId(member.getId())
+                .dayCount(10)
+                .build();
+    }
+
+    /**
+     * TodayReading
+     */
+    public static TodayReading todayReadingFixture(Member member){
+        return TodayReading.builder()
+                .memberId(member.getId())
+                .currentCount(1)
+                .totalCount(3)
+                .build();
+    }
+
+    /**
+     * WeeklyReading
+     */
+    public static WeeklyReading weeklyReadingFixture(Member member) {
+        return WeeklyReading.builder()
+                .memberId(member.getId())
+                .currentCount(3)
+                .goalCount(5)
                 .build();
     }
 }

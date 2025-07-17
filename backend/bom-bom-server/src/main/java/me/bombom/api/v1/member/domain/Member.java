@@ -7,25 +7,35 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import me.bombom.api.v1.common.BaseEntity;
 import me.bombom.api.v1.member.enums.Gender;
-import org.hibernate.validator.constraints.UniqueElements;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+        name = "member",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "providerId"})
+)
 public class Member extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
+    private String provider;
+
+    @Column(nullable = false)
+    private String providerId;
 
     @Column(nullable = false, length = 30)
     private String email;
@@ -48,6 +58,8 @@ public class Member extends BaseEntity {
     @Builder
     public Member(
             Long id,
+            @NonNull String provider,
+            @NonNull String providerId,
             @NonNull String email,
             @NonNull String nickname,
             String profileImageUrl,
@@ -56,6 +68,8 @@ public class Member extends BaseEntity {
             @NonNull Long roleId
     ) {
         this.id = id;
+        this.provider = provider;
+        this.providerId = providerId;
         this.email = email;
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
@@ -64,3 +78,4 @@ public class Member extends BaseEntity {
         this.roleId = roleId;
     }
 }
+

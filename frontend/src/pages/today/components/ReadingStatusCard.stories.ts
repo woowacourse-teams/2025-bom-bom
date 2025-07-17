@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-webpack5';
-import ReadingStatusCard from '../pages/today/components/ReadingStatusCard';
+import ReadingStatusCard from './ReadingStatusCard';
 
 const meta = {
-  title: 'ReadingStatusCard',
+  title: 'components/bombom/ReadingStatusCard',
   component: ReadingStatusCard,
 } satisfies Meta<typeof ReadingStatusCard>;
 

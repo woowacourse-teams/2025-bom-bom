@@ -4,6 +4,10 @@ import goalIcon from '../../../../public/assets/goal.svg';
 import styled from '@emotion/styled';
 import { calculateRate } from '../../../utils/math';
 import ProgressBar from '../../../components/ProgressBar';
+import {
+  TodayReadingStatus,
+  WeeklyReadingStatus,
+} from '../types/readingStatus';
 
 interface iconProps {
   source: string;
@@ -16,16 +20,6 @@ interface ReadingProgressBoxProps {
   progressRate: number;
   description: string;
   icon: iconProps;
-}
-
-interface TodayReadingStatus {
-  readCount: number;
-  totalCount: number;
-}
-
-interface WeeklyReadingStatus {
-  readCount: number;
-  goalCount: number;
 }
 
 interface ReadingStatusCardProps {

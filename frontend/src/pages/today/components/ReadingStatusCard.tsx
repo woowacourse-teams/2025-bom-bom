@@ -12,7 +12,7 @@ interface iconProps {
 
 interface ReadingProgressBoxProps {
   label: string;
-  rateCaption: string;
+  rateString: string;
   progressRate: number;
   description: string;
   icon: iconProps;
@@ -28,7 +28,7 @@ interface ReadingStatusCardProps {
 
 function ReadingProgressBox({
   label,
-  rateCaption,
+  rateString,
   progressRate,
   description,
   icon: { source, alternativeText },
@@ -38,7 +38,7 @@ function ReadingProgressBox({
       <ProgressInfo>
         <img src={source} alt={alternativeText} />
         <ProgressLabel>{label}</ProgressLabel>
-        <ProgressRate>{rateCaption}</ProgressRate>
+        <ProgressRate>{rateString}</ProgressRate>
       </ProgressInfo>
       <ProgressBar progressRate={progressRate} />
       <ProgressDescription>{description}</ProgressDescription>
@@ -56,18 +56,18 @@ function ReadingStatusCard({
   const dailyProgressRate = calculateRate(todayReadCount, totalCount);
   const weeklyProgressRate = calculateRate(weeklyReadCount, goalCount);
 
-  const DAILY_PROGRESS_BOX = {
+  const DAILY_PROGRESS_PROPS = {
     label: '오늘의 진행률',
-    rateCaption: `${dailyProgressRate}%`,
+    rateString: `${dailyProgressRate}%`,
     progressRate: dailyProgressRate,
     description:
       todayReadCount < totalCount ? '목표까지 조금 더!' : '목표 달성!',
     icon: { source: goalIcon, alternativeText: '목표 아이콘' },
   };
 
-  const WEEKLY_PROGRESS_BOX = {
+  const WEEKLY_PROGRESS_PROPS = {
     label: '주간 목표',
-    rateCaption: `${weeklyReadCount} / ${goalCount}`,
+    rateString: `${weeklyReadCount} / ${goalCount}`,
     progressRate: weeklyProgressRate,
     description:
       weeklyReadCount < goalCount
@@ -94,8 +94,8 @@ function ReadingStatusCard({
         <StreakHelperText>Great Job!</StreakHelperText>
       </StreakWrapper>
 
-      <ReadingProgressBox {...DAILY_PROGRESS_BOX} />
-      <ReadingProgressBox {...WEEKLY_PROGRESS_BOX} />
+      <ReadingProgressBox {...DAILY_PROGRESS_PROPS} />
+      <ReadingProgressBox {...WEEKLY_PROGRESS_PROPS} />
     </Container>
   );
 }

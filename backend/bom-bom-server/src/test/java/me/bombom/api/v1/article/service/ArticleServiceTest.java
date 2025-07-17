@@ -9,11 +9,13 @@ import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
+import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.enums.SortOption;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
@@ -74,9 +76,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                null,
-                null,
-                SortOption.DESC,
+                GetArticlesOptions.of(null, null, SortOption.DESC),
                 pageable
         );
 
@@ -98,9 +98,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                null,
-                null,
-                SortOption.ASC,
+                GetArticlesOptions.of(null, null, SortOption.ASC),
                 pageable
         );
 
@@ -118,14 +116,13 @@ class ArticleServiceTest {
     void 아티클_목록_조회_카테고리_필터링_테스트() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
-        String category = categories.getFirst().getName();
+        Category category = categories.getFirst();
+        Long categoryId = category.getId();
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                null,
-                category,
-                SortOption.DESC,
+                GetArticlesOptions.of(null, categoryId, SortOption.DESC),
                 pageable
         );
 
@@ -135,7 +132,7 @@ class ArticleServiceTest {
             softly.assertThat(result.getContent()).hasSize(1);
             softly.assertThat(result.getContent()).extracting("newsletter")
                     .extracting("category")
-                    .containsExactly(category);
+                    .containsExactly(category.getName());
         });
     }
 
@@ -147,9 +144,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                baseTime.toLocalDate(),
-                null,
-                SortOption.DESC,
+                GetArticlesOptions.of(baseTime.toLocalDate(), null, SortOption.DESC),
                 pageable
         );
 
@@ -168,9 +163,7 @@ class ArticleServiceTest {
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 0L,
-                null,
-                categories.getFirst().getName(),
-                SortOption.DESC,
+                GetArticlesOptions.of(null, categories.getFirst().getId(), SortOption.DESC),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
@@ -184,9 +177,7 @@ class ArticleServiceTest {
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 member.getId(),
-                null,
-                "Invalid Category",
-                SortOption.DESC,
+                GetArticlesOptions.of(null, 0L, SortOption.DESC),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
@@ -200,9 +191,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                null,
-                null,
-                SortOption.DESC,
+                GetArticlesOptions.of(null, null, SortOption.DESC),
                 firstPage
         );
 
@@ -228,9 +217,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                null,
-                null,
-                SortOption.DESC,
+                GetArticlesOptions.of(null, null, SortOption.DESC),
                 secondPage
         );
 
@@ -256,9 +243,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                null,
-                null,
-                SortOption.DESC,
+                GetArticlesOptions.of(null, null, SortOption.DESC),
                 pageable
         );
 
@@ -280,9 +265,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                null,
-                null,
-                SortOption.ASC,
+                GetArticlesOptions.of(null, null, SortOption.ASC),
                 pageable
         );
 
@@ -370,7 +353,14 @@ class ArticleServiceTest {
     @Test
     void 아티클_상세_조회_멤버가_이메일의_주인이_아니면_예외() {
         //given
-        Member member2 = TestFixture.createMember("email2", "nickname2");
+        Member member2 = Member.builder()
+                .provider("provider2")
+                .providerId("providerId2")
+                .email("email2")
+                .nickname("nickname2")
+                .gender(Gender.FEMALE)
+                .roleId(1L)
+                .build();
         memberRepository.save(member2);
 
         // when & then

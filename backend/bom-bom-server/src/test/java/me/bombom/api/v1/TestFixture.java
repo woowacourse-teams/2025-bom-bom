@@ -31,15 +31,6 @@ public final class TestFixture {
                 .build();
     }
 
-    public static Member createMember(String email, String nickname) {
-        return Member.builder()
-                .email(email)
-                .nickname(nickname)
-                .gender(Gender.MALE)
-                .roleId(1L)
-                .build();
-    }
-
     /**
      * Category
      */
@@ -102,6 +93,8 @@ public final class TestFixture {
                 .memberId(member.getId())
                 .newsletterId(newsletter.getId())
                 .arrivedDateTime(arrivedTime)
+                .build();
+    }
 
     /**
      * ContinueReading

@@ -1,13 +1,11 @@
 package me.bombom.api.v1.article.service;
 
-import java.time.LocalDate;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
 import me.bombom.api.v1.article.dto.GetArticlesOptions;
-import me.bombom.api.v1.article.enums.SortOption;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -31,19 +29,10 @@ public class ArticleService {
     private final MemberRepository memberRepository;
     private final NewsletterRepository newsletterRepository;
 
-    public Page<ArticleResponse> getArticles(
-            Long memberId,
-            LocalDate date,
-            String categoryName,
-            SortOption sortOption,
-            Pageable pageable
-    ) {
+    public Page<ArticleResponse> getArticles(Long memberId, GetArticlesOptions options, Pageable pageable) {
         validateMemberExists(memberId);
-        return articleRepository.findByMemberId(
-                memberId,
-                GetArticlesOptions.of(date, getCategoryIdByName(categoryName), sortOption),
-                pageable
-        );
+        validateCategoryExists(options.categoryId());
+        return articleRepository.findByMemberId(memberId, options, pageable);
     }
 
     public ArticleDetailResponse getArticleDetail(Long id, Long memberId) {
@@ -64,18 +53,15 @@ public class ArticleService {
         }
     }
 
+    private void validateCategoryExists(Long categoryId) {
+        if (categoryId != null && !categoryRepository.existsById(categoryId)) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND);
+        }
+    }
+
     private void validateArticleOwner(Article article, Long memberId) {
         if (!Objects.equals(article.getMemberId(), memberId)) {
             throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
         }
-    }
-
-    private Long getCategoryIdByName(String categoryName) {
-        if (categoryName == null || categoryName.isBlank()) {
-            return null;
-        }
-        Category category = categoryRepository.findByName(categoryName)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        return category.getId();
     }
 }

@@ -17,7 +17,7 @@ export default function Header({ activeNav = 'home' }: HeaderProps) {
   return (
     <HeaderContainer>
       <HeaderInner>
-        <Left>
+        <LogoWrapper>
           <LogoBox>
             <LogoImg src={homeIcon} alt="logo" />
           </LogoBox>
@@ -25,7 +25,7 @@ export default function Header({ activeNav = 'home' }: HeaderProps) {
             <Title>봄봄</Title>
             <SubTitle>당신의 하루에 찾아오는 작은 설렘</SubTitle>
           </TitleBox>
-        </Left>
+        </LogoWrapper>
         <Nav>
           <NavButton active={activeNav === 'home'}>
             <NavIcon src={homeIcon} alt="home" />
@@ -72,7 +72,7 @@ const HeaderInner = styled.div`
   justify-content: space-between;
 `;
 
-const Left = styled.div`
+const LogoWrapper = styled.div`
   display: flex;
   align-items: center;
 `;

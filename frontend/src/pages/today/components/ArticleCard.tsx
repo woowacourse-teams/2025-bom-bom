@@ -69,14 +69,14 @@ const Title = styled.h2`
 `;
 
 const Description = styled.p`
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-
   overflow: hidden;
+
+  display: -webkit-box;
 
   ${({ theme }) => theme.fonts.body2};
   color: ${({ theme }) => theme.colors.textSecondary};
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 `;
 
 const MetaInfoRow = styled.div`
@@ -91,11 +91,11 @@ const MetaInfoTag = styled.div`
   align-items: center;
 
   padding: 4px 8px;
-  border-radius: 16px;
 
   ${({ theme }) => theme.fonts.caption};
-  background-color: ${({ theme }) => theme.colors.dividers};
   color: ${({ theme }) => theme.colors.textPrimary};
+  background-color: ${({ theme }) => theme.colors.dividers};
+  border-radius: 16px;
 `;
 
 const MetaInfoText = styled.span`

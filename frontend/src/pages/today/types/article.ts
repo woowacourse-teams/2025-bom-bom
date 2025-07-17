@@ -6,9 +6,11 @@ export type Article = {
   thumbnailUrl: string;
   expectedReadTime: number;
   isRead: boolean;
-  newsletter: {
-    name: string;
-    imageUrl: string;
-    category: string;
-  };
+  newsletter: Newsletter;
+};
+
+export type Newsletter = {
+  name: string;
+  imageUrl: string;
+  category: string;
 };

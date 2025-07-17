@@ -27,7 +27,7 @@ public class Article extends BaseEntity {
     private String title;
 
     @Lob
-    @Column(nullable = false, length = 512, columnDefinition = "mediumtext")
+    @Column(nullable = false, columnDefinition = "mediumtext")
     private String contents;
 
     @Column(length = 512)

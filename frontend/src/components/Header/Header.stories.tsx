@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import Header from './Header';
 
 const meta: Meta<typeof Header> = {
-  title: 'common/Header',
+  title: 'components/common/Header',
   component: Header,
   parameters: {
     layout: 'fullscreen',

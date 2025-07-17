@@ -37,7 +37,7 @@ function ArticleCard({ data }: ArticleCardProps) {
           </ReadTimeBox>
         </MetaInfoRow>
       </InfoWrapper>
-      <Thumbnail src={thumbnailUrl || newsletterImageUrl} alt="아티클 썸네일" />
+      <Thumbnail src={thumbnailUrl ?? newsletterImageUrl} alt="아티클 썸네일" />
     </Container>
   );
 }

@@ -17,8 +17,8 @@ export default function NewsletterHero() {
 
 const HeroContainer = styled.div`
   background: linear-gradient(135deg, #ff9966 0%, #ffb366 100%);
-  border-radius: 16px;
   padding: 40px;
+  border-radius: 16px;
   margin-bottom: 32px;
   position: relative;
   overflow: hidden;
@@ -31,7 +31,7 @@ const HeroContent = styled.div`
 `;
 
 const HeroIcon = styled.div`
-  font-size: 48px;
+  ${({ theme }) => theme.fonts.heading1};
   margin-bottom: 16px;
 `;
 
@@ -55,8 +55,6 @@ const CTAButton = styled.button`
   border: none;
   border-radius: 12px;
   padding: 12px 24px;
-  cursor: pointer;
-  font-weight: 600;
   transition: all 0.2s ease;
 
   &:hover {

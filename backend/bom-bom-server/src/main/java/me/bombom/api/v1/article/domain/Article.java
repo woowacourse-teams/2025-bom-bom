@@ -75,4 +75,8 @@ public class Article extends BaseEntity {
         this.newsletterId = newsletterId;
         this.arrivedDateTime = arrivedDateTime;
     }
+
+    public void markAsRead() {
+        isRead = true;
+    }
 }

@@ -47,6 +47,12 @@ public class ArticleService {
         return ArticleDetailResponse.of(article, newsletter, category);
     }
 
+    public void markAsRead(Long id) {
+        Article article = articleRepository.findById(id)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        article.markAsRead();
+    }
+
     private void validateMemberExists(Long memberId) {
         if (!memberRepository.existsById(memberId)) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND);

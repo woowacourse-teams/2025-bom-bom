@@ -5,11 +5,17 @@ import styled from '@emotion/styled';
 import { calculateRate } from '../../../utils/math';
 import ProgressBar from '../../../components/ProgressBar';
 
+interface iconProps {
+  source: string;
+  alternativeText: string;
+}
+
 interface ReadingProgressBoxProps {
   label: string;
   rateCaption: string;
   progressRate: number;
   description: string;
+  icon: iconProps;
 }
 
 interface ReadingStatusCardProps {
@@ -25,11 +31,12 @@ function ReadingProgressBox({
   rateCaption,
   progressRate,
   description,
+  icon: { source, alternativeText },
 }: ReadingProgressBoxProps) {
   return (
     <ProgressContainer>
       <ProgressInfo>
-        <img src={goalIcon} alt="목표 아이콘" />
+        <img src={source} alt={alternativeText} />
         <ProgressLabel>{label}</ProgressLabel>
         <ProgressRate>{rateCaption}</ProgressRate>
       </ProgressInfo>
@@ -55,6 +62,7 @@ function ReadingStatusCard({
     progressRate: dailyProgressRate,
     description:
       todayReadCount !== totalCount ? '목표까지 조금 더!' : '목표 달성!',
+    icon: { source: goalIcon, alternativeText: '목표 아이콘' },
   };
 
   const WEEKLY_PROGRESS_BOX = {
@@ -65,6 +73,7 @@ function ReadingStatusCard({
       weeklyReadCount !== goalCount
         ? `목표까지 ${goalCount - weeklyReadCount}개 남음`
         : '목표 달성!',
+    icon: { source: goalIcon, alternativeText: '목표 아이콘' },
   };
 
   return (

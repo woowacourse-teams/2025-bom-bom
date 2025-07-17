@@ -4,9 +4,6 @@ import NewsletterHero from './NewsletterHero';
 const meta: Meta<typeof NewsletterHero> = {
   title: 'components/NewsletterHero',
   component: NewsletterHero,
-  parameters: {
-    layout: 'padded',
-  },
 };
 export default meta;
 

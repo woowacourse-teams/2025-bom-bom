@@ -56,7 +56,7 @@ public class Article extends BaseEntity {
             Long id,
             @NonNull String title,
             @NonNull String contents,
-            @NonNull String thumbnailUrl,
+            String thumbnailUrl,
             int expectedReadTime,
             @NonNull String contentsSummary,
             boolean isRead,

@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -25,8 +26,9 @@ public class Article extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false, length = 512)
-    private String articleUrl;
+    @Lob
+    @Column(nullable = false, columnDefinition = "mediumtext")
+    private String contents;
 
     @Column(length = 512)
     private String thumbnailUrl;
@@ -53,8 +55,8 @@ public class Article extends BaseEntity {
     public Article(
             Long id,
             @NonNull String title,
-            @NonNull String articleUrl,
-            @NonNull String thumbnailUrl,
+            @NonNull String contents,
+            String thumbnailUrl,
             int expectedReadTime,
             @NonNull String contentsSummary,
             boolean isRead,
@@ -64,7 +66,7 @@ public class Article extends BaseEntity {
     ) {
         this.id = id;
         this.title = title;
-        this.articleUrl = articleUrl;
+        this.contents = contents;
         this.thumbnailUrl = thumbnailUrl;
         this.expectedReadTime = expectedReadTime;
         this.contentsSummary = contentsSummary;

@@ -64,7 +64,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 WHERE a.memberId = :memberId
         """);
         appendDynamicWhereClause(options.date(), options.categoryId(), jpql);
-        appendOrderByClause(options.sort(), jpql);
+        appendOrderByClause(options.sorted(), jpql);
 
         TypedQuery<ArticleResponse> query = entityManager.createQuery(jpql.toString(), ArticleResponse.class);
         setQueryParameters(query, memberId, options.date(), options.categoryId());

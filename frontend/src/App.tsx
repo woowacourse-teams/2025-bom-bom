@@ -1,5 +1,5 @@
-import styled from '@emotion/styled';
 import { ThemeProvider } from '@emotion/react';
+import styled from '@emotion/styled';
 import { theme } from './styles/theme';
 
 const App = () => {
@@ -18,8 +18,6 @@ const Container = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-
-  ${({ theme }) => theme.fonts.heading1};
 
   margin: 0;
   padding: 20px;

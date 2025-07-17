@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import ArticleCard from './ArticleCard';
 
 const meta = {
-  title: 'Components/BomBom/ArticleCard',
+  title: 'components/bombom/ArticleCard',
   component: ArticleCard,
 } satisfies Meta<typeof ArticleCard>;
 

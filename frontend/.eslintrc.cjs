@@ -11,7 +11,7 @@ module.exports = {
     'plugin:prettier/recommended',
     'plugin:storybook/recommended',
   ],
-  ignorePatterns: ['dist', '.eslintrc.js'],
+  ignorePatterns: ['dist', '.eslintrc.cjs'],
   rules: {
     'react/react-in-jsx-scope': 'off',
     'import/no-unresolved': 'off',

@@ -5,13 +5,14 @@
     "strict": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
-    "jsx": "react-jsx",
     "esModuleInterop": true,
     "jsxImportSource": "@emotion/react",
+    "jsx": "react-jsx",
+    "allowUmdGlobalAccess": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "types": ["./emotion.d.ts"]
   },
-  "include": ["./**/*.ts", "src"],
+  "include": ["src", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]
 }

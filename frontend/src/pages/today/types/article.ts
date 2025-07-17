@@ -3,7 +3,7 @@ export type Article = {
   title: string;
   contentsSummary: string;
   arrivedDateTime: Date;
-  thumbnailUrl: string;
+  thumbnailUrl?: string;
   expectedReadTime: number;
   isRead: boolean;
   newsletter: Newsletter;

@@ -15,7 +15,11 @@ function ArticleCard({ data }: ArticleCardProps) {
     thumbnailUrl,
     expectedReadTime,
     isRead,
-    newsletter: { name: newsletterName, category: newsletterCategory },
+    newsletter: {
+      name: newsletterName,
+      category: newsletterCategory,
+      imageUrl: newsletterImageUrl,
+    },
   } = data;
 
   return (
@@ -33,7 +37,7 @@ function ArticleCard({ data }: ArticleCardProps) {
           </ReadTimeBox>
         </MetaInfoRow>
       </InfoWrapper>
-      <Thumbnail src={thumbnailUrl} alt="아티클 썸네일" />
+      <Thumbnail src={thumbnailUrl || newsletterImageUrl} alt="아티클 썸네일" />
     </Container>
   );
 }

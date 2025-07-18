@@ -2,25 +2,11 @@ import statusIcon from '../../../../public/assets/reading-status.svg';
 import streakIcon from '../../../../public/assets/streak.svg';
 import goalIcon from '../../../../public/assets/goal.svg';
 import styled from '@emotion/styled';
-import { calculateRate } from '../../../utils/math';
-import ProgressBar from '../../../components/ProgressBar';
 import {
   TodayReadingStatus,
   WeeklyReadingStatus,
 } from '../types/readingStatus';
-
-interface iconProps {
-  source: string;
-  alternativeText: string;
-}
-
-interface ReadingProgressBoxProps {
-  label: string;
-  rateString: string;
-  progressRate: number;
-  description: string;
-  icon: iconProps;
-}
+import ProgressWithLabel from '../../../components/ProgressWithLabel/ProgressWithLabel';
 
 interface ReadingStatusCardProps {
   streakReadDay: number;
@@ -28,34 +14,11 @@ interface ReadingStatusCardProps {
   weekly: WeeklyReadingStatus;
 }
 
-function ReadingProgressBox({
-  label,
-  rateString,
-  progressRate,
-  description,
-  icon: { source, alternativeText },
-}: ReadingProgressBoxProps) {
-  return (
-    <ProgressContainer>
-      <ProgressInfo>
-        <img src={source} alt={alternativeText} />
-        <ProgressLabel>{label}</ProgressLabel>
-        <ProgressRate>{rateString}</ProgressRate>
-      </ProgressInfo>
-      <ProgressBar progressRate={progressRate} />
-      <ProgressDescription>{description}</ProgressDescription>
-    </ProgressContainer>
-  );
-}
-
 function ReadingStatusCard({
   streakReadDay,
   today: { readCount: todayReadCount, totalCount },
   weekly: { readCount: weeklyReadCount, goalCount },
 }: ReadingStatusCardProps) {
-  const dailyProgressRate = calculateRate(todayReadCount, totalCount);
-  const weeklyProgressRate = calculateRate(weeklyReadCount, goalCount);
-
   return (
     <Container>
       <TitleWrapper>
@@ -74,64 +37,30 @@ function ReadingStatusCard({
         <StreakHelperText>Great Job!</StreakHelperText>
       </StreakWrapper>
 
-      <ReadingProgressBox
+      <ProgressWithLabel
         label="오늘의 진행률"
-        rateString={`${dailyProgressRate}%`}
-        progressRate={dailyProgressRate}
+        icon={{ source: goalIcon, alternativeText: '목표 아이콘' }}
+        value={{ currentCount: todayReadCount, totalCount }}
         description={
           todayReadCount < totalCount ? '목표까지 조금 더!' : '목표 달성!'
         }
-        icon={{ source: goalIcon, alternativeText: '목표 아이콘' }}
       />
-      <ReadingProgressBox
+      <ProgressWithLabel
         label="주간 목표"
-        rateString={`${weeklyReadCount} / ${goalCount}`}
-        progressRate={weeklyProgressRate}
+        icon={{ source: goalIcon, alternativeText: '목표 아이콘' }}
+        value={{ currentCount: weeklyReadCount, totalCount: goalCount }}
         description={
           weeklyReadCount < goalCount
             ? `목표까지 ${goalCount - weeklyReadCount}개 남음`
             : '목표 달성!'
         }
-        icon={{ source: goalIcon, alternativeText: '목표 아이콘' }}
+        rateFormat="ratio"
       />
     </Container>
   );
 }
 
 export default ReadingStatusCard;
-
-const ProgressContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-
-  width: 100%;
-
-  gap: 14px;
-`;
-
-const ProgressInfo = styled.div`
-  display: flex;
-  gap: 6px;
-`;
-
-const ProgressLabel = styled.h3`
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.body2};
-  text-align: center;
-`;
-
-const ProgressRate = styled.span`
-  margin-left: auto;
-
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.body2};
-  text-align: center;
-`;
-
-const ProgressDescription = styled.p`
-  color: ${({ theme }) => theme.colors.textTertiary};
-  font: ${({ theme }) => theme.fonts.caption};
-`;
 
 const Container = styled.section`
   display: flex;

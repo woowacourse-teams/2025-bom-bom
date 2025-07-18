@@ -20,9 +20,10 @@ jobs:
           distribution: temurin
 
       - name: application-dev.yml 파일 만들기
-        run: mkdir -p backend/bom-bom-server/src/main/resources
+        run: |
+          mkdir -p src/main/resources
           echo "${{ secrets.APPLICATION_DEV_PROPERTIES }}" \
-          > backend/bom-bom-server/src/main/resources/application‑dev.yml
+          > src/main/resources/application-dev.yml
 
       - name: Build JAR
         run: ./gradlew clean build

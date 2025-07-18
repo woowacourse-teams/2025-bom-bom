@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 interface ImageInfoCardProps {
   imageUrl: string;
   title: string;
-  description?: string;
+  description: string;
 }
 
 function ImageInfoCard({ imageUrl, title, description }: ImageInfoCardProps) {
@@ -12,7 +12,7 @@ function ImageInfoCard({ imageUrl, title, description }: ImageInfoCardProps) {
       <Image src={imageUrl} alt={`${title} 뉴스레터 이미지`} />
       <InfoBox>
         <Title>{title}</Title>
-        {description && <Description>{description}</Description>}
+        <Description>{description}</Description>
       </InfoBox>
     </Container>
   );

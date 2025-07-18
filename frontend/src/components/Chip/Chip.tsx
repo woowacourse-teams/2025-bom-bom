@@ -8,7 +8,7 @@ interface ChipProps {
 
 function Chip({ text, selected = false, onSelect }: ChipProps) {
   return (
-    <Container selected={selected} onClick={onSelect}>
+    <Container type="button" selected={selected} onClick={onSelect}>
       {text}
     </Container>
   );

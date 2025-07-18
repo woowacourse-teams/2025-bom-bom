@@ -9,15 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TodayRouteImport } from './routes/today'
 import { Route as RecommendRouteImport } from './routes/recommend'
 import { Route as IndexRouteImport } from './routes/index'
 
-const TodayRoute = TodayRouteImport.update({
-  id: '/today',
-  path: '/today',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RecommendRoute = RecommendRouteImport.update({
   id: '/recommend',
   path: '/recommend',
@@ -32,42 +26,31 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/recommend': typeof RecommendRoute
-  '/today': typeof TodayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/recommend': typeof RecommendRoute
-  '/today': typeof TodayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/recommend': typeof RecommendRoute
-  '/today': typeof TodayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/recommend' | '/today'
+  fullPaths: '/' | '/recommend'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/recommend' | '/today'
-  id: '__root__' | '/' | '/recommend' | '/today'
+  to: '/' | '/recommend'
+  id: '__root__' | '/' | '/recommend'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RecommendRoute: typeof RecommendRoute
-  TodayRoute: typeof TodayRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/today': {
-      id: '/today'
-      path: '/today'
-      fullPath: '/today'
-      preLoaderRoute: typeof TodayRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/recommend': {
       id: '/recommend'
       path: '/recommend'
@@ -88,7 +71,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RecommendRoute: RecommendRoute,
-  TodayRoute: TodayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

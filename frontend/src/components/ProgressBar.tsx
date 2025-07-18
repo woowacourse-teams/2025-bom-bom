@@ -17,9 +17,9 @@ export default ProgressBar;
 const ProgressOverlay = styled.div`
   width: 100%;
   height: 10px;
+  border-radius: 10px;
 
   background-color: ${({ theme }) => theme.colors.primaryLight};
-  border-radius: 10px;
 `;
 
 const ProgressGauge = styled.div<{ progressRate: number }>`
@@ -27,8 +27,8 @@ const ProgressGauge = styled.div<{ progressRate: number }>`
 
   width: ${({ progressRate }) => `${progressRate}%`};
   height: 100%;
-
-  background-color: ${({ theme }) => theme.colors.primary};
   border-radius: ${({ progressRate }) =>
     progressRate === 100 ? '10px' : '10px 0 0 10px'};
+
+  background-color: ${({ theme }) => theme.colors.primary};
 `;

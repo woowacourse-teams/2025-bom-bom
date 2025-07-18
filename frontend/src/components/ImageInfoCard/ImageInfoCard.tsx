@@ -22,35 +22,38 @@ export default ImageInfoCard;
 
 const Container = styled.div`
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
 
   width: fit-content;
   padding: 12px 8px;
+
+  gap: 8px;
 `;
 
 const Image = styled.img`
-  width: 58px;
-  aspect-ratio: 1/1;
   flex-shrink: 0;
-  object-fit: cover;
 
+  width: 58px;
   border-radius: 12px;
+
+  aspect-ratio: 1/1;
+  object-fit: cover;
 `;
 
 const InfoBox = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 4px;
 
   height: 60px;
+
+  gap: 4px;
 `;
 
 const Title = styled.h3`
-  ${({ theme }) => theme.fonts.heading6}
   color: ${({ theme }) => theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.heading6};
 `;
 
 const Description = styled.p`
@@ -58,8 +61,10 @@ const Description = styled.p`
 
   display: -webkit-box;
 
-  ${({ theme }) => theme.fonts.caption}
   color: ${({ theme }) => theme.colors.textPrimary};
-  -webkit-line-clamp: 2;
+  font: ${({ theme }) => theme.fonts.caption};
+
   -webkit-box-orient: vertical;
+
+  -webkit-line-clamp: 2;
 `;

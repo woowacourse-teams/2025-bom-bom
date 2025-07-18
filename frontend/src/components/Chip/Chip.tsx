@@ -20,17 +20,17 @@ const Container = styled.button<{
   selected: boolean;
 }>`
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 
   width: fit-content;
   padding: 8px 16px;
+  border-radius: 16px;
 
-  ${({ theme }) => theme.fonts.caption};
+  background-color: ${({ theme, selected }) =>
+    selected ? theme.colors.black : theme.colors.dividers};
 
   color: ${({ theme, selected }) =>
     selected ? theme.colors.white : theme.colors.textPrimary};
-  background-color: ${({ theme, selected }) =>
-    selected ? theme.colors.black : theme.colors.dividers};
-  border-radius: 16px;
+  font: ${({ theme }) => theme.fonts.caption};
 `;

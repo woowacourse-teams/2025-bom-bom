@@ -109,7 +109,6 @@ name: Deploy via self-hosted runner
           echo "Checking ports on http..."
           PID=$(sudo lsof -t -i :http || true)
   name: Deploy via self-hosted runner
-      needs: build
       runs-on: self-hosted
   
       steps:

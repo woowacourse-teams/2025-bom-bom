@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import NewsletterHero from './NewsletterHero';
 
 const meta: Meta<typeof NewsletterHero> = {
-  title: 'components/Bom-Bom/NewsletterHero',
+  title: 'components/bombom/NewsletterHero',
   component: NewsletterHero,
 };
 export default meta;

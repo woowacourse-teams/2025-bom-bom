@@ -42,3 +42,4 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
+

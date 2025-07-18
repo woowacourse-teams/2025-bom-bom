@@ -26,6 +26,7 @@ jobs:
           > src/main/resources/application-dev.yml
 
       - name: Build JAR
+        working-directory: 2025-bom-bom/backend/bom-bom-server
         run: ./gradlew clean build
 
       - name: Set up Docker Buildx

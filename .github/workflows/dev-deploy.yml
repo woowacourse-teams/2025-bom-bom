@@ -29,12 +29,6 @@ jobs:
         working-directory: ./backend/bom-bom-server
         run: ./gradlew clean build
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: bom-bom-server
-          path: backend/bom-bom-server/build/libs/*.jar
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -56,11 +50,17 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Download uploaded artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: bom-bom-server
-          path: ./artifact-dir
+      - name: Pull Docker image
+        run: |
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
+
+      - name: Run Docker container
+        run: |
+          docker stop bom-bom || true
+          docker rm bom-bom || true
+          docker run -d --name bom-bom \
+            -p 80:8080 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
 
       - name: Check if the port 80 is in use
         run: |

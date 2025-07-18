@@ -53,7 +53,6 @@ jobs:
 
 deploy:
   name: Deploy via self-hosted runner
-    needs: build
     runs-on: self-hosted
 
     steps:

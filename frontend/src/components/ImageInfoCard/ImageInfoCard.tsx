@@ -9,7 +9,7 @@ interface ImageInfoCardProps {
 function ImageInfoCard({ imageUrl, title, description }: ImageInfoCardProps) {
   return (
     <Container>
-      <Image src={imageUrl} />
+      <Image src={imageUrl} alt={`${title} 뉴스레터 이미지`} />
       <InfoBox>
         <Title>{title}</Title>
         {description && <Description>{description}</Description>}

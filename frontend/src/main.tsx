@@ -1,8 +1,18 @@
-import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
-import { StrictMode } from 'react';
-import reset from './styles/reset.ts';
 import { Global } from '@emotion/react';
+import { RouterProvider, createRouter } from '@tanstack/react-router';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import reset from './styles/reset.ts';
+
+import { routeTree } from './routeTree.gen';
+
+const router = createRouter({ routeTree });
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router;
+  }
+}
 
 async function enableMocking() {
   const { worker } = await import('./mocks/browser');
@@ -16,7 +26,7 @@ enableMocking().then(() => {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <Global styles={reset} />
-      <App />
+      <RouterProvider router={router} />
     </StrictMode>,
   );
 });

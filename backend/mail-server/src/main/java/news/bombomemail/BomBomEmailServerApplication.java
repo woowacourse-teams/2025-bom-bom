@@ -1,13 +1,12 @@
-package me.bombom;
+package news.bombomemail;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class BomBomServerApplication {
+public class BomBomEmailServerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(BomBomServerApplication.class, args);
+        SpringApplication.run(BomBomEmailServerApplication.class, args);
     }
-
 }

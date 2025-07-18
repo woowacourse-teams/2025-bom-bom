@@ -1,0 +1,88 @@
+name: Backend Dev Server CI
+
+on:
+  push:
+    branches:
+      - server-dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+
+      - name: application-dev.yml 파일 만들기
+        run: |
+          mkdir -p src/main/resources
+          echo "${{ secrets.APPLICATION_DEV_PROPERTIES }}" \
+          > src/main/resources/application-dev.yml
+
+      - name: Build JAR
+        working-directory: ./backend/bom-bom-server
+        run: ./gradlew clean build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bom-bom-server
+          path: backend/bom-bom-server/build/libs/*.jar
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        working-directory: ./backend/bom-bom-server
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
+
+  deploy:
+    name: Deploy via self-hosted runner
+    needs: build
+    runs-on: self-hosted
+
+    steps:
+      - name: Download uploaded artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: bom-bom-server
+          path: ./artifact-dir
+
+      - name: Check if the port 80 is in use
+        run: |
+          echo "Checking port 80..."
+          PID=$(sudo lsof -t -i :80 || true)
+          if [ -n "$PID" ]; then
+            echo "Found process running on port 80: $PID"
+            echo "server_running=true" >> $GITHUB_ENV
+            echo "PID=$PID" >> $GITHUB_ENV
+          else
+            echo "server_running=false" >> $GITHUB_ENV
+          fi
+
+      - name: Stop server if available (gracefully)
+        if: env.server_running == 'true'
+        run: |
+          echo "Gracefully shutting down process ${{ env.PID }}"
+          sudo kill -15 ${{ env.PID }}
+          tail --pid=${{ env.PID }} -f /dev/null
+
+      - name: Start server
+        run: |
+          JAR_FILE=$(find ./artifact-dir -name "*.jar" | head -n 1)
+          echo "Starting server with $JAR_FILE"
+          sudo nohup java -jar "$JAR_FILE" --server.port=80 &

@@ -41,8 +41,11 @@ jobs:
       - name: Build and push Docker image
         working-directory: ./backend/bom-bom-server
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
+          docker buildx create --use
+          docker buildx build \
+          --platform linux/arm64 \
+          -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest \
+          --push .
 
   deploy:
     name: Deploy via self-hosted runner

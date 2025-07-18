@@ -3,7 +3,7 @@ name: Backend Dev Server CI
 on:
   push:
     branches:
-      - server-cicd-test
+      - server-dev
 
 jobs:
   build:

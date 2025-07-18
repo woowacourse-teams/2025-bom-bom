@@ -16,49 +16,58 @@ export default function NewsletterHero() {
 }
 
 const HeroContainer = styled.div`
-  background: linear-gradient(135deg, #ff9966 0%, #ffb366 100%);
+  overflow: hidden;
+  position: relative;
+
+  margin-bottom: 32px;
   padding: 40px;
   border-radius: 16px;
-  margin-bottom: 32px;
-  position: relative;
-  overflow: hidden;
+
+  background: linear-gradient(135deg, #f96 0%, #ffb366 100%);
 `;
 
 const HeroContent = styled.div`
-  text-align: center;
   position: relative;
   z-index: 2;
+
+  text-align: center;
 `;
 
 const HeroIcon = styled.div`
-  ${({ theme }) => theme.fonts.heading1};
   margin-bottom: 16px;
+  font: ${({ theme }) => theme.fonts.heading1};
 `;
 
 const HeroTitle = styled.h1`
-  ${({ theme }) => theme.fonts.heading3};
-  color: ${({ theme }) => theme.colors.white};
   margin-bottom: 12px;
+
+  color: ${({ theme }) => theme.colors.white};
+  font: ${({ theme }) => theme.fonts.heading3};
 `;
 
 const HeroSubtitle = styled.p`
-  ${({ theme }) => theme.fonts.body1};
-  color: ${({ theme }) => theme.colors.white};
-  opacity: 0.9;
   margin-bottom: 24px;
+
+  color: ${({ theme }) => theme.colors.white};
+  font: ${({ theme }) => theme.fonts.body1};
+
+  opacity: 0.9;
 `;
 
 const CTAButton = styled.button`
-  ${({ theme }) => theme.fonts.body2};
-  background: ${({ theme }) => theme.colors.white};
-  color: ${({ theme }) => theme.colors.primary};
+  padding: 12px 24px;
   border: none;
   border-radius: 12px;
-  padding: 12px 24px;
+
+  background: ${({ theme }) => theme.colors.white};
+
+  color: ${({ theme }) => theme.colors.primary};
+  font: ${({ theme }) => theme.fonts.body2};
+
   transition: all 0.2s ease;
 
   &:hover {
+    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 `;

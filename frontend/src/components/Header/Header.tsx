@@ -57,24 +57,27 @@ export default function Header({ activeNav = 'home' }: HeaderProps) {
 }
 
 const HeaderContainer = styled.header`
-  background: ${({ theme }) => theme.colors.white};
   display: flex;
-  justify-content: center;
   align-items: center;
-  box-shadow:
-    0px 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0px 4px 6px -4px rgba(0, 0, 0, 0.1);
-  border-radius: 0 0 8px 8px;
-  padding: 8px 16px;
+  justify-content: center;
+
   height: 64px;
+  padding: 8px 16px;
+  border-radius: 0 0 8px 8px;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 10%),
+    0 4px 6px -4px rgb(0 0 0 / 10%);
+
+  background: ${({ theme }) => theme.colors.white};
 `;
 
 const HeaderInner = styled.div`
-  width: 100%;
-  max-width: 1280px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  width: 100%;
+  max-width: 1280px;
 `;
 
 const LogoWrapper = styled.div`
@@ -83,17 +86,19 @@ const LogoWrapper = styled.div`
 `;
 
 const LogoBox = styled.div`
-  width: 40px;
-  height: 40px;
-  background: ${({ theme }) => theme.colors.primary};
-  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow:
-    0px 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0px 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+  width: 40px;
+  height: 40px;
   margin-right: 12px;
+  border-radius: 14px;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 10%),
+    0 4px 6px -4px rgb(0 0 0 / 10%);
+
+  background: ${({ theme }) => theme.colors.primary};
 `;
 
 const TitleBox = styled.div`
@@ -103,50 +108,57 @@ const TitleBox = styled.div`
 `;
 
 const Title = styled.div`
-  ${({ theme }) => theme.fonts.heading4};
-  background: linear-gradient(
-    144.324deg,
-    #4b5563 0%,
-    #ff9966 50%,
-    #ffd700 100%
-  );
+  background: linear-gradient(144.324deg, #4b5563 0%, #f96 50%, #ffd700 100%);
   background-clip: text;
+
+  font: ${({ theme }) => theme.fonts.heading4};
+
   -webkit-text-fill-color: transparent;
 `;
 
 const SubTitle = styled.div`
-  ${({ theme }) => theme.fonts.body2};
+  font: ${({ theme }) => theme.fonts.body2};
 `;
 
 const Nav = styled.nav`
   display: flex;
-  gap: 8px;
   align-items: center;
-  background: ${({ theme }) => theme.colors.white};
-  border-radius: 14px;
+
   padding: 4px;
+  border-radius: 14px;
+
+  background: ${({ theme }) => theme.colors.white};
+
+  gap: 8px;
 `;
 
 const NavButton = styled.button<{ active?: boolean }>`
   display: flex;
   align-items: center;
-  gap: 4px;
+
   padding: 10px 12px;
   border-radius: 12px;
+
   background: ${({ active, theme }) =>
     active ? theme.colors.primary : 'transparent'};
+
   color: ${({ active, theme }) =>
     active ? theme.colors.white : theme.colors.black};
-  ${({ theme }) => theme.fonts.body2};
+  font: ${({ theme }) => theme.fonts.body2};
+
+  gap: 4px;
 `;
 
 const ProfileBox = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+
   padding: 8px 12px;
   border-radius: 12px;
+
   background: ${({ theme }) => theme.colors.white};
+
+  gap: 8px;
 `;
 
 const ProfileImg = styled.img`
@@ -156,11 +168,11 @@ const ProfileImg = styled.img`
 `;
 
 const ProfileInfo = styled.div`
-  ${({ theme }) => theme.fonts.caption};
-
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+
+  font: ${({ theme }) => theme.fonts.caption};
 `;
 
 const ProfileName = styled.div``;
@@ -168,10 +180,11 @@ const ProfileName = styled.div``;
 const ProfileEmail = styled.div`
   display: flex;
   align-items: center;
+
   cursor: pointer;
   gap: 4px;
 `;
 
 const EmailText = styled.div`
-  ${({ theme }) => theme.fonts.caption};
+  font: ${({ theme }) => theme.fonts.caption};
 `;

@@ -47,29 +47,29 @@ export default ArticleCard;
 const Container = styled.div<{ isRead: boolean }>`
   display: flex;
   align-items: center;
-  gap: 12px;
 
   padding: 20px;
-
   border-bottom: ${({ theme, isRead }) =>
     `${isRead ? '0' : '4px'} solid ${theme.colors.primary}`};
   border-radius: 20px;
-  box-sizing: border-box;
-
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%);
+
+  box-sizing: border-box;
+  gap: 12px;
   opacity: ${({ isRead }) => (isRead ? 0.5 : 1)};
 `;
 
 const InfoWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
 
   width: 100%;
+
+  gap: 12px;
 `;
 
 const Title = styled.h2`
-  ${({ theme }) => theme.fonts.heading4};
+  font: ${({ theme }) => theme.fonts.heading4};
 `;
 
 const Description = styled.p`
@@ -77,48 +77,54 @@ const Description = styled.p`
 
   display: -webkit-box;
 
-  ${({ theme }) => theme.fonts.body2};
   color: ${({ theme }) => theme.colors.textSecondary};
-  -webkit-line-clamp: 2;
+  font: ${({ theme }) => theme.fonts.body2};
+
   -webkit-box-orient: vertical;
+
+  -webkit-line-clamp: 2;
 `;
 
 const MetaInfoRow = styled.div`
   display: flex;
   align-items: center;
+
   gap: 8px;
 `;
 
 const MetaInfoTag = styled.div`
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 
   padding: 4px 8px;
-
-  ${({ theme }) => theme.fonts.caption};
-  color: ${({ theme }) => theme.colors.textPrimary};
-  background-color: ${({ theme }) => theme.colors.dividers};
   border-radius: 16px;
+
+  background-color: ${({ theme }) => theme.colors.dividers};
+
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.caption};
 `;
 
 const MetaInfoText = styled.span`
-  ${({ theme }) => theme.fonts.caption};
   color: ${({ theme }) => theme.colors.textTertiary};
+  font: ${({ theme }) => theme.fonts.caption};
 `;
 
 const ReadTimeBox = styled.div`
   display: flex;
   align-items: center;
+
   gap: 4px;
 `;
 
 const Thumbnail = styled.img`
+  flex-shrink: 0;
+  align-self: stretch;
+
   width: 126px;
+  border-radius: 12px;
+
   aspect-ratio: 1 / 1;
   object-fit: cover;
-  align-self: stretch;
-  flex-shrink: 0;
-
-  border-radius: 12px;
 `;

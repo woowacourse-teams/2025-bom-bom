@@ -103,9 +103,10 @@ export default ReadingStatusCard;
 const ProgressContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 14px;
 
   width: 100%;
+
+  gap: 14px;
 `;
 
 const ProgressInfo = styled.div`
@@ -115,7 +116,7 @@ const ProgressInfo = styled.div`
 
 const ProgressLabel = styled.h3`
   color: ${({ theme }) => theme.colors.textPrimary};
-  ${({ theme }) => theme.fonts.body2};
+  font: ${({ theme }) => theme.fonts.body2};
   text-align: center;
 `;
 
@@ -123,29 +124,30 @@ const ProgressRate = styled.span`
   margin-left: auto;
 
   color: ${({ theme }) => theme.colors.textPrimary};
-  ${({ theme }) => theme.fonts.body2};
+  font: ${({ theme }) => theme.fonts.body2};
   text-align: center;
 `;
 
 const ProgressDescription = styled.p`
   color: ${({ theme }) => theme.colors.textTertiary};
-  ${({ theme }) => theme.fonts.caption};
+  font: ${({ theme }) => theme.fonts.caption};
 `;
 
 const Container = styled.section`
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  gap: 26px;
+  justify-content: center;
 
   width: 310px;
   padding: 34px 30px;
   border: 1px solid ${({ theme }) => theme.colors.white};
   border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 15%);
 
   background-color: ${({ theme }) => theme.colors.white};
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 15%);
+
+  gap: 26px;
 `;
 
 const TitleWrapper = styled.div`
@@ -153,13 +155,14 @@ const TitleWrapper = styled.div`
   align-items: center;
 
   width: 100%;
+
   gap: 10px;
 `;
 
 const StatusIconWrapper = styled.div`
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 
   width: 32px;
   height: 32px;
@@ -177,22 +180,23 @@ const StreakIconImage = styled.img`
 
 const Title = styled.h2`
   color: ${({ theme }) => theme.colors.textPrimary};
-  ${({ theme }) => theme.fonts.heading5};
+  font: ${({ theme }) => theme.fonts.heading5};
   text-align: center;
 `;
 
 const StreakWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+
   gap: 10px;
 `;
 
 const StreakIconWrapper = styled.div`
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 
   width: 70px;
   height: 70px;
@@ -204,13 +208,13 @@ const StreakIconWrapper = styled.div`
 
 const StreakDay = styled.p`
   color: ${({ theme }) => theme.colors.textPrimary};
-  font-size: ${({ theme }) => theme.fonts.heading3.fontSize};
+  font-size: 28px;
   text-align: center;
 `;
 
 const StreakDescription = styled.p`
   color: ${({ theme }) => theme.colors.textSecondary};
-  ${({ theme }) => theme.fonts.body1};
+  font: ${({ theme }) => theme.fonts.body1};
   text-align: center;
 `;
 
@@ -218,8 +222,9 @@ const StreakHelperText = styled.div`
   padding: 4px 8px;
   border-radius: 8px;
 
-  color: ${({ theme }) => theme.colors.white};
   background-color: ${({ theme }) => theme.colors.primary};
-  ${({ theme }) => theme.fonts.body2};
+
+  color: ${({ theme }) => theme.colors.white};
+  font: ${({ theme }) => theme.fonts.body2};
   text-align: center;
 `;

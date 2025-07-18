@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
-import BookIcon from '../icons/BookIcon';
-import AvatarIcon from '../icons/AvatarIcon';
-import TopRightArrowIcon from '../icons/TopRightArrowIcon';
+import BookIcon from '../../../../components/icons/BookIcon';
+import AvatarIcon from '../../../../components/icons/AvatarIcon';
+import TopRightArrowIcon from '../../../../components/icons/TopRightArrowIcon';
 
 // Mock data for the leaderboard
 const leaderboardData = [

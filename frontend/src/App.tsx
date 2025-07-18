@@ -1,14 +1,11 @@
 import { ThemeProvider } from '@emotion/react';
 import styled from '@emotion/styled';
 import { theme } from './styles/theme';
-import ReadingKingLeaderboard from './components/ReadingKingLeaderboard/ReadingKingLeaderboard';
 
 const App = () => {
   return (
     <ThemeProvider theme={theme}>
-      <Container>
-        <ReadingKingLeaderboard />
-      </Container>
+      <Container>Hello World</Container>
     </ThemeProvider>
   );
 };

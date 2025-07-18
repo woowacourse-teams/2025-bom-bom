@@ -3,7 +3,7 @@ name: Backend Dev Server CI
 on:
   push:
     branches:
-      - server-dev
+      - chore-BOM-85/connect-nginx-to-docker
 
 jobs:
   build:

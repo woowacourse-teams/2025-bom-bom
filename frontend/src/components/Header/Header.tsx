@@ -10,57 +10,70 @@ interface HeaderProps {
   activeNav: NavType;
 }
 
-export default function Header({ activeNav = 'home' }: HeaderProps) {
+export default function Header({ activeNav }: HeaderProps) {
   const handleCopyEmail = () => {
     navigator.clipboard.writeText('test@bombom.news');
   };
 
   return (
-    <HeaderContainer>
-      <HeaderInner>
-        <LogoWrapper>
-          <LogoBox>
-            <HomeIcon />
-          </LogoBox>
-          <TitleBox>
-            <Title>봄봄</Title>
-            <SubTitle>당신의 하루에 찾아오는 작은 설렘</SubTitle>
-          </TitleBox>
-        </LogoWrapper>
+    <>
+      <HeaderContainer>
+        <HeaderInner>
+          <LogoWrapper>
+            <LogoBox>
+              <HomeIcon />
+            </LogoBox>
+            <TitleBox>
+              <Title>봄봄</Title>
+              <SubTitle>당신의 하루에 찾아오는 작은 설렘</SubTitle>
+            </TitleBox>
+          </LogoWrapper>
 
-        <Nav>
-          <NavButton active={activeNav === 'home'}>
-            <HomeIcon color={activeNav === 'home' ? 'white' : 'black'} />
-            <p>오늘의 뉴스레터</p>
-          </NavButton>
-          <NavButton active={activeNav === 'recommend'}>
-            <CompassIcon
-              color={activeNav === 'recommend' ? 'white' : 'black'}
-            />
-            <p>뉴스레터 추천</p>
-          </NavButton>
-        </Nav>
+          <Nav>
+            <NavButton active={activeNav === 'home'}>
+              <HomeIcon color={activeNav === 'home' ? 'white' : 'black'} />
+              <p>오늘의 뉴스레터</p>
+            </NavButton>
+            <NavButton active={activeNav === 'recommend'}>
+              <CompassIcon
+                color={activeNav === 'recommend' ? 'white' : 'black'}
+              />
+              <p>뉴스레터 추천</p>
+            </NavButton>
+          </Nav>
 
-        <ProfileBox>
-          <ProfileImg src={compassIcon} alt="profile" />
-          <ProfileInfo>
-            <ProfileName>김봄봄</ProfileName>
-            <ProfileEmail onClick={handleCopyEmail}>
-              <EmailText>test@bombom.news</EmailText>
-              <img src={copyIcon} alt="copy" width={16} height={16} />
-            </ProfileEmail>
-          </ProfileInfo>
-        </ProfileBox>
-      </HeaderInner>
-    </HeaderContainer>
+          <ProfileBox>
+            <ProfileImg src={compassIcon} alt="profile" />
+            <ProfileInfo>
+              <ProfileName>김봄봄</ProfileName>
+              <ProfileEmail onClick={handleCopyEmail}>
+                <EmailText>test@bombom.news</EmailText>
+                <img src={copyIcon} alt="copy" width={16} height={16} />
+              </ProfileEmail>
+            </ProfileInfo>
+          </ProfileBox>
+        </HeaderInner>
+      </HeaderContainer>
+      <EmptyContainer />
+    </>
   );
 }
 
+// 헤더의 공간을 차지하기 위한 컴포넌트
+const EmptyContainer = styled.div`
+  visibility: hidden;
+  height: 64px;
+`;
+
 const HeaderContainer = styled.header`
+  position: fixed;
+  top: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
 
+  width: 100%;
   height: 64px;
   padding: 8px 16px;
   border-radius: 0 0 8px 8px;

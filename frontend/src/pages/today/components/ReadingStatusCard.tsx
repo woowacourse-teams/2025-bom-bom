@@ -136,6 +136,7 @@ const ProgressDescription = styled.p`
 const Container = styled.section`
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
 

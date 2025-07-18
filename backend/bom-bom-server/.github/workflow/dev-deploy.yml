@@ -17,9 +17,6 @@ jobs:
         with:
           java-version: '21'
 
-      - name: Build properties
-        uses:
-
       - name: application-dev.yml 파일 만들기
         run: echo '${{ secrets.APPLICATION_DEV_PROPERTIES }}' > ./src/main/resources/application.yml
 

@@ -29,12 +29,11 @@ jobs:
         working-directory: ./backend/bom-bom-server
         run: ./gradlew clean build
 
-      
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: my-artifact
-          path: build/libs/app.jar
+          name: bom-bom-server
+          path: backend/bom-bom-server/build/libs/*.jar
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -51,103 +50,39 @@ jobs:
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
 
-deploy:
-  name: Deploy via self-hosted runner
-    runs-on: self-hosted
-
-    steps:
-      - name: Download uploaded artifact
-        uses: actions/download-artifact@v4
-        # 앞선 actions/upload-artifact에서 업로드한 실행 파일을 다운로드한다
-        with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.ARTIFACT_DIRECTORY }}
-
-      # 80 포트에 열려있는 프로세스를 확인하고, 존재한다면 환경변수를 설정한다
-      # well-known port (~1024)를 확인하거나 바인딩, 종료할 때에는 권한이 필요하다
-      # bash에서 실패하는 경우 전체 job이 실패하므로, || (or) true 연산을 진행한다
-      - name: Check if the port 80 is in use
-        run: |
-          echo "Checking ports on http..."
-          PID=$(sudo lsof -t -i :http || true)
-name: Deploy via self-hosted runner
+  deploy:
+    name: Deploy via self-hosted runner
     needs: build
     runs-on: self-hosted
 
     steps:
       - name: Download uploaded artifact
         uses: actions/download-artifact@v4
-        # 앞선 actions/upload-artifact에서 업로드한 실행 파일을 다운로드한다
         with:
-          name: my-artifact
+          name: bom-bom-server
+          path: ./artifact-dir
 
-      # 80 포트에 열려있는 프로세스를 확인하고, 존재한다면 환경변수를 설정한다
-      # well-known port (~1024)를 확인하거나 바인딩, 종료할 때에는 권한이 필요하다
-      # bash에서 실패하는 경우 전체 job이 실패하므로, || (or) true 연산을 진행한다
       - name: Check if the port 80 is in use
         run: |
-          echo "Checking ports on http..."
-          PID=$(sudo lsof -t -i :http || true)
-name: Deploy via self-hosted runner
-    needs: build
-    runs-on: self-hosted
+          echo "Checking port 80..."
+          PID=$(sudo lsof -t -i :80 || true)
+          if [ -n "$PID" ]; then
+            echo "Found process running on port 80: $PID"
+            echo "server_running=true" >> $GITHUB_ENV
+            echo "PID=$PID" >> $GITHUB_ENV
+          else
+            echo "server_running=false" >> $GITHUB_ENV
+          fi
 
-    steps:
-      - name: Download uploaded artifact
-        uses: actions/download-artifact@v4
-        # 앞선 actions/upload-artifact에서 업로드한 실행 파일을 다운로드한다
-        with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.ARTIFACT_DIRECTORY }}
-
-      # 80 포트에 열려있는 프로세스를 확인하고, 존재한다면 환경변수를 설정한다
-      # well-known port (~1024)를 확인하거나 바인딩, 종료할 때에는 권한이 필요하다
-      # bash에서 실패하는 경우 전체 job이 실패하므로, || (or) true 연산을 진행한다
-      - name: Check if the port 80 is in use
+      - name: Stop server if available (gracefully)
+        if: env.server_running == 'true'
         run: |
-          echo "Checking ports on http..."
-          PID=$(sudo lsof -t -i :http || true)
-  name: Deploy via self-hosted runner
-      runs-on: self-hosted
-  
-      steps:
-        - name: Download uploaded artifact
-          uses: actions/download-artifact@v4
-          # 앞선 actions/upload-artifact에서 업로드한 실행 파일을 다운로드한다
-          with:
-            name: ${{ env.ARTIFACT_NAME }}
-            path: ${{ env.ARTIFACT_DIRECTORY }}
-  
-        # 80 포트에 열려있는 프로세스를 확인하고, 존재한다면 환경변수를 설정한다
-        # well-known port (~1024)를 확인하거나 바인딩, 종료할 때에는 권한이 필요하다
-        # bash에서 실패하는 경우 전체 job이 실패하므로, || (or) true 연산을 진행한다
-        - name: Check if the port 80 is in use
-          run: |
-            echo "Checking ports on http..."
-            PID=$(sudo lsof -t -i :http || true)
-            if [ -n "$PID" ]; then
-              echo "Found process running on port http: $PID"
-              echo "server_running=true" >> "$GITHUB_ENV"
-              echo "PID=$PID" >> "$GITHUB_ENV"
-            else
-              echo "Process not found running on port http!"
-              echo "server_running=false" >> "$GITHUB_ENV"
-            fi
-  
-        # 앞선 step에서 실행되고 있는 프로세스가 발견되는 경우, 이를 종료한다.
-        # 단, -15와 같은 graceful 종료를 진행한다.
-        # 종료된 것을 확인하기 위해 tail 명령어를 사용한다
-        # 프로그램이 종료되는 경우 tail도 종료된다
-        - name: Stop server if available (gracefully)
-          # 이 step이 실행될 조건을 설정한다
-          if: env.server_running == 'true'
-          run: |
-            echo "Gracefully shutting down process ${{ env.PID }}"
-            sudo kill -15 ${{ env.PID }}
-            tail --pid=${{ env.PID }} -f /dev/null
-  
-        - name: Start server
-          run: |
-            sudo nohup java -jar \
-            ${{ env.ARTIFACT_DIRECTORY }}/${{ env.ARTIFACT_NAME }}.jar \
-            --server.port=80 &
+          echo "Gracefully shutting down process ${{ env.PID }}"
+          sudo kill -15 ${{ env.PID }}
+          tail --pid=${{ env.PID }} -f /dev/null
+
+      - name: Start server
+        run: |
+          JAR_FILE=$(find ./artifact-dir -name "*.jar" | head -n 1)
+          echo "Starting server with $JAR_FILE"
+          sudo nohup java -jar "$JAR_FILE" --server.port=80 &

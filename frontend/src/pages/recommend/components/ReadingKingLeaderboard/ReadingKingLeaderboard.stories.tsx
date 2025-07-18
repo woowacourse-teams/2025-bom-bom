@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import ReadingKingLeaderboard from './ReadingKingLeaderboard';
 
 const meta: Meta<typeof ReadingKingLeaderboard> = {
-  title: 'components/ReadingKingLeaderboard',
+  title: 'components/bombom/ReadingKingLeaderboard',
   component: ReadingKingLeaderboard,
   parameters: {
     layout: 'padded',

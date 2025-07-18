@@ -22,7 +22,11 @@ interface ProgressWithLabelProps {
   rateFormat?: RateFormatType;
 }
 
-const format = {
+type RateFormatMap = {
+  [K in RateFormatType]: (current: number, total: number) => string;
+};
+
+const format: RateFormatMap = {
   percentage: (current: number, total: number) =>
     `${calculateRate(current, total)}%`,
   ratio: (current: number, total: number) => `${current}/${total}`,

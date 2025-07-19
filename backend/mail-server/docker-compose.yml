@@ -1,0 +1,11 @@
+services:
+  mail-app:
+    image: ryandia/bombom-email:latest
+    restart: always
+    environment:
+      INTEGRATION_MAILDIR: /maildir/new
+      SPRING_PROFILES_ACTIVE: docker
+    volumes:
+      - /home/ec2-user/Maildir/new:/maildir/new
+    ports:
+      - "8080:8080"

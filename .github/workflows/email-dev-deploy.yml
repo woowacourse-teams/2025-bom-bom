@@ -30,8 +30,6 @@ jobs:
             > backend/mail-server/src/main/resources/application-test.yml
           echo "${{ secrets.EMAIL_APPLICATION_PROD_DOCKER_PROPERTIES }}" \
             > backend/mail-server/src/main/resources/application-docker.yml
-          echo "${{ secrets.EMAIL_DOCKER_COMPOSE }}" \
-            > backend/mail-server/docker-compose.yml
 
       - name: Build JAR
         run: ./gradlew clean build

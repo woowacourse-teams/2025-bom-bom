@@ -9,13 +9,13 @@ interface ArticleCardListProps {
 }
 
 function ArticleCardList({ articles }: ArticleCardListProps) {
-  const grouped = articles.reduce(
+  const grouped = articles.reduce<{ read: Article[]; unread: Article[] }>(
     (acc, article) => {
       if (article.isRead) acc.read.push(article);
       else acc.unread.push(article);
       return acc;
     },
-    { read: [] as Article[], unread: [] as Article[] },
+    { read: [], unread: [] },
   );
 
   return (

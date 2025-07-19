@@ -1,6 +1,5 @@
 package news.bombomemail.article;
 
-import emailtest.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,6 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import news.bombomemail.common.BaseEntity;
 
 @Entity
 @Getter

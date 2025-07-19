@@ -76,19 +76,11 @@ jobs:
           docker compose -f backend/mail-server/docker-compose.yml down \
           --remove-orphans --volumes || true
 
-      - name: Kill any docker‑proxy on 8080
+      - name: Restart Docker daemon
         run: |
-          echo "▶ 포트 8080을 점유 중인 docker-proxy 프로세스 찾기"
-          ps aux | grep '[d]ocker-proxy' | grep ':8080' || echo "없음"
-          for pid in $(ps aux | grep '[d]ocker-proxy' | grep ':8080' | awk '{print $2}'); do
-            echo "Killing docker-proxy PID=$pid"
-            sudo kill -9 $pid
-          done
-
-      - name: Wait for port to free up
-        run: |
-          echo "▶ 포트 정리 대기(3s)"
-          sleep 3
+          echo "▶ Restarting Docker service to clear all proxy sockets"
+          sudo systemctl restart docker
+          sleep 5
 
       - name: Pull & Deploy with Docker Compose
         run: |
@@ -96,5 +88,4 @@ jobs:
           docker compose -f backend/mail-server/docker-compose.yml up -d mail-app
 
       - name: Final Cleanup (optional)
-        run: |
-          docker system prune -af --volumes
+        run: docker system prune -af --volumes

@@ -5,21 +5,10 @@ interface SearchInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   value?: string;
   onChange?: (value: string) => void;
-  placeholder?: string;
-  disabled?: boolean;
 }
 
 const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
-  (
-    {
-      value,
-      onChange,
-      placeholder = '뉴스레터 제목이나 발행처로 검색하세요...',
-      disabled,
-      ...props
-    },
-    ref,
-  ) => {
+  ({ value, onChange, ...props }, ref) => {
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
       onChange?.(e.target.value);
     };
@@ -31,8 +20,6 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
           type="text"
           value={value}
           onChange={handleChange}
-          placeholder={placeholder}
-          disabled={disabled}
           aria-label="뉴스레터 검색"
           {...props}
         />
@@ -57,7 +44,7 @@ const StyledInput = styled.input`
   height: 100%;
   padding: 15px 43px;
   outline: none;
-  border: 1px solid #d7d7d7;
+  border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 14px;
   box-shadow:
     0 1px 3px 0 rgb(0 0 0 / 10%),
@@ -65,7 +52,7 @@ const StyledInput = styled.input`
 
   background-color: rgb(255 255 255 / 94%);
 
-  color: ${({ theme }) => theme.colors.textPrimary || '#000'};
+  color: ${({ theme }) => theme.colors.textPrimary};
   font-family: Inter, 'Noto Sans KR', sans-serif;
   font-weight: 400;
   font-size: 16px;
@@ -73,7 +60,7 @@ const StyledInput = styled.input`
   transition: all 0.2s ease-in-out;
 
   &::placeholder {
-    color: #717182;
+    color: ${({ theme }) => theme.colors.textSecondary};
     font-weight: 400;
   }
 
@@ -81,8 +68,9 @@ const StyledInput = styled.input`
     box-shadow:
       0 1px 3px 0 rgb(0 0 0 / 10%),
       0 1px 2px -1px rgb(0 0 0 / 10%),
-      0 0 0 2px ${({ theme }) => theme.colors.primary || '#007bff'}20;
-    border-color: ${({ theme }) => theme.colors.primary || '#007bff'};
+      0 0 0 2px ${({ theme }) => theme.colors.primary || theme.colors.primary}20;
+    border-color: ${({ theme }) =>
+      theme.colors.primary || theme.colors.primary};
   }
 
   &:disabled {
@@ -94,6 +82,6 @@ const StyledInput = styled.input`
   }
 
   &:hover:not(:disabled) {
-    border-color: ${({ theme }) => theme.colors.textSecondary || '#999'};
+    border-color: ${({ theme }) => theme.colors.textSecondary};
   }
 `;

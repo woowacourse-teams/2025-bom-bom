@@ -62,6 +62,9 @@ jobs:
         working-directory: backend/mail-server
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Clean up Docker space
         run: |
           docker system prune -af --volumes

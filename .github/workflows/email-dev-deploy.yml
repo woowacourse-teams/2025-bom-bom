@@ -59,6 +59,11 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Clean up Docker space
+        run: |
+          docker system prune -af --volumes
+          docker builder prune -af
+
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:

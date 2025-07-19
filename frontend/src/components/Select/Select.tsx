@@ -2,17 +2,17 @@ import styled from '@emotion/styled';
 import { ComponentProps, useState } from 'react';
 import { useClickOutsideRef } from '../../hooks/useClickOutsideRef';
 import ChevronIcon from '../icons/ChevronIcon';
+import { SelectOption } from './Select.types';
 
-interface SelectProps<T extends { label: string; value: string }>
-  extends ComponentProps<'div'> {
-  options: T[];
-  selectedValue: string | null;
-  onSelectOption: (optionValue: string) => void;
+interface SelectProps<T> extends ComponentProps<'div'> {
+  options: SelectOption<T>[];
+  selectedValue: T | null;
+  onSelectOption: (optionValue: T) => void;
   width?: number;
   placeholder?: string;
 }
 
-function Select<T extends { label: string; value: string }>({
+function Select<T>({
   options,
   selectedValue,
   onSelectOption,
@@ -29,7 +29,7 @@ function Select<T extends { label: string; value: string }>({
     (option) => option.value === selectedValue,
   )?.label;
 
-  const onOptionSelected = (value: string) => {
+  const onOptionSelected = (value: T) => {
     setOpen(false);
     onSelectOption(value);
   };
@@ -46,7 +46,7 @@ function Select<T extends { label: string; value: string }>({
         <SelectMenuWrapper>
           {options.map((option) => (
             <SelectMenuItem
-              key={option.value}
+              key={String(option.value)}
               data-value={option.value}
               onClick={() => onOptionSelected(option.value)}
             >

@@ -6,7 +6,6 @@ const meta: Meta<typeof SearchInput> = {
   title: 'components/common/SearchInput',
   component: SearchInput,
   parameters: {
-    layout: 'centered',
     docs: {
       description: {
         component: '검색 기능을 위한 검색 입력 컴포넌트입니다.',

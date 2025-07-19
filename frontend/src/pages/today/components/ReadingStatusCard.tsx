@@ -68,6 +68,7 @@ const Container = styled.section`
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  gap: 26px;
 
   width: 310px;
   padding: 34px 30px;
@@ -76,17 +77,14 @@ const Container = styled.section`
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 15%);
 
   background-color: ${({ theme }) => theme.colors.white};
-
-  gap: 26px;
 `;
 
 const TitleWrapper = styled.div`
   display: flex;
   align-items: center;
+  gap: 10px;
 
   width: 100%;
-
-  gap: 10px;
 `;
 
 const StatusIconWrapper = styled.div`
@@ -119,7 +117,6 @@ const StreakWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
   gap: 10px;
 `;
 

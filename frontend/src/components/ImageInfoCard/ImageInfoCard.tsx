@@ -24,11 +24,10 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
 
   width: fit-content;
   padding: 12px 8px;
-
-  gap: 8px;
 `;
 
 const Image = styled.img`
@@ -45,10 +44,9 @@ const InfoBox = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  gap: 4px;
 
   height: 60px;
-
-  gap: 4px;
 `;
 
 const Title = styled.h3`

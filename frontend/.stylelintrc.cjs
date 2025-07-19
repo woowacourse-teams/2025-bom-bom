@@ -28,6 +28,7 @@ const groupMap = {
     'justify-content',
     'justify-items',
     'justify-self',
+    'gap',
   ],
   Box: [
     'width',

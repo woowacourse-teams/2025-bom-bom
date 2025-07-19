@@ -89,6 +89,19 @@ jobs:
           username: ${{ secrets.EMAIL_DOCKERHUB_USERNAME }}
           password: ${{ secrets.EMAIL_DOCKERHUB_TOKEN }}
 
+      - name: Free host port 8080
+        run: |
+          # Docker 컨테이너로 8080을 쓰고 있으면 중지·삭제
+          existing=$(docker ps -q --filter "name=bombom-email")
+          if [ -n "$existing" ]; then
+            docker rm -f bombom-email
+          fi
+          # 혹은 일반 프로세스가 점유 중이면 kill
+          pid=$(sudo lsof -t -i tcp:8080) || true
+          if [ -n "$pid" ]; then
+            sudo kill -9 $pid
+          fi
+
       - name: Pull & run container
         run: |
           docker pull ${{ secrets.EMAIL_DOCKERHUB_USERNAME }}/bombom-email:latest

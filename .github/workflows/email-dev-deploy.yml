@@ -1,4 +1,4 @@
-name: Backend Dev Server CI
+name: Backend Email Server
 
 on:
   push:

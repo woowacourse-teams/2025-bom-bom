@@ -20,7 +20,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
           type="text"
           value={value}
           onChange={handleChange}
-          aria-label="뉴스레터 검색"
+          aria-label={props['aria-label'] || '검색'}
           {...props}
         />
       </Container>

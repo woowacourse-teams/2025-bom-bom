@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { formatDateToDotString } from '../../../utils/date';
 import clockIcon from '../../../../public/assets/clock.svg';
 import { Article } from '../types/article';
+import { Link } from '@tanstack/react-router';
 
 interface ArticleCardProps {
   data: Article;
@@ -44,7 +45,7 @@ function ArticleCard({ data }: ArticleCardProps) {
 
 export default ArticleCard;
 
-const Container = styled.button<{ isRead: boolean }>`
+const Container = styled(Link)<{ isRead: boolean }>`
   display: flex;
   align-items: center;
 
@@ -55,6 +56,10 @@ const Container = styled.button<{ isRead: boolean }>`
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%);
 
   background-color: ${({ theme }) => theme.colors.white};
+
+  text-decoration: none;
+
+  color: inherit;
 
   box-sizing: border-box;
   gap: 12px;

@@ -57,6 +57,11 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Check port 8080 before starting container
+        run: |
+          echo "▶ 8080 포트 사용 중인 프로세스:"
+          sudo lsof -i :8080 || echo "사용 중인 프로세스 없음"
+
       - name: Checkout
         uses: actions/checkout@v4
 

@@ -44,6 +44,7 @@ jobs:
           password: ${{ secrets.EMAIL_DOCKERHUB_TOKEN }}
 
       - name: Build & push Docker image
+        working-directory: backend/bom-bom-server
         run: |
           docker buildx build \
             --platform linux/arm64,linux/amd64 \

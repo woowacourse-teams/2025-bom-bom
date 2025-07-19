@@ -71,26 +71,30 @@ jobs:
           username: ${{ secrets.EMAIL_DOCKERHUB_USERNAME }}
           password: ${{ secrets.EMAIL_DOCKERHUB_TOKEN }}
 
-      - name: Stop existing container if running
+      - name: Stop & Remove Previous Compose
         run: |
-          docker ps -q --filter "name=mail-app" | grep -q . && docker stop mail-app && docker rm mail-app || echo "No existing mail-app container"
+          docker compose -f backend/mail-server/docker-compose.yml down \
+          --remove-orphans --volumes || true
 
-      - name: Kill process on 8080
+      - name: Kill any docker‑proxy on 8080
         run: |
-          PID=$(sudo lsof -t -i :8080)
-          if [ -n "$PID" ]; then
-            echo "Killing process on 8080: $PID"
-            sudo kill -9 $PID
-          else
-            echo "No process using 8080"
-          fi
+          echo "▶ 포트 8080을 점유 중인 docker-proxy 프로세스 찾기"
+          ps aux | grep '[d]ocker-proxy' | grep ':8080' || echo "없음"
+          for pid in $(ps aux | grep '[d]ocker-proxy' | grep ':8080' | awk '{print $2}'); do
+            echo "Killing docker-proxy PID=$pid"
+            sudo kill -9 $pid
+          done
+
+      - name: Wait for port to free up
+        run: |
+          echo "▶ 포트 정리 대기(3s)"
+          sleep 3
 
       - name: Pull & Deploy with Docker Compose
         run: |
-            docker compose -f backend/mail-server/docker-compose.yml pull mail-app
-            docker compose -f backend/mail-server/docker-compose.yml up -d mail-app
+          docker compose -f backend/mail-server/docker-compose.yml pull mail-app
+          docker compose -f backend/mail-server/docker-compose.yml up -d mail-app
 
-      - name: Cleanup Docker
+      - name: Final Cleanup (optional)
         run: |
           docker system prune -af --volumes
-          docker builder prune -af

@@ -26,7 +26,9 @@ function ArticleCardList({ articles }: ArticleCardListProps) {
       </ListTitleBox>
       <CardList>
         {grouped.unread.map((article) => (
-          <ArticleCard key={article.articleId} data={article} />
+          <li key={article.articleId}>
+            <ArticleCard data={article} />
+          </li>
         ))}
       </CardList>
       <ListTitleBox>
@@ -35,7 +37,9 @@ function ArticleCardList({ articles }: ArticleCardListProps) {
       </ListTitleBox>
       <CardList>
         {grouped.read.map((article) => (
-          <ArticleCard key={article.articleId} data={article} />
+          <li key={article.articleId}>
+            <ArticleCard key={article.articleId} data={article} />
+          </li>
         ))}
       </CardList>
     </Container>

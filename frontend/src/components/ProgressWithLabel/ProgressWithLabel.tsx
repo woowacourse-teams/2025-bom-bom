@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import ProgressBar from '../ProgressBar';
+import ProgressBar from '../ProgressBar/ProgressBar';
 import { getProgressInfo } from './progress';
 import { RateFormatType } from './types';
 

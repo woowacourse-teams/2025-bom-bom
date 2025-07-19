@@ -5,10 +5,6 @@ import { Article } from '../../pages/today/types/article';
 const meta: Meta<typeof NewsletterItemCard> = {
   title: 'components/bombom/NewsletterItemCard',
   component: NewsletterItemCard,
-  parameters: {
-    layout: 'centered',
-  },
-  tags: ['autodocs'],
 };
 
 export default meta;

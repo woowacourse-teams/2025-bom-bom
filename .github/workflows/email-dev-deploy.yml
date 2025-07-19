@@ -75,6 +75,16 @@ jobs:
         run: |
           docker ps -q --filter "name=mail-app" | grep -q . && docker stop mail-app && docker rm mail-app || echo "No existing mail-app container"
 
+      - name: Kill process on 8080
+        run: |
+          PID=$(sudo lsof -t -i :8080)
+          if [ -n "$PID" ]; then
+            echo "Killing process on 8080: $PID"
+            sudo kill -9 $PID
+          else
+            echo "No process using 8080"
+          fi
+
       - name: Pull & Deploy with Docker Compose
         run: |
             docker compose -f backend/mail-server/docker-compose.yml pull mail-app

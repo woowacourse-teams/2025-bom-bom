@@ -108,8 +108,7 @@ const SelectMenu = styled.div<{ open: boolean }>`
   margin-top: 6px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 6px;
-
-  /* box-shadow: 0 4px 6px 0 rgb(0 0 0 / 9%); */
+  box-shadow: 0 4px 6px 0 rgb(0 0 0 / 9%);
 
   background: white;
 
@@ -117,7 +116,7 @@ const SelectMenu = styled.div<{ open: boolean }>`
   list-style: none;
 `;
 
-const SelectMenuWrapper = styled.div`
+const SelectMenuWrapper = styled.ul`
   display: flex;
   flex-direction: column;
   align-items: flex-start;

@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./backend/email-server
+        working-directory: backend/mail-server
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,13 +23,13 @@ jobs:
 
       - name: Generate config files
         run: |
-          mkdir -p backend/email-server/src/main/resources
+          mkdir -p backend/mail-server/src/main/resources
           echo "${{ secrets.EMAIL_APPLICATION_PROD_PROPERTIES }}" \
-            > backend/email-server/src/main/resources/application-prod.yml
+            > backend/mail-server/src/main/resources/application-prod.yml
           echo "${{ secrets.EMAIL_APPLICATION_TEST_PROPERTIES }}" \
-            > backend/email-server/src/main/resources/application-test.yml
+            > backend/mail-server/src/main/resources/application-test.yml
           echo "${{ secrets.EMAIL_APPLICATION_PROD_DOCKER_PROPERTIES }}" \
-            > backend/email-server/src/main/resources/application-docker.yml
+            > backend/mail-server/src/main/resources/application-docker.yml
 
       - name: Build JAR
         run: ./gradlew clean build

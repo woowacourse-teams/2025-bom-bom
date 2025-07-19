@@ -60,20 +60,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Clean up Docker space
-        run: |
-          docker system prune -af --volumes
-          docker builder prune -af
-
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.EMAIL_DOCKERHUB_USERNAME }}
           password: ${{ secrets.EMAIL_DOCKERHUB_TOKEN }}
 
+      - name: Stop existing container if running
+        run: |
+          docker ps -q --filter "name=mail-app" | grep -q . && docker stop mail-app && docker rm mail-app || echo "No existing mail-app container"
+
       - name: Pull & Deploy with Docker Compose
         run: |
-            docker compose -f backend/mail-server/docker-compose.yml down || true
-            sleep 1
             docker compose -f backend/mail-server/docker-compose.yml pull mail-app
             docker compose -f backend/mail-server/docker-compose.yml up -d mail-app
+
+      - name: Cleanup Docker
+        run: |
+          docker system prune -af --volumes
+          docker builder prune -af

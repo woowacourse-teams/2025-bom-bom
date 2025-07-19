@@ -86,6 +86,3 @@ jobs:
         run: |
           docker compose -f backend/mail-server/docker-compose.yml pull mail-app
           docker compose -f backend/mail-server/docker-compose.yml up -d mail-app
-
-      - name: Final Cleanup (optional)
-        run: docker system prune -af --volumes

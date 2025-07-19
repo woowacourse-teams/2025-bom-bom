@@ -13,7 +13,7 @@ export default meta;
 type Story = StoryObj<typeof Header>;
 
 export const Default: Story = {
-  render: () => <Header activeNav="home" />,
+  render: () => <Header activeNav="today" />,
 };
 
 export const Recommend: Story = {

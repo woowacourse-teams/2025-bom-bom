@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import ProgressBar from '../ProgressBar';
-import { calculateRate } from '../../utils/math';
+import { getProgressInfo } from './progress';
+import { RateFormatType } from './types';
 
 interface IconProps {
   source: string;
@@ -12,8 +13,6 @@ interface Value {
   totalCount: number;
 }
 
-type RateFormatType = 'percentage' | 'ratio';
-
 interface ProgressWithLabelProps {
   label: string;
   icon: IconProps;
@@ -22,16 +21,6 @@ interface ProgressWithLabelProps {
   rateFormat?: RateFormatType;
 }
 
-type RateFormatMap = {
-  [K in RateFormatType]: (current: number, total: number) => string;
-};
-
-const format: RateFormatMap = {
-  percentage: (current: number, total: number) =>
-    `${calculateRate(current, total)}%`,
-  ratio: (current: number, total: number) => `${current}/${total}`,
-};
-
 function ProgressWithLabel({
   label,
   icon: { source, alternativeText },
@@ -39,15 +28,18 @@ function ProgressWithLabel({
   description,
   rateFormat = 'percentage',
 }: ProgressWithLabelProps) {
-  const progressRate = calculateRate(currentCount, totalCount);
-  const formatter = format[rateFormat];
+  const { progressRate, formattedRate } = getProgressInfo({
+    currentCount,
+    totalCount,
+    rateFormat,
+  });
 
   return (
     <Container>
       <ProgressInfo>
         <Icon src={source} alt={alternativeText} />
         <ProgressLabel>{label}</ProgressLabel>
-        <ProgressRate>{formatter(currentCount, totalCount)}</ProgressRate>
+        <ProgressRate>{formattedRate}</ProgressRate>
       </ProgressInfo>
       <ProgressBar progressRate={progressRate} />
       <ProgressDescription>{description}</ProgressDescription>

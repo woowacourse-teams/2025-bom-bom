@@ -1,0 +1,71 @@
+import type { Meta, StoryObj } from '@storybook/react-webpack5';
+import NewsletterItemCard from './NewsletterItemCard';
+
+const meta: Meta<typeof NewsletterItemCard> = {
+  title: 'components/bombom/NewsletterItemCard',
+  component: NewsletterItemCard,
+  parameters: {
+    layout: 'centered',
+  },
+  tags: ['autodocs'],
+  argTypes: {
+    onClick: { action: 'clicked' },
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  args: {
+    title: 'URL 변경만으로 100개 이상의 계정을 해킹한 방법 (IDOR + XSS 취약점)',
+    description:
+      '$500 IDOR 취약점을 중요한 계정 탈취로 바꾼 버그 바운티 스토리입니다. 웹 보안의 기본이지만 놓치기 쉬운 취약점들에 대해 알아봅니다...',
+    imageUrl:
+      'https://images.unsplash.com/photo-1563206767-5b18f218e8de?w=525&h=224&fit=crop&crop=center',
+    tag: '기술',
+    source: 'UPPITY',
+    readTime: '8분',
+  },
+};
+
+export const WithClick: Story = {
+  args: {
+    ...Default.args,
+    onClick: () => alert('카드가 클릭되었습니다!'),
+  },
+};
+
+export const LongTitle: Story = {
+  args: {
+    ...Default.args,
+    title:
+      '매우 긴 제목의 예시입니다. 이런 경우 제목이 어떻게 표시되는지 확인해보겠습니다. 제목이 여러 줄로 나뉘어질 수 있습니다.',
+    description: '긴 제목을 가진 뉴스레터 아이템의 예시입니다.',
+  },
+};
+
+export const ShortContent: Story = {
+  args: {
+    ...Default.args,
+    title: '짧은 제목',
+    description: '짧은 설명입니다.',
+    tag: 'AI',
+    source: 'TechNews',
+    readTime: '3분',
+  },
+};
+
+export const DifferentCategories: Story = {
+  args: {
+    ...Default.args,
+    title: '스타트업 투자 트렌드 2024',
+    description:
+      '올해 스타트업 투자 시장의 주요 동향과 전망을 살펴봅니다. VC들이 주목하는 분야는?',
+    imageUrl:
+      'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=525&h=224&fit=crop&crop=center',
+    tag: '비즈니스',
+    source: 'StartupToday',
+    readTime: '12분',
+  },
+};

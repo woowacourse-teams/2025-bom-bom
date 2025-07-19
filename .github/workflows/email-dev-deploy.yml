@@ -54,14 +54,14 @@ jobs:
   deploy:
     name: Deploy
     needs: build
-    runs-on: self-hosted
+    runs-on:
+      - self-hosted
+      - email-runner
+    defaults:
+      run:
+        working-directory: backend/mail-server
 
     steps:
-      - name: Check port 8080 before starting container
-        run: |
-          echo "▶ 8080 포트 사용 중인 프로세스:"
-          sudo lsof -i :8080 || echo "사용 중인 프로세스 없음"
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -73,16 +73,10 @@ jobs:
 
       - name: Stop & Remove Previous Compose
         run: |
-          docker compose -f backend/mail-server/docker-compose.yml down \
+          docker compose down \
           --remove-orphans --volumes || true
-
-      - name: Restart Docker daemon
-        run: |
-          echo "▶ Restarting Docker service to clear all proxy sockets"
-          sudo systemctl restart docker
-          sleep 5
 
       - name: Pull & Deploy with Docker Compose
         run: |
-          docker compose -f backend/mail-server/docker-compose.yml pull mail-app
-          docker compose -f backend/mail-server/docker-compose.yml up -d mail-app
+          docker compose pull mail-app
+          docker compose up -d mail-app

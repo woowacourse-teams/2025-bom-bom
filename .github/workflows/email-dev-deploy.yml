@@ -73,6 +73,7 @@ jobs:
 
       - name: Pull & Deploy with Docker Compose
         run: |
+            docker compose -f backend/mail-server/docker-compose.yml down || true
+            sleep 1
             docker compose -f backend/mail-server/docker-compose.yml pull mail-app
-            docker compose -f backend/mail-server/docker-compose.yml down mail-app || true
             docker compose -f backend/mail-server/docker-compose.yml up -d mail-app

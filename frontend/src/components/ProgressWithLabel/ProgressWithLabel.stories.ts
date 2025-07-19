@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import ProgressWithLabel from './ProgressWithLabel';
 
 const meta = {
-  title: 'components/common/ReadingStatusCard',
+  title: 'components/common/ProgressWithLabel',
   component: ProgressWithLabel,
 } satisfies Meta<typeof ProgressWithLabel>;
 

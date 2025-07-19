@@ -75,7 +75,7 @@ const StyledInput = styled.input`
   &:disabled {
     background-color: rgb(255 255 255 / 60%);
 
-    color: #999;
+    color: ${({ theme }) => theme.colors.disabledText};
 
     cursor: not-allowed;
   }

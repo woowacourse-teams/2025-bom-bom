@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
-import Header from '../components/Header/Header';
+import PageLayout from '../components/PageLayout/PageLayout';
 import ArticleCardList from '../pages/today/components/ArticleCardList';
 import ReadingStatusCard from '../pages/today/components/ReadingStatusCard';
 
@@ -62,39 +62,28 @@ const ARTICLES = [
 
 function Index() {
   return (
-    <Container>
-      <Header activeNav="home" />
-      <Content>
+    <PageLayout activeNav="today">
+      <Container>
         <TitleBox>
           <Title>오늘의 뉴스레터</Title>
           <TitleDescription>
             3개의 새로운 뉴스레터가 도착했어요
           </TitleDescription>
         </TitleBox>
-        <ContentContainer>
+        <ContentWrapper>
           <ArticleCardList articles={ARTICLES} />
           <ReadingStatusCard
             streakReadDay={267}
             today={{ readCount: 3, totalCount: 5 }}
             weekly={{ readCount: 12, goalCount: 15 }}
           />
-        </ContentContainer>
-      </Content>
-    </Container>
+        </ContentWrapper>
+      </Container>
+    </PageLayout>
   );
 }
 
 const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  width: 100%;
-
-  background-color: ${({ theme }) => theme.colors.white};
-`;
-
-const Content = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -122,7 +111,7 @@ const TitleDescription = styled.p`
   font: ${({ theme }) => theme.fonts.caption};
 `;
 
-const ContentContainer = styled.div`
+const ContentWrapper = styled.div`
   display: flex;
   align-items: flex-start;
   align-self: stretch;

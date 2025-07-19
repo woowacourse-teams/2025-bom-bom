@@ -1,43 +1,42 @@
 import styled from '@emotion/styled';
+import { Article } from '../../pages/today/types/article';
 
 interface NewsletterItemCardProps {
-  title: string;
-  description: string;
-  imageUrl: string;
-  tag: string;
-  source: string;
-  readTime: string;
-  onClick?: () => void;
+  data: Article;
 }
 
-export default function NewsletterItemCard({
-  title,
-  description,
-  imageUrl,
-  tag,
-  source,
-  readTime,
-  onClick,
-}: NewsletterItemCardProps) {
+export default function NewsletterItemCard({ data }: NewsletterItemCardProps) {
+  const {
+    title,
+    contentsSummary,
+    thumbnailUrl,
+    expectedReadTime,
+    newsletter: {
+      name: newsletterName,
+      category: newsletterCategory,
+      imageUrl: newsletterImageUrl,
+    },
+  } = data;
+
   return (
-    <CardContainer onClick={onClick}>
+    <CardContainer>
       <ImageContainer>
-        <NewsletterImage src={imageUrl} alt={title} />
+        <NewsletterImage src={thumbnailUrl ?? newsletterImageUrl} alt={title} />
       </ImageContainer>
 
       <ContentContainer>
         <TextContent>
           <Title>{title}</Title>
-          <Description>{description}</Description>
+          <Description>{contentsSummary}</Description>
         </TextContent>
 
         <MetaContent>
-          <Tag>{tag}</Tag>
+          <Tag>{newsletterCategory}</Tag>
           <MetaInfo>
-            <SourceText>from {source}</SourceText>
+            <SourceText>from {newsletterName}</SourceText>
             <ReadTimeContainer>
               <ClockIcon />
-              <ReadTime>{readTime}</ReadTime>
+              <ReadTime>{`${expectedReadTime}분`}</ReadTime>
             </ReadTimeContainer>
           </MetaInfo>
         </MetaContent>
@@ -61,16 +60,7 @@ const CardContainer = styled.div`
 
   background: ${({ theme }) => theme.colors.white};
 
-  cursor: ${({ onClick }) => (onClick ? 'pointer' : 'default')};
   transition: all 0.2s ease;
-
-  &:hover {
-    box-shadow: ${({ onClick }) =>
-      onClick
-        ? '0px 8px 12px -2px rgba(0, 0, 0, 0.15), 0px 4px 8px -2px rgba(0, 0, 0, 0.1)'
-        : '0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -1px rgba(0, 0, 0, 0.06)'};
-    transform: ${({ onClick }) => (onClick ? 'translateY(-2px)' : 'none')};
-  }
 `;
 
 const ImageContainer = styled.div`

@@ -55,9 +55,6 @@ jobs:
     name: Deploy
     needs: build
     runs-on: self-hosted
-    defaults:
-      run:
-        working-directory: backend/mail-server
 
     steps:
       - name: Checkout
@@ -76,6 +73,6 @@ jobs:
 
       - name: Pull & Deploy with Docker Compose
         run: |
-            docker compose pull mail-app
-            docker compose down mail-app || true
-            docker compose up -d mail-app
+            docker compose -f backend/mail-server/docker-compose.yml pull mail-app
+            docker compose -f backend/mail-server/docker-compose.yml down mail-app || true
+            docker compose -f backend/mail-server/docker-compose.yml up -d mail-app

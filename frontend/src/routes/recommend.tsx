@@ -102,19 +102,16 @@ const SectionIcon = styled.div`
   height: 28px;
   border-radius: 12px;
 
-  background: #f96;
+  background: ${({ theme }) => theme.colors.primary};
 
-  font-size: 14px;
+  font: ${({ theme }) => theme.fonts.body1};
 `;
 
 const SectionTitle = styled.h2`
   margin: 0;
 
-  color: #0f172b;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 17.5px;
-  line-height: 24.5px;
+  color: ${({ theme }) => theme.colors.black};
+  font: ${({ theme }) => theme.fonts.heading5};
 `;
 
 const TrendyGrid = styled.div`

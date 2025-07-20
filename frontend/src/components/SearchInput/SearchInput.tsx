@@ -39,7 +39,7 @@ const Container = styled.div`
 const StyledInput = styled.input`
   width: 100%;
   height: 100%;
-  padding: 15px 43px;
+  padding: 12px 42px;
   outline: none;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 14px;
@@ -47,18 +47,15 @@ const StyledInput = styled.input`
     0 1px 3px 0 rgb(0 0 0 / 10%),
     0 1px 2px -1px rgb(0 0 0 / 10%);
 
-  background-color: rgb(255 255 255 / 94%);
+  background-color: ${({ theme }) => theme.colors.white};
 
   color: ${({ theme }) => theme.colors.textPrimary};
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 16px;
+  font: ${({ theme }) => theme.fonts.body1};
 
   transition: all 0.2s ease-in-out;
 
   &::placeholder {
-    color: ${({ theme }) => theme.colors.textSecondary};
-    font-weight: 400;
+    color: ${({ theme }) => theme.colors.textTertiary};
   }
 
   &:focus {
@@ -70,9 +67,9 @@ const StyledInput = styled.input`
   }
 
   &:disabled {
-    background-color: rgb(255 255 255 / 60%);
+    background-color: ${({ theme }) => theme.colors.disabledBackground};
 
-    color: ${({ theme }) => theme.colors.disabledText};
+    color: ${({ theme }) => theme.colors.textTertiary};
 
     cursor: not-allowed;
   }

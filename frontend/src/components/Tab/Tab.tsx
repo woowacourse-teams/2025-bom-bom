@@ -20,10 +20,10 @@ export default Tab;
 const Container = styled.div<{ selected: boolean }>`
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
 
-  padding: 10px 14px;
-  border-radius: 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
 
   background-color: ${({ selected, theme }) =>
     selected ? theme.colors.primary : theme.colors.white};

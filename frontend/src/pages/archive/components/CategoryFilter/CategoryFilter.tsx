@@ -34,14 +34,12 @@ function CategoryFilter({
             selected={selectedCategory === '전체'}
             onSelect={onSelectCategory}
           >
-            <Content>
-              전체
-              <Badge
-                text={String(
-                  categoryList.reduce((acc, cur) => acc + cur.quantity, 0),
-                )}
-              />
-            </Content>
+            전체
+            <Badge
+              text={String(
+                categoryList.reduce((acc, cur) => acc + cur.quantity, 0),
+              )}
+            />
           </Tab>
         </CategoryTab>
         {categoryList.map(({ name, quantity }) => (
@@ -51,10 +49,8 @@ function CategoryFilter({
               selected={selectedCategory === name}
               onSelect={onSelectCategory}
             >
-              <Content>
-                {name}
-                <Badge text={String(quantity)} />
-              </Content>
+              {name}
+              <Badge text={String(quantity)} />
             </Tab>
           </CategoryTab>
         ))}
@@ -108,14 +104,3 @@ const CategoryTabs = styled.ul`
 `;
 
 const CategoryTab = styled.li``;
-
-const Content = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  width: 100%;
-
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.body2};
-`;

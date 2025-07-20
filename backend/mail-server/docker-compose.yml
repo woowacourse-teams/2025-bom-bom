@@ -1,7 +1,6 @@
 services:
   mail-app:
     image: ryandia/bombom-email:latest
-    restart: always
     environment:
       INTEGRATION_MAILDIR: /maildir/new
       SPRING_PROFILES_ACTIVE: docker

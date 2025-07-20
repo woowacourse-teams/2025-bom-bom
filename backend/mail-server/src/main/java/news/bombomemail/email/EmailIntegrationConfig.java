@@ -27,6 +27,7 @@ public class EmailIntegrationConfig {
     public MessageSource<File> mailFileSource() {
         FileReadingMessageSource source = new FileReadingMessageSource();
         source.setDirectory(new File(mailDir));
+        source.setAutoCreateDirectory(true);
 
         CompositeFileListFilter<File> filter = new CompositeFileListFilter<>();
         filter.addFilter(new SimplePatternFileListFilter("*"));

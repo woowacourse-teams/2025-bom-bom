@@ -134,9 +134,7 @@ const MetaInfo = styled.div`
 
 const SourceText = styled.span`
   color: ${({ theme }) => theme.colors.textTertiary};
-  font:
-    500 12px/18px Montserrat,
-    sans-serif;
+  font: ${({ theme }) => theme.fonts.caption};
 `;
 
 const ReadTimeContainer = styled.div`

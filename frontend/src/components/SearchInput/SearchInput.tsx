@@ -75,6 +75,6 @@ const StyledInput = styled.input`
   }
 
   &:hover:not(:disabled) {
-    border-color: ${({ theme }) => theme.colors.textSecondary};
+    border-color: ${({ theme }) => theme.colors.textTertiary};
   }
 `;

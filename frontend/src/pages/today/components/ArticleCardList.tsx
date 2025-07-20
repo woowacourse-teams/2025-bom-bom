@@ -38,7 +38,7 @@ function ArticleCardList({ articles }: ArticleCardListProps) {
       <CardList>
         {grouped.read.map((article) => (
           <li key={article.articleId}>
-            <ArticleCard key={article.articleId} data={article} />
+            <ArticleCard data={article} />
           </li>
         ))}
       </CardList>

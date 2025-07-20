@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { Article } from '../../../today/types/article';
-import clockIcon from '../../../public/assets/clock.svg';
+import clockIcon from '../../../../../public/assets/clock.svg';
 
 interface NewsletterItemCardProps {
   data: Article;

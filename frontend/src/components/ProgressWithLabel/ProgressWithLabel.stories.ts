@@ -1,9 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import ProgressWithLabel from './ProgressWithLabel';
+import CompassIcon from '../icons/CompassIcon';
 
 const meta = {
   title: 'components/common/ProgressWithLabel',
   component: ProgressWithLabel,
+  args: {
+    Icon: CompassIcon,
+  },
 } satisfies Meta<typeof ProgressWithLabel>;
 
 export default meta;
@@ -17,11 +21,6 @@ export const Default: Story = {
       totalCount: 4,
     },
     description: '[설명]',
-    icon: {
-      source:
-        'https://img.freepik.com/free-vector/illustration-south-korea-flag_53876-27132.jpg',
-      alternativeText: '대한민국 국기',
-    },
   },
 };
 
@@ -33,11 +32,6 @@ export const DailyProgress: Story = {
       totalCount: 4,
     },
     description: '목표까지 조금 더!',
-    icon: {
-      source:
-        'https://img.freepik.com/free-vector/illustration-south-korea-flag_53876-27132.jpg',
-      alternativeText: '대한민국 국기',
-    },
   },
 };
 
@@ -49,11 +43,6 @@ export const WeeklyProgress: Story = {
       totalCount: 4,
     },
     description: '목표까지 1개 남음',
-    icon: {
-      source:
-        'https://img.freepik.com/free-vector/illustration-south-korea-flag_53876-27132.jpg',
-      alternativeText: '대한민국 국기',
-    },
     rateFormat: 'ratio',
   },
 };

@@ -2,11 +2,7 @@ import styled from '@emotion/styled';
 import ProgressBar from '../ProgressBar/ProgressBar';
 import { getProgressInfo } from './progress';
 import { RateFormatType } from './types';
-
-interface IconProps {
-  source: string;
-  alternativeText: string;
-}
+import { ComponentType, SVGProps } from 'react';
 
 interface Value {
   currentCount: number;
@@ -15,7 +11,7 @@ interface Value {
 
 interface ProgressWithLabelProps {
   label: string;
-  icon: IconProps;
+  Icon: ComponentType<SVGProps<SVGSVGElement>>;
   value: Value;
   description: string;
   rateFormat?: RateFormatType;
@@ -23,7 +19,7 @@ interface ProgressWithLabelProps {
 
 function ProgressWithLabel({
   label,
-  icon: { source, alternativeText },
+  Icon,
   value: { currentCount, totalCount },
   description,
   rateFormat = 'percentage',
@@ -37,7 +33,7 @@ function ProgressWithLabel({
   return (
     <Container>
       <ProgressInfo>
-        <Icon src={source} alt={alternativeText} />
+        <StyledIcon as={Icon} />
         <ProgressLabel>{label}</ProgressLabel>
         <ProgressRate>{formattedRate}</ProgressRate>
       </ProgressInfo>
@@ -67,7 +63,7 @@ const ProgressInfo = styled.div`
   gap: 6px;
 `;
 
-const Icon = styled.img`
+const StyledIcon = styled.img`
   width: 16px;
   height: 16px;
 

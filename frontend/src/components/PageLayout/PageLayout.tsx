@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import Header from '../Header/Header';
 import { PropsWithChildren } from 'react';
-import { NavType } from '../../types/nav.types';
+import { NavType } from '../../types/nav';
 
 interface PageLayoutProps {
   activeNav: NavType;

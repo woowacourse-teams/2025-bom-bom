@@ -3,7 +3,7 @@ import compassIcon from '../../../public/assets/compass.svg';
 import copyIcon from '../../../public/assets/copy.svg';
 import CompassIcon from '../icons/CompassIcon';
 import HomeIcon from '../icons/HomeIcon';
-import { NavType } from '../../types/nav.types';
+import { NavType } from '../../types/nav';
 
 interface HeaderProps {
   activeNav: NavType;

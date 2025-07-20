@@ -1,10 +1,9 @@
 addReviewers: true
 addAssignees: author
 reviewers:
-  - GREEN
-  - RED
-  - BLUE
-  - YELLOW
+  - jaeyoung-kwon
+  - guesung
+  - JeLee-river
 numberOfReviewers: 2
 numberOfAssignees: 1
 skipKeywords:

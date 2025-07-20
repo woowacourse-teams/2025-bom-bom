@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { ChangeEvent, forwardRef, InputHTMLAttributes } from 'react';
+import { ChangeEvent, InputHTMLAttributes } from 'react';
 
 interface SearchInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
@@ -7,26 +7,23 @@ interface SearchInputProps
   onChange?: (value: string) => void;
 }
 
-const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
-  ({ value, onChange, ...props }, ref) => {
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-      onChange?.(e.target.value);
-    };
+const SearchInput = ({ value, onChange, ...props }: SearchInputProps) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    onChange?.(e.target.value);
+  };
 
-    return (
-      <Container>
-        <StyledInput
-          ref={ref}
-          type="text"
-          value={value}
-          onChange={handleChange}
-          aria-label={props['aria-label'] || '검색'}
-          {...props}
-        />
-      </Container>
-    );
-  },
-);
+  return (
+    <Container>
+      <StyledInput
+        type="text"
+        value={value}
+        onChange={handleChange}
+        aria-label={props['aria-label'] || '검색'}
+        {...props}
+      />
+    </Container>
+  );
+};
 
 SearchInput.displayName = 'SearchInput';
 

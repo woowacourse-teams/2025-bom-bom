@@ -18,11 +18,11 @@ export const getProgressInfo = ({
   totalCount,
   rateFormat,
 }: FormatRateParams) => {
-  const progressRate = calculateRate(currentCount, totalCount);
+  const rate = calculateRate(currentCount, totalCount);
   const formattedRate = format[rateFormat](currentCount, totalCount);
 
   return {
-    progressRate,
+    rate,
     formattedRate,
   };
 };

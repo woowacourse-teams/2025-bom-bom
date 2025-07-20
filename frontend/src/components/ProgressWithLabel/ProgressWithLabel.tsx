@@ -24,7 +24,7 @@ function ProgressWithLabel({
   description,
   rateFormat = 'percentage',
 }: ProgressWithLabelProps) {
-  const { progressRate, formattedRate } = getProgressInfo({
+  const { rate, formattedRate } = getProgressInfo({
     currentCount,
     totalCount,
     rateFormat,
@@ -37,7 +37,7 @@ function ProgressWithLabel({
         <ProgressLabel>{label}</ProgressLabel>
         <ProgressRate>{formattedRate}</ProgressRate>
       </ProgressInfo>
-      <ProgressBar progressRate={progressRate} />
+      <ProgressBar rate={rate} />
       <ProgressDescription>{description}</ProgressDescription>
     </Container>
   );

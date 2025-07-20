@@ -59,22 +59,3 @@ export const ShortContent: Story = {
     },
   },
 };
-
-export const DifferentCategories: Story = {
-  args: {
-    data: {
-      ...mockArticle,
-      title: '스타트업 투자 트렌드 2024',
-      contentsSummary:
-        '올해 스타트업 투자 시장의 주요 동향과 전망을 살펴봅니다. VC들이 주목하는 분야는?',
-      thumbnailUrl:
-        'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=525&h=224&fit=crop&crop=center',
-      expectedReadTime: 12,
-      newsletter: {
-        ...mockArticle.newsletter,
-        name: 'StartupToday',
-        category: '비즈니스',
-      },
-    },
-  },
-};

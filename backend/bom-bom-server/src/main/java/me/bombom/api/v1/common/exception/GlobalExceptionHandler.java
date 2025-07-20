@@ -14,6 +14,12 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.from(e.getErrorDetail()));
     }
 
+    @ExceptionHandler(CUnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(CUnauthorizedException e){
+        return ResponseEntity.status(e.getHttpStatus())
+                .body(ErrorResponse.from(e.getErrorDetail()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e){
         return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION.getStatus())

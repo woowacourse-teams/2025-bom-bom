@@ -26,7 +26,8 @@ public enum ErrorDetail {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "J001", "로그인이 필요합니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "J002", "유효하지 않은 인증 정보입니다. 다시 로그인 해주세요."),
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "J003", "유효하지 않은 인증 정보입니다. 다시 로그인 해주세요."),
-
+    MISSING_OAUTH_DATA(HttpStatus.UNAUTHORIZED, "J004", "회원가입에 필요한 인증 정보가 없습니다. 다시 로그인 해주세요."),
+    DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, "J005", "이미 사용 중인 닉네임입니다."),
     /*
     * G : 인가
      */

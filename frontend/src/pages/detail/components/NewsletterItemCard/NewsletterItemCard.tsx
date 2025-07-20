@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Article } from '../../pages/today/types/article';
+import { Article } from '../../../today/types/article';
 import clockIcon from '../../../public/assets/clock.svg';
 
 interface NewsletterItemCardProps {

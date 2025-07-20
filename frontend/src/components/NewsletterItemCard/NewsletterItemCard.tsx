@@ -54,7 +54,7 @@ const CardContainer = styled.div`
 
   width: 100%;
   max-width: 525px;
-  border-radius: 21px;
+  border-radius: 20px;
   box-shadow:
     0 4px 6px -1px rgb(0 0 0 / 10%),
     0 2px 4px -1px rgb(0 0 0 / 6%);
@@ -85,7 +85,7 @@ const ContentContainer = styled.div`
   flex-direction: column;
   justify-content: space-between;
 
-  padding: 21px;
+  padding: 20px;
 `;
 
 const TextContent = styled.div`

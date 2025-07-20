@@ -121,11 +121,8 @@ const Tag = styled.span`
 
   background: ${({ theme }) => theme.colors.dividers};
 
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font:
-    500 12px/18px Montserrat,
-    'Noto Sans KR',
-    sans-serif;
+  color: ${({ theme }) => theme.colors.textTertiary};
+  font: ${({ theme }) => theme.fonts.caption};
 `;
 
 const MetaInfo = styled.div`

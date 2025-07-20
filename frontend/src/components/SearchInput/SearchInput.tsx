@@ -1,5 +1,7 @@
 import styled from '@emotion/styled';
 import { ChangeEvent, ComponentProps } from 'react';
+import ReadingGlassesIcon from '../icons/ReadingGlassesIcon';
+import { theme } from '../../styles/theme';
 
 interface SearchInputProps extends Omit<ComponentProps<'input'>, 'onChange'> {
   value?: string;
@@ -17,6 +19,9 @@ export default function SearchInput({
 
   return (
     <Container>
+      <ReadingGlassesIconWrapper>
+        <ReadingGlassesIcon color={theme.colors.textTertiary} />
+      </ReadingGlassesIconWrapper>
       <StyledInput
         type="text"
         value={value}
@@ -33,6 +38,13 @@ const Container = styled.div`
 
   width: 100%;
   height: 42px;
+`;
+
+const ReadingGlassesIconWrapper = styled.div`
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
 `;
 
 const StyledInput = styled.input`

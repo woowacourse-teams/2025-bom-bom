@@ -29,8 +29,9 @@ const colors = {
 };
 
 const gradients = {
-  primary: '135deg, #f96 0%, #ffb366 100%',
-  primaryDark: '144.324deg, #4b5563 0%, #f96 50%, #ffd700 100%',
+  primary: '135deg, #F96 0%, #FFB366 100%',
+  primaryNeutral: '144.324deg, #4b5563 0%, #F96 50%, #FFD700 100%',
+  primaryDark: '107deg, #181818 0%, #F96 100%',
 };
 
 export const theme = {

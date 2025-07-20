@@ -126,18 +126,18 @@ const SubTitle = styled.div`
 const Nav = styled.nav`
   display: flex;
   align-items: center;
-  gap: 8px;
 
   padding: 4px;
   border-radius: 14px;
 
   background: ${({ theme }) => theme.colors.white};
+
+  gap: 8px;
 `;
 
 const NavButton = styled.button<{ active?: boolean }>`
   display: flex;
   align-items: center;
-  gap: 4px;
 
   padding: 10px 12px;
   border-radius: 12px;
@@ -148,17 +148,20 @@ const NavButton = styled.button<{ active?: boolean }>`
   color: ${({ active, theme }) =>
     active ? theme.colors.white : theme.colors.black};
   font: ${({ theme }) => theme.fonts.body2};
+
+  gap: 4px;
 `;
 
 const ProfileBox = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
 
   padding: 8px 12px;
   border-radius: 12px;
 
   background: ${({ theme }) => theme.colors.white};
+
+  gap: 8px;
 `;
 
 const ProfileImg = styled.img`
@@ -180,9 +183,9 @@ const ProfileName = styled.div``;
 const ProfileEmail = styled.div`
   display: flex;
   align-items: center;
-  gap: 4px;
 
   cursor: pointer;
+  gap: 4px;
 `;
 
 const EmailText = styled.div`

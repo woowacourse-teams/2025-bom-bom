@@ -48,7 +48,6 @@ export default ArticleCard;
 const Container = styled(Link)<{ isRead: boolean }>`
   display: flex;
   align-items: center;
-  gap: 12px;
 
   padding: 20px;
   border-bottom: ${({ theme, isRead }) =>
@@ -63,6 +62,7 @@ const Container = styled(Link)<{ isRead: boolean }>`
   color: inherit;
 
   box-sizing: border-box;
+  gap: 12px;
   opacity: ${({ isRead }) => (isRead ? 0.5 : 1)};
 `;
 
@@ -72,6 +72,8 @@ const InfoWrapper = styled.div`
   align-items: flex-start;
 
   width: 100%;
+
+  gap: 12px;
 `;
 
 const Title = styled.h2`
@@ -94,6 +96,7 @@ const Description = styled.p`
 const MetaInfoRow = styled.div`
   display: flex;
   align-items: center;
+
   gap: 8px;
 `;
 
@@ -119,6 +122,7 @@ const MetaInfoText = styled.span`
 const ReadTimeBox = styled.div`
   display: flex;
   align-items: center;
+
   gap: 4px;
 `;
 

@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import BookIcon from '../../../../components/icons/BookIcon';
 import AvatarIcon from '../../../../components/icons/AvatarIcon';
 import TopRightArrowIcon from '../../../../components/icons/TopRightArrowIcon';
 
@@ -178,7 +179,6 @@ export default function ReadingKingLeaderboard({
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 21px;
 
   width: 100%;
   max-width: 400px;
@@ -192,6 +192,7 @@ const Container = styled.div`
   background: rgb(255 255 255 / 80%);
 
   backdrop-filter: blur(10px);
+  gap: 21px;
 `;
 
 const Header = styled.div`
@@ -201,6 +202,7 @@ const Header = styled.div`
 const TitleContainer = styled.div`
   display: flex;
   align-items: center;
+
   gap: 10.5px;
 `;
 
@@ -238,6 +240,7 @@ const Title = styled.h3`
 const LeaderboardList = styled.div`
   display: flex;
   flex-direction: column;
+
   gap: 14px;
 `;
 
@@ -297,9 +300,10 @@ const UserInfo = styled.div`
 const NameContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 7px;
 
   margin-bottom: -1px;
+
+  gap: 7px;
 `;
 
 const UserName = styled.div<{ weight: 'normal' | 'medium' }>`
@@ -326,9 +330,10 @@ const Badge = styled.div`
 const StatsContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 7px;
 
   margin-bottom: -1px;
+
+  gap: 7px;
 `;
 
 const ReadCount = styled.div`
@@ -362,7 +367,6 @@ const MyRankContainer = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 12px;
 
   margin-bottom: 10.5px;
   padding: 13px 14px 14px;
@@ -373,6 +377,8 @@ const MyRankContainer = styled.div`
     rgb(255 153 102 / 10%),
     rgb(255 237 212 / 50%)
   );
+
+  gap: 12px;
 `;
 
 const MyRankInfo = styled.div`
@@ -427,6 +433,7 @@ const MyReadValue = styled.div`
 const ProgressSection = styled.div`
   display: flex;
   flex-direction: column;
+
   gap: 3.5px;
 `;
 

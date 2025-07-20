@@ -25,7 +25,7 @@ jobs:
         run: |
           mkdir -p src/main/resources
           echo "${{ secrets.EMAIL_APPLICATION_PROD_PROPERTIES }}" \
-            > src/main/resources/application-prod.yml
+            > src/main/resources/application.yml
           echo "${{ secrets.EMAIL_APPLICATION_TEST_PROPERTIES }}" \
             > src/main/resources/application-test.yml
           echo "${{ secrets.EMAIL_APPLICATION_PROD_DOCKER_PROPERTIES }}" \

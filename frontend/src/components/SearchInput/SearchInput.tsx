@@ -23,7 +23,7 @@ export default function SearchInput({
         <ReadingGlassesIcon color={theme.colors.textTertiary} />
       </ReadingGlassesIconWrapper>
       <StyledInput
-        type="text"
+        type="search"
         value={value}
         onChange={handleChange}
         aria-label={props['aria-label'] || '검색'}

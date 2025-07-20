@@ -20,12 +20,12 @@ export default function NewsletterItemCard({ data }: NewsletterItemCardProps) {
   } = data;
 
   return (
-    <CardContainer>
-      <ImageContainer>
+    <Container>
+      <ImageWrapper>
         <NewsletterImage src={thumbnailUrl ?? newsletterImageUrl} alt={title} />
-      </ImageContainer>
+      </ImageWrapper>
 
-      <ContentContainer>
+      <ContentWrapper>
         <TextContent>
           <Title>{title}</Title>
           <Description>{contentsSummary}</Description>
@@ -35,18 +35,18 @@ export default function NewsletterItemCard({ data }: NewsletterItemCardProps) {
           <Tag>{newsletterCategory}</Tag>
           <MetaInfo>
             <SourceText>from {newsletterName}</SourceText>
-            <ReadTimeContainer>
+            <ReadTimeBox>
               <img src={clockIcon} alt="시계 아이콘" />
               <ReadTime>{`${expectedReadTime}분`}</ReadTime>
-            </ReadTimeContainer>
+            </ReadTimeBox>
           </MetaInfo>
         </MetaContent>
-      </ContentContainer>
-    </CardContainer>
+      </ContentWrapper>
+    </Container>
   );
 }
 
-const CardContainer = styled.div`
+const Container = styled.div`
   overflow: hidden;
 
   display: flex;
@@ -64,7 +64,7 @@ const CardContainer = styled.div`
   transition: all 0.2s ease;
 `;
 
-const ImageContainer = styled.div`
+const ImageWrapper = styled.div`
   overflow: hidden;
 
   width: 100%;
@@ -79,7 +79,7 @@ const NewsletterImage = styled.img`
   object-position: center;
 `;
 
-const ContentContainer = styled.div`
+const ContentWrapper = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -137,7 +137,7 @@ const SourceText = styled.span`
   font: ${({ theme }) => theme.fonts.caption};
 `;
 
-const ReadTimeContainer = styled.div`
+const ReadTimeBox = styled.div`
   display: flex;
   align-items: center;
 

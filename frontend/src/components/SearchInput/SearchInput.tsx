@@ -1,8 +1,7 @@
 import styled from '@emotion/styled';
-import { ChangeEvent, InputHTMLAttributes } from 'react';
+import { ChangeEvent, ComponentProps } from 'react';
 
-interface SearchInputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+interface SearchInputProps extends Omit<ComponentProps<'input'>, 'onChange'> {
   value?: string;
   onChange?: (value: string) => void;
 }

@@ -2,7 +2,7 @@ services:
   mail-app:
     image: ryandia/bombom-email:latest
     environment:
-      INTEGRATION_MAILDIR: /maildir/new
+      INTEGRATION_MAILDIR: /Maildir/new
       SPRING_PROFILES_ACTIVE: docker
     volumes:
       - /home/ec2-user/Maildir/new:/maildir/new

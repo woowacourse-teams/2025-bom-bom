@@ -16,7 +16,7 @@ function LoginCard() {
         </GreetingMessage>
       </GreetingWrapper>
       <Divider />
-      <GoogleButton>
+      <GoogleButton type="button">
         <GoogleIcon />
         Google로 시작하기
       </GoogleButton>

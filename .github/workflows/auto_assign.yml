@@ -16,7 +16,7 @@ jobs:
         if: contains(steps.changed-files.outputs.all_changed_files, 'frontend/')
         uses: kentaro-m/auto-assign-action@v2.0.0
         with:
-          configuration-path: ".github/auto_assign.yml"
+          configuration-path: ".github/auto_assign_frontend.yml"
 
       - name: Backend Review Assignment
         if: contains(steps.changed-files.outputs.all_changed_files, 'backend/')

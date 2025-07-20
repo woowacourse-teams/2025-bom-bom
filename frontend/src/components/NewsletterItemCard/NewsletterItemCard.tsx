@@ -37,7 +37,7 @@ export default function NewsletterItemCard({ data }: NewsletterItemCardProps) {
             <SourceText>from {newsletterName}</SourceText>
             <ReadTimeBox>
               <img src={clockIcon} alt="시계 아이콘" />
-              <ReadTime>{`${expectedReadTime}분`}</ReadTime>
+              <SourceText>{`${expectedReadTime}분`}</SourceText>
             </ReadTimeBox>
           </MetaInfo>
         </MetaContent>
@@ -154,9 +154,4 @@ const ReadTimeBox = styled.div`
   align-items: center;
 
   gap: 4px;
-`;
-
-const ReadTime = styled.span`
-  color: ${({ theme }) => theme.colors.textTertiary};
-  font: ${({ theme }) => theme.fonts.caption};
 `;

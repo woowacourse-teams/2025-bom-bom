@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { Article } from '../../../today/types/article';
 import clockIcon from '../../../../../public/assets/clock.svg';
+import Badge from '../../../../components/Badge/Badge';
 
 interface NewsletterItemCardProps {
   data: Article;
@@ -32,7 +33,7 @@ export default function NewsletterItemCard({ data }: NewsletterItemCardProps) {
         </TextContent>
 
         <MetaContent>
-          <Tag>{newsletterCategory}</Tag>
+          <Badge text={newsletterCategory} />
           <MetaInfo>
             <SourceText>from {newsletterName}</SourceText>
             <ReadTimeBox>
@@ -121,20 +122,6 @@ const MetaContent = styled.div`
   align-items: center;
 
   gap: 8px;
-`;
-
-const Tag = styled.span`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 4px 8px;
-  border-radius: 8px;
-
-  background: ${({ theme }) => theme.colors.dividers};
-
-  color: ${({ theme }) => theme.colors.textTertiary};
-  font: ${({ theme }) => theme.fonts.caption};
 `;
 
 const MetaInfo = styled.div`

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 export function useClickOutsideRef<T extends HTMLElement = HTMLElement>(
-  callback: (() => void) | null,
+  callback: VoidFunction | null,
 ) {
   const ref = useRef<T>(null);
 

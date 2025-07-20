@@ -4,7 +4,9 @@ import PageLayout from '../components/PageLayout/PageLayout';
 import ReadingKingLeaderboard from '../pages/recommend/components/ReadingKingLeaderboard/ReadingKingLeaderboard';
 import NewsletterHero from '../pages/recommend/components/ReadingKingLeaderboard/NewsletterHero/NewsletterHero';
 import ImageInfoCard from '../components/ImageInfoCard/ImageInfoCard';
+import Chip from '../components/Chip/Chip';
 import { TRENDY_NEWSLETTERS } from '../mocks/trendyNewsLetter';
+import { CATEGORIES } from '../constants/category';
 
 export const Route = createFileRoute('/recommend')({
   component: Index,
@@ -21,6 +23,11 @@ function Index() {
               <SectionIcon>📊</SectionIcon>
               <SectionTitle>트렌디한 뉴스레터</SectionTitle>
             </SectionHeader>
+            <TagContainer>
+              {CATEGORIES.map((category, index) => (
+                <Chip key={index} text={category} selected={index === 0} />
+              ))}
+            </TagContainer>
             <TrendyGrid>
               {TRENDY_NEWSLETTERS.map((newsletter, index) => (
                 <ImageInfoCard
@@ -82,6 +89,16 @@ const SideSection = styled.div`
 
 const TrendySection = styled.div`
   width: 100%;
+  padding: 24px;
+  border: 1px solid rgb(226 232 240 / 100%);
+  border-radius: 21px;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 10%),
+    0 4px 6px -4px rgb(0 0 0 / 10%);
+
+  background: rgb(255 255 255 / 80%);
+
+  backdrop-filter: blur(10px);
 `;
 
 const SectionHeader = styled.div`
@@ -112,6 +129,15 @@ const SectionTitle = styled.h2`
 
   color: ${({ theme }) => theme.colors.black};
   font: ${({ theme }) => theme.fonts.heading5};
+`;
+
+const TagContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+
+  margin-bottom: 16px;
+
+  gap: 8px;
 `;
 
 const TrendyGrid = styled.div`

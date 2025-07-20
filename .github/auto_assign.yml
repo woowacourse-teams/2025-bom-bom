@@ -1,0 +1,11 @@
+addReviewers: true
+addAssignees: author
+reviewers:
+  - GREEN
+  - RED
+  - BLUE
+  - YELLOW
+numberOfReviewers: 2
+numberOfAssignees: 1
+skipKeywords:
+  - wip

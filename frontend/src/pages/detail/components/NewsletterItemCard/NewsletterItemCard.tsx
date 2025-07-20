@@ -61,6 +61,7 @@ const Container = styled.div`
     0 2px 4px -1px rgb(0 0 0 / 6%);
 
   background: ${({ theme }) => theme.colors.white};
+  max-width: 320px;
 
   transition: all 0.2s ease;
 `;

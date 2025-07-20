@@ -28,9 +28,15 @@ const colors = {
   black: '#000000',
 };
 
+const gradients = {
+  primary: '135deg, #f96 0%, #ffb366 100%',
+  primaryDark: '144.324deg, #4b5563 0%, #f96 50%, #ffd700 100%',
+};
+
 export const theme = {
   fonts,
   colors,
+  gradients,
 };
 
 export type AppTheme = typeof theme;

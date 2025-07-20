@@ -3,14 +3,13 @@ import compassIcon from '../../../public/assets/compass.svg';
 import copyIcon from '../../../public/assets/copy.svg';
 import CompassIcon from '../icons/CompassIcon';
 import HomeIcon from '../icons/HomeIcon';
-
-type NavType = 'home' | 'recommend';
+import { NavType } from '../../types/nav';
 
 interface HeaderProps {
   activeNav: NavType;
 }
 
-export default function Header({ activeNav = 'home' }: HeaderProps) {
+export default function Header({ activeNav }: HeaderProps) {
   const handleCopyEmail = () => {
     navigator.clipboard.writeText('test@bombom.news');
   };
@@ -29,8 +28,8 @@ export default function Header({ activeNav = 'home' }: HeaderProps) {
         </LogoWrapper>
 
         <Nav>
-          <NavButton active={activeNav === 'home'}>
-            <HomeIcon color={activeNav === 'home' ? 'white' : 'black'} />
+          <NavButton active={activeNav === 'today'}>
+            <HomeIcon color={activeNav === 'today' ? 'white' : 'black'} />
             <p>오늘의 뉴스레터</p>
           </NavButton>
           <NavButton active={activeNav === 'recommend'}>
@@ -57,10 +56,14 @@ export default function Header({ activeNav = 'home' }: HeaderProps) {
 }
 
 const HeaderContainer = styled.header`
+  position: fixed;
+  top: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
 
+  width: 100%;
   height: 64px;
   padding: 8px 16px;
   border-radius: 0 0 8px 8px;

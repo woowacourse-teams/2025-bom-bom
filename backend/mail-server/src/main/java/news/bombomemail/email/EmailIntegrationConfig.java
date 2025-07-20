@@ -1,6 +1,8 @@
 package news.bombomemail.email;
 
+import jakarta.annotation.PostConstruct;
 import java.io.File;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +16,7 @@ import org.springframework.integration.file.filters.AcceptOnceFileListFilter;
 import org.springframework.integration.file.filters.CompositeFileListFilter;
 import org.springframework.integration.file.filters.SimplePatternFileListFilter;
 
-
+@Slf4j
 @Profile("!test")
 @Configuration
 @EnableIntegration
@@ -22,6 +24,14 @@ public class EmailIntegrationConfig {
 
     @Value("${integration.file.maildir}")
     private String mailDir;
+
+    @PostConstruct
+    public void logMailDir() {
+        log.info("▶▶▶ integration.file.maildir = {}", mailDir);
+        File dir = new File(mailDir);
+        log.info("▶▶▶ 실제 디렉토리: {} (exists: {}, writable: {})",
+                dir.getAbsolutePath(), dir.exists(), dir.canWrite());
+    }
 
     @Bean
     public MessageSource<File> mailFileSource() {

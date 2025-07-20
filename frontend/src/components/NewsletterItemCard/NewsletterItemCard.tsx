@@ -97,13 +97,11 @@ const Title = styled.h3`
 
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.heading5};
-  line-height: 28px;
 `;
 
 const Description = styled.p`
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body2};
-  line-height: 22px;
 `;
 
 const MetaContent = styled.div`

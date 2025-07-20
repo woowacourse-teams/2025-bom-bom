@@ -9,10 +9,10 @@ import { TRENDY_NEWSLETTERS } from '../mocks/trendyNewsLetter';
 import { CATEGORIES } from '../constants/category';
 
 export const Route = createFileRoute('/recommend')({
-  component: Index,
+  component: Recommend,
 });
 
-function Index() {
+function Recommend() {
   return (
     <PageLayout activeNav="recommend">
       <Container>

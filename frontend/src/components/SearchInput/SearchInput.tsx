@@ -7,7 +7,11 @@ interface SearchInputProps
   onChange?: (value: string) => void;
 }
 
-const SearchInput = ({ value, onChange, ...props }: SearchInputProps) => {
+export default function SearchInput({
+  value,
+  onChange,
+  ...props
+}: SearchInputProps) {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange?.(e.target.value);
   };
@@ -23,11 +27,7 @@ const SearchInput = ({ value, onChange, ...props }: SearchInputProps) => {
       />
     </Container>
   );
-};
-
-SearchInput.displayName = 'SearchInput';
-
-export default SearchInput;
+}
 
 const Container = styled.div`
   position: relative;

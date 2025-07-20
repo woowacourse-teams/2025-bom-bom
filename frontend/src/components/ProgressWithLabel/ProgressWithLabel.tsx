@@ -4,15 +4,13 @@ import { getProgressInfo } from './progress';
 import { RateFormatType } from './types';
 import { ComponentType, SVGProps } from 'react';
 
-interface Value {
-  currentCount: number;
-  totalCount: number;
-}
-
 interface ProgressWithLabelProps {
   label: string;
   Icon: ComponentType<SVGProps<SVGSVGElement>>;
-  value: Value;
+  value: {
+    currentCount: number;
+    totalCount: number;
+  };
   description: string;
   rateFormat?: RateFormatType;
 }

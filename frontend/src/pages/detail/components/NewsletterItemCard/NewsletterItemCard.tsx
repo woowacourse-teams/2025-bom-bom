@@ -63,19 +63,16 @@ const Container = styled.div`
   background: ${({ theme }) => theme.colors.white};
 
   transition: all 0.2s ease;
-
-  height: 320px;
 `;
 
 const ImageWrapper = styled.div`
   overflow: hidden;
 
-  width: 100%;
+  height: 120px;
 `;
 
 const NewsletterImage = styled.img`
   width: 100%;
-  height: 100%;
 
   object-fit: cover;
   object-position: center;
@@ -141,4 +138,5 @@ const ReadTimeBox = styled.div`
   align-items: center;
 
   gap: 4px;
+  white-space: nowrap;
 `;

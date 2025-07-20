@@ -42,3 +42,48 @@ export const ShortContent: Story = {
     },
   },
 };
+
+export const MultipleArticles: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: '24px' }}>
+      <NewsletterItemCard
+        data={{
+          ...MOCK_ARTICLES,
+          title: '첫 번째 뉴스레터',
+          contentsSummary: '짧은 내용입니다.',
+          newsletter: {
+            ...MOCK_ARTICLES.newsletter,
+            name: 'Daily Tech',
+            category: 'Technology',
+          },
+        }}
+      />
+      <NewsletterItemCard
+        data={{
+          ...MOCK_ARTICLES,
+          title: '두 번째 뉴스레터',
+          contentsSummary:
+            '긴 내용입니다만 아직 길지 않습니다. 현재 길어지는 중입니다. 더 길어질 예정입니다.',
+          newsletter: {
+            ...MOCK_ARTICLES.newsletter,
+            name: 'Finance Weekly',
+            category: 'Finance',
+          },
+        }}
+      />
+      <NewsletterItemCard
+        data={{
+          ...MOCK_ARTICLES,
+          title:
+            '긴 제목입니다만 아직 길지 않습니다. 현재 길어지는 중입니다. 더 길어질 예정입니다.',
+          contentsSummary: '세 번째 뉴스레터입니다.',
+          newsletter: {
+            ...MOCK_ARTICLES.newsletter,
+            name: 'Startup News',
+            category: 'Business',
+          },
+        }}
+      />
+    </div>
+  ),
+};

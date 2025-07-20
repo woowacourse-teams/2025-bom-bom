@@ -21,7 +21,7 @@ function Select<T>({
   ...props
 }: SelectProps<T>) {
   const [open, setOpen] = useState(false);
-  const SelectRef = useClickOutsideRef<HTMLDivElement>(() => setOpen(false));
+  const selectRef = useClickOutsideRef<HTMLDivElement>(() => setOpen(false));
 
   const toggle = () => setOpen((prev) => !prev);
 
@@ -35,7 +35,7 @@ function Select<T>({
   };
 
   return (
-    <Container ref={SelectRef} {...props} width={width}>
+    <Container ref={selectRef} {...props} width={width}>
       <SelectToggle onClick={toggle}>
         <SelectText selected={selectedValue !== null}>
           {selectedLabel || (placeholder ?? '')}

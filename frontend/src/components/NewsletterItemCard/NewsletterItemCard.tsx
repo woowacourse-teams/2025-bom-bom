@@ -141,7 +141,7 @@ const ReadTimeContainer = styled.div`
   display: flex;
   align-items: center;
 
-  gap: 3.5px;
+  gap: 4px;
 `;
 
 const ReadTime = styled.span`

@@ -10,6 +10,7 @@ import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
+import me.bombom.api.v1.article.dto.GetArticleCategoryStatisticsResponse;
 import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.enums.SortOption;
 import me.bombom.api.v1.article.repository.ArticleRepository;
@@ -73,7 +74,7 @@ class ArticleServiceTest {
     void 아티클_목록_조회_DESC_정렬_테스트() {
         // given
         Pageable pageable = PageRequest.of(0, 10); // 충분한 크기로 전체 조회
-        
+
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
@@ -95,7 +96,7 @@ class ArticleServiceTest {
     void 아티클_목록_조회_ASC_정렬_테스트() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
-        
+
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
@@ -141,7 +142,7 @@ class ArticleServiceTest {
     void 아티클_목록_조회_날짜_필터링_테스트() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
-        
+
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
@@ -174,7 +175,7 @@ class ArticleServiceTest {
     void 아티클_목록_조회_카테고리가_존재하지_않으면_예외() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
-        
+
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 member.getId(),
@@ -188,7 +189,7 @@ class ArticleServiceTest {
     void 아티클_목록_조회_페이징_첫번째_페이지_테스트() {
         // given
         Pageable firstPage = PageRequest.of(0, 2);
-        
+
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
@@ -214,7 +215,7 @@ class ArticleServiceTest {
     void 아티클_목록_조회_페이징_두번째_페이지_테스트() {
         // given
         Pageable secondPage = PageRequest.of(1, 2);
-        
+
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
@@ -240,7 +241,7 @@ class ArticleServiceTest {
     void 아티클_목록_조회_페이징_DESC_정렬_테스트() {
         // given
         Pageable pageable = PageRequest.of(0, 2);
-        
+
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
@@ -262,7 +263,7 @@ class ArticleServiceTest {
     void 아티클_목록_조회_페이징_ASC_정렬_테스트() {
         // given
         Pageable pageable = PageRequest.of(0, 2);
-        
+
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
@@ -387,6 +388,30 @@ class ArticleServiceTest {
     void 다_읽음_갱신_아티클이_존재하지_않으면_예외() {
         // when & then
         assertThatThrownBy(() -> articleService.markAsRead(0L))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 카테고리_별_아티클_개수를_조회한다() {
+        // when
+        GetArticleCategoryStatisticsResponse result = articleService.getArticleCategoryStatistics(member.getId());
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(4);
+            softly.assertThat(result.categories()).hasSize(3);
+            softly.assertThat(result.categories().get(1).category()).isEqualTo("테크");
+            softly.assertThat(result.categories().get(1).count()).isEqualTo(1);
+            softly.assertThat(result.categories().get(2).category()).isEqualTo("푸드");
+            softly.assertThat(result.categories().get(2).count()).isEqualTo(2);
+        });
+    }
+
+    @Test
+    void 카테고리_별_아티클_개수_조회_시_회원이_존재하지_않을_경우_예외가_발생한다() {
+        // when & then
+        assertThatThrownBy(() -> articleService.getArticleCategoryStatistics(2L))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }

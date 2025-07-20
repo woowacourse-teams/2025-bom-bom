@@ -12,4 +12,6 @@ COPY build/libs/*.jar app.jar
 
 USER ${APP_USER}
 
-ENTRYPOINT ["java","-jar","/app/app.jar","--spring.profiles.active=docker"]
+ENTRYPOINT ["java","-jar","/app/app.jar",
+            "--spring.profiles.active=docker",
+            "--integration.file.maildir=/maildir/new"]

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
+import me.bombom.api.v1.article.dto.GetArticleCategoryStatisticsResponse;
 import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.service.ArticleService;
 import org.springframework.data.domain.Page;
@@ -44,5 +45,10 @@ public class ArticleController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateIsRead(@PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id) {
         articleService.markAsRead(id);
+    }
+
+    @GetMapping("/statistics/categories")
+    public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(@RequestParam Long memberId){
+        return articleService.getArticleCategoryStatistics(memberId);
     }
 }

@@ -1,10 +1,13 @@
 package me.bombom.api.v1.article.service;
 
+import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
+import me.bombom.api.v1.article.dto.GetArticleCategoryStatisticsResponse;
+import me.bombom.api.v1.article.dto.GetArticleCountPerCategoryResponse;
 import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -51,6 +54,19 @@ public class ArticleService {
         Article article = articleRepository.findById(id)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         article.markAsRead();
+    }
+
+    public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(Long memberId) {
+        validateMemberExists(memberId);
+        int totalCount = articleRepository.countAllByMemberId(memberId);
+        List<GetArticleCountPerCategoryResponse> countResponse = categoryRepository.findAll()
+                .stream()
+                .map(category -> {
+                    int count = articleRepository.countAllByCategoryId(category.getId());
+                    return GetArticleCountPerCategoryResponse.of(category, count);
+                })
+                .toList();
+        return GetArticleCategoryStatisticsResponse.of(totalCount, countResponse);
     }
 
     private void validateMemberExists(Long memberId) {

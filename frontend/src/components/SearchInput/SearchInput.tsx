@@ -33,7 +33,7 @@ export default function SearchInput({
   );
 }
 
-const Container = styled.div`
+const Container = styled.form`
   position: relative;
 
   width: 100%;
@@ -42,8 +42,9 @@ const Container = styled.div`
 
 const ReadingGlassesIconWrapper = styled.div`
   position: absolute;
-  left: 12px;
   top: 50%;
+  left: 12px;
+
   transform: translateY(-50%);
 `;
 

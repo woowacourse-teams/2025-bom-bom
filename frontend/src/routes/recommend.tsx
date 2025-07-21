@@ -7,6 +7,7 @@ import ImageInfoCard from '../components/ImageInfoCard/ImageInfoCard';
 import Chip from '../components/Chip/Chip';
 import { TRENDY_NEWSLETTERS } from '../mocks/trendyNewsLetter';
 import { CATEGORIES } from '../constants/category';
+import trendingUpIcon from '../../public/assets/trending-up.svg';
 
 export const Route = createFileRoute('/recommend')({
   component: Recommend,
@@ -20,7 +21,9 @@ function Recommend() {
           <NewsletterHero />
           <TrendySection>
             <SectionHeader>
-              <SectionIcon>📊</SectionIcon>
+              <SectionIcon>
+                <img src={trendingUpIcon} alt="trending up" />
+              </SectionIcon>
               <SectionTitle>트렌디한 뉴스레터</SectionTitle>
             </SectionHeader>
             <TagContainer>

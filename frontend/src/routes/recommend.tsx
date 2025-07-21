@@ -108,7 +108,7 @@ const SectionHeader = styled.div`
   gap: 8px;
 `;
 
-const SectionIcon = styled.div`
+const SectionIcon = styled.span`
   display: flex;
   align-items: center;
   justify-content: center;

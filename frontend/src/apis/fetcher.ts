@@ -20,11 +20,16 @@ export const fetcher = {
     body,
   }: FetcherOptions<TRequest>) =>
     request<TRequest, TResponse>({ path, body, method: 'PATCH' }),
+  put: async <TRequest extends Record<string, string>, TResponse>({
+    path,
+    body,
+  }: FetcherOptions<TRequest>) =>
+    request<TRequest, TResponse>({ path, body, method: 'PUT' }),
   delete: async <TResponse>({ path }: FetcherOptions<never>) =>
     request<never, TResponse>({ path, method: 'DELETE' }),
 };
 
-type FetchMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
+type FetchMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT';
 
 type RequestOptions<TRequest> = {
   path: string;

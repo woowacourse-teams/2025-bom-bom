@@ -64,6 +64,9 @@ jobs:
     runs-on: [ self-hosted, linux, arm64, main ]
 
     steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
       - name: Docker 이미지 Pull
         run: |
           IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest

@@ -1,6 +1,6 @@
-import statusIcon from '../../../../public/assets/reading-status.svg';
-import streakIcon from '../../../../public/assets/streak.svg';
-import goalIcon from '../../../../public/assets/goal.svg';
+import statusIcon from '../../../../../public/assets/reading-status.svg';
+import streakIcon from '../../../../../public/assets/streak.svg';
+import goalIcon from '../../../../../public/assets/goal.svg';
 import styled from '@emotion/styled';
 import {
   TodayReadingStatus,

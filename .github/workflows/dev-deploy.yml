@@ -83,9 +83,3 @@ jobs:
           echo "Gracefully shutting down process ${{ env.PID }}"
           sudo kill -15 ${{ env.PID }}
           tail --pid=${{ env.PID }} -f /dev/null
-
-      - name: Start server
-        run: |
-          JAR_FILE=$(find ./artifact-dir -name "*.jar" | head -n 1)
-          echo "Starting server with $JAR_FILE"
-          sudo nohup java -jar "$JAR_FILE" --server.port=80 &

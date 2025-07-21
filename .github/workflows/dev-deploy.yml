@@ -20,6 +20,7 @@ jobs:
           distribution: temurin
 
       - name: application-dev.yml 파일 만들기
+        working-directory: ./backend/bom-bom-server
         run: |
           mkdir -p src/main/resources
           echo "${{ secrets.APPLICATION_DEV_PROPERTIES }}" \
@@ -31,6 +32,10 @@ jobs:
 
       - name: Print JAR path
         run: ls -al ./backend/bom-bom-server/build/libs
+
+      - name: 확인 - JAR 내부에 application.yml 존재 여부
+        run: |
+          unzip -l ./backend/bom-bom-server/build/libs/*.jar | grep application
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

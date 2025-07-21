@@ -1,24 +1,24 @@
 import styled from '@emotion/styled';
+import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import PageLayout from '../components/PageLayout/PageLayout';
+import { getArticles } from '../pages/today/apis/articles';
 import ArticleCardList from '../pages/today/components/ArticleCardList';
 import ReadingStatusCard from '../pages/today/components/ReadingStatusCard';
 import { ARTICLES } from '../mocks/data/mock-articles';
-import { useQuery } from '@tanstack/react-query';
-import { getTodayArticles } from '../pages/today/apis/getTodayArticles';
 
 export const Route = createFileRoute('/')({
   component: Index,
 });
 
 function Index() {
-  const { data } = useQuery({
+  const { data: articles } = useQuery({
     queryKey: ['todayArticles'],
-    queryFn: () => getTodayArticles(),
+    queryFn: () =>
+      getArticles({ date: new Date(), memberId: 1, sorted: 'ASC' }),
   });
 
-  console.log(data);
-
+  if (!articles) return null;
   return (
     <PageLayout activeNav="today">
       <Container>
@@ -29,7 +29,7 @@ function Index() {
           </TitleDescription>
         </TitleBox>
         <ContentWrapper>
-          <ArticleCardList articles={ARTICLES} />
+          <ArticleCardList articles={articles.content} />
           <ReadingStatusCard
             streakReadDay={267}
             today={{ readCount: 3, totalCount: 5 }}

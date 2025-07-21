@@ -18,7 +18,7 @@ export default function Header({ activeNav }: HeaderProps) {
   return (
     <HeaderContainer>
       <HeaderInner>
-        <LogoWrapper>
+        <LogoWrapper to="/">
           <LogoBox>
             <HomeIcon />
           </LogoBox>
@@ -85,7 +85,7 @@ const HeaderInner = styled.div`
   max-width: 1280px;
 `;
 
-const LogoWrapper = styled.div`
+const LogoWrapper = styled(Link)`
   display: flex;
   align-items: center;
 `;

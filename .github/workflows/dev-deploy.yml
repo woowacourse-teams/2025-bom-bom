@@ -107,5 +107,5 @@ jobs:
           echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
 
-          docker compose --env-file ./bom-bom-server/.env down || true
-          docker compose --env-file ./bom-bom-server/.env up -d
+          docker compose --env-file .env down || true
+          docker compose --env-file .env up -d

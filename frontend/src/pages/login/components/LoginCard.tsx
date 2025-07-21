@@ -3,6 +3,11 @@ import GoogleIcon from '@/components/icons/GoogleIcon';
 import SparklesIcon from '@/components/icons/SparklesIcon';
 
 function LoginCard() {
+  const { mutate } = useMutation({
+    mutationKey: ['auth/login/google'],
+    mutationFn: () => login(),
+  });
+
   return (
     <Container>
       <GreetingWrapper>
@@ -16,7 +21,7 @@ function LoginCard() {
         </GreetingMessage>
       </GreetingWrapper>
       <Divider />
-      <GoogleButton type="button">
+      <GoogleButton onClick={() => mutate()} type="button">
         <GoogleIcon />
         Google로 시작하기
       </GoogleButton>

@@ -24,11 +24,11 @@ async function enableMocking() {
   }
 }
 
-enableMocking().then(() => {
-  createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-      <Global styles={reset} />
-      <RouterProvider router={router} />
-    </StrictMode>,
-  );
-});
+// enableMocking().then(() => {
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <Global styles={reset} />
+    <RouterProvider router={router} />
+  </StrictMode>,
+);
+// });

@@ -1,40 +1,43 @@
 import ApiError from './ApiError';
 import { ENV } from './env';
 
-type FetcherOptions<TReq = unknown> = {
+type FetcherOptions<TRequest = unknown> = {
   path: string;
   query?: Record<string, string>;
-  body?: TReq;
+  body?: TRequest;
 };
 
 export const fetcher = {
-  get: async <TRes>({ path, query }: FetcherOptions<never>) =>
-    request<never, TRes>({ path, query, method: 'GET' }),
-  post: async <TReq, TRes>({ path, body }: FetcherOptions<TReq>) =>
-    request<TReq, TRes>({ path, body, method: 'POST' }),
-  patch: async <TReq, TRes>({ path, body }: FetcherOptions<TReq>) =>
-    request<TReq, TRes>({ path, body, method: 'PATCH' }),
-  delete: async <TRes>({ path }: FetcherOptions<never>) =>
-    request<never, TRes>({ path, method: 'DELETE' }),
+  get: async <TResponse>({ path, query }: FetcherOptions<never>) =>
+    request<never, TResponse>({ path, query, method: 'GET' }),
+  post: async <TRequest, TResponse>({ path, body }: FetcherOptions<TRequest>) =>
+    request<TRequest, TResponse>({ path, body, method: 'POST' }),
+  patch: async <TRequest, TResponse>({
+    path,
+    body,
+  }: FetcherOptions<TRequest>) =>
+    request<TRequest, TResponse>({ path, body, method: 'PATCH' }),
+  delete: async <TResponse>({ path }: FetcherOptions<never>) =>
+    request<never, TResponse>({ path, method: 'DELETE' }),
 };
 
 type FetchMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
-type RequestOptions<TReq> = {
+type RequestOptions<TRequest> = {
   path: string;
   method: FetchMethod;
   query?: Record<string, string>;
-  body?: TReq;
+  body?: TRequest;
   headers?: Record<string, string>;
 };
 
-const request = async <TReq, TRes>({
+const request = async <TRequest, TResponse>({
   path,
   method,
   query = {},
   body,
   headers,
-}: RequestOptions<TReq>): Promise<TRes | null> => {
+}: RequestOptions<TRequest>): Promise<TResponse | null> => {
   const url = new URL(ENV.baseUrl + path);
   url.search = new URLSearchParams(query).toString();
 

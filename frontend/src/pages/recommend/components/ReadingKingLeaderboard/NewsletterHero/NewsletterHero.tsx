@@ -23,7 +23,7 @@ const HeroContainer = styled.div`
   padding: 40px;
   border-radius: 16px;
 
-  background: linear-gradient(${({ theme }) => theme.gradients.primary});
+  background: linear-gradient(135deg, #F96 0%, #FFB366 100%);
 `;
 
 const HeroContent = styled.div`

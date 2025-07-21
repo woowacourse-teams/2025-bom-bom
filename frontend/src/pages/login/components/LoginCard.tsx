@@ -72,7 +72,7 @@ const IconWrapper = styled.div`
 `;
 
 const GreetingTitle = styled.h2`
-  background: linear-gradient(${({ theme }) => theme.gradients.primaryDark});
+  background: linear-gradient(107deg, #181818 0%, #F96 100%);
   background-clip: text;
 
   font: ${({ theme }) => theme.fonts.heading3};

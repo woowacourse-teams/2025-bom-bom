@@ -112,7 +112,7 @@ const TitleBox = styled.div`
 `;
 
 const Title = styled.div`
-  background: linear-gradient(${({ theme }) => theme.gradients.primaryNeutral});
+  background: linear-gradient(144.324deg, #4b5563 0%, #F96 50%, #FFD700 100%);
   background-clip: text;
 
   font: ${({ theme }) => theme.fonts.heading4};

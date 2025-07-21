@@ -14,7 +14,7 @@ export interface MemberReadingResponse {
 
 export const getReadingStatus = async (memberId: number) => {
   return await fetcher.get<MemberReadingResponse>({
-    path: '/members/me/reading-status',
+    path: '/members/me/reading',
     query: { memberId },
   });
 };

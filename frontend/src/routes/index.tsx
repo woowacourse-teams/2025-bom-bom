@@ -5,6 +5,7 @@ import PageLayout from '../components/PageLayout/PageLayout';
 import { getArticles } from '../pages/today/apis/articles';
 import ArticleCardList from '../pages/today/components/ArticleCardList';
 import ReadingStatusCard from '../pages/today/components/ReadingStatusCard';
+import { getReadingStatus } from '../pages/today/apis/members';
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -17,7 +18,12 @@ function Index() {
       getArticles({ date: new Date(), memberId: 1, sorted: 'ASC' }),
   });
 
-  if (!articles) return null;
+  const { data: readingStatus } = useQuery({
+    queryKey: ['readingStatus'],
+    queryFn: () => getReadingStatus(1),
+  });
+
+  if (!articles || !readingStatus) return null;
   return (
     <PageLayout activeNav="today">
       <Container>
@@ -30,9 +36,15 @@ function Index() {
         <ContentWrapper>
           <ArticleCardList articles={articles.content} />
           <ReadingStatusCard
-            streakReadDay={267}
-            today={{ readCount: 3, totalCount: 5 }}
-            weekly={{ readCount: 12, goalCount: 15 }}
+            streakReadDay={readingStatus.streakReadDay}
+            today={{
+              readCount: readingStatus.today.readCount,
+              totalCount: readingStatus.today.totalCount,
+            }}
+            weekly={{
+              readCount: readingStatus.weekly.readCount,
+              goalCount: readingStatus.weekly.goalCount,
+            }}
           />
         </ContentWrapper>
       </Container>

@@ -4,7 +4,7 @@ import { useClickOutsideRef } from '../../hooks/useClickOutsideRef';
 import ChevronIcon from '../icons/ChevronIcon';
 import { SelectOption } from './Select.types';
 
-interface SelectProps<T> extends ComponentProps<'div'> {
+interface SelectProps<T extends string | number> extends ComponentProps<'div'> {
   options: SelectOption<T>[];
   selectedValue: T | null;
   onSelectOption: (optionValue: T) => void;
@@ -12,7 +12,7 @@ interface SelectProps<T> extends ComponentProps<'div'> {
   placeholder?: string;
 }
 
-function Select<T>({
+function Select<T extends string | number>({
   options,
   selectedValue,
   onSelectOption,
@@ -45,7 +45,7 @@ function Select<T>({
         <SelectMenuWrapper role="listbox">
           {options.map((option) => (
             <SelectMenuItem
-              key={JSON.stringify(option.value)}
+              key={String(option.value)}
               onClick={() => onOptionSelected(option.value)}
               selected={option.value === selectedValue}
               role="option"

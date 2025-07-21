@@ -16,6 +16,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
         INNER JOIN Newsletter AS n 
         ON a.newsletterId = n.id 
         WHERE n.categoryId = :categoryId 
+            AND a.memberId = :memberId 
     """)
-    int countAllByCategoryId(Long categoryId);
+    int countAllByCategoryIdAndMemberId(Long categoryId, Long memberId);
 }

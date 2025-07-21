@@ -62,7 +62,7 @@ public class ArticleService {
         List<GetArticleCountPerCategoryResponse> countResponse = categoryRepository.findAll()
                 .stream()
                 .map(category -> {
-                    int count = articleRepository.countAllByCategoryId(category.getId());
+                    int count = articleRepository.countAllByCategoryIdAndMemberId(category.getId(), memberId);
                     return GetArticleCountPerCategoryResponse.of(category, count);
                 })
                 .toList();

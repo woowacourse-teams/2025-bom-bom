@@ -1,13 +1,11 @@
 export interface PageableResponse<T> {
-  content: T[];
   totalPages: number;
   totalElements: number;
-  size: number;
-  number: number;
-  numberOfElements: number;
   first: boolean;
   last: boolean;
-  empty: boolean;
+  size: number;
+  content: T[];
+  number: number;
   sort: {
     empty: boolean;
     unsorted: boolean;
@@ -25,4 +23,6 @@ export interface PageableResponse<T> {
       sorted: boolean;
     };
   };
+  numberOfElements: number;
+  empty: boolean;
 }

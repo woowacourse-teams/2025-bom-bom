@@ -1,7 +1,7 @@
 import ApiError from './ApiError';
 import { ENV } from './env';
 
-type FetcherOptions<TRequest = unknown> = {
+type FetcherOptions<TRequest extends Record<string, string>> = {
   path: string;
   query?: Record<string, string>;
   body?: TRequest;
@@ -10,9 +10,12 @@ type FetcherOptions<TRequest = unknown> = {
 export const fetcher = {
   get: async <TResponse>({ path, query }: FetcherOptions<never>) =>
     request<never, TResponse>({ path, query, method: 'GET' }),
-  post: async <TRequest, TResponse>({ path, body }: FetcherOptions<TRequest>) =>
+  post: async <TRequest extends Record<string, string>, TResponse>({
+    path,
+    body,
+  }: FetcherOptions<TRequest>) =>
     request<TRequest, TResponse>({ path, body, method: 'POST' }),
-  patch: async <TRequest, TResponse>({
+  patch: async <TRequest extends Record<string, string>, TResponse>({
     path,
     body,
   }: FetcherOptions<TRequest>) =>

@@ -19,9 +19,6 @@ public class NewsletterController {
 
     @GetMapping
     public List<NewsletterResponse> getNewsletters() {
-        log.info("뉴스레터 시작");
-        List<NewsletterResponse> newsletters = newsletterService.getNewsletters();
-        log.info("뉴스레터 종료");
-        return newsletters;
+        return newsletterService.getNewsletters();
     }
 }

@@ -20,9 +20,6 @@ public class NewsletterService {
     public List<NewsletterResponse> getNewsletters() {
         //임시로 repository 메서드 내부에 Detail 정보 가져오는 것이 불필요
         List<NewsletterResponse> newsletters = newsletterRepository.findNewslettersInfo();
-        for (NewsletterResponse newsletter : newsletters) {
-            log.info(newsletter.name());
-        }
         Collections.shuffle(newsletters); //초기엔 셔플해서 랜덤 순서로 보여주기
         return newsletters;
     }

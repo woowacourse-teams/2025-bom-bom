@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { ReactNode } from 'react';
 
-interface TabProps {
+export interface TabProps {
   id: string | number;
   onSelect: (id: string | number) => void;
   selected?: boolean;

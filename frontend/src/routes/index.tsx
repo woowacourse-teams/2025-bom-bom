@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import PageLayout from '../components/PageLayout/PageLayout';
-import ArticleCardList from '../pages/today/components/ArticleCardList';
-import ReadingStatusCard from '../pages/today/components/ReadingStatusCard';
+import ArticleCardList from '../pages/today/components/ArticleCardList/ArticleCardList';
+import ReadingStatusCard from '../pages/today/components/ReadingStatusCard/ReadingStatusCard';
 import { ARTICLES } from '../mocks/data/mock-articles';
 
 export const Route = createFileRoute('/')({

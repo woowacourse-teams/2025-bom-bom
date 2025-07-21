@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
-import ArticleCard from './ArticleCard';
+import ArticleCard from '../ArticleCard/ArticleCard';
 import checkIcon from '../../../../public/assets/check.svg';
 import letterIcon from '../../../../public/assets/letter.svg';
-import { Article } from '../types/article';
+import { Article } from '../../types/article';
 
 interface ArticleCardListProps {
   articles: Article[];

@@ -5,8 +5,8 @@ import styled from '@emotion/styled';
 import {
   TodayReadingStatus,
   WeeklyReadingStatus,
-} from '../types/readingStatus';
-import ProgressWithLabel from '../../../components/ProgressWithLabel/ProgressWithLabel';
+} from '../../types/readingStatus';
+import ProgressWithLabel from '../../../../components/ProgressWithLabel/ProgressWithLabel';
 
 interface ReadingStatusCardProps {
   streakReadDay: number;

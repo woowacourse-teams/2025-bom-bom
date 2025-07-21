@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
-import { formatDateToDotString } from '../../../utils/date';
+import { formatDateToDotString } from '../../../../utils/date';
 import clockIcon from '../../../../public/assets/clock.svg';
-import { Article } from '../types/article';
+import { Article } from '../../types/article';
 import { Link } from '@tanstack/react-router';
 
 interface ArticleCardProps {

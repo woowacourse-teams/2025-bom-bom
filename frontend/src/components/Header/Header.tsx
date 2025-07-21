@@ -4,6 +4,7 @@ import copyIcon from '../../../public/assets/copy.svg';
 import CompassIcon from '../icons/CompassIcon';
 import HomeIcon from '../icons/HomeIcon';
 import { NavType } from '../../types/nav';
+import { Link } from '@tanstack/react-router';
 
 interface HeaderProps {
   activeNav: NavType;
@@ -28,11 +29,11 @@ export default function Header({ activeNav }: HeaderProps) {
         </LogoWrapper>
 
         <Nav>
-          <NavButton active={activeNav === 'today'}>
+          <NavButton active={activeNav === 'today'} to="/">
             <HomeIcon color={activeNav === 'today' ? 'white' : 'black'} />
             <p>오늘의 뉴스레터</p>
           </NavButton>
-          <NavButton active={activeNav === 'recommend'}>
+          <NavButton active={activeNav === 'recommend'} to="/recommend">
             <CompassIcon
               color={activeNav === 'recommend' ? 'white' : 'black'}
             />
@@ -136,7 +137,7 @@ const Nav = styled.nav`
   gap: 8px;
 `;
 
-const NavButton = styled.button<{ active?: boolean }>`
+const NavButton = styled(Link)<{ active?: boolean }>`
   display: flex;
   align-items: center;
 

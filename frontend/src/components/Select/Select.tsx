@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { ComponentProps, useState } from 'react';
-import { useClickOutsideRef } from '../../hooks/useClickOutsideRef';
+import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
 import ChevronIcon from '../icons/ChevronIcon';
 import { SelectOption } from './Select.types';
 

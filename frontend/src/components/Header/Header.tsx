@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
-import compassIcon from '../../../public/assets/compass.svg';
-import copyIcon from '../../../public/assets/copy.svg';
+import compassIcon from '#/assets/compass.svg';
+import copyIcon from '#/assets/copy.svg';
+import { NavType } from '@/types/nav';
 import CompassIcon from '../icons/CompassIcon';
 import HomeIcon from '../icons/HomeIcon';
-import { NavType } from '../../types/nav';
 
 interface HeaderProps {
   activeNav: NavType;

@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import AvatarIcon from '../../../../components/icons/AvatarIcon';
-import TopRightArrowIcon from '../../../../components/icons/TopRightArrowIcon';
+import AvatarIcon from '@/components/icons/AvatarIcon';
+import TopRightArrowIcon from '@/components/icons/TopRightArrowIcon';
 
 // Mock data for the leaderboard
 const leaderboardData = [

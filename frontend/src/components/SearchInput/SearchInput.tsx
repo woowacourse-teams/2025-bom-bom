@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { ChangeEvent, ComponentProps } from 'react';
 import ReadingGlassesIcon from '../icons/ReadingGlassesIcon';
-import { theme } from '../../styles/theme';
+import { theme } from '@/styles/theme';
 
 interface SearchInputProps extends Omit<ComponentProps<'input'>, 'onChange'> {
   value?: string;

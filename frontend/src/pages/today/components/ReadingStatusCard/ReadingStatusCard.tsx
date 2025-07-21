@@ -1,12 +1,12 @@
 import styled from '@emotion/styled';
-import statusIcon from '../../../../../public/assets/reading-status.svg';
-import streakIcon from '../../../../../public/assets/streak.svg';
-import ProgressWithLabel from '../../../../components/ProgressWithLabel/ProgressWithLabel';
-import GoalIcon from '../../../../components/icons/GoalIcon';
+import statusIcon from '#/assets/reading-status.svg';
+import streakIcon from '#/assets/streak.svg';
+import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
+import GoalIcon from '@/components/icons/GoalIcon';
 import {
   TodayReadingStatus,
   WeeklyReadingStatus,
-} from '../../types/readingStatus';
+} from '@/pages/today/types/readingStatus';
 
 interface ReadingStatusCardProps {
   streakReadDay: number;

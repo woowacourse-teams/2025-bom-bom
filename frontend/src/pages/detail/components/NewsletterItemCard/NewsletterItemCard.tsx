@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
-import { Article } from '../../../today/types/article';
-import clockIcon from '../../../../../public/assets/clock.svg';
-import Badge from '../../../../components/Badge/Badge';
+import clockIcon from '#/assets/clock.svg';
+import Badge from '@/components/Badge/Badge';
+import { Article } from '@/pages/today/types/article';
 
 interface NewsletterItemCardProps {
   data: Article;

@@ -1,4 +1,5 @@
 import ApiError from './ApiError';
+import { DEFAULT_ERROR_MESSAGES } from './constants/defaultErrorMessage';
 import { ENV } from './env';
 
 type FetcherOptions<TRequest extends Record<string, string>> = {
@@ -68,7 +69,7 @@ const request = async <TRequest, TResponse>({
     const status = response.status;
     const contentType = response.headers.get('Content-Type');
     let rawBody;
-    let errorMessage = '알 수 없는 에러가 발생했습니다.';
+    let errorMessage = DEFAULT_ERROR_MESSAGES[status];
 
     try {
       if (contentType?.includes('application/json')) {

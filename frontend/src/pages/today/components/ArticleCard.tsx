@@ -57,13 +57,13 @@ const Container = styled(Link)<{ isRead: boolean }>`
 
   background-color: ${({ theme }) => theme.colors.white};
 
-  text-decoration: none;
-
   color: inherit;
 
   box-sizing: border-box;
   gap: 12px;
   opacity: ${({ isRead }) => (isRead ? 0.5 : 1)};
+
+  text-decoration: none;
 `;
 
 const InfoWrapper = styled.div`

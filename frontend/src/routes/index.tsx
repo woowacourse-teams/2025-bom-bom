@@ -37,14 +37,8 @@ function Index() {
           <ArticleCardList articles={articles.content} />
           <ReadingStatusCard
             streakReadDay={readingStatus.streakReadDay}
-            today={{
-              readCount: readingStatus.today.readCount,
-              totalCount: readingStatus.today.totalCount,
-            }}
-            weekly={{
-              readCount: readingStatus.weekly.readCount,
-              goalCount: readingStatus.weekly.goalCount,
-            }}
+            today={readingStatus.today}
+            weekly={readingStatus.weekly}
           />
         </ContentWrapper>
       </Container>

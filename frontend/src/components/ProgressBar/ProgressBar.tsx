@@ -1,13 +1,13 @@
 import styled from '@emotion/styled';
 
 interface ProgressBarProps {
-  progressRate: number;
+  rate: number;
 }
 
-function ProgressBar({ progressRate }: ProgressBarProps) {
+function ProgressBar({ rate }: ProgressBarProps) {
   return (
     <ProgressOverlay>
-      <ProgressGauge progressRate={progressRate} />
+      <ProgressGauge rate={rate} />
     </ProgressOverlay>
   );
 }
@@ -22,13 +22,12 @@ const ProgressOverlay = styled.div`
   background-color: ${({ theme }) => theme.colors.primaryLight};
 `;
 
-const ProgressGauge = styled.div<{ progressRate: number }>`
+const ProgressGauge = styled.div<{ rate: number }>`
   overflow: hidden;
 
-  width: ${({ progressRate }) => `${progressRate}%`};
+  width: ${({ rate }) => `${rate}%`};
   height: 100%;
-  border-radius: ${({ progressRate }) =>
-    progressRate === 100 ? '10px' : '10px 0 0 10px'};
+  border-radius: ${({ rate }) => (rate === 100 ? '10px' : '10px 0 0 10px')};
 
   background-color: ${({ theme }) => theme.colors.primary};
 `;

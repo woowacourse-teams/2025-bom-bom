@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as RecommendRouteImport } from './routes/recommend'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ArticlesArticleIdRouteImport } from './routes/articles.$articleId'
 
 const RecommendRoute = RecommendRouteImport.update({
   id: '/recommend',
@@ -28,35 +29,44 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArticlesArticleIdRoute = ArticlesArticleIdRouteImport.update({
+  id: '/articles/$articleId',
+  path: '/articles/$articleId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/recommend': typeof RecommendRoute
+  '/articles/$articleId': typeof ArticlesArticleIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/recommend': typeof RecommendRoute
+  '/articles/$articleId': typeof ArticlesArticleIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/recommend': typeof RecommendRoute
+  '/articles/$articleId': typeof ArticlesArticleIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/recommend'
+  fullPaths: '/' | '/login' | '/recommend' | '/articles/$articleId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/recommend'
-  id: '__root__' | '/' | '/login' | '/recommend'
+  to: '/' | '/login' | '/recommend' | '/articles/$articleId'
+  id: '__root__' | '/' | '/login' | '/recommend' | '/articles/$articleId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   RecommendRoute: typeof RecommendRoute
+  ArticlesArticleIdRoute: typeof ArticlesArticleIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/articles/$articleId': {
+      id: '/articles/$articleId'
+      path: '/articles/$articleId'
+      fullPath: '/articles/$articleId'
+      preLoaderRoute: typeof ArticlesArticleIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   RecommendRoute: RecommendRoute,
+  ArticlesArticleIdRoute: ArticlesArticleIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

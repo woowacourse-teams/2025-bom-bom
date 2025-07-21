@@ -34,7 +34,7 @@ export const getArticleById = async ({
 }: GetArticleByIdParams) => {
   return await fetcher.get<Article>({
     path: `/articles/${articleId}`,
-    query: { memberId },
+    query: { memberId: memberId.toString() },
   });
 };
 

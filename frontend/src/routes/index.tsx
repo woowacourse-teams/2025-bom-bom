@@ -5,7 +5,6 @@ import PageLayout from '../components/PageLayout/PageLayout';
 import { getArticles } from '../pages/today/apis/articles';
 import ArticleCardList from '../pages/today/components/ArticleCardList';
 import ReadingStatusCard from '../pages/today/components/ReadingStatusCard';
-import { ARTICLES } from '../mocks/data/mock-articles';
 
 export const Route = createFileRoute('/')({
   component: Index,

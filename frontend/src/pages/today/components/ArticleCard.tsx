@@ -24,7 +24,11 @@ function ArticleCard({ data }: ArticleCardProps) {
   } = data;
 
   return (
-    <Container isRead={isRead}>
+    <Container
+      isRead={isRead}
+      to="/articles/$articleId"
+      params={{ articleId: data.articleId }}
+    >
       <InfoWrapper>
         <Title>{title}</Title>
         <Description>{contentsSummary}</Description>

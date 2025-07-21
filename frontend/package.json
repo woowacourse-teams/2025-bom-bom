@@ -7,9 +7,8 @@
     "build": "webpack --mode production",
     "lint": "eslint src --ext .ts,.tsx,.js,.jsx",
     "lint:fix": "eslint src --ext .ts,.tsx,.js,.jsx --fix",
-    "format": "prettier --write .",
+    "format": "prettier --write . && stylelint './src/**/*.tsx' --fix",
     "type-check": "tsc --noEmit",
-    "styled": "stylelint './src/**/*.tsx' --fix",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test": "jest"

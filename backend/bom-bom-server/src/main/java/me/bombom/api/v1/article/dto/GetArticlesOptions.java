@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public record GetArticlesOptions(
         @RequestParam(required = false) LocalDate date,
         @RequestParam(required = false) Long categoryId,
-        @RequestParam(required = false, name = "sorted", defaultValue = "desc") SortOption sorted
+        @RequestParam(required = false, name = "sorted", defaultValue = "DESC") SortOption sorted
 ) {
 
     public static GetArticlesOptions of(LocalDate date, Long categoryId, SortOption sorted) {

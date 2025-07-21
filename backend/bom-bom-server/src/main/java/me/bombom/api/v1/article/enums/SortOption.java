@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum SortOption {
 
-    DESC("desc"),
-    ASC("asc");
+    DESC("DESC"),
+    ASC("ASC");
 
     private final String value;
 }

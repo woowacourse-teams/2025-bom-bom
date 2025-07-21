@@ -3,11 +3,11 @@ import streakIcon from '../../../../public/assets/streak.svg';
 import goalIcon from '../../../../public/assets/goal.svg';
 import styled from '@emotion/styled';
 import { calculateRate } from '../../../utils/math';
-import ProgressBar from '../../../components/ProgressBar';
 import {
   TodayReadingStatus,
   WeeklyReadingStatus,
 } from '../types/readingStatus';
+import ProgressBar from '../../../components/ProgressBar/ProgressBar';
 
 interface iconProps {
   source: string;

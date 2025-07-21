@@ -21,48 +21,47 @@ export const Default: Story = {
   args: {
     id: 'tab',
     onSelect: (id) => id,
+    text: '봄봄',
   },
   render: (args) => {
     return (
       <>
-        <Tab {...args} selected={false}>
-          Tab1
-        </Tab>
-        <Tab {...args} selected={true}>
-          Tab2
-        </Tab>
+        <Tab {...args} selected={false} />
+        <Tab {...args} selected={true} />
       </>
     );
   },
 };
 
-export const WithMultipleNode: Story = {
+export const WithLeadingIcon: Story = {
   args: {
     id: 'tab',
     onSelect: (id) => id,
-    children: (
-      <div
-        style={{
-          width: '100px',
-          display: 'flex',
-          justifyContent: 'space-between',
-        }}
-      >
-        <p>나침반</p>
-        <CompassIcon />
-      </div>
-    ),
+    text: '나침반',
+    LeadingComponent: <CompassIcon />,
   },
   render: (args) => {
-    const { children, ...props } = args;
     return (
       <>
-        <Tab {...props} selected={false}>
-          {children}
-        </Tab>
-        <Tab {...props} selected={true}>
-          {children}
-        </Tab>
+        <Tab {...args} selected={false} />
+        <Tab {...args} selected={true} />
+      </>
+    );
+  },
+};
+
+export const WithTrailingIcon: Story = {
+  args: {
+    id: 'tab',
+    onSelect: (id) => id,
+    text: '나침반',
+    TrailingComponent: <CompassIcon />,
+  },
+  render: (args) => {
+    return (
+      <>
+        <Tab {...args} selected={false} />
+        <Tab {...args} selected={true} />
       </>
     );
   },

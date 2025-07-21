@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import CategoryIcon from '../../../../components/icons/CategoryIcon';
-import Tab from '../../../../components/Tab/Tab';
+import Tabs from '../../../../components/Tabs/Tabs';
+import Tab from '../../../../components/Tabs/Tab';
 import Badge from '../../../../components/Badge/Badge';
 
 interface CategoryItem {
@@ -19,6 +20,11 @@ function CategoryFilter({
   selectedCategory,
   onSelectCategory,
 }: CategoryFilterProps) {
+  const totalQuantity = categoryList.reduce(
+    (currentQuantity, { quantity }) => currentQuantity + quantity,
+    0,
+  );
+
   return (
     <Container aria-label="카테고리">
       <TitleWrapper>
@@ -27,34 +33,25 @@ function CategoryFilter({
         </IconWrapper>
         <Title>카테고리</Title>
       </TitleWrapper>
-      <CategoryTabs>
-        <CategoryTab key="전체">
-          <Tab
-            id="전체"
-            selected={selectedCategory === '전체'}
-            onSelect={onSelectCategory}
-          >
-            전체
-            <Badge
-              text={String(
-                categoryList.reduce((acc, cur) => acc + cur.quantity, 0),
-              )}
-            />
-          </Tab>
-        </CategoryTab>
+      <Tabs direction="vertical">
+        <Tab
+          id="전체"
+          selected={selectedCategory === '전체'}
+          onSelect={onSelectCategory}
+          text="전체"
+          TrailingComponent={<Badge text={String(totalQuantity)} />}
+        />
         {categoryList.map(({ name, quantity }) => (
-          <CategoryTab key={name}>
-            <Tab
-              id={name}
-              selected={selectedCategory === name}
-              onSelect={onSelectCategory}
-            >
-              {name}
-              <Badge text={String(quantity)} />
-            </Tab>
-          </CategoryTab>
+          <Tab
+            key={name}
+            id={name}
+            selected={selectedCategory === name}
+            onSelect={onSelectCategory}
+            text={name}
+            TrailingComponent={<Badge text={String(quantity)} />}
+          />
         ))}
-      </CategoryTabs>
+      </Tabs>
     </Container>
   );
 }
@@ -95,12 +92,3 @@ const IconWrapper = styled.div`
 const Title = styled.h3`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
-
-const CategoryTabs = styled.ul`
-  display: flex;
-  flex-direction: column;
-
-  gap: 8px;
-`;
-
-const CategoryTab = styled.li``;

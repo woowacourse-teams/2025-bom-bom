@@ -3,7 +3,7 @@ name: Backend Dev Server CI
 on:
   push:
     branches:
-      - server-dev
+      - chore-BOM-85/connect-nginx-to-docker
 
 jobs:
   build:
@@ -23,13 +23,17 @@ jobs:
       - name: application.yml 생성
         working-directory: ./backend/bom-bom-server
         run: |
-          echo "📄 Create application.yml from secret"
+          echo "Create application.yml(prod) from secret"
           mkdir -p src/main/resources
           echo "${{ secrets.APPLICATION_DEV_PROPERTIES }}" > src/main/resources/application.yml
+          
+          echo "Create application.yml(test) from secret"
+          mkdir -p src/test/resources
+          echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
 
       - name: JAR 빌드
         working-directory: ./backend/bom-bom-server
-        run: ./gradlew build -x test --no-daemon
+        run: ./gradlew build --no-daemon
 
       - name: Docker Buildx 설정
         uses: docker/setup-buildx-action@v3

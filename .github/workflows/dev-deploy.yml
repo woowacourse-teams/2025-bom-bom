@@ -19,29 +19,22 @@ jobs:
           java-version: 21
           distribution: temurin
 
-      #      - name: application-dev.yml 파일 만들기
-      #        working-directory: ./backend/bom-bom-server
-      #        run: |
-      #          mkdir -p src/main/resources
-      #          echo "${{ secrets.APPLICATION_DEV_PROPERTIES }}" \
-      #          > src/main/resources/application.yml
-
       - name: application.yml 생성 및 검증
         working-directory: ./backend/bom-bom-server
         run: |
-               echo "📄 Create application.yml from secret"
-               mkdir -p src/main/resources
-               echo "${{ secrets.APPLICATION_DEV_PROPERTIES }}" > src/main/resources/application.yml
-               
-               echo "🔍 Check existence of application.yml"
-               if [ ! -f src/main/resources/application.yml ]; then
-               echo "❌ application.yml 생성 실패"
+          echo "📄 Create application.yml from secret"
+          mkdir -p src/main/resources
+          echo "${{ secrets.APPLICATION_DEV_PROPERTIES }}" > src/main/resources/application.yml
+          
+          echo "🔍 Check existence of application.yml"
+          if [ ! -f src/main/resources/application.yml ]; then
+          echo "❌ application.yml 생성 실패"
           #            exit 1
-               fi
-               
-               echo "✅ application.yml 생성 확인 완료"
-               echo "🔍 내용 미리보기"
-               head -n 10 src/main/resources/application.yml
+          fi
+          
+          echo "✅ application.yml 생성 확인 완료"
+          echo "🔍 내용 미리보기"
+          head -n 10 src/main/resources/application.yml
 
       - name: Build JAR
         working-directory: ./backend/bom-bom-server
@@ -89,7 +82,7 @@ jobs:
       - name: Check if the port 80 is in use
         run: |
           echo "Checking port 80..."
-          PID=$(sudo lsof -t -i :80 | paste -sd ',' -)
+          PIDS=$(sudo lsof -t -i :80 | paste -sd ',' -)
           if [ -n "$PID" ]; then
             echo "Found process running on port 80: $PID"
             echo "server_running=true" >> $GITHUB_ENV

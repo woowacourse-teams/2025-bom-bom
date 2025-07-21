@@ -37,7 +37,7 @@ type RequestOptions<TRequest> = {
   method: FetchMethod;
   query?: Record<string, string | number | Date>;
   body?: TRequest;
-  headers?: Record<string, string>;
+  headers?: HeadersInit;
 };
 
 const request = async <TRequest, TResponse>({

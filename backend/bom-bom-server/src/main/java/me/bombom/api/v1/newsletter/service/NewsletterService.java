@@ -3,11 +3,13 @@ package me.bombom.api.v1.newsletter.service;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -18,6 +20,9 @@ public class NewsletterService {
     public List<NewsletterResponse> getNewsletters() {
         //임시로 repository 메서드 내부에 Detail 정보 가져오는 것이 불필요
         List<NewsletterResponse> newsletters = newsletterRepository.findNewslettersInfo();
+        for (NewsletterResponse newsletter : newsletters) {
+            log.info(newsletter.name());
+        }
         Collections.shuffle(newsletters); //초기엔 셔플해서 랜덤 순서로 보여주기
         return newsletters;
     }

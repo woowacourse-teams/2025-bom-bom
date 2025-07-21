@@ -43,14 +43,14 @@ jobs:
         run: |
           docker buildx create --use
           docker buildx build \
-          --platform linux/arm64 \
+          --platform linux/arm64,linux/amd64 \
           -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest \
           --push .
 
   deploy:
     name: Deploy via self-hosted runner
     needs: build
-    runs-on: self-hosted
+    runs-on: [ self-hosted, linux, arm64, main ]
 
     steps:
       - name: Pull Docker image

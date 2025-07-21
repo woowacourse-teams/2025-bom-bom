@@ -15,3 +15,4 @@ EXPOSE 8080
 
 # ✅ 6. Spring Boot 실행 최적화 옵션 포함
 ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
+

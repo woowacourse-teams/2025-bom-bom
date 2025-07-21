@@ -8,7 +8,7 @@ interface CategoryItem {
   quantity: number;
 }
 
-interface CategoryFilter {
+interface CategoryFilterProps {
   categoryList: CategoryItem[];
   selectedCategory: string;
   onSelectCategory: (id: string | number) => void;
@@ -18,7 +18,7 @@ function CategoryFilter({
   categoryList,
   selectedCategory,
   onSelectCategory,
-}: CategoryFilter) {
+}: CategoryFilterProps) {
   return (
     <Container aria-label="카테고리">
       <TitleWrapper>

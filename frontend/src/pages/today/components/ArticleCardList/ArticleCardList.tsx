@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import ArticleCard from '../ArticleCard/ArticleCard';
-import checkIcon from '../../../../public/assets/check.svg';
-import letterIcon from '../../../../public/assets/letter.svg';
+import checkIcon from '../../../../../public/assets/check.svg';
+import letterIcon from '../../../../../public/assets/letter.svg';
 import { Article } from '../../types/article';
 
 interface ArticleCardListProps {

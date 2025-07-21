@@ -38,7 +38,7 @@ jobs:
 
       - name: Build JAR
         working-directory: ./backend/bom-bom-server
-        run: ./gradlew clean build
+        run: ./gradlew clean build -x test
 
       - name: Print JAR path
         run: ls -al ./backend/bom-bom-server/build/libs

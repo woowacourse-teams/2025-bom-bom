@@ -18,10 +18,14 @@ public class LoggingInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
-                                @Nullable Exception ex) {
+    public void afterCompletion(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Object handler,
+            @Nullable Exception ex
+    ) {
         if (ex != null) {
-            log.error("예외 발생: {}", ex.toString(), ex); // getMessage보다 toString이 더 안전
+            log.error("예외 발생: {}", ex);
         } else {
             log.debug("요청 정상 완료: [{}] {}", request.getMethod(), request.getRequestURI());
         }

@@ -71,7 +71,7 @@ jobs:
       - name: Check if the port 80 is in use
         run: |
           echo "Checking port 80..."
-          PIDS=$(sudo lsof -t -i :80 | paste -sd ',' -)
+          PID=$(sudo lsof -t -i :80 | paste -sd ',' -)
           if [ -n "$PID" ]; then
             echo "Found process running on port 80: $PID"
             echo "server_running=true" >> $GITHUB_ENV

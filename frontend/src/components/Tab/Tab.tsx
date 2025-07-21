@@ -2,26 +2,24 @@ import styled from '@emotion/styled';
 import { ReactNode } from 'react';
 
 export interface TabProps {
-  id: string | number;
-  onSelect: (id: string | number) => void;
+  name: string;
+  onSelect: (name: string) => void;
   selected?: boolean;
-  text: string;
   LeadingComponent?: ReactNode;
   TrailingComponent?: ReactNode;
 }
 
 function Tab({
-  id,
+  name,
   selected = false,
   onSelect,
-  text,
   LeadingComponent,
   TrailingComponent,
 }: TabProps) {
   return (
-    <Container selected={selected} onClick={() => onSelect(id)}>
+    <Container selected={selected} onClick={() => onSelect(name)}>
       {LeadingComponent}
-      {text}
+      {name}
       {TrailingComponent}
     </Container>
   );

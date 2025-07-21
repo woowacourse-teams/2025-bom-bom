@@ -12,7 +12,7 @@ interface CategoryItem {
 interface CategoryFilterProps {
   categoryList: CategoryItem[];
   selectedCategory: string;
-  onSelectCategory: (id: string | number) => void;
+  onSelectCategory: (name: string) => void;
 }
 
 function CategoryFilter({
@@ -35,20 +35,19 @@ function CategoryFilter({
       </TitleWrapper>
       <Tabs direction="vertical">
         <Tab
-          id="전체"
+          key="전체"
+          name="전체"
           selected={selectedCategory === '전체'}
           onSelect={onSelectCategory}
-          text="전체"
           TrailingComponent={<Badge text={String(totalQuantity)} />}
         />
         <>
           {categoryList.map(({ name, quantity }) => (
             <Tab
               key={name}
-              id={name}
+              name={name}
               selected={selectedCategory === name}
               onSelect={onSelectCategory}
-              text={name}
               TrailingComponent={<Badge text={String(quantity)} />}
             />
           ))}

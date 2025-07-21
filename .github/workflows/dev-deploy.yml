@@ -23,7 +23,7 @@ jobs:
         run: |
           mkdir -p src/main/resources
           echo "${{ secrets.APPLICATION_DEV_PROPERTIES }}" \
-          > src/main/resources/application-dev.yml
+          > src/main/resources/application.yml
 
       - name: Build JAR
         working-directory: ./backend/bom-bom-server

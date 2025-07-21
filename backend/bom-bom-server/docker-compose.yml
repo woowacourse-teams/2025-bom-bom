@@ -24,19 +24,5 @@ services:
     depends_on:
       - bombom-server-dev
 
-  db:
-    image: mysql:8.4.5
-    container_name: mysql
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: ${ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    volumes:
-      - db-data:/var/lib/mysql
-    restart: always
-
 volumes:
   db-data:

@@ -29,6 +29,9 @@ jobs:
         working-directory: ./backend/bom-bom-server
         run: ./gradlew clean build
 
+      - name: Print JAR path
+        run: ls -al ./backend/bom-bom-server/build/libs
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 

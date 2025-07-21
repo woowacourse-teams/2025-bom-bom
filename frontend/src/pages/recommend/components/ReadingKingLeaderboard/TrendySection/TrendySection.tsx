@@ -9,9 +9,9 @@ export default function TrendySection() {
   return (
     <Container>
       <SectionHeader>
-        <SectionIcon>
+        <SectionIconBox>
           <img src={trendingUpIcon} alt="trending up" />
-        </SectionIcon>
+        </SectionIconBox>
         <SectionTitle>트렌디한 뉴스레터</SectionTitle>
       </SectionHeader>
       <TagContainer>
@@ -56,7 +56,7 @@ const SectionHeader = styled.div`
   gap: 8px;
 `;
 
-const SectionIcon = styled.span`
+const SectionIconBox = styled.span`
   display: flex;
   align-items: center;
   justify-content: center;

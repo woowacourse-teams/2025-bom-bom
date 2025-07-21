@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
-public class CUnauthorizedException extends RuntimeException {
+public class UnauthorizedException extends RuntimeException {
 
     private final ErrorDetail errorDetail;
 

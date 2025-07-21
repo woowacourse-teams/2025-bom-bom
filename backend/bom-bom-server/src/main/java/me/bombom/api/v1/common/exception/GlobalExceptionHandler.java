@@ -14,8 +14,8 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.from(e.getErrorDetail()));
     }
 
-    @ExceptionHandler(CUnauthorizedException.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorizedException(CUnauthorizedException e){
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException e){
         return ResponseEntity.status(e.getHttpStatus())
                 .body(ErrorResponse.from(e.getErrorDetail()));
     }

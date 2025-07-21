@@ -35,7 +35,7 @@ function Select<T>({
   };
 
   return (
-    <Container ref={selectRef} {...props} width={width}>
+    <Container ref={selectRef} width={width} {...props}>
       <SelectToggle onClick={toggle}>
         <SelectText selected={selectedValue !== null}>
           {selectedLabel ?? placeholder}

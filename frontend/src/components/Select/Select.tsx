@@ -22,7 +22,6 @@ function Select<T>({
 }: SelectProps<T>) {
   const [open, setOpen] = useState(false);
   const selectRef = useClickOutsideRef<HTMLDivElement>(() => setOpen(false));
-
   const toggle = () => setOpen((prev) => !prev);
 
   const selectedLabel = options.find(
@@ -43,13 +42,14 @@ function Select<T>({
         <ChevronIcon width={16} direction={open ? 'up' : 'down'} />
       </SelectToggle>
       <SelectMenu open={open}>
-        <SelectMenuWrapper>
+        <SelectMenuWrapper role="listbox">
           {options.map((option) => (
             <SelectMenuItem
-              selected={option.value === selectedValue}
-              key={String(option.value)}
+              key={JSON.stringify(option.value)}
               data-value={option.value}
               onClick={() => onOptionSelected(option.value)}
+              selected={option.value === selectedValue}
+              role="option"
             >
               {option.label}
             </SelectMenuItem>

@@ -99,6 +99,7 @@ jobs:
 
       - name: 컨테이너 실행 (docker-compose 사용)
         if: env.skip_deploy == 'false'
+        working-directory: ./backend/bom-bom-server
         run: |
           docker stop bom-bom || true
           docker rm bom-bom || true

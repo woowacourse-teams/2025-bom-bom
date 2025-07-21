@@ -34,11 +34,10 @@ export default function Header({ activeNav }: HeaderProps) {
             <HomeIcon color={activeNav === 'today' ? 'white' : 'black'} />
             <p>오늘의 뉴스레터</p>
           </NavButton>
-          <NavButton active={activeNav === 'storage'}>
+          <NavButton active={activeNav === 'storage'} to="/storage">
             <StorageIcon color={activeNav === 'storage' ? 'white' : 'black'} />
             <p>뉴스레터 보관함</p>
           </NavButton>
-          <NavButton active={activeNav === 'recommend'}>
           <NavButton active={activeNav === 'recommend'} to="/recommend">
             <CompassIcon
               color={activeNav === 'recommend' ? 'white' : 'black'}

@@ -1,26 +1,34 @@
-import { createFileRoute } from '@tanstack/react-router';
-import PageLayout from '../components/PageLayout/PageLayout';
 import styled from '@emotion/styled';
+import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
 import StorageIcon from '../components/icons/StorageIcon';
-import ReadingStatusCard from '../pages/today/components/ReadingStatusCard';
+import PageLayout from '../components/PageLayout/PageLayout';
 import SearchInput from '../components/SearchInput/SearchInput';
-import { ARTICLES } from '../mocks/data/mock-articles';
-import ArticleCard from '../pages/today/components/ArticleCard';
 import Select from '../components/Select/Select';
+import { CATEGORIES, CategoryType } from '../constants/category';
+import { ARTICLES } from '../mocks/data/mock-articles';
+import CategoryFilter from '../pages/archive/components/CategoryFilter/CategoryFilter';
+import ArticleCard from '../pages/today/components/ArticleCard';
 
 export const Route = createFileRoute('/storage')({
   component: Storage,
 });
 
 function Storage() {
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryType>('전체');
   return (
     <PageLayout activeNav="storage">
       <Container>
         <SideSection>
-          <ReadingStatusCard
-            streakReadDay={267}
-            today={{ readCount: 3, totalCount: 5 }}
-            weekly={{ readCount: 12, goalCount: 15 }}
+          <CategoryFilter
+            categoryList={CATEGORIES.map((category) => ({
+              value: category,
+              label: category,
+              quantity: 10,
+            }))}
+            selectedValue={selectedCategory}
+            onSelectCategory={(name) => setSelectedCategory(name)}
           />
         </SideSection>
         <MainSection>
@@ -74,7 +82,7 @@ const SideSection = styled.div`
 const MainSection = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
 
   gap: 20px;
 `;

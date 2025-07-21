@@ -57,8 +57,6 @@ const Container = styled(Link)<{ isRead: boolean }>`
 
   background-color: ${({ theme }) => theme.colors.white};
 
-  text-decoration: none;
-
   color: inherit;
 
   box-sizing: border-box;

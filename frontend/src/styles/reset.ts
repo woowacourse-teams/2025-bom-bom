@@ -82,6 +82,11 @@ const reset = css`
       cursor: not-allowed;
     }
   }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
 `;
 
 export default reset;

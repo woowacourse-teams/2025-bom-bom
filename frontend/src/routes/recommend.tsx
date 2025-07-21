@@ -88,7 +88,7 @@ const SideSection = styled.div`
 const TrendySection = styled.div`
   width: 100%;
   padding: 24px;
-  border: 1px solid rgb(226 232 240 / 100%);
+  border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 21px;
   box-shadow:
     0 10px 15px -3px rgb(0 0 0 / 10%),

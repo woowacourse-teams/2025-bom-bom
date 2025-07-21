@@ -34,6 +34,7 @@ jobs:
         run: ls -al ./backend/bom-bom-server/build/libs
 
       - name: 확인 - JAR 내부에 application.yml 존재 여부
+        working-directory: ./backend/bom-bom-server
         run: |
           unzip -l ./backend/bom-bom-server/build/libs/*.jar | grep application
 

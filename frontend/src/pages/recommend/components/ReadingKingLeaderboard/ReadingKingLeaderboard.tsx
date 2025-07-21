@@ -1,5 +1,4 @@
 import styled from '@emotion/styled';
-import BookIcon from '../../../../components/icons/BookIcon';
 import AvatarIcon from '../../../../components/icons/AvatarIcon';
 import TopRightArrowIcon from '../../../../components/icons/TopRightArrowIcon';
 
@@ -83,7 +82,6 @@ interface ReadingKingLeaderboardProps {
 const LeaderboardItem = ({
   rank,
   name,
-  avatar,
   readCount,
   increment,
   isCrown,
@@ -140,7 +138,7 @@ export default function ReadingKingLeaderboard({
 
       <LeaderboardList>
         {data.map((item) => (
-          <LeaderboardItem key={item.id} {...item} />
+          <LeaderboardItem key={item.rank} {...item} />
         ))}
       </LeaderboardList>
 

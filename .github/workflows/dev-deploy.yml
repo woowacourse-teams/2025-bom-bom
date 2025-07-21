@@ -73,15 +73,23 @@ jobs:
         id: compare_digest
         run: |
           IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
-          NEW=$(docker inspect --format='{{.Id}}' $IMAGE)
-          CURRENT=$(docker inspect --format='{{.Image}}' bom-bom || echo "none")
+          NEW=$(docker inspect --format='{{.Id}}' "$IMAGE")
+          
+          # 기존 컨테이너가 존재하는지 확인
+          if docker inspect bom-bom &>/dev/null; then
+          CURRENT=$(docker inspect --format='{{.Image}}' bom-bom)
+          else
+          CURRENT="not_found"
+          fi
+          
           echo "new_image_id=$NEW" >> $GITHUB_OUTPUT
           echo "current_image_id=$CURRENT" >> $GITHUB_OUTPUT
+          
           if [ "$NEW" = "$CURRENT" ]; then
-            echo "Image unchanged. Skipping deployment."
-            echo "skip_deploy=true" >> $GITHUB_ENV
+          echo "Image unchanged. Skipping deployment."
+          echo "skip_deploy=true" >> $GITHUB_ENV
           else
-            echo "skip_deploy=false" >> $GITHUB_ENV
+          echo "skip_deploy=false" >> $GITHUB_ENV
           fi
 
       - name: 기존 컨테이너 정지 및 삭제

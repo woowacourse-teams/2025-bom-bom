@@ -1,7 +1,8 @@
 import { http, HttpResponse } from 'msw';
 import { ARTICLES } from './data/mock-articles';
+import { ENV } from '../apis/env';
 
-const baseURL = process.env.API_BASE_URL;
+const baseURL = ENV.baseUrl;
 
 export const handlers = [
   http.get(`${baseURL}/articles`, () => {

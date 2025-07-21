@@ -54,21 +54,19 @@ const Container = styled.div`
   flex-direction: column;
 
   width: 100%;
-  max-width: 525px;
+  max-width: 320px;
   border-radius: 20px;
   box-shadow:
     0 4px 6px -1px rgb(0 0 0 / 10%),
     0 2px 4px -1px rgb(0 0 0 / 6%);
 
   background: ${({ theme }) => theme.colors.white};
-  max-width: 320px;
 
   transition: all 0.2s ease;
 `;
 
 const ImageWrapper = styled.div`
   overflow: hidden;
-
   height: 120px;
 `;
 
@@ -93,26 +91,31 @@ const TextContent = styled.div`
 `;
 
 const Title = styled.h3`
+  overflow: hidden;
+
+  display: -webkit-box;
+
   margin-bottom: 8px;
 
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.heading5};
 
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-overflow: ellipsis;
 `;
 
 const Description = styled.p`
+  overflow: hidden;
+
+  display: -webkit-box;
+
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body2};
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
+
   -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-overflow: ellipsis;
 `;
 
 const MetaContent = styled.div`
@@ -138,6 +141,7 @@ const ReadTimeBox = styled.div`
   display: flex;
   align-items: center;
 
-  gap: 4px;
   white-space: nowrap;
+
+  gap: 4px;
 `;

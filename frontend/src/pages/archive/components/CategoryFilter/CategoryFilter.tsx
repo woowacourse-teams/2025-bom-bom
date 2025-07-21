@@ -3,13 +3,13 @@ import CategoryIcon from '../../../../components/icons/CategoryIcon';
 import Tab from '../../../../components/Tab/Tab';
 import Badge from '../../../../components/Badge/Badge';
 
-interface CategoryList {
+interface CategoryItem {
   name: string;
   quantity: number;
 }
 
 interface CategoryFilter {
-  categoryList: CategoryList[];
+  categoryList: CategoryItem[];
   selectedCategory: string;
   onSelectCategory: (id: string | number) => void;
 }

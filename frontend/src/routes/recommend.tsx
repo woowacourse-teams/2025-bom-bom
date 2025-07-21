@@ -70,7 +70,6 @@ const MainSection = styled.section`
   flex: 1;
   flex-direction: column;
 
-  width: 100%;
   max-width: 840px;
 
   gap: 24px;

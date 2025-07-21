@@ -4,12 +4,21 @@ import PageLayout from '../components/PageLayout/PageLayout';
 import ArticleCardList from '../pages/today/components/ArticleCardList';
 import ReadingStatusCard from '../pages/today/components/ReadingStatusCard';
 import { ARTICLES } from '../mocks/data/mock-articles';
+import { useQuery } from '@tanstack/react-query';
+import { getTodayArticles } from '../pages/today/apis/getTodayArticles';
 
 export const Route = createFileRoute('/')({
   component: Index,
 });
 
 function Index() {
+  const { data } = useQuery({
+    queryKey: ['todayArticles'],
+    queryFn: () => getTodayArticles(),
+  });
+
+  console.log(data);
+
   return (
     <PageLayout activeNav="today">
       <Container>

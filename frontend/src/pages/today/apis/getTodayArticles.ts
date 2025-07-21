@@ -6,9 +6,9 @@ export const getTodayArticles = async () => {
   return await fetcher.get<PageableResponse<Article>>({
     path: '/articles',
     query: {
-      date: new Date().toString(),
-      category: '종합',
-      page: '1',
+      date: new Date(),
+      memberId: 1,
+      sorted: 'DESC',
     },
   });
 };

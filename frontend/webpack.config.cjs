@@ -62,7 +62,7 @@ module.exports = {
       autoCodeSplitting: true,
     }),
     new webpack.EnvironmentPlugin({
-      API_BASE_URL: 'https://api.example.com/api/v1',
+      API_BASE_URL: 'https://api-dev.bombom.news/api/v1',
       API_TOKEN: 'text_token',
     }),
   ],

@@ -18,6 +18,15 @@ jobs:
         with:
           java-version: 21
           distribution: temurin
+          cache: gradle
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
 
       - name: application.yml 생성 및 검증
         working-directory: ./backend/bom-bom-server
@@ -25,20 +34,10 @@ jobs:
           echo "📄 Create application.yml from secret"
           mkdir -p src/main/resources
           echo "${{ secrets.APPLICATION_DEV_PROPERTIES }}" > src/main/resources/application.yml
-          
-          echo "🔍 Check existence of application.yml"
-          if [ ! -f src/main/resources/application.yml ]; then
-          echo "❌ application.yml 생성 실패"
-          #            exit 1
-          fi
-          
-          echo "✅ application.yml 생성 확인 완료"
-          echo "🔍 내용 미리보기"
-          head -n 10 src/main/resources/application.yml
 
       - name: Build JAR
         working-directory: ./backend/bom-bom-server
-        run: ./gradlew clean build -x test
+        run: ./gradlew build -x test --no-daemon
 
       - name: Print JAR path
         run: ls -al ./backend/bom-bom-server/build/libs
@@ -52,14 +51,16 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build and Push Docker image (with cache)
         working-directory: ./backend/bom-bom-server
         run: |
-          docker buildx create --use
+          docker buildx create --use --name ci-builder || docker buildx use ci-builder
           docker buildx build \
-          --platform linux/arm64,linux/amd64 \
-          -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest \
-          --push .
+            --platform linux/amd64 \
+            --cache-from=type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:buildcache \
+            --cache-to=type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:buildcache,mode=max \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest \
+            --push .
 
   deploy:
     name: Deploy via self-hosted runner
@@ -69,31 +70,31 @@ jobs:
     steps:
       - name: Pull Docker image
         run: |
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
+          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
+          docker pull $IMAGE
 
-      - name: Run Docker container
+      - name: Compare Image Digest and Skip if Unchanged
+        id: compare_digest
+        run: |
+          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
+          NEW=$(docker inspect --format='{{.Id}}' $IMAGE)
+          CURRENT=$(docker inspect --format='{{.Image}}' bom-bom || echo "none")
+          echo "new_image_id=$NEW" >> $GITHUB_OUTPUT
+          echo "current_image_id=$CURRENT" >> $GITHUB_OUTPUT
+          if [ "$NEW" = "$CURRENT" ]; then
+            echo "Image unchanged. Skipping deployment."
+            echo "skip_deploy=true" >> $GITHUB_ENV
+          else
+            echo "skip_deploy=false" >> $GITHUB_ENV
+          fi
+
+      - name: Stop and Remove Existing Container
+        if: env.skip_deploy == 'false'
         run: |
           docker stop bom-bom || true
           docker rm bom-bom || true
-          docker run -d --name bom-bom \
-            -p 8080:8080 \
-            ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
 
-      - name: Check if the port 80 is in use
+      - name: Run New Container
+        if: env.skip_deploy == 'false'
         run: |
-          echo "Checking port 80..."
-          PIDS=$(sudo lsof -t -i :80 | paste -sd ',' -)
-          if [ -n "$PID" ]; then
-            echo "Found process running on port 80: $PID"
-            echo "server_running=true" >> $GITHUB_ENV
-            echo "PID=$PID" >> $GITHUB_ENV
-          else
-            echo "server_running=false" >> $GITHUB_ENV
-          fi
-
-      - name: Stop server if available (gracefully)
-        if: env.server_running == 'true'
-        run: |
-          echo "Gracefully shutting down process ${{ env.PID }}"
-          sudo kill -15 ${{ env.PID }}
-          tail --pid=${{ env.PID }} -f /dev/null
+          docker run -d --name bom-bom -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest

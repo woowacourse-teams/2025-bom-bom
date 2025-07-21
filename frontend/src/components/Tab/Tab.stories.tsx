@@ -20,7 +20,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     name: '봄봄',
-    onSelect: (id) => id,
+    onTabSelect: (id) => id,
   },
   render: (args) => {
     return (
@@ -35,7 +35,7 @@ export const Default: Story = {
 export const WithLeadingIcon: Story = {
   args: {
     name: '나침반',
-    onSelect: (id) => id,
+    onTabSelect: (id) => id,
     LeadingComponent: <CompassIcon />,
   },
   render: (args) => {
@@ -51,7 +51,7 @@ export const WithLeadingIcon: Story = {
 export const WithTrailingIcon: Story = {
   args: {
     name: '나침반',
-    onSelect: (id) => id,
+    onTabSelect: (id) => id,
     TrailingComponent: <CompassIcon />,
   },
   render: (args) => {

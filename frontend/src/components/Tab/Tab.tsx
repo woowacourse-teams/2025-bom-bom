@@ -1,9 +1,10 @@
 import styled from '@emotion/styled';
-import { ReactNode } from 'react';
+import { ComponentProps, ReactNode } from 'react';
 
-export interface TabProps {
+export interface TabProps extends ComponentProps<'li'> {
   name: string;
-  onSelect: (name: string) => void;
+  onTabSelect: (id: string) => void;
+  id?: string;
   selected?: boolean;
   LeadingComponent?: ReactNode;
   TrailingComponent?: ReactNode;
@@ -11,13 +12,15 @@ export interface TabProps {
 
 function Tab({
   name,
+  onTabSelect,
+  id = name,
   selected = false,
-  onSelect,
   LeadingComponent,
   TrailingComponent,
+  ...props
 }: TabProps) {
   return (
-    <Container selected={selected} onClick={() => onSelect(name)}>
+    <Container selected={selected} onClick={() => onTabSelect(id)} {...props}>
       {LeadingComponent}
       {name}
       {TrailingComponent}
@@ -29,6 +32,7 @@ export default Tab;
 
 const Container = styled.li<{ selected: boolean }>`
   width: 100%;
+  min-width: fit-content;
   display: flex;
   align-items: center;
   justify-content: space-between;

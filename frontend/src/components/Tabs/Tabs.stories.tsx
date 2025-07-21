@@ -7,8 +7,13 @@ const meta = {
   component: Tabs,
   args: {
     children: [
-      <Tab key="봄봄1" onSelect={(id) => id} name="봄봄1" selected={false} />,
-      <Tab key="봄봄2" onSelect={(id) => id} name="봄봄2" selected={true} />,
+      <Tab
+        key="봄봄1"
+        onTabSelect={(id) => id}
+        name="봄봄1"
+        selected={false}
+      />,
+      <Tab key="봄봄2" onTabSelect={(id) => id} name="봄봄2" selected={true} />,
     ],
   },
 } satisfies Meta<typeof Tabs>;
@@ -23,8 +28,8 @@ export const HorizontalTabs: Story = {
   render: (args) => {
     return (
       <Tabs {...args}>
-        <Tab onSelect={(id) => id} name="봄봄1" selected={false} />
-        <Tab onSelect={(id) => id} name="봄봄2" selected={true} />
+        <Tab onTabSelect={(id) => id} name="봄봄1" selected={false} />
+        <Tab onTabSelect={(id) => id} name="봄봄2" selected={true} />
       </Tabs>
     );
   },
@@ -37,8 +42,8 @@ export const VerticalTabs: Story = {
   render: (args) => {
     return (
       <Tabs {...args}>
-        <Tab onSelect={(id) => id} name="봄봄1" selected={false} />
-        <Tab onSelect={(id) => id} name="봄봄2" selected={true} />
+        <Tab onTabSelect={(id) => id} name="봄봄1" selected={false} />
+        <Tab onTabSelect={(id) => id} name="봄봄2" selected={true} />
       </Tabs>
     );
   },

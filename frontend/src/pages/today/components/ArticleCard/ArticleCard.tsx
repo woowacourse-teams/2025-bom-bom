@@ -2,7 +2,7 @@ import clockIcon from '#/assets/clock.svg';
 import { formatDateToDotString } from '@/utils/date';
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
-import { Article } from '../../types/article';
+import Chip from '../../../components/Chip/Chip';
 
 interface ArticleCardProps {
   data: Article;
@@ -10,6 +10,7 @@ interface ArticleCardProps {
 
 function ArticleCard({ data }: ArticleCardProps) {
   const {
+    articleId,
     title,
     contentsSummary,
     arrivedDateTime,
@@ -24,12 +25,12 @@ function ArticleCard({ data }: ArticleCardProps) {
   } = data;
 
   return (
-    <Container isRead={isRead}>
+    <Container isRead={isRead} to={`/articles/${articleId}`}>
       <InfoWrapper>
         <Title>{title}</Title>
         <Description>{contentsSummary}</Description>
         <MetaInfoRow>
-          <MetaInfoTag>{newsletterCategory}</MetaInfoTag>
+          <Chip text={newsletterCategory} />
           <MetaInfoText>from {newsletterName}</MetaInfoText>
           <MetaInfoText>{formatDateToDotString(arrivedDateTime)}</MetaInfoText>
           <ReadTimeBox>
@@ -96,20 +97,6 @@ const MetaInfoRow = styled.div`
   display: flex;
   gap: 8px;
   align-items: center;
-`;
-
-const MetaInfoTag = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 4px 8px;
-  border-radius: 16px;
-
-  background-color: ${({ theme }) => theme.colors.dividers};
-
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.caption};
 `;
 
 const MetaInfoText = styled.span`

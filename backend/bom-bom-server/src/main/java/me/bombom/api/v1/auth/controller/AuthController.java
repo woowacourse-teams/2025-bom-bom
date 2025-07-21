@@ -10,11 +10,13 @@
     import me.bombom.api.v1.common.exception.ErrorDetail;
     import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
     import me.bombom.api.v1.member.service.MemberService;
+    import org.springframework.http.HttpStatus;
     import org.springframework.web.bind.annotation.GetMapping;
     import org.springframework.web.bind.annotation.PathVariable;
     import org.springframework.web.bind.annotation.PostMapping;
     import org.springframework.web.bind.annotation.RequestBody;
     import org.springframework.web.bind.annotation.RequestMapping;
+    import org.springframework.web.bind.annotation.ResponseStatus;
     import org.springframework.web.bind.annotation.RestController;
 
     @RestController
@@ -25,6 +27,7 @@
         private final MemberService memberService;
 
         @PostMapping("/signup")
+        @ResponseStatus(HttpStatus.CREATED)
         public void signup(@RequestBody MemberSignupRequest signupRequest, HttpServletRequest request) {
             HttpSession session = request.getSession();
             PendingOAuth2Member pendingMember = (PendingOAuth2Member) session.getAttribute("pendingMember");
@@ -41,6 +44,7 @@
         }
 
         @PostMapping("/logout")
+        @ResponseStatus(HttpStatus.NO_CONTENT)
         public void logout(HttpServletRequest request) {
             if (request.getSession(false) != null) {
                 request.getSession(false).invalidate();

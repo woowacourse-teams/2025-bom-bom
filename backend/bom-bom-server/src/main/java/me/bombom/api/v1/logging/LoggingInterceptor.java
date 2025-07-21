@@ -21,7 +21,8 @@ public class LoggingInterceptor implements HandlerInterceptor {
                                 Exception ex) {
         log.info("Response [{}] {} completed with status {}", request.getMethod(), request.getRequestURI(),
                 response.getStatus());
-        log.info(ex.getMessage());
-        log.info(ex.getStackTrace().toString());
+        if (ex != null) {
+            log.error("Exception occurred: {}", ex.getMessage(), ex);
+        }
     }
 }

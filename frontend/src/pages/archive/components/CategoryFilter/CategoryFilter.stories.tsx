@@ -5,6 +5,28 @@ import { useState } from 'react';
 const meta = {
   title: 'components/bombom/CategoryFilter',
   component: CategoryFilter,
+  parameters: {
+    docs: {
+      description: {
+        component:
+          '카테고리 필터 컴포넌트입니다. 카테고리를 선택할 수 있습니다.',
+      },
+    },
+  },
+  argTypes: {
+    categoryList: {
+      control: 'object',
+      description: '카테고리 목록',
+    },
+    selectedCategory: {
+      control: 'text',
+      description: '선택된 카테고리',
+    },
+    onSelectCategory: {
+      action: 'selectedCategoryChanged',
+      description: '카테고리가 선택되었을 때 호출되는 함수',
+    },
+  },
   args: {
     categoryList: [
       { name: '기술', quantity: 1 },

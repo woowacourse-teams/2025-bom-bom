@@ -1,11 +1,12 @@
 import styled from '@emotion/styled';
-import { ComponentProps } from 'react';
+import { ComponentProps, ReactElement } from 'react';
+import { TabProps } from '../Tab/Tab';
 
 type DirectionType = 'horizontal' | 'vertical';
 
 interface TabsProps extends ComponentProps<'ul'> {
   direction?: DirectionType;
-  children: React.ReactNode;
+  children: ReactElement<TabProps>[];
 }
 
 const Tabs = ({ direction = 'horizontal', children, ...props }: TabsProps) => {

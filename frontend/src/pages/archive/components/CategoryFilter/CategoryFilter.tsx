@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import CategoryIcon from '../../../../components/icons/CategoryIcon';
 import Tabs from '../../../../components/Tabs/Tabs';
-import Tab from '../../../../components/Tabs/Tab';
+import Tab from '../../../../components/Tab/Tab';
 import Badge from '../../../../components/Badge/Badge';
 
 interface CategoryItem {
@@ -41,16 +41,18 @@ function CategoryFilter({
           text="전체"
           TrailingComponent={<Badge text={String(totalQuantity)} />}
         />
-        {categoryList.map(({ name, quantity }) => (
-          <Tab
-            key={name}
-            id={name}
-            selected={selectedCategory === name}
-            onSelect={onSelectCategory}
-            text={name}
-            TrailingComponent={<Badge text={String(quantity)} />}
-          />
-        ))}
+        <>
+          {categoryList.map(({ name, quantity }) => (
+            <Tab
+              key={name}
+              id={name}
+              selected={selectedCategory === name}
+              onSelect={onSelectCategory}
+              text={name}
+              TrailingComponent={<Badge text={String(quantity)} />}
+            />
+          ))}
+        </>
       </Tabs>
     </Container>
   );

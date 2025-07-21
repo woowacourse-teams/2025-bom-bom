@@ -1,12 +1,27 @@
 import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import Tabs from './Tabs';
-import Tab from './Tab';
+import Tab from '../Tab/Tab';
 
 const meta = {
   title: 'components/common/Tabs',
   component: Tabs,
   args: {
-    children: <div></div>,
+    children: [
+      <Tab
+        key="봄봄1"
+        id="tab"
+        onSelect={(id) => id}
+        text="봄봄"
+        selected={false}
+      />,
+      <Tab
+        key="봄봄2"
+        id="tab"
+        onSelect={(id) => id}
+        text="봄봄"
+        selected={true}
+      />,
+    ],
   },
 } satisfies Meta<typeof Tabs>;
 

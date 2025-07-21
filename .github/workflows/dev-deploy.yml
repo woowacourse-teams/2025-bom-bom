@@ -98,17 +98,14 @@ jobs:
           docker stop bom-bom || true
           docker rm bom-bom || true
 
-      - name: .env 파일 생성
-        run: |
-          echo "RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}" >> .env
-          echo "DATABASE=${{ secrets.DATABASE_NAME }}" >> .env
-          echo "MYSQL_USER=${{ secrets.MYSQL_USERNAME }}" >> .env
-          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
-
-      - name: 컨테이너 실행 (docker-compose 사용)
+      - name: 컨테이너 제거 및 재실행 (docker-compose)
         if: env.skip_deploy == 'false'
         working-directory: ./backend/bom-bom-server
         run: |
-          docker stop bom-bom || true
-          docker rm bom-bom || true
+          echo "RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}" > .env
+          echo "DATABASE=${{ secrets.DATABASE }}" >> .env
+          echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
+          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+
+          docker compose --env-file .env down || true
           docker compose --env-file .env up -d

@@ -58,6 +58,7 @@ export default function Header({ activeNav }: HeaderProps) {
 const HeaderContainer = styled.header`
   position: fixed;
   top: 0;
+  z-index: 100;
 
   display: flex;
   align-items: center;

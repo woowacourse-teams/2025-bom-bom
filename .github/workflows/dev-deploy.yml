@@ -10,37 +10,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: 코드 체크아웃
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: JDK 21 설정
         uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: temurin
           cache: gradle
 
-      - name: application.yml 생성 및 검증
+      - name: application.yml 생성
         working-directory: ./backend/bom-bom-server
         run: |
           echo "📄 Create application.yml from secret"
           mkdir -p src/main/resources
           echo "${{ secrets.APPLICATION_DEV_PROPERTIES }}" > src/main/resources/application.yml
 
-      - name: Build JAR
+      - name: JAR 빌드
         working-directory: ./backend/bom-bom-server
         run: ./gradlew build -x test --no-daemon
 
-      - name: Set up Docker Buildx
+      - name: Docker Buildx 설정
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to DockerHub
+      - name: DockerHub 로그인
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and Push Docker image (with cache)
+      - name: Docker 이미지 빌드 및 푸시
         working-directory: ./backend/bom-bom-server
         run: |
           if ! docker buildx inspect ci-builder &>/dev/null; then
@@ -56,17 +56,17 @@ jobs:
             --push .
 
   deploy:
-    name: Deploy via self-hosted runner
+    name: 서버에 배포
     needs: build
     runs-on: [ self-hosted, linux, arm64, main ]
 
     steps:
-      - name: Pull Docker image
+      - name: Docker 이미지 Pull
         run: |
           IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
           docker pull $IMAGE
 
-      - name: Compare Image Digest and Skip if Unchanged
+      - name: 이미지 변경 여부 확인
         id: compare_digest
         run: |
           IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
@@ -81,13 +81,13 @@ jobs:
             echo "skip_deploy=false" >> $GITHUB_ENV
           fi
 
-      - name: Stop and Remove Existing Container
+      - name: 기존 컨테이너 정지 및 삭제
         if: env.skip_deploy == 'false'
         run: |
           docker stop bom-bom || true
           docker rm bom-bom || true
 
-      - name: Run New Container
+      - name: 새 컨테이너 실행
         if: env.skip_deploy == 'false'
         run: |
           docker run -d --name bom-bom -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest

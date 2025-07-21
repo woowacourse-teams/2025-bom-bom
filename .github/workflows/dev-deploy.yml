@@ -20,14 +20,6 @@ jobs:
           distribution: temurin
           cache: gradle
 
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-
       - name: application.yml 생성 및 검증
         working-directory: ./backend/bom-bom-server
         run: |
@@ -38,9 +30,6 @@ jobs:
       - name: Build JAR
         working-directory: ./backend/bom-bom-server
         run: ./gradlew build -x test --no-daemon
-
-      - name: Print JAR path
-        run: ls -al ./backend/bom-bom-server/build/libs
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -54,9 +43,13 @@ jobs:
       - name: Build and Push Docker image (with cache)
         working-directory: ./backend/bom-bom-server
         run: |
-          docker buildx create --use --name ci-builder || docker buildx use ci-builder
+          if ! docker buildx inspect ci-builder &>/dev/null; then
+            docker buildx create --use --name ci-builder
+          else
+            docker buildx use ci-builder
+          fi
           docker buildx build \
-            --platform linux/amd64 \
+            --platform linux/arm64,linux/amd64 \
             --cache-from=type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:buildcache \
             --cache-to=type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:buildcache,mode=max \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest \

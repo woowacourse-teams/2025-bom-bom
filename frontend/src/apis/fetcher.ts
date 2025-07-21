@@ -35,7 +35,7 @@ type FetchMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT';
 type RequestOptions<TRequest> = {
   path: string;
   method: FetchMethod;
-  query?: Record<string, string>;
+  query?: Record<string, string | number | Date>;
   body?: TRequest;
   headers?: Record<string, string>;
 };
@@ -48,7 +48,10 @@ const request = async <TRequest, TResponse>({
   headers,
 }: RequestOptions<TRequest>): Promise<TResponse | null> => {
   const url = new URL(ENV.baseUrl + path);
-  url.search = new URLSearchParams(query).toString();
+  const stringifiedQuery: Record<string, string> = Object.fromEntries(
+    Object.entries(query).map(([key, value]) => [key, value.toString()]),
+  );
+  url.search = new URLSearchParams(stringifiedQuery).toString();
 
   const config: RequestInit = {
     method,

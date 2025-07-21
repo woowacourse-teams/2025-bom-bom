@@ -17,7 +17,7 @@ function Select<T>({
   selectedValue,
   onSelectOption,
   width = 132,
-  placeholder,
+  placeholder = '',
   ...props
 }: SelectProps<T>) {
   const [open, setOpen] = useState(false);
@@ -38,7 +38,7 @@ function Select<T>({
     <Container ref={selectRef} {...props} width={width}>
       <SelectToggle onClick={toggle}>
         <SelectText selected={selectedValue !== null}>
-          {selectedLabel || (placeholder ?? '')}
+          {selectedLabel ?? placeholder}
         </SelectText>
         <ChevronIcon width={16} direction={open ? 'up' : 'down'} />
       </SelectToggle>
@@ -70,12 +70,11 @@ const SelectToggle = styled.div`
   display: flex;
   align-items: center;
 
-  width: 100%;
   padding: 8px 12px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 6px;
 
-  background-color: white;
+  background-color: ${({ theme }) => theme.colors.white};
 
   box-sizing: border-box;
   cursor: pointer;
@@ -123,7 +122,7 @@ const SelectMenuWrapper = styled.ul`
   align-self: stretch;
 
   width: 100%;
-  padding: 0 4px;
+  padding: 4px;
   border-radius: 6px;
 
   background-color: ${({ theme }) => theme.colors.white};
@@ -134,8 +133,7 @@ const SelectMenuItem = styled.li`
   padding: 6px 8px;
   border-radius: 6px;
 
-  font-weight: 400;
-  font-size: 12px;
+  font: ${({ theme }) => theme.fonts.caption};
 
   cursor: pointer;
 

@@ -3,7 +3,7 @@ name: Backend Dev Server CI
 on:
   push:
     branches:
-      - server-dev
+      - chore-BOM-85/connect-nginx-to-docker
 
 jobs:
   build:
@@ -90,7 +90,16 @@ jobs:
           docker stop bom-bom || true
           docker rm bom-bom || true
 
-      - name: 새 컨테이너 실행
+      - name: .env 파일 생성
+        run: |
+          echo "RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}" >> .env
+          echo "DATABASE=${{ secrets.DATABASE_NAME }}" >> .env
+          echo "MYSQL_USER=${{ secrets.MYSQL_USERNAME }}" >> .env
+          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+
+      - name: 컨테이너 실행 (docker-compose 사용)
         if: env.skip_deploy == 'false'
         run: |
-          docker run -d --name bom-bom -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
+          docker stop bom-bom || true
+          docker rm bom-bom || true
+          docker compose --env-file .env up -d

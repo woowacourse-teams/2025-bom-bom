@@ -46,6 +46,7 @@ function Select<T>({
         <SelectMenuWrapper>
           {options.map((option) => (
             <SelectMenuItem
+              selected={option.value === selectedValue}
               key={String(option.value)}
               data-value={option.value}
               onClick={() => onOptionSelected(option.value)}
@@ -128,10 +129,13 @@ const SelectMenuWrapper = styled.ul`
   background-color: ${({ theme }) => theme.colors.white};
 `;
 
-const SelectMenuItem = styled.li`
+const SelectMenuItem = styled.li<{ selected: boolean }>`
   width: 100%;
   padding: 6px 8px;
   border-radius: 6px;
+
+  background-color: ${({ theme, selected }) =>
+    selected ? theme.colors.primaryLight : theme.colors.white};
 
   font: ${({ theme }) => theme.fonts.caption};
 

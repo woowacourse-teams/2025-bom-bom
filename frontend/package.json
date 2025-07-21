@@ -8,6 +8,7 @@
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "format": "prettier --write .",
+    "type-check": "tsc --noEmit",
     "styled": "stylelint './src/**/*.tsx' --fix",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",

@@ -60,6 +60,8 @@ const groupMap = {
     'padding-inline-start',
     'padding-inline-end',
 
+    'gap',
+
     'outline',
     'outline-offset',
     'outline-width',

@@ -65,7 +65,7 @@ const Container = styled.div`
   }
 `;
 
-const MainSection = styled.div`
+const MainSection = styled.section`
   display: flex;
   flex: 1;
   flex-direction: column;

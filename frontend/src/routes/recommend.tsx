@@ -89,7 +89,7 @@ const TrendySection = styled.div`
   width: 100%;
   padding: 24px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
-  border-radius: 21px;
+  border-radius: 20px;
   box-shadow:
     0 10px 15px -3px rgb(0 0 0 / 10%),
     0 4px 6px -4px rgb(0 0 0 / 10%);

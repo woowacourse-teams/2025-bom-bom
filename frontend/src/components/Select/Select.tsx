@@ -46,7 +46,6 @@ function Select<T>({
           {options.map((option) => (
             <SelectMenuItem
               key={JSON.stringify(option.value)}
-              data-value={option.value}
               onClick={() => onOptionSelected(option.value)}
               selected={option.value === selectedValue}
               role="option"

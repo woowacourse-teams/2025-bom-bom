@@ -1,12 +1,12 @@
+import styled from '@emotion/styled';
 import statusIcon from '../../../../../public/assets/reading-status.svg';
 import streakIcon from '../../../../../public/assets/streak.svg';
-import goalIcon from '../../../../../public/assets/goal.svg';
-import styled from '@emotion/styled';
+import ProgressWithLabel from '../../../../components/ProgressWithLabel/ProgressWithLabel';
+import GoalIcon from '../../../../components/icons/GoalIcon';
 import {
   TodayReadingStatus,
   WeeklyReadingStatus,
 } from '../../types/readingStatus';
-import ProgressWithLabel from '../../../../components/ProgressWithLabel/ProgressWithLabel';
 
 interface ReadingStatusCardProps {
   streakReadDay: number;
@@ -39,7 +39,7 @@ function ReadingStatusCard({
 
       <ProgressWithLabel
         label="오늘의 진행률"
-        icon={{ source: goalIcon, alternativeText: '목표 아이콘' }}
+        Icon={GoalIcon}
         value={{ currentCount: todayReadCount, totalCount }}
         description={
           todayReadCount < totalCount ? '목표까지 조금 더!' : '목표 달성!'
@@ -47,7 +47,7 @@ function ReadingStatusCard({
       />
       <ProgressWithLabel
         label="주간 목표"
-        icon={{ source: goalIcon, alternativeText: '목표 아이콘' }}
+        Icon={GoalIcon}
         value={{ currentCount: weeklyReadCount, totalCount: goalCount }}
         description={
           weeklyReadCount < goalCount

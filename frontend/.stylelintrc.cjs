@@ -127,6 +127,7 @@ module.exports = {
       },
     ],
     'order/order': ['custom-properties', 'declarations'],
+    'no-empty-source': null,
 
     'order/properties-order': [
       Object.keys(groupMap).map((groupName) => ({

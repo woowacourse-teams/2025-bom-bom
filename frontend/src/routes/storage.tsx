@@ -89,10 +89,7 @@ function Storage() {
                 { value: 'ASC', label: '오래된순' },
               ]}
               selectedValue={sortFilter}
-              onSelectOption={(value) => {
-                console.log(value);
-                setSortFilter(value);
-              }}
+              onSelectOption={(value) => setSortFilter(value)}
             />
           </SummaryBar>
           <ArticleList>

@@ -35,18 +35,7 @@ export const HorizontalTabs: Story = {
   render: (args) => {
     return (
       <Tabs {...args}>
-        <Tab
-          onTabSelect={(id) => id}
-          value="봄봄1"
-          selected={false}
-          label="봄봄1"
-        />
-        <Tab
-          onTabSelect={(id) => id}
-          value="봄봄2"
-          selected={true}
-          label="봄봄2"
-        />
+       <Tabs {...args} />
       </Tabs>
     );
   },

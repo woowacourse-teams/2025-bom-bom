@@ -43,8 +43,8 @@ public class ArticleController {
 
     @PatchMapping("/{id}/read")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateIsRead(@PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id) {
-        articleService.markAsRead(id);
+    public void updateIsRead(@PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id, @RequestParam Long memberId) {
+        articleService.markAsRead(id, memberId);
     }
 
     @GetMapping("/statistics/categories")

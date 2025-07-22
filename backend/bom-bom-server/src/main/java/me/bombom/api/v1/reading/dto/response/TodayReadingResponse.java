@@ -1,6 +1,6 @@
-package me.bombom.api.v1.member.dto.response;
+package me.bombom.api.v1.reading.dto.response;
 
-import me.bombom.api.v1.member.domain.TodayReading;
+import me.bombom.api.v1.reading.domain.TodayReading;
 
 public record TodayReadingResponse(
         int readCount,

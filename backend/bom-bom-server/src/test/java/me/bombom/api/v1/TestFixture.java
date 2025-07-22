@@ -3,25 +3,26 @@ package me.bombom.api.v1;
 import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.article.domain.Article;
-import me.bombom.api.v1.member.domain.ContinueReading;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.domain.TodayReading;
-import me.bombom.api.v1.member.domain.WeeklyReading;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
+import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.TodayReading;
+import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 
 public final class TestFixture {
 
     private static final LocalDateTime BASE_TIME = LocalDateTime.of(2025, 7, 15, 10, 0);
 
-    private TestFixture(){}
+    private TestFixture() {
+    }
 
     /**
      * Member
      */
-    public static Member normalMemberFixture(){
+    public static Member normalMemberFixture() {
         return Member.builder()
                 .provider("provider")
                 .providerId("providerId")
@@ -126,7 +127,7 @@ public final class TestFixture {
     /**
      * ContinueReading
      */
-    public static ContinueReading continueReadingFixture(Member member){
+    public static ContinueReading continueReadingFixture(Member member) {
         return ContinueReading.builder()
                 .memberId(member.getId())
                 .dayCount(10)
@@ -136,7 +137,7 @@ public final class TestFixture {
     /**
      * TodayReading
      */
-    public static TodayReading todayReadingFixture(Member member){
+    public static TodayReading todayReadingFixture(Member member) {
         return TodayReading.builder()
                 .memberId(member.getId())
                 .currentCount(1)

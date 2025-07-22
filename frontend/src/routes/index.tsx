@@ -6,6 +6,7 @@ import ArticleCardList from '../pages/today/components/ArticleCardList/ArticleCa
 import ReadingStatusCard from '../pages/today/components/ReadingStatusCard/ReadingStatusCard';
 import { getArticles } from '@/pages/today/apis/articles';
 import { getReadingStatus } from '@/pages/today/apis/members';
+import { ARTICLES } from '@/mocks/data/mock-articles';
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -34,7 +35,7 @@ function Index() {
           </TitleDescription>
         </TitleBox>
         <ContentWrapper>
-          <ArticleCardList articles={articles.content} />
+          <ArticleCardList articles={ARTICLES} />
           <ReadingStatusCard
             streakReadDay={readingStatus.streakReadDay}
             today={readingStatus.today}

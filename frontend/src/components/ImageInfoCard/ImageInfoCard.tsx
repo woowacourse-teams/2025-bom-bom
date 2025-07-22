@@ -13,7 +13,9 @@ function ImageInfoCard({ imageUrl, title, description }: ImageInfoCardProps) {
       <Image src={imageUrl} alt={`${title} 뉴스레터 이미지`} />
       <InfoBox>
         <Title>{title}</Title>
-        <Description>{description}</Description>
+        <Description>
+          {description.length === 0 ? title : description}
+        </Description>
       </InfoBox>
     </Container>
   );

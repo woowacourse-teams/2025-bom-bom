@@ -30,7 +30,9 @@ function ArticleCard({ data }: ArticleCardProps) {
     <Container isRead={isRead} to={`/articles/${articleId}`}>
       <InfoWrapper>
         <Title>{title}</Title>
-        <Description>{contentsSummary}</Description>
+        <Description>
+          {contentsSummary.length === 0 ? title : contentsSummary}
+        </Description>
         <MetaInfoRow>
           <Chip text={newsletterCategory} />
           <MetaInfoText>from {newsletterName}</MetaInfoText>

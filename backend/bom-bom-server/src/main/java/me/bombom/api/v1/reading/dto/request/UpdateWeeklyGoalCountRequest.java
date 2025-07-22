@@ -1,4 +1,4 @@
-package me.bombom.api.v1.member.dto.request;
+package me.bombom.api.v1.reading.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 

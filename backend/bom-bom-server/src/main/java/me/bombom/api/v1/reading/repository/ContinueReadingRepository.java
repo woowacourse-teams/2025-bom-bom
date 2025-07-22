@@ -1,8 +1,7 @@
-package me.bombom.api.v1.member.repository;
+package me.bombom.api.v1.reading.repository;
 
-import jakarta.validation.constraints.NotNull;
 import java.util.Optional;
-import me.bombom.api.v1.member.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.ContinueReading;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ContinueReadingRepository extends JpaRepository<ContinueReading, Long> {

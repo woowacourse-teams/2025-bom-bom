@@ -14,11 +14,16 @@ import me.bombom.api.v1.article.enums.SortOption;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.reading.domain.TodayReading;
+import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.reading.repository.TodayReadingRepository;
+import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
+import me.bombom.api.v1.reading.service.ReadingService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +38,7 @@ public class ArticleService {
     private final CategoryRepository categoryRepository;
     private final MemberRepository memberRepository;
     private final NewsletterRepository newsletterRepository;
+    private final ReadingService readingService;
 
     public Page<ArticleResponse> getArticles(
             Long memberId,
@@ -62,10 +68,13 @@ public class ArticleService {
         return ArticleDetailResponse.of(article, newsletter, category);
     }
 
-    public void markAsRead(Long id) {
-        Article article = articleRepository.findById(id)
+    @Transactional
+    public void markAsRead(Long articleId, Long memberId) {
+        Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        validateArticleOwner(article, memberId);
         article.markAsRead();
+        readingService.updateReadingCount(article);
     }
 
     public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(Long memberId) {
@@ -101,4 +110,5 @@ public class ArticleService {
             throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
         }
     }
+
 }

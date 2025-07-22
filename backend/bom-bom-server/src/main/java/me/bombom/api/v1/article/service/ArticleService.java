@@ -1,5 +1,6 @@
 package me.bombom.api.v1.article.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import me.bombom.api.v1.article.dto.ArticleResponse;
 import me.bombom.api.v1.article.dto.GetArticleCategoryStatisticsResponse;
 import me.bombom.api.v1.article.dto.GetArticleCountPerCategoryResponse;
 import me.bombom.api.v1.article.dto.GetArticlesOptions;
+import me.bombom.api.v1.article.enums.SortOption;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -32,10 +34,20 @@ public class ArticleService {
     private final MemberRepository memberRepository;
     private final NewsletterRepository newsletterRepository;
 
-    public Page<ArticleResponse> getArticles(Long memberId, GetArticlesOptions options, Pageable pageable) {
+    public Page<ArticleResponse> getArticles(
+            Long memberId,
+            LocalDate date,
+            String categoryName,
+            SortOption sorted,
+            String keyword,
+            Pageable pageable
+    ) {
         validateMemberExists(memberId);
-        validateCategoryExists(options.categoryId());
-        return articleRepository.findByMemberId(memberId, options, pageable);
+        Long categoryId = findCategoryByName(categoryName);
+        return articleRepository.findByMemberId(
+                memberId,
+                GetArticlesOptions.of(date, categoryId, sorted, keyword),
+                pageable);
     }
 
     public ArticleDetailResponse getArticleDetail(Long id, Long memberId) {
@@ -75,10 +87,13 @@ public class ArticleService {
         }
     }
 
-    private void validateCategoryExists(Long categoryId) {
-        if (categoryId != null && !categoryRepository.existsById(categoryId)) {
-            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND);
+    private Long findCategoryByName(String categoryName) {
+        if (categoryName == null) {
+            return null;
         }
+        Category category = categoryRepository.findByName(categoryName)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        return category.getId();
     }
 
     private void validateArticleOwner(Article article, Long memberId) {

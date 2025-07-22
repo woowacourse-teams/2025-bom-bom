@@ -37,14 +37,20 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 JOIN Category c ON c.id = n.categoryId
                 WHERE a.memberId = :memberId
         """);
-        appendDynamicWhereClause(options.date(), options.categoryId(), jpql);
+        appendDynamicWhereClause(
+                jpql,
+                options.date(),
+                options.categoryId(),
+                options.keyword()
+        );
 
         TypedQuery<Long> countQuery = entityManager.createQuery(jpql.toString(), Long.class);
         setQueryParameters(
                 countQuery,
                 memberId,
                 options.date(),
-                options.categoryId()
+                options.categoryId(),
+                options.keyword()
         );
         return countQuery.getSingleResult();
     }
@@ -63,11 +69,22 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 JOIN Category c ON c.id = n.categoryId
                 WHERE a.memberId = :memberId
         """);
-        appendDynamicWhereClause(options.date(), options.categoryId(), jpql);
+        appendDynamicWhereClause(
+                jpql,
+                options.date(),
+                options.categoryId(),
+                options.keyword()
+        );
         appendOrderByClause(options.sorted(), jpql);
 
         TypedQuery<ArticleResponse> query = entityManager.createQuery(jpql.toString(), ArticleResponse.class);
-        setQueryParameters(query, memberId, options.date(), options.categoryId());
+        setQueryParameters(
+                query,
+                memberId,
+                options.date(),
+                options.categoryId(),
+                options.keyword()
+        );
 
         if (pageable.isPaged()) {
             query.setFirstResult((int) pageable.getOffset());
@@ -77,24 +94,33 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         return query.getResultList();
     }
 
-    private void appendDynamicWhereClause(LocalDate date, Long categoryId, StringBuilder jpql) {
+    private void appendDynamicWhereClause(
+            StringBuilder jpql,
+            LocalDate date,
+            Long categoryId,
+            String keyword
+    ) {
         if (date != null) {
             jpql.append(" AND a.arrivedDateTime BETWEEN :dateAtMinTime AND :dateAtMaxTime");
         }
         if (categoryId != null) {
             jpql.append(" AND n.categoryId = :categoryId");
         }
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            jpql.append(" AND a.title LIKE :keyword");
+        }
     }
 
     private void appendOrderByClause(SortOption sortOption, StringBuilder jpql) {
-        jpql.append(" ORDER BY a.arrivedDateTime ").append(sortOption.getValue());
+        jpql.append(" ORDER BY a.arrivedDateTime ").append(sortOption.name());
     }
 
     private void setQueryParameters(
             TypedQuery<?> query,
             Long memberId,
             LocalDate date,
-            Long categoryId
+            Long categoryId,
+            String keyword
     ) {
         query.setParameter("memberId", memberId);
         if (date != null) {
@@ -103,6 +129,9 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         }
         if (categoryId != null) {
             query.setParameter("categoryId", categoryId);
+        }
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            query.setParameter("keyword", "%" + keyword.trim() + "%");
         }
     }
 }

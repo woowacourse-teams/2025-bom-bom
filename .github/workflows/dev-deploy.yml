@@ -8,81 +8,111 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
 
     steps:
-      - name: Checkout
+      - name: 코드 체크아웃
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: JDK 21 설정
         uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: temurin
+          cache: gradle
 
-      - name: application-dev.yml 파일 만들기
+      - name: application.yml 생성
         run: |
+          echo "Create application.yml(prod) from secret"
           mkdir -p src/main/resources
-          echo "${{ secrets.APPLICATION_DEV_PROPERTIES }}" \
-          > src/main/resources/application-dev.yml
+          echo "${{ secrets.APPLICATION_DEV_PROPERTIES }}" > src/main/resources/application.yml
+          
+          echo "Create application.yml(test) from secret"
+          mkdir -p src/test/resources
+          echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
 
-      - name: Build JAR
-        working-directory: ./backend/bom-bom-server
-        run: ./gradlew clean build
+      - name: JAR 빌드
+        run: ./gradlew build --no-daemon
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: bom-bom-server
-          path: backend/bom-bom-server/build/libs/*.jar
-
-      - name: Set up Docker Buildx
+      - name: Docker Buildx 설정
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to DockerHub
+      - name: DockerHub 로그인
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker image
-        working-directory: ./backend/bom-bom-server
+      - name: Docker 이미지 빌드 및 푸시
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
+          if ! docker buildx inspect ci-builder &>/dev/null; then
+            docker buildx create --use --name ci-builder
+          else
+            docker buildx use ci-builder
+          fi
+          docker buildx build \
+            --platform linux/arm64,linux/amd64 \
+            --cache-from=type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:buildcache \
+            --cache-to=type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:buildcache,mode=max \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest \
+            --push .
 
   deploy:
-    name: Deploy via self-hosted runner
     needs: build
-    runs-on: self-hosted
+    runs-on: [ self-hosted, main ]
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
 
     steps:
-      - name: Download uploaded artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: bom-bom-server
-          path: ./artifact-dir
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
 
-      - name: Check if the port 80 is in use
+      - name: Docker 이미지 Pull
         run: |
-          echo "Checking port 80..."
-          PID=$(sudo lsof -t -i :80 || true)
-          if [ -n "$PID" ]; then
-            echo "Found process running on port 80: $PID"
-            echo "server_running=true" >> $GITHUB_ENV
-            echo "PID=$PID" >> $GITHUB_ENV
+          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
+          docker pull $IMAGE
+
+      - name: 이미지 변경 여부 확인
+        id: compare_digest
+        run: |
+          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
+          NEW=$(docker inspect --format='{{.Id}}' "$IMAGE")
+          
+          # 기존 컨테이너가 존재하는지 확인
+          if docker inspect bom-bom &>/dev/null; then
+          CURRENT=$(docker inspect --format='{{.Image}}' bom-bom)
           else
-            echo "server_running=false" >> $GITHUB_ENV
+          CURRENT="not_found"
+          fi
+          
+          echo "new_image_id=$NEW" >> $GITHUB_OUTPUT
+          echo "current_image_id=$CURRENT" >> $GITHUB_OUTPUT
+          
+          if [ "$NEW" = "$CURRENT" ]; then
+          echo "Image unchanged. Skipping deployment."
+          echo "skip_deploy=true" >> $GITHUB_ENV
+          else
+          echo "skip_deploy=false" >> $GITHUB_ENV
           fi
 
-      - name: Stop server if available (gracefully)
-        if: env.server_running == 'true'
+      - name: 기존 컨테이너 정지 및 삭제
+        if: env.skip_deploy == 'false'
         run: |
-          echo "Gracefully shutting down process ${{ env.PID }}"
-          sudo kill -15 ${{ env.PID }}
-          tail --pid=${{ env.PID }} -f /dev/null
+          docker stop bom-bom || true
+          docker rm bom-bom || true
 
-      - name: Start server
+      - name: 컨테이너 제거 및 재실행 (docker-compose)
+        if: env.skip_deploy == 'false'
         run: |
-          JAR_FILE=$(find ./artifact-dir -name "*.jar" | head -n 1)
-          echo "Starting server with $JAR_FILE"
-          sudo nohup java -jar "$JAR_FILE" --server.port=80 &
+          echo "RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}" > .env
+          echo "DATABASE=${{ secrets.DATABASE }}" >> .env
+          echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
+          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+
+          docker compose --env-file .env down || true
+          docker compose --env-file .env up -d
+          
+          rm .env || true

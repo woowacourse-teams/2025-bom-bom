@@ -33,6 +33,7 @@ export default LoginCard;
 
 const Container = styled.section`
   display: flex;
+  gap: 22px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -44,17 +45,14 @@ const Container = styled.section`
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
 
   background-color: ${({ theme }) => theme.colors.white};
-
-  gap: 22px;
 `;
 
 const GreetingWrapper = styled.div`
   display: flex;
+  gap: 22px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  gap: 22px;
 `;
 
 const IconWrapper = styled.div`
@@ -72,7 +70,7 @@ const IconWrapper = styled.div`
 `;
 
 const GreetingTitle = styled.h2`
-  background: linear-gradient(107deg, #181818 0%, #F96 100%);
+  background: linear-gradient(107deg, #181818 0%, #f96 100%);
   background-clip: text;
 
   font: ${({ theme }) => theme.fonts.heading3};
@@ -106,6 +104,7 @@ const Divider = styled.div`
 
 const GoogleButton = styled.button`
   display: flex;
+  gap: 18px;
   align-items: center;
   justify-content: center;
 
@@ -119,8 +118,6 @@ const GoogleButton = styled.button`
 
   font: ${({ theme }) => theme.fonts.body1};
   text-align: center;
-
-  gap: 18px;
 
   &:hover {
     background-color: ${({ theme }) => theme.colors.primaryLight};

@@ -113,7 +113,7 @@ const TitleBox = styled.div`
 `;
 
 const Title = styled.div`
-  background: linear-gradient(144.324deg, #4b5563 0%, #F96 50%, #FFD700 100%);
+  background: linear-gradient(144.324deg, #4b5563 0%, #f96 50%, #ffd700 100%);
   background-clip: text;
 
   font: ${({ theme }) => theme.fonts.heading4};
@@ -127,18 +127,18 @@ const SubTitle = styled.div`
 
 const Nav = styled.nav`
   display: flex;
+  gap: 8px;
   align-items: center;
 
   padding: 4px;
   border-radius: 14px;
 
   background: ${({ theme }) => theme.colors.white};
-
-  gap: 8px;
 `;
 
 const NavButton = styled(Link)<{ active?: boolean }>`
   display: flex;
+  gap: 4px;
   align-items: center;
 
   padding: 10px 12px;
@@ -150,20 +150,17 @@ const NavButton = styled(Link)<{ active?: boolean }>`
   color: ${({ active, theme }) =>
     active ? theme.colors.white : theme.colors.black};
   font: ${({ theme }) => theme.fonts.body2};
-
-  gap: 4px;
 `;
 
 const ProfileBox = styled.div`
   display: flex;
+  gap: 8px;
   align-items: center;
 
   padding: 8px 12px;
   border-radius: 12px;
 
   background: ${({ theme }) => theme.colors.white};
-
-  gap: 8px;
 `;
 
 const ProfileImg = styled.img`
@@ -184,10 +181,10 @@ const ProfileName = styled.div``;
 
 const ProfileEmail = styled.div`
   display: flex;
+  gap: 4px;
   align-items: center;
 
   cursor: pointer;
-  gap: 4px;
 `;
 
 const EmailText = styled.div`

@@ -43,21 +43,19 @@ function Index() {
 
 const Container = styled.div`
   display: flex;
+  gap: 24px;
   flex-direction: column;
   align-items: flex-start;
 
   width: 1280px;
   padding-top: 64px;
-
-  gap: 24px;
 `;
 
 const TitleBox = styled.div`
   display: flex;
+  gap: 8px;
   flex-direction: column;
   align-items: flex-start;
-
-  gap: 8px;
 `;
 
 const Title = styled.h1`
@@ -71,9 +69,8 @@ const TitleDescription = styled.p`
 
 const ContentWrapper = styled.div`
   display: flex;
+  gap: 24px;
   align-items: flex-start;
   align-self: stretch;
   justify-content: center;
-
-  gap: 24px;
 `;

@@ -50,17 +50,15 @@ export default ArticleCardList;
 
 const Container = styled.div`
   display: flex;
+  gap: 16px;
   flex-direction: column;
   align-items: flex-start;
-
-  gap: 16px;
 `;
 
 const ListTitleBox = styled.div`
   display: flex;
-  align-items: center;
-
   gap: 12px;
+  align-items: center;
 `;
 
 const ListTitle = styled.h5`
@@ -70,7 +68,6 @@ const ListTitle = styled.h5`
 
 const CardList = styled.ul`
   display: flex;
-  flex-direction: column;
-
   gap: 16px;
+  flex-direction: column;
 `;

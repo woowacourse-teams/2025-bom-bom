@@ -64,6 +64,7 @@ export default ReadingStatusCard;
 
 const Container = styled.section`
   display: flex;
+  gap: 26px;
   flex-direction: column;
   flex-shrink: 0;
   align-items: center;
@@ -76,17 +77,14 @@ const Container = styled.section`
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 15%);
 
   background-color: ${({ theme }) => theme.colors.white};
-
-  gap: 26px;
 `;
 
 const TitleWrapper = styled.div`
   display: flex;
+  gap: 10px;
   align-items: center;
 
   width: 100%;
-
-  gap: 10px;
 `;
 
 const StatusIconWrapper = styled.div`
@@ -116,11 +114,10 @@ const Title = styled.h2`
 
 const StreakWrapper = styled.div`
   display: flex;
+  gap: 10px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  gap: 10px;
 `;
 
 const StreakIconWrapper = styled.div`

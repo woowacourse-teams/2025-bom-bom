@@ -68,6 +68,7 @@ const Container = styled.div<{ width: number }>`
 
 const SelectToggle = styled.div`
   display: flex;
+  gap: 10px;
   align-items: center;
 
   padding: 8px 12px;
@@ -78,7 +79,6 @@ const SelectToggle = styled.div`
 
   box-sizing: border-box;
   cursor: pointer;
-  gap: 10px;
   user-select: none;
 `;
 

@@ -61,22 +61,20 @@ export default CategoryFilter;
 
 const Container = styled.nav`
   display: flex;
+  gap: 20px;
   flex-direction: column;
 
   width: 310px;
   padding: 16px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 20px;
-
-  gap: 20px;
 `;
 
 const TitleWrapper = styled.div`
   display: flex;
+  gap: 10px;
   align-items: center;
   justify-content: flex-start;
-
-  gap: 10px;
 `;
 
 const IconWrapper = styled.div`

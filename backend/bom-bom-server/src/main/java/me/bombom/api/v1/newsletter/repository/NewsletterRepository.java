@@ -9,11 +9,12 @@ import org.springframework.data.jpa.repository.Query;
 public interface NewsletterRepository extends JpaRepository<Newsletter, Long> {
 
     @Query("""
-        SELECT new me.bombom.api.v1.newsletter.dto.NewsletterResponse( 
-                n.id, n.name, n.imageUrl, n.description, d.mainPageUrl
+        SELECT new me.bombom.api.v1.newsletter.dto.NewsletterResponse(
+                n.id, n.name, n.imageUrl, n.description, d.mainPageUrl, c.name
             )
         FROM Newsletter n
         JOIN NewsletterDetail d ON n.detailId = d.id
+        JOIN Category c ON c.id = n.categoryId
         ORDER BY d.subscribeCount DESC, n.name ASC
     """)
     List<NewsletterResponse> findNewslettersInfo();

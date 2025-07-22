@@ -1,5 +1,7 @@
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
+const { tanstackRouter } = require('@tanstack/router-plugin/webpack');
 
 module.exports = {
   mode: 'development',
@@ -48,12 +50,24 @@ module.exports = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    alias: {
+      '#': path.resolve(__dirname, 'public'),
+      '@': path.resolve(__dirname, 'src'),
+    },
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: './index.html', // 템플릿 HTML
       filename: 'index.html', // 출력될 HTML 파일 이름
       inject: true, // <script> 태그 자동 삽입
+    }),
+    tanstackRouter({
+      target: 'react',
+      autoCodeSplitting: true,
+    }),
+    new webpack.EnvironmentPlugin({
+      API_BASE_URL: 'https://api-dev.bombom.news/api/v1',
+      API_TOKEN: 'text_token',
     }),
   ],
   devServer: {

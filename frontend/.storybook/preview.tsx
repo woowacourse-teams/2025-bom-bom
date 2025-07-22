@@ -1,7 +1,7 @@
 import { Global, ThemeProvider } from '@emotion/react';
 import type { Preview } from '@storybook/react-webpack5';
-import { theme } from '../src/styles/theme';
-import reset from '../src/styles/reset.ts';
+import { theme } from '@/styles/theme';
+import reset from '@/styles/reset.ts';
 
 const preview: Preview = {
   parameters: {

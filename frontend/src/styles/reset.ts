@@ -1,7 +1,6 @@
 import { css } from '@emotion/react';
 
 const reset = css`
-  /* Pretendard 웹폰트 */
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css');
 
   /* Reset 기본 스타일 */
@@ -44,8 +43,8 @@ const reset = css`
     margin: 0;
     padding: 0;
     border: 0;
-    font: inherit;
 
+    font: inherit;
     vertical-align: baseline;
   }
 
@@ -74,13 +73,19 @@ const reset = css`
 
   button {
     border: none;
-    cursor: pointer;
 
     background-color: transparent;
+
+    cursor: pointer;
 
     :disabled {
       cursor: not-allowed;
     }
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
   }
 `;
 

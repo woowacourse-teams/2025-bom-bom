@@ -1,16 +1,16 @@
 import styled from '@emotion/styled';
-import compassIcon from '../../../public/assets/compass.svg';
-import copyIcon from '../../../public/assets/copy.svg';
+import compassIcon from '#/assets/compass.svg';
+import copyIcon from '#/assets/copy.svg';
+import { NavType } from '@/types/nav';
 import CompassIcon from '../icons/CompassIcon';
 import HomeIcon from '../icons/HomeIcon';
-
-type NavType = 'home' | 'recommend';
+import { Link } from '@tanstack/react-router';
 
 interface HeaderProps {
   activeNav: NavType;
 }
 
-export default function Header({ activeNav = 'home' }: HeaderProps) {
+export default function Header({ activeNav }: HeaderProps) {
   const handleCopyEmail = () => {
     navigator.clipboard.writeText('test@bombom.news');
   };
@@ -18,7 +18,7 @@ export default function Header({ activeNav = 'home' }: HeaderProps) {
   return (
     <HeaderContainer>
       <HeaderInner>
-        <LogoWrapper>
+        <LogoWrapper to="/">
           <LogoBox>
             <HomeIcon />
           </LogoBox>
@@ -29,11 +29,11 @@ export default function Header({ activeNav = 'home' }: HeaderProps) {
         </LogoWrapper>
 
         <Nav>
-          <NavButton active={activeNav === 'home'}>
-            <HomeIcon color={activeNav === 'home' ? 'white' : 'black'} />
+          <NavButton active={activeNav === 'today'} to="/">
+            <HomeIcon color={activeNav === 'today' ? 'white' : 'black'} />
             <p>오늘의 뉴스레터</p>
           </NavButton>
-          <NavButton active={activeNav === 'recommend'}>
+          <NavButton active={activeNav === 'recommend'} to="/recommend">
             <CompassIcon
               color={activeNav === 'recommend' ? 'white' : 'black'}
             />
@@ -57,43 +57,53 @@ export default function Header({ activeNav = 'home' }: HeaderProps) {
 }
 
 const HeaderContainer = styled.header`
-  background: ${({ theme }) => theme.colors.white};
+  position: fixed;
+  top: 0;
+  z-index: 100;
+
   display: flex;
-  justify-content: center;
   align-items: center;
-  box-shadow:
-    0px 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0px 4px 6px -4px rgba(0, 0, 0, 0.1);
-  border-radius: 0 0 8px 8px;
-  padding: 8px 16px;
+  justify-content: center;
+
+  width: 100%;
   height: 64px;
+  padding: 8px 16px;
+  border-radius: 0 0 8px 8px;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 10%),
+    0 4px 6px -4px rgb(0 0 0 / 10%);
+
+  background: ${({ theme }) => theme.colors.white};
 `;
 
 const HeaderInner = styled.div`
-  width: 100%;
-  max-width: 1280px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  width: 100%;
+  max-width: 1280px;
 `;
 
-const LogoWrapper = styled.div`
+const LogoWrapper = styled(Link)`
   display: flex;
   align-items: center;
 `;
 
 const LogoBox = styled.div`
-  width: 40px;
-  height: 40px;
-  background: ${({ theme }) => theme.colors.primary};
-  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow:
-    0px 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0px 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+  width: 40px;
+  height: 40px;
   margin-right: 12px;
+  border-radius: 14px;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 10%),
+    0 4px 6px -4px rgb(0 0 0 / 10%);
+
+  background: ${({ theme }) => theme.colors.primary};
 `;
 
 const TitleBox = styled.div`
@@ -103,49 +113,53 @@ const TitleBox = styled.div`
 `;
 
 const Title = styled.div`
-  ${({ theme }) => theme.fonts.heading4};
-  background: linear-gradient(
-    144.324deg,
-    #4b5563 0%,
-    #ff9966 50%,
-    #ffd700 100%
-  );
+  background: linear-gradient(144.324deg, #4b5563 0%, #f96 50%, #ffd700 100%);
   background-clip: text;
+
+  font: ${({ theme }) => theme.fonts.heading4};
+
   -webkit-text-fill-color: transparent;
 `;
 
 const SubTitle = styled.div`
-  ${({ theme }) => theme.fonts.body2};
+  font: ${({ theme }) => theme.fonts.body2};
 `;
 
 const Nav = styled.nav`
   display: flex;
   gap: 8px;
   align-items: center;
-  background: ${({ theme }) => theme.colors.white};
-  border-radius: 14px;
+
   padding: 4px;
+  border-radius: 14px;
+
+  background: ${({ theme }) => theme.colors.white};
 `;
 
-const NavButton = styled.button<{ active?: boolean }>`
+const NavButton = styled(Link)<{ active?: boolean }>`
   display: flex;
-  align-items: center;
   gap: 4px;
+  align-items: center;
+
   padding: 10px 12px;
   border-radius: 12px;
+
   background: ${({ active, theme }) =>
     active ? theme.colors.primary : 'transparent'};
+
   color: ${({ active, theme }) =>
     active ? theme.colors.white : theme.colors.black};
-  ${({ theme }) => theme.fonts.body2};
+  font: ${({ theme }) => theme.fonts.body2};
 `;
 
 const ProfileBox = styled.div`
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
+
   padding: 8px 12px;
   border-radius: 12px;
+
   background: ${({ theme }) => theme.colors.white};
 `;
 
@@ -156,22 +170,23 @@ const ProfileImg = styled.img`
 `;
 
 const ProfileInfo = styled.div`
-  ${({ theme }) => theme.fonts.caption};
-
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+
+  font: ${({ theme }) => theme.fonts.caption};
 `;
 
 const ProfileName = styled.div``;
 
 const ProfileEmail = styled.div`
   display: flex;
-  align-items: center;
-  cursor: pointer;
   gap: 4px;
+  align-items: center;
+
+  cursor: pointer;
 `;
 
 const EmailText = styled.div`
-  ${({ theme }) => theme.fonts.caption};
+  font: ${({ theme }) => theme.fonts.caption};
 `;

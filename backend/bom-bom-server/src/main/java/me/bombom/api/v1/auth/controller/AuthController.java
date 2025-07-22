@@ -41,17 +41,7 @@ public class AuthController {
     }
 
     @GetMapping("/login/{provider}")
-    public void login(
-            @PathVariable("provider") String provider,
-            @RequestParam String redirectUri,
-            HttpServletResponse response
-    ) throws IOException {
-        if (redirectUri != null || !redirectUri.isBlank()) {
-            Cookie cookie = new Cookie("redirectUri", redirectUri);
-            cookie.setPath("/");
-            cookie.setMaxAge(60 * 5);
-            response.addCookie(cookie);
-        }
+    public void login(@PathVariable("provider") String provider, HttpServletResponse response) throws IOException {
         response.sendRedirect("/oauth2/authorization/" + provider);
     }
 

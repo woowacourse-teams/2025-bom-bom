@@ -19,10 +19,10 @@ export const getReadingStatus = async (memberId: number) => {
   });
 };
 
-interface GetWeeklyReadingGoalParams {
+type GetWeeklyReadingGoalParams = {
   memberId: number;
-  weeklyGoalCount: number;
-}
+  weeklyGoalCount: string;
+};
 
 export interface PatchWeeklyGoalResponse {
   weeklyReadingId: number;
@@ -45,10 +45,10 @@ export const getWeeklyReadingGoal = async ({
   });
 };
 
-interface PatchWeeklyCountParams {
+type PatchWeeklyCountParams = {
   memberId: number;
   count: number;
-}
+};
 
 export interface PatchWeeklyCountResponse {
   weeklyReadingId: number;

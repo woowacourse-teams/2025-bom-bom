@@ -26,7 +26,7 @@ public class ReadingController {
     }
 
     @GetMapping
-    public ReadingInformationResponse getReadingInformation(@RequestParam Long memberId){
+    public ReadingInformationResponse getReadingInformation(@RequestParam @Positive(message = "id는 1 이상의 값이어야 합니다.") Long memberId){
         return readingService.getReadingInformation(memberId);
     }
 }

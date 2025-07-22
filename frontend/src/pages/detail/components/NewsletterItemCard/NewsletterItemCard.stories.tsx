@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import NewsletterItemCard from './NewsletterItemCard';
 import { MOCK_ARTICLES } from '@/mocks/article';
+import type { Meta, StoryObj } from '@storybook/react-webpack5';
 
 const meta: Meta<typeof NewsletterItemCard> = {
   title: 'components/bombom/NewsletterItemCard',

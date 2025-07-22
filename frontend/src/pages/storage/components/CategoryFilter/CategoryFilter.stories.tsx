@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react-webpack5';
-import CategoryFilter from './CategoryFilter';
 import { useState } from 'react';
+import CategoryFilter from './CategoryFilter';
+import type { Meta, StoryObj } from '@storybook/react-webpack5';
 
 const meta = {
   title: 'components/bombom/CategoryFilter',

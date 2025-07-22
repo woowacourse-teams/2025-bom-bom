@@ -1,5 +1,5 @@
-import { calculateRate } from '@/utils/math';
 import { RateFormatType } from './types';
+import { calculateRate } from '@/utils/math';
 
 interface FormatRateParams {
   currentCount: number;

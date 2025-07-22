@@ -23,9 +23,12 @@ module.exports = {
           'external',
           ['parent', 'sibling'],
           'internal',
+          'index',
+          'object',
           'type',
         ],
         pathGroups: [{ pattern: '@/**', group: 'parent' }],
+        pathGroupsExcludedImportTypes: ['type'],
         alphabetize: {
           order: 'asc',
           caseInsensitive: true,

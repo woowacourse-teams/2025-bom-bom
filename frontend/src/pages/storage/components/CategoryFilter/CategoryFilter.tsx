@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
-import CategoryIcon from '@/components/icons/CategoryIcon';
-import Tabs from '@/components/Tabs/Tabs';
-import Tab from '@/components/Tab/Tab';
 import Badge from '@/components/Badge/Badge';
+import CategoryIcon from '@/components/icons/CategoryIcon';
+import Tab from '@/components/Tab/Tab';
+import Tabs from '@/components/Tabs/Tabs';
 
 interface CategoryItem<T extends string> {
   value: T;

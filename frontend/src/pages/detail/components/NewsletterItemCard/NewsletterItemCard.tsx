@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
-import clockIcon from '#/assets/clock.svg';
 import Badge from '@/components/Badge/Badge';
 import { Article } from '@/pages/today/types/article';
+import clockIcon from '#/assets/clock.svg';
 
 interface NewsletterItemCardProps {
   data: Article;
@@ -120,14 +120,16 @@ const Description = styled.p`
 
 const MetaContent = styled.div`
   display: flex;
-  gap: 8px;
   align-items: center;
+
+  gap: 8px;
 `;
 
 const MetaInfo = styled.div`
   display: flex;
-  gap: 8px;
   align-items: center;
+
+  gap: 8px;
 `;
 
 const SourceText = styled.span`
@@ -137,8 +139,9 @@ const SourceText = styled.span`
 
 const ReadTimeBox = styled.div`
   display: flex;
-  gap: 4px;
   align-items: center;
 
   white-space: nowrap;
+
+  gap: 4px;
 `;

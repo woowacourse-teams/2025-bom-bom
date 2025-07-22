@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import PageLayout from '../components/PageLayout/PageLayout';
-import ReadingKingLeaderboard from '../pages/recommend/components/ReadingKingLeaderboard/ReadingKingLeaderboard';
 import NewsletterHero from '../pages/recommend/components/ReadingKingLeaderboard/NewsletterHero/NewsletterHero';
+import ReadingKingLeaderboard from '../pages/recommend/components/ReadingKingLeaderboard/ReadingKingLeaderboard';
 import TrendySection from '../pages/recommend/components/ReadingKingLeaderboard/TrendySection/TrendySection';
 import { useQuery } from '@tanstack/react-query';
 import { getNewsletters } from '../apis/newsLetters';

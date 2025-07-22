@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react-webpack5';
-import Select from './Select';
 import { useState } from 'react';
+import Select from './Select';
+import type { Meta, StoryObj } from '@storybook/react-webpack5';
 
 const meta: Meta<typeof Select> = {
   title: 'components/common/Select',

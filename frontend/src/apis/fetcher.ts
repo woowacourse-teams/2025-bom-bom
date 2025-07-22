@@ -47,65 +47,72 @@ const request = async <TRequest, TResponse>({
   body,
   headers,
 }: RequestOptions<TRequest>): Promise<TResponse | null> => {
-  const url = new URL(ENV.baseUrl + path);
-  const stringifiedQuery: Record<string, string> = Object.fromEntries(
-    Object.entries(query).map(([key, value]) => {
-      if (value instanceof Date) {
-        const yyyy = value.getFullYear();
-        const mm = String(value.getMonth() + 1).padStart(2, '0');
-        const dd = String(value.getDate()).padStart(2, '0');
-        return [key, `${yyyy}-${mm}-${dd}`];
+  try {
+    const url = new URL(ENV.baseUrl + path);
+    const stringifiedQuery: Record<string, string> = Object.fromEntries(
+      Object.entries(query)
+        .filter(([_, value]) => value !== undefined)
+        .map(([key, value]) => {
+          if (value instanceof Date) {
+            const yyyy = value.getFullYear();
+            const mm = String(value.getMonth() + 1).padStart(2, '0');
+            const dd = String(value.getDate()).padStart(2, '0');
+            return [key, `${yyyy}-${mm}-${dd}`];
+          }
+          return [key, value?.toString()];
+        }),
+    );
+    url.search = new URLSearchParams(stringifiedQuery).toString();
+
+    const config: RequestInit = {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Basic ${ENV.token}`,
+        ...headers,
+      },
+    };
+
+    if (body && (method === 'POST' || method === 'PATCH')) {
+      config.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(url, config);
+
+    if (!response.ok) {
+      const status = response.status;
+      const contentType = response.headers.get('Content-Type');
+      let rawBody;
+      let errorMessage = DEFAULT_ERROR_MESSAGES[status];
+
+      try {
+        if (contentType?.includes('application/json')) {
+          rawBody = await response.json();
+          errorMessage = rawBody.message ?? errorMessage;
+        } else {
+          rawBody = await response.text();
+          errorMessage = rawBody || errorMessage;
+        }
+      } catch {
+        errorMessage = '응답 파싱에 실패했습니다.';
       }
-      return [key, value.toString()];
-    }),
-  );
-  url.search = new URLSearchParams(stringifiedQuery).toString();
 
-  const config: RequestInit = {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Basic ${ENV.token}`,
-      ...headers,
-    },
-  };
+      throw new ApiError(status, errorMessage, rawBody);
+    }
 
-  if (body && (method === 'POST' || method === 'PATCH')) {
-    config.body = JSON.stringify(body);
-  }
-
-  const response = await fetch(url, config);
-
-  if (!response.ok) {
-    const status = response.status;
     const contentType = response.headers.get('Content-Type');
-    let rawBody;
-    let errorMessage = DEFAULT_ERROR_MESSAGES[status];
 
-    try {
-      if (contentType?.includes('application/json')) {
-        rawBody = await response.json();
-        errorMessage = rawBody.message ?? errorMessage;
-      } else {
-        rawBody = await response.text();
-        errorMessage = rawBody || errorMessage;
+    if (contentType?.includes('application/json')) {
+      try {
+        return await response.json();
+      } catch {
+        return null;
       }
-    } catch {
-      errorMessage = '응답 파싱에 실패했습니다.';
     }
 
-    throw new ApiError(status, errorMessage, rawBody);
+    return null;
+  } catch (error) {
+    console.error(error);
+    return null;
   }
-
-  const contentType = response.headers.get('Content-Type');
-
-  if (contentType?.includes('application/json')) {
-    try {
-      return await response.json();
-    } catch {
-      return null;
-    }
-  }
-
-  return null;
 };

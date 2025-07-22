@@ -7,8 +7,8 @@ export interface TabProps<T extends string | number>
   label: string;
   onTabSelect: (value: T) => void;
   selected?: boolean;
-  LeadingComponent?: ReactNode;
-  TrailingComponent?: ReactNode;
+  StartComponent?: ReactNode;
+  EndComponent?: ReactNode;
 }
 
 function Tab<T extends string | number>({
@@ -16,8 +16,8 @@ function Tab<T extends string | number>({
   label,
   onTabSelect,
   selected = false,
-  LeadingComponent,
-  TrailingComponent,
+  StartComponent,
+  EndComponent,
   ...props
 }: TabProps<T>) {
   return (
@@ -26,9 +26,9 @@ function Tab<T extends string | number>({
       onClick={() => onTabSelect(value)}
       {...props}
     >
-      {LeadingComponent}
+      {StartComponent}
       {label}
-      {TrailingComponent}
+      {EndComponent}
     </Container>
   );
 }

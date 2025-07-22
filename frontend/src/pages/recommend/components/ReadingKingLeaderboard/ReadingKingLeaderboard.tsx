@@ -176,6 +176,7 @@ export default function ReadingKingLeaderboard({
 
 const Container = styled.div`
   display: flex;
+  gap: 21px;
   flex-direction: column;
 
   width: 100%;
@@ -190,7 +191,6 @@ const Container = styled.div`
   background: rgb(255 255 255 / 80%);
 
   backdrop-filter: blur(10px);
-  gap: 21px;
 `;
 
 const Header = styled.div`
@@ -199,9 +199,8 @@ const Header = styled.div`
 
 const TitleContainer = styled.div`
   display: flex;
-  align-items: center;
-
   gap: 10.5px;
+  align-items: center;
 `;
 
 const HeaderIcon = styled.div`
@@ -237,9 +236,8 @@ const Title = styled.h3`
 
 const LeaderboardList = styled.div`
   display: flex;
-  flex-direction: column;
-
   gap: 14px;
+  flex-direction: column;
 `;
 
 const ItemContainer = styled.div`
@@ -297,11 +295,10 @@ const UserInfo = styled.div`
 
 const NameContainer = styled.div`
   display: flex;
+  gap: 7px;
   align-items: center;
 
   margin-bottom: -1px;
-
-  gap: 7px;
 `;
 
 const UserName = styled.div<{ weight: 'normal' | 'medium' }>`
@@ -327,11 +324,10 @@ const Badge = styled.div`
 
 const StatsContainer = styled.div`
   display: flex;
+  gap: 7px;
   align-items: center;
 
   margin-bottom: -1px;
-
-  gap: 7px;
 `;
 
 const ReadCount = styled.div`
@@ -363,6 +359,7 @@ const MyRankSection = styled.div`
 
 const MyRankContainer = styled.div`
   display: flex;
+  gap: 12px;
   flex-direction: column;
   justify-content: space-between;
 
@@ -375,8 +372,6 @@ const MyRankContainer = styled.div`
     rgb(255 153 102 / 10%),
     rgb(255 237 212 / 50%)
   );
-
-  gap: 12px;
 `;
 
 const MyRankInfo = styled.div`
@@ -430,9 +425,8 @@ const MyReadValue = styled.div`
 
 const ProgressSection = styled.div`
   display: flex;
-  flex-direction: column;
-
   gap: 3.5px;
+  flex-direction: column;
 `;
 
 const ProgressInfo = styled.div`

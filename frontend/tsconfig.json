@@ -12,8 +12,8 @@
     "allowUmdGlobalAccess": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "types": ["./emotion.d.ts", "jest"],
     "baseUrl": ".",
+    "types": ["./emotion.d.ts", "jest", "node"],
     "paths": {
       "@/*": ["src/*"],
       "#/*": ["public/*"]

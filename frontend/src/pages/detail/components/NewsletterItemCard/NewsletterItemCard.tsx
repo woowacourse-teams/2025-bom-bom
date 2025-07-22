@@ -120,16 +120,14 @@ const Description = styled.p`
 
 const MetaContent = styled.div`
   display: flex;
-  align-items: center;
-
   gap: 8px;
+  align-items: center;
 `;
 
 const MetaInfo = styled.div`
   display: flex;
-  align-items: center;
-
   gap: 8px;
+  align-items: center;
 `;
 
 const SourceText = styled.span`
@@ -139,9 +137,8 @@ const SourceText = styled.span`
 
 const ReadTimeBox = styled.div`
   display: flex;
+  gap: 4px;
   align-items: center;
 
   white-space: nowrap;
-
-  gap: 4px;
 `;

@@ -15,6 +15,7 @@ const groupMap = {
   ],
   Layout: [
     'display',
+    'gap',
     'flex',
     'flex-basis',
     'flex-direction',
@@ -59,8 +60,6 @@ const groupMap = {
     'padding-inline',
     'padding-inline-start',
     'padding-inline-end',
-
-    'gap',
 
     'outline',
     'outline-offset',

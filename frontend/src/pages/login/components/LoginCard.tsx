@@ -21,7 +21,7 @@ function LoginCard() {
       <GoogleButton
         onClick={() => {
           window.location.href =
-            'https://api-dev/bombom.news/api/v1/auth/login/google';
+            'https://api-dev.bombom.news/api/v1/auth/login/google';
         }}
         type="button"
       >

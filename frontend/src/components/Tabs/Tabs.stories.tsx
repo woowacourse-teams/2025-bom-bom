@@ -11,6 +11,7 @@ const meta = {
         key="봄봄1"
         onTabSelect={(id) => id}
         value="봄봄1"
+        label="봄봄1"
         selected={false}
         label="봄봄1"
       />,
@@ -18,8 +19,8 @@ const meta = {
         key="봄봄2"
         onTabSelect={(id) => id}
         value="봄봄2"
-        selected={true}
         label="봄봄2"
+        selected={true}
       />,
     ],
   },

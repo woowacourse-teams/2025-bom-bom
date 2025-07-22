@@ -17,7 +17,7 @@ import me.bombom.api.v1.common.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class WeeklyReading extends BaseEntity {
 
-    public static final int INCREASE_CURRENT_COUNT = 1;
+    private static final int INCREASE_CURRENT_COUNT = 1;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,7 +49,7 @@ public class WeeklyReading extends BaseEntity {
         this.goalCount = goalCount;
     }
 
-    public void increaseCurrentCount(int increaseCount) {
-        this.currentCount += increaseCount;
+    public void increaseCurrentCount() {
+        this.currentCount += INCREASE_CURRENT_COUNT;
     }
 }

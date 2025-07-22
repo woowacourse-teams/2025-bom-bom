@@ -33,12 +33,12 @@ function Storage() {
           />
         </SideSection>
         <MainSection>
-          <TitleBox>
-            <TitleIconWrapper>
+          <TitleWrapper>
+            <TitleIconBox>
               <StorageIcon color="white" />
-            </TitleIconWrapper>
+            </TitleIconBox>
             <Title>뉴스레터 보관함</Title>
-          </TitleBox>
+          </TitleWrapper>
           <SearchInput placeholder="뉴스레터 제목이나 발행처로 검색하세요..." />
           <SummaryBar>
             <SummaryText>총 10개 • 읽지 않음 5개 • 읽음 5개</SummaryText>
@@ -88,14 +88,14 @@ const MainSection = styled.div`
   gap: 20px;
 `;
 
-const TitleBox = styled.div`
+const TitleWrapper = styled.div`
   display: flex;
   align-items: center;
 
   gap: 8px;
 `;
 
-const TitleIconWrapper = styled.div`
+const TitleIconBox = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;

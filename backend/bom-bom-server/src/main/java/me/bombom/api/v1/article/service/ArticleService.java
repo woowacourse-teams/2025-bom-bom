@@ -36,8 +36,6 @@ public class ArticleService {
     private final CategoryRepository categoryRepository;
     private final MemberRepository memberRepository;
     private final NewsletterRepository newsletterRepository;
-    private final TodayReadingRepository todayReadingRepository;
-    private final WeeklyReadingRepository weeklyReadingRepository;
     private final ReadingService readingService;
 
     public Page<ArticleResponse> getArticles(Long memberId, GetArticlesOptions options, Pageable pageable) {

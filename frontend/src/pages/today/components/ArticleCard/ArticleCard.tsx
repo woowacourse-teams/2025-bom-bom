@@ -33,7 +33,9 @@ function ArticleCard({ data }: ArticleCardProps) {
         <MetaInfoRow>
           <Chip text={newsletterCategory} />
           <MetaInfoText>from {newsletterName}</MetaInfoText>
-          <MetaInfoText>{formatDateToDotString(arrivedDateTime)}</MetaInfoText>
+          <MetaInfoText>
+            {formatDateToDotString(new Date(arrivedDateTime))}
+          </MetaInfoText>
           <ReadTimeBox>
             <img src={clockIcon} alt="시계 아이콘" />
             <MetaInfoText>{`${expectedReadTime}분`}</MetaInfoText>

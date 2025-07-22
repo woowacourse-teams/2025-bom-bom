@@ -6,7 +6,6 @@ import ArticleCardList from '../pages/today/components/ArticleCardList/ArticleCa
 import ReadingStatusCard from '../pages/today/components/ReadingStatusCard/ReadingStatusCard';
 import { getArticles } from '@/apis/articles';
 import { getReadingStatus } from '@/apis/members';
-import { ARTICLES } from '@/mocks/data/mock-articles';
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -15,8 +14,7 @@ export const Route = createFileRoute('/')({
 function Index() {
   const { data: articles } = useQuery({
     queryKey: ['todayArticles'],
-    queryFn: () =>
-      getArticles({ date: new Date(), memberId: 1, sorted: 'ASC' }),
+    queryFn: () => getArticles({ memberId: 1, sorted: 'ASC' }),
   });
 
   const { data: readingStatus } = useQuery({
@@ -35,7 +33,7 @@ function Index() {
           </TitleDescription>
         </TitleBox>
         <ContentWrapper>
-          <ArticleCardList articles={ARTICLES} />
+          <ArticleCardList articles={articles.content} />
           <ReadingStatusCard
             streakReadDay={readingStatus.streakReadDay}
             today={readingStatus.today}

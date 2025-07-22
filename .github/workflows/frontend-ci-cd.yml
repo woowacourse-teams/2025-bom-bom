@@ -1,0 +1,41 @@
+name: CI
+defaults:
+  run:
+    working-directory: ./frontend
+on:
+  push:
+    paths:
+      - "frontend/**"
+  pull_request:
+    paths:
+      - "frontend/**"
+    branches:
+      - main
+      - client
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Get npm cache directory path
+        id: npm-cache-dir
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v3
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run lint
+      - name: Type check
+        run: npm run type-check
+      - name: Build
+        run: npm run build
+
+      # TODO : Deploy

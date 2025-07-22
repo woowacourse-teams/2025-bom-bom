@@ -1,6 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react-webpack5';
-
 import Chip from './Chip';
+import type { Meta, StoryObj } from '@storybook/react-webpack5';
 
 const meta = {
   title: 'components/common/Chip',

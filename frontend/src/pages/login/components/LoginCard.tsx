@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import SparklesIcon from '@/components/icons/SparklesIcon';
 import GoogleIcon from '@/components/icons/GoogleIcon';
+import SparklesIcon from '@/components/icons/SparklesIcon';
 
 function LoginCard() {
   return (

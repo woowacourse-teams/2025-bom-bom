@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import ProgressBar from './ProgressBar';
+import type { Meta, StoryObj } from '@storybook/react-webpack5';
 
 const meta = {
   title: 'components/common/ProgressBar',

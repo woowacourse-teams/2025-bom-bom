@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import ProgressWithLabel from './ProgressWithLabel';
 import CompassIcon from '../icons/CompassIcon';
+import type { Meta, StoryObj } from '@storybook/react-webpack5';
 
 const meta = {
   title: 'components/common/ProgressWithLabel',

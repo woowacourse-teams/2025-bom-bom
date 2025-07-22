@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import NewsletterHero from './NewsletterHero';
+import type { Meta, StoryObj } from '@storybook/react-webpack5';
 
 const meta: Meta<typeof NewsletterHero> = {
   title: 'components/bombom/NewsletterHero',

@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { ComponentProps, useState } from 'react';
-import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
-import ChevronIcon from '../icons/ChevronIcon';
 import { SelectOption } from './Select.types';
+import ChevronIcon from '../icons/ChevronIcon';
+import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
 
 interface SelectProps<T extends string | number> extends ComponentProps<'div'> {
   options: SelectOption<T>[];

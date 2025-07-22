@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import Tabs from './Tabs';
 import Tab from '../Tab/Tab';
+import type { Meta, StoryObj } from '@storybook/react-webpack5';
 
 const meta = {
   title: 'components/common/Tabs',

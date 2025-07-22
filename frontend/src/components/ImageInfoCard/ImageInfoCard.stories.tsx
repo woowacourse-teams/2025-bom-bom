@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import ImageInfoCard from './ImageInfoCard';
+import type { Meta, StoryObj } from '@storybook/react-webpack5';
 
 const meta: Meta<typeof ImageInfoCard> = {
   title: 'components/common/ImageInfoCard',

@@ -98,12 +98,6 @@ jobs:
           echo "skip_deploy=false" >> $GITHUB_ENV
           fi
 
-      - name: 기존 컨테이너 정지 및 삭제
-        if: env.skip_deploy == 'false'
-        run: |
-          docker stop bom-bom || true
-          docker rm bom-bom || true
-
       - name: 컨테이너 제거 및 재실행 (docker-compose)
         if: env.skip_deploy == 'false'
         run: |
@@ -120,8 +114,7 @@ jobs:
       - name: Docker 리소스 정리
         if: env.skip_deploy == 'false'
         run: |
-          echo "🧼 Docker 리소스 정리 시작"
-          docker container prune -f
-          docker image prune -f
-          docker volume prune -f
+          echo "Docker 리소스 정리 시작"
+          docker container prune -f --filter "until=24h"
+          docker image prune -f --filter "until=24h"
           echo "리소스 정리 완료"

@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import Badge from '@/components/Badge/Badge';
+import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { Article } from '@/pages/today/types/article';
 import clockIcon from '#/assets/clock.svg';
 
@@ -67,7 +68,7 @@ const Container = styled.div`
   transition: all 0.2s ease;
 `;
 
-const NewsletterImage = styled.img`
+const NewsletterImage = styled(ImageWithFallback)`
   width: 100%;
 
   object-fit: cover;
@@ -117,16 +118,14 @@ const Description = styled.p`
 
 const MetaContent = styled.div`
   display: flex;
-  align-items: center;
-
   gap: 8px;
+  align-items: center;
 `;
 
 const MetaInfo = styled.div`
   display: flex;
-  align-items: center;
-
   gap: 8px;
+  align-items: center;
 `;
 
 const SourceText = styled.span`
@@ -136,9 +135,8 @@ const SourceText = styled.span`
 
 const ReadTimeBox = styled.div`
   display: flex;
+  gap: 4px;
   align-items: center;
 
   white-space: nowrap;
-
-  gap: 4px;
 `;

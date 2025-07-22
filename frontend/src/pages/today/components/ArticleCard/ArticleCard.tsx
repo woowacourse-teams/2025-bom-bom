@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
 import { Article } from '../../types/article';
 import Chip from '@/components/Chip/Chip';
+import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { formatDate } from '@/utils/date';
 import clockIcon from '#/assets/clock.svg';
 
@@ -40,7 +41,7 @@ function ArticleCard({ data }: ArticleCardProps) {
           </ReadTimeBox>
         </MetaInfoRow>
       </InfoWrapper>
-      <Thumbnail src={thumbnailUrl ?? newsletterImageUrl} alt="아티클 썸네일" />
+      <Thumbnail src={thumbnailUrl || newsletterImageUrl} alt="아티클 썸네일" />
     </Container>
   );
 }
@@ -111,7 +112,7 @@ const ReadTimeBox = styled.div`
   align-items: center;
 `;
 
-const Thumbnail = styled.img`
+const Thumbnail = styled(ImageWithFallback)`
   flex-shrink: 0;
   align-self: stretch;
 

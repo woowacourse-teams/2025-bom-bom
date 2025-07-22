@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 
 interface ImageInfoCardProps {
   imageUrl: string;
@@ -30,7 +31,7 @@ const Container = styled.div`
   padding: 12px 8px;
 `;
 
-const Image = styled.img`
+const Image = styled(ImageWithFallback)`
   flex-shrink: 0;
 
   width: 58px;

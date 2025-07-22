@@ -33,11 +33,7 @@ export const HorizontalTabs: Story = {
     direction: 'horizontal',
   },
   render: (args) => {
-    return (
-      <Tabs {...args}>
-       <Tabs {...args} />
-      </Tabs>
-    );
+    return <Tabs {...args} />;
   },
 };
 
@@ -46,21 +42,6 @@ export const VerticalTabs: Story = {
     direction: 'vertical',
   },
   render: (args) => {
-    return (
-      <Tabs {...args}>
-        <Tab
-          onTabSelect={(id) => id}
-          value="봄봄1"
-          selected={false}
-          label="봄봄1"
-        />
-        <Tab
-          onTabSelect={(id) => id}
-          value="봄봄2"
-          selected={true}
-          label="봄봄2"
-        />
-      </Tabs>
-    );
+    return <Tabs {...args} />;
   },
 };

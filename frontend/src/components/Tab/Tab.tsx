@@ -54,5 +54,4 @@ const Container = styled.li<{ selected: boolean }>`
   font-weight: ${({ selected }) => (selected ? '600' : '400')};
 
   cursor: pointer;
-  gap: 8px;
 `;

@@ -96,14 +96,13 @@ function Storage() {
 
 const Container = styled.div`
   display: flex;
+  gap: 24px;
   align-items: flex-start;
   justify-content: center;
 
   width: 100%;
   max-width: 1280px;
   padding: 64px 0;
-
-  gap: 24px;
 `;
 
 const SideSection = styled.div`
@@ -112,17 +111,15 @@ const SideSection = styled.div`
 
 const MainSection = styled.div`
   display: flex;
+  gap: 20px;
   flex-direction: column;
   align-items: flex-start;
-
-  gap: 20px;
 `;
 
 const TitleWrapper = styled.div`
   display: flex;
-  align-items: center;
-
   gap: 8px;
+  align-items: center;
 `;
 
 const TitleIconBox = styled.div`
@@ -157,7 +154,6 @@ const SummaryText = styled.p`
 
 const ArticleList = styled.ul`
   display: flex;
-  flex-direction: column;
-
   gap: 16px;
+  flex-direction: column;
 `;

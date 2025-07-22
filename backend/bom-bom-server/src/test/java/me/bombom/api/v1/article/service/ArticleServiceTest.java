@@ -16,27 +16,29 @@ import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.domain.TodayReading;
-import me.bombom.api.v1.member.domain.WeeklyReading;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.member.repository.TodayReadingRepository;
-import me.bombom.api.v1.member.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
+import me.bombom.api.v1.reading.domain.TodayReading;
+import me.bombom.api.v1.reading.domain.WeeklyReading;
+import me.bombom.api.v1.reading.repository.TodayReadingRepository;
+import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
-@DataJpaTest
-@Import(ArticleService.class)
+@SpringBootTest
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+//@DataJpaTest
 class ArticleServiceTest {
 
     private static final LocalDateTime BASE_TIME = LocalDateTime.of(2025, 7, 15, 10, 0);
@@ -398,10 +400,14 @@ class ArticleServiceTest {
         articleService.markAsRead(article.getId(), member.getId());
 
         // then
+        Article updatedArticle = articleRepository.findById(article.getId()).get();
+        TodayReading updatedTodayReading = todayReadingRepository.findByMemberId(member.getId()).get();
+        WeeklyReading updatedWeeklyReading = weeklyReadingRepository.findByMemberId(member.getId()).get();
+
         assertSoftly(softly -> {
-            softly.assertThat(article.isRead()).isTrue();
-            softly.assertThat(todayReading.getCurrentCount()).isEqualTo(2);
-            softly.assertThat(weeklyReading.getCurrentCount()).isEqualTo(4);
+            softly.assertThat(updatedArticle.isRead()).isTrue();
+            softly.assertThat(updatedTodayReading.getCurrentCount()).isEqualTo(2);
+            softly.assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(4);
         });
     }
 
@@ -423,10 +429,14 @@ class ArticleServiceTest {
         articleService.markAsRead(article.getId(), member.getId());
 
         // then
+        Article updatedArticle = articleRepository.findById(article.getId()).get();
+        TodayReading updatedTodayReading = todayReadingRepository.findByMemberId(member.getId()).get();
+        WeeklyReading updatedWeeklyReading = weeklyReadingRepository.findByMemberId(member.getId()).get();
+
         assertSoftly(softly -> {
-            softly.assertThat(article.isRead()).isTrue();
-            softly.assertThat(todayReading.getCurrentCount()).isEqualTo(1);
-            softly.assertThat(weeklyReading.getCurrentCount()).isEqualTo(4);
+            softly.assertThat(updatedArticle.isRead()).isTrue();
+            softly.assertThat(updatedTodayReading.getCurrentCount()).isEqualTo(1);
+            softly.assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(4);
         });
     }
 

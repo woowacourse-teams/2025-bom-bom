@@ -1,4 +1,4 @@
-package me.bombom.api.v1.member.domain;
+package me.bombom.api.v1.reading.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,9 +15,7 @@ import me.bombom.api.v1.common.BaseEntity;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class TodayReading extends BaseEntity {
-
-    private static final int INCREASE_CURRENT_COUNT = 1;
+public class ContinueReading extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,26 +24,17 @@ public class TodayReading extends BaseEntity {
     @Column(nullable = false, unique = true)
     private Long memberId;
 
-    @Column(nullable = false, columnDefinition = "TINYINT")
-    private int totalCount;
-
-    @Column(nullable = false, columnDefinition = "TINYINT DEFAULT 0")
-    private int currentCount;
+    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    private int dayCount;
 
     @Builder
-    public TodayReading(
+    public ContinueReading(
             Long id,
             @NonNull Long memberId,
-            int totalCount,
-            int currentCount
+            int dayCount
     ) {
         this.id = id;
         this.memberId = memberId;
-        this.totalCount = totalCount;
-        this.currentCount = currentCount;
-    }
-
-    public void increaseCurrentCount() {
-        this.currentCount += INCREASE_CURRENT_COUNT;
+        this.dayCount = dayCount;
     }
 }

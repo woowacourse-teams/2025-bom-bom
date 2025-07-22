@@ -1,4 +1,4 @@
-package me.bombom.api.v1.member.domain;
+package me.bombom.api.v1.reading.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

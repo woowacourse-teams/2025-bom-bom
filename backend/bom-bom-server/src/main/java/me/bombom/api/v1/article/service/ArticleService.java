@@ -12,15 +12,16 @@ import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
-import me.bombom.api.v1.member.domain.TodayReading;
-import me.bombom.api.v1.member.domain.WeeklyReading;
+import me.bombom.api.v1.reading.domain.TodayReading;
+import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.member.repository.TodayReadingRepository;
-import me.bombom.api.v1.member.repository.WeeklyReadingRepository;
+import me.bombom.api.v1.reading.repository.TodayReadingRepository;
+import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
+import me.bombom.api.v1.reading.service.ReadingService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ public class ArticleService {
     private final NewsletterRepository newsletterRepository;
     private final TodayReadingRepository todayReadingRepository;
     private final WeeklyReadingRepository weeklyReadingRepository;
+    private final ReadingService readingService;
 
     public Page<ArticleResponse> getArticles(Long memberId, GetArticlesOptions options, Pageable pageable) {
         validateMemberExists(memberId);
@@ -62,8 +64,7 @@ public class ArticleService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         validateArticleOwner(article, memberId);
         article.markAsRead();
-        updateWeeklyReadingCount(article);
-        updateTodayReadingCount(article);
+        readingService.updateReadingCount(article);
     }
 
     public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(Long memberId) {
@@ -97,17 +98,4 @@ public class ArticleService {
         }
     }
 
-    private void updateWeeklyReadingCount(Article article) {
-        WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(article.getMemberId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        weeklyReading.increaseCurrentCount();
-    }
-
-    private void updateTodayReadingCount(Article article) {
-        if(article.isArrivedToday()) {
-            TodayReading todayReading = todayReadingRepository.findByMemberId(article.getMemberId())
-                    .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-            todayReading.increaseCurrentCount();
-        }
-    }
 }

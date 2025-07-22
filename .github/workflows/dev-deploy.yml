@@ -3,11 +3,14 @@ name: Backend Dev Server CI
 on:
   push:
     branches:
-      - server-dev
+      - chore-BOM-85/connect-nginx-to-docker
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
 
     steps:
       - name: 코드 체크아웃
@@ -21,7 +24,6 @@ jobs:
           cache: gradle
 
       - name: application.yml 생성
-        working-directory: ./backend/bom-bom-server
         run: |
           echo "Create application.yml(prod) from secret"
           mkdir -p src/main/resources
@@ -32,7 +34,6 @@ jobs:
           echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
 
       - name: JAR 빌드
-        working-directory: ./backend/bom-bom-server
         run: ./gradlew build --no-daemon
 
       - name: Docker Buildx 설정
@@ -45,7 +46,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Docker 이미지 빌드 및 푸시
-        working-directory: ./backend/bom-bom-server
         run: |
           if ! docker buildx inspect ci-builder &>/dev/null; then
             docker buildx create --use --name ci-builder
@@ -61,7 +61,10 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: [ self-hosted, linux, arm64, main ]
+    runs-on: [ self-hosted, main ]
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
 
     steps:
       - name: 코드 체크아웃
@@ -103,7 +106,6 @@ jobs:
 
       - name: 컨테이너 제거 및 재실행 (docker-compose)
         if: env.skip_deploy == 'false'
-        working-directory: ./backend/bom-bom-server
         run: |
           echo "RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}" > .env
           echo "DATABASE=${{ secrets.DATABASE }}" >> .env
@@ -112,3 +114,5 @@ jobs:
 
           docker compose --env-file .env down || true
           docker compose --env-file .env up -d
+          
+          rm .env || true

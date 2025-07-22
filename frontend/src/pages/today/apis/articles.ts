@@ -8,12 +8,16 @@ interface GetArticlesParams {
   sorted: 'ASC' | 'DESC';
   category?: string;
   size?: number;
+  page?: number;
 }
 
 export const getArticles = async ({
   date,
   memberId,
   sorted,
+  category,
+  size,
+  page,
 }: GetArticlesParams) => {
   return await fetcher.get<PageableResponse<Article>>({
     path: '/articles',
@@ -21,6 +25,9 @@ export const getArticles = async ({
       date,
       memberId,
       sorted,
+      category,
+      size,
+      page,
     },
   });
 };

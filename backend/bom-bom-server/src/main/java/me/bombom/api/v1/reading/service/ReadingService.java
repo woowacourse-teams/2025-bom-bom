@@ -4,6 +4,12 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.dto.request.UpdateWeeklyGoalCountRequest;
+import me.bombom.api.v1.member.dto.response.ReadingInformationResponse;
+import me.bombom.api.v1.member.dto.response.WeeklyGoalCountResponse;
+import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.reading.domain.ContinueReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
@@ -17,9 +23,30 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ReadingService {
 
+    private final MemberRepository memberRepository;
     private final ContinueReadingRepository continueReadingRepository;
     private final TodayReadingRepository todayReadingRepository;
     private final WeeklyReadingRepository weeklyReadingRepository;
+
+    @Transactional
+    public WeeklyGoalCountResponse updateWeeklyGoalCount(UpdateWeeklyGoalCountRequest request) {
+        Member member = memberRepository.findById(request.memberId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(member.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        weeklyReading.updateGoalCount(request.weeklyGoalCount());
+        return WeeklyGoalCountResponse.from(weeklyReading);
+    }
+
+    public ReadingInformationResponse getReadingInformation(Long memberId) {
+        ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        return ReadingInformationResponse.of(continueReading, todayReading, weeklyReading);
+    }
 
     @Transactional
     public void updateReadingCount(Article article){

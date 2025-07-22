@@ -1,4 +1,4 @@
-import { ComponentProps, useState } from 'react';
+import { ComponentProps, useEffect, useState } from 'react';
 import defaultImage from '#/assets/bombom.png';
 
 interface ImageWithFallbackProps extends ComponentProps<'img'> {
@@ -8,6 +8,12 @@ interface ImageWithFallbackProps extends ComponentProps<'img'> {
 
 function ImageWithFallback({ src, alt, ...props }: ImageWithFallbackProps) {
   const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    if (src.length === 0) {
+      setImageError(true);
+    }
+  }, [src]);
 
   return (
     <img

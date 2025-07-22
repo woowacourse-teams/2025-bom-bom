@@ -10,6 +10,7 @@ public record MemberProfileResponse(
         String nickname,
         String profileImageUrl
 ) {
+
     public static MemberProfileResponse from(Member member) {
         return MemberProfileResponse.builder()
                 .id(member.getId())

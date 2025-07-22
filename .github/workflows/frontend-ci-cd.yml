@@ -32,6 +32,10 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Build
+        run: npm run lint
+      - name: Type check
+        run: npm run type-check
+      - name: Build
         run: npm run build
 
       # TODO : Deploy

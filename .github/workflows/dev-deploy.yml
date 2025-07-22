@@ -116,3 +116,12 @@ jobs:
           docker compose --env-file .env up -d
           
           rm .env || true
+
+      - name: Docker 리소스 정리
+        if: env.skip_deploy == 'false'
+        run: |
+          echo "🧼 Docker 리소스 정리 시작"
+          docker container prune -f
+          docker image prune -f
+          docker volume prune -f
+          echo "리소스 정리 완료"

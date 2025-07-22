@@ -19,7 +19,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    name: '봄봄',
+    value: 'bombom',
+    label: '봄봄',
     onTabSelect: (id) => id,
   },
   render: (args) => {
@@ -32,11 +33,12 @@ export const Default: Story = {
   },
 };
 
-export const WithLeadingIcon: Story = {
+export const WithEndIcon: Story = {
   args: {
-    name: '나침반',
+    value: 'compass',
+    label: '나침반',
     onTabSelect: (id) => id,
-    LeadingComponent: <CompassIcon />,
+    StartComponent: <CompassIcon />,
   },
   render: (args) => {
     return (
@@ -48,11 +50,12 @@ export const WithLeadingIcon: Story = {
   },
 };
 
-export const WithTrailingIcon: Story = {
+export const WithStartIcon: Story = {
   args: {
-    name: '나침반',
+    value: 'compass',
+    label: '나침반',
     onTabSelect: (id) => id,
-    TrailingComponent: <CompassIcon />,
+    StartComponent: <CompassIcon />,
   },
   render: (args) => {
     return (

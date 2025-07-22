@@ -4,19 +4,19 @@ import Tabs from '@/components/Tabs/Tabs';
 import Tab from '@/components/Tab/Tab';
 import Badge from '@/components/Badge/Badge';
 
-interface CategoryItem<T extends string | number> {
+interface CategoryItem<T extends string> {
   value: T;
   label: string;
   quantity: number;
 }
 
-interface CategoryFilterProps<T extends string | number> {
+interface CategoryFilterProps<T extends string> {
   categoryList: CategoryItem<T>[];
   selectedValue: T;
   onSelectCategory: (value: T) => void;
 }
 
-function CategoryFilter<T extends string | number>({
+function CategoryFilter<T extends string>({
   categoryList,
   selectedValue,
   onSelectCategory,
@@ -37,7 +37,7 @@ function CategoryFilter<T extends string | number>({
             label={label}
             selected={selectedValue === value}
             onTabSelect={onSelectCategory}
-            TrailingComponent={<Badge text={String(quantity)} />}
+            StartComponent={<Badge text={String(quantity)} />}
           />
         ))}
       </Tabs>

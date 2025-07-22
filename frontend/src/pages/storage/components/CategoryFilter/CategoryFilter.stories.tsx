@@ -18,7 +18,7 @@ const meta = {
       control: 'object',
       description: '카테고리 목록',
     },
-    selectedCategory: {
+    selectedValue: {
       control: 'text',
       description: '선택된 카테고리',
     },
@@ -29,18 +29,18 @@ const meta = {
   },
   args: {
     categoryList: [
-      { name: '기술', quantity: 1 },
-      { name: '경제', quantity: 2 },
-      { name: '디자인', quantity: 3 },
-      { name: '마케팅', quantity: 4 },
-      { name: '비즈니스', quantity: 5 },
-      { name: '문화', quantity: 3 },
-      { name: '건강', quantity: 2 },
-      { name: '여행', quantity: 1 },
-      { name: '푸드', quantity: 3 },
-      { name: '교육', quantity: 0 },
+      { value: '기술', label: '기술', quantity: 1 },
+      { value: '경제', label: '경제', quantity: 2 },
+      { value: '디자인', label: '디자인', quantity: 3 },
+      { value: '마케팅', label: '마케팅', quantity: 4 },
+      { value: '비즈니스', label: '비즈니스', quantity: 5 },
+      { value: '문화', label: '문화', quantity: 3 },
+      { value: '건강', label: '건강', quantity: 2 },
+      { value: '여행', label: '여행', quantity: 1 },
+      { value: '푸드', label: '푸드', quantity: 3 },
+      { value: '교육', label: '교육', quantity: 0 },
     ],
-    selectedCategory: '전체',
+    selectedValue: '전체',
     onSelectCategory: () => {},
   },
 } satisfies Meta<typeof CategoryFilter>;
@@ -50,14 +50,14 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => {
-    const { selectedCategory: initialCategory, ...rest } = args;
+    const { selectedValue: initialCategory, ...rest } = args;
     const [currentSelected, setCurrentSelected] =
       useState<string>(initialCategory);
 
     return (
       <CategoryFilter
         {...rest}
-        selectedCategory={currentSelected}
+        selectedValue={currentSelected}
         onSelectCategory={(id: string | number) => {
           setCurrentSelected(String(id));
         }}

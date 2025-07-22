@@ -1,4 +1,4 @@
-package me.bombom.api.v1.member.dto.response;
+package me.bombom.api.v1.reading.dto.response;
 
 import me.bombom.api.v1.reading.domain.ContinueReading;
 import me.bombom.api.v1.reading.domain.TodayReading;

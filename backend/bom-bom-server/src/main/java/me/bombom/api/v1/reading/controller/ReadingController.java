@@ -2,9 +2,9 @@ package me.bombom.api.v1.reading.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.member.dto.request.UpdateWeeklyGoalCountRequest;
-import me.bombom.api.v1.member.dto.response.ReadingInformationResponse;
-import me.bombom.api.v1.member.dto.response.WeeklyGoalCountResponse;
+import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
+import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
+import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.reading.service.ReadingService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;

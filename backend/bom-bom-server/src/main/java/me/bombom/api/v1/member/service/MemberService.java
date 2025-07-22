@@ -5,18 +5,9 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
-import me.bombom.api.v1.reading.domain.ContinueReading;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.reading.domain.TodayReading;
-import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
-import me.bombom.api.v1.member.dto.request.UpdateWeeklyGoalCountRequest;
-import me.bombom.api.v1.member.dto.response.ReadingInformationResponse;
-import me.bombom.api.v1.member.dto.response.WeeklyGoalCountResponse;
-import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.reading.repository.TodayReadingRepository;
-import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

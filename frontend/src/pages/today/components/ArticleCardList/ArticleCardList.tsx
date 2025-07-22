@@ -1,8 +1,8 @@
-import styled from '@emotion/styled';
-import ArticleCard from '../ArticleCard/ArticleCard';
 import checkIcon from '#/assets/check.svg';
 import letterIcon from '#/assets/letter.svg';
 import { Article } from '@/pages/today/types/article';
+import styled from '@emotion/styled';
+import ArticleCard from '../ArticleCard/ArticleCard';
 
 interface ArticleCardListProps {
   articles: Article[];
@@ -50,15 +50,17 @@ export default ArticleCardList;
 
 const Container = styled.div`
   display: flex;
-  gap: 16px;
   flex-direction: column;
   align-items: flex-start;
+
+  gap: 16px;
 `;
 
 const ListTitleBox = styled.div`
   display: flex;
-  gap: 12px;
   align-items: center;
+
+  gap: 12px;
 `;
 
 const ListTitle = styled.h5`
@@ -68,6 +70,7 @@ const ListTitle = styled.h5`
 
 const CardList = styled.ul`
   display: flex;
-  gap: 16px;
   flex-direction: column;
+
+  gap: 16px;
 `;

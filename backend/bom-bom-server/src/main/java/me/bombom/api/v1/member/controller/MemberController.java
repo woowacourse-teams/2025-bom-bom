@@ -27,11 +27,6 @@ public class MemberController {
         return memberService.updateWeeklyGoalCount(request);
     }
 
-    @PatchMapping("/me/reading/progress/week/count")
-    public WeeklyCurrentCountResponse updateWeeklyCurrentCount(@Valid @RequestBody UpdateWeeklyCurrentCountRequest request){
-        return memberService.updateWeeklyCurrentCount(request);
-    }
-
     @GetMapping("/me/reading")
     public ReadingInformationResponse getReadingInformation(@RequestParam Long memberId){
         return memberService.getReadingInformation(memberId);

@@ -15,6 +15,23 @@ module.exports = {
   rules: {
     'react/react-in-jsx-scope': 'off',
     'import/no-unresolved': 'off',
+    'import/order': [
+      'error',
+      {
+        groups: [
+          'builtin',
+          'external',
+          ['parent', 'sibling'],
+          'internal',
+          'type',
+        ],
+        pathGroups: [{ pattern: '@/**', group: 'parent' }],
+        alphabetize: {
+          order: 'asc',
+          caseInsensitive: true,
+        },
+      },
+    ],
   },
   plugins: ['jsx-a11y', 'import', 'react-hooks', 'react', 'jest', 'prettier'],
   parser: '@typescript-eslint/parser',

@@ -2,10 +2,9 @@ import { Global } from '@emotion/react';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import reset from './styles/reset.ts';
-
-import { routeTree } from './routeTree.gen';
 import { ENV } from './apis/env.ts';
+import { routeTree } from './routeTree.gen';
+import reset from './styles/reset.ts';
 
 const router = createRouter({ routeTree });
 

@@ -1,4 +1,4 @@
-import { calculateRate } from '../../utils/math';
+import { calculateRate } from '@/utils/math';
 import { RateFormatType } from './types';
 
 interface FormatRateParams {

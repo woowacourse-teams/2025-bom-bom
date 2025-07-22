@@ -10,10 +10,17 @@ const meta = {
       <Tab
         key="봄봄1"
         onTabSelect={(id) => id}
-        name="봄봄1"
+        value="봄봄1"
         selected={false}
+        label="봄봄1"
       />,
-      <Tab key="봄봄2" onTabSelect={(id) => id} name="봄봄2" selected={true} />,
+      <Tab
+        key="봄봄2"
+        onTabSelect={(id) => id}
+        value="봄봄2"
+        selected={true}
+        label="봄봄2"
+      />,
     ],
   },
 } satisfies Meta<typeof Tabs>;
@@ -28,8 +35,18 @@ export const HorizontalTabs: Story = {
   render: (args) => {
     return (
       <Tabs {...args}>
-        <Tab onTabSelect={(id) => id} name="봄봄1" selected={false} />
-        <Tab onTabSelect={(id) => id} name="봄봄2" selected={true} />
+        <Tab
+          onTabSelect={(id) => id}
+          value="봄봄1"
+          selected={false}
+          label="봄봄1"
+        />
+        <Tab
+          onTabSelect={(id) => id}
+          value="봄봄2"
+          selected={true}
+          label="봄봄2"
+        />
       </Tabs>
     );
   },
@@ -42,8 +59,18 @@ export const VerticalTabs: Story = {
   render: (args) => {
     return (
       <Tabs {...args}>
-        <Tab onTabSelect={(id) => id} name="봄봄1" selected={false} />
-        <Tab onTabSelect={(id) => id} name="봄봄2" selected={true} />
+        <Tab
+          onTabSelect={(id) => id}
+          value="봄봄1"
+          selected={false}
+          label="봄봄1"
+        />
+        <Tab
+          onTabSelect={(id) => id}
+          value="봄봄2"
+          selected={true}
+          label="봄봄2"
+        />
       </Tabs>
     );
   },

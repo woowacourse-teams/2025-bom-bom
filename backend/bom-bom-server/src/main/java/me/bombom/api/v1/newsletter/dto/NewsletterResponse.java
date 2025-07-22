@@ -5,6 +5,7 @@ public record NewsletterResponse(
         String name,
         String imageUrl,
         String description,
-        String mainPageUrl
+        String mainPageUrl,
+        String category
 ) {
 }

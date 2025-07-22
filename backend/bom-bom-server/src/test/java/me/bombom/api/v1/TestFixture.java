@@ -10,6 +10,7 @@ import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.reading.domain.ContinueReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
+import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 
 public final class TestFixture {
 
@@ -69,6 +70,32 @@ public final class TestFixture {
                 .categoryId(categoryId)
                 .detailId(1L)
                 .build();
+    }
+
+    /**
+     * NewsletterDetail
+     */
+    public static List<NewsletterDetail> createNewsletterDetails() {
+        return List.of(
+                NewsletterDetail.builder()
+                        .mainPageUrl("https://news1.com")
+                        .subscribeUrl("https://news1.com/subscribe")
+                        .issueCycle("매일 발행")
+                        .subscribeCount(1000)
+                        .build(),
+                NewsletterDetail.builder()
+                        .mainPageUrl("https://ittimes.com")
+                        .subscribeUrl("https://ittimes.com/subscribe")
+                        .issueCycle("매주 월요일")
+                        .subscribeCount(850)
+                        .build(),
+                NewsletterDetail.builder()
+                        .mainPageUrl("https://biz.com")
+                        .subscribeUrl("https://biz.com/subscribe")
+                        .issueCycle("격주 화요일")
+                        .subscribeCount(600)
+                        .build()
+        );
     }
 
     /**

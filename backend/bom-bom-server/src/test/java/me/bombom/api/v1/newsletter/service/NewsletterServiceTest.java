@@ -4,9 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
+import me.bombom.api.v1.TestFixture;
+import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
-import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
+import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,57 +30,17 @@ class NewsletterServiceTest {
     @Autowired
     private NewsletterDetailRepository newsletterDetailRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     private List<Newsletter> newsletters;
 
     @BeforeEach
     public void setup() {
-        List<NewsletterDetail> newsletterDetails = List.of(
-            NewsletterDetail.builder()
-                    .mainPageUrl("https://news1.com")
-                    .subscribeUrl("https://news1.com/subscribe")
-                    .issueCycle("매일")
-                    .subscribeCount(1000)
-                    .build(),
-            NewsletterDetail.builder()
-                    .mainPageUrl("https://ittimes.com")
-                    .subscribeUrl("https://ittimes.com/subscribe")
-                    .issueCycle("매주 월요일")
-                    .subscribeCount(850)
-                    .build(),
-            NewsletterDetail.builder()
-                    .mainPageUrl("https://biz.com")
-                    .subscribeUrl("https://biz.com/subscribe")
-                    .issueCycle("격주 화요일")
-                    .subscribeCount(600)
-                    .build()
-            );
-        newsletterDetailRepository.saveAll(newsletterDetails);
-        newsletters = List.of(
-            Newsletter.builder()
-                    .name("뉴스픽")
-                    .description("뉴스픽 요약 뉴스")
-                    .imageUrl("https://cdn.bombom.me/img1.png")
-                    .email("news@newspick.com")
-                    .categoryId(1L)
-                    .detailId(newsletterDetails.get(0).getId())
-                    .build(),
-            Newsletter.builder()
-                    .name("IT타임즈")
-                    .description("IT 업계 트렌드")
-                    .imageUrl("https://cdn.bombom.me/img2.png")
-                    .email("editor@ittimes.io")
-                    .categoryId(2L)
-                    .detailId(newsletterDetails.get(1).getId())
-                    .build(),
-            Newsletter.builder()
-                    .name("비즈레터")
-                    .description("비즈니스 뉴스 큐레이션")
-                    .imageUrl("https://cdn.bombom.me/img3.png")
-                    .email("biz@biz.com")
-                    .categoryId(3L)
-                    .detailId(newsletterDetails.get(2).getId())
-                    .build()
-        );
+        newsletterDetailRepository.saveAll(TestFixture.createNewsletterDetails());
+        List<Category> categories = TestFixture.createCategories();
+        categoryRepository.saveAll(categories);
+        newsletters = TestFixture.createNewsletters(categories);
         newsletterRepository.saveAll(newsletters);
     }
 

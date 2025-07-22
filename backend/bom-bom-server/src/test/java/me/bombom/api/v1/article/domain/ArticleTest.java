@@ -8,17 +8,41 @@ import org.junit.jupiter.api.Test;
 
 class ArticleTest {
 
-    private static final LocalDateTime baseTime = LocalDateTime.of(2025, 7, 15, 10, 0);
+    private static final LocalDateTime BASE_TIME = LocalDateTime.of(2025, 7, 15, 10, 0);
 
     @Test
     void 아티클의_읽기_상태를_true로_바꿀_수_있다() {
         //given
-        Article article = TestFixture.createArticle(1L, 1L, baseTime);
+        Article article = TestFixture.createArticle(1L, 1L, BASE_TIME);
 
         //when
         article.markAsRead();
 
         //then
         assertThat(article.isRead()).isTrue();
+    }
+
+    @Test
+    void 아티클이_오늘_도착했으면_true를_반환한다() {
+        // given
+        Article article = TestFixture.createArticle(1L, 1L, LocalDateTime.now());
+
+        // when
+        boolean result = article.isArrivedToday();
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void 아티클이_오늘_도착하지_않았으면_false를_반환한다() {
+        // given
+        Article article = TestFixture.createArticle(1L, 1L, BASE_TIME);
+
+        // when
+        boolean result = article.isArrivedToday();
+
+        // then
+        assertThat(result).isFalse();
     }
 }

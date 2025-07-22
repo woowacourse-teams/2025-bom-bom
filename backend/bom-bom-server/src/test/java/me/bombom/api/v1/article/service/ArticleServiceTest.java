@@ -1,6 +1,5 @@
 package me.bombom.api.v1.article.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -17,8 +16,12 @@ import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.domain.TodayReading;
+import me.bombom.api.v1.member.domain.WeeklyReading;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.member.repository.TodayReadingRepository;
+import me.bombom.api.v1.member.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
@@ -36,7 +39,7 @@ import org.springframework.data.domain.Pageable;
 @Import(ArticleService.class)
 class ArticleServiceTest {
 
-    private static final LocalDateTime baseTime = LocalDateTime.of(2025, 7, 15, 10, 0);
+    private static final LocalDateTime BASE_TIME = LocalDateTime.of(2025, 7, 15, 10, 0);
 
     @Autowired
     private ArticleService articleService;
@@ -52,6 +55,12 @@ class ArticleServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private TodayReadingRepository todayReadingRepository;
+
+    @Autowired
+    private WeeklyReadingRepository weeklyReadingRepository;
 
     List<Category> categories;
     List<Newsletter> newsletters;
@@ -146,7 +155,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                GetArticlesOptions.of(baseTime.toLocalDate(), null, SortOption.DESC),
+                GetArticlesOptions.of(BASE_TIME.toLocalDate(), null, SortOption.DESC),
                 pageable
         );
 
@@ -328,7 +337,7 @@ class ArticleServiceTest {
                 .isRead(false)
                 .memberId(member.getId())
                 .newsletterId(0L) // 존재하지 않는 뉴스레터 ID
-                .arrivedDateTime(baseTime)
+                .arrivedDateTime(BASE_TIME)
                 .build();
         articleRepository.save(article);
 
@@ -343,7 +352,7 @@ class ArticleServiceTest {
         // given
         Newsletter newsletter = TestFixture.createNewsletter("테스트 뉴스레터", "test@example.com", 0L);
         newsletterRepository.save(newsletter);
-        Article article = TestFixture.createArticle(member.getId(), newsletter.getId(), baseTime);
+        Article article = TestFixture.createArticle(member.getId(), newsletter.getId(), BASE_TIME);
         articleRepository.save(article);
 
         // when & then
@@ -372,22 +381,119 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 다_읽음_갱신_아티클_읽음_갱신_성공_테스트() {
+    void 다_읽음_갱신_성공_테스트_오늘의_뉴스레터일_경우() {
         // given
-        Article article = TestFixture.createArticle(member.getId(), newsletters.getFirst().getId(), baseTime);
+        Article article = TestFixture.createArticle(
+                member.getId(),
+                newsletters.getFirst().getId(),
+                LocalDateTime.now()
+        );
         articleRepository.save(article);
+        TodayReading todayReading = TestFixture.todayReadingFixture(member);
+        todayReadingRepository.save(todayReading);
+        WeeklyReading weeklyReading = TestFixture.weeklyReadingFixture(member);
+        weeklyReadingRepository.save(weeklyReading);
 
         //when
-        articleService.markAsRead(article.getId());
+        articleService.markAsRead(article.getId(), member.getId());
 
         // then
-        assertThat(article.isRead()).isTrue();
+        assertSoftly(softly -> {
+            softly.assertThat(article.isRead()).isTrue();
+            softly.assertThat(todayReading.getCurrentCount()).isEqualTo(2);
+            softly.assertThat(weeklyReading.getCurrentCount()).isEqualTo(4);
+        });
+    }
+
+    @Test
+    void 다_읽음_갱신_성공_테스트_오늘의_뉴스레터가_아닐_경우() {
+        // given
+        Article article = TestFixture.createArticle(
+                member.getId(),
+                newsletters.getFirst().getId(),
+                BASE_TIME
+        );
+        articleRepository.save(article);
+        TodayReading todayReading = TestFixture.todayReadingFixture(member);
+        todayReadingRepository.save(todayReading);
+        WeeklyReading weeklyReading = TestFixture.weeklyReadingFixture(member);
+        weeklyReadingRepository.save(weeklyReading);
+
+        //when
+        articleService.markAsRead(article.getId(), member.getId());
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(article.isRead()).isTrue();
+            softly.assertThat(todayReading.getCurrentCount()).isEqualTo(1);
+            softly.assertThat(weeklyReading.getCurrentCount()).isEqualTo(4);
+        });
     }
 
     @Test
     void 다_읽음_갱신_아티클이_존재하지_않으면_예외() {
         // when & then
-        assertThatThrownBy(() -> articleService.markAsRead(0L))
+        assertThatThrownBy(() -> articleService.markAsRead(0L, member.getId()))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 다_읽음_갱신_아티클_주인이_일치하지_않으면_예외() {
+        // given
+        Member otherMember = Member.builder()
+                .provider("provider2")
+                .providerId("providerId2")
+                .email("email2")
+                .nickname("nickname2")
+                .gender(Gender.FEMALE)
+                .roleId(1L)
+                .build();
+        memberRepository.save(otherMember);
+
+        Article article = TestFixture.createArticle(
+                member.getId(),
+                newsletters.getFirst().getId(),
+                BASE_TIME
+        );
+        articleRepository.save(article);
+
+        // when & then
+        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), otherMember.getId()))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
+    }
+
+    @Test
+    void 다_읽음_갱신_아티클_오늘의_읽기가_존재하지_않을_경우_예외() {
+        // given
+        Article article = TestFixture.createArticle(
+                member.getId(),
+                newsletters.getFirst().getId(),
+                BASE_TIME
+        );
+        articleRepository.save(article);
+
+        // when & then
+        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), member.getId()))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 다_읽음_갱신_아티클_이번주_읽기가_존재하지_않을_경우_예외() {
+        // given
+        Article article = TestFixture.createArticle(
+                member.getId(),
+                newsletters.getFirst().getId(),
+                BASE_TIME
+        );
+        articleRepository.save(article);
+        TodayReading todayReading = TestFixture.todayReadingFixture(member);
+        todayReadingRepository.save(todayReading);
+
+        // when & then
+        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), member.getId()))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }

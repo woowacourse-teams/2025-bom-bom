@@ -8,6 +8,7 @@ import SearchInput from '../components/SearchInput/SearchInput';
 import Select from '../components/Select/Select';
 import CategoryFilter from '../pages/storage/components/CategoryFilter/CategoryFilter';
 import { getArticles, getStatisticsCategories } from '@/apis/articles';
+import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 
 export const Route = createFileRoute('/storage')({
@@ -33,19 +34,7 @@ function Storage() {
 
   if (!articles) return null;
 
-  const count = articles.content.reduce<{
-    total: number;
-    read: number;
-    unread: number;
-  }>(
-    (acc, article) => {
-      acc.total++;
-      if (article.isRead) acc.read++;
-      else acc.unread++;
-      return acc;
-    },
-    { total: 0, read: 0, unread: 0 },
-  );
+  const readStats = getArticleReadStats(articles.content);
 
   return (
     <PageLayout activeNav="storage">
@@ -80,8 +69,8 @@ function Storage() {
           <SearchInput placeholder="뉴스레터 제목이나 발행처로 검색하세요..." />
           <SummaryBar>
             <SummaryText>
-              총 {count?.total}개 • 읽지 않음 {count?.unread}개 • 읽음{' '}
-              {count?.read}개
+              총 {readStats.total}개 • 읽지 않음 {readStats.unread}개 • 읽음{' '}
+              {readStats.read}개
             </SummaryText>
             <Select
               options={[

@@ -1,5 +1,6 @@
 package me.bombom.api.v1.auth.controller;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,7 +41,17 @@ public class AuthController {
     }
 
     @GetMapping("/login/{provider}")
-    public void login(@PathVariable("provider") String provider, HttpServletResponse response) throws IOException {
+    public void login(
+            @PathVariable("provider") String provider,
+            @RequestParam String redirectUri,
+            HttpServletResponse response
+    ) throws IOException {
+        if (redirectUri != null || !redirectUri.isBlank()) {
+            Cookie cookie = new Cookie("redirectUri", redirectUri);
+            cookie.setPath("/");
+            cookie.setMaxAge(60 * 5);
+            response.addCookie(cookie);
+        }
         response.sendRedirect("/oauth2/authorization/" + provider);
     }
 

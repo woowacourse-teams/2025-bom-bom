@@ -1,9 +1,9 @@
+import trendingUpIcon from '#/assets/trending-up.svg';
+import Chip from '@/components/Chip/Chip';
+import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
+import { CATEGORIES } from '@/constants/category';
+import { NewslettersResponse } from '@/pages/today/types/article';
 import styled from '@emotion/styled';
-import trendingUpIcon from '../../../../../../public/assets/trending-up.svg';
-import Chip from '../../../../../components/Chip/Chip';
-import ImageInfoCard from '../../../../../components/ImageInfoCard/ImageInfoCard';
-import { CATEGORIES } from '../../../../../constants/category';
-import { NewslettersResponse } from '../../../../today/types/article';
 
 interface TrendySectionProps {
   newsletters: NewslettersResponse;
@@ -53,11 +53,10 @@ const Container = styled.div`
 
 const SectionHeader = styled.div`
   display: flex;
+  gap: 8px;
   align-items: center;
 
   margin-bottom: 16px;
-
-  gap: 8px;
 `;
 
 const SectionIconBox = styled.span`
@@ -83,17 +82,16 @@ const SectionTitle = styled.h2`
 
 const TagContainer = styled.div`
   display: flex;
+  gap: 8px;
   flex-wrap: wrap;
 
   margin-bottom: 16px;
-
-  gap: 8px;
 `;
 
 const TrendyGrid = styled.div`
   display: grid;
-
   gap: 8px;
+
   grid-template-columns: repeat(2, 1fr);
 
   @media (width <= 768px) {

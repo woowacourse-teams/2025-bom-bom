@@ -1,8 +1,8 @@
+import clockIcon from '#/assets/clock.svg';
+import { formatDateToDotString } from '@/utils/date';
 import styled from '@emotion/styled';
-import { formatDateToDotString } from '../../../utils/date';
-import clockIcon from '../../../../public/assets/clock.svg';
-import { Article } from '../types/article';
 import { Link } from '@tanstack/react-router';
+import { Article } from '../../types/article';
 
 interface ArticleCardProps {
   data: Article;
@@ -53,6 +53,7 @@ export default ArticleCard;
 
 const Container = styled(Link)<{ isRead: boolean }>`
   display: flex;
+  gap: 12px;
   align-items: center;
 
   padding: 20px;
@@ -66,18 +67,18 @@ const Container = styled(Link)<{ isRead: boolean }>`
   color: inherit;
 
   box-sizing: border-box;
-  gap: 12px;
   opacity: ${({ isRead }) => (isRead ? 0.5 : 1)};
+
+  text-decoration: none;
 `;
 
 const InfoWrapper = styled.div`
   display: flex;
+  gap: 12px;
   flex-direction: column;
   align-items: flex-start;
 
   width: 100%;
-
-  gap: 12px;
 `;
 
 const Title = styled.h2`
@@ -99,9 +100,8 @@ const Description = styled.p`
 
 const MetaInfoRow = styled.div`
   display: flex;
-  align-items: center;
-
   gap: 8px;
+  align-items: center;
 `;
 
 const MetaInfoTag = styled.div`
@@ -125,9 +125,8 @@ const MetaInfoText = styled.span`
 
 const ReadTimeBox = styled.div`
   display: flex;
-  align-items: center;
-
   gap: 4px;
+  align-items: center;
 `;
 
 const Thumbnail = styled.img`

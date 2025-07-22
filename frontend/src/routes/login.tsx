@@ -19,6 +19,7 @@ function Login() {
 
 const Container = styled.div`
   display: flex;
+  gap: 28px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -26,8 +27,6 @@ const Container = styled.div`
   min-height: 100vh;
 
   background-color: ${({ theme }) => theme.colors.primary};
-
-  gap: 28px;
 `;
 
 const InfoText = styled.p`

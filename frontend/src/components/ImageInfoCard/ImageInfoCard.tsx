@@ -22,13 +22,12 @@ export default ImageInfoCard;
 
 const Container = styled.div`
   display: flex;
+  gap: 8px;
   align-items: center;
   justify-content: center;
 
   width: fit-content;
   padding: 12px 8px;
-
-  gap: 8px;
 `;
 
 const Image = styled.img`
@@ -43,12 +42,11 @@ const Image = styled.img`
 
 const InfoBox = styled.div`
   display: flex;
+  gap: 4px;
   flex-direction: column;
   justify-content: flex-start;
 
   height: 60px;
-
-  gap: 4px;
 `;
 
 const Title = styled.h3`

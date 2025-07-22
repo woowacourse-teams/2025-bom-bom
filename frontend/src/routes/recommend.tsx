@@ -35,14 +35,13 @@ function Recommend() {
 
 const Container = styled.div`
   display: flex;
+  gap: 24px;
   align-items: flex-start;
   justify-content: center;
 
   width: 100%;
   max-width: 1280px;
   padding: 64px 20px 0;
-
-  gap: 24px;
 
   @media (width <= 768px) {
     flex-direction: column;
@@ -52,12 +51,11 @@ const Container = styled.div`
 
 const MainSection = styled.section`
   display: flex;
+  gap: 24px;
   flex: 1;
   flex-direction: column;
 
   max-width: 840px;
-
-  gap: 24px;
 `;
 
 const SideSection = styled.div`

@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { ComponentProps, useState } from 'react';
-import { useClickOutsideRef } from '../../hooks/useClickOutsideRef';
+import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
 import ChevronIcon from '../icons/ChevronIcon';
 import { SelectOption } from './Select.types';
 
@@ -68,6 +68,7 @@ const Container = styled.div<{ width: number }>`
 
 const SelectToggle = styled.div`
   display: flex;
+  gap: 10px;
   align-items: center;
 
   padding: 8px 12px;
@@ -78,7 +79,6 @@ const SelectToggle = styled.div`
 
   box-sizing: border-box;
   cursor: pointer;
-  gap: 10px;
   user-select: none;
 `;
 

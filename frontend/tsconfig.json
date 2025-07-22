@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
     "target": "es6",
     "module": "esnext",
     "strict": true,
@@ -11,7 +12,12 @@
     "allowUmdGlobalAccess": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "types": ["./emotion.d.ts", "jest", "node"]
+    "baseUrl": ".",
+    "types": ["./emotion.d.ts", "jest", "node"],
+    "paths": {
+      "@/*": ["src/*"],
+      "#/*": ["public/*"]
+    }
   },
   "include": ["src", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]

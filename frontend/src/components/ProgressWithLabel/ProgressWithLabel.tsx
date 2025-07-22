@@ -45,20 +45,18 @@ export default ProgressWithLabel;
 
 const Container = styled.div`
   display: flex;
+  gap: 14px;
   flex-direction: column;
 
   width: 100%;
-
-  gap: 14px;
 `;
 
 const ProgressInfo = styled.div`
   display: flex;
+  gap: 6px;
   align-items: center;
 
   width: 100%;
-
-  gap: 6px;
 `;
 
 const StyledIcon = styled.img`

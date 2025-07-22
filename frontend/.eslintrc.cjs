@@ -8,15 +8,15 @@ module.exports = {
     'plugin:jsx-a11y/recommended',
     'plugin:import/recommended',
     'plugin:react/recommended',
-    'plugin:prettier/recommended',
     'plugin:storybook/recommended',
+    'plugin:prettier/recommended',
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   rules: {
     'react/react-in-jsx-scope': 'off',
     'import/no-unresolved': 'off',
   },
-  plugins: ['jsx-a11y', 'import', 'react-hooks', 'react', 'prettier', 'jest'],
+  plugins: ['jsx-a11y', 'import', 'react-hooks', 'react', 'jest', 'prettier'],
   parser: '@typescript-eslint/parser',
   settings: {
     react: {

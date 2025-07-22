@@ -29,10 +29,7 @@ public class MemberController {
 
     @GetMapping("/me")
     public MemberProfileResponse getMember(@LoginMember Member member) {
-        if (member == null) {
-            throw new UnauthorizedException(ErrorDetail.UNAUTHORIZED);
-        }
-        return MemberProfileResponse.from(member);
+        return memberService.getProfile(member.getId());
     }
 
     @PatchMapping("/me/reading/progress/week/goal")

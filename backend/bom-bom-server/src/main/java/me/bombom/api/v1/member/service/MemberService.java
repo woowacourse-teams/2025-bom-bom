@@ -12,6 +12,7 @@ import me.bombom.api.v1.member.domain.WeeklyReading;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.dto.request.UpdateWeeklyCurrentCountRequest;
 import me.bombom.api.v1.member.dto.request.UpdateWeeklyGoalCountRequest;
+import me.bombom.api.v1.member.dto.response.MemberProfileResponse;
 import me.bombom.api.v1.member.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.member.dto.response.WeeklyCurrentCountResponse;
 import me.bombom.api.v1.member.dto.response.WeeklyGoalCountResponse;
@@ -74,6 +75,12 @@ public class MemberService {
                 .roleId(0L)
                 .build();
         return memberRepository.save(newMember);
+    }
+
+    public MemberProfileResponse getProfile(Long id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        return MemberProfileResponse.from(member);
     }
 
     private void validateDuplicateNickname(MemberSignupRequest signupRequest) {

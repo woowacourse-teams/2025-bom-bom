@@ -1,29 +1,33 @@
 import styled from '@emotion/styled';
 import { ComponentProps, ReactNode } from 'react';
 
-export interface TabProps extends ComponentProps<'li'> {
-  name: string;
-  onTabSelect: (id: string) => void;
-  id?: string;
+export interface TabProps<T extends string> extends ComponentProps<'li'> {
+  value: T;
+  label: string;
+  onTabSelect: (value: T) => void;
   selected?: boolean;
-  LeadingComponent?: ReactNode;
-  TrailingComponent?: ReactNode;
+  StartComponent?: ReactNode;
+  EndComponent?: ReactNode;
 }
 
-function Tab({
-  name,
+function Tab<T extends string>({
+  value,
+  label,
   onTabSelect,
-  id = name,
   selected = false,
-  LeadingComponent,
-  TrailingComponent,
+  StartComponent,
+  EndComponent,
   ...props
-}: TabProps) {
+}: TabProps<T>) {
   return (
-    <Container selected={selected} onClick={() => onTabSelect(id)} {...props}>
-      {LeadingComponent}
-      {name}
-      {TrailingComponent}
+    <Container
+      selected={selected}
+      onClick={() => onTabSelect(value)}
+      {...props}
+    >
+      {StartComponent}
+      {label}
+      {EndComponent}
     </Container>
   );
 }
@@ -50,4 +54,5 @@ const Container = styled.li<{ selected: boolean }>`
   font-weight: ${({ selected }) => (selected ? '600' : '400')};
 
   cursor: pointer;
+  gap: 8px;
 `;

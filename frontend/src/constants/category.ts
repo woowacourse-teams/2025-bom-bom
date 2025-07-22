@@ -7,4 +7,6 @@ export const CATEGORIES = [
   '스타트업',
   '투자',
   '마케팅',
-];
+] as const;
+
+export type CategoryType = (typeof CATEGORIES)[number];

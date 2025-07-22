@@ -4,27 +4,23 @@ import Tabs from '@/components/Tabs/Tabs';
 import Tab from '@/components/Tab/Tab';
 import Badge from '@/components/Badge/Badge';
 
-interface CategoryItem {
-  name: string;
+interface CategoryItem<T extends string> {
+  value: T;
+  label: string;
   quantity: number;
 }
 
-interface CategoryFilterProps {
-  categoryList: CategoryItem[];
-  selectedCategory: string;
-  onSelectCategory: (name: string) => void;
+interface CategoryFilterProps<T extends string> {
+  categoryList: CategoryItem<T>[];
+  selectedValue: T;
+  onSelectCategory: (value: T) => void;
 }
 
-function CategoryFilter({
+function CategoryFilter<T extends string>({
   categoryList,
-  selectedCategory,
+  selectedValue,
   onSelectCategory,
-}: CategoryFilterProps) {
-  const totalQuantity = categoryList.reduce(
-    (currentQuantity, { quantity }) => currentQuantity + quantity,
-    0,
-  );
-
+}: CategoryFilterProps<T>) {
   return (
     <Container aria-label="카테고리">
       <TitleWrapper>
@@ -34,24 +30,16 @@ function CategoryFilter({
         <Title>카테고리</Title>
       </TitleWrapper>
       <Tabs direction="vertical">
-        <Tab
-          key="전체"
-          name="전체"
-          selected={selectedCategory === '전체'}
-          onSelect={onSelectCategory}
-          TrailingComponent={<Badge text={String(totalQuantity)} />}
-        />
-        <>
-          {categoryList.map(({ name, quantity }) => (
-            <Tab
-              key={name}
-              name={name}
-              selected={selectedCategory === name}
-              onSelect={onSelectCategory}
-              TrailingComponent={<Badge text={String(quantity)} />}
-            />
-          ))}
-        </>
+        {categoryList.map(({ value, label, quantity }) => (
+          <Tab
+            key={value}
+            value={value}
+            label={label}
+            selected={selectedValue === value}
+            onTabSelect={onSelectCategory}
+            StartComponent={<Badge text={String(quantity)} />}
+          />
+        ))}
       </Tabs>
     </Container>
   );

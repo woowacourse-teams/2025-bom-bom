@@ -9,11 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StorageRouteImport } from './routes/storage'
 import { Route as RecommendRouteImport } from './routes/recommend'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ArticlesArticleIdRouteImport } from './routes/articles.$articleId'
 
+const StorageRoute = StorageRouteImport.update({
+  id: '/storage',
+  path: '/storage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RecommendRoute = RecommendRouteImport.update({
   id: '/recommend',
   path: '/recommend',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/recommend': typeof RecommendRoute
+  '/storage': typeof StorageRoute
   '/articles/$articleId': typeof ArticlesArticleIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/recommend': typeof RecommendRoute
+  '/storage': typeof StorageRoute
   '/articles/$articleId': typeof ArticlesArticleIdRoute
 }
 export interface FileRoutesById {
@@ -52,25 +60,40 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/recommend': typeof RecommendRoute
+  '/storage': typeof StorageRoute
   '/articles/$articleId': typeof ArticlesArticleIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/recommend' | '/articles/$articleId'
+  fullPaths: '/' | '/login' | '/recommend' | '/storage' | '/articles/$articleId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/recommend' | '/articles/$articleId'
-  id: '__root__' | '/' | '/login' | '/recommend' | '/articles/$articleId'
+  to: '/' | '/login' | '/recommend' | '/storage' | '/articles/$articleId'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/recommend'
+    | '/storage'
+    | '/articles/$articleId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   RecommendRoute: typeof RecommendRoute
+  StorageRoute: typeof StorageRoute
   ArticlesArticleIdRoute: typeof ArticlesArticleIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/storage': {
+      id: '/storage'
+      path: '/storage'
+      fullPath: '/storage'
+      preLoaderRoute: typeof StorageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recommend': {
       id: '/recommend'
       path: '/recommend'
@@ -106,6 +129,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   RecommendRoute: RecommendRoute,
+  StorageRoute: StorageRoute,
   ArticlesArticleIdRoute: ArticlesArticleIdRoute,
 }
 export const routeTree = rootRouteImport

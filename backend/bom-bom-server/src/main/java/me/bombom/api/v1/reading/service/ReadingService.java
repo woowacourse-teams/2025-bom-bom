@@ -27,18 +27,18 @@ public class ReadingService {
         updateWeeklyReadingCount(article);
     }
 
-    private void updateWeeklyReadingCount(Article article) {
-        WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(article.getMemberId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        weeklyReading.increaseCurrentCount();
-    }
-
     private void updateTodayReadingCount(Article article) {
         if(article.isArrivedToday()) {
             TodayReading todayReading = todayReadingRepository.findByMemberId(article.getMemberId())
                     .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
             todayReading.increaseCurrentCount();
         }
+    }
+
+    private void updateWeeklyReadingCount(Article article) {
+        WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(article.getMemberId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        weeklyReading.increaseCurrentCount();
     }
 }
 

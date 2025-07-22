@@ -141,6 +141,4 @@ const ReadTimeBox = styled.div`
   align-items: center;
 
   white-space: nowrap;
-
-  gap: 4px;
 `;

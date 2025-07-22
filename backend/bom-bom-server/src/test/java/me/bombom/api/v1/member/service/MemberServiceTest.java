@@ -16,7 +16,6 @@ import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.dto.request.UpdateWeeklyCurrentCountRequest;
 import me.bombom.api.v1.member.dto.request.UpdateWeeklyGoalCountRequest;
 import me.bombom.api.v1.member.dto.response.ReadingInformationResponse;
-import me.bombom.api.v1.member.dto.response.WeeklyCurrentCountResponse;
 import me.bombom.api.v1.member.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.ContinueReadingRepository;
@@ -48,7 +47,7 @@ class MemberServiceTest {
     private TodayReadingRepository todayReadingRepository;
 
     @Test
-    void 주간_목표를_수정할_수_있다(){
+    void 주간_목표를_수정할_수_있다() {
         // given
         Member savedMember = memberRepository.save(TestFixture.normalMemberFixture());
 
@@ -94,57 +93,6 @@ class MemberServiceTest {
 
         // when & then
         assertThatThrownBy(() -> memberService.updateWeeklyGoalCount(request))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
-    
-    @Test
-    void 이번_주에_읽은_아티클_수를_갱신할_수_있다() {
-        // given
-        Member savedMember = memberRepository.save(TestFixture.normalMemberFixture());
-
-        WeeklyReading weeklyReading = WeeklyReading.builder()
-                .memberId(savedMember.getId())
-                .goalCount(0)
-                .currentCount(2)
-                .build();
-        weeklyReadingRepository.save(weeklyReading);
-
-        UpdateWeeklyCurrentCountRequest request = new UpdateWeeklyCurrentCountRequest(savedMember.getId());
-        
-        // when
-        WeeklyCurrentCountResponse result = memberService.updateWeeklyCurrentCount(request);
-
-        // then
-        assertThat(result.currentCount()).isEqualTo(3);
-    }
-
-    @Test
-    void 이번주_읽은_수_갱신에서_회원_정보가_존재하지_않을_경우_예외가_발생한다() {
-        // given
-        WeeklyReading weeklyReading = WeeklyReading.builder()
-                .memberId(0L)
-                .goalCount(0)
-                .currentCount(2)
-                .build();
-        weeklyReadingRepository.save(weeklyReading);
-
-        UpdateWeeklyCurrentCountRequest request = new UpdateWeeklyCurrentCountRequest(0L);
-
-        // when & then
-        assertThatThrownBy(() -> memberService.updateWeeklyCurrentCount(request))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
-
-    @Test
-    void 이번주_읽은_수_갱신에서_주간_목표_정보가_존재하지_않을_경우_예외가_발생한다() {
-        // given
-        Member savedMember = memberRepository.save(TestFixture.normalMemberFixture());
-        UpdateWeeklyCurrentCountRequest request = new UpdateWeeklyCurrentCountRequest(savedMember.getId());
-
-        // when & then
-        assertThatThrownBy(() -> memberService.updateWeeklyCurrentCount(request))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }

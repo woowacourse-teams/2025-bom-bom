@@ -41,15 +41,6 @@ public class MemberService {
         return WeeklyGoalCountResponse.from(weeklyReading);
     }
 
-    public WeeklyCurrentCountResponse updateWeeklyCurrentCount(UpdateWeeklyCurrentCountRequest request) {
-        Member member = memberRepository.findById(request.memberId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(member.getId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        weeklyReading.increaseCurrentCount(WeeklyReading.INCREASE_CURRENT_COUNT);
-        return WeeklyCurrentCountResponse.from(weeklyReading);
-    }
-
     public ReadingInformationResponse getReadingInformation(Long memberId) {
         ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));

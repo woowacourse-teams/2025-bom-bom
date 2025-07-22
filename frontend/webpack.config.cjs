@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const { tanstackRouter } = require('@tanstack/router-plugin/webpack');
@@ -59,6 +60,10 @@ module.exports = {
     tanstackRouter({
       target: 'react',
       autoCodeSplitting: true,
+    }),
+    new webpack.EnvironmentPlugin({
+      API_BASE_URL: 'https://api-dev.bombom.news/api/v1',
+      API_TOKEN: 'text_token',
     }),
   ],
   devServer: {

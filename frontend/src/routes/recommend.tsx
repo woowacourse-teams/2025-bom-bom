@@ -1,9 +1,63 @@
+import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
+import PageLayout from '../components/PageLayout/PageLayout';
+import ReadingKingLeaderboard from '../pages/recommend/components/ReadingKingLeaderboard/ReadingKingLeaderboard';
+import NewsletterHero from '../pages/recommend/components/ReadingKingLeaderboard/NewsletterHero/NewsletterHero';
+import TrendySection from '../pages/recommend/components/ReadingKingLeaderboard/TrendySection/TrendySection';
 
 export const Route = createFileRoute('/recommend')({
-  component: RouteComponent,
+  component: Recommend,
 });
 
-function RouteComponent() {
-  return <div>Hello recommend!</div>;
+function Recommend() {
+  return (
+    <PageLayout activeNav="recommend">
+      <Container>
+        <MainSection>
+          <NewsletterHero />
+          <TrendySection />
+        </MainSection>
+        <SideSection>
+          <ReadingKingLeaderboard />
+        </SideSection>
+      </Container>
+    </PageLayout>
+  );
 }
+
+const Container = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+
+  width: 100%;
+  max-width: 1280px;
+  padding: 64px 20px 0;
+
+  gap: 24px;
+
+  @media (width <= 768px) {
+    flex-direction: column;
+    align-items: center;
+  }
+`;
+
+const MainSection = styled.section`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  max-width: 840px;
+
+  gap: 24px;
+`;
+
+const SideSection = styled.div`
+  flex-shrink: 0;
+  width: 400px;
+
+  @media (width <= 768px) {
+    width: 100%;
+    max-width: 400px;
+  }
+`;

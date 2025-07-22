@@ -12,7 +12,7 @@
     "allowUmdGlobalAccess": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "types": ["./emotion.d.ts", "jest"]
+    "types": ["./emotion.d.ts", "jest", "node"]
   },
   "include": ["src", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]

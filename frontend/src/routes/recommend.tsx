@@ -5,7 +5,7 @@ import ReadingKingLeaderboard from '../pages/recommend/components/ReadingKingLea
 import NewsletterHero from '../pages/recommend/components/ReadingKingLeaderboard/NewsletterHero/NewsletterHero';
 import TrendySection from '../pages/recommend/components/ReadingKingLeaderboard/TrendySection/TrendySection';
 import { useQuery } from '@tanstack/react-query';
-import { getNewsletters } from '../pages/today/apis/newsLetters';
+import { getNewsletters } from '../apis/newsLetters';
 
 export const Route = createFileRoute('/recommend')({
   component: Recommend,

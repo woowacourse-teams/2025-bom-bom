@@ -1,4 +1,4 @@
-import { fetcher } from '../../../apis/fetcher';
+import { fetcher } from './fetcher';
 
 export interface MemberReadingResponse {
   streakReadDay: number;

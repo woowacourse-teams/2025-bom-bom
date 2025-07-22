@@ -1,6 +1,6 @@
-import { fetcher } from '../../../apis/fetcher';
-import { PageableResponse } from '../../../apis/types/PageableResponse';
-import { Article } from '../types/article';
+import { fetcher } from './fetcher';
+import { PageableResponse } from './types/PageableResponse';
+import { Article } from '../pages/today/types/article';
 
 interface GetArticlesParams {
   date: Date;

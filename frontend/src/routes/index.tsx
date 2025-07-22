@@ -4,8 +4,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import PageLayout from '../components/PageLayout/PageLayout';
 import ArticleCardList from '../pages/today/components/ArticleCardList/ArticleCardList';
 import ReadingStatusCard from '../pages/today/components/ReadingStatusCard/ReadingStatusCard';
-import { getArticles } from '@/pages/today/apis/articles';
-import { getReadingStatus } from '@/pages/today/apis/members';
+import { getArticles } from '@/apis/articles';
+import { getReadingStatus } from '@/apis/members';
 import { ARTICLES } from '@/mocks/data/mock-articles';
 
 export const Route = createFileRoute('/')({

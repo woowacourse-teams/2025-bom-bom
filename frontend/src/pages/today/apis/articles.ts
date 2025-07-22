@@ -6,6 +6,8 @@ interface GetArticlesParams {
   date: Date;
   memberId: number;
   sorted: 'ASC' | 'DESC';
+  category?: string;
+  size?: number;
 }
 
 export const getArticles = async ({

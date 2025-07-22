@@ -2,22 +2,14 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import clockIcon from '../../public/assets/clock.svg';
-import { fetcher } from '../apis/fetcher';
 import Chip from '../components/Chip/Chip';
-import { ARTICLES } from '../mocks/data/mock-articles';
 import NewsletterItemCard from '../pages/detail/components/NewsletterItemCard/NewsletterItemCard';
-import { ArticleDetail } from '../pages/detail/types/articleDetail';
 import { formatDateToDotString } from '../utils/date';
 import { getArticleById, getArticles } from '@/apis/articles';
 
 export const Route = createFileRoute('/articles/$articleId')({
   component: ArticleDetailPage,
 });
-
-interface GetArticleByIdParams {
-  articleId: number;
-  memberId: number;
-}
 
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
@@ -53,7 +45,7 @@ function ArticleDetailPage() {
       </HeaderWrapper>
       <Divider />
       <ContentWrapper
-        dangerouslySetInnerHTML={{ __html: currentArticle.contents }}
+        dangerouslySetInnerHTML={{ __html: currentArticle.contents ?? '' }}
       />
       <Divider />
       <ContentDescription>

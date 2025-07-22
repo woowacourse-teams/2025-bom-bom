@@ -51,7 +51,7 @@ const request = async <TRequest, TResponse>({
     const url = new URL(ENV.baseUrl + path);
     const stringifiedQuery: Record<string, string> = Object.fromEntries(
       Object.entries(query)
-        .filter(([_, value]) => value !== undefined)
+        .filter(([, value]) => value !== undefined)
         .map(([key, value]) => {
           if (value instanceof Date) {
             const yyyy = value.getFullYear();

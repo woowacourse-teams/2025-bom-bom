@@ -31,7 +31,7 @@ jobs:
             ${{ runner.os }}-node-
       - name: Install dependencies
         run: npm install
-      - name: Build
+      - name: Lint
         run: npm run lint
       - name: Type check
         run: npm run type-check

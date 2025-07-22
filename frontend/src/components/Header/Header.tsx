@@ -2,10 +2,10 @@ import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
 import CompassIcon from '../icons/CompassIcon';
 import HomeIcon from '../icons/HomeIcon';
+import StorageIcon from '../icons/StorageIcon';
 import { NavType } from '@/types/nav';
 import compassIcon from '#/assets/compass.svg';
 import copyIcon from '#/assets/copy.svg';
-import StorageIcon from '../icons/StorageIcon';
 
 interface HeaderProps {
   activeNav: NavType;

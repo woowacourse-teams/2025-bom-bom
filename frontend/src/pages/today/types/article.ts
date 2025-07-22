@@ -1,7 +1,7 @@
 export type Article = {
   articleId: string;
   title: string;
-  contentsSummary: string;
+  contents?: string;
   arrivedDateTime: Date;
   thumbnailUrl?: string;
   expectedReadTime: number;

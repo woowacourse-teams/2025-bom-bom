@@ -22,9 +22,11 @@ export default function NewsletterItemCard({ data }: NewsletterItemCardProps) {
 
   return (
     <Container>
-      <ImageWrapper>
-        <NewsletterImage src={thumbnailUrl ?? newsletterImageUrl} alt={title} />
-      </ImageWrapper>
+      <NewsletterImage
+        src={thumbnailUrl ?? newsletterImageUrl}
+        alt={title}
+        height={180}
+      />
 
       <ContentWrapper>
         <TextContent>
@@ -63,11 +65,6 @@ const Container = styled.div`
   background: ${({ theme }) => theme.colors.white};
 
   transition: all 0.2s ease;
-`;
-
-const ImageWrapper = styled.div`
-  overflow: hidden;
-  height: 120px;
 `;
 
 const NewsletterImage = styled.img`

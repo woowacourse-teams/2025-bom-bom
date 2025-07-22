@@ -1,0 +1,21 @@
+package me.bombom.api.v1.member.dto.response;
+
+import lombok.Builder;
+import me.bombom.api.v1.member.domain.Member;
+
+@Builder
+public record MemberProfileResponse(
+        Long id,
+        String email,
+        String nickname,
+        String profileImageUrl
+) {
+    public static MemberProfileResponse from(Member member) {
+        return MemberProfileResponse.builder()
+                .id(member.getId())
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .profileImageUrl(member.getProfileImageUrl())
+                .build();
+    }
+}

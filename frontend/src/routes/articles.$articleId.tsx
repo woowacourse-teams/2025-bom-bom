@@ -29,8 +29,11 @@ function ArticleDetailPage() {
       getArticles({ date: new Date(), memberId: 1, sorted: 'ASC' }),
   });
 
-  if (!currentArticle || !otherArticles) return null;
+  const unReadArticles = otherArticles?.content.filter(
+    (article) => !article.isRead,
+  );
 
+  if (!currentArticle || !otherArticles) return null;
   return (
     <Container>
       <HeaderWrapper>
@@ -59,7 +62,7 @@ function ArticleDetailPage() {
       <TodayArticlesWrapper>
         <TodayArticleTitle>오늘 읽지 않은 다른 아티클</TodayArticleTitle>
         <TodayArticleList>
-          {otherArticles.content.map((article) => (
+          {unReadArticles?.map((article) => (
             <NewsletterItemCard key={article.articleId} data={article} />
           ))}
         </TodayArticleList>

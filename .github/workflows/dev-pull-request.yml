@@ -1,4 +1,4 @@
-name: dev pull request
+name: pull requset - dev
 
 on:
   pull_request:
@@ -20,10 +20,10 @@ jobs:
           java-version: 21
 
       - name: application.yml 파일 만들기
-        run: echo '${{ secrets.APPLICATION_DEV_PROPERTIES }}' > ./src/main/resources/application.yml
+        run: echo '${{ secrets.APPLICATION_DEV_PROPERTIES }}' > src/main/resources/application.yml
 
       - name: test application.yml 파일 만들기
-        run: echo '${{ secrets.APPLICATION_TEST_PROPERTIES }}' > ./src/test/resources/application.yml
+        run: echo '${{ secrets.APPLICATION_TEST_PROPERTIES }}' > src/test/resources/application.yml
 
       - name: 빌드하기 및 테스트 하기
         run: ./gradlew clean build

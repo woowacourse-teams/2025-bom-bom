@@ -29,7 +29,7 @@ public class ArticleController {
 
     @GetMapping
     public Page<ArticleResponse> getArticles(
-            @RequestParam Long memberId,
+            @RequestParam @Positive(message = "id는 1 이상의 값이어야 합니다.") Long memberId,
             @RequestParam(required = false) LocalDate date,
             @RequestParam(required = false) String category,
             @RequestParam(required = false, name = "sorted", defaultValue = "desc") String sorted,

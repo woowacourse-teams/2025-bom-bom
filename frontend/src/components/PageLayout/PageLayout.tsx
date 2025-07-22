@@ -27,7 +27,7 @@ const Container = styled.div`
   align-items: center;
 
   width: 100%;
-  padding-top: 64px; /* header 높이 */
+  padding-top: 72px; /* header 높이 */
 
   background-color: ${({ theme }) => theme.colors.white};
 `;

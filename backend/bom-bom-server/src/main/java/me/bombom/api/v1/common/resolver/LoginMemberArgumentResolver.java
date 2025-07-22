@@ -33,7 +33,11 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         }
         Object principal = authentication.getPrincipal();
         if (principal instanceof CustomOAuth2User) {
-            return ((CustomOAuth2User) principal).getMember();
+            Member member = ((CustomOAuth2User) principal).getMember();
+            if (member == null) {
+                throw new UnauthorizedException(ErrorDetail.UNAUTHORIZED);
+            }
+            return member;
         }
         throw new  UnauthorizedException(ErrorDetail.INVALID_TOKEN);
     }

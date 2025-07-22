@@ -1,13 +1,26 @@
 export type Article = {
   articleId: string;
   title: string;
-  contents?: string;
+  contentsSummary: string;
   arrivedDateTime: Date;
   thumbnailUrl?: string;
   expectedReadTime: number;
   isRead: boolean;
   newsletter: Newsletter;
 };
+
+export interface ArticleDetail {
+  title: string;
+  contents: string;
+  arrivedDateTime: string;
+  expectedReadTime: number;
+  newsletter: {
+    name: string;
+    email: string;
+    imageUrl: string;
+    category: string;
+  };
+}
 
 export type Newsletter = {
   name: string;

@@ -2,8 +2,13 @@ package me.bombom.api.v1.member.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.common.exception.UnauthorizedException;
+import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.UpdateWeeklyCurrentCountRequest;
 import me.bombom.api.v1.member.dto.request.UpdateWeeklyGoalCountRequest;
+import me.bombom.api.v1.member.dto.response.MemberProfileResponse;
 import me.bombom.api.v1.member.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.member.dto.response.WeeklyCurrentCountResponse;
 import me.bombom.api.v1.member.dto.response.WeeklyGoalCountResponse;
@@ -21,6 +26,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
     private final MemberService memberService;
+
+    @GetMapping("/me")
+    public MemberProfileResponse getMember(@LoginMember Member member) {
+        if (member == null) {
+            throw new UnauthorizedException(ErrorDetail.UNAUTHORIZED);
+        }
+        return MemberProfileResponse.from(member);
+    }
 
     @PatchMapping("/me/reading/progress/week/goal")
     public WeeklyGoalCountResponse updateWeeklyGoalCount(@Valid @RequestBody UpdateWeeklyGoalCountRequest request){

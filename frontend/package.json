@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack serve --mode development",
+    "start:msw": "ENABLE_MSW=true webpack serve --mode development",
     "build": "webpack --mode production",
     "lint": "eslint src --ext .ts,.tsx,.js,.jsx",
     "lint:fix": "eslint src --ext .ts,.tsx,.js,.jsx --fix",

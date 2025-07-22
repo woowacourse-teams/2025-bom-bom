@@ -68,6 +68,7 @@ module.exports = {
     new webpack.EnvironmentPlugin({
       API_BASE_URL: 'https://api-dev.bombom.news/api/v1',
       API_TOKEN: 'text_token',
+      ENABLE_MSW: 'false',
     }),
   ],
   devServer: {

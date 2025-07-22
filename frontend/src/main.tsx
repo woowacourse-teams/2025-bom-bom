@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 import reset from './styles/reset.ts';
 
 import { routeTree } from './routeTree.gen';
+import { ENV } from './apis/env.ts';
 
 const router = createRouter({ routeTree });
 
@@ -15,11 +16,13 @@ declare module '@tanstack/react-router' {
 }
 
 async function enableMocking() {
-  const { worker } = await import('./mocks/browser');
+  if (ENV.enableMsw === 'true') {
+    const { worker } = await import('./mocks/browser');
 
-  return worker.start({
-    onUnhandledRequest: 'bypass',
-  });
+    return worker.start({
+      onUnhandledRequest: 'bypass',
+    });
+  }
 }
 
 enableMocking().then(() => {

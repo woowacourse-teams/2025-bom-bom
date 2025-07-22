@@ -1,3 +1,5 @@
+import GoogleIcon from '@/components/icons/GoogleIcon';
+import SparklesIcon from '@/components/icons/SparklesIcon';
 import styled from '@emotion/styled';
 import GoogleIcon from '@/components/icons/GoogleIcon';
 import SparklesIcon from '@/components/icons/SparklesIcon';
@@ -16,12 +18,18 @@ function LoginCard() {
         </GreetingMessage>
       </GreetingWrapper>
       <Divider />
-      <GoogleButton type="button">
+      <GoogleButton
+        onClick={() => {
+          window.location.href =
+            'https://api-dev.bombom.news/api/v1/auth/login/google';
+        }}
+        type="button"
+      >
         <GoogleIcon />
         Google로 시작하기
       </GoogleButton>
       <Terms>
-        로그인하시면 봄봄의 <Highlight>서비스 약관</Highlight>과{' '}
+        로그인하시면 봄봄의 <Highlight>서비스 약관</Highlight>과
         <Highlight>개인정보 처리방침</Highlight>에{'\n'}
         동의하는 것으로 간주됩니다.
       </Terms>

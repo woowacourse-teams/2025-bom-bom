@@ -27,15 +27,14 @@ public class SecurityConfig {
                 // 모든 설정 열어둠
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(FrameOptionsConfig::disable))
-                .cors(configurer ->  configurer.configurationSource(corsConfigurationSource()))
+                .cors(configurer -> configurer.configurationSource(corsConfigurationSource()))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.anyRequest()
                         .permitAll())
                 .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService))
-                        .successHandler(new OAuth2LoginSuccessHandler())
-                );
+                        .userService(customOAuth2UserService))
+                        .successHandler(new OAuth2LoginSuccessHandler()));
         return http.build();
     }
 

@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
-import Chip from '../../../../../components/Chip/Chip';
-import ImageInfoCard from '../../../../../components/ImageInfoCard/ImageInfoCard';
-import { CATEGORIES } from '../../../../../constants/category';
-import { TRENDY_NEWSLETTERS } from '../../../../../mocks/trendyNewsLetter';
-import trendingUpIcon from '../../../../../../public/assets/trending-up.svg';
+import Chip from '@/components/Chip/Chip';
+import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
+import { CATEGORIES } from '@/constants/category';
+import { TRENDY_NEWSLETTERS } from '@/mocks/trendyNewsLetter';
+import trendingUpIcon from '#/assets/trending-up.svg';
 
 export default function TrendySection() {
   return (

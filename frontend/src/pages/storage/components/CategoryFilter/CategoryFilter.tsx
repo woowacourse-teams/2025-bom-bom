@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import Badge from '@/components/Badge/Badge';
-import CategoryIcon from '@/components/icons/CategoryIcon';
+import CategoryIcon from '@/components/Icons/CategoryIcon';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
 
@@ -37,7 +37,7 @@ function CategoryFilter<T extends string>({
             label={label}
             selected={selectedValue === value}
             onTabSelect={onSelectCategory}
-            StartComponent={<Badge text={String(quantity)} />}
+            EndComponent={<Badge text={String(quantity)} />}
           />
         ))}
       </Tabs>

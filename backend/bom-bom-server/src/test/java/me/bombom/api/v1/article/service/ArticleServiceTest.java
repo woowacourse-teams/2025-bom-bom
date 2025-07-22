@@ -26,19 +26,18 @@ import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
+import me.bombom.api.v1.reading.service.ReadingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
-@SpringBootTest
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-//@DataJpaTest
+@DataJpaTest
+@Import({ArticleService.class, ReadingService.class})
 class ArticleServiceTest {
 
     private static final LocalDateTime BASE_TIME = LocalDateTime.of(2025, 7, 15, 10, 0);

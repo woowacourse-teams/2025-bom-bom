@@ -1,8 +1,7 @@
 import styled from '@emotion/styled';
 import { ComponentProps, ReactNode } from 'react';
 
-export interface TabProps<T extends string = string>
-  extends ComponentProps<'li'> {
+export interface TabProps<T extends string> extends ComponentProps<'li'> {
   value: T;
   label: string;
   onTabSelect: (value: T) => void;

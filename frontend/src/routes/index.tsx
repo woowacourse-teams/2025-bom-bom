@@ -2,10 +2,11 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import PageLayout from '../components/PageLayout/PageLayout';
-import { ARTICLES } from '../mocks/data/mock-articles';
-import { getTodayArticles } from '../pages/today/apis/getTodayArticles';
 import ArticleCardList from '../pages/today/components/ArticleCardList/ArticleCardList';
 import ReadingStatusCard from '../pages/today/components/ReadingStatusCard/ReadingStatusCard';
+import { getArticles } from '@/apis/articles';
+import { getReadingStatus } from '@/apis/members';
+import { ARTICLES } from '@/mocks/data/mock-articles';
 
 export const Route = createFileRoute('/')({
   component: Index,

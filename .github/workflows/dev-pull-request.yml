@@ -9,6 +9,9 @@ on:
 jobs:
   dev-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
     steps:
       - name: Github Repository 파일 불러오기
         uses: actions/checkout@v4

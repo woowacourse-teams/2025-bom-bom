@@ -24,20 +24,14 @@ function ArticleCard({ data }: ArticleCardProps) {
   } = data;
 
   return (
-    <Container
-      isRead={isRead}
-      to="/articles/$articleId"
-      params={{ articleId: data.articleId }}
-    >
+    <Container isRead={isRead}>
       <InfoWrapper>
         <Title>{title}</Title>
         <Description>{contentsSummary}</Description>
         <MetaInfoRow>
           <MetaInfoTag>{newsletterCategory}</MetaInfoTag>
           <MetaInfoText>from {newsletterName}</MetaInfoText>
-          <MetaInfoText>
-            {formatDateToDotString(new Date(arrivedDateTime))}
-          </MetaInfoText>
+          <MetaInfoText>{formatDateToDotString(arrivedDateTime)}</MetaInfoText>
           <ReadTimeBox>
             <img src={clockIcon} alt="시계 아이콘" />
             <MetaInfoText>{`${expectedReadTime}분`}</MetaInfoText>

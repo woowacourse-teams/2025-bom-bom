@@ -28,7 +28,7 @@ export default function TrendySection({ newsletters }: TrendySectionProps) {
           <ImageInfoCard
             key={index}
             imageUrl={newsletter.imageUrl}
-            name={newsletter.name}
+            title={newsletter.name}
             description={newsletter.description}
           />
         ))}

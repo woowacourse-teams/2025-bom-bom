@@ -2,16 +2,16 @@ import styled from '@emotion/styled';
 
 interface ImageInfoCardProps {
   imageUrl: string;
-  name: string;
+  title: string;
   description: string;
 }
 
-function ImageInfoCard({ imageUrl, name, description }: ImageInfoCardProps) {
+function ImageInfoCard({ imageUrl, title, description }: ImageInfoCardProps) {
   return (
     <Container>
-      <Image src={imageUrl} alt={`${name} 뉴스레터 이미지`} />
+      <Image src={imageUrl} alt={`${title} 뉴스레터 이미지`} />
       <InfoBox>
-        <Title>{name}</Title>
+        <Title>{title}</Title>
         <Description>{description}</Description>
       </InfoBox>
     </Container>

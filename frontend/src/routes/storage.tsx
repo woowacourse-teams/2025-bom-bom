@@ -17,6 +17,7 @@ export const Route = createFileRoute('/storage')({
 function Storage() {
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryType>('전체');
+
   return (
     <PageLayout activeNav="storage">
       <Container>
@@ -28,7 +29,7 @@ function Storage() {
               quantity: 10,
             }))}
             selectedValue={selectedCategory}
-            onSelectCategory={(name) => setSelectedCategory(name)}
+            onSelectCategory={(value) => setSelectedCategory(value)}
           />
         </SideSection>
         <MainSection>

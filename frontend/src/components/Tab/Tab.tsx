@@ -31,13 +31,13 @@ function Tab({
 export default Tab;
 
 const Container = styled.li<{ selected: boolean }>`
-  width: 100%;
-  min-width: fit-content;
   display: flex;
+  gap: 8px;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
 
+  width: 100%;
+  min-width: fit-content;
   padding: 10px 12px;
   border-radius: 12px;
 

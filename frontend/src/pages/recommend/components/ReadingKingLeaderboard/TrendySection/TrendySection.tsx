@@ -49,11 +49,10 @@ const Container = styled.div`
 
 const SectionHeader = styled.div`
   display: flex;
+  gap: 8px;
   align-items: center;
 
   margin-bottom: 16px;
-
-  gap: 8px;
 `;
 
 const SectionIconBox = styled.span`
@@ -79,17 +78,16 @@ const SectionTitle = styled.h2`
 
 const TagContainer = styled.div`
   display: flex;
+  gap: 8px;
   flex-wrap: wrap;
 
   margin-bottom: 16px;
-
-  gap: 8px;
 `;
 
 const TrendyGrid = styled.div`
   display: grid;
-
   gap: 8px;
+
   grid-template-columns: repeat(2, 1fr);
 
   @media (width <= 768px) {

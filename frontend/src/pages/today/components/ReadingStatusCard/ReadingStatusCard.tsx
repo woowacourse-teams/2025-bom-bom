@@ -1,12 +1,12 @@
-import statusIcon from '../../../../public/assets/reading-status.svg';
-import streakIcon from '../../../../public/assets/streak.svg';
-import goalIcon from '../../../../public/assets/goal.svg';
 import styled from '@emotion/styled';
+import statusIcon from '../../../../../public/assets/reading-status.svg';
+import streakIcon from '../../../../../public/assets/streak.svg';
+import ProgressWithLabel from '../../../../components/ProgressWithLabel/ProgressWithLabel';
+import GoalIcon from '../../../../components/icons/GoalIcon';
 import {
   TodayReadingStatus,
   WeeklyReadingStatus,
-} from '../types/readingStatus';
-import ProgressWithLabel from '../../../components/ProgressWithLabel/ProgressWithLabel';
+} from '../../types/readingStatus';
 
 interface ReadingStatusCardProps {
   streakReadDay: number;
@@ -39,7 +39,7 @@ function ReadingStatusCard({
 
       <ProgressWithLabel
         label="오늘의 진행률"
-        icon={{ source: goalIcon, alternativeText: '목표 아이콘' }}
+        Icon={GoalIcon}
         value={{ currentCount: todayReadCount, totalCount }}
         description={
           todayReadCount < totalCount ? '목표까지 조금 더!' : '목표 달성!'
@@ -47,7 +47,7 @@ function ReadingStatusCard({
       />
       <ProgressWithLabel
         label="주간 목표"
-        icon={{ source: goalIcon, alternativeText: '목표 아이콘' }}
+        Icon={GoalIcon}
         value={{ currentCount: weeklyReadCount, totalCount: goalCount }}
         description={
           weeklyReadCount < goalCount
@@ -64,6 +64,7 @@ export default ReadingStatusCard;
 
 const Container = styled.section`
   display: flex;
+  gap: 26px;
   flex-direction: column;
   flex-shrink: 0;
   align-items: center;
@@ -76,17 +77,14 @@ const Container = styled.section`
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 15%);
 
   background-color: ${({ theme }) => theme.colors.white};
-
-  gap: 26px;
 `;
 
 const TitleWrapper = styled.div`
   display: flex;
+  gap: 10px;
   align-items: center;
 
   width: 100%;
-
-  gap: 10px;
 `;
 
 const StatusIconWrapper = styled.div`
@@ -116,11 +114,10 @@ const Title = styled.h2`
 
 const StreakWrapper = styled.div`
   display: flex;
+  gap: 10px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  gap: 10px;
 `;
 
 const StreakIconWrapper = styled.div`

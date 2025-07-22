@@ -1,11 +1,15 @@
-import styled from '@emotion/styled';
+import trendingUpIcon from '#/assets/trending-up.svg';
 import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import { CATEGORIES } from '@/constants/category';
-import { TRENDY_NEWSLETTERS } from '@/mocks/trendyNewsLetter';
-import trendingUpIcon from '#/assets/trending-up.svg';
+import { NewslettersResponse } from '@/pages/today/types/article';
+import styled from '@emotion/styled';
 
-export default function TrendySection() {
+interface TrendySectionProps {
+  newsletters: NewslettersResponse;
+}
+
+export default function TrendySection({ newsletters }: TrendySectionProps) {
   return (
     <Container>
       <SectionHeader>
@@ -20,11 +24,11 @@ export default function TrendySection() {
         ))}
       </TagContainer>
       <TrendyGrid>
-        {TRENDY_NEWSLETTERS.map((newsletter, index) => (
+        {newsletters.map((newsletter, index) => (
           <ImageInfoCard
             key={index}
             imageUrl={newsletter.imageUrl}
-            title={newsletter.title}
+            title={newsletter.name}
             description={newsletter.description}
           />
         ))}

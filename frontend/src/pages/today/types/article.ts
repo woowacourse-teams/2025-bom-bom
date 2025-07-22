@@ -14,3 +14,13 @@ export type Newsletter = {
   imageUrl: string;
   category: string;
 };
+
+export interface NewsletterResponse {
+  newsletterId: number;
+  name: string;
+  imageUrl: string;
+  description: string;
+  mainPageUrl: string;
+}
+
+export type NewslettersResponse = NewsletterResponse[];

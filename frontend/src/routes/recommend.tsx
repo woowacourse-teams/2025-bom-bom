@@ -4,18 +4,26 @@ import PageLayout from '../components/PageLayout/PageLayout';
 import ReadingKingLeaderboard from '../pages/recommend/components/ReadingKingLeaderboard/ReadingKingLeaderboard';
 import NewsletterHero from '../pages/recommend/components/ReadingKingLeaderboard/NewsletterHero/NewsletterHero';
 import TrendySection from '../pages/recommend/components/ReadingKingLeaderboard/TrendySection/TrendySection';
+import { useQuery } from '@tanstack/react-query';
+import { getNewsletters } from '../apis/newsLetters';
 
 export const Route = createFileRoute('/recommend')({
   component: Recommend,
 });
 
 function Recommend() {
+  const { data: newsletters } = useQuery({
+    queryKey: ['newsletters'],
+    queryFn: () => getNewsletters(),
+  });
+
+  if (!newsletters) return null;
   return (
     <PageLayout activeNav="recommend">
       <Container>
         <MainSection>
           <NewsletterHero />
-          <TrendySection />
+          <TrendySection newsletters={newsletters} />
         </MainSection>
         <SideSection>
           <ReadingKingLeaderboard />

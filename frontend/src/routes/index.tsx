@@ -1,24 +1,30 @@
 import styled from '@emotion/styled';
+import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import PageLayout from '../components/PageLayout/PageLayout';
 import ArticleCardList from '../pages/today/components/ArticleCardList/ArticleCardList';
 import ReadingStatusCard from '../pages/today/components/ReadingStatusCard/ReadingStatusCard';
-import { ARTICLES } from '../mocks/data/mock-articles';
-import { useQuery } from '@tanstack/react-query';
-import { getTodayArticles } from '../pages/today/apis/getTodayArticles';
+import { getArticles } from '@/apis/articles';
+import { getReadingStatus } from '@/apis/members';
+import { ARTICLES } from '@/mocks/data/mock-articles';
 
 export const Route = createFileRoute('/')({
   component: Index,
 });
 
 function Index() {
-  const { data } = useQuery({
+  const { data: articles } = useQuery({
     queryKey: ['todayArticles'],
-    queryFn: () => getTodayArticles(),
+    queryFn: () =>
+      getArticles({ date: new Date(), memberId: 1, sorted: 'ASC' }),
   });
 
-  console.log(data);
+  const { data: readingStatus } = useQuery({
+    queryKey: ['readingStatus'],
+    queryFn: () => getReadingStatus(1),
+  });
 
+  if (!articles || !readingStatus) return null;
   return (
     <PageLayout activeNav="today">
       <Container>
@@ -31,9 +37,9 @@ function Index() {
         <ContentWrapper>
           <ArticleCardList articles={ARTICLES} />
           <ReadingStatusCard
-            streakReadDay={267}
-            today={{ readCount: 3, totalCount: 5 }}
-            weekly={{ readCount: 12, goalCount: 15 }}
+            streakReadDay={readingStatus.streakReadDay}
+            today={readingStatus.today}
+            weekly={readingStatus.weekly}
           />
         </ContentWrapper>
       </Container>

@@ -2,7 +2,7 @@ import ApiError from './ApiError';
 import { DEFAULT_ERROR_MESSAGES } from './constants/defaultErrorMessage';
 import { ENV } from './env';
 
-type FetcherOptions<TRequest extends Record<string, string>> = {
+type FetcherOptions<TRequest extends Record<string, string | number>> = {
   path: string;
   query?: Record<string, string | number | Date>;
   body?: TRequest;
@@ -11,17 +11,17 @@ type FetcherOptions<TRequest extends Record<string, string>> = {
 export const fetcher = {
   get: async <TResponse>({ path, query }: FetcherOptions<never>) =>
     request<never, TResponse>({ path, query, method: 'GET' }),
-  post: async <TRequest extends Record<string, string>, TResponse>({
+  post: async <TRequest extends Record<string, string | number>, TResponse>({
     path,
     body,
   }: FetcherOptions<TRequest>) =>
     request<TRequest, TResponse>({ path, body, method: 'POST' }),
-  patch: async <TRequest extends Record<string, string>, TResponse>({
+  patch: async <TRequest extends Record<string, string | number>, TResponse>({
     path,
     body,
   }: FetcherOptions<TRequest>) =>
     request<TRequest, TResponse>({ path, body, method: 'PATCH' }),
-  put: async <TRequest extends Record<string, string>, TResponse>({
+  put: async <TRequest extends Record<string, string | number>, TResponse>({
     path,
     body,
   }: FetcherOptions<TRequest>) =>

@@ -1,8 +1,7 @@
 import styled from '@emotion/styled';
 import { ComponentProps, ReactNode } from 'react';
 
-export interface TabProps<T extends string | number>
-  extends ComponentProps<'li'> {
+export interface TabProps<T extends string> extends ComponentProps<'li'> {
   value: T;
   label: string;
   onTabSelect: (value: T) => void;
@@ -11,7 +10,7 @@ export interface TabProps<T extends string | number>
   EndComponent?: ReactNode;
 }
 
-function Tab<T extends string | number>({
+function Tab<T extends string>({
   value,
   label,
   onTabSelect,

@@ -1,8 +1,9 @@
 import clockIcon from '#/assets/clock.svg';
+import Chip from '@/components/Chip/Chip';
 import { formatDateToDotString } from '@/utils/date';
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
-import Chip from '../../../components/Chip/Chip';
+import { Article } from '../../types/article';
 
 interface ArticleCardProps {
   data: Article;

@@ -4,10 +4,10 @@ import { createFileRoute } from '@tanstack/react-router';
 import clockIcon from '../../public/assets/clock.svg';
 import { fetcher } from '../apis/fetcher';
 import Chip from '../components/Chip/Chip';
-import { Article } from '../pages/today/types/article';
-import { formatDateToDotString } from '../utils/date';
-import NewsletterItemCard from '../pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { ARTICLES } from '../mocks/data/mock-articles';
+import NewsletterItemCard from '../pages/detail/components/NewsletterItemCard/NewsletterItemCard';
+import { ArticleDetail } from '../pages/detail/types/articleDetail';
+import { formatDateToDotString } from '../utils/date';
 
 export const Route = createFileRoute('/articles/$articleId')({
   component: ArticleDetailPage,
@@ -18,11 +18,8 @@ interface GetArticleByIdParams {
   memberId: number;
 }
 
-const getArticleById = async ({
-  articleId,
-  memberId,
-}: GetArticleByIdParams) => {
-  return fetcher.get<Article>({
+const getArticleById = ({ articleId, memberId }: GetArticleByIdParams) => {
+  return fetcher.get<ArticleDetail>({
     path: `/articles/${articleId}`,
     query: { memberId },
   });
@@ -37,24 +34,26 @@ function ArticleDetailPage() {
       getArticleById({ articleId: Number(articleId), memberId: 1 }),
   });
 
-  console.log(data);
+  if (!data) return null;
 
   return (
     <Container>
       <HeaderWrapper>
-        <Title>오늘의 테크 뉴스</Title>
+        <Title>{data.title}</Title>
         <MetaInfoRow>
           <Chip text="기술" />
-          <MetaInfoText>from UPPITY</MetaInfoText>
-          <MetaInfoText>{formatDateToDotString(new Date())}</MetaInfoText>
+          <MetaInfoText>from {data.newsletter.name}</MetaInfoText>
+          <MetaInfoText>
+            {formatDateToDotString(new Date(data.arrivedDateTime))}
+          </MetaInfoText>
           <ReadTimeBox>
             <img src={clockIcon} alt="시계 아이콘" />
-            <MetaInfoText>{`4분`}</MetaInfoText>
+            <MetaInfoText>{data.expectedReadTime}분</MetaInfoText>
           </ReadTimeBox>
         </MetaInfoRow>
       </HeaderWrapper>
       <Divider />
-      <ContentWrapper></ContentWrapper>
+      <ContentWrapper dangerouslySetInnerHTML={{ __html: data.contents }} />
       <Divider />
       <ContentDescription>
         이 뉴스레터가 유용했다면 동료들과 공유해주세요. 피드백이나 제안사항이
@@ -154,7 +153,7 @@ const TodayArticleTitle = styled.h3`
 const TodayArticleList = styled.div`
   display: grid;
 
-  gap: 8px;
+  gap: 20px;
 
   grid-template-columns: repeat(2, 1fr);
 `;

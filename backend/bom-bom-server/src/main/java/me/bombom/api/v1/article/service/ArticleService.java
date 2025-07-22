@@ -12,7 +12,11 @@ import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.member.domain.TodayReading;
+import me.bombom.api.v1.member.domain.WeeklyReading;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.member.repository.TodayReadingRepository;
+import me.bombom.api.v1.member.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
@@ -31,6 +35,8 @@ public class ArticleService {
     private final CategoryRepository categoryRepository;
     private final MemberRepository memberRepository;
     private final NewsletterRepository newsletterRepository;
+    private final TodayReadingRepository todayReadingRepository;
+    private final WeeklyReadingRepository weeklyReadingRepository;
 
     public Page<ArticleResponse> getArticles(Long memberId, GetArticlesOptions options, Pageable pageable) {
         validateMemberExists(memberId);
@@ -50,10 +56,14 @@ public class ArticleService {
         return ArticleDetailResponse.of(article, newsletter, category);
     }
 
-    public void markAsRead(Long id) {
-        Article article = articleRepository.findById(id)
+    @Transactional
+    public void markAsRead(Long articleId, Long memberId) {
+        Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        validateArticleOwner(article, memberId);
         article.markAsRead();
+        updateWeeklyReadingCount(article);
+        updateTodayReadingCount(article);
     }
 
     public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(Long memberId) {
@@ -84,6 +94,20 @@ public class ArticleService {
     private void validateArticleOwner(Article article, Long memberId) {
         if (!Objects.equals(article.getMemberId(), memberId)) {
             throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
+        }
+    }
+
+    private void updateWeeklyReadingCount(Article article) {
+        WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(article.getMemberId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        weeklyReading.increaseCurrentCount();
+    }
+
+    private void updateTodayReadingCount(Article article) {
+        if(article.isArrivedToday()) {
+            TodayReading todayReading = todayReadingRepository.findByMemberId(article.getMemberId())
+                    .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+            todayReading.increaseCurrentCount();
         }
     }
 }

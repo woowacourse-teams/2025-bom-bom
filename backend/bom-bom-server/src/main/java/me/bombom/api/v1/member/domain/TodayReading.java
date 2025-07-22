@@ -17,6 +17,8 @@ import me.bombom.api.v1.common.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TodayReading extends BaseEntity {
 
+    private static final int INCREASE_CURRENT_COUNT = 1;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,5 +43,9 @@ public class TodayReading extends BaseEntity {
         this.memberId = memberId;
         this.totalCount = totalCount;
         this.currentCount = currentCount;
+    }
+
+    public void increaseCurrentCount() {
+        this.currentCount += INCREASE_CURRENT_COUNT;
     }
 }

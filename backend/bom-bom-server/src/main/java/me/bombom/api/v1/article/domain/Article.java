@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -78,5 +79,9 @@ public class Article extends BaseEntity {
 
     public void markAsRead() {
         isRead = true;
+    }
+
+    public boolean isArrivedToday() {
+        return arrivedDateTime.toLocalDate().isEqual(LocalDate.now());
     }
 }

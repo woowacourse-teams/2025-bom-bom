@@ -13,7 +13,7 @@ class ArticleTest {
     @Test
     void 아티클의_읽기_상태를_true로_바꿀_수_있다() {
         //given
-        Article article = TestFixture.createArticle(1L, 1L, baseTime);
+        Article article = TestFixture.createArticle("제목", 1L, 1L, baseTime);
 
         //when
         article.markAsRead();

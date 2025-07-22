@@ -11,7 +11,6 @@ import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
 import me.bombom.api.v1.article.dto.GetArticleCategoryStatisticsResponse;
-import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.enums.SortOption;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -78,7 +77,10 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                GetArticlesOptions.of(null, null, SortOption.DESC),
+                null,
+                null,
+                SortOption.DESC,
+                null,
                 pageable
         );
 
@@ -100,7 +102,10 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                GetArticlesOptions.of(null, null, SortOption.ASC),
+                null,
+                null,
+                SortOption.ASC,
+                null,
                 pageable
         );
 
@@ -119,12 +124,15 @@ class ArticleServiceTest {
         // given
         Pageable pageable = PageRequest.of(0, 10);
         Category category = categories.getFirst();
-        Long categoryId = category.getId();
+        String categoryName = category.getName();
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                GetArticlesOptions.of(null, categoryId, SortOption.DESC),
+                null,
+                categoryName,
+                SortOption.DESC,
+                null,
                 pageable
         );
 
@@ -146,7 +154,10 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                GetArticlesOptions.of(baseTime.toLocalDate(), null, SortOption.DESC),
+                baseTime.toLocalDate(),
+                null,
+                SortOption.DESC,
+                null,
                 pageable
         );
 
@@ -158,6 +169,30 @@ class ArticleServiceTest {
     }
 
     @Test
+    void 아티클_목록_조회_제목_검색_테스트() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        Page<ArticleResponse> result = articleService.getArticles(
+                member.getId(),
+                baseTime.toLocalDate(),
+                null,
+                SortOption.DESC,
+                "뉴스",
+                pageable
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.getContent())
+                    .extracting(ArticleResponse::title)
+                    .allMatch(title -> title.contains("뉴스"));
+            softly.assertThat(result.getContent()).hasSize(2);
+        });
+    }
+
+    @Test
     void 아티클_목록_조회_멤버가_존재하지_않으면_예외() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
@@ -165,7 +200,10 @@ class ArticleServiceTest {
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 0L,
-                GetArticlesOptions.of(null, categories.getFirst().getId(), SortOption.DESC),
+                null,
+                categories.getFirst().getName(),
+                SortOption.DESC,
+                null,
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
@@ -179,7 +217,10 @@ class ArticleServiceTest {
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 member.getId(),
-                GetArticlesOptions.of(null, 0L, SortOption.DESC),
+                null,
+                "Invaild Category Name",
+                SortOption.DESC,
+                null,
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
@@ -193,7 +234,10 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                GetArticlesOptions.of(null, null, SortOption.DESC),
+                null,
+                null,
+                SortOption.DESC,
+                null,
                 firstPage
         );
 
@@ -219,7 +263,10 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                GetArticlesOptions.of(null, null, SortOption.DESC),
+                null,
+                null,
+                SortOption.DESC,
+                null,
                 secondPage
         );
 
@@ -245,7 +292,10 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                GetArticlesOptions.of(null, null, SortOption.DESC),
+                null,
+                null,
+                SortOption.DESC,
+                null,
                 pageable
         );
 
@@ -267,7 +317,10 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                GetArticlesOptions.of(null, null, SortOption.ASC),
+                null,
+                null,
+                SortOption.ASC,
+                null,
                 pageable
         );
 
@@ -343,7 +396,7 @@ class ArticleServiceTest {
         // given
         Newsletter newsletter = TestFixture.createNewsletter("테스트 뉴스레터", "test@example.com", 0L);
         newsletterRepository.save(newsletter);
-        Article article = TestFixture.createArticle(member.getId(), newsletter.getId(), baseTime);
+        Article article = TestFixture.createArticle("제목", member.getId(), newsletter.getId(), baseTime);
         articleRepository.save(article);
 
         // when & then
@@ -374,7 +427,7 @@ class ArticleServiceTest {
     @Test
     void 다_읽음_갱신_아티클_읽음_갱신_성공_테스트() {
         // given
-        Article article = TestFixture.createArticle(member.getId(), newsletters.getFirst().getId(), baseTime);
+        Article article = TestFixture.createArticle("제목", member.getId(), newsletters.getFirst().getId(), baseTime);
         articleRepository.save(article);
 
         //when

@@ -102,16 +102,16 @@ public final class TestFixture {
      */
     public static List<Article> createArticles(Member member, List<Newsletter> newsletters) {
         return List.of(
-                createArticle(member.getId(), newsletters.get(0).getId(), BASE_TIME.minusMinutes(5)),
-                createArticle(member.getId(), newsletters.get(1).getId(), BASE_TIME.minusMinutes(10)),
-                createArticle(member.getId(), newsletters.get(2).getId(), BASE_TIME.minusMinutes(20)),
-                createArticle(member.getId(), newsletters.get(2).getId(), BASE_TIME.minusDays(1))
+                createArticle("뉴스", member.getId(), newsletters.get(0).getId(), BASE_TIME.minusMinutes(5)),
+                createArticle("뉴스", member.getId(), newsletters.get(1).getId(), BASE_TIME.minusMinutes(10)),
+                createArticle("레터", member.getId(), newsletters.get(2).getId(), BASE_TIME.minusMinutes(20)),
+                createArticle("레터", member.getId(), newsletters.get(2).getId(), BASE_TIME.minusDays(1))
         );
     }
 
-    public static Article createArticle(Long memberId, Long newsletterId, LocalDateTime arrivedTime) {
+    public static Article createArticle(String title, Long memberId, Long newsletterId, LocalDateTime arrivedTime) {
         return Article.builder()
-                .title("아티클")
+                .title(title)
                 .contents("<h1>아티클</h1>")
                 .thumbnailUrl("https://example.com/images/thumb.png")
                 .expectedReadTime(5)

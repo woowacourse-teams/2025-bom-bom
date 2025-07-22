@@ -3,9 +3,9 @@ import { PageableResponse } from './types/PageableResponse';
 import { Article } from '../pages/today/types/article';
 
 interface GetArticlesParams {
-  date: Date;
   memberId: number;
   sorted: 'ASC' | 'DESC';
+  date?: Date;
   category?: string;
   size?: number;
   page?: number;

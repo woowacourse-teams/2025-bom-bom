@@ -14,7 +14,8 @@ export const Route = createFileRoute('/')({
 function Index() {
   const { data: articles } = useQuery({
     queryKey: ['todayArticles'],
-    queryFn: () => getArticles({ memberId: 1, sorted: 'ASC' }),
+    queryFn: () =>
+      getArticles({ date: new Date(), memberId: 1, sorted: 'ASC' }),
   });
 
   const { data: readingStatus } = useQuery({

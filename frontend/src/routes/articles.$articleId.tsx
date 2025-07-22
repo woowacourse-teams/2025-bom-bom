@@ -17,12 +17,16 @@ function ArticleDetailPage() {
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
     queryFn: () =>
-      getArticleById({ articleId: Number(articleId), memberId: 1 }),
+      getArticleById({
+        articleId: Number(articleId),
+        memberId: 1,
+      }),
   });
 
   const { data: otherArticles } = useQuery({
     queryKey: ['otherArticles'],
-    queryFn: () => getArticles({ memberId: 1, sorted: 'ASC' }),
+    queryFn: () =>
+      getArticles({ date: new Date(), memberId: 1, sorted: 'ASC' }),
   });
 
   if (!currentArticle || !otherArticles) return null;

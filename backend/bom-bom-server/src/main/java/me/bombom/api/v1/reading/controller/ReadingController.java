@@ -1,6 +1,7 @@
 package me.bombom.api.v1.reading.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;

@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
 import { Article } from '../../types/article';
+import Badge from '@/components/Badge/Badge';
 import Chip from '@/components/Chip/Chip';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { formatDate } from '@/utils/date';
@@ -41,7 +42,17 @@ function ArticleCard({ data }: ArticleCardProps) {
           </ReadTimeBox>
         </MetaInfoRow>
       </InfoWrapper>
-      <Thumbnail src={thumbnailUrl ?? newsletterImageUrl} alt="아티클 썸네일" />
+      <ThumbnailWrapper>
+        <Thumbnail
+          src={thumbnailUrl ?? newsletterImageUrl}
+          alt="아티클 썸네일"
+        />
+        {isRead && (
+          <BadgeWrapper>
+            <Badge text="읽음" variant="outlinePrimary" />
+          </BadgeWrapper>
+        )}
+      </ThumbnailWrapper>
     </Container>
   );
 }
@@ -64,7 +75,6 @@ const Container = styled(Link)<{ isRead: boolean }>`
   color: inherit;
 
   box-sizing: border-box;
-  opacity: ${({ isRead }) => (isRead ? 0.5 : 1)};
 
   text-decoration: none;
 `;
@@ -112,6 +122,10 @@ const ReadTimeBox = styled.div`
   align-items: center;
 `;
 
+const ThumbnailWrapper = styled.div`
+  position: relative;
+`;
+
 const Thumbnail = styled(ImageWithFallback)`
   flex-shrink: 0;
   align-self: stretch;
@@ -121,4 +135,10 @@ const Thumbnail = styled(ImageWithFallback)`
 
   aspect-ratio: 1 / 1;
   object-fit: cover;
+`;
+
+const BadgeWrapper = styled.div`
+  position: absolute;
+  top: 8px;
+  right: 4px;
 `;

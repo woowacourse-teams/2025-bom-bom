@@ -49,7 +49,7 @@ function ArticleDetailPage() {
     const scrollPercent = getScrollPercent();
     const elapsedTime = (Date.now() - loadedAt) / 100;
 
-    if (scrollPercent >= 70 && elapsedTime >= 3) {
+    if (scrollPercent >= 70 && elapsedTime >= 3 && !currentArticle?.isRead) {
       updateArticleAsRead();
     }
   }, 500);

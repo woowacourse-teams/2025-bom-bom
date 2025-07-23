@@ -70,7 +70,7 @@ function ArticleDetailPage() {
       <HeaderWrapper>
         <Title>{currentArticle.title}</Title>
         <MetaInfoRow>
-          <Chip text="기술" />
+          <Chip text={currentArticle.newsletter.category} />
           <MetaInfoText>from {currentArticle.newsletter.name}</MetaInfoText>
           <MetaInfoText>
             {formatDate(new Date(currentArticle.arrivedDateTime))}

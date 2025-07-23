@@ -29,7 +29,12 @@ function ArticleDetailPage() {
         memberId: 1,
       }),
   });
-  const { mutate: readArticle } = useMutation({
+  const { data: otherArticles } = useQuery({
+    queryKey: ['otherArticles'],
+    queryFn: () =>
+      getArticles({ date: new Date(), memberId: 1, sorted: 'ASC' }),
+  });
+  const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
     mutationFn: () =>
       patchArticleRead({ articleId: Number(articleId), memberId: 1 }),
@@ -40,17 +45,12 @@ function ArticleDetailPage() {
     },
   });
 
-  const { data: otherArticles } = useQuery({
-    queryKey: ['otherArticles'],
-    queryFn: () =>
-      getArticles({ date: new Date(), memberId: 1, sorted: 'ASC' }),
-  });
   const throttledHandleScroll = useThrottle(() => {
     const scrollPercent = getScrollPercent();
     const elapsedTime = (Date.now() - loadedAt) / 100;
 
     if (scrollPercent >= 70 && elapsedTime >= 3) {
-      readArticle();
+      updateArticleAsRead();
     }
   }, 500);
 

@@ -7,11 +7,14 @@ import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback'
 import { formatDate } from '@/utils/date';
 import clockIcon from '#/assets/clock.svg';
 
+type ReadVariantType = 'transparent' | 'badge';
+
 interface ArticleCardProps {
   data: Article;
+  readVariant?: ReadVariantType;
 }
 
-function ArticleCard({ data }: ArticleCardProps) {
+function ArticleCard({ data, readVariant = 'transparent' }: ArticleCardProps) {
   const {
     articleId,
     title,
@@ -28,7 +31,11 @@ function ArticleCard({ data }: ArticleCardProps) {
   } = data;
 
   return (
-    <Container isRead={isRead} to={`/articles/${articleId}`}>
+    <Container
+      isRead={isRead}
+      readVariant={readVariant}
+      to={`/articles/${articleId}`}
+    >
       <InfoWrapper>
         <Title>{title}</Title>
         <Description>{contentsSummary || title}</Description>
@@ -47,7 +54,7 @@ function ArticleCard({ data }: ArticleCardProps) {
           src={thumbnailUrl ?? newsletterImageUrl}
           alt="아티클 썸네일"
         />
-        {isRead && (
+        {isRead && readVariant === 'badge' && (
           <BadgeWrapper>
             <Badge text="읽음" variant="outlinePrimary" />
           </BadgeWrapper>
@@ -59,7 +66,10 @@ function ArticleCard({ data }: ArticleCardProps) {
 
 export default ArticleCard;
 
-const Container = styled(Link)<{ isRead: boolean }>`
+const Container = styled(Link)<{
+  isRead: boolean;
+  readVariant: ReadVariantType;
+}>`
   display: flex;
   gap: 12px;
   align-items: center;
@@ -75,6 +85,9 @@ const Container = styled(Link)<{ isRead: boolean }>`
   color: inherit;
 
   box-sizing: border-box;
+
+  opacity: ${({ isRead, readVariant }) =>
+    isRead && readVariant === 'transparent' ? 0.5 : 1};
 
   text-decoration: none;
 `;

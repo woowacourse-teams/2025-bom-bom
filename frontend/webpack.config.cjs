@@ -1,7 +1,7 @@
-const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const { tanstackRouter } = require('@tanstack/router-plugin/webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
 
 module.exports = (env, argv) => {
   const isProd = argv.mode === 'production';
@@ -12,6 +12,7 @@ module.exports = (env, argv) => {
     output: {
       filename: 'bundle.js',
       path: path.resolve(__dirname, 'dist'),
+      publicPath: '/',
     },
     module: {
       rules: [

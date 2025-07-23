@@ -1,15 +1,21 @@
 import styled from '@emotion/styled';
+import { ComponentProps } from 'react';
 import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 
-interface ImageInfoCardProps {
+interface ImageInfoCardProps extends ComponentProps<'div'> {
   imageUrl: string;
   title: string;
   description: string;
 }
 
-function ImageInfoCard({ imageUrl, title, description }: ImageInfoCardProps) {
+function ImageInfoCard({
+  imageUrl,
+  title,
+  description,
+  ...props
+}: ImageInfoCardProps) {
   return (
-    <Container>
+    <Container {...props}>
       <Image src={imageUrl} alt={`${title} 뉴스레터 이미지`} />
       <InfoBox>
         <Title>{title}</Title>

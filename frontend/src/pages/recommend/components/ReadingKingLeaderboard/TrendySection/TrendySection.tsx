@@ -3,6 +3,7 @@ import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import { CATEGORIES } from '@/constants/category';
 import { NewslettersResponse } from '@/pages/today/types/article';
+import { copyToClipboard } from '@/utils/copy';
 import trendingUpIcon from '#/assets/trending-up.svg';
 
 interface TrendySectionProps {
@@ -10,6 +11,11 @@ interface TrendySectionProps {
 }
 
 export default function TrendySection({ newsletters }: TrendySectionProps) {
+  const handleCardClick = (url: string) => {
+    copyToClipboard('test@bombom.news');
+    window.open(url, '_blank');
+  };
+
   return (
     <Container>
       <SectionHeader>
@@ -25,18 +31,13 @@ export default function TrendySection({ newsletters }: TrendySectionProps) {
       </TagContainer>
       <TrendyGrid>
         {newsletters.map((newsletter, index) => (
-          <a
-            href={newsletter.mainPageUrl}
+          <ImageInfoCard
             key={index}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <ImageInfoCard
-              imageUrl={newsletter.imageUrl}
-              title={newsletter.name}
-              description={newsletter.description}
-            />
-          </a>
+            imageUrl={newsletter.imageUrl}
+            title={newsletter.name}
+            description={newsletter.description}
+            onClick={() => handleCardClick(newsletter.mainPageUrl)}
+          />
         ))}
       </TrendyGrid>
     </Container>

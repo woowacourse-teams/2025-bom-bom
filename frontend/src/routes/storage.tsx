@@ -9,6 +9,7 @@ import Select from '../components/Select/Select';
 import CategoryFilter from '../pages/storage/components/CategoryFilter/CategoryFilter';
 import { getArticles, getStatisticsCategories } from '@/apis/articles';
 import { CategoryType } from '@/constants/category';
+import { useDebounce } from '@/hooks/useDebounce';
 import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 
@@ -20,19 +21,25 @@ function Storage() {
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryType>('전체');
   const [sortFilter, setSortFilter] = useState<'DESC' | 'ASC'>('DESC');
-  const { data: articles } = useQuery({
+  const [searchInput, setSearchInput] = useState('');
+  const { data: articles, refetch: refetchArticles } = useQuery({
     queryKey: ['articles', sortFilter, selectedCategory],
     queryFn: () =>
       getArticles({
         memberId: 1,
         sorted: sortFilter,
         category: selectedCategory === '전체' ? undefined : selectedCategory,
+        keyword: searchInput,
       }),
   });
   const { data: categoryCounts } = useQuery({
     queryKey: ['/articles/statistics/categories'],
     queryFn: () => getStatisticsCategories({ memberId: 1 }),
   });
+
+  const debouncedSearch = useDebounce(() => {
+    refetchArticles();
+  }, 300);
 
   if (!articles || !categoryCounts) return null;
 
@@ -69,7 +76,14 @@ function Storage() {
             </TitleIconBox>
             <Title>뉴스레터 보관함</Title>
           </TitleWrapper>
-          <SearchInput placeholder="뉴스레터 제목이나 발행처로 검색하세요..." />
+          <SearchInput
+            placeholder="뉴스레터 제목으로 검색하세요..."
+            value={searchInput}
+            onChange={(e) => {
+              setSearchInput(e.target.value);
+              debouncedSearch();
+            }}
+          />
           <SummaryBar>
             <SummaryText>
               총 {readStats.total}개 • 읽지 않음 {readStats.unread}개 • 읽음{' '}

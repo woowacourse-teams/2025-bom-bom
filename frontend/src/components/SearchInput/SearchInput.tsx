@@ -1,22 +1,9 @@
 import styled from '@emotion/styled';
-import { ChangeEvent, ComponentProps } from 'react';
+import { ComponentProps } from 'react';
 import ReadingGlassesIcon from '../icons/ReadingGlassesIcon';
 import { theme } from '@/styles/theme';
 
-interface SearchInputProps extends Omit<ComponentProps<'input'>, 'onChange'> {
-  value?: string;
-  onChange?: (value: string) => void;
-}
-
-export default function SearchInput({
-  value,
-  onChange,
-  ...props
-}: SearchInputProps) {
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onChange?.(e.target.value);
-  };
-
+export default function SearchInput({ ...props }: ComponentProps<'input'>) {
   return (
     <Container>
       <ReadingGlassesIconWrapper>
@@ -24,8 +11,6 @@ export default function SearchInput({
       </ReadingGlassesIconWrapper>
       <StyledInput
         type="search"
-        value={value}
-        onChange={handleChange}
         aria-label={props['aria-label'] || '검색'}
         {...props}
       />
@@ -33,7 +18,7 @@ export default function SearchInput({
   );
 }
 
-const Container = styled.form`
+const Container = styled.div`
   position: relative;
 
   width: 100%;

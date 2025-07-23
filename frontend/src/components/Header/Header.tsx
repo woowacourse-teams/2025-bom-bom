@@ -71,7 +71,7 @@ const HeaderContainer = styled.header`
   justify-content: center;
 
   width: 100%;
-  height: 64px;
+  height: 72px;
   padding: 8px 16px;
   border-radius: 0 0 8px 8px;
   box-shadow:

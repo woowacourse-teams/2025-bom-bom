@@ -1,11 +1,14 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createFileRoute, useRouterState } from '@tanstack/react-router';
+import { useEffect } from 'react';
 import clockIcon from '../../public/assets/clock.svg';
 import Chip from '../components/Chip/Chip';
 import NewsletterItemCard from '../pages/detail/components/NewsletterItemCard/NewsletterItemCard';
-import { formatDate } from '../utils/date';
-import { getArticleById, getArticles } from '@/apis/articles';
+import { ArticleDetail } from '../pages/detail/types/articleDetail';
+import { formatDateToDotString } from '../utils/date';
+import { patchArticleRead } from '@/apis/articles';
+import { useThrottle } from '@/hooks/useThrottle';
 
 export const Route = createFileRoute('/articles/$articleId')({
   component: ArticleDetailPage,
@@ -13,6 +16,10 @@ export const Route = createFileRoute('/articles/$articleId')({
 
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
+  const loadedAt = useRouterState({
+    select: (state) => state.loadedAt,
+  });
+  const queryClient = useQueryClient();
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
@@ -22,12 +29,42 @@ function ArticleDetailPage() {
         memberId: 1,
       }),
   });
+  const { mutate: readArticle } = useMutation({
+    mutationKey: ['read', articleId],
+    mutationFn: () =>
+      patchArticleRead({ articleId: Number(articleId), memberId: 1 }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['article', articleId],
+      });
+    },
+  });
 
   const { data: otherArticles } = useQuery({
     queryKey: ['otherArticles'],
     queryFn: () =>
       getArticles({ date: new Date(), memberId: 1, sorted: 'ASC' }),
   });
+  const throttledHandleScroll = useThrottle(() => {
+    const scrollTop = document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight;
+    const clientHeight = document.documentElement.clientHeight;
+
+    const scrollPercent = (scrollTop / (scrollHeight - clientHeight)) * 100;
+
+    const elapsedTime = (Date.now() - loadedAt) / 100;
+
+    if (scrollPercent >= 70 && elapsedTime >= 3) {
+      readArticle();
+    }
+  }, 500);
+
+  useEffect(() => {
+    window.addEventListener('scroll', throttledHandleScroll);
+    return () => window.removeEventListener('scroll', throttledHandleScroll);
+  }, [throttledHandleScroll]);
+
+  if (!data) return null;
 
   const unReadArticles = otherArticles?.content.filter(
     (article) => !article.isRead,

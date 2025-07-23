@@ -23,6 +23,7 @@ function Index() {
   });
 
   if (!articles || !readingStatus) return null;
+
   return (
     <PageLayout activeNav="today">
       <Container>

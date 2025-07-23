@@ -19,9 +19,10 @@ export const fetcher = {
     request<TRequest, TResponse>({ path, body, method: 'POST' }),
   patch: async <TRequest extends Record<string, string | number>, TResponse>({
     path,
+    query,
     body,
   }: FetcherOptions<TRequest>) =>
-    request<TRequest, TResponse>({ path, body, method: 'PATCH' }),
+    request<TRequest, TResponse>({ path, query, body, method: 'PATCH' }),
   put: async <TRequest extends Record<string, string | number>, TResponse>({
     path,
     body,

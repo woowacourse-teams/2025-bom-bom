@@ -8,6 +8,7 @@ import SearchInput from '../components/SearchInput/SearchInput';
 import Select from '../components/Select/Select';
 import CategoryFilter from '../pages/storage/components/CategoryFilter/CategoryFilter';
 import { getArticles, getStatisticsCategories } from '@/apis/articles';
+import { CategoryType } from '@/constants/category';
 import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 
@@ -16,7 +17,8 @@ export const Route = createFileRoute('/storage')({
 });
 
 function Storage() {
-  const [selectedCategory, setSelectedCategory] = useState('1');
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryType>('전체');
   const [sortFilter, setSortFilter] = useState<'DESC' | 'ASC'>('DESC');
   const { data: articles } = useQuery({
     queryKey: ['articles', sortFilter, selectedCategory],
@@ -43,17 +45,15 @@ function Storage() {
           <CategoryFilter
             categoryList={[
               {
-                value: '0',
+                value: '전체',
                 label: '전체',
                 quantity: categoryCounts?.totalCount ?? 0,
               },
-              ...(categoryCounts?.categories.map(
-                ({ category, count }, index) => ({
-                  value: String(index + 1),
-                  label: category,
-                  quantity: count,
-                }),
-              ) ?? []),
+              ...(categoryCounts?.categories.map(({ category, count }) => ({
+                value: category as CategoryType,
+                label: category,
+                quantity: count,
+              })) ?? []),
             ]}
             selectedValue={selectedCategory}
             onSelectCategory={(value) => setSelectedCategory(value)}
@@ -96,14 +96,13 @@ function Storage() {
 
 const Container = styled.div`
   display: flex;
+  gap: 24px;
   align-items: flex-start;
   justify-content: center;
 
   width: 100%;
   max-width: 1280px;
   padding: 64px 0;
-
-  gap: 24px;
 `;
 
 const SideSection = styled.div`
@@ -112,17 +111,15 @@ const SideSection = styled.div`
 
 const MainSection = styled.div`
   display: flex;
+  gap: 20px;
   flex-direction: column;
   align-items: flex-start;
-
-  gap: 20px;
 `;
 
 const TitleWrapper = styled.div`
   display: flex;
-  align-items: center;
-
   gap: 8px;
+  align-items: center;
 `;
 
 const TitleIconBox = styled.div`
@@ -157,7 +154,6 @@ const SummaryText = styled.p`
 
 const ArticleList = styled.ul`
   display: flex;
-  flex-direction: column;
-
   gap: 16px;
+  flex-direction: column;
 `;

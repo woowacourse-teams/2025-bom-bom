@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 
 interface ImageInfoCardProps {
   imageUrl: string;
@@ -12,7 +13,7 @@ function ImageInfoCard({ imageUrl, title, description }: ImageInfoCardProps) {
       <Image src={imageUrl} alt={`${title} 뉴스레터 이미지`} />
       <InfoBox>
         <Title>{title}</Title>
-        <Description>{description}</Description>
+        <Description>{description || title}</Description>
       </InfoBox>
     </Container>
   );
@@ -30,7 +31,7 @@ const Container = styled.div`
   padding: 12px 8px;
 `;
 
-const Image = styled.img`
+const Image = styled(ImageWithFallback)`
   flex-shrink: 0;
 
   width: 58px;

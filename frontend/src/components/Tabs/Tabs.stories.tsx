@@ -11,15 +11,15 @@ const meta = {
         key="봄봄1"
         onTabSelect={(id) => id}
         value="봄봄1"
-        selected={false}
         label="봄봄1"
+        selected={false}
       />,
       <Tab
         key="봄봄2"
         onTabSelect={(id) => id}
         value="봄봄2"
-        selected={true}
         label="봄봄2"
+        selected={true}
       />,
     ],
   },

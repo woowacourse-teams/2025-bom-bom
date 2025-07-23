@@ -2,6 +2,7 @@ import { fetcher } from './fetcher';
 import { PageableResponse } from './types/PageableResponse';
 import { Article } from '../pages/today/types/article';
 import { ArticleDetail } from '@/pages/detail/types/articleDetail';
+import { CategoriesCountType } from '@/pages/today/types/category';
 
 interface GetArticlesParams {
   memberId: number;
@@ -58,5 +59,20 @@ export const patchArticleRead = async ({
 }: PatchArticleReadParams) => {
   return await fetcher.patch({
     path: `/articles/${articleId}/read`,
+  });
+};
+
+interface GetStatisticsCategoriesParams {
+  memberId: number;
+}
+
+export const getStatisticsCategories = async ({
+  memberId,
+}: GetStatisticsCategoriesParams) => {
+  return await fetcher.get<CategoriesCountType>({
+    path: '/articles/statistics/categories',
+    query: {
+      memberId,
+    },
   });
 };

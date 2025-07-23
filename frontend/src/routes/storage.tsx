@@ -1,13 +1,14 @@
 import styled from '@emotion/styled';
+import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import StorageIcon from '../components/icons/StorageIcon';
 import PageLayout from '../components/PageLayout/PageLayout';
 import SearchInput from '../components/SearchInput/SearchInput';
 import Select from '../components/Select/Select';
-import { CATEGORIES, CategoryType } from '../constants/category';
-import { ARTICLES } from '../mocks/data/mock-articles';
 import CategoryFilter from '../pages/storage/components/CategoryFilter/CategoryFilter';
+import { getArticles, getStatisticsCategories } from '@/apis/articles';
+import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 
 export const Route = createFileRoute('/storage')({
@@ -15,19 +16,45 @@ export const Route = createFileRoute('/storage')({
 });
 
 function Storage() {
-  const [selectedCategory, setSelectedCategory] =
-    useState<CategoryType>('전체');
+  const [selectedCategory, setSelectedCategory] = useState('1');
+  const [sortFilter, setSortFilter] = useState<'DESC' | 'ASC'>('DESC');
+  const { data: articles } = useQuery({
+    queryKey: ['articles', sortFilter, selectedCategory],
+    queryFn: () =>
+      getArticles({
+        memberId: 1,
+        sorted: sortFilter,
+        category: selectedCategory === '전체' ? undefined : selectedCategory,
+      }),
+  });
+  const { data: categoryCounts } = useQuery({
+    queryKey: ['/articles/statistics/categories'],
+    queryFn: () => getStatisticsCategories({ memberId: 1 }),
+  });
+
+  if (!articles) return null;
+
+  const readStats = getArticleReadStats(articles.content);
 
   return (
     <PageLayout activeNav="storage">
       <Container>
         <SideSection>
           <CategoryFilter
-            categoryList={CATEGORIES.map((category) => ({
-              value: category,
-              label: category,
-              quantity: 10,
-            }))}
+            categoryList={[
+              {
+                value: '0',
+                label: '전체',
+                quantity: categoryCounts?.totalCount ?? 0,
+              },
+              ...(categoryCounts?.categories.map(
+                ({ category, count }, index) => ({
+                  value: String(index + 1),
+                  label: category,
+                  quantity: count,
+                }),
+              ) ?? []),
+            ]}
             selectedValue={selectedCategory}
             onSelectCategory={(value) => setSelectedCategory(value)}
           />
@@ -41,18 +68,21 @@ function Storage() {
           </TitleWrapper>
           <SearchInput placeholder="뉴스레터 제목이나 발행처로 검색하세요..." />
           <SummaryBar>
-            <SummaryText>총 10개 • 읽지 않음 5개 • 읽음 5개</SummaryText>
+            <SummaryText>
+              총 {readStats.total}개 • 읽지 않음 {readStats.unread}개 • 읽음{' '}
+              {readStats.read}개
+            </SummaryText>
             <Select
               options={[
-                { value: 'desc', label: '최신순' },
-                { value: 'asc', label: '오래된순' },
+                { value: 'DESC', label: '최신순' },
+                { value: 'ASC', label: '오래된순' },
               ]}
-              selectedValue={'desc'}
-              onSelectOption={() => {}}
+              selectedValue={sortFilter}
+              onSelectOption={(value) => setSortFilter(value)}
             />
           </SummaryBar>
           <ArticleList>
-            {ARTICLES.map((article) => (
+            {articles.content.map((article) => (
               <li key={article.articleId}>
                 <ArticleCard data={article} />
               </li>

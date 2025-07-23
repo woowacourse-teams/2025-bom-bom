@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
 import { Article } from '../../types/article';
 import Chip from '@/components/Chip/Chip';
-import { formatDateToDotString } from '@/utils/date';
+import { formatDate } from '@/utils/date';
 import clockIcon from '#/assets/clock.svg';
 
 interface ArticleCardProps {
@@ -33,9 +33,7 @@ function ArticleCard({ data }: ArticleCardProps) {
         <MetaInfoRow>
           <Chip text={newsletterCategory} />
           <MetaInfoText>from {newsletterName}</MetaInfoText>
-          <MetaInfoText>
-            {formatDateToDotString(new Date(arrivedDateTime))}
-          </MetaInfoText>
+          <MetaInfoText>{formatDate(new Date(arrivedDateTime))}</MetaInfoText>
           <ReadTimeBox>
             <img src={clockIcon} alt="시계 아이콘" />
             <MetaInfoText>{`${expectedReadTime}분`}</MetaInfoText>

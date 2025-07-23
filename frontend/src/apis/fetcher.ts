@@ -1,6 +1,7 @@
 import ApiError from './ApiError';
 import { DEFAULT_ERROR_MESSAGES } from './constants/defaultErrorMessage';
 import { ENV } from './env';
+import { formatDate } from '@/utils/date';
 
 type FetcherOptions<TRequest extends Record<string, string | number>> = {
   path: string;
@@ -53,10 +54,7 @@ const request = async <TRequest, TResponse>({
       Object.entries(query)
         .map(([key, value]) => {
           if (value instanceof Date) {
-            const yyyy = value.getFullYear();
-            const mm = String(value.getMonth() + 1).padStart(2, '0');
-            const dd = String(value.getDate()).padStart(2, '0');
-            return [key, `${yyyy}-${mm}-${dd}`];
+            return [key, formatDate(value, '-')];
           }
           return [key, value?.toString()];
         })

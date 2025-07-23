@@ -37,7 +37,7 @@ function CategoryFilter<T extends string>({
             label={label}
             selected={selectedValue === value}
             onTabSelect={onSelectCategory}
-            StartComponent={<Badge text={String(quantity)} />}
+            EndComponent={<Badge text={String(quantity)} />}
           />
         ))}
       </Tabs>

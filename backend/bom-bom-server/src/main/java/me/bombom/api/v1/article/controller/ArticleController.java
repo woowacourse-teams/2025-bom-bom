@@ -11,6 +11,8 @@ import me.bombom.api.v1.article.service.ArticleService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,8 +31,8 @@ public class ArticleController {
 
     @GetMapping
     public Page<ArticleResponse> getArticles(
-            @RequestParam @Positive(message = "id는 1 이상의 값이어야 합니다.") Long memberId,
-            @RequestParam(required = false) LocalDate date,
+            @RequestParam @Positive(message = "memberId는 1 이상의 값이어야 합니다.") Long memberId,
+            @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate date,
             @RequestParam(required = false) String category,
             @RequestParam(required = false, name = "sorted", defaultValue = "desc") String sorted,
             @RequestParam(required = false) String keyword,

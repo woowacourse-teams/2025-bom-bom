@@ -12,6 +12,7 @@ import me.bombom.api.v1.article.enums.SortOption;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
 public class ArticleRepositoryImpl implements CustomArticleRepository{
@@ -106,7 +107,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         if (categoryId != null) {
             jpql.append(" AND n.categoryId = :categoryId");
         }
-        if (keyword != null && !keyword.trim().isEmpty()) {
+        if (StringUtils.hasText(keyword)) {
             jpql.append(" AND a.title LIKE :keyword");
         }
     }
@@ -130,7 +131,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         if (categoryId != null) {
             query.setParameter("categoryId", categoryId);
         }
-        if (keyword != null && !keyword.trim().isEmpty()) {
+        if (StringUtils.hasText(keyword)) {
             query.setParameter("keyword", "%" + keyword.trim() + "%");
         }
     }

@@ -1,18 +1,22 @@
 import styled from '@emotion/styled';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { getNewsletters } from '@/apis/newsLetters';
 import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import { CATEGORIES, CategoryType } from '@/constants/category';
-import { NewslettersResponse } from '@/pages/today/types/article';
 import trendingUpIcon from '#/assets/trending-up.svg';
 
-interface TrendySectionProps {
-  newsletters: NewslettersResponse;
-}
+export default function TrendySection() {
+  const { data: newsletters } = useQuery({
+    queryKey: ['newsletters'],
+    queryFn: () => getNewsletters(),
+  });
 
-export default function TrendySection({ newsletters }: TrendySectionProps) {
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryType>('전체');
+
+  if (!newsletters) return null;
 
   const filteredNewsletters = newsletters.filter(
     (newsletter) =>

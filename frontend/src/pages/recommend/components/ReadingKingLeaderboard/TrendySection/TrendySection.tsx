@@ -14,10 +14,9 @@ export default function TrendySection({ newsletters }: TrendySectionProps) {
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryType>('전체');
 
-  const filteredNewsletters = newsletters.filter((newsletter) =>
-    selectedCategory === '전체'
-      ? true
-      : newsletter.category === selectedCategory,
+  const filteredNewsletters = newsletters.filter(
+    (newsletter) =>
+      selectedCategory === '전체' || newsletter.category === selectedCategory,
   );
 
   return (

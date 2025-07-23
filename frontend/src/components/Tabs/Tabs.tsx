@@ -19,7 +19,7 @@ const Tabs = <T extends string>({
       {children}
     </Container>
   );
-}
+};
 
 export default Tabs;
 

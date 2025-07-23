@@ -13,7 +13,6 @@ const meta = {
         value="봄봄1"
         label="봄봄1"
         selected={false}
-        label="봄봄1"
       />,
       <Tab
         key="봄봄2"

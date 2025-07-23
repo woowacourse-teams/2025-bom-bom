@@ -11,6 +11,7 @@ public record ArticleDetailResponse(
         String contents,
         LocalDateTime arrivedDateTime,
         int expectedReadTime,
+        boolean isRead,
         NewsletterBasicResponse newsletter
 ) {
 
@@ -20,6 +21,7 @@ public record ArticleDetailResponse(
                 article.getContents(),
                 article.getArrivedDateTime(),
                 article.getExpectedReadTime(),
+                article.isRead(),
                 NewsletterBasicResponse.of(newsletter, category)
         );
     }

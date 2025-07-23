@@ -9,6 +9,7 @@ import { ArticleDetail } from '../pages/detail/types/articleDetail';
 import { formatDateToDotString } from '../utils/date';
 import { patchArticleRead } from '@/apis/articles';
 import { useThrottle } from '@/hooks/useThrottle';
+import { getScrollPercent } from '@/utils/scroll';
 
 export const Route = createFileRoute('/articles/$articleId')({
   component: ArticleDetailPage,
@@ -46,12 +47,7 @@ function ArticleDetailPage() {
       getArticles({ date: new Date(), memberId: 1, sorted: 'ASC' }),
   });
   const throttledHandleScroll = useThrottle(() => {
-    const scrollTop = document.documentElement.scrollTop;
-    const scrollHeight = document.documentElement.scrollHeight;
-    const clientHeight = document.documentElement.clientHeight;
-
-    const scrollPercent = (scrollTop / (scrollHeight - clientHeight)) * 100;
-
+    const scrollPercent = getScrollPercent();
     const elapsedTime = (Date.now() - loadedAt) / 100;
 
     if (scrollPercent >= 70 && elapsedTime >= 3) {

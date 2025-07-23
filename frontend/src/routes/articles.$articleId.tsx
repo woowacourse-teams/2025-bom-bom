@@ -104,6 +104,7 @@ function ArticleDetailPage() {
 
 const Container = styled.div`
   display: flex;
+  gap: 20px;
   flex-direction: column;
   align-items: flex-start;
 
@@ -113,17 +114,14 @@ const Container = styled.div`
   padding: 28px;
   border-right: 1px solid ${({ theme }) => theme.colors.stroke};
   border-left: 1px solid ${({ theme }) => theme.colors.stroke};
-
-  gap: 20px;
 `;
 
 const HeaderWrapper = styled.div`
   display: flex;
+  gap: 12px;
   flex-direction: column;
   align-items: flex-start;
   align-self: stretch;
-
-  gap: 12px;
 `;
 
 const Title = styled.h2`
@@ -133,9 +131,8 @@ const Title = styled.h2`
 
 const MetaInfoRow = styled.div`
   display: flex;
-  align-items: center;
-
   gap: 8px;
+  align-items: center;
 `;
 
 const MetaInfoText = styled.span`
@@ -145,9 +142,8 @@ const MetaInfoText = styled.span`
 
 const ReadTimeBox = styled.div`
   display: flex;
-  align-items: center;
-
   gap: 4px;
+  align-items: center;
 `;
 
 const Divider = styled.div`
@@ -170,10 +166,9 @@ const ContentDescription = styled.p`
 
 const TodayArticlesWrapper = styled.div`
   display: flex;
+  gap: 12px;
   flex-direction: column;
   align-items: flex-start;
-
-  gap: 12px;
 `;
 
 const TodayArticleTitle = styled.h3`
@@ -183,7 +178,6 @@ const TodayArticleTitle = styled.h3`
 
 const TodayArticleList = styled.div`
   display: grid;
-
   gap: 20px;
 
   grid-template-columns: repeat(2, 1fr);

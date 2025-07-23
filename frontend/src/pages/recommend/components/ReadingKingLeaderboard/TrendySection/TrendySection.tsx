@@ -13,7 +13,7 @@ interface TrendySectionProps {
 export default function TrendySection({ newsletters }: TrendySectionProps) {
   const handleCardClick = (url: string) => {
     copyToClipboard('test@bombom.news');
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (

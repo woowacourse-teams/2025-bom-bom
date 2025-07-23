@@ -30,7 +30,7 @@ function Index() {
         <TitleBox>
           <Title>오늘의 뉴스레터</Title>
           <TitleDescription>
-            3개의 새로운 뉴스레터가 도착했어요
+            {articles.content.length}개의 새로운 뉴스레터가 도착했어요
           </TitleDescription>
         </TitleBox>
         <ContentWrapper>

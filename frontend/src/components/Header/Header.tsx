@@ -4,6 +4,7 @@ import CompassIcon from '../icons/CompassIcon';
 import HomeIcon from '../icons/HomeIcon';
 import StorageIcon from '../icons/StorageIcon';
 import { NavType } from '@/types/nav';
+import { copyToClipboard } from '@/utils/copy';
 import compassIcon from '#/assets/compass.svg';
 import copyIcon from '#/assets/copy.svg';
 
@@ -13,7 +14,7 @@ interface HeaderProps {
 
 export default function Header({ activeNav }: HeaderProps) {
   const handleCopyEmail = () => {
-    navigator.clipboard.writeText('test@bombom.news');
+    copyToClipboard('test@bombom.news');
   };
 
   return (

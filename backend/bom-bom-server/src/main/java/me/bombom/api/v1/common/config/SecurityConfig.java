@@ -20,6 +20,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -34,7 +35,7 @@ public class SecurityConfig {
                         .permitAll())
                 .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo
                         .userService(customOAuth2UserService))
-                        .successHandler(new OAuth2LoginSuccessHandler()));
+                        .successHandler(oAuth2LoginSuccessHandler));
         return http.build();
     }
 

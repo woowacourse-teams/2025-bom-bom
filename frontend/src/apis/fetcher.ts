@@ -1,7 +1,7 @@
 import ApiError from './ApiError';
 import { DEFAULT_ERROR_MESSAGES } from './constants/defaultErrorMessage';
 import { ENV } from './env';
-import { formatDateToDotString } from '@/utils/date';
+import { formatDateToString } from '@/utils/date';
 
 type FetcherOptions<TRequest extends Record<string, string | number>> = {
   path: string;
@@ -54,7 +54,7 @@ const request = async <TRequest, TResponse>({
       Object.entries(query)
         .map(([key, value]) => {
           if (value instanceof Date) {
-            return [key, formatDateToDotString(value, '-')];
+            return [key, formatDateToString(value, '-')];
           }
           return [key, value?.toString()];
         })

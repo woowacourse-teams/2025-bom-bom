@@ -2,7 +2,7 @@ class ApiError extends Error {
   constructor(
     public status: number,
     public message: string,
-    public rawBody?: any,
+    public rawBody?: unknown,
   ) {
     super(message);
     this.name = 'ApiError';

@@ -2,58 +2,58 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import clockIcon from '../../public/assets/clock.svg';
-import { fetcher } from '../apis/fetcher';
 import Chip from '../components/Chip/Chip';
-import { ARTICLES } from '../mocks/data/mock-articles';
 import NewsletterItemCard from '../pages/detail/components/NewsletterItemCard/NewsletterItemCard';
-import { ArticleDetail } from '../pages/detail/types/articleDetail';
 import { formatDateToDotString } from '../utils/date';
+import { getArticleById, getArticles } from '@/apis/articles';
 
 export const Route = createFileRoute('/articles/$articleId')({
   component: ArticleDetailPage,
 });
 
-interface GetArticleByIdParams {
-  articleId: number;
-  memberId: number;
-}
-
-const getArticleById = ({ articleId, memberId }: GetArticleByIdParams) => {
-  return fetcher.get<ArticleDetail>({
-    path: `/articles/${articleId}`,
-    query: { memberId },
-  });
-};
-
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
 
-  const { data } = useQuery({
+  const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
     queryFn: () =>
-      getArticleById({ articleId: Number(articleId), memberId: 1 }),
+      getArticleById({
+        articleId: Number(articleId),
+        memberId: 1,
+      }),
   });
 
-  if (!data) return null;
+  const { data: otherArticles } = useQuery({
+    queryKey: ['otherArticles'],
+    queryFn: () =>
+      getArticles({ date: new Date(), memberId: 1, sorted: 'ASC' }),
+  });
 
+  const unReadArticles = otherArticles?.content.filter(
+    (article) => !article.isRead,
+  );
+
+  if (!currentArticle || !otherArticles) return null;
   return (
     <Container>
       <HeaderWrapper>
-        <Title>{data.title}</Title>
+        <Title>{currentArticle.title}</Title>
         <MetaInfoRow>
           <Chip text="기술" />
-          <MetaInfoText>from {data.newsletter.name}</MetaInfoText>
+          <MetaInfoText>from {currentArticle.newsletter.name}</MetaInfoText>
           <MetaInfoText>
-            {formatDateToDotString(new Date(data.arrivedDateTime))}
+            {formatDateToDotString(new Date(currentArticle.arrivedDateTime))}
           </MetaInfoText>
           <ReadTimeBox>
             <img src={clockIcon} alt="시계 아이콘" />
-            <MetaInfoText>{data.expectedReadTime}분</MetaInfoText>
+            <MetaInfoText>{currentArticle.expectedReadTime}분</MetaInfoText>
           </ReadTimeBox>
         </MetaInfoRow>
       </HeaderWrapper>
       <Divider />
-      <ContentWrapper dangerouslySetInnerHTML={{ __html: data.contents }} />
+      <ContentWrapper
+        dangerouslySetInnerHTML={{ __html: currentArticle.contents ?? '' }}
+      />
       <Divider />
       <ContentDescription>
         이 뉴스레터가 유용했다면 동료들과 공유해주세요. 피드백이나 제안사항이
@@ -62,7 +62,7 @@ function ArticleDetailPage() {
       <TodayArticlesWrapper>
         <TodayArticleTitle>오늘 읽지 않은 다른 아티클</TodayArticleTitle>
         <TodayArticleList>
-          {ARTICLES.map((article) => (
+          {unReadArticles?.map((article) => (
             <NewsletterItemCard key={article.articleId} data={article} />
           ))}
         </TodayArticleList>

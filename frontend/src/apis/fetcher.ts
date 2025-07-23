@@ -4,7 +4,7 @@ import { ENV } from './env';
 
 type FetcherOptions<TRequest extends Record<string, string | number>> = {
   path: string;
-  query?: Record<string, string | number | Date>;
+  query?: Record<string, string | number | Date | undefined>;
   body?: TRequest;
 };
 
@@ -35,7 +35,7 @@ type FetchMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT';
 type RequestOptions<TRequest> = {
   path: string;
   method: FetchMethod;
-  query?: Record<string, string | number | Date>;
+  query?: Record<string, string | number | Date | undefined>;
   body?: TRequest;
   headers?: HeadersInit;
 };
@@ -51,7 +51,6 @@ const request = async <TRequest, TResponse>({
     const url = new URL(ENV.baseUrl + path);
     const stringifiedQuery: Record<string, string> = Object.fromEntries(
       Object.entries(query)
-        .filter(([_, value]) => value !== undefined)
         .map(([key, value]) => {
           if (value instanceof Date) {
             const yyyy = value.getFullYear();
@@ -60,7 +59,8 @@ const request = async <TRequest, TResponse>({
             return [key, `${yyyy}-${mm}-${dd}`];
           }
           return [key, value?.toString()];
-        }),
+        })
+        .filter(([, value]) => value !== undefined),
     );
     url.search = new URLSearchParams(stringifiedQuery).toString();
 

@@ -1,6 +1,7 @@
 import { fetcher } from './fetcher';
 import { PageableResponse } from './types/PageableResponse';
 import { Article } from '../pages/today/types/article';
+import { ArticleDetail } from '@/pages/detail/types/articleDetail';
 
 interface GetArticlesParams {
   memberId: number;
@@ -41,7 +42,7 @@ export const getArticleById = async ({
   articleId,
   memberId,
 }: GetArticleByIdParams) => {
-  return await fetcher.get<Article>({
+  return await fetcher.get<ArticleDetail>({
     path: `/articles/${articleId}`,
     query: { memberId: memberId.toString() },
   });

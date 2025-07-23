@@ -1,4 +1,3 @@
-import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
@@ -9,6 +8,7 @@ import Select from '../components/Select/Select';
 import { CATEGORIES, CategoryType } from '../constants/category';
 import { ARTICLES } from '../mocks/data/mock-articles';
 import CategoryFilter from '../pages/storage/components/CategoryFilter/CategoryFilter';
+import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 
 export const Route = createFileRoute('/storage')({
   component: Storage,

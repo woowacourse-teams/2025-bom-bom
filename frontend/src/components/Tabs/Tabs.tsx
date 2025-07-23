@@ -4,12 +4,16 @@ import { TabProps } from '../Tab/Tab';
 
 type DirectionType = 'horizontal' | 'vertical';
 
-interface TabsProps extends ComponentProps<'ul'> {
+interface TabsProps<T extends string> extends ComponentProps<'ul'> {
   direction?: DirectionType;
-  children: ReactElement<TabProps>[];
+  children: ReactElement<TabProps<T>>[];
 }
 
-const Tabs = ({ direction = 'horizontal', children, ...props }: TabsProps) => {
+const Tabs = <T extends string>({
+  direction = 'horizontal',
+  children,
+  ...props
+}: TabsProps<T>) => {
   return (
     <Container role="tablist" direction={direction} {...props}>
       {children}

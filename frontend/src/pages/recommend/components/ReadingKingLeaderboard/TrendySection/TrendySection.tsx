@@ -1,9 +1,9 @@
-import trendingUpIcon from '#/assets/trending-up.svg';
+import styled from '@emotion/styled';
 import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import { CATEGORIES } from '@/constants/category';
 import { NewslettersResponse } from '@/pages/today/types/article';
-import styled from '@emotion/styled';
+import trendingUpIcon from '#/assets/trending-up.svg';
 
 interface TrendySectionProps {
   newsletters: NewslettersResponse;

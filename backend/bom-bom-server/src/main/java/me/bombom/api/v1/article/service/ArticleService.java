@@ -14,11 +14,7 @@ import me.bombom.api.v1.article.enums.SortOption;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
-import me.bombom.api.v1.reading.domain.TodayReading;
-import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.reading.repository.TodayReadingRepository;
-import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
@@ -49,7 +45,7 @@ public class ArticleService {
             Pageable pageable
     ) {
         validateMemberExists(memberId);
-        Long categoryId = findCategoryByName(categoryName);
+        Long categoryId = findCategoryIdByName(categoryName);
         return articleRepository.findByMemberId(
                 memberId,
                 GetArticlesOptions.of(date, categoryId, sorted, keyword),
@@ -96,7 +92,7 @@ public class ArticleService {
         }
     }
 
-    private Long findCategoryByName(String categoryName) {
+    private Long findCategoryIdByName(String categoryName) {
         if (categoryName == null) {
             return null;
         }

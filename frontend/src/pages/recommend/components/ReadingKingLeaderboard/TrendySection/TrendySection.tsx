@@ -17,7 +17,7 @@ export default function TrendySection({ newsletters }: TrendySectionProps) {
   const filteredNewsletters = newsletters.filter((newsletter) =>
     selectedCategory === '전체'
       ? true
-      : newsletter.category.includes(selectedCategory),
+      : newsletter.category === selectedCategory,
   );
 
   return (

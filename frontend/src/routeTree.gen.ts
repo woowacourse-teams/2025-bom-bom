@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StorageRouteImport } from './routes/storage'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RecommendRouteImport } from './routes/recommend'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
@@ -18,6 +19,11 @@ import { Route as ArticlesArticleIdRouteImport } from './routes/articles.$articl
 const StorageRoute = StorageRouteImport.update({
   id: '/storage',
   path: '/storage',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RecommendRoute = RecommendRouteImport.update({
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/recommend': typeof RecommendRoute
+  '/signup': typeof SignupRoute
   '/storage': typeof StorageRoute
   '/articles/$articleId': typeof ArticlesArticleIdRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/recommend': typeof RecommendRoute
+  '/signup': typeof SignupRoute
   '/storage': typeof StorageRoute
   '/articles/$articleId': typeof ArticlesArticleIdRoute
 }
@@ -60,19 +68,33 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/recommend': typeof RecommendRoute
+  '/signup': typeof SignupRoute
   '/storage': typeof StorageRoute
   '/articles/$articleId': typeof ArticlesArticleIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/recommend' | '/storage' | '/articles/$articleId'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/recommend'
+    | '/signup'
+    | '/storage'
+    | '/articles/$articleId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/recommend' | '/storage' | '/articles/$articleId'
+  to:
+    | '/'
+    | '/login'
+    | '/recommend'
+    | '/signup'
+    | '/storage'
+    | '/articles/$articleId'
   id:
     | '__root__'
     | '/'
     | '/login'
     | '/recommend'
+    | '/signup'
     | '/storage'
     | '/articles/$articleId'
   fileRoutesById: FileRoutesById
@@ -81,6 +103,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   RecommendRoute: typeof RecommendRoute
+  SignupRoute: typeof SignupRoute
   StorageRoute: typeof StorageRoute
   ArticlesArticleIdRoute: typeof ArticlesArticleIdRoute
 }
@@ -92,6 +115,13 @@ declare module '@tanstack/react-router' {
       path: '/storage'
       fullPath: '/storage'
       preLoaderRoute: typeof StorageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/recommend': {
@@ -129,6 +159,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   RecommendRoute: RecommendRoute,
+  SignupRoute: SignupRoute,
   StorageRoute: StorageRoute,
   ArticlesArticleIdRoute: ArticlesArticleIdRoute,
 }

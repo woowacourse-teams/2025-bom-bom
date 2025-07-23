@@ -65,7 +65,7 @@ export const Interactive: Story = {
     return (
       <SearchInput
         value={value}
-        onChange={setValue}
+        onChange={(e) => setValue(e.target.value)}
         placeholder="뉴스레터 제목이나 발행처로 검색하세요..."
       />
     );

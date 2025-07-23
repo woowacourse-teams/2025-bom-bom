@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import PageLayout from '../components/PageLayout/PageLayout';
 import ArticleCardList from '../pages/today/components/ArticleCardList/ArticleCardList';
 import ReadingStatusCard from '../pages/today/components/ReadingStatusCard/ReadingStatusCard';
 import { getArticles } from '@/apis/articles';
@@ -23,20 +24,24 @@ function Index() {
 
   if (!articles || !readingStatus) return null;
   return (
-    <Container>
-      <TitleBox>
-        <Title>오늘의 뉴스레터</Title>
-        <TitleDescription>3개의 새로운 뉴스레터가 도착했어요</TitleDescription>
-      </TitleBox>
-      <ContentWrapper>
-        <ArticleCardList articles={articles.content} />
-        <ReadingStatusCard
-          streakReadDay={readingStatus.streakReadDay}
-          today={readingStatus.today}
-          weekly={readingStatus.weekly}
-        />
-      </ContentWrapper>
-    </Container>
+    <PageLayout activeNav="today">
+      <Container>
+        <TitleBox>
+          <Title>오늘의 뉴스레터</Title>
+          <TitleDescription>
+            3개의 새로운 뉴스레터가 도착했어요
+          </TitleDescription>
+        </TitleBox>
+        <ContentWrapper>
+          <ArticleCardList articles={articles.content} />
+          <ReadingStatusCard
+            streakReadDay={readingStatus.streakReadDay}
+            today={readingStatus.today}
+            weekly={readingStatus.weekly}
+          />
+        </ContentWrapper>
+      </Container>
+    </PageLayout>
   );
 }
 

@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
+import { useState } from 'react';
 import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
-import { CATEGORIES } from '@/constants/category';
+import { CATEGORIES, CategoryType } from '@/constants/category';
 import { NewslettersResponse } from '@/pages/today/types/article';
 import trendingUpIcon from '#/assets/trending-up.svg';
 
@@ -10,6 +11,15 @@ interface TrendySectionProps {
 }
 
 export default function TrendySection({ newsletters }: TrendySectionProps) {
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryType>('전체');
+
+  const filteredNewsletters = newsletters.filter((newsletter) =>
+    selectedCategory === '전체'
+      ? true
+      : newsletter.category.includes(selectedCategory),
+  );
+
   return (
     <Container>
       <SectionHeader>
@@ -20,11 +30,16 @@ export default function TrendySection({ newsletters }: TrendySectionProps) {
       </SectionHeader>
       <TagContainer>
         {CATEGORIES.map((category, index) => (
-          <Chip key={index} text={category} selected={index === 0} />
+          <Chip
+            key={index}
+            text={category}
+            selected={selectedCategory === category}
+            onSelect={() => setSelectedCategory(category)}
+          />
         ))}
       </TagContainer>
       <TrendyGrid>
-        {newsletters.map((newsletter, index) => (
+        {filteredNewsletters.map((newsletter, index) => (
           <ImageInfoCard
             key={index}
             imageUrl={newsletter.imageUrl}

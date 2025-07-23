@@ -65,7 +65,6 @@ function ArticleDetailPage() {
     (article) => !article.isRead,
   );
 
-  if (!currentArticle || !otherArticles) return null;
   return (
     <Container>
       <HeaderWrapper>

@@ -4,7 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import clockIcon from '../../public/assets/clock.svg';
 import Chip from '../components/Chip/Chip';
 import NewsletterItemCard from '../pages/detail/components/NewsletterItemCard/NewsletterItemCard';
-import { formatDateToString } from '../utils/date';
+import { formatDate } from '../utils/date';
 import { getArticleById, getArticles } from '@/apis/articles';
 
 export const Route = createFileRoute('/articles/$articleId')({
@@ -42,7 +42,7 @@ function ArticleDetailPage() {
           <Chip text="기술" />
           <MetaInfoText>from {currentArticle.newsletter.name}</MetaInfoText>
           <MetaInfoText>
-            {formatDateToString(new Date(currentArticle.arrivedDateTime))}
+            {formatDate(new Date(currentArticle.arrivedDateTime))}
           </MetaInfoText>
           <ReadTimeBox>
             <img src={clockIcon} alt="시계 아이콘" />

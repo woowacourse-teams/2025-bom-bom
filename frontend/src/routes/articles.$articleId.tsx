@@ -1,11 +1,14 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createFileRoute, useRouterState } from '@tanstack/react-router';
+import { useEffect } from 'react';
 import clockIcon from '../../public/assets/clock.svg';
 import Chip from '../components/Chip/Chip';
 import NewsletterItemCard from '../pages/detail/components/NewsletterItemCard/NewsletterItemCard';
-import { formatDate } from '../utils/date';
-import { getArticleById, getArticles } from '@/apis/articles';
+import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
+import { useThrottle } from '@/hooks/useThrottle';
+import { formatDate } from '@/utils/date';
+import { getScrollPercent } from '@/utils/scroll';
 
 export const Route = createFileRoute('/articles/$articleId')({
   component: ArticleDetailPage,
@@ -13,6 +16,10 @@ export const Route = createFileRoute('/articles/$articleId')({
 
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
+  const loadedAt = useRouterState({
+    select: (state) => state.loadedAt,
+  });
+  const queryClient = useQueryClient();
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
@@ -22,24 +29,48 @@ function ArticleDetailPage() {
         memberId: 1,
       }),
   });
-
   const { data: otherArticles } = useQuery({
     queryKey: ['otherArticles'],
     queryFn: () =>
       getArticles({ date: new Date(), memberId: 1, sorted: 'ASC' }),
   });
+  const { mutate: updateArticleAsRead } = useMutation({
+    mutationKey: ['read', articleId],
+    mutationFn: () =>
+      patchArticleRead({ articleId: Number(articleId), memberId: 1 }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['article', articleId],
+      });
+    },
+  });
+
+  const throttledHandleScroll = useThrottle(() => {
+    const scrollPercent = getScrollPercent();
+    const elapsedTime = (Date.now() - loadedAt) / 100;
+
+    if (scrollPercent >= 70 && elapsedTime >= 3 && !currentArticle?.isRead) {
+      updateArticleAsRead();
+    }
+  }, 500);
+
+  useEffect(() => {
+    window.addEventListener('scroll', throttledHandleScroll);
+    return () => window.removeEventListener('scroll', throttledHandleScroll);
+  }, [throttledHandleScroll]);
+
+  if (!currentArticle || !otherArticles) return null;
 
   const unReadArticles = otherArticles?.content.filter(
     (article) => !article.isRead,
   );
 
-  if (!currentArticle || !otherArticles) return null;
   return (
     <Container>
       <HeaderWrapper>
         <Title>{currentArticle.title}</Title>
         <MetaInfoRow>
-          <Chip text="기술" />
+          <Chip text={currentArticle.newsletter.category} />
           <MetaInfoText>from {currentArticle.newsletter.name}</MetaInfoText>
           <MetaInfoText>
             {formatDate(new Date(currentArticle.arrivedDateTime))}

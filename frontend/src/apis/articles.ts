@@ -56,9 +56,13 @@ interface PatchArticleReadParams {
 
 export const patchArticleRead = async ({
   articleId,
+  memberId,
 }: PatchArticleReadParams) => {
   return await fetcher.patch({
-    path: `/articles/${articleId}/read`,
+    path: `/articles/${articleId}/read?`,
+    query: {
+      memberId,
+    },
   });
 };
 

@@ -1,6 +1,7 @@
 export type ArticleDetail = {
   title: string;
   contents: string;
+  isRead: boolean;
   arrivedDateTime: string;
   expectedReadTime: number;
   newsletter: {

@@ -1,4 +1,4 @@
-import { ComponentProps, useEffect, useState } from 'react';
+import { ComponentProps } from 'react';
 import defaultImage from '#/assets/bombom.png';
 
 interface ImageWithFallbackProps extends ComponentProps<'img'> {
@@ -7,19 +7,17 @@ interface ImageWithFallbackProps extends ComponentProps<'img'> {
 }
 
 function ImageWithFallback({ src, alt, ...props }: ImageWithFallbackProps) {
-  const [imageError, setImageError] = useState(false);
-
-  useEffect(() => {
-    if (src.length === 0) {
-      setImageError(true);
-    }
-  }, [src]);
+  const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
+    const image = event.currentTarget;
+    image.src = defaultImage;
+    image.alt = '기본 이미지';
+  };
 
   return (
     <img
-      src={imageError ? defaultImage : src}
-      alt={imageError ? '기본 이미지' : alt}
-      onError={() => setImageError(true)}
+      src={src.length > 0 ? src : defaultImage}
+      alt={src.length > 0 ? alt : '기본 이미지'}
+      onError={handleImageError}
       {...props}
     />
   );

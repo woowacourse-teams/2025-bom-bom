@@ -139,6 +139,6 @@ const Thumbnail = styled(ImageWithFallback)`
 
 const BadgeWrapper = styled.div`
   position: absolute;
-  top: 8px;
+  top: 4px;
   right: 4px;
 `;

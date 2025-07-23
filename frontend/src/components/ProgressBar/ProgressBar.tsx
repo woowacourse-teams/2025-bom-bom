@@ -27,7 +27,8 @@ const ProgressGauge = styled.div<{ rate: number }>`
 
   width: ${({ rate }) => `${rate}%`};
   height: 100%;
-  border-radius: ${({ rate }) => (rate === 100 ? '10px' : '10px 0 0 10px')};
+  max-width: 100%;
+  border-radius: ${({ rate }) => (rate >= 100 ? '10px' : '10px 0 0 10px')};
 
   background-color: ${({ theme }) => theme.colors.primary};
 `;

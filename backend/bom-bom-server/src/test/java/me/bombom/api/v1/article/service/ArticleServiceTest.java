@@ -164,7 +164,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                baseTime.toLocalDate(),
+                BASE_TIME.toLocalDate(),
                 null,
                 SortOption.DESC,
                 null,
@@ -186,7 +186,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member.getId(),
-                baseTime.toLocalDate(),
+                BASE_TIME.toLocalDate(),
                 null,
                 SortOption.DESC,
                 "뉴스",
@@ -406,7 +406,7 @@ class ArticleServiceTest {
         // given
         Newsletter newsletter = TestFixture.createNewsletter("테스트 뉴스레터", "test@example.com", 0L);
         newsletterRepository.save(newsletter);
-        Article article = TestFixture.createArticle("제목", member.getId(), newsletter.getId(), baseTime);
+        Article article = TestFixture.createArticle("제목", member.getId(), newsletter.getId(), BASE_TIME);
         articleRepository.save(article);
 
         // when & then
@@ -438,6 +438,7 @@ class ArticleServiceTest {
     void 다_읽음_갱신_성공_테스트_오늘의_뉴스레터일_경우() {
         // given
         Article article = TestFixture.createArticle(
+                "제목",
                 member.getId(),
                 newsletters.getFirst().getId(),
                 LocalDateTime.now()
@@ -466,7 +467,7 @@ class ArticleServiceTest {
     @Test
     void 다_읽음_갱신_성공_테스트_오늘의_뉴스레터가_아닐_경우() {
         // given
-        Article article = TestFixture.createArticle("제목", member.getId(), newsletters.getFirst().getId(), baseTime);
+        Article article = TestFixture.createArticle("제목", member.getId(), newsletters.getFirst().getId(), BASE_TIME);
         articleRepository.save(article);
         TodayReading todayReading = TestFixture.todayReadingFixture(member);
         todayReadingRepository.save(todayReading);
@@ -510,6 +511,7 @@ class ArticleServiceTest {
         memberRepository.save(otherMember);
 
         Article article = TestFixture.createArticle(
+                "제목",
                 member.getId(),
                 newsletters.getFirst().getId(),
                 BASE_TIME
@@ -526,6 +528,7 @@ class ArticleServiceTest {
     void 다_읽음_갱신_아티클_오늘의_읽기가_존재하지_않을_경우_예외() {
         // given
         Article article = TestFixture.createArticle(
+                "제목",
                 member.getId(),
                 newsletters.getFirst().getId(),
                 BASE_TIME
@@ -542,6 +545,7 @@ class ArticleServiceTest {
     void 다_읽음_갱신_아티클_이번주_읽기가_존재하지_않을_경우_예외() {
         // given
         Article article = TestFixture.createArticle(
+                "제목",
                 member.getId(),
                 newsletters.getFirst().getId(),
                 BASE_TIME

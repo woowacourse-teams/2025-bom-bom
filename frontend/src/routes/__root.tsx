@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { theme } from '../styles/theme';
+import PageLayout from '@/components/PageLayout/PageLayout';
 
 const queryClient = new QueryClient();
 
@@ -11,7 +12,9 @@ export const Route = createRootRoute({
     <>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={theme}>
-          <Outlet />
+          <PageLayout>
+            <Outlet />
+          </PageLayout>
         </ThemeProvider>
       </QueryClientProvider>
       <TanStackRouterDevtools />

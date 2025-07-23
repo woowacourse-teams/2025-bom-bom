@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { getNewsletters } from '../apis/newsLetters';
-import PageLayout from '../components/PageLayout/PageLayout';
 import NewsletterHero from '../pages/recommend/components/ReadingKingLeaderboard/NewsletterHero/NewsletterHero';
 import ReadingKingLeaderboard from '../pages/recommend/components/ReadingKingLeaderboard/ReadingKingLeaderboard';
 import TrendySection from '../pages/recommend/components/ReadingKingLeaderboard/TrendySection/TrendySection';
@@ -19,17 +18,15 @@ function Recommend() {
 
   if (!newsletters) return null;
   return (
-    <PageLayout activeNav="recommend">
-      <Container>
-        <MainSection>
-          <NewsletterHero />
-          <TrendySection newsletters={newsletters} />
-        </MainSection>
-        <SideSection>
-          <ReadingKingLeaderboard />
-        </SideSection>
-      </Container>
-    </PageLayout>
+    <Container>
+      <MainSection>
+        <NewsletterHero />
+        <TrendySection newsletters={newsletters} />
+      </MainSection>
+      <SideSection>
+        <ReadingKingLeaderboard />
+      </SideSection>
+    </Container>
   );
 }
 

@@ -1,20 +1,25 @@
 import styled from '@emotion/styled';
-import { Link } from '@tanstack/react-router';
+import { Link, useLocation } from '@tanstack/react-router';
 import CompassIcon from '../icons/CompassIcon';
 import HomeIcon from '../icons/HomeIcon';
 import StorageIcon from '../icons/StorageIcon';
-import { NavType } from '@/types/nav';
 import compassIcon from '#/assets/compass.svg';
 import copyIcon from '#/assets/copy.svg';
 
-interface HeaderProps {
-  activeNav: NavType;
-}
+const activeNavPageMap = {
+  '/': 'today',
+  '/storage': 'storage',
+  '/recommend': 'recommend',
+} as const;
 
-export default function Header({ activeNav }: HeaderProps) {
+export default function Header() {
   const handleCopyEmail = () => {
     navigator.clipboard.writeText('test@bombom.news');
   };
+
+  const location = useLocation();
+  const activeNav =
+    activeNavPageMap[location.pathname as keyof typeof activeNavPageMap];
 
   return (
     <HeaderContainer>

@@ -1,19 +1,11 @@
 import styled from '@emotion/styled';
 import { PropsWithChildren } from 'react';
 import Header from '../Header/Header';
-import { NavType } from '@/types/nav';
 
-interface PageLayoutProps {
-  activeNav: NavType;
-}
-
-function PageLayout({
-  activeNav,
-  children,
-}: PropsWithChildren<PageLayoutProps>) {
+function PageLayout({ children }: PropsWithChildren) {
   return (
     <Container>
-      <Header activeNav={activeNav} />
+      <Header />
       {children}
     </Container>
   );

@@ -25,12 +25,18 @@ export default function TrendySection({ newsletters }: TrendySectionProps) {
       </TagContainer>
       <TrendyGrid>
         {newsletters.map((newsletter, index) => (
-          <ImageInfoCard
+          <a
+            href={newsletter.mainPageUrl}
             key={index}
-            imageUrl={newsletter.imageUrl}
-            title={newsletter.name}
-            description={newsletter.description}
-          />
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ImageInfoCard
+              imageUrl={newsletter.imageUrl}
+              title={newsletter.name}
+              description={newsletter.description}
+            />
+          </a>
         ))}
       </TrendyGrid>
     </Container>

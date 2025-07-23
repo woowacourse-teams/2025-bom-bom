@@ -5,10 +5,9 @@ import { useEffect } from 'react';
 import clockIcon from '../../public/assets/clock.svg';
 import Chip from '../components/Chip/Chip';
 import NewsletterItemCard from '../pages/detail/components/NewsletterItemCard/NewsletterItemCard';
-import { ArticleDetail } from '../pages/detail/types/articleDetail';
-import { formatDateToDotString } from '../utils/date';
-import { patchArticleRead } from '@/apis/articles';
+import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import { useThrottle } from '@/hooks/useThrottle';
+import { formatDate } from '@/utils/date';
 import { getScrollPercent } from '@/utils/scroll';
 
 export const Route = createFileRoute('/articles/$articleId')({
@@ -60,7 +59,7 @@ function ArticleDetailPage() {
     return () => window.removeEventListener('scroll', throttledHandleScroll);
   }, [throttledHandleScroll]);
 
-  if (!data) return null;
+  if (!currentArticle || !otherArticles) return null;
 
   const unReadArticles = otherArticles?.content.filter(
     (article) => !article.isRead,

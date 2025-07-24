@@ -1,16 +1,54 @@
 import styled from '@emotion/styled';
+import { useState } from 'react';
 import { postSignup } from '@/apis/auth';
+import Tab from '@/components/Tab/Tab';
+import Tabs from '@/components/Tabs/Tabs';
 
 export default function SignupCard() {
+  const [nickname, setNickname] = useState('');
+  const [email, setEmail] = useState('');
+  const [selectedTab, setSelectedTab] = useState('MALE');
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    postSignup();
+    postSignup({
+      nickname,
+      email,
+      gender: selectedTab,
+    });
   };
 
   return (
     <Container onSubmit={handleSubmit}>
-      <EmailInput type="email" placeholder="이메일" />
+      <EmailInput
+        value={nickname}
+        onChange={(e) => setNickname(e.target.value)}
+        type="text"
+        placeholder="닉네임을 입력해주세요."
+      />
+      <EmailRow>
+        <EmailInput
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          type="email"
+          placeholder="이메일을 입력해주세요."
+        />
+        @bombom.news
+      </EmailRow>
+      <Tabs direction="horizontal">
+        <Tab
+          value="MALE"
+          label="남성"
+          selected={selectedTab === 'MALE'}
+          onTabSelect={() => setSelectedTab('MALE')}
+        />
+        <Tab
+          value="FEMALE"
+          label="여성"
+          selected={selectedTab === 'FEMALE'}
+          onTabSelect={() => setSelectedTab('FEMALE')}
+        />
+      </Tabs>
       <SubmitButton type="submit">회원가입</SubmitButton>
     </Container>
   );
@@ -30,6 +68,14 @@ const Container = styled.form`
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
 
   background-color: ${({ theme }) => theme.colors.white};
+`;
+
+const EmailRow = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  width: 100%;
 `;
 
 const EmailInput = styled.input`

@@ -37,6 +37,7 @@ export default function TrendySection({ newsletters }: TrendySectionProps) {
             title={newsletter.name}
             description={newsletter.description}
             onClick={() => handleCardClick(newsletter.mainPageUrl)}
+            as="button"
           />
         ))}
       </TrendyGrid>

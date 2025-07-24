@@ -52,11 +52,10 @@ public class ArticleService {
                 pageable);
     }
 
-    public ArticleDetailResponse getArticleDetail(Long id, Long memberId) {
-        validateMemberExists(memberId);
+    public ArticleDetailResponse getArticleDetail(Long id, Member member) {
         Article article = articleRepository.findById(id)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        validateArticleOwner(article, memberId);
+        validateArticleOwner(article, member.getId());
         Newsletter newsletter = newsletterRepository.findById(article.getNewsletterId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         Category category = categoryRepository.findById(newsletter.getCategoryId())

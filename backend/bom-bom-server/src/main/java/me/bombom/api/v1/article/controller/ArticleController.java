@@ -51,8 +51,11 @@ public class ArticleController {
     }
 
     @GetMapping("/{id}")
-    public ArticleDetailResponse getArticleDetail(@PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id, @RequestParam Long memberId) {
-        return articleService.getArticleDetail(id, memberId);
+    public ArticleDetailResponse getArticleDetail(
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
+            @LoginMember Member member
+    ) {
+        return articleService.getArticleDetail(id, member);
     }
 
     @PatchMapping("/{id}/read")

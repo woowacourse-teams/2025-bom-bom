@@ -1,0 +1,27 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo "Installing dependencies..."
+      - cd frontend
+      - npm install
+
+  pre_build:
+    commands:
+      - echo "Running lint..."
+      - npm run lint
+      - echo "Running type-check..."
+      - npm run type-check
+
+  build:
+    commands:
+      - echo "Building project..."
+      - npm run build
+
+artifacts:
+  base-directory: frontend/dist
+  files:
+    - '**/*'

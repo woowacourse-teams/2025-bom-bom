@@ -116,7 +116,7 @@ const LeaderboardItem = ({
     </UserInfo>
 
     <BookIconContainer>
-      <ArrowIcon direction="topRight" />
+      <ArrowIcon targetDirection="upRight" currentDirection="upRight" />
     </BookIconContainer>
   </ItemContainer>
 );
@@ -130,7 +130,7 @@ export default function ReadingKingLeaderboard({
       <Header>
         <TitleContainer>
           <HeaderIcon>
-            <ArrowIcon direction="topRight" />
+            <ArrowIcon targetDirection="upRight" currentDirection="upRight" />
           </HeaderIcon>
           <Title>이달의 독서왕</Title>
         </TitleContainer>

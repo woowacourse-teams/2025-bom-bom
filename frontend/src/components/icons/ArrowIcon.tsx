@@ -1,28 +1,12 @@
 import styled from '@emotion/styled';
 import { SVGProps } from 'react';
+import { DirectionType } from './Icons.types';
+import { calculateDirection } from './Icons.utils';
 
 interface ArrowIconProps extends SVGProps<SVGSVGElement> {
-  direction:
-    | 'topRight'
-    | 'right'
-    | 'downRight'
-    | 'down'
-    | 'downLeft'
-    | 'left'
-    | 'upLeft'
-    | 'up';
+  targetDirection: DirectionType;
+  currentDirection: DirectionType;
 }
-
-const directionRotationMap = {
-  topRight: 'rotate(0deg)',
-  right: 'rotate(45deg)',
-  downRight: 'rotate(90deg)',
-  down: 'rotate(135deg)',
-  downLeft: 'rotate(180deg)',
-  left: 'rotate(225deg)',
-  upLeft: 'rotate(270deg)',
-  up: 'rotate(315deg)',
-};
 
 export default function ArrowIcon({ direction, ...props }: ArrowIconProps) {
   return (
@@ -40,7 +24,11 @@ export default function ArrowIcon({ direction, ...props }: ArrowIconProps) {
   );
 }
 
-const StyledSVG = styled.svg<{ direction: ArrowIconProps['direction'] }>`
-  transform: ${({ direction }) => directionRotationMap[direction]};
+const StyledSVG = styled.svg<{
+  targetDirection: DirectionType;
+  currentDirection: DirectionType;
+}>`
+  transform: ${({ targetDirection, currentDirection }) =>
+    calculateDirection(targetDirection, currentDirection)};
   transform-origin: center center;
 `;

@@ -115,6 +115,6 @@ const request = async <TRequest, TResponse>({
     return null;
   } catch (error) {
     console.error(error);
-    return null;
+    throw error;
   }
 };

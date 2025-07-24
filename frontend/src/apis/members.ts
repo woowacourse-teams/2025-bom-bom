@@ -67,3 +67,23 @@ export const patchWeeklyCount = async ({
     },
   });
 };
+
+export interface UserInfoResponse {
+  createdAt: string;
+  updatedAt: string;
+  id: number;
+  provider: string;
+  providerId: string;
+  email: string;
+  nickname: string;
+  profileImageUrl: string;
+  birthDate: string;
+  gender: 'MALE' | 'FEMALE';
+  roleId: number;
+}
+
+export const getUserInfo = async () => {
+  return await fetcher.get<UserInfoResponse>({
+    path: '/members/me',
+  });
+};

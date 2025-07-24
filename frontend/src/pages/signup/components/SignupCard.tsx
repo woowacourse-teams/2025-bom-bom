@@ -5,12 +5,9 @@ export default function SignupCard() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    postSignup({
-      nickname: 'string',
-      birthDate: '2025-07-23T09:01:13.779Z',
-      gender: 'MALE',
-    });
+    postSignup();
   };
+
   return (
     <Container onSubmit={handleSubmit}>
       <EmailInput type="email" placeholder="이메일" />

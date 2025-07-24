@@ -7,6 +7,7 @@ type FetcherOptions<TRequest extends Record<string, string | number>> = {
   path: string;
   query?: Record<string, string | number | Date | undefined>;
   body?: TRequest;
+  headers?: HeadersInit;
 };
 
 export const fetcher = {
@@ -15,8 +16,9 @@ export const fetcher = {
   post: async <TRequest extends Record<string, string | number>, TResponse>({
     path,
     body,
+    headers,
   }: FetcherOptions<TRequest>) =>
-    request<TRequest, TResponse>({ path, body, method: 'POST' }),
+    request<TRequest, TResponse>({ path, body, method: 'POST', headers }),
   patch: async <TRequest extends Record<string, string | number>, TResponse>({
     path,
     query,

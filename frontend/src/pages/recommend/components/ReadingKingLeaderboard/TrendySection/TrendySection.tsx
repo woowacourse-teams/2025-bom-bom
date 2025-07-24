@@ -5,6 +5,7 @@ import { getNewsletters } from '@/apis/newsLetters';
 import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import { CATEGORIES, CategoryType } from '@/constants/category';
+import { copyToClipboard } from '@/utils/copy';
 import trendingUpIcon from '#/assets/trending-up.svg';
 
 export default function TrendySection() {
@@ -22,6 +23,11 @@ export default function TrendySection() {
     (newsletter) =>
       selectedCategory === '전체' || newsletter.category === selectedCategory,
   );
+
+  const handleCardClick = (url: string) => {
+    copyToClipboard('test@bombom.news');
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <Container>
@@ -48,6 +54,8 @@ export default function TrendySection() {
             imageUrl={newsletter.imageUrl}
             title={newsletter.name}
             description={newsletter.description}
+            onClick={() => handleCardClick(newsletter.mainPageUrl)}
+            as="button"
           />
         ))}
       </TrendyGrid>

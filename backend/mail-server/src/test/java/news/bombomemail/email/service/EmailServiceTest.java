@@ -23,12 +23,14 @@ import org.springframework.context.annotation.Import;
 
 import java.io.File;
 import java.nio.file.StandardCopyOption;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.SoftAssertions.*;
 
 @DataJpaTest
+@ActiveProfiles("test")
 @Import({EmailService.class, ArticleService.class, EmailConfig.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class EmailServiceTest {

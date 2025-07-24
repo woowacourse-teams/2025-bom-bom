@@ -334,7 +334,7 @@ class ArticleServiceTest {
         Newsletter newsletter = newsletters.getFirst();
 
         // when
-        ArticleDetailResponse result = articleService.getArticleDetail(article.getId(), member.getId());
+        ArticleDetailResponse result = articleService.getArticleDetail(article.getId(), member);
 
         // then
         assertSoftly(softly -> {
@@ -346,18 +346,7 @@ class ArticleServiceTest {
     @Test
     void 아티클_상세_조회_아티클이_존재하지_않으면_예외() {
         // when & then
-        assertThatThrownBy(() -> articleService.getArticleDetail(0L, member.getId()))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
-
-    @Test
-    void 아티클_상세_조회_멤버가_존재하지_않으면_예외() {
-        // given
-        Article article = articles.getFirst();
-
-        // when & then
-        assertThatThrownBy(() -> articleService.getArticleDetail(article.getId(), 0L))
+        assertThatThrownBy(() -> articleService.getArticleDetail(0L, member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -379,7 +368,7 @@ class ArticleServiceTest {
         articleRepository.save(article);
 
         // when & then
-        assertThatThrownBy(() -> articleService.getArticleDetail(article.getId(), member.getId()))
+        assertThatThrownBy(() -> articleService.getArticleDetail(article.getId(), member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -393,7 +382,7 @@ class ArticleServiceTest {
         articleRepository.save(article);
 
         // when & then
-        assertThatThrownBy(() -> articleService.getArticleDetail(article.getId(), member.getId()))
+        assertThatThrownBy(() -> articleService.getArticleDetail(article.getId(), member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -412,7 +401,7 @@ class ArticleServiceTest {
         memberRepository.save(member2);
 
         // when & then
-        assertThatThrownBy(() -> articleService.getArticleDetail(articles.getFirst().getId(), member2.getId()))
+        assertThatThrownBy(() -> articleService.getArticleDetail(articles.getFirst().getId(), member2))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
     }

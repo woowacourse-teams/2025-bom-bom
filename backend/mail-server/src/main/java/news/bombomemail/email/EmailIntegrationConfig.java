@@ -52,7 +52,7 @@ public class EmailIntegrationConfig {
         return IntegrationFlow
                 .from(mailFileSource(),
                         c -> c.poller(Pollers.fixedDelay(5000).getObject()))
-                .handle("emailService", "processMailFile")
+                .handle("emailService", "processEmailFile")
                 .get();
     }
 }

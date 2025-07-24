@@ -1,41 +1,46 @@
+import styled from '@emotion/styled';
 import { SVGProps } from 'react';
 
-export default function ArrowIcon(props: SVGProps<SVGSVGElement>) {
+interface ArrowIconProps extends SVGProps<SVGSVGElement> {
+  direction:
+    | 'topRight'
+    | 'right'
+    | 'downRight'
+    | 'down'
+    | 'downLeft'
+    | 'left'
+    | 'upLeft'
+    | 'up';
+}
+
+const directionRotationMap = {
+  topRight: 'rotate(0deg)',
+  right: 'rotate(45deg)',
+  downRight: 'rotate(90deg)',
+  down: 'rotate(135deg)',
+  downLeft: 'rotate(180deg)',
+  left: 'rotate(225deg)',
+  upLeft: 'rotate(270deg)',
+  up: 'rotate(315deg)',
+};
+
+export default function ArrowIcon({ direction, ...props }: ArrowIconProps) {
   return (
-    <svg
+    <StyledSVG
       {...props}
-      width="15"
-      height="15"
-      viewBox="0 0 15 15"
-      fill="none"
+      direction={direction}
       xmlns="http://www.w3.org/2000/svg"
+      height="24px"
+      viewBox="0 -960 960 960"
+      width="24px"
+      fill="#ffffff"
     >
-      <g clipPath="url(#clip0_619_985)">
-        <path
-          d="M3.66675 7.5H11.8334"
-          stroke="white"
-          strokeWidth="1.16667"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M7.75 3.4165L11.8333 7.49984L7.75 11.5832"
-          stroke="white"
-          strokeWidth="1.16667"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </g>
-      <defs>
-        <clipPath id="clip0_619_985">
-          <rect
-            width="14"
-            height="14"
-            fill="white"
-            transform="translate(0.75 0.5)"
-          />
-        </clipPath>
-      </defs>
-    </svg>
+      <path d="m216-160-56-56 464-464H360v-80h400v400h-80v-264L216-160Z" />
+    </StyledSVG>
   );
 }
+
+const StyledSVG = styled.svg<{ direction: ArrowIconProps['direction'] }>`
+  transform: ${({ direction }) => directionRotationMap[direction]};
+  transform-origin: center center;
+`;

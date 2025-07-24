@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
+import ArrowIcon from '@/components/icons/ArrowIcon';
 import AvatarIcon from '@/components/icons/AvatarIcon';
-import TopRightArrowIcon from '@/components/icons/TopRightArrowIcon';
 
 // Mock data for the leaderboard
 const leaderboardData = [
@@ -116,7 +116,7 @@ const LeaderboardItem = ({
     </UserInfo>
 
     <BookIconContainer>
-      <TopRightArrowIcon />
+      <ArrowIcon direction="topRight" />
     </BookIconContainer>
   </ItemContainer>
 );
@@ -130,7 +130,7 @@ export default function ReadingKingLeaderboard({
       <Header>
         <TitleContainer>
           <HeaderIcon>
-            <TopRightArrowIcon />
+            <ArrowIcon direction="topRight" />
           </HeaderIcon>
           <Title>이달의 독서왕</Title>
         </TitleContainer>

@@ -1,4 +1,6 @@
 import styled from '@emotion/styled';
+import { useMutation } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { postSignup } from '@/apis/auth';
 import Tab from '@/components/Tab/Tab';
@@ -8,14 +10,23 @@ export default function SignupCard() {
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
   const [selectedTab, setSelectedTab] = useState('MALE');
+
+  const navigate = useNavigate();
+  const { mutate: mutateSignup } = useMutation({
+    mutationKey: ['signup', nickname, email, selectedTab],
+    mutationFn: () =>
+      postSignup({
+        nickname,
+        email,
+        gender: selectedTab,
+      }),
+    onSuccess: () => {
+      navigate({ to: '/' });
+    },
+  });
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    postSignup({
-      nickname,
-      email,
-      gender: selectedTab,
-    });
+    mutateSignup();
   };
 
   return (
@@ -30,7 +41,7 @@ export default function SignupCard() {
         <EmailInput
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          type="email"
+          type="text"
           placeholder="이메일을 입력해주세요."
         />
         @bombom.news

@@ -73,13 +73,13 @@ public class ArticleService {
         readingService.updateReadingCount(article);
     }
 
-    public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(Long memberId) {
+    public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(Long memberId, String keyword) {
         validateMemberExists(memberId);
-        int totalCount = articleRepository.countAllByMemberId(memberId);
+        int totalCount = articleRepository.countAllByMemberId(memberId, keyword);
         List<GetArticleCountPerCategoryResponse> countResponse = categoryRepository.findAll()
                 .stream()
                 .map(category -> {
-                    int count = articleRepository.countAllByCategoryIdAndMemberId(category.getId(), memberId);
+                    int count = articleRepository.countAllByCategoryIdAndMemberId(memberId, category.getId(), keyword);
                     return GetArticleCountPerCategoryResponse.of(category, count);
                 })
                 .toList();

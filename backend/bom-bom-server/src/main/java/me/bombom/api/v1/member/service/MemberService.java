@@ -24,7 +24,7 @@ public class MemberService {
         Member newMember = Member.builder()
                 .provider(pendingMember.getProvider())
                 .providerId(pendingMember.getProviderId())
-                .email("tempEmail")
+                .email(signupRequest.email())
                 .profileImageUrl(pendingMember.getProfileUrl())
                 .nickname(signupRequest.nickname())
                 .gender(signupRequest.gender())

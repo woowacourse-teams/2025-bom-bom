@@ -4,14 +4,18 @@ import ArrowIcon from '@/components/icons/ArrowIcon';
 import CompassIcon from '@/components/icons/CompassIcon';
 import PostboxIcon from '@/components/icons/PostboxIcon';
 
-function EmptyLetterCard() {
+interface EmptyLetterCardProps {
+  title: string;
+}
+
+function EmptyLetterCard({ title }: EmptyLetterCardProps) {
   return (
     <Container>
       <PostboxIconWrapper>
         <PostboxIcon />
       </PostboxIconWrapper>
 
-      <EmptyTitle>새로운 뉴스레터가 없어요</EmptyTitle>
+      <EmptyTitle>{title}</EmptyTitle>
 
       <Description>
         <Lead>뉴스레터를 구독하고 봄봄에서 편리하게 관리해보세요.</Lead>

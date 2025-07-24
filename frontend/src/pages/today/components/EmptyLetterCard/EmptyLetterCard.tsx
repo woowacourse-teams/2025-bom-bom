@@ -17,12 +17,12 @@ function EmptyLetterCard({ title }: EmptyLetterCardProps) {
 
       <EmptyTitle>{title}</EmptyTitle>
 
-      <Description>
+      <DescriptionWrapper>
         <Lead>뉴스레터를 구독하고 봄봄에서 편리하게 관리해보세요.</Lead>
         <Support>
           구독한 뉴스레터들이 여기에 깔끔하게 정리되어 나타납니다.
         </Support>
-      </Description>
+      </DescriptionWrapper>
 
       <LinkButton to="/recommend">
         <CompassIcon />
@@ -59,7 +59,7 @@ const EmptyTitle = styled.p`
   -webkit-text-fill-color: transparent;
 `;
 
-const Description = styled.div`
+const DescriptionWrapper = styled.div`
   display: flex;
   gap: 8px;
   flex-direction: column;

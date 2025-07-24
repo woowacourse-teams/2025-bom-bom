@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { ENV } from '../apis/env';
-import { ARTICLE_DETAIL } from './data/articleDefault';
-import { ARTICLES } from './data/mock-articles';
+import { ARTICLE_DETAIL } from './datas/articleDetail';
+import { ARTICLES } from './datas/articles';
 
 const baseURL = ENV.baseUrl;
 

@@ -86,7 +86,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 null,
                 null,
                 SortOption.DESC,
@@ -111,7 +111,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 null,
                 null,
                 SortOption.ASC,
@@ -138,7 +138,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 null,
                 categoryName,
                 SortOption.DESC,
@@ -163,7 +163,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 BASE_TIME.toLocalDate(),
                 null,
                 SortOption.DESC,
@@ -185,7 +185,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 BASE_TIME.toLocalDate(),
                 null,
                 SortOption.DESC,
@@ -203,30 +203,13 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 아티클_목록_조회_멤버가_존재하지_않으면_예외() {
-        // given
-        Pageable pageable = PageRequest.of(0, 10);
-
-        // when & then
-        assertThatThrownBy(() -> articleService.getArticles(
-                0L,
-                null,
-                categories.getFirst().getName(),
-                SortOption.DESC,
-                null,
-                pageable
-        )).isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
-
-    @Test
     void 아티클_목록_조회_카테고리가_존재하지_않으면_예외() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
 
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
-                member.getId(),
+                member,
                 null,
                 "Invaild Category Name",
                 SortOption.DESC,
@@ -243,7 +226,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 null,
                 null,
                 SortOption.DESC,
@@ -272,7 +255,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 null,
                 null,
                 SortOption.DESC,
@@ -301,7 +284,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 null,
                 null,
                 SortOption.DESC,
@@ -326,7 +309,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 null,
                 null,
                 SortOption.ASC,

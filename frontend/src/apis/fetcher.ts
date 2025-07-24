@@ -68,6 +68,7 @@ const request = async <TRequest, TResponse>({
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Basic ${ENV.token}`,
+        credentials: 'include',
         ...headers,
       },
     };

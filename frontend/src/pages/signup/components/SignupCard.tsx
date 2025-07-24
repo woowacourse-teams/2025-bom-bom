@@ -1,15 +1,25 @@
 import styled from '@emotion/styled';
+import { postSignup } from '@/apis/auth';
 
 export default function SignupCard() {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    postSignup({
+      nickname: 'string',
+      birthDate: '2025-07-23T09:01:13.779Z',
+      gender: 'MALE',
+    });
+  };
   return (
-    <Container>
+    <Container onSubmit={handleSubmit}>
       <EmailInput type="email" placeholder="이메일" />
       <SubmitButton type="submit">회원가입</SubmitButton>
     </Container>
   );
 }
 
-const Container = styled.section`
+const Container = styled.form`
   display: flex;
   gap: 22px;
   flex-direction: column;

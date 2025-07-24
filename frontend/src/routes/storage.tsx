@@ -87,7 +87,7 @@ function Storage() {
           <ArticleList>
             {articles.content.map((article) => (
               <li key={article.articleId}>
-                <ArticleCard data={article} />
+                <ArticleCard data={article} readVariant="badge" />
               </li>
             ))}
           </ArticleList>

@@ -21,14 +21,12 @@ public class MemberService {
 
     // TODO : 회원가입 입력 정보 양식 반영
     public Member signup(PendingOAuth2Member pendingMember, MemberSignupRequest signupRequest) {
-        validateDuplicateNickname(signupRequest);
         Member newMember = Member.builder()
                 .provider(pendingMember.getProvider())
                 .providerId(pendingMember.getProviderId())
                 .email("tempEmail")
                 .profileImageUrl(pendingMember.getProfileUrl())
                 .nickname(signupRequest.nickname())
-                .birthDate(LocalDateTime.of(2000, 1, 1, 0, 0, 0))
                 .gender(signupRequest.gender())
                 .roleId(0L)
                 .build();
@@ -39,11 +37,5 @@ public class MemberService {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         return MemberProfileResponse.from(member);
-    }
-
-    private void validateDuplicateNickname(MemberSignupRequest signupRequest) {
-        if (memberRepository.existsByNickname(signupRequest.nickname())) {
-            throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_NICKNAME);
-        }
     }
 }

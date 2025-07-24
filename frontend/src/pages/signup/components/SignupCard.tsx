@@ -21,7 +21,7 @@ export default function SignupCard() {
         gender: selectedTab,
       }),
     onSuccess: () => {
-      navigate({ to: '/' });
+      navigate({ to: '/login' });
     },
   });
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

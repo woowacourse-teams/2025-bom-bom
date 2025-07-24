@@ -34,9 +34,12 @@ function Storage() {
     queryFn: () => getStatisticsCategories({ memberId: 1 }),
   });
 
-  if (!articles) return null;
+  if (!articles || !categoryCounts) return null;
 
   const readStats = getArticleReadStats(articles.content);
+  const existCategories = categoryCounts.categories.filter(
+    (category) => category.count !== 0,
+  );
 
   return (
     <PageLayout activeNav="storage">
@@ -49,7 +52,7 @@ function Storage() {
                 label: '전체',
                 quantity: categoryCounts?.totalCount ?? 0,
               },
-              ...(categoryCounts?.categories.map(({ category, count }) => ({
+              ...(existCategories.map(({ category, count }) => ({
                 value: category as CategoryType,
                 label: category,
                 quantity: count,
@@ -84,7 +87,7 @@ function Storage() {
           <ArticleList>
             {articles.content.map((article) => (
               <li key={article.articleId}>
-                <ArticleCard data={article} />
+                <ArticleCard data={article} readVariant="badge" />
               </li>
             ))}
           </ArticleList>

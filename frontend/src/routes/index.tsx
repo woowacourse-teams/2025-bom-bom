@@ -14,7 +14,8 @@ export const Route = createFileRoute('/')({
 function Index() {
   const { data: articles } = useQuery({
     queryKey: ['todayArticles'],
-    queryFn: () => getArticles({ memberId: 1, sorted: 'DESC' }),
+    queryFn: () =>
+      getArticles({ date: new Date(), memberId: 1, sorted: 'DESC' }),
   });
 
   const { data: readingStatus } = useQuery({
@@ -30,7 +31,7 @@ function Index() {
         <TitleBox>
           <Title>오늘의 뉴스레터</Title>
           <TitleDescription>
-            3개의 새로운 뉴스레터가 도착했어요
+            {articles.content.length}개의 새로운 뉴스레터가 도착했어요
           </TitleDescription>
         </TitleBox>
         <ContentWrapper>

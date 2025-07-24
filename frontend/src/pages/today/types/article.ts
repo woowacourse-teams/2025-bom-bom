@@ -1,3 +1,5 @@
+import { CategoryType } from '@/constants/category';
+
 export type Article = {
   articleId: string;
   title: string;
@@ -21,6 +23,7 @@ export interface NewsletterResponse {
   imageUrl: string;
   description: string;
   mainPageUrl: string;
+  category: CategoryType;
 }
 
 export type NewslettersResponse = NewsletterResponse[];

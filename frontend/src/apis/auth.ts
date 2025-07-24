@@ -15,8 +15,5 @@ export const postSignup = async () => {
       gender: 'MALE',
       // email: 'test@bombom.news',
     },
-    headers: {
-      credentials: 'include',
-    },
   });
 };

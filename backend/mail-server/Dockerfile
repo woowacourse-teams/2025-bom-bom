@@ -1,5 +1,8 @@
 FROM eclipse-temurin:21-jdk-alpine
 
+ENV TZ=Asia/Seoul
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 ARG APP_USER=app
 ARG APP_UID=1001
 ARG APP_GID=1001
@@ -14,4 +17,5 @@ USER ${APP_USER}
 
 ENTRYPOINT ["java","-jar","/app/app.jar", \
             "--spring.profiles.active=docker", \
-            "--integration.file.maildir=/maildir/new"]
+            "--integration.file.maildir=/maildir/new", \
+            "-Duser.timezone=Asia/Seoul"]

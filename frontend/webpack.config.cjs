@@ -72,7 +72,7 @@ module.exports = (env, argv) => {
       }),
       new webpack.DefinePlugin({
         'process.env': JSON.stringify(process.env),
-        'process.env.ENABLE_MSW': JSON.stringify(env.MSW),
+        'process.env.ENABLE_MSW': JSON.stringify(env.ENABLE_MSW),
       }),
     ],
     devServer: {

@@ -574,8 +574,10 @@ class ArticleServiceTest {
         );
         articleRepository.saveAll(testArticles);
 
-        GetArticleCategoryStatisticsResponse result = articleService.getArticleCategoryStatistics(member.getId(),
-                keyword);
+        GetArticleCategoryStatisticsResponse result = articleService.getArticleCategoryStatistics(
+                member.getId(),
+                keyword
+        );
 
         // then
         assertSoftly(softly -> {
@@ -591,7 +593,10 @@ class ArticleServiceTest {
     @Test
     void 전체_카테고리_별_아티클_개수를_조회한다() {
         // when
-        GetArticleCategoryStatisticsResponse result = articleService.getArticleCategoryStatistics(member.getId(), null);
+        GetArticleCategoryStatisticsResponse result = articleService.getArticleCategoryStatistics(
+                member.getId(),
+                null
+        );
 
         // then
         assertSoftly(softly -> {

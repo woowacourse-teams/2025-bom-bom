@@ -14,6 +14,7 @@ import me.bombom.api.v1.article.enums.SortOption;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
@@ -37,17 +38,16 @@ public class ArticleService {
     private final ReadingService readingService;
 
     public Page<ArticleResponse> getArticles(
-            Long memberId,
+            Member member,
             LocalDate date,
             String categoryName,
             SortOption sorted,
             String keyword,
             Pageable pageable
     ) {
-        validateMemberExists(memberId);
         Long categoryId = findCategoryIdByName(categoryName);
         return articleRepository.findByMemberId(
-                memberId,
+                member.getId(),
                 GetArticlesOptions.of(date, categoryId, sorted, keyword),
                 pageable);
     }

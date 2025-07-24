@@ -8,6 +8,8 @@ import me.bombom.api.v1.article.dto.ArticleResponse;
 import me.bombom.api.v1.article.dto.GetArticleCategoryStatisticsResponse;
 import me.bombom.api.v1.article.enums.SortOption;
 import me.bombom.api.v1.article.service.ArticleService;
+import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -31,7 +33,7 @@ public class ArticleController {
 
     @GetMapping
     public Page<ArticleResponse> getArticles(
-            @RequestParam @Positive(message = "memberId는 1 이상의 값이어야 합니다.") Long memberId,
+            @LoginMember Member member,
             @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate date,
             @RequestParam(required = false) String category,
             @RequestParam(required = false, name = "sorted", defaultValue = "desc") String sorted,
@@ -39,7 +41,7 @@ public class ArticleController {
             @PageableDefault Pageable pageable
     ) {
         return articleService.getArticles(
-                memberId,
+                member,
                 date,
                 category,
                 SortOption.from(sorted),

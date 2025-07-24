@@ -39,7 +39,7 @@ function Storage() {
 
   const debouncedSearch = useDebounce(() => {
     refetchArticles();
-  }, 300);
+  }, 500);
 
   if (!articles || !categoryCounts) return null;
 

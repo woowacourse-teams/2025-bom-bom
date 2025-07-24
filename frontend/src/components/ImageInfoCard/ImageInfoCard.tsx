@@ -6,16 +6,18 @@ interface ImageInfoCardProps extends ComponentProps<'div'> {
   imageUrl: string;
   title: string;
   description: string;
+  as?: React.ElementType;
 }
 
 function ImageInfoCard({
   imageUrl,
   title,
   description,
+  as = 'div',
   ...props
 }: ImageInfoCardProps) {
   return (
-    <Container {...props}>
+    <Container as={as} {...props}>
       <Image src={imageUrl} alt={`${title} 뉴스레터 이미지`} />
       <InfoBox>
         <Title>{title}</Title>

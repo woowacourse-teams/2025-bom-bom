@@ -561,9 +561,42 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 카테고리_별_아티클_개수를_조회한다() {
+    void 제목_필터링_된_카테고리_별_아티클_개수를_조회한다() {
         // when
-        GetArticleCategoryStatisticsResponse result = articleService.getArticleCategoryStatistics(member.getId());
+        String keyword = "AI";
+
+        List<Article> testArticles = List.of(
+                TestFixture.createArticle("AI와 디자인", member.getId(), newsletters.get(0).getId(), BASE_TIME),
+                TestFixture.createArticle("생성형 AI 추천", member.getId(), newsletters.get(1).getId(), BASE_TIME),
+                TestFixture.createArticle("리빙 인테리어", member.getId(), newsletters.get(2).getId(), BASE_TIME),
+                TestFixture.createArticle("북카페 추천", member.getId(), newsletters.get(0).getId(), BASE_TIME),
+                TestFixture.createArticle("직업과 AI의 상관관계", member.getId(), newsletters.get(1).getId(), BASE_TIME)
+        );
+        articleRepository.saveAll(testArticles);
+
+        GetArticleCategoryStatisticsResponse result = articleService.getArticleCategoryStatistics(
+                member.getId(),
+                keyword
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(3);
+            softly.assertThat(result.categories()).hasSize(3);
+            softly.assertThat(result.categories().get(0).category()).isEqualTo("경제");
+            softly.assertThat(result.categories().get(0).count()).isEqualTo(1);
+            softly.assertThat(result.categories().get(1).category()).isEqualTo("테크");
+            softly.assertThat(result.categories().get(1).count()).isEqualTo(2);
+        });
+    }
+
+    @Test
+    void 전체_카테고리_별_아티클_개수를_조회한다() {
+        // when
+        GetArticleCategoryStatisticsResponse result = articleService.getArticleCategoryStatistics(
+                member.getId(),
+                null
+        );
 
         // then
         assertSoftly(softly -> {
@@ -579,7 +612,7 @@ class ArticleServiceTest {
     @Test
     void 카테고리_별_아티클_개수_조회_시_회원이_존재하지_않을_경우_예외가_발생한다() {
         // when & then
-        assertThatThrownBy(() -> articleService.getArticleCategoryStatistics(2L))
+        assertThatThrownBy(() -> articleService.getArticleCategoryStatistics(2L, "AI"))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }

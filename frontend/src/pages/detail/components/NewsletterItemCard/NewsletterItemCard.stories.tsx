@@ -1,5 +1,5 @@
 import NewsletterItemCard from './NewsletterItemCard';
-import { MOCK_ARTICLES } from '@/mocks/article';
+import { MOCK_ARTICLES } from '@/mocks/datas/article';
 import type { Meta, StoryObj } from '@storybook/react-webpack5';
 
 const meta: Meta<typeof NewsletterItemCard> = {

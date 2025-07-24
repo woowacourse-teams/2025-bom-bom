@@ -11,6 +11,7 @@ interface GetArticlesParams {
   category?: string;
   size?: number;
   page?: number;
+  keyword?: string;
 }
 
 export const getArticles = async ({
@@ -20,6 +21,7 @@ export const getArticles = async ({
   category,
   size,
   page,
+  keyword,
 }: GetArticlesParams) => {
   return await fetcher.get<PageableResponse<Article>>({
     path: '/articles',
@@ -30,6 +32,7 @@ export const getArticles = async ({
       category,
       size,
       page,
+      keyword,
     },
   });
 };

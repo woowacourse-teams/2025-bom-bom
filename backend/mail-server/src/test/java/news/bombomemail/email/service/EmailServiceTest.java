@@ -14,7 +14,6 @@ import news.bombomemail.member.Gender;
 import news.bombomemail.newsletter.Newsletter;
 import news.bombomemail.newsletter.NewsletterRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +68,6 @@ class EmailServiceTest {
     Path tempDir;
 
     @Test
-    @DisplayName("eml 파일을 파싱하여 Article로 저장한다")
     void eml_파일을_파싱하여_Article로_저장한다() throws Exception {
         // given
         File emlFile = copySampleEmlToTemp();

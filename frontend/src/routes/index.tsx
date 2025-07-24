@@ -6,6 +6,7 @@ import ArticleCardList from '../pages/today/components/ArticleCardList/ArticleCa
 import ReadingStatusCard from '../pages/today/components/ReadingStatusCard/ReadingStatusCard';
 import { getArticles } from '@/apis/articles';
 import { getReadingStatus } from '@/apis/members';
+import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -35,7 +36,11 @@ function Index() {
           </TitleDescription>
         </TitleBox>
         <ContentWrapper>
-          <ArticleCardList articles={articles.content} />
+          {articles.content.length > 0 ? (
+            <ArticleCardList articles={articles.content} />
+          ) : (
+            <EmptyLetterCard title="새로운 뉴스레터가 없어요" />
+          )}
           <ReadingStatusCard
             streakReadDay={readingStatus.streakReadDay}
             today={readingStatus.today}

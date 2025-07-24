@@ -12,6 +12,7 @@ import { CategoryType } from '@/constants/category';
 import { useDebounce } from '@/hooks/useDebounce';
 import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
+import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 
 export const Route = createFileRoute('/storage')({
   component: Storage,
@@ -98,13 +99,17 @@ function Storage() {
               onSelectOption={(value) => setSortFilter(value)}
             />
           </SummaryBar>
-          <ArticleList>
-            {articles.content.map((article) => (
-              <li key={article.articleId}>
-                <ArticleCard data={article} readVariant="badge" />
-              </li>
-            ))}
-          </ArticleList>
+          {articles.content.length > 0 ? (
+            <ArticleList>
+              {articles.content.map((article) => (
+                <li key={article.articleId}>
+                  <ArticleCard data={article} readVariant="badge" />
+                </li>
+              ))}
+            </ArticleList>
+          ) : (
+            <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
+          )}
         </MainSection>
       </Container>
     </PageLayout>
@@ -131,6 +136,8 @@ const MainSection = styled.div`
   gap: 20px;
   flex-direction: column;
   align-items: flex-start;
+
+  width: 100%;
 `;
 
 const TitleWrapper = styled.div`

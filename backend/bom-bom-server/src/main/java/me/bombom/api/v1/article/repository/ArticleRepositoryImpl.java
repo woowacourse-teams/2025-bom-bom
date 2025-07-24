@@ -30,6 +30,40 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         return new PageImpl<>(content, pageable, total);
     }
 
+    @Override
+    public int countAllByMemberId(Long memberId, String keyword) {
+        StringBuilder jpql = new StringBuilder("""
+                SELECT COUNT(a)
+                FROM Article a
+                WHERE a.memberId = :memberId
+        """);
+        addKeywordFilter(jpql, keyword);
+
+        TypedQuery<Long> countQuery = entityManager.createQuery(jpql.toString(), Long.class);
+        addMemberIdParameter(countQuery, memberId);
+        addKeywordParameter(countQuery, keyword);
+        return countQuery.getSingleResult().intValue();
+    }
+
+    @Override
+    public int countAllByCategoryIdAndMemberId(Long memberId, Long categoryId, String keyword) {
+        StringBuilder jpql = new StringBuilder("""
+                SELECT COUNT(a)
+                FROM Article a
+                JOIN Newsletter n ON n.id = a.newsletterId
+                JOIN Category c ON c.id = n.categoryId 
+                WHERE a.memberId = :memberId
+        """);
+        addKeywordFilter(jpql, keyword);
+        addCategoryFilter(jpql, categoryId);
+
+        TypedQuery<Long> countQuery = entityManager.createQuery(jpql.toString(), Long.class);
+        addMemberIdParameter(countQuery, memberId);
+        addKeywordParameter(countQuery, keyword);
+        addCategoryIdParameter(countQuery, categoryId);
+        return countQuery.getSingleResult().intValue();
+    }
+
     private Long getTotalCount(Long memberId, GetArticlesOptions options) {
         StringBuilder jpql = new StringBuilder("""
                 SELECT COUNT(a)
@@ -101,12 +135,24 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             Long categoryId,
             String keyword
     ) {
+        addDateFilter(jpql, date);
+        addCategoryFilter(jpql, categoryId);
+        addKeywordFilter(jpql, keyword);
+    }
+
+    private void addDateFilter(StringBuilder jpql, LocalDate date) {
         if (date != null) {
             jpql.append(" AND a.arrivedDateTime BETWEEN :dateAtMinTime AND :dateAtMaxTime");
         }
+    }
+
+    private void addCategoryFilter(StringBuilder jpql, Long categoryId) {
         if (categoryId != null) {
             jpql.append(" AND n.categoryId = :categoryId");
         }
+    }
+
+    private void addKeywordFilter(StringBuilder jpql, String keyword) {
         if (StringUtils.hasText(keyword)) {
             jpql.append(" AND a.title LIKE :keyword");
         }
@@ -123,14 +169,30 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             Long categoryId,
             String keyword
     ) {
+        addMemberIdParameter(query, memberId);
+        addDateParameter(query, date);
+        addCategoryIdParameter(query, categoryId);
+        addKeywordParameter(query, keyword);
+    }
+
+    private void addMemberIdParameter(TypedQuery<?> query, Long memberId) {
         query.setParameter("memberId", memberId);
+    }
+
+    private void addDateParameter(TypedQuery<?> query, LocalDate date) {
         if (date != null) {
             query.setParameter("dateAtMinTime", date.atTime(LocalTime.MIN));
             query.setParameter("dateAtMaxTime", date.atTime(LocalTime.MAX));
         }
+    }
+
+    private void addCategoryIdParameter(TypedQuery<?> query, Long categoryId) {
         if (categoryId != null) {
             query.setParameter("categoryId", categoryId);
         }
+    }
+
+    private void addKeywordParameter(TypedQuery<?> query, String keyword) {
         if (StringUtils.hasText(keyword)) {
             query.setParameter("keyword", "%" + keyword.trim() + "%");
         }

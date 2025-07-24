@@ -60,7 +60,7 @@ public class ArticleController {
     }
 
     @GetMapping("/statistics/categories")
-    public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(@RequestParam Long memberId){
-        return articleService.getArticleCategoryStatistics(memberId);
+    public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(@RequestParam Long memberId, @RequestParam(required = false) String keyword){
+        return articleService.getArticleCategoryStatistics(memberId, keyword);
     }
 }

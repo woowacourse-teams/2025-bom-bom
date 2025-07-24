@@ -62,7 +62,7 @@ function ArticleDetailPage() {
   if (!currentArticle || !otherArticles) return null;
 
   const unReadArticles = otherArticles?.content.filter(
-    (article) => !article.isRead,
+    (article) => !article.isRead && article.articleId !== Number(articleId),
   );
 
   return (

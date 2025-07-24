@@ -1,7 +1,7 @@
 import { Article } from '../pages/today/types/article';
 
 export const MOCK_ARTICLES: Article = {
-  articleId: '1',
+  articleId: 1,
   title: 'URL 변경만으로 100개 이상의 계정을 해킹한 방법 (IDOR + XSS 취약점)',
   contentsSummary:
     '$500 IDOR 취약점을 중요한 계정 탈취로 바꾼 버그 바운티 스토리입니다. 웹 보안의 기본이지만 놓치기 쉬운 취약점들에 대해 알아봅니다...',

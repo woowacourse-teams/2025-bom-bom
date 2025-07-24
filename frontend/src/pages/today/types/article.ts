@@ -1,7 +1,7 @@
 import { CategoryType } from '@/constants/category';
 
 export type Article = {
-  articleId: string;
+  articleId: number;
   title: string;
   contentsSummary: string;
   arrivedDateTime: string;

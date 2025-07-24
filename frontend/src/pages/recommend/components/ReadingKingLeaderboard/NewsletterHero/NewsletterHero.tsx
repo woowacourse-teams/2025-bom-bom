@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { Link } from '@tanstack/react-router';
 
 export default function NewsletterHero() {
   return (
@@ -9,7 +10,7 @@ export default function NewsletterHero() {
         <HeroSubtitle>
           당신의 관심사에 맞는 최고의 뉴스레터를 추천해드립니다.
         </HeroSubtitle>
-        <CTAButton>로그인하고 맞춤 추천 받기</CTAButton>
+        <CTAButton to="/login">로그인하고 맞춤 추천 받기</CTAButton>
       </HeroContent>
     </HeroContainer>
   );
@@ -54,7 +55,7 @@ const HeroSubtitle = styled.p`
   opacity: 0.9;
 `;
 
-const CTAButton = styled.button`
+const CTAButton = styled(Link)`
   padding: 12px 24px;
   border: none;
   border-radius: 12px;

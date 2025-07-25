@@ -100,7 +100,7 @@ class ReadingServiceTest {
         weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(savedMember));
 
         // when
-        ReadingInformationResponse response = readingService.getReadingInformation(savedMember.getId());
+        ReadingInformationResponse response = readingService.getReadingInformation(savedMember);
 
         // then
         assertSoftly(softly -> {
@@ -114,8 +114,9 @@ class ReadingServiceTest {
 
     @Test
     void 읽기_현황_종합_정보_조회에서_회원_정보가_존재하지_않을_경우_예외가_발생한다() {
+        Member savedMember = memberRepository.save(TestFixture.normalMemberFixture());
         // when & then
-        assertThatThrownBy(() -> readingService.getReadingInformation(1L))
+        assertThatThrownBy(() -> readingService.getReadingInformation(savedMember))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -126,7 +127,7 @@ class ReadingServiceTest {
         Member savedMember = memberRepository.save(TestFixture.normalMemberFixture());
 
         // when & then
-        assertThatThrownBy(() -> readingService.getReadingInformation(savedMember.getId()))
+        assertThatThrownBy(() -> readingService.getReadingInformation(savedMember))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -138,7 +139,7 @@ class ReadingServiceTest {
         continueReadingRepository.save(TestFixture.continueReadingFixture(savedMember));
 
         // when & then
-        assertThatThrownBy(() -> readingService.getReadingInformation(savedMember.getId()))
+        assertThatThrownBy(() -> readingService.getReadingInformation(savedMember))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -151,7 +152,7 @@ class ReadingServiceTest {
         todayReadingRepository.save(TestFixture.todayReadingFixture(savedMember));
 
         // when & then
-        assertThatThrownBy(() -> readingService.getReadingInformation(savedMember.getId()))
+        assertThatThrownBy(() -> readingService.getReadingInformation(savedMember))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }

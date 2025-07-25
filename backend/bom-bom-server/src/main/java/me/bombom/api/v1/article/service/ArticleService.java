@@ -64,31 +64,24 @@ public class ArticleService {
     }
 
     @Transactional
-    public void markAsRead(Long articleId, Long memberId) {
+    public void markAsRead(Long articleId, Member member) {
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        validateArticleOwner(article, memberId);
+        validateArticleOwner(article, member.getId());
         article.markAsRead();
         readingService.updateReadingCount(article);
     }
 
-    public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(Long memberId, String keyword) {
-        validateMemberExists(memberId);
-        int totalCount = articleRepository.countAllByMemberId(memberId, keyword);
+    public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(Member member, String keyword) {
+        int totalCount = articleRepository.countAllByMemberId(member.getId(), keyword);
         List<GetArticleCountPerCategoryResponse> countResponse = categoryRepository.findAll()
                 .stream()
                 .map(category -> {
-                    int count = articleRepository.countAllByCategoryIdAndMemberId(memberId, category.getId(), keyword);
+                    int count = articleRepository.countAllByCategoryIdAndMemberId(member.getId(), category.getId(), keyword);
                     return GetArticleCountPerCategoryResponse.of(category, count);
                 })
                 .toList();
         return GetArticleCategoryStatisticsResponse.of(totalCount, countResponse);
-    }
-
-    private void validateMemberExists(Long memberId) {
-        if (!memberRepository.existsById(memberId)) {
-            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND);
-        }
     }
 
     private Long findCategoryIdByName(String categoryName) {

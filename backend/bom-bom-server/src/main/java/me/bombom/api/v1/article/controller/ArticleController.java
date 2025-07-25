@@ -52,20 +52,26 @@ public class ArticleController {
 
     @GetMapping("/{id}")
     public ArticleDetailResponse getArticleDetail(
-            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
-            @LoginMember Member member
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
     ) {
         return articleService.getArticleDetail(id, member);
     }
 
     @PatchMapping("/{id}/read")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateIsRead(@PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id, @RequestParam Long memberId) {
-        articleService.markAsRead(id, memberId);
+    public void updateIsRead(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+    ) {
+        articleService.markAsRead(id, member);
     }
 
     @GetMapping("/statistics/categories")
-    public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(@RequestParam Long memberId, @RequestParam(required = false) String keyword){
-        return articleService.getArticleCategoryStatistics(memberId, keyword);
+    public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(
+            @LoginMember Member member,
+            @RequestParam(required = false) String keyword
+    ){
+        return articleService.getArticleCategoryStatistics(member, keyword);
     }
 }

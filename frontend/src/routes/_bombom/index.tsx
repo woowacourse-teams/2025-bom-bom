@@ -1,14 +1,13 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import PageLayout from '../components/PageLayout/PageLayout';
-import ArticleCardList from '../pages/today/components/ArticleCardList/ArticleCardList';
-import ReadingStatusCard from '../pages/today/components/ReadingStatusCard/ReadingStatusCard';
+import ArticleCardList from '../../pages/today/components/ArticleCardList/ArticleCardList';
+import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/ReadingStatusCard';
 import { getArticles } from '@/apis/articles';
 import { getReadingStatus } from '@/apis/members';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute('/_bombom/')({
   component: Index,
 });
 
@@ -26,28 +25,26 @@ function Index() {
   if (!articles || !readingStatus) return null;
 
   return (
-    <PageLayout activeNav="today">
-      <Container>
-        <TitleBox>
-          <Title>오늘의 뉴스레터</Title>
-          <TitleDescription>
-            {articles.content.length}개의 새로운 뉴스레터가 도착했어요
-          </TitleDescription>
-        </TitleBox>
-        <ContentWrapper>
-          {articles.content.length > 0 ? (
-            <ArticleCardList articles={articles.content} />
-          ) : (
-            <EmptyLetterCard title="새로운 뉴스레터가 없어요" />
-          )}
-          <ReadingStatusCard
-            streakReadDay={readingStatus.streakReadDay}
-            today={readingStatus.today}
-            weekly={readingStatus.weekly}
-          />
-        </ContentWrapper>
-      </Container>
-    </PageLayout>
+    <Container>
+      <TitleBox>
+        <Title>오늘의 뉴스레터</Title>
+        <TitleDescription>
+          {articles.content.length}개의 새로운 뉴스레터가 도착했어요
+        </TitleDescription>
+      </TitleBox>
+      <ContentWrapper>
+        {articles.content.length > 0 ? (
+          <ArticleCardList articles={articles.content} />
+        ) : (
+          <EmptyLetterCard title="새로운 뉴스레터가 없어요" />
+        )}
+        <ReadingStatusCard
+          streakReadDay={readingStatus.streakReadDay}
+          today={readingStatus.today}
+          weekly={readingStatus.weekly}
+        />
+      </ContentWrapper>
+    </Container>
   );
 }
 

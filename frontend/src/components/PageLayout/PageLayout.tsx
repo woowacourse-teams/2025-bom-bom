@@ -1,19 +1,23 @@
 import styled from '@emotion/styled';
+import { useRouterState } from '@tanstack/react-router';
 import { PropsWithChildren } from 'react';
 import Header from '../Header/Header';
 import { NavType } from '@/types/nav';
 
-interface PageLayoutProps {
-  activeNav: NavType;
-}
+const navMap: Record<string, NavType> = {
+  '/': 'today',
+  '/storage': 'storage',
+  '/recommend': 'recommend',
+};
 
-function PageLayout({
-  activeNav,
-  children,
-}: PropsWithChildren<PageLayoutProps>) {
+function PageLayout({ children }: PropsWithChildren) {
+  const location = useRouterState({
+    select: (state) => state.location.pathname,
+  });
+
   return (
     <Container>
-      <Header activeNav={activeNav} />
+      <Header activeNav={navMap[location]} />
       {children}
     </Container>
   );

@@ -9,26 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as StorageRouteImport } from './routes/storage'
 import { Route as SignupRouteImport } from './routes/signup'
-import { Route as RecommendRouteImport } from './routes/recommend'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as ArticlesArticleIdRouteImport } from './routes/articles.$articleId'
+import { Route as BombomRouteImport } from './routes/_bombom'
+import { Route as BombomIndexRouteImport } from './routes/_bombom/index'
+import { Route as BombomStorageRouteImport } from './routes/_bombom/storage'
+import { Route as BombomRecommendRouteImport } from './routes/_bombom/recommend'
+import { Route as BombomArticlesArticleIdRouteImport } from './routes/_bombom/articles.$articleId'
 
-const StorageRoute = StorageRouteImport.update({
-  id: '/storage',
-  path: '/storage',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RecommendRoute = RecommendRouteImport.update({
-  id: '/recommend',
-  path: '/recommend',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -36,99 +27,98 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const BombomRoute = BombomRouteImport.update({
+  id: '/_bombom',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ArticlesArticleIdRoute = ArticlesArticleIdRouteImport.update({
+const BombomIndexRoute = BombomIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BombomRoute,
+} as any)
+const BombomStorageRoute = BombomStorageRouteImport.update({
+  id: '/storage',
+  path: '/storage',
+  getParentRoute: () => BombomRoute,
+} as any)
+const BombomRecommendRoute = BombomRecommendRouteImport.update({
+  id: '/recommend',
+  path: '/recommend',
+  getParentRoute: () => BombomRoute,
+} as any)
+const BombomArticlesArticleIdRoute = BombomArticlesArticleIdRouteImport.update({
   id: '/articles/$articleId',
   path: '/articles/$articleId',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => BombomRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/recommend': typeof RecommendRoute
   '/signup': typeof SignupRoute
-  '/storage': typeof StorageRoute
-  '/articles/$articleId': typeof ArticlesArticleIdRoute
+  '/recommend': typeof BombomRecommendRoute
+  '/storage': typeof BombomStorageRoute
+  '/': typeof BombomIndexRoute
+  '/articles/$articleId': typeof BombomArticlesArticleIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/recommend': typeof RecommendRoute
   '/signup': typeof SignupRoute
-  '/storage': typeof StorageRoute
-  '/articles/$articleId': typeof ArticlesArticleIdRoute
+  '/recommend': typeof BombomRecommendRoute
+  '/storage': typeof BombomStorageRoute
+  '/': typeof BombomIndexRoute
+  '/articles/$articleId': typeof BombomArticlesArticleIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_bombom': typeof BombomRouteWithChildren
   '/login': typeof LoginRoute
-  '/recommend': typeof RecommendRoute
   '/signup': typeof SignupRoute
-  '/storage': typeof StorageRoute
-  '/articles/$articleId': typeof ArticlesArticleIdRoute
+  '/_bombom/recommend': typeof BombomRecommendRoute
+  '/_bombom/storage': typeof BombomStorageRoute
+  '/_bombom/': typeof BombomIndexRoute
+  '/_bombom/articles/$articleId': typeof BombomArticlesArticleIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/login'
-    | '/recommend'
     | '/signup'
+    | '/recommend'
     | '/storage'
+    | '/'
     | '/articles/$articleId'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/login'
-    | '/recommend'
     | '/signup'
+    | '/recommend'
     | '/storage'
+    | '/'
     | '/articles/$articleId'
   id:
     | '__root__'
-    | '/'
+    | '/_bombom'
     | '/login'
-    | '/recommend'
     | '/signup'
-    | '/storage'
-    | '/articles/$articleId'
+    | '/_bombom/recommend'
+    | '/_bombom/storage'
+    | '/_bombom/'
+    | '/_bombom/articles/$articleId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  BombomRoute: typeof BombomRouteWithChildren
   LoginRoute: typeof LoginRoute
-  RecommendRoute: typeof RecommendRoute
   SignupRoute: typeof SignupRoute
-  StorageRoute: typeof StorageRoute
-  ArticlesArticleIdRoute: typeof ArticlesArticleIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/storage': {
-      id: '/storage'
-      path: '/storage'
-      fullPath: '/storage'
-      preLoaderRoute: typeof StorageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/signup': {
       id: '/signup'
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/recommend': {
-      id: '/recommend'
-      path: '/recommend'
-      fullPath: '/recommend'
-      preLoaderRoute: typeof RecommendRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -138,30 +128,65 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/_bombom': {
+      id: '/_bombom'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof BombomRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/articles/$articleId': {
-      id: '/articles/$articleId'
+    '/_bombom/': {
+      id: '/_bombom/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof BombomIndexRouteImport
+      parentRoute: typeof BombomRoute
+    }
+    '/_bombom/storage': {
+      id: '/_bombom/storage'
+      path: '/storage'
+      fullPath: '/storage'
+      preLoaderRoute: typeof BombomStorageRouteImport
+      parentRoute: typeof BombomRoute
+    }
+    '/_bombom/recommend': {
+      id: '/_bombom/recommend'
+      path: '/recommend'
+      fullPath: '/recommend'
+      preLoaderRoute: typeof BombomRecommendRouteImport
+      parentRoute: typeof BombomRoute
+    }
+    '/_bombom/articles/$articleId': {
+      id: '/_bombom/articles/$articleId'
       path: '/articles/$articleId'
       fullPath: '/articles/$articleId'
-      preLoaderRoute: typeof ArticlesArticleIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof BombomArticlesArticleIdRouteImport
+      parentRoute: typeof BombomRoute
     }
   }
 }
 
+interface BombomRouteChildren {
+  BombomRecommendRoute: typeof BombomRecommendRoute
+  BombomStorageRoute: typeof BombomStorageRoute
+  BombomIndexRoute: typeof BombomIndexRoute
+  BombomArticlesArticleIdRoute: typeof BombomArticlesArticleIdRoute
+}
+
+const BombomRouteChildren: BombomRouteChildren = {
+  BombomRecommendRoute: BombomRecommendRoute,
+  BombomStorageRoute: BombomStorageRoute,
+  BombomIndexRoute: BombomIndexRoute,
+  BombomArticlesArticleIdRoute: BombomArticlesArticleIdRoute,
+}
+
+const BombomRouteWithChildren =
+  BombomRoute._addFileChildren(BombomRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  BombomRoute: BombomRouteWithChildren,
   LoginRoute: LoginRoute,
-  RecommendRoute: RecommendRoute,
   SignupRoute: SignupRoute,
-  StorageRoute: StorageRoute,
-  ArticlesArticleIdRoute: ArticlesArticleIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

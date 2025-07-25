@@ -2,16 +2,16 @@ import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useRouterState } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import clockIcon from '../../public/assets/clock.svg';
-import Chip from '../components/Chip/Chip';
-import NewsletterItemCard from '../pages/detail/components/NewsletterItemCard/NewsletterItemCard';
+import clockIcon from '../../../public/assets/clock.svg';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
+import Chip from '@/components/Chip/Chip';
 import { useThrottle } from '@/hooks/useThrottle';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
+import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { formatDate } from '@/utils/date';
 import { getScrollPercent } from '@/utils/scroll';
 
-export const Route = createFileRoute('/articles/$articleId')({
+export const Route = createFileRoute('/_bombom/articles/$articleId')({
   component: ArticleDetailPage,
 });
 

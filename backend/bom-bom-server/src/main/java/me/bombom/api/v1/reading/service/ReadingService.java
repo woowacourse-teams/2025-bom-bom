@@ -5,13 +5,13 @@ import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
-import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
-import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.reading.domain.ContinueReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
+import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
+import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
+import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
@@ -38,7 +38,8 @@ public class ReadingService {
         return WeeklyGoalCountResponse.from(weeklyReading);
     }
 
-    public ReadingInformationResponse getReadingInformation(Long memberId) {
+    public ReadingInformationResponse getReadingInformation(Member member) {
+        Long memberId = member.getId();
         ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)

@@ -15,13 +15,12 @@ export const Route = createFileRoute('/')({
 function Index() {
   const { data: articles } = useQuery({
     queryKey: ['todayArticles'],
-    queryFn: () =>
-      getArticles({ date: new Date(), memberId: 6, sorted: 'DESC' }),
+    queryFn: () => getArticles({ date: new Date(), sorted: 'DESC' }),
   });
 
   const { data: readingStatus } = useQuery({
     queryKey: ['readingStatus'],
-    queryFn: () => getReadingStatus(1),
+    queryFn: () => getReadingStatus(),
   });
 
   if (!articles || !readingStatus) return null;

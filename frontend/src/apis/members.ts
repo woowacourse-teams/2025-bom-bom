@@ -12,15 +12,13 @@ export interface MemberReadingResponse {
   };
 }
 
-export const getReadingStatus = async (memberId: number) => {
+export const getReadingStatus = async () => {
   return await fetcher.get<MemberReadingResponse>({
     path: '/members/me/reading',
-    query: { memberId },
   });
 };
 
 type GetWeeklyReadingGoalParams = {
-  memberId: number;
   weeklyGoalCount: string;
 };
 
@@ -30,7 +28,6 @@ export interface PatchWeeklyGoalResponse {
 }
 
 export const getWeeklyReadingGoal = async ({
-  memberId,
   weeklyGoalCount,
 }: GetWeeklyReadingGoalParams) => {
   return await fetcher.patch<
@@ -39,14 +36,12 @@ export const getWeeklyReadingGoal = async ({
   >({
     path: '/members/me/reading/progress/week/goal',
     body: {
-      memberId,
       weeklyGoalCount,
     },
   });
 };
 
 type PatchWeeklyCountParams = {
-  memberId: number;
   count: number;
 };
 
@@ -55,14 +50,10 @@ export interface PatchWeeklyCountResponse {
   currentCount: number;
 }
 
-export const patchWeeklyCount = async ({
-  memberId,
-  count,
-}: PatchWeeklyCountParams) => {
+export const patchWeeklyCount = async ({ count }: PatchWeeklyCountParams) => {
   return await fetcher.patch<PatchWeeklyCountParams, PatchWeeklyCountResponse>({
     path: '/members/me/reading/progress/week/count',
     body: {
-      memberId,
       count,
     },
   });

@@ -27,7 +27,6 @@ function Storage() {
     queryKey: ['articles', sortFilter, selectedCategory],
     queryFn: () =>
       getArticles({
-        memberId: 6,
         sorted: sortFilter,
         category: selectedCategory === '전체' ? undefined : selectedCategory,
         keyword: searchInput,
@@ -35,7 +34,7 @@ function Storage() {
   });
   const { data: categoryCounts } = useQuery({
     queryKey: ['/articles/statistics/categories'],
-    queryFn: () => getStatisticsCategories({ memberId: 6 }),
+    queryFn: () => getStatisticsCategories(),
   });
 
   const debouncedSearch = useDebounce(() => {

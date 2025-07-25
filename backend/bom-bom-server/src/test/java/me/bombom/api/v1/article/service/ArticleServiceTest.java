@@ -86,7 +86,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 null,
                 null,
                 SortOption.DESC,
@@ -111,7 +111,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 null,
                 null,
                 SortOption.ASC,
@@ -138,7 +138,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 null,
                 categoryName,
                 SortOption.DESC,
@@ -163,7 +163,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 BASE_TIME.toLocalDate(),
                 null,
                 SortOption.DESC,
@@ -185,7 +185,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 BASE_TIME.toLocalDate(),
                 null,
                 SortOption.DESC,
@@ -203,30 +203,13 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 아티클_목록_조회_멤버가_존재하지_않으면_예외() {
-        // given
-        Pageable pageable = PageRequest.of(0, 10);
-
-        // when & then
-        assertThatThrownBy(() -> articleService.getArticles(
-                0L,
-                null,
-                categories.getFirst().getName(),
-                SortOption.DESC,
-                null,
-                pageable
-        )).isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
-
-    @Test
     void 아티클_목록_조회_카테고리가_존재하지_않으면_예외() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
 
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
-                member.getId(),
+                member,
                 null,
                 "Invaild Category Name",
                 SortOption.DESC,
@@ -243,7 +226,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 null,
                 null,
                 SortOption.DESC,
@@ -272,7 +255,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 null,
                 null,
                 SortOption.DESC,
@@ -301,7 +284,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 null,
                 null,
                 SortOption.DESC,
@@ -326,7 +309,7 @@ class ArticleServiceTest {
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
-                member.getId(),
+                member,
                 null,
                 null,
                 SortOption.ASC,
@@ -351,7 +334,7 @@ class ArticleServiceTest {
         Newsletter newsletter = newsletters.getFirst();
 
         // when
-        ArticleDetailResponse result = articleService.getArticleDetail(article.getId(), member.getId());
+        ArticleDetailResponse result = articleService.getArticleDetail(article.getId(), member);
 
         // then
         assertSoftly(softly -> {
@@ -363,18 +346,7 @@ class ArticleServiceTest {
     @Test
     void 아티클_상세_조회_아티클이_존재하지_않으면_예외() {
         // when & then
-        assertThatThrownBy(() -> articleService.getArticleDetail(0L, member.getId()))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
-
-    @Test
-    void 아티클_상세_조회_멤버가_존재하지_않으면_예외() {
-        // given
-        Article article = articles.getFirst();
-
-        // when & then
-        assertThatThrownBy(() -> articleService.getArticleDetail(article.getId(), 0L))
+        assertThatThrownBy(() -> articleService.getArticleDetail(0L, member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -396,7 +368,7 @@ class ArticleServiceTest {
         articleRepository.save(article);
 
         // when & then
-        assertThatThrownBy(() -> articleService.getArticleDetail(article.getId(), member.getId()))
+        assertThatThrownBy(() -> articleService.getArticleDetail(article.getId(), member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -410,7 +382,7 @@ class ArticleServiceTest {
         articleRepository.save(article);
 
         // when & then
-        assertThatThrownBy(() -> articleService.getArticleDetail(article.getId(), member.getId()))
+        assertThatThrownBy(() -> articleService.getArticleDetail(article.getId(), member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -429,7 +401,7 @@ class ArticleServiceTest {
         memberRepository.save(member2);
 
         // when & then
-        assertThatThrownBy(() -> articleService.getArticleDetail(articles.getFirst().getId(), member2.getId()))
+        assertThatThrownBy(() -> articleService.getArticleDetail(articles.getFirst().getId(), member2))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
     }
@@ -450,7 +422,7 @@ class ArticleServiceTest {
         weeklyReadingRepository.save(weeklyReading);
 
         //when
-        articleService.markAsRead(article.getId(), member.getId());
+        articleService.markAsRead(article.getId(), member);
 
         // then
         Article updatedArticle = articleRepository.findById(article.getId()).get();
@@ -475,7 +447,7 @@ class ArticleServiceTest {
         weeklyReadingRepository.save(weeklyReading);
 
         //when
-        articleService.markAsRead(article.getId(), member.getId());
+        articleService.markAsRead(article.getId(), member);
 
         // then
         Article updatedArticle = articleRepository.findById(article.getId()).get();
@@ -492,7 +464,7 @@ class ArticleServiceTest {
     @Test
     void 다_읽음_갱신_아티클이_존재하지_않으면_예외() {
         // when & then
-        assertThatThrownBy(() -> articleService.markAsRead(0L, member.getId()))
+        assertThatThrownBy(() -> articleService.markAsRead(0L, member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -519,7 +491,7 @@ class ArticleServiceTest {
         articleRepository.save(article);
 
         // when & then
-        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), otherMember.getId()))
+        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), otherMember))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
     }
@@ -536,7 +508,7 @@ class ArticleServiceTest {
         articleRepository.save(article);
 
         // when & then
-        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), member.getId()))
+        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -555,7 +527,7 @@ class ArticleServiceTest {
         todayReadingRepository.save(todayReading);
 
         // when & then
-        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), member.getId()))
+        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -575,7 +547,7 @@ class ArticleServiceTest {
         articleRepository.saveAll(testArticles);
 
         GetArticleCategoryStatisticsResponse result = articleService.getArticleCategoryStatistics(
-                member.getId(),
+                member,
                 keyword
         );
 
@@ -594,7 +566,7 @@ class ArticleServiceTest {
     void 전체_카테고리_별_아티클_개수를_조회한다() {
         // when
         GetArticleCategoryStatisticsResponse result = articleService.getArticleCategoryStatistics(
-                member.getId(),
+                member,
                 null
         );
 
@@ -607,13 +579,5 @@ class ArticleServiceTest {
             softly.assertThat(result.categories().get(2).category()).isEqualTo("푸드");
             softly.assertThat(result.categories().get(2).count()).isEqualTo(2);
         });
-    }
-
-    @Test
-    void 카테고리_별_아티클_개수_조회_시_회원이_존재하지_않을_경우_예외가_발생한다() {
-        // when & then
-        assertThatThrownBy(() -> articleService.getArticleCategoryStatistics(2L, "AI"))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
 }

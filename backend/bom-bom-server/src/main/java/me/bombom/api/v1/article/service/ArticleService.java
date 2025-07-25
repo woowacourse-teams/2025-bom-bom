@@ -14,6 +14,7 @@ import me.bombom.api.v1.article.enums.SortOption;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
@@ -37,26 +38,24 @@ public class ArticleService {
     private final ReadingService readingService;
 
     public Page<ArticleResponse> getArticles(
-            Long memberId,
+            Member member,
             LocalDate date,
             String categoryName,
             SortOption sorted,
             String keyword,
             Pageable pageable
     ) {
-        validateMemberExists(memberId);
         Long categoryId = findCategoryIdByName(categoryName);
         return articleRepository.findByMemberId(
-                memberId,
+                member.getId(),
                 GetArticlesOptions.of(date, categoryId, sorted, keyword),
                 pageable);
     }
 
-    public ArticleDetailResponse getArticleDetail(Long id, Long memberId) {
-        validateMemberExists(memberId);
+    public ArticleDetailResponse getArticleDetail(Long id, Member member) {
         Article article = articleRepository.findById(id)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        validateArticleOwner(article, memberId);
+        validateArticleOwner(article, member.getId());
         Newsletter newsletter = newsletterRepository.findById(article.getNewsletterId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         Category category = categoryRepository.findById(newsletter.getCategoryId())
@@ -65,31 +64,24 @@ public class ArticleService {
     }
 
     @Transactional
-    public void markAsRead(Long articleId, Long memberId) {
+    public void markAsRead(Long articleId, Member member) {
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        validateArticleOwner(article, memberId);
+        validateArticleOwner(article, member.getId());
         article.markAsRead();
         readingService.updateReadingCount(article);
     }
 
-    public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(Long memberId, String keyword) {
-        validateMemberExists(memberId);
-        int totalCount = articleRepository.countAllByMemberId(memberId, keyword);
+    public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(Member member, String keyword) {
+        int totalCount = articleRepository.countAllByMemberId(member.getId(), keyword);
         List<GetArticleCountPerCategoryResponse> countResponse = categoryRepository.findAll()
                 .stream()
                 .map(category -> {
-                    int count = articleRepository.countAllByCategoryIdAndMemberId(memberId, category.getId(), keyword);
+                    int count = articleRepository.countAllByCategoryIdAndMemberId(member.getId(), category.getId(), keyword);
                     return GetArticleCountPerCategoryResponse.of(category, count);
                 })
                 .toList();
         return GetArticleCategoryStatisticsResponse.of(totalCount, countResponse);
-    }
-
-    private void validateMemberExists(Long memberId) {
-        if (!memberRepository.existsById(memberId)) {
-            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND);
-        }
     }
 
     private Long findCategoryIdByName(String categoryName) {

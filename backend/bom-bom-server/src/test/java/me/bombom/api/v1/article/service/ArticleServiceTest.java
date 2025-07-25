@@ -422,7 +422,7 @@ class ArticleServiceTest {
         weeklyReadingRepository.save(weeklyReading);
 
         //when
-        articleService.markAsRead(article.getId(), member.getId());
+        articleService.markAsRead(article.getId(), member);
 
         // then
         Article updatedArticle = articleRepository.findById(article.getId()).get();
@@ -447,7 +447,7 @@ class ArticleServiceTest {
         weeklyReadingRepository.save(weeklyReading);
 
         //when
-        articleService.markAsRead(article.getId(), member.getId());
+        articleService.markAsRead(article.getId(), member);
 
         // then
         Article updatedArticle = articleRepository.findById(article.getId()).get();
@@ -464,7 +464,7 @@ class ArticleServiceTest {
     @Test
     void 다_읽음_갱신_아티클이_존재하지_않으면_예외() {
         // when & then
-        assertThatThrownBy(() -> articleService.markAsRead(0L, member.getId()))
+        assertThatThrownBy(() -> articleService.markAsRead(0L, member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -491,7 +491,7 @@ class ArticleServiceTest {
         articleRepository.save(article);
 
         // when & then
-        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), otherMember.getId()))
+        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), otherMember))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
     }
@@ -508,7 +508,7 @@ class ArticleServiceTest {
         articleRepository.save(article);
 
         // when & then
-        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), member.getId()))
+        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -527,7 +527,7 @@ class ArticleServiceTest {
         todayReadingRepository.save(todayReading);
 
         // when & then
-        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), member.getId()))
+        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -547,7 +547,7 @@ class ArticleServiceTest {
         articleRepository.saveAll(testArticles);
 
         GetArticleCategoryStatisticsResponse result = articleService.getArticleCategoryStatistics(
-                member.getId(),
+                member,
                 keyword
         );
 
@@ -566,7 +566,7 @@ class ArticleServiceTest {
     void 전체_카테고리_별_아티클_개수를_조회한다() {
         // when
         GetArticleCategoryStatisticsResponse result = articleService.getArticleCategoryStatistics(
-                member.getId(),
+                member,
                 null
         );
 
@@ -579,13 +579,5 @@ class ArticleServiceTest {
             softly.assertThat(result.categories().get(2).category()).isEqualTo("푸드");
             softly.assertThat(result.categories().get(2).count()).isEqualTo(2);
         });
-    }
-
-    @Test
-    void 카테고리_별_아티클_개수_조회_시_회원이_존재하지_않을_경우_예외가_발생한다() {
-        // when & then
-        assertThatThrownBy(() -> articleService.getArticleCategoryStatistics(2L, "AI"))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
 }

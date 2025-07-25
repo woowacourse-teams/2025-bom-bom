@@ -26,18 +26,15 @@ function ArticleDetailPage() {
     queryFn: () =>
       getArticleById({
         articleId: Number(articleId),
-        memberId: 6,
       }),
   });
   const { data: otherArticles } = useQuery({
     queryKey: ['otherArticles'],
-    queryFn: () =>
-      getArticles({ date: new Date(), memberId: 6, sorted: 'ASC' }),
+    queryFn: () => getArticles({ date: new Date(), sorted: 'ASC' }),
   });
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
-    mutationFn: () =>
-      patchArticleRead({ articleId: Number(articleId), memberId: 6 }),
+    mutationFn: () => patchArticleRead({ articleId: Number(articleId) }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['article', articleId],

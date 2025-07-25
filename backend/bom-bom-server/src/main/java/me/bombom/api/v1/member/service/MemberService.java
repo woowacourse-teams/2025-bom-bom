@@ -29,7 +29,7 @@ public class MemberService {
                 .profileImageUrl(pendingMember.getProfileUrl())
                 .nickname(signupRequest.nickname())
                 .gender(signupRequest.gender())
-                .roleId(0L)
+                .roleId(1L)
                 .build();
         Member savedMember = memberRepository.save(newMember);
         readingService.initializeReadingInformation(savedMember.getId());

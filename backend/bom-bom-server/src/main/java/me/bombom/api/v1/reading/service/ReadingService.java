@@ -23,10 +23,35 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ReadingService {
 
+    public static final int INITIAL_COUNT = 0;
+
     private final MemberRepository memberRepository;
     private final ContinueReadingRepository continueReadingRepository;
     private final TodayReadingRepository todayReadingRepository;
     private final WeeklyReadingRepository weeklyReadingRepository;
+
+    @Transactional
+    public void initializeReadingInformation(Long memberId) {
+        ContinueReading newContinueReading = ContinueReading.builder()
+                .memberId(memberId)
+                .dayCount(INITIAL_COUNT)
+                .build();
+        continueReadingRepository.save(newContinueReading);
+
+        TodayReading newTodayReading = TodayReading.builder()
+                .memberId(memberId)
+                .totalCount(INITIAL_COUNT)
+                .currentCount(INITIAL_COUNT)
+                .build();
+        todayReadingRepository.save(newTodayReading);
+
+        WeeklyReading newWeeklyReading = WeeklyReading.builder()
+                .memberId(memberId)
+                .goalCount(INITIAL_COUNT)
+                .currentCount(INITIAL_COUNT)
+                .build();
+        weeklyReadingRepository.save(newWeeklyReading);
+    }
 
     @Transactional
     public WeeklyGoalCountResponse updateWeeklyGoalCount(UpdateWeeklyGoalCountRequest request) {

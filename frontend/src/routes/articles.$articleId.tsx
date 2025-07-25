@@ -7,6 +7,7 @@ import Chip from '../components/Chip/Chip';
 import NewsletterItemCard from '../pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import { useThrottle } from '@/hooks/useThrottle';
+import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import { formatDate } from '@/utils/date';
 import { getScrollPercent } from '@/utils/scroll';
 
@@ -89,11 +90,15 @@ function ArticleDetailPage() {
       </ContentDescription>
       <TodayArticlesWrapper>
         <TodayArticleTitle>오늘 읽지 않은 다른 아티클</TodayArticleTitle>
-        <TodayArticleList>
-          {unReadArticles?.map((article) => (
-            <NewsletterItemCard key={article.articleId} data={article} />
-          ))}
-        </TodayArticleList>
+        {unReadArticles.length > 0 ? (
+          <TodayArticleList>
+            {unReadArticles?.map((article) => (
+              <NewsletterItemCard key={article.articleId} data={article} />
+            ))}
+          </TodayArticleList>
+        ) : (
+          <EmptyUnreadCard />
+        )}
       </TodayArticlesWrapper>
     </Container>
   );
@@ -103,7 +108,7 @@ const Container = styled.div`
   display: flex;
   gap: 20px;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
 
   max-width: 700px;
   margin: 0 auto;
@@ -165,10 +170,13 @@ const TodayArticlesWrapper = styled.div`
   display: flex;
   gap: 12px;
   flex-direction: column;
-  align-items: flex-start;
+
+  width: 100%;
 `;
 
 const TodayArticleTitle = styled.h3`
+  align-self: flex-start;
+
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.heading3};
 `;

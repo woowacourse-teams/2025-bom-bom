@@ -1,0 +1,32 @@
+name: pull requset - email-dev
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+    branches:
+      - email-server-dev
+
+jobs:
+  dev-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend/mail-server
+    steps:
+      - name: Github Repository 파일 불러오기
+        uses: actions/checkout@v4
+
+      - name: JDK v21 설치
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: application.yml 파일 만들기
+        run: |
+          mkdir -p src/main/resources
+          echo "${{ secrets.EMAIL_APPLICATION_TEST_PROPERTIES }}" \
+            > src/main/resources/application-test.yml
+
+      - name: 빌드하기 및 테스트 하기
+        run: ./gradlew clean build

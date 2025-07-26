@@ -16,21 +16,17 @@ import news.bombomemail.newsletter.NewsletterRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({ArticleService.class, EmailContentExtractor.class})
+@Import({ArticleService.class})
 class ArticleServiceTest {
 
     @Autowired
     ArticleService articleService;
-
-    @Autowired
-    EmailContentExtractor emailContentExtractor;
 
     @Autowired
     MemberRepository memberRepository;
@@ -68,7 +64,7 @@ class ArticleServiceTest {
         MimeMessage msg = new MimeMessage(session);
         msg.setSubject("제목만");
         msg.setText("이것은 테스트용 이메일 본문입니다.");
-        String content = emailContentExtractor.extractContents(msg);
+        String content = EmailContentExtractor.extractContents(msg);
 
 
         // when
@@ -90,7 +86,7 @@ class ArticleServiceTest {
         msg.setFrom(new InternetAddress("test-newsletter@example.com"));
         msg.setSubject("테스트 이메일 제목");
         msg.setText("이것은 테스트용 이메일 본문입니다.");
-        String content = emailContentExtractor.extractContents(msg);
+        String content = EmailContentExtractor.extractContents(msg);
 
 
         // when
@@ -118,7 +114,7 @@ class ArticleServiceTest {
         msg.setFrom(new InternetAddress("test-newsletter@example.com"));
         msg.setSubject("테스트");
         msg.setText("이것은 테스트용 이메일 본문입니다.");
-        String content = emailContentExtractor.extractContents(msg);
+        String content = EmailContentExtractor.extractContents(msg);
 
         // when
         boolean result = articleService.save(msg, content);
@@ -138,7 +134,7 @@ class ArticleServiceTest {
         msg.setFrom(new InternetAddress("no-news@example.com"));
         msg.setSubject("테스트");
         msg.setText("이것은 테스트용 이메일 본문입니다.");
-        String content = emailContentExtractor.extractContents(msg);
+        String content = EmailContentExtractor.extractContents(msg);
 
         boolean result = articleService.save(msg, content);
 
@@ -157,7 +153,7 @@ class ArticleServiceTest {
         msg.setFrom(new InternetAddress("test-newsletter@example.com"));
         msg.setSubject("제목만");
         msg.setText("");
-        String content = emailContentExtractor.extractContents(msg);
+        String content = EmailContentExtractor.extractContents(msg);
 
         // when
         boolean result = articleService.save(msg, content);
@@ -187,7 +183,7 @@ class ArticleServiceTest {
         msg.setFrom(new InternetAddress("test-newsletter@example.com"));
         msg.setSubject("긴본문테스트");
         msg.setText(longBody);
-        String content = emailContentExtractor.extractContents(msg);
+        String content = EmailContentExtractor.extractContents(msg);
 
         // when
         boolean result = articleService.save(msg, content);

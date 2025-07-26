@@ -8,7 +8,6 @@ import news.bombomemail.article.Article;
 import news.bombomemail.article.ArticleRepository;
 import news.bombomemail.article.ArticleService;
 import news.bombomemail.email.EmailConfig;
-import news.bombomemail.email.util.EmailContentExtractor;
 import news.bombomemail.member.Member;
 import news.bombomemail.member.MemberRepository;
 import news.bombomemail.member.Gender;
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 
@@ -32,7 +30,7 @@ import static org.assertj.core.api.SoftAssertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({EmailService.class, ArticleService.class, EmailConfig.class, EmailContentExtractor.class})
+@Import({EmailService.class, EmailConfig.class, ArticleService.class})
 class EmailServiceTest {
 
     @Autowired

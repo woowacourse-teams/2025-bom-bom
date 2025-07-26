@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import news.bombomemail.article.ArticleService;
+import news.bombomemail.email.util.EmailContentExtractor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,8 @@ public class EmailService {
     public void processEmailFile(File emailFile) {
         try (InputStream fileInputStream = new FileInputStream(emailFile)) {
             MimeMessage mimeMessage = new MimeMessage(mailSession, fileInputStream);
-            boolean saved = articleService.save(mimeMessage);
+            final String contents = EmailContentExtractor.extractContents(mimeMessage);
+            boolean saved = articleService.save(mimeMessage, contents);
             if (saved) {
                 deleteEmailFile(emailFile);
                 return;

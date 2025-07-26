@@ -1,6 +1,7 @@
 package news.bombomemail.member.repository;
 
 import java.util.Optional;
+import news.bombomemail.member.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {

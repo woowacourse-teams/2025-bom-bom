@@ -15,7 +15,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const workers = JSON.parse(fs.readFileSync('.github/workflows/reviewers.json')); 
+            const workers = JSON.parse(fs.readFileSync('.github/reviewers.json')); 
             const mention = context.payload.pull_request.requested_reviewers.map((user) => {
               const login = user.login;
               const mappedValue = workers[login];

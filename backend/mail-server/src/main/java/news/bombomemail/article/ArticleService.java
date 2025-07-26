@@ -20,6 +20,7 @@ import news.bombomemail.member.MemberRepository;
 import news.bombomemail.newsletter.Newsletter;
 import news.bombomemail.newsletter.NewsletterRepository;
 import org.jsoup.Jsoup;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +37,7 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
     private final NewsletterRepository newsletterRepository;
 
-    public boolean save(MimeMessage msg) throws Exception {
+    public boolean save(MimeMessage msg) throws MessagingException, IOException, DataAccessException {
         Member member = resolveMember(msg);
         if (member == null) {
             return false;

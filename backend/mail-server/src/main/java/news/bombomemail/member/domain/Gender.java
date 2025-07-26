@@ -1,4 +1,4 @@
-package news.bombomemail.member;
+package news.bombomemail.member.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

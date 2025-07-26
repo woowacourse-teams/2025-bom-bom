@@ -1,4 +1,4 @@
-package news.bombomemail.article;
+package news.bombomemail.article.service;
 
 import jakarta.mail.Address;
 import jakarta.mail.Message.RecipientType;
@@ -11,12 +11,14 @@ import java.util.Arrays;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import news.bombomemail.article.domain.Article;
+import news.bombomemail.article.repository.ArticleRepository;
 import news.bombomemail.article.util.ReadingTimeCalculator;
 import news.bombomemail.article.util.SummaryGenerator;
-import news.bombomemail.member.Member;
-import news.bombomemail.member.MemberRepository;
-import news.bombomemail.newsletter.Newsletter;
-import news.bombomemail.newsletter.NewsletterRepository;
+import news.bombomemail.member.domain.Member;
+import news.bombomemail.member.repository.MemberRepository;
+import news.bombomemail.newsletter.domain.Newsletter;
+import news.bombomemail.newsletter.repository.NewsletterRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

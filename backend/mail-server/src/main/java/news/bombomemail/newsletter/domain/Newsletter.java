@@ -1,4 +1,4 @@
-package news.bombomemail.newsletter;
+package news.bombomemail.newsletter.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

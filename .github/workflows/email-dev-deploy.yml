@@ -3,7 +3,7 @@ name: Backend Email Server
 on:
   push:
     branches:
-      - feat-BOM-86/make-email-server
+      - email-server-dev
 
 jobs:
   build:

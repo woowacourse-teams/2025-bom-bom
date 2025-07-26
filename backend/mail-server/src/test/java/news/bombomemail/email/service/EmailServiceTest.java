@@ -50,6 +50,8 @@ class EmailServiceTest {
         memberRepository.save(Member.builder()
             .email("test-member@example.com")
             .nickname("테스트멤버")
+            .providerId("test")
+            .provider("google")
             .gender(Gender.MALE)
             .roleId(1L)
             .build());

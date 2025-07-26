@@ -50,6 +50,8 @@ class ArticleServiceTest {
                 .nickname("테스트멤버")
                 .gender(Gender.MALE)
                 .roleId(1L)
+                .providerId("test")
+                .provider("google")
                 .build());
         newsletterRepository.save(Newsletter.builder()
                 .name("테스트뉴스레터")

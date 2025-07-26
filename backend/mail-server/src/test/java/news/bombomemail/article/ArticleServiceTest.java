@@ -7,6 +7,7 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import java.util.List;
 import java.util.Properties;
+import news.bombomemail.email.util.EmailContentExtractor;
 import news.bombomemail.member.Gender;
 import news.bombomemail.member.Member;
 import news.bombomemail.member.MemberRepository;
@@ -22,11 +23,14 @@ import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import(ArticleService.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import({ArticleService.class, EmailContentExtractor.class})
 class ArticleServiceTest {
+
     @Autowired
     ArticleService articleService;
+
+    @Autowired
+    EmailContentExtractor emailContentExtractor;
 
     @Autowired
     MemberRepository memberRepository;
@@ -63,9 +67,12 @@ class ArticleServiceTest {
         // given
         MimeMessage msg = new MimeMessage(session);
         msg.setSubject("제목만");
+        msg.setText("이것은 테스트용 이메일 본문입니다.");
+        String content = emailContentExtractor.extractContents(msg);
+
 
         // when
-        boolean result = articleService.save(msg);
+        boolean result = articleService.save(msg, content);
 
         // then
         assertSoftly(softly -> {
@@ -83,9 +90,11 @@ class ArticleServiceTest {
         msg.setFrom(new InternetAddress("test-newsletter@example.com"));
         msg.setSubject("테스트 이메일 제목");
         msg.setText("이것은 테스트용 이메일 본문입니다.");
+        String content = emailContentExtractor.extractContents(msg);
+
 
         // when
-        boolean result = articleService.save(msg);
+        boolean result = articleService.save(msg, content);
 
         // then
         assertSoftly(softly -> {
@@ -108,9 +117,11 @@ class ArticleServiceTest {
                 new InternetAddress("no-member@example.com"));
         msg.setFrom(new InternetAddress("test-newsletter@example.com"));
         msg.setSubject("테스트");
+        msg.setText("이것은 테스트용 이메일 본문입니다.");
+        String content = emailContentExtractor.extractContents(msg);
 
         // when
-        boolean result = articleService.save(msg);
+        boolean result = articleService.save(msg, content);
 
         // then
         assertSoftly(softly -> {
@@ -126,8 +137,10 @@ class ArticleServiceTest {
                 new InternetAddress("test-member@example.com"));
         msg.setFrom(new InternetAddress("no-news@example.com"));
         msg.setSubject("테스트");
+        msg.setText("이것은 테스트용 이메일 본문입니다.");
+        String content = emailContentExtractor.extractContents(msg);
 
-        boolean result = articleService.save(msg);
+        boolean result = articleService.save(msg, content);
 
         assertSoftly(softly -> {
             softly.assertThat(result).isFalse();
@@ -144,9 +157,10 @@ class ArticleServiceTest {
         msg.setFrom(new InternetAddress("test-newsletter@example.com"));
         msg.setSubject("제목만");
         msg.setText("");
+        String content = emailContentExtractor.extractContents(msg);
 
         // when
-        boolean result = articleService.save(msg);
+        boolean result = articleService.save(msg, content);
 
         // then
         assertSoftly(softly -> {
@@ -173,9 +187,10 @@ class ArticleServiceTest {
         msg.setFrom(new InternetAddress("test-newsletter@example.com"));
         msg.setSubject("긴본문테스트");
         msg.setText(longBody);
+        String content = emailContentExtractor.extractContents(msg);
 
         // when
-        boolean result = articleService.save(msg);
+        boolean result = articleService.save(msg, content);
 
         // then
         assertSoftly(softly -> {

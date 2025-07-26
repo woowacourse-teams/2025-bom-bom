@@ -8,6 +8,7 @@ import news.bombomemail.article.Article;
 import news.bombomemail.article.ArticleRepository;
 import news.bombomemail.article.ArticleService;
 import news.bombomemail.email.EmailConfig;
+import news.bombomemail.email.util.EmailContentExtractor;
 import news.bombomemail.member.Member;
 import news.bombomemail.member.MemberRepository;
 import news.bombomemail.member.Gender;
@@ -31,8 +32,7 @@ import static org.assertj.core.api.SoftAssertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({EmailService.class, ArticleService.class, EmailConfig.class})
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import({EmailService.class, ArticleService.class, EmailConfig.class, EmailContentExtractor.class})
 class EmailServiceTest {
 
     @Autowired

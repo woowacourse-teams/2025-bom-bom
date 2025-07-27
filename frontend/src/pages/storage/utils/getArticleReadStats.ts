@@ -1,4 +1,4 @@
-import { Article } from '@/pages/today/types/article';
+import { components } from '@/types/openapi';
 
 interface ArticleReadStats {
   total: number;
@@ -6,7 +6,9 @@ interface ArticleReadStats {
   unread: number;
 }
 
-export function getArticleReadStats(articles: Article[]): ArticleReadStats {
+export function getArticleReadStats(
+  articles: components['schemas']['ArticleResponse'][],
+): ArticleReadStats {
   return articles.reduce<ArticleReadStats>(
     (acc, article) => {
       acc.total++;

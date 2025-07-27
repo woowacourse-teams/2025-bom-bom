@@ -6,10 +6,12 @@ import { postSignup } from '@/apis/auth';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
 
+type Gender = 'MALE' | 'FEMALE';
+
 export default function SignupCard() {
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
-  const [selectedTab, setSelectedTab] = useState('MALE');
+  const [selectedTab, setSelectedTab] = useState<Gender>('MALE');
 
   const navigate = useNavigate();
   const { mutate: mutateSignup } = useMutation({

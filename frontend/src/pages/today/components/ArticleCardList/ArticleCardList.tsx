@@ -1,15 +1,18 @@
 import styled from '@emotion/styled';
 import ArticleCard from '../ArticleCard/ArticleCard';
-import { Article } from '@/pages/today/types/article';
+import { components } from '@/types/openapi';
 import checkIcon from '#/assets/check.svg';
 import letterIcon from '#/assets/letter.svg';
 
 interface ArticleCardListProps {
-  articles: Article[];
+  articles: components['schemas']['ArticleResponse'][];
 }
 
 function ArticleCardList({ articles }: ArticleCardListProps) {
-  const grouped = articles.reduce<{ read: Article[]; unread: Article[] }>(
+  const grouped = articles.reduce<{
+    read: components['schemas']['ArticleResponse'][];
+    unread: components['schemas']['ArticleResponse'][];
+  }>(
     (acc, article) => {
       if (article.isRead) acc.read.push(article);
       else acc.unread.push(article);

@@ -1,16 +1,16 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
-import { Article } from '../../types/article';
 import Badge from '@/components/Badge/Badge';
 import Chip from '@/components/Chip/Chip';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
+import { components } from '@/types/openapi';
 import { formatDate } from '@/utils/date';
 import clockIcon from '#/assets/clock.svg';
 
 type ReadVariantType = 'transparent' | 'badge';
 
 interface ArticleCardProps {
-  data: Article;
+  data: components['schemas']['ArticleResponse'];
   readVariant?: ReadVariantType;
 }
 
@@ -23,16 +23,12 @@ function ArticleCard({ data, readVariant = 'transparent' }: ArticleCardProps) {
     thumbnailUrl,
     expectedReadTime,
     isRead,
-    newsletter: {
-      name: newsletterName,
-      category: newsletterCategory,
-      imageUrl: newsletterImageUrl,
-    },
+    newsletter,
   } = data;
 
   return (
     <Container
-      isRead={isRead}
+      isRead={isRead ?? false}
       readVariant={readVariant}
       to={`/articles/${articleId}`}
     >
@@ -40,9 +36,11 @@ function ArticleCard({ data, readVariant = 'transparent' }: ArticleCardProps) {
         <Title>{title}</Title>
         <Description>{contentsSummary || title}</Description>
         <MetaInfoRow>
-          <Chip text={newsletterCategory} />
-          <MetaInfoText>from {newsletterName}</MetaInfoText>
-          <MetaInfoText>{formatDate(new Date(arrivedDateTime))}</MetaInfoText>
+          <Chip text={newsletter?.category ?? ''} />
+          <MetaInfoText>from {newsletter?.name ?? ''}</MetaInfoText>
+          <MetaInfoText>
+            {formatDate(new Date(arrivedDateTime ?? ''))}
+          </MetaInfoText>
           <ReadTimeBox>
             <img src={clockIcon} alt="시계 아이콘" />
             <MetaInfoText>{`${expectedReadTime}분`}</MetaInfoText>
@@ -51,7 +49,7 @@ function ArticleCard({ data, readVariant = 'transparent' }: ArticleCardProps) {
       </InfoWrapper>
       <ThumbnailWrapper>
         <Thumbnail
-          src={thumbnailUrl ?? newsletterImageUrl}
+          src={thumbnailUrl ?? newsletter?.imageUrl ?? ''}
           alt="아티클 썸네일"
         />
         {isRead && readVariant === 'badge' && (

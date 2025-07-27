@@ -1,23 +1,17 @@
 import styled from '@emotion/styled';
 import GoalIcon from '@/components/icons/GoalIcon';
 import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
-import {
-  TodayReadingStatus,
-  WeeklyReadingStatus,
-} from '@/pages/today/types/readingStatus';
+import { components } from '@/types/openapi';
 import statusIcon from '#/assets/reading-status.svg';
 import streakIcon from '#/assets/streak.svg';
 
-interface ReadingStatusCardProps {
-  streakReadDay: number;
-  today: TodayReadingStatus;
-  weekly: WeeklyReadingStatus;
-}
+type ReadingStatusCardProps =
+  components['schemas']['ReadingInformationResponse'];
 
 function ReadingStatusCard({
   streakReadDay,
-  today: { readCount: todayReadCount, totalCount },
-  weekly: { readCount: weeklyReadCount, goalCount },
+  today,
+  weekly,
 }: ReadingStatusCardProps) {
   return (
     <Container>
@@ -40,18 +34,30 @@ function ReadingStatusCard({
       <ProgressWithLabel
         label="오늘의 진행률"
         Icon={GoalIcon}
-        value={{ currentCount: todayReadCount, totalCount }}
+        value={{
+          currentCount: today?.readCount ?? 0,
+          totalCount: today?.totalCount ?? 0,
+        }}
         description={
-          todayReadCount < totalCount ? '목표까지 조금 더!' : '목표 달성!'
+          today?.readCount &&
+          today?.totalCount &&
+          today?.readCount < today?.totalCount
+            ? '목표까지 조금 더!'
+            : '목표 달성!'
         }
       />
       <ProgressWithLabel
         label="주간 목표"
         Icon={GoalIcon}
-        value={{ currentCount: weeklyReadCount, totalCount: goalCount }}
+        value={{
+          currentCount: weekly?.readCount ?? 0,
+          totalCount: weekly?.goalCount ?? 0,
+        }}
         description={
-          weeklyReadCount < goalCount
-            ? `목표까지 ${goalCount - weeklyReadCount}개 남음`
+          weekly?.readCount &&
+          weekly?.goalCount &&
+          weekly?.readCount < weekly?.goalCount
+            ? `목표까지 ${weekly?.goalCount - weekly?.readCount}개 남음`
             : '목표 달성!'
         }
         rateFormat="ratio"

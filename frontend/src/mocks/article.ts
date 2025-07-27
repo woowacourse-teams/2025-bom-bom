@@ -1,6 +1,6 @@
-import { Article } from '../pages/today/types/article';
+import { components } from '@/types/openapi';
 
-export const MOCK_ARTICLES: Article = {
+export const MOCK_ARTICLES: components['schemas']['ArticleResponse'] = {
   articleId: 1,
   title: 'URL 변경만으로 100개 이상의 계정을 해킹한 방법 (IDOR + XSS 취약점)',
   contentsSummary:

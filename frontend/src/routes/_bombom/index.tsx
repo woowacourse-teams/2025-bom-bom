@@ -29,11 +29,11 @@ function Index() {
       <TitleBox>
         <Title>오늘의 뉴스레터</Title>
         <TitleDescription>
-          {articles.content.length}개의 새로운 뉴스레터가 도착했어요
+          {articles.content?.length}개의 새로운 뉴스레터가 도착했어요
         </TitleDescription>
       </TitleBox>
       <ContentWrapper>
-        {articles.content.length > 0 ? (
+        {articles.content?.length && articles.content.length > 0 ? (
           <ArticleCardList articles={articles.content} />
         ) : (
           <EmptyLetterCard title="새로운 뉴스레터가 없어요" />

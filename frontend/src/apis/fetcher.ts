@@ -99,7 +99,7 @@ const request = async <TRequest, TResponse>({
         errorMessage = '응답 파싱에 실패했습니다.';
       }
 
-      throw new ApiError(status, errorMessage, rawBody);
+      throw new ApiError(status, errorMessage ?? '', rawBody);
     }
 
     const contentType = response.headers.get('Content-Type');

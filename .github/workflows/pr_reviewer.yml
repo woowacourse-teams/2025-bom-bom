@@ -4,6 +4,11 @@ on:
   pull_request:
     types: [review_requested]
 
+# 동시 실행을 방지하여 중복 메시지 전송을 막습니다
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   specific_review_requested:
     runs-on: ubuntu-latest

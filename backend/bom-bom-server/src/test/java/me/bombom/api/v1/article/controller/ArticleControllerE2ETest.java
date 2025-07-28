@@ -40,7 +40,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(properties = {"frontend.base-url=http://localhost:3000"})
+@TestPropertySource(properties = {
+    "frontend.base-url=http://localhost:3000",
+    "spring.datasource.url=jdbc:h2:mem:testdb",
+    "spring.datasource.driver-class-name=org.h2.Driver",
+    "spring.jpa.hibernate.ddl-auto=create-drop",
+    "spring.jpa.show-sql=false"
+})
 @DisplayName("아티클 목록 조회 Controller E2E 테스트")
 class ArticleControllerE2ETest {
 
@@ -88,7 +94,7 @@ class ArticleControllerE2ETest {
         articles = TestFixture.createArticles(member, newsletters);
         articleRepository.saveAll(articles);
 
-        // CustomOAuth2User 생성
+        // Argument Resolver를 위해 CustomOAuth2User 생성
         Map<String, Object> attributes = Map.of(
                 "id", member.getId().toString(),
                 "email", member.getEmail(),

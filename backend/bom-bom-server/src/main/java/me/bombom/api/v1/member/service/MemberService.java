@@ -7,8 +7,9 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.dto.response.MemberProfileResponse;
+import me.bombom.api.v1.member.event.MemberSignupEvent;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.reading.service.ReadingService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,8 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MemberService {
 
-    private final ReadingService readingService;
     private final MemberRepository memberRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     // TODO : 회원가입 입력 정보 양식 반영
     public Member signup(PendingOAuth2Member pendingMember, MemberSignupRequest signupRequest) {
@@ -32,7 +33,7 @@ public class MemberService {
                 .roleId(1L)
                 .build();
         Member savedMember = memberRepository.save(newMember);
-        readingService.initializeReadingInformation(savedMember.getId());
+        applicationEventPublisher.publishEvent(new MemberSignupEvent(this, savedMember.getId()));
         return savedMember;
     }
 

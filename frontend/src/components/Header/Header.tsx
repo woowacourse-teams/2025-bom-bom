@@ -1,8 +1,11 @@
 import styled from '@emotion/styled';
-import { Link } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
+import { Link, useNavigate } from '@tanstack/react-router';
+import Chip from '../Chip/Chip';
 import CompassIcon from '../icons/CompassIcon';
 import HomeIcon from '../icons/HomeIcon';
 import StorageIcon from '../icons/StorageIcon';
+import { getUserInfo } from '@/apis/members';
 import { NavType } from '@/types/nav';
 import { copyToClipboard } from '@/utils/copy';
 import compassIcon from '#/assets/compass.svg';
@@ -13,6 +16,15 @@ interface HeaderProps {
 }
 
 export default function Header({ activeNav }: HeaderProps) {
+  const navagate = useNavigate();
+  const {
+    data: userInfo,
+    isError,
+    isFetching,
+  } = useQuery({
+    queryKey: ['userInfo'],
+    queryFn: () => getUserInfo(),
+  });
   const handleCopyEmail = () => {
     copyToClipboard('test@bombom.news');
   };
@@ -49,13 +61,25 @@ export default function Header({ activeNav }: HeaderProps) {
 
         <ProfileBox>
           <ProfileImg src={compassIcon} alt="profile" />
-          <ProfileInfo>
-            <ProfileName>김봄봄</ProfileName>
-            <ProfileEmail onClick={handleCopyEmail}>
-              <EmailText>test@bombom.news</EmailText>
-              <img src={copyIcon} alt="copy" width={16} height={16} />
-            </ProfileEmail>
-          </ProfileInfo>
+          {isFetching || isError ? (
+            <Chip
+              text="로그인"
+              selected={false}
+              onSelect={() => {
+                navagate({ to: '/login' });
+              }}
+            />
+          ) : (
+            <ProfileInfo>
+              <ProfileName>{userInfo?.nickname ?? '김봄봄'}</ProfileName>
+              <ProfileEmail onClick={handleCopyEmail}>
+                <EmailText>
+                  {userInfo?.email ?? 'example@bombom.news'}
+                </EmailText>
+                <img src={copyIcon} alt="copy" width={16} height={16} />
+              </ProfileEmail>
+            </ProfileInfo>
+          )}
         </ProfileBox>
       </HeaderInner>
     </HeaderContainer>

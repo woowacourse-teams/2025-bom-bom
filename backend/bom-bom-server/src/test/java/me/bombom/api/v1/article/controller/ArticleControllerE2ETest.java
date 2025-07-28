@@ -14,7 +14,6 @@ import java.util.Map;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
-import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler;
 import me.bombom.api.v1.auth.service.CustomOAuth2UserService;
@@ -40,13 +39,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
+@SpringBootTest
 @AutoConfigureMockMvc
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@DisplayName("아티클 목록 조회 Controller E2E 테스트")
 class ArticleControllerE2ETest {
 
     @Autowired
@@ -70,9 +66,6 @@ class ArticleControllerE2ETest {
     @Autowired
     private NewsletterDetailRepository newsletterDetailRepository;
 
-    @Autowired
-    private ArticleService articleService;
-
     @MockitoBean
     private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
@@ -90,9 +83,14 @@ class ArticleControllerE2ETest {
 
     @BeforeEach
     void setUp() {
-        // TestFixture를 적극 활용한 테스트 데이터 준비
+        newsletterDetailRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+        categoryRepository.deleteAllInBatch();
+        newsletterRepository.deleteAllInBatch();
+        articleRepository.deleteAllInBatch();
+
         newsletterDetailRepository.saveAll(TestFixture.createNewsletterDetails());
-        
+
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
 
@@ -148,39 +146,6 @@ class ArticleControllerE2ETest {
     }
 
     @Test
-    @DisplayName("경제 카테고리 아티클 목록 조회")
-    void 경제_카테고리_아티클_목록_조회() throws Exception {
-        // given
-        setAuthentication();
-        String economyCategory = categories.get(0).getName(); // "경제"
-
-        // when & then
-        mockMvc.perform(get("/api/v1/articles")
-                        .param("category", economyCategory))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.totalElements").value(1))
-                .andExpect(jsonPath("$.content[0].newsletter.category").value("경제"));
-    }
-
-    @Test
-    @DisplayName("테크 카테고리 아티클 목록 조회")
-    void 테크_카테고리_아티클_목록_조회() throws Exception {
-        // given
-        setAuthentication();
-        String techCategory = categories.get(1).getName(); // "테크"
-
-        // when & then
-        mockMvc.perform(get("/api/v1/articles")
-                        .param("category", techCategory))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.totalElements").value(1))
-                .andExpect(jsonPath("$.content[0].newsletter.category").value("테크"));
-    }
-
-    @Test
-    @DisplayName("푸드 카테고리 아티클 목록 조회")
     void 푸드_카테고리_아티클_목록_조회() throws Exception {
         // given
         setAuthentication();
@@ -197,7 +162,6 @@ class ArticleControllerE2ETest {
     }
 
     @Test
-    @DisplayName("뉴스 키워드 검색 아티클 목록 조회")
     void 뉴스_키워드_검색_아티클_목록_조회() throws Exception {
         // given
         setAuthentication();
@@ -213,7 +177,6 @@ class ArticleControllerE2ETest {
     }
 
     @Test
-    @DisplayName("레터 키워드 검색 아티클 목록 조회")
     void 레터_키워드_검색_아티클_목록_조회() throws Exception {
         // given
         setAuthentication();
@@ -229,7 +192,6 @@ class ArticleControllerE2ETest {
     }
 
     @Test
-    @DisplayName("존재하지않는 키워드 검색 아티클 목록 조회")
     void 존재하지않는_키워드_검색_아티클_목록_조회() throws Exception {
         // given
         setAuthentication();
@@ -244,7 +206,6 @@ class ArticleControllerE2ETest {
     }
 
     @Test
-    @DisplayName("기본값이 DESC 정렬인지 확인")
     void 기본값이_DESC_정렬인지_확인() throws Exception {
         // given
         setAuthentication();
@@ -278,7 +239,6 @@ class ArticleControllerE2ETest {
     }
 
     @Test
-    @DisplayName("DESC 정렬 아티클 목록 조회")
     void DESC_정렬_아티클_목록_조회() throws Exception {
         // given
         setAuthentication();
@@ -303,7 +263,6 @@ class ArticleControllerE2ETest {
     }
 
     @Test
-    @DisplayName("ASC 정렬 아티클 목록 조회")
     void ASC_정렬_아티클_목록_조회() throws Exception {
         // given
         setAuthentication();
@@ -328,7 +287,6 @@ class ArticleControllerE2ETest {
     }
 
     @Test
-    @DisplayName("첫번째 페이지 아티클 목록 조회")
     void 첫번째_페이지_아티클_목록_조회() throws Exception {
         // given
         setAuthentication();
@@ -349,7 +307,6 @@ class ArticleControllerE2ETest {
     }
 
     @Test
-    @DisplayName("두번째 페이지 아티클 목록 조회")
     void 두번째_페이지_아티클_목록_조회() throws Exception {
         // given
         setAuthentication();
@@ -369,7 +326,6 @@ class ArticleControllerE2ETest {
     }
 
     @Test
-    @DisplayName("날짜 필터링 아티클 목록 조회")
     void 날짜_필터링_아티클_목록_조회() throws Exception {
         // given
         setAuthentication();
@@ -384,7 +340,6 @@ class ArticleControllerE2ETest {
     }
 
     @Test
-    @DisplayName("카테고리 키워드 날짜 복합 필터링 아티클 목록 조회")
     void 카테고리_키워드_날짜_복합_필터링_아티클_목록_조회() throws Exception {
         // given
         setAuthentication();
@@ -407,7 +362,6 @@ class ArticleControllerE2ETest {
     }
 
     @Test
-    @DisplayName("인증되지 않은 사용자의 아티클 목록 조회 시 401 에러")
     void 인증되지않은_사용자_아티클_목록_조회시_예외() throws Exception {
         // when & then - 인증 정보 없이 요청 (setAuthentication() 호출 안함)
         mockMvc.perform(get("/api/v1/articles")

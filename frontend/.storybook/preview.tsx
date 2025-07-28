@@ -7,6 +7,9 @@ import {
   createRootRoute,
   RouterProvider,
 } from '@tanstack/react-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
 
 const RouterDecorator: Decorator = (Story) => {
   const rootRoute = createRootRoute({
@@ -33,10 +36,12 @@ const preview: Preview = {
   tags: ['autodocs'],
   decorators: [
     (Story) => (
-      <ThemeProvider theme={theme}>
-        <Global styles={reset} />
-        <Story />
-      </ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={theme}>
+          <Global styles={reset} />
+          <Story />
+        </ThemeProvider>
+      </QueryClientProvider>
     ),
     RouterDecorator,
   ],

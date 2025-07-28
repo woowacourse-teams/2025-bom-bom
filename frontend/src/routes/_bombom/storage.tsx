@@ -9,6 +9,7 @@ import CategoryFilter from '../../pages/storage/components/CategoryFilter/Catego
 import { getArticles, getStatisticsCategories } from '@/apis/articles';
 import { CategoryType } from '@/constants/category';
 import { useDebounce } from '@/hooks/useDebounce';
+import EmptySearchCard from '@/pages/storage/components/EmptySearchCard/EmptySearchCard';
 import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
@@ -104,8 +105,10 @@ function Storage() {
               </li>
             ))}
           </ArticleList>
-        ) : (
+        ) : searchInput === '' ? (
           <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
+        ) : (
+          <EmptySearchCard searchQuery={searchInput} />
         )}
       </MainSection>
     </Container>

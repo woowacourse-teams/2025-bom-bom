@@ -11,7 +11,9 @@ public final class SummaryGenerator {
 
     public static String summarize(String htmlText) {
         if (htmlText == null || htmlText.isBlank()) return "";
-        String plain = Jsoup.parse(htmlText).text();
+        String plain = Jsoup.parse(htmlText)
+                .text()
+                .strip();
         if (plain.length() <= MAX_LENGTH) return plain;
         return plain.substring(0, MAX_LENGTH) + "...";
     }

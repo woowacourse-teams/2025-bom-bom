@@ -11,8 +11,11 @@ public final class ReadingTimeCalculator {
 
     public static int calculate(String htmlText) {
         if (htmlText == null || htmlText.isBlank()) return 0;
-        String plain = Jsoup.parse(htmlText).text().trim();
-        int count = plain.split("\\s+").length;
+        String plain = Jsoup.parse(htmlText)
+                .text()
+                .strip();
+        int count = plain.split("\\s+")
+                .length;
         return Math.max((int) Math.ceil((double) count / WORDS_PER_MINUTE), 1);
     }
 }

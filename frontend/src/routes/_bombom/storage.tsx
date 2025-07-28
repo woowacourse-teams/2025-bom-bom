@@ -2,18 +2,18 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import StorageIcon from '../components/icons/StorageIcon';
-import PageLayout from '../components/PageLayout/PageLayout';
-import SearchInput from '../components/SearchInput/SearchInput';
-import Select from '../components/Select/Select';
-import CategoryFilter from '../pages/storage/components/CategoryFilter/CategoryFilter';
+import StorageIcon from '../../components/icons/StorageIcon';
+import SearchInput from '../../components/SearchInput/SearchInput';
+import Select from '../../components/Select/Select';
+import CategoryFilter from '../../pages/storage/components/CategoryFilter/CategoryFilter';
 import { getArticles, getStatisticsCategories } from '@/apis/articles';
 import { CategoryType } from '@/constants/category';
 import { useDebounce } from '@/hooks/useDebounce';
 import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
+import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 
-export const Route = createFileRoute('/storage')({
+export const Route = createFileRoute('/_bombom/storage')({
   component: Storage,
 });
 
@@ -26,7 +26,6 @@ function Storage() {
     queryKey: ['articles', sortFilter, selectedCategory],
     queryFn: () =>
       getArticles({
-        memberId: 1,
         sorted: sortFilter,
         category: selectedCategory === '전체' ? undefined : selectedCategory,
         keyword: searchInput,
@@ -34,12 +33,12 @@ function Storage() {
   });
   const { data: categoryCounts } = useQuery({
     queryKey: ['/articles/statistics/categories'],
-    queryFn: () => getStatisticsCategories({ memberId: 1 }),
+    queryFn: () => getStatisticsCategories(),
   });
 
   const debouncedSearch = useDebounce(() => {
     refetchArticles();
-  }, 300);
+  }, 500);
 
   if (!articles || !categoryCounts) return null;
 
@@ -49,55 +48,55 @@ function Storage() {
   );
 
   return (
-    <PageLayout activeNav="storage">
-      <Container>
-        <SideSection>
-          <CategoryFilter
-            categoryList={[
-              {
-                value: '전체',
-                label: '전체',
-                quantity: categoryCounts?.totalCount ?? 0,
-              },
-              ...(existCategories.map(({ category, count }) => ({
-                value: category as CategoryType,
-                label: category,
-                quantity: count,
-              })) ?? []),
+    <Container>
+      <SideSection>
+        <CategoryFilter
+          categoryList={[
+            {
+              value: '전체',
+              label: '전체',
+              quantity: categoryCounts?.totalCount ?? 0,
+            },
+            ...(existCategories.map(({ category, count }) => ({
+              value: category as CategoryType,
+              label: category,
+              quantity: count,
+            })) ?? []),
+          ]}
+          selectedValue={selectedCategory}
+          onSelectCategory={(value) => setSelectedCategory(value)}
+        />
+      </SideSection>
+      <MainSection>
+        <TitleWrapper>
+          <TitleIconBox>
+            <StorageIcon color="white" />
+          </TitleIconBox>
+          <Title>뉴스레터 보관함</Title>
+        </TitleWrapper>
+        <SearchInput
+          placeholder="뉴스레터 제목으로 검색하세요..."
+          value={searchInput}
+          onChange={(e) => {
+            setSearchInput(e.target.value);
+            debouncedSearch();
+          }}
+        />
+        <SummaryBar>
+          <SummaryText>
+            총 {readStats.total}개 • 읽지 않음 {readStats.unread}개 • 읽음{' '}
+            {readStats.read}개
+          </SummaryText>
+          <Select
+            options={[
+              { value: 'DESC', label: '최신순' },
+              { value: 'ASC', label: '오래된순' },
             ]}
-            selectedValue={selectedCategory}
-            onSelectCategory={(value) => setSelectedCategory(value)}
+            selectedValue={sortFilter}
+            onSelectOption={(value) => setSortFilter(value)}
           />
-        </SideSection>
-        <MainSection>
-          <TitleWrapper>
-            <TitleIconBox>
-              <StorageIcon color="white" />
-            </TitleIconBox>
-            <Title>뉴스레터 보관함</Title>
-          </TitleWrapper>
-          <SearchInput
-            placeholder="뉴스레터 제목으로 검색하세요..."
-            value={searchInput}
-            onChange={(e) => {
-              setSearchInput(e.target.value);
-              debouncedSearch();
-            }}
-          />
-          <SummaryBar>
-            <SummaryText>
-              총 {readStats.total}개 • 읽지 않음 {readStats.unread}개 • 읽음{' '}
-              {readStats.read}개
-            </SummaryText>
-            <Select
-              options={[
-                { value: 'DESC', label: '최신순' },
-                { value: 'ASC', label: '오래된순' },
-              ]}
-              selectedValue={sortFilter}
-              onSelectOption={(value) => setSortFilter(value)}
-            />
-          </SummaryBar>
+        </SummaryBar>
+        {articles.content.length > 0 ? (
           <ArticleList>
             {articles.content.map((article) => (
               <li key={article.articleId}>
@@ -105,9 +104,11 @@ function Storage() {
               </li>
             ))}
           </ArticleList>
-        </MainSection>
-      </Container>
-    </PageLayout>
+        ) : (
+          <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
+        )}
+      </MainSection>
+    </Container>
   );
 }
 
@@ -131,6 +132,8 @@ const MainSection = styled.div`
   gap: 20px;
   flex-direction: column;
   align-items: flex-start;
+
+  width: 100%;
 `;
 
 const TitleWrapper = styled.div`

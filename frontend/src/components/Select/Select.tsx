@@ -39,7 +39,11 @@ function Select<T extends string | number>({
         <SelectText selected={selectedValue !== null}>
           {selectedLabel ?? placeholder}
         </SelectText>
-        <ChevronIcon width={16} direction={open ? 'up' : 'down'} />
+        <ChevronIcon
+          width={16}
+          targetDirection={open ? 'up' : 'down'}
+          currentDirection="down"
+        />
       </SelectToggle>
       <SelectMenu open={open}>
         <SelectMenuWrapper role="listbox">

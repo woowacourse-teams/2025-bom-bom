@@ -5,7 +5,6 @@ import { ArticleDetail } from '@/pages/detail/types/articleDetail';
 import { CategoriesCountType } from '@/pages/today/types/category';
 
 interface GetArticlesParams {
-  memberId: number;
   sorted: 'ASC' | 'DESC';
   date?: Date;
   category?: string;
@@ -16,7 +15,6 @@ interface GetArticlesParams {
 
 export const getArticles = async ({
   date,
-  memberId,
   sorted,
   category,
   size,
@@ -27,7 +25,6 @@ export const getArticles = async ({
     path: '/articles',
     query: {
       date,
-      memberId,
       sorted,
       category,
       size,
@@ -39,47 +36,28 @@ export const getArticles = async ({
 
 interface GetArticleByIdParams {
   articleId: number;
-  memberId: number;
 }
 
-export const getArticleById = async ({
-  articleId,
-  memberId,
-}: GetArticleByIdParams) => {
+export const getArticleById = async ({ articleId }: GetArticleByIdParams) => {
   return await fetcher.get<ArticleDetail>({
     path: `/articles/${articleId}`,
-    query: { memberId: memberId.toString() },
   });
 };
 
 interface PatchArticleReadParams {
   articleId: number;
-  memberId: number;
 }
 
 export const patchArticleRead = async ({
   articleId,
-  memberId,
 }: PatchArticleReadParams) => {
   return await fetcher.patch({
     path: `/articles/${articleId}/read?`,
-    query: {
-      memberId,
-    },
   });
 };
 
-interface GetStatisticsCategoriesParams {
-  memberId: number;
-}
-
-export const getStatisticsCategories = async ({
-  memberId,
-}: GetStatisticsCategoriesParams) => {
+export const getStatisticsCategories = async () => {
   return await fetcher.get<CategoriesCountType>({
     path: '/articles/statistics/categories',
-    query: {
-      memberId,
-    },
   });
 };

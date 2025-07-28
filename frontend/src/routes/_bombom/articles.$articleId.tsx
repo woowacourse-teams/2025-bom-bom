@@ -2,15 +2,16 @@ import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useRouterState } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import clockIcon from '../../public/assets/clock.svg';
-import Chip from '../components/Chip/Chip';
-import NewsletterItemCard from '../pages/detail/components/NewsletterItemCard/NewsletterItemCard';
+import clockIcon from '../../../public/assets/clock.svg';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
+import Chip from '@/components/Chip/Chip';
 import { useThrottle } from '@/hooks/useThrottle';
+import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
+import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { formatDate } from '@/utils/date';
 import { getScrollPercent } from '@/utils/scroll';
 
-export const Route = createFileRoute('/articles/$articleId')({
+export const Route = createFileRoute('/_bombom/articles/$articleId')({
   component: ArticleDetailPage,
 });
 
@@ -26,18 +27,15 @@ function ArticleDetailPage() {
     queryFn: () =>
       getArticleById({
         articleId: Number(articleId),
-        memberId: 1,
       }),
   });
   const { data: otherArticles } = useQuery({
     queryKey: ['otherArticles'],
-    queryFn: () =>
-      getArticles({ date: new Date(), memberId: 1, sorted: 'ASC' }),
+    queryFn: () => getArticles({ date: new Date(), sorted: 'ASC' }),
   });
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
-    mutationFn: () =>
-      patchArticleRead({ articleId: Number(articleId), memberId: 1 }),
+    mutationFn: () => patchArticleRead({ articleId: Number(articleId) }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['article', articleId],
@@ -92,11 +90,15 @@ function ArticleDetailPage() {
       </ContentDescription>
       <TodayArticlesWrapper>
         <TodayArticleTitle>오늘 읽지 않은 다른 아티클</TodayArticleTitle>
-        <TodayArticleList>
-          {unReadArticles?.map((article) => (
-            <NewsletterItemCard key={article.articleId} data={article} />
-          ))}
-        </TodayArticleList>
+        {unReadArticles.length > 0 ? (
+          <TodayArticleList>
+            {unReadArticles?.map((article) => (
+              <NewsletterItemCard key={article.articleId} data={article} />
+            ))}
+          </TodayArticleList>
+        ) : (
+          <EmptyUnreadCard />
+        )}
       </TodayArticlesWrapper>
     </Container>
   );
@@ -106,7 +108,7 @@ const Container = styled.div`
   display: flex;
   gap: 20px;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
 
   max-width: 700px;
   margin: 0 auto;
@@ -168,10 +170,13 @@ const TodayArticlesWrapper = styled.div`
   display: flex;
   gap: 12px;
   flex-direction: column;
-  align-items: flex-start;
+
+  width: 100%;
 `;
 
 const TodayArticleTitle = styled.h3`
+  align-self: flex-start;
+
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.heading3};
 `;

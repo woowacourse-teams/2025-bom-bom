@@ -1,13 +1,14 @@
-const path = require('path');
-const { tanstackRouter } = require('@tanstack/router-plugin/webpack');
-const dotenv = require('dotenv');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const webpack = require('webpack');
+import path from 'path';
+import { tanstackRouter } from '@tanstack/router-plugin/webpack';
+import dotenv from 'dotenv';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import webpack from 'webpack';
+import 'webpack-dev-server';
 
 dotenv.config();
 
-module.exports = (env, argv) => {
-  return {
+export default (env, argv) => {
+  const config: webpack.Configuration = {
     mode: argv.mode,
     entry: './src/main.tsx',
     output: {
@@ -89,4 +90,6 @@ module.exports = (env, argv) => {
       },
     },
   };
+
+  return config;
 };

@@ -1,26 +1,27 @@
 import styled from '@emotion/styled';
 import { SVGProps } from 'react';
+import { DirectionType } from './Icons.types';
+import { calculateDirection } from './Icons.utils';
 
 interface ChevronIconProps extends SVGProps<SVGSVGElement> {
-  direction: 'up' | 'down' | 'left' | 'right';
+  targetDirection: DirectionType;
+  currentDirection: DirectionType;
 }
 
-const directionRotationMap = {
-  up: 'rotate(180deg)',
-  down: 'rotate(0deg)',
-  left: 'rotate(90deg)',
-  right: 'rotate(-90deg)',
-};
-
-function ChevronIcon({ direction, ...props }: ChevronIconProps) {
+function ChevronIcon({
+  targetDirection,
+  currentDirection,
+  ...props
+}: ChevronIconProps) {
   return (
     <StyledSVG
+      targetDirection={targetDirection}
+      currentDirection={currentDirection}
       width="16"
       height="16"
       viewBox="0 0 16 16"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      direction={direction}
       {...props}
     >
       <path
@@ -36,7 +37,11 @@ function ChevronIcon({ direction, ...props }: ChevronIconProps) {
 
 export default ChevronIcon;
 
-const StyledSVG = styled.svg<{ direction: ChevronIconProps['direction'] }>`
-  transform: ${({ direction }) => directionRotationMap[direction]};
+const StyledSVG = styled.svg<{
+  targetDirection: DirectionType;
+  currentDirection: DirectionType;
+}>`
+  transform: ${({ targetDirection, currentDirection }) =>
+    calculateDirection(targetDirection, currentDirection)};
   transition: transform 0.2s ease;
 `;

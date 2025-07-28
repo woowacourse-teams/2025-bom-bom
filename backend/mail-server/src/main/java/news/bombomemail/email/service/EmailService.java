@@ -32,17 +32,14 @@ public class EmailService {
                 deleteEmailFile(emailFile);
                 return;
             }
-            moveToFailedDir(emailFile);
         } catch (MessagingException | IOException e) {
             log.error("이메일 파싱/입출력 오류: {}", emailFile.getName(), e);
-            moveToFailedDir(emailFile);
         } catch (DataAccessException e) {
             log.error("DB 오류: {}", emailFile.getName(), e);
-            moveToFailedDir(emailFile);
         } catch (Exception e) {
             log.error("예상치 못한 오류: {}", emailFile.getName(), e);
-            moveToFailedDir(emailFile);
         }
+        moveToFailedDir(emailFile);
     }
 
     private void deleteEmailFile(File emailFile) {

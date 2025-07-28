@@ -6,6 +6,11 @@ const meta: Meta<typeof Header> = {
   component: Header,
   parameters: {
     layout: 'fullscreen',
+    docs: {
+      story: {
+        inline: false,
+      },
+    },
   },
 };
 export default meta;

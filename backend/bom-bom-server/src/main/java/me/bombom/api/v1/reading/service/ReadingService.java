@@ -23,7 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ReadingService {
 
-    public static final int INITIAL_COUNT = 0;
+    private static final int INITIAL_COUNT = 0;
+    private static final int INITIAL_WEEKLY_GOAL_COUNT = 3;
 
     private final MemberRepository memberRepository;
     private final ContinueReadingRepository continueReadingRepository;
@@ -47,7 +48,7 @@ public class ReadingService {
 
         WeeklyReading newWeeklyReading = WeeklyReading.builder()
                 .memberId(memberId)
-                .goalCount(INITIAL_COUNT)
+                .goalCount(INITIAL_WEEKLY_GOAL_COUNT)
                 .currentCount(INITIAL_COUNT)
                 .build();
         weeklyReadingRepository.save(newWeeklyReading);

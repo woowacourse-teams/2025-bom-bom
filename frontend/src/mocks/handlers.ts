@@ -5,18 +5,7 @@ import { ARTICLES } from './datas/articles';
 
 const baseURL = ENV.baseUrl;
 
-// 뉴스레터 mock 데이터 생성 (ARTICLES에서 newsletter만 추출)
-const NEWSLETTERS = ARTICLES.map((a, i) => ({
-  newsletterId: i + 1,
-  name: a.newsletter.name,
-  imageUrl: a.newsletter.imageUrl,
-  description: `${a.newsletter.name}의 설명입니다.`,
-  mainPageUrl: 'https://example.com',
-  category: a.newsletter.category,
-}));
-
 export const handlers = [
-  // 기사 목록
   http.get(`${baseURL}/articles`, () => {
     return HttpResponse.json({
       totalPages: 1,
@@ -68,7 +57,7 @@ export const handlers = [
 
   // 뉴스레터 목록
   http.get(`${baseURL}/newsletters`, () => {
-    return HttpResponse.json(NEWSLETTERS);
+    return HttpResponse.json(ARTICLES);
   }),
 
   // 멤버 읽기 상태

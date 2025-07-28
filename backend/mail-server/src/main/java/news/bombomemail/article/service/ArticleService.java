@@ -57,17 +57,17 @@ public class ArticleService {
             return null;
         }
 
-        String toEmail = ((InternetAddress) toRecipients[0]).getAddress();
-        Optional<Member> optionalMember = memberRepository.findByEmail(toEmail);
+        String toEmailAddress = ((InternetAddress) toRecipients[0]).getAddress();
+        Optional<Member> optionalMember = memberRepository.findByEmail(toEmailAddress);
         if (optionalMember.isEmpty()) {
-            log.info("미등록 수신자({})라 메일을 폐기합니다: {}", toEmail, message.getSubject());
+            log.info("미등록 수신자({})라 메일을 폐기합니다: {}", toEmailAddress, message.getSubject());
             return null;
         }
         return optionalMember.get();
     }
 
     private Newsletter resolveNewsletter(MimeMessage message) throws MessagingException {
-        String fromEmail = Optional.ofNullable(message.getFrom())
+        String fromEmailAddress = Optional.ofNullable(message.getFrom())
                 .stream()
                 .flatMap(Arrays::stream)
                 .filter(InternetAddress.class::isInstance)
@@ -76,14 +76,14 @@ public class ArticleService {
                 .findFirst()
                 .orElse(null);
 
-        if (fromEmail == null) {
+        if (fromEmailAddress == null) {
             log.info("보낸이가 존재하지 않아 메일을 폐기합니다: {}", message.getSubject());
             return null;
         }
 
-        Optional<Newsletter> optionalNewsletter = newsletterRepository.findByEmail(fromEmail);
+        Optional<Newsletter> optionalNewsletter = newsletterRepository.findByEmail(fromEmailAddress);
         if (optionalNewsletter.isEmpty()) {
-            log.info("미등록 발신자({})라 메일 폐기합니다: {}", fromEmail, message.getSubject());
+            log.info("미등록 발신자({})라 메일 폐기합니다: {}", fromEmailAddress, message.getSubject());
             return null;
         }
         return optionalNewsletter.get();

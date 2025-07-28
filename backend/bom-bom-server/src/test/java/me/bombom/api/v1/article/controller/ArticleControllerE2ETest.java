@@ -14,6 +14,7 @@ import java.util.Map;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler;
 import me.bombom.api.v1.member.domain.Member;
@@ -64,6 +65,9 @@ class ArticleControllerE2ETest {
 
     @Autowired
     private NewsletterDetailRepository newsletterDetailRepository;
+
+    @Autowired
+    private ArticleService articleService;
 
     @MockitoBean
     private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;

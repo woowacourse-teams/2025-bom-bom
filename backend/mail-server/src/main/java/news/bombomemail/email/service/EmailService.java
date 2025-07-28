@@ -26,7 +26,7 @@ public class EmailService {
     public void processEmailFile(File emailFile) {
         try (InputStream fileInputStream = new FileInputStream(emailFile)) {
             MimeMessage mimeMessage = new MimeMessage(mailSession, fileInputStream);
-            final String contents = EmailContentExtractor.extractContents(mimeMessage);
+            String contents = EmailContentExtractor.extractContents(mimeMessage);
             boolean saved = articleService.save(mimeMessage, contents);
             if (saved) {
                 deleteEmailFile(emailFile);

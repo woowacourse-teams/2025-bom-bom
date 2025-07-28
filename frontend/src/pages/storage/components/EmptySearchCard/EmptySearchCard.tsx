@@ -37,7 +37,7 @@ const Container = styled.section`
 `;
 
 const EmptySearchIconWrapper = styled.div`
-  padding: 46px;
+  padding: 38px;
 `;
 
 const EmptyTitle = styled.h2`

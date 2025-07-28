@@ -37,6 +37,8 @@ const Container = styled.div`
 
   width: fit-content;
   padding: 12px 8px;
+
+  text-align: left;
 `;
 
 const Image = styled(ImageWithFallback)`

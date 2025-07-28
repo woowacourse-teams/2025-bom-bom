@@ -1,11 +1,24 @@
 import { Global, ThemeProvider } from '@emotion/react';
-import type { Preview } from '@storybook/react-webpack5';
+import type { Preview, Decorator } from '@storybook/react-webpack5';
 import { theme } from '@/styles/theme';
 import reset from '@/styles/reset.ts';
-import { createRouter, RouterProvider } from '@tanstack/react-router';
-import { routeTree } from '@/routeTree.gen';
+import {
+  createRouter,
+  createRootRoute,
+  RouterProvider,
+} from '@tanstack/react-router';
 
-const router = createRouter({ routeTree });
+const RouterDecorator: Decorator = (Story) => {
+  const rootRoute = createRootRoute({
+    component: () => <Story />,
+  });
+
+  const router = createRouter({
+    routeTree: rootRoute,
+  });
+
+  return <RouterProvider router={router} />;
+};
 
 const preview: Preview = {
   parameters: {
@@ -22,10 +35,10 @@ const preview: Preview = {
     (Story) => (
       <ThemeProvider theme={theme}>
         <Global styles={reset} />
-        <RouterProvider router={router} />
         <Story />
       </ThemeProvider>
     ),
+    RouterDecorator,
   ],
 };
 

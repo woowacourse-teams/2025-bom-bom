@@ -14,14 +14,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     // TODO : 회원가입 입력 정보 양식 반영
+    @Transactional
     public Member signup(PendingOAuth2Member pendingMember, MemberSignupRequest signupRequest) {
         Member newMember = Member.builder()
                 .provider(pendingMember.getProvider())

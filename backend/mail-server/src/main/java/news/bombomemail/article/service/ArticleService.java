@@ -90,10 +90,10 @@ public class ArticleService {
     }
 
     private Article buildArticle(
-            final MimeMessage message,
-            final String contents,
-            final Member member,
-            final Newsletter newsletter
+            MimeMessage message,
+            String contents,
+            Member member,
+            Newsletter newsletter
     ) throws MessagingException {
         return Article.builder()
                 .title(message.getSubject())

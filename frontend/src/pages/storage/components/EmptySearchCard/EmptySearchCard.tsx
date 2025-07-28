@@ -58,7 +58,7 @@ const DescriptionWrapper = styled.div`
 
 const Lead = styled.p`
   color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.body2};
+  font: ${({ theme }) => theme.fonts.body1};
   text-align: center;
 `;
 

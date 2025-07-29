@@ -10,7 +10,7 @@ interface UseScrollTriggerParams {
 }
 
 export function useScrollTrigger({
-  enabled = true,
+  enabled = false,
   threshold = 70,
   delay = 500,
   onTrigger,
@@ -27,6 +27,12 @@ export function useScrollTrigger({
       onTrigger();
     }
   }, 500);
+
+  useEffect(() => {
+    if (enabled && getScrollPercent() === 100) {
+      onTrigger();
+    }
+  }, [enabled, onTrigger]);
 
   useEffect(() => {
     window.addEventListener('scroll', throttledHandleScroll);

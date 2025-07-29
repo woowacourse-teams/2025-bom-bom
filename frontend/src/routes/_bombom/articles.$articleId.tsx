@@ -39,7 +39,7 @@ function ArticleDetailPage() {
   });
 
   useScrollTrigger({
-    enabled: !currentArticle?.isRead,
+    enabled: !currentArticle?.isRead && !!currentArticle,
     threshold: 70,
     delay: 500,
     onTrigger: updateArticleAsRead,

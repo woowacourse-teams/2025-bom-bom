@@ -19,15 +19,15 @@ export const getWeeklyReadingGoal = async ({
   >({
     path: '/members/me/reading/progress/week/goal',
     body: {
-      weeklyGoalCount,
       memberId,
+      weeklyGoalCount,
     },
   });
 };
 
 export const patchWeeklyCount = async ({
-  memberId,
   weeklyGoalCount,
+  memberId,
 }: components['schemas']['UpdateWeeklyGoalCountRequest']) => {
   return await fetcher.patch<
     components['schemas']['UpdateWeeklyGoalCountRequest'],

@@ -25,8 +25,12 @@ export default function Header({ activeNav }: HeaderProps) {
     queryKey: ['userInfo'],
     queryFn: () => getUserInfo(),
   });
+
   const handleCopyEmail = () => {
-    copyToClipboard('test@bombom.news');
+    if (!userInfo?.email) return;
+
+    alert(`이메일이 복사되었습니다.`);
+    copyToClipboard(userInfo?.email);
   };
 
   return (

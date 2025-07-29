@@ -19,7 +19,7 @@ const router = createRouter({
     queryClient,
   },
   getScrollRestorationKey: (location) => {
-    const paths = ['/articles/$articleId'];
+    const paths = ['_bombom/articles/$articleId'];
     return paths.includes(location.pathname)
       ? location.pathname
       : location.state.__TSR_key!;

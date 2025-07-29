@@ -8,7 +8,7 @@ import StorageIcon from '../icons/StorageIcon';
 import { getUserInfo } from '@/apis/members';
 import { NavType } from '@/types/nav';
 import { copyToClipboard } from '@/utils/copy';
-import compassIcon from '#/assets/compass.svg';
+import defaultImage from '#/assets/bombom.png';
 import copyIcon from '#/assets/copy.svg';
 
 interface HeaderProps {
@@ -64,7 +64,10 @@ export default function Header({ activeNav }: HeaderProps) {
         </Nav>
 
         <ProfileBox>
-          <ProfileImg src={compassIcon} alt="profile" />
+          <ProfileImg
+            src={userInfo?.profileImageUrl ?? defaultImage}
+            alt="profile"
+          />
           {isFetching || isError ? (
             <Chip
               text="로그인"

@@ -8,7 +8,7 @@ import Select from '../../components/Select/Select';
 import CategoryFilter from '../../pages/storage/components/CategoryFilter/CategoryFilter';
 import { getArticles, getStatisticsCategories } from '@/apis/articles';
 import { CategoryType } from '@/constants/category';
-import { useDebounce } from '@/hooks/useDebounce';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import EmptySearchCard from '@/pages/storage/components/EmptySearchCard/EmptySearchCard';
 import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
@@ -23,28 +23,24 @@ function Storage() {
     useState<CategoryType>('전체');
   const [sortFilter, setSortFilter] = useState<'DESC' | 'ASC'>('DESC');
   const [searchInput, setSearchInput] = useState('');
-  const { data: articles, refetch: refetchArticles } = useQuery({
-    queryKey: ['articles', sortFilter, selectedCategory],
+  const debouncedSearchInput = useDebouncedValue(searchInput, 500);
+
+  const { data: articles } = useQuery({
+    queryKey: ['articles', sortFilter, selectedCategory, debouncedSearchInput],
     queryFn: () =>
       getArticles({
         sorted: sortFilter,
         category: selectedCategory === '전체' ? undefined : selectedCategory,
-        keyword: searchInput,
+        keyword: debouncedSearchInput,
       }),
   });
-  const { data: categoryCounts, refetch: refetchStatisticsCategories } =
-    useQuery({
-      queryKey: ['articlesStatisticsCategories'],
-      queryFn: () =>
-        getStatisticsCategories({
-          keyword: searchInput,
-        }),
-    });
-
-  const debouncedSearch = useDebounce(() => {
-    refetchArticles();
-    refetchStatisticsCategories();
-  }, 500);
+  const { data: categoryCounts } = useQuery({
+    queryKey: ['articlesStatisticsCategories', debouncedSearchInput],
+    queryFn: () =>
+      getStatisticsCategories({
+        keyword: debouncedSearchInput,
+      }),
+  });
 
   if (!articles || !categoryCounts) return null;
 
@@ -85,7 +81,6 @@ function Storage() {
           value={searchInput}
           onChange={(e) => {
             setSearchInput(e.target.value);
-            debouncedSearch();
           }}
         />
         <SummaryBar>

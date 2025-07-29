@@ -156,4 +156,20 @@ class ReadingServiceTest {
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
+
+    @Test
+    void 읽기_정보를_초기화한다() {
+        // given
+        Member savedMember = memberRepository.save(TestFixture.normalMemberFixture());
+        Long id = savedMember.getId();
+        // when
+        readingService.initializeReadingInformation(id);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(continueReadingRepository.findByMemberId(id)).isPresent();
+            softly.assertThat(todayReadingRepository.findByMemberId(id)).isPresent();
+            softly.assertThat(weeklyReadingRepository.findByMemberId(id)).isPresent();
+        });
+    }
 }

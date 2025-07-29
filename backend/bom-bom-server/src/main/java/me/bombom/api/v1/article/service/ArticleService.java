@@ -37,14 +37,14 @@ public class ArticleService {
     public Page<ArticleResponse> getArticles(
             Member member,
             LocalDate date,
-            String categoryName,
+            String category,
             String keyword,
             Pageable pageable
     ) {
-        Long categoryId = findCategoryIdByName(categoryName);
+        validateCategoryNameInput(category);
         return articleRepository.findByMemberId(
                 member.getId(),
-                GetArticlesOptions.of(date, categoryId, keyword),
+                GetArticlesOptions.of(date, category, keyword),
                 pageable);
     }
 
@@ -80,13 +80,10 @@ public class ArticleService {
         return GetArticleCategoryStatisticsResponse.of(totalCount, countResponse);
     }
 
-    private Long findCategoryIdByName(String categoryName) {
-        if (categoryName == null) {
-            return null;
+    private void validateCategoryNameInput(String categoryName) {
+        if (categoryName != null && !categoryRepository.existsByName(categoryName)) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND);
         }
-        Category category = categoryRepository.findByName(categoryName)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        return category.getId();
     }
 
     private void validateArticleOwner(Article article, Long memberId) {

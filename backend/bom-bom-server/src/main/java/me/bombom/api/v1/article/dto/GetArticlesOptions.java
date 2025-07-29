@@ -4,11 +4,11 @@ import java.time.LocalDate;
 
 public record GetArticlesOptions(
         LocalDate date,
-        Long categoryId,
+        String category,
         String keyword
 ) {
 
-    public static GetArticlesOptions of(LocalDate date, Long categoryId, String keyword) {
-        return new GetArticlesOptions(date, categoryId, keyword);
+    public static GetArticlesOptions of(LocalDate date, String category, String keyword) {
+        return new GetArticlesOptions(date, category, keyword);
     }
 }

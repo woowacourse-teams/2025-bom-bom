@@ -63,7 +63,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .where(createMemberWhereClause(memberId))
                 .where(createDateWhereClause(options.date()))
                 .where(createKeywordWhereClause(options.keyword()))
-                .where(createCategoryWhereClause(options.categoryId()))
+                .where(createCategoryNameWhereClause(options.category()))
                 .orderBy(orderSpecifiers.stream().toArray(OrderSpecifier[]::new))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -91,13 +91,17 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .join(category).on(newsletter.categoryId.eq(category.id))
                 .where(createMemberWhereClause(memberId))
                 .where(StringUtils.hasText(keyword) ? article.title.like("%" + keyword.trim() + "%") : null)
-                .where(createCategoryWhereClause(categoryId))
+                .where(createCategoryIdWhereClause(categoryId))
                 .fetchOne()
                 .intValue();
     }
 
-    private Predicate createCategoryWhereClause(Long categoryId) {
-        return categoryId != null ? newsletter.categoryId.eq(categoryId) : null;
+    private Predicate createCategoryNameWhereClause(String categoryName) {
+        return categoryName != null ? category.name.eq(categoryName) : null;
+    }
+
+    private Predicate createCategoryIdWhereClause(Long categoryId) {
+        return categoryId != null ? category.id.eq(categoryId) : null;
     }
 
     private BooleanExpression createMemberWhereClause(Long memberId) {

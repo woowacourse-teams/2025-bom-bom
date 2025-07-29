@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class MemberService {
 
+    private static final long MEMBER_ROLE_ID = 1L;
+
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -31,7 +33,7 @@ public class MemberService {
                 .profileImageUrl(pendingMember.getProfileUrl())
                 .nickname(signupRequest.nickname())
                 .gender(signupRequest.gender())
-                .roleId(1L)
+                .roleId(MEMBER_ROLE_ID)
                 .build();
         Member savedMember = memberRepository.save(newMember);
         applicationEventPublisher.publishEvent(new MemberSignupEvent(savedMember.getId()));

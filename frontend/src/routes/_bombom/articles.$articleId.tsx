@@ -9,6 +9,7 @@ import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
 import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
+import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { useHighlightManager } from '@/pages/detail/hooks/useHighlightManager';
 import { saveSelection } from '@/pages/detail/utils/highlight';
@@ -29,7 +30,7 @@ function getXPathForElement(node: Node, root: Node = document): string {
   const index =
     Array.from(node.parentNode!.childNodes)
       .filter((n) => n.nodeName === node.nodeName)
-      .indexOf(node) + 1;
+      .indexOf(node as ChildNode) + 1;
   return (
     getXPathForElement(node.parentNode!, root) +
     '/' +
@@ -61,21 +62,17 @@ interface HighlightData {
   color: string;
 }
 
-function saveSelection(): HighlightData | null {
-  const selection = window.getSelection();
-  console.log('selection', selection);
-  if (!selection || selection.isCollapsed) return null;
-
+function saveSelection(selection: Selection): HighlightData {
   const range = selection.getRangeAt(0);
   const startXPath = getXPathForElement(range.startContainer);
   const endXPath = getXPathForElement(range.endContainer);
 
   return {
+    color: '#FFEB3B',
     startXPath,
     startOffset: range.startOffset,
     endXPath,
     endOffset: range.endOffset,
-    color: '#FFEB3B',
   };
 }
 
@@ -162,10 +159,7 @@ function ArticleDetailPage() {
         </MetaInfoRow>
       </HeaderWrapper>
       <Divider />
-      <button onClick={applyHighlights}>Apply Highlights</button>
       <ContentWrapper
-        ref={containerRef}
-        onMouseUp={handleMouseUp}
         dangerouslySetInnerHTML={{ __html: currentArticle.contents ?? '' }}
       />
       <Spacing size={24} />

@@ -17,6 +17,7 @@ import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -33,7 +34,7 @@ public class ReadingService {
     private final TodayReadingRepository todayReadingRepository;
     private final WeeklyReadingRepository weeklyReadingRepository;
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void initializeReadingInformation(Long memberId) {
         log.info("읽기 정보 초기화 시작 - memberId: {}", memberId);
         

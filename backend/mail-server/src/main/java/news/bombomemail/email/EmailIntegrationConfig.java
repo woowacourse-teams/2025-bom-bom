@@ -1,0 +1,58 @@
+package news.bombomemail.email;
+
+import jakarta.annotation.PostConstruct;
+import java.io.File;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.integration.config.EnableIntegration;
+import org.springframework.integration.core.MessageSource;
+import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.integration.dsl.Pollers;
+import org.springframework.integration.file.FileReadingMessageSource;
+import org.springframework.integration.file.filters.AcceptOnceFileListFilter;
+import org.springframework.integration.file.filters.CompositeFileListFilter;
+import org.springframework.integration.file.filters.SimplePatternFileListFilter;
+
+@Slf4j
+@Profile("!test")
+@Configuration
+@EnableIntegration
+public class EmailIntegrationConfig {
+
+    @Value("${integration.file.maildir}")
+    private String mailDir;
+
+    @PostConstruct
+    public void logMailDir() {
+        log.info("▶▶▶ integration.file.maildir = {}", mailDir);
+        File dir = new File(mailDir);
+        log.info("▶▶▶ 실제 디렉토리: {} (exists: {}, writable: {})",
+                dir.getAbsolutePath(), dir.exists(), dir.canWrite());
+    }
+
+    @Bean
+    public MessageSource<File> mailFileSource() {
+        FileReadingMessageSource source = new FileReadingMessageSource();
+        source.setDirectory(new File(mailDir));
+        source.setAutoCreateDirectory(true);
+
+        CompositeFileListFilter<File> filter = new CompositeFileListFilter<>();
+        filter.addFilter(new SimplePatternFileListFilter("*"));
+        filter.addFilter(new AcceptOnceFileListFilter<>());
+        source.setFilter(filter);
+
+        return source;
+    }
+
+    @Bean
+    public IntegrationFlow mailFileFlow() {
+        return IntegrationFlow
+                .from(mailFileSource(),
+                        c -> c.poller(Pollers.fixedDelay(5000).getObject()))
+                .handle("emailService", "processEmailFile")
+                .get();
+    }
+}

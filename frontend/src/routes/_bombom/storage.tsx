@@ -179,4 +179,6 @@ const ArticleList = styled.ul`
   display: flex;
   gap: 16px;
   flex-direction: column;
+
+  width: 100%;
 `;

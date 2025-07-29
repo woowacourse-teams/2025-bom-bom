@@ -1,6 +1,7 @@
 package me.bombom.api.v1.reading.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -18,6 +19,7 @@ import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -33,25 +35,59 @@ public class ReadingService {
 
     @Transactional
     public void initializeReadingInformation(Long memberId) {
-        ContinueReading newContinueReading = ContinueReading.builder()
-                .memberId(memberId)
-                .dayCount(INITIAL_COUNT)
-                .build();
-        continueReadingRepository.save(newContinueReading);
+        log.info("읽기 정보 초기화 시작 - memberId: {}", memberId);
+        
+        if (memberId == null) {
+            log.error("memberId가 null입니다!");
+            throw new IllegalArgumentException("memberId cannot be null");
+        }
+        
+        try {
+            log.info("ContinueReading 생성 시작 - memberId: {}", memberId);
+            ContinueReading newContinueReading = ContinueReading.builder()
+                    .memberId(memberId)
+                    .dayCount(INITIAL_COUNT)
+                    .build();
+            log.info("ContinueReading 객체 생성 완료: {}", newContinueReading);
+            
+            ContinueReading savedContinueReading = continueReadingRepository.save(newContinueReading);
+            log.info("ContinueReading 저장 완료 - id: {}, memberId: {}", 
+                    savedContinueReading.getId(), savedContinueReading.getMemberId());
 
-        TodayReading newTodayReading = TodayReading.builder()
-                .memberId(memberId)
-                .totalCount(INITIAL_COUNT)
-                .currentCount(INITIAL_COUNT)
-                .build();
-        todayReadingRepository.save(newTodayReading);
+            log.info("TodayReading 생성 시작 - memberId: {}", memberId);
+            TodayReading newTodayReading = TodayReading.builder()
+                    .memberId(memberId)
+                    .totalCount(INITIAL_COUNT)
+                    .currentCount(INITIAL_COUNT)
+                    .build();
+            log.info("TodayReading 객체 생성 완료: {}", newTodayReading);
+            
+            TodayReading savedTodayReading = todayReadingRepository.save(newTodayReading);
+            log.info("TodayReading 저장 완료 - id: {}, memberId: {}", 
+                    savedTodayReading.getId(), savedTodayReading.getMemberId());
 
-        WeeklyReading newWeeklyReading = WeeklyReading.builder()
-                .memberId(memberId)
-                .goalCount(INITIAL_WEEKLY_GOAL_COUNT)
-                .currentCount(INITIAL_COUNT)
-                .build();
-        weeklyReadingRepository.save(newWeeklyReading);
+            log.info("WeeklyReading 생성 시작 - memberId: {}", memberId);
+            WeeklyReading newWeeklyReading = WeeklyReading.builder()
+                    .memberId(memberId)
+                    .goalCount(INITIAL_WEEKLY_GOAL_COUNT)
+                    .currentCount(INITIAL_COUNT)
+                    .build();
+            log.info("WeeklyReading 객체 생성 완료: {}", newWeeklyReading);
+            
+            WeeklyReading savedWeeklyReading = weeklyReadingRepository.save(newWeeklyReading);
+            log.info("WeeklyReading 저장 완료 - id: {}, memberId: {}", 
+                    savedWeeklyReading.getId(), savedWeeklyReading.getMemberId());
+            
+            log.info("모든 읽기 정보 초기화 완료 - memberId: {}", memberId);
+            
+        } catch (Exception e) {
+            log.error("읽기 정보 초기화 중 예외 발생!");
+            log.error("memberId: {}", memberId);
+            log.error("에러 메시지: {}", e.getMessage());
+            log.error("에러 타입: {}", e.getClass().getSimpleName());
+            log.error("스택 트레이스:", e);
+            throw e;
+        }
     }
 
     @Transactional

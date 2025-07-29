@@ -10,8 +10,8 @@ import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
 import me.bombom.api.v1.article.dto.GetArticleCategoryStatisticsResponse;
-import me.bombom.api.v1.article.enums.SortOption;
 import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
@@ -34,9 +34,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 @DataJpaTest
-@Import({ArticleService.class, ReadingService.class})
+@Import({ArticleService.class, ReadingService.class, QuerydslConfig.class})
 class ArticleServiceTest {
 
     private static final LocalDateTime BASE_TIME = LocalDateTime.of(2025, 7, 15, 10, 0);
@@ -89,7 +91,6 @@ class ArticleServiceTest {
                 member,
                 null,
                 null,
-                SortOption.DESC,
                 null,
                 pageable
         );
@@ -107,14 +108,13 @@ class ArticleServiceTest {
     @Test
     void 아티클_목록_조회_ASC_정렬_테스트() {
         // given
-        Pageable pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Direction.ASC, "arrivedDateTime"));
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
                 null,
                 null,
-                SortOption.ASC,
                 null,
                 pageable
         );
@@ -141,7 +141,6 @@ class ArticleServiceTest {
                 member,
                 null,
                 categoryName,
-                SortOption.DESC,
                 null,
                 pageable
         );
@@ -166,7 +165,6 @@ class ArticleServiceTest {
                 member,
                 BASE_TIME.toLocalDate(),
                 null,
-                SortOption.DESC,
                 null,
                 pageable
         );
@@ -188,7 +186,6 @@ class ArticleServiceTest {
                 member,
                 BASE_TIME.toLocalDate(),
                 null,
-                SortOption.DESC,
                 "뉴스",
                 pageable
         );
@@ -211,8 +208,7 @@ class ArticleServiceTest {
         assertThatThrownBy(() -> articleService.getArticles(
                 member,
                 null,
-                "Invaild Category Name",
-                SortOption.DESC,
+                "Invalid Category Name",
                 null,
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
@@ -229,7 +225,6 @@ class ArticleServiceTest {
                 member,
                 null,
                 null,
-                SortOption.DESC,
                 null,
                 firstPage
         );
@@ -258,7 +253,6 @@ class ArticleServiceTest {
                 member,
                 null,
                 null,
-                SortOption.DESC,
                 null,
                 secondPage
         );
@@ -287,7 +281,6 @@ class ArticleServiceTest {
                 member,
                 null,
                 null,
-                SortOption.DESC,
                 null,
                 pageable
         );
@@ -305,14 +298,13 @@ class ArticleServiceTest {
     @Test
     void 아티클_목록_조회_페이징_ASC_정렬_테스트() {
         // given
-        Pageable pageable = PageRequest.of(0, 2);
+        Pageable pageable = PageRequest.of(0, 2, Sort.by(Direction.ASC, "arrivedDateTime"));
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
                 null,
                 null,
-                SortOption.ASC,
                 null,
                 pageable
         );

@@ -10,12 +10,10 @@ import me.bombom.api.v1.article.dto.ArticleResponse;
 import me.bombom.api.v1.article.dto.GetArticleCategoryStatisticsResponse;
 import me.bombom.api.v1.article.dto.GetArticleCountPerCategoryResponse;
 import me.bombom.api.v1.article.dto.GetArticlesOptions;
-import me.bombom.api.v1.article.enums.SortOption;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
@@ -33,7 +31,6 @@ public class ArticleService {
 
     private final ArticleRepository articleRepository;
     private final CategoryRepository categoryRepository;
-    private final MemberRepository memberRepository;
     private final NewsletterRepository newsletterRepository;
     private final ReadingService readingService;
 
@@ -41,14 +38,13 @@ public class ArticleService {
             Member member,
             LocalDate date,
             String categoryName,
-            SortOption sorted,
             String keyword,
             Pageable pageable
     ) {
         Long categoryId = findCategoryIdByName(categoryName);
         return articleRepository.findByMemberId(
                 member.getId(),
-                GetArticlesOptions.of(date, categoryId, sorted, keyword),
+                GetArticlesOptions.of(date, categoryId, keyword),
                 pageable);
     }
 
@@ -98,5 +94,4 @@ public class ArticleService {
             throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
         }
     }
-
 }

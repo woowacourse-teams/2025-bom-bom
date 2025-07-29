@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
 import me.bombom.api.v1.article.dto.GetArticleCategoryStatisticsResponse;
-import me.bombom.api.v1.article.enums.SortOption;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
@@ -36,7 +35,6 @@ public class ArticleController {
             @LoginMember Member member,
             @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate date,
             @RequestParam(required = false) String category,
-            @RequestParam(required = false, name = "sorted", defaultValue = "desc") String sorted,
             @RequestParam(required = false) String keyword,
             @PageableDefault Pageable pageable
     ) {
@@ -44,7 +42,6 @@ public class ArticleController {
                 member,
                 date,
                 category,
-                SortOption.from(sorted),
                 keyword,
                 pageable
         );

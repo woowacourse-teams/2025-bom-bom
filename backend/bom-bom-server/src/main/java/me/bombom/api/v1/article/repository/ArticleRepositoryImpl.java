@@ -1,14 +1,25 @@
 package me.bombom.api.v1.article.repository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
+import static me.bombom.api.v1.article.domain.QArticle.article;
+import static me.bombom.api.v1.newsletter.domain.QCategory.category;
+import static me.bombom.api.v1.newsletter.domain.QNewsletter.newsletter;
+
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.dto.ArticleResponse;
 import me.bombom.api.v1.article.dto.GetArticlesOptions;
-import me.bombom.api.v1.article.enums.SortOption;
+import me.bombom.api.v1.article.dto.QArticleResponse;
+import me.bombom.api.v1.newsletter.dto.QNewsletterSummaryResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +28,7 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class ArticleRepositoryImpl implements CustomArticleRepository{
 
-    private final EntityManager entityManager;
+    private final JPAQueryFactory jpaQueryFactory;
 
     @Override
     public Page<ArticleResponse> findByMemberId(
@@ -25,176 +36,94 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             GetArticlesOptions options,
             Pageable pageable
     ) {
-        Long total = getTotalCount(memberId, options);
-        List<ArticleResponse> content = getArticleContents(memberId, options, pageable);
+        Long total = jpaQueryFactory.select(article.count())
+                .from(article)
+                .join(newsletter).on(article.newsletterId.eq(newsletter.id))
+                .join(category).on(newsletter.categoryId.eq(category.id))
+                .where(createMemberWhereClause(memberId))
+                .where(createDateWhereClause(options.date()))
+                .where(createKeywordWhereClause(options.keyword()))
+                .fetchOne();
+
+        List<OrderSpecifier<?>> orderSpecifiers = getOrderSpecifiers(pageable);
+
+        List<ArticleResponse> content = jpaQueryFactory.select(new QArticleResponse(
+                        article.id,
+                        article.title,
+                        article.contentsSummary,
+                        article.arrivedDateTime,
+                        article.thumbnailUrl,
+                        article.expectedReadTime,
+                        article.isRead,
+                        new QNewsletterSummaryResponse(newsletter.name, newsletter.imageUrl, category.name)
+                ))
+                .from(article)
+                .join(newsletter).on(article.newsletterId.eq(newsletter.id))
+                .join(category).on(newsletter.categoryId.eq(category.id))
+                .where(createMemberWhereClause(memberId))
+                .where(createDateWhereClause(options.date()))
+                .where(createKeywordWhereClause(options.keyword()))
+                .where(createCategoryWhereClause(options.categoryId()))
+                .orderBy(orderSpecifiers.stream().toArray(OrderSpecifier[]::new))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+
         return new PageImpl<>(content, pageable, total);
     }
 
     @Override
     public int countAllByMemberId(Long memberId, String keyword) {
-        StringBuilder jpql = new StringBuilder("""
-                SELECT COUNT(a)
-                FROM Article a
-                WHERE a.memberId = :memberId
-        """);
-        addKeywordFilter(jpql, keyword);
-
-        TypedQuery<Long> countQuery = entityManager.createQuery(jpql.toString(), Long.class);
-        addMemberIdParameter(countQuery, memberId);
-        addKeywordParameter(countQuery, keyword);
-        return countQuery.getSingleResult().intValue();
+        return jpaQueryFactory.select(article.count())
+                .from(article)
+                .where(createMemberWhereClause(memberId))
+                .where(StringUtils.hasText(keyword) ? article.title.like("%" + keyword + "%") : null)
+                .fetchOne()
+                .intValue();
     }
 
     @Override
     public int countAllByCategoryIdAndMemberId(Long memberId, Long categoryId, String keyword) {
-        StringBuilder jpql = new StringBuilder("""
-                SELECT COUNT(a)
-                FROM Article a
-                JOIN Newsletter n ON n.id = a.newsletterId
-                JOIN Category c ON c.id = n.categoryId 
-                WHERE a.memberId = :memberId
-        """);
-        addKeywordFilter(jpql, keyword);
-        addCategoryFilter(jpql, categoryId);
-
-        TypedQuery<Long> countQuery = entityManager.createQuery(jpql.toString(), Long.class);
-        addMemberIdParameter(countQuery, memberId);
-        addKeywordParameter(countQuery, keyword);
-        addCategoryIdParameter(countQuery, categoryId);
-        return countQuery.getSingleResult().intValue();
+        return jpaQueryFactory.select(article.count())
+                .from(article)
+                .join(newsletter).on(article.newsletterId.eq(newsletter.id))
+                .join(category).on(newsletter.categoryId.eq(category.id))
+                .where(createMemberWhereClause(memberId))
+                .where(StringUtils.hasText(keyword) ? article.title.like("%" + keyword.trim() + "%") : null)
+                .where(createCategoryWhereClause(categoryId))
+                .fetchOne()
+                .intValue();
     }
 
-    private Long getTotalCount(Long memberId, GetArticlesOptions options) {
-        StringBuilder jpql = new StringBuilder("""
-                SELECT COUNT(a)
-                FROM Article a
-                JOIN Newsletter n ON n.id = a.newsletterId
-                JOIN Category c ON c.id = n.categoryId
-                WHERE a.memberId = :memberId
-        """);
-        appendDynamicWhereClause(
-                jpql,
-                options.date(),
-                options.categoryId(),
-                options.keyword()
-        );
-
-        TypedQuery<Long> countQuery = entityManager.createQuery(jpql.toString(), Long.class);
-        setQueryParameters(
-                countQuery,
-                memberId,
-                options.date(),
-                options.categoryId(),
-                options.keyword()
-        );
-        return countQuery.getSingleResult();
+    private Predicate createCategoryWhereClause(Long categoryId) {
+        return categoryId != null ? newsletter.categoryId.eq(categoryId) : null;
     }
 
-    private List<ArticleResponse> getArticleContents(
-            Long memberId,
-            GetArticlesOptions options,
-            Pageable pageable
-    ) {
-        StringBuilder jpql = new StringBuilder("""
-                SELECT new me.bombom.api.v1.article.dto.ArticleResponse(
-                        a.id, a.title, a.contentsSummary, a.arrivedDateTime, a.thumbnailUrl, a.expectedReadTime, a.isRead,
-                        new me.bombom.api.v1.newsletter.dto.NewsletterSummaryResponse(n.name, n.imageUrl, c.name))
-                FROM Article a
-                JOIN Newsletter n ON n.id = a.newsletterId
-                JOIN Category c ON c.id = n.categoryId
-                WHERE a.memberId = :memberId
-        """);
-        appendDynamicWhereClause(
-                jpql,
-                options.date(),
-                options.categoryId(),
-                options.keyword()
-        );
-        appendOrderByClause(options.sorted(), jpql);
-
-        TypedQuery<ArticleResponse> query = entityManager.createQuery(jpql.toString(), ArticleResponse.class);
-        setQueryParameters(
-                query,
-                memberId,
-                options.date(),
-                options.categoryId(),
-                options.keyword()
-        );
-
-        if (pageable.isPaged()) {
-            query.setFirstResult((int) pageable.getOffset());
-            query.setMaxResults(pageable.getPageSize());
-        }
-
-        return query.getResultList();
+    private BooleanExpression createMemberWhereClause(Long memberId) {
+        return article.memberId.eq(memberId);
     }
 
-    private void appendDynamicWhereClause(
-            StringBuilder jpql,
-            LocalDate date,
-            Long categoryId,
-            String keyword
-    ) {
-        addDateFilter(jpql, date);
-        addCategoryFilter(jpql, categoryId);
-        addKeywordFilter(jpql, keyword);
+    private Predicate createDateWhereClause(LocalDate date) {
+        return date != null ? article.arrivedDateTime.between(
+                date.atTime(LocalTime.MIN),
+                date.atTime(LocalTime.MAX))
+                : null;
     }
 
-    private void addDateFilter(StringBuilder jpql, LocalDate date) {
-        if (date != null) {
-            jpql.append(" AND a.arrivedDateTime BETWEEN :dateAtMinTime AND :dateAtMaxTime");
-        }
+    private Predicate createKeywordWhereClause(String keyword) {
+        return StringUtils.hasText(keyword) ? article.title.like("%" + keyword + "%") : null;
     }
 
-    private void addCategoryFilter(StringBuilder jpql, Long categoryId) {
-        if (categoryId != null) {
-            jpql.append(" AND n.categoryId = :categoryId");
-        }
-    }
-
-    private void addKeywordFilter(StringBuilder jpql, String keyword) {
-        if (StringUtils.hasText(keyword)) {
-            jpql.append(" AND a.title LIKE :keyword");
-        }
-    }
-
-    private void appendOrderByClause(SortOption sortOption, StringBuilder jpql) {
-        jpql.append(" ORDER BY a.arrivedDateTime ").append(sortOption.name());
-    }
-
-    private void setQueryParameters(
-            TypedQuery<?> query,
-            Long memberId,
-            LocalDate date,
-            Long categoryId,
-            String keyword
-    ) {
-        addMemberIdParameter(query, memberId);
-        addDateParameter(query, date);
-        addCategoryIdParameter(query, categoryId);
-        addKeywordParameter(query, keyword);
-    }
-
-    private void addMemberIdParameter(TypedQuery<?> query, Long memberId) {
-        query.setParameter("memberId", memberId);
-    }
-
-    private void addDateParameter(TypedQuery<?> query, LocalDate date) {
-        if (date != null) {
-            query.setParameter("dateAtMinTime", date.atTime(LocalTime.MIN));
-            query.setParameter("dateAtMaxTime", date.atTime(LocalTime.MAX));
-        }
-    }
-
-    private void addCategoryIdParameter(TypedQuery<?> query, Long categoryId) {
-        if (categoryId != null) {
-            query.setParameter("categoryId", categoryId);
-        }
-    }
-
-    private void addKeywordParameter(TypedQuery<?> query, String keyword) {
-        if (StringUtils.hasText(keyword)) {
-            query.setParameter("keyword", "%" + keyword.trim() + "%");
-        }
+    private List<OrderSpecifier<?>> getOrderSpecifiers(Pageable pageable) {
+        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
+        pageable.getSort().stream().forEach(sort -> {
+            Order order = sort.isAscending() ? Order.ASC : Order.DESC;
+            String property = sort.getProperty();
+            Path<Object> target = Expressions.path(Object.class, article, property);
+            OrderSpecifier<?> orderSpecifier = new OrderSpecifier(order, target);
+            orderSpecifiers.add(orderSpecifier);
+        });
+        return orderSpecifiers;
     }
 }

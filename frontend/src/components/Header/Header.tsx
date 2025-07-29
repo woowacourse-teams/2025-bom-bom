@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
-import Chip from '../Chip/Chip';
+import Button from '../Button/Button';
 import CompassIcon from '../icons/CompassIcon';
 import HomeIcon from '../icons/HomeIcon';
 import StorageIcon from '../icons/StorageIcon';
@@ -65,10 +65,9 @@ export default function Header({ activeNav }: HeaderProps) {
 
         <ProfileWrapper>
           {isFetching || isError ? (
-            <Chip
+            <Button
               text="로그인"
-              selected={false}
-              onSelect={() => {
+              onClick={() => {
                 navagate({ to: '/login' });
               }}
             />

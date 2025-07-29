@@ -10,9 +10,9 @@ interface ButtonProps extends ComponentProps<'button'> {
   variant?: VariantType;
 }
 
-function Button({ text, onClick, variant = 'default' }: ButtonProps) {
+function Button({ text, onClick, variant = 'default', ...props }: ButtonProps) {
   return (
-    <Container type="button" onClick={onClick} variant={variant}>
+    <Container type="button" onClick={onClick} variant={variant} {...props}>
       {text}
     </Container>
   );

@@ -1,12 +1,13 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useRouterState } from '@tanstack/react-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import clockIcon from '../../../public/assets/clock.svg';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
 import { useThrottle } from '@/hooks/useThrottle';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
+import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { formatDate } from '@/utils/date';
 import { getScrollPercent } from '@/utils/scroll';
@@ -25,7 +26,7 @@ function getXPathForElement(node: Node, root: Node = document): string {
   const index =
     Array.from(node.parentNode!.childNodes)
       .filter((n) => n.nodeName === node.nodeName)
-      .indexOf(node) + 1;
+      .indexOf(node as ChildNode) + 1;
   return (
     getXPathForElement(node.parentNode!, root) +
     '/' +
@@ -57,21 +58,17 @@ interface HighlightData {
   color: string;
 }
 
-function saveSelection(): HighlightData | null {
-  const selection = window.getSelection();
-  console.log('selection', selection);
-  if (!selection || selection.isCollapsed) return null;
-
+function saveSelection(selection: Selection): HighlightData {
   const range = selection.getRangeAt(0);
   const startXPath = getXPathForElement(range.startContainer);
   const endXPath = getXPathForElement(range.endContainer);
 
   return {
+    color: '#FFEB3B',
     startXPath,
     startOffset: range.startOffset,
     endXPath,
     endOffset: range.endOffset,
-    color: '#FFEB3B',
   };
 }
 
@@ -100,7 +97,7 @@ function ArticleDetailPage() {
   const loadedAt = useRouterState({
     select: (state) => state.loadedAt,
   });
-  const containerRef = useRef<HTMLDivElement>(null);
+  // const containerRef = useRef<HTMLDivElement>(null);
   const [highlights, setHighlights] = useState<HighlightData[]>([]);
   const queryClient = useQueryClient();
 
@@ -134,24 +131,14 @@ function ArticleDetailPage() {
     }
   }, 500);
 
-  const handleMouseUp = () => {
-    const selectionData = saveSelection();
-    if (selectionData) {
-      setHighlights((prev) => [...prev, selectionData]);
-    }
-    window.getSelection()?.removeAllRanges();
-  };
-
-  console.log(highlights);
-
-  const applyHighlights = () => {
-    highlights.forEach((h) => restoreHighlight(h));
-  };
-
   useEffect(() => {
     window.addEventListener('scroll', throttledHandleScroll);
     return () => window.removeEventListener('scroll', throttledHandleScroll);
   }, [throttledHandleScroll]);
+
+  useEffect(() => {
+    highlights.forEach((h) => restoreHighlight(h));
+  }, [highlights]);
 
   if (!currentArticle || !otherArticles) return null;
 
@@ -176,10 +163,7 @@ function ArticleDetailPage() {
         </MetaInfoRow>
       </HeaderWrapper>
       <Divider />
-      <button onClick={applyHighlights}>Apply Highlights</button>
       <ContentWrapper
-        ref={containerRef}
-        onMouseUp={handleMouseUp}
         dangerouslySetInnerHTML={{ __html: currentArticle.contents ?? '' }}
       />
       <Divider />
@@ -199,6 +183,12 @@ function ArticleDetailPage() {
           <EmptyUnreadCard />
         )}
       </TodayArticlesWrapper>
+      <FloatingToolbar
+        onSave={(selection) => {
+          const highLightData = saveSelection(selection);
+          setHighlights((prev) => [...prev, highLightData]);
+        }}
+      />
     </Container>
   );
 }

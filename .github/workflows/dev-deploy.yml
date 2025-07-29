@@ -3,7 +3,7 @@ name: Backend Dev Server CI
 on:
   push:
     branches:
-      - server-dev
+      - fix-BOM-186/fix-init-reading-info-event
 
 jobs:
   build:

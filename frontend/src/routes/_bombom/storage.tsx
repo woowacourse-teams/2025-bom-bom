@@ -32,13 +32,18 @@ function Storage() {
         keyword: searchInput,
       }),
   });
-  const { data: categoryCounts } = useQuery({
-    queryKey: ['/articles/statistics/categories'],
-    queryFn: () => getStatisticsCategories(),
-  });
+  const { data: categoryCounts, refetch: refetchStatisticsCategories } =
+    useQuery({
+      queryKey: ['articlesStatisticsCategories'],
+      queryFn: () =>
+        getStatisticsCategories({
+          keyword: searchInput,
+        }),
+    });
 
   const debouncedSearch = useDebounce(() => {
     refetchArticles();
+    refetchStatisticsCategories();
   }, 500);
 
   if (!articles || !categoryCounts) return null;

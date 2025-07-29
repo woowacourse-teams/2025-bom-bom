@@ -56,8 +56,15 @@ export const patchArticleRead = async ({
   });
 };
 
-export const getStatisticsCategories = async () => {
+interface GetStatisticsCategoriesParams {
+  keyword?: string;
+}
+
+export const getStatisticsCategories = async ({
+  keyword,
+}: GetStatisticsCategoriesParams) => {
   return await fetcher.get<CategoriesCountType>({
     path: '/articles/statistics/categories',
+    query: { keyword },
   });
 };

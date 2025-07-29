@@ -34,7 +34,7 @@ public class MemberService {
                 .roleId(1L)
                 .build();
         Member savedMember = memberRepository.save(newMember);
-        applicationEventPublisher.publishEvent(new MemberSignupEvent(this, savedMember.getId()));
+        applicationEventPublisher.publishEvent(new MemberSignupEvent(savedMember.getId()));
         return savedMember;
     }
 

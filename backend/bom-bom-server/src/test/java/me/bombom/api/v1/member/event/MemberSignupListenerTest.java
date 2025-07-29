@@ -34,7 +34,7 @@ class MemberSignupListenerTest {
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
 
         // when
-        publisher.publishEvent(new MemberSignupEvent(this, member.getId()));
+        publisher.publishEvent(new MemberSignupEvent(member.getId()));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 

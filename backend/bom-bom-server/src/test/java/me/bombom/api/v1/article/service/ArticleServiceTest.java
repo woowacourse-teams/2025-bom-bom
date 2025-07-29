@@ -10,6 +10,7 @@ import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
 import me.bombom.api.v1.article.dto.GetArticleCategoryStatisticsResponse;
+import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -89,9 +90,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                null,
-                null,
-                null,
+                GetArticlesOptions.of(null, null, null),
                 pageable
         );
 
@@ -113,9 +112,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                null,
-                null,
-                null,
+                GetArticlesOptions.of(null, null, null),
                 pageable
         );
 
@@ -139,9 +136,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                null,
-                categoryName,
-                null,
+                GetArticlesOptions.of(null, categoryName, null),
                 pageable
         );
 
@@ -163,9 +158,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                BASE_TIME.toLocalDate(),
-                null,
-                null,
+                GetArticlesOptions.of(BASE_TIME.toLocalDate(), null, null),
                 pageable
         );
 
@@ -184,9 +177,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                BASE_TIME.toLocalDate(),
-                null,
-                "뉴스",
+                GetArticlesOptions.of(BASE_TIME.toLocalDate(), null, "뉴스"),
                 pageable
         );
 
@@ -207,9 +198,7 @@ class ArticleServiceTest {
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 member,
-                null,
-                "Invalid Category Name",
-                null,
+                GetArticlesOptions.of(null, "Invalid Category Name", null),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
@@ -223,9 +212,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                null,
-                null,
-                null,
+                GetArticlesOptions.of(null, null, null),
                 firstPage
         );
 
@@ -251,9 +238,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                null,
-                null,
-                null,
+                GetArticlesOptions.of(null, null, null),
                 secondPage
         );
 
@@ -279,9 +264,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                null,
-                null,
-                null,
+                GetArticlesOptions.of(null, null, null),
                 pageable
         );
 
@@ -303,9 +286,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                null,
-                null,
-                null,
+                GetArticlesOptions.of(null, null, null),
                 pageable
         );
 

@@ -1,6 +1,5 @@
 package me.bombom.api.v1.article.service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -36,15 +35,13 @@ public class ArticleService {
 
     public Page<ArticleResponse> getArticles(
             Member member,
-            LocalDate date,
-            String category,
-            String keyword,
+            GetArticlesOptions getArticlesOptions,
             Pageable pageable
     ) {
-        validateCategoryNameInput(category);
+        validateCategoryNameInput(getArticlesOptions.category());
         return articleRepository.findByMemberId(
                 member.getId(),
-                GetArticlesOptions.of(date, category, keyword),
+                getArticlesOptions,
                 pageable);
     }
 

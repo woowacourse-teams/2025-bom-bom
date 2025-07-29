@@ -1,15 +1,15 @@
 import { ThemeProvider } from '@emotion/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createRootRoute, Outlet, redirect } from '@tanstack/react-router';
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { theme } from '../styles/theme';
-import { getUserInfo } from '@/apis/members';
+import { queryClient } from '@/main';
 
-const queryClient = new QueryClient();
+interface BomBomRouterContext {
+  queryClient: QueryClient;
+}
 
-let isFirstCheck = true;
-
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<BomBomRouterContext>()({
   component: () => (
     <>
       <QueryClientProvider client={queryClient}>
@@ -20,23 +20,4 @@ export const Route = createRootRoute({
       <TanStackRouterDevtools />
     </>
   ),
-  beforeLoad: async ({ location }) => {
-    if (!isFirstCheck) {
-      return;
-    }
-
-    try {
-      await queryClient.fetchQuery({
-        queryKey: ['me'],
-        queryFn: getUserInfo,
-        retry: false,
-      });
-    } catch {
-      if (location.pathname !== '/recommend') {
-        throw redirect({ to: '/recommend' });
-      }
-    } finally {
-      isFirstCheck = false;
-    }
-  },
 });

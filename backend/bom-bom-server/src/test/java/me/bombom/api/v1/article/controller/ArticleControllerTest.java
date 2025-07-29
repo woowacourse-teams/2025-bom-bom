@@ -41,7 +41,7 @@ import org.springframework.test.web.servlet.MvcResult;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class ArticleControllerE2ETest {
+class ArticleControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

@@ -1,14 +1,14 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
-import Chip from '../Chip/Chip';
+import Button from '../Button/Button';
 import CompassIcon from '../icons/CompassIcon';
 import HomeIcon from '../icons/HomeIcon';
 import StorageIcon from '../icons/StorageIcon';
 import { getUserInfo } from '@/apis/members';
 import { NavType } from '@/types/nav';
 import { copyToClipboard } from '@/utils/copy';
-import compassIcon from '#/assets/compass.svg';
+import defaultImage from '#/assets/bombom.png';
 import copyIcon from '#/assets/copy.svg';
 
 interface HeaderProps {
@@ -63,28 +63,32 @@ export default function Header({ activeNav }: HeaderProps) {
           </NavButton>
         </Nav>
 
-        <ProfileBox>
-          <ProfileImg src={compassIcon} alt="profile" />
+        <ProfileWrapper>
           {isFetching || isError ? (
-            <Chip
+            <Button
               text="로그인"
-              selected={false}
-              onSelect={() => {
+              onClick={() => {
                 navagate({ to: '/login' });
               }}
             />
           ) : (
             <ProfileInfo>
-              <ProfileName>{userInfo?.nickname ?? '김봄봄'}</ProfileName>
-              <ProfileEmail onClick={handleCopyEmail}>
-                <EmailText>
-                  {userInfo?.email ?? 'example@bombom.news'}
-                </EmailText>
-                <img src={copyIcon} alt="copy" width={16} height={16} />
-              </ProfileEmail>
+              <ProfileImg
+                src={userInfo?.profileImageUrl ?? defaultImage}
+                alt="profile"
+              />
+              <ProfileTextBox>
+                <ProfileName>{userInfo?.nickname ?? '김봄봄'}</ProfileName>
+                <ProfileEmail onClick={handleCopyEmail}>
+                  <EmailText>
+                    {userInfo?.email ?? 'example@bombom.news'}
+                  </EmailText>
+                  <img src={copyIcon} alt="copy" width={16} height={16} />
+                </ProfileEmail>
+              </ProfileTextBox>
             </ProfileInfo>
           )}
-        </ProfileBox>
+        </ProfileWrapper>
       </HeaderInner>
     </HeaderContainer>
   );
@@ -186,7 +190,7 @@ const NavButton = styled(Link)<{ active?: boolean }>`
   font: ${({ theme }) => theme.fonts.body2};
 `;
 
-const ProfileBox = styled.div`
+const ProfileWrapper = styled.div`
   display: flex;
   gap: 8px;
   align-items: center;
@@ -198,15 +202,21 @@ const ProfileBox = styled.div`
 `;
 
 const ProfileImg = styled.img`
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
+`;
+
+const ProfileTextBox = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
 const ProfileInfo = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
 
   font: ${({ theme }) => theme.fonts.caption};
 `;

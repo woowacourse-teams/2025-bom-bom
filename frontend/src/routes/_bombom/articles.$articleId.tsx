@@ -14,6 +14,86 @@ export const Route = createFileRoute('/_bombom/articles/$articleId')({
   component: ArticleDetailPage,
 });
 
+/** 특정 노드의 XPath를 구하는 함수 */
+function getXPathForElement(node: Node, root: Node = document): string {
+  // TextNode일 경우 부모 요소로 이동
+  if (node.nodeType === Node.TEXT_NODE) {
+    node = node.parentNode!;
+  }
+  if (node === root) return '.';
+  const index =
+    Array.from(node.parentNode!.childNodes)
+      .filter((n) => n.nodeName === node.nodeName)
+      .indexOf(node) + 1;
+  return (
+    getXPathForElement(node.parentNode!, root) +
+    '/' +
+    node.nodeName.toLowerCase() +
+    `[${index}]`
+  );
+}
+
+/** XPath로 노드를 다시 찾는 함수 */
+function getElementByXPath(
+  xpath: string,
+  root: Document = document,
+): Node | null {
+  const result = document.evaluate(
+    xpath,
+    root,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null,
+  );
+  return result.singleNodeValue;
+}
+
+interface HighlightData {
+  startXPath: string;
+  startOffset: number;
+  endXPath: string;
+  endOffset: number;
+  color: string;
+}
+
+function saveSelection(): HighlightData | null {
+  const selection = window.getSelection();
+  console.log('selection', selection);
+  if (!selection || selection.isCollapsed) return null;
+
+  const range = selection.getRangeAt(0);
+  const startXPath = getXPathForElement(range.startContainer);
+  const endXPath = getXPathForElement(range.endContainer);
+
+  return {
+    startXPath,
+    startOffset: range.startOffset,
+    endXPath,
+    endOffset: range.endOffset,
+    color: '#FFEB3B',
+  };
+}
+
+function restoreHighlight(data: HighlightData) {
+  const startElement = getElementByXPath(data.startXPath);
+  const endElement = getElementByXPath(data.endXPath);
+  if (!startElement || !endElement) return;
+
+  const range = document.createRange();
+
+  const startTextNode = startElement.firstChild!;
+  const endTextNode = endElement.firstChild!;
+  range.setStart(startTextNode, data.startOffset);
+  range.setEnd(endTextNode, data.endOffset);
+
+  // === surroundContents 대신 safe replace ===
+  const contents = range.extractContents(); // 선택된 내용을 DOM에서 잘라냄
+  const mark = document.createElement('mark');
+  mark.style.backgroundColor = data.color;
+  mark.appendChild(contents); // 선택 영역을 mark 안에 넣음
+  range.insertNode(mark);
+}
+
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
   const queryClient = useQueryClient();
@@ -69,7 +149,10 @@ function ArticleDetailPage() {
         </MetaInfoRow>
       </HeaderWrapper>
       <Divider />
+      <button onClick={applyHighlights}>Apply Highlights</button>
       <ContentWrapper
+        ref={containerRef}
+        onMouseUp={handleMouseUp}
         dangerouslySetInnerHTML={{ __html: currentArticle.contents ?? '' }}
       />
       <Spacing size={24} />

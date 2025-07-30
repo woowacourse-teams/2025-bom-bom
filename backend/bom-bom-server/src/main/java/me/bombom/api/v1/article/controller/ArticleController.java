@@ -35,7 +35,7 @@ public class ArticleController {
             @LoginMember Member member,
             @ModelAttribute GetArticlesOptions getArticlesOptions,
             @PageableDefault(sort = "arrivedDateTime", direction = Direction.DESC) Pageable pageable
-    ) { // GET /articles?sort=arrivedDateTime,asc 이렇게 입력 가능
+    ) {
         return articleService.getArticles(
                 member,
                 getArticlesOptions,

@@ -39,10 +39,7 @@ public class ArticleService {
             Pageable pageable
     ) {
         validateCategoryNameInput(getArticlesOptions.category());
-        return articleRepository.findByMemberId(
-                member.getId(),
-                getArticlesOptions,
-                pageable);
+        return articleRepository.findByMemberId(member.getId(), getArticlesOptions, pageable);
     }
 
     public ArticleDetailResponse getArticleDetail(Long id, Member member) {

@@ -1,12 +1,13 @@
 import path from 'path';
 import { tanstackRouter } from '@tanstack/router-plugin/webpack';
+import dotenv from 'dotenv';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack from 'webpack';
 import 'webpack-dev-server';
 
-export default (env, argv) => {
-  const isProd = argv.mode === 'production';
+dotenv.config();
 
+export default (env, argv) => {
   const config: webpack.Configuration = {
     mode: argv.mode,
     entry: './src/main.tsx',
@@ -70,12 +71,9 @@ export default (env, argv) => {
         target: 'react',
         autoCodeSplitting: true,
       }),
-      new webpack.EnvironmentPlugin({
-        API_BASE_URL: isProd
-          ? 'https://api-dev.bombom.news/api/v1'
-          : 'https://api-dev.bombom.news/api/v1',
-        API_TOKEN: process.env.API_TOKEN ?? '',
-        ENABLE_MSW: process.env.ENABLE_MSW ?? 'false',
+      new webpack.DefinePlugin({
+        'process.env': JSON.stringify(process.env),
+        'process.env.ENABLE_MSW': JSON.stringify(env.ENABLE_MSW),
       }),
     ],
     devServer: {

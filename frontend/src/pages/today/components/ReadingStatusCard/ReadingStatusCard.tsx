@@ -1,24 +1,25 @@
 import styled from '@emotion/styled';
+import { useQuery } from '@tanstack/react-query';
+import { getReadingStatus } from '@/apis/members';
 import GoalIcon from '@/components/icons/GoalIcon';
 import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
-import {
-  TodayReadingStatus,
-  WeeklyReadingStatus,
-} from '@/pages/today/types/readingStatus';
 import statusIcon from '#/assets/reading-status.svg';
 import streakIcon from '#/assets/streak.svg';
 
-interface ReadingStatusCardProps {
-  streakReadDay: number;
-  today: TodayReadingStatus;
-  weekly: WeeklyReadingStatus;
-}
+function ReadingStatusCard() {
+  const { data } = useQuery({
+    queryKey: ['readingStatus'],
+    queryFn: () => getReadingStatus(),
+  });
 
-function ReadingStatusCard({
-  streakReadDay,
-  today: { readCount: todayReadCount, totalCount },
-  weekly: { readCount: weeklyReadCount, goalCount },
-}: ReadingStatusCardProps) {
+  if (!data) return null;
+
+  const {
+    streakReadDay,
+    today: { readCount: todayReadCount, totalCount },
+    weekly: { readCount: weeklyReadCount, goalCount },
+  } = data;
+
   return (
     <Container>
       <TitleWrapper>

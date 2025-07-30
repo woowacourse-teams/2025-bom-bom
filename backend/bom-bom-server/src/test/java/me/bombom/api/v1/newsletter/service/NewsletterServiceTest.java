@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
+import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
@@ -18,7 +19,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
-@Import(NewsletterService.class)
+@Import({NewsletterService.class, QuerydslConfig.class})
 class NewsletterServiceTest {
 
     @Autowired

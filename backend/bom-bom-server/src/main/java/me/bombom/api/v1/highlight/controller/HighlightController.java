@@ -7,7 +7,9 @@ import me.bombom.api.v1.highlight.dto.HighlightCreateRequest;
 import me.bombom.api.v1.highlight.dto.HighlightResponse;
 import me.bombom.api.v1.highlight.service.HighlightService;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +24,7 @@ public class HighlightController {
 
     private final HighlightService highlightService;
 
-    //GET, POST, DELETE, PATCH(COLOR만)
+    //DELETE, PATCH(COLOR만)
 
     @GetMapping
     public List<HighlightResponse> getHighlight(
@@ -35,5 +37,10 @@ public class HighlightController {
     @ResponseStatus(HttpStatus.CREATED)
     public void createHighlight(@RequestBody HighlightCreateRequest createRequest) {
         highlightService.create(createRequest);
+    }
+
+    @DeleteMapping
+    public void deleteHighlight(@PathVariable Long id) {
+        highlightService.delete(id);
     }
 }

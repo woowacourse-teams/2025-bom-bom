@@ -2,6 +2,9 @@ package me.bombom.api.v1.highlight.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
 import me.bombom.api.v1.highlight.dto.HighlightCreateRequest;
@@ -16,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class HighlightService {
 
     private final HighlightRepository highlightRepository;
+    private final ArticleRepository articleRepository;
 
     public List<HighlightResponse> getHighlights(Long articleId) {
         return HighlightResponse.from(highlightRepository.findByArticleId(articleId));
@@ -31,5 +35,16 @@ public class HighlightService {
                 .text(createRequest.text())
                 .build();
         highlightRepository.save(highlight);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        highlightRepository.deleteById(id);
+    }
+
+    private void validateArticleExist(HighlightCreateRequest createRequest) {
+        if (!articleRepository.existsById(createRequest.articleId())) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND);
+        }
     }
 }

@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import ArticleCard from '../ArticleCard/ArticleCard';
+import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
 import { Article } from '@/pages/today/types/article';
 import checkIcon from '#/assets/check.svg';
 import letterIcon from '#/assets/letter.svg';
@@ -17,6 +18,9 @@ function ArticleCardList({ articles }: ArticleCardListProps) {
     },
     { read: [], unread: [] },
   );
+
+  if (articles.length === 0)
+    return <EmptyLetterCard title="새로운 뉴스레터가 없어요" />;
 
   return (
     <Container>

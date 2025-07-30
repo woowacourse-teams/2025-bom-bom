@@ -18,14 +18,14 @@ function EmptyUnreadCard() {
 export default EmptyUnreadCard;
 
 const Container = styled.section`
+  width: 100%;
+  padding: 20px;
+
   display: flex;
   gap: 16px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  width: 100%;
-  padding: 20px;
 `;
 
 const EmptyTitle = styled.h4`

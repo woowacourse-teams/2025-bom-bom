@@ -48,14 +48,14 @@ function CategoryFilter<T extends string>({
 export default CategoryFilter;
 
 const Container = styled.nav`
-  display: flex;
-  gap: 20px;
-  flex-direction: column;
-
   width: 310px;
   padding: 16px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 20px;
+
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
 `;
 
 const TitleWrapper = styled.div`
@@ -66,12 +66,12 @@ const TitleWrapper = styled.div`
 `;
 
 const IconWrapper = styled.div`
+  padding: 8px;
+  border-radius: 50%;
+
   display: flex;
   align-items: center;
   justify-content: center;
-
-  padding: 8px;
-  border-radius: 50%;
 
   background-color: ${({ theme }) => theme.colors.primary};
 `;

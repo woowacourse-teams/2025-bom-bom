@@ -35,19 +35,18 @@ function Tab<T extends string>({
 export default Tab;
 
 const Container = styled.li<{ selected: boolean }>`
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: space-between;
-
   width: 100%;
   min-width: fit-content;
   padding: 10px 12px;
   border-radius: 12px;
 
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+
   background-color: ${({ selected, theme }) =>
     selected ? theme.colors.primary : theme.colors.white};
-
   color: ${({ selected, theme }) =>
     selected ? theme.colors.white : theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body2};

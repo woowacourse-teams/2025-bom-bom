@@ -19,7 +19,6 @@ export default function NewsletterHero() {
 const HeroContainer = styled.div`
   overflow: hidden;
   position: relative;
-
   margin-bottom: 32px;
   padding: 40px;
   border-radius: 16px;
@@ -61,7 +60,6 @@ const CTAButton = styled(Link)`
   border-radius: 12px;
 
   background: ${({ theme }) => theme.colors.white};
-
   color: ${({ theme }) => theme.colors.primary};
   font: ${({ theme }) => theme.fonts.body2};
 

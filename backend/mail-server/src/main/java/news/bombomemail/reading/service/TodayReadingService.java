@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import news.bombomemail.reading.domain.TodayReading;
 import news.bombomemail.reading.repository.TodayReadingRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -16,7 +17,7 @@ public class TodayReadingService {
 
     private final TodayReadingRepository todayReadingRepository;
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateTodayTotalCount(Long memberId) {
             todayReadingRepository.findByMemberId(memberId)
                     .ifPresentOrElse(

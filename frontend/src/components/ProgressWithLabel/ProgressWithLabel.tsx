@@ -44,19 +44,19 @@ function ProgressWithLabel({
 export default ProgressWithLabel;
 
 const Container = styled.div`
+  width: 100%;
+
   display: flex;
   gap: 14px;
   flex-direction: column;
-
-  width: 100%;
 `;
 
 const ProgressInfo = styled.div`
+  width: 100%;
+
   display: flex;
   gap: 6px;
   align-items: center;
-
-  width: 100%;
 `;
 
 const StyledIcon = styled.img`

@@ -49,13 +49,13 @@ function Index() {
 }
 
 const Container = styled.div`
+  width: 1280px;
+  padding-top: 64px;
+
   display: flex;
   gap: 24px;
   flex-direction: column;
   align-items: flex-start;
-
-  width: 1280px;
-  padding-top: 64px;
 `;
 
 const TitleBox = styled.div`

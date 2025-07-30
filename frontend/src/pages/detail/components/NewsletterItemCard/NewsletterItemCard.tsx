@@ -52,16 +52,15 @@ export default function NewsletterItemCard({ data }: NewsletterItemCardProps) {
 
 const Container = styled.div`
   overflow: hidden;
-
-  display: flex;
-  flex-direction: column;
-
   width: 100%;
   max-width: 320px;
   border-radius: 20px;
   box-shadow:
     0 4px 6px -1px rgb(0 0 0 / 10%),
     0 2px 4px -1px rgb(0 0 0 / 6%);
+
+  display: flex;
+  flex-direction: column;
 
   background: ${({ theme }) => theme.colors.white};
 
@@ -76,12 +75,12 @@ const NewsletterImage = styled(ImageWithFallback)`
 `;
 
 const ContentWrapper = styled.div`
+  padding: 20px;
+
   display: flex;
   flex: 1;
   flex-direction: column;
   justify-content: space-between;
-
-  padding: 20px;
 `;
 
 const TextContent = styled.div`
@@ -90,10 +89,9 @@ const TextContent = styled.div`
 
 const Title = styled.h3`
   overflow: hidden;
+  margin-bottom: 8px;
 
   display: -webkit-box;
-
-  margin-bottom: 8px;
 
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.heading5};

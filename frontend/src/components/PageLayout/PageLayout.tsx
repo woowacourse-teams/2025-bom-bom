@@ -26,12 +26,12 @@ function PageLayout({ children }: PropsWithChildren) {
 export default PageLayout;
 
 const Container = styled.div`
+  width: 100%;
+  padding: 72px 0; /* header 높이 */
+
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  width: 100%;
-  padding: 72px 0; /* header 높이 */
 
   background-color: ${({ theme }) => theme.colors.white};
 `;

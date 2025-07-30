@@ -175,10 +175,6 @@ export default function ReadingKingLeaderboard({
 }
 
 const Container = styled.div`
-  display: flex;
-  gap: 21px;
-  flex-direction: column;
-
   width: 100%;
   max-width: 400px;
   padding: 22px;
@@ -187,6 +183,10 @@ const Container = styled.div`
   box-shadow:
     0 10px 15px -3px rgb(0 0 0 / 10%),
     0 4px 6px -4px rgb(0 0 0 / 10%);
+
+  display: flex;
+  gap: 21px;
+  flex-direction: column;
 
   background: rgb(255 255 255 / 80%);
 
@@ -204,13 +204,13 @@ const TitleContainer = styled.div`
 `;
 
 const HeaderIcon = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   width: 28px;
   height: 28px;
   border-radius: 12.75px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   background: #f96;
 
@@ -241,21 +241,21 @@ const LeaderboardList = styled.div`
 `;
 
 const ItemContainer = styled.div`
-  display: flex;
-  align-items: center;
-
   padding: 10.5px;
   border-radius: 12.75px;
+
+  display: flex;
+  align-items: center;
 `;
 
 const RankIconContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   width: 17.5px;
   height: 17.5px;
   margin-right: 10.5px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const CrownIconWrapper = styled.div`
@@ -286,19 +286,19 @@ const AvatarContainer = styled.div`
 `;
 
 const UserInfo = styled.div`
+  padding-bottom: 1px;
+
   display: flex;
   flex: 1;
   flex-direction: column;
-
-  padding-bottom: 1px;
 `;
 
 const NameContainer = styled.div`
+  margin-bottom: -1px;
+
   display: flex;
   gap: 7px;
   align-items: center;
-
-  margin-bottom: -1px;
 `;
 
 const UserName = styled.div<{ weight: 'normal' | 'medium' }>`
@@ -314,7 +314,6 @@ const Badge = styled.div`
   border-radius: 6.75px;
 
   background: linear-gradient(to right, #fef9c2, #fef3c6);
-
   color: #a65f00;
   font-family: Inter, 'Noto Sans KR', sans-serif;
   font-weight: 500;
@@ -323,11 +322,11 @@ const Badge = styled.div`
 `;
 
 const StatsContainer = styled.div`
+  margin-bottom: -1px;
+
   display: flex;
   gap: 7px;
   align-items: center;
-
-  margin-bottom: -1px;
 `;
 
 const ReadCount = styled.div`
@@ -358,14 +357,14 @@ const MyRankSection = styled.div`
 `;
 
 const MyRankContainer = styled.div`
+  margin-bottom: 10.5px;
+  padding: 13px 14px 14px;
+  border-radius: 14px;
+
   display: flex;
   gap: 12px;
   flex-direction: column;
   justify-content: space-between;
-
-  margin-bottom: 10.5px;
-  padding: 13px 14px 14px;
-  border-radius: 14px;
 
   background: linear-gradient(
     to right,
@@ -453,7 +452,6 @@ const ProgressValue = styled.div`
 
 const ProgressBar = styled.div`
   overflow: hidden;
-
   width: 100%;
   height: 7px;
   border-radius: 50px;

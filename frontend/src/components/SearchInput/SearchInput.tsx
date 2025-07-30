@@ -20,7 +20,6 @@ export default function SearchInput({ ...props }: ComponentProps<'input'>) {
 
 const Container = styled.div`
   position: relative;
-
   width: 100%;
   height: 42px;
 `;
@@ -45,7 +44,6 @@ const StyledInput = styled.input`
     0 1px 2px -1px rgb(0 0 0 / 10%);
 
   background-color: ${({ theme }) => theme.colors.white};
-
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body1};
 
@@ -65,7 +63,6 @@ const StyledInput = styled.input`
 
   &:disabled {
     background-color: ${({ theme }) => theme.colors.disabledBackground};
-
     color: ${({ theme }) => theme.colors.textTertiary};
 
     cursor: not-allowed;

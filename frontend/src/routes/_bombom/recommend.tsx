@@ -23,14 +23,14 @@ function Recommend() {
 }
 
 const Container = styled.div`
+  width: 100%;
+  max-width: 1280px;
+  padding: 64px 20px 0;
+
   display: flex;
   gap: 24px;
   align-items: flex-start;
   justify-content: center;
-
-  width: 100%;
-  max-width: 1280px;
-  padding: 64px 20px 0;
 
   @media (width <= 768px) {
     flex-direction: column;
@@ -39,17 +39,17 @@ const Container = styled.div`
 `;
 
 const MainSection = styled.section`
+  max-width: 840px;
+
   display: flex;
   gap: 24px;
   flex: 1;
   flex-direction: column;
-
-  max-width: 840px;
 `;
 
 const SideSection = styled.div`
-  flex-shrink: 0;
   width: 400px;
+  flex-shrink: 0;
 
   @media (width <= 768px) {
     width: 100%;

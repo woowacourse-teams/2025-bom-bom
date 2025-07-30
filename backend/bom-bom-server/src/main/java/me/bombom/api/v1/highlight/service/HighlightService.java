@@ -23,6 +23,7 @@ public class HighlightService {
 
     @Transactional
     public void create(HighlightCreateRequest createRequest) {
+        validateArticleExist(createRequest);
         Highlight highlight = Highlight.builder()
                 .articleId(createRequest.articleId())
                 .highlightLocation(new HighlightLocation(createRequest.startOffset(), createRequest.startPath(), createRequest.endOffset(), createRequest.endPath()))

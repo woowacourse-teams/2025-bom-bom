@@ -26,10 +26,11 @@ jobs:
           mkdir -p src/main/resources
           echo "${{ secrets.EMAIL_APPLICATION_PROD_PROPERTIES }}" \
             > src/main/resources/application.yml
-          echo "${{ secrets.EMAIL_APPLICATION_TEST_PROPERTIES }}" \
-            > src/main/resources/application-test.yml
           echo "${{ secrets.EMAIL_APPLICATION_PROD_DOCKER_PROPERTIES }}" \
             > src/main/resources/application-docker.yml
+          mkdir -p src/test/resources  
+          echo "${{ secrets.EMAIL_APPLICATION_TEST_PROPERTIES }}" \
+            > src/test/resources/application.yml
 
       - name: Build JAR
         run: ./gradlew clean build

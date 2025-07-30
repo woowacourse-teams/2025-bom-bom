@@ -15,26 +15,29 @@ import news.bombomemail.article.domain.Article;
 import news.bombomemail.article.repository.ArticleRepository;
 import news.bombomemail.article.util.ReadingTimeCalculator;
 import news.bombomemail.article.util.SummaryGenerator;
+import news.bombomemail.subscribe.event.SubscribeEvent;
+import news.bombomemail.reading.event.TodayReadingEvent;
 import news.bombomemail.member.domain.Member;
 import news.bombomemail.member.repository.MemberRepository;
 import news.bombomemail.newsletter.domain.Newsletter;
 import news.bombomemail.newsletter.repository.NewsletterRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ArticleService {
-
-    private static final LocalDateTime TIME_ZONE_SEOUL = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
     private final MemberRepository memberRepository;
     private final ArticleRepository articleRepository;
     private final NewsletterRepository newsletterRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
+    @Transactional
     public boolean save(MimeMessage message, String contents) throws MessagingException, DataAccessException {
         Member member = resolveMember(message);
         if (member == null) {
@@ -47,6 +50,8 @@ public class ArticleService {
         }
 
         articleRepository.save(buildArticle(message, contents, member, newsletter));
+        applicationEventPublisher.publishEvent(TodayReadingEvent.from(member.getId()));
+        applicationEventPublisher.publishEvent(SubscribeEvent.of(newsletter.getId(), member.getId()));
         return true;
     }
 
@@ -102,7 +107,7 @@ public class ArticleService {
                 .contentsSummary(SummaryGenerator.summarize(contents))
                 .memberId(member.getId())
                 .newsletterId(newsletter.getId())
-                .arrivedDateTime(TIME_ZONE_SEOUL)
+                .arrivedDateTime(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
                 .build();
     }
 }

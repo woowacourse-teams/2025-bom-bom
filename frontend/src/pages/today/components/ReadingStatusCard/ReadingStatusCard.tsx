@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
+import ReadingStatusCardSkeleton from './ReadingStatusCardSkeleton';
 import { getReadingStatus } from '@/apis/members';
 import GoalIcon from '@/components/icons/GoalIcon';
 import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
@@ -7,11 +8,12 @@ import statusIcon from '#/assets/reading-status.svg';
 import streakIcon from '#/assets/streak.svg';
 
 function ReadingStatusCard() {
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['readingStatus'],
     queryFn: () => getReadingStatus(),
   });
 
+  if (isLoading) return <ReadingStatusCardSkeleton />;
   if (!data) return null;
 
   const {

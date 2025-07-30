@@ -8,93 +8,93 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root';
-import { Route as SignupRouteImport } from './routes/signup';
-import { Route as LoginRouteImport } from './routes/login';
-import { Route as BombomRouteImport } from './routes/_bombom';
-import { Route as BombomIndexRouteImport } from './routes/_bombom/index';
-import { Route as BombomStorageRouteImport } from './routes/_bombom/storage';
-import { Route as BombomRecommendRouteImport } from './routes/_bombom/recommend';
-import { Route as BombomArticlesArticleIdRouteImport } from './routes/_bombom/articles.$articleId';
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as BombomRouteImport } from './routes/_bombom'
+import { Route as BombomIndexRouteImport } from './routes/_bombom/index'
+import { Route as BombomStorageRouteImport } from './routes/_bombom/storage'
+import { Route as BombomRecommendRouteImport } from './routes/_bombom/recommend'
+import { Route as BombomArticlesArticleIdRouteImport } from './routes/_bombom/articles.$articleId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const BombomRoute = BombomRouteImport.update({
   id: '/_bombom',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const BombomIndexRoute = BombomIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => BombomRoute,
-} as any);
+} as any)
 const BombomStorageRoute = BombomStorageRouteImport.update({
   id: '/storage',
   path: '/storage',
   getParentRoute: () => BombomRoute,
-} as any);
+} as any)
 const BombomRecommendRoute = BombomRecommendRouteImport.update({
   id: '/recommend',
   path: '/recommend',
   getParentRoute: () => BombomRoute,
-} as any);
+} as any)
 const BombomArticlesArticleIdRoute = BombomArticlesArticleIdRouteImport.update({
   id: '/articles/$articleId',
   path: '/articles/$articleId',
   getParentRoute: () => BombomRoute,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  '/login': typeof LoginRoute;
-  '/signup': typeof SignupRoute;
-  '/recommend': typeof BombomRecommendRoute;
-  '/storage': typeof BombomStorageRoute;
-  '/': typeof BombomIndexRoute;
-  '/articles/$articleId': typeof BombomArticlesArticleIdRoute;
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/recommend': typeof BombomRecommendRoute
+  '/storage': typeof BombomStorageRoute
+  '/': typeof BombomIndexRoute
+  '/articles/$articleId': typeof BombomArticlesArticleIdRoute
 }
 export interface FileRoutesByTo {
-  '/login': typeof LoginRoute;
-  '/signup': typeof SignupRoute;
-  '/recommend': typeof BombomRecommendRoute;
-  '/storage': typeof BombomStorageRoute;
-  '/': typeof BombomIndexRoute;
-  '/articles/$articleId': typeof BombomArticlesArticleIdRoute;
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/recommend': typeof BombomRecommendRoute
+  '/storage': typeof BombomStorageRoute
+  '/': typeof BombomIndexRoute
+  '/articles/$articleId': typeof BombomArticlesArticleIdRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  '/_bombom': typeof BombomRouteWithChildren;
-  '/login': typeof LoginRoute;
-  '/signup': typeof SignupRoute;
-  '/_bombom/recommend': typeof BombomRecommendRoute;
-  '/_bombom/storage': typeof BombomStorageRoute;
-  '/_bombom/': typeof BombomIndexRoute;
-  '/_bombom/articles/$articleId': typeof BombomArticlesArticleIdRoute;
+  __root__: typeof rootRouteImport
+  '/_bombom': typeof BombomRouteWithChildren
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/_bombom/recommend': typeof BombomRecommendRoute
+  '/_bombom/storage': typeof BombomStorageRoute
+  '/_bombom/': typeof BombomIndexRoute
+  '/_bombom/articles/$articleId': typeof BombomArticlesArticleIdRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/login'
     | '/signup'
     | '/recommend'
     | '/storage'
     | '/'
-    | '/articles/$articleId';
-  fileRoutesByTo: FileRoutesByTo;
+    | '/articles/$articleId'
+  fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/signup'
     | '/recommend'
     | '/storage'
     | '/'
-    | '/articles/$articleId';
+    | '/articles/$articleId'
   id:
     | '__root__'
     | '/_bombom'
@@ -103,74 +103,74 @@ export interface FileRouteTypes {
     | '/_bombom/recommend'
     | '/_bombom/storage'
     | '/_bombom/'
-    | '/_bombom/articles/$articleId';
-  fileRoutesById: FileRoutesById;
+    | '/_bombom/articles/$articleId'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  BombomRoute: typeof BombomRouteWithChildren;
-  LoginRoute: typeof LoginRoute;
-  SignupRoute: typeof SignupRoute;
+  BombomRoute: typeof BombomRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
     '/signup': {
-      id: '/signup';
-      path: '/signup';
-      fullPath: '/signup';
-      preLoaderRoute: typeof SignupRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
-      id: '/login';
-      path: '/login';
-      fullPath: '/login';
-      preLoaderRoute: typeof LoginRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_bombom': {
-      id: '/_bombom';
-      path: '';
-      fullPath: '';
-      preLoaderRoute: typeof BombomRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/_bombom'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof BombomRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_bombom/': {
-      id: '/_bombom/';
-      path: '/';
-      fullPath: '/';
-      preLoaderRoute: typeof BombomIndexRouteImport;
-      parentRoute: typeof BombomRoute;
-    };
+      id: '/_bombom/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof BombomIndexRouteImport
+      parentRoute: typeof BombomRoute
+    }
     '/_bombom/storage': {
-      id: '/_bombom/storage';
-      path: '/storage';
-      fullPath: '/storage';
-      preLoaderRoute: typeof BombomStorageRouteImport;
-      parentRoute: typeof BombomRoute;
-    };
+      id: '/_bombom/storage'
+      path: '/storage'
+      fullPath: '/storage'
+      preLoaderRoute: typeof BombomStorageRouteImport
+      parentRoute: typeof BombomRoute
+    }
     '/_bombom/recommend': {
-      id: '/_bombom/recommend';
-      path: '/recommend';
-      fullPath: '/recommend';
-      preLoaderRoute: typeof BombomRecommendRouteImport;
-      parentRoute: typeof BombomRoute;
-    };
+      id: '/_bombom/recommend'
+      path: '/recommend'
+      fullPath: '/recommend'
+      preLoaderRoute: typeof BombomRecommendRouteImport
+      parentRoute: typeof BombomRoute
+    }
     '/_bombom/articles/$articleId': {
-      id: '/_bombom/articles/$articleId';
-      path: '/articles/$articleId';
-      fullPath: '/articles/$articleId';
-      preLoaderRoute: typeof BombomArticlesArticleIdRouteImport;
-      parentRoute: typeof BombomRoute;
-    };
+      id: '/_bombom/articles/$articleId'
+      path: '/articles/$articleId'
+      fullPath: '/articles/$articleId'
+      preLoaderRoute: typeof BombomArticlesArticleIdRouteImport
+      parentRoute: typeof BombomRoute
+    }
   }
 }
 
 interface BombomRouteChildren {
-  BombomRecommendRoute: typeof BombomRecommendRoute;
-  BombomStorageRoute: typeof BombomStorageRoute;
-  BombomIndexRoute: typeof BombomIndexRoute;
-  BombomArticlesArticleIdRoute: typeof BombomArticlesArticleIdRoute;
+  BombomRecommendRoute: typeof BombomRecommendRoute
+  BombomStorageRoute: typeof BombomStorageRoute
+  BombomIndexRoute: typeof BombomIndexRoute
+  BombomArticlesArticleIdRoute: typeof BombomArticlesArticleIdRoute
 }
 
 const BombomRouteChildren: BombomRouteChildren = {
@@ -178,16 +178,16 @@ const BombomRouteChildren: BombomRouteChildren = {
   BombomStorageRoute: BombomStorageRoute,
   BombomIndexRoute: BombomIndexRoute,
   BombomArticlesArticleIdRoute: BombomArticlesArticleIdRoute,
-};
+}
 
 const BombomRouteWithChildren =
-  BombomRoute._addFileChildren(BombomRouteChildren);
+  BombomRoute._addFileChildren(BombomRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   BombomRoute: BombomRouteWithChildren,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()

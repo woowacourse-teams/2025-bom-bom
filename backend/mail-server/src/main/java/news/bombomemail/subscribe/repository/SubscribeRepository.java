@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
 
-    boolean existsSubscribeByNewsletterIdAndMemberId(Long newsletterId, Long memberId);
+    boolean existsByNewsletterIdAndMemberId(Long newsletterId, Long memberId);
 }

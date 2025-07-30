@@ -16,7 +16,7 @@ public class SubscribeService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void save(Long newsletterId, Long memberId) {
-        boolean isSubscribe = subscribeRepository.existsSubscribeByNewsletterIdAndMemberId(newsletterId, memberId);
+        boolean isSubscribe = subscribeRepository.existsByNewsletterIdAndMemberId(newsletterId, memberId);
         if (isSubscribe) {
             return;
         }

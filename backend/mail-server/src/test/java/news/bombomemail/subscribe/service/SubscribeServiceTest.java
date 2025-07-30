@@ -29,7 +29,7 @@ class SubscribeServiceTest {
         subscribeService.save(newsletterId, memberId);
 
         // then
-        boolean exists = subscribeRepository.existsSubscribeByNewsletterIdAndMemberId(newsletterId, memberId);
+        boolean exists = subscribeRepository.existsByNewsletterIdAndMemberId(newsletterId, memberId);
         assertThat(exists).isTrue();
     }
 

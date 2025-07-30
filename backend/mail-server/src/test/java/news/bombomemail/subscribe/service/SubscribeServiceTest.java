@@ -1,6 +1,5 @@
 package news.bombomemail.subscribe.service;
 
-import news.bombomemail.subscribe.domain.Subscribe;
 import news.bombomemail.subscribe.repository.SubscribeRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +20,9 @@ class SubscribeServiceTest {
 
     @Test
     void 구독이_정상적으로_저장된다() {
-        // given
         Long newsletterId = 1L;
         Long memberId = 2L;
-
-        // when
         subscribeService.save(newsletterId, memberId);
-
-        // then
         boolean exists = subscribeRepository.existsByNewsletterIdAndMemberId(newsletterId, memberId);
         assertThat(exists).isTrue();
     }
@@ -38,12 +32,9 @@ class SubscribeServiceTest {
         // given
         Long newsletterId = 1L;
         Long memberId = 2L;
-        subscribeRepository.save(Subscribe.builder()
-                .newsletterId(newsletterId)
-                .memberId(memberId)
-                .build());
 
         // when
+        subscribeService.save(newsletterId, memberId);
         subscribeService.save(newsletterId, memberId);
 
         // then

@@ -4,13 +4,11 @@ import news.bombomemail.reading.domain.TodayReading;
 import news.bombomemail.reading.repository.TodayReadingRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
-@Import(TodayReadingService.class)
+@SpringBootTest
 class TodayReadingServiceTest {
 
     @Autowired
@@ -20,7 +18,7 @@ class TodayReadingServiceTest {
     TodayReadingService todayReadingService;
 
     @Test
-    void totalCount가_1_증가한다() {
+    void totalCount_증가() {
         // given
         Long memberId = 1L;
         todayReadingRepository.save(TodayReading.builder()
@@ -31,21 +29,19 @@ class TodayReadingServiceTest {
 
         // when
         todayReadingService.updateTodayTotalCount(memberId);
+        TodayReading todayReading = todayReadingRepository.findByMemberId(memberId).orElseThrow();
 
         // then
-        TodayReading todayReading = todayReadingRepository.findByMemberId(memberId).orElseThrow();
         assertThat(todayReading.getTotalCount()).isEqualTo(1);
     }
 
     @Test
-    void TodayReading_없으면_totalCount_증가하지_않고_에러로그만_남는다() {
+    void todayReading_없으면_변화없음() {
         // given
         Long memberId = 999L;
 
         // when
         todayReadingService.updateTodayTotalCount(memberId);
-
-        // then
         assertThat(todayReadingRepository.findByMemberId(memberId)).isEmpty();
     }
 } 

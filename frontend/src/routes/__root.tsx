@@ -1,12 +1,15 @@
 import { ThemeProvider } from '@emotion/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createRootRoute, Outlet } from '@tanstack/react-router';
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { theme } from '../styles/theme';
+import { queryClient } from '@/main';
 
-const queryClient = new QueryClient();
+interface BomBomRouterContext {
+  queryClient: QueryClient;
+}
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<BomBomRouterContext>()({
   component: () => (
     <>
       <QueryClientProvider client={queryClient}>

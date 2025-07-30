@@ -37,6 +37,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 
 @DataJpaTest
 @Import({ArticleService.class, ReadingService.class, QuerydslConfig.class})
@@ -202,6 +203,24 @@ class ArticleServiceTest {
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 아티클_목록_조회_정렬_기준_필드가_존재하지_않으면_예외() {
+        // given
+        Pageable pageable = PageRequest.of(
+                0,
+                10,
+                Sort.by(new Order(Direction.DESC, "invalidField"))
+        );
+
+        // when & then
+        assertThatThrownBy(() -> articleService.getArticles(
+                member,
+                GetArticlesOptions.of(null, null, null),
+                pageable
+        )).isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
     }
 
     @Test

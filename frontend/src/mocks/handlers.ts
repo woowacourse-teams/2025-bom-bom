@@ -2,6 +2,7 @@ import { http, HttpResponse } from 'msw';
 import { ENV } from '../apis/env';
 import { ARTICLE_DETAIL } from './datas/articleDetail';
 import { ARTICLES } from './datas/articles';
+import { TRENDY_NEWSLETTERS } from './datas/trendyNewsLetter';
 
 const baseURL = ENV.baseUrl;
 
@@ -57,7 +58,7 @@ export const handlers = [
 
   // 뉴스레터 목록
   http.get(`${baseURL}/newsletters`, () => {
-    return HttpResponse.json(ARTICLES);
+    return HttpResponse.json(TRENDY_NEWSLETTERS);
   }),
 
   // 멤버 읽기 상태

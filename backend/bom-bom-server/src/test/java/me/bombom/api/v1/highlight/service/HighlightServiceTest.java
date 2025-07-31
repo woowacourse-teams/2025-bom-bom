@@ -11,9 +11,8 @@ import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.highlight.domain.Highlight;
-import me.bombom.api.v1.highlight.domain.HighlightLocation;
-import me.bombom.api.v1.highlight.dto.HighlightCreateRequest;
-import me.bombom.api.v1.highlight.dto.HighlightResponse;
+import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
+import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -65,46 +64,8 @@ class HighlightServiceTest {
         newsletterRepository.saveAll(newsletters);
         articles = TestFixture.createArticles(member, newsletters);
         articleRepository.saveAll(articles);
-        highlights = createHighlightFixtures();
+        highlights = TestFixture.createHighlightFixtures(articles);
         highlightRepository.saveAll(highlights);
-    }
-
-    private List<Highlight> createHighlightFixtures() {
-        Long firstArticleId = articles.get(0).getId();
-        Long secondArticleId = articles.get(1).getId();
-
-        return List.of(
-                Highlight.builder()
-                        .highlightLocation(new HighlightLocation("0", "div[0]/p[0]", "10", "div[0]/p[0]"))
-                        .articleId(firstArticleId)
-                        .color("#ffeb3b")
-                        .text("첫 번째 하이라이트")
-                        .build(),
-                Highlight.builder()
-                        .highlightLocation(new HighlightLocation("15", "div[0]/p[1]", "25", "div[0]/p[1]"))
-                        .articleId(firstArticleId)
-                        .color("#4caf50")
-                        .text("두 번째 하이라이트")
-                        .build(),
-                Highlight.builder()
-                        .highlightLocation(new HighlightLocation("5", "div[0]/h1", "15", "div[0]/h1"))
-                        .articleId(secondArticleId)
-                        .color("#2196f3")
-                        .text("세 번째 하이라이트")
-                        .build()
-        );
-    }
-
-    private HighlightCreateRequest createHighlightRequest(Long articleId) {
-        return new HighlightCreateRequest(
-                "0",
-                "div[0]/p[2]",
-                "20",
-                "div[0]/p[2]",
-                articleId,
-                "#f44336",
-                "새로운 하이라이트 텍스트"
-        );
     }
 
     private HighlightCreateRequest createDuplicateHighlightRequest() {
@@ -126,10 +87,14 @@ class HighlightServiceTest {
         Long firstArticleId = articles.getFirst().getId();
 
         // when
-        List<HighlightResponse> responses = highlightService.getHighlights(firstArticleId);
+        List<HighlightResponse> responses = highlightService.getHighlights(firstArticleId, member);
 
         // then
         assertThat(responses).hasSize(2);
+        assertThat(responses.get(0).text()).isEqualTo("첫 번째 하이라이트");
+        assertThat(responses.get(1).text()).isEqualTo("두 번째 하이라이트");
+        assertThat(responses.get(0).color()).isEqualTo("#ffeb3b");
+        assertThat(responses.get(1).color()).isEqualTo("#4caf50");
     }
 
     @Test
@@ -138,7 +103,7 @@ class HighlightServiceTest {
         Long nonExistArticleId = 0L;
 
         // when & then
-        assertThatThrownBy(() -> highlightService.getHighlights(nonExistArticleId))
+        assertThatThrownBy(() -> highlightService.getHighlights(nonExistArticleId, member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -147,11 +112,11 @@ class HighlightServiceTest {
     void 하이라이트를_생성할_수_있다() {
         // given
         Long articleId = articles.getFirst().getId();
-        HighlightCreateRequest request = createHighlightRequest(articleId);
+        HighlightCreateRequest request = TestFixture.createHighlightRequest(articleId);
         long beforeCount = highlightRepository.count();
 
         // when
-        highlightService.create(request);
+        highlightService.create(request, member);
 
         // then
         assertThat(highlightRepository.count()).isEqualTo(beforeCount + 1);
@@ -164,7 +129,7 @@ class HighlightServiceTest {
         long beforeCount = highlightRepository.count();
 
         // when
-        highlightService.create(duplicateRequest);
+        highlightService.create(duplicateRequest, member);
 
         // then
         assertThat(highlightRepository.count()).isEqualTo(beforeCount); // 개수 변화 없음
@@ -174,10 +139,10 @@ class HighlightServiceTest {
     void 존재하지_않는_아티클에_하이라이트_생성시_예외_발생() {
         // given
         Long nonExistentArticleId = 0L;
-        HighlightCreateRequest request = createHighlightRequest(nonExistentArticleId);
+        HighlightCreateRequest request = TestFixture.createHighlightRequest(nonExistentArticleId);
 
         // when & then
-        assertThatThrownBy(() -> highlightService.create(request))
+        assertThatThrownBy(() -> highlightService.create(request, member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -189,7 +154,7 @@ class HighlightServiceTest {
         long beforeCount = highlightRepository.count();
 
         // when
-        highlightService.delete(highlightId);
+        highlightService.delete(highlightId, member);
 
         // then
         assertSoftly(softly -> {
@@ -205,7 +170,7 @@ class HighlightServiceTest {
         String newColor = "#9c27b0";
 
         // when
-        highlightService.changeColor(highlightId, newColor);
+        highlightService.changeColor(highlightId, newColor, member);
 
         // then
         Highlight updatedHighlight = highlightRepository.findById(highlightId).get();
@@ -219,7 +184,7 @@ class HighlightServiceTest {
         String newColor = "#9c27b0";
 
         // when & then
-        assertThatThrownBy(() -> highlightService.changeColor(nonExistentHighlightId, newColor))
+        assertThatThrownBy(() -> highlightService.changeColor(nonExistentHighlightId, newColor, member))
                 .isInstanceOf(CIllegalArgumentException.class);
     }
 }

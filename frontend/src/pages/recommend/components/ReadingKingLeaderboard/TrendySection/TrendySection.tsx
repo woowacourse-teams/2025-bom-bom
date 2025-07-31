@@ -6,7 +6,7 @@ import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import { CATEGORIES, CategoryType } from '@/constants/category';
 import { copyToClipboard } from '@/utils/copy';
-import trendingUpIcon from '#/assets/trending-up.svg';
+import TrendingUpIcon from '#/assets/trending-up.svg';
 
 export default function TrendySection() {
   const { data: newsletters } = useQuery({
@@ -33,7 +33,7 @@ export default function TrendySection() {
     <Container>
       <SectionHeader>
         <SectionIconBox>
-          <img src={trendingUpIcon} alt="trending up" />
+          <TrendingUpIcon width={16} height={16} />
         </SectionIconBox>
         <SectionTitle>트렌디한 뉴스레터</SectionTitle>
       </SectionHeader>
@@ -78,23 +78,24 @@ const Container = styled.div`
 `;
 
 const SectionHeader = styled.div`
-  margin-bottom: 16px;
-
   display: flex;
   gap: 8px;
   align-items: center;
+
+  margin-bottom: 16px;
 `;
 
 const SectionIconBox = styled.span`
-  width: 28px;
-  height: 28px;
-  border-radius: 12px;
-
   display: flex;
   align-items: center;
   justify-content: center;
 
+  width: 28px;
+  height: 28px;
+  border-radius: 12px;
+
   background: ${({ theme }) => theme.colors.primary};
+
   font: ${({ theme }) => theme.fonts.body1};
 `;
 
@@ -106,11 +107,11 @@ const SectionTitle = styled.h2`
 `;
 
 const TagContainer = styled.div`
-  margin-bottom: 16px;
-
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+
+  margin-bottom: 16px;
 `;
 
 const TrendyGrid = styled.div`

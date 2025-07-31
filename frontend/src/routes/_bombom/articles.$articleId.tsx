@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import clockIcon from '../../../public/assets/clock.svg';
+import ClockIcon from '#/assets/clock.svg';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
@@ -62,7 +62,7 @@ function ArticleDetailPage() {
             {formatDate(new Date(currentArticle.arrivedDateTime))}
           </MetaInfoText>
           <ReadTimeBox>
-            <img src={clockIcon} alt="시계 아이콘" />
+            <ClockIcon width={16} height={16} />
             <MetaInfoText>{currentArticle.expectedReadTime}분</MetaInfoText>
           </ReadTimeBox>
         </MetaInfoRow>
@@ -93,17 +93,17 @@ function ArticleDetailPage() {
 }
 
 const Container = styled.div`
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+  align-items: center;
+
   max-width: 700px;
   margin: 0 auto;
   margin-top: 20px;
   padding: 28px;
   border-right: 1px solid ${({ theme }) => theme.colors.stroke};
   border-left: 1px solid ${({ theme }) => theme.colors.stroke};
-
-  display: flex;
-  gap: 20px;
-  flex-direction: column;
-  align-items: center;
 `;
 
 const HeaderWrapper = styled.div`
@@ -155,11 +155,11 @@ const ContentDescription = styled.p`
 `;
 
 const TodayArticlesWrapper = styled.div`
-  width: 100%;
-
   display: flex;
   gap: 12px;
   flex-direction: column;
+
+  width: 100%;
 `;
 
 const TodayArticleTitle = styled.h3`

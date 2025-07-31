@@ -26,7 +26,6 @@ public class Highlight extends BaseEntity {
 
     private Long articleId;
 
-    //TODO: #으로 시작하는지 검증 필요
     private String color;
 
     private String text;

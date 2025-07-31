@@ -1,5 +1,7 @@
 package me.bombom.api.v1.highlight.controller;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +48,8 @@ public class HighlightController {
     }
 
     @PatchMapping("/{id}")
-    public void changeHighlightColor(@PathVariable Long id, @RequestBody String color) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changeHighlightColor(@PathVariable Long id, @Pattern(regexp = "^#?[0-9a-fA-F]{6}$") @RequestBody String color) {
         highlightService.changeColor(id, color);
     }
 }

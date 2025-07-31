@@ -1,4 +1,7 @@
 name: 'Chromatic Deployment'
+defaults:
+  run:
+    working-directory: ./frontend
 
 on: push
 

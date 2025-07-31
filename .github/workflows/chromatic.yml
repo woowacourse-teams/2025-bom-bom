@@ -1,11 +1,6 @@
 name: 'Chromatic Deployment'
 
-on:
-  push:
-    paths:
-      - 'frontend/**'
-    branches:
-      - client
+on: push
 
 jobs:
   chromatic:

@@ -1,5 +1,6 @@
 package me.bombom.api.v1.highlight.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,12 +23,16 @@ public class Highlight extends BaseEntity {
     private Long id;
 
     @Embedded
+    @Column(nullable = false)
     private HighlightLocation highlightLocation;
 
+    @Column(nullable = false)
     private Long articleId;
 
+    @Column(nullable = false)
     private String color;
 
+    @Column(nullable = false, columnDefinition = "text")
     private String text;
 
     @Builder

@@ -14,12 +14,6 @@ const router = createRouter({
   context: {
     queryClient,
   },
-  getScrollRestorationKey: (location) => {
-    const paths = ['_bombom/articles/$articleId'];
-    return paths.includes(location.pathname)
-      ? location.pathname
-      : location.state.__TSR_key!;
-  },
 });
 
 declare module '@tanstack/react-router' {

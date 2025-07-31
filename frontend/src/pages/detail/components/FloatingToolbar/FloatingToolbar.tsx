@@ -49,10 +49,10 @@ export default function FloatingToolbar({ onSave }: FloatingToolBarProps) {
           onSave(selectionRef.current);
         }}
       >
-        <img src={Pen} alt="하이라이트 아이콘" />
+        <Pen />
       </ToolbarButton>
       <ToolbarButton onClick={() => alert('Action 2')}>
-        <img src={Comment} alt="메모 아이콘" />
+        <Comment />
       </ToolbarButton>
     </Container>
   );

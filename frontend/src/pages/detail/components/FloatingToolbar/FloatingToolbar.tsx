@@ -1,6 +1,8 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useEffect, useRef, useState } from 'react';
+import Comment from '#/assets/comment.svg';
+import Pen from '#/assets/pen.svg';
 
 interface ToolbarPosition {
   x: number;
@@ -43,19 +45,19 @@ export default function FloatingToolbar({ onSave }: FloatingToolBarProps) {
       <ToolbarButton
         onClick={() => {
           if (selectionRef.current === null) return;
-
           setIsVisible(false);
           onSave(selectionRef.current);
         }}
       >
-        저장
+        <img src={Pen} alt="하이라이트 아이콘" />
       </ToolbarButton>
-      <ToolbarButton onClick={() => alert('Action 2')}>🌐</ToolbarButton>
+      <ToolbarButton onClick={() => alert('Action 2')}>
+        <img src={Comment} alt="메모 아이콘" />
+      </ToolbarButton>
     </Container>
   );
 }
 
-// fade-in / fade-out keyframes
 const fadeIn = keyframes`
     from { opacity: 0; transform: translate(-50%, -90%); }
     to { opacity: 1; transform: translate(-50%, -100%); }
@@ -71,31 +73,17 @@ const Container = styled.div<{ position: ToolbarPosition; visible: boolean }>`
   top: ${({ position }) => position.y}px;
   left: ${({ position }) => position.x}px;
   z-index: 1000;
+  padding: 6px 10px 4px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
 
   display: flex;
   gap: 8px;
 
-  padding: 8px 12px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
-
-  background: #333;
-
-  color: #fff;
+  background: ${({ theme }) => theme.colors.primary};
 
   animation: ${({ visible }) => (visible ? fadeIn : fadeOut)} 0.2s ease-in-out
     forwards;
-
-  opacity: ${({ visible }) => (visible ? 1 : 0)};
 `;
 
-const ToolbarButton = styled.button`
-  border: none;
-
-  background: transparent;
-
-  color: #fff;
-  font-size: 18px;
-
-  cursor: pointer;
-`;
+const ToolbarButton = styled.button``;

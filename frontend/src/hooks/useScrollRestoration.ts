@@ -1,5 +1,6 @@
 import { useLocation } from '@tanstack/react-router';
 import { useLayoutEffect } from 'react';
+import { useDebounce } from './useDebounce';
 import useLocalStorage from './useLocalStorage';
 
 const useScrollRestoration = (path: string) => {
@@ -8,29 +9,31 @@ const useScrollRestoration = (path: string) => {
   const { get: getScrollLocation, set: setScrollLocation } =
     useLocalStorage<number>(storageKey, 0);
 
+  const restoreScroll = useDebounce((scrollLocation: number) => {
+    window.scroll({
+      top: scrollLocation,
+      behavior: 'smooth',
+    });
+  }, 400);
+
   useLayoutEffect(() => {
     if (path !== location.pathname) return;
 
     const scrollLocation = getScrollLocation();
     if (scrollLocation) {
-      setTimeout(() => {
-        window.scroll({
-          top: scrollLocation,
-          behavior: 'smooth',
-        });
-      }, 400);
+      restoreScroll(scrollLocation);
     }
 
-    const handleScrollLocation = () => {
+    const saveLocation = () => {
       setScrollLocation(window.scrollY);
     };
-    window.addEventListener('beforeunload', handleScrollLocation);
+    window.addEventListener('beforeunload', saveLocation);
 
     return () => {
       setScrollLocation(window.scrollY);
-      window.removeEventListener('beforeunload', handleScrollLocation);
+      window.removeEventListener('beforeunload', saveLocation);
     };
-  }, [getScrollLocation, setScrollLocation]);
+  }, [restoreScroll, getScrollLocation, setScrollLocation]);
 };
 
 export default useScrollRestoration;

@@ -80,4 +80,6 @@ const ContentWrapper = styled.div`
   align-items: flex-start;
   align-self: stretch;
   justify-content: center;
+
+  width: 100%;
 `;

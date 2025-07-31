@@ -53,6 +53,8 @@ const Container = styled.div`
   gap: 16px;
   flex-direction: column;
   align-items: flex-start;
+
+  width: 100%;
 `;
 
 const ListTitleBox = styled.div`
@@ -70,4 +72,6 @@ const CardList = styled.ul`
   display: flex;
   gap: 16px;
   flex-direction: column;
+
+  width: 100%;
 `;

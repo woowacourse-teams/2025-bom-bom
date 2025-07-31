@@ -13,7 +13,7 @@ function EmptyLetterCard({ title }: EmptyLetterCardProps) {
   return (
     <Container>
       <PostboxIconWrapper>
-        <PostboxIcon width={100} height={100} />
+        <PostboxIcon width={160} height={160} />
       </PostboxIconWrapper>
 
       <EmptyTitle>{title}</EmptyTitle>

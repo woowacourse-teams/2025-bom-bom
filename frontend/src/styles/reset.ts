@@ -84,8 +84,18 @@ const reset = css`
   }
 
   a {
-    text-decoration: none;
     color: inherit;
+    text-decoration: none;
+  }
+
+  mark[data-highlight-id] {
+    background-color: #ffeb3b;
+    transition: box-shadow 0.2s ease-in-out;
+  }
+
+  mark[data-highlight-id].hovered-highlight {
+    box-shadow: 0 0 6px rgb(0 0 0 / 30%);
+    cursor: pointer;
   }
 `;
 

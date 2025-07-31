@@ -14,7 +14,6 @@ jobs:
         with:
           fetch-depth: 0
       - run: npm install
-      - uses: chromaui/action@latest
-        with:
-          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - run: npx chromatic --project-token ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -38,7 +38,7 @@ public class ArticleService {
             GetArticlesOptions getArticlesOptions,
             Pageable pageable
     ) {
-        validateCategoryNameInput(getArticlesOptions.category());
+        validateCategoryName(getArticlesOptions.category());
         return articleRepository.findByMemberId(member.getId(), getArticlesOptions, pageable);
     }
 
@@ -74,7 +74,7 @@ public class ArticleService {
         return GetArticleCategoryStatisticsResponse.of(totalCount, countResponse);
     }
 
-    private void validateCategoryNameInput(String categoryName) {
+    private void validateCategoryName(String categoryName) {
         if (categoryName != null && !categoryRepository.existsByName(categoryName)) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND);
         }

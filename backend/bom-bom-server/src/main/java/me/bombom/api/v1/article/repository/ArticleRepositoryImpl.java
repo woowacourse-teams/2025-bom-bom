@@ -9,6 +9,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -23,8 +24,8 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.newsletter.dto.QNewsletterSummaryResponse;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
@@ -132,7 +133,9 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
 
     private List<OrderSpecifier<?>> getOrderSpecifiers(Pageable pageable) {
         List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
-        pageable.getSort().stream().forEach(sort -> {
+        pageable.getSort()
+                .stream()
+                .forEach(sort -> {
             Order order = sort.isAscending() ? Order.ASC : Order.DESC;
             String property = sort.getProperty();
             Path<?> target = resolveSortProperty(property);
@@ -142,7 +145,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         return orderSpecifiers;
     }
 
-    private static Path<?> resolveSortProperty(String property) {
+    private Path<?> resolveSortProperty(String property) {
         Path<?> sortPath = SORT_FIELD_WHITELIST_MAP.get(property);
         if (sortPath == null) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);

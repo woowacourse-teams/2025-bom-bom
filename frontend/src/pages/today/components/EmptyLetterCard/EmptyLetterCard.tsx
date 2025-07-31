@@ -13,7 +13,7 @@ function EmptyLetterCard({ title }: EmptyLetterCardProps) {
   return (
     <Container>
       <PostboxIconWrapper>
-        <PostboxIcon />
+        <PostboxIcon width={100} height={100} />
       </PostboxIconWrapper>
 
       <EmptyTitle>{title}</EmptyTitle>
@@ -26,7 +26,7 @@ function EmptyLetterCard({ title }: EmptyLetterCardProps) {
       </DescriptionWrapper>
 
       <LinkButton to="/recommend">
-        <CompassIcon />
+        <CompassIcon width={16} height={16} />
         추천 뉴스레터 보기
         <StyledArrowIcon targetDirection="right" currentDirection="upRight" />
       </LinkButton>
@@ -37,13 +37,13 @@ function EmptyLetterCard({ title }: EmptyLetterCardProps) {
 export default EmptyLetterCard;
 
 const Container = styled.section`
+  width: 100%;
+
   display: flex;
   gap: 22px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  width: 100%;
 `;
 
 const PostboxIconWrapper = styled.div`
@@ -53,7 +53,6 @@ const PostboxIconWrapper = styled.div`
 const EmptyTitle = styled.h2`
   background: linear-gradient(90deg, #181818 0%, #f96 100%);
   background-clip: text;
-
   font: ${({ theme }) => theme.fonts.heading2};
   text-align: center;
 
@@ -79,16 +78,15 @@ const Support = styled.p`
 `;
 
 const LinkButton = styled(Link)`
+  padding: 10px 12px;
+  border-radius: 12px;
+
   display: flex;
   gap: 4px;
   align-items: center;
   justify-content: center;
 
-  padding: 10px 12px;
-  border-radius: 12px;
-
   background: ${({ theme }) => theme.colors.primary};
-
   color: ${({ theme }) => theme.colors.white};
   font: ${({ theme }) => theme.fonts.body1};
 

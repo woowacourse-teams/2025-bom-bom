@@ -4,11 +4,7 @@ on:
   push:
     paths:
       - 'frontend/**'
-  pull_request:
-    paths:
-      - 'frontend/**'
     branches:
-      - main
       - client
 
 jobs:

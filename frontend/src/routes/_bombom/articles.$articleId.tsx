@@ -138,8 +138,8 @@ function ArticleDetailPage() {
       </TodayArticlesWrapper>
       <FloatingToolbar
         onSave={(selection) => {
-          const HighlightType = saveSelection(selection);
-          setHighlights((prev) => [...prev, HighlightType]);
+          const highlightData = saveSelection(selection);
+          setHighlights((prev) => [...prev, highlightData]);
         }}
       />
       <MemoPanel

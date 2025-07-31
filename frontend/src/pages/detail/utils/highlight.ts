@@ -1,7 +1,7 @@
 import {
-  getElementByXPath,
+  getNodeByXPath,
   getTextNodesInRange,
-  getXPathForElement,
+  getXPathForNode,
 } from './selection';
 import { HighlightType } from '../types/highlight';
 
@@ -37,15 +37,17 @@ export const saveSelection = (selection: Selection): HighlightType => {
       ? range.commonAncestorContainer.parentElement!
       : (range.commonAncestorContainer as Element);
 
-  const xpath = getXPathForElement(container);
-  const offsets = getOffsetsFromRangeIncludingMarks(container, range); // 변경
+  const xpath = getXPathForNode(container);
+  const offsets = getOffsetsFromRangeIncludingMarks(container, range);
+
   return {
     startXPath: xpath,
     startOffset: offsets.start,
     endXPath: xpath,
     endOffset: offsets.end,
-    color: '#FFEB3B',
+    color: '#FFD6C2',
     id: crypto.randomUUID(),
+    text: selection.toString(), // 선택된 텍스트 저장
   };
 };
 
@@ -70,7 +72,7 @@ export const getOffsetsFromRangeIncludingMarks = (
 };
 
 function createRangeFromOffsetsIncludingMarks(
-  container: Element,
+  container: Node,
   start: number,
   end: number,
 ) {
@@ -110,11 +112,11 @@ function createRangeFromOffsetsIncludingMarks(
 }
 
 export const restoreHighlight = (data: HighlightType) => {
-  const element = getElementByXPath(data.startXPath);
+  const element = getNodeByXPath(data.startXPath);
   if (!element) return;
 
   const range = createRangeFromOffsetsIncludingMarks(
-    element as Element,
+    element,
     data.startOffset,
     data.endOffset,
   );

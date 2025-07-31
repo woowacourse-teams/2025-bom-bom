@@ -4,6 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import ArticleCardList from '../../pages/today/components/ArticleCardList/ArticleCardList';
 import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/ReadingStatusCard';
 import { getArticles } from '@/apis/articles';
+import PetCard from '@/components/PetCard/PetCard';
 
 export const Route = createFileRoute('/_bombom/')({
   component: Index,
@@ -25,7 +26,10 @@ function Index() {
       </TitleBox>
       <ContentWrapper>
         <ArticleCardList articles={articles?.content ?? []} />
-        <ReadingStatusCard />
+        <SideCardWrapper>
+          <PetCard />
+          <ReadingStatusCard />
+        </SideCardWrapper>
       </ContentWrapper>
     </Container>
   );
@@ -58,11 +62,21 @@ const TitleDescription = styled.p`
 `;
 
 const ContentWrapper = styled.div`
+  width: 100%;
+
   display: flex;
   gap: 24px;
   align-items: flex-start;
   align-self: stretch;
   justify-content: center;
+`;
 
-  width: 100%;
+const SideCardWrapper = styled.div`
+  width: 310px;
+
+  display: flex;
+  gap: 24px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 `;

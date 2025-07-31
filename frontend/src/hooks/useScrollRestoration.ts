@@ -1,5 +1,5 @@
 import { useLocation } from '@tanstack/react-router';
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import useLocalStorage from './useLocalStorage';
 
 const useScrollRestoration = (path: string) => {
@@ -8,12 +8,17 @@ const useScrollRestoration = (path: string) => {
   const { get: getScrollLocation, set: setScrollLocation } =
     useLocalStorage<number>(storageKey, 0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (path !== location.pathname) return;
 
     const scrollLocation = getScrollLocation();
     if (scrollLocation) {
-      window.scrollTo(0, scrollLocation);
+      setTimeout(() => {
+        window.scroll({
+          top: scrollLocation,
+          behavior: 'smooth',
+        });
+      }, 400);
     }
 
     const handleScrollLocation = () => {

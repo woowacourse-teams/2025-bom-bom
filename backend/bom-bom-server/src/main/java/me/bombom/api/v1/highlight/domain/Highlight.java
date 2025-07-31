@@ -23,7 +23,6 @@ public class Highlight extends BaseEntity {
     private Long id;
 
     @Embedded
-    @Column(nullable = false)
     private HighlightLocation highlightLocation;
 
     @Column(nullable = false)

@@ -8,6 +8,7 @@ import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.highlight.domain.Highlight;
@@ -27,7 +28,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
-@Import({HighlightService.class})
+@Import({HighlightService.class, QuerydslConfig.class})
 class HighlightServiceTest {
 
     @Autowired

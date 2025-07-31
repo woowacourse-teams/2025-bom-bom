@@ -16,6 +16,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     @Value("${frontend.base-url}")
     private String frontendBaseUrl;
 
+    @Value("${frontend.local-url}")
+    private String frontendLocalUrl;
+
     @Override
     public void onAuthenticationSuccess(
             HttpServletRequest request,
@@ -25,10 +28,17 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         Member member = oAuth2User.getMember();
 
+        // TODO: 운영 환경 사용 전에 제거
+        String frontendRedirectUrl = frontendBaseUrl;
+        String state = request.getParameter("state");
+        if (state != null && state.contains("env=local")) {
+            frontendRedirectUrl = frontendLocalUrl;
+        }
+
         if (member == null) {
-            response.sendRedirect(frontendBaseUrl + "/signup");
+            response.sendRedirect(frontendRedirectUrl + "/signup");
         } else {
-            response.sendRedirect(frontendBaseUrl + "/");
+            response.sendRedirect(frontendRedirectUrl + "/");
         }
     }
 }

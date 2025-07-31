@@ -5,6 +5,7 @@ import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
 
 public record HighlightResponse(
+        Long highlightId,
         HighlightLocation highlightLocation,
         Long articleId,
         String color,
@@ -18,6 +19,7 @@ public record HighlightResponse(
 
     public static HighlightResponse from(Highlight highlight) {
         return new HighlightResponse(
+                highlight.getId(),
                 highlight.getHighlightLocation(),
                 highlight.getArticleId(),
                 highlight.getColor(),

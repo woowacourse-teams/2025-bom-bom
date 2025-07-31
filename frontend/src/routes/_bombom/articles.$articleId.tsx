@@ -83,24 +83,30 @@ function getTextNodesInRange(range: Range): Text[] {
 }
 
 interface HighlightData {
+  id: string;
+  color: string;
   startXPath: string;
   startOffset: number;
   endXPath: string;
   endOffset: number;
-  color: string;
 }
 
 function saveSelection(selection: Selection): HighlightData {
   const range = selection.getRangeAt(0);
-  const startXPath = getXPathForElement(range.startContainer);
-  const endXPath = getXPathForElement(range.endContainer);
+  const container =
+    range.commonAncestorContainer.nodeType === Node.TEXT_NODE
+      ? range.commonAncestorContainer.parentElement!
+      : (range.commonAncestorContainer as Element);
 
+  const xpath = getXPathForElement(container);
+  const offsets = getOffsetsFromRangeIncludingMarks(container, range); // 변경
   return {
+    startXPath: xpath,
+    startOffset: offsets.start,
+    endXPath: xpath,
+    endOffset: offsets.end,
     color: '#FFEB3B',
-    startXPath,
-    startOffset: range.startOffset,
-    endXPath,
-    endOffset: range.endOffset,
+    id: crypto.randomUUID(),
   };
 }
 
@@ -129,55 +135,88 @@ function highlightNodeSegment(
   parent.replaceChild(frag, node);
 }
 
-function isAlreadyHighlighted(node: Text) {
-  return node.parentNode?.nodeName === 'MARK';
+function getOffsetsFromRangeIncludingMarks(container: Element, range: Range) {
+  let start = -1;
+  let end = -1;
+  let currentOffset = 0;
+
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+
+  while (walker.nextNode()) {
+    const node = walker.currentNode as Text;
+    if (node === range.startContainer)
+      start = currentOffset + range.startOffset;
+    if (node === range.endContainer) end = currentOffset + range.endOffset;
+    currentOffset += node.textContent!.length;
+  }
+  return { start, end };
 }
 
-export function restoreHighlight(data: HighlightData) {
-  const startElement = getElementByXPath(data.startXPath);
-  const endElement = getElementByXPath(data.endXPath);
-  if (!startElement || !endElement) return;
-
+function createRangeFromOffsetsIncludingMarks(
+  container: Element,
+  start: number,
+  end: number,
+) {
   const range = document.createRange();
-  const startTextNode = startElement.firstChild as Text;
-  const endTextNode = endElement.firstChild as Text;
-  range.setStart(startTextNode, data.startOffset);
-  range.setEnd(endTextNode, data.endOffset);
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
 
-  const textNodes = getTextNodesInRange(range);
+  let currentOffset = 0;
+  let startNode: Text | null = null;
+  let endNode: Text | null = null;
+  let startNodeOffset = 0;
+  let endNodeOffset = 0;
 
-  // === 그룹 ID 생성 ===
-  const highlightId = crypto.randomUUID();
+  while (walker.nextNode()) {
+    const node = walker.currentNode as Text;
+    const len = node.textContent!.length;
 
-  // === 단일 노드 ===
-  if (textNodes.length === 1) {
-    const node = textNodes[0];
-    if (!isAlreadyHighlighted(node) && data.startOffset < data.endOffset) {
-      highlightNodeSegment(
-        node,
-        data.startOffset,
-        data.endOffset,
-        data.color,
-        highlightId,
-      );
+    // start node 찾기
+    if (!startNode && start >= currentOffset && start <= currentOffset + len) {
+      startNode = node;
+      startNodeOffset = start - currentOffset;
     }
-    return;
+
+    // end node 찾기
+    if (!endNode && end >= currentOffset && end <= currentOffset + len) {
+      endNode = node;
+      endNodeOffset = end - currentOffset;
+    }
+
+    currentOffset += len;
   }
 
-  // === 여러 노드 ===
-  textNodes.forEach((node, index) => {
-    if (isAlreadyHighlighted(node)) return;
+  if (!startNode || !endNode) throw new Error('Offset 변환 실패');
+  range.setStart(startNode, startNodeOffset);
+  range.setEnd(endNode, endNodeOffset);
 
+  return range;
+}
+
+function restoreHighlight(data: HighlightData) {
+  const element = getElementByXPath(data.startXPath);
+  if (!element) return;
+
+  const range = createRangeFromOffsetsIncludingMarks(
+    element as Element,
+    data.startOffset,
+    data.endOffset,
+  );
+
+  // === 하이라이트 적용 ===
+  const highlightId = data.id || crypto.randomUUID();
+  const textNodes = getTextNodesInRange(range); // mark 제외 처리 가능
+  textNodes.forEach((node, index) => {
     const isFirst = index === 0;
     const isLast = index === textNodes.length - 1;
 
     let start = 0;
     let end = node.textContent!.length;
-    if (isFirst) start = data.startOffset;
-    if (isLast) end = data.endOffset;
+    if (isFirst) start = range.startOffset;
+    if (isLast) end = range.endOffset;
 
-    if (start < end)
+    if (start < end) {
       highlightNodeSegment(node, start, end, data.color, highlightId);
+    }
   });
 }
 
@@ -189,6 +228,7 @@ function ArticleDetailPage() {
   // const containerRef = useRef<HTMLDivElement>(null);
   const [highlights, setHighlights] = useState<HighlightData[]>([]);
   const queryClient = useQueryClient();
+  console.log(highlights);
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
@@ -236,9 +276,7 @@ function ArticleDetailPage() {
         const id = target.dataset.highlightId;
         document
           .querySelectorAll(`mark[data-highlight-id="${id}"]`)
-          .forEach((el) => {
-            el.classList.add('hovered-highlight');
-          });
+          .forEach((el) => el.classList.add('hovered-highlight'));
       }
     });
 
@@ -248,18 +286,15 @@ function ArticleDetailPage() {
         const id = target.dataset.highlightId;
         document
           .querySelectorAll(`mark[data-highlight-id="${id}"]`)
-          .forEach((el) => {
-            el.classList.remove('hovered-highlight');
-          });
+          .forEach((el) => el.classList.remove('hovered-highlight'));
       }
     });
 
-    // Click 시 Floating Toolbar 열기
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (target.tagName === 'MARK' && target.dataset.highlightId) {
-        // openFloatingToolbar(target); // FloatingToolbar 열기 로직 호출
-        console.log('CcCCCCCCClick');
+        // openFloatingToolbar(target); // FloatingToolbar 열기
+        console.log('CCCCCCClick');
       }
     });
   }, []);

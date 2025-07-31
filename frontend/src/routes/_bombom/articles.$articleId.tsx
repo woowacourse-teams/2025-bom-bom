@@ -54,6 +54,38 @@ function getElementByXPath(
   return result.singleNodeValue;
 }
 
+function getTextNodesInRange(range: Range): Text[] {
+  const textNodes: Text[] = [];
+
+  // === 선택된 범위가 단일 TextNode 내부 ===
+  if (
+    range.startContainer === range.endContainer &&
+    range.startContainer.nodeType === Node.TEXT_NODE
+  ) {
+    textNodes.push(range.startContainer as Text);
+    return textNodes;
+  }
+
+  // === 여러 노드일 경우 기존 TreeWalker 사용 ===
+  const walker = document.createTreeWalker(
+    range.commonAncestorContainer,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode(node) {
+        return range.intersectsNode(node)
+          ? NodeFilter.FILTER_ACCEPT
+          : NodeFilter.FILTER_REJECT;
+      },
+    },
+  );
+
+  let node: Node | null;
+  while ((node = walker.nextNode())) {
+    textNodes.push(node as Text);
+  }
+  return textNodes;
+}
+
 interface HighlightData {
   startXPath: string;
   startOffset: number;
@@ -76,24 +108,81 @@ function saveSelection(selection: Selection): HighlightData {
   };
 }
 
-function restoreHighlight(data: HighlightData) {
+function highlightNodeSegment(
+  node: Text,
+  start: number,
+  end: number,
+  color: string,
+  highlightId: string,
+) {
+  const parent = node.parentNode!;
+  const before = node.textContent!.slice(0, start);
+  const middle = node.textContent!.slice(start, end);
+  const after = node.textContent!.slice(end);
+
+  const mark = document.createElement('mark');
+  mark.style.backgroundColor = color;
+  mark.dataset.highlightId = highlightId;
+  mark.textContent = middle;
+
+  const frag = document.createDocumentFragment();
+  if (before) frag.appendChild(document.createTextNode(before));
+  frag.appendChild(mark);
+  if (after) frag.appendChild(document.createTextNode(after));
+
+  parent.replaceChild(frag, node);
+}
+
+function isAlreadyHighlighted(node: Text) {
+  return node.parentNode?.nodeName === 'MARK';
+}
+
+export function restoreHighlight(data: HighlightData) {
   const startElement = getElementByXPath(data.startXPath);
   const endElement = getElementByXPath(data.endXPath);
   if (!startElement || !endElement) return;
 
   const range = document.createRange();
-
-  const startTextNode = startElement.firstChild!;
-  const endTextNode = endElement.firstChild!;
+  const startTextNode = startElement.firstChild as Text;
+  const endTextNode = endElement.firstChild as Text;
   range.setStart(startTextNode, data.startOffset);
   range.setEnd(endTextNode, data.endOffset);
 
-  // === surroundContents 대신 safe replace ===
-  const contents = range.extractContents(); // 선택된 내용을 DOM에서 잘라냄
-  const mark = document.createElement('mark');
-  mark.style.backgroundColor = data.color;
-  mark.appendChild(contents); // 선택 영역을 mark 안에 넣음
-  range.insertNode(mark);
+  const textNodes = getTextNodesInRange(range);
+
+  // === 그룹 ID 생성 ===
+  const highlightId = crypto.randomUUID();
+
+  // === 단일 노드 ===
+  if (textNodes.length === 1) {
+    const node = textNodes[0];
+    if (!isAlreadyHighlighted(node) && data.startOffset < data.endOffset) {
+      highlightNodeSegment(
+        node,
+        data.startOffset,
+        data.endOffset,
+        data.color,
+        highlightId,
+      );
+    }
+    return;
+  }
+
+  // === 여러 노드 ===
+  textNodes.forEach((node, index) => {
+    if (isAlreadyHighlighted(node)) return;
+
+    const isFirst = index === 0;
+    const isLast = index === textNodes.length - 1;
+
+    let start = 0;
+    let end = node.textContent!.length;
+    if (isFirst) start = data.startOffset;
+    if (isLast) end = data.endOffset;
+
+    if (start < end)
+      highlightNodeSegment(node, start, end, data.color, highlightId);
+  });
 }
 
 function ArticleDetailPage() {
@@ -132,6 +221,41 @@ function ArticleDetailPage() {
     throttleMs: 500,
     onTrigger: updateArticleAsRead,
   });
+
+  useEffect(() => {
+    document.addEventListener('mouseover', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'MARK' && target.dataset.highlightId) {
+        const id = target.dataset.highlightId;
+        document
+          .querySelectorAll(`mark[data-highlight-id="${id}"]`)
+          .forEach((el) => {
+            el.classList.add('hovered-highlight');
+          });
+      }
+    });
+
+    document.addEventListener('mouseout', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'MARK' && target.dataset.highlightId) {
+        const id = target.dataset.highlightId;
+        document
+          .querySelectorAll(`mark[data-highlight-id="${id}"]`)
+          .forEach((el) => {
+            el.classList.remove('hovered-highlight');
+          });
+      }
+    });
+
+    // Click 시 Floating Toolbar 열기
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'MARK' && target.dataset.highlightId) {
+        // openFloatingToolbar(target); // FloatingToolbar 열기 로직 호출
+        console.log('CcCCCCCCClick');
+      }
+    });
+  }, []);
 
   if (!currentArticle || !otherArticles) return null;
 

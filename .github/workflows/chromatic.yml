@@ -3,7 +3,12 @@ defaults:
   run:
     working-directory: ./frontend
 
-on: push
+on:
+  push:
+    paths:
+      - 'frontend/**'
+    branches:
+      - client
 
 jobs:
   chromatic:

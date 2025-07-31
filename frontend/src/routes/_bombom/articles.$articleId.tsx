@@ -8,6 +8,7 @@ import Spacing from '@/components/Spacing/Spacing';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
+import { MemoPanel } from '@/pages/detail/components/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { useHighlightManager } from '@/pages/detail/hooks/useHighlightManager';
 import { HighlightType } from '@/pages/detail/types/highlight';
@@ -23,6 +24,8 @@ function ArticleDetailPage() {
   const { articleId } = Route.useParams();
   const [highlights, setHighlights] = useState<HighlightType[]>([]);
   const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  console.log(highlights);
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
@@ -62,6 +65,7 @@ function ArticleDetailPage() {
   return (
     <Container>
       <HeaderWrapper>
+        <button onClick={() => setOpen((open) => !open)}>열기</button>
         <Title>{currentArticle.title}</Title>
         <MetaInfoRow>
           <Chip text={currentArticle.newsletter.category} />
@@ -102,6 +106,13 @@ function ArticleDetailPage() {
           const highlightData = saveSelection(selection);
           setHighlights((prev) => [...prev, highlightData]);
         }}
+      />
+      <MemoPanel
+        open={open}
+        setOpen={setOpen}
+        notes={[{ id: '1', content: 'content', memo: 'memo' }]}
+        handleDeleteNote={(id) => console.log(id)}
+        handleUpdateMemo={(id) => console.log(id)}
       />
     </Container>
   );

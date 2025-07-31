@@ -32,6 +32,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     testImplementation("org.springframework.security:spring-security-test")
 
+    // querydsl
+    implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
+    annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
+    annotationProcessor("jakarta.annotation:jakarta.annotation-api")
+    annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+
     // lombok
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
@@ -54,4 +60,9 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+// Querydsl 생성된 파일 정리
+tasks.named<Delete>("clean") {
+    delete("src/main/generated")
 }

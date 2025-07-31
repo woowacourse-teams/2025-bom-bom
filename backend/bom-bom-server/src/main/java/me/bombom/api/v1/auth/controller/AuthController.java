@@ -3,6 +3,7 @@ package me.bombom.api.v1.auth.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,7 @@ public class AuthController {
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public void signup(@RequestBody MemberSignupRequest signupRequest, HttpServletRequest request) {
+    public void signup(@Valid @RequestBody MemberSignupRequest signupRequest, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session == null) {
             throw new UnauthorizedException(ErrorDetail.MISSING_OAUTH_DATA);

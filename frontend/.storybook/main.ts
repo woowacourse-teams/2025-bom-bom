@@ -16,6 +16,9 @@ const config: StorybookConfig = {
         API_TOKEN: '',
         ENABLE_MSW: 'false',
       }),
+      new webpack.DefinePlugin({
+        'process.env': JSON.stringify(process.env),
+      }),
     );
 
     return {

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import ReadingStatusCardSkeleton from './ReadingStatusCardSkeleton';
 import { getReadingStatus } from '@/apis/members';
 import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
+import { theme } from '@/styles/theme';
 import GoalIcon from '#/assets/goal.svg';
 import StatusIcon from '#/assets/reading-status.svg';
 import StreakIcon from '#/assets/streak.svg';
@@ -26,14 +27,19 @@ function ReadingStatusCard() {
     <Container>
       <TitleWrapper>
         <StatusIconWrapper>
-          <StatusIcon width={20} height={20} />
+          <StatusIcon width={20} height={20} color={theme.colors.white} />
         </StatusIconWrapper>
         <Title>읽기 현황</Title>
       </TitleWrapper>
 
       <StreakWrapper>
         <StreakIconWrapper>
-          <StreakIcon width={34} height={34} />
+          <StreakIcon
+            width={34}
+            height={34}
+            fill={theme.colors.white}
+            color={theme.colors.primary}
+          />
         </StreakIconWrapper>
         <StreakDay>{`${streakReadDay}일`}</StreakDay>
         <StreakDescription>연속 읽기 중!🔥</StreakDescription>

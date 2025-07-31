@@ -7,6 +7,7 @@ import Spacing from '@/components/Spacing/Spacing';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
+import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
 

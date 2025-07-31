@@ -4,7 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import clockIcon from '../../../public/assets/clock.svg';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
-import { useScrollTrigger } from '@/hooks/useScrollTrigger';
+import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { formatDate } from '@/utils/date';
@@ -38,10 +38,10 @@ function ArticleDetailPage() {
     },
   });
 
-  useScrollTrigger({
+  useScrollThreshold({
     enabled: !currentArticle?.isRead && !!currentArticle,
     threshold: 70,
-    delay: 500,
+    throttleMs: 500,
     onTrigger: updateArticleAsRead,
   });
 

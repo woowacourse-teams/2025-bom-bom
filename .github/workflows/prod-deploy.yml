@@ -82,50 +82,23 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Docker 이미지 Pull
-        run: |
-          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod  # ✅ latest → prod
-          sudo docker pull $IMAGE
+       - name: .env file 생성
+          run: |
+          cat <<EOF > .env
+          RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
+          DATABASE=${{ secrets.PROD_DATABASE }}
+          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          EOF
 
-      - name: 이미지 변경 여부 확인
-        id: compare_digest
-        run: |
-          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod  # ✅ latest → prod
-          NEW=$(sudo docker inspect --format='{{.Id}}' "$IMAGE")
-
-          if sudo docker inspect bom-bom &>/dev/null; then
-            CURRENT=$(sudo docker inspect --format='{{.Image}}' bom-bom)
-          else
-            CURRENT="not_found"
-          fi
-
-          echo "new_image_id=$NEW" >> $GITHUB_OUTPUT
-          echo "current_image_id=$CURRENT" >> $GITHUB_OUTPUT
-
-          if [ "$NEW" = "$CURRENT" ]; then
-            echo "Image unchanged. Skipping deployment."
-            echo "skip_deploy=true" >> $GITHUB_ENV
-          else
-            echo "skip_deploy=false" >> $GITHUB_ENV
-          fi
-
-      - name: 컨테이너 제거 및 재실행 (docker-compose)
-        if: env.skip_deploy == 'false'
-        run: |
-          echo "RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}" > .env            # ✅ dev → prod
-          echo "DATABASE=${{ secrets.PROD_DATABASE }}" >> .env                   # ✅ dev → prod
-          echo "MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}" >> .env              # ✅ dev → prod
-          echo "MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}" >> .env      # ✅ dev → prod
-
-          sudo docker compose -f docker-compose-prod.yml --env-file .env down || true
-          sudo docker compose -f docker-compose-prod.yml --env-file .env up -d
-
-          rm .env || true
+      - name: 컨테이너 재실행
+         run: |
+          sudo docker compose \
+            -f docker-compose-prod.yml \
+            --env-file .env \
+            up -d --remove-orphans --pull=always
 
       - name: Docker 리소스 정리
-        if: env.skip_deploy == 'false'
-        run: |
-          echo "Docker 리소스 정리 시작"
+         run: |
           sudo docker container prune -f --filter "until=24h"
-          sudo docker image prune -f --filter "until=24h"
-          echo "리소스 정리 완료"
+          sudo docker image prune     -f --filter "until=24h"

@@ -1,6 +1,8 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
+import clockIcon from '../../../public/assets/clock.svg';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
@@ -221,6 +223,7 @@ function restoreHighlight(data: HighlightData) {
 
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
+  const [highlights, setHighlights] = useState<HighlightData[]>([]);
   const queryClient = useQueryClient();
   console.log(highlights);
 
@@ -251,6 +254,10 @@ function ArticleDetailPage() {
     throttleMs: 500,
     onTrigger: updateArticleAsRead,
   });
+
+  useEffect(() => {
+    highlights.forEach((h) => restoreHighlight(h));
+  }, [highlights]);
 
   useEffect(() => {
     document.addEventListener('mouseover', (e) => {

@@ -1,4 +1,4 @@
-name: 'Chromatic Deployment'
+name: 'Chromatic'
 
 on:
   push:

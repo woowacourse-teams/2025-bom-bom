@@ -3,8 +3,13 @@ name: 'Chromatic Deployment'
 on:
   push:
     paths:
-      - 'frontend/src/**/*.{tsx,ts}'
-      - 'frontend/.storybook/**'
+      - 'frontend/**'
+  pull_request:
+    paths:
+      - 'frontend/**'
+    branches:
+      - main
+      - client
 
 jobs:
   chromatic:

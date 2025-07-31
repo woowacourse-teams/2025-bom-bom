@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { createFileRoute, useLocation } from '@tanstack/react-router';
+import { useState, useRef } from 'react';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
@@ -22,6 +22,8 @@ function ArticleDetailPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(true);
   const [memo, setMemo] = useState('');
+  const location = useLocation();
+  const pathRef = useRef(location.pathname);
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
@@ -51,7 +53,7 @@ function ArticleDetailPage() {
     onTrigger: updateArticleAsRead,
   });
 
-  useScrollRestoration();
+  useScrollRestoration(pathRef.current);
 
   if (!currentArticle || !otherArticles) return null;
 

@@ -107,7 +107,7 @@ jobs:
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
 
           docker compose -f docker-compose-dev.yml --env-file .env down || true
-          docker compose docker-compose-dev.yml --env-file .env up -d
+          docker compose -f docker-compose-dev.yml --env-file .env up -d
           
           rm .env || true
 

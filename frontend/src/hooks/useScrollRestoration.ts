@@ -33,7 +33,13 @@ const useScrollRestoration = (path: string) => {
       setScrollLocation(window.scrollY);
       window.removeEventListener('beforeunload', saveLocation);
     };
-  }, [restoreScroll, getScrollLocation, setScrollLocation]);
+  }, [
+    restoreScroll,
+    getScrollLocation,
+    setScrollLocation,
+    path,
+    location.pathname,
+  ]);
 };
 
 export default useScrollRestoration;

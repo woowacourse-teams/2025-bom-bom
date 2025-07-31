@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { ComponentProps, useState } from 'react';
 import { SelectOption } from './Select.types';
-import ChevronIcon from '../icons/ChevronIcon';
 import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
+import ChevronIcon from '#/assets/chevron.svg';
 
 interface SelectProps<T extends string | number> extends ComponentProps<'div'> {
   options: SelectOption<T>[];
@@ -65,18 +65,19 @@ function Select<T extends string | number>({
 
 const Container = styled.div<{ width: number }>`
   position: relative;
+
   width: ${({ width }) => `${width}px`};
   height: 36px;
 `;
 
 const SelectToggle = styled.div`
-  padding: 8px 12px;
-  border: 1px solid ${({ theme }) => theme.colors.stroke};
-  border-radius: 6px;
-
   display: flex;
   gap: 10px;
   align-items: center;
+
+  padding: 8px 12px;
+  border: 1px solid ${({ theme }) => theme.colors.stroke};
+  border-radius: 6px;
 
   background-color: ${({ theme }) => theme.colors.white};
 
@@ -103,13 +104,14 @@ const SelectMenu = styled.div<{ open: boolean }>`
   top: 100%;
   left: 0;
   z-index: 10;
+
+  display: ${({ open }) => (open ? 'block' : 'none')};
+
   width: 100%;
   margin-top: 6px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 6px;
   box-shadow: 0 4px 6px 0 rgb(0 0 0 / 9%);
-
-  display: ${({ open }) => (open ? 'block' : 'none')};
 
   background: white;
 
@@ -118,14 +120,14 @@ const SelectMenu = styled.div<{ open: boolean }>`
 `;
 
 const SelectMenuWrapper = styled.ul`
-  width: 100%;
-  padding: 4px;
-  border-radius: 6px;
-
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   align-self: stretch;
+
+  width: 100%;
+  padding: 4px;
+  border-radius: 6px;
 
   background-color: ${({ theme }) => theme.colors.white};
 `;
@@ -137,6 +139,7 @@ const SelectMenuItem = styled.li<{ selected: boolean }>`
 
   background-color: ${({ theme, selected }) =>
     selected ? theme.colors.primaryLight : theme.colors.white};
+
   font: ${({ theme }) => theme.fonts.caption};
 
   cursor: pointer;

@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import StorageIcon from '../../components/icons/StorageIcon';
 import SearchInput from '../../components/SearchInput/SearchInput';
 import Select from '../../components/Select/Select';
 import CategoryFilter from '../../pages/storage/components/CategoryFilter/CategoryFilter';
@@ -13,6 +12,7 @@ import EmptySearchCard from '@/pages/storage/components/EmptySearchCard/EmptySea
 import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
+import StorageIcon from '#/assets/storage.svg';
 
 export const Route = createFileRoute('/_bombom/storage')({
   component: Storage,
@@ -116,14 +116,14 @@ function Storage() {
 }
 
 const Container = styled.div`
-  width: 100%;
-  max-width: 1280px;
-  padding: 64px 0;
-
   display: flex;
   gap: 24px;
   align-items: flex-start;
   justify-content: center;
+
+  width: 100%;
+  max-width: 1280px;
+  padding: 64px 0;
 `;
 
 const SideSection = styled.div`
@@ -131,12 +131,12 @@ const SideSection = styled.div`
 `;
 
 const MainSection = styled.div`
-  width: 100%;
-
   display: flex;
   gap: 20px;
   flex-direction: column;
   align-items: flex-start;
+
+  width: 100%;
 `;
 
 const TitleWrapper = styled.div`
@@ -146,14 +146,14 @@ const TitleWrapper = styled.div`
 `;
 
 const TitleIconBox = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   width: 28px;
   height: 28px;
   padding: 6px;
   border-radius: 14px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
   background-color: ${({ theme }) => theme.colors.primary};
 `;
@@ -163,11 +163,11 @@ const Title = styled.h1`
 `;
 
 const SummaryBar = styled.div`
-  width: 100%;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  width: 100%;
 `;
 
 const SummaryText = styled.p`

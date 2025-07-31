@@ -2,8 +2,8 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import ReadingStatusCardSkeleton from './ReadingStatusCardSkeleton';
 import { getReadingStatus } from '@/apis/members';
-import GoalIcon from '@/components/icons/GoalIcon';
 import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
+import GoalIcon from '#/assets/goal.svg';
 import StatusIcon from '#/assets/reading-status.svg';
 import StreakIcon from '#/assets/streak.svg';
 

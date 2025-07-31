@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
-import ArrowIcon from '@/components/icons/ArrowIcon';
-import CompassIcon from '@/components/icons/CompassIcon';
-import PostboxIcon from '@/components/icons/PostboxIcon';
+import ArrowIcon from '#/assets/arrow.svg';
+import CompassIcon from '#/assets/compass.svg';
+import PostboxIcon from '#/assets/postbox.svg';
 
 interface EmptyLetterCardProps {
   title: string;
@@ -36,13 +36,13 @@ function EmptyLetterCard({ title }: EmptyLetterCardProps) {
 export default EmptyLetterCard;
 
 const Container = styled.section`
-  width: 100%;
-
   display: flex;
   gap: 22px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
+  width: 100%;
 `;
 
 const PostboxIconWrapper = styled.div`
@@ -52,6 +52,7 @@ const PostboxIconWrapper = styled.div`
 const EmptyTitle = styled.h2`
   background: linear-gradient(90deg, #181818 0%, #f96 100%);
   background-clip: text;
+
   font: ${({ theme }) => theme.fonts.heading2};
   text-align: center;
 
@@ -77,15 +78,16 @@ const Support = styled.p`
 `;
 
 const LinkButton = styled(Link)`
-  padding: 10px 12px;
-  border-radius: 12px;
-
   display: flex;
   gap: 4px;
   align-items: center;
   justify-content: center;
 
+  padding: 10px 12px;
+  border-radius: 12px;
+
   background: ${({ theme }) => theme.colors.primary};
+
   color: ${({ theme }) => theme.colors.white};
   font: ${({ theme }) => theme.fonts.body1};
 

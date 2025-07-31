@@ -2,14 +2,14 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import Button from '../Button/Button';
-import CompassIcon from '../icons/CompassIcon';
-import HomeIcon from '../icons/HomeIcon';
-import StorageIcon from '../icons/StorageIcon';
 import { getUserInfo } from '@/apis/members';
 import { NavType } from '@/types/nav';
 import { copyToClipboard } from '@/utils/copy';
 import defaultImage from '#/assets/bombom.png';
+import CompassIcon from '#/assets/compass.svg';
 import CopyIcon from '#/assets/copy.svg';
+import HomeIcon from '#/assets/home.svg';
+import StorageIcon from '#/assets/storage.svg';
 
 interface HeaderProps {
   activeNav: NavType;

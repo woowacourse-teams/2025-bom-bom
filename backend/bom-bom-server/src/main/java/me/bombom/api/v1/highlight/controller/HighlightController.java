@@ -51,7 +51,6 @@ public class HighlightController {
     }
 
     @PatchMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeHighlightColor(
             @LoginMember Member member,
             @PathVariable Long id,

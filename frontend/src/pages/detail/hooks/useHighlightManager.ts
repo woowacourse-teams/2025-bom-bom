@@ -30,21 +30,12 @@ export const useHighlightManager = (highlights: HighlightType[]) => {
       }
     };
 
-    const handleClick = (e: Event) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'MARK' && target.dataset.highlightId) {
-        console.log('CCCCCCClick'); // → openFloatingToolbar(target) 같은 UI 호출 가능
-      }
-    };
-
     document.addEventListener('mouseover', handleMouseOver);
     document.addEventListener('mouseout', handleMouseOut);
-    document.addEventListener('click', handleClick);
 
     return () => {
       document.removeEventListener('mouseover', handleMouseOver);
       document.removeEventListener('mouseout', handleMouseOut);
-      document.removeEventListener('click', handleClick);
     };
   }, []);
 };

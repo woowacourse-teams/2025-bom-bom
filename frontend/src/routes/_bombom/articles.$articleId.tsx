@@ -1,13 +1,13 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import ClockIcon from '#/assets/clock.svg';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { formatDate } from '@/utils/date';
+import ClockIcon from '#/assets/clock.svg';
 
 export const Route = createFileRoute('/_bombom/articles/$articleId')({
   component: ArticleDetailPage,

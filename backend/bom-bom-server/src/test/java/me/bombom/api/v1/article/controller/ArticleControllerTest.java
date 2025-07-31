@@ -261,7 +261,8 @@ class ArticleControllerTest {
 
         // when & then
         MvcResult result = mockMvc.perform(get("/api/v1/articles")
-                        .param("sorted", "asc"))
+                        .param("sort", "arrivedDateTime")
+                        .param("direction", "asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.totalElements").value(4))

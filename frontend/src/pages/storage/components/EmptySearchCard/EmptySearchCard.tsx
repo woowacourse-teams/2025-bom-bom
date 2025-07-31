@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import EmptySearchIcon from '@/components/icons/EmptySearchIcon';
+import EmptySearchIcon from '#/assets/empty-search.svg';
 
 interface EmptySearchCardProps {
   searchQuery: string;
@@ -27,13 +27,13 @@ function EmptySearchCard({ searchQuery }: EmptySearchCardProps) {
 export default EmptySearchCard;
 
 const Container = styled.section`
-  width: 100%;
-
   display: flex;
   gap: 22px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
+  width: 100%;
 `;
 
 const EmptySearchIconWrapper = styled.div`
@@ -43,6 +43,7 @@ const EmptySearchIconWrapper = styled.div`
 const EmptyTitle = styled.h2`
   background: linear-gradient(90deg, #181818 0%, #f96 100%);
   background-clip: text;
+
   font: ${({ theme }) => theme.fonts.heading2};
   text-align: center;
 

@@ -5,7 +5,7 @@ import Badge from '@/components/Badge/Badge';
 import Chip from '@/components/Chip/Chip';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { formatDate } from '@/utils/date';
-import clockIcon from '#/assets/clock.svg';
+import ClockIcon from '#/assets/clock.svg';
 
 type ReadVariantType = 'transparent' | 'badge';
 
@@ -44,7 +44,7 @@ function ArticleCard({ data, readVariant = 'transparent' }: ArticleCardProps) {
           <MetaInfoText>from {newsletterName}</MetaInfoText>
           <MetaInfoText>{formatDate(new Date(arrivedDateTime))}</MetaInfoText>
           <ReadTimeBox>
-            <img src={clockIcon} alt="시계 아이콘" />
+            <ClockIcon width={16} height={16} />
             <MetaInfoText>{`${expectedReadTime}분`}</MetaInfoText>
           </ReadTimeBox>
         </MetaInfoRow>
@@ -70,17 +70,18 @@ const Container = styled(Link)<{
   isRead: boolean;
   readVariant: ReadVariantType;
 }>`
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
   padding: 20px;
   border-bottom: ${({ theme, isRead }) =>
     `${isRead ? '0' : '4px'} solid ${theme.colors.primary}`};
   border-radius: 20px;
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%);
 
-  display: flex;
-  gap: 12px;
-  align-items: center;
-
   background-color: ${({ theme }) => theme.colors.white};
+
   color: inherit;
 
   box-sizing: border-box;
@@ -92,12 +93,12 @@ const Container = styled(Link)<{
 `;
 
 const InfoWrapper = styled.div`
-  width: 100%;
-
   display: flex;
   gap: 12px;
   flex-direction: column;
   align-items: flex-start;
+
+  width: 100%;
 `;
 
 const Title = styled.h2`
@@ -139,11 +140,11 @@ const ThumbnailWrapper = styled.div`
 `;
 
 const Thumbnail = styled(ImageWithFallback)`
-  width: 126px;
-  border-radius: 12px;
-
   flex-shrink: 0;
   align-self: stretch;
+
+  width: 126px;
+  border-radius: 12px;
 
   aspect-ratio: 1 / 1;
   object-fit: cover;

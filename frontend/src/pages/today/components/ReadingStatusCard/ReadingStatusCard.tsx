@@ -2,10 +2,10 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import ReadingStatusCardSkeleton from './ReadingStatusCardSkeleton';
 import { getReadingStatus } from '@/apis/members';
-import GoalIcon from '@/components/icons/GoalIcon';
 import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
-import statusIcon from '#/assets/reading-status.svg';
-import streakIcon from '#/assets/streak.svg';
+import GoalIcon from '#/assets/goal.svg';
+import StatusIcon from '#/assets/reading-status.svg';
+import StreakIcon from '#/assets/streak.svg';
 
 function ReadingStatusCard() {
   const { data, isLoading } = useQuery({
@@ -26,14 +26,14 @@ function ReadingStatusCard() {
     <Container>
       <TitleWrapper>
         <StatusIconWrapper>
-          <img src={statusIcon} alt="현황 아이콘" />
+          <StatusIcon width={20} height={20} />
         </StatusIconWrapper>
         <Title>읽기 현황</Title>
       </TitleWrapper>
 
       <StreakWrapper>
         <StreakIconWrapper>
-          <StreakIconImage src={streakIcon} alt="연속 읽기 아이콘" />
+          <StreakIcon width={34} height={34} />
         </StreakIconWrapper>
         <StreakDay>{`${streakReadDay}일`}</StreakDay>
         <StreakDescription>연속 읽기 중!🔥</StreakDescription>
@@ -66,12 +66,6 @@ function ReadingStatusCard() {
 export default ReadingStatusCard;
 
 const Container = styled.section`
-  width: 310px;
-  padding: 34px 30px;
-  border: 1px solid ${({ theme }) => theme.colors.white};
-  border-radius: 20px;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 15%);
-
   display: flex;
   gap: 26px;
   flex-direction: column;
@@ -79,34 +73,34 @@ const Container = styled.section`
   align-items: center;
   justify-content: center;
 
+  width: 310px;
+  padding: 34px 30px;
+  border: 1px solid ${({ theme }) => theme.colors.white};
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 15%);
+
   background-color: ${({ theme }) => theme.colors.white};
 `;
 
 const TitleWrapper = styled.div`
-  width: 100%;
-
   display: flex;
   gap: 10px;
   align-items: center;
+
+  width: 100%;
 `;
 
 const StatusIconWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   width: 32px;
   height: 32px;
   padding: 6px;
   border-radius: 14px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   background-color: ${({ theme }) => theme.colors.primary};
-`;
-
-const StreakIconImage = styled.img`
-  filter: drop-shadow(0 0 8px rgb(255 153 102 / 50%))
-    drop-shadow(0 0 16px rgb(255 153 102 / 30%))
-    drop-shadow(0 0 16px rgb(255 153 102 / 20%));
 `;
 
 const Title = styled.h2`
@@ -124,14 +118,14 @@ const StreakWrapper = styled.div`
 `;
 
 const StreakIconWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   width: 70px;
   height: 70px;
   padding: 18px;
   border-radius: 36px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
   background-color: ${({ theme }) => theme.colors.primaryLight};
 `;
@@ -153,6 +147,7 @@ const StreakHelperText = styled.div`
   border-radius: 8px;
 
   background-color: ${({ theme }) => theme.colors.primary};
+
   color: ${({ theme }) => theme.colors.white};
   font: ${({ theme }) => theme.fonts.body2};
   text-align: center;

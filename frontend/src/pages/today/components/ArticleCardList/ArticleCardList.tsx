@@ -2,8 +2,9 @@ import styled from '@emotion/styled';
 import ArticleCard from '../ArticleCard/ArticleCard';
 import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
 import { Article } from '@/pages/today/types/article';
-import checkIcon from '#/assets/check.svg';
-import letterIcon from '#/assets/letter.svg';
+import { theme } from '@/styles/theme';
+import CheckIcon from '#/assets/check.svg';
+import LetterIcon from '#/assets/letter.svg';
 
 interface ArticleCardListProps {
   articles: Article[];
@@ -25,7 +26,7 @@ function ArticleCardList({ articles }: ArticleCardListProps) {
   return (
     <Container>
       <ListTitleBox>
-        <img src={letterIcon} alt="새로운 뉴스레터 타이틀 이미지" />
+        <LetterIcon width={32} height={32} color={theme.colors.white} />
         <ListTitle>새로운 뉴스레터 ({grouped.unread.length}개)</ListTitle>
       </ListTitleBox>
       <CardList>
@@ -36,7 +37,7 @@ function ArticleCardList({ articles }: ArticleCardListProps) {
         ))}
       </CardList>
       <ListTitleBox>
-        <img src={checkIcon} alt="새로운 뉴스레터 타이틀 이미지" />
+        <CheckIcon width={32} height={32} color={theme.colors.black} />
         <ListTitle>읽은 뉴스레터 ({grouped.read.length}개)</ListTitle>
       </ListTitleBox>
       <CardList>

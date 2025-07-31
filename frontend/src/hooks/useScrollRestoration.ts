@@ -33,11 +33,11 @@ const useScrollRestoration = (path: string) => {
     const saveLocation = () => {
       setScrollLocation(window.scrollY);
     };
-    window.addEventListener('beforeunload', saveLocation);
+    window.addEventListener('visibilitychange', saveLocation);
 
     return () => {
       setScrollLocation(window.scrollY);
-      window.removeEventListener('beforeunload', saveLocation);
+      window.removeEventListener('visibilitychange', saveLocation);
     };
   }, [
     restoreScroll,

@@ -19,6 +19,16 @@ export default function FloatingToolbar({ onSave }: FloatingToolBarProps) {
   const [position, setPosition] = useState<ToolbarPosition>({ x: 0, y: 0 });
 
   useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'MARK' && target.dataset.highlightId) {
+        const highlightId = target.dataset.highlightId;
+        console.log('하이라이트 클릭됨', highlightId);
+        setIsVisible(true);
+        // TODO: 하이라이트 클릭 시 toolbar 열기 or 편집 모드
+      }
+    };
+
     const handleMouseUp = () => {
       const selection = window.getSelection();
       if (selection && !selection.isCollapsed) {
@@ -36,8 +46,12 @@ export default function FloatingToolbar({ onSave }: FloatingToolBarProps) {
       }
     };
 
+    document.addEventListener('click', handleClick);
     document.addEventListener('mouseup', handleMouseUp);
-    return () => document.removeEventListener('mouseup', handleMouseUp);
+    return () => {
+      document.removeEventListener('click', handleClick);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
   }, []);
 
   return (

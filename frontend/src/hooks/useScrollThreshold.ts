@@ -21,9 +21,9 @@ export function useScrollThreshold({
     if (!enabled) return;
 
     const scrollPercent = getScrollPercent();
-    const elapsed = Date.now() - startTimeRef.current;
+    const durationMs = Date.now() - startTimeRef.current;
 
-    if (scrollPercent >= threshold && elapsed >= throttleMs) {
+    if (scrollPercent >= threshold && durationMs >= throttleMs) {
       onTrigger();
     }
   }, 500);

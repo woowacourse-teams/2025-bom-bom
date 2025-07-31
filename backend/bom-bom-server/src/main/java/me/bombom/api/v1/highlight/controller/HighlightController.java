@@ -5,9 +5,11 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
 import me.bombom.api.v1.highlight.service.HighlightService;
+import me.bombom.api.v1.member.domain.Member;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,28 +33,30 @@ public class HighlightController {
 
     @GetMapping
     public List<HighlightResponse> getHighlight(
+            @LoginMember Member member,
             @RequestParam @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     ) {
-        return highlightService.getHighlights(articleId);
+        return highlightService.getHighlights(articleId, member);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createHighlight(@Valid @RequestBody HighlightCreateRequest createRequest) {
-        highlightService.create(createRequest);
+    public void createHighlight(@LoginMember Member member, @Valid @RequestBody HighlightCreateRequest createRequest) {
+        highlightService.create(createRequest, member);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteHighlight(@PathVariable Long id) {
-        highlightService.delete(id);
+    public void deleteHighlight(@LoginMember Member member, @PathVariable Long id) {
+        highlightService.delete(id, member);
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeHighlightColor(
+            @LoginMember Member member,
             @PathVariable Long id,
             @Pattern(regexp = COLOR_HEX_PATTERN) @RequestBody String color
     ) {
-        highlightService.changeColor(id, color);
+        highlightService.changeColor(id, color, member);
     }
 }

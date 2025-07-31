@@ -1,4 +1,4 @@
-package me.bombom.api.v1.highlight.dto;
+package me.bombom.api.v1.highlight.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;

@@ -1,12 +1,12 @@
-package me.bombom.api.v1.highlight.dto;
+package me.bombom.api.v1.highlight.dto.response;
 
 import java.util.List;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
 
 public record HighlightResponse(
-        Long highlightId,
-        HighlightLocation highlightLocation,
+        Long id,
+        HighlightLocation location,
         Long articleId,
         String color,
         String text

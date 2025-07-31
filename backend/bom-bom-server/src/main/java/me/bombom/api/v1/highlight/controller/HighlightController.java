@@ -5,8 +5,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.highlight.dto.HighlightCreateRequest;
-import me.bombom.api.v1.highlight.dto.HighlightResponse;
+import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
+import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
 import me.bombom.api.v1.highlight.service.HighlightService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,8 +27,6 @@ public class HighlightController {
 
     private final HighlightService highlightService;
 
-    //DELETE, PATCH(COLOR만). 조회 시 Id를 줘야 하는지
-
     @GetMapping
     public List<HighlightResponse> getHighlight(
             @RequestParam @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
@@ -38,7 +36,7 @@ public class HighlightController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createHighlight(@RequestBody HighlightCreateRequest createRequest) {
+    public void createHighlight(@Valid @RequestBody HighlightCreateRequest createRequest) {
         highlightService.create(createRequest);
     }
 
@@ -49,7 +47,10 @@ public class HighlightController {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void changeHighlightColor(@PathVariable Long id, @Pattern(regexp = "^#?[0-9a-fA-F]{6}$") @RequestBody String color) {
+    public void changeHighlightColor(
+            @PathVariable Long id,
+            @Pattern(regexp = "^#[0-9a-fA-F]{6}$") @RequestBody String color
+    ) {
         highlightService.changeColor(id, color);
     }
 }

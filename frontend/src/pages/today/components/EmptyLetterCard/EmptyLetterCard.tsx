@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
-import ArrowIcon from '#/assets/arrow.svg';
+
+import ArrowIcon from '@/components/icons/ArrowIcon';
 import CompassIcon from '#/assets/compass.svg';
 import PostboxIcon from '#/assets/postbox.svg';
 

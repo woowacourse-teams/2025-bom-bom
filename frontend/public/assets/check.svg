@@ -2,7 +2,7 @@
   <rect x="0.670532" y="0.388428" width="28" height="28" rx="12.75" fill="#F1F5F9" />
   <path
     d="M20.3878 13.2219C20.6542 14.5293 20.4643 15.8885 19.8499 17.0729C19.2354 18.2573 18.2335 19.1952 17.0112 19.7303C15.7889 20.2654 14.4201 20.3653 13.133 20.0133C11.846 19.6613 10.7186 18.8787 9.93869 17.796C9.15882 16.7134 8.77368 15.3961 8.8475 14.0639C8.92132 12.7316 9.44963 11.4649 10.3443 10.4751C11.239 9.48519 12.446 8.83196 13.7641 8.62431C15.0821 8.41665 16.4315 8.66713 17.5872 9.33396"
-    stroke="#45556C" stroke-width="1.16667" stroke-linecap="round" stroke-linejoin="round" />
-  <path d="M12.9205 13.805L14.6705 15.555L20.5039 9.72168" stroke="#45556C" stroke-width="1.16667"
+    stroke="currentColor" stroke-width="1.16667" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M12.9205 13.805L14.6705 15.555L20.5039 9.72168" stroke="currentColor" stroke-width="1.16667"
     stroke-linecap="round" stroke-linejoin="round" />
 </svg>

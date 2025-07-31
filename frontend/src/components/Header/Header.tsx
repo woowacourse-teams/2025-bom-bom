@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import Button from '../Button/Button';
 import { getUserInfo } from '@/apis/members';
+import { theme } from '@/styles/theme';
 import { NavType } from '@/types/nav';
 import { copyToClipboard } from '@/utils/copy';
 import defaultImage from '#/assets/bombom.png';
@@ -38,7 +39,7 @@ export default function Header({ activeNav }: HeaderProps) {
       <HeaderInner>
         <LogoWrapper to="/">
           <LogoBox>
-            <HomeIcon width={24} height={24} color="white" />
+            <HomeIcon width={24} height={24} color={theme.colors.white} />
           </LogoBox>
           <TitleBox>
             <Title>봄봄</Title>

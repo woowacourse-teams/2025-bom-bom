@@ -12,6 +12,7 @@ import EmptySearchCard from '@/pages/storage/components/EmptySearchCard/EmptySea
 import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
+import { theme } from '@/styles/theme';
 import StorageIcon from '#/assets/storage.svg';
 
 export const Route = createFileRoute('/_bombom/storage')({
@@ -72,7 +73,7 @@ function Storage() {
       <MainSection>
         <TitleWrapper>
           <TitleIconBox>
-            <StorageIcon color="white" />
+            <StorageIcon color={theme.colors.white} />
           </TitleIconBox>
           <Title>뉴스레터 보관함</Title>
         </TitleWrapper>

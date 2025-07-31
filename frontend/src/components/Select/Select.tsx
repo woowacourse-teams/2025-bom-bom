@@ -2,7 +2,9 @@ import styled from '@emotion/styled';
 import { ComponentProps, useState } from 'react';
 import { SelectOption } from './Select.types';
 import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
-import ChevronIcon from '#/assets/chevron.svg';
+import { theme } from '@/styles/theme';
+import ChevronDownIcon from '#/assets/chevron-down.svg';
+import ChevronUpIcon from '#/assets/chevron-up.svg';
 
 interface SelectProps<T extends string | number> extends ComponentProps<'div'> {
   options: SelectOption<T>[];
@@ -39,11 +41,11 @@ function Select<T extends string | number>({
         <SelectText selected={selectedValue !== null}>
           {selectedLabel ?? placeholder}
         </SelectText>
-        <ChevronIcon
-          width={16}
-          targetDirection={open ? 'up' : 'down'}
-          currentDirection="down"
-        />
+        {open ? (
+          <ChevronUpIcon width={16} color={theme.colors.black} />
+        ) : (
+          <ChevronDownIcon width={16} color={theme.colors.black} />
+        )}
       </SelectToggle>
       <SelectMenu open={open}>
         <SelectMenuWrapper role="listbox">

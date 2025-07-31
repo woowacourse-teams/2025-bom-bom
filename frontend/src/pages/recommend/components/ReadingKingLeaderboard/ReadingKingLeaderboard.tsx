@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import ArrowIcon from '#/assets/arrow.svg';
+import ArrowIcon from '@/components/icons/ArrowIcon';
 import AvatarIcon from '#/assets/avatar.svg';
 
 // Mock data for the leaderboard

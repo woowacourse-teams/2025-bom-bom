@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
+import Spacing from '@/components/Spacing/Spacing';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
@@ -71,6 +72,7 @@ function ArticleDetailPage() {
       <ContentWrapper
         dangerouslySetInnerHTML={{ __html: currentArticle.contents ?? '' }}
       />
+      <Spacing size={24} />
       <Divider />
       <ContentDescription>
         이 뉴스레터가 유용했다면 동료들과 공유해주세요. 피드백이나 제안사항이
@@ -116,7 +118,7 @@ const HeaderWrapper = styled.div`
 
 const Title = styled.h2`
   color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.heading1};
+  font: ${({ theme }) => theme.fonts.heading2};
 `;
 
 const MetaInfoRow = styled.div`
@@ -166,7 +168,7 @@ const TodayArticleTitle = styled.h3`
   align-self: flex-start;
 
   color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.heading3};
+  font: ${({ theme }) => theme.fonts.heading4};
 `;
 
 const TodayArticleList = styled.div`

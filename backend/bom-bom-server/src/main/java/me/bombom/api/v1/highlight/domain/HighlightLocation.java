@@ -5,8 +5,8 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 public record HighlightLocation(
         String startOffset,
-        String startPath,
+        String startXPath,
         String endOffset,
-        String endPath
+        String endXPath
 ) {
 }

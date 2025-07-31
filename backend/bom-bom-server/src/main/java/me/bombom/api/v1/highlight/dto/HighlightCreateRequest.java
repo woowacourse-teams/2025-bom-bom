@@ -1,12 +1,16 @@
 package me.bombom.api.v1.highlight.dto;
 
-public record HighlightCreateRequest(
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
+
+public record HighlightCreateRequest( //
         String startOffset,
-        String startPath,
+        String startXPath,
         String endOffset,
-        String endPath,
-        Long articleId,
-        String color,
-        String text
+        String endXPath,
+        @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId,
+        @Pattern(regexp = "^#[0-9a-fA-F]{6}$") String color,
+        @NotNull String text
 ) {
 }

@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
@@ -10,11 +10,9 @@ import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnre
 import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
+import { useHighlightManager } from '@/pages/detail/hooks/useHighlightManager';
 import { HighlightType } from '@/pages/detail/types/highlight';
-import {
-  restoreHighlight,
-  saveSelection,
-} from '@/pages/detail/utils/highlight';
+import { saveSelection } from '@/pages/detail/utils/highlight';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
 
@@ -56,40 +54,7 @@ function ArticleDetailPage() {
     throttleMs: 500,
     onTrigger: updateArticleAsRead,
   });
-
-  useEffect(() => {
-    highlights.forEach((h) => restoreHighlight(h));
-  }, [highlights]);
-
-  useEffect(() => {
-    document.addEventListener('mouseover', (e) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'MARK' && target.dataset.highlightId) {
-        const id = target.dataset.highlightId;
-        document
-          .querySelectorAll(`mark[data-highlight-id="${id}"]`)
-          .forEach((el) => el.classList.add('hovered-highlight'));
-      }
-    });
-
-    document.addEventListener('mouseout', (e) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'MARK' && target.dataset.highlightId) {
-        const id = target.dataset.highlightId;
-        document
-          .querySelectorAll(`mark[data-highlight-id="${id}"]`)
-          .forEach((el) => el.classList.remove('hovered-highlight'));
-      }
-    });
-
-    document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'MARK' && target.dataset.highlightId) {
-        // openFloatingToolbar(target); // FloatingToolbar 열기
-        console.log('CCCCCCClick');
-      }
-    });
-  }, []);
+  useHighlightManager(highlights);
 
   if (!currentArticle || !otherArticles) return null;
 

@@ -45,9 +45,9 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             GetArticlesOptions options,
             Pageable pageable
     ) {
-        Long total = getTotal(memberId, options);
+        JPAQuery<Long> totalQuery = getTotalQuery(memberId, options);
         List<ArticleResponse> content = getContent(memberId, options, pageable);
-        return new PageImpl<>(content, pageable, total);
+        return PageableExecutionUtils.getPage(content, pageable, totalQuery::fetchOne);
     }
 
     @Override
@@ -73,15 +73,14 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .intValue();
     }
 
-    private Long getTotal(Long memberId, GetArticlesOptions options) {
+    private JPAQuery<Long> getTotalQuery(Long memberId, GetArticlesOptions options) {
         return jpaQueryFactory.select(article.count())
                 .from(article)
                 .join(newsletter).on(article.newsletterId.eq(newsletter.id))
                 .join(category).on(newsletter.categoryId.eq(category.id))
                 .where(createMemberWhereClause(memberId))
                 .where(createDateWhereClause(options.date()))
-                .where(createKeywordWhereClause(options.keyword()))
-                .fetchOne();
+                .where(createKeywordWhereClause(options.keyword()));
     }
 
     private List<ArticleResponse> getContent(Long memberId, GetArticlesOptions options, Pageable pageable) {

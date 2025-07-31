@@ -34,7 +34,7 @@ jobs:
           echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
 
       - name: JAR 빌드
-        run: ./gradlew build --no-daemon
+        run: ./gradlew clean build --no-daemon
 
       - name: Docker Buildx 설정
         uses: docker/setup-buildx-action@v3

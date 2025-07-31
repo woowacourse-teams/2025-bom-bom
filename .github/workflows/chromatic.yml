@@ -1,4 +1,7 @@
 name: 'Chromatic'
+defaults:
+  run:
+    working-directory: ./frontend
 
 on: push
 

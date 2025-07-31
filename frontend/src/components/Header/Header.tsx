@@ -38,7 +38,7 @@ export default function Header({ activeNav }: HeaderProps) {
       <HeaderInner>
         <LogoWrapper to="/">
           <LogoBox>
-            <HomeIcon />
+            <HomeIcon width={24} height={24} color="white" />
           </LogoBox>
           <TitleBox>
             <Title>봄봄</Title>
@@ -48,7 +48,11 @@ export default function Header({ activeNav }: HeaderProps) {
 
         <Nav>
           <NavButton active={activeNav === 'today'} to="/">
-            <HomeIcon color={activeNav === 'today' ? 'white' : 'black'} />
+            <HomeIcon
+              width={24}
+              height={24}
+              color={activeNav === 'today' ? 'white' : 'black'}
+            />
             <p>오늘의 뉴스레터</p>
           </NavButton>
           <NavButton active={activeNav === 'storage'} to="/storage">

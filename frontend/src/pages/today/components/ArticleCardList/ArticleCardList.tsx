@@ -25,7 +25,7 @@ function ArticleCardList({ articles }: ArticleCardListProps) {
   return (
     <Container>
       <ListTitleBox>
-        <LetterIcon width={16} height={16} />
+        <LetterIcon width={32} height={32} />
         <ListTitle>새로운 뉴스레터 ({grouped.unread.length}개)</ListTitle>
       </ListTitleBox>
       <CardList>
@@ -36,7 +36,7 @@ function ArticleCardList({ articles }: ArticleCardListProps) {
         ))}
       </CardList>
       <ListTitleBox>
-        <CheckIcon width={16} height={16} />
+        <CheckIcon width={32} height={32} />
         <ListTitle>읽은 뉴스레터 ({grouped.read.length}개)</ListTitle>
       </ListTitleBox>
       <CardList>

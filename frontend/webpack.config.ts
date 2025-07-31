@@ -70,6 +70,7 @@ export default (env, argv) => {
       tanstackRouter({
         target: 'react',
         autoCodeSplitting: true,
+        semicolons: true,
       }),
       new webpack.DefinePlugin({
         'process.env': JSON.stringify(process.env),

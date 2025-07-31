@@ -5,7 +5,7 @@ import useLocalStorage from './useLocalStorage';
 const useScrollRestoration = (path: string) => {
   const location = useLocation();
   const storageKey = `scroll-${location.pathname}`;
-  const { get: getScrollLocation, set: setScrollLocation } =
+  const { data: scrollLocation, set: setScrollLocation } =
     useLocalStorage<number>(storageKey, 0);
   const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -25,7 +25,6 @@ const useScrollRestoration = (path: string) => {
   useLayoutEffect(() => {
     if (path !== location.pathname) return;
 
-    const scrollLocation = getScrollLocation();
     if (scrollLocation) {
       restoreScroll(scrollLocation);
     }
@@ -40,11 +39,11 @@ const useScrollRestoration = (path: string) => {
       window.removeEventListener('visibilitychange', saveLocation);
     };
   }, [
-    restoreScroll,
-    getScrollLocation,
-    setScrollLocation,
     path,
     location.pathname,
+    scrollLocation,
+    restoreScroll,
+    setScrollLocation,
   ]);
 };
 

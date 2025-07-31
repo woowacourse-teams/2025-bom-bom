@@ -20,8 +20,6 @@ const useLocalStorage = <T extends SerializableType>(
 
   const [data, setData] = useState<T>(getInitStorage);
 
-  const get = useCallback(() => data, [data]);
-
   const set = useCallback(
     (value: T) => {
       setData(value);
@@ -36,7 +34,7 @@ const useLocalStorage = <T extends SerializableType>(
   }, [storage, key, defaultData]);
 
   return {
-    get,
+    data,
     set,
     remove,
   };

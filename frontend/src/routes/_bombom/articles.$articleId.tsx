@@ -338,9 +338,7 @@ function ArticleDetailPage() {
       </TodayArticlesWrapper>
       <FloatingToolbar
         onSave={(selection) => {
-          console.log(selection);
           const highLightData = saveSelection(selection);
-          // console.log(highLightData);
           setHighlights((prev) => [...prev, highLightData]);
         }}
       />

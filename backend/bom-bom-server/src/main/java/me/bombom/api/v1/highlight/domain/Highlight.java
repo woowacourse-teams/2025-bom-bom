@@ -45,4 +45,8 @@ public class Highlight extends BaseEntity {
         this.color = color;
         this.text = text;
     }
+
+    public void changeColor(String color) {
+        this.color = color;
+    }
 }

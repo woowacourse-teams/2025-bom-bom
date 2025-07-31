@@ -9,6 +9,7 @@ import me.bombom.api.v1.highlight.service.HighlightService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +25,7 @@ public class HighlightController {
 
     private final HighlightService highlightService;
 
-    //DELETE, PATCH(COLOR만)
+    //DELETE, PATCH(COLOR만). 조회 시 Id를 줘야 하는지
 
     @GetMapping
     public List<HighlightResponse> getHighlight(
@@ -39,8 +40,13 @@ public class HighlightController {
         highlightService.create(createRequest);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public void deleteHighlight(@PathVariable Long id) {
         highlightService.delete(id);
+    }
+
+    @PatchMapping("/{id}")
+    public void changeHighlightColor(@PathVariable Long id, @RequestBody String color) {
+        highlightService.changeColor(id, color);
     }
 }

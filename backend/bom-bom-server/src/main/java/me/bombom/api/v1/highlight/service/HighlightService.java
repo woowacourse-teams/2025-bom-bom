@@ -47,4 +47,10 @@ public class HighlightService {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND);
         }
     }
+
+    public void changeColor(Long id, String color) {
+        Highlight highlight = highlightRepository.findById(id)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        highlight.changeColor(color);
+    }
 }

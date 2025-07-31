@@ -4,8 +4,6 @@ import { createFileRoute } from '@tanstack/react-router';
 import ArticleCardList from '../../pages/today/components/ArticleCardList/ArticleCardList';
 import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/ReadingStatusCard';
 import { getArticles } from '@/apis/articles';
-import { getReadingStatus } from '@/apis/members';
-import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 
 export const Route = createFileRoute('/_bombom/')({
   component: Index,
@@ -17,32 +15,17 @@ function Index() {
     queryFn: () => getArticles({ date: new Date(), sorted: 'DESC' }),
   });
 
-  const { data: readingStatus } = useQuery({
-    queryKey: ['readingStatus'],
-    queryFn: () => getReadingStatus(),
-  });
-
-  if (!articles || !readingStatus) return null;
-
   return (
     <Container>
       <TitleBox>
         <Title>오늘의 뉴스레터</Title>
         <TitleDescription>
-          {articles.content.length}개의 새로운 뉴스레터가 도착했어요
+          {articles?.content.length ?? 0}개의 새로운 뉴스레터가 도착했어요
         </TitleDescription>
       </TitleBox>
       <ContentWrapper>
-        {articles.content.length > 0 ? (
-          <ArticleCardList articles={articles.content} />
-        ) : (
-          <EmptyLetterCard title="새로운 뉴스레터가 없어요" />
-        )}
-        <ReadingStatusCard
-          streakReadDay={readingStatus.streakReadDay}
-          today={readingStatus.today}
-          weekly={readingStatus.weekly}
-        />
+        <ArticleCardList articles={articles?.content ?? []} />
+        <ReadingStatusCard />
       </ContentWrapper>
     </Container>
   );

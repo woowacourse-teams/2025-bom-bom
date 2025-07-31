@@ -98,7 +98,7 @@ function Storage() {
             onSelectOption={(value) => setSortFilter(value)}
           />
         </SummaryBar>
-        {articles.content.length === 0 ? (
+        {articles.content.length > 0 ? (
           <ArticleList>
             {articles.content.map((article) => (
               <li key={article.articleId}>

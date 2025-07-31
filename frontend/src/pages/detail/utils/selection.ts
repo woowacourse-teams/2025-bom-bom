@@ -1,8 +1,5 @@
 /** 특정 노드의 XPath를 구하는 함수 */
-export const getXPathForElement = (
-  node: Node,
-  root: Node = document,
-): string => {
+export const getXPathForNode = (node: Node, root: Node = document): string => {
   // TextNode일 경우 부모 요소로 이동
   if (node.nodeType === Node.TEXT_NODE) {
     node = node.parentNode!;
@@ -13,7 +10,7 @@ export const getXPathForElement = (
       .filter((n) => n.nodeName === node.nodeName)
       .indexOf(node as ChildNode) + 1;
   return (
-    getXPathForElement(node.parentNode!, root) +
+    getXPathForNode(node.parentNode!, root) +
     '/' +
     node.nodeName.toLowerCase() +
     `[${index}]`
@@ -21,7 +18,7 @@ export const getXPathForElement = (
 };
 
 /** XPath로 노드를 다시 찾는 함수 */
-export const getElementByXPath = (xpath: string, root: Document = document) => {
+export const getNodeByXPath = (xpath: string, root: Document = document) => {
   const result = document.evaluate(
     xpath,
     root,

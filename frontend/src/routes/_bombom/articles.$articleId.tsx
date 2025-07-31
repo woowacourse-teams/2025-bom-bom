@@ -25,7 +25,6 @@ function ArticleDetailPage() {
   const { articleId } = Route.useParams();
   const [highlights, setHighlights] = useState<HighlightType[]>([]);
   const queryClient = useQueryClient();
-  console.log(highlights);
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
@@ -135,8 +134,8 @@ function ArticleDetailPage() {
       </TodayArticlesWrapper>
       <FloatingToolbar
         onSave={(selection) => {
-          const HighlightType = saveSelection(selection);
-          setHighlights((prev) => [...prev, HighlightType]);
+          const highlightData = saveSelection(selection);
+          setHighlights((prev) => [...prev, highlightData]);
         }}
       />
     </Container>

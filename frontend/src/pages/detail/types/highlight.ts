@@ -5,4 +5,5 @@ export interface HighlightType {
   startOffset: number;
   endXPath: string;
   endOffset: number;
+  text: string;
 }

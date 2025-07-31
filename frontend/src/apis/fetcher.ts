@@ -61,7 +61,7 @@ const request = async <TRequest, TResponse>({
           }
           return [key, value?.toString()];
         })
-        .filter(([, value]) => value !== undefined),
+        .filter(([, value]) => value),
     );
     url.search = new URLSearchParams(stringifiedQuery).toString();
 

@@ -1,15 +1,13 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createFileRoute, useRouterState } from '@tanstack/react-router';
-import { useEffect } from 'react';
+import { createFileRoute } from '@tanstack/react-router';
 import clockIcon from '../../../public/assets/clock.svg';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
-import { useThrottle } from '@/hooks/useThrottle';
+import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { formatDate } from '@/utils/date';
-import { getScrollPercent } from '@/utils/scroll';
 
 export const Route = createFileRoute('/_bombom/articles/$articleId')({
   component: ArticleDetailPage,
@@ -17,9 +15,6 @@ export const Route = createFileRoute('/_bombom/articles/$articleId')({
 
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
-  const loadedAt = useRouterState({
-    select: (state) => state.loadedAt,
-  });
   const queryClient = useQueryClient();
 
   const { data: currentArticle } = useQuery({
@@ -43,19 +38,12 @@ function ArticleDetailPage() {
     },
   });
 
-  const throttledHandleScroll = useThrottle(() => {
-    const scrollPercent = getScrollPercent();
-    const elapsedTime = (Date.now() - loadedAt) / 100;
-
-    if (scrollPercent >= 70 && elapsedTime >= 3 && !currentArticle?.isRead) {
-      updateArticleAsRead();
-    }
-  }, 500);
-
-  useEffect(() => {
-    window.addEventListener('scroll', throttledHandleScroll);
-    return () => window.removeEventListener('scroll', throttledHandleScroll);
-  }, [throttledHandleScroll]);
+  useScrollThreshold({
+    enabled: !currentArticle?.isRead && !!currentArticle,
+    threshold: 70,
+    throttleMs: 500,
+    onTrigger: updateArticleAsRead,
+  });
 
   if (!currentArticle || !otherArticles) return null;
 

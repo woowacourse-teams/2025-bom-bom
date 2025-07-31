@@ -42,7 +42,7 @@ export default (env, argv) => {
           ],
         },
         {
-          test: /\.(png|svg|jpg|jpeg|gif)$/i,
+          test: /\.(png|jpg|jpeg|gif)$/i,
           type: 'asset',
         },
         {
@@ -51,6 +51,11 @@ export default (env, argv) => {
           generator: {
             filename: 'assets/[name][ext]',
           },
+        },
+        {
+          test: /\.svg$/i,
+          issuer: /\.[jt]sx?$/,
+          use: [{ loader: '@svgr/webpack' }],
         },
       ],
     },

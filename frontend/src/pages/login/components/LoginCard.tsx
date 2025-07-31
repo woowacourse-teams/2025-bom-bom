@@ -1,13 +1,19 @@
 import styled from '@emotion/styled';
-import GoogleIcon from '@/components/icons/GoogleIcon';
-import SparklesIcon from '@/components/icons/SparklesIcon';
+import { theme } from '@/styles/theme';
+import GoogleIcon from '#/assets/google.svg';
+import SparklesIcon from '#/assets/sparkles.svg';
 
 function LoginCard() {
   return (
     <Container>
       <GreetingWrapper>
         <IconWrapper>
-          <SparklesIcon />
+          <SparklesIcon
+            width={24}
+            height={24}
+            fill={theme.colors.white}
+            color={theme.colors.white}
+          />
         </IconWrapper>
         <GreetingTitle>봄봄에 오신 걸 환영해요</GreetingTitle>
         <GreetingMessage>
@@ -23,7 +29,7 @@ function LoginCard() {
         }}
         type="button"
       >
-        <GoogleIcon />
+        <GoogleIcon width={24} height={24} fill="black" />
         Google로 시작하기
       </GoogleButton>
       <Terms>

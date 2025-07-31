@@ -1,17 +1,23 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { getUserInfo } from '@/apis/members';
 import { getNewsletters } from '@/apis/newsLetters';
 import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import { CATEGORIES, CategoryType } from '@/constants/category';
 import { copyToClipboard } from '@/utils/copy';
-import trendingUpIcon from '#/assets/trending-up.svg';
+import TrendingUpIcon from '#/assets/trending-up.svg';
 
 export default function TrendySection() {
   const { data: newsletters } = useQuery({
     queryKey: ['newsletters'],
     queryFn: () => getNewsletters(),
+  });
+
+  const { data: userInfo } = useQuery({
+    queryKey: ['userInfo'],
+    queryFn: () => getUserInfo(),
   });
 
   const [selectedCategory, setSelectedCategory] =
@@ -25,7 +31,8 @@ export default function TrendySection() {
   );
 
   const handleCardClick = (url: string) => {
-    copyToClipboard('test@bombom.news');
+    alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
+    copyToClipboard(userInfo?.email ?? '');
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -33,7 +40,7 @@ export default function TrendySection() {
     <Container>
       <SectionHeader>
         <SectionIconBox>
-          <img src={trendingUpIcon} alt="trending up" />
+          <TrendingUpIcon width={16} height={16} />
         </SectionIconBox>
         <SectionTitle>트렌디한 뉴스레터</SectionTitle>
       </SectionHeader>

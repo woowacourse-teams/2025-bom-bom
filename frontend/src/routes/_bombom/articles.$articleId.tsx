@@ -1,13 +1,14 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import clockIcon from '../../../public/assets/clock.svg';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
+import Spacing from '@/components/Spacing/Spacing';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { formatDate } from '@/utils/date';
+import ClockIcon from '#/assets/clock.svg';
 
 export const Route = createFileRoute('/_bombom/articles/$articleId')({
   component: ArticleDetailPage,
@@ -62,7 +63,7 @@ function ArticleDetailPage() {
             {formatDate(new Date(currentArticle.arrivedDateTime))}
           </MetaInfoText>
           <ReadTimeBox>
-            <img src={clockIcon} alt="시계 아이콘" />
+            <ClockIcon width={16} height={16} />
             <MetaInfoText>{currentArticle.expectedReadTime}분</MetaInfoText>
           </ReadTimeBox>
         </MetaInfoRow>
@@ -71,6 +72,7 @@ function ArticleDetailPage() {
       <ContentWrapper
         dangerouslySetInnerHTML={{ __html: currentArticle.contents ?? '' }}
       />
+      <Spacing size={24} />
       <Divider />
       <ContentDescription>
         이 뉴스레터가 유용했다면 동료들과 공유해주세요. 피드백이나 제안사항이
@@ -93,17 +95,17 @@ function ArticleDetailPage() {
 }
 
 const Container = styled.div`
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+  align-items: center;
+
   max-width: 700px;
   margin: 0 auto;
   margin-top: 20px;
   padding: 28px;
   border-right: 1px solid ${({ theme }) => theme.colors.stroke};
   border-left: 1px solid ${({ theme }) => theme.colors.stroke};
-
-  display: flex;
-  gap: 20px;
-  flex-direction: column;
-  align-items: center;
 `;
 
 const HeaderWrapper = styled.div`
@@ -116,7 +118,7 @@ const HeaderWrapper = styled.div`
 
 const Title = styled.h2`
   color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.heading1};
+  font: ${({ theme }) => theme.fonts.heading2};
 `;
 
 const MetaInfoRow = styled.div`
@@ -155,18 +157,18 @@ const ContentDescription = styled.p`
 `;
 
 const TodayArticlesWrapper = styled.div`
-  width: 100%;
-
   display: flex;
   gap: 12px;
   flex-direction: column;
+
+  width: 100%;
 `;
 
 const TodayArticleTitle = styled.h3`
   align-self: flex-start;
 
   color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.heading3};
+  font: ${({ theme }) => theme.fonts.heading4};
 `;
 
 const TodayArticleList = styled.div`

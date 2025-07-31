@@ -1,15 +1,16 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
+import HomeIcon from '../../../public/assets/home.svg';
 import Button from '../Button/Button';
-import CompassIcon from '../icons/CompassIcon';
-import HomeIcon from '../icons/HomeIcon';
-import StorageIcon from '../icons/StorageIcon';
 import { getUserInfo } from '@/apis/members';
+import { theme } from '@/styles/theme';
 import { NavType } from '@/types/nav';
 import { copyToClipboard } from '@/utils/copy';
 import defaultImage from '#/assets/bombom.png';
-import copyIcon from '#/assets/copy.svg';
+import CompassIcon from '#/assets/compass.svg';
+import CopyIcon from '#/assets/copy.svg';
+import StorageIcon from '#/assets/storage.svg';
 
 interface HeaderProps {
   activeNav: NavType;
@@ -38,7 +39,7 @@ export default function Header({ activeNav }: HeaderProps) {
       <HeaderInner>
         <LogoWrapper to="/">
           <LogoBox>
-            <HomeIcon />
+            <HomeIcon width={24} height={24} color={theme.colors.white} />
           </LogoBox>
           <TitleBox>
             <Title>봄봄</Title>
@@ -48,15 +49,25 @@ export default function Header({ activeNav }: HeaderProps) {
 
         <Nav>
           <NavButton active={activeNav === 'today'} to="/">
-            <HomeIcon color={activeNav === 'today' ? 'white' : 'black'} />
+            <HomeIcon
+              width={24}
+              height={24}
+              color={activeNav === 'today' ? 'white' : 'black'}
+            />
             <p>오늘의 뉴스레터</p>
           </NavButton>
           <NavButton active={activeNav === 'storage'} to="/storage">
-            <StorageIcon color={activeNav === 'storage' ? 'white' : 'black'} />
+            <StorageIcon
+              width={24}
+              height={24}
+              color={activeNav === 'storage' ? 'white' : 'black'}
+            />
             <p>뉴스레터 보관함</p>
           </NavButton>
           <NavButton active={activeNav === 'recommend'} to="/recommend">
             <CompassIcon
+              width={24}
+              height={24}
               color={activeNav === 'recommend' ? 'white' : 'black'}
             />
             <p>뉴스레터 추천</p>
@@ -83,7 +94,7 @@ export default function Header({ activeNav }: HeaderProps) {
                   <EmailText>
                     {userInfo?.email ?? 'example@bombom.news'}
                   </EmailText>
-                  <img src={copyIcon} alt="copy" width={16} height={16} />
+                  <CopyIcon width={16} height={16} />
                 </ProfileEmail>
               </ProfileTextBox>
             </ProfileInfo>

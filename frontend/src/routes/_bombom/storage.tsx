@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import StorageIcon from '../../components/icons/StorageIcon';
 import SearchInput from '../../components/SearchInput/SearchInput';
 import Select from '../../components/Select/Select';
 import CategoryFilter from '../../pages/storage/components/CategoryFilter/CategoryFilter';
@@ -13,6 +12,8 @@ import EmptySearchCard from '@/pages/storage/components/EmptySearchCard/EmptySea
 import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
+import { theme } from '@/styles/theme';
+import StorageIcon from '#/assets/storage.svg';
 
 export const Route = createFileRoute('/_bombom/storage')({
   component: Storage,
@@ -72,7 +73,7 @@ function Storage() {
       <MainSection>
         <TitleWrapper>
           <TitleIconBox>
-            <StorageIcon color="white" />
+            <StorageIcon color={theme.colors.white} />
           </TitleIconBox>
           <Title>뉴스레터 보관함</Title>
         </TitleWrapper>
@@ -97,7 +98,7 @@ function Storage() {
             onSelectOption={(value) => setSortFilter(value)}
           />
         </SummaryBar>
-        {articles.content.length > 0 ? (
+        {articles.content.length === 0 ? (
           <ArticleList>
             {articles.content.map((article) => (
               <li key={article.articleId}>
@@ -176,9 +177,9 @@ const SummaryText = styled.p`
 `;
 
 const ArticleList = styled.ul`
+  width: 100%;
+
   display: flex;
   gap: 16px;
   flex-direction: column;
-
-  width: 100%;
 `;

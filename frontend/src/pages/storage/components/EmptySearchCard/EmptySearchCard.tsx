@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import EmptySearchIcon from '@/components/icons/EmptySearchIcon';
+import EmptySearchIcon from '#/assets/empty-search.svg';
 
 interface EmptySearchCardProps {
   searchQuery: string;
@@ -9,7 +9,7 @@ function EmptySearchCard({ searchQuery }: EmptySearchCardProps) {
   return (
     <Container>
       <EmptySearchIconWrapper>
-        <EmptySearchIcon />
+        <EmptySearchIcon width={100} height={100} />
       </EmptySearchIconWrapper>
 
       <EmptyTitle>검색 결과가 없어요</EmptyTitle>

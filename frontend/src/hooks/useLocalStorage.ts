@@ -8,49 +8,32 @@ type SerializableType =
   | SerializableType[]
   | { [key: string]: SerializableType };
 
-const ROOT_KEY = 'bombom';
-
 const useLocalStorage = <T extends SerializableType>(
   key: string,
   defaultData: T,
 ) => {
   const storage = window.localStorage;
-  const getInitStorage = useCallback((): Record<string, string> => {
-    return JSON.parse(storage.getItem(ROOT_KEY) ?? '{}');
-  }, [storage]);
+  const getInitStorage = useCallback(() => {
+    const initData = storage.getItem(key);
+    return initData ? JSON.parse(initData) : defaultData;
+  }, [storage, key, defaultData]);
 
-  const [data, setData] =
-    useState<Record<string, SerializableType>>(getInitStorage);
+  const [data, setData] = useState<T>(getInitStorage);
 
-  const get = useCallback(() => {
-    return (data[key] ?? defaultData) as T;
-  }, [data, key, defaultData]);
+  const get = useCallback(() => data, [data]);
 
   const set = useCallback(
     (value: T) => {
-      setData((prev) => {
-        const newData = {
-          ...prev,
-          [key]: value,
-        };
-
-        storage.setItem(ROOT_KEY, JSON.stringify(newData));
-        return newData;
-      });
+      setData(value);
+      storage.setItem(key, JSON.stringify(value));
     },
     [storage, key],
   );
 
   const remove = useCallback(() => {
-    setData((prev) => {
-      const newData = Object.fromEntries(
-        Object.entries(prev).filter(([targetKey]) => targetKey !== key),
-      );
-
-      storage.setItem(ROOT_KEY, JSON.stringify(newData));
-      return newData;
-    });
-  }, [storage, key]);
+    setData(defaultData);
+    storage.removeItem(key);
+  }, [storage, key, defaultData]);
 
   return {
     get,

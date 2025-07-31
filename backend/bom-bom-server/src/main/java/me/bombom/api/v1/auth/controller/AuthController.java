@@ -48,14 +48,12 @@ public class AuthController {
     @GetMapping("/login/{provider}")
     public void login(
             @PathVariable("provider") String provider,
-            @RequestParam(required = false) String env,
-            HttpServletResponse response
+            @RequestParam(defaultValue = "deploy") String env,
+            HttpServletResponse response,
+            HttpSession httpSession
     ) throws IOException {
-        String redirectUrl = "/oauth2/authorization/" + provider;
-        if("local".equals(env)) {
-            redirectUrl += "?state=env%3Dlocal";
-        }
-        response.sendRedirect(redirectUrl);
+        httpSession.setAttribute("env", env);
+        response.sendRedirect("/oauth2/authorization/" + provider);
     }
 
     @PostMapping("/logout")

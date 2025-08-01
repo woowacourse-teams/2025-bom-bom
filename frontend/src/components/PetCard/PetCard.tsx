@@ -1,19 +1,28 @@
 import styled from '@emotion/styled';
+import Button from '../Button/Button';
 import ProgressBar from '../ProgressBar/ProgressBar';
+import Spacing from '../Spacing/Spacing';
+import { theme } from '@/styles/theme';
 import petImage from '#/assets/pet-example.png';
+import PetIcon from '#/assets/pet.svg';
 
 const PetCard = () => {
   return (
     <Container>
       <TitleWrapper>
         <StatusIconWrapper>
-          {/* <StatusIcon width={20} height={20} /> */}
+          <PetIcon width={16} height={16} color={theme.colors.white} />
         </StatusIconWrapper>
-        <Title>읽기 현황</Title>
+        <Title>몽이</Title>
       </TitleWrapper>
+
+      <Spacing size={16} />
+
       <img src={petImage} alt="pet" width={160} height={160} />
-      <p>현재 레벨</p>
-      <ProgressBar rate={70} />
+      <p>레벨 2 : 아직 애기</p>
+      <Spacing size={16} />
+      <ProgressBar rate={70} caption="70%" />
+      <Button text="출석 먹이주기" onClick={() => {}} />
     </Container>
   );
 };
@@ -28,7 +37,6 @@ const Container = styled.section`
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 15%);
 
   display: flex;
-  gap: 16px;
   flex-direction: column;
   flex-shrink: 0;
   align-items: center;

@@ -1,7 +1,6 @@
 package me.bombom.api.v1.article.service;
 
 import java.util.List;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
@@ -81,7 +80,7 @@ public class ArticleService {
     }
 
     private void validateArticleOwner(Article article, Long memberId) {
-        if (!Objects.equals(article.getMemberId(), memberId)) {
+        if (!article.isOwner(memberId)) {
             throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
         }
     }

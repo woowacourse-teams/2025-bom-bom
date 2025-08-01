@@ -33,18 +33,22 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         Member member = oAuth2User.getMember();
 
-        String redirectUrl = frontendBaseUrl;
+        String redirectUrl = getBaseUrlByEnv(request);
+        if (member == null) {
+            redirectUrl +=  SIGNUP_PATH;
+        } else {
+            redirectUrl +=  HOME_PATH;
+        }
 
+        response.sendRedirect(redirectUrl);
+    }
+
+    private String getBaseUrlByEnv(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         String env = session != null ? (String) session.getAttribute("env") : null;
         if (LOCAL_ENV.equals(env)) {
-            redirectUrl = frontendLocalUrl;
+            return frontendLocalUrl;
         }
-
-        if (member == null) {
-            response.sendRedirect(redirectUrl + SIGNUP_PATH);
-        } else {
-            response.sendRedirect(redirectUrl + HOME_PATH);
-        }
+        return frontendBaseUrl;
     }
 }

@@ -22,8 +22,6 @@ function ArticleDetailPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(true);
   const [memo, setMemo] = useState('');
-  const location = useLocation();
-  const pathRef = useRef(location.pathname);
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
@@ -53,7 +51,7 @@ function ArticleDetailPage() {
     onTrigger: updateArticleAsRead,
   });
 
-  useScrollRestoration(pathRef.current);
+  useScrollRestoration();
 
   if (!currentArticle || !otherArticles) return null;
 

@@ -28,7 +28,7 @@ public class Highlight extends BaseEntity {
     @Column(nullable = false)
     private Long articleId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10)
     private String color;
 
     @Column(nullable = false, columnDefinition = "text")

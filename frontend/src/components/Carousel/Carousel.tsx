@@ -92,7 +92,7 @@ const Slide = styled.li<{ slideWidth: number }>`
 const PrevSlideButton = styled.button`
   position: absolute;
   top: 50%;
-  left: 16px;
+  left: 24px;
 
   transform: translateY(-50%);
 
@@ -104,7 +104,7 @@ const PrevSlideButton = styled.button`
 const NextSlideButton = styled.button`
   position: absolute;
   top: 50%;
-  right: 16px;
+  right: 24px;
 
   transform: translateY(-50%);
 

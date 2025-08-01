@@ -1,10 +1,11 @@
 import styled from '@emotion/styled';
-import React, {
+import {
   PropsWithChildren,
   useState,
   useRef,
   useCallback,
   useEffect,
+  Children,
 } from 'react';
 import { useThrottle } from '@/hooks/useThrottle';
 import arrowNext from '#/assets/carousel-arrow-next.png';
@@ -18,7 +19,7 @@ const START_SLIDE_INDEX = 1;
 const INIT_SLIDE_WIDTH = 0;
 
 const Carousel = ({ timer = true, children }: CarouselProps) => {
-  const originSlides = React.Children.toArray(children);
+  const originSlides = Children.toArray(children);
   const [slideIndex, setSlideIndex] = useState(START_SLIDE_INDEX);
   const [slideWidth, setSlideWidth] = useState(INIT_SLIDE_WIDTH);
   const [isTransitioning, setIsTransitioning] = useState(false);

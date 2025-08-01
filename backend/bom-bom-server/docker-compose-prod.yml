@@ -11,3 +11,5 @@ services:
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
     restart: always
+    volumes:
+          - /home/ec2-user/bombom-prod/logs:/logs

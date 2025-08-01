@@ -41,6 +41,6 @@ class MemberSignupListenerTest {
         TestTransaction.end();
 
         // then
-        verify(readingService, times(1)).initializeReadingInformation(member.getId());
+        verify(readingService, times(1)).createReadingInformation(member.getId());
     }
 }

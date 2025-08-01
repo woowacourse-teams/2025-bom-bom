@@ -164,7 +164,7 @@ class ReadingServiceTest {
         Member savedMember = memberRepository.save(TestFixture.normalMemberFixture());
         Long id = savedMember.getId();
         // when
-        readingService.initializeReadingInformation(id);
+        readingService.createReadingInformation(id);
 
         // then
         assertSoftly(softly -> {

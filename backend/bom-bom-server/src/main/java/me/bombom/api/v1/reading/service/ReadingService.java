@@ -33,25 +33,14 @@ public class ReadingService {
     private final WeeklyReadingRepository weeklyReadingRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void initializeReadingInformation(Long memberId) {
-        ContinueReading newContinueReading = ContinueReading.builder()
-                .memberId(memberId)
-                .dayCount(INITIAL_COUNT)
-                .build();
+    public void createReadingInformation(Long memberId) {
+        ContinueReading newContinueReading = ContinueReading.create(memberId);
         continueReadingRepository.save(newContinueReading);
 
-        TodayReading newTodayReading = TodayReading.builder()
-                .memberId(memberId)
-                .totalCount(INITIAL_COUNT)
-                .currentCount(INITIAL_COUNT)
-                .build();
+        TodayReading newTodayReading = TodayReading.create(memberId);
         todayReadingRepository.save(newTodayReading);
 
-        WeeklyReading newWeeklyReading = WeeklyReading.builder()
-                .memberId(memberId)
-                .goalCount(INITIAL_WEEKLY_GOAL_COUNT)
-                .currentCount(INITIAL_COUNT)
-                .build();
+        WeeklyReading newWeeklyReading = WeeklyReading.create(memberId);
         weeklyReadingRepository.save(newWeeklyReading);
     }
 

@@ -16,7 +16,7 @@ public class MemberSignupListener {
     @TransactionalEventListener
     public void on(MemberSignupEvent event) {
         try {
-            readingService.initializeReadingInformation(event.getMemberId());
+            readingService.createReadingInformation(event.getMemberId());
         } catch (Exception e) {
             // TODO: 로깅 및 로직 추가
             log.error("읽기 정보 초기화에 실패했습니다.");

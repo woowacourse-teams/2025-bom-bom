@@ -82,8 +82,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-       - name: .env file 생성
-          run: |
+      - name: .env file 생성
+        run: |
           cat <<EOF > .env
           RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
           DATABASE=${{ secrets.PROD_DATABASE }}
@@ -92,13 +92,13 @@ jobs:
           EOF
 
       - name: 컨테이너 재실행
-         run: |
+        run: |
           sudo docker compose \
             -f docker-compose-prod.yml \
             --env-file .env \
             up -d --remove-orphans --pull=always
 
       - name: Docker 리소스 정리
-         run: |
+        run: |
           sudo docker container prune -f --filter "until=24h"
           sudo docker image prune     -f --filter "until=24h"

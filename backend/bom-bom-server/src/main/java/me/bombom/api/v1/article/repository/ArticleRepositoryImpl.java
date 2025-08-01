@@ -16,7 +16,9 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.dto.ArticleResponse;
 import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.dto.QArticleResponse;
@@ -28,6 +30,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.util.StringUtils;
 
+@Slf4j
 @RequiredArgsConstructor
 public class ArticleRepositoryImpl implements CustomArticleRepository{
 
@@ -113,22 +116,29 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     }
 
     private Predicate createCategoryNameWhereClause(String categoryName) {
-        return categoryName != null ? category.name.eq(categoryName) : null;
+        return Optional.ofNullable(categoryName)
+                .map(String::trim)
+                .filter(name -> !name.isEmpty())
+                .map(category.name::eq)
+                .orElse(null);
     }
 
     private Predicate createCategoryIdWhereClause(Long categoryId) {
-        return categoryId != null ? category.id.eq(categoryId) : null;
+        return Optional.ofNullable(categoryId)
+                .map(category.id::eq)
+                .orElse(null);
     }
 
     private Predicate createDateWhereClause(LocalDate date) {
-        return date != null ? article.arrivedDateTime.between(
-                date.atTime(LocalTime.MIN),
-                date.atTime(LocalTime.MAX))
-                : null;
+        return Optional.ofNullable(date)
+                .map(d -> article.arrivedDateTime.between(
+                        d.atTime(LocalTime.MIN),
+                        d.atTime(LocalTime.MAX)))
+                .orElse(null);
     }
 
     private Predicate createKeywordWhereClause(String keyword) {
-        return StringUtils.hasText(keyword) ? article.title.like("%" + keyword.trim() + "%") : null;
+        return StringUtils.hasText(keyword) ? article.title.like("%" + keyword.strip() + "%") : null;
     }
 
     private List<OrderSpecifier<?>> getOrderSpecifiers(Pageable pageable) {
@@ -146,10 +156,15 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     }
 
     private Path<?> resolveSortProperty(String property) {
-        Path<?> sortPath = SORT_FIELD_WHITELIST_MAP.get(property);
-        if (sortPath == null) {
+        if (!StringUtils.hasText(property)) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
         }
-        return sortPath;
+
+        String normalized = property.strip();
+        return Optional.ofNullable(SORT_FIELD_WHITELIST_MAP.get(normalized))
+                .orElseThrow(() -> {
+                    log.debug("허용되지 않는 정렬 키: {}", property);
+                    return new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
+                });
     }
 }

@@ -101,6 +101,8 @@ const Container = styled.div`
   position: relative;
   width: 100%;
   height: 330px;
+  margin: 0 auto 18px;
+  border-radius: 16px;
 
   background: transparent;
 `;
@@ -114,14 +116,14 @@ const SlidesWrapper = styled.ul<{
 
   display: flex;
 
-  transform: ${({ slideIndex, slideWidth }) =>
-    `translateX(-${slideIndex * slideWidth}px)`};
+  transform: ${({ slideIndex }) => `translateX(-${slideIndex * 100}%)`};
   transition: ${({ isTransitioning }) =>
     isTransitioning ? 'transform 0.3s ease-in-out' : 'none'};
 `;
 
 const Slide = styled.li<{ slideWidth: number }>`
-  flex: 0 0 ${({ slideWidth }) => slideWidth}px;
+  height: 100%;
+  flex: 0 0 100%;
 `;
 
 const PrevSlideButton = styled.button`

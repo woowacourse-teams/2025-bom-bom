@@ -8,20 +8,22 @@ export default function NewsletterHero() {
   const userInfo = queryClient.getQueryData(['userInfo']);
 
   return (
-    <Container>
+    <>
       {userInfo ? (
         <SlideCardList />
       ) : (
-        <HeroContent>
-          <HeroIcon>🌸</HeroIcon>
-          <HeroTitle>새로운 뉴스레터를 발견해보세요! 📚</HeroTitle>
-          <HeroSubtitle>
-            당신의 관심사에 맞는 최고의 뉴스레터를 추천해드립니다.
-          </HeroSubtitle>
-          <CTAButton to="/login">로그인하고 맞춤 추천 받기</CTAButton>
-        </HeroContent>
+        <Container>
+          <HeroContent>
+            <HeroIcon>🌸</HeroIcon>
+            <HeroTitle>새로운 뉴스레터를 발견해보세요! 📚</HeroTitle>
+            <HeroSubtitle>
+              당신의 관심사에 맞는 최고의 뉴스레터를 추천해드립니다.
+            </HeroSubtitle>
+            <CTAButton to="/login">로그인하고 맞춤 추천 받기</CTAButton>
+          </HeroContent>
+        </Container>
       )}
-    </Container>
+    </>
   );
 }
 

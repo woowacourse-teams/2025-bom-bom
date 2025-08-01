@@ -41,4 +41,8 @@ public class Pet extends BaseEntity {
         this.stageId = stageId;
         this.currentScore = currentScore;
     }
+
+    public void increaseCurrentScore(int score) {
+        this.currentScore += score;
+    }
 }

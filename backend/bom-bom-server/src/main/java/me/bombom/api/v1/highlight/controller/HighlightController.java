@@ -1,11 +1,11 @@
 package me.bombom.api.v1.highlight.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.highlight.dto.request.HighlightColorChangeRequest;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
 import me.bombom.api.v1.highlight.service.HighlightService;
@@ -46,16 +46,20 @@ public class HighlightController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteHighlight(@LoginMember Member member, @PathVariable Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteHighlight(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id) {
         highlightService.delete(id, member);
     }
 
     @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeHighlightColor(
             @LoginMember Member member,
-            @PathVariable Long id,
-            @Pattern(regexp = COLOR_HEX_PATTERN) @RequestBody String color
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
+            @Valid @RequestBody HighlightColorChangeRequest request
     ) {
-        highlightService.changeColor(id, color, member);
+        highlightService.changeColor(id, request.color(), member);
     }
 }

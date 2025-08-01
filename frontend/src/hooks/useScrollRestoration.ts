@@ -1,8 +1,9 @@
 import { useLocation } from '@tanstack/react-router';
-import { useCallback, useLayoutEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+import { useDebounce } from './useDebounce';
 import useLocalStorage from './useLocalStorage';
 
-const useScrollRestoration = (path: string) => {
+const useScrollRestoration = () => {
   const location = useLocation();
   const storageKey = `scroll-${location.pathname}`;
   const { data: scrollLocation, set: setScrollLocation } =
@@ -19,32 +20,26 @@ const useScrollRestoration = (path: string) => {
         top: scrollLocation,
         behavior: 'smooth',
       });
-    }, 400);
+    }, 300);
   }, []);
 
-  useLayoutEffect(() => {
-    if (path !== location.pathname) return;
+  const handleScroll = useDebounce(() => {
+    setScrollLocation(window.scrollY);
+  }, 100);
 
+  useEffect(() => {
     if (scrollLocation) {
       restoreScroll(scrollLocation);
     }
+  }, [restoreScroll, scrollLocation]);
 
-    const saveLocation = () => {
-      setScrollLocation(window.scrollY);
-    };
-    window.addEventListener('visibilitychange', saveLocation);
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
 
     return () => {
-      setScrollLocation(window.scrollY);
-      window.removeEventListener('visibilitychange', saveLocation);
+      window.removeEventListener('scroll', handleScroll);
     };
-  }, [
-    path,
-    location.pathname,
-    scrollLocation,
-    restoreScroll,
-    setScrollLocation,
-  ]);
+  }, [handleScroll]);
 };
 
 export default useScrollRestoration;

@@ -28,8 +28,6 @@ function ArticleDetailPage() {
   const { highlights, addHighlights } = useHighlightManager();
 
   console.log(highlights);
-  const location = useLocation();
-  const pathRef = useRef(location.pathname);
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
@@ -59,7 +57,7 @@ function ArticleDetailPage() {
     onTrigger: updateArticleAsRead,
   });
 
-  useScrollRestoration(pathRef.current);
+  useScrollRestoration();
 
   if (!currentArticle || !otherArticles) return null;
 

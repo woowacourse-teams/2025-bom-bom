@@ -4,6 +4,7 @@ import {
   getXPathForNode,
 } from './selection';
 import { HighlightType } from '../types/highlight';
+import { theme } from '@/styles/theme';
 
 export const highlightNodeSegment = (
   node: Text,
@@ -45,7 +46,7 @@ export const saveSelection = (selection: Selection): HighlightType => {
     startOffset: offsets.start,
     endXPath: xpath,
     endOffset: offsets.end,
-    color: '#FFD6C2',
+    color: theme.colors.primaryLight,
     id: crypto.randomUUID(),
     text: selection.toString(), // 선택된 텍스트 저장
   };

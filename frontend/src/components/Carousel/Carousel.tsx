@@ -6,6 +6,7 @@ import React, {
   useCallback,
   useEffect,
 } from 'react';
+import { useThrottle } from '@/hooks/useThrottle';
 import arrowNext from '#/assets/carousel-arrow-next.png';
 import arrowPrev from '#/assets/carousel-arrow-prev.png';
 
@@ -57,15 +58,15 @@ const Carousel = ({ children }: PropsWithChildren) => {
     }
   };
 
-  const handlePrevButtonClick = () => {
+  const handlePrevButtonClick = useThrottle(() => {
     setIsTransitioning(true);
     setSlideIndex((prev) => prev - 1);
-  };
+  }, 500);
 
-  const handleNextButtonClick = () => {
+  const handleNextButtonClick = useThrottle(() => {
     setIsTransitioning(true);
     setSlideIndex((prev) => prev + 1);
-  };
+  }, 500);
 
   return (
     <Container ref={containerRef}>

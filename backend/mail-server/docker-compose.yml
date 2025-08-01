@@ -6,6 +6,7 @@ services:
       SPRING_PROFILES_ACTIVE: docker
     volumes:
       - /home/ec2-user/Maildir:/maildir
+      - /home/ec2-user/mail-server/logs:/logs 
     user: "1001:1001"
     ports:
       - "8080:8080"

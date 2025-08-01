@@ -117,14 +117,14 @@ function Storage() {
 }
 
 const Container = styled.div`
+  width: 100%;
+  max-width: 1280px;
+  padding: 64px 0;
+
   display: flex;
   gap: 24px;
   align-items: flex-start;
   justify-content: center;
-
-  width: 100%;
-  max-width: 1280px;
-  padding: 64px 0;
 `;
 
 const SideSection = styled.div`
@@ -132,12 +132,12 @@ const SideSection = styled.div`
 `;
 
 const MainSection = styled.div`
+  width: 100%;
+
   display: flex;
   gap: 20px;
   flex-direction: column;
   align-items: flex-start;
-
-  width: 100%;
 `;
 
 const TitleWrapper = styled.div`
@@ -147,14 +147,14 @@ const TitleWrapper = styled.div`
 `;
 
 const TitleIconBox = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   width: 28px;
   height: 28px;
   padding: 6px;
   border-radius: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   background-color: ${({ theme }) => theme.colors.primary};
 `;
@@ -164,11 +164,11 @@ const Title = styled.h1`
 `;
 
 const SummaryBar = styled.div`
+  width: 100%;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  width: 100%;
 `;
 
 const SummaryText = styled.p`

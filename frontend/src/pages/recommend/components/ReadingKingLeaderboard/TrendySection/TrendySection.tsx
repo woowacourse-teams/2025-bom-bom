@@ -85,24 +85,23 @@ const Container = styled.div`
 `;
 
 const SectionHeader = styled.div`
+  margin-bottom: 16px;
+
   display: flex;
   gap: 8px;
   align-items: center;
-
-  margin-bottom: 16px;
 `;
 
 const SectionIconBox = styled.span`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   width: 28px;
   height: 28px;
   border-radius: 12px;
 
-  background: ${({ theme }) => theme.colors.primary};
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
+  background: ${({ theme }) => theme.colors.primary};
   font: ${({ theme }) => theme.fonts.body1};
 `;
 
@@ -114,11 +113,11 @@ const SectionTitle = styled.h2`
 `;
 
 const TagContainer = styled.div`
+  margin-bottom: 16px;
+
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-
-  margin-bottom: 16px;
 `;
 
 const TrendyGrid = styled.div`

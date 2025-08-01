@@ -18,6 +18,12 @@ export default function FloatingToolbar({ onSave }: FloatingToolBarProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState<ToolbarPosition>({ x: 0, y: 0 });
 
+  const handleSave = () => {
+    if (selectionRef.current === null) return;
+    setIsVisible(false);
+    onSave(selectionRef.current);
+  };
+
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -56,13 +62,7 @@ export default function FloatingToolbar({ onSave }: FloatingToolBarProps) {
 
   return (
     <Container position={position} visible={isVisible}>
-      <ToolbarButton
-        onClick={() => {
-          if (selectionRef.current === null) return;
-          setIsVisible(false);
-          onSave(selectionRef.current);
-        }}
-      >
+      <ToolbarButton onClick={handleSave}>
         <Pen />
       </ToolbarButton>
       <ToolbarButton onClick={() => alert('Action 2')}>

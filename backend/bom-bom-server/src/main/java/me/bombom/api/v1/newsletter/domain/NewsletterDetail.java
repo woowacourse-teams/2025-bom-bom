@@ -20,10 +20,10 @@ public class NewsletterDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length=512, nullable = false)
+    @Column(nullable = false, length=512)
     private String mainPageUrl;
 
-    @Column(length=512, nullable = false)
+    @Column(nullable = false, length=512)
     private String subscribeUrl;
 
     @Column(nullable = false)
@@ -32,18 +32,23 @@ public class NewsletterDetail {
     @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
     private int subscribeCount;
 
+    @Column(nullable = false, length = 100)
+    private String sender;
+
     @Builder
     public NewsletterDetail(
             Long id,
             @NonNull String mainPageUrl,
             @NonNull String subscribeUrl,
             @NonNull String issueCycle,
-            int subscribeCount
+            int subscribeCount,
+            @NonNull String sender
     ) {
         this.id = id;
         this.mainPageUrl = mainPageUrl;
         this.subscribeUrl = subscribeUrl;
         this.issueCycle = issueCycle;
         this.subscribeCount = subscribeCount;
+        this.sender = sender;
     }
 }

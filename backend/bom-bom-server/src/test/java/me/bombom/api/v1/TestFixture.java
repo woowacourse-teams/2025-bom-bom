@@ -85,18 +85,21 @@ public final class TestFixture {
                         .subscribeUrl("https://news1.com/subscribe")
                         .issueCycle("매일 발행")
                         .subscribeCount(1000)
+                        .sender("발신자")
                         .build(),
                 NewsletterDetail.builder()
                         .mainPageUrl("https://ittimes.com")
                         .subscribeUrl("https://ittimes.com/subscribe")
                         .issueCycle("매주 월요일")
                         .subscribeCount(850)
+                        .sender("발신자")
                         .build(),
                 NewsletterDetail.builder()
                         .mainPageUrl("https://biz.com")
                         .subscribeUrl("https://biz.com/subscribe")
                         .issueCycle("격주 화요일")
                         .subscribeCount(600)
+                        .sender("발신자")
                         .build()
         );
     }

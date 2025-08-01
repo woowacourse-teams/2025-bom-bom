@@ -140,7 +140,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     private Predicate createKeywordWhereClause(String keyword) {
         return StringUtils.hasText(keyword) ? article.title.like("%" + keyword.strip() + "%") : null;
     }
-
+  
     private List<OrderSpecifier<?>> getOrderSpecifiers(Pageable pageable) {
         List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
         pageable.getSort()

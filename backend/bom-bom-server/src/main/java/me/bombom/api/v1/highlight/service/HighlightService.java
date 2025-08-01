@@ -24,13 +24,17 @@ public class HighlightService {
     private final ArticleRepository articleRepository;
 
     public List<HighlightResponse> getHighlights(Long articleId, Member member) {
-        validateArticleExist(articleId);
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        validateArticleOwner(member, article);
         return HighlightResponse.from(highlightRepository.findByArticleId(articleId));
     }
 
     @Transactional
     public void create(HighlightCreateRequest createRequest, Member member) {
-        validateArticleExist(createRequest.articleId());
+        Article article = articleRepository.findById(createRequest.articleId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        validateArticleOwner(member, article);
         HighlightLocation highlightLocation = new HighlightLocation(
                 createRequest.startOffset(),
                 createRequest.startXPath(),
@@ -40,9 +44,6 @@ public class HighlightService {
         if (highlightRepository.existsByArticleIdAndHighlightLocation(createRequest.articleId(), highlightLocation)) {
             return;
         }
-        Article article = articleRepository.findById(createRequest.articleId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        validateArticleOwner(member, article);
         Highlight highlight = Highlight.builder()
                 .articleId(createRequest.articleId())
                 .highlightLocation(highlightLocation)
@@ -70,12 +71,6 @@ public class HighlightService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         validateArticleOwner(member, article);
         highlight.changeColor(color);
-    }
-
-    private void validateArticleExist(Long articleId) {
-        if (!articleRepository.existsById(articleId)) {
-            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND);
-        }
     }
 
     private static void validateArticleOwner(Member member, Article article) {

@@ -14,6 +14,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
+    private static final String LOCAL_ENV = "local";
+    private static final String SIGNUP_PATH = "/signup";
+    private static final String HOME_PATH = "/";
+
     @Value("${frontend.base-url}")
     private String frontendBaseUrl;
 
@@ -33,14 +37,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         HttpSession session = request.getSession(false);
         String env = session != null ? (String) session.getAttribute("env") : null;
-        if ("local".equals(env)) {
+        if (LOCAL_ENV.equals(env)) {
             redirectUrl = frontendLocalUrl;
         }
 
         if (member == null) {
-            response.sendRedirect(redirectUrl + "/signup");
+            response.sendRedirect(redirectUrl + SIGNUP_PATH);
         } else {
-            response.sendRedirect(redirectUrl + "/");
+            response.sendRedirect(redirectUrl + HOME_PATH);
         }
     }
 }

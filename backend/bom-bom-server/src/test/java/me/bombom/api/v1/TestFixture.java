@@ -232,7 +232,7 @@ public final class TestFixture {
         return Pet.builder()
                 .memberId(member.getId())
                 .stageId(stageId)
-                .currentScore(15)
+                .currentScore(0)
                 .build();
     }
 }

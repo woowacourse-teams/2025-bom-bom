@@ -1,5 +1,6 @@
 package me.bombom.api.v1.pet.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -60,7 +61,7 @@ class PetServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(result.level()).isEqualTo(1);
             softly.assertThat(result.totalScore()).isEqualTo(50);
-            softly.assertThat(result.currentScore()).isEqualTo(15);
+            softly.assertThat(result.currentScore()).isEqualTo(0);
         });
     }
 
@@ -82,5 +83,26 @@ class PetServiceTest {
         assertThatThrownBy(() -> petService.getPet(member))
                 .isInstanceOf(CServerErrorException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
+    void 키우기_출석_점수_반영() {
+        // given
+        Pet pet = TestFixture.createPet(member, stage.getId());
+        petRepository.save(pet);
+
+        // when
+        petService.addAttendanceScore(member);
+
+        // then
+        assertThat(pet.getCurrentScore()).isEqualTo(5);
+    }
+
+    @Test
+    void 키우기_출석_시_키우기가_없을_경우_에러() {
+        // when & then
+        assertThatThrownBy(() -> petService.addAttendanceScore(member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
 }

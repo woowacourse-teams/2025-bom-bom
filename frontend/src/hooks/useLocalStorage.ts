@@ -13,10 +13,10 @@ const useLocalStorage = <T extends SerializableType>(
   defaultData: T,
 ) => {
   const storage = window.localStorage;
-  const getInitStorage = useCallback(() => {
+  const getInitStorage = () => {
     const initData = storage.getItem(key);
     return initData ? JSON.parse(initData) : defaultData;
-  }, [storage, key, defaultData]);
+  };
 
   const [data, setData] = useState<T>(getInitStorage);
 

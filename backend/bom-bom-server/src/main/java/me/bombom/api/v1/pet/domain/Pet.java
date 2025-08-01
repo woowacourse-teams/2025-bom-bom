@@ -17,6 +17,10 @@ import me.bombom.api.v1.common.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Pet extends BaseEntity {
 
+    public static final int ATTENDANCE_SCORE = 5;
+    public static final int ARTICLE_READING_SCORE = 10;
+    public static final int CONTINUE_READING_BONUS_SCORE = 5;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

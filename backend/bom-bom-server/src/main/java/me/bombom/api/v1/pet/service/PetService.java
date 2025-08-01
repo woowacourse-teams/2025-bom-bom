@@ -18,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class PetService {
 
-    private static final int ATTENDANCE_SCORE = 5;
-
     private final PetRepository petRepository;
     private final StageRepository stageRepository;
 
@@ -31,13 +29,10 @@ public class PetService {
         return PetResponse.of(pet,stage);
     }
 
-    /*
-    점수 바뀌면 자동으로 레벨업 갱신하는 이벤트 리스너 필요
-     */
     @Transactional
     public void addAttendanceScore(Member member) {
         Pet pet = petRepository.findByMemberId(member.getId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        pet.increaseCurrentScore(ATTENDANCE_SCORE);
+        pet.increaseCurrentScore(Pet.ATTENDANCE_SCORE);
     }
 }

@@ -8,7 +8,7 @@ import Spacing from '@/components/Spacing/Spacing';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
-import { MemoPanel } from '@/pages/detail/components/MemoPanel';
+import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { useHighlightManager } from '@/pages/detail/hooks/useHighlightManager';
 import { HighlightType } from '@/pages/detail/types/highlight';
@@ -24,7 +24,9 @@ function ArticleDetailPage() {
   const { articleId } = Route.useParams();
   const [highlights, setHighlights] = useState<HighlightType[]>([]);
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
+  const [memo, setMemo] = useState('');
+
   console.log(highlights);
 
   const { data: currentArticle } = useQuery({
@@ -109,10 +111,10 @@ function ArticleDetailPage() {
       />
       <MemoPanel
         open={open}
-        setOpen={setOpen}
-        notes={[{ id: '1', content: 'content', memo: 'memo' }]}
-        handleDeleteNote={(id) => console.log(id)}
-        handleUpdateMemo={(id) => console.log(id)}
+        handleClose={() => setOpen(false)}
+        notes={[{ id: '1', content: 'content', memo }]}
+        handleDeleteMemo={(id) => console.log(id)}
+        handleUpdateMemo={(id, e) => console.log(id, setMemo(e.target.value))}
       />
     </Container>
   );

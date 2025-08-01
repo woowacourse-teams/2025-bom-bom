@@ -24,9 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ReadingService {
 
-    private static final int INITIAL_COUNT = 0;
-    private static final int INITIAL_WEEKLY_GOAL_COUNT = 3;
-
     private final MemberRepository memberRepository;
     private final ContinueReadingRepository continueReadingRepository;
     private final TodayReadingRepository todayReadingRepository;
@@ -42,6 +39,18 @@ public class ReadingService {
 
         WeeklyReading newWeeklyReading = WeeklyReading.create(memberId);
         weeklyReadingRepository.save(newWeeklyReading);
+    }
+
+    @Transactional
+    public void resetTodayReadingCount() {
+        todayReadingRepository.findAll()
+                .forEach(TodayReading::resetCount);
+    }
+
+    @Transactional
+    public void resetWeeklyReadingCount() {
+        weeklyReadingRepository.findAll()
+                .forEach(WeeklyReading::resetCurrentCount);
     }
 
     @Transactional

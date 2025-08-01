@@ -25,6 +25,12 @@ const Carousel = ({ timer = true, children }: CarouselProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  if (originSlides.length === 0 && process.env.NODE_ENV === 'development') {
+    throw new Error(
+      'Carousel 컴포넌트에 최소 한 개 이상의 child가 필요합니다.',
+    );
+  }
+
   const infinitySlides = [
     originSlides[originSlides.length - 1],
     ...originSlides,

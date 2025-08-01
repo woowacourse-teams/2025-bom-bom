@@ -59,7 +59,7 @@ const Carousel = ({ timer = true, children }: CarouselProps) => {
     }
 
     if (slideIndex === infinitySlides.length - 1) {
-      setSlideIndex(1);
+      setSlideIndex(START_SLIDE_INDEX);
     }
   };
 

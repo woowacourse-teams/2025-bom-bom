@@ -5,53 +5,55 @@ import type { Meta, StoryObj } from '@storybook/react-webpack5';
 const meta = {
   title: 'components/common/Carousel',
   component: Carousel,
-  parameters: {
-    layout: 'centered',
-  },
-  args: {
-    children: [],
-  },
+  parameters: { layout: 'centered' },
 } satisfies Meta<typeof Carousel>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+interface SlideType {
+  label: string;
+  backgroundColor: 'primary' | 'primaryLight';
+}
+interface SlideBoxProps {
+  backgroundColor: 'primary' | 'primaryLight';
+  children: React.ReactNode;
+}
+
+const slides: SlideType[] = [
+  { label: '슬라이드1', backgroundColor: 'primary' },
+  { label: '슬라이드2', backgroundColor: 'primaryLight' },
+];
+
+const SlideBox = ({ backgroundColor, children }: SlideBoxProps) => {
+  const theme = useTheme();
+
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        padding: '54px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: theme.colors[backgroundColor],
+        font: theme.fonts.heading2,
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
 export const Default: Story = {
-  render: () => {
-    const theme = useTheme();
-
-    return (
-      <Carousel>
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            padding: '54px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: theme.colors.primary,
-            font: theme.fonts.heading2,
-          }}
-        >
-          슬라이드1
-        </div>
-
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            padding: '54px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: theme.colors.primaryLight,
-            font: theme.fonts.heading2,
-          }}
-        >
-          슬라이드2
-        </div>
-      </Carousel>
-    );
-  },
+  render: () => (
+    <Carousel>
+      {slides.map(({ label, backgroundColor }) => (
+        <SlideBox key={label} backgroundColor={backgroundColor}>
+          {label}
+        </SlideBox>
+      ))}
+    </Carousel>
+  ),
 };

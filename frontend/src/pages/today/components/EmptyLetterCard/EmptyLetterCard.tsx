@@ -13,7 +13,7 @@ function EmptyLetterCard({ title }: EmptyLetterCardProps) {
   return (
     <Container>
       <PostboxIconWrapper>
-        <PostboxIcon />
+        <PostboxIcon width={160} height={160} />
       </PostboxIconWrapper>
 
       <EmptyTitle>{title}</EmptyTitle>
@@ -26,7 +26,7 @@ function EmptyLetterCard({ title }: EmptyLetterCardProps) {
       </DescriptionWrapper>
 
       <LinkButton to="/recommend">
-        <CompassIcon />
+        <CompassIcon width={16} height={16} />
         추천 뉴스레터 보기
         <StyledArrowIcon targetDirection="right" currentDirection="upRight" />
       </LinkButton>

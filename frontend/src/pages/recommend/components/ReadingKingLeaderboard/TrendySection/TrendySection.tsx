@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { getUserInfo } from '@/apis/members';
 import { getNewsletters } from '@/apis/newsLetters';
 import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
@@ -14,6 +15,11 @@ export default function TrendySection() {
     queryFn: () => getNewsletters(),
   });
 
+  const { data: userInfo } = useQuery({
+    queryKey: ['userInfo'],
+    queryFn: () => getUserInfo(),
+  });
+
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryType>('전체');
 
@@ -25,7 +31,8 @@ export default function TrendySection() {
   );
 
   const handleCardClick = (url: string) => {
-    copyToClipboard('test@bombom.news');
+    alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
+    copyToClipboard(userInfo?.email ?? '');
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 

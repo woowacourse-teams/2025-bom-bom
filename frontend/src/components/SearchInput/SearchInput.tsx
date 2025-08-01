@@ -7,7 +7,11 @@ export default function SearchInput({ ...props }: ComponentProps<'input'>) {
   return (
     <Container>
       <ReadingGlassesIconWrapper>
-        <ReadingGlassesIcon color={theme.colors.textTertiary} />
+        <ReadingGlassesIcon
+          color={theme.colors.textTertiary}
+          width={16}
+          height={16}
+        />
       </ReadingGlassesIconWrapper>
       <StyledInput
         type="search"

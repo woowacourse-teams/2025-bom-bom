@@ -177,9 +177,9 @@ const SummaryText = styled.p`
 `;
 
 const ArticleList = styled.ul`
+  width: 100%;
+
   display: flex;
   gap: 16px;
   flex-direction: column;
-
-  width: 100%;
 `;

@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
+import HomeIcon from '../../../public/assets/home.svg';
 import Button from '../Button/Button';
 import { getUserInfo } from '@/apis/members';
 import { theme } from '@/styles/theme';
@@ -9,7 +10,6 @@ import { copyToClipboard } from '@/utils/copy';
 import defaultImage from '#/assets/bombom.png';
 import CompassIcon from '#/assets/compass.svg';
 import CopyIcon from '#/assets/copy.svg';
-import HomeIcon from '#/assets/home.svg';
 import StorageIcon from '#/assets/storage.svg';
 
 interface HeaderProps {
@@ -109,11 +109,6 @@ const HeaderContainer = styled.header`
   position: fixed;
   top: 0;
   z-index: 100;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   width: 100%;
   height: 72px;
   padding: 8px 16px;
@@ -122,16 +117,20 @@ const HeaderContainer = styled.header`
     0 10px 15px -3px rgb(0 0 0 / 10%),
     0 4px 6px -4px rgb(0 0 0 / 10%);
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   background: ${({ theme }) => theme.colors.white};
 `;
 
 const HeaderInner = styled.div`
+  width: 100%;
+  max-width: 1280px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  width: 100%;
-  max-width: 1280px;
 `;
 
 const LogoWrapper = styled(Link)`
@@ -140,10 +139,6 @@ const LogoWrapper = styled(Link)`
 `;
 
 const LogoBox = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   width: 40px;
   height: 40px;
   margin-right: 12px;
@@ -151,6 +146,10 @@ const LogoBox = styled.div`
   box-shadow:
     0 10px 15px -3px rgb(0 0 0 / 10%),
     0 4px 6px -4px rgb(0 0 0 / 10%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   background: ${({ theme }) => theme.colors.primary};
 `;
@@ -164,7 +163,6 @@ const TitleBox = styled.div`
 const Title = styled.div`
   background: linear-gradient(144.324deg, #4b5563 0%, #f96 50%, #ffd700 100%);
   background-clip: text;
-
   font: ${({ theme }) => theme.fonts.heading4};
 
   -webkit-text-fill-color: transparent;
@@ -175,39 +173,38 @@ const SubTitle = styled.div`
 `;
 
 const Nav = styled.nav`
+  padding: 4px;
+  border-radius: 14px;
+
   display: flex;
   gap: 8px;
   align-items: center;
-
-  padding: 4px;
-  border-radius: 14px;
 
   background: ${({ theme }) => theme.colors.white};
 `;
 
 const NavButton = styled(Link)<{ active?: boolean }>`
+  padding: 10px 12px;
+  border-radius: 12px;
+
   display: flex;
   gap: 4px;
   align-items: center;
 
-  padding: 10px 12px;
-  border-radius: 12px;
-
   background: ${({ active, theme }) =>
     active ? theme.colors.primary : 'transparent'};
-
   color: ${({ active, theme }) =>
     active ? theme.colors.white : theme.colors.black};
   font: ${({ theme }) => theme.fonts.body2};
 `;
 
 const ProfileWrapper = styled.div`
+  padding: 8px 12px;
+  border-radius: 12px;
+
   display: flex;
   gap: 8px;
   align-items: center;
-
-  padding: 8px 12px;
-  border-radius: 12px;
 
   background: ${({ theme }) => theme.colors.white};
 `;

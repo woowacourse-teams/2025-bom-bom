@@ -27,7 +27,6 @@ const Carousel = ({ children }: PropsWithChildren) => {
     const resizeObserver = new ResizeObserver(() => {
       updateWidth();
     });
-
     resizeObserver.observe(containerRef.current);
     updateWidth();
 
@@ -36,11 +35,11 @@ const Carousel = ({ children }: PropsWithChildren) => {
     };
   }, [updateWidth]);
 
-  const goPrev = () => {
+  const handlePrevButtonClick = () => {
     setSlideIndex((prev) => (prev > 0 ? prev - 1 : totalSlides - 1));
   };
 
-  const goNext = () => {
+  const handleNextButtonClick = () => {
     setSlideIndex((prev) => (prev < totalSlides - 1 ? prev + 1 : 0));
   };
 
@@ -54,11 +53,11 @@ const Carousel = ({ children }: PropsWithChildren) => {
         ))}
       </SlidesWrapper>
 
-      <PrevSlideButton type="button" onClick={goPrev}>
+      <PrevSlideButton type="button" onClick={handlePrevButtonClick}>
         <img src={arrowPrev} alt="이전 슬라이드 버튼" />
       </PrevSlideButton>
 
-      <NextSlideButton type="button" onClick={goNext}>
+      <NextSlideButton type="button" onClick={handleNextButtonClick}>
         <img src={arrowNext} alt="다음 슬라이드 버튼" />
       </NextSlideButton>
     </Container>
@@ -96,6 +95,10 @@ const PrevSlideButton = styled.button`
   left: 16px;
 
   transform: translateY(-50%);
+
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 const NextSlideButton = styled.button`
@@ -104,4 +107,8 @@ const NextSlideButton = styled.button`
   right: 16px;
 
   transform: translateY(-50%);
+
+  &:hover {
+    opacity: 0.8;
+  }
 `;

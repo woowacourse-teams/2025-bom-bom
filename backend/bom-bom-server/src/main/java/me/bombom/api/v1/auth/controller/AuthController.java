@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -45,7 +46,13 @@ public class AuthController {
     }
 
     @GetMapping("/login/{provider}")
-    public void login(@PathVariable("provider") String provider, HttpServletResponse response) throws IOException {
+    public void login(
+            @PathVariable("provider") String provider,
+            @RequestParam(defaultValue = "deploy") String env,
+            HttpServletResponse response,
+            HttpSession httpSession
+    ) throws IOException {
+        httpSession.setAttribute("env", env);
         response.sendRedirect("/oauth2/authorization/" + provider);
     }
 

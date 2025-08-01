@@ -7,10 +7,10 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
+import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.reading.domain.ContinueReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
-import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 
 public final class TestFixture {
 
@@ -82,18 +82,21 @@ public final class TestFixture {
                         .subscribeUrl("https://news1.com/subscribe")
                         .issueCycle("매일 발행")
                         .subscribeCount(1000)
+                        .sender("발신자")
                         .build(),
                 NewsletterDetail.builder()
                         .mainPageUrl("https://ittimes.com")
                         .subscribeUrl("https://ittimes.com/subscribe")
                         .issueCycle("매주 월요일")
                         .subscribeCount(850)
+                        .sender("발신자")
                         .build(),
                 NewsletterDetail.builder()
                         .mainPageUrl("https://biz.com")
                         .subscribeUrl("https://biz.com/subscribe")
                         .issueCycle("격주 화요일")
                         .subscribeCount(600)
+                        .sender("발신자")
                         .build()
         );
     }

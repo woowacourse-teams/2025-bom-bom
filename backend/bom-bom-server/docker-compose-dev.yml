@@ -10,6 +10,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://${RDS_ENDPOINT}:3306/${DATABASE}?useSSL=false&serverTimezone=Asia/Seoul
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      LOGGING_FILE_NAME: /logs/bombom-dev.log
     restart: always
     volumes:
       - /home/ec2-user/bombom-dev/logs:/logs

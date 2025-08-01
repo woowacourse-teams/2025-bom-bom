@@ -70,10 +70,14 @@ public class HighlightService {
         Article article = articleRepository.findById(highlight.getArticleId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         validateArticleOwner(member, article);
+
+        if (highlight.isSameColor(color)) {
+            return;
+        }
         highlight.changeColor(color);
     }
 
-    private static void validateArticleOwner(Member member, Article article) {
+    private void validateArticleOwner(Member member, Article article) {
         if (article.isNotOwner(member.getId())) {
             throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
         }

@@ -49,6 +49,10 @@ public class Highlight extends BaseEntity {
         this.text = text;
     }
 
+    public boolean isSameColor(String color) {
+        return this.color.equals(color);
+    }
+
     public void changeColor(String color) {
         this.color = color;
     }

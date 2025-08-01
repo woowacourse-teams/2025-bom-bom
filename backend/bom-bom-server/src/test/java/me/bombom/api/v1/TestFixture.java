@@ -3,6 +3,9 @@ package me.bombom.api.v1;
 import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.article.domain.Article;
+import me.bombom.api.v1.highlight.domain.Highlight;
+import me.bombom.api.v1.highlight.domain.HighlightLocation;
+import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.newsletter.domain.Category;
@@ -157,5 +160,46 @@ public final class TestFixture {
                 .currentCount(3)
                 .goalCount(5)
                 .build();
+    }
+
+    /**
+     * Highlight
+     */
+
+    public static List<Highlight> createHighlightFixtures(List<Article> articles) {
+        Long firstArticleId = articles.get(0).getId();
+        Long secondArticleId = articles.get(1).getId();
+        return List.of(
+                Highlight.builder()
+                        .highlightLocation(new HighlightLocation("0", "div[0]/p[0]", "10", "div[0]/p[0]"))
+                        .articleId(firstArticleId)
+                        .color("#ffeb3b")
+                        .text("첫 번째 하이라이트")
+                        .build(),
+                Highlight.builder()
+                        .highlightLocation(new HighlightLocation("15", "div[0]/p[1]", "25", "div[0]/p[1]"))
+                        .articleId(firstArticleId)
+                        .color("#4caf50")
+                        .text("두 번째 하이라이트")
+                        .build(),
+                Highlight.builder()
+                        .highlightLocation(new HighlightLocation("5", "div[0]/h1", "15", "div[0]/h1"))
+                        .articleId(secondArticleId)
+                        .color("#2196f3")
+                        .text("세 번째 하이라이트")
+                        .build()
+        );
+    }
+
+    public static HighlightCreateRequest createHighlightRequest(Long articleId) {
+        return new HighlightCreateRequest(
+                "0",
+                "div[0]/p[2]",
+                "20",
+                "div[0]/p[2]",
+                articleId,
+                "#f44336",
+                "새로운 하이라이트 텍스트"
+        );
     }
 }

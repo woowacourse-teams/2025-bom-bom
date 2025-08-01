@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 
-public record HighlightCreateRequest( //
+public record HighlightCreateRequest(
         @NotNull String startOffset,
         @NotNull String startXPath,
         @NotNull String endOffset,

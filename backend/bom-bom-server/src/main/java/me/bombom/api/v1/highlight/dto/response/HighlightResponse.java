@@ -11,6 +11,7 @@ public record HighlightResponse(
         String color,
         String text
 ) {
+
     public static List<HighlightResponse> from(List<Highlight> highlights) {
         return highlights.stream()
                 .map(HighlightResponse::from)

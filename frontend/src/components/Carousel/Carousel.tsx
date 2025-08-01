@@ -126,8 +126,8 @@ const Container = styled.div`
   overflow: hidden;
   position: relative;
   width: 100%;
-  height: 330px;
-  margin: 0 auto 18px;
+  height: 320px;
+  margin: 0 auto 20px;
   border-radius: 16px;
 
   background: transparent;

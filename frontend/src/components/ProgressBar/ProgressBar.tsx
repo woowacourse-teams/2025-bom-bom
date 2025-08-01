@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 
 interface ProgressBarProps {
   rate: number;
-  caption: string;
+  caption?: string;
 }
 
 function ProgressBar({ rate, caption }: ProgressBarProps) {

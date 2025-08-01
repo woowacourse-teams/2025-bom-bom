@@ -9,11 +9,21 @@ import React, {
 import arrowNext from '#/assets/carousel-arrow-next.png';
 import arrowPrev from '#/assets/carousel-arrow-prev.png';
 
+const START_SLIDE_INDEX = 1;
+const INIT_SLIDE_WIDTH = 0;
+
 const Carousel = ({ children }: PropsWithChildren) => {
-  const [slideIndex, setSlideIndex] = useState(0);
-  const [slideWidth, setSlideWidth] = useState(0);
+  const originSlides = React.Children.toArray(children);
+  const [slideIndex, setSlideIndex] = useState(START_SLIDE_INDEX);
+  const [slideWidth, setSlideWidth] = useState(INIT_SLIDE_WIDTH);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const totalSlides = React.Children.count(children);
+
+  const infinitySlides = [
+    originSlides[originSlides.length - 1],
+    ...originSlides,
+    originSlides[0],
+  ];
 
   const updateWidth = useCallback(() => {
     if (containerRef.current) {
@@ -35,20 +45,39 @@ const Carousel = ({ children }: PropsWithChildren) => {
     };
   }, [updateWidth]);
 
+  const handleTransitionEnd = () => {
+    setIsTransitioning(false);
+
+    if (slideIndex === 0) {
+      setSlideIndex(originSlides.length);
+    }
+
+    if (slideIndex === infinitySlides.length - 1) {
+      setSlideIndex(1);
+    }
+  };
+
   const handlePrevButtonClick = () => {
-    setSlideIndex((prev) => (prev > 0 ? prev - 1 : totalSlides - 1));
+    setIsTransitioning(true);
+    setSlideIndex((prev) => prev - 1);
   };
 
   const handleNextButtonClick = () => {
-    setSlideIndex((prev) => (prev < totalSlides - 1 ? prev + 1 : 0));
+    setIsTransitioning(true);
+    setSlideIndex((prev) => prev + 1);
   };
 
   return (
     <Container ref={containerRef}>
-      <SlidesWrapper slideIndex={slideIndex} slideWidth={slideWidth}>
-        {React.Children.map(children, (child, index) => (
+      <SlidesWrapper
+        slideIndex={slideIndex}
+        slideWidth={slideWidth}
+        isTransitioning={isTransitioning}
+        onTransitionEnd={handleTransitionEnd}
+      >
+        {infinitySlides.map((slideContent, index) => (
           <Slide key={`slide-${index}`} slideWidth={slideWidth}>
-            {child}
+            {slideContent}
           </Slide>
         ))}
       </SlidesWrapper>
@@ -75,14 +104,19 @@ const Container = styled.div`
   background: transparent;
 `;
 
-const SlidesWrapper = styled.ul<{ slideIndex: number; slideWidth: number }>`
+const SlidesWrapper = styled.ul<{
+  slideIndex: number;
+  slideWidth: number;
+  isTransitioning: boolean;
+}>`
   height: 100%;
 
   display: flex;
 
   transform: ${({ slideIndex, slideWidth }) =>
     `translateX(-${slideIndex * slideWidth}px)`};
-  transition: transform 0.3s ease-in-out;
+  transition: ${({ isTransitioning }) =>
+    isTransitioning ? 'transform 0.3s ease-in-out' : 'none'};
 `;
 
 const Slide = styled.li<{ slideWidth: number }>`

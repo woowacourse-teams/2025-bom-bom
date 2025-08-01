@@ -10,15 +10,20 @@ import { useThrottle } from '@/hooks/useThrottle';
 import arrowNext from '#/assets/carousel-arrow-next.png';
 import arrowPrev from '#/assets/carousel-arrow-prev.png';
 
+interface CarouselProps extends PropsWithChildren {
+  timer?: boolean;
+}
+
 const START_SLIDE_INDEX = 1;
 const INIT_SLIDE_WIDTH = 0;
 
-const Carousel = ({ children }: PropsWithChildren) => {
+const Carousel = ({ timer = true, children }: CarouselProps) => {
   const originSlides = React.Children.toArray(children);
   const [slideIndex, setSlideIndex] = useState(START_SLIDE_INDEX);
   const [slideWidth, setSlideWidth] = useState(INIT_SLIDE_WIDTH);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const infinitySlides = [
     originSlides[originSlides.length - 1],
@@ -58,6 +63,17 @@ const Carousel = ({ children }: PropsWithChildren) => {
     }
   };
 
+  const setSlidingTimer = useCallback(() => {
+    if (timerIdRef.current) {
+      clearTimeout(timerIdRef.current);
+    }
+
+    timerIdRef.current = setTimeout(() => {
+      setIsTransitioning(true);
+      setSlideIndex((prev) => prev + 1);
+    }, 4000);
+  }, []);
+
   const handlePrevButtonClick = useThrottle(() => {
     setIsTransitioning(true);
     setSlideIndex((prev) => prev - 1);
@@ -67,6 +83,10 @@ const Carousel = ({ children }: PropsWithChildren) => {
     setIsTransitioning(true);
     setSlideIndex((prev) => prev + 1);
   }, 500);
+
+  if (timer) {
+    setSlidingTimer();
+  }
 
   return (
     <Container ref={containerRef}>

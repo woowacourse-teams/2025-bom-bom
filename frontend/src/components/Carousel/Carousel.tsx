@@ -1,6 +1,11 @@
 import styled from '@emotion/styled';
-import { PropsWithChildren, useState, Children, useEffect } from 'react';
-import { useThrottle } from '@/hooks/useThrottle';
+import {
+  PropsWithChildren,
+  useState,
+  useRef,
+  Children,
+  useEffect,
+} from 'react';
 import arrowNext from '#/assets/carousel-arrow-next.png';
 import arrowPrev from '#/assets/carousel-arrow-prev.png';
 
@@ -14,6 +19,7 @@ const Carousel = ({ timer = true, children }: CarouselProps) => {
   const originSlides = Children.toArray(children);
   const [slideIndex, setSlideIndex] = useState(START_SLIDE_INDEX);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   if (originSlides.length === 0 && process.env.NODE_ENV === 'development') {
     throw new Error(
@@ -30,11 +36,11 @@ const Carousel = ({ timer = true, children }: CarouselProps) => {
   const handleTransitionEnd = () => {
     setIsTransitioning(false);
 
-    if (slideIndex === 0) {
+    if (slideIndex <= 0) {
       setSlideIndex(originSlides.length);
     }
 
-    if (slideIndex === infinitySlides.length - 1) {
+    if (slideIndex >= infinitySlides.length - 1) {
       setSlideIndex(START_SLIDE_INDEX);
     }
   };
@@ -42,23 +48,33 @@ const Carousel = ({ timer = true, children }: CarouselProps) => {
   useEffect(() => {
     if (!timer) return;
 
-    const timerIdRef = setInterval(() => {
-      setIsTransitioning(true);
-      setSlideIndex((prev) => prev + 1);
-    }, 4000);
+    if (!isTransitioning) {
+      timerIdRef.current = setTimeout(() => {
+        setIsTransitioning(true);
+        setSlideIndex((prev) => prev + 1);
+      }, 4000);
+    }
 
-    return () => clearInterval(timerIdRef);
-  }, [timer]);
+    return () => {
+      if (timerIdRef.current) {
+        clearTimeout(timerIdRef.current);
+      }
+    };
+  }, [timer, slideIndex, isTransitioning]);
 
-  const handlePrevButtonClick = useThrottle(() => {
+  const handlePrevButtonClick = () => {
+    if (isTransitioning) return;
+
     setIsTransitioning(true);
     setSlideIndex((prev) => prev - 1);
-  }, 500);
+  };
 
-  const handleNextButtonClick = useThrottle(() => {
+  const handleNextButtonClick = () => {
+    if (isTransitioning) return;
+
     setIsTransitioning(true);
     setSlideIndex((prev) => prev + 1);
-  }, 500);
+  };
 
   return (
     <Container>

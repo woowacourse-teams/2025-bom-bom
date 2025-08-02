@@ -1,11 +1,14 @@
 import styled from '@emotion/styled';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import SlideCardList from '../../SlideCardList/SlideCardList';
+import { getUserInfo } from '@/apis/members';
 
 export default function NewsletterHero() {
-  const queryClient = useQueryClient();
-  const userInfo = queryClient.getQueryData(['userInfo']);
+  const { data: userInfo } = useQuery({
+    queryKey: ['userInfo'],
+    queryFn: () => getUserInfo(),
+  });
 
   return (
     <>

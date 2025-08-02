@@ -1,24 +1,13 @@
 import styled from '@emotion/styled';
-import {
-  PropsWithChildren,
-  useState,
-  useRef,
-  Children,
-  useEffect,
-} from 'react';
+import { PropsWithChildren, Children } from 'react';
+import useSlide from './useSlide';
 import arrowNext from '#/assets/carousel-arrow-next.png';
 import arrowPrev from '#/assets/carousel-arrow-prev.png';
 
-interface CarouselProps {
+interface CarouselProps extends PropsWithChildren {
   timer?: boolean | number;
   children: React.ReactNode;
 }
-interface CarouselProps extends PropsWithChildren {
-  timer?: boolean | number;
-}
-
-const DEFAULT_DELAY = 4000;
-const START_SLIDE_INDEX = 1;
 
 /**
  * @property {boolean|number} [timer=true] - 자동 슬라이드 재생 여부 또는 주기 설정(ms).
@@ -29,9 +18,7 @@ const START_SLIDE_INDEX = 1;
  */
 const Carousel = ({ timer = true, children }: CarouselProps) => {
   const originSlides = Children.toArray(children);
-  const [slideIndex, setSlideIndex] = useState(START_SLIDE_INDEX);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const slideCount = originSlides.length;
 
   if (process.env.NODE_ENV === 'development') {
     if (originSlides.length === 0) {
@@ -51,49 +38,13 @@ const Carousel = ({ timer = true, children }: CarouselProps) => {
     originSlides[0],
   ];
 
-  const handleTransitionEnd = () => {
-    setIsTransitioning(false);
-
-    if (slideIndex <= 0) {
-      setSlideIndex(originSlides.length);
-    }
-
-    if (slideIndex >= infinitySlides.length - 1) {
-      setSlideIndex(START_SLIDE_INDEX);
-    }
-  };
-
-  useEffect(() => {
-    if (!timer) return;
-
-    const autoSlideDelay = typeof timer === 'number' ? timer : DEFAULT_DELAY;
-    if (!isTransitioning) {
-      timerIdRef.current = setTimeout(() => {
-        setIsTransitioning(true);
-        setSlideIndex((prev) => prev + 1);
-      }, autoSlideDelay);
-    }
-
-    return () => {
-      if (timerIdRef.current) {
-        clearTimeout(timerIdRef.current);
-      }
-    };
-  }, [timer, slideIndex, isTransitioning]);
-
-  const handlePrevButtonClick = () => {
-    if (isTransitioning) return;
-
-    setIsTransitioning(true);
-    setSlideIndex((prev) => prev - 1);
-  };
-
-  const handleNextButtonClick = () => {
-    if (isTransitioning) return;
-
-    setIsTransitioning(true);
-    setSlideIndex((prev) => prev + 1);
-  };
+  const {
+    slideIndex,
+    isTransitioning,
+    handleTransitionEnd,
+    handlePrevButtonClick,
+    handleNextButtonClick,
+  } = useSlide({ slideCount, timer });
 
   return (
     <Container>

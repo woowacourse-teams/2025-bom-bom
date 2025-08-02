@@ -4,7 +4,6 @@ import {
   useState,
   useRef,
   useCallback,
-  useEffect,
   Children,
 } from 'react';
 import { useThrottle } from '@/hooks/useThrottle';
@@ -16,14 +15,11 @@ interface CarouselProps extends PropsWithChildren {
 }
 
 const START_SLIDE_INDEX = 1;
-const INIT_SLIDE_WIDTH = 0;
 
 const Carousel = ({ timer = true, children }: CarouselProps) => {
   const originSlides = Children.toArray(children);
   const [slideIndex, setSlideIndex] = useState(START_SLIDE_INDEX);
-  const [slideWidth, setSlideWidth] = useState(INIT_SLIDE_WIDTH);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
   const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   if (originSlides.length === 0 && process.env.NODE_ENV === 'development') {
@@ -37,26 +33,6 @@ const Carousel = ({ timer = true, children }: CarouselProps) => {
     ...originSlides,
     originSlides[0],
   ];
-
-  const updateWidth = useCallback(() => {
-    if (containerRef.current) {
-      setSlideWidth(containerRef.current.clientWidth);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const resizeObserver = new ResizeObserver(() => {
-      updateWidth();
-    });
-    resizeObserver.observe(containerRef.current);
-    updateWidth();
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [updateWidth]);
 
   const handleTransitionEnd = () => {
     setIsTransitioning(false);
@@ -96,17 +72,14 @@ const Carousel = ({ timer = true, children }: CarouselProps) => {
   }
 
   return (
-    <Container ref={containerRef}>
+    <Container>
       <SlidesWrapper
         slideIndex={slideIndex}
-        slideWidth={slideWidth}
         isTransitioning={isTransitioning}
         onTransitionEnd={handleTransitionEnd}
       >
         {infinitySlides.map((slideContent, index) => (
-          <Slide key={`slide-${index}`} slideWidth={slideWidth}>
-            {slideContent}
-          </Slide>
+          <Slide key={`slide-${index}`}>{slideContent}</Slide>
         ))}
       </SlidesWrapper>
 
@@ -136,7 +109,6 @@ const Container = styled.div`
 
 const SlidesWrapper = styled.ul<{
   slideIndex: number;
-  slideWidth: number;
   isTransitioning: boolean;
 }>`
   height: 100%;
@@ -148,7 +120,7 @@ const SlidesWrapper = styled.ul<{
     isTransitioning ? 'transform 0.3s ease-in-out' : 'none'};
 `;
 
-const Slide = styled.li<{ slideWidth: number }>`
+const Slide = styled.li`
   height: 100%;
   flex: 0 0 100%;
 `;

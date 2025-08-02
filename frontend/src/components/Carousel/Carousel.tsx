@@ -9,22 +9,40 @@ import {
 import arrowNext from '#/assets/carousel-arrow-next.png';
 import arrowPrev from '#/assets/carousel-arrow-prev.png';
 
+interface CarouselProps {
+  timer?: boolean | number;
+  children: React.ReactNode;
+}
 interface CarouselProps extends PropsWithChildren {
-  timer?: boolean;
+  timer?: boolean | number;
 }
 
+const DEFAULT_DELAY = 4000;
 const START_SLIDE_INDEX = 1;
 
+/**
+ * @property {boolean|number} [timer=true] - 자동 슬라이드 재생 여부 또는 주기 설정(ms).
+ *   - `false`: 비활성화
+ *   - `true`: 기본 4초 주기
+ *   - `number`: 커스텀 주기(ms)
+ * @property {React.ReactNode} children - 슬라이드로 렌더링할 자식 요소들
+ */
 const Carousel = ({ timer = true, children }: CarouselProps) => {
   const originSlides = Children.toArray(children);
   const [slideIndex, setSlideIndex] = useState(START_SLIDE_INDEX);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  if (originSlides.length === 0 && process.env.NODE_ENV === 'development') {
-    throw new Error(
-      'Carousel 컴포넌트에 최소 한 개 이상의 child가 필요합니다.',
-    );
+  if (process.env.NODE_ENV === 'development') {
+    if (originSlides.length === 0) {
+      throw new Error(
+        'Carousel 컴포넌트에 최소 한 개 이상의 child가 필요합니다.',
+      );
+    }
+
+    if (typeof timer === 'number' && timer < 100) {
+      throw new Error('timer 주기는 100ms 이상이어야 합니다.');
+    }
   }
 
   const infinitySlides = [
@@ -48,11 +66,12 @@ const Carousel = ({ timer = true, children }: CarouselProps) => {
   useEffect(() => {
     if (!timer) return;
 
+    const autoSlideDelay = typeof timer === 'number' ? timer : DEFAULT_DELAY;
     if (!isTransitioning) {
       timerIdRef.current = setTimeout(() => {
         setIsTransitioning(true);
         setSlideIndex((prev) => prev + 1);
-      }, 4000);
+      }, autoSlideDelay);
     }
 
     return () => {

@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { PropsWithChildren, Children } from 'react';
-import useSlide from './useSlide';
+import useCarousel from './useCarousel';
 import arrowNext from '#/assets/carousel-arrow-next.png';
 import arrowPrev from '#/assets/carousel-arrow-prev.png';
 
@@ -44,7 +44,7 @@ const Carousel = ({ timer = true, children }: CarouselProps) => {
     handleTransitionEnd,
     handlePrevButtonClick,
     handleNextButtonClick,
-  } = useSlide({ slideCount, timer });
+  } = useCarousel({ slideCount, timer });
 
   return (
     <Container>

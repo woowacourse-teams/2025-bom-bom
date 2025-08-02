@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-interface UseSlideProps {
+interface UseCarouselProps {
   slideCount: number;
   timer?: boolean | number;
 }
@@ -8,7 +8,7 @@ interface UseSlideProps {
 const DEFAULT_DELAY = 4000;
 const START_SLIDE_INDEX = 1;
 
-const useSlide = ({ slideCount, timer = true }: UseSlideProps) => {
+const useCarousel = ({ slideCount, timer = true }: UseCarouselProps) => {
   const [slideIndex, setSlideIndex] = useState(START_SLIDE_INDEX);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -66,4 +66,4 @@ const useSlide = ({ slideCount, timer = true }: UseSlideProps) => {
   };
 };
 
-export default useSlide;
+export default useCarousel;

@@ -46,9 +46,47 @@ const SlideBox = ({ backgroundColor, children }: SlideBoxProps) => {
   );
 };
 
-export const Default: Story = {
-  render: () => (
-    <Carousel>
+export const DefaultTimer: Story = {
+  args: {
+    timer: true,
+    children: [],
+  },
+  render: (args) => (
+    <Carousel timer={args.timer}>
+      {slides.map(({ label, backgroundColor }) => (
+        <SlideBox key={label} backgroundColor={backgroundColor}>
+          {label}
+        </SlideBox>
+      ))}
+    </Carousel>
+  ),
+};
+
+export const CustomTimer: Story = {
+  args: {
+    timer: 1000,
+    children: [],
+  },
+
+  render: ({ timer }) => (
+    <Carousel timer={timer}>
+      {slides.map(({ label, backgroundColor }) => (
+        <SlideBox key={label} backgroundColor={backgroundColor}>
+          {label}
+        </SlideBox>
+      ))}
+    </Carousel>
+  ),
+};
+
+export const UserControlled: Story = {
+  args: {
+    timer: false,
+    children: [],
+  },
+
+  render: ({ timer }) => (
+    <Carousel timer={timer}>
       {slides.map(({ label, backgroundColor }) => (
         <SlideBox key={label} backgroundColor={backgroundColor}>
           {label}

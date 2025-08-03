@@ -10,7 +10,6 @@ export const useHighlightManager = () => {
     queryKey: ['highlight'],
     queryFn: () => getHighlights(),
   });
-
   const { mutate: addHighlights } = useMutation({
     mutationKey: ['addHighlights'],
     mutationFn: (highlight: Omit<HighlightType, 'id'>) =>

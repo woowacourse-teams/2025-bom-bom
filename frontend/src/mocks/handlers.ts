@@ -91,7 +91,7 @@ export const handlers = [
     const newHighlight = (await request.json()) as HighlightType;
     // ID가 없는 경우 임의 ID 생성
     if (!newHighlight.id) {
-      newHighlight.id = crypto.randomUUID();
+      newHighlight.id = Math.random();
     }
     HIGHLIGHTS.push(newHighlight);
     return HttpResponse.json(newHighlight, { status: 201 });
@@ -104,7 +104,7 @@ export const handlers = [
       const { id } = params;
       const updated = (await request.json()) as Partial<HighlightType>;
 
-      const index = HIGHLIGHTS.findIndex((h) => h.id === id);
+      const index = HIGHLIGHTS.findIndex((h) => h.id === Number(id));
       if (index === -1) {
         return new HttpResponse('Not Found', { status: 404 });
       }
@@ -117,7 +117,7 @@ export const handlers = [
   // 삭제
   http.delete(new RegExp(`${baseURL}/highlight/\\w+$`), ({ params }) => {
     const { id } = params;
-    const index = HIGHLIGHTS.findIndex((h) => h.id === id);
+    const index = HIGHLIGHTS.findIndex((h) => h.id === Number(id));
     if (index === -1) {
       return new HttpResponse('Not Found', { status: 404 });
     }

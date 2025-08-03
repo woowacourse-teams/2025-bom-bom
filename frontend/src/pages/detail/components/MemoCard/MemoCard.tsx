@@ -4,11 +4,11 @@ import { theme } from '@/styles/theme';
 import DeleteIcon from '#/assets/delete.svg';
 
 interface MemoCardProps {
-  id: string;
+  id: number;
   content: string;
   memo: string;
-  handleDeleteMemo: (id: string) => void;
-  handleUpdateMemo: (id: string, e: ChangeEvent<HTMLTextAreaElement>) => void;
+  handleDeleteMemo: (id: number) => void;
+  handleUpdateMemo: (id: number, e: ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
 const MemoCard = ({

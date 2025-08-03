@@ -22,8 +22,7 @@ export const Route = createFileRoute('/_bombom/articles/$articleId')({
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(true);
-  const [memo, setMemo] = useState('');
+  const [open, setOpen] = useState(false);
   const { highlights, addHighlights } = useHighlightManager();
 
   console.log(highlights);
@@ -65,7 +64,6 @@ function ArticleDetailPage() {
   return (
     <Container>
       <HeaderWrapper>
-        <button onClick={() => setOpen((open) => !open)}>열기</button>
         <Title>{currentArticle.title}</Title>
         <MetaInfoRow>
           <Chip text={currentArticle.newsletter?.category ?? ''} />
@@ -117,9 +115,9 @@ function ArticleDetailPage() {
       <MemoPanel
         open={open}
         handleClose={() => setOpen(false)}
-        notes={[{ id: '1', content: 'content', memo }]}
+        memos={highlights ?? []}
         handleDeleteMemo={(id) => console.log(id)}
-        handleUpdateMemo={(id, e) => console.log(id, setMemo(e.target.value))}
+        handleUpdateMemo={(id, e) => console.log(id, e.target.value)}
       />
     </Container>
   );

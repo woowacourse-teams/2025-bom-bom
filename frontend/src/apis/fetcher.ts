@@ -3,29 +3,39 @@ import { DEFAULT_ERROR_MESSAGES } from './constants/defaultErrorMessage';
 import { ENV } from './env';
 import { formatDate } from '@/utils/date';
 
-type FetcherOptions<TRequest extends Record<string, string | number>> = {
-  path: string;
-  query?: Record<string, string | number | Date | undefined>;
-  body?: TRequest;
-  headers?: HeadersInit;
-};
+type FetcherOptions<TRequest extends Record<string, string | number | object>> =
+  {
+    path: string;
+    query?: Record<string, string | number | Date | undefined>;
+    body?: TRequest;
+    headers?: HeadersInit;
+  };
 
 export const fetcher = {
   get: async <TResponse>({ path, query }: FetcherOptions<never>) =>
     request<never, TResponse>({ path, query, method: 'GET' }),
-  post: async <TRequest extends Record<string, string | number>, TResponse>({
+  post: async <
+    TRequest extends Record<string, string | number | object>,
+    TResponse,
+  >({
     path,
     body,
     headers,
   }: FetcherOptions<TRequest>) =>
     request<TRequest, TResponse>({ path, body, method: 'POST', headers }),
-  patch: async <TRequest extends Record<string, string | number>, TResponse>({
+  patch: async <
+    TRequest extends Record<string, string | number | object>,
+    TResponse,
+  >({
     path,
     query,
     body,
   }: FetcherOptions<TRequest>) =>
     request<TRequest, TResponse>({ path, query, body, method: 'PATCH' }),
-  put: async <TRequest extends Record<string, string | number>, TResponse>({
+  put: async <
+    TRequest extends Record<string, string | number | object>,
+    TResponse,
+  >({
     path,
     body,
   }: FetcherOptions<TRequest>) =>

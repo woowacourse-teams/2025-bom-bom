@@ -21,6 +21,7 @@ export const Route = createFileRoute('/_bombom/articles/$articleId')({
 
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
+  const articleIdNumber = Number(articleId);
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const { highlights, addHighlights } = useHighlightManager();
@@ -31,7 +32,7 @@ function ArticleDetailPage() {
     queryKey: ['article', articleId],
     queryFn: () =>
       getArticleById({
-        articleId: Number(articleId),
+        articleId: articleIdNumber,
       }),
   });
   const { data: otherArticles } = useQuery({
@@ -40,7 +41,7 @@ function ArticleDetailPage() {
   });
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
-    mutationFn: () => patchArticleRead({ articleId: Number(articleId) }),
+    mutationFn: () => patchArticleRead({ articleId: articleIdNumber }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['article', articleId],
@@ -103,11 +104,11 @@ function ArticleDetailPage() {
       </TodayArticlesWrapper>
       <FloatingToolbar
         onHighlight={(selection) => {
-          const highlightData = saveSelection(selection);
+          const highlightData = saveSelection(selection, articleIdNumber);
           addHighlights(highlightData);
         }}
         onMemo={(selection) => {
-          const highlightData = saveSelection(selection);
+          const highlightData = saveSelection(selection, articleIdNumber);
           addHighlights(highlightData);
           setOpen(true);
         }}

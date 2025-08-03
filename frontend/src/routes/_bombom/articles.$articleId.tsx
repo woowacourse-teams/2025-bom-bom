@@ -7,8 +7,8 @@ import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
-import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
+import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { useHighlightManager } from '@/pages/detail/hooks/useHighlightManager';
 import { saveSelection } from '@/pages/detail/utils/highlight';
@@ -25,6 +25,8 @@ function ArticleDetailPage() {
   const [open, setOpen] = useState(true);
   const [memo, setMemo] = useState('');
   const { highlights, addHighlights } = useHighlightManager();
+
+  console.log(highlights);
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
@@ -171,6 +173,16 @@ const ContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  mark[data-highlight-id] {
+    background-color: #ffeb3b;
+    transition: box-shadow 0.2s ease-in-out;
+  }
+
+  mark[data-highlight-id].hovered-highlight {
+    box-shadow: 0 0 6px rgb(0 0 0 / 30%);
+    cursor: pointer;
+  }
 `;
 
 const ContentDescription = styled.p`

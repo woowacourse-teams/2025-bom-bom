@@ -74,33 +74,47 @@ function getHighlightRange(container: Node, start: number, end: number) {
   const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
 
   let currentOffset = 0;
-  let startNode: Text | null = null;
-  let endNode: Text | null = null;
-  let startNodeOffset = 0;
-  let endNodeOffset = 0;
+
+  const positions = {
+    startNode: null as Text | null,
+    endNode: null as Text | null,
+    startOffset: 0,
+    endOffset: 0,
+  };
 
   while (walker.nextNode()) {
     const node = walker.currentNode as Text;
     const len = node.textContent!.length;
 
     // start node 찾기
-    if (!startNode && start >= currentOffset && start <= currentOffset + len) {
-      startNode = node;
-      startNodeOffset = start - currentOffset;
+    if (
+      !positions.startNode &&
+      start >= currentOffset &&
+      start <= currentOffset + len
+    ) {
+      positions.startNode = node;
+      positions.startOffset = start - currentOffset;
     }
 
     // end node 찾기
-    if (!endNode && end >= currentOffset && end <= currentOffset + len) {
-      endNode = node;
-      endNodeOffset = end - currentOffset;
+    if (
+      !positions.endNode &&
+      end >= currentOffset &&
+      end <= currentOffset + len
+    ) {
+      positions.endNode = node;
+      positions.endOffset = end - currentOffset;
     }
 
     currentOffset += len;
   }
 
-  if (!startNode || !endNode) throw new Error('Offset 변환 실패');
-  range.setStart(startNode, startNodeOffset);
-  range.setEnd(endNode, endNodeOffset);
+  if (!positions.startNode || !positions.endNode) {
+    throw new Error('Offset 변환 실패');
+  }
+
+  range.setStart(positions.startNode, positions.startOffset);
+  range.setEnd(positions.endNode, positions.endOffset);
 
   return range;
 }

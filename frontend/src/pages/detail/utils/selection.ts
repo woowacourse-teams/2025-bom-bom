@@ -1,10 +1,12 @@
+const ROOT_PATH = '.';
+
 /** 특정 노드의 XPath를 구하는 함수 */
 export const getXPathForNode = (node: Node, root: Node = document): string => {
   // TextNode일 경우 부모 요소로 이동
   if (node.nodeType === Node.TEXT_NODE) {
     node = node.parentNode!;
   }
-  if (node === root) return '.';
+  if (node === root) return ROOT_PATH;
   const index =
     Array.from(node.parentNode!.childNodes)
       .filter((n) => n.nodeName === node.nodeName)

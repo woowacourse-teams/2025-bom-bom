@@ -24,7 +24,7 @@ function ArticleDetailPage() {
   const articleIdNumber = Number(articleId);
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const { highlights, addHighlights } = useHighlightManager();
+  const { highlights, addHighlight, removeHighlight } = useHighlightManager();
 
   console.log(highlights);
 
@@ -105,11 +105,11 @@ function ArticleDetailPage() {
       <FloatingToolbar
         onHighlight={(selection) => {
           const highlightData = saveSelection(selection, articleIdNumber);
-          addHighlights(highlightData);
+          addHighlight(highlightData);
         }}
         onMemo={(selection) => {
           const highlightData = saveSelection(selection, articleIdNumber);
-          addHighlights(highlightData);
+          addHighlight(highlightData);
           setOpen(true);
         }}
       />
@@ -117,7 +117,7 @@ function ArticleDetailPage() {
         open={open}
         handleClose={() => setOpen(false)}
         memos={highlights ?? []}
-        handleDeleteMemo={(id) => console.log(id)}
+        handleDeleteMemo={removeHighlight}
         handleUpdateMemo={(id, e) => console.log(id, e.target.value)}
       />
     </Container>

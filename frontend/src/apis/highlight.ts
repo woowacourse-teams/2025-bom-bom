@@ -6,12 +6,12 @@ interface PostHighlightParams {
 }
 
 interface PatchHighlightParams {
-  id: string;
+  id: number;
   data: Partial<HighlightType>;
 }
 
 interface DeleteHighlightParams {
-  id: string;
+  id: number;
 }
 
 export const getHighlights = async () => {
@@ -36,6 +36,6 @@ export const patchHighlight = async ({ id, data }: PatchHighlightParams) => {
 
 export const deleteHighlight = async ({ id }: DeleteHighlightParams) => {
   return await fetcher.delete({
-    path: `/highlight/${id}`,
+    path: `/highlight/${id.toString()}`,
   });
 };

@@ -2,7 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { HighlightType } from '../types/highlight';
 import { restoreHighlight } from '../utils/highlight';
-import { getHighlights, postHighlight } from '@/apis/highlight';
+import {
+  deleteHighlight,
+  getHighlights,
+  postHighlight,
+} from '@/apis/highlight';
 
 export const useHighlightManager = () => {
   const queryClient = useQueryClient();
@@ -10,10 +14,19 @@ export const useHighlightManager = () => {
     queryKey: ['highlight'],
     queryFn: () => getHighlights(),
   });
-  const { mutate: addHighlights } = useMutation({
+  const { mutate: addHighlight } = useMutation({
     mutationKey: ['addHighlights'],
     mutationFn: (highlight: Omit<HighlightType, 'id'>) =>
       postHighlight({ highlight }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['highlight'],
+      });
+    },
+  });
+  const { mutate: removeHighlight } = useMutation({
+    mutationKey: ['removeHighlight'],
+    mutationFn: (id: number) => deleteHighlight({ id }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['highlight'],
@@ -59,6 +72,7 @@ export const useHighlightManager = () => {
 
   return {
     highlights,
-    addHighlights,
+    addHighlight,
+    removeHighlight,
   };
 };

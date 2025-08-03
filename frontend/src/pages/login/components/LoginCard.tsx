@@ -25,8 +25,7 @@ function LoginCard() {
       <Divider />
       <GoogleButton
         onClick={() => {
-          const envQuery =
-            process.env.NODE_ENV === 'development' ? '?env=local' : '';
+          const envQuery = ENV.nodeEnv === 'development' ? '?env=local' : '';
           window.location.href = `${ENV.baseUrl}/auth/login/google${envQuery}`;
         }}
         type="button"

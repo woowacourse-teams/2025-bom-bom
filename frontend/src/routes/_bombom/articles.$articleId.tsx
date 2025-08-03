@@ -22,7 +22,6 @@ export const Route = createFileRoute('/_bombom/articles/$articleId')({
 
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
-  const [highlights, setHighlights] = useState<HighlightType[]>([]);
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(true);
   const [memo, setMemo] = useState('');
@@ -57,7 +56,6 @@ function ArticleDetailPage() {
     throttleMs: 500,
     onTrigger: updateArticleAsRead,
   });
-  useHighlightManager(highlights);
 
   if (!currentArticle || !otherArticles) return null;
 

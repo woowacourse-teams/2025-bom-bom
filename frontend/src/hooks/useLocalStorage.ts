@@ -18,12 +18,16 @@ const useLocalStorage = <T extends SerializableType>(
     return (storage.getItem(key) ?? defaultData) as T;
   };
 
+  const getServerSnapshot = () => {
+    return null;
+  };
+
   const subscribe = useCallback((listener: () => void) => {
     window.addEventListener('storage', listener);
     return () => window.removeEventListener('storage', listener);
   }, []);
 
-  const store = useSyncExternalStore(subscribe, getSnapshot);
+  const store = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const set = useCallback(
     (value: T) => {

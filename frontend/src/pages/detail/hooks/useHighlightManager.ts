@@ -1,16 +1,29 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { HighlightType } from '../types/highlight';
 import { restoreHighlight } from '../utils/highlight';
+import { getHighlights, postHighlight } from '@/apis/highlight';
 
 export const useHighlightManager = () => {
-  const [highlights, setHighlights] = useState<HighlightType[]>([]);
+  const queryClient = useQueryClient();
+  const { data: highlights } = useQuery({
+    queryKey: ['highlight'],
+    queryFn: () => getHighlights(),
+  });
 
-  const addHighlights = useCallback((highlight: HighlightType) => {
-    setHighlights((prev) => [...prev, highlight]);
-  }, []);
+  const { mutate: addHighlights } = useMutation({
+    mutationKey: ['addHighlights'],
+    mutationFn: (highlight: Omit<HighlightType, 'id'>) =>
+      postHighlight({ highlight }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['highlight'],
+      });
+    },
+  });
 
   useEffect(() => {
-    if (highlights?.length === 0) return;
+    if (!highlights || highlights?.length === 0) return;
 
     highlights.forEach((h) => restoreHighlight(h));
   }, [highlights]);

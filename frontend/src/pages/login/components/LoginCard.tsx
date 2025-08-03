@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { ENV } from '@/apis/env';
 import { theme } from '@/styles/theme';
 import GoogleIcon from '#/assets/google.svg';
 import SparklesIcon from '#/assets/sparkles.svg';
@@ -25,8 +26,8 @@ function LoginCard() {
       <GoogleButton
         onClick={() => {
           const envQuery =
-            window.location.hostname === 'localhost' ? '?env=local' : '';
-          window.location.href = `https://api-dev.bombom.news/api/v1/auth/login/google${envQuery}`;
+            process.env.NODE_ENV === 'development' ? '?env=local' : '';
+          window.location.href = `${ENV.baseUrl}/auth/login/google${envQuery}`;
         }}
         type="button"
       >

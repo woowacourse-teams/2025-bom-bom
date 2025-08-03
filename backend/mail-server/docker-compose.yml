@@ -4,9 +4,10 @@ services:
     environment:
       INTEGRATION_MAILDIR: /maildir/new
       SPRING_PROFILES_ACTIVE: docker
+      LOGGING_FILE_NAME: /logs/bombom-email.log
     volumes:
       - /home/ec2-user/Maildir:/maildir
-      - /home/ec2-user/mail-server/logs:/logs 
+      - /home/ec2-user/bombom-email/logs:/logs 
     user: "1001:1001"
     ports:
       - "8080:8080"

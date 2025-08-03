@@ -32,7 +32,7 @@ const useLocalStorage = <T extends SerializableType>(
   const set = useCallback(
     (value: T) => {
       const newValue = JSON.stringify(value);
-      window.localStorage.setItem(key, newValue);
+      storage.setItem(key, newValue);
       window.dispatchEvent(new StorageEvent('storage', { key, newValue }));
     },
     [key],
@@ -40,6 +40,7 @@ const useLocalStorage = <T extends SerializableType>(
 
   const remove = useCallback(() => {
     storage.removeItem(key);
+    window.dispatchEvent(new StorageEvent('storage', { key, newValue: null }));
   }, [key]);
 
   return {

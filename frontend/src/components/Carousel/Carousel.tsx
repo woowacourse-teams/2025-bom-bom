@@ -6,7 +6,6 @@ import arrowPrev from '#/assets/carousel-arrow-prev.png';
 
 interface CarouselProps extends PropsWithChildren {
   timer?: boolean | number;
-  children: React.ReactNode;
 }
 
 /**

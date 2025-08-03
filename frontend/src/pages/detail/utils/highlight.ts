@@ -39,7 +39,7 @@ export const saveSelection = (selection: Selection): HighlightType => {
       : (range.commonAncestorContainer as Element);
 
   const xpath = getXPathForNode(container);
-  const offsets = getOffsetsFromRangeIncludingMarks(container, range);
+  const offsets = getHighlightOffsets(container, range);
 
   return {
     startXPath: xpath,
@@ -52,10 +52,7 @@ export const saveSelection = (selection: Selection): HighlightType => {
   };
 };
 
-export const getOffsetsFromRangeIncludingMarks = (
-  container: Element,
-  range: Range,
-) => {
+export const getHighlightOffsets = (container: Element, range: Range) => {
   let start = -1;
   let end = -1;
   let currentOffset = 0;
@@ -72,11 +69,7 @@ export const getOffsetsFromRangeIncludingMarks = (
   return { start, end };
 };
 
-function createRangeFromOffsetsIncludingMarks(
-  container: Node,
-  start: number,
-  end: number,
-) {
+function getHighlightRange(container: Node, start: number, end: number) {
   const range = document.createRange();
   const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
 
@@ -116,11 +109,7 @@ export const restoreHighlight = (data: HighlightType) => {
   const element = getNodeByXPath(data.startXPath);
   if (!element) return;
 
-  const range = createRangeFromOffsetsIncludingMarks(
-    element,
-    data.startOffset,
-    data.endOffset,
-  );
+  const range = getHighlightRange(element, data.startOffset, data.endOffset);
 
   // === 하이라이트 적용 ===
   const highlightId = data.id || crypto.randomUUID();

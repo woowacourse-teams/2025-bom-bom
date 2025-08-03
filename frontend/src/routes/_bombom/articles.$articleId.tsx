@@ -11,7 +11,6 @@ import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { useHighlightManager } from '@/pages/detail/hooks/useHighlightManager';
-import { HighlightType } from '@/pages/detail/types/highlight';
 import { saveSelection } from '@/pages/detail/utils/highlight';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
@@ -22,10 +21,10 @@ export const Route = createFileRoute('/_bombom/articles/$articleId')({
 
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
-  const [highlights, setHighlights] = useState<HighlightType[]>([]);
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(true);
   const [memo, setMemo] = useState('');
+  const { highlights, addHighlights } = useHighlightManager();
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
@@ -54,7 +53,6 @@ function ArticleDetailPage() {
     throttleMs: 500,
     onTrigger: updateArticleAsRead,
   });
-  useHighlightManager(highlights);
 
   if (!currentArticle || !otherArticles) return null;
 
@@ -104,7 +102,7 @@ function ArticleDetailPage() {
       <FloatingToolbar
         onSave={(selection) => {
           const highlightData = saveSelection(selection);
-          setHighlights((prev) => [...prev, highlightData]);
+          addHighlights(highlightData);
         }}
       />
       <MemoPanel

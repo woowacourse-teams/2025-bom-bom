@@ -1,8 +1,14 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { HighlightType } from '../types/highlight';
 import { restoreHighlight } from '../utils/highlight';
 
-export const useHighlightManager = (highlights: HighlightType[]) => {
+export const useHighlightManager = () => {
+  const [highlights, setHighlights] = useState<HighlightType[]>([]);
+
+  const addHighlights = useCallback((highlight: HighlightType) => {
+    setHighlights((prev) => [...prev, highlight]);
+  }, []);
+
   useEffect(() => {
     if (highlights?.length === 0) return;
 
@@ -38,4 +44,9 @@ export const useHighlightManager = (highlights: HighlightType[]) => {
       document.removeEventListener('mouseout', handleMouseOut);
     };
   }, []);
+
+  return {
+    highlights,
+    addHighlights,
+  };
 };

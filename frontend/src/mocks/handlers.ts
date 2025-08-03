@@ -3,8 +3,11 @@ import { ENV } from '../apis/env';
 import { ARTICLE_DETAIL } from './datas/articleDetail';
 import { ARTICLES } from './datas/articles';
 import { TRENDY_NEWSLETTERS } from './datas/trendyNewsLetter';
+import { HighlightType } from '@/pages/detail/types/highlight';
 
 const baseURL = ENV.baseUrl;
+
+const HIGHLIGHTS: HighlightType[] = [];
 
 export const handlers = [
   http.get(`${baseURL}/articles`, () => {
@@ -74,5 +77,51 @@ export const handlers = [
         goalCount: 10,
       },
     });
+  }),
+
+  // ------------------ 하이라이트 CRUD ------------------
+
+  // 전체 조회
+  http.get(`${baseURL}/highlight`, () => {
+    return HttpResponse.json(HIGHLIGHTS);
+  }),
+
+  // 생성
+  http.post(`${baseURL}/highlight`, async ({ request }) => {
+    const newHighlight = (await request.json()) as HighlightType;
+    // ID가 없는 경우 임의 ID 생성
+    if (!newHighlight.id) {
+      newHighlight.id = crypto.randomUUID();
+    }
+    HIGHLIGHTS.push(newHighlight);
+    return HttpResponse.json(newHighlight, { status: 201 });
+  }),
+
+  // 수정
+  http.patch(
+    new RegExp(`${baseURL}/highlight/\\w+$`),
+    async ({ request, params }) => {
+      const { id } = params;
+      const updated = (await request.json()) as Partial<HighlightType>;
+
+      const index = HIGHLIGHTS.findIndex((h) => h.id === id);
+      if (index === -1) {
+        return new HttpResponse('Not Found', { status: 404 });
+      }
+
+      HIGHLIGHTS[index] = { ...HIGHLIGHTS[index], ...updated };
+      return HttpResponse.json(HIGHLIGHTS[index]);
+    },
+  ),
+
+  // 삭제
+  http.delete(new RegExp(`${baseURL}/highlight/\\w+$`), ({ params }) => {
+    const { id } = params;
+    const index = HIGHLIGHTS.findIndex((h) => h.id === id);
+    if (index === -1) {
+      return new HttpResponse('Not Found', { status: 404 });
+    }
+    HIGHLIGHTS.splice(index, 1);
+    return new HttpResponse(null, { status: 204 });
   }),
 ];

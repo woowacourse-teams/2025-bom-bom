@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 
 type SerializableType =
   | string
@@ -8,33 +8,38 @@ type SerializableType =
   | SerializableType[]
   | { [key: string]: SerializableType };
 
+const storage = window.localStorage;
+
 const useLocalStorage = <T extends SerializableType>(
   key: string,
   defaultData: T,
 ) => {
-  const storage = window.localStorage;
-  const getInitStorage = () => {
-    const initData = storage.getItem(key);
-    return initData ? JSON.parse(initData) : defaultData;
+  const getSnapshot = () => {
+    return (storage.getItem(key) ?? defaultData) as T;
   };
 
-  const [data, setData] = useState<T>(getInitStorage);
+  const subscribe = useCallback((listener: () => void) => {
+    window.addEventListener('storage', listener);
+    return () => window.removeEventListener('storage', listener);
+  }, []);
+
+  const store = useSyncExternalStore(subscribe, getSnapshot);
 
   const set = useCallback(
     (value: T) => {
-      setData(value);
-      storage.setItem(key, JSON.stringify(value));
+      const newValue = JSON.stringify(value);
+      window.localStorage.setItem(key, newValue);
+      window.dispatchEvent(new StorageEvent('storage', { key, newValue }));
     },
-    [storage, key],
+    [key],
   );
 
   const remove = useCallback(() => {
-    setData(defaultData);
     storage.removeItem(key);
-  }, [storage, key, defaultData]);
+  }, [key]);
 
   return {
-    data,
+    data: store,
     set,
     remove,
   };

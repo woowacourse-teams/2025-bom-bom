@@ -42,12 +42,12 @@ export const handlers = [
   }),
 
   // 기사 상세
-  http.get(new RegExp(`${baseURL}/articles/\\d+$`), () => {
+  http.get(`${baseURL}/articles/:id`, () => {
     return HttpResponse.json(ARTICLE_DETAIL);
   }),
 
   // 기사 읽음 처리
-  http.patch(new RegExp(`${baseURL}/articles/\\d+/read`), () => {
+  http.patch(`${baseURL}/articles/:id/read`, () => {
     return new HttpResponse(null, { status: 204 });
   }),
 
@@ -90,32 +90,27 @@ export const handlers = [
   http.post(`${baseURL}/highlight`, async ({ request }) => {
     const newHighlight = (await request.json()) as HighlightType;
     // ID가 없는 경우 임의 ID 생성
-    if (!newHighlight.id) {
-      newHighlight.id = Math.random();
-    }
+    newHighlight.id = HIGHLIGHTS.length + 1;
     HIGHLIGHTS.push(newHighlight);
     return HttpResponse.json(newHighlight, { status: 201 });
   }),
 
   // 수정
-  http.patch(
-    new RegExp(`${baseURL}/highlight/\\w+$`),
-    async ({ request, params }) => {
-      const { id } = params;
-      const updated = (await request.json()) as Partial<HighlightType>;
+  http.patch(`${baseURL}/highlight/:id`, async ({ request, params }) => {
+    const { id } = params;
+    const updated = (await request.json()) as Partial<HighlightType>;
 
-      const index = HIGHLIGHTS.findIndex((h) => h.id === Number(id));
-      if (index === -1) {
-        return new HttpResponse('Not Found', { status: 404 });
-      }
+    const index = HIGHLIGHTS.findIndex((h) => h.id === Number(id));
+    if (index === -1) {
+      return new HttpResponse('Not Found', { status: 404 });
+    }
 
-      HIGHLIGHTS[index] = { ...HIGHLIGHTS[index], ...updated };
-      return HttpResponse.json(HIGHLIGHTS[index]);
-    },
-  ),
+    HIGHLIGHTS[index] = { ...HIGHLIGHTS[index], ...updated };
+    return HttpResponse.json(HIGHLIGHTS[index]);
+  }),
 
   // 삭제
-  http.delete(new RegExp(`${baseURL}/highlight/\\w+$`), ({ params }) => {
+  http.delete(`${baseURL}/highlight/:id`, ({ params }) => {
     const { id } = params;
     const index = HIGHLIGHTS.findIndex((h) => h.id === Number(id));
     if (index === -1) {

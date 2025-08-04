@@ -42,4 +42,12 @@ public class PetService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         pet.increaseCurrentScore(score);
     }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void createPet(Long memberId) {
+        petRepository.save(Pet.builder()
+                .memberId(memberId)
+                .stageId(1L) // TODO: stage ID 따른 상수화 필요
+                .build());
+    }
 }

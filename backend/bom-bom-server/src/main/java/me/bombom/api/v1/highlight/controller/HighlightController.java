@@ -5,8 +5,8 @@ import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
-import me.bombom.api.v1.highlight.dto.request.ChangeHighlightColorRequest;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
+import me.bombom.api.v1.highlight.dto.request.UpdateHighlightRequest;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
 import me.bombom.api.v1.highlight.service.HighlightService;
 import me.bombom.api.v1.member.domain.Member;
@@ -57,11 +57,11 @@ public class HighlightController {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void changeHighlightColor(
+    public void updateHighlight(
             @LoginMember Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
-            @Valid @RequestBody ChangeHighlightColorRequest request
+            @Valid @RequestBody UpdateHighlightRequest request
     ) {
-        highlightService.changeColor(id, request.color(), member);
+        highlightService.updateHighlight(id, request, member);
     }
 }

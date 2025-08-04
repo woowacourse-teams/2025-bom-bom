@@ -9,6 +9,7 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
+import me.bombom.api.v1.highlight.dto.request.UpdateHighlightRequest;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
@@ -64,17 +65,19 @@ public class HighlightService {
     }
 
     @Transactional
-    public void changeColor(Long id, String color, Member member) {
+    public void updateHighlight(Long id, UpdateHighlightRequest request, Member member) {
         Highlight highlight = highlightRepository.findById(id)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         Article article = articleRepository.findById(highlight.getArticleId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         validateArticleOwner(member, article);
 
-        if (highlight.isSameColor(color)) {
-            return;
+        if (request.color() != null) {
+            highlight.changeColor(request.color());
         }
-        highlight.changeColor(color);
+        if (request.memo() != null) {
+            highlight.editMemo(request.memo());
+        }
     }
 
     private void validateArticleOwner(Member member, Article article) {

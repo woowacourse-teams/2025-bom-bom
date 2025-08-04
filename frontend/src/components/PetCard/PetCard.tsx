@@ -22,7 +22,7 @@ const PetCard = () => {
       <Level>레벨 2 : 아직 애기</Level>
       <Spacing size={16} />
       <ProgressBar rate={70} caption="70%" />
-      <Button text="출석 먹이주기" onClick={() => {}} />
+      <Button text="맘마 먹이기" onClick={() => {}} />
     </Container>
   );
 };

@@ -18,4 +18,8 @@ public class BookmarkService {
     public Page<BookmarkResponse> getBookmarks(Long id, Pageable pageable) {
         return bookmarkRepository.findByMemberId(id, pageable);
     }
+
+    public boolean getBookmarkStatus(Long memberId, Long articleId) {
+        return bookmarkRepository.existsByMemberIdAndArticleId(memberId, articleId);
+    }
 }

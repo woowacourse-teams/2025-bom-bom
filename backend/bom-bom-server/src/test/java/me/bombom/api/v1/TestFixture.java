@@ -175,18 +175,21 @@ public final class TestFixture {
                         .articleId(firstArticleId)
                         .color("#ffeb3b")
                         .text("첫 번째 하이라이트")
+                        .memo("메모")
                         .build(),
                 Highlight.builder()
                         .highlightLocation(new HighlightLocation("15", "div[0]/p[1]", "25", "div[0]/p[1]"))
                         .articleId(firstArticleId)
                         .color("#4caf50")
                         .text("두 번째 하이라이트")
+                        .memo("메모")
                         .build(),
                 Highlight.builder()
                         .highlightLocation(new HighlightLocation("5", "div[0]/h1", "15", "div[0]/h1"))
                         .articleId(secondArticleId)
                         .color("#2196f3")
                         .text("세 번째 하이라이트")
+                        .memo("메모")
                         .build()
         );
     }

@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { theme } from '@/styles/theme';
 import BookmarkActiveIcon from '#/assets/bookmark-active.svg';
 import BookmarkInactiveIcon from '#/assets/bookmark-inactive.svg';
 import ArrowIcon from '#/assets/chevron-up.svg';
@@ -18,7 +19,11 @@ const FloatingActionButtons = ({
         {bookmarked ? (
           <BookmarkActiveIcon width={44} height={44} />
         ) : (
-          <BookmarkInactiveIcon width={44} height={44} />
+          <BookmarkInactiveIcon
+            width={44}
+            height={44}
+            color={theme.colors.icons}
+          />
         )}
       </ActionButton>
 

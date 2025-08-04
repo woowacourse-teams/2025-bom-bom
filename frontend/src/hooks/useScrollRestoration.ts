@@ -1,13 +1,11 @@
-import { useLocation } from '@tanstack/react-router';
 import { useCallback, useEffect, useRef } from 'react';
 import { useDebounce } from './useDebounce';
 import { createStorage } from '@/utils/storage';
 
 const DEFAULT_SCROLL_LOCATION = 0;
 
-const useScrollRestoration = () => {
-  const location = useLocation();
-  const storageKey = `scroll-${location.pathname}`;
+const useScrollRestoration = (pathname: string) => {
+  const storageKey = `scroll-${pathname}`;
   const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollStorage = createStorage<number>(
     storageKey,

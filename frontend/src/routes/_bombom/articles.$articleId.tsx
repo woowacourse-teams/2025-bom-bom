@@ -57,7 +57,7 @@ function ArticleDetailPage() {
     onTrigger: updateArticleAsRead,
   });
 
-  useScrollRestoration();
+  useScrollRestoration(articleId);
 
   if (!currentArticle || !otherArticles) return null;
 

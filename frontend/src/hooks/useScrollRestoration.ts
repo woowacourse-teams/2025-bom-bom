@@ -1,10 +1,20 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useDebounce } from './useDebounce';
+import { READ_THRESHOLD } from '@/constants/article';
+import { getScrollPercent } from '@/utils/scroll';
 import { createStorage } from '@/utils/storage';
 
 const DEFAULT_SCROLL_LOCATION = 0;
 
-const useScrollRestoration = (pathname: string) => {
+interface UseScrollRestorationParams {
+  pathname: string;
+  threshold?: number;
+}
+
+const useScrollRestoration = ({
+  pathname,
+  threshold = READ_THRESHOLD,
+}: UseScrollRestorationParams) => {
   const storageKey = `scroll-${pathname}`;
   const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollStorage = createStorage<number>(
@@ -24,6 +34,12 @@ const useScrollRestoration = (pathname: string) => {
   }, []);
 
   const handleScroll = useDebounce(() => {
+    const scrollPercent = getScrollPercent();
+    if (scrollPercent >= threshold) {
+      scrollStorage.remove();
+      return;
+    }
+
     scrollStorage.set(window.scrollY);
   }, 100);
 

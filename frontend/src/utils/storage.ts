@@ -10,6 +10,7 @@ interface StorageType<T extends SerializableType> {
   localStorage: Storage;
   get: () => T;
   set: (data: T) => void;
+  remove: () => void;
 }
 
 export const createStorage = <T extends SerializableType>(
@@ -26,5 +27,9 @@ export const createStorage = <T extends SerializableType>(
   set(data) {
     const stringifyData = JSON.stringify(data);
     this.localStorage.setItem(key, stringifyData);
+  },
+
+  remove() {
+    this.localStorage.removeItem(key);
   },
 });

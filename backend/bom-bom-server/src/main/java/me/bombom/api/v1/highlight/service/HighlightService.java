@@ -36,12 +36,8 @@ public class HighlightService {
         Article article = articleRepository.findById(createRequest.articleId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         validateArticleOwner(member, article);
-        HighlightLocation highlightLocation = new HighlightLocation(
-                createRequest.startOffset(),
-                createRequest.startXPath(),
-                createRequest.endOffset(),
-                createRequest.endXPath()
-        );
+        HighlightLocation highlightLocation = createRequest.location()
+                .toHighlightLocation();
         if (highlightRepository.existsByArticleIdAndHighlightLocation(createRequest.articleId(), highlightLocation)) {
             return;
         }
@@ -50,6 +46,7 @@ public class HighlightService {
                 .highlightLocation(highlightLocation)
                 .color(createRequest.color())
                 .text(createRequest.text())
+                .memo(createRequest.memo())
                 .build();
         highlightRepository.save(highlight);
     }

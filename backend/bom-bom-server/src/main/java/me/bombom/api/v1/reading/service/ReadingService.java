@@ -43,6 +43,23 @@ public class ReadingService {
     }
 
     @Transactional
+    public void resetContinueReadingCount() {
+        todayReadingRepository.findAll()
+                .stream()
+                .filter(todayReading -> todayReading.getTotalCount() != 0)
+                .forEach(todayReading -> {
+                    Long memberId = todayReading.getMemberId();
+                    ContinueReading continueReading = continueReadingRepository.findById(memberId)
+                            .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                    if (todayReading.getCurrentCount() == 0) {
+                        continueReading.resetDayCount();
+                    } else {
+                        continueReading.increaseDayCount();
+                    }
+                });
+    }
+
+    @Transactional
     public void resetTodayReadingCount() {
         todayReadingRepository.findAll()
                 .forEach(TodayReading::resetCount);
@@ -96,6 +113,17 @@ public class ReadingService {
             score += ScorePolicyConstants.CONTINUE_READING_BONUS_SCORE;
         }
         return score;
+    }
+
+    public ReadingInformationResponse getReadingInformation(Member member) {
+        Long memberId = member.getId();
+        ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        return ReadingInformationResponse.of(continueReading, todayReading, weeklyReading);
     }
 
     private void updateTodayReadingCount(Article article) {

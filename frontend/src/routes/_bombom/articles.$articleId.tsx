@@ -24,9 +24,8 @@ function ArticleDetailPage() {
   const articleIdNumber = Number(articleId);
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const { highlights, addHighlight, removeHighlight } = useHighlightManager();
-
-  console.log(highlights);
+  const { highlights, addHighlight, updateMemo, removeHighlight } =
+    useHighlightManager();
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
@@ -118,7 +117,7 @@ function ArticleDetailPage() {
         handleClose={() => setOpen(false)}
         memos={highlights ?? []}
         handleDeleteMemo={removeHighlight}
-        handleUpdateMemo={(id, e) => console.log(id, e.target.value)}
+        handleUpdateMemo={updateMemo}
       />
     </Container>
   );

@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
-import { ChangeEvent, useRef } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { theme } from '@/styles/theme';
 import DeleteIcon from '#/assets/delete.svg';
 
@@ -8,7 +9,7 @@ interface MemoCardProps {
   content: string;
   memo: string;
   handleDeleteMemo: (id: number) => void;
-  handleUpdateMemo: (id: number, e: ChangeEvent<HTMLTextAreaElement>) => void;
+  handleUpdateMemo: (id: number, memo: string) => void; // <-- e 대신 memo string
 }
 
 const MemoCard = ({
@@ -19,12 +20,21 @@ const MemoCard = ({
   handleUpdateMemo,
 }: MemoCardProps) => {
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [localMemo, setLocalMemo] = useState(memo);
+  const debouncedMemo = useDebouncedValue(localMemo, 500);
 
-  const autoResize = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  useEffect(() => {
+    if (debouncedMemo !== memo) {
+      handleUpdateMemo(id, debouncedMemo);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedMemo]);
+
+  const autoResize = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const target = e.target;
-    target.style.height = 'auto'; // 높이를 리셋
-    target.style.height = `${target.scrollHeight}px`; // scrollHeight 만큼 늘림
-    handleUpdateMemo(id, e);
+    target.style.height = 'auto';
+    target.style.height = `${target.scrollHeight}px`;
+    setLocalMemo(target.value);
   };
 
   return (
@@ -45,7 +55,7 @@ const MemoCard = ({
       <NoteMemo
         ref={textAreaRef}
         rows={1}
-        value={memo}
+        value={localMemo}
         onChange={autoResize}
         placeholder="메모를 입력해주세요"
       />

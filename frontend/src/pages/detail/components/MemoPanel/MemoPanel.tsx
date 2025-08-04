@@ -1,5 +1,4 @@
 import styled from '@emotion/styled';
-import { ChangeEvent } from 'react';
 import { HighlightType } from '../../types/highlight';
 import MemoCard from '../MemoCard/MemoCard';
 import { theme } from '@/styles/theme';
@@ -10,7 +9,7 @@ interface MemoPanelProps {
   open: boolean;
   memos: HighlightType[];
   handleDeleteMemo: (id: number) => void;
-  handleUpdateMemo: (id: number, e: ChangeEvent<HTMLTextAreaElement>) => void;
+  handleUpdateMemo: (id: number, memo: string) => void;
   handleClose: () => void;
 }
 

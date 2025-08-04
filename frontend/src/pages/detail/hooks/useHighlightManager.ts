@@ -5,6 +5,7 @@ import { restoreHighlight } from '../utils/highlight';
 import {
   deleteHighlight,
   getHighlights,
+  patchHighlight,
   postHighlight,
 } from '@/apis/highlight';
 
@@ -24,6 +25,24 @@ export const useHighlightManager = () => {
       });
     },
   });
+  const { mutate: updateHighlight } = useMutation({
+    mutationKey: ['updateHighlight'],
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: Partial<Omit<HighlightType, 'id'>>;
+    }) => patchHighlight({ id, data }),
+    onSuccess: (updatedHighlight, variables) => {
+      queryClient.setQueryData<HighlightType[]>(['highlight'], (old) => {
+        if (!old) return [];
+        return old.map((h) =>
+          h.id === variables.id ? { ...h, ...variables.data } : h,
+        );
+      });
+    },
+  });
   const { mutate: removeHighlight } = useMutation({
     mutationKey: ['removeHighlight'],
     mutationFn: (id: number) => deleteHighlight({ id }),
@@ -33,6 +52,10 @@ export const useHighlightManager = () => {
       });
     },
   });
+
+  const updateMemo = (id: number, memo: string) => {
+    updateHighlight({ id, data: { memo } });
+  };
 
   useEffect(() => {
     if (!highlights || highlights?.length === 0) return;
@@ -73,6 +96,7 @@ export const useHighlightManager = () => {
   return {
     highlights,
     addHighlight,
+    updateMemo,
     removeHighlight,
   };
 };

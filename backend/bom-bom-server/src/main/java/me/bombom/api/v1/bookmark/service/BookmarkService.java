@@ -1,8 +1,11 @@
 package me.bombom.api.v1.bookmark.service;
 
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.bookmark.domain.Bookmark;
 import me.bombom.api.v1.bookmark.dto.BookmarkResponse;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,5 +24,17 @@ public class BookmarkService {
 
     public boolean getBookmarkStatus(Long memberId, Long articleId) {
         return bookmarkRepository.existsByMemberIdAndArticleId(memberId, articleId);
+    }
+
+    @Transactional
+    public void save(Long memberId, Long articleId) {
+        if (bookmarkRepository.existsByMemberIdAndArticleId(memberId, articleId)) {
+            throw new CIllegalArgumentException(ErrorDetail.DUPLICATION);
+        }
+        Bookmark bookmark = Bookmark.builder()
+                .memberId(memberId)
+                .articleId(articleId)
+                .build();
+        bookmarkRepository.save(bookmark);
     }
 }

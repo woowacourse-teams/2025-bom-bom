@@ -13,12 +13,12 @@ public class ReadingScheduler {
 
     private final ReadingService readingService;
 
-    @Scheduled(cron="0 0 5 * * *", zone = TIME_ZONE)
+    @Scheduled(cron="0 0 0 * * *", zone = TIME_ZONE)
     public void daily() {
         readingService.resetTodayReadingCount();
     }
 
-    @Scheduled(cron="0 0 5 * * MON", zone = TIME_ZONE)
+    @Scheduled(cron="0 0 0 * * MON", zone = TIME_ZONE)
     public void weekly() {
         readingService.resetWeeklyReadingCount();
     }

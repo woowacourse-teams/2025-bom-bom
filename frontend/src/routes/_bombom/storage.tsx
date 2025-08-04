@@ -8,7 +8,6 @@ import CategoryFilter from '../../pages/storage/components/CategoryFilter/Catego
 import { getArticles, getStatisticsCategories } from '@/apis/articles';
 import { CategoryType } from '@/constants/category';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
-import EmptySearchCard from '@/pages/storage/components/EmptySearchCard/EmptySearchCard';
 import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';

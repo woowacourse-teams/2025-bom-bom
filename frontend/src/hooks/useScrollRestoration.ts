@@ -16,12 +16,10 @@ const useScrollRestoration = () => {
       clearTimeout(timerIdRef.current);
     }
 
-    timerIdRef.current = setTimeout(() => {
-      window.scroll({
-        top: scrollLocation,
-        behavior: 'smooth',
-      });
-    }, 300);
+    window.scroll({
+      top: scrollLocation,
+      behavior: 'smooth',
+    });
   }, []);
 
   const handleScroll = useDebounce(() => {

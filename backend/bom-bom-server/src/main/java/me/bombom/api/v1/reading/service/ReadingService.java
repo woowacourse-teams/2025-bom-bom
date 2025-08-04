@@ -42,7 +42,19 @@ public class ReadingService {
     }
 
     @Transactional
-    public void resetContinueReadingCount() {
+    public void resetTodayReadingCount() {
+        todayReadingRepository.findAll()
+                .forEach(TodayReading::resetCount);
+    }
+
+    @Transactional
+    public void resetWeeklyReadingCount() {
+        weeklyReadingRepository.findAll()
+                .forEach(WeeklyReading::resetCurrentCount);
+    }
+
+    @Transactional
+    public void updateContinueReadingCount() {
         todayReadingRepository.findAll()
                 .stream()
                 .filter(todayReading -> todayReading.getTotalCount() != 0)
@@ -56,18 +68,6 @@ public class ReadingService {
                         continueReading.increaseDayCount();
                     }
                 });
-    }
-
-    @Transactional
-    public void resetTodayReadingCount() {
-        todayReadingRepository.findAll()
-                .forEach(TodayReading::resetCount);
-    }
-
-    @Transactional
-    public void resetWeeklyReadingCount() {
-        weeklyReadingRepository.findAll()
-                .forEach(WeeklyReading::resetCurrentCount);
     }
 
     @Transactional

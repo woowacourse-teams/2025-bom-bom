@@ -57,12 +57,11 @@ public class HighlightController {
     }
 
     @PatchMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateHighlight(
+    public HighlightResponse updateHighlight(
             @LoginMember Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
             @Valid @RequestBody UpdateHighlightRequest request
     ) {
-        highlightService.update(id, request, member);
+        return highlightService.update(id, request, member);
     }
 }

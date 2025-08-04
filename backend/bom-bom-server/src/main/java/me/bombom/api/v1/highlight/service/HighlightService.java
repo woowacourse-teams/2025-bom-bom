@@ -36,14 +36,14 @@ public class HighlightService {
         Article article = articleRepository.findById(createRequest.articleId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         validateArticleOwner(member, article);
-        HighlightLocation highlightLocation = createRequest.location()
+        HighlightLocation location = createRequest.location()
                 .toHighlightLocation();
-        if (highlightRepository.existsByArticleIdAndHighlightLocation(createRequest.articleId(), highlightLocation)) {
+        if (highlightRepository.existsByArticleIdAndHighlightLocation(createRequest.articleId(), location)) {
             return;
         }
         Highlight highlight = Highlight.builder()
                 .articleId(createRequest.articleId())
-                .highlightLocation(highlightLocation)
+                .highlightLocation(location)
                 .color(createRequest.color())
                 .text(createRequest.text())
                 .memo(createRequest.memo())
@@ -53,33 +53,38 @@ public class HighlightService {
 
     @Transactional
     public void delete(Long id, Member member) {
-        Highlight highlight = highlightRepository.findById(id)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        Article article = articleRepository.findById(highlight.getArticleId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        validateArticleOwner(member, article);
+        findHighlightWithOwnerValidation(id, member);
         highlightRepository.deleteById(id);
     }
 
     @Transactional
-    public void update(Long id, UpdateHighlightRequest request, Member member) {
-        Highlight highlight = highlightRepository.findById(id)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        Article article = articleRepository.findById(highlight.getArticleId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        validateArticleOwner(member, article);
-
-        if (request.color() != null) {
-            highlight.changeColor(request.color());
-        }
-        if (request.memo() != null) {
-            highlight.editMemo(request.memo());
-        }
+    public HighlightResponse update(Long id, UpdateHighlightRequest request, Member member) {
+        Highlight highlight = findHighlightWithOwnerValidation(id, member);
+        updateHighlight(request, highlight);
+        return HighlightResponse.from(highlight);
     }
 
     private void validateArticleOwner(Member member, Article article) {
         if (!article.isOwner(member.getId())) {
             throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
+        }
+    }
+
+    private Highlight findHighlightWithOwnerValidation(Long id, Member member) {
+        Highlight highlight = highlightRepository.findById(id)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        Article article = articleRepository.findById(highlight.getArticleId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        validateArticleOwner(member, article);
+        return highlight;
+    }
+
+    private void updateHighlight(UpdateHighlightRequest request, Highlight highlight) {
+        if (request.color() != null) {
+            highlight.changeColor(request.color());
+        }
+        if (request.memo() != null) {
+            highlight.editMemo(request.memo());
         }
     }
 }

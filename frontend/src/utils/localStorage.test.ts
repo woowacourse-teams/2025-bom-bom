@@ -1,4 +1,4 @@
-import { createStorage } from './storage';
+import { createStorage } from './localStorage';
 
 describe('createStorage', () => {
   const KEY = 'test';

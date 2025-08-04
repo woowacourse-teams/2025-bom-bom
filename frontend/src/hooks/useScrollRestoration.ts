@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useDebounce } from './useDebounce';
 import { READ_THRESHOLD } from '@/constants/article';
+import { createStorage } from '@/utils/localStorage';
 import { getScrollPercent } from '@/utils/scroll';
-import { createStorage } from '@/utils/storage';
 
 const DEFAULT_SCROLL_LOCATION = 0;
 

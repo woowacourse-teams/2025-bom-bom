@@ -43,6 +43,10 @@ function ArticleDetailPage() {
     queryKey: ['articles', { date: today, sorted: 'ASC' }],
     queryFn: () => getArticles({ date: today, sorted: 'ASC' }),
   });
+  const { data: bookmarked } = useQuery({
+    queryKey: ['bookmarked'],
+    queryFn: () => getBookmarked({ articleId: Number(articleId) }),
+  });
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
     mutationFn: () => patchArticleRead({ articleId: Number(articleId) }),

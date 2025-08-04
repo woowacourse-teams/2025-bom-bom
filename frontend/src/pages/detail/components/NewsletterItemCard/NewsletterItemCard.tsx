@@ -1,31 +1,22 @@
 import styled from '@emotion/styled';
 import Badge from '@/components/Badge/Badge';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
-import { Article } from '@/pages/today/types/article';
+import { components } from '@/types/openapi';
 import ClockIcon from '#/assets/clock.svg';
 
 interface NewsletterItemCardProps {
-  data: Article;
+  data: components['schemas']['ArticleResponse'];
 }
 
 export default function NewsletterItemCard({ data }: NewsletterItemCardProps) {
-  const {
-    title,
-    contentsSummary,
-    thumbnailUrl,
-    expectedReadTime,
-    newsletter: {
-      name: newsletterName,
-      category: newsletterCategory,
-      imageUrl: newsletterImageUrl,
-    },
-  } = data;
+  const { title, contentsSummary, thumbnailUrl, expectedReadTime, newsletter } =
+    data;
 
   return (
     <Container>
       <NewsletterImage
-        src={thumbnailUrl ?? newsletterImageUrl}
-        alt={title}
+        src={thumbnailUrl ?? newsletter?.imageUrl ?? ''}
+        alt={title ?? ''}
         height={180}
       />
 
@@ -36,9 +27,9 @@ export default function NewsletterItemCard({ data }: NewsletterItemCardProps) {
         </TextContent>
 
         <MetaContent>
-          <Badge text={newsletterCategory} />
+          <Badge text={newsletter?.category ?? ''} />
           <MetaInfo>
-            <SourceText>from {newsletterName}</SourceText>
+            <SourceText>from {newsletter?.name ?? ''}</SourceText>
             <ReadTimeBox>
               <ClockIcon width={16} height={16} />
               <SourceText>{`${expectedReadTime}분`}</SourceText>

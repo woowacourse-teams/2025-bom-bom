@@ -1,8 +1,5 @@
 import { fetcher } from './fetcher';
-import { PageableResponse } from './types/PageableResponse';
-import { Article } from '../pages/today/types/article';
-import { ArticleDetail } from '@/pages/detail/types/articleDetail';
-import { CategoriesCountType } from '@/pages/today/types/category';
+import { components } from '@/types/openapi';
 
 interface GetArticlesParams {
   sorted: 'ASC' | 'DESC';
@@ -21,7 +18,7 @@ export const getArticles = async ({
   page,
   keyword,
 }: GetArticlesParams) => {
-  return await fetcher.get<PageableResponse<Article>>({
+  return await fetcher.get<components['schemas']['PageArticleResponse']>({
     path: '/articles',
     query: {
       date,
@@ -39,7 +36,7 @@ interface GetArticleByIdParams {
 }
 
 export const getArticleById = async ({ articleId }: GetArticleByIdParams) => {
-  return await fetcher.get<ArticleDetail>({
+  return await fetcher.get<components['schemas']['ArticleDetailResponse']>({
     path: `/articles/${articleId}`,
   });
 };
@@ -63,7 +60,9 @@ interface GetStatisticsCategoriesParams {
 export const getStatisticsCategories = async ({
   keyword,
 }: GetStatisticsCategoriesParams) => {
-  return await fetcher.get<CategoriesCountType>({
+  return await fetcher.get<
+    components['schemas']['GetArticleCategoryStatisticsResponse']
+  >({
     path: '/articles/statistics/categories',
     query: { keyword },
   });

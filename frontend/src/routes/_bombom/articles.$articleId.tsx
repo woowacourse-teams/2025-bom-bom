@@ -52,7 +52,7 @@ function ArticleDetailPage() {
 
   if (!currentArticle || !otherArticles) return null;
 
-  const unReadArticles = otherArticles?.content.filter(
+  const unReadArticles = otherArticles?.content?.filter(
     (article) => !article.isRead && article.articleId !== Number(articleId),
   );
 
@@ -62,10 +62,12 @@ function ArticleDetailPage() {
         <button onClick={() => setOpen((open) => !open)}>열기</button>
         <Title>{currentArticle.title}</Title>
         <MetaInfoRow>
-          <Chip text={currentArticle.newsletter.category} />
-          <MetaInfoText>from {currentArticle.newsletter.name}</MetaInfoText>
+          <Chip text={currentArticle.newsletter?.category ?? ''} />
           <MetaInfoText>
-            {formatDate(new Date(currentArticle.arrivedDateTime))}
+            from {currentArticle.newsletter?.name ?? ''}
+          </MetaInfoText>
+          <MetaInfoText>
+            {formatDate(new Date(currentArticle.arrivedDateTime ?? ''))}
           </MetaInfoText>
           <ReadTimeBox>
             <ClockIcon width={16} height={16} />
@@ -85,7 +87,7 @@ function ArticleDetailPage() {
       </ContentDescription>
       <TodayArticlesWrapper>
         <TodayArticleTitle>오늘 읽지 않은 다른 아티클</TodayArticleTitle>
-        {unReadArticles.length > 0 ? (
+        {unReadArticles?.length && unReadArticles.length > 0 ? (
           <TodayArticleList>
             {unReadArticles?.map((article) => (
               <NewsletterItemCard key={article.articleId} data={article} />

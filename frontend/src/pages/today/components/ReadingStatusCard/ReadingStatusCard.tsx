@@ -17,11 +17,7 @@ function ReadingStatusCard() {
   if (isLoading) return <ReadingStatusCardSkeleton />;
   if (!data) return null;
 
-  const {
-    streakReadDay,
-    today: { readCount: todayReadCount, totalCount },
-    weekly: { readCount: weeklyReadCount, goalCount },
-  } = data;
+  const { streakReadDay, today, weekly } = data;
 
   return (
     <Container>
@@ -49,18 +45,30 @@ function ReadingStatusCard() {
       <ProgressWithLabel
         label="오늘의 진행률"
         Icon={GoalIcon}
-        value={{ currentCount: todayReadCount, totalCount }}
+        value={{
+          currentCount: today?.readCount ?? 0,
+          totalCount: today?.totalCount ?? 0,
+        }}
         description={
-          todayReadCount < totalCount ? '목표까지 조금 더!' : '목표 달성!'
+          today?.readCount &&
+          today?.totalCount &&
+          today?.readCount < today?.totalCount
+            ? '목표까지 조금 더!'
+            : '목표 달성!'
         }
       />
       <ProgressWithLabel
         label="주간 목표"
         Icon={GoalIcon}
-        value={{ currentCount: weeklyReadCount, totalCount: goalCount }}
+        value={{
+          currentCount: weekly?.readCount ?? 0,
+          totalCount: weekly?.goalCount ?? 0,
+        }}
         description={
-          weeklyReadCount < goalCount
-            ? `목표까지 ${goalCount - weeklyReadCount}개 남음`
+          weekly?.readCount &&
+          weekly?.goalCount &&
+          weekly?.readCount < weekly?.goalCount
+            ? `목표까지 ${weekly?.goalCount - weekly?.readCount}개 남음`
             : '목표 달성!'
         }
         rateFormat="ratio"

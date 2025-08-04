@@ -173,4 +173,95 @@ class ReadingServiceTest {
             softly.assertThat(weeklyReadingRepository.findByMemberId(id)).isPresent();
         });
     }
+
+    @Test
+    void 모든_회원의_오늘_읽은_수를_초기화한다() {
+        // given
+        Member member1 = memberRepository.save(TestFixture.normalMemberFixture());
+        Member member2 = memberRepository.save(TestFixture.normalMember2Fixture());
+
+        todayReadingRepository.save(TestFixture.todayReadingFixture(member1));
+        todayReadingRepository.save(TestFixture.todayReadingFixture(member2));
+
+        // when
+        readingService.resetTodayReadingCount();
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(todayReadingRepository.findByMemberId(member1.getId()).get().getCurrentCount())
+                    .isZero();
+            softly.assertThat(todayReadingRepository.findByMemberId(member2.getId()).get().getCurrentCount())
+                    .isZero();
+        });
+    }
+
+    @Test
+    void 모든_회원의_주간_읽은_수를_초기화한다() {
+
+        // given
+        Member member1 = memberRepository.save(TestFixture.normalMemberFixture());
+        Member member2 = memberRepository.save(TestFixture.normalMember2Fixture());
+
+        weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member1));
+        weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member2));
+
+        // when
+        readingService.resetWeeklyReadingCount();
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(weeklyReadingRepository.findByMemberId(member1.getId()).get().getCurrentCount())
+                    .isZero();
+            softly.assertThat(weeklyReadingRepository.findByMemberId(member2.getId()).get().getCurrentCount())
+                    .isZero();
+        });
+    }
+
+    @Test
+    void 오늘_받은_뉴스레터를_읽은_경우_연속_읽기_일수를_증가시킨다() {
+        // given
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+
+        todayReadingRepository.save(TestFixture.todayReadingFixture(member));
+        continueReadingRepository.save(TestFixture.continueReadingFixture(member));
+
+        // when
+        readingService.updateContinueReadingCount();
+
+        // then
+        assertThat(continueReadingRepository.findByMemberId(member.getId()).get().getDayCount())
+                .isEqualTo(11);
+    }
+
+    @Test
+    void 오늘_받은_뉴스레터가_없는_경우_연속_읽기_일수가_갱신되지_않는다() {
+        // given
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+
+        todayReadingRepository.save(TestFixture.todayReadingFixtureZeroTotalCount(member));
+        continueReadingRepository.save(TestFixture.continueReadingFixture(member));
+
+        // when
+        readingService.updateContinueReadingCount();
+
+        // then
+        assertThat(continueReadingRepository.findByMemberId(member.getId()).get().getDayCount())
+                .isEqualTo(10);
+    }
+
+    @Test
+    void 오늘_받은_뉴스레터를_하나도_읽지_않을_경우_연속_읽기_일수가_초기화된다() {
+        // given
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+
+        todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));
+        continueReadingRepository.save(TestFixture.continueReadingFixture(member));
+
+        // when
+        readingService.updateContinueReadingCount();
+
+        // then
+        assertThat(continueReadingRepository.findByMemberId(member.getId()).get().getDayCount())
+                .isZero();
+    }
 }

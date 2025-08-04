@@ -1,4 +1,5 @@
 import { Global } from '@emotion/react';
+import { init as initSentry } from '@sentry/react';
 import { QueryClient } from '@tanstack/react-query';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { StrictMode } from 'react';
@@ -6,6 +7,11 @@ import { createRoot } from 'react-dom/client';
 import { ENV } from './apis/env.ts';
 import { routeTree } from './routeTree.gen';
 import reset from './styles/reset.ts';
+
+initSentry({
+  dsn: ENV.sentryDsn,
+  sendDefaultPii: true,
+});
 
 export const queryClient = new QueryClient();
 

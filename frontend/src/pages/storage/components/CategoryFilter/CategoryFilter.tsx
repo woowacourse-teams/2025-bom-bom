@@ -1,8 +1,9 @@
 import styled from '@emotion/styled';
 import Badge from '@/components/Badge/Badge';
-import CategoryIcon from '@/components/icons/CategoryIcon';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
+import { theme } from '@/styles/theme';
+import CategoryIcon from '#/assets/category.svg';
 
 interface CategoryItem<T extends string> {
   value: T;
@@ -25,7 +26,7 @@ function CategoryFilter<T extends string>({
     <Container aria-label="카테고리">
       <TitleWrapper>
         <IconWrapper>
-          <CategoryIcon />
+          <CategoryIcon width={16} height={16} fill={theme.colors.white} />
         </IconWrapper>
         <Title>카테고리</Title>
       </TitleWrapper>
@@ -48,14 +49,14 @@ function CategoryFilter<T extends string>({
 export default CategoryFilter;
 
 const Container = styled.nav`
-  display: flex;
-  gap: 20px;
-  flex-direction: column;
-
   width: 310px;
   padding: 16px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 20px;
+
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
 `;
 
 const TitleWrapper = styled.div`
@@ -66,12 +67,12 @@ const TitleWrapper = styled.div`
 `;
 
 const IconWrapper = styled.div`
+  padding: 8px;
+  border-radius: 50%;
+
   display: flex;
   align-items: center;
   justify-content: center;
-
-  padding: 8px;
-  border-radius: 50%;
 
   background-color: ${({ theme }) => theme.colors.primary};
 `;

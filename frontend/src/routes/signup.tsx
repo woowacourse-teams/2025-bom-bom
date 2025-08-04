@@ -15,13 +15,13 @@ function RouteComponent() {
 }
 
 const Container = styled.div`
+  min-height: 100vh;
+
   display: flex;
   gap: 28px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  min-height: 100vh;
 
   background-color: ${({ theme }) => theme.colors.primary};
 `;

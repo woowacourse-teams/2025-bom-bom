@@ -1,12 +1,13 @@
 import path from 'path';
 import { tanstackRouter } from '@tanstack/router-plugin/webpack';
+import dotenv from 'dotenv';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack from 'webpack';
 import 'webpack-dev-server';
 
-export default (env, argv) => {
-  const isProd = argv.mode === 'production';
+dotenv.config();
 
+export default (env, argv) => {
   const config: webpack.Configuration = {
     mode: argv.mode,
     entry: './src/main.tsx',
@@ -41,7 +42,7 @@ export default (env, argv) => {
           ],
         },
         {
-          test: /\.(png|svg|jpg|jpeg|gif)$/i,
+          test: /\.(png|jpg|jpeg|gif)$/i,
           type: 'asset',
         },
         {
@@ -50,6 +51,11 @@ export default (env, argv) => {
           generator: {
             filename: 'assets/[name][ext]',
           },
+        },
+        {
+          test: /\.svg$/i,
+          issuer: /\.[jt]sx?$/,
+          use: [{ loader: '@svgr/webpack' }],
         },
       ],
     },
@@ -65,17 +71,17 @@ export default (env, argv) => {
         template: './index.html', // 템플릿 HTML
         filename: 'index.html', // 출력될 HTML 파일 이름
         inject: true, // <script> 태그 자동 삽입
+        favicon: './public/assets/bombom.png',
+        hash: true,
       }),
       tanstackRouter({
         target: 'react',
         autoCodeSplitting: true,
+        semicolons: true,
       }),
-      new webpack.EnvironmentPlugin({
-        API_BASE_URL: isProd
-          ? 'https://api-dev.bombom.news/api/v1'
-          : 'https://api-dev.bombom.news/api/v1',
-        API_TOKEN: process.env.API_TOKEN ?? '',
-        ENABLE_MSW: process.env.ENABLE_MSW ?? 'false',
+      new webpack.DefinePlugin({
+        'process.env': JSON.stringify(process.env),
+        'process.env.ENABLE_MSW': JSON.stringify(env.ENABLE_MSW),
       }),
     ],
     devServer: {

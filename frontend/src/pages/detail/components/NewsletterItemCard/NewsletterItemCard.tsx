@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import Badge from '@/components/Badge/Badge';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { components } from '@/types/openapi';
-import clockIcon from '#/assets/clock.svg';
+import ClockIcon from '#/assets/clock.svg';
 
 interface NewsletterItemCardProps {
   data: components['schemas']['ArticleResponse'];
@@ -31,7 +31,7 @@ export default function NewsletterItemCard({ data }: NewsletterItemCardProps) {
           <MetaInfo>
             <SourceText>from {newsletter?.name ?? ''}</SourceText>
             <ReadTimeBox>
-              <img src={clockIcon} alt="시계 아이콘" />
+              <ClockIcon width={16} height={16} />
               <SourceText>{`${expectedReadTime}분`}</SourceText>
             </ReadTimeBox>
           </MetaInfo>

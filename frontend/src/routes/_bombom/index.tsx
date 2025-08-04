@@ -4,8 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import ArticleCardList from '../../pages/today/components/ArticleCardList/ArticleCardList';
 import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/ReadingStatusCard';
 import { getArticles } from '@/apis/articles';
-import { getReadingStatus } from '@/apis/members';
-import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
+import PetCard from '@/components/PetCard/PetCard';
 
 export const Route = createFileRoute('/_bombom/')({
   component: Index,
@@ -17,45 +16,33 @@ function Index() {
     queryFn: () => getArticles({ date: new Date(), sorted: 'DESC' }),
   });
 
-  const { data: readingStatus } = useQuery({
-    queryKey: ['readingStatus'],
-    queryFn: () => getReadingStatus(),
-  });
-
-  if (!articles || !readingStatus) return null;
-
   return (
     <Container>
       <TitleBox>
         <Title>오늘의 뉴스레터</Title>
         <TitleDescription>
-          {articles.content?.length}개의 새로운 뉴스레터가 도착했어요
+          {articles?.content?.length ?? 0}개의 새로운 뉴스레터가 도착했어요
         </TitleDescription>
       </TitleBox>
       <ContentWrapper>
-        {articles.content?.length && articles.content.length > 0 ? (
-          <ArticleCardList articles={articles.content} />
-        ) : (
-          <EmptyLetterCard title="새로운 뉴스레터가 없어요" />
-        )}
-        <ReadingStatusCard
-          streakReadDay={readingStatus.streakReadDay}
-          today={readingStatus.today}
-          weekly={readingStatus.weekly}
-        />
+        <ArticleCardList articles={articles?.content ?? []} />
+        <SideCardWrapper>
+          <PetCard />
+          <ReadingStatusCard />
+        </SideCardWrapper>
       </ContentWrapper>
     </Container>
   );
 }
 
 const Container = styled.div`
+  width: 1280px;
+  padding-top: 64px;
+
   display: flex;
   gap: 24px;
   flex-direction: column;
   align-items: flex-start;
-
-  width: 1280px;
-  padding-top: 64px;
 `;
 
 const TitleBox = styled.div`
@@ -75,9 +62,21 @@ const TitleDescription = styled.p`
 `;
 
 const ContentWrapper = styled.div`
+  width: 100%;
+
   display: flex;
   gap: 24px;
   align-items: flex-start;
   align-self: stretch;
   justify-content: center;
+`;
+
+const SideCardWrapper = styled.div`
+  width: 310px;
+
+  display: flex;
+  gap: 24px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 `;

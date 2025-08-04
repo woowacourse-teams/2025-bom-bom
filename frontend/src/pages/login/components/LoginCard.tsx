@@ -1,13 +1,19 @@
 import styled from '@emotion/styled';
-import GoogleIcon from '@/components/icons/GoogleIcon';
-import SparklesIcon from '@/components/icons/SparklesIcon';
+import { theme } from '@/styles/theme';
+import GoogleIcon from '#/assets/google.svg';
+import SparklesIcon from '#/assets/sparkles.svg';
 
 function LoginCard() {
   return (
     <Container>
       <GreetingWrapper>
         <IconWrapper>
-          <SparklesIcon />
+          <SparklesIcon
+            width={24}
+            height={24}
+            fill={theme.colors.white}
+            color={theme.colors.white}
+          />
         </IconWrapper>
         <GreetingTitle>봄봄에 오신 걸 환영해요</GreetingTitle>
         <GreetingMessage>
@@ -23,7 +29,7 @@ function LoginCard() {
         }}
         type="button"
       >
-        <GoogleIcon />
+        <GoogleIcon width={24} height={24} fill="black" />
         Google로 시작하기
       </GoogleButton>
       <Terms>
@@ -38,17 +44,17 @@ function LoginCard() {
 export default LoginCard;
 
 const Container = styled.section`
-  display: flex;
-  gap: 22px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
   width: 410px;
   height: 540px;
   padding: 28px;
   border-radius: 20px;
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+
+  display: flex;
+  gap: 22px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 
   background-color: ${({ theme }) => theme.colors.white};
 `;
@@ -62,15 +68,15 @@ const GreetingWrapper = styled.div`
 `;
 
 const IconWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   padding: 18px;
   border-radius: 50%;
   box-shadow:
     0 20px 25px -5px ${({ theme }) => `${theme.colors.primaryLight}40`},
     0 10px 10px -5px ${({ theme }) => `${theme.colors.primaryLight}20`};
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   background-color: ${({ theme }) => theme.colors.primary};
 `;
@@ -78,7 +84,6 @@ const IconWrapper = styled.div`
 const GreetingTitle = styled.h2`
   background: linear-gradient(107deg, #181818 0%, #f96 100%);
   background-clip: text;
-
   font: ${({ theme }) => theme.fonts.heading3};
   text-align: center;
 
@@ -109,19 +114,18 @@ const Divider = styled.div`
 `;
 
 const GoogleButton = styled.button`
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  justify-content: center;
-
   width: 100%;
   padding: 12px;
   border: 2px solid ${({ theme }) => theme.colors.dividers};
   border-radius: 8px;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 5%);
 
-  background-color: ${({ theme }) => theme.colors.white};
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: center;
 
+  background-color: ${({ theme }) => theme.colors.white};
   font: ${({ theme }) => theme.fonts.body1};
   text-align: center;
 

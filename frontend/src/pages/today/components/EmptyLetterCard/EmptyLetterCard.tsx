@@ -1,8 +1,9 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
+
 import ArrowIcon from '@/components/icons/ArrowIcon';
-import CompassIcon from '@/components/icons/CompassIcon';
-import PostboxIcon from '@/components/icons/PostboxIcon';
+import CompassIcon from '#/assets/compass.svg';
+import PostboxIcon from '#/assets/postbox.svg';
 
 interface EmptyLetterCardProps {
   title: string;
@@ -12,7 +13,7 @@ function EmptyLetterCard({ title }: EmptyLetterCardProps) {
   return (
     <Container>
       <PostboxIconWrapper>
-        <PostboxIcon />
+        <PostboxIcon width={160} height={160} />
       </PostboxIconWrapper>
 
       <EmptyTitle>{title}</EmptyTitle>
@@ -25,7 +26,7 @@ function EmptyLetterCard({ title }: EmptyLetterCardProps) {
       </DescriptionWrapper>
 
       <LinkButton to="/recommend">
-        <CompassIcon />
+        <CompassIcon width={16} height={16} />
         추천 뉴스레터 보기
         <StyledArrowIcon targetDirection="right" currentDirection="upRight" />
       </LinkButton>

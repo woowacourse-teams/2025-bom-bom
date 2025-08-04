@@ -5,7 +5,7 @@ import Chip from '@/components/Chip/Chip';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { components } from '@/types/openapi';
 import { formatDate } from '@/utils/date';
-import clockIcon from '#/assets/clock.svg';
+import ClockIcon from '#/assets/clock.svg';
 
 type ReadVariantType = 'transparent' | 'badge';
 
@@ -42,7 +42,7 @@ function ArticleCard({ data, readVariant = 'transparent' }: ArticleCardProps) {
             {formatDate(new Date(arrivedDateTime ?? ''))}
           </MetaInfoText>
           <ReadTimeBox>
-            <img src={clockIcon} alt="시계 아이콘" />
+            <ClockIcon width={16} height={16} />
             <MetaInfoText>{`${expectedReadTime}분`}</MetaInfoText>
           </ReadTimeBox>
         </MetaInfoRow>

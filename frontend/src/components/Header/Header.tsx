@@ -1,15 +1,16 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
-import Chip from '../Chip/Chip';
-import CompassIcon from '../icons/CompassIcon';
-import HomeIcon from '../icons/HomeIcon';
-import StorageIcon from '../icons/StorageIcon';
+import HomeIcon from '../../../public/assets/home.svg';
+import Button from '../Button/Button';
 import { getUserInfo } from '@/apis/members';
+import { theme } from '@/styles/theme';
 import { NavType } from '@/types/nav';
 import { copyToClipboard } from '@/utils/copy';
-import compassIcon from '#/assets/compass.svg';
-import copyIcon from '#/assets/copy.svg';
+import defaultImage from '#/assets/bombom.png';
+import CompassIcon from '#/assets/compass.svg';
+import CopyIcon from '#/assets/copy.svg';
+import StorageIcon from '#/assets/storage.svg';
 
 interface HeaderProps {
   activeNav: NavType;
@@ -38,7 +39,7 @@ export default function Header({ activeNav }: HeaderProps) {
       <HeaderInner>
         <LogoWrapper to="/">
           <LogoBox>
-            <HomeIcon />
+            <HomeIcon width={24} height={24} color={theme.colors.white} />
           </LogoBox>
           <TitleBox>
             <Title>봄봄</Title>
@@ -48,43 +49,57 @@ export default function Header({ activeNav }: HeaderProps) {
 
         <Nav>
           <NavButton active={activeNav === 'today'} to="/">
-            <HomeIcon color={activeNav === 'today' ? 'white' : 'black'} />
+            <HomeIcon
+              width={24}
+              height={24}
+              color={activeNav === 'today' ? 'white' : 'black'}
+            />
             <p>오늘의 뉴스레터</p>
           </NavButton>
           <NavButton active={activeNav === 'storage'} to="/storage">
-            <StorageIcon color={activeNav === 'storage' ? 'white' : 'black'} />
+            <StorageIcon
+              width={24}
+              height={24}
+              color={activeNav === 'storage' ? 'white' : 'black'}
+            />
             <p>뉴스레터 보관함</p>
           </NavButton>
           <NavButton active={activeNav === 'recommend'} to="/recommend">
             <CompassIcon
+              width={24}
+              height={24}
               color={activeNav === 'recommend' ? 'white' : 'black'}
             />
             <p>뉴스레터 추천</p>
           </NavButton>
         </Nav>
 
-        <ProfileBox>
-          <ProfileImg src={compassIcon} alt="profile" />
+        <ProfileWrapper>
           {isFetching || isError ? (
-            <Chip
+            <Button
               text="로그인"
-              selected={false}
-              onSelect={() => {
+              onClick={() => {
                 navagate({ to: '/login' });
               }}
             />
           ) : (
             <ProfileInfo>
-              <ProfileName>{userInfo?.nickname ?? '김봄봄'}</ProfileName>
-              <ProfileEmail onClick={handleCopyEmail}>
-                <EmailText>
-                  {userInfo?.email ?? 'example@bombom.news'}
-                </EmailText>
-                <img src={copyIcon} alt="copy" width={16} height={16} />
-              </ProfileEmail>
+              <ProfileImg
+                src={userInfo?.profileImageUrl ?? defaultImage}
+                alt="profile"
+              />
+              <ProfileTextBox>
+                <ProfileName>{userInfo?.nickname ?? '김봄봄'}</ProfileName>
+                <ProfileEmail onClick={handleCopyEmail}>
+                  <EmailText>
+                    {userInfo?.email ?? 'example@bombom.news'}
+                  </EmailText>
+                  <CopyIcon width={16} height={16} />
+                </ProfileEmail>
+              </ProfileTextBox>
             </ProfileInfo>
           )}
-        </ProfileBox>
+        </ProfileWrapper>
       </HeaderInner>
     </HeaderContainer>
   );
@@ -94,11 +109,6 @@ const HeaderContainer = styled.header`
   position: fixed;
   top: 0;
   z-index: 100;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   width: 100%;
   height: 72px;
   padding: 8px 16px;
@@ -107,16 +117,20 @@ const HeaderContainer = styled.header`
     0 10px 15px -3px rgb(0 0 0 / 10%),
     0 4px 6px -4px rgb(0 0 0 / 10%);
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   background: ${({ theme }) => theme.colors.white};
 `;
 
 const HeaderInner = styled.div`
+  width: 100%;
+  max-width: 1280px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  width: 100%;
-  max-width: 1280px;
 `;
 
 const LogoWrapper = styled(Link)`
@@ -125,10 +139,6 @@ const LogoWrapper = styled(Link)`
 `;
 
 const LogoBox = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   width: 40px;
   height: 40px;
   margin-right: 12px;
@@ -136,6 +146,10 @@ const LogoBox = styled.div`
   box-shadow:
     0 10px 15px -3px rgb(0 0 0 / 10%),
     0 4px 6px -4px rgb(0 0 0 / 10%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   background: ${({ theme }) => theme.colors.primary};
 `;
@@ -149,7 +163,6 @@ const TitleBox = styled.div`
 const Title = styled.div`
   background: linear-gradient(144.324deg, #4b5563 0%, #f96 50%, #ffd700 100%);
   background-clip: text;
-
   font: ${({ theme }) => theme.fonts.heading4};
 
   -webkit-text-fill-color: transparent;
@@ -160,53 +173,58 @@ const SubTitle = styled.div`
 `;
 
 const Nav = styled.nav`
+  padding: 4px;
+  border-radius: 14px;
+
   display: flex;
   gap: 8px;
   align-items: center;
-
-  padding: 4px;
-  border-radius: 14px;
 
   background: ${({ theme }) => theme.colors.white};
 `;
 
 const NavButton = styled(Link)<{ active?: boolean }>`
+  padding: 10px 12px;
+  border-radius: 12px;
+
   display: flex;
   gap: 4px;
   align-items: center;
 
-  padding: 10px 12px;
-  border-radius: 12px;
-
   background: ${({ active, theme }) =>
     active ? theme.colors.primary : 'transparent'};
-
   color: ${({ active, theme }) =>
     active ? theme.colors.white : theme.colors.black};
   font: ${({ theme }) => theme.fonts.body2};
 `;
 
-const ProfileBox = styled.div`
+const ProfileWrapper = styled.div`
+  padding: 8px 12px;
+  border-radius: 12px;
+
   display: flex;
   gap: 8px;
   align-items: center;
-
-  padding: 8px 12px;
-  border-radius: 12px;
 
   background: ${({ theme }) => theme.colors.white};
 `;
 
 const ProfileImg = styled.img`
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
+`;
+
+const ProfileTextBox = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
 const ProfileInfo = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
 
   font: ${({ theme }) => theme.fonts.caption};
 `;

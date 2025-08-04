@@ -30,34 +30,34 @@ function ImageInfoCard({
 export default ImageInfoCard;
 
 const Container = styled.div`
+  width: fit-content;
+  padding: 12px 8px;
+
   display: flex;
   gap: 8px;
   align-items: center;
   justify-content: center;
 
-  width: fit-content;
-  padding: 12px 8px;
-
   text-align: left;
 `;
 
 const Image = styled(ImageWithFallback)`
-  flex-shrink: 0;
-
   width: 58px;
   border-radius: 12px;
+
+  flex-shrink: 0;
 
   aspect-ratio: 1/1;
   object-fit: cover;
 `;
 
 const InfoBox = styled.div`
+  height: 60px;
+
   display: flex;
   gap: 4px;
   flex-direction: column;
   justify-content: flex-start;
-
-  height: 60px;
 `;
 
 const Title = styled.h3`

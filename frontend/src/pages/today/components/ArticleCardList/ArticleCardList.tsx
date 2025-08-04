@@ -1,8 +1,10 @@
 import styled from '@emotion/styled';
 import ArticleCard from '../ArticleCard/ArticleCard';
+import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
+import { theme } from '@/styles/theme';
 import { components } from '@/types/openapi';
-import checkIcon from '#/assets/check.svg';
-import letterIcon from '#/assets/letter.svg';
+import CheckIcon from '#/assets/check.svg';
+import LetterIcon from '#/assets/letter.svg';
 
 interface ArticleCardListProps {
   articles: components['schemas']['ArticleResponse'][];
@@ -21,10 +23,13 @@ function ArticleCardList({ articles }: ArticleCardListProps) {
     { read: [], unread: [] },
   );
 
+  if (articles.length === 0)
+    return <EmptyLetterCard title="새로운 뉴스레터가 없어요" />;
+
   return (
     <Container>
       <ListTitleBox>
-        <img src={letterIcon} alt="새로운 뉴스레터 타이틀 이미지" />
+        <LetterIcon width={32} height={32} color={theme.colors.white} />
         <ListTitle>새로운 뉴스레터 ({grouped.unread.length}개)</ListTitle>
       </ListTitleBox>
       <CardList>
@@ -35,7 +40,7 @@ function ArticleCardList({ articles }: ArticleCardListProps) {
         ))}
       </CardList>
       <ListTitleBox>
-        <img src={checkIcon} alt="새로운 뉴스레터 타이틀 이미지" />
+        <CheckIcon width={32} height={32} color={theme.colors.black} />
         <ListTitle>읽은 뉴스레터 ({grouped.read.length}개)</ListTitle>
       </ListTitleBox>
       <CardList>
@@ -56,6 +61,8 @@ const Container = styled.div`
   gap: 16px;
   flex-direction: column;
   align-items: flex-start;
+
+  width: 100%;
 `;
 
 const ListTitleBox = styled.div`
@@ -73,4 +80,6 @@ const CardList = styled.ul`
   display: flex;
   gap: 16px;
   flex-direction: column;
+
+  width: 100%;
 `;

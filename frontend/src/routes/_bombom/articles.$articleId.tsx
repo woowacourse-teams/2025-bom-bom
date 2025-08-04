@@ -1,15 +1,16 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createFileRoute, useRouterState } from '@tanstack/react-router';
-import { useEffect } from 'react';
-import clockIcon from '../../../public/assets/clock.svg';
+import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
-import { useThrottle } from '@/hooks/useThrottle';
+import Spacing from '@/components/Spacing/Spacing';
+import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
+import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { formatDate } from '@/utils/date';
-import { getScrollPercent } from '@/utils/scroll';
+import ClockIcon from '#/assets/clock.svg';
 
 export const Route = createFileRoute('/_bombom/articles/$articleId')({
   component: ArticleDetailPage,
@@ -17,10 +18,9 @@ export const Route = createFileRoute('/_bombom/articles/$articleId')({
 
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
-  const loadedAt = useRouterState({
-    select: (state) => state.loadedAt,
-  });
   const queryClient = useQueryClient();
+  const [open, setOpen] = useState(true);
+  const [memo, setMemo] = useState('');
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
@@ -43,19 +43,12 @@ function ArticleDetailPage() {
     },
   });
 
-  const throttledHandleScroll = useThrottle(() => {
-    const scrollPercent = getScrollPercent();
-    const elapsedTime = (Date.now() - loadedAt) / 100;
-
-    if (scrollPercent >= 70 && elapsedTime >= 3 && !currentArticle?.isRead) {
-      updateArticleAsRead();
-    }
-  }, 500);
-
-  useEffect(() => {
-    window.addEventListener('scroll', throttledHandleScroll);
-    return () => window.removeEventListener('scroll', throttledHandleScroll);
-  }, [throttledHandleScroll]);
+  useScrollThreshold({
+    enabled: !currentArticle?.isRead && !!currentArticle,
+    threshold: 70,
+    throttleMs: 500,
+    onTrigger: updateArticleAsRead,
+  });
 
   if (!currentArticle || !otherArticles) return null;
 
@@ -66,6 +59,7 @@ function ArticleDetailPage() {
   return (
     <Container>
       <HeaderWrapper>
+        <button onClick={() => setOpen((open) => !open)}>열기</button>
         <Title>{currentArticle.title}</Title>
         <MetaInfoRow>
           <Chip text={currentArticle.newsletter?.category ?? ''} />
@@ -76,7 +70,7 @@ function ArticleDetailPage() {
             {formatDate(new Date(currentArticle.arrivedDateTime ?? ''))}
           </MetaInfoText>
           <ReadTimeBox>
-            <img src={clockIcon} alt="시계 아이콘" />
+            <ClockIcon width={16} height={16} />
             <MetaInfoText>{currentArticle.expectedReadTime}분</MetaInfoText>
           </ReadTimeBox>
         </MetaInfoRow>
@@ -85,6 +79,7 @@ function ArticleDetailPage() {
       <ContentWrapper
         dangerouslySetInnerHTML={{ __html: currentArticle.contents ?? '' }}
       />
+      <Spacing size={24} />
       <Divider />
       <ContentDescription>
         이 뉴스레터가 유용했다면 동료들과 공유해주세요. 피드백이나 제안사항이
@@ -102,22 +97,29 @@ function ArticleDetailPage() {
           <EmptyUnreadCard />
         )}
       </TodayArticlesWrapper>
+      <MemoPanel
+        open={open}
+        handleClose={() => setOpen(false)}
+        notes={[{ id: '1', content: 'content', memo }]}
+        handleDeleteMemo={(id) => console.log(id)}
+        handleUpdateMemo={(id, e) => console.log(id, setMemo(e.target.value))}
+      />
     </Container>
   );
 }
 
 const Container = styled.div`
-  display: flex;
-  gap: 20px;
-  flex-direction: column;
-  align-items: center;
-
   max-width: 700px;
   margin: 0 auto;
   margin-top: 20px;
   padding: 28px;
   border-right: 1px solid ${({ theme }) => theme.colors.stroke};
   border-left: 1px solid ${({ theme }) => theme.colors.stroke};
+
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const HeaderWrapper = styled.div`
@@ -130,7 +132,7 @@ const HeaderWrapper = styled.div`
 
 const Title = styled.h2`
   color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.heading1};
+  font: ${({ theme }) => theme.fonts.heading2};
 `;
 
 const MetaInfoRow = styled.div`
@@ -169,18 +171,18 @@ const ContentDescription = styled.p`
 `;
 
 const TodayArticlesWrapper = styled.div`
+  width: 100%;
+
   display: flex;
   gap: 12px;
   flex-direction: column;
-
-  width: 100%;
 `;
 
 const TodayArticleTitle = styled.h3`
   align-self: flex-start;
 
   color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.heading3};
+  font: ${({ theme }) => theme.fonts.heading4};
 `;
 
 const TodayArticleList = styled.div`

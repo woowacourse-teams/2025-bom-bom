@@ -1,30 +1,41 @@
 import styled from '@emotion/styled';
-import GoalIcon from '@/components/icons/GoalIcon';
+import { useQuery } from '@tanstack/react-query';
+import ReadingStatusCardSkeleton from './ReadingStatusCardSkeleton';
+import { getReadingStatus } from '@/apis/members';
 import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
-import { components } from '@/types/openapi';
-import statusIcon from '#/assets/reading-status.svg';
-import streakIcon from '#/assets/streak.svg';
+import { theme } from '@/styles/theme';
+import GoalIcon from '#/assets/goal.svg';
+import StatusIcon from '#/assets/reading-status.svg';
+import StreakIcon from '#/assets/streak.svg';
 
-type ReadingStatusCardProps =
-  components['schemas']['ReadingInformationResponse'];
+function ReadingStatusCard() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['readingStatus'],
+    queryFn: () => getReadingStatus(),
+  });
 
-function ReadingStatusCard({
-  streakReadDay,
-  today,
-  weekly,
-}: ReadingStatusCardProps) {
+  if (isLoading) return <ReadingStatusCardSkeleton />;
+  if (!data) return null;
+
+  const { streakReadDay, today, weekly } = data;
+
   return (
     <Container>
       <TitleWrapper>
         <StatusIconWrapper>
-          <img src={statusIcon} alt="현황 아이콘" />
+          <StatusIcon width={20} height={20} color={theme.colors.white} />
         </StatusIconWrapper>
         <Title>읽기 현황</Title>
       </TitleWrapper>
 
       <StreakWrapper>
         <StreakIconWrapper>
-          <StreakIconImage src={streakIcon} alt="연속 읽기 아이콘" />
+          <StreakIcon
+            width={34}
+            height={34}
+            fill={theme.colors.white}
+            color={theme.colors.primary}
+          />
         </StreakIconWrapper>
         <StreakDay>{`${streakReadDay}일`}</StreakDay>
         <StreakDescription>연속 읽기 중!🔥</StreakDescription>
@@ -104,12 +115,6 @@ const StatusIconWrapper = styled.div`
   border-radius: 14px;
 
   background-color: ${({ theme }) => theme.colors.primary};
-`;
-
-const StreakIconImage = styled.img`
-  filter: drop-shadow(0 0 8px rgb(255 153 102 / 50%))
-    drop-shadow(0 0 16px rgb(255 153 102 / 30%))
-    drop-shadow(0 0 16px rgb(255 153 102 / 20%));
 `;
 
 const Title = styled.h2`

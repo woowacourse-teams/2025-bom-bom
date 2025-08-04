@@ -1,10 +1,10 @@
 import styled from '@emotion/styled';
-import FirecrackerIcon from '@/components/icons/FirecrackerIcon';
+import firecrackerIcon from '#/assets/fire-cracker.png';
 
 function EmptyUnreadCard() {
   return (
     <Container>
-      <FirecrackerIcon />
+      <img src={firecrackerIcon} alt="firecracker" width={96} height={96} />
       <EmptyTitle>축하합니다! 오늘 모든 뉴스레터를 읽으셨네요!</EmptyTitle>
 
       <DescriptionWrapper>
@@ -30,7 +30,7 @@ const Container = styled.section`
 
 const EmptyTitle = styled.h4`
   color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.heading4};
+  font: ${({ theme }) => theme.fonts.heading5};
   text-align: center;
 `;
 

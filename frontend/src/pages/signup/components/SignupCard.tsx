@@ -68,27 +68,27 @@ export default function SignupCard() {
 }
 
 const Container = styled.form`
-  display: flex;
-  gap: 22px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
   width: 410px;
   height: 540px;
   padding: 28px;
   border-radius: 20px;
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
 
+  display: flex;
+  gap: 22px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
   background-color: ${({ theme }) => theme.colors.white};
 `;
 
 const EmailRow = styled.div`
+  width: 100%;
+
   display: flex;
   gap: 8px;
   align-items: center;
-
-  width: 100%;
 `;
 
 const EmailInput = styled.input`
@@ -105,6 +105,5 @@ const SubmitButton = styled.button`
   border-radius: 12px;
 
   background-color: ${({ theme }) => theme.colors.primary};
-
   color: ${({ theme }) => theme.colors.white};
 `;

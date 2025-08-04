@@ -1,5 +1,5 @@
 const groupMap = {
-  Position: [
+  PositionAndBox: [
     'visibility',
     'overflow',
     'float',
@@ -12,25 +12,7 @@ const groupMap = {
     'left',
 
     'z-index',
-  ],
-  Layout: [
-    'display',
-    'gap',
-    'flex',
-    'flex-basis',
-    'flex-direction',
-    'flex-flow',
-    'flex-grow',
-    'flex-shrink',
-    'flex-wrap',
-    'align-content',
-    'align-items',
-    'align-self',
-    'justify-content',
-    'justify-items',
-    'justify-self',
-  ],
-  Box: [
+
     'width',
     'height',
     'min-width',
@@ -82,7 +64,24 @@ const groupMap = {
 
     'box-shadow',
   ],
-  Background: [
+  Layout: [
+    'display',
+    'gap',
+    'flex',
+    'flex-basis',
+    'flex-direction',
+    'flex-flow',
+    'flex-grow',
+    'flex-shrink',
+    'flex-wrap',
+    'align-content',
+    'align-items',
+    'align-self',
+    'justify-content',
+    'justify-items',
+    'justify-self',
+  ],
+  FontAndBackground: [
     'background',
     'background-attachment',
     'background-clip',
@@ -93,8 +92,7 @@ const groupMap = {
     'background-position',
     'background-repeat',
     'background-size',
-  ],
-  Font: [
+
     'color',
     'font',
     'font-family',

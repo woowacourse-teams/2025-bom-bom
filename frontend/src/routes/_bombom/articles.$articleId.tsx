@@ -1,11 +1,13 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
+import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
@@ -17,6 +19,8 @@ export const Route = createFileRoute('/_bombom/articles/$articleId')({
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
   const queryClient = useQueryClient();
+  const [open, setOpen] = useState(true);
+  const [memo, setMemo] = useState('');
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
@@ -55,6 +59,7 @@ function ArticleDetailPage() {
   return (
     <Container>
       <HeaderWrapper>
+        <button onClick={() => setOpen((open) => !open)}>열기</button>
         <Title>{currentArticle.title}</Title>
         <MetaInfoRow>
           <Chip text={currentArticle.newsletter.category} />
@@ -90,22 +95,29 @@ function ArticleDetailPage() {
           <EmptyUnreadCard />
         )}
       </TodayArticlesWrapper>
+      <MemoPanel
+        open={open}
+        handleClose={() => setOpen(false)}
+        notes={[{ id: '1', content: 'content', memo }]}
+        handleDeleteMemo={(id) => console.log(id)}
+        handleUpdateMemo={(id, e) => console.log(id, setMemo(e.target.value))}
+      />
     </Container>
   );
 }
 
 const Container = styled.div`
-  display: flex;
-  gap: 20px;
-  flex-direction: column;
-  align-items: center;
-
   max-width: 700px;
   margin: 0 auto;
   margin-top: 20px;
   padding: 28px;
   border-right: 1px solid ${({ theme }) => theme.colors.stroke};
   border-left: 1px solid ${({ theme }) => theme.colors.stroke};
+
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const HeaderWrapper = styled.div`
@@ -157,11 +169,11 @@ const ContentDescription = styled.p`
 `;
 
 const TodayArticlesWrapper = styled.div`
+  width: 100%;
+
   display: flex;
   gap: 12px;
   flex-direction: column;
-
-  width: 100%;
 `;
 
 const TodayArticleTitle = styled.h3`

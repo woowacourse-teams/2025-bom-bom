@@ -4,7 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { getBookmarkArticles } from '@/apis/bookmark';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
-import StorageIcon from '#/assets/storage.svg';
+import BookmarkIcon from '#/assets/bookmark-inactive.svg';
 
 const BookmarkPage = () => {
   const { data: articles } = useQuery({
@@ -22,7 +22,7 @@ const BookmarkPage = () => {
         <BookmarkStorageIcon />
         <Title>북마크 보관함</Title>
       </TitleWrapper>
-      {articles.content?.length && articles.content.length > 0 ? (
+      {articles.content?.length && articles.content?.length > 0 ? (
         <ArticleList>
           {articles.content?.map((article) => (
             <li key={article.articleId}>
@@ -73,7 +73,7 @@ const Title = styled.h1`
   font: ${({ theme }) => theme.fonts.heading2};
 `;
 
-const BookmarkStorageIcon = styled(StorageIcon)`
+const BookmarkStorageIcon = styled(BookmarkIcon)`
   width: 36px;
   height: 36px;
   padding: 8px;

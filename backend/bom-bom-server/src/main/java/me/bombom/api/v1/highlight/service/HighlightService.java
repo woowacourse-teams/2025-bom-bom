@@ -65,7 +65,7 @@ public class HighlightService {
     }
 
     @Transactional
-    public void updateHighlight(Long id, UpdateHighlightRequest request, Member member) {
+    public void update(Long id, UpdateHighlightRequest request, Member member) {
         Highlight highlight = highlightRepository.findById(id)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         Article article = articleRepository.findById(highlight.getArticleId())

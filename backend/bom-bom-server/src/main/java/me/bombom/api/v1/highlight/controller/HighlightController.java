@@ -34,7 +34,7 @@ public class HighlightController {
     private final HighlightService highlightService;
 
     @GetMapping
-    public List<HighlightResponse> getHighlight(
+    public List<HighlightResponse> getHighlights(
             @LoginMember Member member,
             @RequestParam @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     ) {
@@ -51,7 +51,8 @@ public class HighlightController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteHighlight(
             @LoginMember Member member,
-            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id) {
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+    ) {
         highlightService.delete(id, member);
     }
 
@@ -62,6 +63,6 @@ public class HighlightController {
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
             @Valid @RequestBody UpdateHighlightRequest request
     ) {
-        highlightService.updateHighlight(id, request, member);
+        highlightService.update(id, request, member);
     }
 }

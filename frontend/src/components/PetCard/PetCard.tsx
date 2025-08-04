@@ -3,7 +3,7 @@ import Button from '../Button/Button';
 import ProgressBar from '../ProgressBar/ProgressBar';
 import Spacing from '../Spacing/Spacing';
 import { theme } from '@/styles/theme';
-import petImage from '#/assets/pet-example.png';
+import petImage from '#/assets/pet-1-lv1.png';
 import PetIcon from '#/assets/pet.svg';
 
 const PetCard = () => {
@@ -18,8 +18,8 @@ const PetCard = () => {
 
       <Spacing size={16} />
 
-      <img src={petImage} alt="pet" width={160} height={160} />
-      <p>레벨 2 : 아직 애기</p>
+      <img src={petImage} alt="pet" width={100} height={120} />
+      <Level>레벨 2 : 아직 애기</Level>
       <Spacing size={16} />
       <ProgressBar rate={70} caption="70%" />
       <Button text="출석 먹이주기" onClick={() => {}} />
@@ -43,6 +43,11 @@ const Container = styled.section`
   justify-content: center;
 
   background-color: ${({ theme }) => theme.colors.white};
+`;
+
+const Level = styled.p`
+  color: ${({ theme }) => theme.colors.textTertiary};
+  font: ${({ theme }) => theme.fonts.body2};
 `;
 
 const TitleWrapper = styled.div`

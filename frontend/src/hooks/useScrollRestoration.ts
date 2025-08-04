@@ -9,7 +9,10 @@ const useScrollRestoration = () => {
   const location = useLocation();
   const storageKey = `scroll-${location.pathname}`;
   const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const storage = createStorage<number>(storageKey, DEFAULT_SCROLL_LOCATION);
+  const scrollStorage = createStorage<number>(
+    storageKey,
+    DEFAULT_SCROLL_LOCATION,
+  );
 
   const restoreScroll = useCallback((scrollLocation: number) => {
     if (timerIdRef.current) {
@@ -23,15 +26,15 @@ const useScrollRestoration = () => {
   }, []);
 
   const handleScroll = useDebounce(() => {
-    storage.set(window.scrollY);
+    scrollStorage.set(window.scrollY);
   }, 100);
 
   useEffect(() => {
-    const scrollLocation = storage.get();
+    const scrollLocation = scrollStorage.get();
     if (scrollLocation) {
       restoreScroll(scrollLocation);
     }
-  }, [storage, restoreScroll]);
+  }, [scrollStorage, restoreScroll]);
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);

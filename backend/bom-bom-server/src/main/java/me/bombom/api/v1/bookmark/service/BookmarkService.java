@@ -37,4 +37,9 @@ public class BookmarkService {
                 .build();
         bookmarkRepository.save(bookmark);
     }
+
+    @Transactional
+    public void deleteByArticleId(Long memberId, Long articleId) {
+        bookmarkRepository.deleteByArticleIdAndMemberId(memberId, articleId);
+    }
 }

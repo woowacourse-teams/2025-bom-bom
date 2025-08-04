@@ -20,7 +20,7 @@ class ReadingSchedulerTest {
     private ReadingService readingService;
 
     @Test
-    void daily메서드는_매일_5시에_실행된다() {
+    void daily_스케줄러는_오늘_읽기_정보를_초기화한다() {
         // when
         readingScheduler.daily();
 
@@ -29,7 +29,7 @@ class ReadingSchedulerTest {
     }
 
     @Test
-    void weekly메서드는_매주_월요일_5시에_실행된다() {
+    void weekly_스케줄러는_주간_읽기_정보를_초기화한다() {
         // when
         readingScheduler.weekly();
 

@@ -18,6 +18,8 @@ import me.bombom.api.v1.common.BaseEntity;
 public class ContinueReading extends BaseEntity {
 
     private static final int INITIAL_DAY_COUNT = 0;
+    private static final int RESET_DAY_COUNT = 0;
+    private static final int INCREASE_DAY_COUNT = 1;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,5 +47,13 @@ public class ContinueReading extends BaseEntity {
                 .memberId(memberId)
                 .dayCount(INITIAL_DAY_COUNT)
                 .build();
+    }
+
+    public void resetDayCount() {
+        dayCount = RESET_DAY_COUNT;
+    }
+
+    public void increaseDayCount() {
+        dayCount += INCREASE_DAY_COUNT;
     }
 }

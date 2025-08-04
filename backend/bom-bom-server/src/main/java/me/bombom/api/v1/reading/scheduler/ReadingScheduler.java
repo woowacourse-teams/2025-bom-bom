@@ -15,6 +15,7 @@ public class ReadingScheduler {
 
     @Scheduled(cron="0 0 0 * * *", zone = TIME_ZONE)
     public void daily() {
+        readingService.resetContinueReadingCount();
         readingService.resetTodayReadingCount();
     }
 

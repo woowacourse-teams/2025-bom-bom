@@ -20,11 +20,12 @@ class ReadingSchedulerTest {
     private ReadingService readingService;
 
     @Test
-    void daily_스케줄러는_오늘_읽기_정보를_초기화한다() {
+    void daily_스케줄러는_연속_및_읽기_정보를_초기화한다() {
         // when
         readingScheduler.daily();
 
         // then
+        verify(readingService, times(1)).resetContinueReadingCount();
         verify(readingService, times(1)).resetTodayReadingCount();
     }
 

@@ -60,7 +60,7 @@ public class ReadingService {
                 .filter(todayReading -> todayReading.getTotalCount() != 0)
                 .forEach(todayReading -> {
                     Long memberId = todayReading.getMemberId();
-                    ContinueReading continueReading = continueReadingRepository.findById(memberId)
+                    ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
                             .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
                     if (todayReading.getCurrentCount() == 0) {
                         continueReading.resetDayCount();

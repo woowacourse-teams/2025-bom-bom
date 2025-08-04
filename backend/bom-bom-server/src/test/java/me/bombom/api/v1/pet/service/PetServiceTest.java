@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import me.bombom.api.v1.TestFixture;
+import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -22,7 +23,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
-@Import(PetService.class)
+@Import({PetService.class, QuerydslConfig.class})
 class PetServiceTest {
 
     @Autowired
@@ -37,8 +38,8 @@ class PetServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    Member member;
-    Stage stage;
+    private Member member;
+    private Stage stage;
 
     @BeforeEach
     void setUp() {

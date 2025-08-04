@@ -6,6 +6,7 @@ import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
+import me.bombom.api.v1.highlight.dto.request.HighlightLocationRequest;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.newsletter.domain.Category;
@@ -196,13 +197,11 @@ public final class TestFixture {
 
     public static HighlightCreateRequest createHighlightRequest(Long articleId) {
         return new HighlightCreateRequest(
-                "0",
-                "div[0]/p[2]",
-                "20",
-                "div[0]/p[2]",
+                new HighlightLocationRequest("0", "div[0]/p[2]", "20", "div[0]/p[2]"),
                 articleId,
                 "#f44336",
-                "새로운 하이라이트 텍스트"
+                "새로운 하이라이트 텍스트",
+                "메모"
         );
     }
 }

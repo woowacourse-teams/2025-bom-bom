@@ -75,7 +75,7 @@ export default function Header({ activeNav }: HeaderProps) {
         </Nav>
 
         <ProfileWrapper>
-          {isFetching || isError ? (
+          {!isFetching && isError ? (
             <Button
               text="로그인"
               onClick={() => {

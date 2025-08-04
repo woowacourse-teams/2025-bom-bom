@@ -98,14 +98,19 @@ export const handlers = [
   // 수정
   http.patch(`${baseURL}/highlight/:id`, async ({ request, params }) => {
     const { id } = params;
-    const updated = (await request.json()) as Partial<HighlightType>;
+    const updated = (await request.json()) as Partial<
+      Omit<HighlightType, 'id'>
+    >;
 
     const index = HIGHLIGHTS.findIndex((h) => h.id === Number(id));
-    if (index === -1) {
+    if (index === -1 || !HIGHLIGHTS[index]) {
       return new HttpResponse('Not Found', { status: 404 });
     }
 
-    HIGHLIGHTS[index] = { ...HIGHLIGHTS[index], ...updated };
+    HIGHLIGHTS[index] = {
+      ...HIGHLIGHTS[index],
+      ...updated,
+    };
     return HttpResponse.json(HIGHLIGHTS[index]);
   }),
 

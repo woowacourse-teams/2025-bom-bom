@@ -42,4 +42,13 @@ describe('createStorage', () => {
     );
     expect(storage.get()).toEqual(NEW_DATA);
   });
+
+  it('remove: local storage의 데이터가 정상적으로 제거된다.', () => {
+    const STORED_DATA = { count: 42 };
+    window.localStorage.setItem(KEY, JSON.stringify(STORED_DATA));
+    storage.remove();
+
+    expect(window.localStorage.removeItem).toHaveBeenCalledWith(KEY);
+    expect(window.localStorage.getItem(KEY)).toBeNull();
+  });
 });

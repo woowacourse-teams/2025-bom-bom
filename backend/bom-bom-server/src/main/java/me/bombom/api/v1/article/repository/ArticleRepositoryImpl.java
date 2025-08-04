@@ -24,6 +24,7 @@ import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.dto.QArticleResponse;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.newsletter.dto.QNewsletterSummaryResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -73,6 +74,17 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .where(createMemberWhereClause(memberId))
                 .where(createKeywordWhereClause(keyword))
                 .where(createCategoryIdWhereClause(categoryId))
+                .fetchOne()
+                .intValue();
+    }
+
+    @Override
+    public int countByMemberIdAndArrivedDateTimeAndIsRead(Long memberId, LocalDate date, boolean isRead) {
+        return jpaQueryFactory.select(article.count())
+                .from(article)
+                .where(createMemberWhereClause(memberId))
+                .where(createDateWhereClause(date))
+                .where(article.isRead.eq(isRead))
                 .fetchOne()
                 .intValue();
     }

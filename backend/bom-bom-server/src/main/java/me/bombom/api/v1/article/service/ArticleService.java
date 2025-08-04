@@ -1,5 +1,6 @@
 package me.bombom.api.v1.article.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.domain.Article;
@@ -16,10 +17,14 @@ import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
+import me.bombom.api.v1.pet.ScorePolicyConstants;
+import me.bombom.api.v1.pet.event.AddArticleScoreEvent;
 import me.bombom.api.v1.reading.service.ReadingService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -30,6 +35,7 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
     private final CategoryRepository categoryRepository;
     private final NewsletterRepository newsletterRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final ReadingService readingService;
 
     public Page<ArticleResponse> getArticles(
@@ -59,6 +65,7 @@ public class ArticleService {
         validateArticleOwner(article, member.getId());
         article.markAsRead();
         readingService.updateReadingCount(article);
+        applicationEventPublisher.publishEvent(new AddArticleScoreEvent(member));
     }
 
     public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(Member member, String keyword) {
@@ -71,6 +78,12 @@ public class ArticleService {
                 })
                 .toList();
         return GetArticleCategoryStatisticsResponse.of(totalCount, countResponse);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public boolean canAddArticleScore(Member member){
+        int todayReadCount = articleRepository.countByMemberIdAndArrivedDateTimeAndIsRead(member.getId(), LocalDate.now(), true);
+        return todayReadCount <= ScorePolicyConstants.MAX_TODAY_READING_COUNT;
     }
 
     private void validateCategoryName(String categoryName) {

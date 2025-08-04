@@ -5,12 +5,14 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.pet.ScorePolicyConstants;
 import me.bombom.api.v1.pet.domain.Pet;
 import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.pet.dto.PetResponse;
 import me.bombom.api.v1.pet.repository.PetRepository;
 import me.bombom.api.v1.pet.repository.StageRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -31,8 +33,13 @@ public class PetService {
 
     @Transactional
     public void addAttendanceScore(Member member) {
+        increaseCurrentScore(member, ScorePolicyConstants.ATTENDANCE_SCORE);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void increaseCurrentScore(Member member, int score){
         Pet pet = petRepository.findByMemberId(member.getId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        pet.increaseCurrentScore(Pet.ATTENDANCE_SCORE);
+        pet.increaseCurrentScore(score);
     }
 }

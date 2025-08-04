@@ -6,6 +6,7 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.pet.ScorePolicyConstants;
 import me.bombom.api.v1.reading.domain.ContinueReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
@@ -80,6 +81,18 @@ public class ReadingService {
     public void updateReadingCount(Article article){
         updateTodayReadingCount(article);
         updateWeeklyReadingCount(article);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public int calculateArticleScore(Member member){
+        // 연속 읽기 날 수가 7일 이상이면 아티클 당 보너스 점수 +5
+        int score = ScorePolicyConstants.ARTICLE_READING_SCORE;
+        ContinueReading continueReading = continueReadingRepository.findByMemberId(member.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        if(continueReading.getDayCount() >= ScorePolicyConstants.MIN_CONTINUE_READING_COUNT){
+            score += ScorePolicyConstants.CONTINUE_READING_BONUS_SCORE;
+        }
+        return score;
     }
 
     private void updateTodayReadingCount(Article article) {

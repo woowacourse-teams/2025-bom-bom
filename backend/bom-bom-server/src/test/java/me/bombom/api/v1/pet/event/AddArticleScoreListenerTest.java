@@ -28,6 +28,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.transaction.TestTransaction;
 
+@Transactional
 @SpringBootTest
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -75,7 +76,6 @@ public class AddArticleScoreListenerTest {
     }
 
     @Test
-    @Transactional
     void 연속_읽기_보너스_점수와_아티클_점수를_받을_수_있는_경우() {
         // given
         articleRepository.saveAll(List.of(
@@ -103,7 +103,6 @@ public class AddArticleScoreListenerTest {
     }
 
     @Test
-    @Transactional
     void 아티클_점수만_받을_수_있는_경우() {
         // given
         articleRepository.saveAll(List.of(
@@ -131,7 +130,6 @@ public class AddArticleScoreListenerTest {
     }
 
     @Test
-    @Transactional
     void 아티클_점수를_받을_수_없는_경우() {
         // given
         articleRepository.saveAll(List.of(

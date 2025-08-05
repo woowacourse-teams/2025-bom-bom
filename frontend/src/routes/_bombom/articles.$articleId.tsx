@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
+import { getBookmarked } from '@/apis/bookmark';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
@@ -12,7 +13,7 @@ import FloatingActionButtons from '@/pages/detail/components/FloatingActionButto
 import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
 import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
-import useBookmark from '@/pages/detail/hooks/useBookmark';
+import useBookmarkMutation from '@/pages/detail/hooks/useBookmarkMutation';
 import { useHighlightManager } from '@/pages/detail/hooks/useHighlightManager';
 import { saveSelection } from '@/pages/detail/utils/highlight';
 import { formatDate } from '@/utils/date';
@@ -60,7 +61,7 @@ function ArticleDetailPage() {
     },
   });
 
-  const { bookmarked, onToggleBookmarkClick } = useBookmark({
+  const { onToggleBookmarkClick } = useBookmarkMutation({
     articleId: Number(articleId),
   });
 

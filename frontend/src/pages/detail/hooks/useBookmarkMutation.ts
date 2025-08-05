@@ -1,18 +1,14 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { deleteBookmark, getBookmarked, postBookmark } from '@/apis/bookmark';
+import { useMutation } from '@tanstack/react-query';
+import { deleteBookmark, postBookmark } from '@/apis/bookmark';
 import { queryClient } from '@/main';
 
-interface UseBookmarkParams {
+interface UseBookmarkMutationParams {
   articleId: number;
 }
 
-const useBookmark = ({ articleId }: UseBookmarkParams) => {
-  const { data: bookmarked } = useQuery({
-    queryKey: ['bookmarked'],
-    queryFn: () => getBookmarked({ articleId }),
-  });
+const useBookmarkMutation = ({ articleId }: UseBookmarkMutationParams) => {
   const { mutate: addBookmark } = useMutation({
-    mutationKey: ['bookmarked', String(articleId)],
+    mutationKey: ['bookmarked', articleId],
     mutationFn: () => postBookmark({ articleId }),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -21,7 +17,7 @@ const useBookmark = ({ articleId }: UseBookmarkParams) => {
     },
   });
   const { mutate: removeBookmark } = useMutation({
-    mutationKey: ['bookmarked', String(articleId)],
+    mutationKey: ['bookmarked', articleId],
     mutationFn: () => deleteBookmark({ articleId }),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -30,7 +26,7 @@ const useBookmark = ({ articleId }: UseBookmarkParams) => {
     },
   });
 
-  const onToggleBookmarkClick = () => {
+  const onToggleBookmarkClick = (bookmarked: boolean) => {
     if (bookmarked) {
       removeBookmark();
     } else {
@@ -39,9 +35,8 @@ const useBookmark = ({ articleId }: UseBookmarkParams) => {
   };
 
   return {
-    bookmarked,
     onToggleBookmarkClick,
   };
 };
 
-export default useBookmark;
+export default useBookmarkMutation;

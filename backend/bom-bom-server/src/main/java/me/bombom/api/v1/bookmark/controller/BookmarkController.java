@@ -44,7 +44,7 @@ public class BookmarkController {
         return bookmarkService.getBookmarkStatus(member.getId(), articleId);
     }
 
-    @PostMapping({"/{articleId}"})
+    @PostMapping("/{articleId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void saveBookmark(
             @LoginMember Member member,
@@ -53,7 +53,7 @@ public class BookmarkController {
         bookmarkService.save(member.getId(), articleId);
     }
 
-    @DeleteMapping({"/{articleId}"})
+    @DeleteMapping("/{articleId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBookmark(
             @LoginMember Member member,

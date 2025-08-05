@@ -61,7 +61,7 @@ const PetCard = () => {
         <PetImage
           src={petImage}
           alt="pet"
-          width={100}
+          width={80}
           height={120}
           isAnimating={isAnimating}
         />

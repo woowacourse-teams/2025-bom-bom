@@ -26,10 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
-public class AuthController {
+public class AuthController implements AuthControllerApi{
 
     private final MemberService memberService;
 
+    @Override
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
     public void signup(@Valid @RequestBody MemberSignupRequest signupRequest, HttpServletRequest request) {
@@ -45,6 +46,7 @@ public class AuthController {
         session.removeAttribute("pendingMember");
     }
 
+//    @Override
     @GetMapping("/login/{provider}")
     public void login(
             @PathVariable("provider") String provider,
@@ -56,6 +58,7 @@ public class AuthController {
         response.sendRedirect("/oauth2/authorization/" + provider);
     }
 
+    @Override
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(HttpServletRequest request) {

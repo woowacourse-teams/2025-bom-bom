@@ -12,10 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/members")
-public class MemberController {
+public class MemberController implements MemberControllerApi{
 
     private final MemberService memberService;
 
+    @Override
     @GetMapping("/me")
     public MemberProfileResponse getMember(@LoginMember Member member) {
         return memberService.getProfile(member.getId());

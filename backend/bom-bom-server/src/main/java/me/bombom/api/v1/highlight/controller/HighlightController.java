@@ -27,12 +27,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/highlights")
-public class HighlightController {
+public class HighlightController implements HighlightControllerApi{
 
     public static final String COLOR_HEX_PATTERN = "^#[0-9a-fA-F]{6}$";
 
     private final HighlightService highlightService;
 
+    @Override
     @GetMapping
     public List<HighlightResponse> getHighlights(
             @LoginMember Member member,
@@ -41,12 +42,14 @@ public class HighlightController {
         return highlightService.getHighlights(articleId, member);
     }
 
+    @Override
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void createHighlight(@LoginMember Member member, @Valid @RequestBody HighlightCreateRequest createRequest) {
         highlightService.create(createRequest, member);
     }
 
+    @Override
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteHighlight(
@@ -56,6 +59,7 @@ public class HighlightController {
         highlightService.delete(id, member);
     }
 
+    @Override
     @PatchMapping("/{id}")
     public HighlightResponse updateHighlight(
             @LoginMember Member member,

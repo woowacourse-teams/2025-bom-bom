@@ -32,22 +32,41 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     testImplementation("org.springframework.security:spring-security-test")
 
+    // querydsl
+    implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
+    annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
+    annotationProcessor("jakarta.annotation:jakarta.annotation-api")
+    annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+
     // lombok
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
     // spring security
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-security")
 
+    // prometheus
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus")
+
     // test
-    testRuntimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // db
     runtimeOnly("com.mysql:mysql-connector-j")
+    runtimeOnly("com.h2database:h2")
+
+    // swagger
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+// Querydsl 생성된 파일 정리
+tasks.named<Delete>("clean") {
+    delete("src/main/generated")
 }

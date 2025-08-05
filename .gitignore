@@ -1,5 +1,37 @@
 HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
 .idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
 
 ### VS Code ###
 .vscode/
@@ -18,6 +50,8 @@ app_*.log.gz
 # .yml .properties
 *.yml
 *.properties
+
+src/main/resources/log4j2.xml
 
 # .github 디렉토리 내의 .yml 파일 예외 처리
 !.github/**/*.yml

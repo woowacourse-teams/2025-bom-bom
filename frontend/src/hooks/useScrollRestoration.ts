@@ -6,6 +6,8 @@ import { getScrollPercent } from '@/utils/scroll';
 
 const DEFAULT_SCROLL_LOCATION = 0;
 
+type StorageKeyType = `scroll-${string}`;
+
 interface UseScrollRestorationParams {
   pathname: string;
   threshold?: number;
@@ -15,9 +17,9 @@ const useScrollRestoration = ({
   pathname,
   threshold = READ_THRESHOLD,
 }: UseScrollRestorationParams) => {
-  const storageKey = `scroll-${pathname}`;
+  const storageKey: StorageKeyType = `scroll-${pathname}`;
   const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const scrollStorage = createStorage<number>(
+  const scrollStorage = createStorage<number, StorageKeyType>(
     storageKey,
     DEFAULT_SCROLL_LOCATION,
   );

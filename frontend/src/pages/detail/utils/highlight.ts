@@ -11,7 +11,7 @@ export const highlightNodeSegment = (
   start: number,
   end: number,
   color: string,
-  highlightId: string,
+  highlightId: number,
 ) => {
   const parent = node.parentNode!;
   const before = node.textContent!.slice(0, start);
@@ -20,7 +20,7 @@ export const highlightNodeSegment = (
 
   const mark = document.createElement('mark');
   mark.style.backgroundColor = color;
-  mark.dataset.highlightId = highlightId;
+  mark.dataset.highlightId = highlightId.toString();
   mark.textContent = middle;
 
   const frag = document.createDocumentFragment();
@@ -31,7 +31,10 @@ export const highlightNodeSegment = (
   parent.replaceChild(frag, node);
 };
 
-export const saveSelection = (selection: Selection): HighlightType => {
+export const saveSelection = (
+  selection: Selection,
+  articleId: number,
+): Omit<HighlightType, 'id'> => {
   const range = selection.getRangeAt(0);
   const container =
     range.commonAncestorContainer.nodeType === Node.TEXT_NODE
@@ -42,13 +45,16 @@ export const saveSelection = (selection: Selection): HighlightType => {
   const offsets = getHighlightOffsets(container, range);
 
   return {
-    startXPath: xpath,
-    startOffset: offsets.start,
-    endXPath: xpath,
-    endOffset: offsets.end,
+    location: {
+      startXPath: xpath,
+      startOffset: offsets.start,
+      endXPath: xpath,
+      endOffset: offsets.end,
+    },
+    articleId,
     color: theme.colors.primaryLight,
-    id: crypto.randomUUID(),
     text: selection.toString(), // 선택된 텍스트 저장
+    memo: '',
   };
 };
 
@@ -120,13 +126,17 @@ function getHighlightRange(container: Node, start: number, end: number) {
 }
 
 export const restoreHighlight = (data: HighlightType) => {
-  const element = getNodeByXPath(data.startXPath);
+  const element = getNodeByXPath(data.location.startXPath);
   if (!element) return;
 
-  const range = getHighlightRange(element, data.startOffset, data.endOffset);
+  const range = getHighlightRange(
+    element,
+    data.location.startOffset,
+    data.location.endOffset,
+  );
 
   // === 하이라이트 적용 ===
-  const highlightId = data.id || crypto.randomUUID();
+  const highlightId = data.id || Math.random();
   const textNodes = getTextNodesInRange(range); // mark 제외 처리 가능
   textNodes.forEach((node, index) => {
     const isFirst = index === 0;

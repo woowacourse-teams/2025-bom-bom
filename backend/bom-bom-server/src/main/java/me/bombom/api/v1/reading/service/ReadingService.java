@@ -42,23 +42,6 @@ public class ReadingService {
     }
 
     @Transactional
-    public void resetContinueReadingCount() {
-        todayReadingRepository.findAll()
-                .stream()
-                .filter(todayReading -> todayReading.getTotalCount() != 0)
-                .forEach(todayReading -> {
-                    Long memberId = todayReading.getMemberId();
-                    ContinueReading continueReading = continueReadingRepository.findById(memberId)
-                            .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-                    if (todayReading.getCurrentCount() == 0) {
-                        continueReading.resetDayCount();
-                    } else {
-                        continueReading.increaseDayCount();
-                    }
-                });
-    }
-
-    @Transactional
     public void resetTodayReadingCount() {
         todayReadingRepository.findAll()
                 .forEach(TodayReading::resetCount);
@@ -72,7 +55,6 @@ public class ReadingService {
 
     @Transactional
     public void resetContinueReadingCount() {
-        // TODO: 페이징 혹은 batch 처리
         todayReadingRepository.findAll()
                 .stream()
                 .filter(todayReading -> (todayReading.getTotalCount() != 0) && (todayReading.getCurrentCount() == 0))
@@ -109,8 +91,8 @@ public class ReadingService {
     public void updateReadingCount(Long memberId, boolean isTodayArticle) {
         // TODO: 규칙 확정 후 연속 읽기 로직 수정
         if (isTodayArticle) {
-            updateContinueReadingCount(memberId);
             updateTodayReadingCount(memberId);
+            updateContinueReadingCount(memberId);
         }
         updateWeeklyReadingCount(memberId);
     }
@@ -146,17 +128,6 @@ public class ReadingService {
         WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         weeklyReading.increaseCurrentCount();
-    }
-
-    public ReadingInformationResponse getReadingInformation(Member member) {
-        Long memberId = member.getId();
-        ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        return ReadingInformationResponse.of(continueReading, todayReading, weeklyReading);
     }
 
     private boolean isBonusApplicable(ContinueReading continueReading) {

@@ -16,22 +16,25 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.env.Environment;
 
 @Configuration
 @Profile("!test")
 public class SwaggerConfig {
-
-    // 환경별 서버 URL 설정
-    private static final String PROD_URL = "https://api.bombom.news";
-    private static final String DEV_URL = "https://api-dev.bombom.news";
-    private static final String LOCAL_URL = "http://localhost:";
 
     // 프로파일 상수
     private static final String PROD_PROFILE = "prod";
     private static final String DEV_PROFILE = "dev";
 
     private static final String SECURITY_SCHEME_NAME = "googleOAuth";
+
+    @Value("${swagger.url.prod}")
+    private String prodUrl;
+
+    @Value("${swagger.url.dev}")
+    private String devUrl;
+
+    @Value("${swagger.url.local}")
+    private String localUrl;
 
     @Value("${spring.profiles.active}")
     private String activeProfile;
@@ -52,12 +55,12 @@ public class SwaggerConfig {
 
     private List<Server> setApiServer() {
         if (isProfileActive(PROD_PROFILE)) {
-            return List.of(createServer(PROD_URL, "봄봄 Production API"));
+            return List.of(createServer(prodUrl, "봄봄 Production API"));
         }
         if (isProfileActive(DEV_PROFILE)) {
-            return List.of(createServer(DEV_URL, "봄봄 Development API"));
+            return List.of(createServer(devUrl, "봄봄 Development API"));
         }
-        return List.of(createServer(LOCAL_URL.concat(serverPort), "봄봄 Local API"));
+        return List.of(createServer(localUrl.concat(serverPort), "봄봄 Local API"));
     }
 
     private Server createServer(String url, String description) {

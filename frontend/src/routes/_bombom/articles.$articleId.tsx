@@ -111,11 +111,11 @@ function ArticleDetailPage() {
         )}
       </TodayArticlesWrapper>
       <FloatingToolbar
-        onHighlight={(selection) => {
+        onHighlightButtonClick={(selection) => {
           const highlightData = saveSelection(selection, articleIdNumber);
           addHighlight(highlightData);
         }}
-        onMemo={(selection) => {
+        onMemoButtonClick={(selection) => {
           const highlightData = saveSelection(selection, articleIdNumber);
           addHighlight(highlightData);
           setOpen(true);
@@ -125,8 +125,8 @@ function ArticleDetailPage() {
         open={open}
         handleClose={() => setOpen(false)}
         memos={highlights ?? []}
-        handleDeleteMemo={removeHighlight}
-        handleUpdateMemo={updateMemo}
+        removeHighlight={removeHighlight}
+        updateMemo={updateMemo}
       />
     </Container>
   );

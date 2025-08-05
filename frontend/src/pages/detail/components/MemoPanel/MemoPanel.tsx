@@ -8,16 +8,16 @@ import MemoIcon from '#/assets/memo.svg';
 interface MemoPanelProps {
   open: boolean;
   memos: HighlightType[];
-  handleDeleteMemo: (id: number) => void;
-  handleUpdateMemo: (id: number, memo: string) => void;
+  removeHighlight: (id: number) => void;
+  updateMemo: (id: number, memo: string) => void;
   handleClose: () => void;
 }
 
 const MemoPanel = ({
   open,
   memos,
-  handleDeleteMemo,
-  handleUpdateMemo,
+  removeHighlight,
+  updateMemo,
   handleClose,
 }: MemoPanelProps) => {
   return (
@@ -56,8 +56,8 @@ const MemoPanel = ({
               id={note.id}
               content={note.text}
               memo={note.memo}
-              handleDeleteMemo={handleDeleteMemo}
-              handleUpdateMemo={handleUpdateMemo}
+              removeHighlight={removeHighlight}
+              updateMemo={updateMemo}
             />
           ))
         )}

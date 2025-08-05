@@ -8,16 +8,16 @@ interface MemoCardProps {
   id: number;
   content: string;
   memo: string;
-  handleDeleteMemo: (id: number) => void;
-  handleUpdateMemo: (id: number, memo: string) => void; // <-- e 대신 memo string
+  removeHighlight: (id: number) => void;
+  updateMemo: (id: number, memo: string) => void; // <-- e 대신 memo string
 }
 
 const MemoCard = ({
   id,
   content,
   memo,
-  handleDeleteMemo,
-  handleUpdateMemo,
+  removeHighlight,
+  updateMemo,
 }: MemoCardProps) => {
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   const [localMemo, setLocalMemo] = useState(memo);
@@ -25,9 +25,9 @@ const MemoCard = ({
 
   useEffect(() => {
     if (debouncedMemo !== memo) {
-      handleUpdateMemo(id, debouncedMemo);
+      updateMemo(id, debouncedMemo);
     }
-    // 의존성 배열에 handleUpdateMemo, id, memo를 넣으면
+    // 의존성 배열에 updateMemo, id, memo를 넣으면
     // memo가 변경될 때마다(예: 서버 응답으로 값이 업데이트될 때) 불필요하게 effect가 재실행됨.
     // 우리는 debouncedMemo가 변경될 때만 서버 업데이트를 호출하려는 목적이므로 eslint 경고를 무시하고 의존성 배열을 최소화함.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -46,7 +46,7 @@ const MemoCard = ({
         <ColorDotWrapper>
           <ColorDot />
         </ColorDotWrapper>
-        <DeleteButton onClick={() => handleDeleteMemo(id)}>
+        <DeleteButton onClick={() => removeHighlight(id)}>
           <DeleteIcon fill={theme.colors.black} width={20} height={20} />
         </DeleteButton>
       </HeaderBox>

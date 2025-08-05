@@ -27,13 +27,6 @@ const MemoCard = ({
     onRemoveButtonClick(id);
   };
 
-  const autoResize = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    const target = e.target;
-    target.style.height = 'auto';
-    target.style.height = `${target.scrollHeight}px`;
-    setLocalMemo(target.value);
-  };
-
   useEffect(() => {
     if (debouncedMemo !== memo) {
       onMemoChange(id, debouncedMemo);
@@ -43,6 +36,14 @@ const MemoCard = ({
     // 우리는 debouncedMemo가 변경될 때만 서버 업데이트를 호출하려는 목적이므로 eslint 경고를 무시하고 의존성 배열을 최소화함.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedMemo]);
+
+  useEffect(() => {
+    if (!textAreaRef.current) return;
+
+    const el = textAreaRef.current;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [localMemo]);
 
   return (
     <Container>
@@ -63,7 +64,7 @@ const MemoCard = ({
         ref={textAreaRef}
         rows={1}
         value={localMemo}
-        onChange={autoResize}
+        onChange={(e) => setLocalMemo(e.target.value)}
         placeholder="메모를 입력해주세요"
       />
     </Container>
@@ -136,6 +137,7 @@ const MemoContentText = styled.p`
 
 const NoteMemo = styled.textarea`
   width: 100%;
+  height: auto;
   padding: 8px 12px;
   outline: none;
   border: none;

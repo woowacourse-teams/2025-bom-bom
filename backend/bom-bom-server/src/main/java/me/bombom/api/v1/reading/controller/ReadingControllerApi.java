@@ -28,16 +28,7 @@ public interface ReadingControllerApi {
     @ApiResponses({
         @ApiResponse(
             responseCode = "200",
-            description = "주간 목표 업데이트 성공",
-            content = @Content(schema = @Schema(implementation = WeeklyGoalCountResponse.class))
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "잘못된 요청 데이터"
-        ),
-        @ApiResponse(
-            responseCode = "401",
-            description = "로그인이 필요합니다"
+            description = "주간 목표 업데이트 성공"
         )
     })
     WeeklyGoalCountResponse updateWeeklyGoalCount(
@@ -60,6 +51,6 @@ public interface ReadingControllerApi {
         )
     })
     ReadingInformationResponse getReadingInformation(
-        @Parameter(description = "로그인한 회원 정보") @LoginMember Member member
+            Member member
     );
 } 

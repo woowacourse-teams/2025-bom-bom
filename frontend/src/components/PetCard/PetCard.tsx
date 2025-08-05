@@ -1,12 +1,27 @@
 import styled from '@emotion/styled';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import Button from '../Button/Button';
 import ProgressBar from '../ProgressBar/ProgressBar';
 import Spacing from '../Spacing/Spacing';
+import { getPet, postPetAttendance } from '@/apis/pet';
+import { queryClient } from '@/main';
 import { theme } from '@/styles/theme';
 import petImage from '#/assets/pet-1-lv1.png';
 import PetIcon from '#/assets/pet.svg';
 
 const PetCard = () => {
+  const { data: pet } = useQuery({
+    queryKey: ['pet'],
+    queryFn: getPet,
+  });
+
+  const { mutate: mutatePetAttendance } = useMutation({
+    mutationFn: postPetAttendance,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pet'] });
+    },
+  });
+
   return (
     <Container>
       <TitleWrapper>
@@ -19,10 +34,13 @@ const PetCard = () => {
       <Spacing size={16} />
 
       <img src={petImage} alt="pet" width={100} height={120} />
-      <Level>레벨 2 : 아직 애기</Level>
+      <Level>레벨 {pet?.level} : 아직 애기</Level>
       <Spacing size={16} />
-      <ProgressBar rate={70} caption="70%" />
-      <Button text="맘마 먹이기" onClick={() => {}} />
+      <ProgressBar
+        rate={pet?.currentScore ?? 0 / (pet?.totalScore ?? 1)}
+        caption={`${pet?.currentScore ?? 0}%`}
+      />
+      <Button text="맘마 먹이기" onClick={mutatePetAttendance} />
     </Container>
   );
 };

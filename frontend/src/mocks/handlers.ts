@@ -75,4 +75,33 @@ export const handlers = [
       },
     });
   }),
+
+  // 펫 정보 조회
+  http.get(`${baseURL}/members/me/pet`, () => {
+    return HttpResponse.json({
+      id: 1,
+      name: '봄봄이',
+      level: 3,
+      experience: 150,
+      maxExperience: 200,
+      imageUrl: '/assets/pet-1-lv3.png',
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+    });
+  }),
+
+  // 펫 출석 체크
+  http.get(`${baseURL}/members/me/pet/attendance`, () => {
+    return HttpResponse.json({
+      id: 1,
+      name: '봄봄이',
+      level: 3,
+      experience: 160,
+      maxExperience: 200,
+      imageUrl: '/assets/pet-1-lv3.png',
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+      attendanceReward: 10,
+    });
+  }),
 ];

@@ -2,7 +2,8 @@ package me.bombom.api.v1.bookmark.service;
 
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
-import me.bombom.api.v1.bookmark.dto.BookmarkResponse;
+import me.bombom.api.v1.bookmark.dto.response.BookmarkResponse;
+import me.bombom.api.v1.bookmark.dto.response.BookmarkStatusResponse;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
@@ -25,8 +26,8 @@ public class BookmarkService {
         return bookmarkRepository.findByMemberId(id, pageable);
     }
 
-    public boolean getBookmarkStatus(Long memberId, Long articleId) {
-        return bookmarkRepository.existsByMemberIdAndArticleId(memberId, articleId);
+    public BookmarkStatusResponse getBookmarkStatus(Long memberId, Long articleId) {
+        return BookmarkStatusResponse.from(bookmarkRepository.existsByMemberIdAndArticleId(memberId, articleId));
     }
 
     @Transactional

@@ -9,7 +9,7 @@ import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
-import me.bombom.api.v1.bookmark.dto.BookmarkResponse;
+import me.bombom.api.v1.bookmark.dto.response.BookmarkResponse;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.member.domain.Member;
@@ -31,6 +31,7 @@ import me.bombom.api.v1.TestJpaAuditingConfig;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.bookmark.dto.response.BookmarkStatusResponse;
 
 @DataJpaTest
 @Import({BookmarkService.class, QuerydslConfig.class, TestJpaAuditingConfig.class})
@@ -92,10 +93,10 @@ class BookmarkServiceTest {
         bookmarkService.addBookmark(member.getId(), article.getId());
 
         // when
-        boolean exists = bookmarkService.getBookmarkStatus(member.getId(), article.getId());
+        BookmarkStatusResponse status = bookmarkService.getBookmarkStatus(member.getId(), article.getId());
 
         // then
-        assertThat(exists).isTrue();
+        assertThat(status.bookmarkStatus()).isTrue();
     }
 
     @Test

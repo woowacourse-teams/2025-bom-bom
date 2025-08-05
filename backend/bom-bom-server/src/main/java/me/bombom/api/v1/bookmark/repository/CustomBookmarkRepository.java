@@ -1,6 +1,6 @@
 package me.bombom.api.v1.bookmark.repository;
 
-import me.bombom.api.v1.bookmark.dto.BookmarkResponse;
+import me.bombom.api.v1.bookmark.dto.response.BookmarkResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

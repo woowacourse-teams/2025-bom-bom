@@ -2,7 +2,8 @@ package me.bombom.api.v1.bookmark.controller;
 
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.bookmark.dto.BookmarkResponse;
+import me.bombom.api.v1.bookmark.dto.response.BookmarkResponse;
+import me.bombom.api.v1.bookmark.dto.response.BookmarkStatusResponse;
 import me.bombom.api.v1.bookmark.service.BookmarkService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
@@ -37,7 +38,7 @@ public class BookmarkController {
     }
 
     @GetMapping("/status/articles/{articleId}")
-    public boolean getBookmarkStatus(
+    public BookmarkStatusResponse getBookmarkStatus(
             @LoginMember Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     ) {

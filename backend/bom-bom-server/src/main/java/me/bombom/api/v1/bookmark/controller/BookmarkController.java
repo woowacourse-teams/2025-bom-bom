@@ -36,7 +36,7 @@ public class BookmarkController {
         return bookmarkService.getBookmarks(member.getId(), pageable);
     }
 
-    @GetMapping("/status/{articleId}")
+    @GetMapping("/status/articles/{articleId}")
     public boolean getBookmarkStatus(
             @LoginMember Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
@@ -44,7 +44,7 @@ public class BookmarkController {
         return bookmarkService.getBookmarkStatus(member.getId(), articleId);
     }
 
-    @PostMapping("/{articleId}")
+    @PostMapping("/articles/{articleId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addBookmark(
             @LoginMember Member member,
@@ -53,7 +53,7 @@ public class BookmarkController {
         bookmarkService.addBookmark(member.getId(), articleId);
     }
 
-    @DeleteMapping("/{articleId}")
+    @DeleteMapping("/articles/{articleId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBookmark(
             @LoginMember Member member,

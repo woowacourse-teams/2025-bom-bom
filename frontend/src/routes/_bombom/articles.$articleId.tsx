@@ -11,7 +11,8 @@ import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnre
 import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
 import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
-import { useHighlightManager } from '@/pages/detail/hooks/useHighlightManager';
+import { useHighlightData } from '@/pages/detail/hooks/useHighlightData';
+import { useHighlightHoverEffect } from '@/pages/detail/hooks/useHighlightHoverEffect';
 import {
   restoreHighlight,
   saveSelection,
@@ -29,7 +30,7 @@ function ArticleDetailPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const { highlights, addHighlight, updateMemo, removeHighlight } =
-    useHighlightManager({ articleId: articleIdNumber });
+    useHighlightData({ articleId: articleIdNumber });
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
@@ -64,6 +65,7 @@ function ArticleDetailPage() {
   });
 
   useScrollRestoration({ pathname: articleId });
+  useHighlightHoverEffect();
 
   useEffect(() => {
     if (!highlights || highlights?.length === 0 || !currentArticle) return;

@@ -41,7 +41,7 @@ public class BookmarkRepositoryImpl implements CustomBookmarkRepository {
     @Override
     public Page<BookmarkResponse> findByMemberId(Long memberId, Pageable pageable) {
         JPAQuery<Long> totalQuery = getTotalQuery(memberId);
-        List<BookmarkResponse> content = getContent(memberId, pageable);
+        List<BookmarkResponse> content = getContents(memberId, pageable);
         return PageableExecutionUtils.getPage(content, pageable, totalQuery::fetchOne);
     }
 
@@ -56,7 +56,7 @@ public class BookmarkRepositoryImpl implements CustomBookmarkRepository {
         return article.memberId.eq(memberId);
     }
 
-    private List<BookmarkResponse> getContent(Long memberId, Pageable pageable) {
+    private List<BookmarkResponse> getContents(Long memberId, Pageable pageable) {
         return jpaQueryFactory.select(new QBookmarkResponse(
                         bookmark.id,
                         new QArticleResponse(

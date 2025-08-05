@@ -1,7 +1,8 @@
 import { fetcher } from './fetcher';
+import { components } from '@/types/openapi';
 
 export const getBookmarkArticles = async () => {
-  return await fetcher.get({
+  return await fetcher.get<components['schemas']['PageArticleResponse']>({
     path: '/bookmarks',
   });
 };

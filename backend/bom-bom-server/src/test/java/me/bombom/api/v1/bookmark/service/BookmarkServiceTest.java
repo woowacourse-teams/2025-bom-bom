@@ -19,7 +19,6 @@ import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +72,7 @@ class BookmarkServiceTest {
     @Test
     void 북마크_저장_및_조회_테스트() {
         // given
-        bookmarkService.save(member.getId(), article.getId());
+        bookmarkService.addBookmark(member.getId(), article.getId());
 
         // when
         Page<BookmarkResponse> bookmarks = bookmarkService.getBookmarks(member.getId(), PageRequest.of(0, 10));
@@ -88,7 +87,7 @@ class BookmarkServiceTest {
     @Test
     void 북마크_상태_조회_테스트() {
         // given
-        bookmarkService.save(member.getId(), article.getId());
+        bookmarkService.addBookmark(member.getId(), article.getId());
 
         // when
         boolean exists = bookmarkService.getBookmarkStatus(member.getId(), article.getId());
@@ -100,33 +99,38 @@ class BookmarkServiceTest {
     @Test
     void 북마크_삭제_테스트() {
         // given
-        bookmarkService.save(member.getId(), article.getId());
+        bookmarkService.addBookmark(member.getId(), article.getId());
         assertThat(bookmarkRepository.count()).isEqualTo(1);
 
         // when
-        bookmarkService.deleteByArticleId(member.getId(), article.getId());
+        bookmarkService.deleteBookmark(member.getId(), article.getId());
 
         // then
         assertThat(bookmarkRepository.count()).isZero();
     }
 
     @Test
-    void 북마크_중복_저장_예외_테스트() {
+    void 북마크_중복_저장_스킵_테스트() {
         // given
-        bookmarkService.save(member.getId(), article.getId());
+        bookmarkService.addBookmark(member.getId(), article.getId());
+        long countAfterFirst = bookmarkRepository.count();
 
-        // when & then
-        assertThatThrownBy(() -> bookmarkService.save(member.getId(), article.getId()))
-            .isInstanceOf(CIllegalArgumentException.class);
+        // when
+        bookmarkService.addBookmark(member.getId(), article.getId());
+        long countAfterSecond = bookmarkRepository.count();
+
+        // then
+        assertThat(countAfterFirst).isEqualTo(1);
+        assertThat(countAfterSecond).isEqualTo(1);
     }
 
     @Test
     void 북마크_createdAt_DESC_정렬_테스트() {
         // given
-        bookmarkService.save(member.getId(), article.getId());
+        bookmarkService.addBookmark(member.getId(), article.getId());
         Article article2 = TestFixture.createArticle("두번째 아티클", member.getId(), newsletters.get(0).getId(), java.time.LocalDateTime.now().plusMinutes(1));
         articleRepository.save(article2);
-        bookmarkService.save(member.getId(), article2.getId());
+        bookmarkService.addBookmark(member.getId(), article2.getId());
 
         List<Bookmark> bookmarks = bookmarkRepository.findAll();
         Bookmark first = bookmarks.stream().filter(b -> b.getArticleId().equals(article.getId())).findFirst().orElseThrow();
@@ -151,10 +155,10 @@ class BookmarkServiceTest {
     @Test
     void 북마크_createdAt_ASC_정렬_테스트() {
         // given
-        bookmarkService.save(member.getId(), article.getId());
+        bookmarkService.addBookmark(member.getId(), article.getId());
         Article article2 = TestFixture.createArticle("두번째 아티클", member.getId(), newsletters.get(0).getId(), java.time.LocalDateTime.now().plusMinutes(1));
         articleRepository.save(article2);
-        bookmarkService.save(member.getId(), article2.getId());
+        bookmarkService.addBookmark(member.getId(), article2.getId());
 
         List<Bookmark> bookmarks = bookmarkRepository.findAll();
         Bookmark first = bookmarks.stream().filter(b -> b.getArticleId().equals(article.getId())).findFirst().orElseThrow();

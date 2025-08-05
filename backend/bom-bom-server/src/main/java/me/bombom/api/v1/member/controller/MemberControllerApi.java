@@ -23,8 +23,7 @@ public interface MemberControllerApi {
     @ApiResponses({
         @ApiResponse(
             responseCode = "200",
-            description = "프로필 조회 성공",
-            content = @Content(schema = @Schema(implementation = MemberProfileResponse.class))
+            description = "프로필 조회 성공"
         ),
         @ApiResponse(
             responseCode = "401",
@@ -32,6 +31,6 @@ public interface MemberControllerApi {
         )
     })
     MemberProfileResponse getMember(
-        @Parameter(description = "로그인한 회원 정보") @LoginMember Member member
+        Member member
     );
 } 

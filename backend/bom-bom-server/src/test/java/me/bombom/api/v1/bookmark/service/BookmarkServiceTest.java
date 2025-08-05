@@ -2,6 +2,7 @@ package me.bombom.api.v1.bookmark.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.*;
 
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
@@ -18,6 +19,7 @@ import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,8 +79,10 @@ class BookmarkServiceTest {
         Page<BookmarkResponse> bookmarks = bookmarkService.getBookmarks(member.getId(), PageRequest.of(0, 10));
 
         // then
-        assertThat(bookmarks.getContent()).hasSize(1);
-        assertThat(bookmarks.getContent().getFirst().articleResponse().articleId()).isEqualTo(article.getId());
+        assertSoftly(softly -> {
+            softly.assertThat(bookmarks.getContent()).hasSize(1);
+            softly.assertThat(bookmarks.getContent().getFirst().articleResponse().articleId()).isEqualTo(article.getId());
+        });
     }
 
     @Test

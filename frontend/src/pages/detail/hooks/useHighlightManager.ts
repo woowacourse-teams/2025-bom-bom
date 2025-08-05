@@ -35,10 +35,12 @@ export const useHighlightManager = () => {
       data: Partial<Omit<HighlightType, 'id'>>;
     }) => patchHighlight({ id, data }),
     onSuccess: (updatedHighlight, variables) => {
-      queryClient.setQueryData<HighlightType[]>(['highlight'], (old) => {
-        if (!old) return [];
-        return old.map((h) =>
-          h.id === variables.id ? { ...h, ...variables.data } : h,
+      queryClient.setQueryData<HighlightType[]>(['highlight'], (prev) => {
+        if (!prev) return [];
+        return prev.map((highlight) =>
+          highlight.id === variables.id
+            ? { ...highlight, ...variables.data }
+            : highlight,
         );
       });
     },
@@ -60,7 +62,7 @@ export const useHighlightManager = () => {
   useEffect(() => {
     if (!highlights || highlights?.length === 0) return;
 
-    highlights.forEach((h) => restoreHighlight(h));
+    highlights.forEach((highlight) => restoreHighlight(highlight));
   }, [highlights]);
 
   useEffect(() => {

@@ -42,15 +42,12 @@ public interface ReadingControllerApi {
     @ApiResponses({
         @ApiResponse(
             responseCode = "200",
-            description = "읽기 정보 조회 성공",
-            content = @Content(schema = @Schema(implementation = ReadingInformationResponse.class))
+            description = "읽기 정보 조회 성공"
         ),
         @ApiResponse(
             responseCode = "401",
             description = "로그인이 필요합니다"
         )
     })
-    ReadingInformationResponse getReadingInformation(
-            Member member
-    );
+    ReadingInformationResponse getReadingInformation(Member member);
 } 

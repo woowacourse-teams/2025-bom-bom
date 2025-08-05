@@ -29,7 +29,7 @@ public class BookmarkService {
     @Transactional
     public void save(Long memberId, Long articleId) {
         if (bookmarkRepository.existsByMemberIdAndArticleId(memberId, articleId)) {
-            throw new CIllegalArgumentException(ErrorDetail.DUPLICATION);
+            return;
         }
         Bookmark bookmark = Bookmark.builder()
                 .memberId(memberId)

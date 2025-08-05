@@ -211,7 +211,7 @@ public final class TestFixture {
     public static Stage createStage(int level, int totalScore) {
         return Stage.builder()
                 .level(level)
-                .totalScore(totalScore)
+                .requiredScore(totalScore)
                 .build();
     }
 

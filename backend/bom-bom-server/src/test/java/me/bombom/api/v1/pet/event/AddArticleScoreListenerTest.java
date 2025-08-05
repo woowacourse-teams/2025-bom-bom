@@ -93,7 +93,7 @@ public class AddArticleScoreListenerTest {
         );
 
         // when
-        publisher.publishEvent(new AddArticleScoreEvent(member));
+        publisher.publishEvent(new AddArticleScoreEvent(member.getId()));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -120,7 +120,7 @@ public class AddArticleScoreListenerTest {
         );
 
         // when
-        publisher.publishEvent(new AddArticleScoreEvent(member));
+        publisher.publishEvent(new AddArticleScoreEvent(member.getId()));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -141,7 +141,7 @@ public class AddArticleScoreListenerTest {
         );
 
         // when
-        publisher.publishEvent(new AddArticleScoreEvent(member));
+        publisher.publishEvent(new AddArticleScoreEvent(member.getId()));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 

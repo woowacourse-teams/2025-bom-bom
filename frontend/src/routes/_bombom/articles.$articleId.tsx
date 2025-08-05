@@ -35,9 +35,10 @@ function ArticleDetailPage() {
         articleId: Number(articleId),
       }),
   });
+  const today = new Date();
   const { data: otherArticles } = useQuery({
-    queryKey: ['otherArticles'],
-    queryFn: () => getArticles({ date: new Date(), sorted: 'ASC' }),
+    queryKey: ['articles', { date: today, sorted: 'ASC' }],
+    queryFn: () => getArticles({ date: today, sorted: 'ASC' }),
   });
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
@@ -45,6 +46,9 @@ function ArticleDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['article', articleId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['articles', { date: today, sorted: 'ASC' }],
       });
     },
   });
@@ -61,6 +65,7 @@ function ArticleDetailPage() {
   const unReadArticles = otherArticles?.content?.filter(
     (article) => !article.isRead && article.articleId !== Number(articleId),
   );
+  console.log(unReadArticles);
 
   return (
     <Container>

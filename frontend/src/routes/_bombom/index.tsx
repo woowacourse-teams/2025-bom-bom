@@ -11,9 +11,10 @@ export const Route = createFileRoute('/_bombom/')({
 });
 
 function Index() {
+  const today = new Date();
   const { data: articles } = useQuery({
-    queryKey: ['todayArticles'],
-    queryFn: () => getArticles({ date: new Date(), sorted: 'DESC' }),
+    queryKey: ['articles', { date: today }],
+    queryFn: () => getArticles({ date: today }),
   });
 
   return (

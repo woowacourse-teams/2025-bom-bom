@@ -30,7 +30,6 @@ public class SwaggerConfig {
     // 프로파일 상수
     private static final String PROD_PROFILE = "prod";
     private static final String DEV_PROFILE = "dev";
-    private static final String LOCAL_PROFILE = "local";
 
     private static final String SECURITY_SCHEME_NAME = "googleOAuth";
 
@@ -85,11 +84,11 @@ public class SwaggerConfig {
     private String getApiVersion() {
         if (isProfileActive(PROD_PROFILE)) {
             return "v1.0.0";
-        } else if (isProfileActive(DEV_PROFILE)) {
-            return "v1.0.0-dev";
-        } else {
-            return "v1.0.0-local";
         }
+        if (isProfileActive(DEV_PROFILE)) {
+            return "v1.0.0-dev";
+        }
+        return "v1.0.0-local";
     }
 
     private String getApiDescription() {

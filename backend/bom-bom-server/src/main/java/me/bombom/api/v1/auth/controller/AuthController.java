@@ -46,7 +46,7 @@ public class AuthController implements AuthControllerApi{
         session.removeAttribute("pendingMember");
     }
 
-//    @Override
+    @Override
     @GetMapping("/login/{provider}")
     public void login(
             @PathVariable("provider") String provider,

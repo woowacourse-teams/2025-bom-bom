@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.io.IOException;
@@ -47,21 +49,23 @@ public interface AuthControllerApi {
         @Parameter(description = "HTTP 요청 객체") HttpServletRequest request
     );
 
-//    @Operation(
-//        summary = "OAuth2 로그인",
-//        description = "지정된 OAuth2 제공자로 로그인을 시작합니다."
-//    )
-//    @ApiResponses({
-//        @ApiResponse(
-//            responseCode = "302",
-//            description = "OAuth2 인증 페이지로 리다이렉트"
-//        )
-//    })
-//    void login(
-//        @Parameter(description = "OAuth2 제공자 (google, kakao 등)", example = "google")
-//        @PathVariable("provider") String provider,
-//        @Parameter(description = "HTTP 응답 객체") HttpServletResponse response
-//    ) throws IOException;
+    @Operation(
+        summary = "OAuth2 로그인",
+        description = "지정된 OAuth2 제공자로 로그인을 시작합니다."
+    )
+    @ApiResponses({
+        @ApiResponse(
+            responseCode = "302",
+            description = "OAuth2 인증 페이지로 리다이렉트"
+        )
+    })
+    void login(
+        @Parameter(description = "OAuth2 제공자 (google, kakao 등)", example = "google")
+        @PathVariable("provider") String provider,
+        @RequestParam(defaultValue = "deploy") String env,
+        HttpServletResponse response,
+        HttpSession httpSession
+    ) throws IOException;
 
     @Operation(
         summary = "로그아웃",
@@ -74,6 +78,6 @@ public interface AuthControllerApi {
         )
     })
     void logout(
-        @Parameter(description = "HTTP 요청 객체") HttpServletRequest request
+        HttpServletRequest request
     );
 } 

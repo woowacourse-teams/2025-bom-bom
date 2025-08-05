@@ -1,9 +1,13 @@
 export interface HighlightType {
-  id: string;
+  id: number;
   color: string;
-  startXPath: string;
-  startOffset: number;
-  endXPath: string;
-  endOffset: number;
+  location: {
+    startXPath: string;
+    startOffset: number;
+    endXPath: string;
+    endOffset: number;
+  };
+  articleId: number;
   text: string;
+  memo: string;
 }

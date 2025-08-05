@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { patchArticleRead } from '@/apis/articles';
 import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
@@ -12,8 +12,12 @@ import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnre
 import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
 import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
-import { useHighlightManager } from '@/pages/detail/hooks/useHighlightManager';
-import { saveSelection } from '@/pages/detail/utils/highlight';
+import { useHighlightData } from '@/pages/detail/hooks/useHighlightData';
+import { useHighlightHoverEffect } from '@/pages/detail/hooks/useHighlightHoverEffect';
+import {
+  restoreHighlight,
+  saveSelection,
+} from '@/pages/detail/utils/highlight';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
 
@@ -23,12 +27,11 @@ export const Route = createFileRoute('/_bombom/articles/$articleId')({
 
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
+  const articleIdNumber = Number(articleId);
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(true);
-  const [memo, setMemo] = useState('');
-  const { highlights, addHighlights } = useHighlightManager();
-
-  console.log(highlights);
+  const [open, setOpen] = useState(false);
+  const { highlights, addHighlight, updateMemo, removeHighlight } =
+    useHighlightData({ articleId: articleIdNumber });
 
   const { data: currentArticle } = useQuery(
     queries.articleById({ id: Number(articleId) }),
@@ -40,7 +43,7 @@ function ArticleDetailPage() {
   );
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
-    mutationFn: () => patchArticleRead({ id: Number(articleId) }),
+    mutationFn: () => patchArticleRead({ id: articleIdNumber }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['article', articleId],
@@ -59,6 +62,13 @@ function ArticleDetailPage() {
   });
 
   useScrollRestoration({ pathname: articleId });
+  useHighlightHoverEffect();
+
+  useEffect(() => {
+    if (!highlights || highlights?.length === 0 || !currentArticle) return;
+
+    highlights.forEach((highlight) => restoreHighlight(highlight));
+  }, [currentArticle, highlights]);
 
   if (!currentArticle || !todayArticles) return null;
 
@@ -69,7 +79,6 @@ function ArticleDetailPage() {
   return (
     <Container>
       <HeaderWrapper>
-        <button onClick={() => setOpen((open) => !open)}>열기</button>
         <Title>{currentArticle.title}</Title>
         <MetaInfoRow>
           <Chip text={currentArticle.newsletter?.category ?? ''} />
@@ -108,17 +117,22 @@ function ArticleDetailPage() {
         )}
       </TodayArticlesWrapper>
       <FloatingToolbar
-        onSave={(selection) => {
-          const highlightData = saveSelection(selection);
-          addHighlights(highlightData);
+        onHighlightButtonClick={(selection) => {
+          const highlightData = saveSelection(selection, articleIdNumber);
+          addHighlight(highlightData);
+        }}
+        onMemoButtonClick={(selection) => {
+          const highlightData = saveSelection(selection, articleIdNumber);
+          addHighlight(highlightData);
+          setOpen(true);
         }}
       />
       <MemoPanel
         open={open}
         handleClose={() => setOpen(false)}
-        notes={[{ id: '1', content: 'content', memo }]}
-        handleDeleteMemo={(id) => console.log(id)}
-        handleUpdateMemo={(id, e) => console.log(id, setMemo(e.target.value))}
+        memos={highlights ?? []}
+        removeHighlight={removeHighlight}
+        updateMemo={updateMemo}
       />
     </Container>
   );

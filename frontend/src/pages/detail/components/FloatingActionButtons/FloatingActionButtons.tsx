@@ -17,12 +17,12 @@ const FloatingActionButtons = ({
     <Container>
       <ActionButton type="button" onClick={onToggleBookmarkClick}>
         {bookmarked ? (
-          <BookmarkActiveIcon width={44} height={44} />
+          <BookmarkActiveIcon width={28} height={28} />
         ) : (
           <BookmarkInactiveIcon
-            width={44}
-            height={44}
-            color={theme.colors.icons}
+            width={28}
+            height={28}
+            color={theme.colors.primary}
           />
         )}
       </ActionButton>
@@ -40,14 +40,14 @@ const Container = styled.div`
   position: fixed;
   top: 60%;
   left: 20%;
-  width: 72px;
-  padding: 8px 0;
+  width: 56px;
+  padding: 4px 0;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 12px;
   box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
 
   display: flex;
-  gap: 12px;
+  gap: 8px;
   flex-direction: column;
   align-items: center;
 
@@ -71,13 +71,13 @@ const ActionButton = styled.button`
   }
 
   &:hover > svg {
-    transform: scale(1.2);
+    transform: scale(1.1);
   }
 `;
 
 const ScrollUpIcon = styled(ArrowIcon)`
-  width: 44px;
-  height: 44px;
+  width: 28px;
+  height: 28px;
 
   color: ${({ theme }) => theme.colors.icons};
 `;

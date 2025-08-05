@@ -72,6 +72,7 @@ public class ReadingService {
 
     @Transactional
     public void resetContinueReadingCount() {
+        // TODO: 페이징 혹은 batch 처리
         todayReadingRepository.findAll()
                 .stream()
                 .filter(todayReading -> (todayReading.getTotalCount() != 0) && (todayReading.getCurrentCount() == 0))

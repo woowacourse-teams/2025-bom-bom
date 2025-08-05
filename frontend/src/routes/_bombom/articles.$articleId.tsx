@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
+import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
@@ -61,6 +62,8 @@ function ArticleDetailPage() {
     throttleMs: 500,
     onTrigger: updateArticleAsRead,
   });
+
+  useScrollRestoration({ pathname: articleId });
 
   if (!currentArticle || !otherArticles) return null;
 

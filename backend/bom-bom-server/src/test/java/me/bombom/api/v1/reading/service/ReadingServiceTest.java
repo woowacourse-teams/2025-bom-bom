@@ -218,22 +218,6 @@ class ReadingServiceTest {
     }
 
     @Test
-    void 오늘_받은_뉴스레터를_읽은_경우_연속_읽기_일수를_증가시킨다() {
-        // given
-        Member member = memberRepository.save(TestFixture.normalMemberFixture());
-
-        todayReadingRepository.save(TestFixture.todayReadingFixture(member));
-        continueReadingRepository.save(TestFixture.continueReadingFixture(member));
-
-        // when
-        readingService.updateContinueReadingCount();
-
-        // then
-        assertThat(continueReadingRepository.findByMemberId(member.getId()).get().getDayCount())
-                .isEqualTo(11);
-    }
-
-    @Test
     void 오늘_받은_뉴스레터가_없는_경우_연속_읽기_일수가_갱신되지_않는다() {
         // given
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
@@ -242,7 +226,7 @@ class ReadingServiceTest {
         continueReadingRepository.save(TestFixture.continueReadingFixture(member));
 
         // when
-        readingService.updateContinueReadingCount();
+        readingService.resetContinueReadingCount();
 
         // then
         assertThat(continueReadingRepository.findByMemberId(member.getId()).get().getDayCount())
@@ -258,7 +242,7 @@ class ReadingServiceTest {
         continueReadingRepository.save(TestFixture.continueReadingFixture(member));
 
         // when
-        readingService.updateContinueReadingCount();
+        readingService.resetContinueReadingCount();
 
         // then
         assertThat(continueReadingRepository.findByMemberId(member.getId()).get().getDayCount())

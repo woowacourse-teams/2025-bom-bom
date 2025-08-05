@@ -2,7 +2,8 @@ import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
-import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
+import { getArticleById, patchArticleRead } from '@/apis/articles';
+import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
@@ -33,17 +34,17 @@ function ArticleDetailPage() {
     queryKey: ['article', articleId],
     queryFn: () =>
       getArticleById({
-        articleId: Number(articleId),
+        id: Number(articleId),
       }),
   });
   const today = useMemo(() => new Date(), []);
-  const { data: otherArticles } = useQuery({
-    queryKey: ['articles', { date: today, sorted: 'ASC' }],
-    queryFn: () => getArticles({ date: today, sorted: 'ASC' }),
-  });
+
+  const { data: todayArticles } = useQuery(
+    queries.articles({ date: today.toLocaleDateString() }),
+  );
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
-    mutationFn: () => patchArticleRead({ articleId: Number(articleId) }),
+    mutationFn: () => patchArticleRead({ id: Number(articleId) }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['article', articleId],
@@ -63,9 +64,9 @@ function ArticleDetailPage() {
 
   useScrollRestoration({ pathname: articleId });
 
-  if (!currentArticle || !otherArticles) return null;
+  if (!currentArticle || !todayArticles) return null;
 
-  const unReadArticles = otherArticles?.content?.filter(
+  const unReadArticles = todayArticles?.content?.filter(
     (article) => !article.isRead && article.articleId !== Number(articleId),
   );
 

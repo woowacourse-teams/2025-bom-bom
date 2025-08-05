@@ -45,9 +45,9 @@ public interface ArticleControllerApi {
             )
     })
     public Page<ArticleResponse> getArticles(
-            @Parameter(hidden = true) @LoginMember Member member,
-            @Parameter(description = "조회할 날짜 (YYYY-MM-DD)") @ModelAttribute GetArticlesOptions getArticlesOptions,
-            @Parameter(description = "페이징 정보") @PageableDefault(sort = "arrivedDateTime", direction = Direction.DESC) Pageable pageable
+            Member member,
+            @Parameter(description = "필터링 관련 요청") GetArticlesOptions getArticlesOptions,
+            @Parameter(description = "페이징 관련 요청") Pageable pageable
     );
 
     @Operation(
@@ -61,17 +61,12 @@ public interface ArticleControllerApi {
             content = @Content(schema = @Schema(implementation = ArticleDetailResponse.class))
         ),
         @ApiResponse(
-            responseCode = "400",
-            description = "잘못된 아티클 ID"
-        ),
-        @ApiResponse(
             responseCode = "404",
             description = "아티클을 찾을 수 없음"
         )
     })
-    @GetMapping("/{id}")
     ArticleDetailResponse getArticleDetail(
-        @Parameter(description = "로그인한 회원 정보") @LoginMember Member member,
+        Member member,
         @Parameter(description = "아티클 ID")
         @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
     );
@@ -86,34 +81,29 @@ public interface ArticleControllerApi {
             description = "읽음 처리 성공"
         ),
         @ApiResponse(
-            responseCode = "400",
-            description = "잘못된 아티클 ID"
-        ),
-        @ApiResponse(
             responseCode = "404",
             description = "아티클을 찾을 수 없음"
         )
     })
-//    @ResponseStatus(HttpStatus.NO_CONTENT)
     void updateIsRead(
-        @Parameter(description = "로그인한 회원 정보") @LoginMember Member member,
-        @Parameter(description = "아티클 ID", example = "1") 
+        Member member,
+        @Parameter(description = "아티클 ID", example = "1")
         @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
     );
 
     @Operation(
-        summary = "카테고리별 아티클 통계 조회",
-        description = "카테고리별 아티클 통계 정보를 조회합니다."
+        summary = "카테고리별 아티클 개수 조회",
+        description = "카테고리별 아티클 개수 정보를 조회합니다."
     )
     @ApiResponses({
         @ApiResponse(
             responseCode = "200",
-            description = "카테고리별 통계 조회 성공",
+            description = "카테고리별 개수 조회 성공",
             content = @Content(schema = @Schema(implementation = GetArticleCategoryStatisticsResponse.class))
         )
     })
     GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(
-        @Parameter(description = "로그인한 회원 정보") @LoginMember Member member,
-        @Parameter(description = "검색 키워드") @RequestParam(required = false) String keyword
+        Member member,
+        @Parameter(description = "검색 키워드") String keyword
     );
 }

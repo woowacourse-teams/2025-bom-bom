@@ -21,16 +21,8 @@ public interface MemberControllerApi {
         description = "로그인한 회원의 프로필 정보를 조회합니다."
     )
     @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "프로필 조회 성공"
-        ),
-        @ApiResponse(
-            responseCode = "401",
-            description = "로그인이 필요합니다"
-        )
+        @ApiResponse(responseCode = "200", description = "프로필 조회 성공"),
+        @ApiResponse(responseCode = "401", description = "로그인이 필요합니다")
     })
-    MemberProfileResponse getMember(
-        Member member
-    );
+    MemberProfileResponse getMember(Member member);
 } 

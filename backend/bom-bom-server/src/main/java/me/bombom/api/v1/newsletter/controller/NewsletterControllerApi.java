@@ -20,10 +20,7 @@ public interface NewsletterControllerApi {
         description = "모든 뉴스레터 목록을 조회합니다."
     )
     @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "뉴스레터 목록 조회 성공"
-        )
+        @ApiResponse(responseCode = "200", description = "뉴스레터 목록 조회 성공")
     })
     List<NewsletterResponse> getNewsletters();
 } 

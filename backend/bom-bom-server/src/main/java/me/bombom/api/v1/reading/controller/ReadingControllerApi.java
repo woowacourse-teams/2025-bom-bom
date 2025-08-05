@@ -26,10 +26,7 @@ public interface ReadingControllerApi {
         description = "사용자의 주간 읽기 목표량을 업데이트합니다."
     )
     @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "주간 목표 업데이트 성공"
-        )
+        @ApiResponse(responseCode = "200", description = "주간 목표 업데이트 성공")
     })
     WeeklyGoalCountResponse updateWeeklyGoalCount(
         @Parameter(description = "주간 목표 업데이트 요청 데이터") @Valid @RequestBody UpdateWeeklyGoalCountRequest request
@@ -40,14 +37,8 @@ public interface ReadingControllerApi {
         description = "사용자의 읽기 지표 관련 정보를 조회합니다."
     )
     @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "읽기 정보 조회 성공"
-        ),
-        @ApiResponse(
-            responseCode = "401",
-            description = "로그인이 필요합니다"
-        )
+        @ApiResponse(responseCode = "200", description = "읽기 정보 조회 성공"),
+        @ApiResponse(responseCode = "401", description = "로그인이 필요합니다")
     })
     ReadingInformationResponse getReadingInformation(Member member);
 } 

@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Tag(name = "Pet", description = "펫 관련 API")
-@RequestMapping("/api/v1/members/me/pet")
 public interface PetControllerApi {
 
     @Operation(summary = "내 펫 정보 조회", description = "현재 로그인한 사용자의 펫 정보를 조회합니다.")

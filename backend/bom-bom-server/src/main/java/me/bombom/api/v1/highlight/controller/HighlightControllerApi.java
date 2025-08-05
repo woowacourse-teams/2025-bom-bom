@@ -31,14 +31,8 @@ interface HighlightControllerApi {
             description = "특정 아티클의 하이라이트 목록을 조회합니다."
     )
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "하이라이트 목록 조회 성공"
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "잘못된 아티클 ID"
-            )
+            @ApiResponse(responseCode = "200", description = "하이라이트 목록 조회 성공"),
+            @ApiResponse(responseCode = "404", description = "잘못된 아티클 ID")
     })
     List<HighlightResponse> getHighlights(
             Member member,
@@ -50,14 +44,8 @@ interface HighlightControllerApi {
             description = "새로운 하이라이트를 생성합니다."
     )
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "하이라이트 생성 성공"
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "잘못된 요청 데이터"
-            )
+            @ApiResponse(responseCode = "201", description = "하이라이트 생성 성공"),
+            @ApiResponse(responseCode = "404", description = "잘못된 요청 데이터")
     })
     void createHighlight(
             Member member,
@@ -69,14 +57,8 @@ interface HighlightControllerApi {
             description = "특정 하이라이트를 삭제합니다."
     )
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "204",
-                    description = "하이라이트 삭제 성공"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "하이라이트를 찾을 수 없음"
-            )
+            @ApiResponse(responseCode = "204", description = "하이라이트 삭제 성공"),
+            @ApiResponse(responseCode = "404", description = "하이라이트를 찾을 수 없음")
     })
     void deleteHighlight(
             Member member,
@@ -88,14 +70,8 @@ interface HighlightControllerApi {
             description = "특정 하이라이트의 색상을 변경합니다."
     )
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "204",
-                    description = "하이라이트 색상 변경 성공"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "하이라이트를 찾을 수 없음"
-            )
+            @ApiResponse(responseCode = "204", description = "하이라이트 색상 변경 성공"),
+            @ApiResponse(responseCode = "404", description = "하이라이트를 찾을 수 없음")
     })
     HighlightResponse updateHighlight(
             Member member,

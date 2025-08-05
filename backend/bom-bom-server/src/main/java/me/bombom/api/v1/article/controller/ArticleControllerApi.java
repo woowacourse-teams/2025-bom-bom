@@ -38,10 +38,7 @@ public interface ArticleControllerApi {
             description = "조건에 맞는 아티클 목록을 페이징하여 조회합니다."
     )
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "아티클 목록 조회 성공"
-            )
+            @ApiResponse(responseCode = "200", description = "아티클 목록 조회 성공")
     })
     public Page<ArticleResponse> getArticles(
             Member member,
@@ -54,14 +51,8 @@ public interface ArticleControllerApi {
         description = "특정 아티클의 상세 정보를 조회합니다."
     )
     @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "아티클 상세 조회 성공"
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "아티클을 찾을 수 없음"
-        )
+        @ApiResponse(responseCode = "200", description = "아티클 상세 조회 성공"),
+        @ApiResponse(responseCode = "404", description = "아티클을 찾을 수 없음")
     })
     ArticleDetailResponse getArticleDetail(
         Member member,
@@ -74,14 +65,8 @@ public interface ArticleControllerApi {
         description = "특정 아티클을 읽음 처리합니다."
     )
     @ApiResponses({
-        @ApiResponse(
-            responseCode = "204",
-            description = "읽음 처리 성공"
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "아티클을 찾을 수 없음"
-        )
+        @ApiResponse(responseCode = "204", description = "읽음 처리 성공"),
+        @ApiResponse(responseCode = "404", description = "아티클을 찾을 수 없음")
     })
     void updateIsRead(
         Member member,
@@ -94,10 +79,7 @@ public interface ArticleControllerApi {
         description = "카테고리별 아티클 개수 정보를 조회합니다."
     )
     @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "카테고리별 개수 조회 성공"
-        )
+        @ApiResponse(responseCode = "200", description = "카테고리별 개수 조회 성공")
     })
     GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(
         Member member,

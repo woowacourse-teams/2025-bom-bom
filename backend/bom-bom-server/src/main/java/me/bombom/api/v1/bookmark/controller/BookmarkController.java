@@ -46,11 +46,11 @@ public class BookmarkController {
 
     @PostMapping("/{articleId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void saveBookmark(
+    public void addBookmark(
             @LoginMember Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     ) {
-        bookmarkService.save(member.getId(), articleId);
+        bookmarkService.addBookmark(member.getId(), articleId);
     }
 
     @DeleteMapping("/{articleId}")
@@ -59,6 +59,6 @@ public class BookmarkController {
             @LoginMember Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     ) {
-        bookmarkService.deleteByArticleId(member.getId(), articleId);
+        bookmarkService.deleteBookmark(member.getId(), articleId);
     }
 }

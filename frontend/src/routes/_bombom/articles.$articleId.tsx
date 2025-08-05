@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
-import { getArticleById, patchArticleRead } from '@/apis/articles';
+import { patchArticleRead } from '@/apis/articles';
 import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
@@ -30,13 +30,9 @@ function ArticleDetailPage() {
 
   console.log(highlights);
 
-  const { data: currentArticle } = useQuery({
-    queryKey: ['article', articleId],
-    queryFn: () =>
-      getArticleById({
-        id: Number(articleId),
-      }),
-  });
+  const { data: currentArticle } = useQuery(
+    queries.articleById({ id: Number(articleId) }),
+  );
   const today = useMemo(() => new Date(), []);
 
   const { data: todayArticles } = useQuery(

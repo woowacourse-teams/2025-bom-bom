@@ -1,15 +1,10 @@
 import { queryOptions } from '@tanstack/react-query';
 import {
-  getArticles,
   getArticleById,
+  getArticles,
   getStatisticsCategories,
 } from './articles';
-import { postSignup } from './auth';
-import {
-  getUserInfo,
-  getReadingStatus,
-  patchWeeklyReadingGoal,
-} from './members';
+import { getReadingStatus, getUserInfo } from './members';
 import { getNewsletters } from './newsLetters';
 
 export const queries = {
@@ -44,23 +39,10 @@ export const queries = {
       queryFn: getReadingStatus,
     }),
 
-  weeklyReadingGoal: (params: Parameters<typeof patchWeeklyReadingGoal>[0]) =>
-    queryOptions({
-      queryKey: ['reading', 'weekly', 'goal'],
-      queryFn: () => patchWeeklyReadingGoal(params),
-    }),
-
   // newsletters
   newsletters: () =>
     queryOptions({
       queryKey: ['newsletters'],
       queryFn: getNewsletters,
-    }),
-
-  // auth
-  signup: (params: Parameters<typeof postSignup>[0]) =>
-    queryOptions({
-      queryKey: ['auth', 'signup'],
-      queryFn: () => postSignup(params),
     }),
 };

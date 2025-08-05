@@ -56,8 +56,8 @@ const MemoPanel = ({
               id={note.id}
               content={note.text}
               memo={note.memo}
-              removeHighlight={removeHighlight}
-              updateMemo={updateMemo}
+              onRemoveButtonClick={removeHighlight}
+              onMemoChange={updateMemo}
             />
           ))
         )}

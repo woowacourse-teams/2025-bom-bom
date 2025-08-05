@@ -10,11 +10,13 @@ interface ToolbarPosition {
 }
 
 interface FloatingToolBarProps {
+  selectionTargetRef: React.RefObject<HTMLDivElement | null>;
   onHighlightButtonClick: (selection: Selection) => void;
   onMemoButtonClick: (selection: Selection) => void;
 }
 
 export default function FloatingToolbar({
+  selectionTargetRef,
   onHighlightButtonClick,
   onMemoButtonClick,
 }: FloatingToolBarProps) {
@@ -49,14 +51,20 @@ export default function FloatingToolbar({
       const selection = window.getSelection();
       if (selection && !selection.isCollapsed) {
         const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
+        if (
+          selectionTargetRef.current?.contains(range.commonAncestorContainer)
+        ) {
+          const rect = range.getBoundingClientRect();
 
-        setPosition({
-          x: rect.left + rect.width / 2,
-          y: rect.top,
-        });
-        setIsVisible(true);
-        selectionRef.current = selection;
+          setPosition({
+            x: rect.left + rect.width / 2,
+            y: rect.top,
+          });
+          setIsVisible(true);
+          selectionRef.current = selection;
+        } else {
+          setIsVisible(false);
+        }
       } else {
         setIsVisible(false);
       }
@@ -68,7 +76,7 @@ export default function FloatingToolbar({
       document.removeEventListener('click', handleClick);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, []);
+  }, [selectionTargetRef]);
 
   return (
     <Container position={position} visible={isVisible}>

@@ -34,7 +34,11 @@ public class Bookmark extends BaseEntity {
     private Long memberId;
 
     @Builder
-    public Bookmark(Long id, @NotNull Long articleId, @NotNull Long memberId) {
+    public Bookmark(
+            Long id,
+            @NotNull Long articleId,
+            @NotNull Long memberId
+    ) {
         this.id = id;
         this.articleId = articleId;
         this.memberId = memberId;

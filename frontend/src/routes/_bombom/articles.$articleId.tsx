@@ -32,7 +32,7 @@ function ArticleDetailPage() {
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
   const { data: bookmarked } = useQuery({
-    queryKey: ['bookmarked'],
+    queryKey: ['bookmarked', articleId],
     queryFn: () => getBookmarked({ articleId: Number(articleId) }),
   });
   const { mutate: updateArticleAsRead } = useMutation({

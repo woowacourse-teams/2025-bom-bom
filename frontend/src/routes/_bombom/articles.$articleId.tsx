@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
@@ -12,6 +12,7 @@ import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnre
 import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { useHighlightData } from '@/pages/detail/hooks/useHighlightData';
+import { useHighlightHoverEffect } from '@/pages/detail/hooks/useHighlightHoverEffect';
 import { saveSelection } from '@/pages/detail/utils/highlight';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
@@ -68,12 +69,6 @@ function ArticleDetailPage() {
 
   useScrollRestoration({ pathname: articleId });
   useHighlightHoverEffect();
-
-  useEffect(() => {
-    if (!highlights || highlights?.length === 0 || !currentArticle) return;
-
-    highlights.forEach((highlight) => restoreHighlight(highlight));
-  }, [currentArticle, highlights]);
 
   if (!currentArticle || !otherArticles) return null;
 

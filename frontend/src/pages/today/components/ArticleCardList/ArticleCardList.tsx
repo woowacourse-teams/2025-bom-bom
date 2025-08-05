@@ -57,12 +57,12 @@ function ArticleCardList({ articles }: ArticleCardListProps) {
 export default ArticleCardList;
 
 const Container = styled.div`
+  width: 100%;
+
   display: flex;
   gap: 16px;
   flex-direction: column;
   align-items: flex-start;
-
-  width: 100%;
 `;
 
 const ListTitleBox = styled.div`
@@ -77,9 +77,9 @@ const ListTitle = styled.h5`
 `;
 
 const CardList = styled.ul`
+  width: 100%;
+
   display: flex;
   gap: 16px;
   flex-direction: column;
-
-  width: 100%;
 `;

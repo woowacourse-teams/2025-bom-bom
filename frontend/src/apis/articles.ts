@@ -2,7 +2,7 @@ import { fetcher } from './fetcher';
 import { components } from '@/types/openapi';
 
 interface GetArticlesParams {
-  sorted: 'ASC' | 'DESC';
+  sorted?: 'ASC' | 'DESC';
   date?: Date;
   category?: string;
   size?: number;

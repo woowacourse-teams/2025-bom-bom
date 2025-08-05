@@ -138,12 +138,10 @@ public class SwaggerConfig {
     }
 
     private String getOAuthAuthorizationUrl() {
-        // 환경별로 다른 OAuth URL을 사용할 수 있습니다
         return "https://accounts.google.com/o/oauth2/v2/auth";
     }
 
     private String getOAuthTokenUrl() {
-        // 환경별로 다른 Token URL을 사용할 수 있습니다
         return "https://oauth2.googleapis.com/token";
     }
 

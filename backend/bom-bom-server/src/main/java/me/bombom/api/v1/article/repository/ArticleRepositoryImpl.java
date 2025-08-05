@@ -57,35 +57,44 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
 
     @Override
     public int countAllByMemberId(Long memberId, String keyword) {
-        return jpaQueryFactory.select(article.count())
+        Long count = jpaQueryFactory.select(article.count())
                 .from(article)
                 .where(createMemberWhereClause(memberId))
                 .where(createKeywordWhereClause(keyword))
-                .fetchOne()
+                .fetchOne();
+
+        return Optional.ofNullable(count)
+                .orElse(0L)
                 .intValue();
     }
 
     @Override
     public int countAllByCategoryIdAndMemberId(Long memberId, Long categoryId, String keyword) {
-        return jpaQueryFactory.select(article.count())
+        Long count = jpaQueryFactory.select(article.count())
                 .from(article)
                 .join(newsletter).on(article.newsletterId.eq(newsletter.id))
                 .join(category).on(newsletter.categoryId.eq(category.id))
                 .where(createMemberWhereClause(memberId))
                 .where(createKeywordWhereClause(keyword))
                 .where(createCategoryIdWhereClause(categoryId))
-                .fetchOne()
+                .fetchOne();
+
+        return Optional.ofNullable(count)
+                .orElse(0L)
                 .intValue();
     }
 
     @Override
     public int countByMemberIdAndArrivedDateTimeAndIsRead(Long memberId, LocalDate date, boolean isRead) {
-        return jpaQueryFactory.select(article.count())
+        Long count = jpaQueryFactory.select(article.count())
                 .from(article)
                 .where(createMemberWhereClause(memberId))
                 .where(createDateWhereClause(date))
                 .where(article.isRead.eq(isRead))
-                .fetchOne()
+                .fetchOne();
+
+        return Optional.ofNullable(count)
+                .orElse(0L)
                 .intValue();
     }
 

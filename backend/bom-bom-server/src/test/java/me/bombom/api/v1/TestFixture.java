@@ -51,17 +51,6 @@ public final class TestFixture {
                 .build();
     }
 
-    public static Member normalMember2Fixture() {
-        return Member.builder()
-                .provider("provider2")
-                .providerId("providerId2")
-                .email("email2")
-                .nickname("nickname2")
-                .gender(Gender.FEMALE)
-                .roleId(1L)
-                .build();
-    }
-
     /**
      * Category
      */
@@ -174,14 +163,6 @@ public final class TestFixture {
                 .memberId(member.getId())
                 .currentCount(1)
                 .totalCount(3)
-                .build();
-    }
-
-    public static TodayReading todayReadingFixtureZeroTotalCount(Member member) {
-        return TodayReading.builder()
-                .memberId(member.getId())
-                .currentCount(0)
-                .totalCount(0)
                 .build();
     }
 

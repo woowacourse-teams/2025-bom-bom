@@ -124,7 +124,7 @@ function ArticleDetailPage() {
       />
       <FloatingActionButtons
         bookmarked={!!bookmarked}
-        handleBookmarkClick={onToggleBookmarkClick}
+        onToggleBookmarkClick={onToggleBookmarkClick}
       />
     </Container>
   );

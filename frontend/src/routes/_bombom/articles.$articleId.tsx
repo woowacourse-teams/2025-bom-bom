@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
@@ -67,6 +67,13 @@ function ArticleDetailPage() {
   });
 
   useScrollRestoration({ pathname: articleId });
+  useHighlightHoverEffect();
+
+  useEffect(() => {
+    if (!highlights || highlights?.length === 0 || !currentArticle) return;
+
+    highlights.forEach((highlight) => restoreHighlight(highlight));
+  }, [currentArticle, highlights]);
 
   if (!currentArticle || !otherArticles) return null;
 

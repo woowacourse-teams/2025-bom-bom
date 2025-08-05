@@ -20,9 +20,9 @@ class ReadingSchedulerTest {
     private ReadingService readingService;
 
     @Test
-    void daily_스케줄러는_연속_및_읽기_정보를_초기화한다() {
+    void daily_ResetReadingCount_스케줄러는_연속_및_읽기_정보를_초기화한다() {
         // when
-        readingScheduler.daily();
+        readingScheduler.dailyResetReadingCount();
 
         // then
         verify(readingService, times(1)).resetContinueReadingCount();
@@ -30,9 +30,9 @@ class ReadingSchedulerTest {
     }
 
     @Test
-    void weekly_스케줄러는_주간_읽기_정보를_초기화한다() {
+    void weekly_ResetReadingCount_스케줄러는_주간_읽기_정보를_초기화한다() {
         // when
-        readingScheduler.weekly();
+        readingScheduler.weeklyResetReadingCount();
 
         // then
         verify(readingService, times(1)).resetWeeklyReadingCount();

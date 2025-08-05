@@ -18,14 +18,14 @@ public class ReadingScheduler {
     private final ReadingService readingService;
 
     @Scheduled(cron = DAILY_CRON, zone = TIME_ZONE)
-    public void daily() {
+    public void dailyResetReadingCount() {
         log.info("오늘 읽기 초기화 실행");
         readingService.resetContinueReadingCount();
         readingService.resetTodayReadingCount();
     }
 
     @Scheduled(cron = WEEKLY_CRON, zone = TIME_ZONE)
-    public void weekly() {
+    public void weeklyResetReadingCount() {
         log.info("주간 읽기 초기화 실행");
         readingService.resetWeeklyReadingCount();
     }

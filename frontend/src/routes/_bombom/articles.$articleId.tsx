@@ -53,6 +53,12 @@ function ArticleDetailPage() {
     },
   });
 
+  const handleSaveHighlight = (selection: Selection, openMemo = false) => {
+    const highlightData = saveSelection(selection, articleIdNumber);
+    addHighlight(highlightData);
+    if (openMemo) setOpen(true);
+  };
+
   useScrollThreshold({
     enabled: !currentArticle?.isRead && !!currentArticle,
     threshold: 70,
@@ -90,15 +96,10 @@ function ArticleDetailPage() {
       <ArticleContent
         article={currentArticle.contents}
         highlights={highlights}
-        onHighlightButtonClick={(selection) => {
-          const highlightData = saveSelection(selection, articleIdNumber);
-          addHighlight(highlightData);
-        }}
-        onMemoButtonClick={(selection) => {
-          const highlightData = saveSelection(selection, articleIdNumber);
-          addHighlight(highlightData);
-          setOpen(true);
-        }}
+        onHighlightButtonClick={(selection) =>
+          handleSaveHighlight(selection, false)
+        }
+        onMemoButtonClick={(selection) => handleSaveHighlight(selection, true)}
       />
       <Spacing size={24} />
       <Divider />

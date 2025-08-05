@@ -27,6 +27,9 @@ const MemoCard = ({
     if (debouncedMemo !== memo) {
       handleUpdateMemo(id, debouncedMemo);
     }
+    // 의존성 배열에 handleUpdateMemo, id, memo를 넣으면
+    // memo가 변경될 때마다(예: 서버 응답으로 값이 업데이트될 때) 불필요하게 effect가 재실행됨.
+    // 우리는 debouncedMemo가 변경될 때만 서버 업데이트를 호출하려는 목적이므로 eslint 경고를 무시하고 의존성 배열을 최소화함.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedMemo]);
 

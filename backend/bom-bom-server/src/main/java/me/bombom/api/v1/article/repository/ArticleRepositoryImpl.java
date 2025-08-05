@@ -24,6 +24,7 @@ import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.dto.QArticleResponse;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.newsletter.dto.QNewsletterSummaryResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -56,24 +57,44 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
 
     @Override
     public int countAllByMemberId(Long memberId, String keyword) {
-        return jpaQueryFactory.select(article.count())
+        Long count = jpaQueryFactory.select(article.count())
                 .from(article)
                 .where(createMemberWhereClause(memberId))
                 .where(createKeywordWhereClause(keyword))
-                .fetchOne()
+                .fetchOne();
+
+        return Optional.ofNullable(count)
+                .orElse(0L)
                 .intValue();
     }
 
     @Override
     public int countAllByCategoryIdAndMemberId(Long memberId, Long categoryId, String keyword) {
-        return jpaQueryFactory.select(article.count())
+        Long count = jpaQueryFactory.select(article.count())
                 .from(article)
                 .join(newsletter).on(article.newsletterId.eq(newsletter.id))
                 .join(category).on(newsletter.categoryId.eq(category.id))
                 .where(createMemberWhereClause(memberId))
                 .where(createKeywordWhereClause(keyword))
                 .where(createCategoryIdWhereClause(categoryId))
-                .fetchOne()
+                .fetchOne();
+
+        return Optional.ofNullable(count)
+                .orElse(0L)
+                .intValue();
+    }
+
+    @Override
+    public int countByMemberIdAndArrivedDateTimeAndIsRead(Long memberId, LocalDate date, boolean isRead) {
+        Long count = jpaQueryFactory.select(article.count())
+                .from(article)
+                .where(createMemberWhereClause(memberId))
+                .where(createDateWhereClause(date))
+                .where(article.isRead.eq(isRead))
+                .fetchOne();
+
+        return Optional.ofNullable(count)
+                .orElse(0L)
                 .intValue();
     }
 

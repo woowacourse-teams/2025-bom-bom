@@ -2,6 +2,7 @@ package me.bombom.api.v1.member.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.pet.service.PetService;
 import me.bombom.api.v1.reading.service.ReadingService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -12,11 +13,13 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class MemberSignupListener {
 
     private final ReadingService readingService;
+    private final PetService petService;
 
     @TransactionalEventListener
     public void on(MemberSignupEvent event) {
         try {
             readingService.initializeReadingInformation(event.getMemberId());
+            petService.createPet(event.getMemberId());
         } catch (Exception e) {
             // TODO: 로깅 및 로직 추가
             log.error("읽기 정보 초기화에 실패했습니다.");

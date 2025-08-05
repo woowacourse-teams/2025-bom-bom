@@ -3,6 +3,7 @@ package me.bombom.api.v1;
 import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.article.domain.Article;
+import me.bombom.api.v1.highlight.domain.Color;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
@@ -174,21 +175,21 @@ public final class TestFixture {
                 Highlight.builder()
                         .highlightLocation(new HighlightLocation("0", "div[0]/p[0]", "10", "div[0]/p[0]"))
                         .articleId(firstArticleId)
-                        .color("#ffeb3b")
+                        .color(Color.from("#ffeb3b"))
                         .text("첫 번째 하이라이트")
                         .memo("메모")
                         .build(),
                 Highlight.builder()
                         .highlightLocation(new HighlightLocation("15", "div[0]/p[1]", "25", "div[0]/p[1]"))
                         .articleId(firstArticleId)
-                        .color("#4caf50")
+                        .color(Color.from("#4caf50"))
                         .text("두 번째 하이라이트")
                         .memo("메모")
                         .build(),
                 Highlight.builder()
                         .highlightLocation(new HighlightLocation("5", "div[0]/h1", "15", "div[0]/h1"))
                         .articleId(secondArticleId)
-                        .color("#2196f3")
+                        .color(Color.from("#2196f3"))
                         .text("세 번째 하이라이트")
                         .memo("메모")
                         .build()
@@ -199,7 +200,7 @@ public final class TestFixture {
         return new HighlightCreateRequest(
                 new HighlightLocationRequest("0", "div[0]/p[2]", "20", "div[0]/p[2]"),
                 articleId,
-                "#f44336",
+                Color.from("#f44336"),
                 "새로운 하이라이트 텍스트",
                 "메모"
         );

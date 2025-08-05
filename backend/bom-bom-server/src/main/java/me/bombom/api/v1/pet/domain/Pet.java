@@ -27,6 +27,7 @@ public class Pet extends BaseEntity {
     @Column(nullable = false)
     private Long stageId;
 
+    @Column(nullable = false, columnDefinition = "int default 0")
     private int currentScore = 0;
 
     @Builder

@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { HighlightType } from '../types/highlight';
-import { restoreHighlight } from '../utils/highlight';
 import {
   deleteHighlight,
   getHighlights,
@@ -9,11 +8,11 @@ import {
   postHighlight,
 } from '@/apis/highlight';
 
-export const useHighlightManager = () => {
+export const useHighlightManager = ({ articleId }: { articleId: number }) => {
   const queryClient = useQueryClient();
   const { data: highlights } = useQuery({
     queryKey: ['highlight'],
-    queryFn: () => getHighlights(),
+    queryFn: () => getHighlights(articleId),
   });
   const { mutate: addHighlight } = useMutation({
     mutationKey: ['addHighlights'],
@@ -58,12 +57,6 @@ export const useHighlightManager = () => {
   const updateMemo = (id: number, memo: string) => {
     updateHighlight({ id, data: { memo } });
   };
-
-  useEffect(() => {
-    if (!highlights || highlights?.length === 0) return;
-
-    highlights.forEach((highlight) => restoreHighlight(highlight));
-  }, [highlights]);
 
   useEffect(() => {
     const handleMouseOver = (e: Event) => {

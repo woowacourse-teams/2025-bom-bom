@@ -14,9 +14,12 @@ interface DeleteHighlightParams {
   id: number;
 }
 
-export const getHighlights = async () => {
+export const getHighlights = async (articleId: number) => {
   return await fetcher.get<HighlightType[]>({
     path: '/highlights',
+    query: {
+      articleId,
+    },
   });
 };
 

@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
@@ -11,7 +11,10 @@ import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingT
 import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import { useHighlightManager } from '@/pages/detail/hooks/useHighlightManager';
-import { saveSelection } from '@/pages/detail/utils/highlight';
+import {
+  restoreHighlight,
+  saveSelection,
+} from '@/pages/detail/utils/highlight';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
 
@@ -25,7 +28,7 @@ function ArticleDetailPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const { highlights, addHighlight, updateMemo, removeHighlight } =
-    useHighlightManager();
+    useHighlightManager({ articleId: articleIdNumber });
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
@@ -54,6 +57,12 @@ function ArticleDetailPage() {
     throttleMs: 500,
     onTrigger: updateArticleAsRead,
   });
+
+  useEffect(() => {
+    if (!highlights || highlights?.length === 0 || !currentArticle) return;
+
+    highlights.forEach((highlight) => restoreHighlight(highlight));
+  }, [currentArticle, highlights]);
 
   if (!currentArticle || !otherArticles) return null;
 

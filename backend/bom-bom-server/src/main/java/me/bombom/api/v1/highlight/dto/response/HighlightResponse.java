@@ -9,7 +9,8 @@ public record HighlightResponse(
         HighlightLocation location,
         Long articleId,
         String color,
-        String text
+        String text,
+        String memo
 ) {
 
     public static List<HighlightResponse> from(List<Highlight> highlights) {
@@ -24,7 +25,8 @@ public record HighlightResponse(
                 highlight.getHighlightLocation(),
                 highlight.getArticleId(),
                 highlight.getColor(),
-                highlight.getText()
+                highlight.getText(),
+                highlight.getMemo()
         );
     }
 }

@@ -34,26 +34,31 @@ public class Highlight extends BaseEntity {
     @Column(nullable = false, columnDefinition = "text")
     private String text;
 
+    @Column(length = 500)
+    private String memo;
+
     @Builder
     public Highlight(
             Long id,
             @NotNull HighlightLocation highlightLocation,
             @NotNull Long articleId,
             @NotNull String color,
-            @NotNull String text
+            @NotNull String text,
+            String memo
     ) {
         this.id = id;
         this.highlightLocation = highlightLocation;
         this.articleId = articleId;
         this.color = color;
         this.text = text;
-    }
-
-    public boolean isSameColor(String color) {
-        return this.color.equals(color);
+        this.memo = memo;
     }
 
     public void changeColor(String color) {
         this.color = color;
+    }
+
+    public void editMemo(String memo) {
+        this.memo = memo;
     }
 }

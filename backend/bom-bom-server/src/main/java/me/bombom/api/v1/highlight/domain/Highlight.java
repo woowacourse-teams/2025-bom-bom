@@ -1,5 +1,6 @@
 package me.bombom.api.v1.highlight.domain;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -28,8 +29,9 @@ public class Highlight extends BaseEntity {
     @Column(nullable = false)
     private Long articleId;
 
-    @Column(nullable = false, length = 10)
-    private String color;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(nullable = false, name = "color", length = 10))
+    private Color color;
 
     @Column(nullable = false, columnDefinition = "text")
     private String text;
@@ -42,7 +44,7 @@ public class Highlight extends BaseEntity {
             Long id,
             @NotNull HighlightLocation highlightLocation,
             @NotNull Long articleId,
-            @NotNull String color,
+            @NotNull Color color,
             @NotNull String text,
             String memo
     ) {
@@ -54,7 +56,7 @@ public class Highlight extends BaseEntity {
         this.memo = memo;
     }
 
-    public void changeColor(String color) {
+    public void changeColor(Color color) {
         this.color = color;
     }
 

@@ -16,26 +16,26 @@ interface DeleteHighlightParams {
 
 export const getHighlights = async () => {
   return await fetcher.get<HighlightType[]>({
-    path: '/highlight',
+    path: '/highlights',
   });
 };
 
 export const postHighlight = async ({ highlight }: PostHighlightParams) => {
   return await fetcher.post({
-    path: '/highlight',
+    path: '/highlights',
     body: highlight,
   });
 };
 
 export const patchHighlight = async ({ id, data }: PatchHighlightParams) => {
   return await fetcher.patch({
-    path: `/highlight/${id}`,
+    path: `/highlights/${id}`,
     body: data,
   });
 };
 
 export const deleteHighlight = async ({ id }: DeleteHighlightParams) => {
   return await fetcher.delete({
-    path: `/highlight/${id.toString()}`,
+    path: `/highlights/${id.toString()}`,
   });
 };

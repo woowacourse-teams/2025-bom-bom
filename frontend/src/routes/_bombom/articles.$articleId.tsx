@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
-import { deleteBookmark, getBookmarked, postBookmark } from '@/apis/bookmark';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
@@ -12,6 +11,7 @@ import FloatingActionButtons from '@/pages/detail/components/FloatingActionButto
 import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
 import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
+import useBookmark from '@/pages/detail/hooks/useBookmark';
 import { useHighlightManager } from '@/pages/detail/hooks/useHighlightManager';
 import { saveSelection } from '@/pages/detail/utils/highlight';
 import { formatDate } from '@/utils/date';
@@ -41,10 +41,6 @@ function ArticleDetailPage() {
     queryKey: ['otherArticles'],
     queryFn: () => getArticles({ date: new Date(), sorted: 'ASC' }),
   });
-  const { data: bookmarked } = useQuery({
-    queryKey: ['bookmarked'],
-    queryFn: () => getBookmarked({ articleId: Number(articleId) }),
-  });
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
     mutationFn: () => patchArticleRead({ articleId: Number(articleId) }),
@@ -54,32 +50,10 @@ function ArticleDetailPage() {
       });
     },
   });
-  const { mutate: addBookmark } = useMutation({
-    mutationKey: ['bookmarked', articleId],
-    mutationFn: () => postBookmark({ articleId: Number(articleId) }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['bookmarked', articleId],
-      });
-    },
-  });
-  const { mutate: removeBookmark } = useMutation({
-    mutationKey: ['bookmarked', articleId],
-    mutationFn: () => deleteBookmark({ articleId: Number(articleId) }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['bookmarked', articleId],
-      });
-    },
-  });
 
-  const handleBookmarkClick = () => {
-    if (bookmarked) {
-      removeBookmark();
-    } else {
-      addBookmark();
-    }
-  };
+  const { bookmarked, onToggleBookmarkClick } = useBookmark({
+    articleId: Number(articleId),
+  });
 
   useScrollThreshold({
     enabled: !currentArticle?.isRead && !!currentArticle,
@@ -150,7 +124,7 @@ function ArticleDetailPage() {
       />
       <FloatingActionButtons
         bookmarked={!!bookmarked}
-        handleBookmarkClick={handleBookmarkClick}
+        handleBookmarkClick={onToggleBookmarkClick}
       />
     </Container>
   );

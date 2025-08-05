@@ -62,6 +62,9 @@ public class ArticleService {
     public void markAsRead(Long articleId, Member member) {
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        if(article.isRead()) {
+            return;
+        }
         validateArticleOwner(article, member.getId());
         article.markAsRead();
         readingService.updateReadingCount(article);

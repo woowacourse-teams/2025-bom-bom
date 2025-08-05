@@ -45,7 +45,7 @@ const PetCard = () => {
         <StatusIconWrapper>
           <PetIcon width={16} height={16} color={theme.colors.white} />
         </StatusIconWrapper>
-        <Title>몽이</Title>
+        <Title>봄이</Title>
       </TitleWrapper>
 
       <Spacing size={16} />

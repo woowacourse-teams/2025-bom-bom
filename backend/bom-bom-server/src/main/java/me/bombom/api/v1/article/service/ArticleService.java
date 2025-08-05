@@ -68,7 +68,7 @@ public class ArticleService {
         validateArticleOwner(article, member.getId());
         article.markAsRead();
         readingService.updateReadingCount(article);
-        applicationEventPublisher.publishEvent(new AddArticleScoreEvent(member));
+        applicationEventPublisher.publishEvent(new AddArticleScoreEvent(member.getId()));
     }
 
     public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(Member member, String keyword) {
@@ -84,8 +84,8 @@ public class ArticleService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public boolean canAddArticleScore(Member member){
-        int todayReadCount = articleRepository.countByMemberIdAndArrivedDateTimeAndIsRead(member.getId(), LocalDate.now(), true);
+    public boolean canAddArticleScore(Long memberId){
+        int todayReadCount = articleRepository.countByMemberIdAndArrivedDateTimeAndIsRead(memberId, LocalDate.now(), true);
         return todayReadCount <= ScorePolicyConstants.MAX_TODAY_READING_COUNT;
     }
 

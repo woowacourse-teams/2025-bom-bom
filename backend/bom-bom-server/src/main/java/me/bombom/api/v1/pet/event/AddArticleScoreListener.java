@@ -21,13 +21,12 @@ public class AddArticleScoreListener {
     @TransactionalEventListener
     public void on(AddArticleScoreEvent event){
         try {
-            Member member = event.getMember();
-            if(articleService.canAddArticleScore(member)) {
-                int score = readingService.calculateArticleScore(member);
-                petService.increaseCurrentScore(member, score);
+            if(articleService.canAddArticleScore(event.getMemberId())) {
+                int score = readingService.calculateArticleScore(event.getMemberId());
+                petService.increaseCurrentScore(event.getMemberId(), score);
             }
         } catch (Exception e){
-            log.error("아티클 점수 추가 실패, member: {}", event.getMember().getId(), e);
+            log.error("아티클 점수 추가 실패, member: {}", event.getMemberId(), e);
         }
     }
 }

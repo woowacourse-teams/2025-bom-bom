@@ -6,9 +6,9 @@ import me.bombom.api.v1.member.domain.Member;
 @Getter
 public class AddArticleScoreEvent {
 
-    private Member member;
+    private final Long memberId;
 
-    public AddArticleScoreEvent(Member member) {
-        this.member = member;
+    public AddArticleScoreEvent(Long memberId) {
+        this.memberId = memberId;
     }
 }

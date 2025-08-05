@@ -84,10 +84,10 @@ public class ReadingService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public int calculateArticleScore(Member member){
+    public int calculateArticleScore(Long memberId){
         // 연속 읽기 날 수가 7일 이상이면 아티클 당 보너스 점수 +5
         int score = ScorePolicyConstants.ARTICLE_READING_SCORE;
-        ContinueReading continueReading = continueReadingRepository.findByMemberId(member.getId())
+        ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         if(continueReading.getDayCount() >= ScorePolicyConstants.MIN_CONTINUE_READING_COUNT){
             score += ScorePolicyConstants.CONTINUE_READING_BONUS_SCORE;

@@ -12,17 +12,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/members/me/pet")
 public class PetController {
 
     private final PetService petService;
 
-    @GetMapping("/members/me/pet")
+    @GetMapping
     public PetResponse getPet(@LoginMember Member member){
         return petService.getPet(member);
     }
 
-    @PostMapping("/members/me/attendance")
+    @PostMapping("/attendance")
     public void addAttendanceScore(@LoginMember Member member){
         petService.addAttendanceScore(member);
     }

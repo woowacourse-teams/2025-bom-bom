@@ -22,8 +22,7 @@ public interface NewsletterControllerApi {
     @ApiResponses({
         @ApiResponse(
             responseCode = "200",
-            description = "뉴스레터 목록 조회 성공",
-            content = @Content(schema = @Schema(implementation = List.class))
+            description = "뉴스레터 목록 조회 성공"
         )
     })
     List<NewsletterResponse> getNewsletters();

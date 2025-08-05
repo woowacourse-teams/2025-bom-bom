@@ -10,18 +10,28 @@ interface ToolbarPosition {
 }
 
 interface FloatingToolBarProps {
-  onSave: (selection: Selection) => void;
+  onHighlightButtonClick: (selection: Selection) => void;
+  onMemoButtonClick: (selection: Selection) => void;
 }
 
-export default function FloatingToolbar({ onSave }: FloatingToolBarProps) {
+export default function FloatingToolbar({
+  onHighlightButtonClick,
+  onMemoButtonClick,
+}: FloatingToolBarProps) {
   const selectionRef = useRef<Selection>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState<ToolbarPosition>({ x: 0, y: 0 });
 
-  const handleSave = () => {
+  const handleHighlightButtonClick = () => {
     if (selectionRef.current === null) return;
     setIsVisible(false);
-    onSave(selectionRef.current);
+    onHighlightButtonClick(selectionRef.current);
+  };
+
+  const handleMemoButtonClick = () => {
+    if (selectionRef.current === null) return;
+    setIsVisible(false);
+    onMemoButtonClick(selectionRef.current);
   };
 
   useEffect(() => {
@@ -62,10 +72,10 @@ export default function FloatingToolbar({ onSave }: FloatingToolBarProps) {
 
   return (
     <Container position={position} visible={isVisible}>
-      <ToolbarButton onClick={handleSave}>
+      <ToolbarButton onClick={handleHighlightButtonClick}>
         <Pen />
       </ToolbarButton>
-      <ToolbarButton onClick={() => alert('Action 2')}>
+      <ToolbarButton onClick={handleMemoButtonClick}>
         <Comment />
       </ToolbarButton>
     </Container>

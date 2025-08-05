@@ -1,11 +1,30 @@
-name: Pull Request
+name: "Auto Assign"
 
 on:
   pull_request:
-    types: [review_requested]
+    types: [opened, reopened]
 
 jobs:
-  specific_review_requested:
+  add-reviews:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v39
+
+      - name: Frontend Review Assignment
+        if: contains(steps.changed-files.outputs.all_changed_files, 'frontend/')
+        uses: kentaro-m/auto-assign-action@v2.0.0
+        with:
+          configuration-path: ".github/auto_assign_frontend.yml"
+
+      - name: Backend Review Assignment
+        if: contains(steps.changed-files.outputs.all_changed_files, 'backend/')
+        uses: kentaro-m/auto-assign-action@v2.0.0
+        with:
+          configuration-path: ".github/auto_assign_backend.yml"
+
+  send_slack_message:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { ChangeEvent } from 'react';
+import { HighlightType } from '../../types/highlight';
 import MemoCard from '../MemoCard/MemoCard';
 import { theme } from '@/styles/theme';
 import CloseIcon from '#/assets/close.svg';
@@ -7,21 +7,17 @@ import MemoIcon from '#/assets/memo.svg';
 
 interface MemoPanelProps {
   open: boolean;
-  notes: {
-    id: string;
-    content: string;
-    memo: string;
-  }[];
-  handleDeleteMemo: (id: string) => void;
-  handleUpdateMemo: (id: string, e: ChangeEvent<HTMLTextAreaElement>) => void;
+  memos: HighlightType[];
+  removeHighlight: (id: number) => void;
+  updateMemo: (id: number, memo: string) => void;
   handleClose: () => void;
 }
 
 const MemoPanel = ({
   open,
-  notes,
-  handleDeleteMemo,
-  handleUpdateMemo,
+  memos,
+  removeHighlight,
+  updateMemo,
   handleClose,
 }: MemoPanelProps) => {
   return (
@@ -33,7 +29,7 @@ const MemoPanel = ({
           </IconWrapper>
           <HeaderTitleBox>
             <HeaderTitleText>읽기 노트</HeaderTitleText>
-            <HeaderTitleCaption>{notes.length}개의 메모</HeaderTitleCaption>
+            <HeaderTitleCaption>{memos.length}개의 메모</HeaderTitleCaption>
           </HeaderTitleBox>
         </HeaderLeft>
 
@@ -43,7 +39,7 @@ const MemoPanel = ({
       </Header>
 
       <NotesList>
-        {notes.length === 0 ? (
+        {memos.length === 0 ? (
           <EmptyWrapper>
             <EmptyIconWrapper>
               <MemoIcon width={36} height={36} fill={theme.colors.primary} />
@@ -54,14 +50,14 @@ const MemoPanel = ({
             </HeaderTitleCaption>
           </EmptyWrapper>
         ) : (
-          notes.map((note) => (
+          memos.map((note) => (
             <MemoCard
               key={note.id}
               id={note.id}
-              content={note.content}
+              content={note.text}
               memo={note.memo}
-              handleDeleteMemo={handleDeleteMemo}
-              handleUpdateMemo={handleUpdateMemo}
+              onRemoveButtonClick={removeHighlight}
+              onMemoChange={updateMemo}
             />
           ))
         )}
@@ -132,7 +128,10 @@ const CloseButton = styled.button`
 const NotesList = styled.div`
   padding: 24px;
 
+  display: flex;
+  gap: 16px;
   flex: 1;
+  flex-direction: column;
 
   overflow-y: auto;
 `;

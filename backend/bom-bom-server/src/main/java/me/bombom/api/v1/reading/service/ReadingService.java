@@ -108,8 +108,8 @@ public class ReadingService {
     public void updateReadingCount(Long memberId, boolean isTodayArticle) {
         // TODO: 규칙 확정 후 연속 읽기 로직 수정
         if (isTodayArticle) {
-            updateTodayReadingCount(memberId);
             updateContinueReadingCount(memberId);
+            updateTodayReadingCount(memberId);
         }
         updateWeeklyReadingCount(memberId);
     }

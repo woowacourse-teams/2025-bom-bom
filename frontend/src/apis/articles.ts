@@ -1,55 +1,40 @@
 import { fetcher } from './fetcher';
-import { components } from '@/types/openapi';
+import { components, operations } from '@/types/openapi';
 
 interface GetArticlesParams {
-  sorted?: 'ASC' | 'DESC';
-  date?: Date;
+  date?: string;
   category?: string;
-  size?: number;
-  page?: number;
   keyword?: string;
+
+  page?: number;
+  size?: number;
+  sort?: 'ASC' | 'DESC';
 }
 
-export const getArticles = async ({
-  date,
-  sorted,
-  category,
-  size,
-  page,
-  keyword,
-}: GetArticlesParams) => {
-  return await fetcher.get<components['schemas']['PageArticleResponse']>({
+type GetArticlesResponse = components['schemas']['PageArticleResponse'];
+
+export const getArticles = async (params: GetArticlesParams) => {
+  return await fetcher.get<GetArticlesResponse>({
     path: '/articles',
-    query: {
-      date,
-      sorted,
-      category,
-      size,
-      page,
-      keyword,
-    },
+    query: { ...params },
   });
 };
 
-interface GetArticleByIdParams {
-  articleId: number;
-}
+type GetArticleByIdParams =
+  operations['getArticleDetail']['parameters']['path'];
+type GetArticleByIdResponse = components['schemas']['ArticleDetailResponse'];
 
-export const getArticleById = async ({ articleId }: GetArticleByIdParams) => {
-  return await fetcher.get<components['schemas']['ArticleDetailResponse']>({
-    path: `/articles/${articleId}`,
+export const getArticleById = async ({ id }: GetArticleByIdParams) => {
+  return await fetcher.get<GetArticleByIdResponse>({
+    path: `/articles/${id}`,
   });
 };
 
-interface PatchArticleReadParams {
-  articleId: number;
-}
+type PatchArticleReadParams = operations['updateIsRead']['parameters']['path'];
 
-export const patchArticleRead = async ({
-  articleId,
-}: PatchArticleReadParams) => {
+export const patchArticleRead = async ({ id }: PatchArticleReadParams) => {
   return await fetcher.patch({
-    path: `/articles/${articleId}/read?`,
+    path: `/articles/${id}/read`,
   });
 };
 

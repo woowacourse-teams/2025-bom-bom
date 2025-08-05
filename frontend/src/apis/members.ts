@@ -9,40 +9,32 @@ export const getReadingStatus = async () => {
   );
 };
 
-export const getWeeklyReadingGoal = async ({
+export type GetUserInfoResponse =
+  components['schemas']['MemberProfileResponse'];
+
+export const getUserInfo = async () => {
+  return await fetcher.get<components['schemas']['MemberProfileResponse']>({
+    path: '/members/me',
+  });
+};
+
+export type PatchWeeklyReadingGoalParams =
+  components['schemas']['UpdateWeeklyGoalCountRequest'];
+export type PatchWeeklyReadingGoalResponse =
+  components['schemas']['WeeklyGoalCountResponse'];
+
+export const patchWeeklyReadingGoal = async ({
   weeklyGoalCount,
   memberId,
-}: components['schemas']['UpdateWeeklyGoalCountRequest']) => {
+}: PatchWeeklyReadingGoalParams) => {
   return await fetcher.patch<
-    components['schemas']['UpdateWeeklyGoalCountRequest'],
-    components['schemas']['WeeklyGoalCountResponse']
+    PatchWeeklyReadingGoalParams,
+    PatchWeeklyReadingGoalResponse
   >({
     path: '/members/me/reading/progress/week/goal',
     body: {
       memberId,
       weeklyGoalCount,
     },
-  });
-};
-
-export const patchWeeklyCount = async ({
-  weeklyGoalCount,
-  memberId,
-}: components['schemas']['UpdateWeeklyGoalCountRequest']) => {
-  return await fetcher.patch<
-    components['schemas']['UpdateWeeklyGoalCountRequest'],
-    components['schemas']['WeeklyGoalCountResponse']
-  >({
-    path: '/members/me/reading/progress/week/count',
-    body: {
-      memberId,
-      weeklyGoalCount,
-    },
-  });
-};
-
-export const getUserInfo = async () => {
-  return await fetcher.get<components['schemas']['MemberProfileResponse']>({
-    path: '/members/me',
   });
 };

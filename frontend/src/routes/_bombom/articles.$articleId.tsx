@@ -1,8 +1,9 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useMemo, useState } from 'react';
-import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
+import { useMemo, useState } from 'react';
+import { getArticleById, patchArticleRead } from '@/apis/articles';
+import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
@@ -11,12 +12,8 @@ import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnre
 import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
 import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
-import { useHighlightData } from '@/pages/detail/hooks/useHighlightData';
-import { useHighlightHoverEffect } from '@/pages/detail/hooks/useHighlightHoverEffect';
-import {
-  restoreHighlight,
-  saveSelection,
-} from '@/pages/detail/utils/highlight';
+import { useHighlightManager } from '@/pages/detail/hooks/useHighlightManager';
+import { saveSelection } from '@/pages/detail/utils/highlight';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
 
@@ -26,27 +23,28 @@ export const Route = createFileRoute('/_bombom/articles/$articleId')({
 
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
-  const articleIdNumber = Number(articleId);
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const { highlights, addHighlight, updateMemo, removeHighlight } =
-    useHighlightData({ articleId: articleIdNumber });
+  const [open, setOpen] = useState(true);
+  const [memo, setMemo] = useState('');
+  const { highlights, addHighlights } = useHighlightManager();
+
+  console.log(highlights);
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
     queryFn: () =>
       getArticleById({
-        articleId: articleIdNumber,
+        id: Number(articleId),
       }),
   });
   const today = useMemo(() => new Date(), []);
-  const { data: otherArticles } = useQuery({
-    queryKey: ['articles', { date: today, sorted: 'ASC' }],
-    queryFn: () => getArticles({ date: today, sorted: 'ASC' }),
-  });
+
+  const { data: todayArticles } = useQuery(
+    queries.articles({ date: today.toLocaleDateString() }),
+  );
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
-    mutationFn: () => patchArticleRead({ articleId: articleIdNumber }),
+    mutationFn: () => patchArticleRead({ id: Number(articleId) }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['article', articleId],
@@ -65,23 +63,17 @@ function ArticleDetailPage() {
   });
 
   useScrollRestoration({ pathname: articleId });
-  useHighlightHoverEffect();
 
-  useEffect(() => {
-    if (!highlights || highlights?.length === 0 || !currentArticle) return;
+  if (!currentArticle || !todayArticles) return null;
 
-    highlights.forEach((highlight) => restoreHighlight(highlight));
-  }, [currentArticle, highlights]);
-
-  if (!currentArticle || !otherArticles) return null;
-
-  const unReadArticles = otherArticles?.content?.filter(
+  const unReadArticles = todayArticles?.content?.filter(
     (article) => !article.isRead && article.articleId !== Number(articleId),
   );
 
   return (
     <Container>
       <HeaderWrapper>
+        <button onClick={() => setOpen((open) => !open)}>열기</button>
         <Title>{currentArticle.title}</Title>
         <MetaInfoRow>
           <Chip text={currentArticle.newsletter?.category ?? ''} />
@@ -120,22 +112,17 @@ function ArticleDetailPage() {
         )}
       </TodayArticlesWrapper>
       <FloatingToolbar
-        onHighlightButtonClick={(selection) => {
-          const highlightData = saveSelection(selection, articleIdNumber);
-          addHighlight(highlightData);
-        }}
-        onMemoButtonClick={(selection) => {
-          const highlightData = saveSelection(selection, articleIdNumber);
-          addHighlight(highlightData);
-          setOpen(true);
+        onSave={(selection) => {
+          const highlightData = saveSelection(selection);
+          addHighlights(highlightData);
         }}
       />
       <MemoPanel
         open={open}
         handleClose={() => setOpen(false)}
-        memos={highlights ?? []}
-        removeHighlight={removeHighlight}
-        updateMemo={updateMemo}
+        notes={[{ id: '1', content: 'content', memo }]}
+        handleDeleteMemo={(id) => console.log(id)}
+        handleUpdateMemo={(id, e) => console.log(id, setMemo(e.target.value))}
       />
     </Container>
   );

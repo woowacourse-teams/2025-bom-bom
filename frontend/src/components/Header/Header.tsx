@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import HomeIcon from '../../../public/assets/home.svg';
 import Button from '../Button/Button';
-import { getUserInfo } from '@/apis/members';
+import { queries } from '@/apis/queries';
 import { theme } from '@/styles/theme';
 import { NavType } from '@/types/nav';
 import { copyToClipboard } from '@/utils/copy';
@@ -18,14 +18,7 @@ interface HeaderProps {
 
 export default function Header({ activeNav }: HeaderProps) {
   const navagate = useNavigate();
-  const {
-    data: userInfo,
-    isError,
-    isFetching,
-  } = useQuery({
-    queryKey: ['userInfo'],
-    queryFn: () => getUserInfo(),
-  });
+  const { data: userInfo, isError, isFetching } = useQuery(queries.me());
 
   const handleCopyEmail = () => {
     if (!userInfo?.email) return;
@@ -221,11 +214,12 @@ const ProfileTextBox = styled.div`
 `;
 
 const ProfileInfo = styled.div`
+  max-width: 100px;
+
   display: flex;
   gap: 8px;
   align-items: center;
   justify-content: center;
-  max-width: 100px;
 
   font: ${({ theme }) => theme.fonts.caption};
 `;

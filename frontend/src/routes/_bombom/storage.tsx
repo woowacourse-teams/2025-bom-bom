@@ -5,7 +5,6 @@ import { useState } from 'react';
 import SearchInput from '../../components/SearchInput/SearchInput';
 import Select from '../../components/Select/Select';
 import CategoryFilter from '../../pages/storage/components/CategoryFilter/CategoryFilter';
-import { getStatisticsCategories } from '@/apis/articles';
 import { queries } from '@/apis/queries';
 import { CategoryType } from '@/constants/category';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -34,13 +33,11 @@ function Storage() {
     }),
   );
 
-  const { data: categoryCounts } = useQuery({
-    queryKey: ['articlesStatisticsCategories', debouncedSearchInput],
-    queryFn: () =>
-      getStatisticsCategories({
-        keyword: debouncedSearchInput,
-      }),
-  });
+  const { data: categoryCounts } = useQuery(
+    queries.statisticsCategories({
+      keyword: debouncedSearchInput,
+    }),
+  );
 
   if (!articles || !categoryCounts) return null;
 

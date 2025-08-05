@@ -1,8 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { getUserInfo } from '@/apis/members';
-import { getNewsletters } from '@/apis/newsLetters';
+import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import { CATEGORIES, CategoryType } from '@/constants/category';
@@ -10,15 +9,9 @@ import { copyToClipboard } from '@/utils/copy';
 import TrendingUpIcon from '#/assets/trending-up.svg';
 
 export default function TrendySection() {
-  const { data: newsletters } = useQuery({
-    queryKey: ['newsletters'],
-    queryFn: () => getNewsletters(),
-  });
+  const { data: newsletters } = useQuery(queries.newsletters());
 
-  const { data: userInfo } = useQuery({
-    queryKey: ['userInfo'],
-    queryFn: () => getUserInfo(),
-  });
+  const { data: userInfo } = useQuery(queries.me());
 
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryType>('전체');

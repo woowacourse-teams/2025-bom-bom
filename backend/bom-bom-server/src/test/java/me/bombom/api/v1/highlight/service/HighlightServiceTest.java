@@ -13,6 +13,8 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
+import me.bombom.api.v1.highlight.dto.request.HighlightLocationRequest;
+import me.bombom.api.v1.highlight.dto.request.UpdateHighlightRequest;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
@@ -72,13 +74,11 @@ class HighlightServiceTest {
     private HighlightCreateRequest createDuplicateHighlightRequest() {
         Long firstArticleId = articles.getFirst().getId();
         return new HighlightCreateRequest(
-                "0",
-                "div[0]/p[0]",
-                "10",
-                "div[0]/p[0]",
+                new HighlightLocationRequest("0", "div[0]/p[0]", "10", "div[0]/p[0]"),
                 firstArticleId,
                 "#ffeb3b",
-                "중복된 하이라이트"
+                "중복된 하이라이트",
+                "메모"
         );
     }
 
@@ -168,24 +168,53 @@ class HighlightServiceTest {
     void 하이라이트_색상을_변경할_수_있다() {
         // given
         Long highlightId = highlights.getFirst().getId();
-        String newColor = "#9c27b0";
+        UpdateHighlightRequest request = new UpdateHighlightRequest("#9c27b0", null);
 
         // when
-        highlightService.changeColor(highlightId, newColor, member);
+        HighlightResponse updated = highlightService.update(highlightId, request, member);
 
         // then
-        Highlight updatedHighlight = highlightRepository.findById(highlightId).get();
-        assertThat(updatedHighlight.getColor()).isEqualTo(newColor);
+        assertThat(updated.color()).isEqualTo(request.color());
     }
+
+    @Test
+    void 하이라이트_메모를_변경할_수_있다() {
+        // given
+        Long highlightId = highlights.getFirst().getId();
+        UpdateHighlightRequest request = new UpdateHighlightRequest(null, "새로운 메모입니다.");
+
+        // when
+        HighlightResponse updated = highlightService.update(highlightId, request, member);
+
+        // then
+        assertThat(updated.memo()).isEqualTo(request.memo());
+    }
+    @Test
+    void 하이라이트_색상과_메모를_변경할_수_있다() {
+        // given
+        Long highlightId = highlights.getFirst().getId();
+        UpdateHighlightRequest request = new UpdateHighlightRequest("#9c27b0", "새로운 메모입니다.");
+
+        // when
+        HighlightResponse updated = highlightService.update(highlightId, request, member);
+
+        // then
+        assertSoftly(softly -> {
+                assertThat(updated.color()).isEqualTo(request.color());
+                assertThat(updated.memo()).isEqualTo(request.memo());
+        });
+    }
+
 
     @Test
     void 존재하지_않는_하이라이트_색상_변경시_예외_발생() {
         // given
         Long nonExistentHighlightId = 0L;
-        String newColor = "#9c27b0";
+        UpdateHighlightRequest request = new UpdateHighlightRequest("#9c27b0", null);
+
 
         // when & then
-        assertThatThrownBy(() -> highlightService.changeColor(nonExistentHighlightId, newColor, member))
+        assertThatThrownBy(() -> highlightService.update(nonExistentHighlightId, request, member))
                 .isInstanceOf(CIllegalArgumentException.class);
     }
 }

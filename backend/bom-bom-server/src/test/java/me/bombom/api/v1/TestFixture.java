@@ -6,6 +6,7 @@ import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
+import me.bombom.api.v1.highlight.dto.request.HighlightLocationRequest;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.newsletter.domain.Category;
@@ -202,31 +203,32 @@ public final class TestFixture {
                         .articleId(firstArticleId)
                         .color("#ffeb3b")
                         .text("첫 번째 하이라이트")
+                        .memo("메모")
                         .build(),
                 Highlight.builder()
                         .highlightLocation(new HighlightLocation("15", "div[0]/p[1]", "25", "div[0]/p[1]"))
                         .articleId(firstArticleId)
                         .color("#4caf50")
                         .text("두 번째 하이라이트")
+                        .memo("메모")
                         .build(),
                 Highlight.builder()
                         .highlightLocation(new HighlightLocation("5", "div[0]/h1", "15", "div[0]/h1"))
                         .articleId(secondArticleId)
                         .color("#2196f3")
                         .text("세 번째 하이라이트")
+                        .memo("메모")
                         .build()
         );
     }
 
     public static HighlightCreateRequest createHighlightRequest(Long articleId) {
         return new HighlightCreateRequest(
-                "0",
-                "div[0]/p[2]",
-                "20",
-                "div[0]/p[2]",
+                new HighlightLocationRequest("0", "div[0]/p[2]", "20", "div[0]/p[2]"),
                 articleId,
                 "#f44336",
-                "새로운 하이라이트 텍스트"
+                "새로운 하이라이트 텍스트",
+                "메모"
         );
     }
 }

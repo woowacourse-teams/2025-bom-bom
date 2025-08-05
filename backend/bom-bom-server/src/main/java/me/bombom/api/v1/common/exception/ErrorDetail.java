@@ -19,6 +19,7 @@ public enum ErrorDetail {
     INVALID_JSON_FORMAT(HttpStatus.BAD_REQUEST, "M006", "Json 형식과 맞지 않습니다."),
     HANDLE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "M007", "권한이 없습니다."),
     INVALID_REQUEST_PARAMETER_VALIDATION(HttpStatus.BAD_REQUEST, "M008", "요청 파라미터 유효성이 맞지 않습니다."),
+    DUPLICATED_DATA(HttpStatus.BAD_REQUEST, "M009", "이미 존재하는 데이터입니다."),
 
     /*
     * J : 인증

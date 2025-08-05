@@ -96,7 +96,7 @@ public class ArticleService {
     }
 
     private void validateArticleOwner(Article article, Long memberId) {
-        if (!article.isOwner(memberId)) {
+        if (article.isNotOwner(memberId)) {
             throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
         }
     }

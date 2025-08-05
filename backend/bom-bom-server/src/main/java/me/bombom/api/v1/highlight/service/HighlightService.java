@@ -65,7 +65,7 @@ public class HighlightService {
     }
 
     private void validateArticleOwner(Member member, Article article) {
-        if (!article.isOwner(member.getId())) {
+        if (article.isNotOwner(member.getId())) {
             throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
         }
     }

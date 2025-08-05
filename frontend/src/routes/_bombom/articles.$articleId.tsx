@@ -65,7 +65,6 @@ function ArticleDetailPage() {
   const unReadArticles = otherArticles?.content?.filter(
     (article) => !article.isRead && article.articleId !== Number(articleId),
   );
-  console.log(unReadArticles);
 
   return (
     <Container>

@@ -26,10 +26,6 @@ const PetCard = () => {
     onSuccess: () => {
       setIsAnimating(true);
 
-      setTimeout(() => {
-        setIsAnimating(false);
-      }, 1000);
-
       queryClient.invalidateQueries({ queryKey: ['pet'] });
     },
   });
@@ -61,6 +57,7 @@ const PetCard = () => {
           width={80}
           height={120}
           isAnimating={isAnimating}
+          onAnimationEnd={() => setIsAnimating(false)}
         />
         {isAnimating && (
           <>

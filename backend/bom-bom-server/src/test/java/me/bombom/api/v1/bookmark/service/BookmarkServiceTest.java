@@ -13,6 +13,7 @@ import me.bombom.api.v1.bookmark.dto.BookmarkResponse;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.newsletter.domain.Category;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.PageRequest;
 import me.bombom.api.v1.TestJpaAuditingConfig;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 
 @DataJpaTest
 @Import({BookmarkService.class, QuerydslConfig.class, TestJpaAuditingConfig.class})
@@ -178,5 +180,26 @@ class BookmarkServiceTest {
             assertThat(ascBookmarks.getContent().get(0).articleResponse().articleId()).isEqualTo(second.getArticleId());
             assertThat(ascBookmarks.getContent().get(1).articleResponse().articleId()).isEqualTo(first.getArticleId());
         }
+    }
+
+    @Test
+    void 다른_사용자_아티클_북마크_예외_테스트() {
+        // given
+        Member otherMember = Member.builder()
+            .provider("provider2")
+            .providerId("providerId2")
+            .email("other@email.com")
+            .nickname("other")
+            .gender(Gender.FEMALE)
+            .roleId(1L)
+            .build();
+        otherMember = memberRepository.save(otherMember);
+        Article otherArticle = TestFixture.createArticle("타인 아티클", otherMember.getId(), newsletters.get(0).getId(), java.time.LocalDateTime.now().plusMinutes(2));
+        articleRepository.save(otherArticle);
+
+        // when & then
+        assertThatThrownBy(() -> bookmarkService.addBookmark(member.getId(), otherArticle.getId()))
+            .isInstanceOf(CIllegalArgumentException.class)
+            .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
     }
 } 

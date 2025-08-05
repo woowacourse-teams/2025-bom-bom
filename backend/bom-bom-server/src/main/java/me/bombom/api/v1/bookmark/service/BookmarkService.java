@@ -47,6 +47,9 @@ public class BookmarkService {
 
     @Transactional
     public void deleteBookmark(Long memberId, Long articleId) {
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        validateArticleOwner(memberId, article);
         bookmarkRepository.deleteByArticleIdAndMemberId(memberId, articleId);
     }
 

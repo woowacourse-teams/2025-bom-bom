@@ -202,4 +202,26 @@ class BookmarkServiceTest {
             .isInstanceOf(CIllegalArgumentException.class)
             .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
     }
+
+    @Test
+    void 다른_사용자_아티클_북마크_삭제_예외_테스트() {
+        // given
+        Member otherMember = Member.builder()
+            .provider("provider2")
+            .providerId("providerId2")
+            .email("other@email.com")
+            .nickname("other")
+            .gender(Gender.FEMALE)
+            .roleId(1L)
+            .build();
+        otherMember = memberRepository.save(otherMember);
+        Article otherArticle = TestFixture.createArticle("타인 아티클", otherMember.getId(), newsletters.get(0).getId(), java.time.LocalDateTime.now().plusMinutes(2));
+        articleRepository.save(otherArticle);
+        bookmarkService.addBookmark(otherMember.getId(), otherArticle.getId());
+
+        // when & then
+        assertThatThrownBy(() -> bookmarkService.deleteBookmark(member.getId(), otherArticle.getId()))
+            .isInstanceOf(CIllegalArgumentException.class)
+            .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
+    }
 } 

@@ -1,11 +1,13 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { PET_LEVEL } from './PetCard.constants';
 import Button from '../Button/Button';
 import ProgressBar from '../ProgressBar/ProgressBar';
 import Spacing from '../Spacing/Spacing';
 import { getPet, postPetAttendance } from '@/apis/pet';
 import { queryClient } from '@/main';
 import { theme } from '@/styles/theme';
+import { calculateRate } from '@/utils/math';
 import petImage from '#/assets/pet-1-lv1.png';
 import PetIcon from '#/assets/pet.svg';
 
@@ -22,6 +24,11 @@ const PetCard = () => {
     },
   });
 
+  const levelPercentage = calculateRate(
+    pet?.currentScore ?? 0,
+    pet?.totalScore ?? 1,
+  );
+
   return (
     <Container>
       <TitleWrapper>
@@ -34,12 +41,12 @@ const PetCard = () => {
       <Spacing size={16} />
 
       <img src={petImage} alt="pet" width={100} height={120} />
-      <Level>레벨 {pet?.level} : 아직 애기</Level>
+      <Level>
+        레벨 {pet?.level} :{' '}
+        {PET_LEVEL[(pet?.level ?? 1) as keyof typeof PET_LEVEL]}
+      </Level>
       <Spacing size={16} />
-      <ProgressBar
-        rate={pet?.currentScore ?? 0 / (pet?.totalScore ?? 1)}
-        caption={`${pet?.currentScore ?? 0}%`}
-      />
+      <ProgressBar rate={levelPercentage} caption={`${levelPercentage}%`} />
       <Button text="맘마 먹이기" onClick={mutatePetAttendance} />
     </Container>
   );

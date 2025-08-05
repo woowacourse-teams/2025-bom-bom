@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import { useMemo } from 'react';
 import ArticleCardList from '../../pages/today/components/ArticleCardList/ArticleCardList';
 import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/ReadingStatusCard';
 import { getArticles } from '@/apis/articles';
@@ -11,9 +12,10 @@ export const Route = createFileRoute('/_bombom/')({
 });
 
 function Index() {
+  const today = useMemo(() => new Date(), []);
   const { data: articles } = useQuery({
-    queryKey: ['todayArticles'],
-    queryFn: () => getArticles({ date: new Date(), sorted: 'DESC' }),
+    queryKey: ['articles', { date: today }],
+    queryFn: () => getArticles({ date: today }),
   });
 
   return (

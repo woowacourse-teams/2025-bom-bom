@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
@@ -36,9 +36,10 @@ function ArticleDetailPage() {
         articleId: Number(articleId),
       }),
   });
+  const today = useMemo(() => new Date(), []);
   const { data: otherArticles } = useQuery({
-    queryKey: ['otherArticles'],
-    queryFn: () => getArticles({ date: new Date(), sorted: 'ASC' }),
+    queryKey: ['articles', { date: today, sorted: 'ASC' }],
+    queryFn: () => getArticles({ date: today, sorted: 'ASC' }),
   });
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
@@ -46,6 +47,9 @@ function ArticleDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['article', articleId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['articles', { date: today, sorted: 'ASC' }],
       });
     },
   });

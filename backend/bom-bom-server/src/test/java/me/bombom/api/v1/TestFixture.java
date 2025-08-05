@@ -12,6 +12,8 @@ import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
+import me.bombom.api.v1.pet.domain.Pet;
+import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.reading.domain.ContinueReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
@@ -230,5 +232,36 @@ public final class TestFixture {
                 "새로운 하이라이트 텍스트",
                 "메모"
         );
+    }
+
+    /**
+     * Stage
+     */
+    public static Stage createStage(int level, int totalScore) {
+        return Stage.builder()
+                .level(level)
+                .requiredScore(totalScore)
+                .build();
+    }
+
+    public static List<Stage> createStages() {
+        return List.of(
+                createStage(1, 50),
+                createStage(2, 100),
+                createStage(3, 160),
+                createStage(4, 215),
+                createStage(5, 330)
+        );
+    }
+
+    /**
+     * Pet
+     */
+    public static Pet createPet(Member member, Long stageId) {
+        return Pet.builder()
+                .memberId(member.getId())
+                .stageId(stageId)
+                .currentScore(0)
+                .build();
     }
 }

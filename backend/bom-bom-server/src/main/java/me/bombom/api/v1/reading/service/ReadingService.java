@@ -6,6 +6,7 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.pet.ScorePolicyConstants;
 import me.bombom.api.v1.reading.domain.ContinueReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
@@ -86,6 +87,17 @@ public class ReadingService {
         updateWeeklyReadingCount(article);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public int calculateArticleScore(Long memberId) {
+        int score = ScorePolicyConstants.ARTICLE_READING_SCORE;
+        ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        if (isBonusApplicable(continueReading)) {
+            score += ScorePolicyConstants.CONTINUE_READING_BONUS_SCORE;
+        }
+        return score;
+    }
+
     private void updateTodayReadingCount(Article article) {
         if (article.isArrivedToday()) {
             TodayReading todayReading = todayReadingRepository.findByMemberId(article.getMemberId())
@@ -109,6 +121,10 @@ public class ReadingService {
         WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         return ReadingInformationResponse.of(continueReading, todayReading, weeklyReading);
+    }
+
+    private boolean isBonusApplicable(ContinueReading continueReading) {
+        return continueReading.getDayCount() >= ScorePolicyConstants.MIN_CONTINUE_READING_COUNT;
     }
 }
 

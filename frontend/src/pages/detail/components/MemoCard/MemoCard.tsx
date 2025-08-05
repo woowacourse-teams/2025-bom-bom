@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { theme } from '@/styles/theme';
 import DeleteIcon from '#/assets/delete.svg';

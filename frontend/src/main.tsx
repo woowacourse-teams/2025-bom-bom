@@ -1,5 +1,8 @@
 import { Global } from '@emotion/react';
-import { init as initSentry } from '@sentry/react';
+import {
+  init as initSentry,
+  tanstackRouterBrowserTracingIntegration,
+} from '@sentry/react';
 import { QueryClient } from '@tanstack/react-query';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { StrictMode } from 'react';
@@ -8,11 +11,6 @@ import { ENV } from './apis/env.ts';
 import { routeTree } from './routeTree.gen';
 import reset from './styles/reset.ts';
 
-initSentry({
-  dsn: ENV.sentryDsn,
-  sendDefaultPii: true,
-});
-
 export const queryClient = new QueryClient();
 
 const router = createRouter({
@@ -20,6 +18,12 @@ const router = createRouter({
   context: {
     queryClient,
   },
+});
+
+initSentry({
+  dsn: ENV.sentryDsn,
+  sendDefaultPii: true,
+  integrations: [tanstackRouterBrowserTracingIntegration(router)],
 });
 
 declare module '@tanstack/react-router' {

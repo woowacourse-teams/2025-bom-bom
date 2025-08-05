@@ -11,8 +11,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import me.bombom.api.v1.common.resolver.LoginMember;
-import me.bombom.api.v1.highlight.dto.request.ChangeHighlightColorRequest;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
+import me.bombom.api.v1.highlight.dto.request.UpdateHighlightRequest;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,17 +33,15 @@ interface HighlightControllerApi {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "하이라이트 목록 조회 성공",
-                    content = @Content(schema = @Schema(implementation = HighlightResponse.class))
+                    description = "하이라이트 목록 조회 성공"
             ),
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 아티클 ID"
             )
     })
-    @GetMapping
-    List<HighlightResponse> getHighlight(
-            @Parameter(hidden = true) @LoginMember Member member,
+    List<HighlightResponse> getHighlights(
+            Member member,
             @Parameter(description = "아티클 ID") @RequestParam @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     );
 
@@ -61,9 +59,8 @@ interface HighlightControllerApi {
                     description = "잘못된 요청 데이터"
             )
     })
-    @PostMapping
     void createHighlight(
-            @Parameter(hidden = true) @LoginMember Member member,
+            Member member,
             @Parameter(description = "하이라이트 생성 요청") @Valid @RequestBody HighlightCreateRequest createRequest
     );
 
@@ -77,17 +74,12 @@ interface HighlightControllerApi {
                     description = "하이라이트 삭제 성공"
             ),
             @ApiResponse(
-                    responseCode = "400",
-                    description = "잘못된 하이라이트 ID"
-            ),
-            @ApiResponse(
                     responseCode = "404",
                     description = "하이라이트를 찾을 수 없음"
             )
     })
-    @DeleteMapping("/{id}")
     void deleteHighlight(
-            @Parameter(hidden = true) @LoginMember Member member,
+            Member member,
             @Parameter(description = "하이라이트 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
     );
 
@@ -101,18 +93,13 @@ interface HighlightControllerApi {
                     description = "하이라이트 색상 변경 성공"
             ),
             @ApiResponse(
-                    responseCode = "400",
-                    description = "잘못된 하이라이트 ID 또는 색상 값"
-            ),
-            @ApiResponse(
                     responseCode = "404",
                     description = "하이라이트를 찾을 수 없음"
             )
     })
-    @PatchMapping("/{id}")
-    void changeHighlightColor(
-            @Parameter(hidden = true) @LoginMember Member member,
+    HighlightResponse updateHighlight(
+            Member member,
             @Parameter(description = "하이라이트 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
-            @Parameter(description = "색상 변경 요청") @Valid @RequestBody ChangeHighlightColorRequest request
+            @Parameter(description = "색상 변경 요청") @Valid @RequestBody UpdateHighlightRequest request
     );
 }

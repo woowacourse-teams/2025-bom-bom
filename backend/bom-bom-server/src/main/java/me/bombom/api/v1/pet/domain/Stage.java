@@ -24,16 +24,16 @@ public class Stage extends BaseEntity {
     private int level;
 
     @Column(nullable = false)
-    private int totalScore;
+    private int requiredScore;
 
     @Builder
     public Stage(
             Long id,
             int level,
-            int totalScore
+            int requiredScore
     ) {
         this.id = id;
         this.level = level;
-        this.totalScore = totalScore;
+        this.requiredScore = requiredScore;
     }
 }

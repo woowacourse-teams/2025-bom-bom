@@ -12,7 +12,7 @@ public record PetResponse(
     public static PetResponse of(Pet pet, Stage stage) {
         return new PetResponse(
                 stage.getLevel(),
-                stage.getTotalScore(),
+                stage.getRequiredScore(),
                 pet.getCurrentScore()
         );
     }

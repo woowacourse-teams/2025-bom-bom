@@ -8,7 +8,7 @@ import BookmarkIcon from '#/assets/bookmark-inactive.svg';
 
 const BookmarkPage = () => {
   const { data: articles } = useQuery({
-    queryKey: ['bookmark'],
+    queryKey: ['bookmarkArticles'],
     queryFn: () => getBookmarkArticles(),
   });
 

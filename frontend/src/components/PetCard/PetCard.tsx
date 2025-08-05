@@ -61,11 +61,11 @@ const PetCard = () => {
         />
         {isAnimating && (
           <>
-            <Heart>❤️</Heart>
-            <Heart style={{ animationDelay: '0.1s' }}>❤️</Heart>
-            <Heart style={{ animationDelay: '0.2s' }}>❤️</Heart>
-            <Heart style={{ animationDelay: '0.3s' }}>❤️</Heart>
-            <Heart style={{ animationDelay: '0.4s' }}>❤️</Heart>
+            {[...Array(5)].map((_, index) => (
+              <Heart key={index} style={{ animationDelay: `${index * 0.1}s` }}>
+                ❤️
+              </Heart>
+            ))}
           </>
         )}
       </PetImageContainer>

@@ -36,7 +36,7 @@ public class SwaggerConfig {
     @Value("${swagger.url.local}")
     private String localUrl;
 
-    @Value("${spring.profiles.active}")
+    @Value("${swagger.profile}")
     private String activeProfile;
 
     @Value("${server.port:8080}")

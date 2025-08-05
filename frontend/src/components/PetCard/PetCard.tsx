@@ -15,7 +15,6 @@ import PetIcon from '#/assets/pet.svg';
 
 const PetCard = () => {
   const [isAnimating, setIsAnimating] = useState(false);
-  const [showHearts, setShowHearts] = useState(false);
 
   const { data: pet } = useQuery({
     queryKey: ['pet'],
@@ -26,11 +25,9 @@ const PetCard = () => {
     mutationFn: postPetAttendance,
     onSuccess: () => {
       setIsAnimating(true);
-      setShowHearts(true);
 
       setTimeout(() => {
         setIsAnimating(false);
-        setShowHearts(false);
       }, 1000);
 
       queryClient.invalidateQueries({ queryKey: ['pet'] });
@@ -65,7 +62,7 @@ const PetCard = () => {
           height={120}
           isAnimating={isAnimating}
         />
-        {showHearts && (
+        {isAnimating && (
           <>
             <Heart>❤️</Heart>
             <Heart style={{ animationDelay: '0.1s' }}>❤️</Heart>

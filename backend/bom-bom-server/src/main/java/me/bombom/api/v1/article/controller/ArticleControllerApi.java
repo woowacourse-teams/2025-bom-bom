@@ -40,8 +40,7 @@ public interface ArticleControllerApi {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "아티클 목록 조회 성공",
-                    content = @Content(schema = @Schema(implementation = Page.class))
+                    description = "아티클 목록 조회 성공"
             )
     })
     public Page<ArticleResponse> getArticles(
@@ -57,8 +56,7 @@ public interface ArticleControllerApi {
     @ApiResponses({
         @ApiResponse(
             responseCode = "200",
-            description = "아티클 상세 조회 성공",
-            content = @Content(schema = @Schema(implementation = ArticleDetailResponse.class))
+            description = "아티클 상세 조회 성공"
         ),
         @ApiResponse(
             responseCode = "404",
@@ -98,8 +96,7 @@ public interface ArticleControllerApi {
     @ApiResponses({
         @ApiResponse(
             responseCode = "200",
-            description = "카테고리별 개수 조회 성공",
-            content = @Content(schema = @Schema(implementation = GetArticleCategoryStatisticsResponse.class))
+            description = "카테고리별 개수 조회 성공"
         )
     })
     GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(

@@ -38,17 +38,18 @@ export const patchArticleRead = async ({ id }: PatchArticleReadParams) => {
   });
 };
 
-interface GetStatisticsCategoriesParams {
-  keyword?: string;
-}
+type GetStatisticsCategoriesParams = Omit<
+  operations['getArticleCategoryStatistics']['parameters']['query'],
+  'member'
+>;
+type GetStatisticsCategoriesResponse =
+  components['schemas']['GetArticleCategoryStatisticsResponse'];
 
-export const getStatisticsCategories = async ({
-  keyword,
-}: GetStatisticsCategoriesParams) => {
-  return await fetcher.get<
-    components['schemas']['GetArticleCategoryStatisticsResponse']
-  >({
+export const getStatisticsCategories = async (
+  params: GetStatisticsCategoriesParams,
+) => {
+  return await fetcher.get<GetStatisticsCategoriesResponse>({
     path: '/articles/statistics/categories',
-    query: { keyword },
+    query: { ...params },
   });
 };

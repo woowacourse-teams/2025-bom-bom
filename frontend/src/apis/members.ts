@@ -1,26 +1,26 @@
 import { fetcher } from './fetcher';
 import { components } from '@/types/openapi';
 
+type GetReadingStatusResponse =
+  components['schemas']['ReadingInformationResponse'];
+
 export const getReadingStatus = async () => {
-  return await fetcher.get<components['schemas']['ReadingInformationResponse']>(
-    {
-      path: '/members/me/reading',
-    },
-  );
+  return await fetcher.get<GetReadingStatusResponse>({
+    path: '/members/me/reading',
+  });
 };
 
-export type GetUserInfoResponse =
-  components['schemas']['MemberProfileResponse'];
+type GetUserInfoResponse = components['schemas']['MemberProfileResponse'];
 
 export const getUserInfo = async () => {
-  return await fetcher.get<components['schemas']['MemberProfileResponse']>({
+  return await fetcher.get<GetUserInfoResponse>({
     path: '/members/me',
   });
 };
 
-export type PatchWeeklyReadingGoalParams =
+type PatchWeeklyReadingGoalParams =
   components['schemas']['UpdateWeeklyGoalCountRequest'];
-export type PatchWeeklyReadingGoalResponse =
+type PatchWeeklyReadingGoalResponse =
   components['schemas']['WeeklyGoalCountResponse'];
 
 export const patchWeeklyReadingGoal = async ({

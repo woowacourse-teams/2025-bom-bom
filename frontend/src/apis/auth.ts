@@ -1,15 +1,14 @@
 import { fetcher } from './fetcher';
 import { components } from '@/types/openapi';
 
+type PostSignupParams = components['schemas']['MemberSignupRequest'];
+
 export const postSignup = async ({
   nickname,
   email,
   gender,
-}: components['schemas']['MemberSignupRequest']) => {
-  return await fetcher.post<
-    components['schemas']['MemberSignupRequest'],
-    never
-  >({
+}: PostSignupParams) => {
+  return await fetcher.post<PostSignupParams, never>({
     path: '/auth/signup',
     body: {
       nickname,

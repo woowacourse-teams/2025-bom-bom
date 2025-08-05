@@ -75,7 +75,7 @@ export default function Header({ activeNav }: HeaderProps) {
         </Nav>
 
         <ProfileWrapper>
-          {isFetching || isError ? (
+          {!isFetching && isError ? (
             <Button
               text="로그인"
               onClick={() => {
@@ -225,6 +225,7 @@ const ProfileInfo = styled.div`
   gap: 8px;
   align-items: center;
   justify-content: center;
+  max-width: 100px;
 
   font: ${({ theme }) => theme.fonts.caption};
 `;

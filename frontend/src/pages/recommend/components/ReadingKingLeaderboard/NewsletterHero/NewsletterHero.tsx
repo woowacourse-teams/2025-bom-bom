@@ -1,35 +1,55 @@
 import styled from '@emotion/styled';
+import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
+import SlideCardList from '../../SlideCardList/SlideCardList';
+import { getUserInfo } from '@/apis/members';
 
 export default function NewsletterHero() {
+  const { data: userInfo } = useQuery({
+    queryKey: ['userInfo'],
+    queryFn: () => getUserInfo(),
+  });
+
   return (
-    <HeroContainer>
-      <HeroContent>
-        <HeroIcon>🌸</HeroIcon>
-        <HeroTitle>새로운 뉴스레터를 발견해보세요! 📚</HeroTitle>
-        <HeroSubtitle>
-          당신의 관심사에 맞는 최고의 뉴스레터를 추천해드립니다.
-        </HeroSubtitle>
-        <CTAButton to="/login">로그인하고 맞춤 추천 받기</CTAButton>
-      </HeroContent>
-    </HeroContainer>
+    <>
+      {userInfo ? (
+        <SlideCardList />
+      ) : (
+        <Container>
+          <HeroContent>
+            <HeroIcon>🌸</HeroIcon>
+            <HeroTitle>새로운 뉴스레터를 발견해보세요! 📚</HeroTitle>
+            <HeroSubtitle>
+              당신의 관심사에 맞는 최고의 뉴스레터를 추천해드립니다.
+            </HeroSubtitle>
+            <CTAButton to="/login">로그인하고 맞춤 추천 받기</CTAButton>
+          </HeroContent>
+        </Container>
+      )}
+    </>
   );
 }
 
-const HeroContainer = styled.div`
+const Container = styled.div`
   overflow: hidden;
-  position: relative;
-  margin-bottom: 32px;
-  padding: 40px;
+  width: 100%;
+  margin: 0 auto 18px;
   border-radius: 16px;
 
-  background: linear-gradient(135deg, #f96 0%, #ffb366 100%);
+  background: transparent;
 `;
 
 const HeroContent = styled.div`
-  position: relative;
   z-index: 2;
+  width: 100%;
+  padding: 56px;
 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(135deg, #f96 0%, #ffb366 100%);
   text-align: center;
 `;
 
@@ -55,6 +75,7 @@ const HeroSubtitle = styled.p`
 `;
 
 const CTAButton = styled(Link)`
+  width: fit-content;
   padding: 12px 24px;
   border: none;
   border-radius: 12px;

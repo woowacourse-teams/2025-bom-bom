@@ -15,9 +15,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 
 @Configuration
+@Profile("!test")
 public class SwaggerConfig {
 
     // 환경별 서버 URL 설정
@@ -35,7 +37,7 @@ public class SwaggerConfig {
     @Value("${spring.profiles.active}")
     private String activeProfile;
 
-    @Value("${server.port}")
+    @Value("${server.port:8080}")
     private String serverPort;
 
     @Bean
@@ -56,11 +58,7 @@ public class SwaggerConfig {
         if (isProfileActive(DEV_PROFILE)) {
             return List.of(createServer(DEV_URL, "봄봄 Development API"));
         }
-        if (isProfileActive(LOCAL_PROFILE)){
-            return List.of(createServer(LOCAL_URL, "봄봄 Local API"));
-        }
-
-        return null;
+        return List.of(createServer(LOCAL_URL.concat(serverPort), "봄봄 Local API"));
     }
 
     private Server createServer(String url, String description) {

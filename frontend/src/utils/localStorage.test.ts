@@ -3,7 +3,7 @@ import { createStorage } from './localStorage';
 describe('createStorage', () => {
   const KEY = 'test';
   const DEFAULT_DATA = { count: 0 };
-  let storage: ReturnType<typeof createStorage<{ count: number }>>;
+  let storage: ReturnType<typeof createStorage<{ count: number }, 'test'>>;
 
   beforeEach(() => {
     window.localStorage.clear();

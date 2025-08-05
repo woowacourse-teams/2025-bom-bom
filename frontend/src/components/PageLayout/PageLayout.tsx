@@ -17,7 +17,7 @@ function PageLayout({ children }: PropsWithChildren) {
 
   return (
     <Container>
-      <Header activeNav={navMap[location]} />
+      <Header activeNav={navMap[location] || 'today'} />
       {children}
     </Container>
   );

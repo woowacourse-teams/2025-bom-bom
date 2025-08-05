@@ -58,10 +58,10 @@ export default function TrendySection() {
         {filteredNewsletters.map((newsletter, index) => (
           <ImageInfoCard
             key={index}
-            imageUrl={newsletter.imageUrl}
-            title={newsletter.name}
-            description={newsletter.description}
-            onClick={() => handleCardClick(newsletter.mainPageUrl)}
+            imageUrl={newsletter.imageUrl ?? ''}
+            title={newsletter.name ?? ''}
+            description={newsletter.description ?? ''}
+            onClick={() => handleCardClick(newsletter.mainPageUrl ?? '')}
             as="button"
           />
         ))}

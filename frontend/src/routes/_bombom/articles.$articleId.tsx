@@ -1,14 +1,18 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
+import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
+import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
 import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
+import { useHighlightManager } from '@/pages/detail/hooks/useHighlightManager';
+import { saveSelection } from '@/pages/detail/utils/highlight';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
 
@@ -21,6 +25,9 @@ function ArticleDetailPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(true);
   const [memo, setMemo] = useState('');
+  const { highlights, addHighlights } = useHighlightManager();
+
+  console.log(highlights);
 
   const { data: currentArticle } = useQuery({
     queryKey: ['article', articleId],
@@ -29,9 +36,10 @@ function ArticleDetailPage() {
         articleId: Number(articleId),
       }),
   });
+  const today = useMemo(() => new Date(), []);
   const { data: otherArticles } = useQuery({
-    queryKey: ['otherArticles'],
-    queryFn: () => getArticles({ date: new Date(), sorted: 'ASC' }),
+    queryKey: ['articles', { date: today, sorted: 'ASC' }],
+    queryFn: () => getArticles({ date: today, sorted: 'ASC' }),
   });
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
@@ -39,6 +47,9 @@ function ArticleDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['article', articleId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['articles', { date: today, sorted: 'ASC' }],
       });
     },
   });
@@ -50,9 +61,11 @@ function ArticleDetailPage() {
     onTrigger: updateArticleAsRead,
   });
 
+  useScrollRestoration({ pathname: articleId });
+
   if (!currentArticle || !otherArticles) return null;
 
-  const unReadArticles = otherArticles?.content.filter(
+  const unReadArticles = otherArticles?.content?.filter(
     (article) => !article.isRead && article.articleId !== Number(articleId),
   );
 
@@ -62,10 +75,12 @@ function ArticleDetailPage() {
         <button onClick={() => setOpen((open) => !open)}>열기</button>
         <Title>{currentArticle.title}</Title>
         <MetaInfoRow>
-          <Chip text={currentArticle.newsletter.category} />
-          <MetaInfoText>from {currentArticle.newsletter.name}</MetaInfoText>
+          <Chip text={currentArticle.newsletter?.category ?? ''} />
           <MetaInfoText>
-            {formatDate(new Date(currentArticle.arrivedDateTime))}
+            from {currentArticle.newsletter?.name ?? ''}
+          </MetaInfoText>
+          <MetaInfoText>
+            {formatDate(new Date(currentArticle.arrivedDateTime ?? ''))}
           </MetaInfoText>
           <ReadTimeBox>
             <ClockIcon width={16} height={16} />
@@ -85,7 +100,7 @@ function ArticleDetailPage() {
       </ContentDescription>
       <TodayArticlesWrapper>
         <TodayArticleTitle>오늘 읽지 않은 다른 아티클</TodayArticleTitle>
-        {unReadArticles.length > 0 ? (
+        {unReadArticles?.length && unReadArticles.length > 0 ? (
           <TodayArticleList>
             {unReadArticles?.map((article) => (
               <NewsletterItemCard key={article.articleId} data={article} />
@@ -95,6 +110,12 @@ function ArticleDetailPage() {
           <EmptyUnreadCard />
         )}
       </TodayArticlesWrapper>
+      <FloatingToolbar
+        onSave={(selection) => {
+          const highlightData = saveSelection(selection);
+          addHighlights(highlightData);
+        }}
+      />
       <MemoPanel
         open={open}
         handleClose={() => setOpen(false)}
@@ -161,6 +182,16 @@ const ContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  mark[data-highlight-id] {
+    background-color: #ffeb3b;
+    transition: box-shadow 0.2s ease-in-out;
+  }
+
+  mark[data-highlight-id].hovered-highlight {
+    box-shadow: 0 0 6px rgb(0 0 0 / 30%);
+    cursor: pointer;
+  }
 `;
 
 const ContentDescription = styled.p`

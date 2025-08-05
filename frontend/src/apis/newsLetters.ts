@@ -1,8 +1,8 @@
 import { fetcher } from './fetcher';
-import { NewslettersResponse } from '../pages/today/types/article';
+import { components } from '@/types/openapi';
 
 export const getNewsletters = async () => {
-  return await fetcher.get<NewslettersResponse>({
+  return await fetcher.get<components['schemas']['NewsletterResponse'][]>({
     path: '/newsletters',
   });
 };

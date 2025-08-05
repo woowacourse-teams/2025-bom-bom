@@ -1,17 +1,20 @@
 import styled from '@emotion/styled';
 import ArticleCard from '../ArticleCard/ArticleCard';
 import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
-import { Article } from '@/pages/today/types/article';
 import { theme } from '@/styles/theme';
+import { components } from '@/types/openapi';
 import CheckIcon from '#/assets/check.svg';
 import LetterIcon from '#/assets/letter.svg';
 
 interface ArticleCardListProps {
-  articles: Article[];
+  articles: components['schemas']['ArticleResponse'][];
 }
 
 function ArticleCardList({ articles }: ArticleCardListProps) {
-  const grouped = articles.reduce<{ read: Article[]; unread: Article[] }>(
+  const grouped = articles.reduce<{
+    read: components['schemas']['ArticleResponse'][];
+    unread: components['schemas']['ArticleResponse'][];
+  }>(
     (acc, article) => {
       if (article.isRead) acc.read.push(article);
       else acc.unread.push(article);
@@ -54,12 +57,12 @@ function ArticleCardList({ articles }: ArticleCardListProps) {
 export default ArticleCardList;
 
 const Container = styled.div`
+  width: 100%;
+
   display: flex;
   gap: 16px;
   flex-direction: column;
   align-items: flex-start;
-
-  width: 100%;
 `;
 
 const ListTitleBox = styled.div`
@@ -74,9 +77,9 @@ const ListTitle = styled.h5`
 `;
 
 const CardList = styled.ul`
+  width: 100%;
+
   display: flex;
   gap: 16px;
   flex-direction: column;
-
-  width: 100%;
 `;

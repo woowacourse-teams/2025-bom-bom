@@ -8,7 +8,6 @@ import CategoryFilter from '../../pages/storage/components/CategoryFilter/Catego
 import { getArticles, getStatisticsCategories } from '@/apis/articles';
 import { CategoryType } from '@/constants/category';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
-import EmptySearchCard from '@/pages/storage/components/EmptySearchCard/EmptySearchCard';
 import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
@@ -45,8 +44,8 @@ function Storage() {
 
   if (!articles || !categoryCounts) return null;
 
-  const readStats = getArticleReadStats(articles.content);
-  const existCategories = categoryCounts.categories.filter(
+  const readStats = getArticleReadStats(articles.content ?? []);
+  const existCategories = categoryCounts.categories?.filter(
     (category) => category.count !== 0,
   );
 
@@ -60,10 +59,10 @@ function Storage() {
               label: '전체',
               quantity: categoryCounts?.totalCount ?? 0,
             },
-            ...(existCategories.map(({ category, count }) => ({
+            ...(existCategories?.map(({ category, count }) => ({
               value: category as CategoryType,
-              label: category,
-              quantity: count,
+              label: category ?? '',
+              quantity: count ?? 0,
             })) ?? []),
           ]}
           selectedValue={selectedCategory}
@@ -98,18 +97,16 @@ function Storage() {
             onSelectOption={(value) => setSortFilter(value)}
           />
         </SummaryBar>
-        {articles.content.length > 0 ? (
+        {articles.content?.length && articles.content.length > 0 ? (
           <ArticleList>
-            {articles.content.map((article) => (
+            {articles.content?.map((article) => (
               <li key={article.articleId}>
                 <ArticleCard data={article} readVariant="badge" />
               </li>
             ))}
           </ArticleList>
-        ) : searchInput === '' ? (
-          <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
         ) : (
-          <EmptySearchCard searchQuery={searchInput} />
+          <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
         )}
       </MainSection>
     </Container>

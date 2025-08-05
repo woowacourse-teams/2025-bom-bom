@@ -1,7 +1,6 @@
 package me.bombom.api.v1.reading.service;
 
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
@@ -72,19 +71,15 @@ public class ReadingService {
     }
 
     @Transactional
-    public void updateContinueReadingCount() {
+    public void resetContinueReadingCount() {
         todayReadingRepository.findAll()
                 .stream()
-                .filter(todayReading -> todayReading.getTotalCount() != 0)
+                .filter(todayReading -> (todayReading.getTotalCount() != 0) && (todayReading.getCurrentCount() == 0))
                 .forEach(todayReading -> {
                     Long memberId = todayReading.getMemberId();
                     ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
                             .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-                    if (todayReading.getCurrentCount() == 0) {
-                        continueReading.resetDayCount();
-                    } else {
-                        continueReading.increaseDayCount();
-                    }
+                    continueReading.resetDayCount();
                 });
     }
 
@@ -98,12 +93,6 @@ public class ReadingService {
         return WeeklyGoalCountResponse.from(weeklyReading);
     }
 
-    @Transactional
-    public void updateReadingCount(Article article) {
-        updateTodayReadingCount(article);
-        updateWeeklyReadingCount(article);
-    }
-
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public int calculateArticleScore(Long memberId) {
         int score = ScorePolicyConstants.ARTICLE_READING_SCORE;
@@ -113,6 +102,16 @@ public class ReadingService {
             score += ScorePolicyConstants.CONTINUE_READING_BONUS_SCORE;
         }
         return score;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateReadingCount(Long memberId, boolean isTodayArticle) {
+        // TODO: 규칙 확정 후 연속 읽기 로직 수정
+        if (isTodayArticle) {
+            updateTodayReadingCount(memberId);
+            updateContinueReadingCount(memberId);
+        }
+        updateWeeklyReadingCount(memberId);
     }
 
     public ReadingInformationResponse getReadingInformation(Member member) {
@@ -126,16 +125,24 @@ public class ReadingService {
         return ReadingInformationResponse.of(continueReading, todayReading, weeklyReading);
     }
 
-    private void updateTodayReadingCount(Article article) {
-        if (article.isArrivedToday()) {
-            TodayReading todayReading = todayReadingRepository.findByMemberId(article.getMemberId())
-                    .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-            todayReading.increaseCurrentCount();
+    private void updateTodayReadingCount(Long memberId) {
+        TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        todayReading.increaseCurrentCount();
+    }
+
+    private void updateContinueReadingCount(Long memberId) {
+        TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        if (todayReading.getCurrentCount() == 0) {
+            continueReading.increaseDayCount();
         }
     }
 
-    private void updateWeeklyReadingCount(Article article) {
-        WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(article.getMemberId())
+    private void updateWeeklyReadingCount(Long memberId) {
+        WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         weeklyReading.increaseCurrentCount();
     }

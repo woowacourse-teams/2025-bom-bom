@@ -16,7 +16,11 @@ public record BookmarkResponse(
         boolean isRead,
         NewsletterSummaryResponse newsletter
 ) {
+
     @QueryProjection
+    public BookmarkResponse {
+    }
+
     public BookmarkResponse(final Long id, final ArticleResponse articleResponse) {
         this(
                 id,

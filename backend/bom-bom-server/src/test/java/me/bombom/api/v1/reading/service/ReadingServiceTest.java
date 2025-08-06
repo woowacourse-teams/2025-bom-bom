@@ -1,6 +1,7 @@
 package me.bombom.api.v1.reading.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
@@ -74,8 +75,10 @@ class ReadingServiceTest {
         TodayReading updatedTodayReading = todayReadingRepository.findByMemberId(member.getId()).get();
         WeeklyReading updatedWeeklyReading = weeklyReadingRepository.findByMemberId(member.getId()).get();
 
-        assertThat(updatedTodayReading.getCurrentCount()).isEqualTo(initialTodayCount + 1);
-        assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(initialWeeklyCount + 1);
+        assertSoftly(softly -> {
+            softly.assertThat(updatedTodayReading.getCurrentCount()).isEqualTo(initialTodayCount + 1);
+            softly.assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(initialWeeklyCount + 1);
+        });
     }
 
     @Test
@@ -122,8 +125,10 @@ class ReadingServiceTest {
         ContinueReading updatedContinueReading = continueReadingRepository.findByMemberId(member.getId()).get();
         WeeklyReading updatedWeeklyReading = weeklyReadingRepository.findByMemberId(member.getId()).get();
 
-        assertThat(updatedTodayReading.getCurrentCount()).isEqualTo(initialTodayCount);
-        assertThat(updatedContinueReading.getDayCount()).isEqualTo(initialContinueCount);
-        assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(initialWeeklyCount + 1);
+        assertSoftly(softly -> {
+            softly.assertThat(updatedTodayReading.getCurrentCount()).isEqualTo(initialTodayCount);
+            softly.assertThat(updatedContinueReading.getDayCount()).isEqualTo(initialContinueCount);
+            softly.assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(initialWeeklyCount + 1);
+        });
     }
 }

@@ -91,8 +91,8 @@ public class ReadingService {
     public void updateReadingCount(Long memberId, boolean isTodayArticle) {
         // TODO: 규칙 확정 후 연속 읽기 로직 수정
         if (isTodayArticle) {
-            updateTodayReadingCount(memberId);
             updateContinueReadingCount(memberId);
+            updateTodayReadingCount(memberId);
         }
         updateWeeklyReadingCount(memberId);
     }
@@ -121,22 +121,6 @@ public class ReadingService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         if (todayReading.getCurrentCount() == 0) {
             continueReading.increaseDayCount();
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public int calculateArticleScore(Long memberId) {
-        int score = ScorePolicyConstants.ARTICLE_READING_SCORE;
-        ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        if (isBonusApplicable(continueReading)) {
-            score += ScorePolicyConstants.CONTINUE_READING_BONUS_SCORE;
-        }
-        return score;
-    }
-
-    private void updateTodayReadingCount(Article article) {
-        if(article.isArrivedToday()) {
-            TodayReading todayReading = todayReadingRepository.findByMemberId(article.getMemberId())
-                    .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-            todayReading.increaseCurrentCount();
         }
     }
 

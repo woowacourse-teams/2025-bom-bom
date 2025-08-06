@@ -15,24 +15,24 @@ export const getPageNumbers = (
 
   // 모든 페이지를 표시할 수 있는 경우
   if (totalPages <= maxVisiblePages) {
-    return Array.from({ length: totalPages }, (_, i) => i);
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
   }
 
   // 첫 번째 페이지 근처인 경우
   if (currentPage <= 3) {
     return [
-      ...Array.from({ length: 4 }, (_, i) => i),
+      ...Array.from({ length: 4 }, (_, i) => i + 1),
       ELLIPSIS,
-      totalPages - 1,
+      totalPages,
     ];
   }
 
   // 마지막 페이지 근처인 경우
   if (currentPage >= totalPages - 2) {
     return [
-      0,
+      1,
       ELLIPSIS,
-      ...Array.from({ length: 4 }, (_, i) => totalPages - 4 + i),
+      ...Array.from({ length: 4 }, (_, i) => totalPages - 4 + i + 1),
     ];
   }
 

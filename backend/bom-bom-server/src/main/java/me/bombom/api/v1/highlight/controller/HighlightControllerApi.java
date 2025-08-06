@@ -42,7 +42,7 @@ public interface HighlightControllerApi {
         @ApiResponse(responseCode = "403", description = "아티클에 대한 접근 권한 없음", content = @Content),
         @ApiResponse(responseCode = "404", description = "아티클을 찾을 수 없음", content = @Content)
     })
-    void createHighlight(
+    HighlightResponse createHighlight(
         @Parameter(hidden = true) Member member,
         @Valid @RequestBody HighlightCreateRequest request
     );

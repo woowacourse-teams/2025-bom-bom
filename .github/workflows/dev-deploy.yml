@@ -31,7 +31,7 @@ jobs:
           
           echo "Create application.yml(test) from secret"
           mkdir -p src/test/resources
-          echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application-test.yml
+          echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
 
       - name: JAR 빌드
         run: ./gradlew clean build --no-daemon
@@ -101,8 +101,8 @@ jobs:
       - name: 컨테이너 제거 및 재실행 (docker-compose)
         if: env.skip_deploy == 'false'
         run: |
-          docker compose -f docker-compose-dev.yml --env-file .env down || true
-          docker compose -f docker-compose-dev.yml --env-file .env up -d
+          docker compose -f docker-compose-dev.yml down || true
+          docker compose -f docker-compose-dev.yml up -d
           
           rm .env || true
 

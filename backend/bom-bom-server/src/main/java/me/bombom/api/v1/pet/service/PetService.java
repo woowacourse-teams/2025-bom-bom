@@ -32,7 +32,10 @@ public class PetService {
     }
 
     @Transactional
-    public void addAttendanceScore(Member member) {
+    public void attend(Member member) {
+        Pet pet = petRepository.findByMemberId(member.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        pet.updateAttendance(true);
         increaseCurrentScore(member.getId(), ScorePolicyConstants.ATTENDANCE_SCORE);
     }
 

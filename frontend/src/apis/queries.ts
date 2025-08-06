@@ -1,4 +1,4 @@
-import { queryOptions } from '@tanstack/react-query';
+import { queryOptions, useQueryClient } from '@tanstack/react-query';
 import {
   getArticleById,
   getArticles,
@@ -35,7 +35,7 @@ export const queries = {
 
   readingStatus: () =>
     queryOptions({
-      queryKey: ['reading', 'status'],
+      queryKey: ['members', 'me', 'reading'],
       queryFn: getReadingStatus,
     }),
 

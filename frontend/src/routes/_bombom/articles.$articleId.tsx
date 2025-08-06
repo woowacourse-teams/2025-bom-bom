@@ -11,12 +11,10 @@ import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import ArticleContent from '@/pages/detail/components/ArticleContent/ArticleContent';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
-import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
 import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import useBookmarkMutation from '@/pages/detail/hooks/useBookmarkMutation';
 import { useHighlightData } from '@/pages/detail/hooks/useHighlightData';
-import { useHighlightHoverEffect } from '@/pages/detail/hooks/useHighlightHoverEffect';
 import { saveSelection } from '@/pages/detail/utils/highlight';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
@@ -80,13 +78,6 @@ function ArticleDetailPage() {
   });
 
   useScrollRestoration({ pathname: articleId });
-  useHighlightHoverEffect();
-
-  useEffect(() => {
-    if (!highlights || highlights?.length === 0 || !currentArticle) return;
-
-    highlights.forEach((highlight) => restoreHighlight(highlight));
-  }, [currentArticle, highlights]);
 
   useScrollRestoration({ pathname: articleId });
 

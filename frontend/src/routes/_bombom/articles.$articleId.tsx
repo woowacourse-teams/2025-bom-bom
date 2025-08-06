@@ -12,6 +12,7 @@ import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import ArticleContent from '@/pages/detail/components/ArticleContent/ArticleContent';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
+import { FloatingToolbarMode } from '@/pages/detail/components/FloatingToolbar/FloatingToolbar.types';
 import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import useBookmarkMutation from '@/pages/detail/hooks/useBookmarkMutation';
@@ -59,9 +60,40 @@ function ArticleDetailPage() {
     articleId: Number(articleId),
   });
 
-  const handleSaveHighlight = (selection: Selection) => {
-    const highlightData = saveSelection(selection, articleIdNumber);
-    addHighlight(highlightData);
+  const handleHighlightClick = ({
+    mode,
+    selection,
+    highlightId,
+  }: {
+    mode: FloatingToolbarMode;
+    selection: Selection | null;
+    highlightId: number | null;
+  }) => {
+    const isNewHighlight = mode === 'new';
+
+    if (isNewHighlight && selection) {
+      const highlightData = saveSelection(selection, articleIdNumber);
+      addHighlight(highlightData);
+    }
+    if (!isNewHighlight && highlightId) {
+      removeHighlight(highlightId);
+    }
+  };
+
+  const handleMemoClick = ({
+    mode,
+    selection,
+  }: {
+    mode: FloatingToolbarMode;
+    selection: Selection | null;
+  }) => {
+    const isNewHighlight = mode === 'new';
+
+    if (isNewHighlight && selection) {
+      const highlightData = saveSelection(selection, articleIdNumber);
+      addHighlight(highlightData);
+    }
+    setOpen(true);
   };
 
   useScrollThreshold({
@@ -101,11 +133,8 @@ function ArticleDetailPage() {
       <ArticleContent
         articleContent={currentArticle.contents}
         highlights={highlights}
-        onHighlightButtonClick={handleSaveHighlight}
-        onMemoButtonClick={(selection) => {
-          handleSaveHighlight(selection);
-          setOpen(true);
-        }}
+        onHighlightClick={handleHighlightClick}
+        onMemoClick={handleMemoClick}
       />
       <Spacing size={24} />
       <Divider />

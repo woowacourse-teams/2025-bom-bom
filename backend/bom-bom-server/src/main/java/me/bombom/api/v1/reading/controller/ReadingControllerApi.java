@@ -11,7 +11,7 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Reading", description = "읽기 정보 관련 API")
@@ -24,9 +24,7 @@ public interface ReadingControllerApi {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "읽기 정보 조회 성공")
     })
-    ResponseEntity<ReadingInformationResponse> getReadingInformation(
-        @Parameter(hidden = true) Member member
-    );
+    ReadingInformationResponse getReadingInformation(@Parameter(hidden = true) Member member);
 
     @Operation(summary = "주간 목표 아티클 개수 수정", description = "주간 목표로 설정된 아티클 개수를 수정합니다.")
     @ApiResponses({
@@ -34,8 +32,5 @@ public interface ReadingControllerApi {
         @ApiResponse(responseCode = "400", description = "잘못된 요청 값", content = @Content),
         @ApiResponse(responseCode = "404", description = "주간 읽기 정보를 찾을 수 없음", content = @Content)
     })
-    ResponseEntity<WeeklyGoalCountResponse> updateWeeklyGoalCount(
-        @Parameter(hidden = true) Member member,
-        @Valid @RequestBody UpdateWeeklyGoalCountRequest request
-    );
+    WeeklyGoalCountResponse updateWeeklyGoalCount(@Valid @RequestBody UpdateWeeklyGoalCountRequest request);
 } 

@@ -105,6 +105,9 @@ jobs:
           echo "DEV_SPRING_DATASOURCE_PASSWORD=bombom77@@" >> .env
           echo "LOGGING_FILE_NAME=/logs/bombom-dev.log" >> .env
 
+      - name: 환경변수 검증
+        run: |
+          docker compose -f docker-compose-dev.yml --env-file .env config | grep SPRING_
 
       - name: 컨테이너 재실행
         run: |

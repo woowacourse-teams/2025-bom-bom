@@ -24,7 +24,7 @@ public record HighlightResponse(
                 highlight.getId(),
                 highlight.getHighlightLocation(),
                 highlight.getArticleId(),
-                highlight.getColor(),
+                highlight.getColor().getValue(),
                 highlight.getText(),
                 highlight.getMemo()
         );

@@ -76,6 +76,7 @@ const Pagination = ({
 export default Pagination;
 
 const Container = styled.div`
+  width: 100%;
   margin-top: 32px;
 
   display: flex;

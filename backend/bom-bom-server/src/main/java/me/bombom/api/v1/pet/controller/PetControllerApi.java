@@ -22,5 +22,5 @@ public interface PetControllerApi {
             @ApiResponse(responseCode = "200", description = "출석 점수 부여 성공"),
             @ApiResponse(responseCode = "401", description = "인증 실패")
     })
-    void addAttendanceScore(Member member);
+    void attend(Member member);
 }

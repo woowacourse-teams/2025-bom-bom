@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
+import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
 import me.bombom.api.v1.highlight.dto.request.UpdateHighlightRequest;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
@@ -31,7 +32,7 @@ public interface HighlightControllerApi {
     })
     List<HighlightResponse> getHighlights(
         @Parameter(hidden = true) Member member,
-        @Parameter(description = "아티클 ID") @RequestParam @Positive Long articleId
+        @Parameter(description = "아티클 ID") @RequestParam @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     );
 
     @Operation(summary = "하이라이트 생성", description = "새로운 하이라이트를 생성합니다.")
@@ -54,8 +55,8 @@ public interface HighlightControllerApi {
         @ApiResponse(responseCode = "404", description = "하이라이트를 찾을 수 없음", content = @Content)
     })
     HighlightResponse updateHighlight(
-        @Parameter(hidden = true) Member member,
-        @Parameter(description = "하이라이트 ID") @PathVariable @Positive Long highlightId,
+        @Parameter(hidden = true) @LoginMember Member member,
+        @Parameter(description = "하이라이트 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
         @Valid @RequestBody UpdateHighlightRequest request
     );
 
@@ -67,6 +68,6 @@ public interface HighlightControllerApi {
     })
     void deleteHighlight(
         @Parameter(hidden = true) Member member,
-        @Parameter(description = "하이라이트 ID") @PathVariable @Positive Long highlightId
+        @Parameter(description = "하이라이트 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long highlightId
     );
 }

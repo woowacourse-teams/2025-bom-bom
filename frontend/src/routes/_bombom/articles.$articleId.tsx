@@ -64,10 +64,9 @@ function ArticleDetailPage() {
     articleId: Number(articleId),
   });
 
-  const handleSaveHighlight = (selection: Selection, openMemo = false) => {
+  const handleSaveHighlight = (selection: Selection) => {
     const highlightData = saveSelection(selection, articleIdNumber);
     addHighlight(highlightData);
-    if (openMemo) setOpen(true);
   };
 
   useScrollThreshold({
@@ -107,10 +106,11 @@ function ArticleDetailPage() {
       <ArticleContent
         articleContent={currentArticle.contents}
         highlights={highlights}
-        onHighlightButtonClick={(selection) =>
-          handleSaveHighlight(selection, false)
-        }
-        onMemoButtonClick={(selection) => handleSaveHighlight(selection, true)}
+        onHighlightButtonClick={handleSaveHighlight}
+        onMemoButtonClick={(selection) => {
+          handleSaveHighlight(selection);
+          setOpen(true);
+        }}
       />
       <Spacing size={24} />
       <Divider />

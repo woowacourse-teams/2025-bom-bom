@@ -13,7 +13,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post: operations['addAttendanceScore'];
+    post: operations['attend'];
     delete?: never;
     options?: never;
     head?: never;
@@ -31,6 +31,22 @@ export interface paths {
     put?: never;
     post: operations['createHighlight'];
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/bookmarks/articles/{articleId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['addBookmark'];
+    delete: operations['deleteBookmark'];
     options?: never;
     head?: never;
     patch?: never;
@@ -180,6 +196,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/bookmarks': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getBookmarks'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/bookmarks/status/articles/{articleId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getBookmarkStatus'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/auth/login/{provider}': {
     parameters: {
       query?: never;
@@ -267,11 +315,14 @@ export interface components {
       /** Format: int64 */
       roleId?: number;
     };
+    Color: {
+      value?: string;
+    };
     HighlightCreateRequest: {
       location: components['schemas']['HighlightLocationRequest'];
       /** Format: int64 */
       articleId?: number;
-      color?: string;
+      color: components['schemas']['Color'];
       text: string;
       memo?: string;
     };
@@ -302,7 +353,7 @@ export interface components {
       weeklyGoalCount?: number;
     };
     UpdateHighlightRequest: {
-      color?: string;
+      color?: components['schemas']['Color'];
       memo?: string;
     };
     HighlightLocation: {
@@ -362,12 +413,7 @@ export interface components {
       totalScore?: number;
       /** Format: int32 */
       currentScore?: number;
-    };
-    GetArticlesOptions: {
-      /** Format: date */
-      date?: string;
-      category?: string;
-      keyword?: string;
+      isAttended?: boolean;
     };
     Pageable: {
       /** Format: int32 */
@@ -376,7 +422,9 @@ export interface components {
       size?: number;
       sort?: string[];
     };
-    ArticleResponse: {
+    BookmarkResponse: {
+      /** Format: int64 */
+      id?: number;
       /** Format: int64 */
       articleId?: number;
       title?: string;
@@ -393,6 +441,62 @@ export interface components {
       name?: string;
       imageUrl?: string;
       category?: string;
+    };
+    PageBookmarkResponse: {
+      /** Format: int64 */
+      totalElements?: number;
+      /** Format: int32 */
+      totalPages?: number;
+      /** Format: int32 */
+      size?: number;
+      content?: components['schemas']['BookmarkResponse'][];
+      /** Format: int32 */
+      number?: number;
+      sort?: components['schemas']['SortObject'];
+      /** Format: int32 */
+      numberOfElements?: number;
+      pageable?: components['schemas']['PageableObject'];
+      first?: boolean;
+      last?: boolean;
+      empty?: boolean;
+    };
+    PageableObject: {
+      /** Format: int64 */
+      offset?: number;
+      sort?: components['schemas']['SortObject'];
+      paged?: boolean;
+      /** Format: int32 */
+      pageNumber?: number;
+      /** Format: int32 */
+      pageSize?: number;
+      unpaged?: boolean;
+    };
+    SortObject: {
+      empty?: boolean;
+      sorted?: boolean;
+      unsorted?: boolean;
+    };
+    BookmarkStatusResponse: {
+      bookmarkStatus?: boolean;
+    };
+    GetArticlesOptions: {
+      /** Format: date */
+      date?: string;
+      category?: string;
+      keyword?: string;
+    };
+    ArticleResponse: {
+      /** Format: int64 */
+      articleId?: number;
+      title?: string;
+      contentsSummary?: string;
+      /** Format: date-time */
+      arrivedDateTime?: string;
+      thumbnailUrl?: string;
+      /** Format: int32 */
+      expectedReadTime?: number;
+      isRead?: boolean;
+      newsletter?: components['schemas']['NewsletterSummaryResponse'];
     };
     PageArticleResponse: {
       /** Format: int64 */
@@ -411,22 +515,6 @@ export interface components {
       first?: boolean;
       last?: boolean;
       empty?: boolean;
-    };
-    PageableObject: {
-      /** Format: int64 */
-      offset?: number;
-      sort?: components['schemas']['SortObject'];
-      unpaged?: boolean;
-      paged?: boolean;
-      /** Format: int32 */
-      pageNumber?: number;
-      /** Format: int32 */
-      pageSize?: number;
-    };
-    SortObject: {
-      empty?: boolean;
-      sorted?: boolean;
-      unsorted?: boolean;
     };
     ArticleDetailResponse: {
       title?: string;
@@ -463,7 +551,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  addAttendanceScore: {
+  attend: {
     parameters: {
       query: {
         member: components['schemas']['Member'];
@@ -523,6 +611,50 @@ export interface operations {
     responses: {
       /** @description Created */
       201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  addBookmark: {
+    parameters: {
+      query: {
+        member: components['schemas']['Member'];
+      };
+      header?: never;
+      path: {
+        articleId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  deleteBookmark: {
+    parameters: {
+      query: {
+        member: components['schemas']['Member'];
+      };
+      header?: never;
+      path: {
+        articleId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -748,6 +880,53 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['PetResponse'];
+        };
+      };
+    };
+  };
+  getBookmarks: {
+    parameters: {
+      query: {
+        member: components['schemas']['Member'];
+        pageable: components['schemas']['Pageable'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['PageBookmarkResponse'];
+        };
+      };
+    };
+  };
+  getBookmarkStatus: {
+    parameters: {
+      query: {
+        member: components['schemas']['Member'];
+      };
+      header?: never;
+      path: {
+        articleId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['BookmarkStatusResponse'];
         };
       };
     };

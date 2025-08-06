@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { ELLIPSIS } from './Pagination.constants';
 import {
   getPageNumbers,
   canGoToPreviousPage,
@@ -50,10 +51,10 @@ const Pagination = ({
           <PageNumber
             key={index}
             isCurrent={page === currentPage}
-            isDisabled={page === '...'}
+            isDisabled={page === ELLIPSIS}
             onClick={() => typeof page === 'number' && onPageChange(page)}
           >
-            {page === '...' ? '...' : page}
+            {page === ELLIPSIS ? ELLIPSIS : page}
           </PageNumber>
         ))}
       </PageNumbers>

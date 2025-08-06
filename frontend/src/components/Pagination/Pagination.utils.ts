@@ -1,3 +1,5 @@
+import { ELLIPSIS } from './Pagination.constants';
+
 /**
  * 페이지네이션에서 표시할 페이지 번호들을 생성합니다.
  *
@@ -18,14 +20,18 @@ export const getPageNumbers = (
 
   // 첫 번째 페이지 근처인 경우
   if (currentPage <= 3) {
-    return [...Array.from({ length: 4 }, (_, i) => i), '...', totalPages - 1];
+    return [
+      ...Array.from({ length: 4 }, (_, i) => i),
+      ELLIPSIS,
+      totalPages - 1,
+    ];
   }
 
   // 마지막 페이지 근처인 경우
   if (currentPage >= totalPages - 2) {
     return [
       0,
-      '...',
+      ELLIPSIS,
       ...Array.from({ length: 4 }, (_, i) => totalPages - 4 + i),
     ];
   }
@@ -33,11 +39,11 @@ export const getPageNumbers = (
   // 중간 페이지인 경우
   return [
     0,
-    '...',
+    ELLIPSIS,
     currentPage - 1,
     currentPage,
     currentPage + 1,
-    '...',
+    ELLIPSIS,
     totalPages - 1,
   ];
 };

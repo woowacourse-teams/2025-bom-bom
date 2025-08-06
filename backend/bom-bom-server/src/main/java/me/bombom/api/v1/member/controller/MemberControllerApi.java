@@ -1,19 +1,17 @@
 package me.bombom.api.v1.member.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.response.MemberProfileResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 @Tag(name = "Member", description = "회원 관련 API")
+@ApiResponses({
+    @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content)
+})
 public interface MemberControllerApi {
 
     @Operation(

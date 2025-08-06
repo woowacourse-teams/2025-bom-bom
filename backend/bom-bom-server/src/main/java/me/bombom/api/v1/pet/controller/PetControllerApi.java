@@ -6,9 +6,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.pet.dto.PetResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 @Tag(name = "Pet", description = "펫 관련 API")
 public interface PetControllerApi {

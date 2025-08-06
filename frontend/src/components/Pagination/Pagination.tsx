@@ -47,16 +47,19 @@ const Pagination = ({
       </NavigationButton>
 
       <PageNumberButtonWrapper>
-        {pageNumbers.map((page, index) => (
-          <PageNumberButton
-            key={index}
-            isCurrent={page === currentPage}
-            isDisabled={page === ELLIPSIS}
-            onClick={() => typeof page === 'number' && onPageChange(page)}
-          >
-            {page === ELLIPSIS ? ELLIPSIS : page}
-          </PageNumberButton>
-        ))}
+        {pageNumbers.map((page, index) =>
+          page === ELLIPSIS ? (
+            <EllipsisText key={index}>{ELLIPSIS}</EllipsisText>
+          ) : (
+            <PageNumberButton
+              key={index}
+              isCurrent={page === currentPage}
+              onClick={() => onPageChange(page as number)}
+            >
+              {page}
+            </PageNumberButton>
+          ),
+        )}
       </PageNumberButtonWrapper>
 
       <NavigationButton
@@ -121,7 +124,6 @@ const PageNumberButtonWrapper = styled.div`
 
 const PageNumberButton = styled.button<{
   isCurrent: boolean;
-  isDisabled: boolean;
 }>`
   height: 40px;
   min-width: 40px;
@@ -141,16 +143,24 @@ const PageNumberButton = styled.button<{
     isCurrent ? theme.colors.white : theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body2};
 
-  cursor: ${({ isDisabled }) => (isDisabled ? 'default' : 'pointer')};
+  cursor: pointer;
   transition: all 0.2s ease;
 
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-
-  &:hover:not(:disabled) {
+  &:hover {
     background-color: ${({ theme, isCurrent }) =>
       isCurrent ? theme.colors.primary : theme.colors.disabledBackground};
   }
+`;
+
+const EllipsisText = styled.span`
+  height: 40px;
+  min-width: 40px;
+  padding: 0 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font: ${({ theme }) => theme.fonts.body2};
 `;

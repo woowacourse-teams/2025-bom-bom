@@ -51,7 +51,7 @@ public class BookmarkService {
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         validateArticleOwner(memberId, article);
-        bookmarkRepository.deleteByArticleIdAndMemberId(memberId, articleId);
+        bookmarkRepository.deleteByMemberIdAndArticleId(memberId, articleId);
     }
 
     private void validateArticleOwner(Long memberId, Article article) {

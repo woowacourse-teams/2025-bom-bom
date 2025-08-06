@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Pagination from './Pagination';
 import type { Meta, StoryObj } from '@storybook/react-webpack5';
 
@@ -21,70 +22,39 @@ const meta: Meta<typeof Pagination> = {
       description: '페이지 변경 시 호출되는 콜백 함수',
     },
   },
+  render: (args) => {
+    const [currentPage, setCurrentPage] = useState(args.currentPage);
+
+    return (
+      <Pagination
+        {...args}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
+    );
+  },
 };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// 기본 스토리 - 작은 페이지 수
 export const Default: Story = {
   args: {
-    currentPage: 0,
-    totalPages: 5,
+    currentPage: 1,
+    totalPages: 7,
   },
 };
 
-// 첫 번째 페이지
-export const FirstPage: Story = {
-  args: {
-    currentPage: 0,
-    totalPages: 10,
-  },
-};
-
-// 마지막 페이지
-export const LastPage: Story = {
-  args: {
-    currentPage: 9,
-    totalPages: 10,
-  },
-};
-
-// 중간 페이지
-export const MiddlePage: Story = {
-  args: {
-    currentPage: 5,
-    totalPages: 10,
-  },
-};
-
-// 많은 페이지 수 (첫 번째 근처)
-export const ManyPagesFirst: Story = {
+export const SmallPages: Story = {
   args: {
     currentPage: 1,
-    totalPages: 20,
+    totalPages: 3,
   },
 };
 
-// 많은 페이지 수 (마지막 근처)
-export const ManyPagesAlmostLast: Story = {
+export const BigPages: Story = {
   args: {
-    currentPage: 18,
-    totalPages: 20,
-  },
-};
-
-export const ManyPagesLast: Story = {
-  args: {
-    currentPage: 20,
-    totalPages: 20,
-  },
-};
-
-// 많은 페이지 수 (중간)
-export const ManyPagesMiddle: Story = {
-  args: {
-    currentPage: 10,
+    currentPage: 16,
     totalPages: 20,
   },
 };

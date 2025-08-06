@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { patchArticleRead } from '@/apis/articles';
 import { getBookmarked } from '@/apis/bookmark';
 import { queries } from '@/apis/queries';
@@ -9,18 +9,14 @@ import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
+import ArticleContent from '@/pages/detail/components/ArticleContent/ArticleContent';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
-import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
 import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import useBookmarkMutation from '@/pages/detail/hooks/useBookmarkMutation';
 import { useHighlightData } from '@/pages/detail/hooks/useHighlightData';
-import { useHighlightHoverEffect } from '@/pages/detail/hooks/useHighlightHoverEffect';
-import {
-  restoreHighlight,
-  saveSelection,
-} from '@/pages/detail/utils/highlight';
+import { saveSelection } from '@/pages/detail/utils/highlight';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
 
@@ -63,21 +59,17 @@ function ArticleDetailPage() {
     articleId: Number(articleId),
   });
 
+  const handleSaveHighlight = (selection: Selection) => {
+    const highlightData = saveSelection(selection, articleIdNumber);
+    addHighlight(highlightData);
+  };
+
   useScrollThreshold({
     enabled: !currentArticle?.isRead && !!currentArticle,
     threshold: 70,
     throttleMs: 500,
     onTrigger: updateArticleAsRead,
   });
-
-  useScrollRestoration({ pathname: articleId });
-  useHighlightHoverEffect();
-
-  useEffect(() => {
-    if (!highlights || highlights?.length === 0 || !currentArticle) return;
-
-    highlights.forEach((highlight) => restoreHighlight(highlight));
-  }, [currentArticle, highlights]);
 
   useScrollRestoration({ pathname: articleId });
 
@@ -106,8 +98,14 @@ function ArticleDetailPage() {
         </MetaInfoRow>
       </HeaderWrapper>
       <Divider />
-      <ContentWrapper
-        dangerouslySetInnerHTML={{ __html: currentArticle.contents ?? '' }}
+      <ArticleContent
+        articleContent={currentArticle.contents}
+        highlights={highlights}
+        onHighlightButtonClick={handleSaveHighlight}
+        onMemoButtonClick={(selection) => {
+          handleSaveHighlight(selection);
+          setOpen(true);
+        }}
       />
       <Spacing size={24} />
       <Divider />
@@ -127,17 +125,6 @@ function ArticleDetailPage() {
           <EmptyUnreadCard />
         )}
       </TodayArticlesWrapper>
-      <FloatingToolbar
-        onHighlightButtonClick={(selection) => {
-          const highlightData = saveSelection(selection, articleIdNumber);
-          addHighlight(highlightData);
-        }}
-        onMemoButtonClick={(selection) => {
-          const highlightData = saveSelection(selection, articleIdNumber);
-          addHighlight(highlightData);
-          setOpen(true);
-        }}
-      />
       <MemoPanel
         open={open}
         handleClose={() => setOpen(false)}
@@ -202,22 +189,6 @@ const Divider = styled.div`
   height: 1px;
 
   background-color: ${({ theme }) => theme.colors.dividers};
-`;
-
-const ContentWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  mark[data-highlight-id] {
-    background-color: #ffeb3b;
-    transition: box-shadow 0.2s ease-in-out;
-  }
-
-  mark[data-highlight-id].hovered-highlight {
-    box-shadow: 0 0 6px rgb(0 0 0 / 30%);
-    cursor: pointer;
-  }
 `;
 
 const ContentDescription = styled.p`

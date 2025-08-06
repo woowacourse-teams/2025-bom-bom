@@ -29,6 +29,9 @@ public class Highlight extends BaseEntity {
     @Column(nullable = false)
     private Long articleId;
 
+    /**
+     * @Column 변경 시, Color 내부 주석에도 변경 필요
+     */
     @Embedded
     @AttributeOverride(name = "value", column = @Column(nullable = false, name = "color", length = 10))
     private Color color;

@@ -21,6 +21,10 @@ public class Color {
 
     private static final Pattern HEX_PATTERN = Pattern.compile("^#[0-9a-fA-F]{6}$");
 
+    /**
+     * @Column(nullable = false, name = "color", length = 10)
+     * 변경시 Highlight에도 변경 필요
+     */
     private String value;
 
     @JsonCreator(mode = Mode.DELEGATING)

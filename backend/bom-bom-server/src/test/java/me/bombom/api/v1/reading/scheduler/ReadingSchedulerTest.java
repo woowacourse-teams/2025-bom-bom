@@ -25,7 +25,7 @@ class ReadingSchedulerTest {
         readingScheduler.dailyResetReadingCount();
 
         // then
-        verify(readingService, times(1)).updateContinueReadingCount();
+        verify(readingService, times(1)).resetContinueReadingCount();
         verify(readingService, times(1)).resetTodayReadingCount();
     }
 

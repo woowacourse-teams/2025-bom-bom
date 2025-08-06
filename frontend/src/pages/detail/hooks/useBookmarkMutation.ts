@@ -1,12 +1,13 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteBookmark, postBookmark } from '@/apis/bookmark';
-import { queryClient } from '@/main';
 
 interface UseBookmarkMutationParams {
   articleId: number;
 }
 
 const useBookmarkMutation = ({ articleId }: UseBookmarkMutationParams) => {
+  const queryClient = useQueryClient();
+
   const { mutate: addBookmark } = useMutation({
     mutationKey: ['bookmarked', articleId],
     mutationFn: () => postBookmark({ articleId }),

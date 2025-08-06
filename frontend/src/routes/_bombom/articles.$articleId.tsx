@@ -27,20 +27,21 @@ function ArticleDetailPage() {
   const queryClient = useQueryClient();
 
   const { data: currentArticle } = useQuery(
-    queries.articleById({ id: Number(articleId) }),
+    queries.articleById({ id: articleIdNumber }),
   );
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
   const { data: bookmarked } = useQuery({
-    queryKey: ['bookmarked', articleId],
-    queryFn: () => getBookmarked({ articleId: Number(articleId) }),
+    queryKey: ['bookmarked', articleIdNumber],
+    queryFn: () => getBookmarked({ articleId: articleIdNumber }),
   });
+
   const { mutate: updateArticleAsRead } = useMutation({
-    mutationKey: ['read', articleId],
+    mutationKey: ['read', articleIdNumber],
     mutationFn: () => patchArticleRead({ id: articleIdNumber }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['article', articleId],
+        queryKey: ['article', articleIdNumber],
       });
       queryClient.invalidateQueries({
         queryKey: ['articles', { date: today, sorted: 'ASC' }],
@@ -49,7 +50,7 @@ function ArticleDetailPage() {
   });
 
   const { onToggleBookmarkClick } = useBookmarkMutation({
-    articleId: Number(articleId),
+    articleId: articleIdNumber,
   });
 
   useScrollThreshold({
@@ -64,7 +65,7 @@ function ArticleDetailPage() {
   if (!currentArticle || !todayArticles) return null;
 
   const unReadArticles = todayArticles?.content?.filter(
-    (article) => !article.isRead && article.articleId !== Number(articleId),
+    (article) => !article.isRead && article.articleId !== articleIdNumber,
   );
 
   return (
@@ -109,7 +110,7 @@ function ArticleDetailPage() {
         )}
       </TodayArticlesWrapper>
       <FloatingActionButtons
-        bookmarked={!!bookmarked}
+        bookmarked={!!bookmarked?.bookmarkStatus}
         onToggleBookmarkClick={onToggleBookmarkClick}
       />
     </Container>

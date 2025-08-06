@@ -3,6 +3,7 @@ package me.bombom.api.v1.pet.service;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.common.config.QuerydslConfig;
@@ -38,6 +39,9 @@ class PetServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private Member member;
     private Stage stage;
@@ -123,6 +127,7 @@ class PetServiceTest {
                         createPet(true)
                 )
         );
+        entityManager.clear();
 
         // when
         petService.resetAttendance();

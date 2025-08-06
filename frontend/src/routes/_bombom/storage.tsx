@@ -30,7 +30,7 @@ function Storage() {
 
   const { data: articles } = useQuery(
     queries.articles({
-      sort: sortFilter,
+      sort: `arrivedDateTime,${sortFilter}`,
       category: selectedCategory === '전체' ? undefined : selectedCategory,
       keyword: debouncedSearchInput,
       size: 6,

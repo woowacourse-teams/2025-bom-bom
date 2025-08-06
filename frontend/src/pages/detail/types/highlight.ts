@@ -3,9 +3,9 @@ export interface HighlightType {
   color: string;
   location: {
     startXPath: string;
-    startOffset: number;
+    startOffset: string;
     endXPath: string;
-    endOffset: number;
+    endOffset: string;
   };
   articleId: number;
   text: string;

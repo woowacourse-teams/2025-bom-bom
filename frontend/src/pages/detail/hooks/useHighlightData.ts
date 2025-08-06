@@ -11,7 +11,7 @@ export const useHighlightData = ({ articleId }: { articleId: number }) => {
   const queryClient = useQueryClient();
   const { data: highlights } = useQuery({
     queryKey: ['highlight'],
-    queryFn: () => getHighlights(articleId),
+    queryFn: () => getHighlights({ articleId }),
   });
   const { mutate: addHighlight } = useMutation({
     mutationKey: ['addHighlights'],
@@ -27,17 +27,19 @@ export const useHighlightData = ({ articleId }: { articleId: number }) => {
     mutationKey: ['updateHighlight'],
     mutationFn: ({
       id,
-      data,
+      color,
+      memo,
     }: {
       id: number;
-      data: Partial<Omit<HighlightType, 'id'>>;
-    }) => patchHighlight({ id, data }),
+      color?: string;
+      memo?: string;
+    }) => patchHighlight({ id, color, memo }),
     onSuccess: (updatedHighlight, variables) => {
       queryClient.setQueryData<HighlightType[]>(['highlight'], (prev) => {
         if (!prev) return [];
         return prev.map((highlight) =>
           highlight.id === variables.id
-            ? { ...highlight, ...variables.data }
+            ? { ...highlight, ...variables }
             : highlight,
         );
       });
@@ -54,7 +56,7 @@ export const useHighlightData = ({ articleId }: { articleId: number }) => {
   });
 
   const updateMemo = (id: number, memo: string) => {
-    updateHighlight({ id, data: { memo } });
+    updateHighlight({ id, memo });
   };
 
   return {

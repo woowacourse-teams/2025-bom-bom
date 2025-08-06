@@ -1,17 +1,14 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { getHighlights } from '@/apis/highlight';
+import { queries } from '@/apis/queries';
 import MemoCard from '@/pages/detail/components/MemoCard/MemoCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import { theme } from '@/styles/theme';
 import MemoIcon from '#/assets/memo.svg';
 
 const MemoPage = () => {
-  const { data: highlights } = useQuery({
-    queryKey: ['bookmarkArticles'],
-    queryFn: () => getHighlights(209),
-  });
+  const { data: highlights } = useQuery(queries.highlights({ articleId: 209 }));
 
   if (!highlights) return null;
 

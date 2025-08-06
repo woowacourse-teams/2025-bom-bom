@@ -84,7 +84,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "🎁 *새로운 선물이 도착했어요!* 🎁\n\n📦 **선물 내용**\n • 🏷️ 이름: ${{ github.event.pull_request.title }}\n • 👀 받을 분들: ${{ steps.reviewers.outputs.result }}\n • 🔗 선물 열어보기: <${{ github.event.pull_request.html_url }}|여기를 클릭!>\n\n✨ 이 선물을 열어보시고 소중한 의견을 나눠주세요!\n🤝 함께 만들어가는 코드, 함께 성장하는 우리팀!\n\n💝 *설레는 마음으로 리뷰 부탁드려요~*"
+                    "text": "🎁 *새로운 선물이 도착했어요!* 🎁\n\n📦 선물 내용\n • 🏷️ 이름: ${{ github.event.pull_request.title }}\n • 👀 받을 분들: ${{ steps.reviewers.outputs.result }}\n • 🔗 선물 열어보기: <${{ github.event.pull_request.html_url }}|여기를 클릭!>\n\n✨ 이 선물을 열어보시고 소중한 의견을 나눠주세요!\n🤝 함께 만들어가는 코드, 함께 성장하는 우리팀!\n\n💝 *설레는 마음으로 리뷰 부탁드려요~*"
                   }
                 }
               ]

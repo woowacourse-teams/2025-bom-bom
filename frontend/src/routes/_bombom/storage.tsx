@@ -1,11 +1,12 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SearchInput from '../../components/SearchInput/SearchInput';
 import Select from '../../components/Select/Select';
 import CategoryFilter from '../../pages/storage/components/CategoryFilter/CategoryFilter';
 import { queries } from '@/apis/queries';
+import Pagination from '@/components/Pagination/Pagination';
 import { CategoryType } from '@/constants/category';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
@@ -24,6 +25,7 @@ function Storage() {
     useState<CategoryType>('전체');
   const [sortFilter, setSortFilter] = useState<'DESC' | 'ASC'>('DESC');
   const [searchInput, setSearchInput] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const debouncedSearchInput = useDebouncedValue(searchInput, 500);
 
   const { data: articles } = useQuery(
@@ -31,6 +33,7 @@ function Storage() {
       sort: sortFilter,
       category: selectedCategory === '전체' ? undefined : selectedCategory,
       keyword: debouncedSearchInput,
+      page: currentPage,
     }),
   );
 
@@ -39,6 +42,28 @@ function Storage() {
       keyword: debouncedSearchInput,
     }),
   );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleCategoryChange = (value: CategoryType) => {
+    setSelectedCategory(value);
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (value: 'DESC' | 'ASC') => {
+    setSortFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchInput]);
 
   if (!articles || !categoryCounts) return null;
 
@@ -64,7 +89,7 @@ function Storage() {
             })) ?? []),
           ]}
           selectedValue={selectedCategory}
-          onSelectCategory={(value) => setSelectedCategory(value)}
+          onSelectCategory={handleCategoryChange}
         />
         <QuickMenu />
       </SideSection>
@@ -78,9 +103,7 @@ function Storage() {
         <SearchInput
           placeholder="뉴스레터 제목으로 검색하세요..."
           value={searchInput}
-          onChange={(e) => {
-            setSearchInput(e.target.value);
-          }}
+          onChange={handleSearchChange}
         />
         <SummaryBar>
           <SummaryText>
@@ -93,17 +116,24 @@ function Storage() {
               { value: 'ASC', label: '오래된순' },
             ]}
             selectedValue={sortFilter}
-            onSelectOption={(value) => setSortFilter(value)}
+            onSelectOption={handleSortChange}
           />
         </SummaryBar>
         {articles.content?.length && articles.content.length > 0 ? (
-          <ArticleList>
-            {articles.content?.map((article) => (
-              <li key={article.articleId}>
-                <ArticleCard data={article} readVariant="badge" />
-              </li>
-            ))}
-          </ArticleList>
+          <>
+            <ArticleList>
+              {articles.content?.map((article) => (
+                <li key={article.articleId}>
+                  <ArticleCard data={article} readVariant="badge" />
+                </li>
+              ))}
+            </ArticleList>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={articles.totalPages ?? 1}
+              onPageChange={handlePageChange}
+            />
+          </>
         ) : (
           <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
         )}

@@ -2,8 +2,9 @@ import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
-import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
+import { patchArticleRead } from '@/apis/articles';
 import { getBookmarked } from '@/apis/bookmark';
+import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
@@ -31,25 +32,19 @@ function ArticleDetailPage() {
   const { highlights, addHighlight, updateMemo, removeHighlight } =
     useHighlightData({ articleId: articleIdNumber });
 
-  const { data: currentArticle } = useQuery({
-    queryKey: ['article', articleId],
-    queryFn: () =>
-      getArticleById({
-        articleId: articleIdNumber,
-      }),
-  });
+  const { data: currentArticle } = useQuery(
+    queries.articleById({ id: Number(articleId) }),
+  );
   const today = useMemo(() => new Date(), []);
-  const { data: otherArticles } = useQuery({
-    queryKey: ['articles', { date: today, sorted: 'ASC' }],
-    queryFn: () => getArticles({ date: today, sorted: 'ASC' }),
-  });
+
+  const { data: todayArticles } = useQuery(queries.articles({ date: today }));
   const { data: bookmarked } = useQuery({
     queryKey: ['bookmarked'],
     queryFn: () => getBookmarked({ articleId: Number(articleId) }),
   });
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
-    mutationFn: () => patchArticleRead({ articleId: articleIdNumber }),
+    mutationFn: () => patchArticleRead({ id: articleIdNumber }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['article', articleId],
@@ -78,9 +73,9 @@ function ArticleDetailPage() {
 
   useScrollRestoration({ pathname: articleId });
 
-  if (!currentArticle || !otherArticles) return null;
+  if (!currentArticle || !todayArticles) return null;
 
-  const unReadArticles = otherArticles?.content?.filter(
+  const unReadArticles = todayArticles?.content?.filter(
     (article) => !article.isRead && article.articleId !== Number(articleId),
   );
 

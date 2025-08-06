@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
-import { getUserInfo } from '@/apis/members';
+import { queries } from '@/apis/queries';
 import PageLayout from '@/components/PageLayout/PageLayout';
 
 export const Route = createFileRoute('/_bombom')({
@@ -8,11 +8,7 @@ export const Route = createFileRoute('/_bombom')({
     const { queryClient } = context;
 
     try {
-      await queryClient.fetchQuery({
-        queryKey: ['me'],
-        queryFn: getUserInfo,
-        retry: false,
-      });
+      await queryClient.fetchQuery(queries.me());
     } catch {
       if (location.pathname !== '/recommend') {
         alert('이 기능을 이용하려면 로그인이 필요합니다.');

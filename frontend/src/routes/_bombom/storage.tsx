@@ -65,7 +65,6 @@ function Storage() {
     setCurrentPage(1);
   }, [debouncedSearchInput]);
 
-
   const readStats = getArticleReadStats(articles?.content ?? []);
   const existCategories = categoryCounts?.categories?.filter(
     (category) => category.count !== 0,

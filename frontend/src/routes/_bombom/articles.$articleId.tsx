@@ -79,8 +79,6 @@ function ArticleDetailPage() {
 
   useScrollRestoration({ pathname: articleId });
 
-  useScrollRestoration({ pathname: articleId });
-
   if (!currentArticle || !otherArticles) return null;
 
   const unReadArticles = otherArticles?.content?.filter(

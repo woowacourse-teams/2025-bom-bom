@@ -52,19 +52,18 @@ export default function FloatingToolbar({
       if (selection && !selection.isCollapsed) {
         const range = selection.getRangeAt(0);
         if (
-          selectionTargetRef.current?.contains(range.commonAncestorContainer)
-        ) {
-          const rect = range.getBoundingClientRect();
+          !selectionTargetRef.current?.contains(range.commonAncestorContainer)
+        )
+          return;
 
-          setPosition({
-            x: rect.left + rect.width / 2,
-            y: rect.top,
-          });
-          setIsVisible(true);
-          selectionRef.current = selection;
-        } else {
-          setIsVisible(false);
-        }
+        const rect = range.getBoundingClientRect();
+
+        setPosition({
+          x: rect.left + rect.width / 2,
+          y: rect.top,
+        });
+        setIsVisible(true);
+        selectionRef.current = selection;
       } else {
         setIsVisible(false);
       }

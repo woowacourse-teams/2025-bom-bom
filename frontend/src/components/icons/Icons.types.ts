@@ -1,3 +1,9 @@
-import { directionRotationMap } from './Icons.constants';
-
-export type DirectionType = keyof typeof directionRotationMap;
+export type DirectionType =
+  | 'up'
+  | 'down'
+  | 'left'
+  | 'right'
+  | 'upRight'
+  | 'upLeft'
+  | 'downRight'
+  | 'downLeft';

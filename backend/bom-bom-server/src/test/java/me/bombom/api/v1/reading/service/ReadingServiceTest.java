@@ -3,6 +3,9 @@ package me.bombom.api.v1.reading.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.member.domain.Member;
@@ -16,14 +19,18 @@ import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
+@DataJpaTest
 @Transactional
-@SpringBootTest
 @ActiveProfiles("test")
+@Import({ReadingService.class, ReadingServiceTest.TestConfig.class})
 class ReadingServiceTest {
 
     @Autowired
@@ -48,30 +55,26 @@ class ReadingServiceTest {
 
     @BeforeEach
     void setUp() {
-        String uniqueNickname = "test_nickname_" + UUID.randomUUID().toString();
-        String uniqueProviderId = "test_providerId_" + UUID.randomUUID().toString();
+        String nickname = "test_nickname_" + UUID.randomUUID();
+        String providerId = "test_providerId_" + UUID.randomUUID();
 
-        member = memberRepository.save(TestFixture.createUniqueMember(uniqueNickname, uniqueProviderId));
+        member = memberRepository.save(TestFixture.createUniqueMember(nickname, providerId));
         todayReading = todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));
         continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
         weeklyReading = weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member));
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
-
         TestTransaction.start();
     }
 
     @Test
     void 오늘_도착한_아티클을_읽으면_오늘_및_주간_읽기_횟수가_증가한다() {
-        // given
         int initialTodayCount = todayReading.getCurrentCount();
         int initialWeeklyCount = weeklyReading.getCurrentCount();
 
-        // when
         readingService.updateReadingCount(member.getId(), true);
 
-        // then
         TodayReading updatedTodayReading = todayReadingRepository.findByMemberId(member.getId()).get();
         WeeklyReading updatedWeeklyReading = weeklyReadingRepository.findByMemberId(member.getId()).get();
 
@@ -83,13 +86,10 @@ class ReadingServiceTest {
 
     @Test
     void 오늘_도착한_아티클을_최초로_읽을_때_연속_읽기_횟수가_증가한다() {
-        // given
         int initialContinueCount = continueReading.getDayCount();
 
-        // when
         readingService.updateReadingCount(member.getId(), true);
 
-        // then
         ContinueReading updatedContinueReading = continueReadingRepository.findByMemberId(member.getId()).get();
 
         assertThat(updatedContinueReading.getDayCount()).isEqualTo(initialContinueCount + 1);
@@ -97,14 +97,11 @@ class ReadingServiceTest {
 
     @Test
     void 이미_연속_읽기_횟수가_증가하면_그날은_더이상_증가하지_않는다() {
-        // given
         int initialContinueCount = continueReading.getDayCount();
 
-        // when
         readingService.updateReadingCount(member.getId(), true);
         readingService.updateReadingCount(member.getId(), true);
 
-        // then
         ContinueReading updatedContinueReading = continueReadingRepository.findByMemberId(member.getId()).get();
 
         assertThat(updatedContinueReading.getDayCount()).isEqualTo(initialContinueCount + 1);
@@ -112,15 +109,12 @@ class ReadingServiceTest {
 
     @Test
     void 오늘_도착하지_않은_아티클을_읽으면_주간_읽기_횟수만_증가한다() {
-        // given
         int initialTodayCount = todayReading.getCurrentCount();
         int initialContinueCount = continueReading.getDayCount();
         int initialWeeklyCount = weeklyReading.getCurrentCount();
 
-        // when
         readingService.updateReadingCount(member.getId(), false);
 
-        // then
         TodayReading updatedTodayReading = todayReadingRepository.findByMemberId(member.getId()).get();
         ContinueReading updatedContinueReading = continueReadingRepository.findByMemberId(member.getId()).get();
         WeeklyReading updatedWeeklyReading = weeklyReadingRepository.findByMemberId(member.getId()).get();
@@ -130,5 +124,16 @@ class ReadingServiceTest {
             softly.assertThat(updatedContinueReading.getDayCount()).isEqualTo(initialContinueCount);
             softly.assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(initialWeeklyCount + 1);
         });
+    }
+
+    @TestConfiguration
+    static class TestConfig {
+        @PersistenceContext
+        private EntityManager em;
+
+        @Bean
+        public JPAQueryFactory jpaQueryFactory() {
+            return new JPAQueryFactory(em);
+        }
     }
 }

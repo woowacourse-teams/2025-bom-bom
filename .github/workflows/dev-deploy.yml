@@ -101,11 +101,6 @@ jobs:
       - name: 컨테이너 제거 및 재실행 (docker-compose)
         if: env.skip_deploy == 'false'
         run: |
-          echo "RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}" > .env
-          echo "DATABASE=${{ secrets.DATABASE }}" >> .env
-          echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
-          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
-
           docker compose -f docker-compose-dev.yml --env-file .env down || true
           docker compose -f docker-compose-dev.yml --env-file .env up -d
           

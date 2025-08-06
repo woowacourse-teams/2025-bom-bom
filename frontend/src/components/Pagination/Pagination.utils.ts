@@ -21,7 +21,7 @@ export const getPageNumbers = (
   // 첫 번째 페이지 근처인 경우
   if (currentPage <= 3) {
     return [
-      ...Array.from({ length: 4 }, (_, i) => i + 1),
+      ...Array.from({ length: 5 }, (_, i) => i + 1),
       ELLIPSIS,
       totalPages,
     ];
@@ -32,7 +32,7 @@ export const getPageNumbers = (
     return [
       1,
       ELLIPSIS,
-      ...Array.from({ length: 4 }, (_, i) => totalPages - 4 + i + 1),
+      ...Array.from({ length: 5 }, (_, i) => totalPages - 4 + i + 1),
     ];
   }
 

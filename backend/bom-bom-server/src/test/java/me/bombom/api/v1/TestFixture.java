@@ -258,4 +258,12 @@ public final class TestFixture {
                 .currentScore(0)
                 .build();
     }
+
+    public static Pet createPetWithScore(Member member, Long stageId, int currentScore) {
+        return Pet.builder()
+                .memberId(member.getId())
+                .stageId(stageId)
+                .currentScore(currentScore)
+                .build();
+    }
 }

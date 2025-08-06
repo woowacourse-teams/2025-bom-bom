@@ -91,6 +91,7 @@ public class AddArticleScoreListenerTest {
                         .dayCount(7)
                         .build()
         );
+        stageRepository.save(TestFixture.createStage(1, 0));
 
         // when
         publisher.publishEvent(new AddArticleScoreEvent(member.getId()));
@@ -118,6 +119,7 @@ public class AddArticleScoreListenerTest {
                         .dayCount(6)
                         .build()
         );
+        stageRepository.save(TestFixture.createStage(1, 0));
 
         // when
         publisher.publishEvent(new AddArticleScoreEvent(member.getId()));

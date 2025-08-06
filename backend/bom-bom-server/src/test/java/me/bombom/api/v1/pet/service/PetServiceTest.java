@@ -94,6 +94,8 @@ class PetServiceTest {
     @Test
     void 키우기_출석_점수_반영() {
         // given
+        Stage stage = TestFixture.createStage(1, 0);
+        stageRepository.save(stage);
         Pet pet = TestFixture.createPet(member, stage.getId());
         petRepository.save(pet);
 
@@ -146,5 +148,55 @@ class PetServiceTest {
                 .stageId(1L)
                 .isAttended(isAttend)
                 .build();
+    }
+
+    @Test
+    void 펫_스테이지_업데이트_성공() {
+        // given
+        Stage nextStage = TestFixture.createStage(2, 100);
+        stageRepository.save(nextStage);
+        stageRepository.findById(nextStage.getId());
+        Pet pet = TestFixture.createPetWithScore(member, stage.getId(), 100);
+        petRepository.save(pet);
+
+        // when
+        petService.increaseCurrentScore(member.getId(), 0);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(pet.getStageId()).isEqualTo(nextStage.getId());
+        });
+    }
+
+    @Test
+    void 점수_부족_시_펫_스테이지_업데이트_실패() {
+        // given
+        Stage nextStage = TestFixture.createStage(2, 100);
+        stageRepository.save(nextStage);
+        Pet pet = TestFixture.createPetWithScore(member, stage.getId(), 99);
+        petRepository.save(pet);
+
+        // when
+        petService.increaseCurrentScore(member.getId(), 0);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(pet.getStageId()).isEqualTo(stage.getId());
+        });
+    }
+
+    @Test
+    void 최고_레벨일_시에_펫_스테이지_업데이트_실패() {
+        // given
+        Pet pet = TestFixture.createPetWithScore(member, stage.getId(), 100);
+        petRepository.save(pet);
+
+        // when
+        petService.increaseCurrentScore(member.getId(), 0);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(pet.getStageId()).isEqualTo(stage.getId());
+        });
     }
 }

@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { getPageNumbers } from './Pagination.utils';
 import ChevronLeftIcon from '#/assets/chevron-left.svg';
 import ChevronRightIcon from '#/assets/chevron-right.svg';
 
@@ -7,41 +8,6 @@ interface PaginationProps {
   totalPages: number;
   onPageChange: (page: number) => void;
 }
-
-const getPageNumbers = (currentPage: number, totalPages: number) => {
-  const pages: (number | string)[] = [];
-  const maxVisiblePages = 5;
-
-  if (totalPages <= maxVisiblePages) {
-    for (let i = 0; i < totalPages; i++) {
-      pages.push(i);
-    }
-  } else {
-    if (currentPage <= 3) {
-      for (let i = 0; i < 4; i++) {
-        pages.push(i);
-      }
-      pages.push('...');
-      pages.push(totalPages - 1);
-    } else if (currentPage >= totalPages - 2) {
-      pages.push(0);
-      pages.push('...');
-      for (let i = totalPages - 4; i < totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      pages.push(0);
-      pages.push('...');
-      for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-        pages.push(i);
-      }
-      pages.push('...');
-      pages.push(totalPages - 1);
-    }
-  }
-
-  return pages;
-};
 
 function Pagination({
   currentPage,
@@ -62,7 +28,7 @@ function Pagination({
     }
   };
 
-  // if (totalPages <= 1) return null;
+  if (totalPages <= 1) return null;
 
   return (
     <Container>
@@ -82,7 +48,7 @@ function Pagination({
             isDisabled={page === '...'}
             onClick={() => typeof page === 'number' && onPageChange(page)}
           >
-            {page === '...' ? '...' : (page as number) + 1}
+            {page === '...' ? '...' : page}
           </PageNumber>
         ))}
       </PageNumbers>

@@ -79,6 +79,20 @@ export const handlers = [
     });
   }),
 
+  // 펫 정보 조회
+  http.get(`${baseURL}/members/me/pet`, () => {
+    return HttpResponse.json({
+      level: 1,
+      totalScore: 100,
+      currentScore: 50,
+    });
+  }),
+
+  // 펫 출석 체크
+  http.post(`${baseURL}/members/me/pet/attendance`, () => {
+    return HttpResponse.json();
+  }),
+
   // ------------------ 하이라이트 CRUD ------------------
 
   // 전체 조회

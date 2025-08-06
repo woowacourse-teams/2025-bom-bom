@@ -3,14 +3,18 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
+import { getBookmarked } from '@/apis/bookmark';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import ArticleContent from '@/pages/detail/components/ArticleContent/ArticleContent';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
+import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
+import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
 import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
+import useBookmarkMutation from '@/pages/detail/hooks/useBookmarkMutation';
 import { useHighlightData } from '@/pages/detail/hooks/useHighlightData';
 import { useHighlightHoverEffect } from '@/pages/detail/hooks/useHighlightHoverEffect';
 import { saveSelection } from '@/pages/detail/utils/highlight';
@@ -41,6 +45,10 @@ function ArticleDetailPage() {
     queryKey: ['articles', { date: today, sorted: 'ASC' }],
     queryFn: () => getArticles({ date: today, sorted: 'ASC' }),
   });
+  const { data: bookmarked } = useQuery({
+    queryKey: ['bookmarked'],
+    queryFn: () => getBookmarked({ articleId: Number(articleId) }),
+  });
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
     mutationFn: () => patchArticleRead({ articleId: articleIdNumber }),
@@ -52,6 +60,10 @@ function ArticleDetailPage() {
         queryKey: ['articles', { date: today, sorted: 'ASC' }],
       });
     },
+  });
+
+  const { onToggleBookmarkClick } = useBookmarkMutation({
+    articleId: Number(articleId),
   });
 
   const handleSaveHighlight = (selection: Selection, openMemo = false) => {
@@ -69,6 +81,14 @@ function ArticleDetailPage() {
 
   useScrollRestoration({ pathname: articleId });
   useHighlightHoverEffect();
+
+  useEffect(() => {
+    if (!highlights || highlights?.length === 0 || !currentArticle) return;
+
+    highlights.forEach((highlight) => restoreHighlight(highlight));
+  }, [currentArticle, highlights]);
+
+  useScrollRestoration({ pathname: articleId });
 
   if (!currentArticle || !otherArticles) return null;
 
@@ -127,6 +147,10 @@ function ArticleDetailPage() {
         memos={highlights ?? []}
         removeHighlight={removeHighlight}
         updateMemo={updateMemo}
+      />
+      <FloatingActionButtons
+        bookmarked={!!bookmarked}
+        onToggleBookmarkClick={onToggleBookmarkClick}
       />
     </Container>
   );

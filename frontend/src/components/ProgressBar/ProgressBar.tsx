@@ -38,6 +38,9 @@ const ProgressGauge = styled.div<{ rate: number }>`
   border-radius: ${({ rate }) => (rate >= 100 ? '10px' : '10px 0 0 10px')};
 
   background-color: ${({ theme }) => theme.colors.primary};
+
+  /* 애니메이션 추가 */
+  transition: width 0.5s ease-in-out;
 `;
 
 const ProgressCaption = styled.p`

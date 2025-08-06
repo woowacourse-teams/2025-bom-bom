@@ -1,7 +1,5 @@
 import styled from '@emotion/styled';
 import { useEffect, useRef, useState } from 'react';
-import { useHighlightData } from '../../hooks/useHighlightData';
-import { useEffect, useRef, useState } from 'react';
 import { processContent } from './ArticleContent.utils';
 import { useHighlightData } from '../../hooks/useHighlightData';
 import { useHighlightHoverEffect } from '../../hooks/useHighlightHoverEffect';

@@ -13,7 +13,7 @@ interface GetBookmarkedParams {
 
 export const getBookmarked = async ({ articleId }: GetBookmarkedParams) => {
   return await fetcher.get({
-    path: `/bookmarks/status/${articleId}`,
+    path: `/bookmarks/status/articles/${articleId}`,
   });
 };
 
@@ -23,7 +23,7 @@ interface PostBookmarkParams {
 
 export const postBookmark = async ({ articleId }: PostBookmarkParams) => {
   return await fetcher.post({
-    path: `/bookmarks/${articleId}`,
+    path: `/bookmarks/articles/${articleId}`,
   });
 };
 
@@ -33,6 +33,6 @@ interface DeleteBookmarkParams {
 
 export const deleteBookmark = async ({ articleId }: DeleteBookmarkParams) => {
   return await fetcher.delete({
-    path: `/bookmarks/${articleId}`,
+    path: `/bookmarks/articles/${articleId}`,
   });
 };

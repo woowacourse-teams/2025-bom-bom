@@ -30,7 +30,6 @@ function ArticleDetailPage() {
     queries.articleById({ id: Number(articleId) }),
   );
   const today = useMemo(() => new Date(), []);
-
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
   const { data: bookmarked } = useQuery({
     queryKey: ['bookmarked'],

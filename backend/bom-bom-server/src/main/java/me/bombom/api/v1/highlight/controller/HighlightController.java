@@ -32,11 +32,16 @@ public class HighlightController {
     private final HighlightService highlightService;
 
     @GetMapping
-    public List<HighlightResponse> getHighlights(
+    public List<HighlightResponse> getHighlights(@LoginMember Member member) {
+        return highlightService.getHighlights(member);
+    }
+
+    @GetMapping
+    public List<HighlightResponse> getHighlightsByArticleId(
             @LoginMember Member member,
             @RequestParam @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     ) {
-        return highlightService.getHighlights(articleId, member);
+        return highlightService.getHighlightsByArticleId(articleId, member);
     }
 
     @PostMapping

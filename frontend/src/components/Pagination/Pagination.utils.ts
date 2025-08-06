@@ -11,7 +11,7 @@ export const getPageNumbers = (
   currentPage: number,
   totalPages: number,
 ): (number | string)[] => {
-  const maxVisiblePages = 5;
+  const maxVisiblePages = 7;
 
   // 모든 페이지를 표시할 수 있는 경우
   if (totalPages <= maxVisiblePages) {

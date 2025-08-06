@@ -84,7 +84,8 @@
     "@tanstack/react-router-devtools": "^1.128.3",
     "dotenv": "^17.2.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-ga4": "^2.1.0"
   },
   "msw": {
     "workerDirectory": [

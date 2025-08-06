@@ -1,28 +1,31 @@
 package me.bombom.api.v1.reading.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.common.config.QuerydslConfig;
-import me.bombom.api.v1.common.exception.CIllegalArgumentException;
-import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
-import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
-import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
-import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.transaction.TestTransaction;
+import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
+@Transactional
+@ActiveProfiles("test")
 @Import({ReadingService.class, QuerydslConfig.class})
 class ReadingServiceTest {
 
@@ -33,144 +36,89 @@ class ReadingServiceTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private WeeklyReadingRepository weeklyReadingRepository;
-
-    @Autowired
     private ContinueReadingRepository continueReadingRepository;
 
     @Autowired
     private TodayReadingRepository todayReadingRepository;
 
-    @Test
-    void 주간_목표를_수정할_수_있다() {
-        // given
-        Member savedMember = memberRepository.save(TestFixture.normalMemberFixture());
+    @Autowired
+    private WeeklyReadingRepository weeklyReadingRepository;
 
-        WeeklyReading weeklyReading = WeeklyReading.builder()
-                .memberId(savedMember.getId())
-                .goalCount(0)
-                .currentCount(2)
-                .build();
-        weeklyReadingRepository.save(weeklyReading);
+    private Member member;
+    private TodayReading todayReading;
+    private ContinueReading continueReading;
+    private WeeklyReading weeklyReading;
 
-        UpdateWeeklyGoalCountRequest request = new UpdateWeeklyGoalCountRequest(savedMember.getId(), 3);
+    @BeforeEach
+    void setUp() {
+        String nickname = "test_nickname_" + UUID.randomUUID();
+        String providerId = "test_providerId_" + UUID.randomUUID();
 
-        // when
-        WeeklyGoalCountResponse result = readingService.updateWeeklyGoalCount(request);
+        member = memberRepository.save(TestFixture.createUniqueMember(nickname, providerId));
+        todayReading = todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));
+        continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
+        weeklyReading = weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member));
 
-        // then
-        assertThat(result.weeklyGoalCount()).isEqualTo(3);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
     }
 
     @Test
-    void 주간_목표_수정에서_회원_정보가_존재하지_않을_경우_예외가_발생한다() {
-        // given
-        WeeklyReading weeklyReading = WeeklyReading.builder()
-                .memberId(0L)
-                .goalCount(0)
-                .currentCount(2)
-                .build();
-        weeklyReadingRepository.save(weeklyReading);
+    void 오늘_도착한_아티클을_읽으면_오늘_및_주간_읽기_횟수가_증가한다() {
+        int initialTodayCount = todayReading.getCurrentCount();
+        int initialWeeklyCount = weeklyReading.getCurrentCount();
 
-        UpdateWeeklyGoalCountRequest request = new UpdateWeeklyGoalCountRequest(0L, 3);
+        readingService.updateReadingCount(member.getId(), true);
 
-        // when & then
-        assertThatThrownBy(() -> readingService.updateWeeklyGoalCount(request))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
+        TodayReading updatedTodayReading = todayReadingRepository.findByMemberId(member.getId()).get();
+        WeeklyReading updatedWeeklyReading = weeklyReadingRepository.findByMemberId(member.getId()).get();
 
-    @Test
-    void 주간_목표_수정에서_주간_목표_정보가_존재하지_않을_경우_예외가_발생한다() {
-        // given
-        Member savedMember = memberRepository.save(TestFixture.normalMemberFixture());
-        UpdateWeeklyGoalCountRequest request = new UpdateWeeklyGoalCountRequest(savedMember.getId(), 3);
-
-        // when & then
-        assertThatThrownBy(() -> readingService.updateWeeklyGoalCount(request))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
-
-    @Test
-    void 읽기_현황_종합_정보를_조회할_수_있다() {
-        // given
-        Member savedMember = memberRepository.save(TestFixture.normalMemberFixture());
-        continueReadingRepository.save(TestFixture.continueReadingFixture(savedMember));
-        todayReadingRepository.save(TestFixture.todayReadingFixture(savedMember));
-        weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(savedMember));
-
-        // when
-        ReadingInformationResponse response = readingService.getReadingInformation(savedMember);
-
-        // then
         assertSoftly(softly -> {
-            softly.assertThat(response.streakReadDay()).isEqualTo(10);
-            softly.assertThat(response.today().readCount()).isEqualTo(1);
-            softly.assertThat(response.today().totalCount()).isEqualTo(3);
-            softly.assertThat(response.weekly().readCount()).isEqualTo(3);
-            softly.assertThat(response.weekly().goalCount()).isEqualTo(5);
+            softly.assertThat(updatedTodayReading.getCurrentCount()).isEqualTo(initialTodayCount + 1);
+            softly.assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(initialWeeklyCount + 1);
         });
     }
 
     @Test
-    void 읽기_현황_종합_정보_조회에서_회원_정보가_존재하지_않을_경우_예외가_발생한다() {
-        Member savedMember = memberRepository.save(TestFixture.normalMemberFixture());
-        // when & then
-        assertThatThrownBy(() -> readingService.getReadingInformation(savedMember))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    void 오늘_도착한_아티클을_최초로_읽을_때_연속_읽기_횟수가_증가한다() {
+        int initialContinueCount = continueReading.getDayCount();
+
+        readingService.updateReadingCount(member.getId(), true);
+
+        ContinueReading updatedContinueReading = continueReadingRepository.findByMemberId(member.getId()).get();
+
+        assertThat(updatedContinueReading.getDayCount()).isEqualTo(initialContinueCount + 1);
     }
 
     @Test
-    void 읽기_현황_종합_정보_조회에서_연속_읽기가_존재하지_않을_경우_예외가_발생한다() {
-        // given
-        Member savedMember = memberRepository.save(TestFixture.normalMemberFixture());
+    void 이미_연속_읽기_횟수가_증가하면_그날은_더이상_증가하지_않는다() {
+        int initialContinueCount = continueReading.getDayCount();
 
-        // when & then
-        assertThatThrownBy(() -> readingService.getReadingInformation(savedMember))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+        readingService.updateReadingCount(member.getId(), true);
+        readingService.updateReadingCount(member.getId(), true);
+
+        ContinueReading updatedContinueReading = continueReadingRepository.findByMemberId(member.getId()).get();
+
+        assertThat(updatedContinueReading.getDayCount()).isEqualTo(initialContinueCount + 1);
     }
 
     @Test
-    void 읽기_현황_종합_정보_조회에서_일간_읽기_정보가_존재하지_않을_경우_예외가_발생한다() {
-        // given
-        Member savedMember = memberRepository.save(TestFixture.normalMemberFixture());
-        continueReadingRepository.save(TestFixture.continueReadingFixture(savedMember));
+    void 오늘_도착하지_않은_아티클을_읽으면_주간_읽기_횟수만_증가한다() {
+        int initialTodayCount = todayReading.getCurrentCount();
+        int initialContinueCount = continueReading.getDayCount();
+        int initialWeeklyCount = weeklyReading.getCurrentCount();
 
-        // when & then
-        assertThatThrownBy(() -> readingService.getReadingInformation(savedMember))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
+        readingService.updateReadingCount(member.getId(), false);
 
-    @Test
-    void 읽기_현황_종합_정보_조회에서_주간_목표_정보가_존재하지_않을_경우_예외가_발생한다() {
-        // given
-        Member savedMember = memberRepository.save(TestFixture.normalMemberFixture());
-        continueReadingRepository.save(TestFixture.continueReadingFixture(savedMember));
-        todayReadingRepository.save(TestFixture.todayReadingFixture(savedMember));
+        TodayReading updatedTodayReading = todayReadingRepository.findByMemberId(member.getId()).get();
+        ContinueReading updatedContinueReading = continueReadingRepository.findByMemberId(member.getId()).get();
+        WeeklyReading updatedWeeklyReading = weeklyReadingRepository.findByMemberId(member.getId()).get();
 
-        // when & then
-        assertThatThrownBy(() -> readingService.getReadingInformation(savedMember))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
-
-    @Test
-    void 읽기_정보를_초기화한다() {
-        // given
-        Member savedMember = memberRepository.save(TestFixture.normalMemberFixture());
-        Long id = savedMember.getId();
-        // when
-        readingService.initializeReadingInformation(id);
-
-        // then
         assertSoftly(softly -> {
-            softly.assertThat(continueReadingRepository.findByMemberId(id)).isPresent();
-            softly.assertThat(todayReadingRepository.findByMemberId(id)).isPresent();
-            softly.assertThat(weeklyReadingRepository.findByMemberId(id)).isPresent();
+            softly.assertThat(updatedTodayReading.getCurrentCount()).isEqualTo(initialTodayCount);
+            softly.assertThat(updatedContinueReading.getDayCount()).isEqualTo(initialContinueCount);
+            softly.assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(initialWeeklyCount + 1);
         });
     }
 }

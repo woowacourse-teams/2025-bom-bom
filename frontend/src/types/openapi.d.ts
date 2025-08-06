@@ -413,7 +413,6 @@ export interface components {
       totalScore?: number;
       /** Format: int32 */
       currentScore?: number;
-      isAttended?: boolean;
     };
     Pageable: {
       /** Format: int32 */

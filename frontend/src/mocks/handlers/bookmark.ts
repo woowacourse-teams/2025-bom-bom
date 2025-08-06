@@ -37,32 +37,30 @@ export const bookmarkHandlers = [
     });
   }),
 
-  http.get(
-    `${baseURL}/bookmarks/status/articles/:articleId`,
-    async ({ request }) => {
-      const { articleId } = (await request.json()) as { articleId: number };
+  http.get(`${baseURL}/bookmarks/status/articles/:articleId`, ({ params }) => {
+    const { articleId } = params;
 
-      const bookmarked =
-        BOOKMARKS.find((bookmark) => bookmark.articleId === articleId) ?? false;
-      return HttpResponse.json({ data: bookmarked }, { status: 200 });
-    },
-  ),
+    const bookmarked =
+      BOOKMARKS.find((bookmark) => bookmark.articleId === Number(articleId)) ??
+      false;
+    return HttpResponse.json({ bookmarkStatus: bookmarked }, { status: 200 });
+  }),
 
-  http.post(`${baseURL}/bookmarks/articles/:articleId`, async ({ request }) => {
-    const { articleId } = (await request.json()) as { articleId: number };
+  http.post(`${baseURL}/bookmarks/articles/:articleId`, ({ params }) => {
+    const { articleId } = params;
     const newBookmark = {
       id: BOOKMARKS.length + 1,
-      articleId,
+      articleId: Number(articleId),
     };
 
     BOOKMARKS.push(newBookmark);
-    return HttpResponse.json({ data: newBookmark }, { status: 201 });
+    return new HttpResponse(null, { status: 204 });
   }),
 
   http.delete(`${baseURL}/bookmarks/articles/:articleId`, ({ params }) => {
-    const { id } = params;
+    const { articleId } = params;
     const index = BOOKMARKS.findIndex(
-      (bookmark) => bookmark.articleId === Number(id),
+      (bookmark) => bookmark.articleId === Number(articleId),
     );
     if (index === -1) {
       return new HttpResponse('Not Found', { status: 404 });

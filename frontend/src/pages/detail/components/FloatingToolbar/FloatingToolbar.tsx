@@ -1,6 +1,6 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { useEffect, useRef, useState } from 'react';
+import { RefObject, useEffect, useRef, useState } from 'react';
 import Comment from '#/assets/comment.svg';
 import Pen from '#/assets/pen.svg';
 
@@ -10,7 +10,7 @@ interface ToolbarPosition {
 }
 
 interface FloatingToolBarProps {
-  selectionTargetRef: React.RefObject<HTMLDivElement | null>;
+  selectionTargetRef: RefObject<HTMLDivElement | null>;
   onHighlightButtonClick: (selection: Selection) => void;
   onMemoButtonClick: (selection: Selection) => void;
 }

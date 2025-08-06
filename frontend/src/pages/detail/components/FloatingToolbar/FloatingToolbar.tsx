@@ -13,12 +13,22 @@ interface ToolbarPosition {
 
 interface FloatingToolBarProps {
   selectionTargetRef: RefObject<HTMLDivElement | null>;
-  onHighlightClick: (
-    mode: FloatingToolbarMode,
-    selection: Selection | null,
-    highlightId: number | null,
-  ) => void;
-  onMemoClick: (mode: FloatingToolbarMode, selection: Selection | null) => void;
+  onHighlightClick: ({
+    mode,
+    selection,
+    highlightId,
+  }: {
+    mode: FloatingToolbarMode;
+    selection: Selection | null;
+    highlightId: number | null;
+  }) => void;
+  onMemoClick: ({
+    mode,
+    selection,
+  }: {
+    mode: FloatingToolbarMode;
+    selection: Selection | null;
+  }) => void;
 }
 
 export default function FloatingToolbar({
@@ -40,12 +50,19 @@ export default function FloatingToolbar({
 
   const handleHighlightClick = () => {
     hideToolbar();
-    onHighlightClick(currentMode, selectionRef.current, selectedHighlightId);
+    onHighlightClick({
+      mode: currentMode,
+      selection: selectionRef.current,
+      highlightId: selectedHighlightId,
+    });
   };
 
   const handleMemoClick = () => {
     hideToolbar();
-    onMemoClick(currentMode, selectionRef.current);
+    onMemoClick({
+      mode: currentMode,
+      selection: selectionRef.current,
+    });
   };
 
   useEffect(() => {

@@ -65,25 +65,36 @@ function ArticleDetailPage() {
     articleId: Number(articleId),
   });
 
-  const handleHighlightClick = (
-    mode: FloatingToolbarMode,
-    selection: Selection | null,
-    highlightId: number | null,
-  ) => {
-    if (mode === 'new' && selection) {
+  const handleHighlightClick = ({
+    mode,
+    selection,
+    highlightId,
+  }: {
+    mode: FloatingToolbarMode;
+    selection: Selection | null;
+    highlightId: number | null;
+  }) => {
+    const isNewHighlight = mode === 'new';
+
+    if (isNewHighlight && selection) {
       const highlightData = saveSelection(selection, articleIdNumber);
       addHighlight(highlightData);
     }
-    if (mode === 'existing' && highlightId) {
+    if (!isNewHighlight && highlightId) {
       removeHighlight(highlightId);
     }
   };
 
-  const handleMemoClick = (
-    mode: FloatingToolbarMode,
-    selection: Selection | null,
-  ) => {
-    if (mode === 'new' && selection) {
+  const handleMemoClick = ({
+    mode,
+    selection,
+  }: {
+    mode: FloatingToolbarMode;
+    selection: Selection | null;
+  }) => {
+    const isNewHighlight = mode === 'new';
+
+    if (isNewHighlight && selection) {
       const highlightData = saveSelection(selection, articleIdNumber);
       addHighlight(highlightData);
     }

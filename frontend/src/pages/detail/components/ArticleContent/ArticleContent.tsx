@@ -10,12 +10,22 @@ import { components } from '@/types/openapi';
 interface ArticleContentProps {
   articleContent: components['schemas']['ArticleDetailResponse']['contents'];
   highlights: HighlightType[] | null | undefined;
-  onHighlightClick: (
-    mode: FloatingToolbarMode,
-    selection: Selection | null,
-    highlightId: number | null,
-  ) => void;
-  onMemoClick: (mode: FloatingToolbarMode, selection: Selection | null) => void;
+  onHighlightClick: ({
+    mode,
+    selection,
+    highlightId,
+  }: {
+    mode: FloatingToolbarMode;
+    selection: Selection | null;
+    highlightId: number | null;
+  }) => void;
+  onMemoClick: ({
+    mode,
+    selection,
+  }: {
+    mode: FloatingToolbarMode;
+    selection: Selection | null;
+  }) => void;
 }
 
 const ArticleContent = ({

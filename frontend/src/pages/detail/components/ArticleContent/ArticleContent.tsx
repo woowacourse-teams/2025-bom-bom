@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { useEffect, useRef } from 'react';
+import { processContent } from './ArticleContent.utils';
 import { useHighlightHoverEffect } from '../../hooks/useHighlightHoverEffect';
 import { HighlightType } from '../../types/highlight';
 import { restoreHighlight } from '../../utils/highlight';
@@ -33,7 +34,9 @@ const ArticleContent = ({
     <>
       <Container
         ref={contentRef}
-        dangerouslySetInnerHTML={{ __html: articleContent ?? '' }}
+        dangerouslySetInnerHTML={{
+          __html: processContent(articleContent ?? ''),
+        }}
       />
       <FloatingToolbar
         selectionTargetRef={contentRef}
@@ -47,9 +50,16 @@ const ArticleContent = ({
 export default ArticleContent;
 
 const Container = styled.div`
+  overflow: visible;
+
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
+
+  white-space: normal;
+
+  word-break: break-all;
+  word-wrap: break-word;
 
   mark[data-highlight-id] {
     background-color: #ffeb3b;

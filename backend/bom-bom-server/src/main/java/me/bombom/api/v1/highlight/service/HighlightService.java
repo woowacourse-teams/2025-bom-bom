@@ -24,15 +24,8 @@ public class HighlightService {
     private final HighlightRepository highlightRepository;
     private final ArticleRepository articleRepository;
 
-    public List<HighlightResponse> getHighlights(Member member) {
-        return highlightRepository.findByMemberId(member.getId());
-    }
-
-    public List<HighlightResponse> getHighlightsByArticleId(Long articleId, Member member) {
-        Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        validateArticleOwner(member, article);
-        return HighlightResponse.from(highlightRepository.findByArticleId(articleId));
+    public List<HighlightResponse> getHighlights(Member member, Long articleId) {
+        return highlightRepository.findHighlights(member.getId(), articleId);
     }
 
     @Transactional

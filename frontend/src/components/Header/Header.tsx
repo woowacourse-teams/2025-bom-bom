@@ -68,7 +68,7 @@ export default function Header({ activeNav }: HeaderProps) {
         </Nav>
 
         <ProfileWrapper>
-          {!isFetching && isError ? (
+          {isFetching || isError ? (
             <Button
               text="로그인"
               onClick={() => {
@@ -192,6 +192,7 @@ const NavButton = styled(Link)<{ active?: boolean }>`
 `;
 
 const ProfileWrapper = styled.div`
+  width: 120px;
   padding: 8px 12px;
   border-radius: 12px;
 

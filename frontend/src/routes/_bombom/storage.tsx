@@ -8,6 +8,7 @@ import CategoryFilter from '../../pages/storage/components/CategoryFilter/Catego
 import { queries } from '@/apis/queries';
 import { CategoryType } from '@/constants/category';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
@@ -65,6 +66,7 @@ function Storage() {
           selectedValue={selectedCategory}
           onSelectCategory={(value) => setSelectedCategory(value)}
         />
+        <QuickMenu />
       </SideSection>
       <MainSection>
         <TitleWrapper>
@@ -123,6 +125,10 @@ const Container = styled.div`
 
 const SideSection = styled.div`
   margin-top: 70px;
+
+  display: flex;
+  gap: 32px;
+  flex-direction: column;
 `;
 
 const MainSection = styled.div`

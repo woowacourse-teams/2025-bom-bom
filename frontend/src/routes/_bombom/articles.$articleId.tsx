@@ -3,15 +3,18 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useMemo, useState } from 'react';
 import { patchArticleRead } from '@/apis/articles';
+import { getBookmarked } from '@/apis/bookmark';
 import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
+import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
 import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingToolbar';
 import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
+import useBookmarkMutation from '@/pages/detail/hooks/useBookmarkMutation';
 import { useHighlightData } from '@/pages/detail/hooks/useHighlightData';
 import { useHighlightHoverEffect } from '@/pages/detail/hooks/useHighlightHoverEffect';
 import {
@@ -39,6 +42,10 @@ function ArticleDetailPage() {
   const today = useMemo(() => new Date(), []);
 
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
+  const { data: bookmarked } = useQuery({
+    queryKey: ['bookmarked'],
+    queryFn: () => getBookmarked({ articleId: Number(articleId) }),
+  });
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
     mutationFn: () => patchArticleRead({ id: articleIdNumber }),
@@ -50,6 +57,10 @@ function ArticleDetailPage() {
         queryKey: ['articles', { date: today, sorted: 'ASC' }],
       });
     },
+  });
+
+  const { onToggleBookmarkClick } = useBookmarkMutation({
+    articleId: Number(articleId),
   });
 
   useScrollThreshold({
@@ -67,6 +78,8 @@ function ArticleDetailPage() {
 
     highlights.forEach((highlight) => restoreHighlight(highlight));
   }, [currentArticle, highlights]);
+
+  useScrollRestoration({ pathname: articleId });
 
   if (!currentArticle || !todayArticles) return null;
 
@@ -131,6 +144,10 @@ function ArticleDetailPage() {
         memos={highlights ?? []}
         removeHighlight={removeHighlight}
         updateMemo={updateMemo}
+      />
+      <FloatingActionButtons
+        bookmarked={!!bookmarked}
+        onToggleBookmarkClick={onToggleBookmarkClick}
       />
     </Container>
   );

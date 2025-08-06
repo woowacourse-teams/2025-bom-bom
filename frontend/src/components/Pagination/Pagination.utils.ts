@@ -38,13 +38,13 @@ export const getPageNumbers = (
 
   // 중간 페이지인 경우
   return [
-    0,
+    1,
     ELLIPSIS,
     currentPage - 1,
     currentPage,
     currentPage + 1,
     ELLIPSIS,
-    totalPages - 1,
+    totalPages,
   ];
 };
 
@@ -80,7 +80,7 @@ export const canGoToNextPage = (
   currentPage: number,
   totalPages: number,
 ): boolean => {
-  return currentPage < totalPages - 1;
+  return currentPage < totalPages;
 };
 
 /**

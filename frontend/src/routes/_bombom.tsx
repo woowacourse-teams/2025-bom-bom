@@ -1,6 +1,8 @@
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
+import { createFileRoute, Outlet } from '@tanstack/react-router';
+import { DEFAULT_ERROR_MESSAGES } from '@/apis/constants/defaultErrorMessage';
 import { queries } from '@/apis/queries';
 import PageLayout from '@/components/PageLayout/PageLayout';
+import RequireLoginCard from '@/components/RequireLoginCard/RequireLoginCard';
 
 export const Route = createFileRoute('/_bombom')({
   component: RouteComponent,
@@ -11,9 +13,17 @@ export const Route = createFileRoute('/_bombom')({
       await queryClient.fetchQuery(queries.me());
     } catch {
       if (location.pathname !== '/recommend') {
-        alert('이 기능을 이용하려면 로그인이 필요합니다.');
-        return redirect({ to: '/login' });
+        throw new Response(DEFAULT_ERROR_MESSAGES[401], { status: 401 });
       }
+    }
+  },
+  errorComponent: ({ error }) => {
+    if (error instanceof Response && error.status === 401) {
+      return (
+        <PageLayout>
+          <RequireLoginCard />
+        </PageLayout>
+      );
     }
   },
 });

@@ -61,15 +61,22 @@ export const MiddlePage: Story = {
 // 많은 페이지 수 (첫 번째 근처)
 export const ManyPagesFirst: Story = {
   args: {
-    currentPage: 2,
+    currentPage: 1,
     totalPages: 20,
   },
 };
 
 // 많은 페이지 수 (마지막 근처)
+export const ManyPagesAlmostLast: Story = {
+  args: {
+    currentPage: 18,
+    totalPages: 20,
+  },
+};
+
 export const ManyPagesLast: Story = {
   args: {
-    currentPage: 17,
+    currentPage: 20,
     totalPages: 20,
   },
 };
@@ -79,53 +86,5 @@ export const ManyPagesMiddle: Story = {
   args: {
     currentPage: 10,
     totalPages: 20,
-  },
-};
-
-// 단일 페이지
-export const SinglePage: Story = {
-  args: {
-    currentPage: 0,
-    totalPages: 1,
-  },
-};
-
-// 두 페이지
-export const TwoPages: Story = {
-  args: {
-    currentPage: 0,
-    totalPages: 2,
-  },
-};
-
-// 세 페이지
-export const ThreePages: Story = {
-  args: {
-    currentPage: 1,
-    totalPages: 3,
-  },
-};
-
-// 네 페이지
-export const FourPages: Story = {
-  args: {
-    currentPage: 2,
-    totalPages: 4,
-  },
-};
-
-// 다섯 페이지 (최대 표시 가능)
-export const FivePages: Story = {
-  args: {
-    currentPage: 2,
-    totalPages: 5,
-  },
-};
-
-// 여섯 페이지 (생략 표시 시작)
-export const SixPages: Story = {
-  args: {
-    currentPage: 2,
-    totalPages: 6,
   },
 };

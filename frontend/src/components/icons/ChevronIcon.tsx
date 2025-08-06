@@ -1,34 +1,36 @@
 import styled from '@emotion/styled';
 import { SVGProps } from 'react';
 import { DirectionType } from './Icons.types';
-import ArrowRightSvg from '#/assets/arrow-right.svg';
+import ChevronDownSvg from '#/assets/chevron-down.svg';
 
-interface ArrowIconProps extends SVGProps<SVGSVGElement> {
+interface ChevronIconProps extends SVGProps<SVGSVGElement> {
   direction?: DirectionType;
 }
 
-export const rotationMap = {
-  up: -90,
+const rotationMap: Record<DirectionType, number> = {
+  up: 180,
   upRight: -45,
-  right: 0,
-  downRight: 45,
-  down: 90,
+  right: -90,
+  downRight: -135,
+  down: 0,
   downLeft: 135,
-  left: 180,
-  upLeft: 225,
+  left: 90,
+  upLeft: 45,
 };
 
-export default function ArrowIcon({
-  direction = 'upRight',
+const ChevronIcon = ({
+  direction = 'down',
   className,
   ...props
-}: ArrowIconProps) {
+}: ChevronIconProps) => {
   return (
     <Wrapper className={className} rotation={rotationMap[direction]}>
-      <ArrowRightSvg {...props} />
+      <ChevronDownSvg {...props} />
     </Wrapper>
   );
-}
+};
+
+export default ChevronIcon;
 
 const Wrapper = styled.span<{
   rotation: number;

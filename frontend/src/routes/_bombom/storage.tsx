@@ -33,7 +33,8 @@ function Storage() {
       // sort: sortFilter,
       category: selectedCategory === '전체' ? undefined : selectedCategory,
       keyword: debouncedSearchInput,
-      // page: currentPage,
+      size: 6,
+      page: currentPage - 1,
     }),
   );
 

@@ -39,13 +39,11 @@ export default function FloatingToolbar({
     : 'new';
 
   const handleHighlightClick = () => {
-    if (!selectionRef.current) return;
     hideToolbar();
     onHighlightClick(currentMode, selectionRef.current, selectedHighlightId);
   };
 
   const handleMemoClick = () => {
-    if (!selectionRef.current) return;
     hideToolbar();
     onMemoClick(currentMode, selectionRef.current);
   };

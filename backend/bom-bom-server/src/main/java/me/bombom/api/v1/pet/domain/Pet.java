@@ -30,20 +30,29 @@ public class Pet extends BaseEntity {
     @Column(nullable = false, columnDefinition = "int default 0")
     private int currentScore = 0;
 
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean isAttended = false;
+
     @Builder
     public Pet(
             Long id,
             @NotNull Long memberId,
             @NotNull Long stageId,
-            int currentScore
+            int currentScore,
+            boolean isAttended
     ) {
         this.id = id;
         this.memberId = memberId;
         this.stageId = stageId;
         this.currentScore = currentScore;
+        this.isAttended = isAttended;
     }
 
     public void increaseCurrentScore(int score) {
         this.currentScore += score;
+    }
+
+    public void updateAttendance(boolean isAttended){
+        this.isAttended = isAttended;
     }
 }

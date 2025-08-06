@@ -14,11 +14,11 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-function Pagination({
+const Pagination = ({
   currentPage,
   totalPages,
   onPageChange,
-}: PaginationProps) {
+}: PaginationProps) => {
   const pageNumbers = getPageNumbers(currentPage, totalPages);
 
   const handlePrevPage = () => {
@@ -67,7 +67,7 @@ function Pagination({
       </NavigationButton>
     </Container>
   );
-}
+};
 
 export default Pagination;
 

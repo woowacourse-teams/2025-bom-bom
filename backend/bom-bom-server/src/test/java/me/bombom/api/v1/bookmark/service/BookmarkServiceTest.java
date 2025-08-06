@@ -2,7 +2,7 @@ package me.bombom.api.v1.bookmark.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
@@ -10,12 +10,14 @@ import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkResponse;
+import me.bombom.api.v1.bookmark.dto.response.BookmarkStatusResponse;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
+import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
@@ -27,14 +29,11 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import me.bombom.api.v1.TestJpaAuditingConfig;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import me.bombom.api.v1.common.exception.ErrorDetail;
-import me.bombom.api.v1.bookmark.dto.response.BookmarkStatusResponse;
 
 @DataJpaTest
-@Import({BookmarkService.class, QuerydslConfig.class, TestJpaAuditingConfig.class})
+@Import({BookmarkService.class, QuerydslConfig.class})
 class BookmarkServiceTest {
 
     @Autowired

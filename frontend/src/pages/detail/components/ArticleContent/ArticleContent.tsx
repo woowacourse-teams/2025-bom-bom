@@ -42,7 +42,11 @@ const ArticleContent = ({
   useEffect(() => {
     if (!highlights || highlights?.length === 0 || !articleContent) return;
 
-    highlights.forEach((highlight) => restoreHighlight(highlight));
+    try {
+      highlights.forEach((highlight) => restoreHighlight(highlight));
+    } catch (error) {
+      console.error(error);
+    }
   }, [articleContent, highlights]);
 
   return (

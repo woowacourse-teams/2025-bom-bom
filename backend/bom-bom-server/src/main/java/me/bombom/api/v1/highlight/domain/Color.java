@@ -19,7 +19,7 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Color {
 
-    private static final String COLOR_HEX_PATTERN = "^#[0-9a-fA-F]{6}$";
+    private static final Pattern HEX_PATTERN = Pattern.compile("^#[0-9a-fA-F]{6}$");
 
     private String value;
 
@@ -30,7 +30,7 @@ public class Color {
     }
 
     private static void validateFormat(String value) {
-        if (!Pattern.matches(COLOR_HEX_PATTERN, value)) {
+        if (!HEX_PATTERN.matcher(value).matches()) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE);
         }
     }

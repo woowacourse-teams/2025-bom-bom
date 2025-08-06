@@ -1,8 +1,9 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { RefObject, useEffect, useRef, useState } from 'react';
-import Comment from '#/assets/comment.svg';
-import Pen from '#/assets/pen.svg';
+import MemoIcon from '#/assets/comment.svg';
+import HighlightOffIcon from '#/assets/edit-off.svg';
+import HighlightIcon from '#/assets/edit.svg';
 
 interface ToolbarPosition {
   x: number;
@@ -12,79 +13,111 @@ interface ToolbarPosition {
 interface FloatingToolBarProps {
   selectionTargetRef: RefObject<HTMLDivElement | null>;
   onHighlightButtonClick: (selection: Selection) => void;
+  onHighlightOffButtonClick: (id: number) => void;
   onMemoButtonClick: (selection: Selection) => void;
 }
 
 export default function FloatingToolbar({
   selectionTargetRef,
   onHighlightButtonClick,
+  onHighlightOffButtonClick,
   onMemoButtonClick,
 }: FloatingToolBarProps) {
   const selectionRef = useRef<Selection>(null);
+  const [selectedHighlightId, setSelectedHighlightId] = useState<number | null>(
+    null,
+  );
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState<ToolbarPosition>({ x: 0, y: 0 });
 
+  const hideToolbar = () => setIsVisible(false);
+
   const handleHighlightButtonClick = () => {
-    if (selectionRef.current === null) return;
-    setIsVisible(false);
+    if (!selectionRef.current) return;
+    hideToolbar();
     onHighlightButtonClick(selectionRef.current);
   };
 
+  const handleHighlightOffButtonClick = () => {
+    if (!selectedHighlightId) return;
+    hideToolbar();
+    onHighlightOffButtonClick(selectedHighlightId);
+    setSelectedHighlightId(null);
+  };
+
   const handleMemoButtonClick = () => {
-    if (selectionRef.current === null) return;
-    setIsVisible(false);
+    if (!selectionRef.current) return;
+    hideToolbar();
     onMemoButtonClick(selectionRef.current);
   };
 
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'MARK' && target.dataset.highlightId) {
-        const highlightId = target.dataset.highlightId;
-        console.log('하이라이트 클릭됨', highlightId);
-        setIsVisible(true);
-        // TODO: 하이라이트 클릭 시 toolbar 열기 or 편집 모드
-      }
+    const showToolbarAt = (rect: DOMRect) => {
+      setPosition({ x: rect.left + rect.width / 2, y: rect.top });
+      setIsVisible(true);
     };
 
-    const handleMouseUp = () => {
+    const handleTextSelection = (selection: Selection) => {
+      selectionRef.current = selection;
+      const range = selection.getRangeAt(0);
+      if (!selectionTargetRef.current?.contains(range.commonAncestorContainer))
+        return;
+
+      const rect = range.getBoundingClientRect();
+      setSelectedHighlightId(null);
+      showToolbarAt(rect);
+    };
+
+    const handleHighlightClick = (target: HTMLElement) => {
+      const id = target.dataset.highlightId;
+      if (!id) return;
+
+      setSelectedHighlightId(Number(id));
+      const rect = target.getBoundingClientRect();
+      showToolbarAt(rect);
+    };
+
+    const handleDocumentClick = (e: MouseEvent) => {
       const selection = window.getSelection();
       if (selection && !selection.isCollapsed) {
-        const range = selection.getRangeAt(0);
-        if (
-          !selectionTargetRef.current?.contains(range.commonAncestorContainer)
-        )
-          return;
-
-        const rect = range.getBoundingClientRect();
-
-        setPosition({
-          x: rect.left + rect.width / 2,
-          y: rect.top,
-        });
-        setIsVisible(true);
-        selectionRef.current = selection;
-      } else {
-        setIsVisible(false);
+        handleTextSelection(selection);
+        return;
       }
+
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'MARK') {
+        handleHighlightClick(target);
+        return;
+      }
+
+      hideToolbar();
     };
 
-    document.addEventListener('click', handleClick);
-    document.addEventListener('mouseup', handleMouseUp);
-    return () => {
-      document.removeEventListener('click', handleClick);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
+    document.addEventListener('click', handleDocumentClick);
+    return () => document.removeEventListener('click', handleDocumentClick);
   }, [selectionTargetRef]);
 
   return (
     <Container position={position} visible={isVisible}>
-      <ToolbarButton onClick={handleHighlightButtonClick}>
-        <Pen />
-      </ToolbarButton>
-      <ToolbarButton onClick={handleMemoButtonClick}>
-        <Comment />
-      </ToolbarButton>
+      {selectedHighlightId ? (
+        <>
+          <ToolbarButton onClick={handleHighlightOffButtonClick}>
+            <HighlightOffIcon />
+          </ToolbarButton>
+          <ToolbarButton onClick={hideToolbar}>
+            <MemoIcon />
+          </ToolbarButton>
+        </>
+      ) : (
+        <>
+          <ToolbarButton onClick={handleHighlightButtonClick}>
+            <HighlightIcon />
+          </ToolbarButton>
+          <ToolbarButton onClick={handleMemoButtonClick}>
+            <MemoIcon />
+          </ToolbarButton>
+        </>
+      )}
     </Container>
   );
 }

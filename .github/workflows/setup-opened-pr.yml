@@ -78,13 +78,13 @@ jobs:
           channel-id: ${{ secrets.TEST_CHANNEL }}
           payload: |
             {
-              "text": "pr review request",
+              "text": "🎁 선물이 도착했어요! 🎁",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "리뷰어로 할당되었습니다.\n • 제목: ${{ github.event.pull_request.title }}\n • 리뷰어: ${{ steps.reviewers.outputs.result }}\n • 링크: <${{ github.event.pull_request.html_url }}|리뷰하러 가기>\n💪 코드 리뷰는 코드 품질을 향상시키고, 버그를 줄이며, 팀원 간의 지식 공유와 협업을 촉진하는 핵심 프로세스입니다.\n🙏 적극적인 참여와 의견을 부탁드립니다."
+                    "text": "🎁 *새로운 선물이 도착했어요!* 🎁\n\n📦 **선물 내용**\n • 🏷️ 이름: ${{ github.event.pull_request.title }}\n • 👀 받을 분들: ${{ steps.reviewers.outputs.result }}\n • 🔗 선물 열어보기: <${{ github.event.pull_request.html_url }}|여기를 클릭!>\n\n✨ 이 선물을 열어보시고 소중한 의견을 나눠주세요!\n🤝 함께 만들어가는 코드, 함께 성장하는 우리팀!\n\n💝 *설레는 마음으로 리뷰 부탁드려요~*"
                   }
                 }
               ]

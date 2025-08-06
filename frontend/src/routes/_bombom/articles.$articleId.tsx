@@ -110,7 +110,7 @@ function ArticleDetailPage() {
         )}
       </TodayArticlesWrapper>
       <FloatingActionButtons
-        bookmarked={!!bookmarked?.bookmarkStatus}
+        bookmarked={bookmarked?.bookmarkStatus ?? null}
         onToggleBookmarkClick={onToggleBookmarkClick}
       />
     </Container>

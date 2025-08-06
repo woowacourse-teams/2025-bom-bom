@@ -5,7 +5,7 @@ import BookmarkInactiveIcon from '#/assets/bookmark-inactive.svg';
 import ArrowIcon from '#/assets/chevron-up.svg';
 
 interface FloatingActionButtonsProps {
-  bookmarked: boolean;
+  bookmarked: boolean | null;
   onToggleBookmarkClick: (bookmarked: boolean) => void;
 }
 
@@ -13,6 +13,8 @@ const FloatingActionButtons = ({
   bookmarked,
   onToggleBookmarkClick,
 }: FloatingActionButtonsProps) => {
+  if (bookmarked === null) return;
+
   return (
     <Container>
       <ActionButton

@@ -12,7 +12,7 @@ interface GetBookmarkedParams {
 }
 
 export const getBookmarked = async ({ articleId }: GetBookmarkedParams) => {
-  return await fetcher.get({
+  return await fetcher.get<components['schemas']['BookmarkStatusResponse']>({
     path: `/bookmarks/status/articles/${articleId}`,
   });
 };

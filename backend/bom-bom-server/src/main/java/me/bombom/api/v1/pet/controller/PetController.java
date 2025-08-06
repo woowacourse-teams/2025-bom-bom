@@ -13,15 +13,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/members/me/pet")
-public class PetController {
+public class PetController implements PetControllerApi{
 
     private final PetService petService;
 
+    @Override
     @GetMapping
     public PetResponse getPet(@LoginMember Member member){
         return petService.getPet(member);
     }
 
+    @Override
     @PostMapping("/attendance")
     public void attend(@LoginMember Member member){
         petService.attend(member);

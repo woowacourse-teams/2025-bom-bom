@@ -35,6 +35,9 @@ public class PetService {
     public void attend(Member member) {
         Pet pet = petRepository.findByMemberId(member.getId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        if(pet.isAttended()){
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
+        }
         pet.markAsAttended();
         increaseCurrentScore(member.getId(), ScorePolicyConstants.ATTENDANCE_SCORE);
     }

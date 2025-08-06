@@ -96,7 +96,7 @@ function ArticleDetailPage() {
       </HeaderWrapper>
       <Divider />
       <ArticleContent
-        article={currentArticle.contents}
+        articleContent={currentArticle.contents}
         highlights={highlights}
         onHighlightButtonClick={(selection) =>
           handleSaveHighlight(selection, false)

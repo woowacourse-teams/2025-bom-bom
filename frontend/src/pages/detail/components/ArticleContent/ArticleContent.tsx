@@ -7,14 +7,14 @@ import FloatingToolbar from '../FloatingToolbar/FloatingToolbar';
 import { components } from '@/types/openapi';
 
 interface ArticleContentProps {
-  article: components['schemas']['ArticleDetailResponse']['contents'];
+  articleContent: components['schemas']['ArticleDetailResponse']['contents'];
   highlights: HighlightType[] | null | undefined;
   onHighlightButtonClick: (selection: Selection) => void;
   onMemoButtonClick: (selection: Selection) => void;
 }
 
 const ArticleContent = ({
-  article,
+  articleContent,
   highlights,
   onHighlightButtonClick,
   onMemoButtonClick,
@@ -24,16 +24,16 @@ const ArticleContent = ({
   useHighlightHoverEffect();
 
   useEffect(() => {
-    if (!highlights || highlights?.length === 0 || !article) return;
+    if (!highlights || highlights?.length === 0 || !articleContent) return;
 
     highlights.forEach((highlight) => restoreHighlight(highlight));
-  }, [article, highlights]);
+  }, [articleContent, highlights]);
 
   return (
     <>
       <Container
         ref={contentRef}
-        dangerouslySetInnerHTML={{ __html: article ?? '' }}
+        dangerouslySetInnerHTML={{ __html: articleContent ?? '' }}
       />
       <FloatingToolbar
         selectionTargetRef={contentRef}

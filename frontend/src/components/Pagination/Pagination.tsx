@@ -8,45 +8,47 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
+const getPageNumbers = (currentPage: number, totalPages: number) => {
+  const pages: (number | string)[] = [];
+  const maxVisiblePages = 5;
+
+  if (totalPages <= maxVisiblePages) {
+    for (let i = 0; i < totalPages; i++) {
+      pages.push(i);
+    }
+  } else {
+    if (currentPage <= 3) {
+      for (let i = 0; i < 4; i++) {
+        pages.push(i);
+      }
+      pages.push('...');
+      pages.push(totalPages - 1);
+    } else if (currentPage >= totalPages - 2) {
+      pages.push(0);
+      pages.push('...');
+      for (let i = totalPages - 4; i < totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(0);
+      pages.push('...');
+      for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+        pages.push(i);
+      }
+      pages.push('...');
+      pages.push(totalPages - 1);
+    }
+  }
+
+  return pages;
+};
+
 function Pagination({
   currentPage,
   totalPages,
   onPageChange,
 }: PaginationProps) {
-  const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
-    const maxVisiblePages = 5;
-
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 0; i < totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 0; i < 4; i++) {
-          pages.push(i);
-        }
-        pages.push('...');
-        pages.push(totalPages - 1);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(0);
-        pages.push('...');
-        for (let i = totalPages - 4; i < totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        pages.push(0);
-        pages.push('...');
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i);
-        }
-        pages.push('...');
-        pages.push(totalPages - 1);
-      }
-    }
-
-    return pages;
-  };
+  const pageNumbers = getPageNumbers(currentPage, totalPages);
 
   const handlePrevPage = () => {
     if (currentPage > 0) {
@@ -60,7 +62,7 @@ function Pagination({
     }
   };
 
-  if (totalPages <= 1) return null;
+  // if (totalPages <= 1) return null;
 
   return (
     <Container>
@@ -73,7 +75,7 @@ function Pagination({
       </NavigationButton>
 
       <PageNumbers>
-        {getPageNumbers().map((page, index) => (
+        {pageNumbers.map((page, index) => (
           <PageNumber
             key={index}
             isCurrent={page === currentPage}
@@ -110,7 +112,7 @@ const Container = styled.div`
 const NavigationButton = styled.button`
   width: 40px;
   height: 40px;
-  border: 1px solid ${({ theme }) => theme.colors.border};
+  border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 8px;
 
   display: flex;
@@ -122,13 +124,13 @@ const NavigationButton = styled.button`
   cursor: pointer;
   transition: all 0.2s ease;
 
-  &:hover:not(:disabled) {
-    background-color: ${({ theme }) => theme.colors.background};
-  }
-
   &:disabled {
     cursor: not-allowed;
     opacity: 0.5;
+  }
+
+  &:hover:not(:disabled) {
+    background-color: ${({ theme }) => theme.colors.disabledBackground};
   }
 
   svg {
@@ -154,7 +156,7 @@ const PageNumber = styled.button<{
   padding: 0 12px;
   border: 1px solid
     ${({ theme, isCurrent }) =>
-      isCurrent ? theme.colors.primary : theme.colors.border};
+      isCurrent ? theme.colors.primary : theme.colors.stroke};
   border-radius: 8px;
 
   display: flex;
@@ -170,12 +172,13 @@ const PageNumber = styled.button<{
   cursor: ${({ isDisabled }) => (isDisabled ? 'default' : 'pointer')};
   transition: all 0.2s ease;
 
-  &:hover:not(:disabled) {
-    background-color: ${({ theme, isCurrent }) =>
-      isCurrent ? theme.colors.primary : theme.colors.background};
-  }
-
   &:disabled {
     cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &:hover:not(:disabled) {
+    background-color: ${({ theme, isCurrent }) =>
+      isCurrent ? theme.colors.primary : theme.colors.disabledBackground};
   }
 `;

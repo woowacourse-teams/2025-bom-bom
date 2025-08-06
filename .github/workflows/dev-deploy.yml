@@ -100,15 +100,16 @@ jobs:
 
       - name: .env 파일 생성
         run: |
-          echo "SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/bombom?useSSL=false&serverTimezone=Asia/Seoul" >> .env
-          echo "SPRING_DATASOURCE_USERNAME=root" >> .env
-          echo "SPRING_DATASOURCE_PASSWORD=bombom77@@" >> .env
+          echo "DEV_SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/bombom?useSSL=false&serverTimezone=Asia/Seoul" >> .env
+          echo "DEV_SPRING_DATASOURCE_USERNAME=root" >> .env
+          echo "DEV_SPRING_DATASOURCE_PASSWORD=bombom77@@" >> .env
           echo "LOGGING_FILE_NAME=/logs/bombom-dev.log" >> .env
+
 
       - name: 컨테이너 재실행
         run: |
-          docker compose -f docker-compose-dev.yml down || true
-          docker compose -f docker-compose-dev.yml up -d
+          docker compose --env-file .env -f docker-compose-dev.yml down || true
+          docker compose --env-file .env -f docker-compose-dev.yml up -d
 
       - name: Docker 리소스 정리
         if: env.skip_deploy == 'false'

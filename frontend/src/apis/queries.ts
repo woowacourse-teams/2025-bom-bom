@@ -1,4 +1,4 @@
-import { queryOptions, useQueryClient } from '@tanstack/react-query';
+import { queryOptions } from '@tanstack/react-query';
 import {
   getArticleById,
   getArticles,
@@ -25,7 +25,7 @@ export const queries = {
     params?: Parameters<typeof getStatisticsCategories>[0],
   ) =>
     queryOptions({
-      queryKey: ['statistics', 'categories'],
+      queryKey: ['articles', 'statistics', 'categories'],
       queryFn: () => getStatisticsCategories(params ?? {}),
     }),
 

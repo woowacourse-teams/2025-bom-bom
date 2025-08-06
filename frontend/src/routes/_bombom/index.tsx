@@ -13,9 +13,7 @@ export const Route = createFileRoute('/_bombom/')({
 
 function Index() {
   const today = useMemo(() => new Date(), []);
-  const { data: todayArticles } = useQuery(
-    queries.articles({ date: today.toLocaleDateString() }),
-  );
+  const { data: todayArticles } = useQuery(queries.articles({ date: today }));
 
   return (
     <Container>

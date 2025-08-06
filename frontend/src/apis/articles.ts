@@ -2,7 +2,7 @@ import { fetcher } from './fetcher';
 import { components, operations } from '@/types/openapi';
 
 interface GetArticlesParams {
-  date?: string;
+  date?: Date;
   category?: string;
   keyword?: string;
 

@@ -38,9 +38,7 @@ function ArticleDetailPage() {
   );
   const today = useMemo(() => new Date(), []);
 
-  const { data: todayArticles } = useQuery(
-    queries.articles({ date: today.toLocaleDateString() }),
-  );
+  const { data: todayArticles } = useQuery(queries.articles({ date: today }));
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
     mutationFn: () => patchArticleRead({ id: articleIdNumber }),

@@ -24,15 +24,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 })
 public interface HighlightControllerApi {
 
-    @Operation(summary = "하이라이트 목록 조회", description = "특정 아티클에 저장된 하이라이트 목록을 조회합니다.")
+    @Operation(summary = "하이라이트 목록 조회", description = "조건에 맞는 하이라이트 목록을 조회합니다.")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "하이라이트 목록 조회 성공"),
-        @ApiResponse(responseCode = "403", description = "아티클에 대한 접근 권한 없음", content = @Content),
-        @ApiResponse(responseCode = "404", description = "아티클을 찾을 수 없음", content = @Content)
+        @ApiResponse(responseCode = "200", description = "하이라이트 목록 조회 성공")
     })
     List<HighlightResponse> getHighlights(
         @Parameter(hidden = true) Member member,
-        @Parameter(description = "아티클 ID") @RequestParam @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
+        @Parameter(description = "아티클 ID (예: ?articleId=1)") @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     );
 
     @Operation(summary = "하이라이트 생성", description = "새로운 하이라이트를 생성합니다.")

@@ -37,15 +37,18 @@ export const bookmarkHandlers = [
     });
   }),
 
-  http.get(`${baseURL}/bookmarks/status/:articleId`, async ({ request }) => {
-    const { articleId } = (await request.json()) as { articleId: number };
+  http.get(
+    `${baseURL}/bookmarks/status/articles/:articleId`,
+    async ({ request }) => {
+      const { articleId } = (await request.json()) as { articleId: number };
 
-    const bookmarked =
-      BOOKMARKS.find((bookmark) => bookmark.articleId === articleId) ?? false;
-    return HttpResponse.json({ data: bookmarked }, { status: 200 });
-  }),
+      const bookmarked =
+        BOOKMARKS.find((bookmark) => bookmark.articleId === articleId) ?? false;
+      return HttpResponse.json({ data: bookmarked }, { status: 200 });
+    },
+  ),
 
-  http.post(`${baseURL}/bookmarks/:articleId`, async ({ request }) => {
+  http.post(`${baseURL}/bookmarks/articles/:articleId`, async ({ request }) => {
     const { articleId } = (await request.json()) as { articleId: number };
     const newBookmark = {
       id: BOOKMARKS.length + 1,
@@ -56,7 +59,7 @@ export const bookmarkHandlers = [
     return HttpResponse.json({ data: newBookmark }, { status: 201 });
   }),
 
-  http.delete(`${baseURL}/bookmarks/:articleId`, ({ params }) => {
+  http.delete(`${baseURL}/bookmarks/articles/:articleId`, ({ params }) => {
     const { id } = params;
     const index = BOOKMARKS.findIndex(
       (bookmark) => bookmark.articleId === Number(id),

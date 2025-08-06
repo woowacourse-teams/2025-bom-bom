@@ -46,7 +46,7 @@ const Pagination = ({
         <ChevronLeftIcon />
       </NavigationButton>
 
-      <PageNumbers>
+      <PageNumberButtonWrapper>
         {pageNumbers.map((page, index) => (
           <PageNumberButton
             key={index}
@@ -57,7 +57,7 @@ const Pagination = ({
             {page === ELLIPSIS ? ELLIPSIS : page}
           </PageNumberButton>
         ))}
-      </PageNumbers>
+      </PageNumberButtonWrapper>
 
       <NavigationButton
         onClick={handleNextPage}
@@ -113,7 +113,7 @@ const NavigationButton = styled.button`
   }
 `;
 
-const PageNumbers = styled.div`
+const PageNumberButtonWrapper = styled.div`
   display: flex;
   gap: 4px;
   align-items: center;

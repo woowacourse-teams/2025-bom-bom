@@ -38,41 +38,21 @@ public class SecurityConfig {
     @Value("${swagger.admin.password}")
     private String adminPassword;
 
-    // Swagger UI 전용 보안 설정
     @Bean
-    @Order(1)
-    public SecurityFilterChain swaggerSecurityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .securityMatcher(
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**",
-                        "/swagger-resources/**",
-                        "/webjars/**",
-                        "/swagger-ui.html"
-                )
-                .csrf(AbstractHttpConfigurer::disable)
-                .headers(headers -> headers.frameOptions(FrameOptionsConfig::disable))
-                .cors(configurer -> configurer.configurationSource(corsConfigurationSource()))
-                .formLogin(Customizer.withDefaults())
-                .httpBasic(Customizer.withDefaults())
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                .build();
-    }
-
-    // API 전용 보안 설정
-    @Bean
-    @Order(2)
     public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
-        return http
+        http
+                // 모든 설정 열어둠
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(FrameOptionsConfig::disable))
                 .cors(configurer -> configurer.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .successHandler(oAuth2LoginSuccessHandler)
-                )
-                .build();
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.anyRequest()
+                        .permitAll())
+                .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService))
+                        .successHandler(oAuth2LoginSuccessHandler));
+        return http.build();
     }
 
     @Bean

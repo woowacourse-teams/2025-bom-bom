@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SearchInput from '../../components/SearchInput/SearchInput';
 import Select from '../../components/Select/Select';
 import CategoryFilter from '../../pages/storage/components/CategoryFilter/CategoryFilter';
@@ -45,31 +45,34 @@ function Storage() {
       }),
   });
 
-  if (!articles || !categoryCounts) return null;
-
-  const readStats = getArticleReadStats(articles.content ?? []);
-  const existCategories = categoryCounts.categories?.filter(
-    (category) => category.count !== 0,
-  );
-
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
   const handleCategoryChange = (value: CategoryType) => {
     setSelectedCategory(value);
-    setCurrentPage(0);
+    setCurrentPage(1);
   };
 
   const handleSortChange = (value: 'DESC' | 'ASC') => {
     setSortFilter(value);
-    setCurrentPage(0);
+    setCurrentPage(1);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
-    setCurrentPage(0);
   };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchInput]);
+
+  if (!articles || !categoryCounts) return null;
+
+  const readStats = getArticleReadStats(articles.content ?? []);
+  const existCategories = categoryCounts.categories?.filter(
+    (category) => category.count !== 0,
+  );
 
   return (
     <Container>

@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useEffect, useRef, useState } from 'react';
-import { useHighlightData } from '../../hooks/useHighlightData';
 import { processContent } from './ArticleContent.utils';
+import { useHighlightData } from '../../hooks/useHighlightData';
 import { useHighlightHoverEffect } from '../../hooks/useHighlightHoverEffect';
 import { restoreHighlight, saveSelection } from '../../utils/highlight';
 import FloatingToolbar from '../FloatingToolbar/FloatingToolbar';
@@ -15,7 +15,7 @@ interface ArticleContentProps {
 }
 
 const ArticleContent = ({ articleId, articleContent }: ArticleContentProps) => {
-  const [open, setOpen] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const { highlights, addHighlight, updateMemo, removeHighlight } =
     useHighlightData({ articleId });
@@ -53,7 +53,7 @@ const ArticleContent = ({ articleId, articleContent }: ArticleContentProps) => {
       const highlightData = saveSelection(selection, articleId);
       addHighlight(highlightData);
     }
-    setOpen(true);
+    setPanelOpen(true);
   };
 
   useHighlightHoverEffect();
@@ -64,9 +64,9 @@ const ArticleContent = ({ articleId, articleContent }: ArticleContentProps) => {
     try {
       highlights.forEach((highlight) => restoreHighlight(highlight));
     } catch (error) {
-    }
       console.error(error);
-  }, [articleContent, highlights, open]);
+    }
+  }, [articleContent, highlights, panelOpen]);
 
   return (
     <>
@@ -82,8 +82,8 @@ const ArticleContent = ({ articleId, articleContent }: ArticleContentProps) => {
         onMemoClick={handleMemoClick}
       />
       <MemoPanel
-        open={open}
-        handleClose={() => setOpen(false)}
+        open={panelOpen}
+        handleClose={() => setPanelOpen(false)}
         memos={highlights ?? []}
         removeHighlight={removeHighlight}
         updateMemo={updateMemo}

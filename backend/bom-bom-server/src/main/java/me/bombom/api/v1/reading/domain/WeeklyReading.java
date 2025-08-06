@@ -17,6 +17,9 @@ import me.bombom.api.v1.common.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class WeeklyReading extends BaseEntity {
 
+    private static final int INITIAL_GOAL_COUNT = 3;
+    private static final int INITIAL_CURRENT_COUNT = 0;
+    private static final int RESET_CURRENT_COUNT = 0;
     private static final int INCREASE_CURRENT_COUNT = 1;
 
     @Id
@@ -43,6 +46,18 @@ public class WeeklyReading extends BaseEntity {
         this.memberId = memberId;
         this.goalCount = goalCount;
         this.currentCount = currentCount;
+    }
+
+    public static WeeklyReading create(Long memberId) {
+        return WeeklyReading.builder()
+                .memberId(memberId)
+                .goalCount(INITIAL_GOAL_COUNT)
+                .currentCount(INITIAL_CURRENT_COUNT)
+                .build();
+    }
+
+    public void resetCurrentCount() {
+        currentCount = RESET_CURRENT_COUNT;
     }
 
     public void updateGoalCount(int goalCount) {

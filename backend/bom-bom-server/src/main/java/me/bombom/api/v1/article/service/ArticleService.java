@@ -19,7 +19,7 @@ import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.pet.ScorePolicyConstants;
 import me.bombom.api.v1.pet.event.AddArticleScoreEvent;
-import me.bombom.api.v1.reading.service.ReadingService;
+import me.bombom.api.v1.reading.event.UpdateReadingCountEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +36,6 @@ public class ArticleService {
     private final CategoryRepository categoryRepository;
     private final NewsletterRepository newsletterRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final ReadingService readingService;
 
     public Page<ArticleResponse> getArticles(
             Member member,
@@ -67,7 +66,7 @@ public class ArticleService {
         }
         validateArticleOwner(article, member.getId());
         article.markAsRead();
-        readingService.updateReadingCount(article);
+        applicationEventPublisher.publishEvent(new UpdateReadingCountEvent(articleId));
         applicationEventPublisher.publishEvent(new AddArticleScoreEvent(member.getId()));
     }
 
@@ -87,6 +86,12 @@ public class ArticleService {
     public boolean canAddArticleScore(Long memberId){
         int todayReadCount = articleRepository.countByMemberIdAndArrivedDateTimeAndIsRead(memberId, LocalDate.now(), true);
         return todayReadCount <= ScorePolicyConstants.MAX_TODAY_READING_COUNT;
+    }
+
+    public boolean isArrivedToday(Long articleId) {
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        return article.isArrivedToday();
     }
 
     private void validateCategoryName(String categoryName) {

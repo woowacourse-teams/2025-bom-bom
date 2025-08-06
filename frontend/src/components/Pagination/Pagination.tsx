@@ -1,5 +1,10 @@
 import styled from '@emotion/styled';
-import { getPageNumbers } from './Pagination.utils';
+import {
+  getPageNumbers,
+  canGoToPreviousPage,
+  canGoToNextPage,
+  shouldShowPagination,
+} from './Pagination.utils';
 import ChevronLeftIcon from '#/assets/chevron-left.svg';
 import ChevronRightIcon from '#/assets/chevron-right.svg';
 
@@ -17,24 +22,24 @@ function Pagination({
   const pageNumbers = getPageNumbers(currentPage, totalPages);
 
   const handlePrevPage = () => {
-    if (currentPage > 0) {
+    if (canGoToPreviousPage(currentPage)) {
       onPageChange(currentPage - 1);
     }
   };
 
   const handleNextPage = () => {
-    if (currentPage < totalPages - 1) {
+    if (canGoToNextPage(currentPage, totalPages)) {
       onPageChange(currentPage + 1);
     }
   };
 
-  if (totalPages <= 1) return null;
+  if (!shouldShowPagination(totalPages)) return null;
 
   return (
     <Container>
       <NavigationButton
         onClick={handlePrevPage}
-        disabled={currentPage === 0}
+        disabled={!canGoToPreviousPage(currentPage)}
         aria-label="이전 페이지"
       >
         <ChevronLeftIcon />
@@ -55,7 +60,7 @@ function Pagination({
 
       <NavigationButton
         onClick={handleNextPage}
-        disabled={currentPage === totalPages - 1}
+        disabled={!canGoToNextPage(currentPage, totalPages)}
         aria-label="다음 페이지"
       >
         <ChevronRightIcon />

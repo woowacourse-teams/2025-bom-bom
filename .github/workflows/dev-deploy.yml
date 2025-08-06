@@ -82,8 +82,8 @@ jobs:
           NEW=$(docker inspect --format='{{.Id}}' "$IMAGE")
           
           # 기존 컨테이너가 존재하는지 확인
-          if docker inspect bom-bom &>/dev/null; then
-          CURRENT=$(docker inspect --format='{{.Image}}' bom-bom)
+          if docker inspect bombom-server-dev &>/dev/null; then
+          CURRENT=$(docker inspect --format='{{.Image}}' bombom-server-dev)
           else
           CURRENT="not_found"
           fi
@@ -98,13 +98,17 @@ jobs:
           echo "skip_deploy=false" >> $GITHUB_ENV
           fi
 
-      - name: 컨테이너 제거 및 재실행 (docker-compose)
-        if: env.skip_deploy == 'false'
+      - name: .env 파일 생성
+        run: |
+          echo "SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/bombom?useSSL=false&serverTimezone=Asia/Seoul" >> .env
+          echo "SPRING_DATASOURCE_USERNAME=root" >> .env
+          echo "SPRING_DATASOURCE_PASSWORD=bombom77@@" >> .env
+          echo "LOGGING_FILE_NAME=/logs/bombom-dev.log" >> .env
+
+      - name: 컨테이너 재실행
         run: |
           docker compose -f docker-compose-dev.yml down || true
           docker compose -f docker-compose-dev.yml up -d
-          
-          rm .env || true
 
       - name: Docker 리소스 정리
         if: env.skip_deploy == 'false'

@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import SearchInput from '../../components/SearchInput/SearchInput';
 import Select from '../../components/Select/Select';
 import CategoryFilter from '../../pages/storage/components/CategoryFilter/CategoryFilter';
-import { getArticles, getStatisticsCategories } from '@/apis/articles';
+import { queries } from '@/apis/queries';
 import Pagination from '@/components/Pagination/Pagination';
 import { CategoryType } from '@/constants/category';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -28,23 +28,20 @@ function Storage() {
   const [currentPage, setCurrentPage] = useState(1);
   const debouncedSearchInput = useDebouncedValue(searchInput, 500);
 
-  const { data: articles } = useQuery({
-    queryKey: ['articles', sortFilter, selectedCategory, debouncedSearchInput],
-    queryFn: () =>
-      getArticles({
-        sorted: sortFilter,
-        category: selectedCategory === '전체' ? undefined : selectedCategory,
-        keyword: debouncedSearchInput,
-        page: currentPage,
-      }),
-  });
-  const { data: categoryCounts } = useQuery({
-    queryKey: ['articlesStatisticsCategories', debouncedSearchInput],
-    queryFn: () =>
-      getStatisticsCategories({
-        keyword: debouncedSearchInput,
-      }),
-  });
+  const { data: articles } = useQuery(
+    queries.articles({
+      sort: sortFilter,
+      category: selectedCategory === '전체' ? undefined : selectedCategory,
+      keyword: debouncedSearchInput,
+      page: currentPage,
+    }),
+  );
+
+  const { data: categoryCounts } = useQuery(
+    queries.statisticsCategories({
+      keyword: debouncedSearchInput,
+    }),
+  );
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

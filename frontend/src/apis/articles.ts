@@ -1,69 +1,57 @@
 import { fetcher } from './fetcher';
-import { components } from '@/types/openapi';
+import { components, operations } from '@/types/openapi';
 
-interface GetArticlesParams {
-  sorted?: 'ASC' | 'DESC';
+export interface GetArticlesParams {
   date?: Date;
   category?: string;
-  size?: number;
+  keyword?: string;
+
   page?: number;
-  keyword?: string;
+  size?: number;
+  sort?: 'ASC' | 'DESC';
 }
 
-export const getArticles = async ({
-  date,
-  sorted,
-  category,
-  size,
-  page,
-  keyword,
-}: GetArticlesParams) => {
-  return await fetcher.get<components['schemas']['PageArticleResponse']>({
+export type GetArticlesResponse = components['schemas']['PageArticleResponse'];
+
+export const getArticles = async (params: GetArticlesParams) => {
+  return await fetcher.get<GetArticlesResponse>({
     path: '/articles',
-    query: {
-      date,
-      sorted,
-      category,
-      size,
-      page,
-      keyword,
-    },
+    query: { ...params },
   });
 };
 
-interface GetArticleByIdParams {
-  articleId: number;
-}
+export type GetArticleByIdParams =
+  operations['getArticleDetail']['parameters']['path'];
+export type GetArticleByIdResponse =
+  components['schemas']['ArticleDetailResponse'];
 
-export const getArticleById = async ({ articleId }: GetArticleByIdParams) => {
-  return await fetcher.get<components['schemas']['ArticleDetailResponse']>({
-    path: `/articles/${articleId}`,
+export const getArticleById = async ({ id }: GetArticleByIdParams) => {
+  return await fetcher.get<GetArticleByIdResponse>({
+    path: `/articles/${id}`,
   });
 };
 
-interface PatchArticleReadParams {
-  articleId: number;
-}
+export type PatchArticleReadParams =
+  operations['updateIsRead']['parameters']['path'];
 
-export const patchArticleRead = async ({
-  articleId,
-}: PatchArticleReadParams) => {
+export const patchArticleRead = async ({ id }: PatchArticleReadParams) => {
   return await fetcher.patch({
-    path: `/articles/${articleId}/read?`,
+    path: `/articles/${id}/read`,
   });
 };
 
-interface GetStatisticsCategoriesParams {
-  keyword?: string;
-}
+export type GetStatisticsCategoriesParams = Omit<
+  operations['getArticleCategoryStatistics']['parameters']['query'],
+  'member'
+>;
+export type GetStatisticsCategoriesResponse =
+  components['schemas']['GetArticleCategoryStatisticsResponse'];
 
-export const getStatisticsCategories = async ({
-  keyword,
-}: GetStatisticsCategoriesParams) => {
-  return await fetcher.get<
-    components['schemas']['GetArticleCategoryStatisticsResponse']
-  >({
+export const getStatisticsCategories = async (
+  params: GetStatisticsCategoriesParams,
+) => {
+  return await fetcher.get<GetStatisticsCategoriesResponse>({
     path: '/articles/statistics/categories',
-    query: { keyword },
+    query: { ...params },
   });
 };

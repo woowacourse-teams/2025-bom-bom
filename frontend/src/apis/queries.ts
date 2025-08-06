@@ -17,7 +17,7 @@ export const queries = {
 
   articleById: (params: Parameters<typeof getArticleById>[0]) =>
     queryOptions({
-      queryKey: ['article', params.id],
+      queryKey: ['articles', params.id],
       queryFn: () => getArticleById(params),
     }),
 
@@ -31,7 +31,11 @@ export const queries = {
 
   // members
   me: () =>
-    queryOptions({ queryKey: ['me'], queryFn: getUserInfo, retry: false }),
+    queryOptions({
+      queryKey: ['members', 'me'],
+      queryFn: getUserInfo,
+      retry: false,
+    }),
 
   readingStatus: () =>
     queryOptions({

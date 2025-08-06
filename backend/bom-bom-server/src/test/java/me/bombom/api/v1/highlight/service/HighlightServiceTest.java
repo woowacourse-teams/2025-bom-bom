@@ -89,7 +89,7 @@ class HighlightServiceTest {
         Long firstArticleId = articles.getFirst().getId();
 
         // when
-        List<HighlightResponse> responses = highlightService.getHighlights(firstArticleId, member);
+        List<HighlightResponse> responses = highlightService.getHighlightsByArticleId(firstArticleId, member);
 
         // then
         assertThat(responses).hasSize(2);
@@ -105,7 +105,7 @@ class HighlightServiceTest {
         Long nonExistArticleId = 0L;
 
         // when & then
-        assertThatThrownBy(() -> highlightService.getHighlights(nonExistArticleId, member))
+        assertThatThrownBy(() -> highlightService.getHighlightsByArticleId(nonExistArticleId, member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -217,5 +217,14 @@ class HighlightServiceTest {
         // when & then
         assertThatThrownBy(() -> highlightService.update(nonExistentHighlightId, request, member))
                 .isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void 멤버로_하이라이트를_조회할_수_있다() {
+        // when
+        List<HighlightResponse> responses = highlightService.getHighlights(member);
+
+        // then
+        assertThat(responses).hasSize(highlights.size());
     }
 }

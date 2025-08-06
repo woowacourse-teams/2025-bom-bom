@@ -25,7 +25,7 @@ public class PetController implements PetControllerApi{
 
     @Override
     @PostMapping("/attendance")
-    public void addAttendanceScore(@LoginMember Member member){
-        petService.addAttendanceScore(member);
+    public void attend(@LoginMember Member member){
+        petService.attend(member);
     }
 }

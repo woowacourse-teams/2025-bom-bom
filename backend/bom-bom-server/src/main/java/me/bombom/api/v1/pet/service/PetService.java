@@ -32,7 +32,10 @@ public class PetService {
     }
 
     @Transactional
-    public void addAttendanceScore(Member member) {
+    public void attend(Member member) {
+        Pet pet = petRepository.findByMemberId(member.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        pet.markAsAttended();
         increaseCurrentScore(member.getId(), ScorePolicyConstants.ATTENDANCE_SCORE);
     }
 
@@ -49,5 +52,10 @@ public class PetService {
                 .memberId(memberId)
                 .stageId(1L) // TODO: stage ID 따른 상수화 필요
                 .build());
+    }
+
+    @Transactional
+    public void resetAttendance() {
+        petRepository.resetAllAttendance();
     }
 }

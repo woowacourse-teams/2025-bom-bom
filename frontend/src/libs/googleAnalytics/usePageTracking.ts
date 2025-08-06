@@ -8,8 +8,8 @@ export const usePageTracking = () => {
   useEffect(() => {
     ReactGA.send({
       hitType: 'pageview',
-      page: location.pathname + location.search,
+      page: location.pathname,
       title: document.title,
     });
-  }, [location.pathname, location.search]);
+  }, [location.pathname]);
 };

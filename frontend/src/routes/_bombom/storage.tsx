@@ -28,12 +28,12 @@ function Storage() {
   const [currentPage, setCurrentPage] = useState(1);
   const debouncedSearchInput = useDebouncedValue(searchInput, 500);
 
-  const { data: articles } = useQuery(
+  const { data: articles, isLoading } = useQuery(
     queries.articles({
-      sort: sortFilter,
+      // sort: sortFilter,
       category: selectedCategory === '전체' ? undefined : selectedCategory,
       keyword: debouncedSearchInput,
-      page: currentPage,
+      // page: currentPage,
     }),
   );
 
@@ -65,10 +65,9 @@ function Storage() {
     setCurrentPage(1);
   }, [debouncedSearchInput]);
 
-  if (!articles || !categoryCounts) return null;
 
-  const readStats = getArticleReadStats(articles.content ?? []);
-  const existCategories = categoryCounts.categories?.filter(
+  const readStats = getArticleReadStats(articles?.content ?? []);
+  const existCategories = categoryCounts?.categories?.filter(
     (category) => category.count !== 0,
   );
 
@@ -119,10 +118,11 @@ function Storage() {
             onSelectOption={handleSortChange}
           />
         </SummaryBar>
-        {articles.content?.length && articles.content.length > 0 ? (
+        {isLoading ||
+        (articles?.content?.length && articles?.content.length > 0) ? (
           <>
             <ArticleList>
-              {articles.content?.map((article) => (
+              {articles?.content?.map((article) => (
                 <li key={article.articleId}>
                   <ArticleCard data={article} readVariant="badge" />
                 </li>
@@ -130,7 +130,7 @@ function Storage() {
             </ArticleList>
             <Pagination
               currentPage={currentPage}
-              totalPages={articles.totalPages ?? 1}
+              totalPages={articles?.totalPages ?? 1}
               onPageChange={handlePageChange}
             />
           </>

@@ -85,10 +85,11 @@ const ArticleContent = ({ articleId, articleContent }: ArticleContentProps) => {
       />
       <MemoPanel
         open={panelOpen}
-        handleClose={() => setPanelOpen(false)}
         memos={highlights ?? []}
         removeHighlight={removeHighlight}
         updateMemo={updateMemo}
+        handleClose={() => setPanelOpen(false)}
+        handleToggle={() => setPanelOpen((prev) => !prev)}
       />
     </>
   );

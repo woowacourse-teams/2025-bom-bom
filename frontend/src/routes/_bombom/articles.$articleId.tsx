@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { patchArticleRead } from '@/apis/articles';
 import { getBookmarked } from '@/apis/bookmark';
 import { queries } from '@/apis/queries';
@@ -12,12 +12,8 @@ import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import ArticleContent from '@/pages/detail/components/ArticleContent/ArticleContent';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
-import { FloatingToolbarMode } from '@/pages/detail/components/FloatingToolbar/FloatingToolbar.types';
-import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
 import useBookmarkMutation from '@/pages/detail/hooks/useBookmarkMutation';
-import { useHighlightData } from '@/pages/detail/hooks/useHighlightData';
-import { saveSelection } from '@/pages/detail/utils/highlight';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
 
@@ -29,9 +25,6 @@ function ArticleDetailPage() {
   const { articleId } = Route.useParams();
   const articleIdNumber = Number(articleId);
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const { highlights, addHighlight, updateMemo, removeHighlight } =
-    useHighlightData({ articleId: articleIdNumber });
 
   const { data: currentArticle } = useQuery(
     queries.articleById({ id: Number(articleId) }),
@@ -59,42 +52,6 @@ function ArticleDetailPage() {
   const { onToggleBookmarkClick } = useBookmarkMutation({
     articleId: Number(articleId),
   });
-
-  const handleHighlightClick = ({
-    mode,
-    selection,
-    highlightId,
-  }: {
-    mode: FloatingToolbarMode;
-    selection: Selection | null;
-    highlightId: number | null;
-  }) => {
-    const isNewHighlight = mode === 'new';
-
-    if (isNewHighlight && selection) {
-      const highlightData = saveSelection(selection, articleIdNumber);
-      addHighlight(highlightData);
-    }
-    if (!isNewHighlight && highlightId) {
-      removeHighlight(highlightId);
-    }
-  };
-
-  const handleMemoClick = ({
-    mode,
-    selection,
-  }: {
-    mode: FloatingToolbarMode;
-    selection: Selection | null;
-  }) => {
-    const isNewHighlight = mode === 'new';
-
-    if (isNewHighlight && selection) {
-      const highlightData = saveSelection(selection, articleIdNumber);
-      addHighlight(highlightData);
-    }
-    setOpen(true);
-  };
 
   useScrollThreshold({
     enabled: !currentArticle?.isRead && !!currentArticle,
@@ -131,10 +88,8 @@ function ArticleDetailPage() {
       </HeaderWrapper>
       <Divider />
       <ArticleContent
+        articleId={articleIdNumber}
         articleContent={currentArticle.contents}
-        highlights={highlights}
-        onHighlightClick={handleHighlightClick}
-        onMemoClick={handleMemoClick}
       />
       <Spacing size={24} />
       <Divider />
@@ -154,13 +109,6 @@ function ArticleDetailPage() {
           <EmptyUnreadCard />
         )}
       </TodayArticlesWrapper>
-      <MemoPanel
-        open={open}
-        handleClose={() => setOpen(false)}
-        memos={highlights ?? []}
-        removeHighlight={removeHighlight}
-        updateMemo={updateMemo}
-      />
       <FloatingActionButtons
         bookmarked={!!bookmarked}
         onToggleBookmarkClick={onToggleBookmarkClick}

@@ -1,6 +1,6 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { useEffect, useRef, useState } from 'react';
+import { RefObject, useEffect, useRef, useState } from 'react';
 import Comment from '#/assets/comment.svg';
 import Pen from '#/assets/pen.svg';
 
@@ -10,11 +10,13 @@ interface ToolbarPosition {
 }
 
 interface FloatingToolBarProps {
+  selectionTargetRef: RefObject<HTMLDivElement | null>;
   onHighlightButtonClick: (selection: Selection) => void;
   onMemoButtonClick: (selection: Selection) => void;
 }
 
 export default function FloatingToolbar({
+  selectionTargetRef,
   onHighlightButtonClick,
   onMemoButtonClick,
 }: FloatingToolBarProps) {
@@ -49,6 +51,11 @@ export default function FloatingToolbar({
       const selection = window.getSelection();
       if (selection && !selection.isCollapsed) {
         const range = selection.getRangeAt(0);
+        if (
+          !selectionTargetRef.current?.contains(range.commonAncestorContainer)
+        )
+          return;
+
         const rect = range.getBoundingClientRect();
 
         setPosition({
@@ -68,7 +75,7 @@ export default function FloatingToolbar({
       document.removeEventListener('click', handleClick);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, []);
+  }, [selectionTargetRef]);
 
   return (
     <Container position={position} visible={isVisible}>

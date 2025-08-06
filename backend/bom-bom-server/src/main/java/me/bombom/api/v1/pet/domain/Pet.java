@@ -52,7 +52,11 @@ public class Pet extends BaseEntity {
         this.currentScore += score;
     }
 
-    public void updateAttendance(boolean isAttended){
-        this.isAttended = isAttended;
+    public void markAsAttended() {
+        this.isAttended = true;
+    }
+
+    public void clearAttendance() {
+        this.isAttended = false;
     }
 }

@@ -35,7 +35,7 @@ public class PetService {
     public void attend(Member member) {
         Pet pet = petRepository.findByMemberId(member.getId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        pet.updateAttendance(true);
+        pet.markAsAttended();
         increaseCurrentScore(member.getId(), ScorePolicyConstants.ATTENDANCE_SCORE);
     }
 
@@ -56,7 +56,6 @@ public class PetService {
 
     @Transactional
     public void resetAttendance() {
-        petRepository.findAllByIsAttended(true)
-                .forEach(pet -> pet.updateAttendance(false));
+        petRepository.resetAllAttendance();
     }
 }

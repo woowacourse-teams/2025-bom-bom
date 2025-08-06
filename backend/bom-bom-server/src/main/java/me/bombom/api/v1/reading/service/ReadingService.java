@@ -30,7 +30,7 @@ public class ReadingService {
     private final WeeklyReadingRepository weeklyReadingRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void createReadingInformation(Long memberId) {
+    public void initializeReadingInformation(Long memberId) {
         ContinueReading newContinueReading = ContinueReading.create(memberId);
         continueReadingRepository.save(newContinueReading);
 

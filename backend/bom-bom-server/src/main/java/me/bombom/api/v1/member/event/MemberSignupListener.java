@@ -18,7 +18,7 @@ public class MemberSignupListener {
     @TransactionalEventListener
     public void on(MemberSignupEvent event) {
         try {
-            readingService.createReadingInformation(event.getMemberId());
+            readingService.initializeReadingInformation(event.getMemberId());
             petService.createPet(event.getMemberId());
         } catch (Exception e) {
             // TODO: 로깅 및 로직 추가

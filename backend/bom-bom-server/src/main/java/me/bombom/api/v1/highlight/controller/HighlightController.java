@@ -29,8 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/highlights")
 public class HighlightController {
 
-    public static final String COLOR_HEX_PATTERN = "^#[0-9a-fA-F]{6}$";
-
     private final HighlightService highlightService;
 
     @GetMapping

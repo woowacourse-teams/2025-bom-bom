@@ -83,7 +83,7 @@ class BookmarkServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(bookmarks.getContent()).hasSize(1);
-            softly.assertThat(bookmarks.getContent().getFirst().articleResponse().articleId()).isEqualTo(article.getId());
+            softly.assertThat(bookmarks.getContent().getFirst().articleId()).isEqualTo(article.getId());
         });
     }
 
@@ -147,11 +147,11 @@ class BookmarkServiceTest {
 
         // then
         if (first.getCreatedAt().isBefore(second.getCreatedAt())) {
-            assertThat(descBookmarks.getContent().get(0).articleResponse().articleId()).isEqualTo(second.getArticleId());
-            assertThat(descBookmarks.getContent().get(1).articleResponse().articleId()).isEqualTo(first.getArticleId());
+            assertThat(descBookmarks.getContent().get(0).articleId()).isEqualTo(second.getArticleId());
+            assertThat(descBookmarks.getContent().get(1).articleId()).isEqualTo(first.getArticleId());
         } else {
-            assertThat(descBookmarks.getContent().get(0).articleResponse().articleId()).isEqualTo(first.getArticleId());
-            assertThat(descBookmarks.getContent().get(1).articleResponse().articleId()).isEqualTo(second.getArticleId());
+            assertThat(descBookmarks.getContent().get(0).articleId()).isEqualTo(first.getArticleId());
+            assertThat(descBookmarks.getContent().get(1).articleId()).isEqualTo(second.getArticleId());
         }
     }
 
@@ -175,11 +175,11 @@ class BookmarkServiceTest {
 
         // then
         if (first.getCreatedAt().isBefore(second.getCreatedAt())) {
-            assertThat(ascBookmarks.getContent().get(0).articleResponse().articleId()).isEqualTo(first.getArticleId());
-            assertThat(ascBookmarks.getContent().get(1).articleResponse().articleId()).isEqualTo(second.getArticleId());
+            assertThat(ascBookmarks.getContent().get(0).articleId()).isEqualTo(first.getArticleId());
+            assertThat(ascBookmarks.getContent().get(1).articleId()).isEqualTo(second.getArticleId());
         } else {
-            assertThat(ascBookmarks.getContent().get(0).articleResponse().articleId()).isEqualTo(second.getArticleId());
-            assertThat(ascBookmarks.getContent().get(1).articleResponse().articleId()).isEqualTo(first.getArticleId());
+            assertThat(ascBookmarks.getContent().get(0).articleId()).isEqualTo(second.getArticleId());
+            assertThat(ascBookmarks.getContent().get(1).articleId()).isEqualTo(first.getArticleId());
         }
     }
 

@@ -1,9 +1,9 @@
 package me.bombom.api.v1.pet.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -16,6 +16,7 @@ import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.pet.dto.PetResponse;
 import me.bombom.api.v1.pet.repository.PetRepository;
 import me.bombom.api.v1.pet.repository.StageRepository;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,17 +94,52 @@ class PetServiceTest {
         petRepository.save(pet);
 
         // when
-        petService.addAttendanceScore(member);
+        petService.attend(member);
 
         // then
-        assertThat(pet.getCurrentScore()).isEqualTo(5);
+        assertSoftly(softly -> {
+                    softly.assertThat(pet.getCurrentScore()).isEqualTo(5);
+                    softly.assertThat(pet.isAttended()).isTrue();
+                }
+        );
     }
 
     @Test
     void 키우기_출석_시_키우기가_없을_경우_에러() {
         // when & then
-        assertThatThrownBy(() -> petService.addAttendanceScore(member))
+        assertThatThrownBy(() -> petService.attend(member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 키우기_출석_초기화() {
+        // given
+        petRepository.saveAll(
+                List.of(
+                        createPet(false),
+                        createPet(false),
+                        createPet(true),
+                        createPet(true)
+                )
+        );
+
+        // when
+        petService.resetAttendance();
+
+        // then
+        long notAttendedCount = petRepository.findAll()
+                .stream()
+                .filter(pet -> !pet.isAttended())
+                .count();
+        Assertions.assertThat(notAttendedCount).isEqualTo(4);
+    }
+
+    private Pet createPet(boolean isAttend) {
+        return Pet.builder()
+                .memberId(1L)
+                .stageId(1L)
+                .isAttended(isAttend)
+                .build();
     }
 }

@@ -1,7 +1,7 @@
 import { fetcher } from './fetcher';
 import { components, operations } from '@/types/openapi';
 
-interface GetArticlesParams {
+export interface GetArticlesParams {
   date?: Date;
   category?: string;
   keyword?: string;
@@ -11,7 +11,7 @@ interface GetArticlesParams {
   sort?: 'ASC' | 'DESC';
 }
 
-type GetArticlesResponse = components['schemas']['PageArticleResponse'];
+export type GetArticlesResponse = components['schemas']['PageArticleResponse'];
 
 export const getArticles = async (params: GetArticlesParams) => {
   return await fetcher.get<GetArticlesResponse>({
@@ -20,9 +20,10 @@ export const getArticles = async (params: GetArticlesParams) => {
   });
 };
 
-type GetArticleByIdParams =
+export type GetArticleByIdParams =
   operations['getArticleDetail']['parameters']['path'];
-type GetArticleByIdResponse = components['schemas']['ArticleDetailResponse'];
+export type GetArticleByIdResponse =
+  components['schemas']['ArticleDetailResponse'];
 
 export const getArticleById = async ({ id }: GetArticleByIdParams) => {
   return await fetcher.get<GetArticleByIdResponse>({
@@ -30,7 +31,8 @@ export const getArticleById = async ({ id }: GetArticleByIdParams) => {
   });
 };
 
-type PatchArticleReadParams = operations['updateIsRead']['parameters']['path'];
+export type PatchArticleReadParams =
+  operations['updateIsRead']['parameters']['path'];
 
 export const patchArticleRead = async ({ id }: PatchArticleReadParams) => {
   return await fetcher.patch({
@@ -38,11 +40,11 @@ export const patchArticleRead = async ({ id }: PatchArticleReadParams) => {
   });
 };
 
-type GetStatisticsCategoriesParams = Omit<
+export type GetStatisticsCategoriesParams = Omit<
   operations['getArticleCategoryStatistics']['parameters']['query'],
   'member'
 >;
-type GetStatisticsCategoriesResponse =
+export type GetStatisticsCategoriesResponse =
   components['schemas']['GetArticleCategoryStatisticsResponse'];
 
 export const getStatisticsCategories = async (

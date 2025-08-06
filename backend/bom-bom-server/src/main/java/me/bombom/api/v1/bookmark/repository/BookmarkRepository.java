@@ -7,5 +7,5 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long>, Custo
 
     boolean existsByMemberIdAndArticleId(Long memberId, Long articleId);
 
-    void deleteByArticleIdAndMemberId(Long articleId, Long memberId);
+    void deleteByArticleIdAndMemberId(Long memberId, Long articleId);
 }

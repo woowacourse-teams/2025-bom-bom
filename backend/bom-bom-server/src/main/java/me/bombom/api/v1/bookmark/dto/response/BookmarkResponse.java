@@ -18,7 +18,7 @@ public record BookmarkResponse(
 ) {
 
     @QueryProjection
-    public BookmarkResponse(final Long id, final ArticleResponse articleResponse) {
+    public BookmarkResponse(Long id, ArticleResponse articleResponse) {
         this(
                 id,
                 articleResponse.articleId(),

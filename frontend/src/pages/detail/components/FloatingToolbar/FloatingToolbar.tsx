@@ -1,6 +1,7 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { RefObject, useEffect, useRef, useState } from 'react';
+import { FloatingToolbarMode } from './FloatingToolbar.types';
 import MemoIcon from '#/assets/comment.svg';
 import HighlightOffIcon from '#/assets/edit-off.svg';
 import HighlightIcon from '#/assets/edit.svg';
@@ -12,16 +13,18 @@ interface ToolbarPosition {
 
 interface FloatingToolBarProps {
   selectionTargetRef: RefObject<HTMLDivElement | null>;
-  onHighlightButtonClick: (selection: Selection) => void;
-  onHighlightOffButtonClick: (id: number) => void;
-  onMemoButtonClick: (selection: Selection) => void;
+  onHighlightClick: (
+    mode: FloatingToolbarMode,
+    selection: Selection | null,
+    highlightId: number | null,
+  ) => void;
+  onMemoClick: (mode: FloatingToolbarMode, selection: Selection | null) => void;
 }
 
 export default function FloatingToolbar({
   selectionTargetRef,
-  onHighlightButtonClick,
-  onHighlightOffButtonClick,
-  onMemoButtonClick,
+  onHighlightClick,
+  onMemoClick,
 }: FloatingToolBarProps) {
   const selectionRef = useRef<Selection>(null);
   const [selectedHighlightId, setSelectedHighlightId] = useState<number | null>(
@@ -31,24 +34,20 @@ export default function FloatingToolbar({
   const [position, setPosition] = useState<ToolbarPosition>({ x: 0, y: 0 });
 
   const hideToolbar = () => setIsVisible(false);
+  const currentMode: FloatingToolbarMode = selectedHighlightId
+    ? 'existing'
+    : 'new';
 
-  const handleHighlightButtonClick = () => {
+  const handleHighlightClick = () => {
     if (!selectionRef.current) return;
     hideToolbar();
-    onHighlightButtonClick(selectionRef.current);
+    onHighlightClick(currentMode, selectionRef.current, selectedHighlightId);
   };
 
-  const handleHighlightOffButtonClick = () => {
-    if (!selectedHighlightId) return;
-    hideToolbar();
-    onHighlightOffButtonClick(selectedHighlightId);
-    setSelectedHighlightId(null);
-  };
-
-  const handleMemoButtonClick = () => {
+  const handleMemoClick = () => {
     if (!selectionRef.current) return;
     hideToolbar();
-    onMemoButtonClick(selectionRef.current);
+    onMemoClick(currentMode, selectionRef.current);
   };
 
   useEffect(() => {
@@ -99,25 +98,12 @@ export default function FloatingToolbar({
 
   return (
     <Container position={position} visible={isVisible}>
-      {selectedHighlightId ? (
-        <>
-          <ToolbarButton onClick={handleHighlightOffButtonClick}>
-            <HighlightOffIcon />
-          </ToolbarButton>
-          <ToolbarButton onClick={hideToolbar}>
-            <MemoIcon />
-          </ToolbarButton>
-        </>
-      ) : (
-        <>
-          <ToolbarButton onClick={handleHighlightButtonClick}>
-            <HighlightIcon />
-          </ToolbarButton>
-          <ToolbarButton onClick={handleMemoButtonClick}>
-            <MemoIcon />
-          </ToolbarButton>
-        </>
-      )}
+      <ToolbarButton onClick={handleHighlightClick}>
+        {currentMode === 'new' ? <HighlightIcon /> : <HighlightOffIcon />}
+      </ToolbarButton>
+      <ToolbarButton onClick={handleMemoClick}>
+        <MemoIcon />
+      </ToolbarButton>
     </Container>
   );
 }

@@ -4,20 +4,25 @@ import { useHighlightHoverEffect } from '../../hooks/useHighlightHoverEffect';
 import { HighlightType } from '../../types/highlight';
 import { restoreHighlight } from '../../utils/highlight';
 import FloatingToolbar from '../FloatingToolbar/FloatingToolbar';
+import { FloatingToolbarMode } from '../FloatingToolbar/FloatingToolbar.types';
 import { components } from '@/types/openapi';
 
 interface ArticleContentProps {
   articleContent: components['schemas']['ArticleDetailResponse']['contents'];
   highlights: HighlightType[] | null | undefined;
-  onHighlightButtonClick: (selection: Selection) => void;
-  onMemoButtonClick: (selection: Selection) => void;
+  onHighlightClick: (
+    mode: FloatingToolbarMode,
+    selection: Selection | null,
+    highlightId: number | null,
+  ) => void;
+  onMemoClick: (mode: FloatingToolbarMode, selection: Selection | null) => void;
 }
 
 const ArticleContent = ({
   articleContent,
   highlights,
-  onHighlightButtonClick,
-  onMemoButtonClick,
+  onHighlightClick,
+  onMemoClick,
 }: ArticleContentProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -37,8 +42,8 @@ const ArticleContent = ({
       />
       <FloatingToolbar
         selectionTargetRef={contentRef}
-        onHighlightButtonClick={onHighlightButtonClick}
-        onMemoButtonClick={onMemoButtonClick}
+        onHighlightClick={onHighlightClick}
+        onMemoClick={onMemoClick}
       />
     </>
   );

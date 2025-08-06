@@ -8,7 +8,7 @@ export interface GetArticlesParams {
 
   page?: number;
   size?: number;
-  sort?: 'ASC' | 'DESC';
+  sort?: string;
 }
 
 export type GetArticlesResponse = components['schemas']['PageArticleResponse'];

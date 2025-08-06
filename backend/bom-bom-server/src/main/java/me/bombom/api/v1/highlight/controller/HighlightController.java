@@ -41,8 +41,8 @@ public class HighlightController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createHighlight(@LoginMember Member member, @Valid @RequestBody HighlightCreateRequest createRequest) {
-        highlightService.create(createRequest, member);
+    public HighlightResponse createHighlight(@LoginMember Member member, @Valid @RequestBody HighlightCreateRequest createRequest) {
+        return highlightService.create(createRequest, member);
     }
 
     @DeleteMapping("/{id}")

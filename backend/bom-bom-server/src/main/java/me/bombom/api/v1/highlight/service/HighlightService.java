@@ -32,23 +32,18 @@ public class HighlightService {
     }
 
     @Transactional
-    public void create(HighlightCreateRequest createRequest, Member member) {
-        Article article = articleRepository.findById(createRequest.articleId())
+    public HighlightResponse create(HighlightCreateRequest request, Member member) {
+        Article article = articleRepository.findById(request.articleId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         validateArticleOwner(member, article);
-        HighlightLocation location = createRequest.location()
+        HighlightLocation location = request.location()
                 .toHighlightLocation();
-        if (highlightRepository.existsByArticleIdAndHighlightLocation(createRequest.articleId(), location)) {
-            return;
-        }
-        Highlight highlight = Highlight.builder()
-                .articleId(createRequest.articleId())
-                .highlightLocation(location)
-                .color(createRequest.color())
-                .text(createRequest.text())
-                .memo(createRequest.memo())
-                .build();
-        highlightRepository.save(highlight);
+        return highlightRepository.findByArticleIdAndHighlightLocation(article.getId(), location)
+                .map(HighlightResponse::from)
+                .orElseGet(() -> {
+                    Highlight highlight = highlightRepository.save(buildHighlight(request, location));
+                    return HighlightResponse.from(highlight);
+                });
     }
 
     @Transactional
@@ -68,6 +63,16 @@ public class HighlightService {
         if (article.isNotOwner(member.getId())) {
             throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
         }
+    }
+
+    private Highlight buildHighlight(HighlightCreateRequest createRequest, HighlightLocation location) {
+        return Highlight.builder()
+                .articleId(createRequest.articleId())
+                .highlightLocation(location)
+                .color(createRequest.color())
+                .text(createRequest.text())
+                .memo(createRequest.memo())
+                .build();
     }
 
     private Highlight findHighlightWithOwnerValidation(Long id, Member member) {

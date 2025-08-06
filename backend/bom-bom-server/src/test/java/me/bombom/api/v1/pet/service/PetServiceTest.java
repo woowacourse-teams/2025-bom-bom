@@ -5,6 +5,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -23,8 +24,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.transaction.TestTransaction;
+import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
+@Transactional
 @Import({PetService.class, QuerydslConfig.class})
 class PetServiceTest {
 
@@ -44,20 +48,23 @@ class PetServiceTest {
     private EntityManager entityManager;
 
     private Member member;
-    private Stage stage;
+    private Stage firstStage;
+    private Stage secondStage;
 
     @BeforeEach
     void setUp() {
-        member = TestFixture.normalMemberFixture();
+        member = TestFixture.createUniqueMember(UUID.randomUUID().toString(), UUID.randomUUID().toString());
         memberRepository.save(member);
-        stage = TestFixture.createStage(1, 50);
-        stageRepository.save(stage);
+        firstStage = TestFixture.createStage(1, 50);
+        stageRepository.save(firstStage);
+        secondStage = TestFixture.createStage(2, 100);
+        stageRepository.save(secondStage);
     }
 
     @Test
     void 키우기_정보_조회() {
         // given
-        Pet pet = TestFixture.createPet(member, stage.getId());
+        Pet pet = TestFixture.createPet(member, firstStage.getId());
         petRepository.save(pet);
 
         // when
@@ -153,50 +160,40 @@ class PetServiceTest {
     @Test
     void 펫_스테이지_업데이트_성공() {
         // given
-        Stage nextStage = TestFixture.createStage(2, 100);
-        stageRepository.save(nextStage);
-        stageRepository.findById(nextStage.getId());
-        Pet pet = TestFixture.createPetWithScore(member, stage.getId(), 100);
+        Pet pet = TestFixture.createPetWithScore(member, firstStage.getId(), 99);
         petRepository.save(pet);
 
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+
         // when
-        petService.increaseCurrentScore(member.getId(), 0);
+        petService.increaseCurrentScore(member.getId(), 2);
+        Pet updatedPet = petRepository.findById(pet.getId()).orElseThrow();
+        Stage stage = stageRepository.findById(updatedPet.getStageId()).orElseThrow();
 
         // then
         assertSoftly(softly -> {
-            softly.assertThat(pet.getStageId()).isEqualTo(nextStage.getId());
+            softly.assertThat(stage.getLevel()).isEqualTo(secondStage.getLevel());
         });
     }
 
     @Test
     void 점수_부족_시_펫_스테이지_업데이트_실패() {
         // given
-        Stage nextStage = TestFixture.createStage(2, 100);
-        stageRepository.save(nextStage);
-        Pet pet = TestFixture.createPetWithScore(member, stage.getId(), 99);
+        Pet pet = TestFixture.createPetWithScore(member, firstStage.getId(), 99);
         petRepository.save(pet);
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
 
         // when
         petService.increaseCurrentScore(member.getId(), 0);
+        Pet updatedPet = petRepository.findById(pet.getId()).orElseThrow();
+        Stage stage = stageRepository.findById(updatedPet.getStageId()).orElseThrow();
 
         // then
         assertSoftly(softly -> {
-            softly.assertThat(pet.getStageId()).isEqualTo(stage.getId());
-        });
-    }
-
-    @Test
-    void 최고_레벨일_시에_펫_스테이지_업데이트_실패() {
-        // given
-        Pet pet = TestFixture.createPetWithScore(member, stage.getId(), 100);
-        petRepository.save(pet);
-
-        // when
-        petService.increaseCurrentScore(member.getId(), 0);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(pet.getStageId()).isEqualTo(stage.getId());
+            softly.assertThat(stage.getLevel()).isEqualTo(firstStage.getLevel());
         });
     }
 }

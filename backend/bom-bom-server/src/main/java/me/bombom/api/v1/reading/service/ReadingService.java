@@ -57,7 +57,7 @@ public class ReadingService {
     public void resetContinueReadingCount() {
         todayReadingRepository.findAll()
                 .stream()
-                .filter(todayReading -> (todayReading.getTotalCount() != 0) && (todayReading.getCurrentCount() == 0))
+                .filter(this::shouldResetContinueReadingCount)
                 .forEach(this::applyResetContinueReadingCount);
     }
 
@@ -103,6 +103,10 @@ public class ReadingService {
         return ReadingInformationResponse.of(continueReading, todayReading, weeklyReading);
     }
 
+    private boolean shouldResetContinueReadingCount(TodayReading todayReading) {
+        return (todayReading.getTotalCount() != 0) && (todayReading.getCurrentCount() == 0);
+    }
+
     private void applyResetContinueReadingCount(TodayReading todayReading) {
         Long memberId = todayReading.getMemberId();
         ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
@@ -115,7 +119,7 @@ public class ReadingService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        if (todayReading.getCurrentCount() == 0) {
+        if (canIncreaseContinueReadingCount(todayReading)) {
             continueReading.increaseDayCount();
         }
     }
@@ -134,6 +138,10 @@ public class ReadingService {
 
     private boolean isBonusApplicable(ContinueReading continueReading) {
         return continueReading.getDayCount() >= ScorePolicyConstants.MIN_CONTINUE_READING_COUNT;
+    }
+
+    private boolean canIncreaseContinueReadingCount(TodayReading todayReading) {
+        return todayReading.getCurrentCount() == 0;
     }
 }
 

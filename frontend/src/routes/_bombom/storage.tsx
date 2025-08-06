@@ -35,6 +35,7 @@ function Storage() {
         sorted: sortFilter,
         category: selectedCategory === '전체' ? undefined : selectedCategory,
         keyword: debouncedSearchInput,
+        page: currentPage,
       }),
   });
   const { data: categoryCounts } = useQuery({

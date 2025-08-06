@@ -31,7 +31,7 @@ jobs:
           
           echo "Create application.yml(test) from secret"
           mkdir -p src/test/resources
-          echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
+          echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application-test.yml
 
       - name: JAR 빌드
         run: ./gradlew clean build --no-daemon

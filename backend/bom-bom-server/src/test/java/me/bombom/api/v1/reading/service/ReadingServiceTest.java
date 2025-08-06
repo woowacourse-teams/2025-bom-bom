@@ -3,11 +3,9 @@ package me.bombom.api.v1.reading.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
+import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.reading.domain.ContinueReading;
@@ -20,8 +18,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.transaction.TestTransaction;
@@ -30,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @Transactional
 @ActiveProfiles("test")
-@Import({ReadingService.class, ReadingServiceTest.TestConfig.class})
+@Import({ReadingService.class, QuerydslConfig.class})
 class ReadingServiceTest {
 
     @Autowired
@@ -124,16 +120,5 @@ class ReadingServiceTest {
             softly.assertThat(updatedContinueReading.getDayCount()).isEqualTo(initialContinueCount);
             softly.assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(initialWeeklyCount + 1);
         });
-    }
-
-    @TestConfiguration
-    static class TestConfig {
-        @PersistenceContext
-        private EntityManager em;
-
-        @Bean
-        public JPAQueryFactory jpaQueryFactory() {
-            return new JPAQueryFactory(em);
-        }
     }
 }

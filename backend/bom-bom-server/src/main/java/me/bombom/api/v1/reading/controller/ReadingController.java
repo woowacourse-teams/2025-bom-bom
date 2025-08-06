@@ -17,15 +17,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/members/me/reading")
-public class ReadingController {
+public class ReadingController implements ReadingControllerApi{
 
     private final ReadingService readingService;
 
+    @Override
     @PatchMapping("/progress/week/goal")
     public WeeklyGoalCountResponse updateWeeklyGoalCount(@Valid @RequestBody UpdateWeeklyGoalCountRequest request){
         return readingService.updateWeeklyGoalCount(request);
     }
 
+    @Override
     @GetMapping
     public ReadingInformationResponse getReadingInformation(@LoginMember Member member){
         return readingService.getReadingInformation(member);

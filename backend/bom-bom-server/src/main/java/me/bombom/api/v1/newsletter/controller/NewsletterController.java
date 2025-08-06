@@ -11,10 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/newsletters")
-public class NewsletterController {
+public class NewsletterController implements NewsletterControllerApi{
 
     private final NewsletterService newsletterService;
 
+    @Override
     @GetMapping
     public List<NewsletterResponse> getNewsletters() {
         return newsletterService.getNewsletters();

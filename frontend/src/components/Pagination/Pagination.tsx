@@ -48,14 +48,14 @@ const Pagination = ({
 
       <PageNumbers>
         {pageNumbers.map((page, index) => (
-          <PageNumber
+          <PageNumberButton
             key={index}
             isCurrent={page === currentPage}
             isDisabled={page === ELLIPSIS}
             onClick={() => typeof page === 'number' && onPageChange(page)}
           >
             {page === ELLIPSIS ? ELLIPSIS : page}
-          </PageNumber>
+          </PageNumberButton>
         ))}
       </PageNumbers>
 
@@ -119,7 +119,7 @@ const PageNumbers = styled.div`
   align-items: center;
 `;
 
-const PageNumber = styled.button<{
+const PageNumberButton = styled.button<{
   isCurrent: boolean;
   isDisabled: boolean;
 }>`

@@ -29,6 +29,18 @@ public final class TestFixture {
     /**
      * Member
      */
+
+    public static Member createUniqueMember(String nickname, String providerId) {
+        return Member.builder()
+                .provider("provider")
+                .providerId(providerId)
+                .email("email")
+                .nickname(nickname)
+                .gender(Gender.FEMALE)
+                .roleId(1L)
+                .build();
+    }
+
     public static Member normalMemberFixture() {
         return Member.builder()
                 .provider("provider")
@@ -151,6 +163,14 @@ public final class TestFixture {
         return TodayReading.builder()
                 .memberId(member.getId())
                 .currentCount(1)
+                .totalCount(3)
+                .build();
+    }
+
+    public static TodayReading todayReadingFixtureZeroCurrentCount(Member member) {
+        return TodayReading.builder()
+                .memberId(member.getId())
+                .currentCount(0)
                 .totalCount(3)
                 .build();
     }

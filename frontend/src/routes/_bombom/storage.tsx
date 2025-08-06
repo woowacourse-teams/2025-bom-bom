@@ -25,7 +25,7 @@ function Storage() {
     useState<CategoryType>('전체');
   const [sortFilter, setSortFilter] = useState<'DESC' | 'ASC'>('DESC');
   const [searchInput, setSearchInput] = useState('');
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const debouncedSearchInput = useDebouncedValue(searchInput, 500);
 
   const { data: articles } = useQuery({

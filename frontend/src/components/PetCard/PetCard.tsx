@@ -76,7 +76,11 @@ const PetCard = () => {
       </Level>
       <Spacing size={16} />
       <ProgressBar rate={levelPercentage} caption={`${levelPercentage}%`} />
-      <Button text="맘마 먹이기" onClick={handleAttendanceClick} />
+      <Button
+        text={pet?.isAttended ? '출석 완료!' : '출석체크하기'}
+        onClick={handleAttendanceClick}
+        disabled={pet?.isAttended}
+      />
     </Container>
   );
 };

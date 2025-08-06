@@ -23,7 +23,9 @@ public interface ArticleControllerApi {
 
     @Operation(
             summary = "아티클 목록 조회",
-            description = "조건에 맞는 아티클 목록을 페이징하여 조회합니다. 정렬 기본값은 'arrivedDateTime, DESC' 입니다."
+            description = "조건에 맞는 아티클 목록을 페이징하여 조회합니다. "
+                    + "(정렬 기본값: ?page=0&size=10&sort=arrivedDateTime,desc)"
+
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "아티클 목록 조회 성공"),

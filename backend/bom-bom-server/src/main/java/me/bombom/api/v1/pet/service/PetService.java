@@ -53,4 +53,10 @@ public class PetService {
                 .stageId(1L) // TODO: stage ID 따른 상수화 필요
                 .build());
     }
+
+    @Transactional
+    public void resetAttendance() {
+        petRepository.findAllByIsAttended(true)
+                .forEach(pet -> pet.updateAttendance(false));
+    }
 }

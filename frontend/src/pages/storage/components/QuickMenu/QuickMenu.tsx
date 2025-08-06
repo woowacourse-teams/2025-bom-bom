@@ -1,6 +1,8 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
+import { theme } from '@/styles/theme';
 import BookmarkIcon from '#/assets/bookmark-inactive.svg';
+import MemoIcon from '#/assets/memo.svg';
 import QuickMenuIcon from '#/assets/quick-menu.svg';
 
 const QuickMenu = () => {
@@ -15,6 +17,10 @@ const QuickMenu = () => {
       <BookmarkWrapper>
         <StyledBookmarkIcon />
         <BookmarkLink to={'/bookmark'}>북마크</BookmarkLink>
+      </BookmarkWrapper>
+      <BookmarkWrapper>
+        <MemoIcon width={20} height={20} fill={theme.colors.primary} />
+        <BookmarkLink to={'/memo'}>메모</BookmarkLink>
       </BookmarkWrapper>
     </Container>
   );

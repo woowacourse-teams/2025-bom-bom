@@ -364,6 +364,25 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    Member: {
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id?: number;
+      provider?: string;
+      providerId?: string;
+      email?: string;
+      nickname?: string;
+      profileImageUrl?: string;
+      /** Format: date-time */
+      birthDate?: string;
+      /** @enum {string} */
+      gender?: 'MALE' | 'FEMALE';
+      /** Format: int64 */
+      roleId?: number;
+    };
     Color: {
       value?: string;
     };
@@ -371,33 +390,22 @@ export interface components {
       location: components['schemas']['HighlightLocationRequest'];
       /** Format: int64 */
       articleId?: number;
-      color: components['schemas']['Color'];
+      /**
+       * @description 하이라이트 색상 (HEX 형식, 예: #FF0000)
+       * @example #FFD6C2
+       */
+      color: string;
       text: string;
       memo?: string;
     };
     HighlightLocationRequest: {
-      startOffset: string;
+      /** Format: int32 */
+      startOffset: number;
       startXPath: string;
-      endOffset: string;
+      /** Format: int32 */
+      endOffset: number;
       endXPath: string;
     };
-    HighlightLocationResponse: {
-      startOffset?: string;
-      startXPath?: string;
-      endOffset?: string;
-      endXPath?: string;
-    };
-    HighlightResponse: {
-      /** Format: int64 */
-      id?: number;
-      location?: components['schemas']['HighlightLocationResponse'];
-      /** Format: int64 */
-      articleId?: number;
-      color?: string;
-      text?: string;
-      memo?: string;
-    };
-    /** @description 회원가입 요청 데이터 */
     MemberSignupRequest: {
       nickname: string;
       email: string;
@@ -420,6 +428,22 @@ export interface components {
     };
     UpdateHighlightRequest: {
       color?: components['schemas']['Color'];
+      memo?: string;
+    };
+    HighlightLocation: {
+      startOffset?: string;
+      startXPath?: string;
+      endOffset?: string;
+      endXPath?: string;
+    };
+    HighlightResponse: {
+      /** Format: int64 */
+      id?: number;
+      location?: components['schemas']['HighlightLocation'];
+      /** Format: int64 */
+      articleId?: number;
+      color?: string;
+      text?: string;
       memo?: string;
     };
     NewsletterResponse: {
@@ -460,9 +484,9 @@ export interface components {
       /** Format: int32 */
       level?: number;
       /** Format: int32 */
-      totalScore?: number;
+      currentStageScore?: number;
       /** Format: int32 */
-      currentScore?: number;
+      requiredStageScore?: number;
       isAttended?: boolean;
     };
     Pageable: {

@@ -7,12 +7,7 @@ const GAInitializer = () => {
     const isProduction = ENV.nodeEnv === 'production';
     if (!isProduction) return;
 
-    if (!ENV.googleAnalyticsId) {
-      console.warn('[GA] googleAnalyticsId is missing in production');
-      return;
-    }
-
-    initGA('G-H8TK28L3HP');
+    initGA('G-GXQCT7B1GM');
   }, []);
   return null;
 };

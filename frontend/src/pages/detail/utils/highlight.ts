@@ -46,17 +46,15 @@ export const saveSelection = (
   const offsets = getHighlightOffsets(container, range);
 
   return {
-    highlight: {
-      location: {
-        startXPath: xpath,
-        startOffset: offsets.start,
-        endXPath: xpath,
-        endOffset: offsets.end,
-      },
-      articleId,
-      color: theme.colors.primaryLight,
-      text: selection.toString(), // 선택된 텍스트 저장
+    location: {
+      startXPath: xpath,
+      startOffset: offsets.start,
+      endXPath: xpath,
+      endOffset: offsets.end,
     },
+    articleId,
+    color: theme.colors.primaryLight,
+    text: selection.toString(), // 선택된 텍스트 저장
   };
 };
 

@@ -1,4 +1,5 @@
 import { Global } from '@emotion/react';
+import Clarity from '@microsoft/clarity';
 import {
   init as initSentry,
   tanstackRouterBrowserTracingIntegration,
@@ -10,6 +11,8 @@ import { createRoot } from 'react-dom/client';
 import { ENV } from './apis/env.ts';
 import { routeTree } from './routeTree.gen';
 import reset from './styles/reset.ts';
+
+Clarity.init(ENV.clarityProjectId);
 
 export const queryClient = new QueryClient();
 

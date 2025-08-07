@@ -4,4 +4,5 @@ export const ENV = {
   enableMsw: `${process.env.ENABLE_MSW}`,
   sentryDsn: `${process.env.SENTRY_DSN}`,
   nodeEnv: `${process.env.NODE_ENV}`,
+  clarityProjectId: `${process.env.CLARITY_PROJECT_ID}`,
 } as const;

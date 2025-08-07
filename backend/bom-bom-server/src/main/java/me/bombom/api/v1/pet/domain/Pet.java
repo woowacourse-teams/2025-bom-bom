@@ -59,4 +59,8 @@ public class Pet extends BaseEntity {
     public void clearAttendance() {
         this.isAttended = false;
     }
+
+    public void updateStage(Stage newStage) {
+        this.stageId = newStage.getId();
+    }
 }

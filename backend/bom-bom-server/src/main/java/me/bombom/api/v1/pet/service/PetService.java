@@ -47,6 +47,7 @@ public class PetService {
         Pet pet = petRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         pet.increaseCurrentScore(score);
+        updatePetStage(pet);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -60,5 +61,11 @@ public class PetService {
     @Transactional
     public void resetAttendance() {
         petRepository.resetAllAttendance();
+    }
+
+    private void updatePetStage(Pet pet) {
+        Stage stageByScore = stageRepository.findNextStageByScore(pet.getCurrentScore())
+                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
+        pet.updateStage(stageByScore);
     }
 }

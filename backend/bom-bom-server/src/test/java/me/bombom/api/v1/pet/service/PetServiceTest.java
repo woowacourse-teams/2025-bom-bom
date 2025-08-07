@@ -1,10 +1,12 @@
 package me.bombom.api.v1.pet.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -17,12 +19,13 @@ import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.pet.dto.PetResponse;
 import me.bombom.api.v1.pet.repository.PetRepository;
 import me.bombom.api.v1.pet.repository.StageRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.transaction.TestTransaction;
+import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @Import({PetService.class, QuerydslConfig.class})
@@ -44,20 +47,23 @@ class PetServiceTest {
     private EntityManager entityManager;
 
     private Member member;
-    private Stage stage;
+    private Stage firstStage;
+    private Stage secondStage;
 
     @BeforeEach
     void setUp() {
-        member = TestFixture.normalMemberFixture();
+        member = TestFixture.createUniqueMember(UUID.randomUUID().toString(), UUID.randomUUID().toString());
         memberRepository.save(member);
-        stage = TestFixture.createStage(1, 50);
-        stageRepository.save(stage);
+        firstStage = TestFixture.createStage(1, 50);
+        stageRepository.save(firstStage);
+        secondStage = TestFixture.createStage(2, 100);
+        stageRepository.save(secondStage);
     }
 
     @Test
     void 키우기_정보_조회() {
         // given
-        Pet pet = TestFixture.createPet(member, stage.getId());
+        Pet pet = TestFixture.createPet(member, firstStage.getId());
         petRepository.save(pet);
 
         // when
@@ -94,6 +100,8 @@ class PetServiceTest {
     @Test
     void 키우기_출석_점수_반영() {
         // given
+        Stage stage = TestFixture.createStage(1, 0);
+        stageRepository.save(stage);
         Pet pet = TestFixture.createPet(member, stage.getId());
         petRepository.save(pet);
 
@@ -137,7 +145,7 @@ class PetServiceTest {
                 .stream()
                 .filter(pet -> !pet.isAttended())
                 .count();
-        Assertions.assertThat(notAttendedCount).isEqualTo(4);
+        assertThat(notAttendedCount).isEqualTo(4);
     }
 
     private Pet createPet(boolean isAttend) {
@@ -146,5 +154,41 @@ class PetServiceTest {
                 .stageId(1L)
                 .isAttended(isAttend)
                 .build();
+    }
+
+    @Test
+    void 펫_스테이지_업데이트_성공() {
+        // given
+        Pet pet = TestFixture.createPetWithScore(member, firstStage.getId(), 99);
+        petRepository.save(pet);
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+
+        // when
+        petService.increaseCurrentScore(member.getId(), 2);
+        Pet updatedPet = petRepository.findById(pet.getId()).orElseThrow();
+        Stage stage = stageRepository.findById(updatedPet.getStageId()).orElseThrow();
+
+        // then
+        assertThat(stage.getLevel()).isEqualTo(secondStage.getLevel());
+    }
+
+    @Test
+    void 점수_부족_시_펫_스테이지_업데이트_실패() {
+        // given
+        Pet pet = TestFixture.createPetWithScore(member, firstStage.getId(), 99);
+        petRepository.save(pet);
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+
+        // when
+        petService.increaseCurrentScore(member.getId(), 0);
+        Pet updatedPet = petRepository.findById(pet.getId()).orElseThrow();
+        Stage stage = stageRepository.findById(updatedPet.getStageId()).orElseThrow();
+
+        // then
+        assertThat(stage.getLevel()).isEqualTo(firstStage.getLevel());
     }
 }

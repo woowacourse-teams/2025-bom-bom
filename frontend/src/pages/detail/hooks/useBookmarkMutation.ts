@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteBookmark, postBookmark } from '@/apis/bookmark';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface UseBookmarkMutationParams {
   articleId: number;
@@ -8,23 +9,54 @@ interface UseBookmarkMutationParams {
 const useBookmarkMutation = ({ articleId }: UseBookmarkMutationParams) => {
   const queryClient = useQueryClient();
 
+  const debounceInvalidateQueries = useDebounce(() => {
+    queryClient.invalidateQueries({ queryKey: ['bookmarked', articleId] });
+  }, 300);
+
   const { mutate: addBookmark } = useMutation({
-    mutationKey: ['bookmarked', articleId],
     mutationFn: () => postBookmark({ articleId }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['bookmarked', articleId],
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ['bookmarked', articleId] });
+      const previousBookmark = queryClient.getQueryData<boolean>([
+        'bookmarked',
+        articleId,
+      ]);
+      queryClient.setQueryData(['bookmarked', articleId], {
+        bookmarkStatus: true,
       });
+      return { previousBookmark };
     },
+    onError: (err, newBookmark, context) => {
+      queryClient.setQueryData(
+        ['bookmarked', articleId],
+        context?.previousBookmark,
+      );
+    },
+    onSettled: () => debounceInvalidateQueries(),
   });
+
   const { mutate: removeBookmark } = useMutation({
-    mutationKey: ['bookmarked', articleId],
     mutationFn: () => deleteBookmark({ articleId }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
+    onMutate: async () => {
+      await queryClient.cancelQueries({
         queryKey: ['bookmarked', articleId],
       });
+      const previousBookmark = queryClient.getQueryData<boolean>([
+        'bookmarked',
+        articleId,
+      ]);
+      queryClient.setQueryData(['bookmarked', articleId], {
+        bookmarkStatus: false,
+      });
+      return { previousBookmark };
     },
+    onError: (err, newBookmark, context) => {
+      queryClient.setQueryData(
+        ['bookmarked', articleId],
+        context?.previousBookmark,
+      );
+    },
+    onSettled: () => debounceInvalidateQueries(),
   });
 
   const toggleBookmark = (bookmarked: boolean) => {
@@ -35,9 +67,7 @@ const useBookmarkMutation = ({ articleId }: UseBookmarkMutationParams) => {
     }
   };
 
-  return {
-    toggleBookmark,
-  };
+  return { toggleBookmark };
 };
 
 export default useBookmarkMutation;

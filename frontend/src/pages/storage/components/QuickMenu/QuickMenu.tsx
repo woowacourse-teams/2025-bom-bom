@@ -1,6 +1,8 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
+import { theme } from '@/styles/theme';
 import BookmarkIcon from '#/assets/bookmark-inactive.svg';
+import MemoIcon from '#/assets/memo.svg';
 import QuickMenuIcon from '#/assets/quick-menu.svg';
 
 const QuickMenu = () => {
@@ -12,10 +14,14 @@ const QuickMenu = () => {
         </QuickMenuIconWrapper>
         <Title>바로 가기</Title>
       </TitleWrapper>
-      <BookmarkWrapper>
+      <ButtonWrapper>
         <StyledBookmarkIcon />
-        <BookmarkLink to={'/bookmark'}>북마크</BookmarkLink>
-      </BookmarkWrapper>
+        <LinkButton to={'/bookmark'}>북마크</LinkButton>
+      </ButtonWrapper>
+      <ButtonWrapper>
+        <MemoIcon width={20} height={20} fill={theme.colors.primary} />
+        <LinkButton to={'/memo'}>메모</LinkButton>
+      </ButtonWrapper>
     </Container>
   );
 };
@@ -62,7 +68,7 @@ const Title = styled.h3`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const BookmarkWrapper = styled.div`
+const ButtonWrapper = styled.div`
   display: flex;
   gap: 4px;
   align-items: center;
@@ -75,6 +81,6 @@ const StyledBookmarkIcon = styled(BookmarkIcon)`
   color: ${({ theme }) => theme.colors.primary};
 `;
 
-const BookmarkLink = styled(Link)`
+const LinkButton = styled(Link)`
   font: ${({ theme }) => theme.fonts.body1};
 `;

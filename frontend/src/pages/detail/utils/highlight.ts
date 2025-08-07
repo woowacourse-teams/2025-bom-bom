@@ -4,6 +4,7 @@ import {
   getXPathForNode,
 } from './selection';
 import { HighlightType } from '../types/highlight';
+import { PostHighlightParams } from '@/apis/highlight';
 import { theme } from '@/styles/theme';
 
 export const highlightNodeSegment = (
@@ -34,7 +35,7 @@ export const highlightNodeSegment = (
 export const saveSelection = (
   selection: Selection,
   articleId: number,
-): Omit<HighlightType, 'id'> => {
+): PostHighlightParams => {
   const range = selection.getRangeAt(0);
   const container =
     range.commonAncestorContainer.nodeType === Node.TEXT_NODE
@@ -54,7 +55,6 @@ export const saveSelection = (
     articleId,
     color: theme.colors.primaryLight,
     text: selection.toString(), // 선택된 텍스트 저장
-    memo: '',
   };
 };
 
@@ -131,8 +131,8 @@ export const restoreHighlight = (data: HighlightType) => {
 
   const range = getHighlightRange(
     element,
-    data.location.startOffset,
-    data.location.endOffset,
+    Number(data.location.startOffset),
+    Number(data.location.endOffset),
   );
 
   // === 하이라이트 적용 ===

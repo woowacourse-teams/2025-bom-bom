@@ -1,41 +1,49 @@
 import { fetcher } from './fetcher';
 import { HighlightType } from '@/pages/detail/types/highlight';
+import { components, operations } from '@/types/openapi';
 
-interface PostHighlightParams {
-  highlight: Omit<HighlightType, 'id'>;
-}
+export type GetHighlightsParams =
+  operations['getHighlights']['parameters']['query'];
+export type GetHighlightsResponse = HighlightType[];
 
-interface PatchHighlightParams {
-  id: number;
-  data: Partial<HighlightType>;
-}
-
-interface DeleteHighlightParams {
-  id: number;
-}
-
-export const getHighlights = async (articleId: number) => {
-  return await fetcher.get<HighlightType[]>({
+export const getHighlights = async (params: GetHighlightsParams) => {
+  return await fetcher.get<GetHighlightsResponse>({
     path: '/highlights',
-    query: {
-      articleId,
+    query: params,
+  });
+};
+
+export type PostHighlightParams =
+  components['schemas']['HighlightCreateRequest'];
+
+export const postHighlight = async (params: PostHighlightParams) => {
+  return await fetcher.post({
+    path: '/highlights',
+    body: params,
+  });
+};
+
+export type PatchHighlightParams =
+  operations['updateHighlight']['parameters']['path'];
+export type PatchHighlightRequest =
+  components['schemas']['UpdateHighlightRequest'];
+
+export const patchHighlight = async ({
+  id,
+  color,
+  memo,
+}: PatchHighlightParams & PatchHighlightRequest) => {
+  return await fetcher.patch({
+    path: `/highlights/${id}`,
+    body: {
+      color,
+      memo,
     },
   });
 };
 
-export const postHighlight = async ({ highlight }: PostHighlightParams) => {
-  return await fetcher.post({
-    path: '/highlights',
-    body: highlight,
-  });
-};
-
-export const patchHighlight = async ({ id, data }: PatchHighlightParams) => {
-  return await fetcher.patch({
-    path: `/highlights/${id}`,
-    body: data,
-  });
-};
+export type DeleteHighlightParams =
+  operations['deleteHighlight']['parameters']['path'];
 
 export const deleteHighlight = async ({ id }: DeleteHighlightParams) => {
   return await fetcher.delete({

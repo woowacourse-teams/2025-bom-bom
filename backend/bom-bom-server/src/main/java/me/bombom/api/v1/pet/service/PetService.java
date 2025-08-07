@@ -64,7 +64,7 @@ public class PetService {
     }
 
     private void updatePetStage(Pet pet) {
-        Stage stageByScore = stageRepository.findFirstByScore(pet.getCurrentScore())
+        Stage stageByScore = stageRepository.findNextStageByScore(pet.getCurrentScore())
                 .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
         pet.updateStage(stageByScore);
     }

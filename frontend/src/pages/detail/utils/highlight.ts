@@ -4,6 +4,7 @@ import {
   getXPathForNode,
 } from './selection';
 import { HighlightType } from '../types/highlight';
+import { PostHighlightParams } from '@/apis/highlight';
 import { theme } from '@/styles/theme';
 
 export const highlightNodeSegment = (
@@ -34,7 +35,7 @@ export const highlightNodeSegment = (
 export const saveSelection = (
   selection: Selection,
   articleId: number,
-): Omit<HighlightType, 'id'> => {
+): PostHighlightParams => {
   const range = selection.getRangeAt(0);
   const container =
     range.commonAncestorContainer.nodeType === Node.TEXT_NODE
@@ -45,16 +46,17 @@ export const saveSelection = (
   const offsets = getHighlightOffsets(container, range);
 
   return {
-    location: {
-      startXPath: xpath,
-      startOffset: offsets.start.toString(),
-      endXPath: xpath,
-      endOffset: offsets.end.toString(),
+    highlight: {
+      location: {
+        startXPath: xpath,
+        startOffset: offsets.start,
+        endXPath: xpath,
+        endOffset: offsets.end,
+      },
+      articleId,
+      color: theme.colors.primaryLight,
+      text: selection.toString(), // 선택된 텍스트 저장
     },
-    articleId,
-    color: theme.colors.primaryLight,
-    text: selection.toString(), // 선택된 텍스트 저장
-    memo: '',
   };
 };
 

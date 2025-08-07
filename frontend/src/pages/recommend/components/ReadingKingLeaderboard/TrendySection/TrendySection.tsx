@@ -57,7 +57,7 @@ export default function TrendySection() {
             imageUrl={newsletter.imageUrl ?? ''}
             title={newsletter.name ?? ''}
             description={newsletter.description ?? ''}
-            onClick={() => handleCardClick(newsletter.mainPageUrl ?? '')}
+            onClick={() => handleCardClick(newsletter.subscribeUrl ?? '')}
             as="button"
           />
         ))}

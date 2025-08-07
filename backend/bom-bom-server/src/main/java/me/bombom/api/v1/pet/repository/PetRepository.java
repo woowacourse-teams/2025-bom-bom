@@ -11,8 +11,6 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
 
     Optional<Pet> findByMemberId(Long memberId);
 
-    List<Pet> findAllByIsAttended(boolean isAttended);
-
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Pet p SET p.isAttended = false WHERE p.isAttended = true")
     void resetAllAttendance();

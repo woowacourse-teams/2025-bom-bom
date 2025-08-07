@@ -37,8 +37,4 @@ public class Stage extends BaseEntity {
         this.level = level;
         this.requiredScore = requiredScore;
     }
-
-    public boolean isAchievable(int score) {
-        return score >= this.requiredScore;
-    }
 }

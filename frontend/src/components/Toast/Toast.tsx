@@ -8,13 +8,9 @@ interface ToastProps {
 }
 
 const Toast = ({ message, duration, isVisible }: ToastProps) => {
-  return (
-    isVisible && (
-      <Container isVisible={isVisible} duration={duration}>
-        {message}
-      </Container>
-    )
-  );
+  if (!isVisible) return;
+
+  return <Container duration={duration}>{message}</Container>;
 };
 
 export default Toast;
@@ -38,7 +34,7 @@ const toastAnimation = keyframes`
   }
 `;
 
-const Container = styled.div<{ isVisible: boolean; duration: number }>`
+const Container = styled.div<{ duration: number }>`
   position: fixed;
   top: 100px;
   z-index: 1000;

@@ -70,6 +70,8 @@ function Storage() {
   const existCategories = categoryCounts?.categories?.filter(
     (category) => category.count !== 0,
   );
+  const isLoadingOrHaveContent =
+    isLoading || (articles?.content?.length && articles?.content.length > 0);
 
   return (
     <Container>
@@ -118,8 +120,7 @@ function Storage() {
             onSelectOption={handleSortChange}
           />
         </SummaryBar>
-        {isLoading ||
-        (articles?.content?.length && articles?.content.length > 0) ? (
+        {isLoadingOrHaveContent ? (
           <>
             <ArticleList>
               {articles?.content?.map((article) => (

@@ -7,7 +7,11 @@ import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLette
 import { theme } from '@/styles/theme';
 import MemoIcon from '#/assets/memo.svg';
 
-const MemoPage = () => {
+export const Route = createFileRoute('/_bombom/memo')({
+  component: MemoPage,
+});
+
+function MemoPage() {
   const { data: highlights } = useQuery(queries.highlights({}));
 
   return (
@@ -33,11 +37,7 @@ const MemoPage = () => {
       )}
     </Container>
   );
-};
-
-export const Route = createFileRoute('/_bombom/memo')({
-  component: MemoPage,
-});
+}
 
 export default MemoPage;
 

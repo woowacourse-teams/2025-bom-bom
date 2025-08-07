@@ -1,5 +1,6 @@
 package me.bombom.api.v1.pet.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -18,7 +19,6 @@ import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.pet.dto.PetResponse;
 import me.bombom.api.v1.pet.repository.PetRepository;
 import me.bombom.api.v1.pet.repository.StageRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,6 @@ import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
-@Transactional
 @Import({PetService.class, QuerydslConfig.class})
 class PetServiceTest {
 
@@ -146,7 +145,7 @@ class PetServiceTest {
                 .stream()
                 .filter(pet -> !pet.isAttended())
                 .count();
-        Assertions.assertThat(notAttendedCount).isEqualTo(4);
+        assertThat(notAttendedCount).isEqualTo(4);
     }
 
     private Pet createPet(boolean isAttend) {
@@ -172,9 +171,7 @@ class PetServiceTest {
         Stage stage = stageRepository.findById(updatedPet.getStageId()).orElseThrow();
 
         // then
-        assertSoftly(softly -> {
-            softly.assertThat(stage.getLevel()).isEqualTo(secondStage.getLevel());
-        });
+        assertThat(stage.getLevel()).isEqualTo(secondStage.getLevel());
     }
 
     @Test
@@ -192,8 +189,6 @@ class PetServiceTest {
         Stage stage = stageRepository.findById(updatedPet.getStageId()).orElseThrow();
 
         // then
-        assertSoftly(softly -> {
-            softly.assertThat(stage.getLevel()).isEqualTo(firstStage.getLevel());
-        });
+        assertThat(stage.getLevel()).isEqualTo(firstStage.getLevel());
     }
 }

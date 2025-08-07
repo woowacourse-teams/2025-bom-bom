@@ -54,9 +54,9 @@ class PetServiceTest {
     void setUp() {
         member = TestFixture.createUniqueMember(UUID.randomUUID().toString(), UUID.randomUUID().toString());
         memberRepository.save(member);
-        firstStage = TestFixture.createStage(1, 50);
+        firstStage = TestFixture.createStage(1, 0);
         stageRepository.save(firstStage);
-        secondStage = TestFixture.createStage(2, 100);
+        secondStage = TestFixture.createStage(2, 50);
         stageRepository.save(secondStage);
     }
 
@@ -72,8 +72,8 @@ class PetServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(result.level()).isEqualTo(1);
-            softly.assertThat(result.totalScore()).isEqualTo(50);
-            softly.assertThat(result.currentScore()).isEqualTo(0);
+            softly.assertThat(result.currentStageScore()).isEqualTo(0);
+            softly.assertThat(result.requiredStageScore()).isEqualTo(50);
         });
     }
 
@@ -159,14 +159,14 @@ class PetServiceTest {
     @Test
     void 펫_스테이지_업데이트_성공() {
         // given
-        Pet pet = TestFixture.createPetWithScore(member, firstStage.getId(), 99);
+        Pet pet = TestFixture.createPetWithScore(member, firstStage.getId(), 49);
         petRepository.save(pet);
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
         // when
-        petService.increaseCurrentScore(member.getId(), 2);
+        petService.increaseCurrentScore(member.getId(), 1);
         Pet updatedPet = petRepository.findById(pet.getId()).orElseThrow();
         Stage stage = stageRepository.findById(updatedPet.getStageId()).orElseThrow();
 
@@ -177,14 +177,14 @@ class PetServiceTest {
     @Test
     void 점수_부족_시_펫_스테이지_업데이트_실패() {
         // given
-        Pet pet = TestFixture.createPetWithScore(member, firstStage.getId(), 99);
+        Pet pet = TestFixture.createPetWithScore(member, firstStage.getId(), 48);
         petRepository.save(pet);
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
         // when
-        petService.increaseCurrentScore(member.getId(), 0);
+        petService.increaseCurrentScore(member.getId(), 1);
         Pet updatedPet = petRepository.findById(pet.getId()).orElseThrow();
         Stage stage = stageRepository.findById(updatedPet.getStageId()).orElseThrow();
 

@@ -11,9 +11,18 @@ public interface StageRepository extends JpaRepository<Stage, Long> {
     @Query("""
                 SELECT s
                 FROM Stage s
-                WHERE s.requiredScore <= :score
+                WHERE s.requiredScore <= :currentScore
                 ORDER BY s.requiredScore DESC
                 LIMIT 1
             """)
-    Optional<Stage> findNextStageByScore(@Param("score") int score);
+    Optional<Stage> findCurrentStageByCurrentScore(@Param("currentScore") int currentScore);
+
+    @Query("""
+                SELECT s
+                FROM Stage s
+                WHERE s.requiredScore > :currentScore
+                ORDER BY s.requiredScore ASC
+                LIMIT 1
+            """)
+    Optional<Stage> findNextStageByCurrentScore(@Param("currentScore") int currentScore);
 }

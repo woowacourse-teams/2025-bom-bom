@@ -5,6 +5,7 @@ import {
   getHighlights,
   patchHighlight,
   postHighlight,
+  PostHighlightParams,
 } from '@/apis/highlight';
 
 export const useHighlightData = ({ articleId }: { articleId: number }) => {
@@ -15,8 +16,7 @@ export const useHighlightData = ({ articleId }: { articleId: number }) => {
   });
   const { mutate: addHighlight } = useMutation({
     mutationKey: ['addHighlights'],
-    mutationFn: (highlight: Omit<HighlightType, 'id'>) =>
-      postHighlight({ highlight }),
+    mutationFn: (params: PostHighlightParams) => postHighlight(params),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['highlight'],

@@ -1,7 +1,4 @@
 import styled from '@emotion/styled';
-import { useState } from 'react';
-import Toast from '@/components/Toast/Toast';
-import useToast from '@/components/Toast/useToast';
 import { theme } from '@/styles/theme';
 import BookmarkActiveIcon from '#/assets/bookmark-active.svg';
 import BookmarkInactiveIcon from '#/assets/bookmark-inactive.svg';
@@ -12,38 +9,18 @@ interface FloatingActionButtonsProps {
   onToggleBookmark: (bookmarked: boolean) => void;
 }
 
-const ADD_BOOKMARK_MESSAGE = '북마크가 추가되었습니다.';
-const DELETE_BOOKMARK_MESSAGE = '북마크가 해제되었습니다.';
-const TOAST_DURATION = 3000;
-
 const FloatingActionButtons = ({
   bookmarked,
   onToggleBookmark,
 }: FloatingActionButtonsProps) => {
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const { isVisible, showToast } = useToast({
-    duration: TOAST_DURATION,
-  });
-
   if (bookmarked === null) return;
 
   const handleToggleBookmark = () => {
     onToggleBookmark(bookmarked);
-
-    const message = bookmarked ? DELETE_BOOKMARK_MESSAGE : ADD_BOOKMARK_MESSAGE;
-    setToastMessage(message);
-
-    showToast(message);
   };
 
   return (
     <>
-      <Toast
-        isVisible={isVisible}
-        message={toastMessage ?? ''}
-        duration={TOAST_DURATION}
-      />
-
       <Container>
         <ActionButton type="button" onClick={handleToggleBookmark}>
           {bookmarked ? (

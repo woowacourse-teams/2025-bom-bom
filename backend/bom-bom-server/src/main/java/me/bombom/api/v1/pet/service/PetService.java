@@ -28,7 +28,7 @@ public class PetService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         Stage currentStage = stageRepository.findById(pet.getStageId())
                 .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
-        Stage nextStage = stageRepository.findNextStageByScore(pet.getCurrentScore())
+        Stage nextStage = stageRepository.findNextStageByCurrentScore(pet.getCurrentScore())
                 .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
         return PetResponse.of(pet, currentStage, nextStage);
     }
@@ -66,7 +66,7 @@ public class PetService {
     }
 
     private void updatePetStage(Pet pet) {
-        Stage stageByScore = stageRepository.findCurrentStageByScore(pet.getCurrentScore())
+        Stage stageByScore = stageRepository.findCurrentStageByCurrentScore(pet.getCurrentScore())
                 .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
         pet.updateStage(stageByScore);
     }

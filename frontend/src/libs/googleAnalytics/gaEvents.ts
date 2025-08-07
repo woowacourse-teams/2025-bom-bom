@@ -1,5 +1,3 @@
-import ReactGA from 'react-ga4';
-
 interface TrackEventParams {
   category: string;
   action: string;
@@ -13,10 +11,14 @@ export const trackEvent = ({
   label,
   value,
 }: TrackEventParams) => {
-  ReactGA.event({
-    category,
-    action,
-    label,
+  if (typeof window.gtag !== 'function') {
+    console.warn('[GA] gtag is not initialized');
+    return;
+  }
+
+  window.gtag('event', action, {
+    event_category: category,
+    event_label: label,
     value,
   });
 };

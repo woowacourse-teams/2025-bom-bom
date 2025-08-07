@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import ReactGA from 'react-ga4';
+import { initGA } from './initGA';
 import { ENV } from '@/apis/env';
 
 const GAInitializer = () => {
@@ -12,7 +12,7 @@ const GAInitializer = () => {
       return;
     }
 
-    ReactGA.initialize(ENV.googleAnalyticsId);
+    initGA(ENV.googleAnalyticsId);
   }, []);
   return null;
 };

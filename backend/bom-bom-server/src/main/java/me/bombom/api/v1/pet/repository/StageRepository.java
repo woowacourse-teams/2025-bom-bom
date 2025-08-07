@@ -15,7 +15,7 @@ public interface StageRepository extends JpaRepository<Stage, Long> {
                 ORDER BY s.requiredScore DESC
                 LIMIT 1
             """)
-    Optional<Stage> findCurrentStageByCurrentScore(@Param("score") int currentScore);
+    Optional<Stage> findCurrentStageByCurrentScore(@Param("currentScore") int currentScore);
 
     @Query("""
                 SELECT s
@@ -24,5 +24,5 @@ public interface StageRepository extends JpaRepository<Stage, Long> {
                 ORDER BY s.requiredScore ASC
                 LIMIT 1
             """)
-    Optional<Stage> findNextStageByCurrentScore(@Param("score") int currentScore);
+    Optional<Stage> findNextStageByCurrentScore(@Param("currentScore") int currentScore);
 }

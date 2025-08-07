@@ -26,7 +26,8 @@ public interface HighlightControllerApi {
 
     @Operation(summary = "하이라이트 목록 조회", description = "조건에 맞는 하이라이트 목록을 조회합니다.")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "하이라이트 목록 조회 성공")
+        @ApiResponse(responseCode = "200", description = "하이라이트 목록 조회 성공"),
+        @ApiResponse(responseCode = "400", description = "잘못된 요청 값", content = @Content)
     })
     List<HighlightResponse> getHighlights(
         @Parameter(hidden = true) Member member,

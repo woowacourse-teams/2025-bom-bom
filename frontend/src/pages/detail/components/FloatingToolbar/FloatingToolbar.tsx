@@ -57,7 +57,6 @@ export default function FloatingToolbar({
     });
     window.getSelection()?.removeAllRanges();
   };
-  console.log(isVisible, position);
 
   const handleMemoClick = () => {
     hideToolbar();

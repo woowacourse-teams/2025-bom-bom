@@ -26,9 +26,11 @@ public class PetService {
     public PetResponse getPet(Member member) {
         Pet pet = petRepository.findByMemberId(member.getId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        Stage stage = stageRepository.findById(pet.getStageId())
+        Stage currentStage = stageRepository.findById(pet.getStageId())
                 .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
-        return PetResponse.of(pet,stage);
+        Stage nextStage = stageRepository.findNextStageByScore(pet.getCurrentScore())
+                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
+        return PetResponse.of(pet, currentStage, nextStage);
     }
 
     @Transactional
@@ -64,7 +66,7 @@ public class PetService {
     }
 
     private void updatePetStage(Pet pet) {
-        Stage stageByScore = stageRepository.findNextStageByScore(pet.getCurrentScore())
+        Stage stageByScore = stageRepository.findCurrentStageByScore(pet.getCurrentScore())
                 .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
         pet.updateStage(stageByScore);
     }

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { HighlightType } from '../types/highlight';
+import { addHighlightToDOM, removeHighlightFromDOM } from '../utils/highlight';
 import {
   deleteHighlight,
   getHighlights,
@@ -48,7 +49,8 @@ export const useHighlightData = ({ articleId }: { articleId: number }) => {
   const { mutate: removeHighlight } = useMutation({
     mutationKey: ['removeHighlight'],
     mutationFn: (id: number) => deleteHighlight({ id }),
-    onSuccess: () => {
+    onSuccess: (_, id) => {
+      removeHighlightFromDOM(id);
       queryClient.invalidateQueries({
         queryKey: ['highlight'],
       });

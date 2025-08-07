@@ -89,7 +89,7 @@ class HighlightServiceTest {
         Long firstArticleId = articles.getFirst().getId();
 
         // when
-        List<HighlightResponse> responses = highlightService.getHighlights(firstArticleId, member);
+        List<HighlightResponse> responses = highlightService.getHighlights(member, firstArticleId);
 
         // then
         assertThat(responses).hasSize(2);
@@ -100,14 +100,12 @@ class HighlightServiceTest {
     }
 
     @Test
-    void 존재하지_않는_아티클_id로_조회시_예외_발생() {
-        // given
-        Long nonExistArticleId = 0L;
+    void 멤버로_하이라이트를_조회할_수_있다() {
+        // when
+        List<HighlightResponse> responses = highlightService.getHighlights(member, null);
 
-        // when & then
-        assertThatThrownBy(() -> highlightService.getHighlights(nonExistArticleId, member))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+        // then
+        assertThat(responses).hasSize(highlights.size());
     }
 
     @Test
@@ -177,7 +175,6 @@ class HighlightServiceTest {
         // then
         assertThat(updated.color()).isEqualTo(request.color().getValue());
     }
-
     @Test
     void 하이라이트_메모를_변경할_수_있다() {
         // given
@@ -190,6 +187,7 @@ class HighlightServiceTest {
         // then
         assertThat(updated.memo()).isEqualTo(request.memo());
     }
+
     @Test
     void 하이라이트_색상과_메모를_변경할_수_있다() {
         // given

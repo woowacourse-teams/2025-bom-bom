@@ -35,16 +35,16 @@ public class HighlightController implements HighlightControllerApi{
     @GetMapping
     public List<HighlightResponse> getHighlights(
             @LoginMember Member member,
-            @RequestParam @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
+            @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     ) {
-        return highlightService.getHighlights(articleId, member);
+        return highlightService.getHighlights(member, articleId);
     }
 
     @Override
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createHighlight(@LoginMember Member member, @Valid @RequestBody HighlightCreateRequest createRequest) {
-        highlightService.create(createRequest, member);
+    public HighlightResponse createHighlight(@LoginMember Member member, @Valid @RequestBody HighlightCreateRequest createRequest) {
+        return highlightService.create(createRequest, member);
     }
 
     @Override

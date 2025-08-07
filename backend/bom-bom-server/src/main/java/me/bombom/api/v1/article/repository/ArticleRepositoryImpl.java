@@ -24,7 +24,6 @@ import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.dto.QArticleResponse;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
-import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.newsletter.dto.QNewsletterSummaryResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -105,7 +104,8 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .join(category).on(newsletter.categoryId.eq(category.id))
                 .where(createMemberWhereClause(memberId))
                 .where(createDateWhereClause(options.date()))
-                .where(createKeywordWhereClause(options.keyword()));
+                .where(createKeywordWhereClause(options.keyword()))
+                .where(createCategoryNameWhereClause(options.category()));
     }
 
     private List<ArticleResponse> getContent(Long memberId, GetArticlesOptions options, Pageable pageable) {

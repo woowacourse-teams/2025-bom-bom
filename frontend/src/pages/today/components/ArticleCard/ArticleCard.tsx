@@ -4,6 +4,7 @@ import { Article } from '../../types/article';
 import Badge from '@/components/Badge/Badge';
 import Chip from '@/components/Chip/Chip';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
 
@@ -35,6 +36,13 @@ function ArticleCard({ data, readVariant = 'transparent' }: ArticleCardProps) {
       isRead={isRead}
       readVariant={readVariant}
       to={`/articles/${articleId}`}
+      onClick={() => {
+        trackEvent({
+          category: 'Article',
+          action: 'Click Article Card',
+          label: `${newsletterName} - [${articleId}]${title}`,
+        });
+      }}
     >
       <InfoWrapper>
         <Title>{title}</Title>
@@ -70,18 +78,17 @@ const Container = styled(Link)<{
   isRead: boolean;
   readVariant: ReadVariantType;
 }>`
-  display: flex;
-  gap: 12px;
-  align-items: center;
-
   padding: 20px;
   border-bottom: ${({ theme, isRead }) =>
     `${isRead ? '0' : '4px'} solid ${theme.colors.primary}`};
   border-radius: 20px;
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%);
 
-  background-color: ${({ theme }) => theme.colors.white};
+  display: flex;
+  gap: 12px;
+  align-items: center;
 
+  background-color: ${({ theme }) => theme.colors.white};
   color: inherit;
 
   box-sizing: border-box;
@@ -93,12 +100,12 @@ const Container = styled(Link)<{
 `;
 
 const InfoWrapper = styled.div`
+  width: 100%;
+
   display: flex;
   gap: 12px;
   flex-direction: column;
   align-items: flex-start;
-
-  width: 100%;
 `;
 
 const Title = styled.h2`
@@ -140,11 +147,11 @@ const ThumbnailWrapper = styled.div`
 `;
 
 const Thumbnail = styled(ImageWithFallback)`
-  flex-shrink: 0;
-  align-self: stretch;
-
   width: 126px;
   border-radius: 12px;
+
+  flex-shrink: 0;
+  align-self: stretch;
 
   aspect-ratio: 1 / 1;
   object-fit: cover;

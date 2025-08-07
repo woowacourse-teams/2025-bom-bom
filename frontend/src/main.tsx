@@ -13,7 +13,7 @@ import GAInitializer from './libs/googleAnalytics/GAInitializer.tsx';
 import { routeTree } from './routeTree.gen';
 import reset from './styles/reset.ts';
 
-Clarity.init(ENV.clarityProjectId);
+if (ENV.nodeEnv === 'production') Clarity.init(ENV.clarityProjectId);
 
 export const queryClient = new QueryClient();
 
@@ -28,6 +28,7 @@ initSentry({
   dsn: ENV.sentryDsn,
   sendDefaultPii: true,
   integrations: [tanstackRouterBrowserTracingIntegration(router)],
+  sampleRate: ENV.nodeEnv === 'development' ? 1 : 0.1,
 });
 
 declare module '@tanstack/react-router' {

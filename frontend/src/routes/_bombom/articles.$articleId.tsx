@@ -49,7 +49,7 @@ function ArticleDetailPage() {
     },
   });
 
-  const { onToggleBookmarkClick } = useBookmarkMutation({
+  const { onToggleBookmark } = useBookmarkMutation({
     articleId: articleIdNumber,
   });
 
@@ -111,7 +111,7 @@ function ArticleDetailPage() {
       </TodayArticlesWrapper>
       <FloatingActionButtons
         bookmarked={bookmarked?.bookmarkStatus ?? null}
-        onToggleBookmarkClick={onToggleBookmarkClick}
+        onToggleBookmark={onToggleBookmark}
       />
     </Container>
   );

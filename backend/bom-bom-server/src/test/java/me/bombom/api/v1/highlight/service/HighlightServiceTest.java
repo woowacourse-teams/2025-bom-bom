@@ -75,7 +75,7 @@ class HighlightServiceTest {
     private HighlightCreateRequest createDuplicateHighlightRequest() {
         Long firstArticleId = articles.getFirst().getId();
         return new HighlightCreateRequest(
-                new HighlightLocationRequest("0", "div[0]/p[0]", "10", "div[0]/p[0]"),
+                new HighlightLocationRequest(0, "div[0]/p[0]", 10, "div[0]/p[0]"),
                 firstArticleId,
                 Color.from("#ffeb3b"),
                 "중복된 하이라이트",

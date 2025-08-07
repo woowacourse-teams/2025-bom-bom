@@ -34,6 +34,14 @@ const Container = styled.button<{
   font: ${({ theme }) => theme.fonts.caption};
 
   ${({ variant, theme }) => variantStyles[variant](theme)}
+
+  &:disabled {
+    background-color: ${({ theme }) => theme.colors.disabledBackground};
+    color: ${({ theme }) => theme.colors.disabledText};
+
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 `;
 
 const variantStyles = {

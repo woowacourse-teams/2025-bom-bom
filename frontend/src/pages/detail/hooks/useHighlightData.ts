@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { HighlightType } from '../types/highlight';
-import { addHighlightToDOM, removeHighlightFromDOM } from '../utils/highlight';
+import { removeHighlightFromDOM } from '../utils/highlight';
 import {
   deleteHighlight,
   getHighlights,

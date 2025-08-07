@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HighlightLocation {
-    private String startOffset;
+    private Integer startOffset;
     private String startXPath;
-    private String endOffset;
+    private Integer endOffset;
     private String endXPath;
 }

@@ -4,9 +4,9 @@ import com.querydsl.core.annotations.QueryProjection;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
 
 public record HighlightLocationResponse(
-        String startOffset,
+        Integer startOffset,
         String startXPath,
-        String endOffset,
+        Integer endOffset,
         String endXPath
 ) {
 

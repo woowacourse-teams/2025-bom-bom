@@ -30,7 +30,7 @@ function Storage() {
 
   const { data: articles, isLoading } = useQuery(
     queries.articles({
-      // sort: sortFilter,
+      sort: sortFilter,
       category: selectedCategory === '전체' ? undefined : selectedCategory,
       keyword: debouncedSearchInput,
       size: 6,

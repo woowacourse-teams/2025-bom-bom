@@ -50,7 +50,9 @@ const useScrollRestoration = ({
     if (scrollLocation) {
       restoreScroll(scrollLocation);
     }
-  }, [scrollStorage, restoreScroll]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // store 생성될 때마다 다시 복구하는 이슈
+  }, [restoreScroll]);
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);

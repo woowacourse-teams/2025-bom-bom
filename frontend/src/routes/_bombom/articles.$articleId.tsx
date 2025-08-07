@@ -1,8 +1,6 @@
 import styled from '@emotion/styled';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useMemo } from 'react';
-import { patchArticleRead } from '@/apis/articles';
 import { getBookmarked } from '@/apis/bookmark';
 import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
@@ -10,10 +8,10 @@ import Spacing from '@/components/Spacing/Spacing';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import ArticleContent from '@/pages/detail/components/ArticleContent/ArticleContent';
-import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
-import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
+import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
 import useBookmarkMutation from '@/pages/detail/hooks/useBookmarkMutation';
+import useMarkArticleAsReadMutation from '@/pages/detail/hooks/useMarkArticleAsReadMutation';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
 
@@ -24,32 +22,19 @@ export const Route = createFileRoute('/_bombom/articles/$articleId')({
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
   const articleIdNumber = Number(articleId);
-  const queryClient = useQueryClient();
 
   const { data: currentArticle } = useQuery(
-    queries.articleById({ id: Number(articleId) }),
+    queries.articleById({ id: articleIdNumber }),
   );
-  const today = useMemo(() => new Date(), []);
-  const { data: todayArticles } = useQuery(queries.articles({ date: today }));
   const { data: bookmarked } = useQuery({
     queryKey: ['bookmarked'],
-    queryFn: () => getBookmarked({ articleId: Number(articleId) }),
+    queryFn: () => getBookmarked({ articleId: articleIdNumber }),
   });
-  const { mutate: updateArticleAsRead } = useMutation({
-    mutationKey: ['read', articleId],
-    mutationFn: () => patchArticleRead({ id: articleIdNumber }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['article', articleId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['articles', { date: today, sorted: 'ASC' }],
-      });
-    },
+  const { mutate: updateArticleAsRead } = useMarkArticleAsReadMutation({
+    articleId: articleIdNumber,
   });
-
-  const { onToggleBookmarkClick } = useBookmarkMutation({
-    articleId: Number(articleId),
+  const { toggleBookmark } = useBookmarkMutation({
+    articleId: articleIdNumber,
   });
 
   useScrollThreshold({
@@ -61,11 +46,7 @@ function ArticleDetailPage() {
 
   useScrollRestoration({ pathname: articleId });
 
-  if (!currentArticle || !todayArticles) return null;
-
-  const unReadArticles = todayArticles?.content?.filter(
-    (article) => !article.isRead && article.articleId !== Number(articleId),
-  );
+  if (!currentArticle) return null;
 
   return (
     <Container>
@@ -86,31 +67,24 @@ function ArticleDetailPage() {
         </MetaInfoRow>
       </HeaderWrapper>
       <Divider />
+
       <ArticleContent
         articleId={articleIdNumber}
         articleContent={currentArticle.contents}
       />
       <Spacing size={24} />
       <Divider />
+
       <ContentDescription>
         이 뉴스레터가 유용했다면 동료들과 공유해주세요. 피드백이나 제안사항이
         있으시면 언제든 연락 주시기 바랍니다.
       </ContentDescription>
-      <TodayArticlesWrapper>
-        <TodayArticleTitle>오늘 읽지 않은 다른 아티클</TodayArticleTitle>
-        {unReadArticles?.length && unReadArticles.length > 0 ? (
-          <TodayArticleList>
-            {unReadArticles?.map((article) => (
-              <NewsletterItemCard key={article.articleId} data={article} />
-            ))}
-          </TodayArticleList>
-        ) : (
-          <EmptyUnreadCard />
-        )}
-      </TodayArticlesWrapper>
+
+      <TodayUnreadArticlesSection articleId={articleIdNumber} />
+
       <FloatingActionButtons
         bookmarked={!!bookmarked}
-        onToggleBookmarkClick={onToggleBookmarkClick}
+        onToggleBookmarkClick={toggleBookmark}
       />
     </Container>
   );
@@ -170,26 +144,4 @@ const Divider = styled.div`
 const ContentDescription = styled.p`
   color: ${({ theme }) => theme.colors.textTertiary};
   font: ${({ theme }) => theme.fonts.body2};
-`;
-
-const TodayArticlesWrapper = styled.div`
-  width: 100%;
-
-  display: flex;
-  gap: 12px;
-  flex-direction: column;
-`;
-
-const TodayArticleTitle = styled.h3`
-  align-self: flex-start;
-
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.heading4};
-`;
-
-const TodayArticleList = styled.div`
-  display: grid;
-  gap: 20px;
-
-  grid-template-columns: repeat(2, 1fr);
 `;

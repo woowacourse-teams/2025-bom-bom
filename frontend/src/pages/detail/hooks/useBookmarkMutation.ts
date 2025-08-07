@@ -26,7 +26,7 @@ const useBookmarkMutation = ({ articleId }: UseBookmarkMutationParams) => {
     },
   });
 
-  const onToggleBookmarkClick = (bookmarked: boolean) => {
+  const toggleBookmark = (bookmarked: boolean) => {
     if (bookmarked) {
       removeBookmark();
     } else {
@@ -35,7 +35,7 @@ const useBookmarkMutation = ({ articleId }: UseBookmarkMutationParams) => {
   };
 
   return {
-    onToggleBookmarkClick,
+    toggleBookmark,
   };
 };
 

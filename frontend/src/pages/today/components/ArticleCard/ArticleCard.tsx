@@ -3,8 +3,8 @@ import { Link } from '@tanstack/react-router';
 import Badge from '@/components/Badge/Badge';
 import Chip from '@/components/Chip/Chip';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
-import { components } from '@/types/openapi';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
+import { components } from '@/types/openapi';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
 
@@ -36,7 +36,7 @@ function ArticleCard({ data, readVariant = 'transparent' }: ArticleCardProps) {
         trackEvent({
           category: 'Article',
           action: 'Click Article Card',
-          label: `${newsletterName} - [${articleId}]${title}`,
+          label: `${newsletter?.name} - [${articleId}]${title}`,
         });
       }}
     >

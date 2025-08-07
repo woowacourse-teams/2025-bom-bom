@@ -55,7 +55,9 @@ export default function FloatingToolbar({
       selection: selectionRef.current,
       highlightId: selectedHighlightId,
     });
+    window.getSelection()?.removeAllRanges();
   };
+  console.log(isVisible, position);
 
   const handleMemoClick = () => {
     hideToolbar();
@@ -63,6 +65,7 @@ export default function FloatingToolbar({
       mode: currentMode,
       selection: selectionRef.current,
     });
+    window.getSelection()?.removeAllRanges();
   };
 
   useEffect(() => {
@@ -107,8 +110,8 @@ export default function FloatingToolbar({
       hideToolbar();
     };
 
-    document.addEventListener('click', handleDocumentClick);
-    return () => document.removeEventListener('click', handleDocumentClick);
+    document.addEventListener('mouseup', handleDocumentClick);
+    return () => document.removeEventListener('mouseup', handleDocumentClick);
   }, [selectionTargetRef]);
 
   return (

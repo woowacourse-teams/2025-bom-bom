@@ -364,27 +364,32 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    Color: {
-      value?: string;
-    };
     HighlightCreateRequest: {
       location: components['schemas']['HighlightLocationRequest'];
       /** Format: int64 */
       articleId?: number;
-      color: components['schemas']['Color'];
+      /**
+       * @description 하이라이트 색상 (HEX 형식, 예: #FF0000)
+       * @example #FFD6C2
+       */
+      color: string;
       text: string;
       memo?: string;
     };
     HighlightLocationRequest: {
-      startOffset: string;
+      /** Format: int32 */
+      startOffset: number;
       startXPath: string;
-      endOffset: string;
+      /** Format: int32 */
+      endOffset: number;
       endXPath: string;
     };
     HighlightLocationResponse: {
-      startOffset?: string;
+      /** Format: int32 */
+      startOffset?: number;
       startXPath?: string;
-      endOffset?: string;
+      /** Format: int32 */
+      endOffset?: number;
       endXPath?: string;
     };
     HighlightResponse: {
@@ -419,7 +424,11 @@ export interface components {
       weeklyGoalCount?: number;
     };
     UpdateHighlightRequest: {
-      color?: components['schemas']['Color'];
+      /**
+       * @description 하이라이트 색상 (HEX 형식, 예: #FF0000)
+       * @example #FFD6C2
+       */
+      color?: string;
       memo?: string;
     };
     NewsletterResponse: {

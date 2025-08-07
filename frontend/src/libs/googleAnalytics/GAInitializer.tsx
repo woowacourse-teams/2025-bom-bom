@@ -12,7 +12,7 @@ const GAInitializer = () => {
       return;
     }
 
-    initGA(ENV.googleAnalyticsId);
+    initGA('G-H8TK28L3HP');
   }, []);
   return null;
 };

@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { getBookmarkArticles } from '@/apis/bookmark';
+import { queries } from '@/apis/queries';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import BookmarkIcon from '#/assets/bookmark-inactive.svg';
@@ -11,10 +11,7 @@ export const Route = createFileRoute('/_bombom/bookmark')({
 });
 
 function BookmarkPage() {
-  const { data: articles } = useQuery({
-    queryKey: ['bookmarkArticles'],
-    queryFn: () => getBookmarkArticles(),
-  });
+  const { data: articles } = useQuery(queries.bookmarks());
 
   if (!articles) return null;
 

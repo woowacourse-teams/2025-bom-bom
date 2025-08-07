@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useMemo } from 'react';
 import { patchArticleRead } from '@/apis/articles';
-import { getBookmarked } from '@/apis/bookmark';
 import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
@@ -31,10 +30,9 @@ function ArticleDetailPage() {
   );
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
-  const { data: bookmarked } = useQuery({
-    queryKey: ['bookmarked', articleIdNumber],
-    queryFn: () => getBookmarked({ articleId: articleIdNumber }),
-  });
+  const { data: bookmarked } = useQuery(
+    queries.bookmarkStatus({ articleId: articleIdNumber }),
+  );
 
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleIdNumber],

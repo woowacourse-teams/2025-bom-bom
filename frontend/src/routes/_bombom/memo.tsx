@@ -8,7 +8,7 @@ import { theme } from '@/styles/theme';
 import MemoIcon from '#/assets/memo.svg';
 
 const MemoPage = () => {
-  const { data: highlights } = useQuery(queries.highlights({ articleId: 209 }));
+  const { data: highlights } = useQuery(queries.highlights({}));
 
   return (
     <Container>

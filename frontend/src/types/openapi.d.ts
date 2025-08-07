@@ -13,7 +13,11 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post: operations['addAttendanceScore'];
+    /**
+     * 출석 점수 부여
+     * @description 오늘의 출석 점수를 펫에게 부여합니다.
+     */
+    post: operations['attend'];
     delete?: never;
     options?: never;
     head?: never;
@@ -27,10 +31,34 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * 하이라이트 목록 조회
+     * @description 조건에 맞는 하이라이트 목록을 조회합니다.
+     */
     get: operations['getHighlights'];
     put?: never;
+    /**
+     * 하이라이트 생성
+     * @description 새로운 하이라이트를 생성합니다.
+     */
     post: operations['createHighlight'];
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/bookmarks/articles/{articleId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['addBookmark'];
+    delete: operations['deleteBookmark'];
     options?: never;
     head?: never;
     patch?: never;
@@ -45,6 +73,10 @@ export interface paths {
     };
     get?: never;
     put?: never;
+    /**
+     * 회원가입
+     * @description OAuth2 인증 후 추가 정보를 입력하여 회원가입을 완료합니다.
+     */
     post: operations['signup'];
     delete?: never;
     options?: never;
@@ -61,6 +93,10 @@ export interface paths {
     };
     get?: never;
     put?: never;
+    /**
+     * 로그아웃
+     * @description 현재 세션을 무효화하여 로그아웃합니다.
+     */
     post: operations['logout'];
     delete?: never;
     options?: never;
@@ -81,6 +117,10 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
+    /**
+     * 주간 목표 아티클 개수 수정
+     * @description 주간 목표로 설정된 아티클 개수를 수정합니다.
+     */
     patch: operations['updateWeeklyGoalCount'];
     trace?: never;
   };
@@ -94,9 +134,17 @@ export interface paths {
     get?: never;
     put?: never;
     post?: never;
+    /**
+     * 하이라이트 삭제
+     * @description 특정 하이라이트를 삭제합니다.
+     */
     delete: operations['deleteHighlight'];
     options?: never;
     head?: never;
+    /**
+     * 하이라이트 내용/위치 수정
+     * @description 특정 하이라이트의 내용(텍스트)이나 위치를 수정합니다.
+     */
     patch: operations['updateHighlight'];
     trace?: never;
   };
@@ -113,6 +161,10 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
+    /**
+     * 아티클 읽음 처리
+     * @description 특정 아티클을 읽음 처리합니다.
+     */
     patch: operations['updateIsRead'];
     trace?: never;
   };
@@ -123,6 +175,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * 뉴스레터 목록 조회
+     * @description 모든 뉴스레터 목록을 조회합니다.
+     */
     get: operations['getNewsletters'];
     put?: never;
     post?: never;
@@ -139,6 +195,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * 내 프로필 조회
+     * @description 로그인한 회원의 프로필 정보를 조회합니다.
+     */
     get: operations['getMember'];
     put?: never;
     post?: never;
@@ -155,6 +215,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * 읽기 정보 조회
+     * @description 현재 사용자의 주간/오늘/연속 읽기 정보를 조회합니다.
+     */
     get: operations['getReadingInformation'];
     put?: never;
     post?: never;
@@ -171,7 +235,43 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * 내 펫 정보 조회
+     * @description 현재 로그인한 사용자의 펫 정보를 조회합니다.
+     */
     get: operations['getPet'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/bookmarks': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getBookmarks'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/bookmarks/status/articles/{articleId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getBookmarkStatus'];
     put?: never;
     post?: never;
     delete?: never;
@@ -187,6 +287,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * OAuth2 로그인
+     * @description 지정된 OAuth2 제공자로 로그인을 시작합니다.
+     */
     get: operations['login'];
     put?: never;
     post?: never;
@@ -203,6 +307,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * 아티클 목록 조회
+     * @description 조건에 맞는 아티클 목록을 페이징하여 조회합니다. (정렬 기본값: ?page=0&size=10&sort=arrivedDateTime,desc)
+     */
     get: operations['getArticles'];
     put?: never;
     post?: never;
@@ -219,6 +327,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * 아티클 상세 조회
+     * @description 특정 아티클의 상세 정보를 조회합니다.
+     */
     get: operations['getArticleDetail'];
     put?: never;
     post?: never;
@@ -235,6 +347,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * 카테고리별 아티클 개수 조회
+     * @description 카테고리별 아티클 개수 정보를 조회합니다. 키워드 검색 시 해당 키워드가 제목에 포함된 아티클만 대상으로 합니다.
+     */
     get: operations['getArticleCategoryStatistics'];
     put?: never;
     post?: never;
@@ -248,30 +364,14 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    Member: {
-      /** Format: date-time */
-      createdAt?: string;
-      /** Format: date-time */
-      updatedAt?: string;
-      /** Format: int64 */
-      id?: number;
-      provider?: string;
-      providerId?: string;
-      email?: string;
-      nickname?: string;
-      profileImageUrl?: string;
-      /** Format: date-time */
-      birthDate?: string;
-      /** @enum {string} */
-      gender?: 'MALE' | 'FEMALE';
-      /** Format: int64 */
-      roleId?: number;
+    Color: {
+      value?: string;
     };
     HighlightCreateRequest: {
       location: components['schemas']['HighlightLocationRequest'];
       /** Format: int64 */
       articleId?: number;
-      color?: string;
+      color: components['schemas']['Color'];
       text: string;
       memo?: string;
     };
@@ -281,6 +381,23 @@ export interface components {
       endOffset: string;
       endXPath: string;
     };
+    HighlightLocationResponse: {
+      startOffset?: string;
+      startXPath?: string;
+      endOffset?: string;
+      endXPath?: string;
+    };
+    HighlightResponse: {
+      /** Format: int64 */
+      id?: number;
+      location?: components['schemas']['HighlightLocationResponse'];
+      /** Format: int64 */
+      articleId?: number;
+      color?: string;
+      text?: string;
+      memo?: string;
+    };
+    /** @description 회원가입 요청 데이터 */
     MemberSignupRequest: {
       nickname: string;
       email: string;
@@ -302,23 +419,7 @@ export interface components {
       weeklyGoalCount?: number;
     };
     UpdateHighlightRequest: {
-      color?: string;
-      memo?: string;
-    };
-    HighlightLocation: {
-      startOffset?: string;
-      startXPath?: string;
-      endOffset?: string;
-      endXPath?: string;
-    };
-    HighlightResponse: {
-      /** Format: int64 */
-      id?: number;
-      location?: components['schemas']['HighlightLocation'];
-      /** Format: int64 */
-      articleId?: number;
-      color?: string;
-      text?: string;
+      color?: components['schemas']['Color'];
       memo?: string;
     };
     NewsletterResponse: {
@@ -327,7 +428,7 @@ export interface components {
       name?: string;
       imageUrl?: string;
       description?: string;
-      mainPageUrl?: string;
+      subscribeUrl?: string;
       category?: string;
     };
     MemberProfileResponse: {
@@ -362,12 +463,7 @@ export interface components {
       totalScore?: number;
       /** Format: int32 */
       currentScore?: number;
-    };
-    GetArticlesOptions: {
-      /** Format: date */
-      date?: string;
-      category?: string;
-      keyword?: string;
+      isAttended?: boolean;
     };
     Pageable: {
       /** Format: int32 */
@@ -376,7 +472,9 @@ export interface components {
       size?: number;
       sort?: string[];
     };
-    ArticleResponse: {
+    BookmarkResponse: {
+      /** Format: int64 */
+      id?: number;
       /** Format: int64 */
       articleId?: number;
       title?: string;
@@ -393,6 +491,62 @@ export interface components {
       name?: string;
       imageUrl?: string;
       category?: string;
+    };
+    PageBookmarkResponse: {
+      /** Format: int64 */
+      totalElements?: number;
+      /** Format: int32 */
+      totalPages?: number;
+      /** Format: int32 */
+      size?: number;
+      content?: components['schemas']['BookmarkResponse'][];
+      /** Format: int32 */
+      number?: number;
+      sort?: components['schemas']['SortObject'];
+      /** Format: int32 */
+      numberOfElements?: number;
+      pageable?: components['schemas']['PageableObject'];
+      first?: boolean;
+      last?: boolean;
+      empty?: boolean;
+    };
+    PageableObject: {
+      /** Format: int64 */
+      offset?: number;
+      sort?: components['schemas']['SortObject'];
+      paged?: boolean;
+      /** Format: int32 */
+      pageNumber?: number;
+      /** Format: int32 */
+      pageSize?: number;
+      unpaged?: boolean;
+    };
+    SortObject: {
+      empty?: boolean;
+      sorted?: boolean;
+      unsorted?: boolean;
+    };
+    BookmarkStatusResponse: {
+      bookmarkStatus?: boolean;
+    };
+    GetArticlesOptions: {
+      /** Format: date */
+      date?: string;
+      category?: string;
+      keyword?: string;
+    };
+    ArticleResponse: {
+      /** Format: int64 */
+      articleId?: number;
+      title?: string;
+      contentsSummary?: string;
+      /** Format: date-time */
+      arrivedDateTime?: string;
+      thumbnailUrl?: string;
+      /** Format: int32 */
+      expectedReadTime?: number;
+      isRead?: boolean;
+      newsletter?: components['schemas']['NewsletterSummaryResponse'];
     };
     PageArticleResponse: {
       /** Format: int64 */
@@ -411,22 +565,6 @@ export interface components {
       first?: boolean;
       last?: boolean;
       empty?: boolean;
-    };
-    PageableObject: {
-      /** Format: int64 */
-      offset?: number;
-      sort?: components['schemas']['SortObject'];
-      unpaged?: boolean;
-      paged?: boolean;
-      /** Format: int32 */
-      pageNumber?: number;
-      /** Format: int32 */
-      pageSize?: number;
-    };
-    SortObject: {
-      empty?: boolean;
-      sorted?: boolean;
-      unsorted?: boolean;
     };
     ArticleDetailResponse: {
       title?: string;
@@ -463,19 +601,24 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  addAttendanceScore: {
+  attend: {
     parameters: {
-      query: {
-        member: components['schemas']['Member'];
-      };
+      query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description OK */
+      /** @description 출석 점수 부여 성공 */
       200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 인증 실패 */
+      401: {
         headers: {
           [name: string]: unknown;
         };
@@ -485,9 +628,9 @@ export interface operations {
   };
   getHighlights: {
     parameters: {
-      query: {
-        member: components['schemas']['Member'];
-        articleId: number;
+      query?: {
+        /** @description 아티클 ID (예: ?articleId=1) */
+        articleId?: number;
       };
       header?: never;
       path?: never;
@@ -495,7 +638,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description OK */
+      /** @description 하이라이트 목록 조회 성공 */
       200: {
         headers: {
           [name: string]: unknown;
@@ -504,13 +647,25 @@ export interface operations {
           '*/*': components['schemas']['HighlightResponse'][];
         };
       };
+      /** @description 잘못된 요청 값 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 인증 실패 (로그인 필요) */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   createHighlight: {
     parameters: {
-      query: {
-        member: components['schemas']['Member'];
-      };
+      query?: never;
       header?: never;
       path?: never;
       cookie?: never;
@@ -521,8 +676,87 @@ export interface operations {
       };
     };
     responses: {
+      /** @description 하이라이트 생성 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['HighlightResponse'];
+        };
+      };
       /** @description Created */
       201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['HighlightResponse'];
+        };
+      };
+      /** @description 잘못된 요청 값 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 인증 실패 (로그인 필요) */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 아티클에 대한 접근 권한 없음 */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 아티클을 찾을 수 없음 */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  addBookmark: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        articleId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  deleteBookmark: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        articleId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -543,8 +777,22 @@ export interface operations {
       };
     };
     responses: {
-      /** @description Created */
+      /** @description 회원가입 성공 */
       201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 잘못된 요청 데이터 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description OAuth2 인증 정보 없음 */
+      401: {
         headers: {
           [name: string]: unknown;
         };
@@ -561,7 +809,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description No Content */
+      /** @description 로그아웃 성공 */
       204: {
         headers: {
           [name: string]: unknown;
@@ -583,7 +831,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description OK */
+      /** @description 주간 목표 개수 수정 성공 */
       200: {
         headers: {
           [name: string]: unknown;
@@ -592,23 +840,64 @@ export interface operations {
           '*/*': components['schemas']['WeeklyGoalCountResponse'];
         };
       };
+      /** @description 잘못된 요청 값 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 인증 실패 (로그인 필요) */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 주간 읽기 정보를 찾을 수 없음 */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   deleteHighlight: {
     parameters: {
-      query: {
-        member: components['schemas']['Member'];
-      };
+      query?: never;
       header?: never;
       path: {
+        /** @description 하이라이트 ID */
         id: number;
       };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description No Content */
+      /** @description 하이라이트 삭제 성공 */
       204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 인증 실패 (로그인 필요) */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 하이라이트에 대한 접근 권한 없음 */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 하이라이트를 찾을 수 없음 */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -618,11 +907,10 @@ export interface operations {
   };
   updateHighlight: {
     parameters: {
-      query: {
-        member: components['schemas']['Member'];
-      };
+      query?: never;
       header?: never;
       path: {
+        /** @description 하이라이트 ID */
         id: number;
       };
       cookie?: never;
@@ -633,7 +921,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description OK */
+      /** @description 하이라이트 수정 성공 */
       200: {
         headers: {
           [name: string]: unknown;
@@ -642,23 +930,67 @@ export interface operations {
           '*/*': components['schemas']['HighlightResponse'];
         };
       };
+      /** @description 잘못된 요청 값 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 인증 실패 (로그인 필요) */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 하이라이트에 대한 접근 권한 없음 */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 하이라이트를 찾을 수 없음 */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   updateIsRead: {
     parameters: {
-      query: {
-        member: components['schemas']['Member'];
-      };
+      query?: never;
       header?: never;
       path: {
+        /**
+         * @description 아티클 ID
+         * @example 1
+         */
         id: number;
       };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description No Content */
+      /** @description 읽음 처리 성공 */
       204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 아티클에 대한 접근 권한 없음 */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 아티클을 찾을 수 없음 */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -675,7 +1007,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description OK */
+      /** @description 뉴스레터 목록 조회 성공 */
       200: {
         headers: {
           [name: string]: unknown;
@@ -688,16 +1020,14 @@ export interface operations {
   };
   getMember: {
     parameters: {
-      query: {
-        member: components['schemas']['Member'];
-      };
+      query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description OK */
+      /** @description 프로필 조회 성공 */
       200: {
         headers: {
           [name: string]: unknown;
@@ -706,20 +1036,25 @@ export interface operations {
           '*/*': components['schemas']['MemberProfileResponse'];
         };
       };
+      /** @description 인증 실패 (로그인 필요) */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   getReadingInformation: {
     parameters: {
-      query: {
-        member: components['schemas']['Member'];
-      };
+      query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description OK */
+      /** @description 읽기 정보 조회 성공 */
       200: {
         headers: {
           [name: string]: unknown;
@@ -728,21 +1063,35 @@ export interface operations {
           '*/*': components['schemas']['ReadingInformationResponse'];
         };
       };
+      /** @description 인증 실패 (로그인 필요) */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   getPet: {
     parameters: {
-      query: {
-        member: components['schemas']['Member'];
-      };
+      query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description OK */
+      /** @description 펫 정보 조회 성공 */
       200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['PetResponse'];
+        };
+      };
+      /** @description 인증 실패 */
+      401: {
         headers: {
           [name: string]: unknown;
         };
@@ -752,33 +1101,9 @@ export interface operations {
       };
     };
   };
-  login: {
-    parameters: {
-      query?: {
-        env?: string;
-      };
-      header?: never;
-      path: {
-        provider: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  getArticles: {
+  getBookmarks: {
     parameters: {
       query: {
-        member: components['schemas']['Member'];
-        getArticlesOptions: components['schemas']['GetArticlesOptions'];
         pageable: components['schemas']['Pageable'];
       };
       header?: never;
@@ -793,19 +1118,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          '*/*': components['schemas']['PageArticleResponse'];
+          '*/*': components['schemas']['PageBookmarkResponse'];
         };
       };
     };
   };
-  getArticleDetail: {
+  getBookmarkStatus: {
     parameters: {
-      query: {
-        member: components['schemas']['Member'];
-      };
+      query?: never;
       header?: never;
       path: {
-        id: number;
+        articleId: number;
       };
       cookie?: never;
     };
@@ -817,15 +1140,110 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
+          '*/*': components['schemas']['BookmarkStatusResponse'];
+        };
+      };
+    };
+  };
+  login: {
+    parameters: {
+      query?: {
+        env?: string;
+      };
+      header?: never;
+      path: {
+        /**
+         * @description OAuth2 제공자 (google, kakao 등)
+         * @example google
+         */
+        provider: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OAuth2 인증 페이지로 리다이렉트 */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getArticles: {
+    parameters: {
+      query: {
+        /** @description 필터링 관련 요청 */
+        getArticlesOptions: components['schemas']['GetArticlesOptions'];
+        /** @description 페이징 관련 요청 (예: ?page=0&size=10&sort=createdAt,desc) */
+        pageable: components['schemas']['Pageable'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 아티클 목록 조회 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['PageArticleResponse'];
+        };
+      };
+      /** @description 잘못된 정렬 파라미터 요청 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getArticleDetail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description 아티클 ID */
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 아티클 상세 조회 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
           '*/*': components['schemas']['ArticleDetailResponse'];
         };
+      };
+      /** @description 아티클에 대한 접근 권한 없음 */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 아티클을 찾을 수 없음 */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
   getArticleCategoryStatistics: {
     parameters: {
-      query: {
-        member: components['schemas']['Member'];
+      query?: {
+        /** @description 검색 키워드 (선택) */
         keyword?: string;
       };
       header?: never;
@@ -834,7 +1252,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description OK */
+      /** @description 카테고리별 개수 조회 성공 */
       200: {
         headers: {
           [name: string]: unknown;

@@ -2,18 +2,14 @@ import { fetcher } from './fetcher';
 import { HighlightType } from '@/pages/detail/types/highlight';
 import { components, operations } from '@/types/openapi';
 
-export type GetHighlightsParams = Omit<
-  operations['getHighlights']['parameters']['query'],
-  'member'
->;
+export type GetHighlightsParams =
+  operations['getHighlights']['parameters']['query'];
 export type GetHighlightsResponse = HighlightType[];
 
-export const getHighlights = async ({ articleId }: GetHighlightsParams) => {
+export const getHighlights = async (params: GetHighlightsParams) => {
   return await fetcher.get<GetHighlightsResponse>({
     path: '/highlights',
-    query: {
-      articleId,
-    },
+    query: params,
   });
 };
 
@@ -21,10 +17,10 @@ export type PostHighlightParams = {
   highlight: components['schemas']['HighlightCreateRequest'];
 };
 
-export const postHighlight = async ({ highlight }: PostHighlightParams) => {
+export const postHighlight = async (params: PostHighlightParams) => {
   return await fetcher.post({
     path: '/highlights',
-    body: highlight,
+    body: params,
   });
 };
 

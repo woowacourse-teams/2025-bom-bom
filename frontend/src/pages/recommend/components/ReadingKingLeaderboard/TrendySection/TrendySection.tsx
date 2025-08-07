@@ -6,6 +6,7 @@ import { getNewsletters } from '@/apis/newsLetters';
 import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import { CATEGORIES, CategoryType } from '@/constants/category';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { copyToClipboard } from '@/utils/copy';
 import TrendingUpIcon from '#/assets/trending-up.svg';
 
@@ -61,7 +62,14 @@ export default function TrendySection() {
             imageUrl={newsletter.imageUrl}
             title={newsletter.name}
             description={newsletter.description}
-            onClick={() => handleCardClick(newsletter.mainPageUrl)}
+            onClick={() => {
+              handleCardClick(newsletter.mainPageUrl);
+              trackEvent({
+                category: 'Newsletter',
+                action: 'Click Trendy Newsletter Card',
+                label: newsletter.name ?? 'Unknown Newsletter',
+              });
+            }}
             as="button"
           />
         ))}

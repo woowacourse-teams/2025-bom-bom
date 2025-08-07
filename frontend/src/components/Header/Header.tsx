@@ -4,6 +4,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import HomeIcon from '../../../public/assets/home.svg';
 import Button from '../Button/Button';
 import { getUserInfo } from '@/apis/members';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { theme } from '@/styles/theme';
 import { NavType } from '@/types/nav';
 import { copyToClipboard } from '@/utils/copy';
@@ -37,7 +38,16 @@ export default function Header({ activeNav }: HeaderProps) {
   return (
     <HeaderContainer>
       <HeaderInner>
-        <LogoWrapper to="/">
+        <LogoWrapper
+          to="/"
+          onClick={() =>
+            trackEvent({
+              category: 'Navigation',
+              action: 'Click Logo',
+              label: 'Go to Home',
+            })
+          }
+        >
           <LogoBox>
             <HomeIcon width={24} height={24} color={theme.colors.white} />
           </LogoBox>
@@ -48,7 +58,17 @@ export default function Header({ activeNav }: HeaderProps) {
         </LogoWrapper>
 
         <Nav>
-          <NavButton active={activeNav === 'today'} to="/">
+          <NavButton
+            active={activeNav === 'today'}
+            to="/"
+            onClick={() => {
+              trackEvent({
+                category: 'Navigation',
+                action: 'Click Today Nav',
+                label: 'Go to Today',
+              });
+            }}
+          >
             <HomeIcon
               width={24}
               height={24}
@@ -56,7 +76,17 @@ export default function Header({ activeNav }: HeaderProps) {
             />
             <p>오늘의 뉴스레터</p>
           </NavButton>
-          <NavButton active={activeNav === 'storage'} to="/storage">
+          <NavButton
+            active={activeNav === 'storage'}
+            to="/storage"
+            onClick={() => {
+              trackEvent({
+                category: 'Navigation',
+                action: 'Click Storage Nav',
+                label: 'Go to Storage',
+              });
+            }}
+          >
             <StorageIcon
               width={24}
               height={24}
@@ -64,7 +94,17 @@ export default function Header({ activeNav }: HeaderProps) {
             />
             <p>뉴스레터 보관함</p>
           </NavButton>
-          <NavButton active={activeNav === 'recommend'} to="/recommend">
+          <NavButton
+            active={activeNav === 'recommend'}
+            to="/recommend"
+            onClick={() => {
+              trackEvent({
+                category: 'Navigation',
+                action: 'Click Recommend Nav',
+                label: 'Go to Recommend',
+              });
+            }}
+          >
             <CompassIcon
               width={24}
               height={24}
@@ -90,7 +130,16 @@ export default function Header({ activeNav }: HeaderProps) {
               />
               <ProfileTextBox>
                 <ProfileName>{userInfo?.nickname ?? '김봄봄'}</ProfileName>
-                <ProfileEmail onClick={handleCopyEmail}>
+                <ProfileEmail
+                  onClick={() => {
+                    handleCopyEmail();
+                    trackEvent({
+                      category: 'User',
+                      action: 'Click Copy Email',
+                      label: userInfo?.email ?? 'No Email',
+                    });
+                  }}
+                >
                   <EmailText>
                     {userInfo?.email ?? 'example@bombom.news'}
                   </EmailText>

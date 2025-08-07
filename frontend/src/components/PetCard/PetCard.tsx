@@ -10,7 +10,6 @@ import { getPet, postPetAttendance } from '@/apis/pet';
 import { queryClient } from '@/main';
 import { theme } from '@/styles/theme';
 import { calculateRate } from '@/utils/math';
-import petImage from '#/assets/pet-1-lv1.png';
 import PetIcon from '#/assets/pet.svg';
 
 const PetCard = () => {
@@ -52,7 +51,7 @@ const PetCard = () => {
 
       <PetImageContainer>
         <PetImage
-          src={petImage}
+          src={`./assets/pet-1-lv${pet?.level ?? 1}.png`}
           alt="pet"
           width={80}
           height={120}

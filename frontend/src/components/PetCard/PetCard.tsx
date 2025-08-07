@@ -30,8 +30,8 @@ const PetCard = () => {
   });
 
   const levelPercentage = calculateRate(
-    pet?.currentScore ?? 0,
-    pet?.totalScore ?? 1,
+    pet?.currentStageScore ?? 0,
+    pet?.requiredStageScore ?? 1,
   );
 
   const handleAttendanceClick = () => {

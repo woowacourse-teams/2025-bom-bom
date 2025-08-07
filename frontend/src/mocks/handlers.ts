@@ -83,8 +83,8 @@ export const handlers = [
   http.get(`${baseURL}/members/me/pet`, () => {
     return HttpResponse.json({
       level: 1,
-      totalScore: 100,
-      currentScore: 50,
+      currentStageScore: 100,
+      requiredStageScore: 50,
     });
   }),
 

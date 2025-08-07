@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import Badge from '@/components/Badge/Badge';
 import Chip from '@/components/Chip/Chip';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { components } from '@/types/openapi';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
@@ -31,6 +32,13 @@ function ArticleCard({ data, readVariant = 'transparent' }: ArticleCardProps) {
       isRead={isRead ?? false}
       readVariant={readVariant}
       to={`/articles/${articleId}`}
+      onClick={() => {
+        trackEvent({
+          category: 'Article',
+          action: 'Click Article Card',
+          label: `${newsletter?.name} - [${articleId}]${title}`,
+        });
+      }}
     >
       <InfoWrapper>
         <Title>{title}</Title>

@@ -5,9 +5,11 @@ import lombok.Getter;
 @Getter
 public class UpdateReadingCountEvent {
 
+    private final Long memberId;
     private final Long articleId;
 
-    public UpdateReadingCountEvent(Long articleId) {
+    public UpdateReadingCountEvent(Long memberId, Long articleId) {
+        this.memberId = memberId;
         this.articleId = articleId;
     }
 }

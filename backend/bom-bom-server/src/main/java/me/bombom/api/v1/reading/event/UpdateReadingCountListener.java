@@ -19,9 +19,9 @@ public class UpdateReadingCountListener {
     public void on(UpdateReadingCountEvent event) {
         try {
             boolean isTodayArticle = articleService.isArrivedToday(event.getArticleId());
-            readingService.updateReadingCount(event.getArticleId(), isTodayArticle);
+            readingService.updateReadingCount(event.getMemberId(), isTodayArticle);
         } catch (Exception e) {
-            log.error("읽기 횟수 갱신 실패, article id: {}", event.getArticleId(), e);
+            log.error("읽기 횟수 갱신 실패, article id: {}", event.getMemberId(), e);
         }
     }
 }

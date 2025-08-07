@@ -32,17 +32,18 @@ class UpdateReadingCountListenerTest {
     @Test
     void 읽기_횟수_갱신_이벤트_발행_시_관련_메서드가_호출된다() {
         // given
+        Long memberId = 1L;
         Long articleId = 1L;
         boolean isTodayArticle = true;
         given(articleService.isArrivedToday(articleId)).willReturn(isTodayArticle);
 
         // when
-        publisher.publishEvent(new UpdateReadingCountEvent(articleId));
+        publisher.publishEvent(new UpdateReadingCountEvent(memberId, articleId));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
         // then
         verify(articleService, times(1)).isArrivedToday(articleId);
-        verify(readingService, times(1)).updateReadingCount(articleId, isTodayArticle);
+        verify(readingService, times(1)).updateReadingCount(memberId, isTodayArticle);
     }
 }

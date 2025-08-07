@@ -66,7 +66,7 @@ public class ArticleService {
         }
         validateArticleOwner(article, member.getId());
         article.markAsRead();
-        applicationEventPublisher.publishEvent(new UpdateReadingCountEvent(articleId));
+        applicationEventPublisher.publishEvent(new UpdateReadingCountEvent(member.getId(), articleId));
         applicationEventPublisher.publishEvent(new AddArticleScoreEvent(member.getId()));
     }
 

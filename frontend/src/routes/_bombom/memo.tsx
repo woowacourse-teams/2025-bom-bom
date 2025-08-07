@@ -10,8 +10,6 @@ import MemoIcon from '#/assets/memo.svg';
 const MemoPage = () => {
   const { data: highlights } = useQuery(queries.highlights({ articleId: 209 }));
 
-  if (!highlights) return null;
-
   return (
     <Container>
       <TitleWrapper>

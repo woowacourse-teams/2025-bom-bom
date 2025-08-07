@@ -47,9 +47,9 @@ export const saveSelection = (
   return {
     location: {
       startXPath: xpath,
-      startOffset: offsets.start,
+      startOffset: offsets.start.toString(),
       endXPath: xpath,
-      endOffset: offsets.end,
+      endOffset: offsets.end.toString(),
     },
     articleId,
     color: theme.colors.primaryLight,
@@ -131,8 +131,8 @@ export const restoreHighlight = (data: HighlightType) => {
 
   const range = getHighlightRange(
     element,
-    data.location.startOffset,
-    data.location.endOffset,
+    Number(data.location.startOffset),
+    Number(data.location.endOffset),
   );
 
   // === 하이라이트 적용 ===

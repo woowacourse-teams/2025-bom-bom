@@ -9,6 +9,7 @@ import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ENV } from './apis/env.ts';
+import GAInitializer from './libs/googleAnalytics/GAInitializer.tsx';
 import { routeTree } from './routeTree.gen';
 import reset from './styles/reset.ts';
 
@@ -50,6 +51,7 @@ enableMocking().then(() => {
     <StrictMode>
       <Global styles={reset} />
       <RouterProvider router={router} />
+      <GAInitializer />
     </StrictMode>,
   );
 });

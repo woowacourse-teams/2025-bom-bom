@@ -195,21 +195,21 @@ public final class TestFixture {
         Long secondArticleId = articles.get(1).getId();
         return List.of(
                 Highlight.builder()
-                        .highlightLocation(new HighlightLocation("0", "div[0]/p[0]", "10", "div[0]/p[0]"))
+                        .highlightLocation(new HighlightLocation(0, "div[0]/p[0]", 10, "div[0]/p[0]"))
                         .articleId(firstArticleId)
                         .color(Color.from("#ffeb3b"))
                         .text("첫 번째 하이라이트")
                         .memo("메모")
                         .build(),
                 Highlight.builder()
-                        .highlightLocation(new HighlightLocation("15", "div[0]/p[1]", "25", "div[0]/p[1]"))
+                        .highlightLocation(new HighlightLocation(15, "div[0]/p[1]", 25, "div[0]/p[1]"))
                         .articleId(firstArticleId)
                         .color(Color.from("#4caf50"))
                         .text("두 번째 하이라이트")
                         .memo("메모")
                         .build(),
                 Highlight.builder()
-                        .highlightLocation(new HighlightLocation("5", "div[0]/h1", "15", "div[0]/h1"))
+                        .highlightLocation(new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
                         .articleId(secondArticleId)
                         .color(Color.from("#2196f3"))
                         .text("세 번째 하이라이트")
@@ -220,7 +220,7 @@ public final class TestFixture {
 
     public static HighlightCreateRequest createHighlightRequest(Long articleId) {
         return new HighlightCreateRequest(
-                new HighlightLocationRequest("0", "div[0]/p[2]", "20", "div[0]/p[2]"),
+                new HighlightLocationRequest(0, "div[0]/p[2]", 20, "div[0]/p[2]"),
                 articleId,
                 Color.from("#f44336"),
                 "새로운 하이라이트 텍스트",

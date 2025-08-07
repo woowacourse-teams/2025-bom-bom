@@ -118,9 +118,9 @@ class HighlightControllerTest {
         String content = String.format("""
         {
           "location": {
-            "startOffset": "0",
+            "startOffset": 0,
             "startXPath": "div[0]/p[0]",
-            "endOffset": "10",
+            "endOffset": 10,
             "endXPath": "div[0]/p[0]"
           },
           "articleId": %d,

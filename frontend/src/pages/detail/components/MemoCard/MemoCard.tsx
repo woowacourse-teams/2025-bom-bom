@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useEffect, useRef, useState } from 'react';
+import { ElementType, useEffect, useRef, useState } from 'react';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { theme } from '@/styles/theme';
 import DeleteIcon from '#/assets/delete.svg';
@@ -8,14 +8,18 @@ interface MemoCardProps {
   id: number;
   content: string;
   memo: string;
-  onRemoveButtonClick: (id: number) => void;
-  onMemoChange: (id: number, memo: string) => void; // <-- e 대신 memo string
+  as?: ElementType;
+  onClick?: () => void;
+  onRemoveButtonClick?: (id: number) => void;
+  onMemoChange?: (id: number, memo: string) => void; // <-- e 대신 memo string
 }
 
 const MemoCard = ({
   id,
   content,
   memo,
+  as,
+  onClick,
   onRemoveButtonClick,
   onMemoChange,
 }: MemoCardProps) => {
@@ -24,12 +28,12 @@ const MemoCard = ({
   const debouncedMemo = useDebouncedValue(localMemo, 500);
 
   const handleRemoveButtonClick = () => {
-    onRemoveButtonClick(id);
+    onRemoveButtonClick?.(id);
   };
 
   useEffect(() => {
     if (debouncedMemo !== memo) {
-      onMemoChange(id, debouncedMemo);
+      onMemoChange?.(id, debouncedMemo);
     }
     // 의존성 배열에 updateMemo, id, memo를 넣으면
     // memo가 변경될 때마다(예: 서버 응답으로 값이 업데이트될 때) 불필요하게 effect가 재실행됨.
@@ -46,27 +50,34 @@ const MemoCard = ({
   }, [localMemo]);
 
   return (
-    <Container>
+    <Container as={as} onClick={onClick}>
       <HeaderBox>
         <ColorDotWrapper>
           <ColorDot />
         </ColorDotWrapper>
-        <DeleteButton onClick={handleRemoveButtonClick}>
-          <DeleteIcon fill={theme.colors.black} width={20} height={20} />
-        </DeleteButton>
+        {onRemoveButtonClick && (
+          <DeleteButton onClick={handleRemoveButtonClick}>
+            <DeleteIcon fill={theme.colors.black} width={20} height={20} />
+          </DeleteButton>
+        )}
       </HeaderBox>
 
       <MemoContent>
         <MemoContentText>{content}</MemoContentText>
       </MemoContent>
 
-      <NoteMemo
-        ref={textAreaRef}
-        rows={1}
-        value={localMemo}
-        onChange={(e) => setLocalMemo(e.target.value)}
-        placeholder="메모를 입력해주세요"
-      />
+      {onMemoChange ? (
+        <NoteMemo
+          ref={textAreaRef}
+          name="memo"
+          rows={1}
+          value={localMemo}
+          onChange={(e) => setLocalMemo(e.target.value)}
+          placeholder="메모를 입력해주세요"
+        />
+      ) : (
+        <MemoText>{memo || '메모가 없습니다.'}</MemoText>
+      )}
     </Container>
   );
 };
@@ -86,6 +97,7 @@ const Container = styled.div`
   align-self: stretch;
 
   background-color: ${({ theme }) => theme.colors.white};
+  text-align: left;
 
   transition: box-shadow 0.2s;
 
@@ -151,4 +163,15 @@ const NoteMemo = styled.textarea`
   font: ${({ theme }) => theme.fonts.body2};
 
   resize: none;
+`;
+
+const MemoText = styled.p`
+  width: 100%;
+  padding: 8px 12px;
+
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.body2};
+  white-space: pre-wrap;
+
+  word-break: break-all;
 `;

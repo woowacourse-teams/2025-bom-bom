@@ -3,6 +3,7 @@ import { ENV } from '../apis/env';
 import { ARTICLE_DETAIL } from './datas/articleDetail';
 import { ARTICLES } from './datas/articles';
 import { TRENDY_NEWSLETTERS } from './datas/trendyNewsLetter';
+import { bookmarkHandlers } from './handlers/bookmark';
 import { HighlightType } from '@/pages/detail/types/highlight';
 
 const baseURL = ENV.baseUrl;
@@ -83,8 +84,8 @@ export const handlers = [
   http.get(`${baseURL}/members/me/pet`, () => {
     return HttpResponse.json({
       level: 1,
-      totalScore: 100,
-      currentScore: 50,
+      currentStageScore: 100,
+      requiredStageScore: 50,
     });
   }),
 
@@ -138,4 +139,5 @@ export const handlers = [
     HIGHLIGHTS.splice(index, 1);
     return new HttpResponse(null, { status: 204 });
   }),
+  ...bookmarkHandlers,
 ];

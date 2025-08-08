@@ -5,6 +5,7 @@ import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import { CATEGORIES, CategoryType } from '@/constants/category';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { copyToClipboard } from '@/utils/copy';
 import TrendingUpIcon from '#/assets/trending-up.svg';
 
@@ -24,8 +25,11 @@ export default function TrendySection() {
   );
 
   const handleCardClick = (url: string) => {
-    alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
-    copyToClipboard(userInfo?.email ?? '');
+    if (userInfo?.email) {
+      copyToClipboard(userInfo.email ?? '');
+      alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
+    }
+
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -54,7 +58,14 @@ export default function TrendySection() {
             imageUrl={newsletter.imageUrl ?? ''}
             title={newsletter.name ?? ''}
             description={newsletter.description ?? ''}
-            onClick={() => handleCardClick(newsletter.mainPageUrl ?? '')}
+            onClick={() => {
+              handleCardClick(newsletter.subscribeUrl ?? '');
+              trackEvent({
+                category: 'Newsletter',
+                action: 'Click Trendy Newsletter Card',
+                label: newsletter.name ?? 'Unknown Newsletter',
+              });
+            }}
             as="button"
           />
         ))}

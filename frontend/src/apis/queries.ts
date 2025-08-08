@@ -7,6 +7,12 @@ import {
   getStatisticsCategories,
   GetStatisticsCategoriesParams,
 } from './articles';
+import {
+  getBookmarkArticles,
+  getBookmarked,
+  GetBookmarkedParams,
+} from './bookmark';
+import { getHighlights, GetHighlightsParams } from './highlight';
 import { getReadingStatus, getUserInfo } from './members';
 import { getNewsletters } from './newsLetters';
 
@@ -49,5 +55,25 @@ export const queries = {
     queryOptions({
       queryKey: ['newsletters'],
       queryFn: getNewsletters,
+    }),
+
+  // highlights
+  highlights: (params: GetHighlightsParams) =>
+    queryOptions({
+      queryKey: ['highlights', params?.articleId],
+      queryFn: () => getHighlights(params),
+    }),
+
+  // bookmarks
+  bookmarks: () =>
+    queryOptions({
+      queryKey: ['bookmarkArticles'],
+      queryFn: () => getBookmarkArticles(),
+    }),
+
+  bookmarkStatus: (params: GetBookmarkedParams) =>
+    queryOptions({
+      queryKey: ['bookmarked', params.articleId],
+      queryFn: () => getBookmarked(params),
     }),
 };

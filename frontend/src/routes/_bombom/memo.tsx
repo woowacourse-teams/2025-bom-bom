@@ -19,7 +19,7 @@ function MemoPage() {
     <Container>
       <TitleWrapper>
         <BookmarkStorageIcon fill={theme.colors.white} />
-        <Title>북마크 보관함</Title>
+        <Title>메모 보관함</Title>
       </TitleWrapper>
       {highlights && highlights.length > 0 ? (
         <MemoList>

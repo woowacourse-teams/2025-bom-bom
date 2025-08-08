@@ -10,7 +10,6 @@ import Pagination from '@/components/Pagination/Pagination';
 import { CategoryType } from '@/constants/category';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
-import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import { theme } from '@/styles/theme';
@@ -66,7 +65,6 @@ function Storage() {
     setCurrentPage(1);
   }, [debouncedSearchInput]);
 
-  const readStats = getArticleReadStats(articles?.content ?? []);
   const existCategories = categoryCounts?.categories?.filter(
     (category) => category.count !== 0,
   );

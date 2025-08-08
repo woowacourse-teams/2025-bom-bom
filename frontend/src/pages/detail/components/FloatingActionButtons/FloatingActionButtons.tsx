@@ -19,6 +19,10 @@ const FloatingActionButtons = ({
     onBookmarkClick(bookmarked);
   };
 
+  const handleScrollUp = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <>
       <Container>
@@ -35,7 +39,7 @@ const FloatingActionButtons = ({
         </ActionButton>
 
         <ActionButton type="button">
-          <ScrollUpIcon />
+          <ScrollUpIcon onClick={handleScrollUp} />
         </ActionButton>
       </Container>
     </>

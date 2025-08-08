@@ -1,12 +1,12 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { patchArticleRead } from '@/apis/articles';
-import { getBookmarked } from '@/apis/bookmark';
 import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
@@ -27,20 +27,26 @@ function ArticleDetailPage() {
   const queryClient = useQueryClient();
 
   const { data: currentArticle } = useQuery(
-    queries.articleById({ id: Number(articleId) }),
+    queries.articleById({ id: articleIdNumber }),
   );
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
-  const { data: bookmarked } = useQuery({
-    queryKey: ['bookmarked'],
-    queryFn: () => getBookmarked({ articleId: Number(articleId) }),
-  });
+  const { data: bookmarked } = useQuery(
+    queries.bookmarkStatus({ articleId: articleIdNumber }),
+  );
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const debouncedBookmark = useDebouncedValue(isBookmarked ?? false, 500);
+
+  useEffect(() => {
+    setIsBookmarked(bookmarked?.bookmarkStatus ?? false);
+  }, [bookmarked?.bookmarkStatus]);
+
   const { mutate: updateArticleAsRead } = useMutation({
-    mutationKey: ['read', articleId],
+    mutationKey: ['read', articleIdNumber],
     mutationFn: () => patchArticleRead({ id: articleIdNumber }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['article', articleId],
+        queryKey: ['article', articleIdNumber],
       });
       queryClient.invalidateQueries({
         queryKey: ['articles', { date: today, sorted: 'ASC' }],
@@ -48,9 +54,14 @@ function ArticleDetailPage() {
     },
   });
 
-  const { onToggleBookmarkClick } = useBookmarkMutation({
-    articleId: Number(articleId),
+  const { toggleBookmark } = useBookmarkMutation({
+    articleId: articleIdNumber,
   });
+
+  const onBookmarkClick = () => {
+    setIsBookmarked((prev) => !prev);
+    toggleBookmark(debouncedBookmark);
+  };
 
   useScrollThreshold({
     enabled: !currentArticle?.isRead && !!currentArticle,
@@ -64,7 +75,7 @@ function ArticleDetailPage() {
   if (!currentArticle || !todayArticles) return null;
 
   const unReadArticles = todayArticles?.content?.filter(
-    (article) => !article.isRead && article.articleId !== Number(articleId),
+    (article) => !article.isRead && article.articleId !== articleIdNumber,
   );
 
   return (
@@ -109,8 +120,8 @@ function ArticleDetailPage() {
         )}
       </TodayArticlesWrapper>
       <FloatingActionButtons
-        bookmarked={!!bookmarked}
-        onToggleBookmarkClick={onToggleBookmarkClick}
+        bookmarked={isBookmarked}
+        onBookmarkClick={onBookmarkClick}
       />
     </Container>
   );

@@ -27,7 +27,7 @@ export default function Header({ activeNav }: HeaderProps) {
     copyToClipboard(userInfo?.email);
   };
 
-  const isLoadingOrHaveInfo = isFetching || userInfo;
+  const isLoggedIn = isFetching || userInfo;
 
   return (
     <HeaderContainer>
@@ -70,7 +70,7 @@ export default function Header({ activeNav }: HeaderProps) {
         </Nav>
 
         <ProfileWrapper>
-          {isLoadingOrHaveInfo ? (
+          {isLoggedIn ? (
             <ProfileInfo>
               <ProfileImg
                 src={userInfo?.profileImageUrl ?? defaultImage}

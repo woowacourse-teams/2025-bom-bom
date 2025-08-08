@@ -60,11 +60,7 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
   useEffect(() => {
     if (!highlights || !articleContent) return;
 
-    try {
-      restoreHighlightAll(highlights);
-    } catch (error) {
-      console.error(error);
-    }
+    restoreHighlightAll(highlights);
   }, [articleContent, highlights]);
 
   return (

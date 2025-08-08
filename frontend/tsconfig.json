@@ -1,13 +1,25 @@
 {
   "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
     "target": "es6",
     "module": "esnext",
     "strict": true,
     "skipLibCheck": true,
-    "moduleResolution": "node",
-    "jsx": "react-jsx", // JSX를 React 문법으로 변환해요
-    "esModuleInterop": true // React를 ESM으로 import할 수 있게 해줘요
+    "moduleResolution": "Bundler",
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "jsxImportSource": "@emotion/react",
+    "jsx": "react-jsx",
+    "allowUmdGlobalAccess": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "types": ["./emotion.d.ts", "jest", "node"],
+    "paths": {
+      "@/*": ["src/*"],
+      "#/*": ["public/*"]
+    }
   },
-  "include": ["./**/*.ts", "src/main.tsx"],
+  "include": ["src", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]
 }

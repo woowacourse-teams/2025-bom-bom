@@ -10,7 +10,20 @@ import { getPet, postPetAttendance } from '@/apis/pet';
 import { queryClient } from '@/main';
 import { theme } from '@/styles/theme';
 import { calculateRate } from '@/utils/math';
+import petLv1 from '#/assets/pet-1-lv1.png';
+import petLv2 from '#/assets/pet-1-lv2.png';
+import petLv3 from '#/assets/pet-1-lv3.png';
+import petLv4 from '#/assets/pet-1-lv4.png';
+import petLv5 from '#/assets/pet-1-lv5.png';
 import PetIcon from '#/assets/pet.svg';
+
+const petImages: Record<number, string> = {
+  1: petLv1,
+  2: petLv2,
+  3: petLv3,
+  4: petLv4,
+  5: petLv5,
+};
 
 const PetCard = () => {
   const [isAnimating, setIsAnimating] = useState(false);
@@ -51,7 +64,7 @@ const PetCard = () => {
 
       <PetImageContainer>
         <PetImage
-          src={`./assets/pet-1-lv${pet?.level ?? 1}.png`}
+          src={petImages[pet?.level ?? 1]}
           alt="pet"
           width={80}
           height={120}

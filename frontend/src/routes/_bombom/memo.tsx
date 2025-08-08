@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
 import MemoCard from '@/pages/detail/components/MemoCard/MemoCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
@@ -12,6 +12,7 @@ export const Route = createFileRoute('/_bombom/memo')({
 });
 
 function MemoPage() {
+  const navigate = useNavigate();
   const { data: highlights } = useQuery(queries.highlights({}));
 
   return (
@@ -28,6 +29,10 @@ function MemoPage() {
                 id={highlight.id}
                 content={highlight.text}
                 memo={highlight.memo}
+                as="button"
+                onClick={() =>
+                  navigate({ to: `/articles/${highlight.articleId}` })
+                }
               />
             </li>
           ))}

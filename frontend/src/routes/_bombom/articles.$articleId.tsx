@@ -9,7 +9,7 @@ import Spacing from '@/components/Spacing/Spacing';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
-import ArticleContent from '@/pages/detail/components/ArticleContent/ArticleContent';
+import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
 import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
@@ -97,7 +97,7 @@ function ArticleDetailPage() {
         </MetaInfoRow>
       </HeaderWrapper>
       <Divider />
-      <ArticleContent
+      <ArticleBody
         articleId={articleIdNumber}
         articleContent={currentArticle.contents}
       />

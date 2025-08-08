@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useEffect, useRef, useState } from 'react';
+import { ElementType, useEffect, useRef, useState } from 'react';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { theme } from '@/styles/theme';
 import DeleteIcon from '#/assets/delete.svg';
@@ -8,6 +8,8 @@ interface MemoCardProps {
   id: number;
   content: string;
   memo: string;
+  as?: ElementType;
+  onClick?: () => void;
   onRemoveButtonClick?: (id: number) => void;
   onMemoChange?: (id: number, memo: string) => void; // <-- e 대신 memo string
 }
@@ -16,6 +18,8 @@ const MemoCard = ({
   id,
   content,
   memo,
+  as,
+  onClick,
   onRemoveButtonClick,
   onMemoChange,
 }: MemoCardProps) => {
@@ -46,7 +50,7 @@ const MemoCard = ({
   }, [localMemo]);
 
   return (
-    <Container>
+    <Container as={as} onClick={onClick}>
       <HeaderBox>
         <ColorDotWrapper>
           <ColorDot />
@@ -93,6 +97,7 @@ const Container = styled.div`
   align-self: stretch;
 
   background-color: ${({ theme }) => theme.colors.white};
+  text-align: left;
 
   transition: box-shadow 0.2s;
 

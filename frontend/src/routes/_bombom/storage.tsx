@@ -107,10 +107,7 @@ function Storage() {
           onChange={handleSearchChange}
         />
         <SummaryBar>
-          <SummaryText>
-            총 {readStats.total}개 • 읽지 않음 {readStats.unread}개 • 읽음{' '}
-            {readStats.read}개
-          </SummaryText>
+          <SummaryText>총 {articles?.totalElements ?? 0}개</SummaryText>
           <Select
             options={[
               { value: 'DESC', label: '최신순' },

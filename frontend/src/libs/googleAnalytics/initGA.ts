@@ -18,7 +18,7 @@ export const initGA = (
   const script = document.createElement('script');
   script.async = true;
   script.src = `${gtagUrl}?id=${measurementId}`;
-  document.body.appendChild(script);
+  document.head.appendChild(script);
 
   // gtag 초기화
   window.dataLayer = window.dataLayer || [];

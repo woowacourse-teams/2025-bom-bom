@@ -10,7 +10,6 @@ import Pagination from '@/components/Pagination/Pagination';
 import { CategoryType } from '@/constants/category';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
-import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import { theme } from '@/styles/theme';
@@ -66,7 +65,6 @@ function Storage() {
     setCurrentPage(1);
   }, [debouncedSearchInput]);
 
-  const readStats = getArticleReadStats(articles?.content ?? []);
   const existCategories = categoryCounts?.categories?.filter(
     (category) => category.count !== 0,
   );
@@ -107,10 +105,7 @@ function Storage() {
           onChange={handleSearchChange}
         />
         <SummaryBar>
-          <SummaryText>
-            총 {readStats.total}개 • 읽지 않음 {readStats.unread}개 • 읽음{' '}
-            {readStats.read}개
-          </SummaryText>
+          <SummaryText>총 {articles?.totalElements ?? 0}개</SummaryText>
           <Select
             options={[
               { value: 'DESC', label: '최신순' },

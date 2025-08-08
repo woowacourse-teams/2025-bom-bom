@@ -1,5 +1,6 @@
 package me.bombom.api.v1.pet.event;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.transaction.TestTransaction;
@@ -35,7 +35,7 @@ import org.springframework.test.context.transaction.TestTransaction;
 public class AddArticleScoreListenerTest {
 
     @Autowired
-    private ApplicationEventPublisher publisher;
+    private AddArticleScoreListener addArticleScoreListener;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -57,6 +57,9 @@ public class AddArticleScoreListenerTest {
 
     @Autowired
     private ContinueReadingRepository continueReadingRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private Member member;
     private Pet pet;
@@ -91,11 +94,14 @@ public class AddArticleScoreListenerTest {
                         .dayCount(7)
                         .build()
         );
+        stageRepository.save(TestFixture.createStage(1, 0));
 
-        // when
-        publisher.publishEvent(new AddArticleScoreEvent(member.getId()));
         TestTransaction.flagForCommit();
         TestTransaction.end();
+        entityManager.clear();
+
+        // when
+        addArticleScoreListener.on(new AddArticleScoreEvent(member.getId()));
 
         // then
         pet = petRepository.findById(pet.getId()).orElseThrow();
@@ -118,11 +124,14 @@ public class AddArticleScoreListenerTest {
                         .dayCount(6)
                         .build()
         );
+        stageRepository.save(TestFixture.createStage(1, 0));
 
-        // when
-        publisher.publishEvent(new AddArticleScoreEvent(member.getId()));
         TestTransaction.flagForCommit();
         TestTransaction.end();
+        entityManager.clear();
+
+        // when
+        addArticleScoreListener.on(new AddArticleScoreEvent(member.getId()));
 
         // then
         pet = petRepository.findById(pet.getId()).orElseThrow();
@@ -140,10 +149,12 @@ public class AddArticleScoreListenerTest {
                 )
         );
 
-        // when
-        publisher.publishEvent(new AddArticleScoreEvent(member.getId()));
         TestTransaction.flagForCommit();
         TestTransaction.end();
+        entityManager.clear();
+
+        // when
+        addArticleScoreListener.on(new AddArticleScoreEvent(member.getId()));
 
         // then
         pet = petRepository.findById(pet.getId()).orElseThrow();

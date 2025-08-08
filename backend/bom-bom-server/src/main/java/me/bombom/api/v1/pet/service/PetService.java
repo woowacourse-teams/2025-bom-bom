@@ -26,13 +26,21 @@ public class PetService {
     public PetResponse getPet(Member member) {
         Pet pet = petRepository.findByMemberId(member.getId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        Stage stage = stageRepository.findById(pet.getStageId())
+        Stage currentStage = stageRepository.findById(pet.getStageId())
                 .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
-        return PetResponse.of(pet,stage);
+        Stage nextStage = stageRepository.findNextStageByCurrentScore(pet.getCurrentScore())
+                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
+        return PetResponse.of(pet, currentStage, nextStage);
     }
 
     @Transactional
-    public void addAttendanceScore(Member member) {
+    public void attend(Member member) {
+        Pet pet = petRepository.findByMemberId(member.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        if(pet.isAttended()){
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
+        }
+        pet.markAsAttended();
         increaseCurrentScore(member.getId(), ScorePolicyConstants.ATTENDANCE_SCORE);
     }
 
@@ -41,6 +49,7 @@ public class PetService {
         Pet pet = petRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         pet.increaseCurrentScore(score);
+        updatePetStage(pet);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -49,5 +58,16 @@ public class PetService {
                 .memberId(memberId)
                 .stageId(1L) // TODO: stage ID 따른 상수화 필요
                 .build());
+    }
+
+    @Transactional
+    public void resetAttendance() {
+        petRepository.resetAllAttendance();
+    }
+
+    private void updatePetStage(Pet pet) {
+        Stage stageByScore = stageRepository.findCurrentStageByCurrentScore(pet.getCurrentScore())
+                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
+        pet.updateStage(stageByScore);
     }
 }

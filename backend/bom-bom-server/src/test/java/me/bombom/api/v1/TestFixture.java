@@ -3,6 +3,7 @@ package me.bombom.api.v1;
 import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.article.domain.Article;
+import me.bombom.api.v1.highlight.domain.Color;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
@@ -28,6 +29,18 @@ public final class TestFixture {
     /**
      * Member
      */
+
+    public static Member createUniqueMember(String nickname, String providerId) {
+        return Member.builder()
+                .provider("provider")
+                .providerId(providerId)
+                .email("email")
+                .nickname(nickname)
+                .gender(Gender.FEMALE)
+                .roleId(1L)
+                .build();
+    }
+
     public static Member normalMemberFixture() {
         return Member.builder()
                 .provider("provider")
@@ -154,6 +167,14 @@ public final class TestFixture {
                 .build();
     }
 
+    public static TodayReading todayReadingFixtureZeroCurrentCount(Member member) {
+        return TodayReading.builder()
+                .memberId(member.getId())
+                .currentCount(0)
+                .totalCount(3)
+                .build();
+    }
+
     /**
      * WeeklyReading
      */
@@ -174,23 +195,23 @@ public final class TestFixture {
         Long secondArticleId = articles.get(1).getId();
         return List.of(
                 Highlight.builder()
-                        .highlightLocation(new HighlightLocation("0", "div[0]/p[0]", "10", "div[0]/p[0]"))
+                        .highlightLocation(new HighlightLocation(0, "div[0]/p[0]", 10, "div[0]/p[0]"))
                         .articleId(firstArticleId)
-                        .color("#ffeb3b")
+                        .color(Color.from("#ffeb3b"))
                         .text("첫 번째 하이라이트")
                         .memo("메모")
                         .build(),
                 Highlight.builder()
-                        .highlightLocation(new HighlightLocation("15", "div[0]/p[1]", "25", "div[0]/p[1]"))
+                        .highlightLocation(new HighlightLocation(15, "div[0]/p[1]", 25, "div[0]/p[1]"))
                         .articleId(firstArticleId)
-                        .color("#4caf50")
+                        .color(Color.from("#4caf50"))
                         .text("두 번째 하이라이트")
                         .memo("메모")
                         .build(),
                 Highlight.builder()
-                        .highlightLocation(new HighlightLocation("5", "div[0]/h1", "15", "div[0]/h1"))
+                        .highlightLocation(new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
                         .articleId(secondArticleId)
-                        .color("#2196f3")
+                        .color(Color.from("#2196f3"))
                         .text("세 번째 하이라이트")
                         .memo("메모")
                         .build()
@@ -199,9 +220,9 @@ public final class TestFixture {
 
     public static HighlightCreateRequest createHighlightRequest(Long articleId) {
         return new HighlightCreateRequest(
-                new HighlightLocationRequest("0", "div[0]/p[2]", "20", "div[0]/p[2]"),
+                new HighlightLocationRequest(0, "div[0]/p[2]", 20, "div[0]/p[2]"),
                 articleId,
-                "#f44336",
+                Color.from("#f44336"),
                 "새로운 하이라이트 텍스트",
                 "메모"
         );
@@ -235,6 +256,14 @@ public final class TestFixture {
                 .memberId(member.getId())
                 .stageId(stageId)
                 .currentScore(0)
+                .build();
+    }
+
+    public static Pet createPetWithScore(Member member, Long stageId, int currentScore) {
+        return Pet.builder()
+                .memberId(member.getId())
+                .stageId(stageId)
+                .currentScore(currentScore)
                 .build();
     }
 }

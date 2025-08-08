@@ -10,7 +10,7 @@ public interface NewsletterRepository extends JpaRepository<Newsletter, Long> {
 
     @Query("""
         SELECT new me.bombom.api.v1.newsletter.dto.NewsletterResponse(
-                n.id, n.name, n.imageUrl, n.description, d.mainPageUrl, c.name
+                n.id, n.name, n.imageUrl, n.description, d.subscribeUrl, c.name
             )
         FROM Newsletter n
         JOIN NewsletterDetail d ON n.detailId = d.id

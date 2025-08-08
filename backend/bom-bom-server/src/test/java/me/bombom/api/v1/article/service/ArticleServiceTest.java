@@ -399,61 +399,6 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 다_읽음_갱신_성공_테스트_오늘의_뉴스레터일_경우() {
-        // given
-        Article article = TestFixture.createArticle(
-                "제목",
-                member.getId(),
-                newsletters.getFirst().getId(),
-                LocalDateTime.now()
-        );
-        articleRepository.save(article);
-        TodayReading todayReading = TestFixture.todayReadingFixture(member);
-        todayReadingRepository.save(todayReading);
-        WeeklyReading weeklyReading = TestFixture.weeklyReadingFixture(member);
-        weeklyReadingRepository.save(weeklyReading);
-
-        //when
-        articleService.markAsRead(article.getId(), member);
-
-        // then
-        Article updatedArticle = articleRepository.findById(article.getId()).get();
-        TodayReading updatedTodayReading = todayReadingRepository.findByMemberId(member.getId()).get();
-        WeeklyReading updatedWeeklyReading = weeklyReadingRepository.findByMemberId(member.getId()).get();
-
-        assertSoftly(softly -> {
-            softly.assertThat(updatedArticle.isRead()).isTrue();
-            softly.assertThat(updatedTodayReading.getCurrentCount()).isEqualTo(2);
-            softly.assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(4);
-        });
-    }
-
-    @Test
-    void 다_읽음_갱신_성공_테스트_오늘의_뉴스레터가_아닐_경우() {
-        // given
-        Article article = TestFixture.createArticle("제목", member.getId(), newsletters.getFirst().getId(), BASE_TIME);
-        articleRepository.save(article);
-        TodayReading todayReading = TestFixture.todayReadingFixture(member);
-        todayReadingRepository.save(todayReading);
-        WeeklyReading weeklyReading = TestFixture.weeklyReadingFixture(member);
-        weeklyReadingRepository.save(weeklyReading);
-
-        //when
-        articleService.markAsRead(article.getId(), member);
-
-        // then
-        Article updatedArticle = articleRepository.findById(article.getId()).get();
-        TodayReading updatedTodayReading = todayReadingRepository.findByMemberId(member.getId()).get();
-        WeeklyReading updatedWeeklyReading = weeklyReadingRepository.findByMemberId(member.getId()).get();
-
-        assertSoftly(softly -> {
-            softly.assertThat(updatedArticle.isRead()).isTrue();
-            softly.assertThat(updatedTodayReading.getCurrentCount()).isEqualTo(1);
-            softly.assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(4);
-        });
-    }
-
-    @Test
     void 다_읽음_갱신_아티클이_존재하지_않으면_예외() {
         // when & then
         assertThatThrownBy(() -> articleService.markAsRead(0L, member))
@@ -486,42 +431,6 @@ class ArticleServiceTest {
         assertThatThrownBy(() -> articleService.markAsRead(article.getId(), otherMember))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
-    }
-
-    @Test
-    void 다_읽음_갱신_아티클_오늘의_읽기가_존재하지_않을_경우_예외() {
-        // given
-        Article article = TestFixture.createArticle(
-                "제목",
-                member.getId(),
-                newsletters.getFirst().getId(),
-                BASE_TIME
-        );
-        articleRepository.save(article);
-
-        // when & then
-        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), member))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
-
-    @Test
-    void 다_읽음_갱신_아티클_이번주_읽기가_존재하지_않을_경우_예외() {
-        // given
-        Article article = TestFixture.createArticle(
-                "제목",
-                member.getId(),
-                newsletters.getFirst().getId(),
-                BASE_TIME
-        );
-        articleRepository.save(article);
-        TodayReading todayReading = TestFixture.todayReadingFixture(member);
-        todayReadingRepository.save(todayReading);
-
-        // when & then
-        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), member))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
 
     @Test

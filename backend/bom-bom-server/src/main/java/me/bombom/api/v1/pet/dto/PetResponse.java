@@ -4,16 +4,20 @@ import me.bombom.api.v1.pet.domain.Pet;
 import me.bombom.api.v1.pet.domain.Stage;
 
 public record PetResponse(
-        int level,
-        int totalScore,
-        int currentScore
+    int level,
+    int currentStageScore,
+    int requiredStageScore,
+    boolean isAttended
 ) {
+    public static PetResponse of(Pet pet, Stage currentStage, Stage nextStage) {
+        int currentStageScore = pet.getCurrentScore() - currentStage.getRequiredScore();
+        int requiredStageScore = nextStage.getRequiredScore() - currentStage.getRequiredScore();
 
-    public static PetResponse of(Pet pet, Stage stage) {
         return new PetResponse(
-                stage.getLevel(),
-                stage.getRequiredScore(),
-                pet.getCurrentScore()
+            currentStage.getLevel(),
+            currentStageScore,
+            requiredStageScore,
+            pet.isAttended()
         );
     }
 }

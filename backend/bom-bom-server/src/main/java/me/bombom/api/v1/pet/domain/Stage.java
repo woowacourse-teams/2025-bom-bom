@@ -16,6 +16,7 @@ import me.bombom.api.v1.common.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Stage extends BaseEntity {
 
+    // TODO: 규칙 확정 후 ENUM 전환
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

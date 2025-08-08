@@ -28,10 +28,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/articles")
-public class ArticleController {
+public class ArticleController implements ArticleControllerApi{
 
     private final ArticleService articleService;
 
+    @Override
     @GetMapping
     public Page<ArticleResponse> getArticles(
             @LoginMember Member member,
@@ -45,6 +46,7 @@ public class ArticleController {
         );
     }
 
+    @Override
     @GetMapping("/{id}")
     public ArticleDetailResponse getArticleDetail(
             @LoginMember Member member,
@@ -53,6 +55,7 @@ public class ArticleController {
         return articleService.getArticleDetail(id, member);
     }
 
+    @Override
     @PatchMapping("/{id}/read")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateIsRead(
@@ -62,6 +65,7 @@ public class ArticleController {
         articleService.markAsRead(id, member);
     }
 
+    @Override
     @GetMapping("/statistics/categories")
     public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(
             @LoginMember Member member,

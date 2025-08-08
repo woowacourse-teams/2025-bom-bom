@@ -125,7 +125,17 @@ function getHighlightRange(container: Node, start: number, end: number) {
   return range;
 }
 
-export const restoreHighlight = (data: HighlightType) => {
+/**
+ * 초기 복원 시 모든 하이라이트 그리기
+ */
+export const restoreHighlightAll = (highlights: HighlightType[]) => {
+  highlights.forEach((highlight) => addHighlightToDOM(highlight));
+};
+
+/**
+ * 단일 하이라이트 DOM에 추가
+ */
+export const addHighlightToDOM = (data: HighlightType) => {
   const element = getNodeByXPath(data.location.startXPath);
   if (!element) return;
 
@@ -135,9 +145,9 @@ export const restoreHighlight = (data: HighlightType) => {
     Number(data.location.endOffset),
   );
 
-  // === 하이라이트 적용 ===
-  const highlightId = data.id || Math.random();
-  const textNodes = getTextNodesInRange(range); // mark 제외 처리 가능
+  const highlightId = data.id;
+  const textNodes = getTextNodesInRange(range);
+
   textNodes.forEach((node, index) => {
     const isFirst = index === 0;
     const isLast = index === textNodes.length - 1;
@@ -150,5 +160,18 @@ export const restoreHighlight = (data: HighlightType) => {
     if (start < end) {
       highlightNodeSegment(node, start, end, data.color, highlightId);
     }
+  });
+};
+
+/**
+ * 특정 하이라이트 제거
+ */
+export const removeHighlightFromDOM = (highlightId: number) => {
+  const marks = document.querySelectorAll(
+    `mark[data-highlight-id="${highlightId}"]`,
+  );
+  marks.forEach((mark) => {
+    const textNode = document.createTextNode(mark.textContent ?? '');
+    mark.replaceWith(textNode);
   });
 };

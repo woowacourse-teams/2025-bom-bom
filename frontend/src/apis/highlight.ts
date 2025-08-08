@@ -15,9 +15,10 @@ export const getHighlights = async (params: GetHighlightsParams) => {
 
 export type PostHighlightParams =
   components['schemas']['HighlightCreateRequest'];
+export type PostHighlightResponse = HighlightType;
 
 export const postHighlight = async (params: PostHighlightParams) => {
-  return await fetcher.post({
+  return await fetcher.post<PostHighlightParams, PostHighlightResponse>({
     path: '/highlights',
     body: params,
   });

@@ -1,99 +1,24 @@
 import styled from '@emotion/styled';
-import { useEffect, useRef, useState } from 'react';
+import { memo, RefObject } from 'react';
 import { processContent } from './ArticleContent.utils';
-import { useHighlightData } from '../../hooks/useHighlightData';
-import { useHighlightHoverEffect } from '../../hooks/useHighlightHoverEffect';
-import { restoreHighlight, saveSelection } from '../../utils/highlight';
-import FloatingToolbar from '../FloatingToolbar/FloatingToolbar';
-import { FloatingToolbarMode } from '../FloatingToolbar/FloatingToolbar.types';
-import MemoPanel from '../MemoPanel/MemoPanel';
-import { components } from '@/types/openapi';
 
 interface ArticleContentProps {
-  articleId: number;
-  articleContent: components['schemas']['ArticleDetailResponse']['contents'];
+  ref: RefObject<HTMLDivElement | null>;
+  content?: string;
 }
 
-const ArticleContent = ({ articleId, articleContent }: ArticleContentProps) => {
-  const [panelOpen, setPanelOpen] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const { highlights, addHighlight, updateMemo, removeHighlight } =
-    useHighlightData({ articleId });
-
-  const handleHighlightClick = ({
-    mode,
-    selection,
-    highlightId,
-  }: {
-    mode: FloatingToolbarMode;
-    selection: Selection | null;
-    highlightId: number | null;
-  }) => {
-    const isNewHighlight = mode === 'new';
-
-    if (isNewHighlight && selection) {
-      const highlightData = saveSelection(selection, articleId);
-      addHighlight(highlightData);
-    }
-    if (!isNewHighlight && highlightId) {
-      removeHighlight(highlightId);
-    }
-  };
-
-  const handleMemoClick = ({
-    mode,
-    selection,
-  }: {
-    mode: FloatingToolbarMode;
-    selection: Selection | null;
-  }) => {
-    const isNewHighlight = mode === 'new';
-
-    if (isNewHighlight && selection) {
-      const highlightData = saveSelection(selection, articleId);
-      addHighlight(highlightData);
-    }
-    setPanelOpen(true);
-  };
-
-  useHighlightHoverEffect();
-
-  useEffect(() => {
-    if (!highlights || highlights?.length === 0 || !articleContent) return;
-
-    try {
-      highlights.forEach((highlight) => restoreHighlight(highlight));
-    } catch (error) {
-      console.error(error);
-    }
-  }, [articleContent, highlights, panelOpen]);
-
+const ArticleContent = ({ ref, content }: ArticleContentProps) => {
   return (
-    <>
-      <Container
-        ref={contentRef}
-        dangerouslySetInnerHTML={{
-          __html: processContent(articleContent ?? ''),
-        }}
-      />
-      <FloatingToolbar
-        selectionTargetRef={contentRef}
-        onHighlightClick={handleHighlightClick}
-        onMemoClick={handleMemoClick}
-      />
-      <MemoPanel
-        open={panelOpen}
-        memos={highlights ?? []}
-        removeHighlight={removeHighlight}
-        updateMemo={updateMemo}
-        handleClose={() => setPanelOpen(false)}
-        handleToggle={() => setPanelOpen((prev) => !prev)}
-      />
-    </>
+    <Container
+      ref={ref}
+      dangerouslySetInnerHTML={{
+        __html: processContent(content ?? ''),
+      }}
+    />
   );
 };
 
-export default ArticleContent;
+export default memo(ArticleContent);
 
 const Container = styled.div`
   overflow: visible;

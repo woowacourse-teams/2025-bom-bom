@@ -129,7 +129,13 @@ function getHighlightRange(container: Node, start: number, end: number) {
  * 초기 복원 시 모든 하이라이트 그리기
  */
 export const restoreHighlightAll = (highlights: HighlightType[]) => {
-  highlights.forEach((highlight) => addHighlightToDOM(highlight));
+  highlights.forEach((highlight) => {
+    try {
+      addHighlightToDOM(highlight);
+    } catch (error) {
+      console.error(error);
+    }
+  });
 };
 
 /**

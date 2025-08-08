@@ -7,6 +7,8 @@ on:
 jobs:
   add-reviews:
     runs-on: ubuntu-latest
+    outputs:
+      assigned-reviewers: ${{ steps.get-assigned-reviewers.outputs.reviewers }}
     steps:
       - name: Get changed files
         id: changed-files
@@ -24,8 +26,25 @@ jobs:
         with:
           configuration-path: ".github/auto_assign_backend.yml"
 
+      - name: Get Assigned Reviewers
+        id: get-assigned-reviewers
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            const reviewers = pr.requested_reviewers.map(reviewer => reviewer.login);
+            console.log('Assigned reviewers:', reviewers);
+
+            core.setOutput('reviewers', reviewers.join(','));
+
   send_slack_message:
     runs-on: ubuntu-latest
+    needs: add-reviews
     steps:
       - uses: actions/checkout@v3
       - name: Get Reviewers List
@@ -35,27 +54,37 @@ jobs:
           script: |
             const fs = require('fs');
             const workers = JSON.parse(fs.readFileSync('.github/reviewers.json')); 
-            const mention = context.payload.pull_request.requested_reviewers.map((user) => {
-              const login = user.login;
+
+            // Get assigned reviewers from the add-reviews job
+            const assignedReviewers = '${{ needs.add-reviews.outputs.assigned-reviewers }}'.split(',').filter(r => r);
+
+            const mention = assignedReviewers.map((login) => {
               const mappedValue = workers[login];
               return mappedValue ? `<@${mappedValue}>` : `No mapping found for ${login}`;
-            })
+            });
+
+            console.log('Assigned reviewers:', assignedReviewers);
+            console.log('Mention list:', mention);
+
             return mention.join(', ');
           result-encoding: string
+      - name: Print Reviewers Result
+        run: |
+          echo "Reviewers Result: ${{ steps.reviewers.outputs.result }}"
 
-      - name: pr reviewer 되면 slack 알림 보냄
+      - name: Send Slack notification for PR reviewers
         uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: ${{ secrets.TEST_CHANNEL }}
           payload: |
             {
-              "text": "pr review request",
+              "text": "🎁 선물이 도착했어요! 🎁",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "리뷰어로 할당되었습니다.\n • 제목: ${{ github.event.pull_request.title }}\n • 리뷰어: ${{ steps.reviewers.outputs.result }}\n • 링크: <${{ github.event.pull_request.html_url }}|리뷰하러 가기>\n💪 코드 리뷰는 코드 품질을 향상시키고, 버그를 줄이며, 팀원 간의 지식 공유와 협업을 촉진하는 핵심 프로세스입니다.\n🙏 적극적인 참여와 의견을 부탁드립니다."
+                    "text": "🎁 *새로운 선물이 도착했어요!* 🎁\n\n📦 선물 내용\n • 🏷️ 이름: ${{ github.event.pull_request.title }}\n • 👀 받을 분들: ${{ steps.reviewers.outputs.result }}\n • 🔗 선물 열어보기: <${{ github.event.pull_request.html_url }}|여기를 클릭!>\n\n✨ 이 선물을 열어보시고 소중한 의견을 나눠주세요!\n🤝 함께 만들어가는 코드, 함께 성장하는 우리팀!\n\n💝 *설레는 마음으로 리뷰 부탁드려요~*"
                   }
                 }
               ]

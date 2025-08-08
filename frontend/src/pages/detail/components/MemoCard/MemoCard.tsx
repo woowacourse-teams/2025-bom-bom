@@ -1,54 +1,83 @@
 import styled from '@emotion/styled';
-import { ChangeEvent, useRef } from 'react';
+import { ElementType, useEffect, useRef, useState } from 'react';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { theme } from '@/styles/theme';
 import DeleteIcon from '#/assets/delete.svg';
 
 interface MemoCardProps {
-  id: string;
+  id: number;
   content: string;
   memo: string;
-  handleDeleteMemo: (id: string) => void;
-  handleUpdateMemo: (id: string, e: ChangeEvent<HTMLTextAreaElement>) => void;
+  as?: ElementType;
+  onClick?: () => void;
+  onRemoveButtonClick?: (id: number) => void;
+  onMemoChange?: (id: number, memo: string) => void; // <-- e 대신 memo string
 }
 
 const MemoCard = ({
   id,
   content,
   memo,
-  handleDeleteMemo,
-  handleUpdateMemo,
+  as,
+  onClick,
+  onRemoveButtonClick,
+  onMemoChange,
 }: MemoCardProps) => {
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [localMemo, setLocalMemo] = useState(memo);
+  const debouncedMemo = useDebouncedValue(localMemo, 500);
 
-  const autoResize = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const target = e.target;
-    target.style.height = 'auto'; // 높이를 리셋
-    target.style.height = `${target.scrollHeight}px`; // scrollHeight 만큼 늘림
-    handleUpdateMemo(id, e);
+  const handleRemoveButtonClick = () => {
+    onRemoveButtonClick?.(id);
   };
 
+  useEffect(() => {
+    if (debouncedMemo !== memo) {
+      onMemoChange?.(id, debouncedMemo);
+    }
+    // 의존성 배열에 updateMemo, id, memo를 넣으면
+    // memo가 변경될 때마다(예: 서버 응답으로 값이 업데이트될 때) 불필요하게 effect가 재실행됨.
+    // 우리는 debouncedMemo가 변경될 때만 서버 업데이트를 호출하려는 목적이므로 eslint 경고를 무시하고 의존성 배열을 최소화함.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedMemo]);
+
+  useEffect(() => {
+    if (!textAreaRef.current) return;
+
+    const el = textAreaRef.current;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [localMemo]);
+
   return (
-    <Container>
+    <Container as={as} onClick={onClick}>
       <HeaderBox>
         <ColorDotWrapper>
           <ColorDot />
         </ColorDotWrapper>
-        <DeleteButton onClick={() => handleDeleteMemo(id)}>
-          <DeleteIcon fill={theme.colors.black} width={20} height={20} />
-        </DeleteButton>
+        {onRemoveButtonClick && (
+          <DeleteButton onClick={handleRemoveButtonClick}>
+            <DeleteIcon fill={theme.colors.black} width={20} height={20} />
+          </DeleteButton>
+        )}
       </HeaderBox>
 
       <MemoContent>
         <MemoContentText>{content}</MemoContentText>
       </MemoContent>
 
-      <NoteMemo
-        ref={textAreaRef}
-        rows={1}
-        value={memo}
-        onChange={autoResize}
-        placeholder="메모를 입력해주세요"
-      />
+      {onMemoChange ? (
+        <NoteMemo
+          ref={textAreaRef}
+          name="memo"
+          rows={1}
+          value={localMemo}
+          onChange={(e) => setLocalMemo(e.target.value)}
+          placeholder="메모를 입력해주세요"
+        />
+      ) : (
+        <MemoText>{memo || '메모가 없습니다.'}</MemoText>
+      )}
     </Container>
   );
 };
@@ -68,6 +97,7 @@ const Container = styled.div`
   align-self: stretch;
 
   background-color: ${({ theme }) => theme.colors.white};
+  text-align: left;
 
   transition: box-shadow 0.2s;
 
@@ -119,6 +149,7 @@ const MemoContentText = styled.p`
 
 const NoteMemo = styled.textarea`
   width: 100%;
+  height: auto;
   padding: 8px 12px;
   outline: none;
   border: none;
@@ -132,4 +163,15 @@ const NoteMemo = styled.textarea`
   font: ${({ theme }) => theme.fonts.body2};
 
   resize: none;
+`;
+
+const MemoText = styled.p`
+  width: 100%;
+  padding: 8px 12px;
+
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.body2};
+  white-space: pre-wrap;
+
+  word-break: break-all;
 `;

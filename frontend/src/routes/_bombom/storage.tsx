@@ -1,14 +1,15 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SearchInput from '../../components/SearchInput/SearchInput';
 import Select from '../../components/Select/Select';
 import CategoryFilter from '../../pages/storage/components/CategoryFilter/CategoryFilter';
-import { getArticles, getStatisticsCategories } from '@/apis/articles';
+import { queries } from '@/apis/queries';
+import Pagination from '@/components/Pagination/Pagination';
 import { CategoryType } from '@/constants/category';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
-import EmptySearchCard from '@/pages/storage/components/EmptySearchCard/EmptySearchCard';
+import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import { getArticleReadStats } from '@/pages/storage/utils/getArticleReadStats';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
@@ -24,31 +25,53 @@ function Storage() {
     useState<CategoryType>('전체');
   const [sortFilter, setSortFilter] = useState<'DESC' | 'ASC'>('DESC');
   const [searchInput, setSearchInput] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const debouncedSearchInput = useDebouncedValue(searchInput, 500);
 
-  const { data: articles } = useQuery({
-    queryKey: ['articles', sortFilter, selectedCategory, debouncedSearchInput],
-    queryFn: () =>
-      getArticles({
-        sorted: sortFilter,
-        category: selectedCategory === '전체' ? undefined : selectedCategory,
-        keyword: debouncedSearchInput,
-      }),
-  });
-  const { data: categoryCounts } = useQuery({
-    queryKey: ['articlesStatisticsCategories', debouncedSearchInput],
-    queryFn: () =>
-      getStatisticsCategories({
-        keyword: debouncedSearchInput,
-      }),
-  });
+  const { data: articles, isLoading } = useQuery(
+    queries.articles({
+      sort: `arrivedDateTime,${sortFilter}`,
+      category: selectedCategory === '전체' ? undefined : selectedCategory,
+      keyword: debouncedSearchInput,
+      size: 6,
+      page: currentPage - 1,
+    }),
+  );
 
-  if (!articles || !categoryCounts) return null;
+  const { data: categoryCounts } = useQuery(
+    queries.statisticsCategories({
+      keyword: debouncedSearchInput,
+    }),
+  );
 
-  const readStats = getArticleReadStats(articles.content);
-  const existCategories = categoryCounts.categories.filter(
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleCategoryChange = (value: CategoryType) => {
+    setSelectedCategory(value);
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (value: 'DESC' | 'ASC') => {
+    setSortFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchInput]);
+
+  const readStats = getArticleReadStats(articles?.content ?? []);
+  const existCategories = categoryCounts?.categories?.filter(
     (category) => category.count !== 0,
   );
+  const isLoadingOrHaveContent =
+    isLoading || (articles?.content?.length && articles?.content.length > 0);
 
   return (
     <Container>
@@ -60,15 +83,16 @@ function Storage() {
               label: '전체',
               quantity: categoryCounts?.totalCount ?? 0,
             },
-            ...(existCategories.map(({ category, count }) => ({
+            ...(existCategories?.map(({ category, count }) => ({
               value: category as CategoryType,
-              label: category,
-              quantity: count,
+              label: category ?? '',
+              quantity: count ?? 0,
             })) ?? []),
           ]}
           selectedValue={selectedCategory}
-          onSelectCategory={(value) => setSelectedCategory(value)}
+          onSelectCategory={handleCategoryChange}
         />
+        <QuickMenu />
       </SideSection>
       <MainSection>
         <TitleWrapper>
@@ -80,9 +104,7 @@ function Storage() {
         <SearchInput
           placeholder="뉴스레터 제목으로 검색하세요..."
           value={searchInput}
-          onChange={(e) => {
-            setSearchInput(e.target.value);
-          }}
+          onChange={handleSearchChange}
         />
         <SummaryBar>
           <SummaryText>
@@ -95,21 +117,26 @@ function Storage() {
               { value: 'ASC', label: '오래된순' },
             ]}
             selectedValue={sortFilter}
-            onSelectOption={(value) => setSortFilter(value)}
+            onSelectOption={handleSortChange}
           />
         </SummaryBar>
-        {articles.content.length > 0 ? (
-          <ArticleList>
-            {articles.content.map((article) => (
-              <li key={article.articleId}>
-                <ArticleCard data={article} readVariant="badge" />
-              </li>
-            ))}
-          </ArticleList>
-        ) : searchInput === '' ? (
-          <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
+        {isLoadingOrHaveContent ? (
+          <>
+            <ArticleList>
+              {articles?.content?.map((article) => (
+                <li key={article.articleId}>
+                  <ArticleCard data={article} readVariant="badge" />
+                </li>
+              ))}
+            </ArticleList>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={articles?.totalPages ?? 1}
+              onPageChange={handlePageChange}
+            />
+          </>
         ) : (
-          <EmptySearchCard searchQuery={searchInput} />
+          <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
         )}
       </MainSection>
     </Container>
@@ -129,6 +156,10 @@ const Container = styled.div`
 
 const SideSection = styled.div`
   margin-top: 70px;
+
+  display: flex;
+  gap: 32px;
+  flex-direction: column;
 `;
 
 const MainSection = styled.div`

@@ -1,80 +1,40 @@
 import { fetcher } from './fetcher';
+import { components } from '@/types/openapi';
 
-export interface MemberReadingResponse {
-  streakReadDay: number;
-  today: {
-    readCount: number;
-    totalCount: number;
-  };
-  weekly: {
-    readCount: number;
-    goalCount: number;
-  };
-}
+type GetReadingStatusResponse =
+  components['schemas']['ReadingInformationResponse'];
 
 export const getReadingStatus = async () => {
-  return await fetcher.get<MemberReadingResponse>({
+  return await fetcher.get<GetReadingStatusResponse>({
     path: '/members/me/reading',
   });
 };
 
-type GetWeeklyReadingGoalParams = {
-  weeklyGoalCount: string;
+type GetUserInfoResponse = components['schemas']['MemberProfileResponse'];
+
+export const getUserInfo = async () => {
+  return await fetcher.get<GetUserInfoResponse>({
+    path: '/members/me',
+  });
 };
 
-export interface PatchWeeklyGoalResponse {
-  weeklyReadingId: number;
-  weeklyGoalCount: number;
-}
+type PatchWeeklyReadingGoalParams =
+  components['schemas']['UpdateWeeklyGoalCountRequest'];
+type PatchWeeklyReadingGoalResponse =
+  components['schemas']['WeeklyGoalCountResponse'];
 
-export const getWeeklyReadingGoal = async ({
+export const patchWeeklyReadingGoal = async ({
   weeklyGoalCount,
-}: GetWeeklyReadingGoalParams) => {
+  memberId,
+}: PatchWeeklyReadingGoalParams) => {
   return await fetcher.patch<
-    GetWeeklyReadingGoalParams,
-    PatchWeeklyGoalResponse
+    PatchWeeklyReadingGoalParams,
+    PatchWeeklyReadingGoalResponse
   >({
     path: '/members/me/reading/progress/week/goal',
     body: {
+      memberId,
       weeklyGoalCount,
     },
-  });
-};
-
-type PatchWeeklyCountParams = {
-  count: number;
-};
-
-export interface PatchWeeklyCountResponse {
-  weeklyReadingId: number;
-  currentCount: number;
-}
-
-export const patchWeeklyCount = async ({ count }: PatchWeeklyCountParams) => {
-  return await fetcher.patch<PatchWeeklyCountParams, PatchWeeklyCountResponse>({
-    path: '/members/me/reading/progress/week/count',
-    body: {
-      count,
-    },
-  });
-};
-
-export interface UserInfoResponse {
-  createdAt: string;
-  updatedAt: string;
-  id: number;
-  provider: string;
-  providerId: string;
-  email: string;
-  nickname: string;
-  profileImageUrl: string;
-  birthDate: string;
-  gender: 'MALE' | 'FEMALE';
-  roleId: number;
-}
-
-export const getUserInfo = async () => {
-  return await fetcher.get<UserInfoResponse>({
-    path: '/members/me',
   });
 };

@@ -1,14 +1,19 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
-import { getArticleById, getArticles, patchArticleRead } from '@/apis/articles';
+import { useMemo } from 'react';
+import { patchArticleRead } from '@/apis/articles';
+import { getBookmarked } from '@/apis/bookmark';
+import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
+import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
+import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
 import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
-import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
+import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
 import NewsletterItemCard from '@/pages/detail/components/NewsletterItemCard/NewsletterItemCard';
+import useBookmarkMutation from '@/pages/detail/hooks/useBookmarkMutation';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
 
@@ -18,29 +23,33 @@ export const Route = createFileRoute('/_bombom/articles/$articleId')({
 
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
+  const articleIdNumber = Number(articleId);
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(true);
-  const [memo, setMemo] = useState('');
 
-  const { data: currentArticle } = useQuery({
-    queryKey: ['article', articleId],
-    queryFn: () =>
-      getArticleById({
-        articleId: Number(articleId),
-      }),
-  });
-  const { data: otherArticles } = useQuery({
-    queryKey: ['otherArticles'],
-    queryFn: () => getArticles({ date: new Date(), sorted: 'ASC' }),
+  const { data: currentArticle } = useQuery(
+    queries.articleById({ id: Number(articleId) }),
+  );
+  const today = useMemo(() => new Date(), []);
+  const { data: todayArticles } = useQuery(queries.articles({ date: today }));
+  const { data: bookmarked } = useQuery({
+    queryKey: ['bookmarked'],
+    queryFn: () => getBookmarked({ articleId: Number(articleId) }),
   });
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleId],
-    mutationFn: () => patchArticleRead({ articleId: Number(articleId) }),
+    mutationFn: () => patchArticleRead({ id: articleIdNumber }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['article', articleId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['articles', { date: today, sorted: 'ASC' }],
+      });
     },
+  });
+
+  const { onToggleBookmarkClick } = useBookmarkMutation({
+    articleId: Number(articleId),
   });
 
   useScrollThreshold({
@@ -50,22 +59,25 @@ function ArticleDetailPage() {
     onTrigger: updateArticleAsRead,
   });
 
-  if (!currentArticle || !otherArticles) return null;
+  useScrollRestoration({ pathname: articleId });
 
-  const unReadArticles = otherArticles?.content.filter(
+  if (!currentArticle || !todayArticles) return null;
+
+  const unReadArticles = todayArticles?.content?.filter(
     (article) => !article.isRead && article.articleId !== Number(articleId),
   );
 
   return (
     <Container>
       <HeaderWrapper>
-        <button onClick={() => setOpen((open) => !open)}>열기</button>
         <Title>{currentArticle.title}</Title>
         <MetaInfoRow>
-          <Chip text={currentArticle.newsletter.category} />
-          <MetaInfoText>from {currentArticle.newsletter.name}</MetaInfoText>
+          <Chip text={currentArticle.newsletter?.category ?? ''} />
           <MetaInfoText>
-            {formatDate(new Date(currentArticle.arrivedDateTime))}
+            from {currentArticle.newsletter?.name ?? ''}
+          </MetaInfoText>
+          <MetaInfoText>
+            {formatDate(new Date(currentArticle.arrivedDateTime ?? ''))}
           </MetaInfoText>
           <ReadTimeBox>
             <ClockIcon width={16} height={16} />
@@ -74,8 +86,9 @@ function ArticleDetailPage() {
         </MetaInfoRow>
       </HeaderWrapper>
       <Divider />
-      <ContentWrapper
-        dangerouslySetInnerHTML={{ __html: currentArticle.contents ?? '' }}
+      <ArticleBody
+        articleId={articleIdNumber}
+        articleContent={currentArticle.contents}
       />
       <Spacing size={24} />
       <Divider />
@@ -85,7 +98,7 @@ function ArticleDetailPage() {
       </ContentDescription>
       <TodayArticlesWrapper>
         <TodayArticleTitle>오늘 읽지 않은 다른 아티클</TodayArticleTitle>
-        {unReadArticles.length > 0 ? (
+        {unReadArticles?.length && unReadArticles.length > 0 ? (
           <TodayArticleList>
             {unReadArticles?.map((article) => (
               <NewsletterItemCard key={article.articleId} data={article} />
@@ -95,12 +108,9 @@ function ArticleDetailPage() {
           <EmptyUnreadCard />
         )}
       </TodayArticlesWrapper>
-      <MemoPanel
-        open={open}
-        handleClose={() => setOpen(false)}
-        notes={[{ id: '1', content: 'content', memo }]}
-        handleDeleteMemo={(id) => console.log(id)}
-        handleUpdateMemo={(id, e) => console.log(id, setMemo(e.target.value))}
+      <FloatingActionButtons
+        bookmarked={!!bookmarked}
+        onToggleBookmarkClick={onToggleBookmarkClick}
       />
     </Container>
   );
@@ -155,12 +165,6 @@ const Divider = styled.div`
   height: 1px;
 
   background-color: ${({ theme }) => theme.colors.dividers};
-`;
-
-const ContentWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 `;
 
 const ContentDescription = styled.p`

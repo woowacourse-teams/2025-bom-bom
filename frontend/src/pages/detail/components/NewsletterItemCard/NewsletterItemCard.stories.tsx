@@ -35,9 +35,9 @@ export const ShortContent: Story = {
       contentsSummary: '짧은 설명입니다.',
       expectedReadTime: 3,
       newsletter: {
-        ...ARTICLES[0].newsletter,
         name: 'TechNews',
         category: 'AI',
+        imageUrl: 'https://example.com/newsletter-image.jpg',
       },
     },
   },
@@ -52,9 +52,9 @@ export const MultipleArticles: Story = {
           title: '첫 번째 뉴스레터',
           contentsSummary: '짧은 내용입니다.',
           newsletter: {
-            ...ARTICLES[0].newsletter,
             name: 'Daily Tech',
             category: 'Technology',
+            imageUrl: 'https://example.com/newsletter-image.jpg',
           },
         }}
       />
@@ -65,9 +65,9 @@ export const MultipleArticles: Story = {
           contentsSummary:
             '긴 내용입니다만 아직 길지 않습니다. 현재 길어지는 중입니다. 더 길어질 예정입니다.',
           newsletter: {
-            ...ARTICLES[0].newsletter,
             name: 'Finance Weekly',
             category: 'Finance',
+            imageUrl: 'https://example.com/newsletter-image.jpg',
           },
         }}
       />
@@ -78,9 +78,9 @@ export const MultipleArticles: Story = {
             '긴 제목입니다만 아직 길지 않습니다. 현재 길어지는 중입니다. 더 길어질 예정입니다.',
           contentsSummary: '세 번째 뉴스레터입니다.',
           newsletter: {
-            ...ARTICLES[0].newsletter,
             name: 'Startup News',
             category: 'Business',
+            imageUrl: 'https://example.com/newsletter-image.jpg',
           },
         }}
       />

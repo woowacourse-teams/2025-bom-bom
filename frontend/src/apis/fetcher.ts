@@ -3,7 +3,9 @@ import { DEFAULT_ERROR_MESSAGES } from './constants/defaultErrorMessage';
 import { ENV } from './env';
 import { formatDate } from '@/utils/date';
 
-type FetcherOptions<TRequest extends Record<string, string | number>> = {
+type JsonBody = Record<string, unknown>;
+
+type FetcherOptions<TRequest extends JsonBody> = {
   path: string;
   query?: Record<string, string | number | Date | undefined>;
   body?: TRequest;
@@ -13,19 +15,19 @@ type FetcherOptions<TRequest extends Record<string, string | number>> = {
 export const fetcher = {
   get: async <TResponse>({ path, query }: FetcherOptions<never>) =>
     request<never, TResponse>({ path, query, method: 'GET' }),
-  post: async <TRequest extends Record<string, string | number>, TResponse>({
+  post: async <TRequest extends JsonBody, TResponse>({
     path,
     body,
     headers,
   }: FetcherOptions<TRequest>) =>
     request<TRequest, TResponse>({ path, body, method: 'POST', headers }),
-  patch: async <TRequest extends Record<string, string | number>, TResponse>({
+  patch: async <TRequest extends JsonBody, TResponse>({
     path,
     query,
     body,
   }: FetcherOptions<TRequest>) =>
     request<TRequest, TResponse>({ path, query, body, method: 'PATCH' }),
-  put: async <TRequest extends Record<string, string | number>, TResponse>({
+  put: async <TRequest extends JsonBody, TResponse>({
     path,
     body,
   }: FetcherOptions<TRequest>) =>
@@ -99,7 +101,7 @@ const request = async <TRequest, TResponse>({
         errorMessage = '응답 파싱에 실패했습니다.';
       }
 
-      throw new ApiError(status, errorMessage, rawBody);
+      throw new ApiError(status, errorMessage ?? '', rawBody);
     }
 
     const contentType = response.headers.get('Content-Type');

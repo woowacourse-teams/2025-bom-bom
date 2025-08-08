@@ -1,34 +1,43 @@
 import styled from '@emotion/styled';
 import { SVGProps } from 'react';
 import { DirectionType } from './Icons.types';
-import { calculateDirection } from './Icons.utils';
+import ArrowRightSvg from '#/assets/arrow-right.svg';
 
 interface ArrowIconProps extends SVGProps<SVGSVGElement> {
-  targetDirection: DirectionType;
-  currentDirection: DirectionType;
+  direction?: DirectionType;
 }
 
-export default function ArrowIcon({ direction, ...props }: ArrowIconProps) {
+export const rotationMap = {
+  up: -90,
+  upRight: -45,
+  right: 0,
+  downRight: 45,
+  down: 90,
+  downLeft: 135,
+  left: 180,
+  upLeft: 225,
+};
+
+export default function ArrowIcon({
+  direction = 'upRight',
+  className,
+  ...props
+}: ArrowIconProps) {
   return (
-    <StyledSVG
-      {...props}
-      direction={direction}
-      xmlns="http://www.w3.org/2000/svg"
-      height="24px"
-      viewBox="0 -960 960 960"
-      width="24px"
-      fill="#ffffff"
-    >
-      <path d="m216-160-56-56 464-464H360v-80h400v400h-80v-264L216-160Z" />
-    </StyledSVG>
+    <Wrapper className={className} rotation={rotationMap[direction]}>
+      <ArrowRightSvg {...props} />
+    </Wrapper>
   );
 }
 
-const StyledSVG = styled.svg<{
-  targetDirection: DirectionType;
-  currentDirection: DirectionType;
+const Wrapper = styled.span<{
+  rotation: number;
 }>`
-  transform: ${({ targetDirection, currentDirection }) =>
-    calculateDirection(targetDirection, currentDirection)};
-  transform-origin: center center;
+  width: fit-content;
+  height: fit-content;
+
+  display: inline-flex;
+
+  transform: rotate(${({ rotation }) => rotation}deg);
+  transition: transform 0.2s ease-in-out;
 `;

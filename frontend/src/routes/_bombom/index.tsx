@@ -1,9 +1,10 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import { useMemo } from 'react';
 import ArticleCardList from '../../pages/today/components/ArticleCardList/ArticleCardList';
 import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/ReadingStatusCard';
-import { getArticles } from '@/apis/articles';
+import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
 
 export const Route = createFileRoute('/_bombom/')({
@@ -11,21 +12,19 @@ export const Route = createFileRoute('/_bombom/')({
 });
 
 function Index() {
-  const { data: articles } = useQuery({
-    queryKey: ['todayArticles'],
-    queryFn: () => getArticles({ date: new Date(), sorted: 'DESC' }),
-  });
+  const today = useMemo(() => new Date(), []);
+  const { data: todayArticles } = useQuery(queries.articles({ date: today }));
 
   return (
     <Container>
       <TitleBox>
         <Title>오늘의 뉴스레터</Title>
         <TitleDescription>
-          {articles?.content.length ?? 0}개의 새로운 뉴스레터가 도착했어요
+          {todayArticles?.content?.length ?? 0}개의 새로운 뉴스레터가 도착했어요
         </TitleDescription>
       </TitleBox>
       <ContentWrapper>
-        <ArticleCardList articles={articles?.content ?? []} />
+        <ArticleCardList articles={todayArticles?.content ?? []} />
         <SideCardWrapper>
           <PetCard />
           <ReadingStatusCard />

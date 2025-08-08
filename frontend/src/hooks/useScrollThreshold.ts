@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useThrottle } from './useThrottle';
+import { READ_THRESHOLD } from '@/constants/article';
 import { getScrollPercent } from '@/utils/scroll';
 
 interface UseScrollThresholdParams {
@@ -11,7 +12,7 @@ interface UseScrollThresholdParams {
 
 export function useScrollThreshold({
   enabled = false,
-  threshold = 70,
+  threshold = READ_THRESHOLD,
   throttleMs = 500,
   onTrigger,
 }: UseScrollThresholdParams) {

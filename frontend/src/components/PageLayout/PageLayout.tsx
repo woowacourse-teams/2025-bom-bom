@@ -17,7 +17,7 @@ function PageLayout({ children }: PropsWithChildren) {
 
   return (
     <Container>
-      <Header activeNav={navMap[location]} />
+      <Header activeNav={navMap[location] || 'today'} />
       {children}
     </Container>
   );
@@ -27,6 +27,7 @@ export default PageLayout;
 
 const Container = styled.div`
   width: 100%;
+  min-height: 100vh;
   padding: 72px 0; /* header 높이 */
 
   display: flex;

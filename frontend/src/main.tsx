@@ -1,4 +1,9 @@
 import { Global } from '@emotion/react';
+import Clarity from '@microsoft/clarity';
+import {
+  init as initSentry,
+  tanstackRouterBrowserTracingIntegration,
+} from '@sentry/react';
 import { QueryClient } from '@tanstack/react-query';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { StrictMode } from 'react';
@@ -8,6 +13,8 @@ import GAInitializer from './libs/googleAnalytics/GAInitializer.tsx';
 import { routeTree } from './routeTree.gen';
 import reset from './styles/reset.ts';
 
+if (ENV.nodeEnv === 'production') Clarity.init(ENV.clarityProjectId);
+
 export const queryClient = new QueryClient();
 
 const router = createRouter({
@@ -15,6 +22,13 @@ const router = createRouter({
   context: {
     queryClient,
   },
+});
+
+initSentry({
+  dsn: ENV.sentryDsn,
+  sendDefaultPii: true,
+  integrations: [tanstackRouterBrowserTracingIntegration(router)],
+  sampleRate: ENV.nodeEnv === 'development' ? 1 : 0.1,
 });
 
 declare module '@tanstack/react-router' {

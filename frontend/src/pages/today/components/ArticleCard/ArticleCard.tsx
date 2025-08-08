@@ -1,17 +1,17 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
-import { Article } from '../../types/article';
 import Badge from '@/components/Badge/Badge';
 import Chip from '@/components/Chip/Chip';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
+import { components } from '@/types/openapi';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
 
 type ReadVariantType = 'transparent' | 'badge';
 
 interface ArticleCardProps {
-  data: Article;
+  data: components['schemas']['ArticleResponse'];
   readVariant?: ReadVariantType;
 }
 
@@ -24,23 +24,19 @@ function ArticleCard({ data, readVariant = 'transparent' }: ArticleCardProps) {
     thumbnailUrl,
     expectedReadTime,
     isRead,
-    newsletter: {
-      name: newsletterName,
-      category: newsletterCategory,
-      imageUrl: newsletterImageUrl,
-    },
+    newsletter,
   } = data;
 
   return (
     <Container
-      isRead={isRead}
+      isRead={isRead ?? false}
       readVariant={readVariant}
       to={`/articles/${articleId}`}
       onClick={() => {
         trackEvent({
           category: 'Article',
           action: 'Click Article Card',
-          label: `${newsletterName} - [${articleId}]${title}`,
+          label: `${newsletter?.name} - [${articleId}]${title}`,
         });
       }}
     >
@@ -48,9 +44,11 @@ function ArticleCard({ data, readVariant = 'transparent' }: ArticleCardProps) {
         <Title>{title}</Title>
         <Description>{contentsSummary || title}</Description>
         <MetaInfoRow>
-          <Chip text={newsletterCategory} />
-          <MetaInfoText>from {newsletterName}</MetaInfoText>
-          <MetaInfoText>{formatDate(new Date(arrivedDateTime))}</MetaInfoText>
+          <Chip text={newsletter?.category ?? ''} />
+          <MetaInfoText>from {newsletter?.name ?? ''}</MetaInfoText>
+          <MetaInfoText>
+            {formatDate(new Date(arrivedDateTime ?? ''))}
+          </MetaInfoText>
           <ReadTimeBox>
             <ClockIcon width={16} height={16} />
             <MetaInfoText>{`${expectedReadTime}분`}</MetaInfoText>
@@ -59,7 +57,7 @@ function ArticleCard({ data, readVariant = 'transparent' }: ArticleCardProps) {
       </InfoWrapper>
       <ThumbnailWrapper>
         <Thumbnail
-          src={thumbnailUrl ?? newsletterImageUrl}
+          src={thumbnailUrl ?? newsletter?.imageUrl ?? ''}
           alt="아티클 썸네일"
         />
         {isRead && readVariant === 'badge' && (

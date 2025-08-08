@@ -1,30 +1,29 @@
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
-import { getUserInfo } from '@/apis/members';
+import { createFileRoute, Outlet } from '@tanstack/react-router';
+import { DEFAULT_ERROR_MESSAGES } from '@/apis/constants/defaultErrorMessage';
+import { queries } from '@/apis/queries';
 import PageLayout from '@/components/PageLayout/PageLayout';
-
-let isFirstCheck = true;
+import RequireLoginCard from '@/components/RequireLoginCard/RequireLoginCard';
 
 export const Route = createFileRoute('/_bombom')({
   component: RouteComponent,
   beforeLoad: async ({ context, location }) => {
     const { queryClient } = context;
 
-    if (!isFirstCheck) {
-      return;
-    }
-
     try {
-      await queryClient.fetchQuery({
-        queryKey: ['me'],
-        queryFn: getUserInfo,
-        retry: false,
-      });
+      await queryClient.fetchQuery(queries.me());
     } catch {
       if (location.pathname !== '/recommend') {
-        throw redirect({ to: '/recommend' });
+        throw new Response(DEFAULT_ERROR_MESSAGES[401], { status: 401 });
       }
-    } finally {
-      isFirstCheck = false;
+    }
+  },
+  errorComponent: ({ error }) => {
+    if (error instanceof Response && error.status === 401) {
+      return (
+        <PageLayout>
+          <RequireLoginCard />
+        </PageLayout>
+      );
     }
   },
 });

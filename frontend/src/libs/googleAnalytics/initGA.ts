@@ -5,7 +5,10 @@ declare global {
   }
 }
 
-export const initGA = (measurementId: string) => {
+export const initGA = (
+  measurementId: string,
+  gtagUrl: string = 'https://www.googletagmanager.com/gtag/js',
+) => {
   if (!measurementId) {
     console.warn('[GA] Measurement ID missing');
     return;
@@ -14,18 +17,16 @@ export const initGA = (measurementId: string) => {
   // gtag.js 삽입
   const script = document.createElement('script');
   script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-  document.head.appendChild(script);
+  script.src = `${gtagUrl}?id=${measurementId}`;
+  document.body.appendChild(script);
 
   // gtag 초기화
   window.dataLayer = window.dataLayer || [];
-  function gtag(...args: unknown[]) {
-    window.dataLayer.push(args);
-  }
-  window.gtag = gtag;
+  window.gtag = function gtag() {
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer.push(arguments);
+  };
 
-  gtag('js', new Date());
-  gtag('config', measurementId, {
-    send_page_view: false, // 수동으로 pageview 보내기 위해 false로 설정
-  });
+  window.gtag('js', new Date());
+  window.gtag('config', measurementId);
 };

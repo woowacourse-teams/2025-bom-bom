@@ -3,14 +3,16 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { theme } from '../styles/theme';
+import { usePageTracking } from '@/libs/googleAnalytics/usePageTracking';
 import { queryClient } from '@/main';
 
 interface BomBomRouterContext {
   queryClient: QueryClient;
 }
 
-export const Route = createRootRouteWithContext<BomBomRouterContext>()({
-  component: () => (
+const RootComponent = () => {
+  usePageTracking();
+  return (
     <>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={theme}>
@@ -19,5 +21,9 @@ export const Route = createRootRouteWithContext<BomBomRouterContext>()({
       </QueryClientProvider>
       <TanStackRouterDevtools />
     </>
-  ),
+  );
+};
+
+export const Route = createRootRouteWithContext<BomBomRouterContext>()({
+  component: RootComponent,
 });

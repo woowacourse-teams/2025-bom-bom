@@ -5,39 +5,40 @@ import BookmarkInactiveIcon from '#/assets/bookmark-inactive.svg';
 import ArrowIcon from '#/assets/chevron-up.svg';
 
 interface FloatingActionButtonsProps {
-  bookmarked: boolean;
-  onToggleBookmarkClick: (bookmarked: boolean) => void;
+  bookmarked: boolean | null;
+  onBookmarkClick: (bookmarked: boolean) => void;
 }
 
 const FloatingActionButtons = ({
   bookmarked,
-  onToggleBookmarkClick,
+  onBookmarkClick,
 }: FloatingActionButtonsProps) => {
-  const handleScrollUp = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (bookmarked === null) return;
+
+  const handleBookmarkClick = () => {
+    onBookmarkClick(bookmarked);
   };
 
   return (
-    <Container>
-      <ActionButton
-        type="button"
-        onClick={() => onToggleBookmarkClick(bookmarked)}
-      >
-        {bookmarked ? (
-          <BookmarkActiveIcon width={28} height={28} />
-        ) : (
-          <BookmarkInactiveIcon
-            width={28}
-            height={28}
-            color={theme.colors.primary}
-          />
-        )}
-      </ActionButton>
+    <>
+      <Container>
+        <ActionButton type="button" onClick={handleBookmarkClick}>
+          {bookmarked ? (
+            <BookmarkActiveIcon width={28} height={28} />
+          ) : (
+            <BookmarkInactiveIcon
+              width={28}
+              height={28}
+              color={theme.colors.primary}
+            />
+          )}
+        </ActionButton>
 
-      <ActionButton type="button">
-        <ScrollUpIcon onClick={handleScrollUp} />
-      </ActionButton>
-    </Container>
+        <ActionButton type="button">
+          <ScrollUpIcon />
+        </ActionButton>
+      </Container>
+    </>
   );
 };
 

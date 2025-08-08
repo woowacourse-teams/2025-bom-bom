@@ -1,12 +1,14 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteBookmark, postBookmark } from '@/apis/bookmark';
-import { queryClient } from '@/main';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface UseBookmarkMutationParams {
   articleId: number;
 }
 
 const useBookmarkMutation = ({ articleId }: UseBookmarkMutationParams) => {
+  const queryClient = useQueryClient();
+
   const { mutate: addBookmark } = useMutation({
     mutationKey: ['bookmarked', articleId],
     mutationFn: () => postBookmark({ articleId }),
@@ -16,6 +18,7 @@ const useBookmarkMutation = ({ articleId }: UseBookmarkMutationParams) => {
       });
     },
   });
+
   const { mutate: removeBookmark } = useMutation({
     mutationKey: ['bookmarked', articleId],
     mutationFn: () => deleteBookmark({ articleId }),
@@ -26,17 +29,15 @@ const useBookmarkMutation = ({ articleId }: UseBookmarkMutationParams) => {
     },
   });
 
-  const onToggleBookmarkClick = (bookmarked: boolean) => {
+  const toggleBookmark = useDebounce((bookmarked: boolean) => {
     if (bookmarked) {
       removeBookmark();
     } else {
       addBookmark();
     }
-  };
+  }, 500);
 
-  return {
-    onToggleBookmarkClick,
-  };
+  return { toggleBookmark };
 };
 
 export default useBookmarkMutation;

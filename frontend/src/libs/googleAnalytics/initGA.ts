@@ -28,5 +28,7 @@ export const initGA = (
   };
 
   window.gtag('js', new Date());
-  window.gtag('config', measurementId);
+  window.gtag('config', measurementId, {
+    send_page_view: false, // 수동으로 pageview 보내기 위해 false로 설정
+  });
 };

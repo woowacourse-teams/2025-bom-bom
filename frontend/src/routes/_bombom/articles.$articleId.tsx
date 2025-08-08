@@ -1,11 +1,12 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { patchArticleRead } from '@/apis/articles';
 import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import ArticleContent from '@/pages/detail/components/ArticleContent/ArticleContent';
@@ -33,6 +34,12 @@ function ArticleDetailPage() {
   const { data: bookmarked } = useQuery(
     queries.bookmarkStatus({ articleId: articleIdNumber }),
   );
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const debouncedBookmark = useDebouncedValue(isBookmarked ?? false, 500);
+
+  useEffect(() => {
+    setIsBookmarked(bookmarked?.bookmarkStatus ?? false);
+  }, [bookmarked?.bookmarkStatus]);
 
   const { mutate: updateArticleAsRead } = useMutation({
     mutationKey: ['read', articleIdNumber],
@@ -50,6 +57,11 @@ function ArticleDetailPage() {
   const { toggleBookmark } = useBookmarkMutation({
     articleId: articleIdNumber,
   });
+
+  const onBookmarkClick = () => {
+    setIsBookmarked((prev) => !prev);
+    toggleBookmark(debouncedBookmark);
+  };
 
   useScrollThreshold({
     enabled: !currentArticle?.isRead && !!currentArticle,
@@ -108,8 +120,8 @@ function ArticleDetailPage() {
         )}
       </TodayArticlesWrapper>
       <FloatingActionButtons
-        bookmarked={bookmarked?.bookmarkStatus ?? null}
-        toggleBookmark={toggleBookmark}
+        bookmarked={isBookmarked}
+        onBookmarkClick={onBookmarkClick}
       />
     </Container>
   );

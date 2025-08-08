@@ -6,23 +6,23 @@ import ArrowIcon from '#/assets/chevron-up.svg';
 
 interface FloatingActionButtonsProps {
   bookmarked: boolean | null;
-  toggleBookmark: (bookmarked: boolean) => void;
+  onBookmarkClick: (bookmarked: boolean) => void;
 }
 
 const FloatingActionButtons = ({
   bookmarked,
-  toggleBookmark,
+  onBookmarkClick,
 }: FloatingActionButtonsProps) => {
   if (bookmarked === null) return;
 
-  const handleToggleBookmark = () => {
-    toggleBookmark(bookmarked);
+  const handleBookmarkClick = () => {
+    onBookmarkClick(bookmarked);
   };
 
   return (
     <>
       <Container>
-        <ActionButton type="button" onClick={handleToggleBookmark}>
+        <ActionButton type="button" onClick={handleBookmarkClick}>
           {bookmarked ? (
             <BookmarkActiveIcon width={28} height={28} />
           ) : (

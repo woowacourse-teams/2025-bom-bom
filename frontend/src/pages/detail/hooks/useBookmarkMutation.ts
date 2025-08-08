@@ -9,63 +9,33 @@ interface UseBookmarkMutationParams {
 const useBookmarkMutation = ({ articleId }: UseBookmarkMutationParams) => {
   const queryClient = useQueryClient();
 
-  const debounceInvalidateQueries = useDebounce(() => {
-    queryClient.invalidateQueries({ queryKey: ['bookmarked', articleId] });
-  }, 300);
-
   const { mutate: addBookmark } = useMutation({
+    mutationKey: ['bookmarked', articleId],
     mutationFn: () => postBookmark({ articleId }),
-    onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: ['bookmarked', articleId] });
-      const previousBookmark = queryClient.getQueryData<boolean>([
-        'bookmarked',
-        articleId,
-      ]);
-      queryClient.setQueryData(['bookmarked', articleId], {
-        bookmarkStatus: true,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['bookmarked', articleId],
       });
-      return { previousBookmark };
     },
-    onError: (err, newBookmark, context) => {
-      queryClient.setQueryData(
-        ['bookmarked', articleId],
-        context?.previousBookmark,
-      );
-    },
-    onSettled: () => debounceInvalidateQueries(),
   });
 
   const { mutate: removeBookmark } = useMutation({
+    mutationKey: ['bookmarked', articleId],
     mutationFn: () => deleteBookmark({ articleId }),
-    onMutate: async () => {
-      await queryClient.cancelQueries({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
         queryKey: ['bookmarked', articleId],
       });
-      const previousBookmark = queryClient.getQueryData<boolean>([
-        'bookmarked',
-        articleId,
-      ]);
-      queryClient.setQueryData(['bookmarked', articleId], {
-        bookmarkStatus: false,
-      });
-      return { previousBookmark };
     },
-    onError: (err, newBookmark, context) => {
-      queryClient.setQueryData(
-        ['bookmarked', articleId],
-        context?.previousBookmark,
-      );
-    },
-    onSettled: () => debounceInvalidateQueries(),
   });
 
-  const toggleBookmark = (bookmarked: boolean) => {
+  const toggleBookmark = useDebounce((bookmarked: boolean) => {
     if (bookmarked) {
       removeBookmark();
     } else {
       addBookmark();
     }
-  };
+  }, 500);
 
   return { toggleBookmark };
 };

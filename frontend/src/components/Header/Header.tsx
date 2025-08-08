@@ -19,7 +19,7 @@ interface HeaderProps {
 
 export default function Header({ activeNav }: HeaderProps) {
   const navagate = useNavigate();
-  const { data: userInfo, isError, isFetching } = useQuery(queries.me());
+  const { data: userInfo, isFetching } = useQuery(queries.me());
 
   const handleCopyEmail = () => {
     if (!userInfo?.email) return;
@@ -27,6 +27,8 @@ export default function Header({ activeNav }: HeaderProps) {
     alert(`이메일이 복사되었습니다.`);
     copyToClipboard(userInfo?.email);
   };
+
+  const isLoggedIn = isFetching || userInfo;
 
   return (
     <HeaderContainer>
@@ -108,38 +110,29 @@ export default function Header({ activeNav }: HeaderProps) {
         </Nav>
 
         <ProfileWrapper>
-          {isFetching || isError ? (
+          {isLoggedIn ? (
+            <ProfileInfo>
+              <ProfileImg
+                src={userInfo?.profileImageUrl ?? defaultImage}
+                alt="profile"
+                width={32}
+                height={32}
+              />
+              <ProfileTextBox>
+                <ProfileName>{userInfo?.nickname}</ProfileName>
+                <ProfileEmail onClick={handleCopyEmail}>
+                  <EmailText>{userInfo?.email}</EmailText>
+                  <CopyIcon width={16} height={16} />
+                </ProfileEmail>
+              </ProfileTextBox>
+            </ProfileInfo>
+          ) : (
             <Button
               text="로그인"
               onClick={() => {
                 navagate({ to: '/login' });
               }}
             />
-          ) : (
-            <ProfileInfo>
-              <ProfileImg
-                src={userInfo?.profileImageUrl ?? defaultImage}
-                alt="profile"
-              />
-              <ProfileTextBox>
-                <ProfileName>{userInfo?.nickname ?? '김봄봄'}</ProfileName>
-                <ProfileEmail
-                  onClick={() => {
-                    handleCopyEmail();
-                    trackEvent({
-                      category: 'User',
-                      action: 'Click Copy Email',
-                      label: userInfo?.email ?? 'No Email',
-                    });
-                  }}
-                >
-                  <EmailText>
-                    {userInfo?.email ?? 'example@bombom.news'}
-                  </EmailText>
-                  <CopyIcon width={16} height={16} />
-                </ProfileEmail>
-              </ProfileTextBox>
-            </ProfileInfo>
           )}
         </ProfileWrapper>
       </HeaderInner>

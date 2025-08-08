@@ -6,11 +6,11 @@ import ArticleContent from '../ArticleContent/ArticleContent';
 import FloatingToolbar from '../FloatingToolbar/FloatingToolbar';
 import { FloatingToolbarMode } from '../FloatingToolbar/FloatingToolbar.types';
 import MemoPanel from '../MemoPanel/MemoPanel';
-import { components } from '@/types/openapi';
+import { GetArticleByIdResponse } from '@/apis/articles';
 
 interface ArticleBodyProps {
   articleId: number;
-  articleContent: components['schemas']['ArticleDetailResponse']['contents'];
+  articleContent: GetArticleByIdResponse['contents'];
 }
 
 const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
@@ -65,7 +65,7 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
     } catch (error) {
       console.error(error);
     }
-  }, [articleContent, highlights, panelOpen]);
+  }, [articleContent, highlights]);
 
   return (
     <>

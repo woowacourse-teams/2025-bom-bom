@@ -1,4 +1,4 @@
-name: "Auto Assign"
+name: Setup Opened PR
 
 on:
   pull_request:
@@ -42,52 +42,48 @@ jobs:
 
             core.setOutput('reviewers', reviewers.join(','));
 
-  send_slack_message:
-    runs-on: ubuntu-latest
-    needs: add-reviews
-    steps:
-      - uses: actions/checkout@v3
-      - name: Get Reviewers List
-        id: reviewers
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs');
-            const workers = JSON.parse(fs.readFileSync('.github/reviewers.json')); 
-
-            // Get assigned reviewers from the add-reviews job
-            const assignedReviewers = '${{ needs.add-reviews.outputs.assigned-reviewers }}'.split(',').filter(r => r);
-
-            const mention = assignedReviewers.map((login) => {
-              const mappedValue = workers[login];
-              return mappedValue ? `<@${mappedValue}>` : `No mapping found for ${login}`;
-            });
-
-            console.log('Assigned reviewers:', assignedReviewers);
-            console.log('Mention list:', mention);
-
-            return mention.join(', ');
-          result-encoding: string
-      - name: Print Reviewers Result
+      - name: Send notification
+        env:
+          SLACK_WEBHOOK_URL_FE: ${{ secrets.SLACK_WEBHOOK_URL_FE_NOTIFY }}
+          SLACK_WEBHOOK_URL_BE: ${{ secrets.SLACK_WEBHOOK_URL_BE_NOTIFY }}
         run: |
-          echo "Reviewers Result: ${{ steps.reviewers.outputs.result }}"
+          TITLE="${{ github.event.pull_request.title }}"
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+          URL="${{ github.event.pull_request.html_url }}"
 
-      - name: Send Slack notification for PR reviewers
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          channel-id: ${{ secrets.TEST_CHANNEL }}
-          payload: |
-            {
-              "text": "🎁 선물이 도착했어요! 🎁",
-              "blocks": [
+          if [[ "$TITLE" == "[FE]"* ]]; then
+            WEBHOOK_URL=$SLACK_WEBHOOK_URL_FE
+          elif [[ "$TITLE" == "[BE]"* ]]; then
+            WEBHOOK_URL=$SLACK_WEBHOOK_URL_BE
+          else
+            exit 0
+          fi
+
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{
+              \"text\": \"📦 새로운 Pull Request가 생성되었습니다!\",
+              \"attachments\": [
                 {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "🎁 *새로운 선물이 도착했어요!* 🎁\n\n📦 선물 내용\n • 🏷️ 이름: ${{ github.event.pull_request.title }}\n • 👀 받을 분들: ${{ steps.reviewers.outputs.result }}\n • 🔗 선물 열어보기: <${{ github.event.pull_request.html_url }}|여기를 클릭!>\n\n✨ 이 선물을 열어보시고 소중한 의견을 나눠주세요!\n🤝 함께 만들어가는 코드, 함께 성장하는 우리팀!\n\n💝 *설레는 마음으로 리뷰 부탁드려요~*"
-                  }
+                  \"title\": \"${TITLE}\",
+                  \"title_link\": \"${URL}\",
+                  \"color\": \"#FF9966\",
+                  \"fields\": [
+                    {
+                      \"title\": \"작성자\",
+                      \"value\": \"${AUTHOR}\",
+                      \"short\": true
+                    },
+                  ],
+                  \"footer\": \"작은 리뷰 하나가 큰 개선이 됩니다 🙌\",
+                  \"actions\": [
+                    {
+                      \"type\": \"button\",
+                      \"text\": \"지금 확인하기\",
+                      \"url\": \"${URL}\",
+                      \"style\": \"primary\"
+                    }
+                  ]
                 }
               ]
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.TEST_BOT_TOKEN }}
+            }" \
+            "$WEBHOOK_URL"

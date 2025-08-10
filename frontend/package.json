@@ -9,7 +9,7 @@
     "lint": "eslint src --ext .ts,.tsx,.js,.jsx",
     "lint:fix": "eslint src --ext .ts,.tsx,.js,.jsx --fix",
     "format": "prettier --write . && stylelint './src/**/*.tsx' --fix",
-    "generate-openapi-types": "openapi-typescript ./src/types/openapi.yml -o ./src/types/openapi.d.ts && prettier --write ./src/types/openapi.d.ts",
+    "generate-openapi-types": "openapi-typescript https://api-dev.bombom.news/v3/api-docs -o ./src/types/openapi.d.ts && prettier --write ./src/types/openapi.d.ts",
     "type-check": "tsc --noEmit",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",

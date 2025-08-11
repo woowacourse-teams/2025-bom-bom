@@ -1,17 +1,14 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useMemo } from 'react';
-import { patchArticleRead } from '@/apis/articles';
-import { getBookmarked } from '@/apis/bookmark';
+import { useEffect, useState } from 'react';
 import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
-import ArticleContent from '@/pages/detail/components/ArticleContent/ArticleContent';
-import EmptyUnreadCard from '@/pages/detail/components/EmptyUnreadCard/EmptyUnreadCard';
+import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
 import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
 import useBookmarkMutation from '@/pages/detail/hooks/useBookmarkMutation';
@@ -30,21 +27,16 @@ function ArticleDetailPage() {
   const { data: currentArticle } = useQuery(
     queries.articleById({ id: articleIdNumber }),
   );
-  const { data: bookmarked } = useQuery({
-    queryKey: ['bookmarked'],
-    queryFn: () => getBookmarked({ articleId: articleIdNumber }),
-  });
   const { mutate: updateArticleAsRead } = useMarkArticleAsReadMutation({
     articleId: articleIdNumber,
+  });
   const { data: bookmarked } = useQuery(
     queries.bookmarkStatus({ articleId: articleIdNumber }),
   );
-  const debouncedBookmark = useDebouncedValue(isBookmarked ?? false, 500);
   const [isBookmarked, setIsBookmarked] = useState(false);
   useEffect(() => {
     setIsBookmarked(bookmarked?.bookmarkStatus ?? false);
   }, [bookmarked?.bookmarkStatus]);
-  });
   const { toggleBookmark } = useBookmarkMutation({
     articleId: articleIdNumber,
   });
@@ -53,6 +45,7 @@ function ArticleDetailPage() {
     setIsBookmarked((prev) => !prev);
     toggleBookmark(debouncedBookmark);
   };
+  const debouncedBookmark = useDebouncedValue(isBookmarked, 500);
 
   useScrollThreshold({
     enabled: !currentArticle?.isRead && !!currentArticle,

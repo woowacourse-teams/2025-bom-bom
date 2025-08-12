@@ -11,7 +11,7 @@ interface ProgressWithLabelProps {
     currentCount: number;
     totalCount: number;
   };
-  description: string;
+  description?: string;
   rateFormat?: RateFormatType;
 }
 
@@ -36,7 +36,7 @@ function ProgressWithLabel({
         <ProgressRate>{formattedRate}</ProgressRate>
       </ProgressInfo>
       <ProgressBar rate={rate} />
-      <ProgressDescription>{description}</ProgressDescription>
+      {description && <ProgressDescription>{description}</ProgressDescription>}
     </Container>
   );
 }
@@ -55,7 +55,7 @@ const ProgressInfo = styled.div`
   width: 100%;
 
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
 `;
 

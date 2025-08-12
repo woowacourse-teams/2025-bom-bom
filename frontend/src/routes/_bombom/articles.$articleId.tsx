@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
 import { queries } from '@/apis/queries';
 import Spacing from '@/components/Spacing/Spacing';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
@@ -10,7 +9,7 @@ import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
 import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
-import useBookmarkMutation from '@/pages/detail/hooks/useBookmarkMutation';
+import { useArticleBookmark } from '@/pages/detail/hooks/useArticleBookmark';
 import useMarkArticleAsReadMutation from '@/pages/detail/hooks/useMarkArticleAsReadMutation';
 
 export const Route = createFileRoute('/_bombom/articles/$articleId')({
@@ -27,21 +26,9 @@ function ArticleDetailPage() {
   const { mutate: updateArticleAsRead } = useMarkArticleAsReadMutation({
     articleId: articleIdNumber,
   });
-  const { data: bookmarked } = useQuery(
-    queries.bookmarkStatusByArticleId({ articleId: articleIdNumber }),
-  );
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  useEffect(() => {
-    setIsBookmarked(bookmarked?.bookmarkStatus ?? false);
-  }, [bookmarked?.bookmarkStatus]);
-  const { toggleBookmark } = useBookmarkMutation({
+  const { isBookmarked, toggleBookmark } = useArticleBookmark({
     articleId: articleIdNumber,
   });
-
-  const onBookmarkClick = () => {
-    setIsBookmarked((prev) => !prev);
-    toggleBookmark(isBookmarked);
-  };
 
   useScrollThreshold({
     enabled: !currentArticle?.isRead && !!currentArticle,
@@ -81,7 +68,7 @@ function ArticleDetailPage() {
 
       <FloatingActionButtons
         bookmarked={isBookmarked}
-        onBookmarkClick={onBookmarkClick}
+        onBookmarkClick={toggleBookmark}
       />
     </Container>
   );

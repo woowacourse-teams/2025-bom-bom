@@ -85,7 +85,7 @@ const SideCardWrapper = styled.div<{ device: DeviceType }>`
 
   display: flex;
   gap: 24px;
-  flex-direction: column;
+  flex-direction: ${({ device }) => (device === 'mobile' ? 'row' : 'column')};
   align-items: center;
   justify-content: flex-start;
 `;

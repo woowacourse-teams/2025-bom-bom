@@ -41,7 +41,7 @@ const Container = styled.div<{ device: DeviceType }>`
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 24px;
-  padding-top: ${({ device }) => (device === 'mobile' ? '32px' : '64px')};
+  padding-top: ${({ device }) => (device === 'pc' ? '64px' : '32px')};
 
   display: flex;
   gap: 24px;
@@ -73,19 +73,18 @@ const ContentWrapper = styled.div<{ device: DeviceType }>`
   display: flex;
   gap: 24px;
   flex-direction: ${({ device }) =>
-    device === 'mobile' ? 'column-reverse' : 'row'};
-  align-items: ${({ device }) =>
-    device === 'mobile' ? 'center' : 'flex-start'};
+    device === 'pc' ? 'row' : 'column-reverse'};
+  align-items: ${({ device }) => (device === 'pc' ? 'flex-start' : 'center')};
   align-self: stretch;
   justify-content: center;
 `;
 
 const SideCardWrapper = styled.div<{ device: DeviceType }>`
-  width: ${({ device }) => (device === 'mobile' ? '100%' : '310px')};
+  width: ${({ device }) => (device === 'pc' ? '310px' : '100%')};
 
   display: flex;
-  gap: 24px;
-  flex-direction: ${({ device }) => (device === 'mobile' ? 'row' : 'column')};
+  gap: ${({ device }) => (device === 'pc' ? '24px' : '0px')};
+  flex-direction: ${({ device }) => (device === 'pc' ? 'column' : 'row')};
   align-items: center;
   justify-content: flex-start;
 `;

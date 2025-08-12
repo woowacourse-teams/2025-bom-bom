@@ -7,6 +7,7 @@ import Button from '../Button/Button';
 import ProgressBar from '../ProgressBar/ProgressBar';
 import Spacing from '../Spacing/Spacing';
 import { getPet, postPetAttendance } from '@/apis/pet';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import { queryClient } from '@/main';
 import { theme } from '@/styles/theme';
 import { calculateRate } from '@/utils/math';
@@ -26,6 +27,7 @@ const petImages: Record<number, string> = {
 };
 
 const PetCard = () => {
+  const device = useDeviceType();
   const [isAnimating, setIsAnimating] = useState(false);
 
   const { data: pet } = useQuery({
@@ -52,7 +54,7 @@ const PetCard = () => {
   };
 
   return (
-    <Container>
+    <Container device={device}>
       <TitleWrapper>
         <StatusIconWrapper>
           <PetIcon width={16} height={16} color={theme.colors.white} />
@@ -99,7 +101,7 @@ const PetCard = () => {
 
 export default PetCard;
 
-const Container = styled.section`
+const Container = styled.section<{ device: DeviceType }>`
   width: 310px;
   padding: 34px 30px;
   border: 1px solid ${({ theme }) => theme.colors.white};
@@ -113,6 +115,15 @@ const Container = styled.section`
   justify-content: center;
 
   background-color: ${({ theme }) => theme.colors.white};
+
+  ${({ device }) =>
+    device !== 'pc' &&
+    `
+    border: none;
+    background-color: transparent;
+    box-shadow: none;
+    flex: 1;
+  `}
 `;
 
 const PetImageContainer = styled.div`

@@ -9,7 +9,7 @@ const useRemoveBookmarkMutation = ({ articleId }: { articleId: number }) => {
     mutationFn: () => deleteBookmark({ articleId }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: queries.bookmarkStatusByArticleId({ articleId }).queryKey,
+        queryKey: queries.articleBookmarkStatus({ articleId }).queryKey,
       });
     },
   });

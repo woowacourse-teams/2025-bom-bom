@@ -50,8 +50,8 @@ function convertToMediaQueryString(condition: MediaCondition): string {
     case 'aspect-ratio':
     case 'min-aspect-ratio':
     case 'max-aspect-ratio': {
-      const [w, h] = condition.value;
-      return `(${condition.key}: ${w}/${h})`;
+      const [width, height] = condition.value;
+      return `(${condition.key}: ${width}/${height})`;
     }
 
     case 'min-resolution':

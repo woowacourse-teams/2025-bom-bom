@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
-import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
@@ -43,9 +42,8 @@ function ArticleDetailPage() {
 
   const onBookmarkClick = () => {
     setIsBookmarked((prev) => !prev);
-    toggleBookmark(debouncedBookmark);
+    toggleBookmark(isBookmarked);
   };
-  const debouncedBookmark = useDebouncedValue(isBookmarked, 500);
 
   useScrollThreshold({
     enabled: !currentArticle?.isRead && !!currentArticle,

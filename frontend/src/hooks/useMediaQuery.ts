@@ -1,18 +1,29 @@
 import { useEffect, useState } from 'react';
 
-export type MediaFeatureKey =
-  | 'max-width'
-  | 'min-width'
-  | 'max-height'
-  | 'min-height'
-  | 'aspect-ratio'
-  | 'min-aspect-ratio'
-  | 'max-aspect-ratio'
-  | 'min-resolution'
-  | 'max-resolution'
-  | 'orientation'
-  | 'prefers-color-scheme'
-  | 'hover';
+const MEDIA_FEATURE_KEYS = [
+  'max-width',
+  'min-width',
+  'max-height',
+  'min-height',
+  'aspect-ratio',
+  'min-aspect-ratio',
+  'max-aspect-ratio',
+  'min-resolution',
+  'max-resolution',
+  'orientation',
+  'prefers-color-scheme',
+  'hover',
+  'pointer',
+] as const;
+
+type MediaFeatureKey = (typeof MEDIA_FEATURE_KEYS)[number];
+
+function isMediaFeatureKey(key: unknown): key is MediaFeatureKey {
+  return (
+    typeof key === 'string' &&
+    MEDIA_FEATURE_KEYS.includes(key as MediaFeatureKey)
+  );
+}
 
 type PxNumber = number;
 type RatioTuple = [number, number];
@@ -36,7 +47,7 @@ export type MediaCondition =
   | { key: 'pointer'; value: 'coarse' | 'fine' };
 
 function convertToMediaQueryString(condition: MediaCondition): string {
-  if ('key' in condition === false || typeof condition.key !== 'string') {
+  if (!('key' in condition) || !isMediaFeatureKey(condition.key)) {
     throw new Error('[useMediaQuery] 잘못된 condition 형식입니다.');
   }
 

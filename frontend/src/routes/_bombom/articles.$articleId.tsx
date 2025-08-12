@@ -3,17 +3,15 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { queries } from '@/apis/queries';
-import Chip from '@/components/Chip/Chip';
 import Spacing from '@/components/Spacing/Spacing';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
+import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
 import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
 import useBookmarkMutation from '@/pages/detail/hooks/useBookmarkMutation';
 import useMarkArticleAsReadMutation from '@/pages/detail/hooks/useMarkArticleAsReadMutation';
-import { formatDate } from '@/utils/date';
-import ClockIcon from '#/assets/clock.svg';
 
 export const Route = createFileRoute('/_bombom/articles/$articleId')({
   component: ArticleDetailPage,
@@ -58,23 +56,15 @@ function ArticleDetailPage() {
 
   return (
     <Container>
-      <HeaderWrapper>
-        <Title>{currentArticle.title}</Title>
-        <MetaInfoRow>
-          <Chip text={currentArticle.newsletter?.category ?? ''} />
-          <MetaInfoText>
-            from {currentArticle.newsletter?.name ?? ''}
-          </MetaInfoText>
-          <MetaInfoText>
-            {formatDate(new Date(currentArticle.arrivedDateTime ?? ''))}
-          </MetaInfoText>
-          <ReadTimeBox>
-            <ClockIcon width={16} height={16} />
-            <MetaInfoText>{currentArticle.expectedReadTime}분</MetaInfoText>
-          </ReadTimeBox>
-        </MetaInfoRow>
-      </HeaderWrapper>
+      <ArticleHeader
+        title={currentArticle.title ?? ''}
+        newsletterCategory={currentArticle.newsletter?.category ?? ''}
+        newsletterName={currentArticle.newsletter?.name ?? ''}
+        arrivedDateTime={new Date(currentArticle.arrivedDateTime ?? '')}
+        expectedReadTime={currentArticle.expectedReadTime ?? 1}
+      />
       <Divider />
+
       <ArticleBody
         articleId={articleIdNumber}
         articleContent={currentArticle.contents}
@@ -108,36 +98,6 @@ const Container = styled.div`
   display: flex;
   gap: 20px;
   flex-direction: column;
-  align-items: center;
-`;
-
-const HeaderWrapper = styled.div`
-  display: flex;
-  gap: 12px;
-  flex-direction: column;
-  align-items: flex-start;
-  align-self: stretch;
-`;
-
-const Title = styled.h2`
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.heading2};
-`;
-
-const MetaInfoRow = styled.div`
-  display: flex;
-  gap: 8px;
-  align-items: center;
-`;
-
-const MetaInfoText = styled.span`
-  color: ${({ theme }) => theme.colors.textTertiary};
-  font: ${({ theme }) => theme.fonts.caption};
-`;
-
-const ReadTimeBox = styled.div`
-  display: flex;
-  gap: 4px;
   align-items: center;
 `;
 

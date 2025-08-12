@@ -85,54 +85,60 @@ function Storage() {
           value={searchInput}
           onChange={handleSearchChange}
         />
-        <CategoryFilterWrapper>
-          <CategoryFilter
-            categoryList={[
-              {
-                value: '전체',
-                label: '전체',
-                quantity: categoryCounts?.totalCount ?? 0,
-              },
-              ...(existCategories?.map(({ category, count }) => ({
-                value: category as CategoryType,
-                label: category ?? '',
-                quantity: count ?? 0,
-              })) ?? []),
-            ]}
-            selectedValue={selectedCategory}
-            onSelectCategory={handleCategoryChange}
-          />
-        </CategoryFilterWrapper>
-        <QuickMenu />
-        <SummaryBar>
-          <SummaryText>총 {articles?.totalElements ?? 0}개</SummaryText>
-          <Select
-            options={[
-              { value: 'DESC', label: '최신순' },
-              { value: 'ASC', label: '오래된순' },
-            ]}
-            selectedValue={sortFilter}
-            onSelectOption={handleSortChange}
-          />
-        </SummaryBar>
-        {isLoadingOrHaveContent ? (
-          <>
-            <ArticleList>
-              {articles?.content?.map((article) => (
-                <li key={article.articleId}>
-                  <ArticleCard data={article} readVariant="badge" />
-                </li>
-              ))}
-            </ArticleList>
-            <Pagination
-              currentPage={currentPage}
-              totalPages={articles?.totalPages ?? 1}
-              onPageChange={handlePageChange}
-            />
-          </>
-        ) : (
-          <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
-        )}
+        <ContentWrapper>
+          <SidebarSection>
+            <CategoryFilterWrapper>
+              <CategoryFilter
+                categoryList={[
+                  {
+                    value: '전체',
+                    label: '전체',
+                    quantity: categoryCounts?.totalCount ?? 0,
+                  },
+                  ...(existCategories?.map(({ category, count }) => ({
+                    value: category as CategoryType,
+                    label: category ?? '',
+                    quantity: count ?? 0,
+                  })) ?? []),
+                ]}
+                selectedValue={selectedCategory}
+                onSelectCategory={handleCategoryChange}
+              />
+            </CategoryFilterWrapper>
+            <QuickMenu />
+          </SidebarSection>
+          <MainContentSection>
+            <SummaryBar>
+              <SummaryText>총 {articles?.totalElements ?? 0}개</SummaryText>
+              <Select
+                options={[
+                  { value: 'DESC', label: '최신순' },
+                  { value: 'ASC', label: '오래된순' },
+                ]}
+                selectedValue={sortFilter}
+                onSelectOption={handleSortChange}
+              />
+            </SummaryBar>
+            {isLoadingOrHaveContent ? (
+              <>
+                <ArticleList>
+                  {articles?.content?.map((article) => (
+                    <li key={article.articleId}>
+                      <ArticleCard data={article} readVariant="badge" />
+                    </li>
+                  ))}
+                </ArticleList>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={articles?.totalPages ?? 1}
+                  onPageChange={handlePageChange}
+                />
+              </>
+            ) : (
+              <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
+            )}
+          </MainContentSection>
+        </ContentWrapper>
       </MainSection>
     </Container>
   );
@@ -178,6 +184,43 @@ const TitleIconBox = styled.div`
 
 const Title = styled.h1`
   font: ${({ theme }) => theme.fonts.heading2};
+`;
+
+const ContentWrapper = styled.div`
+  width: 100%;
+
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+
+  @media (width <= 1024px) {
+    gap: 20px;
+    flex-direction: column;
+  }
+`;
+
+const SidebarSection = styled.div`
+  width: 320px;
+
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+
+  @media (width <= 1024px) {
+    min-width: 100%;
+    order: 1;
+  }
+`;
+
+const MainContentSection = styled.div`
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  flex-direction: column;
+
+  @media (width <= 1024px) {
+    order: 2;
+  }
 `;
 
 const CategoryFilterWrapper = styled.div`

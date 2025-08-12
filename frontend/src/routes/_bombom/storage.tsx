@@ -80,11 +80,7 @@ function Storage() {
           </TitleIconBox>
           <Title>뉴스레터 보관함</Title>
         </TitleWrapper>
-        <SearchInput
-          placeholder="뉴스레터 제목으로 검색하세요..."
-          value={searchInput}
-          onChange={handleSearchChange}
-        />
+
         <ContentWrapper>
           <SidebarSection>
             <CategoryFilterWrapper>
@@ -108,6 +104,11 @@ function Storage() {
             <QuickMenu />
           </SidebarSection>
           <MainContentSection>
+            <SearchInput
+              placeholder="뉴스레터 제목으로 검색하세요..."
+              value={searchInput}
+              onChange={handleSearchChange}
+            />
             <SummaryBar>
               <SummaryText>총 {articles?.totalElements ?? 0}개</SummaryText>
               <Select
@@ -119,6 +120,7 @@ function Storage() {
                 onSelectOption={handleSortChange}
               />
             </SummaryBar>
+
             {isLoadingOrHaveContent ? (
               <>
                 <ArticleList>

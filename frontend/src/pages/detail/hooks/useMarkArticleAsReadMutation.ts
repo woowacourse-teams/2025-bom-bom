@@ -14,7 +14,6 @@ const useMarkArticleAsReadMutation = ({
   const today = useMemo(() => new Date(), []);
 
   return useMutation({
-    mutationKey: ['read', articleId],
     mutationFn: () => patchArticleRead({ id: articleId }),
     onSuccess: () => {
       queryClient.invalidateQueries({

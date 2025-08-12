@@ -10,10 +10,10 @@ interface UseArticleBookmarkParams {
 }
 
 export const useArticleBookmark = ({ articleId }: UseArticleBookmarkParams) => {
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const { data: bookmarked } = useQuery(
     queries.bookmarkStatusByArticleId({ articleId }),
   );
-  const [isBookmarked, setIsBookmarked] = useState(false);
   const { mutate: addBookmark } = useAddBookmarkMutation({ articleId });
   const { mutate: removeBookmark } = useRemoveBookmarkMutation({ articleId });
 

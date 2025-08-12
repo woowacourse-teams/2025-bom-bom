@@ -4,7 +4,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import HomeIcon from '../../../public/assets/home.svg';
 import Button from '../Button/Button';
 import { queries } from '@/apis/queries';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { theme } from '@/styles/theme';
 import { NavType } from '@/types/nav';
@@ -50,31 +50,35 @@ export default function Header({ activeNav }: HeaderProps) {
           <LogoBox>
             <HomeIcon width={22} height={22} color={theme.colors.white} />
           </LogoBox>
-          <MobileTitle>봄봄</MobileTitle>
+          <Title>봄봄</Title>
         </LogoWrapper>
 
-        <MobileProfileArea>
+        <ProfileWrapper>
           {isLoggedIn ? (
-            <MobileProfile>
+            <ProfileInfo>
               <ProfileImg
                 src={userInfo?.profileImageUrl ?? defaultImage}
                 alt="profile"
-                width={30}
-                height={30}
+                width={32}
+                height={32}
               />
-              <MobileEmail onClick={handleCopyEmail} aria-label="이메일 복사">
-                <CopyIcon width={16} height={16} />
-              </MobileEmail>
-            </MobileProfile>
+              <ProfileTextBox>
+                <ProfileName>{userInfo?.nickname}</ProfileName>
+                <ProfileEmail onClick={handleCopyEmail}>
+                  <EmailText>{userInfo?.email}</EmailText>
+                  <CopyIcon width={16} height={16} />
+                </ProfileEmail>
+              </ProfileTextBox>
+            </ProfileInfo>
           ) : (
-            <SmallLoginButton
-              type="button"
-              onClick={() => navigate({ to: '/login' })}
-            >
-              로그인
-            </SmallLoginButton>
+            <Button
+              text="로그인"
+              onClick={() => {
+                navigate({ to: '/login' });
+              }}
+            />
           )}
-        </MobileProfileArea>
+        </ProfileWrapper>
       </MobileHeaderBar>
 
       <BottomNavWrapper>
@@ -172,7 +176,7 @@ export default function Header({ activeNav }: HeaderProps) {
           </TitleBox>
         </LogoWrapper>
 
-        <Nav>
+        <Nav deviceType={deviceType}>
           <NavButton
             active={activeNav === 'today'}
             to="/"
@@ -276,45 +280,6 @@ const MobileHeaderBar = styled.header`
   justify-content: space-between;
 
   background: ${({ theme }) => theme.colors.white};
-`;
-
-const MobileTitle = styled.span`
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.heading5};
-`;
-
-const MobileProfileArea = styled.div`
-  display: flex;
-  gap: 6px;
-  align-items: center;
-`;
-
-const MobileProfile = styled.div`
-  display: flex;
-  gap: 8px;
-  align-items: center;
-`;
-
-const MobileEmail = styled.button`
-  padding: 4px;
-  border: 0;
-
-  display: flex;
-  align-items: center;
-
-  background: transparent;
-
-  cursor: pointer;
-`;
-
-const SmallLoginButton = styled.button`
-  padding: 6px 10px;
-  border: 0;
-  border-radius: 10px;
-
-  background: ${({ theme }) => theme.colors.primary};
-  color: ${({ theme }) => theme.colors.white};
-  font: ${({ theme }) => theme.fonts.caption};
 `;
 
 const BottomNavWrapper = styled.nav`
@@ -431,12 +396,12 @@ const SubTitle = styled.div`
   font: ${({ theme }) => theme.fonts.body2};
 `;
 
-const Nav = styled.nav`
+const Nav = styled.nav<{ deviceType: DeviceType }>`
   padding: 4px;
   border-radius: 14px;
 
   display: flex;
-  gap: 8px;
+  gap: ${({ deviceType }) => (deviceType !== 'pc' ? '4px' : '8px')};
   align-items: center;
 
   background: ${({ theme }) => theme.colors.white};
@@ -458,7 +423,7 @@ const NavButton = styled(Link)<{ active?: boolean }>`
 `;
 
 const ProfileWrapper = styled.div`
-  width: 120px;
+  min-width: 200px;
   padding: 8px 12px;
   border-radius: 12px;
 
@@ -481,8 +446,6 @@ const ProfileTextBox = styled.div`
 `;
 
 const ProfileInfo = styled.div`
-  max-width: 100px;
-
   display: flex;
   gap: 8px;
   align-items: center;

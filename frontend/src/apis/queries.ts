@@ -8,9 +8,9 @@ import {
   GetStatisticsCategoriesParams,
 } from './articles';
 import {
-  getBookmarkArticles,
-  getBookmarked,
-  GetBookmarkedParams,
+  getArticleBookmarkStatus,
+  GetArticleBookmarkStatusParams,
+  getBookmarks,
 } from './bookmark';
 import { getHighlights, GetHighlightsParams } from './highlight';
 import { getReadingStatus, getUserInfo } from './members';
@@ -68,12 +68,12 @@ export const queries = {
   bookmarks: () =>
     queryOptions({
       queryKey: ['bookmarks'],
-      queryFn: () => getBookmarkArticles(),
+      queryFn: () => getBookmarks(),
     }),
 
-  bookmarkStatusByArticleId: (params: GetBookmarkedParams) =>
+  articleBookmarkStatus: (params: GetArticleBookmarkStatusParams) =>
     queryOptions({
       queryKey: ['bookmarks', 'status', 'articles', params.articleId],
-      queryFn: () => getBookmarked(params),
+      queryFn: () => getArticleBookmarkStatus(params),
     }),
 };

@@ -74,22 +74,6 @@ function Storage() {
   return (
     <Container>
       <SideSection>
-        <CategoryFilter
-          categoryList={[
-            {
-              value: '전체',
-              label: '전체',
-              quantity: categoryCounts?.totalCount ?? 0,
-            },
-            ...(existCategories?.map(({ category, count }) => ({
-              value: category as CategoryType,
-              label: category ?? '',
-              quantity: count ?? 0,
-            })) ?? []),
-          ]}
-          selectedValue={selectedCategory}
-          onSelectCategory={handleCategoryChange}
-        />
         <QuickMenu />
       </SideSection>
       <MainSection>
@@ -104,6 +88,24 @@ function Storage() {
           value={searchInput}
           onChange={handleSearchChange}
         />
+        <CategoryFilterWrapper>
+          <CategoryFilter
+            categoryList={[
+              {
+                value: '전체',
+                label: '전체',
+                quantity: categoryCounts?.totalCount ?? 0,
+              },
+              ...(existCategories?.map(({ category, count }) => ({
+                value: category as CategoryType,
+                label: category ?? '',
+                quantity: count ?? 0,
+              })) ?? []),
+            ]}
+            selectedValue={selectedCategory}
+            onSelectCategory={handleCategoryChange}
+          />
+        </CategoryFilterWrapper>
         <SummaryBar>
           <SummaryText>총 {articles?.totalElements ?? 0}개</SummaryText>
           <Select
@@ -187,6 +189,11 @@ const TitleIconBox = styled.div`
 
 const Title = styled.h1`
   font: ${({ theme }) => theme.fonts.heading2};
+`;
+
+const CategoryFilterWrapper = styled.div`
+  width: 100%;
+  margin-bottom: 8px;
 `;
 
 const SummaryBar = styled.div`

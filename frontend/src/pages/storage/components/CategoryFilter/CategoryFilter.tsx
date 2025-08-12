@@ -30,7 +30,7 @@ function CategoryFilter<T extends string>({
         </IconWrapper>
         <Title>카테고리</Title>
       </TitleWrapper>
-      <Tabs direction="vertical">
+      <StyledTabs direction="horizontal">
         {categoryList.map(({ value, label, quantity }) => (
           <Tab
             key={value}
@@ -41,7 +41,7 @@ function CategoryFilter<T extends string>({
             EndComponent={<Badge text={String(quantity)} />}
           />
         ))}
-      </Tabs>
+      </StyledTabs>
     </Container>
   );
 }
@@ -49,7 +49,7 @@ function CategoryFilter<T extends string>({
 export default CategoryFilter;
 
 const Container = styled.nav`
-  width: 310px;
+  width: 100%;
   padding: 16px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 20px;
@@ -79,4 +79,22 @@ const IconWrapper = styled.div`
 
 const Title = styled.h3`
   font: ${({ theme }) => theme.fonts.heading5};
+`;
+
+const StyledTabs = styled(Tabs)`
+  padding-bottom: 4px;
+  overflow-x: auto;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background: ${({ theme }) => theme.colors.stroke};
+  }
 `;

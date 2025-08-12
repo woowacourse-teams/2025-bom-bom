@@ -73,9 +73,6 @@ function Storage() {
 
   return (
     <Container>
-      <SideSection>
-        <QuickMenu />
-      </SideSection>
       <MainSection>
         <TitleWrapper>
           <TitleIconBox>
@@ -106,6 +103,7 @@ function Storage() {
             onSelectCategory={handleCategoryChange}
           />
         </CategoryFilterWrapper>
+        <QuickMenu />
         <SummaryBar>
           <SummaryText>총 {articles?.totalElements ?? 0}개</SummaryText>
           <Select
@@ -146,17 +144,8 @@ const Container = styled.div`
   padding: 64px 0;
 
   display: flex;
-  gap: 24px;
   align-items: flex-start;
   justify-content: center;
-`;
-
-const SideSection = styled.div`
-  margin-top: 70px;
-
-  display: flex;
-  gap: 32px;
-  flex-direction: column;
 `;
 
 const MainSection = styled.div`

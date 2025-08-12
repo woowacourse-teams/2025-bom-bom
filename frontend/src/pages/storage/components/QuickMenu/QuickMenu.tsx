@@ -14,14 +14,16 @@ const QuickMenu = () => {
         </QuickMenuIconWrapper>
         <Title>바로 가기</Title>
       </TitleWrapper>
-      <ButtonWrapper>
-        <StyledBookmarkIcon />
-        <LinkButton to={'/bookmark'}>북마크</LinkButton>
-      </ButtonWrapper>
-      <ButtonWrapper>
-        <MemoIcon width={20} height={20} fill={theme.colors.primary} />
-        <LinkButton to={'/memo'}>메모</LinkButton>
-      </ButtonWrapper>
+      <ButtonContainer>
+        <ButtonWrapper>
+          <StyledBookmarkIcon />
+          <LinkButton to={'/bookmark'}>북마크</LinkButton>
+        </ButtonWrapper>
+        <ButtonWrapper>
+          <MemoIcon width={20} height={20} fill={theme.colors.primary} />
+          <LinkButton to={'/memo'}>메모</LinkButton>
+        </ButtonWrapper>
+      </ButtonContainer>
     </Container>
   );
 };
@@ -29,7 +31,7 @@ const QuickMenu = () => {
 export default QuickMenu;
 
 const Container = styled.nav`
-  width: 310px;
+  width: 100%;
   padding: 16px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 20px;
@@ -83,4 +85,10 @@ const StyledBookmarkIcon = styled(BookmarkIcon)`
 
 const LinkButton = styled(Link)`
   font: ${({ theme }) => theme.fonts.body1};
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 16px;
+  align-items: center;
 `;

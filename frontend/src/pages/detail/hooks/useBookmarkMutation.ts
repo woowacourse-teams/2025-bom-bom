@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteBookmark, postBookmark } from '@/apis/bookmark';
+import { queries } from '@/apis/queries';
 import { useDebounce } from '@/hooks/useDebounce';
 
 interface UseBookmarkMutationParams {
@@ -14,17 +15,16 @@ const useBookmarkMutation = ({ articleId }: UseBookmarkMutationParams) => {
     mutationFn: () => postBookmark({ articleId }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['bookmarked', articleId],
+        queryKey: queries.bookmarkStatusByArticleId({ articleId }).queryKey,
       });
     },
   });
 
   const { mutate: removeBookmark } = useMutation({
-    mutationKey: ['bookmarked', articleId],
     mutationFn: () => deleteBookmark({ articleId }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['bookmarked', articleId],
+        queryKey: queries.bookmarkStatusByArticleId({ articleId }).queryKey,
       });
     },
   });

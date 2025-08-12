@@ -67,13 +67,13 @@ export const queries = {
   // bookmarks
   bookmarks: () =>
     queryOptions({
-      queryKey: ['bookmarkArticles'],
+      queryKey: ['bookmarks'],
       queryFn: () => getBookmarkArticles(),
     }),
 
-  bookmarkStatus: (params: GetBookmarkedParams) =>
+  bookmarkStatusByArticleId: (params: GetBookmarkedParams) =>
     queryOptions({
-      queryKey: ['bookmarked', params.articleId],
+      queryKey: ['bookmarks', 'status', 'articles', params.articleId],
       queryFn: () => getBookmarked(params),
     }),
 };

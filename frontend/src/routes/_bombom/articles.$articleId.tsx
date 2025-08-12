@@ -31,7 +31,7 @@ function ArticleDetailPage() {
     articleId: articleIdNumber,
   });
   const { data: bookmarked } = useQuery(
-    queries.bookmarkStatus({ articleId: articleIdNumber }),
+    queries.bookmarkStatusByArticleId({ articleId: articleIdNumber }),
   );
   const [isBookmarked, setIsBookmarked] = useState(false);
   useEffect(() => {

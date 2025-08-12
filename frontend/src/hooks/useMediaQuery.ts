@@ -16,7 +16,6 @@ export type MediaFeatureKey =
 
 type PxNumber = number;
 type RatioTuple = [number, number];
-type ResolutionUnit = 'dppx' | 'dpi';
 
 export type MediaCondition =
   | {
@@ -29,7 +28,7 @@ export type MediaCondition =
     }
   | {
       key: 'min-resolution' | 'max-resolution';
-      value: { amount: number; unit?: ResolutionUnit };
+      value: { amount: number; unit?: 'dppx' | 'dpi' };
     }
   | { key: 'orientation'; value: 'portrait' | 'landscape' }
   | { key: 'prefers-color-scheme'; value: 'dark' | 'light' }
@@ -38,8 +37,9 @@ export type MediaCondition =
 
 function convertToMediaQueryString(condition: MediaCondition): string {
   if ('key' in condition === false || typeof condition.key !== 'string') {
-    throw new Error('[useMediaQuery] 잘못된 KV 형식입니다.');
+    throw new Error('[useMediaQuery] 잘못된 condition 형식입니다.');
   }
+
   switch (condition.key) {
     case 'max-width':
     case 'min-width':

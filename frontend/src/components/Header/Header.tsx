@@ -4,6 +4,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import HomeIcon from '../../../public/assets/home.svg';
 import Button from '../Button/Button';
 import { queries } from '@/apis/queries';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { theme } from '@/styles/theme';
 import { NavType } from '@/types/nav';
@@ -18,7 +19,8 @@ interface HeaderProps {
 }
 
 export default function Header({ activeNav }: HeaderProps) {
-  const navagate = useNavigate();
+  const navigate = useNavigate();
+  const deviceType = useDeviceType();
   const { data: userInfo, isFetching } = useQuery(queries.me());
 
   const handleCopyEmail = () => {
@@ -28,9 +30,125 @@ export default function Header({ activeNav }: HeaderProps) {
     copyToClipboard(userInfo?.email);
   };
 
+  console.log(deviceType);
+
   const isLoggedIn = isFetching || userInfo;
 
-  return (
+  return deviceType === 'mobile' ? (
+    <>
+      <MobileHeaderBar>
+        <LogoWrapper
+          to="/"
+          onClick={() =>
+            trackEvent({
+              category: 'Navigation',
+              action: 'Click Logo (Mobile)',
+              label: 'Go to Home',
+            })
+          }
+        >
+          <LogoBox>
+            <HomeIcon width={22} height={22} color={theme.colors.white} />
+          </LogoBox>
+          <MobileTitle>봄봄</MobileTitle>
+        </LogoWrapper>
+
+        <MobileProfileArea>
+          {isLoggedIn ? (
+            <MobileProfile>
+              <ProfileImg
+                src={userInfo?.profileImageUrl ?? defaultImage}
+                alt="profile"
+                width={30}
+                height={30}
+              />
+              <MobileEmail onClick={handleCopyEmail} aria-label="이메일 복사">
+                <CopyIcon width={16} height={16} />
+              </MobileEmail>
+            </MobileProfile>
+          ) : (
+            <SmallLoginButton
+              type="button"
+              onClick={() => navigate({ to: '/login' })}
+            >
+              로그인
+            </SmallLoginButton>
+          )}
+        </MobileProfileArea>
+      </MobileHeaderBar>
+
+      <BottomNavWrapper>
+        <BottomNavItem
+          to="/"
+          active={activeNav === 'today'}
+          onClick={() =>
+            trackEvent({
+              category: 'Navigation',
+              action: 'Click Today Nav (Bottom)',
+              label: 'Go to Today',
+            })
+          }
+        >
+          <HomeIcon
+            width={22}
+            height={22}
+            color={
+              activeNav === 'today' ? theme.colors.white : theme.colors.black
+            }
+          />
+          <span>오늘</span>
+        </BottomNavItem>
+
+        <BottomNavItem
+          to="/storage"
+          active={activeNav === 'storage'}
+          onClick={() =>
+            trackEvent({
+              category: 'Navigation',
+              action: 'Click Storage Nav (Bottom)',
+              label: 'Go to Storage',
+            })
+          }
+        >
+          <StorageIcon
+            width={22}
+            height={22}
+            color={
+              activeNav === 'storage' ? theme.colors.white : theme.colors.black
+            }
+          />
+          <span>보관함</span>
+        </BottomNavItem>
+
+        <BottomNavItem
+          to="/recommend"
+          active={activeNav === 'recommend'}
+          onClick={() =>
+            trackEvent({
+              category: 'Navigation',
+              action: 'Click Recommend Nav (Bottom)',
+              label: 'Go to Recommend',
+            })
+          }
+        >
+          <CompassIcon
+            width={22}
+            height={22}
+            color={
+              activeNav === 'recommend'
+                ? theme.colors.white
+                : theme.colors.black
+            }
+          />
+          <span>추천</span>
+        </BottomNavItem>
+      </BottomNavWrapper>
+
+      {/* 본문이 헤더/바텀탭과 겹치지 않도록 여백 가이드 */}
+      <MobileTopSpacer />
+      <MobileBottomSpacer />
+    </>
+  ) : (
     <HeaderContainer>
       <HeaderInner>
         <LogoWrapper
@@ -48,7 +166,9 @@ export default function Header({ activeNav }: HeaderProps) {
           </LogoBox>
           <TitleBox>
             <Title>봄봄</Title>
-            <SubTitle>당신의 하루에 찾아오는 작은 설렘</SubTitle>
+            {deviceType === 'pc' && (
+              <SubTitle>당신의 하루에 찾아오는 작은 설렘</SubTitle>
+            )}
           </TitleBox>
         </LogoWrapper>
 
@@ -130,7 +250,7 @@ export default function Header({ activeNav }: HeaderProps) {
             <Button
               text="로그인"
               onClick={() => {
-                navagate({ to: '/login' });
+                navigate({ to: '/login' });
               }}
             />
           )}
@@ -139,6 +259,110 @@ export default function Header({ activeNav }: HeaderProps) {
     </HeaderContainer>
   );
 }
+
+const MobileHeaderBar = styled.header`
+  position: fixed;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  height: 56px;
+  padding: 8px 12px;
+  box-shadow:
+    0 8px 12px -6px rgb(0 0 0 / 10%),
+    0 3px 5px -4px rgb(0 0 0 / 10%);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: ${({ theme }) => theme.colors.white};
+`;
+
+const MobileTitle = styled.span`
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.heading5};
+`;
+
+const MobileProfileArea = styled.div`
+  display: flex;
+  gap: 6px;
+  align-items: center;
+`;
+
+const MobileProfile = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
+const MobileEmail = styled.button`
+  padding: 4px;
+  border: 0;
+
+  display: flex;
+  align-items: center;
+
+  background: transparent;
+
+  cursor: pointer;
+`;
+
+const SmallLoginButton = styled.button`
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 10px;
+
+  background: ${({ theme }) => theme.colors.primary};
+  color: ${({ theme }) => theme.colors.white};
+  font: ${({ theme }) => theme.fonts.caption};
+`;
+
+const BottomNavWrapper = styled.nav`
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  height: 64px;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  border-top: 1px solid ${({ theme }) => theme.colors.stroke};
+  box-shadow: 0 -8px 12px -6px rgb(0 0 0 / 10%);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+
+  background: ${({ theme }) => theme.colors.white};
+`;
+
+const BottomNavItem = styled(Link)<{ active?: boolean }>`
+  height: 48px;
+  margin: 0 4px;
+  border-radius: 12px;
+
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  background: ${({ active, theme }) =>
+    active ? theme.colors.primary : 'transparent'};
+  color: ${({ active, theme }) =>
+    active ? theme.colors.white : theme.colors.black};
+  font: ${({ theme }) => theme.fonts.caption};
+`;
+
+const MobileTopSpacer = styled.div`
+  height: 56px; /* MobileHeaderBar 높이만큼 */
+`;
+
+const MobileBottomSpacer = styled.div`
+  height: calc(
+    64px + env(safe-area-inset-bottom)
+  ); /* BottomNavWrapper 높이만큼 */
+`;
 
 const HeaderContainer = styled.header`
   position: fixed;

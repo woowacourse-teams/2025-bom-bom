@@ -6,6 +6,7 @@ import ArticleCardList from '../../pages/today/components/ArticleCardList/Articl
 import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/ReadingStatusCard';
 import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 
 export const Route = createFileRoute('/_bombom/')({
   component: Index,
@@ -14,18 +15,19 @@ export const Route = createFileRoute('/_bombom/')({
 function Index() {
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
+  const device = useDeviceType();
 
   return (
-    <Container>
+    <Container device={device}>
       <TitleBox>
         <Title>오늘의 뉴스레터</Title>
         <TitleDescription>
           {todayArticles?.content?.length ?? 0}개의 새로운 뉴스레터가 도착했어요
         </TitleDescription>
       </TitleBox>
-      <ContentWrapper>
+      <ContentWrapper device={device}>
         <ArticleCardList articles={todayArticles?.content ?? []} />
-        <SideCardWrapper>
+        <SideCardWrapper device={device}>
           <PetCard />
           <ReadingStatusCard />
         </SideCardWrapper>
@@ -34,14 +36,19 @@ function Index() {
   );
 }
 
-const Container = styled.div`
-  width: 1280px;
-  padding-top: 64px;
+const Container = styled.div<{ device: DeviceType }>`
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  padding-top: ${({ device }) => (device === 'mobile' ? '32px' : '64px')};
 
   display: flex;
   gap: 24px;
   flex-direction: column;
   align-items: flex-start;
+
+  box-sizing: border-box;
 `;
 
 const TitleBox = styled.div`
@@ -60,18 +67,21 @@ const TitleDescription = styled.p`
   font: ${({ theme }) => theme.fonts.caption};
 `;
 
-const ContentWrapper = styled.div`
+const ContentWrapper = styled.div<{ device: DeviceType }>`
   width: 100%;
 
   display: flex;
   gap: 24px;
-  align-items: flex-start;
+  flex-direction: ${({ device }) =>
+    device === 'mobile' ? 'column-reverse' : 'row'};
+  align-items: ${({ device }) =>
+    device === 'mobile' ? 'center' : 'flex-start'};
   align-self: stretch;
   justify-content: center;
 `;
 
-const SideCardWrapper = styled.div`
-  width: 310px;
+const SideCardWrapper = styled.div<{ device: DeviceType }>`
+  width: ${({ device }) => (device === 'mobile' ? '100%' : '310px')};
 
   display: flex;
   gap: 24px;

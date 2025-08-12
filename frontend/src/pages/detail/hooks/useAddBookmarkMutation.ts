@@ -9,7 +9,7 @@ const useAddBookmarkMutation = ({ articleId }: { articleId: number }) => {
     mutationFn: () => postBookmark({ articleId }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: queries.bookmarkStatusByArticleId({ articleId }).queryKey,
+        queryKey: queries.articleBookmarkStatus({ articleId }).queryKey,
       });
     },
   });

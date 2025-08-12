@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import Badge from '@/components/Badge/Badge';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
 import CategoryIcon from '#/assets/category.svg';
 
@@ -22,6 +23,8 @@ function CategoryFilter<T extends string>({
   selectedValue,
   onSelectCategory,
 }: CategoryFilterProps<T>) {
+  const deviceType = useDeviceType();
+
   return (
     <Container aria-label="카테고리">
       <TitleWrapper>
@@ -30,7 +33,7 @@ function CategoryFilter<T extends string>({
         </IconWrapper>
         <Title>카테고리</Title>
       </TitleWrapper>
-      <StyledTabs direction="horizontal">
+      <StyledTabs direction={deviceType === 'pc' ? 'vertical' : 'horizontal'}>
         {categoryList.map(({ value, label, quantity }) => (
           <Tab
             key={value}

@@ -71,6 +71,9 @@ const Title = styled.h3`
 `;
 
 const ButtonWrapper = styled.div`
+  padding: 8px;
+  border-radius: 8px;
+
   display: flex;
   gap: 4px;
   align-items: center;

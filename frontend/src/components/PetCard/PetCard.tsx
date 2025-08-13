@@ -56,12 +56,14 @@ const PetCard = () => {
 
   return (
     <Container device={device}>
-      <TitleWrapper>
-        <StatusIconWrapper>
-          <PetIcon width={16} height={16} color={theme.colors.white} />
-        </StatusIconWrapper>
-        <Title>봄이</Title>
-      </TitleWrapper>
+      {device === 'pc' && (
+        <TitleWrapper>
+          <StatusIconWrapper>
+            <PetIcon width={16} height={16} color={theme.colors.white} />
+          </StatusIconWrapper>
+          <Title>봄이</Title>
+        </TitleWrapper>
+      )}
 
       <Spacing size={16} />
 
@@ -91,7 +93,8 @@ const PetCard = () => {
       </Level>
       <Spacing size={16} />
       <ProgressBar rate={levelPercentage} caption={`${levelPercentage}%`} />
-      <Button
+      <AttendanceButton
+        device={device}
         text={pet?.isAttended ? '출석 완료!' : '출석체크하기'}
         onClick={handleAttendanceClick}
         disabled={pet?.isAttended}
@@ -104,7 +107,6 @@ export default PetCard;
 
 const Container = styled.section<{ device: DeviceType }>`
   width: 310px;
-  padding: 34px 30px;
   border-radius: 20px;
 
   display: flex;
@@ -191,8 +193,22 @@ const Title = styled.h2`
   text-align: center;
 `;
 
+const AttendanceButton = styled(Button)<{ device: DeviceType }>`
+  height: 32px;
+
+  ${({ device }) =>
+    device === 'mobile' && {
+      position: 'absolute',
+      left: '50%',
+      bottom: 0,
+      width: '50%',
+      transform: 'translateX(-50%)',
+    }}
+`;
+
 const containerStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {
   pc: () => ({
+    padding: '34px 30px',
     border: `1px solid ${theme.colors.white}`,
     boxShadow: '0 25px 50px -12px rgb(0 0 0 / 15%)',
     backgroundColor: theme.colors.white,

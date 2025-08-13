@@ -20,12 +20,16 @@ function Index() {
 
   return (
     <Container device={device}>
-      <TitleBox>
-        <Title>오늘의 뉴스레터</Title>
-        <TitleDescription>
-          {todayArticles?.content?.length ?? 0}개의 새로운 뉴스레터가 도착했어요
-        </TitleDescription>
-      </TitleBox>
+      {device !== 'mobile' && (
+        <TitleBox>
+          <Title>오늘의 뉴스레터</Title>
+          <TitleDescription>
+            {todayArticles?.content?.length ?? 0}개의 새로운 뉴스레터가
+            도착했어요
+          </TitleDescription>
+        </TitleBox>
+      )}
+
       <ContentWrapper device={device}>
         <ArticleCardList articles={todayArticles?.content ?? []} />
         <SideCardWrapper device={device}>
@@ -42,10 +46,10 @@ const Container = styled.div<{ device: DeviceType }>`
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 24px;
-  padding-top: ${({ device }) => (device === 'pc' ? '64px' : '32px')};
+  padding-top: ${({ device }) => (device === 'mobile' ? '0px' : '64px')};
 
   display: flex;
-  gap: 24px;
+  gap: 44px;
   flex-direction: column;
   align-items: flex-start;
 
@@ -81,8 +85,14 @@ const ContentWrapper = styled.div<{ device: DeviceType }>`
 `;
 
 const SideCardWrapper = styled.div<{ device: DeviceType }>`
+  min-width: 300px;
+  max-width: calc(100% - 200px);
+  padding: 4dvh 1dvh;
+
   display: flex;
-  justify-content: flex-start;
+  gap: 36px;
+
+  box-sizing: border-box;
 
   ${({ device, theme }) => sideCardWrapperStyles[device](theme)}
 `;
@@ -90,21 +100,22 @@ const SideCardWrapper = styled.div<{ device: DeviceType }>`
 const sideCardWrapperStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {
   pc: (theme) => ({
     width: '310px',
-    border: `1px solid ${theme.colors.white}`,
-    gap: '24px',
     flexDirection: 'column',
+    justifyContent: 'flex-start',
     alignItems: 'center',
+    gap: '24px',
+    border: `1px solid ${theme.colors.white}`,
   }),
   tablet: () => ({
     width: '100%',
-    borderRadius: '20px',
-    boxShadow: '0 25px 50px -12px rgb(0 0 0 / 15%)',
+    justifyContent: 'center',
     alignItems: 'flex-start',
   }),
   mobile: () => ({
+    position: 'relative',
+    paddingBottom: '44px',
     width: '100%',
-    borderRadius: '20px',
-    boxShadow: '0 25px 50px -12px rgb(0 0 0 / 15%)',
-    alignItems: 'flex-start',
+    justifyContent: 'center',
+    alignItems: 'center',
   }),
 };

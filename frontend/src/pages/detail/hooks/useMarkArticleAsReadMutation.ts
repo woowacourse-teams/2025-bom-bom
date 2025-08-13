@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useMemo } from 'react';
 import { patchArticleRead } from '@/apis/articles';
 import { queries } from '@/apis/queries';
 
@@ -11,11 +10,12 @@ const useMarkArticleAsReadMutation = ({
   articleId,
 }: UseMarkArticleAsReadMutationParams) => {
   const queryClient = useQueryClient();
-  const today = useMemo(() => new Date(), []);
 
   return useMutation({
     mutationFn: () => patchArticleRead({ id: articleId }),
     onSuccess: () => {
+      const today = new Date();
+
       queryClient.invalidateQueries({
         queryKey: queries.articleById({ id: articleId }).queryKey,
       });

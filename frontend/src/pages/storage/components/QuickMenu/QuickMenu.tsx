@@ -12,7 +12,9 @@ const QuickMenu = () => {
 
   if (deviceType === 'mobile') {
     return (
-      <FloatingActionButton icon={<LinkIcon />}>
+      <FloatingActionButton
+        icon={<LinkIcon width={24} height={24} fill={theme.colors.white} />}
+      >
         <ButtonWrapper>
           <StyledBookmarkIcon />
           <LinkButton to={'/bookmark'}>북마크</LinkButton>

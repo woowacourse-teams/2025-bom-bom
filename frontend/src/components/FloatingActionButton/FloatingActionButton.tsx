@@ -19,9 +19,7 @@ const FloatingActionButton = ({
   return (
     <>
       <FloatingButton onClick={toggleMenu}>{icon}</FloatingButton>
-      {isOpen && (
-        <FloatingMenu onClick={() => setIsOpen(false)}>{children}</FloatingMenu>
-      )}
+      {isOpen && <FloatingMenu>{children}</FloatingMenu>}
     </>
   );
 };
@@ -49,10 +47,6 @@ const FloatingButton = styled.button`
 
   &:hover {
     box-shadow: 0 6px 16px rgb(0 0 0 / 20%);
-  }
-
-  svg {
-    color: ${({ theme }) => theme.colors.white};
   }
 `;
 

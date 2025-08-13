@@ -9,7 +9,7 @@ import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
-import me.bombom.api.v1.article.dto.GetArticleCategoryStatisticsResponse;
+import me.bombom.api.v1.article.dto.GetArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.config.QuerydslConfig;
@@ -22,8 +22,6 @@ import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
-import me.bombom.api.v1.reading.domain.TodayReading;
-import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.reading.service.ReadingService;
@@ -434,7 +432,7 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 제목_필터링_된_카테고리_별_아티클_개수를_조회한다() {
+    void 제목_필터링_된_뉴스레터_별_아티클_개수를_조회한다() {
         // when
         String keyword = "AI";
 
@@ -447,7 +445,7 @@ class ArticleServiceTest {
         );
         articleRepository.saveAll(testArticles);
 
-        GetArticleCategoryStatisticsResponse result = articleService.getArticleCategoryStatistics(
+        GetArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
                 member,
                 keyword
         );
@@ -455,18 +453,17 @@ class ArticleServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(result.totalCount()).isEqualTo(3);
-            softly.assertThat(result.categories()).hasSize(3);
-            softly.assertThat(result.categories().get(0).category()).isEqualTo("경제");
-            softly.assertThat(result.categories().get(0).count()).isEqualTo(1);
-            softly.assertThat(result.categories().get(1).category()).isEqualTo("테크");
-            softly.assertThat(result.categories().get(1).count()).isEqualTo(2);
+            softly.assertThat(result.newsletters().get(0).newsletter()).isEqualTo("뉴스픽");
+            softly.assertThat(result.newsletters().get(0).count()).isEqualTo(1);
+            softly.assertThat(result.newsletters().get(1).newsletter()).isEqualTo("IT타임즈");
+            softly.assertThat(result.newsletters().get(1).count()).isEqualTo(2);
         });
     }
 
     @Test
-    void 전체_카테고리_별_아티클_개수를_조회한다() {
+    void 전체_뉴스레터_별_아티클_개수를_조회한다() {
         // when
-        GetArticleCategoryStatisticsResponse result = articleService.getArticleCategoryStatistics(
+        GetArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
                 member,
                 null
         );
@@ -474,11 +471,12 @@ class ArticleServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(result.totalCount()).isEqualTo(4);
-            softly.assertThat(result.categories()).hasSize(3);
-            softly.assertThat(result.categories().get(1).category()).isEqualTo("테크");
-            softly.assertThat(result.categories().get(1).count()).isEqualTo(1);
-            softly.assertThat(result.categories().get(2).category()).isEqualTo("푸드");
-            softly.assertThat(result.categories().get(2).count()).isEqualTo(2);
+            softly.assertThat(result.newsletters().get(0).newsletter()).isEqualTo("뉴스픽");
+            softly.assertThat(result.newsletters().get(0).count()).isEqualTo(1);
+            softly.assertThat(result.newsletters().get(1).newsletter()).isEqualTo("IT타임즈");
+            softly.assertThat(result.newsletters().get(1).count()).isEqualTo(1);
+            softly.assertThat(result.newsletters().get(2).newsletter()).isEqualTo("비즈레터");
+            softly.assertThat(result.newsletters().get(2).count()).isEqualTo(2);
         });
     }
 }

@@ -60,6 +60,10 @@ dependencies {
 
     // swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
+
+    // logging
+    implementation("org.springframework.cloud:spring-cloud-starter-sleuth:3.1.2")
+    implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 }
 
 tasks.withType<Test> {

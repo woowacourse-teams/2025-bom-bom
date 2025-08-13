@@ -3,11 +3,16 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import Button from '../Button/Button';
 import { queries } from '@/apis/queries';
+import { DeviceType } from '@/hooks/useDeviceType';
 import { copyToClipboard } from '@/utils/copy';
 import defaultImage from '#/assets/bombom.png';
 import CopyIcon from '#/assets/copy.svg';
 
-const HeaderProfile = () => {
+interface HeaderProfileProps {
+  deviceType: DeviceType;
+}
+
+const HeaderProfile = ({ deviceType }: HeaderProfileProps) => {
   const navigate = useNavigate();
   const { data: userInfo, isFetching } = useQuery(queries.me());
 
@@ -24,14 +29,18 @@ const HeaderProfile = () => {
     <Container>
       {isLoggedIn ? (
         <ProfileInfo>
-          <ProfileImg
-            src={userInfo?.profileImageUrl ?? defaultImage}
-            alt="profile"
-            width={32}
-            height={32}
-          />
+          {deviceType !== 'mobile' && (
+            <ProfileImg
+              src={userInfo?.profileImageUrl ?? defaultImage}
+              alt="profile"
+              width={32}
+              height={32}
+            />
+          )}
           <ProfileTextBox>
-            <ProfileName>{userInfo?.nickname}</ProfileName>
+            {deviceType !== 'mobile' && (
+              <ProfileName>{userInfo?.nickname}</ProfileName>
+            )}
             <ProfileEmail onClick={handleCopyEmail}>
               <EmailText>{userInfo?.email}</EmailText>
               <CopyIcon width={16} height={16} />

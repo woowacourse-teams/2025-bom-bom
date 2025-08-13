@@ -16,7 +16,7 @@ export default function Header({ activeNav }: HeaderProps) {
     <>
       <MobileHeaderContainer>
         <HeaderLogo deviceType={deviceType} />
-        <HeaderProfile />
+        <HeaderProfile deviceType={deviceType} />
       </MobileHeaderContainer>
 
       <BottomNavWrapper>
@@ -32,7 +32,7 @@ export default function Header({ activeNav }: HeaderProps) {
           <HeaderNavButtons activeNav={activeNav} deviceType={deviceType} />
         </NavWrapper>
 
-        <HeaderProfile />
+        <HeaderProfile deviceType={deviceType} />
       </HeaderInner>
     </HeaderContainer>
   );

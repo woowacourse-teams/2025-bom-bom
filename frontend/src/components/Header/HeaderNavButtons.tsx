@@ -93,5 +93,6 @@ const NavButton = styled(Link)<{ active?: boolean; deviceType: DeviceType }>`
     active ? theme.colors.primary : 'transparent'};
   color: ${({ active, theme }) =>
     active ? theme.colors.white : theme.colors.black};
-  font: ${({ theme }) => theme.fonts.body2};
+  font: ${({ deviceType, theme }) =>
+    deviceType === 'mobile' ? theme.fonts.body3 : theme.fonts.body2};
 `;

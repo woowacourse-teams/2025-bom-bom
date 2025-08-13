@@ -1,19 +1,24 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
 import BookmarkIcon from '#/assets/bookmark-inactive.svg';
 import MemoIcon from '#/assets/memo.svg';
 import QuickMenuIcon from '#/assets/quick-menu.svg';
 
 const QuickMenu = () => {
+  const deviceType = useDeviceType();
+
   return (
     <Container>
-      <TitleWrapper>
-        <QuickMenuIconWrapper>
-          <StyledQuickMenuIcon />
-        </QuickMenuIconWrapper>
-        <Title>바로 가기</Title>
-      </TitleWrapper>
+      {deviceType === 'pc' && (
+        <TitleWrapper>
+          <QuickMenuIconWrapper>
+            <StyledQuickMenuIcon />
+          </QuickMenuIconWrapper>
+          <Title>바로 가기</Title>
+        </TitleWrapper>
+      )}
       <ButtonContainer>
         <ButtonWrapper>
           <StyledBookmarkIcon />

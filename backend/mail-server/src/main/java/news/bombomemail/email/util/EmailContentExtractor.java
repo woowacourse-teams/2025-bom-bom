@@ -201,15 +201,7 @@ public final class EmailContentExtractor {
         if (part.isMimeType("multipart/*")) {
             log.debug("Multipart 파트 발견 - 파트 개수: {}", ((Multipart) part.getContent()).getCount());
             Multipart multipart = (Multipart) part.getContent();
-            List<Integer> order = new ArrayList<>();
-            for (int i = 0; i < multipart.getCount(); i++) order.add(i);
-            order.sort((a,b) -> {
-                try {
-                    String ca = multipart.getBodyPart(a).getContentType().toLowerCase();
-                    String cb = multipart.getBodyPart(b).getContentType().toLowerCase();
-                    return score(cb) - score(ca);
-                } catch (MessagingException e) { return 0; }
-            });
+            List<Integer> order = sort(multipart);
             for (int idx : order) {
                 BodyPart bp = multipart.getBodyPart(idx);
                 log.debug("Multipart 파트 {}: {}", idx, bp.getContentType());
@@ -223,6 +215,19 @@ public final class EmailContentExtractor {
         
         log.debug("파트에서 텍스트 추출 실패 - Content-Type: {}", contentType);
         return "";
+    }
+
+    private static List<Integer> sort(Multipart multipart) throws MessagingException {
+        List<Integer> order = new ArrayList<>();
+        for (int i = 0; i < multipart.getCount(); i++) order.add(i);
+        order.sort((a,b) -> {
+            try {
+                String contentTypeA = multipart.getBodyPart(a).getContentType().toLowerCase();
+                String contentTypeB = multipart.getBodyPart(b).getContentType().toLowerCase();
+                return score(contentTypeB) - score(contentTypeA);
+            } catch (MessagingException e) { return 0; }
+        });
+        return order;
     }
 
     private static int score(String ct) {

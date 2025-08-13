@@ -56,8 +56,8 @@ export default CategoryFilter;
 const Container = styled.nav<{ isPc: boolean }>`
   width: 100%;
   padding: 16px;
-  border: ${({ isPc }) => (isPc ? '1px solid' : 'none')}
-    ${({ theme }) => theme.colors.stroke};
+  border: ${({ isPc, theme }) =>
+    isPc ? `1px solid ${theme.colors.stroke}` : 'none'};
   border-radius: 20px;
 
   display: flex;

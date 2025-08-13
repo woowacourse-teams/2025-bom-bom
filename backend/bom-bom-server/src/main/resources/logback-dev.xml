@@ -1,0 +1,43 @@
+<included>
+    <!-- DEV 프로파일: Pretty JSON 콘솔 + 텍스트 파일 -->
+    <appender name="DEV_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <prettyPrint>true</prettyPrint>
+            <providers>
+                <timestamp fieldName="time" pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX"/>
+                <mdc>
+                    <includeMdcKeyName>traceId</includeMdcKeyName>
+                    <includeMdcKeyName>API</includeMdcKeyName>
+                    <includeMdcKeyName>userId</includeMdcKeyName>
+                </mdc>
+                <message/>
+                <stackTrace>
+                    <fieldName>trace</fieldName>
+                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                        <maxLength>2048</maxLength>
+                        <shortenedClassNameLength>20</shortenedClassNameLength>
+                        <rootCauseFirst>true</rootCauseFirst>
+                    </throwableConverter>
+                </stackTrace>
+            </providers>
+        </encoder>
+    </appender>
+
+    <appender name="DEV_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/bombom-dev.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 날짜 + 인덱스 형식 -->
+            <fileNamePattern>${LOG_PATH}/bombom-dev.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="DEBUG">
+        <appender-ref ref="DEV_CONSOLE"/>
+        <appender-ref ref="DEV_FILE"/>
+    </root>
+</included>

@@ -43,8 +43,9 @@ const MobileHeaderContainer = styled.header`
   top: 0;
   z-index: 100;
   width: 100%;
-  height: 56px;
+  height: calc(56px + env(safe-area-inset-top));
   padding: 8px 12px;
+  padding-top: calc(8px + env(safe-area-inset-top));
   box-shadow:
     0 8px 12px -6px rgb(0 0 0 / 10%),
     0 3px 5px -4px rgb(0 0 0 / 10%);

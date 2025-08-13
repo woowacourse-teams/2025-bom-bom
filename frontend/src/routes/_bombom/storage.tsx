@@ -39,7 +39,6 @@ function Storage() {
     size: 6,
   };
 
-  // PC용 일반 쿼리
   const { data: articles, isLoading } = useQuery({
     ...queries.articles({
       ...baseQueryParams,
@@ -48,7 +47,6 @@ function Storage() {
     enabled: isPc,
   });
 
-  // 모바일/태블릿용 무한 쿼리
   const {
     data: infiniteArticles,
     fetchNextPage,
@@ -77,7 +75,6 @@ function Storage() {
     }),
   );
 
-  // Intersection Observer를 사용한 무한 스크롤
   useEffect(() => {
     if (isPc || !loadMoreRef.current) return;
 
@@ -121,13 +118,10 @@ function Storage() {
     (category) => category.count !== 0,
   );
 
-  // 현재 디바이스에 맞는 로딩 상태
   const currentLoading = isPc ? isLoading : isInfiniteLoading;
 
-  // PC용 article 배열
   const pcArticleList = articles?.content || [];
 
-  // 모바일용 article 배열 (모든 페이지의 content를 평탄화)
   const mobileArticleList =
     infiniteArticles?.pages?.flatMap((page) => page?.content || []) || [];
 

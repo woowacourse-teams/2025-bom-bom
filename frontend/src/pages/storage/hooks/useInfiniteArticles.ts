@@ -6,7 +6,7 @@ interface UseInfiniteArticlesParams {
   isPc: boolean;
 }
 
-export const useInfiniteArticles = ({
+const useInfiniteArticles = ({
   baseQueryParams,
   isPc,
 }: UseInfiniteArticlesParams) => {
@@ -26,3 +26,5 @@ export const useInfiniteArticles = ({
     enabled: !isPc,
   });
 };
+
+export default useInfiniteArticles;

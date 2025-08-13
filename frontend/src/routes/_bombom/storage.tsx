@@ -12,7 +12,7 @@ import { CategoryType } from '@/constants/category';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
-import { useInfiniteArticles } from '@/pages/storage/hooks/useInfiniteArticles';
+import useInfiniteArticles from '@/pages/storage/hooks/useInfiniteArticles';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import { theme } from '@/styles/theme';

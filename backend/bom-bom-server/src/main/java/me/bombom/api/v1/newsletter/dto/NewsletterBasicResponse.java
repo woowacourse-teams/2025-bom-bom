@@ -14,8 +14,7 @@ public record NewsletterBasicResponse(
         @Schema(type = "string", description = "이메일", required = true)
         String email,
 
-        @NotNull
-        @Schema(type = "string", description = "이미지 URL", required = true)
+        @Schema(type = "string", description = "이미지 URL")
         String imageUrl,
 
         @NotNull

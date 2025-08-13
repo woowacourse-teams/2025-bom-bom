@@ -19,8 +19,7 @@ public record MemberProfileResponse(
         @Schema(type = "string", description = "닉네임", required = true)
         String nickname,
 
-        @NotNull
-        @Schema(type = "string", description = "프로필 이미지 URL", required = true)
+        @Schema(type = "string", description = "프로필 이미지 URL")
         String profileImageUrl
 ) {
 

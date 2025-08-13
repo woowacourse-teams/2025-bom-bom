@@ -9,8 +9,7 @@ public record NewsletterSummaryResponse(
         @Schema(type = "string", description = "뉴스레터명", required = true)
         String name,
 
-        @NotNull
-        @Schema(type = "string", description = "이미지 URL", required = true)
+        @Schema(type = "string", description = "이미지 URL")
         String imageUrl,
 
         @NotNull

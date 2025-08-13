@@ -23,8 +23,7 @@ public record ArticleResponse(
         @Schema(type = "string", format = "date-time", description = "도착 시간", required = true)
         LocalDateTime arrivedDateTime,
 
-        @NotNull
-        @Schema(type = "string", description = "썸네일 URL", required = true)
+        @Schema(type = "string", description = "썸네일 URL")
         String thumbnailUrl,
         
         @Schema(type = "integer", format = "int32", description = "예상 읽기 시간(분)", required = true)

@@ -25,20 +25,33 @@ public class PetService {
 
     public PetResponse getPet(Member member) {
         Pet pet = petRepository.findByMemberId(member.getId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", member.getId())
+                    .addContext("entityType", "Pet"));
         Stage currentStage = stageRepository.findById(pet.getStageId())
-                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
+                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
+                    .addContext("memberId", member.getId())
+                    .addContext("stageId", pet.getStageId())
+                    .addContext("operation", "findCurrentStage"));
         Stage nextStage = stageRepository.findNextStageByCurrentScore(pet.getCurrentScore())
-                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
+                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
+                    .addContext("memberId", member.getId())
+                    .addContext("currentScore", pet.getCurrentScore())
+                    .addContext("operation", "findNextStage"));
         return PetResponse.of(pet, currentStage, nextStage);
     }
 
     @Transactional
     public void attend(Member member) {
         Pet pet = petRepository.findByMemberId(member.getId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", member.getId())
+                    .addContext("entityType", "Pet")
+                    .addContext("operation", "attendance"));
         if(pet.isAttended()){
-            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                .addContext("memberId", member.getId())
+                .addContext("alreadyAttended", true);
         }
         pet.markAsAttended();
         increaseCurrentScore(member.getId(), ScorePolicyConstants.ATTENDANCE_SCORE);
@@ -47,7 +60,11 @@ public class PetService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void increaseCurrentScore(Long memberId, int score){
         Pet pet = petRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", memberId)
+                    .addContext("scoreToAdd", score)
+                    .addContext("entityType", "Pet")
+                    .addContext("operation", "increaseScore"));
         pet.increaseCurrentScore(score);
         updatePetStage(pet);
     }
@@ -67,7 +84,10 @@ public class PetService {
 
     private void updatePetStage(Pet pet) {
         Stage stageByScore = stageRepository.findCurrentStageByCurrentScore(pet.getCurrentScore())
-                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
+                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
+                    .addContext("memberId", pet.getMemberId())
+                    .addContext("currentScore", pet.getCurrentScore())
+                    .addContext("operation", "updatePetStage"));
         pet.updateStage(stageByScore);
     }
 }

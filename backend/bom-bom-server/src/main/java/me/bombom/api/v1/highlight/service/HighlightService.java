@@ -31,7 +31,9 @@ public class HighlightService {
     @Transactional
     public HighlightResponse create(HighlightCreateRequest request, Member member) {
         Article article = articleRepository.findById(request.articleId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", member.getId())
+                    .addContext("articleId", request.articleId()));
         validateArticleOwner(member, article);
         HighlightLocation location = request.location()
                 .toHighlightLocation();
@@ -58,7 +60,10 @@ public class HighlightService {
 
     private void validateArticleOwner(Member member, Article article) {
         if (article.isNotOwner(member.getId())) {
-            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                .addContext("memberId", member.getId())
+                .addContext("articleId", article.getId())
+                .addContext("actualOwnerId", article.getMemberId());
         }
     }
 
@@ -74,9 +79,16 @@ public class HighlightService {
 
     private Highlight findHighlightWithOwnerValidation(Long id, Member member) {
         Highlight highlight = highlightRepository.findById(id)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", member.getId())
+                    .addContext("highlightId", id)
+                    .addContext("entityType", "Highlight"));
         Article article = articleRepository.findById(highlight.getArticleId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", member.getId())
+                    .addContext("highlightId", id)
+                    .addContext("articleId", highlight.getArticleId())
+                    .addContext("entityType", "Article"));
         validateArticleOwner(member, article);
         return highlight;
     }

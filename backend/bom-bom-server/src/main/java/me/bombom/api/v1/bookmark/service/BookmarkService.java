@@ -33,7 +33,9 @@ public class BookmarkService {
     @Transactional
     public void addBookmark(Long memberId, Long articleId) {
         Article article = articleRepository.findById(articleId)
-            .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+            .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                .addContext("memberId", memberId)
+                .addContext("articleId", articleId));
         validateArticleOwner(memberId, article);
         if (bookmarkRepository.existsByMemberIdAndArticleId(memberId, articleId)) {
             return;
@@ -49,14 +51,19 @@ public class BookmarkService {
     @Transactional
     public void deleteBookmark(Long memberId, Long articleId) {
         Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", memberId)
+                    .addContext("articleId", articleId));
         validateArticleOwner(memberId, article);
         bookmarkRepository.deleteByMemberIdAndArticleId(memberId, articleId);
     }
 
     private void validateArticleOwner(Long memberId, Article article) {
         if (article.isNotOwner(memberId)) {
-            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                .addContext("memberId", memberId)
+                .addContext("articleId", article.getId())
+                .addContext("actualOwnerId", article.getMemberId());
         }
     }
 }

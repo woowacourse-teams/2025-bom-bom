@@ -42,11 +42,16 @@ public class AuthController implements AuthControllerApi{
     public void signup(@Valid @RequestBody MemberSignupRequest signupRequest, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session == null) {
-            throw new UnauthorizedException(ErrorDetail.MISSING_OAUTH_DATA);
+            throw new UnauthorizedException(ErrorDetail.MISSING_OAUTH_DATA)
+                .addContext("sessionExists", false)
+                .addContext("requestedEmail", signupRequest.email());
         }
         PendingOAuth2Member pendingMember = (PendingOAuth2Member) session.getAttribute("pendingMember");
         if (pendingMember == null) {
-            throw new UnauthorizedException(ErrorDetail.MISSING_OAUTH_DATA);
+            throw new UnauthorizedException(ErrorDetail.MISSING_OAUTH_DATA)
+                .addContext("sessionExists", true)
+                .addContext("pendingMemberExists", false)
+                .addContext("requestedEmail", signupRequest.email());
         }
         Member newMember = memberService.signup(pendingMember, signupRequest);
         session.removeAttribute("pendingMember");

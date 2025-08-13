@@ -42,7 +42,8 @@ public class MemberService {
 
     public MemberProfileResponse getProfile(Long id) {
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", id));
         return MemberProfileResponse.from(member);
     }
 }

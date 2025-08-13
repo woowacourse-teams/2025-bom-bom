@@ -64,9 +64,12 @@ public class ReadingService {
     @Transactional
     public WeeklyGoalCountResponse updateWeeklyGoalCount(UpdateWeeklyGoalCountRequest request) {
         Member member = memberRepository.findById(request.memberId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", request.memberId()));
         WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(member.getId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", member.getId())
+                    .addContext("entityType", "WeeklyReading"));
         weeklyReading.updateGoalCount(request.weeklyGoalCount());
         return WeeklyGoalCountResponse.from(weeklyReading);
     }
@@ -75,7 +78,9 @@ public class ReadingService {
     public int calculateArticleScore(Long memberId) {
         int score = ScorePolicyConstants.ARTICLE_READING_SCORE;
         ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", memberId)
+                    .addContext("entityType", "ContinueReading"));
         if (isBonusApplicable(continueReading)) {
             score += ScorePolicyConstants.CONTINUE_READING_BONUS_SCORE;
         }
@@ -95,11 +100,17 @@ public class ReadingService {
     public ReadingInformationResponse getReadingInformation(Member member) {
         Long memberId = member.getId();
         ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", memberId)
+                    .addContext("entityType", "ContinueReading"));
         TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", memberId)
+                    .addContext("entityType", "TodayReading"));
         WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", memberId)
+                    .addContext("entityType", "WeeklyReading"));
         return ReadingInformationResponse.of(continueReading, todayReading, weeklyReading);
     }
 
@@ -110,15 +121,24 @@ public class ReadingService {
     private void applyResetContinueReadingCount(TodayReading todayReading) {
         Long memberId = todayReading.getMemberId();
         ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", memberId)
+                    .addContext("entityType", "ContinueReading")
+                    .addContext("operation", "applyResetContinueReadingCount"));
         continueReading.resetDayCount();
     }
 
     private void updateContinueReadingCount(Long memberId) {
         TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", memberId)
+                    .addContext("entityType", "TodayReading")
+                    .addContext("operation", "updateContinueReadingCount"));
         ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", memberId)
+                    .addContext("entityType", "ContinueReading")
+                    .addContext("operation", "updateContinueReadingCount"));
         if (canIncreaseContinueReadingCount(todayReading)) {
             continueReading.increaseDayCount();
         }
@@ -126,13 +146,19 @@ public class ReadingService {
 
     private void updateTodayReadingCount(Long memberId) {
         TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", memberId)
+                    .addContext("entityType", "TodayReading")
+                    .addContext("operation", "updateTodayReadingCount"));
         todayReading.increaseCurrentCount();
     }
 
     private void updateWeeklyReadingCount(Long memberId) {
         WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("memberId", memberId)
+                    .addContext("entityType", "WeeklyReading")
+                    .addContext("operation", "updateWeeklyReadingCount"));
         weeklyReading.increaseCurrentCount();
     }
 

@@ -26,13 +26,15 @@ function CategoryFilter<T extends string>({
   const deviceType = useDeviceType();
 
   return (
-    <Container aria-label="카테고리">
-      <TitleWrapper>
-        <IconWrapper>
-          <CategoryIcon width={16} height={16} fill={theme.colors.white} />
-        </IconWrapper>
-        <Title>카테고리</Title>
-      </TitleWrapper>
+    <Container aria-label="카테고리" isPc={deviceType === 'pc'}>
+      {deviceType === 'pc' && (
+        <TitleWrapper>
+          <IconWrapper>
+            <CategoryIcon width={16} height={16} fill={theme.colors.white} />
+          </IconWrapper>
+          <Title>카테고리</Title>
+        </TitleWrapper>
+      )}
       <StyledTabs direction={deviceType === 'pc' ? 'vertical' : 'horizontal'}>
         {categoryList.map(({ value, label, quantity }) => (
           <Tab
@@ -51,10 +53,11 @@ function CategoryFilter<T extends string>({
 
 export default CategoryFilter;
 
-const Container = styled.nav`
+const Container = styled.nav<{ isPc: boolean }>`
   width: 100%;
   padding: 16px;
-  border: 1px solid ${({ theme }) => theme.colors.stroke};
+  border: ${({ isPc }) => (isPc ? '1px solid' : 'none')}
+    ${({ theme }) => theme.colors.stroke};
   border-radius: 20px;
 
   display: flex;

@@ -81,10 +81,15 @@ const ContentWrapper = styled.div<{ device: DeviceType }>`
 
 const SideCardWrapper = styled.div<{ device: DeviceType }>`
   width: ${({ device }) => (device === 'pc' ? '310px' : '100%')};
+  border: ${({ device, theme }) =>
+    device === 'pc' ? `1px solid ${theme.colors.white}` : 'none'};
+  border-radius: ${({ device }) => (device === 'pc' ? 'none' : '20px')};
+  box-shadow: ${({ device }) =>
+    device === 'pc' ? 'none' : '0 25px 50px -12px rgb(0 0 0 / 15%)'};
 
   display: flex;
   gap: ${({ device }) => (device === 'pc' ? '24px' : '0px')};
   flex-direction: ${({ device }) => (device === 'pc' ? 'column' : 'row')};
-  align-items: center;
+  align-items: ${({ device }) => (device === 'pc' ? 'center' : 'flex-start')};
   justify-content: flex-start;
 `;

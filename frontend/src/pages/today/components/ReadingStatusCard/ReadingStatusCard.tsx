@@ -32,14 +32,12 @@ function ReadingStatusCard() {
 
   return (
     <Container device={device}>
-      {device === 'pc' && (
-        <TitleWrapper>
-          <StatusIconWrapper>
-            <StatusIcon width={20} height={20} color={theme.colors.white} />
-          </StatusIconWrapper>
-          <Title>읽기 현황</Title>
-        </TitleWrapper>
-      )}
+      <TitleWrapper>
+        <StatusIconWrapper>
+          <StatusIcon width={20} height={20} color={theme.colors.white} />
+        </StatusIconWrapper>
+        <Title>읽기 현황</Title>
+      </TitleWrapper>
 
       {device === 'pc' ? (
         <StreakWrapper>
@@ -96,20 +94,20 @@ const Container = styled.section<{ device: DeviceType }>`
   width: 310px;
   padding: 34px 30px;
   border: ${({ device, theme }) =>
-    device === 'mobile' ? 'none' : `1px solid ${theme.colors.white}`};
+    device === 'pc' ? `1px solid ${theme.colors.white}` : 'none'};
   border-radius: 20px;
   box-shadow: ${({ device }) =>
-    device === 'mobile' ? 'none' : '0 25px 50px -12px rgb(0 0 0 / 15%)'};
+    device === 'pc' ? '0 25px 50px -12px rgb(0 0 0 / 15%)' : 'none'};
 
   display: flex;
   gap: 26px;
-  flex: ${({ device }) => (device === 'mobile' ? '1' : 'auto')};
+  flex: ${({ device }) => (device === 'pc' ? 'auto' : '1')};
   flex-direction: column;
-  align-items: flex-start;
+  align-items: ${({ device }) => (device === 'pc' ? 'center' : 'flex-start')};
   justify-content: center;
 
   background-color: ${({ device, theme }) =>
-    device === 'mobile' ? 'transparent' : `${theme.colors.white}`};
+    device === 'pc' ? `${theme.colors.white}` : 'transparent'};
 `;
 
 const TitleWrapper = styled.div`

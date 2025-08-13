@@ -6,11 +6,11 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 public record GetArticlesOptions(
         @DateTimeFormat(iso = ISO.DATE) LocalDate date,
-        String category,
+        String newsletter,
         String keyword
 ) {
 
-    public static GetArticlesOptions of(LocalDate date, String category, String keyword) {
-        return new GetArticlesOptions(date, category, keyword);
+    public static GetArticlesOptions of(LocalDate date, String newsletter, String keyword) {
+        return new GetArticlesOptions(date, newsletter, keyword);
     }
 }

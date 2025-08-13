@@ -18,4 +18,6 @@ public interface NewsletterRepository extends JpaRepository<Newsletter, Long> {
         ORDER BY d.subscribeCount DESC, n.name ASC
     """)
     List<NewsletterResponse> findNewslettersInfo();
+
+    boolean existsByName(String name);
 }

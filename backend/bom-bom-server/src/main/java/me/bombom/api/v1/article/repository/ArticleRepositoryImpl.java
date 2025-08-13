@@ -68,14 +68,13 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     }
 
     @Override
-    public int countAllByCategoryIdAndMemberId(Long memberId, Long categoryId, String keyword) {
+    public int countAllByNewsletterIdAndMemberId(Long memberId, Long newsletterId, String keyword) {
         Long count = jpaQueryFactory.select(article.count())
                 .from(article)
                 .join(newsletter).on(article.newsletterId.eq(newsletter.id))
-                .join(category).on(newsletter.categoryId.eq(category.id))
                 .where(createMemberWhereClause(memberId))
+                .where(createNewsletterIdWhereClause(newsletterId))
                 .where(createKeywordWhereClause(keyword))
-                .where(createCategoryIdWhereClause(categoryId))
                 .fetchOne();
 
         return Optional.ofNullable(count)
@@ -105,7 +104,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .where(createMemberWhereClause(memberId))
                 .where(createDateWhereClause(options.date()))
                 .where(createKeywordWhereClause(options.keyword()))
-                .where(createCategoryNameWhereClause(options.category()));
+                .where(createNewsletterNameWhereClause(options.newsletter()));
     }
 
     private List<ArticleResponse> getContent(Long memberId, GetArticlesOptions options, Pageable pageable) {
@@ -125,7 +124,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .where(createMemberWhereClause(memberId))
                 .where(createDateWhereClause(options.date()))
                 .where(createKeywordWhereClause(options.keyword()))
-                .where(createCategoryNameWhereClause(options.category()))
+                .where(createNewsletterNameWhereClause(options.newsletter()))
                 .orderBy(getOrderSpecifiers(pageable).toArray(OrderSpecifier[]::new))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -136,17 +135,18 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         return article.memberId.eq(memberId);
     }
 
-    private Predicate createCategoryNameWhereClause(String categoryName) {
-        return Optional.ofNullable(categoryName)
+    private Predicate createNewsletterNameWhereClause(String newsletterName) {
+        return Optional.ofNullable(newsletterName)
                 .map(String::trim)
                 .filter(name -> !name.isEmpty())
-                .map(category.name::eq)
+                .map(newsletter.name::eq)
                 .orElse(null);
     }
 
-    private Predicate createCategoryIdWhereClause(Long categoryId) {
-        return Optional.ofNullable(categoryId)
-                .map(category.id::eq)
+
+    private Predicate createNewsletterIdWhereClause(Long newsletterId) {
+        return Optional.ofNullable(newsletterId)
+                .map(newsletter.id::eq)
                 .orElse(null);
     }
 

@@ -38,6 +38,9 @@ const Container = styled.li<{ selected: boolean }>`
   width: 100%;
   min-width: fit-content;
   padding: 10px 12px;
+  border: 2px solid
+    ${({ selected, theme }) =>
+      selected ? theme.colors.primary : 'transparent'};
   border-radius: 12px;
 
   display: flex;
@@ -53,4 +56,10 @@ const Container = styled.li<{ selected: boolean }>`
   font-weight: ${({ selected }) => (selected ? '600' : '400')};
 
   cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background-color: ${({ selected, theme }) =>
+      selected ? theme.colors.primary : theme.colors.disabledBackground};
+  }
 `;

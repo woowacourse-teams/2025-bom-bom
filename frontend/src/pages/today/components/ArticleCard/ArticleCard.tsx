@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
 import Badge from '@/components/Badge/Badge';
-import Chip from '@/components/Chip/Chip';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { components } from '@/types/openapi';
@@ -44,7 +43,6 @@ function ArticleCard({ data, readVariant = 'transparent' }: ArticleCardProps) {
         <Title>{title}</Title>
         <Description>{contentsSummary || title}</Description>
         <MetaInfoRow>
-          <Chip text={newsletter?.category ?? ''} />
           <MetaInfoText>from {newsletter?.name ?? ''}</MetaInfoText>
           <MetaInfoText>
             {formatDate(new Date(arrivedDateTime ?? ''))}
@@ -107,7 +105,15 @@ const InfoWrapper = styled.div`
 `;
 
 const Title = styled.h2`
+  overflow: hidden;
+
+  display: -webkit-box;
+
   font: ${({ theme }) => theme.fonts.heading4};
+
+  -webkit-box-orient: vertical;
+
+  -webkit-line-clamp: 2;
 `;
 
 const Description = styled.p`

@@ -1,17 +1,18 @@
 import styled from '@emotion/styled';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 import SearchInput from '../../components/SearchInput/SearchInput';
 import Select from '../../components/Select/Select';
 import CategoryFilter from '../../pages/storage/components/CategoryFilter/CategoryFilter';
-import { getArticles, GetArticlesParams } from '@/apis/articles';
+import { GetArticlesParams } from '@/apis/articles';
 import { queries } from '@/apis/queries';
 import Pagination from '@/components/Pagination/Pagination';
 import { CategoryType } from '@/constants/category';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
+import { useInfiniteArticles } from '@/pages/storage/hooks/useInfiniteArticles';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import { theme } from '@/styles/theme';
@@ -53,21 +54,7 @@ function Storage() {
     hasNextPage,
     isFetchingNextPage,
     isLoading: isInfiniteLoading,
-  } = useInfiniteQuery({
-    queryKey: ['articles', 'infinite', baseQueryParams],
-    queryFn: ({ pageParam = 0 }) =>
-      getArticles({
-        ...baseQueryParams,
-        page: pageParam,
-      }),
-    getNextPageParam: (lastPage, allPages) => {
-      if (!lastPage?.totalPages) return undefined;
-      const nextPage = allPages.length;
-      return nextPage < lastPage.totalPages ? nextPage : undefined;
-    },
-    initialPageParam: 0,
-    enabled: !isPc,
-  });
+  } = useInfiniteArticles({ baseQueryParams, isPc });
 
   const { data: categoryCounts } = useQuery(
     queries.statisticsCategories({

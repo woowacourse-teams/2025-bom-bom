@@ -43,8 +43,6 @@ const FloatingButton = styled.button`
 
   background-color: ${({ theme }) => theme.colors.primary};
 
-  cursor: pointer;
-
   &:hover {
     box-shadow: 0 6px 16px rgb(0 0 0 / 20%);
   }

@@ -128,16 +128,16 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 아티클_목록_조회_카테고리_필터링_테스트() {
+    void 아티클_목록_조회_뉴스레터_필터링_테스트() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
-        Category category = categories.getFirst();
-        String categoryName = category.getName();
+        Newsletter newsletter = newsletters.getFirst();
+        String newsletterName = newsletter.getName();
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, categoryName, null),
+                GetArticlesOptions.of(null, newsletterName, null),
                 pageable
         );
 
@@ -146,8 +146,8 @@ class ArticleServiceTest {
             softly.assertThat(result.getTotalElements()).isEqualTo(1);
             softly.assertThat(result.getContent()).hasSize(1);
             softly.assertThat(result.getContent()).extracting("newsletter")
-                    .extracting("category")
-                    .containsExactly(category.getName());
+                    .extracting("name")
+                    .containsExactly(newsletter.getName());
         });
     }
 

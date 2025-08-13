@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
-import me.bombom.api.v1.article.dto.GetArticleCategoryStatisticsResponse;
-import me.bombom.api.v1.article.dto.GetArticleCountPerCategoryResponse;
+import me.bombom.api.v1.article.dto.GetArticleCountPerNewsletterResponse;
+import me.bombom.api.v1.article.dto.GetArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -42,7 +42,7 @@ public class ArticleService {
             GetArticlesOptions getArticlesOptions,
             Pageable pageable
     ) {
-        validateCategoryName(getArticlesOptions.category());
+        validateNewsletterName(getArticlesOptions.newsletter());
         return articleRepository.findByMemberId(member.getId(), getArticlesOptions, pageable);
     }
 
@@ -61,30 +61,35 @@ public class ArticleService {
     public void markAsRead(Long articleId, Member member) {
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
-        if(article.isRead()) {
+        if (article.isRead()) {
             return;
         }
         validateArticleOwner(article, member.getId());
         article.markAsRead();
-        applicationEventPublisher.publishEvent(new UpdateReadingCountEvent(articleId));
+        applicationEventPublisher.publishEvent(new UpdateReadingCountEvent(member.getId(), articleId));
         applicationEventPublisher.publishEvent(new AddArticleScoreEvent(member.getId()));
     }
 
-    public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(Member member, String keyword) {
+    public GetArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(Member member, String keyword) {
         int totalCount = articleRepository.countAllByMemberId(member.getId(), keyword);
-        List<GetArticleCountPerCategoryResponse> countResponse = categoryRepository.findAll()
+        List<GetArticleCountPerNewsletterResponse> countResponse = newsletterRepository.findAll()
                 .stream()
-                .map(category -> {
-                    int count = articleRepository.countAllByCategoryIdAndMemberId(member.getId(), category.getId(), keyword);
-                    return GetArticleCountPerCategoryResponse.of(category, count);
+                .map(newsletter -> {
+                    int count = articleRepository.countAllByNewsletterIdAndMemberId(
+                            member.getId(),
+                            newsletter.getId(),
+                            keyword
+                    );
+                    return GetArticleCountPerNewsletterResponse.of(newsletter, count);
                 })
                 .toList();
-        return GetArticleCategoryStatisticsResponse.of(totalCount, countResponse);
+        return GetArticleNewsletterStatisticsResponse.of(totalCount, countResponse);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public boolean canAddArticleScore(Long memberId){
-        int todayReadCount = articleRepository.countByMemberIdAndArrivedDateTimeAndIsRead(memberId, LocalDate.now(), true);
+    public boolean canAddArticleScore(Long memberId) {
+        int todayReadCount = articleRepository.countByMemberIdAndArrivedDateTimeAndIsRead(memberId, LocalDate.now(),
+                true);
         return todayReadCount <= ScorePolicyConstants.MAX_TODAY_READING_COUNT;
     }
 
@@ -94,8 +99,8 @@ public class ArticleService {
         return article.isArrivedToday();
     }
 
-    private void validateCategoryName(String categoryName) {
-        if (categoryName != null && !categoryRepository.existsByName(categoryName)) {
+    private void validateNewsletterName(String newsletterName) {
+        if (newsletterName != null && !newsletterRepository.existsByName(newsletterName)) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND);
         }
     }

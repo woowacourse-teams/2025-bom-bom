@@ -138,19 +138,19 @@ class ArticleControllerTest {
     }
 
     @Test
-    void 푸드_카테고리_아티클_목록_조회() throws Exception {
+    void 뉴스레터_아티클_목록_조회() throws Exception {
         // given
         setAuthentication();
-        String foodCategory = categories.get(2).getName(); // "푸드"
+        String newsletterName = newsletters.get(2).getName();
 
         // when & then
         mockMvc.perform(get("/api/v1/articles")
-                        .param("category", foodCategory))
+                        .param("newsletter", newsletterName))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.totalElements").value(2))
-                .andExpect(jsonPath("$.content[0].newsletter.category").value("푸드"))
-                .andExpect(jsonPath("$.content[1].newsletter.category").value("푸드"));
+                .andExpect(jsonPath("$.content[0].newsletter.name").value(newsletterName))
+                .andExpect(jsonPath("$.content[1].newsletter.name").value(newsletterName));
     }
 
     @Test

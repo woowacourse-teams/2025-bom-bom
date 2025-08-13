@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
-import me.bombom.api.v1.article.dto.GetArticleCategoryStatisticsResponse;
+import me.bombom.api.v1.article.dto.GetArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.common.resolver.LoginMember;
@@ -66,11 +66,11 @@ public class ArticleController implements ArticleControllerApi{
     }
 
     @Override
-    @GetMapping("/statistics/categories")
-    public GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(
+    @GetMapping("/statistics/newsletters")
+    public GetArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(
             @LoginMember Member member,
             @RequestParam(required = false) String keyword
     ){
-        return articleService.getArticleCategoryStatistics(member, keyword);
+        return articleService.getArticleNewsletterStatistics(member, keyword);
     }
 }

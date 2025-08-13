@@ -12,6 +12,7 @@ public interface CustomArticleRepository {
 
     int countAllByMemberId(Long memberId, String keyword);
 
-    int countAllByCategoryIdAndMemberId(Long memberId, Long categoryId, String keyword);
+    int countAllByNewsletterIdAndMemberId(Long memberId, Long newsletterId, String keyword);
+
     int countByMemberIdAndArrivedDateTimeAndIsRead(Long memberId, LocalDate date, boolean isRead);
 }

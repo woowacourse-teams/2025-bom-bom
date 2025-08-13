@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
-import me.bombom.api.v1.article.dto.GetArticleCategoryStatisticsResponse;
+import me.bombom.api.v1.article.dto.GetArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
@@ -68,13 +68,13 @@ public interface ArticleControllerApi {
     );
 
     @Operation(
-        summary = "카테고리별 아티클 개수 조회",
-        description = "카테고리별 아티클 개수 정보를 조회합니다. 키워드 검색 시 해당 키워드가 제목에 포함된 아티클만 대상으로 합니다."
+        summary = "뉴스레터별 아티클 개수 조회",
+        description = "뉴스레터별 아티클 개수 정보를 조회합니다. 키워드 검색 시 해당 키워드가 제목에 포함된 아티클만 대상으로 합니다."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "카테고리별 개수 조회 성공")
+        @ApiResponse(responseCode = "200", description = "뉴스레터별 개수 조회 성공")
     })
-    GetArticleCategoryStatisticsResponse getArticleCategoryStatistics(
+    GetArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(
         @Parameter(hidden = true) Member member,
         @Parameter(description = "검색 키워드 (선택)") @RequestParam(required = false) String keyword
     );

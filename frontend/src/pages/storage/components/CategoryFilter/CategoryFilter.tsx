@@ -55,7 +55,6 @@ export default CategoryFilter;
 
 const Container = styled.nav<{ isPc: boolean }>`
   width: 100%;
-  padding: 16px;
   border: ${({ isPc, theme }) =>
     isPc ? `1px solid ${theme.colors.stroke}` : 'none'};
   border-radius: 20px;
@@ -88,7 +87,7 @@ const Title = styled.h3`
 `;
 
 const StyledTabs = styled(Tabs)`
-  padding-bottom: 4px;
+  padding-bottom: 8px;
   overflow-x: auto;
 
   &::-webkit-scrollbar {

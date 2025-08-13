@@ -6,13 +6,14 @@ import ProgressBar from '../ProgressBar/ProgressBar';
 
 interface ProgressWithLabelProps {
   label: string;
-  Icon: ComponentType<SVGProps<SVGSVGElement>>;
+  Icon?: ComponentType<SVGProps<SVGSVGElement>>;
   value: {
     currentCount: number;
     totalCount: number;
   };
   description?: string;
   rateFormat?: RateFormatType;
+  showGraph?: boolean;
 }
 
 function ProgressWithLabel({
@@ -21,6 +22,7 @@ function ProgressWithLabel({
   value: { currentCount, totalCount },
   description,
   rateFormat = 'percentage',
+  showGraph = true,
 }: ProgressWithLabelProps) {
   const { rate, formattedRate } = getProgressInfo({
     currentCount,
@@ -31,11 +33,11 @@ function ProgressWithLabel({
   return (
     <Container>
       <ProgressInfo>
-        <StyledIcon as={Icon} />
+        {Icon && <StyledIcon as={Icon} />}
         <ProgressLabel>{label}</ProgressLabel>
         <ProgressRate>{formattedRate}</ProgressRate>
       </ProgressInfo>
-      <ProgressBar rate={rate} />
+      {showGraph && <ProgressBar rate={rate} />}
       {description && <ProgressDescription>{description}</ProgressDescription>}
     </Container>
   );

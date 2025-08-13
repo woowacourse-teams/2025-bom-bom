@@ -55,3 +55,17 @@ export const getStatisticsCategories = async (
     query: { ...params },
   });
 };
+
+export type GetArticlesStatisticsNewslettersResponse = {
+  totalCount: number;
+  newsletters: {
+    newsletter: string;
+    count: number;
+  }[];
+};
+
+export const getArticlesStatisticsNewsletters = async () => {
+  return await fetcher.get<GetArticlesStatisticsNewslettersResponse>({
+    path: '/articles/statistics/newsletters',
+  });
+};

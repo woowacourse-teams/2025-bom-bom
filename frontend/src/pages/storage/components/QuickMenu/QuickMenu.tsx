@@ -1,24 +1,38 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
+import FloatingActionButton from '@/components/FloatingActionButton/FloatingActionButton';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
 import BookmarkIcon from '#/assets/bookmark-inactive.svg';
+import LinkIcon from '#/assets/link.svg';
 import MemoIcon from '#/assets/memo.svg';
-import QuickMenuIcon from '#/assets/quick-menu.svg';
 
 const QuickMenu = () => {
   const deviceType = useDeviceType();
 
+  if (deviceType === 'mobile') {
+    return (
+      <FloatingActionButton icon={<LinkIcon />}>
+        <ButtonWrapper>
+          <StyledBookmarkIcon />
+          <LinkButton to={'/bookmark'}>북마크</LinkButton>
+        </ButtonWrapper>
+        <ButtonWrapper>
+          <MemoIcon width={20} height={20} fill={theme.colors.primary} />
+          <LinkButton to={'/memo'}>메모</LinkButton>
+        </ButtonWrapper>
+      </FloatingActionButton>
+    );
+  }
+
   return (
     <Container>
-      {deviceType === 'pc' && (
-        <TitleWrapper>
-          <QuickMenuIconWrapper>
-            <StyledQuickMenuIcon />
-          </QuickMenuIconWrapper>
-          <Title>바로 가기</Title>
-        </TitleWrapper>
-      )}
+      <TitleWrapper>
+        <QuickMenuIconWrapper>
+          <StyledLinkIcon />
+        </QuickMenuIconWrapper>
+        <Title>바로 가기</Title>
+      </TitleWrapper>
       <ButtonContainer>
         <ButtonWrapper>
           <StyledBookmarkIcon />
@@ -64,7 +78,7 @@ const QuickMenuIconWrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
 `;
 
-const StyledQuickMenuIcon = styled(QuickMenuIcon)`
+const StyledLinkIcon = styled(LinkIcon)`
   width: 16px;
   height: 16px;
 

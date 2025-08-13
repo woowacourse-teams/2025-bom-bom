@@ -42,7 +42,7 @@ public class ArticleService {
             GetArticlesOptions getArticlesOptions,
             Pageable pageable
     ) {
-        validateCategoryName(getArticlesOptions.category());
+        validateNewsletterName(getArticlesOptions.newsletter());
         return articleRepository.findByMemberId(member.getId(), getArticlesOptions, pageable);
     }
 
@@ -94,8 +94,8 @@ public class ArticleService {
         return article.isArrivedToday();
     }
 
-    private void validateCategoryName(String categoryName) {
-        if (categoryName != null && !categoryRepository.existsByName(categoryName)) {
+    private void validateNewsletterName(String newsletterName) {
+        if (newsletterName != null && !newsletterRepository.existsByName(newsletterName)) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND);
         }
     }

@@ -15,16 +15,16 @@ const TodayUnreadArticlesSection = ({
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
 
-  const unReadArticles = todayArticles?.content?.filter(
+  const unreadArticles = todayArticles?.content?.filter(
     (article) => !article.isRead && article.articleId !== articleId,
   );
 
   return (
     <Container>
       <TodayArticleTitle>오늘 읽지 않은 다른 아티클</TodayArticleTitle>
-      {unReadArticles?.length && unReadArticles.length > 0 ? (
+      {unreadArticles?.length && unreadArticles.length > 0 ? (
         <TodayArticleList>
-          {unReadArticles?.map((article) => (
+          {unreadArticles?.map((article) => (
             <NewsletterItemCard key={article.articleId} data={article} />
           ))}
         </TodayArticleList>
@@ -37,7 +37,7 @@ const TodayUnreadArticlesSection = ({
 
 export default TodayUnreadArticlesSection;
 
-const Container = styled.div`
+const Container = styled.section`
   width: 100%;
 
   display: flex;

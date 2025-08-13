@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import Badge from '@/components/Badge/Badge';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
 import CategoryIcon from '#/assets/category.svg';
 
@@ -22,15 +23,19 @@ function CategoryFilter<T extends string>({
   selectedValue,
   onSelectCategory,
 }: CategoryFilterProps<T>) {
+  const deviceType = useDeviceType();
+
   return (
-    <Container aria-label="카테고리">
-      <TitleWrapper>
-        <IconWrapper>
-          <CategoryIcon width={16} height={16} fill={theme.colors.white} />
-        </IconWrapper>
-        <Title>카테고리</Title>
-      </TitleWrapper>
-      <Tabs direction="vertical">
+    <Container aria-label="카테고리" isPc={deviceType === 'pc'}>
+      {deviceType === 'pc' && (
+        <TitleWrapper>
+          <IconWrapper>
+            <CategoryIcon width={16} height={16} fill={theme.colors.white} />
+          </IconWrapper>
+          <Title>카테고리</Title>
+        </TitleWrapper>
+      )}
+      <StyledTabs direction={deviceType === 'pc' ? 'vertical' : 'horizontal'}>
         {categoryList.map(({ value, label, quantity }) => (
           <Tab
             key={value}
@@ -41,17 +46,18 @@ function CategoryFilter<T extends string>({
             EndComponent={<Badge text={String(quantity)} />}
           />
         ))}
-      </Tabs>
+      </StyledTabs>
     </Container>
   );
 }
 
 export default CategoryFilter;
 
-const Container = styled.nav`
-  width: 310px;
-  padding: 16px;
-  border: 1px solid ${({ theme }) => theme.colors.stroke};
+const Container = styled.nav<{ isPc: boolean }>`
+  width: 100%;
+  padding: ${({ isPc }) => (isPc ? '16px' : '0')};
+  border: ${({ isPc, theme }) =>
+    isPc ? `1px solid ${theme.colors.stroke}` : 'none'};
   border-radius: 20px;
 
   display: flex;
@@ -79,4 +85,22 @@ const IconWrapper = styled.div`
 
 const Title = styled.h3`
   font: ${({ theme }) => theme.fonts.heading5};
+`;
+
+const StyledTabs = styled(Tabs)`
+  padding-bottom: 8px;
+  overflow-x: auto;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background: ${({ theme }) => theme.colors.stroke};
+  }
 `;

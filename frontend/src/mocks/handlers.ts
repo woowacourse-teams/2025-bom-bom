@@ -60,6 +60,31 @@ export const handlers = [
     });
   }),
 
+  // 뉴스레터 통계
+  http.get(`${baseURL}/articles/statistics/newsletters`, () => {
+    return HttpResponse.json({
+      totalCount: ARTICLES.length,
+      newsletters: [
+        { newsletter: '테크뉴스', count: 5 },
+        { newsletter: '개발자뉴스', count: 3 },
+        { newsletter: 'AI뉴스', count: 2 },
+      ],
+    });
+  }),
+
+  // 북마크 뉴스레터 통계
+  http.get(`${baseURL}/bookmarks/statistics/newsletters`, () => {
+    return HttpResponse.json({
+      totalCount: 8,
+      newsletters: [
+        { newsletter: '테크뉴스', count: 3 },
+        { newsletter: '개발자뉴스', count: 2 },
+        { newsletter: 'AI뉴스', count: 1 },
+        { newsletter: '스타트업뉴스', count: 2 },
+      ],
+    });
+  }),
+
   // 뉴스레터 목록
   http.get(`${baseURL}/newsletters`, () => {
     return HttpResponse.json(TRENDY_NEWSLETTERS);

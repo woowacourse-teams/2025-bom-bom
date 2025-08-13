@@ -10,7 +10,7 @@ import MemoIcon from '#/assets/memo.svg';
 const QuickMenu = () => {
   const deviceType = useDeviceType();
 
-  if (deviceType === 'mobile') {
+  if (deviceType !== 'pc') {
     return (
       <FloatingActionButton
         icon={<LinkIcon width={24} height={24} fill={theme.colors.white} />}

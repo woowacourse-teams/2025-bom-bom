@@ -13,7 +13,7 @@ import StatusIcon from '#/assets/reading-status.svg';
 import StreakIcon from '#/assets/streak.svg';
 
 function ReadingStatusCard() {
-  const device = useDeviceType();
+  const deviceType = useDeviceType();
   const { data, isLoading } = useQuery(queries.readingStatus());
 
   if (isLoading) return <ReadingStatusCardSkeleton />;
@@ -34,8 +34,8 @@ function ReadingStatusCard() {
       : '목표 달성!';
 
   return (
-    <Container device={device}>
-      {device === 'pc' && (
+    <Container deviceType={deviceType}>
+      {deviceType === 'pc' && (
         <TitleWrapper>
           <StatusIconWrapper>
             <StatusIcon width={20} height={20} color={theme.colors.white} />
@@ -44,9 +44,9 @@ function ReadingStatusCard() {
         </TitleWrapper>
       )}
 
-      {device === 'pc' ? (
+      {deviceType === 'pc' ? (
         <>
-          <StreakWrapper device={device}>
+          <StreakWrapper deviceType={deviceType}>
             <StreakIconWrapper>
               <StreakIcon
                 width={34}
@@ -56,7 +56,7 @@ function ReadingStatusCard() {
               />
             </StreakIconWrapper>
             <StreakDay>{`${streakReadDay}일`}</StreakDay>
-            <StreakDescription device={device}>
+            <StreakDescription deviceType={deviceType}>
               연속 읽기 중!🔥
             </StreakDescription>
             <StreakHelperText>Great Job!</StreakHelperText>
@@ -69,7 +69,7 @@ function ReadingStatusCard() {
               currentCount: today?.readCount ?? 0,
               totalCount: today?.totalCount ?? 0,
             }}
-            {...(device === 'pc'
+            {...(deviceType === 'pc'
               ? { description: todayProgressDescription }
               : {})}
           />
@@ -80,7 +80,7 @@ function ReadingStatusCard() {
               currentCount: weekly?.readCount ?? 0,
               totalCount: weekly?.goalCount ?? 0,
             }}
-            {...(device === 'pc'
+            {...(deviceType === 'pc'
               ? { description: weeklyProgressDescription }
               : {})}
             rateFormat="ratio"
@@ -88,9 +88,11 @@ function ReadingStatusCard() {
         </>
       ) : (
         <StatisticWrapper>
-          <StreakWrapper device={device}>
+          <StreakWrapper deviceType={deviceType}>
             <StreakCounter streakReadDay={streakReadDay ?? 0} />
-            <StreakDescription device={device}>연속 읽기 중!</StreakDescription>
+            <StreakDescription deviceType={deviceType}>
+              연속 읽기 중!
+            </StreakDescription>
           </StreakWrapper>
 
           <GoalWrapper>
@@ -117,7 +119,7 @@ function ReadingStatusCard() {
 
 export default ReadingStatusCard;
 
-const Container = styled.section<{ device: DeviceType }>`
+const Container = styled.section<{ deviceType: DeviceType }>`
   width: 310px;
   border-radius: 20px;
 
@@ -126,7 +128,7 @@ const Container = styled.section<{ device: DeviceType }>`
   flex-direction: column;
   justify-content: center;
 
-  ${({ device, theme }) => containerStyles[device](theme)}
+  ${({ deviceType, theme }) => containerStyles[deviceType](theme)}
 `;
 
 const TitleWrapper = styled.div`
@@ -156,9 +158,9 @@ const Title = styled.h2`
   text-align: center;
 `;
 
-const StreakWrapper = styled.div<{ device: DeviceType }>`
+const StreakWrapper = styled.div<{ deviceType: DeviceType }>`
   display: flex;
-  gap: ${({ device }) => (device === 'pc' ? '8px' : '0px')};
+  gap: ${({ deviceType }) => (deviceType === 'pc' ? '8px' : '0px')};
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -183,10 +185,10 @@ const StreakDay = styled.p`
   text-align: center;
 `;
 
-const StreakDescription = styled.p<{ device: DeviceType }>`
+const StreakDescription = styled.p<{ deviceType: DeviceType }>`
   color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ device, theme }) =>
-    device === 'pc' ? theme.fonts.body1 : theme.fonts.body2};
+  font: ${({ deviceType, theme }) =>
+    deviceType === 'pc' ? theme.fonts.body1 : theme.fonts.body2};
   text-align: center;
 `;
 

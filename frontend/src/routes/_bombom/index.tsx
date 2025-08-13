@@ -16,11 +16,11 @@ export const Route = createFileRoute('/_bombom/')({
 function Index() {
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
-  const device = useDeviceType();
+  const deviceType = useDeviceType();
 
   return (
-    <Container device={device}>
-      {device !== 'mobile' && (
+    <Container deviceType={deviceType}>
+      {deviceType !== 'mobile' && (
         <TitleBox>
           <Title>오늘의 뉴스레터</Title>
           <TitleDescription>
@@ -30,9 +30,9 @@ function Index() {
         </TitleBox>
       )}
 
-      <ContentWrapper device={device}>
+      <ContentWrapper deviceType={deviceType}>
         <ArticleCardList articles={todayArticles?.content ?? []} />
-        <SideCardWrapper device={device}>
+        <SideCardWrapper deviceType={deviceType}>
           <PetCard />
           <ReadingStatusCard />
         </SideCardWrapper>
@@ -41,12 +41,13 @@ function Index() {
   );
 }
 
-const Container = styled.div<{ device: DeviceType }>`
+const Container = styled.div<{ deviceType: DeviceType }>`
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 24px;
-  padding-top: ${({ device }) => (device === 'mobile' ? '0px' : '64px')};
+  padding-top: ${({ deviceType }) =>
+    deviceType === 'mobile' ? '0px' : '64px'};
 
   display: flex;
   gap: 44px;
@@ -72,19 +73,20 @@ const TitleDescription = styled.p`
   font: ${({ theme }) => theme.fonts.caption};
 `;
 
-const ContentWrapper = styled.div<{ device: DeviceType }>`
+const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
   width: 100%;
 
   display: flex;
   gap: 24px;
-  flex-direction: ${({ device }) =>
-    device === 'pc' ? 'row' : 'column-reverse'};
-  align-items: ${({ device }) => (device === 'pc' ? 'flex-start' : 'center')};
+  flex-direction: ${({ deviceType }) =>
+    deviceType === 'pc' ? 'row' : 'column-reverse'};
+  align-items: ${({ deviceType }) =>
+    deviceType === 'pc' ? 'flex-start' : 'center'};
   align-self: stretch;
   justify-content: center;
 `;
 
-const SideCardWrapper = styled.div<{ device: DeviceType }>`
+const SideCardWrapper = styled.div<{ deviceType: DeviceType }>`
   min-width: 300px;
   max-width: calc(100% - 200px);
   padding: 4dvh 1dvh;
@@ -94,7 +96,7 @@ const SideCardWrapper = styled.div<{ device: DeviceType }>`
 
   box-sizing: border-box;
 
-  ${({ device, theme }) => sideCardWrapperStyles[device](theme)}
+  ${({ deviceType, theme }) => sideCardWrapperStyles[deviceType](theme)}
 `;
 
 const sideCardWrapperStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {

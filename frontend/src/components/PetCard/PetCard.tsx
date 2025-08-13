@@ -28,7 +28,7 @@ const petImages: Record<number, string> = {
 };
 
 const PetCard = () => {
-  const device = useDeviceType();
+  const deviceType = useDeviceType();
   const [isAnimating, setIsAnimating] = useState(false);
 
   const { data: pet } = useQuery({
@@ -55,8 +55,8 @@ const PetCard = () => {
   };
 
   return (
-    <Container device={device}>
-      {device === 'pc' && (
+    <Container deviceType={deviceType}>
+      {deviceType === 'pc' && (
         <TitleWrapper>
           <StatusIconWrapper>
             <PetIcon width={16} height={16} color={theme.colors.white} />
@@ -94,7 +94,7 @@ const PetCard = () => {
       <Spacing size={16} />
       <ProgressBar rate={levelPercentage} caption={`${levelPercentage}%`} />
       <AttendanceButton
-        device={device}
+        deviceType={deviceType}
         text={pet?.isAttended ? '출석 완료!' : '출석체크하기'}
         onClick={handleAttendanceClick}
         disabled={pet?.isAttended}
@@ -105,7 +105,7 @@ const PetCard = () => {
 
 export default PetCard;
 
-const Container = styled.section<{ device: DeviceType }>`
+const Container = styled.section<{ deviceType: DeviceType }>`
   width: 310px;
   border-radius: 20px;
 
@@ -115,7 +115,7 @@ const Container = styled.section<{ device: DeviceType }>`
   align-items: center;
   justify-content: center;
 
-  ${({ device, theme }) => containerStyles[device](theme)}
+  ${({ deviceType, theme }) => containerStyles[deviceType](theme)}
 `;
 
 const PetImageContainer = styled.div`
@@ -193,11 +193,11 @@ const Title = styled.h2`
   text-align: center;
 `;
 
-const AttendanceButton = styled(Button)<{ device: DeviceType }>`
+const AttendanceButton = styled(Button)<{ deviceType: DeviceType }>`
   height: 32px;
 
-  ${({ device }) =>
-    device === 'mobile' && {
+  ${({ deviceType }) =>
+    deviceType === 'mobile' && {
       position: 'absolute',
       left: '50%',
       bottom: 0,

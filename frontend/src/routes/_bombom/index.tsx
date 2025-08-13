@@ -7,6 +7,7 @@ import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/Re
 import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import type { CSSObject, Theme } from '@emotion/react';
 
 export const Route = createFileRoute('/_bombom/')({
   component: Index,
@@ -80,16 +81,30 @@ const ContentWrapper = styled.div<{ device: DeviceType }>`
 `;
 
 const SideCardWrapper = styled.div<{ device: DeviceType }>`
-  width: ${({ device }) => (device === 'pc' ? '310px' : '100%')};
-  border: ${({ device, theme }) =>
-    device === 'pc' ? `1px solid ${theme.colors.white}` : 'none'};
-  border-radius: ${({ device }) => (device === 'pc' ? 'none' : '20px')};
-  box-shadow: ${({ device }) =>
-    device === 'pc' ? 'none' : '0 25px 50px -12px rgb(0 0 0 / 15%)'};
-
   display: flex;
-  gap: ${({ device }) => (device === 'pc' ? '24px' : '0px')};
-  flex-direction: ${({ device }) => (device === 'pc' ? 'column' : 'row')};
-  align-items: ${({ device }) => (device === 'pc' ? 'center' : 'flex-start')};
   justify-content: flex-start;
+
+  ${({ device, theme }) => sideCardWrapperStyles[device](theme)}
 `;
+
+const sideCardWrapperStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {
+  pc: (theme) => ({
+    width: '310px',
+    border: `1px solid ${theme.colors.white}`,
+    gap: '24px',
+    flexDirection: 'column',
+    alignItems: 'center',
+  }),
+  tablet: () => ({
+    width: '100%',
+    borderRadius: '20px',
+    boxShadow: '0 25px 50px -12px rgb(0 0 0 / 15%)',
+    alignItems: 'flex-start',
+  }),
+  mobile: () => ({
+    width: '100%',
+    borderRadius: '20px',
+    boxShadow: '0 25px 50px -12px rgb(0 0 0 / 15%)',
+    alignItems: 'flex-start',
+  }),
+};

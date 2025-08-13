@@ -5,6 +5,7 @@ import { queries } from '@/apis/queries';
 import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
+import type { CSSObject, Theme } from '@emotion/react';
 import GoalIcon from '#/assets/goal.svg';
 import StatusIcon from '#/assets/reading-status.svg';
 import StreakIcon from '#/assets/streak.svg';
@@ -40,7 +41,7 @@ function ReadingStatusCard() {
       </TitleWrapper>
 
       {device === 'pc' ? (
-        <StreakWrapper>
+        <StreakWrapper device={device}>
           <StreakIconWrapper>
             <StreakIcon
               width={34}
@@ -54,15 +55,15 @@ function ReadingStatusCard() {
           <StreakHelperText>Great Job!</StreakHelperText>
         </StreakWrapper>
       ) : (
-        <StreakWrapperMobile>
+        <StreakWrapper device={device}>
           <StreakIcon
             width={16}
             height={16}
             fill={theme.colors.white}
             color={theme.colors.primary}
           />
-          <StreakDayMobile>{`${streakReadDay}일 연속 읽기 중!`}</StreakDayMobile>
-        </StreakWrapperMobile>
+          <StreakDescription>{`${streakReadDay}일 연속 읽기 중!`}</StreakDescription>
+        </StreakWrapper>
       )}
 
       <ProgressWithLabel
@@ -93,21 +94,14 @@ export default ReadingStatusCard;
 const Container = styled.section<{ device: DeviceType }>`
   width: 310px;
   padding: 34px 30px;
-  border: ${({ device, theme }) =>
-    device === 'pc' ? `1px solid ${theme.colors.white}` : 'none'};
   border-radius: 20px;
-  box-shadow: ${({ device }) =>
-    device === 'pc' ? '0 25px 50px -12px rgb(0 0 0 / 15%)' : 'none'};
 
   display: flex;
   gap: 26px;
-  flex: ${({ device }) => (device === 'pc' ? 'auto' : '1')};
   flex-direction: column;
-  align-items: ${({ device }) => (device === 'pc' ? 'center' : 'flex-start')};
   justify-content: center;
 
-  background-color: ${({ device, theme }) =>
-    device === 'pc' ? `${theme.colors.white}` : 'transparent'};
+  ${({ device, theme }) => containerStyles[device](theme)}
 `;
 
 const TitleWrapper = styled.div`
@@ -137,10 +131,10 @@ const Title = styled.h2`
   text-align: center;
 `;
 
-const StreakWrapper = styled.div`
+const StreakWrapper = styled.div<{ device: DeviceType }>`
   display: flex;
-  gap: 10px;
-  flex-direction: column;
+  gap: 8px;
+  flex-direction: ${({ device }) => (device === 'pc' ? 'column' : 'row')};
   align-items: center;
   justify-content: center;
 `;
@@ -180,15 +174,21 @@ const StreakHelperText = styled.div`
   text-align: center;
 `;
 
-const StreakWrapperMobile = styled.div`
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: center;
-
-  text-align: center;
-`;
-
-const StreakDayMobile = styled.p`
-  font: ${({ theme }) => theme.fonts.body2};
-`;
+const containerStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {
+  pc: (theme) => ({
+    alignItems: 'center',
+    backgroundColor: theme.colors.white,
+    border: `1px solid ${theme.colors.white}`,
+    boxShadow: '0 25px 50px -12px rgb(0 0 0 / 15%)',
+  }),
+  tablet: (theme) => ({
+    flex: '1',
+    alignItems: 'flex-start',
+    color: theme.colors.white,
+  }),
+  mobile: (theme) => ({
+    flex: '1',
+    alignItems: 'flex-start',
+    color: theme.colors.white,
+  }),
+};

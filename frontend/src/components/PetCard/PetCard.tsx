@@ -11,6 +11,7 @@ import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import { queryClient } from '@/main';
 import { theme } from '@/styles/theme';
 import { calculateRate } from '@/utils/math';
+import type { CSSObject, Theme } from '@emotion/react';
 import petLv1 from '#/assets/pet-1-lv1.png';
 import petLv2 from '#/assets/pet-1-lv2.png';
 import petLv3 from '#/assets/pet-1-lv3.png';
@@ -104,9 +105,7 @@ export default PetCard;
 const Container = styled.section<{ device: DeviceType }>`
   width: 310px;
   padding: 34px 30px;
-  border: 1px solid ${({ theme }) => theme.colors.white};
   border-radius: 20px;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 15%);
 
   display: flex;
   flex-direction: column;
@@ -114,16 +113,7 @@ const Container = styled.section<{ device: DeviceType }>`
   align-items: center;
   justify-content: center;
 
-  background-color: ${({ theme }) => theme.colors.white};
-
-  ${({ device }) =>
-    device !== 'pc' &&
-    `
-    border: none;
-    background-color: transparent;
-    box-shadow: none;
-    flex: 1;
-  `}
+  ${({ device, theme }) => containerStyles[device](theme)}
 `;
 
 const PetImageContainer = styled.div`
@@ -200,3 +190,17 @@ const Title = styled.h2`
   font: ${({ theme }) => theme.fonts.heading5};
   text-align: center;
 `;
+
+const containerStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {
+  pc: () => ({
+    border: `1px solid ${theme.colors.white}`,
+    boxShadow: '0 25px 50px -12px rgb(0 0 0 / 15%)',
+    backgroundColor: theme.colors.white,
+  }),
+  tablet: () => ({
+    flex: '1',
+  }),
+  mobile: () => ({
+    flex: '1',
+  }),
+};

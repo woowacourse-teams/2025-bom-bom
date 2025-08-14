@@ -1,46 +1,41 @@
 import styled from '@emotion/styled';
 import CategoryFilter from '../CategoryFilter/CategoryFilter';
 import { GetArticlesStatisticsNewslettersResponse } from '@/apis/articles';
-import { CategoryType } from '@/constants/category';
 
 type NewsletterCount = GetArticlesStatisticsNewslettersResponse['newsletters'];
 
-interface CategoryFilterWithCountProps {
-  selectedCategory: CategoryType;
-  onCategoryChange: (value: CategoryType) => void;
+interface NewsletterFilterWithCountProps {
+  selectedNewsletter: string;
+  onNewsletterChange: (value: string) => void;
   totalCount: number;
   existNewsletters: NewsletterCount | undefined;
 }
 
-export default function CategoryFilterWithCount({
-  selectedCategory,
-  onCategoryChange,
+export default function NewsletterFilterWithCount({
+  selectedNewsletter,
+  onNewsletterChange,
   totalCount,
   existNewsletters,
-}: CategoryFilterWithCountProps) {
+}: NewsletterFilterWithCountProps) {
   return (
-    <CategoryFilterWrapper>
+    <NewsletterFilterWrapper>
       <CategoryFilter
-        categoryList={[
+        newsLetterList={[
           {
-            value: '전체',
-            label: '전체',
-            quantity: totalCount,
+            newsletter: '전체',
+            count: totalCount,
+            imageUrl: '',
           },
-          ...(existNewsletters?.map(({ newsletter, count }) => ({
-            value: newsletter as CategoryType,
-            label: newsletter ?? '',
-            quantity: count ?? 0,
-          })) ?? []),
+          ...(existNewsletters ?? []),
         ]}
-        selectedValue={selectedCategory}
-        onSelectCategory={onCategoryChange}
+        selectedValue={selectedNewsletter}
+        onSelectNewsletter={onNewsletterChange}
       />
-    </CategoryFilterWrapper>
+    </NewsletterFilterWrapper>
   );
 }
 
-const CategoryFilterWrapper = styled.div`
+const NewsletterFilterWrapper = styled.div`
   width: 100%;
   margin-bottom: 8px;
 `;

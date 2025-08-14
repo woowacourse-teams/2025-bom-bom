@@ -13,7 +13,11 @@ import {
   getBookmarks,
   getBookmarksStatisticsNewsletters,
 } from './bookmark';
-import { getHighlights, GetHighlightsParams } from './highlight';
+import {
+  getHighlights,
+  GetHighlightsParams,
+  getHighlightStatisticsNewsletter,
+} from './highlight';
 import { getReadingStatus, getUserInfo } from './members';
 import { getNewsletters } from './newsLetters';
 
@@ -96,5 +100,11 @@ export const queries = {
     queryOptions({
       queryKey: ['bookmarks', 'statistics', 'newsletters'],
       queryFn: getBookmarksStatisticsNewsletters,
+    }),
+
+  highlightStatisticsNewsletter: () =>
+    queryOptions({
+      queryKey: ['highlights', 'statistics', 'newsletters'],
+      queryFn: getHighlightStatisticsNewsletter,
     }),
 };

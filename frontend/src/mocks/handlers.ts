@@ -185,4 +185,26 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 });
   }),
   ...bookmarkHandlers,
+
+  // 뉴스레터별 하이라이트 통계
+  http.get(`${baseURL}/highlights/statistics/newsletters`, () => {
+    const newsletterStats = {
+      totalCount: 4,
+      newsletters: [
+        {
+          id: 1,
+          name: '뉴닉',
+          imageUrl: 'https://example.com/newneek.png',
+          highlightCount: 1,
+        },
+        {
+          id: 2,
+          name: '디에디트',
+          imageUrl: 'https://example.com/theedit.png',
+          highlightCount: 3,
+        },
+      ],
+    };
+    return HttpResponse.json(newsletterStats);
+  }),
 ];

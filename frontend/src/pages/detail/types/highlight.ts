@@ -10,4 +10,8 @@ export interface HighlightType {
   articleId: number;
   text: string;
   memo: string;
+  newsletterName: string;
+  newsletterImageUrl: string;
+  articleTitle: string;
+  createdAt: string;
 }

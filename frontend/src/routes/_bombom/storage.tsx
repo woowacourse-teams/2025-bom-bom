@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import { useDeviceType } from '@/hooks/useDeviceType';
-import CategoryFilterWithCount from '@/pages/storage/components/CategoryFilterWithCount/CategoryFilterWithCount';
 import MobileStorageContent from '@/pages/storage/components/MobileStorageContent/MobileStorageContent';
+import CategoryFilterWithCount from '@/pages/storage/components/NewsletterFilterWithCount/NewsletterFilterWithCount';
 import PCStorageContent from '@/pages/storage/components/PCStorageContent/PCStorageContent';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import { useStorageFilters } from '@/pages/storage/hooks/useStorageFilters';

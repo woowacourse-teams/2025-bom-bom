@@ -3,6 +3,7 @@ import FloatingActionButton from './FloatingActionButton';
 import { theme } from '@/styles/theme';
 import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import BookmarkIcon from '#/assets/bookmark-inactive.svg';
+import CommentIcon from '#/assets/comment.svg';
 import LinkIcon from '#/assets/link.svg';
 import MemoIcon from '#/assets/memo.svg';
 
@@ -14,10 +15,10 @@ const meta: Meta<typeof FloatingActionButton> = {
     docs: {
       story: {
         inline: false,
-        height: '200px',
+        height: '300px',
       },
       canvas: {
-        height: '200px',
+        height: '300px',
       },
     },
   },
@@ -47,6 +48,11 @@ const StyledLink = styled.button`
   justify-content: center;
 `;
 
+const StyledChat = styled.div`
+  width: 160px;
+  height: 120px;
+`;
+
 export const Default: Story = {
   render: () => (
     <FloatingActionButton
@@ -60,6 +66,16 @@ export const Default: Story = {
         <MemoIcon width={20} height={20} fill={theme.colors.primary} />
         <LinkText>메모</LinkText>
       </StyledLink>
+    </FloatingActionButton>
+  ),
+};
+
+export const Chat: Story = {
+  render: () => (
+    <FloatingActionButton
+      icon={<CommentIcon width={24} height={24} fill="white" />}
+    >
+      <StyledChat />
     </FloatingActionButton>
   ),
 };

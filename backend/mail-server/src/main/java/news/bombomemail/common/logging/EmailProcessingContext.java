@@ -83,15 +83,6 @@ public final class EmailProcessingContext {
     }
     
     /**
-     * 8자리 고유 traceId 생성
-     * 
-     * @return 8자리 알파벳-숫자 조합의 traceId
-     */
-    private static String generateTraceId() {
-        return UUID.randomUUID().toString().substring(0, 8);
-    }
-    
-    /**
      * 람다 스타일의 컨텍스트 관리를 위한 헬퍼
      * 
      * @param emailFile 처리할 이메일 파일
@@ -131,5 +122,14 @@ public final class EmailProcessingContext {
     @FunctionalInterface
     public interface ThrowingRunnable<E extends Exception> {
         void run() throws E;
+    }
+
+    /**
+     * 8자리 고유 traceId 생성
+     *
+     * @return 8자리 알파벳-숫자 조합의 traceId
+     */
+    private static String generateTraceId() {
+        return UUID.randomUUID().toString().substring(0, 8);
     }
 }

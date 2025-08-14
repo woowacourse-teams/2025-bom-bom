@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { ReactNode, useState, useRef } from 'react';
+import { ReactNode, useState } from 'react';
 import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
 
 interface FloatingActionButtonProps {
@@ -12,26 +12,20 @@ const FloatingActionButton = ({
   children,
 }: FloatingActionButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const toggleMenu = () => {
-    setIsOpen(!isOpen);
+    setIsOpen((prev) => !prev);
   };
 
-  const menuRef = useClickOutsideRef<HTMLDivElement>(() => {
-    if (buttonRef.current && buttonRef.current.contains(document.activeElement))
-      return;
-
+  const floatingRef = useClickOutsideRef<HTMLDivElement>(() => {
     setIsOpen(false);
   });
 
   return (
-    <>
-      <FloatingButton ref={buttonRef} onClick={toggleMenu}>
-        {icon}
-      </FloatingButton>
-      {isOpen && <FloatingMenu ref={menuRef}>{children}</FloatingMenu>}
-    </>
+    <div ref={floatingRef}>
+      <FloatingButton onClick={toggleMenu}>{icon}</FloatingButton>
+      {isOpen && <FloatingMenu>{children}</FloatingMenu>}
+    </div>
   );
 };
 

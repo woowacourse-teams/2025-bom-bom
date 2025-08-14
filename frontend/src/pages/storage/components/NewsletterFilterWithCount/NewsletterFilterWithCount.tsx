@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import CategoryFilter from '../CategoryFilter/CategoryFilter';
+import NewsletterFilter from '../NewsletterFilter/NewsletterFilter';
 import { GetArticlesStatisticsNewslettersResponse } from '@/apis/articles';
 
 type NewsletterCount = GetArticlesStatisticsNewslettersResponse['newsletters'];
@@ -19,7 +19,7 @@ export default function NewsletterFilterWithCount({
 }: NewsletterFilterWithCountProps) {
   return (
     <NewsletterFilterWrapper>
-      <CategoryFilter
+      <NewsletterFilter
         newsLetterList={[
           {
             newsletter: '전체',

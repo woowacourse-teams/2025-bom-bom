@@ -1,23 +1,22 @@
 import styled from '@emotion/styled';
 import CategoryFilter from '../CategoryFilter/CategoryFilter';
+import { GetArticlesStatisticsNewslettersResponse } from '@/apis/articles';
 import { CategoryType } from '@/constants/category';
-import { components } from '@/types/openapi';
 
-type CategoryCount =
-  components['schemas']['GetArticleCountPerCategoryResponse'];
+type NewsletterCount = GetArticlesStatisticsNewslettersResponse['newsletters'];
 
 interface CategoryFilterWithCountProps {
   selectedCategory: CategoryType;
   onCategoryChange: (value: CategoryType) => void;
   totalCount: number;
-  existCategories: CategoryCount[] | undefined;
+  existNewsletters: NewsletterCount | undefined;
 }
 
 export default function CategoryFilterWithCount({
   selectedCategory,
   onCategoryChange,
   totalCount,
-  existCategories,
+  existNewsletters,
 }: CategoryFilterWithCountProps) {
   return (
     <CategoryFilterWrapper>
@@ -28,9 +27,9 @@ export default function CategoryFilterWithCount({
             label: '전체',
             quantity: totalCount,
           },
-          ...(existCategories?.map(({ category, count }) => ({
-            value: category as CategoryType,
-            label: category ?? '',
+          ...(existNewsletters?.map(({ newsletter, count }) => ({
+            value: newsletter as CategoryType,
+            label: newsletter ?? '',
             quantity: count ?? 0,
           })) ?? []),
         ]}

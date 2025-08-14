@@ -20,9 +20,7 @@ export const useStorageFilters = () => {
   };
 
   const { data: categoryCounts } = useQuery(
-    queries.statisticsCategories({
-      keyword: debouncedSearchInput,
-    }),
+    queries.articlesStatisticsNewsletters(),
   );
 
   const handleCategoryChange = (value: CategoryType) => {
@@ -37,9 +35,7 @@ export const useStorageFilters = () => {
     setSearchInput(e.target.value);
   };
 
-  const existCategories = categoryCounts?.categories?.filter(
-    (category) => category.count !== 0,
-  );
+  const existNewsletters = categoryCounts?.newsletters;
 
   return {
     selectedCategory,
@@ -48,7 +44,7 @@ export const useStorageFilters = () => {
     debouncedSearchInput,
     baseQueryParams,
     categoryCounts,
-    existCategories,
+    existNewsletters,
     handleCategoryChange,
     handleSortChange,
     handleSearchChange,

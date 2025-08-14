@@ -40,22 +40,6 @@ export const patchArticleRead = async ({ id }: PatchArticleReadParams) => {
   });
 };
 
-export type GetStatisticsCategoriesParams = Omit<
-  operations['getArticleCategoryStatistics']['parameters']['query'],
-  'member'
->;
-export type GetStatisticsCategoriesResponse =
-  components['schemas']['GetArticleCategoryStatisticsResponse'];
-
-export const getStatisticsCategories = async (
-  params: GetStatisticsCategoriesParams,
-) => {
-  return await fetcher.get<GetStatisticsCategoriesResponse>({
-    path: '/articles/statistics/categories',
-    query: { ...params },
-  });
-};
-
 export type GetArticlesStatisticsNewslettersResponse = {
   totalCount: number;
   newsletters: {

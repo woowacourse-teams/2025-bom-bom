@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { Article } from '@/types/article';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
+import { Article } from '@/types/articles';
 
 interface ArticleListProps {
   articles: Article[];

@@ -70,7 +70,7 @@ public class BookmarkController implements BookmarkControllerApi {
 
     @Override
     @GetMapping("/statistics/newsletters")
-    public GetBookmarkNewsletterStatisticsResponse getBookmarkNewsletterStatistics(@LoginMember Member member){
+    public GetBookmarkNewsletterStatisticsResponse getBookmarkNewsletterStatistics(@LoginMember Member member) {
         return bookmarkService.getBookmarkNewsletterStatistics(member);
     }
 }

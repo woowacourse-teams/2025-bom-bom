@@ -2,24 +2,22 @@ package me.bombom.api.v1.bookmark.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.article.dto.GetArticleCountPerNewsletterResponse;
-import me.bombom.api.v1.article.dto.GetArticleNewsletterStatisticsResponse;
+import me.bombom.api.v1.article.domain.Article;
+import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkResponse;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkStatusResponse;
 import me.bombom.api.v1.bookmark.dto.response.GetBookmarkCountPerNewsletterResponse;
 import me.bombom.api.v1.bookmark.dto.response.GetBookmarkNewsletterStatisticsResponse;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
-import me.bombom.api.v1.article.domain.Article;
-import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import me.bombom.api.v1.common.exception.CIllegalArgumentException;
-import me.bombom.api.v1.common.exception.ErrorDetail;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +39,7 @@ public class BookmarkService {
     @Transactional
     public void addBookmark(Long memberId, Long articleId) {
         Article article = articleRepository.findById(articleId)
-            .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
         validateArticleOwner(memberId, article);
         if (bookmarkRepository.existsByMemberIdAndArticleId(memberId, articleId)) {
             return;
@@ -73,7 +71,8 @@ public class BookmarkService {
         List<GetBookmarkCountPerNewsletterResponse> countResponse = newsletterRepository.findAll()
                 .stream()
                 .map(newsletter -> {
-                    int count = bookmarkRepository.countAllByMemberIdAndNewsletterId(member.getId(), newsletter.getId());
+                    int count = bookmarkRepository.countAllByMemberIdAndNewsletterId(member.getId(),
+                            newsletter.getId());
                     return GetBookmarkCountPerNewsletterResponse.of(newsletter, count);
                 })
                 .filter(response -> response.count() > 0)

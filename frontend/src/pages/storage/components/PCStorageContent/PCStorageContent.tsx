@@ -37,7 +37,11 @@ export default function PCStorageContent({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [baseQueryParams.keyword, baseQueryParams.category, baseQueryParams.sort]);
+  }, [
+    baseQueryParams.keyword,
+    baseQueryParams.newsletter,
+    baseQueryParams.sort,
+  ]);
 
   const articleList = articles?.content || [];
   const totalElements = articles?.totalElements;

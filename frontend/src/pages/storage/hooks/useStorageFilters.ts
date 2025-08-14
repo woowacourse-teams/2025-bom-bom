@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useCallback, useState } from 'react';
 import { GetArticlesParams } from '@/apis/articles';
 import { queries } from '@/apis/queries';
 import { CategoryType } from '@/constants/category';
@@ -25,17 +25,17 @@ export const useStorageFilters = () => {
     }),
   );
 
-  const handleCategoryChange = (value: CategoryType) => {
+  const handleCategoryChange = useCallback((value: CategoryType) => {
     setSelectedCategory(value);
-  };
+  }, []);
 
-  const handleSortChange = (value: 'DESC' | 'ASC') => {
+  const handleSortChange = useCallback((value: 'DESC' | 'ASC') => {
     setSortFilter(value);
-  };
+  }, []);
 
-  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
-  };
+  }, []);
 
   const existCategories = categoryCounts?.categories?.filter(
     (category) => category.count !== 0,

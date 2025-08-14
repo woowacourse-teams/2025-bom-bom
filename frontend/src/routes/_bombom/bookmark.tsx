@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
-import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import { useStorageFilters } from '@/pages/storage/hooks/useStorageFilters';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';

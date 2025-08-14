@@ -15,14 +15,14 @@ const QuickMenu = () => {
       <FloatingActionButton
         icon={<LinkIcon width={24} height={24} fill={theme.colors.white} />}
       >
-        <ButtonWrapper>
+        <StyledLink to="/bookmark">
           <StyledBookmarkIcon />
-          <LinkButton to={'/bookmark'}>북마크</LinkButton>
-        </ButtonWrapper>
-        <ButtonWrapper>
+          <LinkText>북마크</LinkText>
+        </StyledLink>
+        <StyledLink to="/memo">
           <MemoIcon width={20} height={20} fill={theme.colors.primary} />
-          <LinkButton to={'/memo'}>메모</LinkButton>
-        </ButtonWrapper>
+          <LinkText>메모</LinkText>
+        </StyledLink>
       </FloatingActionButton>
     );
   }
@@ -36,14 +36,14 @@ const QuickMenu = () => {
         <Title>바로 가기</Title>
       </TitleWrapper>
       <ButtonContainer>
-        <ButtonWrapper>
+        <StyledLink to="/bookmark">
           <StyledBookmarkIcon />
-          <LinkButton to={'/bookmark'}>북마크</LinkButton>
-        </ButtonWrapper>
-        <ButtonWrapper>
+          <LinkText>북마크</LinkText>
+        </StyledLink>
+        <StyledLink to="/memo">
           <MemoIcon width={20} height={20} fill={theme.colors.primary} />
-          <LinkButton to={'/memo'}>메모</LinkButton>
-        </ButtonWrapper>
+          <LinkText>메모</LinkText>
+        </StyledLink>
       </ButtonContainer>
     </Container>
   );
@@ -91,15 +91,6 @@ const Title = styled.h3`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const ButtonWrapper = styled.div`
-  padding: 8px;
-  border-radius: 8px;
-
-  display: flex;
-  gap: 4px;
-  align-items: center;
-`;
-
 const StyledBookmarkIcon = styled(BookmarkIcon)`
   width: 20px;
   height: 20px;
@@ -107,12 +98,23 @@ const StyledBookmarkIcon = styled(BookmarkIcon)`
   color: ${({ theme }) => theme.colors.primary};
 `;
 
-const LinkButton = styled(Link)`
+const LinkText = styled.span`
   font: ${({ theme }) => theme.fonts.body1};
+`;
+
+const StyledLink = styled(Link)`
+  padding: 8px;
+  border-radius: 8px;
+
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
 `;
 
 const ButtonContainer = styled.div`
   display: flex;
   gap: 16px;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
 `;

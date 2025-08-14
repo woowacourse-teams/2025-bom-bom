@@ -15,7 +15,7 @@ export const Route = createFileRoute('/_bombom/storage')({
 
 function Storage() {
   const deviceType = useDeviceType();
-  const isPc = deviceType === 'pc';
+  const isPC = deviceType === 'pc';
 
   const {
     selectedNewsletter,
@@ -56,7 +56,7 @@ function Storage() {
             <QuickMenu />
           </SidebarSection>
           <MainContentSection>
-            {isPc ? (
+            {isPC ? (
               <PCStorageContent
                 baseQueryParams={baseQueryParams}
                 searchInput={searchInput}

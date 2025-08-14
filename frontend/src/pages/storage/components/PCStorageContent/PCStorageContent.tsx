@@ -43,14 +43,12 @@ export default function PCStorageContent({
     baseQueryParams.sort,
   ]);
 
-  const articleList = articles?.content || [];
   const totalElements = articles?.totalElements;
+  const articleList = articles?.content || [];
   const isLoadingOrHaveContent = isLoading || articleList.length > 0;
 
-  if (!isLoadingOrHaveContent) {
+  if (!isLoadingOrHaveContent && searchInput === '')
     return <EmptyLetterCard title="보관된 뉴스레터가 없어요" />;
-  }
-
   return (
     <>
       <SearchAndSort

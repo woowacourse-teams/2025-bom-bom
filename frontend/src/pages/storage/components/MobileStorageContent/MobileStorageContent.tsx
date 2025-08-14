@@ -48,9 +48,11 @@ export default function MobileStorageContent({
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const articleList =
-    infiniteArticles?.pages?.flatMap((page) => page?.content || []) || [];
-  const totalElements = infiniteArticles?.pages?.[0]?.totalElements;
+  const infiniteArticlesPages = infiniteArticles?.pages || [];
+  const articleList = infiniteArticlesPages.flatMap(
+    (page) => page?.content || [],
+  );
+  const totalElements = infiniteArticlesPages[0]?.totalElements;
   const isLoadingOrHaveContent = isInfiniteLoading || articleList.length > 0;
 
   if (!isLoadingOrHaveContent) {

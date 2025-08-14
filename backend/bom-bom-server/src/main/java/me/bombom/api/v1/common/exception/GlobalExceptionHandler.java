@@ -15,9 +15,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CIllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(CIllegalArgumentException e){
         if (!e.getContext().isEmpty()) {
-            log.error("IllegalArgumentException: {} - Context: {}", e.getMessage(), e.getContext(), e);
+            log.info("IllegalArgumentException: {} - Context: {}", e.getMessage(), e.getContext(), e);
         } else {
-            log.error("IllegalArgumentException: ", e);
+            log.info("IllegalArgumentException: ", e);
         }
         return ResponseEntity.status(e.getHttpStatus())
                 .body(ErrorResponse.from(e.getErrorDetail()));
@@ -26,9 +26,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException e){
         if (!e.getContext().isEmpty()) {
-            log.error("UnauthorizedException: {} - Context: {}", e.getMessage(), e.getContext(), e);
+            log.warn("UnauthorizedException: {} - Context: {}", e.getMessage(), e.getContext(), e);
         } else {
-            log.error("UnauthorizedException: ", e);
+            log.warn("UnauthorizedException: ", e);
         }
         return ResponseEntity.status(e.getHttpStatus())
                 .body(ErrorResponse.from(e.getErrorDetail()));
@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e){
-        log.error("Validation failed: ", e);
+        log.info("Validation failed: ", e);
         return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION.getStatus())
                 .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION));
     }
@@ -54,14 +54,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResourceFoundException(NoResourceFoundException e) {
-        log.error("No resource found: ", e);
+        log.warn("No resource found: ", e);
         return ResponseEntity.status(ErrorDetail.ENTITY_NOT_FOUND.getStatus())
                 .body(ErrorResponse.from(ErrorDetail.ENTITY_NOT_FOUND));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleNotReadable(HttpMessageNotReadableException e) {
-        log.warn("Request body parse error: ", e);
+        log.info("Request body parse error: ", e);
         return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION.getStatus())
                  .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION));
     }

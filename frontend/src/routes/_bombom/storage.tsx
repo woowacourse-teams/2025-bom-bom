@@ -18,13 +18,13 @@ function Storage() {
   const isPc = deviceType === 'pc';
 
   const {
-    selectedCategory,
+    selectedNewsletter,
     sortFilter,
     searchInput,
     baseQueryParams,
     categoryCounts,
     existNewsletters,
-    handleCategoryChange,
+    handleNewsletterChange,
     handleSortChange,
     handleSearchChange,
   } = useStorageFilters();
@@ -42,8 +42,8 @@ function Storage() {
         <ContentWrapper>
           <SidebarSection>
             <CategoryFilterWithCount
-              selectedCategory={selectedCategory}
-              onCategoryChange={handleCategoryChange}
+              selectedNewsletter={selectedNewsletter}
+              onNewsletterChange={handleNewsletterChange}
               totalCount={categoryCounts?.totalCount ?? 0}
               existNewsletters={existNewsletters}
             />

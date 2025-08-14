@@ -2,19 +2,17 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { GetArticlesParams } from '@/apis/articles';
 import { queries } from '@/apis/queries';
-import { CategoryType } from '@/constants/category';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 export const useStorageFilters = () => {
-  const [selectedCategory, setSelectedCategory] =
-    useState<CategoryType>('전체');
+  const [selectedNewsletter, setSelectedNewsletter] = useState('전체');
   const [sortFilter, setSortFilter] = useState<'DESC' | 'ASC'>('DESC');
   const [searchInput, setSearchInput] = useState('');
   const debouncedSearchInput = useDebouncedValue(searchInput, 500);
 
   const baseQueryParams: GetArticlesParams = {
     sort: `arrivedDateTime,${sortFilter}`,
-    category: selectedCategory === '전체' ? undefined : selectedCategory,
+    category: selectedNewsletter === '전체' ? undefined : selectedNewsletter,
     keyword: debouncedSearchInput,
     size: 6,
   };
@@ -23,8 +21,8 @@ export const useStorageFilters = () => {
     queries.articlesStatisticsNewsletters(),
   );
 
-  const handleCategoryChange = (value: CategoryType) => {
-    setSelectedCategory(value);
+  const handleNewsletterChange = (value: string) => {
+    setSelectedNewsletter(value);
   };
 
   const handleSortChange = (value: 'DESC' | 'ASC') => {
@@ -35,17 +33,19 @@ export const useStorageFilters = () => {
     setSearchInput(e.target.value);
   };
 
-  const existNewsletters = categoryCounts?.newsletters;
+  const existNewsletters = categoryCounts?.newsletters.filter(
+    (newsletter) => newsletter.count > 0,
+  );
 
   return {
-    selectedCategory,
+    selectedNewsletter,
     sortFilter,
     searchInput,
     debouncedSearchInput,
     baseQueryParams,
     categoryCounts,
     existNewsletters,
-    handleCategoryChange,
+    handleNewsletterChange,
     handleSortChange,
     handleSearchChange,
   };

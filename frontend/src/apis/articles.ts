@@ -40,13 +40,8 @@ export const patchArticleRead = async ({ id }: PatchArticleReadParams) => {
   });
 };
 
-export type GetArticlesStatisticsNewslettersResponse = {
-  totalCount: number;
-  newsletters: {
-    newsletter: string;
-    count: number;
-  }[];
-};
+export type GetArticlesStatisticsNewslettersResponse =
+  components['schemas']['GetArticleNewsletterStatisticsResponse'];
 
 export const getArticlesStatisticsNewsletters = async () => {
   return await fetcher.get<GetArticlesStatisticsNewslettersResponse>({

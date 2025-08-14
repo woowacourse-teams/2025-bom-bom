@@ -54,9 +54,9 @@ function BookmarkPage() {
           </SidebarSection>
 
           <MainContentSection deviceType={deviceType}>
-            {articles.content?.length && articles.content?.length > 0 ? (
+            {articles.content && articles.content?.length > 0 ? (
               <ArticleList>
-                {articles.content?.map((article) => (
+                {articles.content.map((article) => (
                   <li key={article.articleId}>
                     <ArticleCard data={article} readVariant="badge" />
                   </li>

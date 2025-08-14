@@ -340,7 +340,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/api/v1/articles/statistics/categories': {
+  '/api/v1/articles/statistics/newsletters': {
     parameters: {
       query?: never;
       header?: never;
@@ -348,10 +348,10 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * 카테고리별 아티클 개수 조회
-     * @description 카테고리별 아티클 개수 정보를 조회합니다. 키워드 검색 시 해당 키워드가 제목에 포함된 아티클만 대상으로 합니다.
+     * 뉴스레터별 아티클 개수 조회
+     * @description 뉴스레터별 아티클 개수 정보를 조회합니다. 키워드 검색 시 해당 키워드가 제목에 포함된 아티클만 대상으로 합니다.
      */
-    get: operations['getArticleCategoryStatistics'];
+    get: operations['getArticleNewsletterStatistics'];
     put?: never;
     post?: never;
     delete?: never;
@@ -384,22 +384,41 @@ export interface components {
       endOffset: number;
       endXPath: string;
     };
+    /** @description 하이라이트 위치 정보 */
     HighlightLocationResponse: {
-      /** Format: int32 */
-      startOffset?: number;
-      startXPath?: string;
-      /** Format: int32 */
-      endOffset?: number;
-      endXPath?: string;
+      /**
+       * Format: int32
+       * @description 시작 오프셋
+       */
+      startOffset: number;
+      /** @description 시작 XPath */
+      startXPath: string;
+      /**
+       * Format: int32
+       * @description 끝 오프셋
+       */
+      endOffset: number;
+      /** @description 끝 XPath */
+      endXPath: string;
     };
     HighlightResponse: {
-      /** Format: int64 */
-      id?: number;
-      location?: components['schemas']['HighlightLocationResponse'];
-      /** Format: int64 */
-      articleId?: number;
-      color?: string;
-      text?: string;
+      /**
+       * Format: int64
+       * @description 하이라이트 ID
+       */
+      id: number;
+      /** @description 하이라이트 위치 정보 */
+      location: components['schemas']['HighlightLocationResponse'];
+      /**
+       * Format: int64
+       * @description 아티클 ID
+       */
+      articleId: number;
+      /** @description 하이라이트 색상 */
+      color: string;
+      /** @description 하이라이트된 텍스트 */
+      text: string;
+      /** @description 메모 */
       memo?: string;
     };
     /** @description 회원가입 요청 데이터 */
@@ -418,10 +437,16 @@ export interface components {
       weeklyGoalCount: number;
     };
     WeeklyGoalCountResponse: {
-      /** Format: int64 */
-      weeklyReadingId?: number;
-      /** Format: int32 */
-      weeklyGoalCount?: number;
+      /**
+       * Format: int64
+       * @description 주간 읽기 ID
+       */
+      weeklyReadingId: number;
+      /**
+       * Format: int32
+       * @description 주간 목표 읽기 수
+       */
+      weeklyGoalCount: number;
     };
     UpdateHighlightRequest: {
       /**
@@ -432,47 +457,90 @@ export interface components {
       memo?: string;
     };
     NewsletterResponse: {
-      /** Format: int64 */
-      newsletterId?: number;
-      name?: string;
+      /**
+       * Format: int64
+       * @description 뉴스레터 ID
+       */
+      newsletterId: number;
+      /** @description 뉴스레터명 */
+      name: string;
+      /** @description 이미지 URL */
       imageUrl?: string;
-      description?: string;
-      subscribeUrl?: string;
-      category?: string;
+      /** @description 설명 */
+      description: string;
+      /** @description 구독 URL */
+      subscribeUrl: string;
+      /** @description 카테고리 */
+      category: string;
     };
     MemberProfileResponse: {
-      /** Format: int64 */
-      id?: number;
-      email?: string;
-      nickname?: string;
+      /**
+       * Format: int64
+       * @description 회원 ID
+       */
+      id: number;
+      /** @description 이메일 */
+      email: string;
+      /** @description 닉네임 */
+      nickname: string;
+      /** @description 프로필 이미지 URL */
       profileImageUrl?: string;
     };
     ReadingInformationResponse: {
-      /** Format: int32 */
-      streakReadDay?: number;
-      today?: components['schemas']['TodayReadingResponse'];
-      weekly?: components['schemas']['WeeklyReadingResponse'];
+      /**
+       * Format: int32
+       * @description 연속 읽기 일수
+       */
+      streakReadDay: number;
+      /** @description 오늘 읽기 정보 */
+      today: components['schemas']['TodayReadingResponse'];
+      /** @description 주간 읽기 정보 */
+      weekly: components['schemas']['WeeklyReadingResponse'];
     };
+    /** @description 오늘 읽기 정보 */
     TodayReadingResponse: {
-      /** Format: int32 */
-      readCount?: number;
-      /** Format: int32 */
-      totalCount?: number;
+      /**
+       * Format: int32
+       * @description 읽은 아티클 수
+       */
+      readCount: number;
+      /**
+       * Format: int32
+       * @description 전체 아티클 수
+       */
+      totalCount: number;
     };
+    /** @description 주간 읽기 정보 */
     WeeklyReadingResponse: {
-      /** Format: int32 */
-      readCount?: number;
-      /** Format: int32 */
-      goalCount?: number;
+      /**
+       * Format: int32
+       * @description 읽은 아티클 수
+       */
+      readCount: number;
+      /**
+       * Format: int32
+       * @description 목표 읽기 수
+       */
+      goalCount: number;
     };
     PetResponse: {
-      /** Format: int32 */
-      level?: number;
-      /** Format: int32 */
-      currentStageScore?: number;
-      /** Format: int32 */
-      requiredStageScore?: number;
-      isAttended?: boolean;
+      /**
+       * Format: int32
+       * @description 펫 레벨
+       */
+      level: number;
+      /**
+       * Format: int32
+       * @description 현재 스테이지 점수
+       */
+      currentStageScore: number;
+      /**
+       * Format: int32
+       * @description 필요한 스테이지 점수
+       */
+      requiredStageScore: number;
+      /** @description 출석 여부 */
+      isAttended: boolean;
     };
     Pageable: {
       /** Format: int32 */
@@ -482,24 +550,45 @@ export interface components {
       sort?: string[];
     };
     BookmarkResponse: {
-      /** Format: int64 */
-      id?: number;
-      /** Format: int64 */
-      articleId?: number;
-      title?: string;
-      contentsSummary?: string;
-      /** Format: date-time */
-      arrivedDateTime?: string;
+      /**
+       * Format: int64
+       * @description 북마크 ID
+       */
+      id: number;
+      /**
+       * Format: int64
+       * @description 아티클 ID
+       */
+      articleId: number;
+      /** @description 아티클 제목 */
+      title: string;
+      /** @description 아티클 내용 요약 */
+      contentsSummary: string;
+      /**
+       * Format: date-time
+       * @description 도착 시간
+       */
+      arrivedDateTime: string;
+      /** @description 썸네일 URL */
       thumbnailUrl?: string;
-      /** Format: int32 */
-      expectedReadTime?: number;
-      isRead?: boolean;
-      newsletter?: components['schemas']['NewsletterSummaryResponse'];
+      /**
+       * Format: int32
+       * @description 예상 읽기 시간(분)
+       */
+      expectedReadTime: number;
+      /** @description 읽음 여부 */
+      isRead: boolean;
+      /** @description 뉴스레터 정보 */
+      newsletter: components['schemas']['NewsletterSummaryResponse'];
     };
+    /** @description 뉴스레터 정보 */
     NewsletterSummaryResponse: {
-      name?: string;
+      /** @description 뉴스레터명 */
+      name: string;
+      /** @description 이미지 URL */
       imageUrl?: string;
-      category?: string;
+      /** @description 카테고리 */
+      category: string;
     };
     PageBookmarkResponse: {
       /** Format: int64 */
@@ -536,26 +625,41 @@ export interface components {
       unsorted?: boolean;
     };
     BookmarkStatusResponse: {
-      bookmarkStatus?: boolean;
+      /** @description 북마크 상태 */
+      bookmarkStatus: boolean;
     };
     GetArticlesOptions: {
       /** Format: date */
       date?: string;
-      category?: string;
+      newsletter?: string;
       keyword?: string;
     };
     ArticleResponse: {
-      /** Format: int64 */
-      articleId?: number;
-      title?: string;
-      contentsSummary?: string;
-      /** Format: date-time */
-      arrivedDateTime?: string;
+      /**
+       * Format: int64
+       * @description 아티클 ID
+       */
+      articleId: number;
+      /** @description 아티클 제목 */
+      title: string;
+      /** @description 아티클 내용 요약 */
+      contentsSummary: string;
+      /**
+       * Format: date-time
+       * @description 도착 시간
+       */
+      arrivedDateTime: string;
+      /** @description 썸네일 URL */
       thumbnailUrl?: string;
-      /** Format: int32 */
-      expectedReadTime?: number;
-      isRead?: boolean;
-      newsletter?: components['schemas']['NewsletterSummaryResponse'];
+      /**
+       * Format: int32
+       * @description 예상 읽기 시간(분)
+       */
+      expectedReadTime: number;
+      /** @description 읽음 여부 */
+      isRead: boolean;
+      /** @description 뉴스레터 정보 */
+      newsletter: components['schemas']['NewsletterSummaryResponse'];
     };
     PageArticleResponse: {
       /** Format: int64 */
@@ -576,30 +680,56 @@ export interface components {
       empty?: boolean;
     };
     ArticleDetailResponse: {
-      title?: string;
-      contents?: string;
-      /** Format: date-time */
-      arrivedDateTime?: string;
-      /** Format: int32 */
-      expectedReadTime?: number;
-      isRead?: boolean;
-      newsletter?: components['schemas']['NewsletterBasicResponse'];
+      /** @description 아티클 제목 */
+      title: string;
+      /** @description 아티클 내용 */
+      contents: string;
+      /**
+       * Format: date-time
+       * @description 도착 시간
+       */
+      arrivedDateTime: string;
+      /**
+       * Format: int32
+       * @description 예상 읽기 시간(분)
+       */
+      expectedReadTime: number;
+      /** @description 읽음 여부 */
+      isRead: boolean;
+      /** @description 뉴스레터 정보 */
+      newsletter: components['schemas']['NewsletterBasicResponse'];
     };
+    /** @description 뉴스레터 정보 */
     NewsletterBasicResponse: {
-      name?: string;
-      email?: string;
+      /** @description 뉴스레터명 */
+      name: string;
+      /** @description 이메일 */
+      email: string;
+      /** @description 이미지 URL */
       imageUrl?: string;
-      category?: string;
+      /** @description 카테고리 */
+      category: string;
     };
-    GetArticleCategoryStatisticsResponse: {
-      /** Format: int32 */
-      totalCount?: number;
-      categories?: components['schemas']['GetArticleCountPerCategoryResponse'][];
+    /** @description 뉴스레터별 통계 */
+    GetArticleCountPerNewsletterResponse: {
+      /** @description 뉴스레터명 */
+      newsletter: string;
+      /** @description 이미지 url */
+      imageUrl: string;
+      /**
+       * Format: int64
+       * @description 아티클 수
+       */
+      count: number;
     };
-    GetArticleCountPerCategoryResponse: {
-      category?: string;
-      /** Format: int64 */
-      count?: number;
+    GetArticleNewsletterStatisticsResponse: {
+      /**
+       * Format: int32
+       * @description 전체 아티클 수
+       */
+      totalCount: number;
+      /** @description 뉴스레터별 통계 */
+      newsletters: components['schemas']['GetArticleCountPerNewsletterResponse'][];
     };
   };
   responses: never;
@@ -1249,7 +1379,7 @@ export interface operations {
       };
     };
   };
-  getArticleCategoryStatistics: {
+  getArticleNewsletterStatistics: {
     parameters: {
       query?: {
         /** @description 검색 키워드 (선택) */
@@ -1261,13 +1391,13 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description 카테고리별 개수 조회 성공 */
+      /** @description 뉴스레터별 개수 조회 성공 */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          '*/*': components['schemas']['GetArticleCategoryStatisticsResponse'];
+          '*/*': components['schemas']['GetArticleNewsletterStatisticsResponse'];
         };
       };
     };

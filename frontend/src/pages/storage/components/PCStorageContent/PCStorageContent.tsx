@@ -24,12 +24,12 @@ export default function PCStorageContent({
 }: PCStorageContentProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: articles, isLoading } = useQuery({
-    ...queries.articles({
+  const { data: articles, isLoading } = useQuery(
+    queries.articles({
       ...baseQueryParams,
       page: currentPage - 1,
     }),
-  });
+  );
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

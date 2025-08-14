@@ -9,7 +9,6 @@ import { theme } from '@/styles/theme';
 import type { CSSObject, Theme } from '@emotion/react';
 import GoalIcon from '#/assets/goal.svg';
 import StatusIcon from '#/assets/reading-status.svg';
-import StreakIcon from '#/assets/streak.svg';
 
 function ReadingStatusCard() {
   const deviceType = useDeviceType();
@@ -37,78 +36,34 @@ function ReadingStatusCard() {
         </TitleWrapper>
       )}
 
-      {deviceType === 'pc' ? (
-        <>
-          <StreakWrapper deviceType={deviceType}>
-            <StreakIconWrapper>
-              <StreakIcon
-                width={34}
-                height={34}
-                fill={theme.colors.white}
-                color={theme.colors.primary}
-              />
-            </StreakIconWrapper>
-            <StreakDay>{`${streakReadDay}일`}</StreakDay>
-            <StreakDescription deviceType={deviceType}>
-              연속 읽기 중!🔥
-            </StreakDescription>
-            <StreakHelperText>Great Job!</StreakHelperText>
-          </StreakWrapper>
+      <StreakWrapper deviceType={deviceType}>
+        <StreakCounter streakReadDay={streakReadDay} />
+        <StreakDescription deviceType={deviceType}>
+          연속 읽기 중!
+        </StreakDescription>
+      </StreakWrapper>
 
-          <ProgressWithLabel
-            label="오늘의 진행률"
-            Icon={GoalIcon}
-            value={{
-              currentCount: today.readCount,
-              totalCount: today.totalCount,
-            }}
-            {...(deviceType === 'pc'
-              ? { description: todayProgressDescription }
-              : {})}
-          />
-          <ProgressWithLabel
-            label="주간 목표"
-            Icon={GoalIcon}
-            value={{
-              currentCount: weekly.readCount,
-              totalCount: weekly.goalCount,
-            }}
-            {...(deviceType === 'pc'
-              ? { description: weeklyGoalDescription }
-              : {})}
-            rateFormat="ratio"
-          />
-        </>
-      ) : (
-        <StatisticWrapper>
-          <StreakWrapper deviceType={deviceType}>
-            <StreakCounter streakReadDay={streakReadDay} />
-            <StreakDescription deviceType={deviceType}>
-              연속 읽기 중!
-            </StreakDescription>
-          </StreakWrapper>
-
-          <GoalWrapper>
-            <ProgressWithLabel
-              label="오늘의 진행률"
-              value={{
-                currentCount: today.readCount,
-                totalCount: today.totalCount,
-              }}
-              showGraph={false}
-            />
-            <ProgressWithLabel
-              label="주간 목표"
-              value={{
-                currentCount: weekly.readCount,
-                totalCount: weekly.goalCount,
-              }}
-              rateFormat="ratio"
-              showGraph={false}
-            />
-          </GoalWrapper>
-        </StatisticWrapper>
-      )}
+      <ProgressWithLabel
+        label="오늘의 진행률"
+        value={{
+          currentCount: today.readCount,
+          totalCount: today.totalCount,
+        }}
+        {...(deviceType === 'pc'
+          ? { Icon: GoalIcon, description: todayProgressDescription }
+          : { showGraph: false })}
+      />
+      <ProgressWithLabel
+        label="주간 목표"
+        value={{
+          currentCount: weekly.readCount,
+          totalCount: weekly.goalCount,
+        }}
+        rateFormat="ratio"
+        {...(deviceType === 'pc'
+          ? { Icon: GoalIcon, description: weeklyGoalDescription }
+          : { showGraph: false })}
+      />
     </Container>
   );
 }
@@ -122,6 +77,7 @@ const Container = styled.section<{ deviceType: DeviceType }>`
   display: flex;
   gap: 26px;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
 
   ${({ deviceType, theme }) => containerStyles[deviceType](theme)}
@@ -162,25 +118,6 @@ const StreakWrapper = styled.div<{ deviceType: DeviceType }>`
   justify-content: center;
 `;
 
-const StreakIconWrapper = styled.div`
-  width: 70px;
-  height: 70px;
-  padding: 18px;
-  border-radius: 36px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background-color: ${({ theme }) => theme.colors.primaryLight};
-`;
-
-const StreakDay = styled.p`
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font-size: 28px;
-  text-align: center;
-`;
-
 const StreakDescription = styled.p<{ deviceType: DeviceType }>`
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ deviceType, theme }) =>
@@ -188,52 +125,21 @@ const StreakDescription = styled.p<{ deviceType: DeviceType }>`
   text-align: center;
 `;
 
-const StreakHelperText = styled.div`
-  padding: 4px 8px;
-  border-radius: 8px;
-
-  background-color: ${({ theme }) => theme.colors.primary};
-  color: ${({ theme }) => theme.colors.white};
-  font: ${({ theme }) => theme.fonts.body2};
-  text-align: center;
-`;
-
-const StatisticWrapper = styled.div`
-  width: 100%;
-
-  display: flex;
-  gap: 16px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-`;
-
-const GoalWrapper = styled.div`
-  width: 100%;
-
-  display: flex;
-  gap: 12px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  text-align: center;
-`;
-
 const containerStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {
   pc: (theme) => ({
     padding: '34px 30px',
-    alignItems: 'center',
     backgroundColor: theme.colors.white,
     border: `1px solid ${theme.colors.white}`,
     boxShadow: '0 25px 50px -12px rgb(0 0 0 / 15%)',
   }),
   tablet: () => ({
+    height: '200px',
     flex: '1',
-    alignItems: 'flex-start',
+    gap: '12px',
   }),
   mobile: () => ({
+    height: '200px',
     flex: '1',
-    alignItems: 'flex-start',
+    gap: '12px',
   }),
 };

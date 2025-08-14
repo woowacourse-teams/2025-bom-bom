@@ -17,11 +17,11 @@ const QuickMenu = () => {
       >
         <StyledLink to="/bookmark">
           <StyledBookmarkIcon />
-          <LinkButton to="/bookmark">북마크</LinkButton>
+          <LinkText>북마크</LinkText>
         </StyledLink>
         <StyledLink to="/memo">
           <MemoIcon width={20} height={20} fill={theme.colors.primary} />
-          <LinkButton to="/memo">메모</LinkButton>
+          <LinkText>메모</LinkText>
         </StyledLink>
       </FloatingActionButton>
     );
@@ -38,11 +38,11 @@ const QuickMenu = () => {
       <ButtonContainer>
         <StyledLink to="/bookmark">
           <StyledBookmarkIcon />
-          <LinkButton to="/bookmark">북마크</LinkButton>
+          <LinkText>북마크</LinkText>
         </StyledLink>
         <StyledLink to="/memo">
           <MemoIcon width={20} height={20} fill={theme.colors.primary} />
-          <LinkButton to="/memo">메모</LinkButton>
+          <LinkText>메모</LinkText>
         </StyledLink>
       </ButtonContainer>
     </Container>
@@ -98,7 +98,7 @@ const StyledBookmarkIcon = styled(BookmarkIcon)`
   color: ${({ theme }) => theme.colors.primary};
 `;
 
-const LinkButton = styled(Link)`
+const LinkText = styled.span`
   font: ${({ theme }) => theme.fonts.body1};
 `;
 

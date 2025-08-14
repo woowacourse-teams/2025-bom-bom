@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { GetArticlesParams } from '@/apis/articles';
 import { queries } from '@/apis/queries';
 import { CategoryType } from '@/constants/category';
@@ -33,7 +33,7 @@ export const useStorageFilters = () => {
     setSortFilter(value);
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
   };
 

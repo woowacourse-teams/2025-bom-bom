@@ -65,9 +65,21 @@ export const handlers = [
     return HttpResponse.json({
       totalCount: ARTICLES.length,
       newsletters: [
-        { newsletter: '테크뉴스', count: 5 },
-        { newsletter: '개발자뉴스', count: 3 },
-        { newsletter: 'AI뉴스', count: 2 },
+        {
+          newsletter: '테크뉴스',
+          count: 5,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+        {
+          newsletter: '개발자뉴스',
+          count: 3,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+        {
+          newsletter: 'AI뉴스',
+          count: 2,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
       ],
     });
   }),
@@ -77,10 +89,26 @@ export const handlers = [
     return HttpResponse.json({
       totalCount: 8,
       newsletters: [
-        { newsletter: '테크뉴스', count: 3 },
-        { newsletter: '개발자뉴스', count: 2 },
-        { newsletter: 'AI뉴스', count: 1 },
-        { newsletter: '스타트업뉴스', count: 2 },
+        {
+          newsletter: '테크뉴스',
+          count: 3,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+        {
+          newsletter: '개발자뉴스',
+          count: 2,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+        {
+          newsletter: 'AI뉴스',
+          count: 1,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+        {
+          newsletter: '스타트업뉴스',
+          count: 2,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
       ],
     });
   }),

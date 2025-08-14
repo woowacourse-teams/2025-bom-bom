@@ -45,6 +45,7 @@ export type GetBookmarksStatisticsNewslettersResponse = {
   newsletters: {
     newsletter: string;
     count: number;
+    imageUrl: string;
   }[];
 };
 

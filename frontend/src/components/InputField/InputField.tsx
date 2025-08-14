@@ -66,7 +66,7 @@ const Input = styled.input<{ hasSuffix: boolean }>`
   width: 100%;
   height: 48px;
   padding: 12px 14px;
-  padding-right: ${({ hasSuffix }) => (hasSuffix ? '132px' : undefined)};
+  padding-right: ${({ hasSuffix }) => (hasSuffix ? '148px' : undefined)};
   outline: none;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 12px;

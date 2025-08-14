@@ -64,7 +64,7 @@ const SignupCard = () => {
           label="생년월일"
           inputValue={birthDate}
           onInputChange={(e) => setBirthDate(e.target.value)}
-          placeholder="생년월일 입력해주세요"
+          placeholder="YYYY/MM/DD"
         />
 
         <InputField
@@ -103,7 +103,7 @@ const SignupCard = () => {
         />
 
         <FieldGroup>
-          <Label as="div">성별</Label>
+          <Label as="p">성별</Label>
           <Tabs direction="horizontal">
             <Tab
               value="MALE"
@@ -162,6 +162,8 @@ const Description = styled.p`
 `;
 
 const FieldGroup = styled.div`
+  width: fit-content;
+
   display: flex;
   gap: 8px;
   flex-direction: column;

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import ArticleList from '../ArticleList/ArticleList';
-import SearchAndSort from '../SearchAndSort/SearchAndSort';
+import ArticleListControls from '../ArticleListControls/ArticleListControls';
 import { GetArticlesParams } from '@/apis/articles';
 import { queries } from '@/apis/queries';
 import Pagination from '@/components/Pagination/Pagination';
@@ -24,12 +24,12 @@ export default function PCStorageContent({
 }: PCStorageContentProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: articles, isLoading } = useQuery({
-    ...queries.articles({
+  const { data: articles, isLoading } = useQuery(
+    queries.articles({
       ...baseQueryParams,
       page: currentPage - 1,
     }),
-  });
+  );
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -51,7 +51,7 @@ export default function PCStorageContent({
     return <EmptyLetterCard title="보관된 뉴스레터가 없어요" />;
   return (
     <>
-      <SearchAndSort
+      <ArticleListControls
         searchInput={searchInput}
         onSearchChange={onSearchChange}
         sortFilter={sortFilter}

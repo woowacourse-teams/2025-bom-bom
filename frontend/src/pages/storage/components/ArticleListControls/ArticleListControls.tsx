@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import SearchInput from '@/components/SearchInput/SearchInput';
 import Select from '@/components/Select/Select';
 
-interface SearchAndSortProps {
+interface ArticleListControlsProps {
   searchInput: string;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   sortFilter: 'DESC' | 'ASC';
@@ -10,15 +10,15 @@ interface SearchAndSortProps {
   totalElements: number | undefined;
 }
 
-export default function SearchAndSort({
+export default function ArticleListControls({
   searchInput,
   onSearchChange,
   sortFilter,
   onSortChange,
   totalElements,
-}: SearchAndSortProps) {
+}: ArticleListControlsProps) {
   return (
-    <>
+    <Container>
       <SearchInput
         placeholder="뉴스레터 제목으로 검색하세요..."
         value={searchInput}
@@ -35,9 +35,15 @@ export default function SearchAndSort({
           onSelectOption={onSortChange}
         />
       </SummaryBar>
-    </>
+    </Container>
   );
 }
+
+const Container = styled.div`
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+`;
 
 const SummaryBar = styled.div`
   width: 100%;

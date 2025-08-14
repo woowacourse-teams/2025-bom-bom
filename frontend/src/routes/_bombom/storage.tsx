@@ -23,7 +23,6 @@ function Storage() {
     searchInput,
     baseQueryParams,
     categoryCounts,
-    existNewsletters,
     handleNewsletterChange,
     handleSortChange,
     handleSearchChange,
@@ -39,8 +38,8 @@ function Storage() {
           <Title>뉴스레터 보관함</Title>
         </TitleWrapper>
 
-        <ContentWrapper>
-          <SidebarSection>
+        <ContentWrapper isPC={isPC}>
+          <SidebarSection isPC={isPC}>
             <NewsLetterFilter
               newsLetterList={[
                 {
@@ -48,14 +47,16 @@ function Storage() {
                   count: categoryCounts?.totalCount ?? 0,
                   imageUrl: '',
                 },
-                ...(existNewsletters ?? []),
+                ...(categoryCounts?.newsletters.filter(
+                  (newsletter) => newsletter.count !== 0,
+                ) ?? []),
               ]}
               selectedValue={selectedNewsletter}
               onSelectNewsletter={handleNewsletterChange}
             />
             <QuickMenu />
           </SidebarSection>
-          <MainContentSection>
+          <MainContentSection isPC={isPC}>
             {isPC ? (
               <PCStorageContent
                 baseQueryParams={baseQueryParams}
@@ -122,39 +123,33 @@ const Title = styled.h1`
   font: ${({ theme }) => theme.fonts.heading2};
 `;
 
-const ContentWrapper = styled.div`
+const ContentWrapper = styled.div<{ isPC: boolean }>`
   width: 100%;
 
   display: flex;
-  gap: 32px;
+  gap: ${({ isPC }) => (isPC ? 32 : 20)}px;
+  flex-direction: ${({ isPC }) => (isPC ? 'row' : 'column')};
   align-items: flex-start;
-
-  @media (width <= 1024px) {
-    gap: 20px;
-    flex-direction: column;
-  }
 `;
 
-const SidebarSection = styled.div`
+const SidebarSection = styled.div<{ isPC: boolean }>`
   width: 320px;
+  min-width: ${({ isPC }) => (isPC ? 320 : '100%')};
 
   display: flex;
   gap: 20px;
   flex-direction: column;
 
-  @media (width <= 1024px) {
-    min-width: 100%;
-    order: 1;
-  }
+  order: ${({ isPC }) => (isPC ? '1' : '2')};
 `;
 
-const MainContentSection = styled.div`
+const MainContentSection = styled.div<{ isPC: boolean }>`
+  width: 100%;
+
   display: flex;
-  gap: 20px;
+  gap: 40px;
   flex: 1;
   flex-direction: column;
 
-  @media (width <= 1024px) {
-    order: 2;
-  }
+  order: ${({ isPC }) => (isPC ? '2' : '1')};
 `;

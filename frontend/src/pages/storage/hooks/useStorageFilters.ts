@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useCallback, useState } from 'react';
 import { GetArticlesParams } from '@/apis/articles';
 import { queries } from '@/apis/queries';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -21,30 +21,24 @@ export const useStorageFilters = () => {
     queries.articlesStatisticsNewsletters(),
   );
 
-  const handleNewsletterChange = (value: string) => {
+  const handleNewsletterChange = useCallback((value: string) => {
     setSelectedNewsletter(value);
-  };
+  }, []);
 
-  const handleSortChange = (value: 'DESC' | 'ASC') => {
+  const handleSortChange = useCallback((value: 'DESC' | 'ASC') => {
     setSortFilter(value);
-  };
+  }, []);
 
-  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
-  };
-
-  const existNewsletters = categoryCounts?.newsletters.filter(
-    (newsletter) => newsletter.count > 0,
-  );
+  }, []);
 
   return {
     selectedNewsletter,
     sortFilter,
     searchInput,
-    debouncedSearchInput,
     baseQueryParams,
     categoryCounts,
-    existNewsletters,
     handleNewsletterChange,
     handleSortChange,
     handleSearchChange,

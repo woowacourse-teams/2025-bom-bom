@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import MobileStorageContent from '@/pages/storage/components/MobileStorageContent/MobileStorageContent';
-import CategoryFilterWithCount from '@/pages/storage/components/NewsletterFilterWithCount/NewsletterFilterWithCount';
+import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import PCStorageContent from '@/pages/storage/components/PCStorageContent/PCStorageContent';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import { useStorageFilters } from '@/pages/storage/hooks/useStorageFilters';
@@ -41,11 +41,17 @@ function Storage() {
 
         <ContentWrapper>
           <SidebarSection>
-            <CategoryFilterWithCount
-              selectedNewsletter={selectedNewsletter}
-              onNewsletterChange={handleNewsletterChange}
-              totalCount={categoryCounts?.totalCount ?? 0}
-              existNewsletters={existNewsletters}
+            <NewsLetterFilter
+              newsLetterList={[
+                {
+                  newsletter: '전체',
+                  count: categoryCounts?.totalCount ?? 0,
+                  imageUrl: '',
+                },
+                ...(existNewsletters ?? []),
+              ]}
+              selectedValue={selectedNewsletter}
+              onSelectNewsletter={handleNewsletterChange}
             />
             <QuickMenu />
           </SidebarSection>

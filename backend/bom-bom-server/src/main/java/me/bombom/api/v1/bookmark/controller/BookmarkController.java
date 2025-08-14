@@ -26,10 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/bookmarks")
-public class BookmarkController {
+public class BookmarkController implements BookmarkControllerApi {
 
     private final BookmarkService bookmarkService;
 
+    @Override
     @GetMapping
     public Page<BookmarkResponse> getBookmarks(
             @LoginMember Member member,
@@ -38,6 +39,7 @@ public class BookmarkController {
         return bookmarkService.getBookmarks(member.getId(), pageable);
     }
 
+    @Override
     @GetMapping("/status/articles/{articleId}")
     public BookmarkStatusResponse getBookmarkStatus(
             @LoginMember Member member,
@@ -46,6 +48,7 @@ public class BookmarkController {
         return bookmarkService.getBookmarkStatus(member.getId(), articleId);
     }
 
+    @Override
     @PostMapping("/articles/{articleId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addBookmark(
@@ -55,6 +58,7 @@ public class BookmarkController {
         bookmarkService.addBookmark(member.getId(), articleId);
     }
 
+    @Override
     @DeleteMapping("/articles/{articleId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBookmark(
@@ -64,6 +68,7 @@ public class BookmarkController {
         bookmarkService.deleteBookmark(member.getId(), articleId);
     }
 
+    @Override
     @GetMapping("/statistics/newsletters")
     public GetBookmarkNewsletterStatisticsResponse getBookmarkNewsletterStatistics(@LoginMember Member member){
         return bookmarkService.getBookmarkNewsletterStatistics(member);

@@ -88,7 +88,6 @@ const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
 
 const SideCardWrapper = styled.div<{ deviceType: DeviceType }>`
   min-width: 300px;
-  max-width: calc(100% - 200px);
   padding: 4dvh 1dvh;
 
   display: flex;
@@ -110,6 +109,7 @@ const sideCardWrapperStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {
   }),
   tablet: () => ({
     width: '100%',
+    maxWidth: 'calc(100% - 200px)',
     justifyContent: 'center',
     alignItems: 'flex-start',
   }),

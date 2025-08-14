@@ -51,7 +51,7 @@ function Storage() {
                   (newsletter) => newsletter.count !== 0,
                 ) ?? []),
               ]}
-              selectedValue={selectedNewsletter}
+              selectedNewsletter={selectedNewsletter}
               onSelectNewsletter={handleNewsletterChange}
             />
             <QuickMenu />

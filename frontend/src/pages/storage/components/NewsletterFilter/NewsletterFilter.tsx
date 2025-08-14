@@ -9,19 +9,19 @@ import NewsIcon from '#/assets/news.svg';
 
 interface NewsLetterFilterProps {
   newsLetterList: Newsletter[];
-  selectedValue: string;
+  selectedNewsletter: string;
   onSelectNewsletter: (value: string) => void;
 }
 
 function NewsLetterFilter({
   newsLetterList,
-  selectedValue,
+  selectedNewsletter,
   onSelectNewsletter,
 }: NewsLetterFilterProps) {
   const deviceType = useDeviceType();
 
   return (
-    <Container aria-label="카테고리" isPc={deviceType === 'pc'}>
+    <Container aria-label="뉴스레터" isPc={deviceType === 'pc'}>
       {deviceType === 'pc' && (
         <TitleWrapper>
           <IconWrapper>
@@ -36,7 +36,7 @@ function NewsLetterFilter({
             key={newsletter}
             value={newsletter}
             label={newsletter}
-            selected={selectedValue === newsletter}
+            selected={selectedNewsletter === newsletter}
             onTabSelect={onSelectNewsletter}
             StartComponent={<NewsLetterImage src={imageUrl} />}
             EndComponent={<Badge text={String(count)} />}

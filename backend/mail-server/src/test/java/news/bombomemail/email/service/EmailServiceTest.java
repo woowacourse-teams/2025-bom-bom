@@ -7,7 +7,7 @@ import java.util.List;
 import news.bombomemail.article.domain.Article;
 import news.bombomemail.article.repository.ArticleRepository;
 import news.bombomemail.article.service.ArticleService;
-import news.bombomemail.email.EmailConfig;
+import news.bombomemail.email.config.EmailConfig;
 import news.bombomemail.member.domain.Member;
 import news.bombomemail.member.repository.MemberRepository;
 import news.bombomemail.member.domain.Gender;

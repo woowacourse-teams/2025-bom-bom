@@ -143,8 +143,10 @@ const SidebarSection = styled.div`
 `;
 
 const MainContentSection = styled.div`
+  width: 100%;
+
   display: flex;
-  gap: 20px;
+  gap: 40px;
   flex: 1;
   flex-direction: column;
 

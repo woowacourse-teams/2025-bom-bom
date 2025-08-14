@@ -15,12 +15,8 @@ export const Route = createFileRoute('/_bombom/bookmark')({
 function BookmarkPage() {
   const { data: articles } = useQuery(queries.bookmarks());
 
-  const {
-    selectedNewsletter,
-    categoryCounts,
-    existNewsletters,
-    handleNewsletterChange,
-  } = useStorageFilters();
+  const { selectedNewsletter, newletterCounts, handleNewsletterChange } =
+    useStorageFilters();
 
   if (!articles) return null;
 
@@ -38,12 +34,14 @@ function BookmarkPage() {
               newsLetterList={[
                 {
                   newsletter: '전체',
-                  count: categoryCounts?.totalCount ?? 0,
+                  count: newletterCounts?.totalCount ?? 0,
                   imageUrl: '',
                 },
-                ...(existNewsletters ?? []),
+                ...(newletterCounts?.newsletters.filter(
+                  (newsletter) => newsletter.count !== 0,
+                ) ?? []),
               ]}
-              selectedValue={selectedNewsletter}
+              selectedNewsletter={selectedNewsletter}
               onSelectNewsletter={handleNewsletterChange}
             />
           </SidebarSection>

@@ -17,7 +17,7 @@ export const useStorageFilters = () => {
     newsletter: selectedNewsletter === '전체' ? undefined : selectedNewsletter,
   };
 
-  const { data: categoryCounts } = useQuery(
+  const { data: newletterCounts } = useQuery(
     queries.articlesStatisticsNewsletters({
       keyword: debouncedSearchInput,
     }),
@@ -40,7 +40,7 @@ export const useStorageFilters = () => {
     sortFilter,
     searchInput,
     baseQueryParams,
-    categoryCounts,
+    newletterCounts,
     handleNewsletterChange,
     handleSortChange,
     handleSearchChange,

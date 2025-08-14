@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useEffect, useRef } from 'react';
 import ArticleList from '../ArticleList/ArticleList';
-import SearchAndSort from '../SearchAndSort/SearchAndSort';
+import ArticleListControls from '../ArticleListControls/ArticleListControls';
 import { GetArticlesParams } from '@/apis/articles';
 import useInfiniteArticles from '@/pages/storage/hooks/useInfiniteArticles';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
@@ -60,7 +60,7 @@ export default function MobileStorageContent({
 
   return (
     <>
-      <SearchAndSort
+      <ArticleListControls
         searchInput={searchInput}
         onSearchChange={onSearchChange}
         sortFilter={sortFilter}

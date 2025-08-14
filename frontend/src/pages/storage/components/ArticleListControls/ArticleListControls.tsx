@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import SearchInput from '@/components/SearchInput/SearchInput';
 import Select from '@/components/Select/Select';
 
-interface SearchAndSortProps {
+interface ArticleListControlsProps {
   searchInput: string;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   sortFilter: 'DESC' | 'ASC';
@@ -10,13 +10,13 @@ interface SearchAndSortProps {
   totalElements: number | undefined;
 }
 
-export default function SearchAndSort({
+export default function ArticleListControls({
   searchInput,
   onSearchChange,
   sortFilter,
   onSortChange,
   totalElements,
-}: SearchAndSortProps) {
+}: ArticleListControlsProps) {
   return (
     <Container>
       <SearchInput

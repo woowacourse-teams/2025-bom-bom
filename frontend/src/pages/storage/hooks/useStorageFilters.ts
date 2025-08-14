@@ -18,7 +18,9 @@ export const useStorageFilters = () => {
   };
 
   const { data: categoryCounts } = useQuery(
-    queries.articlesStatisticsNewsletters(),
+    queries.articlesStatisticsNewsletters({
+      keyword: debouncedSearchInput,
+    }),
   );
 
   const handleNewsletterChange = useCallback((value: string) => {

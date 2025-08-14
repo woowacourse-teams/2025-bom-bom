@@ -38,11 +38,17 @@ export const patchArticleRead = async ({ id }: PatchArticleReadParams) => {
   });
 };
 
+export type GetArticleStatisticsNewslettersParams =
+  operations['getArticleNewsletterStatistics']['parameters']['query'];
+
 export type GetArticlesStatisticsNewslettersResponse =
   components['schemas']['GetArticleNewsletterStatisticsResponse'];
 
-export const getArticlesStatisticsNewsletters = async () => {
+export const getArticlesStatisticsNewsletters = async (
+  params: GetArticleStatisticsNewslettersParams,
+) => {
   return await fetcher.get<GetArticlesStatisticsNewslettersResponse>({
     path: '/articles/statistics/newsletters',
+    query: params,
   });
 };

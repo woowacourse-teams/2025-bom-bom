@@ -5,6 +5,7 @@ import {
   getArticles,
   type GetArticlesParams,
   getArticlesStatisticsNewsletters,
+  GetArticleStatisticsNewslettersParams,
 } from './articles';
 import {
   getArticleBookmarkStatus,
@@ -42,10 +43,12 @@ export const queries = {
       queryFn: () => getArticleById(params),
     }),
 
-  articlesStatisticsNewsletters: () =>
+  articlesStatisticsNewsletters: (
+    params: GetArticleStatisticsNewslettersParams,
+  ) =>
     queryOptions({
-      queryKey: ['articles', 'statistics', 'newsletters'],
-      queryFn: getArticlesStatisticsNewsletters,
+      queryKey: ['articles', 'statistics', 'newsletters', params],
+      queryFn: () => getArticlesStatisticsNewsletters(params),
     }),
 
   bookmarksStatisticsNewsletters: () =>

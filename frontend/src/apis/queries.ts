@@ -1,4 +1,4 @@
-import { queryOptions } from '@tanstack/react-query';
+import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query';
 import {
   getArticleById,
   GetArticleByIdParams,
@@ -22,6 +22,18 @@ export const queries = {
     queryOptions({
       queryKey: ['articles', params],
       queryFn: () => getArticles(params ?? {}),
+    }),
+
+  infiniteArticles: (params?: GetArticlesParams) =>
+    infiniteQueryOptions({
+      queryKey: ['articles', 'infinite', params],
+      queryFn: () => getArticles(params ?? {}),
+      getNextPageParam: (lastPage, allPages) => {
+        if (!lastPage?.totalPages) return undefined;
+        const nextPage = allPages.length;
+        return nextPage < lastPage.totalPages ? nextPage : undefined;
+      },
+      initialPageParam: 0,
     }),
 
   articleById: (params: GetArticleByIdParams) =>

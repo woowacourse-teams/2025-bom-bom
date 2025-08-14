@@ -45,15 +45,36 @@ public class BookmarkRepositoryImpl implements CustomBookmarkRepository {
         return PageableExecutionUtils.getPage(content, pageable, totalQuery::fetchOne);
     }
 
+    @Override
+    public int countAllByMemberId(Long memberId) {
+        Long count = jpaQueryFactory.select(bookmark.count())
+                .from(bookmark)
+                .where(createBookmarkMemberWhereClause(memberId))
+                .fetchOne();
+
+        return Optional.ofNullable(count)
+                .orElse(0L)
+                .intValue();
+    }
+
+    @Override
+    public int countAllByMemberIdAndNewsletterId(Long memberId, Long newsletterId) {
+        Long count = jpaQueryFactory.select(bookmark.count())
+                .from(bookmark)
+                .join(article).on(bookmark.articleId.eq(article.id))
+                .where(createBookmarkMemberWhereClause(memberId))
+                .where(createNewsletterIdWhereClause(newsletterId))
+                .fetchOne();
+
+        return Optional.ofNullable(count)
+                .orElse(0L)
+                .intValue();
+    }
+
     private JPAQuery<Long> getTotalQuery(Long memberId) {
         return jpaQueryFactory.select(bookmark.count())
                 .from(bookmark)
-                .join(article).on(bookmark.articleId.eq(article.id))
-                .where(createMemberWhereClause(memberId));
-    }
-
-    private BooleanExpression createMemberWhereClause(Long memberId) {
-        return article.memberId.eq(memberId);
+                .where(createBookmarkMemberWhereClause(memberId));
     }
 
     private List<BookmarkResponse> getContents(Long memberId, Pageable pageable) {
@@ -74,11 +95,19 @@ public class BookmarkRepositoryImpl implements CustomBookmarkRepository {
                 .join(article).on(bookmark.articleId.eq(article.id))
                 .join(newsletter).on(article.newsletterId.eq(newsletter.id))
                 .join(category).on(newsletter.categoryId.eq(category.id))
-                .where(createMemberWhereClause(memberId))
+                .where(createBookmarkMemberWhereClause(memberId))
                 .orderBy(getOrderSpecifiers(pageable).toArray(OrderSpecifier[]::new))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
+    }
+
+    private BooleanExpression createBookmarkMemberWhereClause(Long memberId) {
+        return bookmark.memberId.eq(memberId);
+    }
+
+    private BooleanExpression createNewsletterIdWhereClause(Long newsletterId) {
+        return article.newsletterId.eq(newsletterId);
     }
 
     private List<OrderSpecifier<?>> getOrderSpecifiers(Pageable pageable) {

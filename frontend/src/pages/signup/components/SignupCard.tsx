@@ -1,3 +1,4 @@
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
@@ -84,15 +85,18 @@ const SignupCard = () => {
               >
                 <EmailHelpIcon fill={theme.colors.primary} />
               </InfoButton>
+              <InfoText>이 주소로 뉴스레터가 도착해요!</InfoText>
 
               <Tooltip
                 role="tooltip"
-                id="email-why-tooltip"
-                data-open={emailHelpOpen}
+                id="email-help-tooltip"
+                open={emailHelpOpen}
               >
                 봄봄은 <b>개인 메일</b>이 아닌 <b>봄봄 전용 메일</b>(
-                <b>@bombom.news</b>)로 뉴스레터를 <b>구독</b>해요. 여기서 만드는
-                주소는 봄봄 서비스에서 발행·관리되며, 구독/알림에 사용됩니다.
+                <b>@bombom.news</b>)로 뉴스레터를 <b>수신</b>해요.
+                <br />- 뉴스레터 전용이라 깔끔하게 관리돼요.
+                <br />- 구독/알림/차단 같은 관리 기능에 이 주소를 사용해요.
+                <br />- 일반 메일 송수신은 지원하지 않아요. (수신 전용)
               </Tooltip>
             </LabelRow>
           }
@@ -204,18 +208,22 @@ const InfoButton = styled.button`
   }
 `;
 
+const InfoText = styled.p`
+  color: ${({ theme }) => theme.colors.textTertiary};
+  font: ${({ theme }) => theme.fonts.caption};
+`;
+
 const EmailHelpIcon = styled(HelpIcon)`
   background-color: ${({ theme }) => theme.colors.white};
 `;
 
-const Tooltip = styled.div`
+const Tooltip = styled.div<{ open: boolean }>`
   visibility: hidden;
   position: absolute;
   bottom: 28px;
   left: 0;
   z-index: 10;
   width: 100%;
-  max-width: 260px;
   padding: 10px 12px;
   border-radius: 10px;
   box-shadow: 0 10px 20px -12px rgb(0 0 0 / 35%);
@@ -231,12 +239,14 @@ const Tooltip = styled.div`
     transform 0.15s ease,
     visibility 0.15s;
 
-  &[data-open='true'] {
-    visibility: visible;
+  ${({ open }) =>
+    open &&
+    css`
+      visibility: visible;
 
-    opacity: 1;
-    transform: translateY(0);
-  }
+      opacity: 1;
+      transform: translateY(0);
+    `}
 `;
 
 const Suffix = styled.span`

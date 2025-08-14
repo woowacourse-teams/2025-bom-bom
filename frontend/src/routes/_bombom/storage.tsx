@@ -1,20 +1,11 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useRef, useState } from 'react';
-import SearchInput from '../../components/SearchInput/SearchInput';
-import Select from '../../components/Select/Select';
-import CategoryFilter from '../../pages/storage/components/CategoryFilter/CategoryFilter';
-import { GetArticlesParams } from '@/apis/articles';
-import { queries } from '@/apis/queries';
-import Pagination from '@/components/Pagination/Pagination';
-import { CategoryType } from '@/constants/category';
-import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useDeviceType } from '@/hooks/useDeviceType';
+import CategoryFilterWithCount from '@/pages/storage/components/CategoryFilterWithCount/CategoryFilterWithCount';
+import MobileStorageContent from '@/pages/storage/components/MobileStorageContent/MobileStorageContent';
+import PCStorageContent from '@/pages/storage/components/PCStorageContent/PCStorageContent';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
-import useInfiniteArticles from '@/pages/storage/hooks/useInfiniteArticles';
-import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
-import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
+import { useStorageFilters } from '@/pages/storage/hooks/useStorageFilters';
 import { theme } from '@/styles/theme';
 import StorageIcon from '#/assets/storage.svg';
 
@@ -23,101 +14,20 @@ export const Route = createFileRoute('/_bombom/storage')({
 });
 
 function Storage() {
-  const [selectedCategory, setSelectedCategory] =
-    useState<CategoryType>('전체');
-  const [sortFilter, setSortFilter] = useState<'DESC' | 'ASC'>('DESC');
-  const [searchInput, setSearchInput] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const debouncedSearchInput = useDebouncedValue(searchInput, 500);
   const deviceType = useDeviceType();
   const isPc = deviceType === 'pc';
-  const loadMoreRef = useRef<HTMLDivElement>(null);
-
-  const baseQueryParams: GetArticlesParams = {
-    sort: `arrivedDateTime,${sortFilter}`,
-    category: selectedCategory === '전체' ? undefined : selectedCategory,
-    keyword: debouncedSearchInput,
-    size: 6,
-  };
-
-  const { data: articles, isLoading } = useQuery({
-    ...queries.articles({
-      ...baseQueryParams,
-      page: currentPage - 1,
-    }),
-    enabled: isPc,
-  });
 
   const {
-    data: infiniteArticles,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading: isInfiniteLoading,
-  } = useInfiniteArticles({ baseQueryParams, isPc });
-
-  const { data: categoryCounts } = useQuery(
-    queries.statisticsCategories({
-      keyword: debouncedSearchInput,
-    }),
-  );
-
-  useEffect(() => {
-    if (isPc || !loadMoreRef.current) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0.1 },
-    );
-
-    observer.observe(loadMoreRef.current);
-
-    return () => observer.disconnect();
-  }, [isPc, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const handleCategoryChange = (value: CategoryType) => {
-    setSelectedCategory(value);
-    setCurrentPage(1);
-  };
-
-  const handleSortChange = (value: 'DESC' | 'ASC') => {
-    setSortFilter(value);
-    setCurrentPage(1);
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchInput(e.target.value);
-  };
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [debouncedSearchInput]);
-
-  const existCategories = categoryCounts?.categories?.filter(
-    (category) => category.count !== 0,
-  );
-
-  const currentLoading = isPc ? isLoading : isInfiniteLoading;
-
-  const pcArticleList = articles?.content || [];
-
-  const mobileArticleList =
-    infiniteArticles?.pages?.flatMap((page) => page?.content || []) || [];
-
-  const articleList = isPc ? pcArticleList : mobileArticleList;
-  const totalElements = isPc
-    ? articles?.totalElements
-    : infiniteArticles?.pages?.[0]?.totalElements;
-
-  const isLoadingOrHaveContent = currentLoading || articleList.length > 0;
+    selectedCategory,
+    sortFilter,
+    searchInput,
+    baseQueryParams,
+    categoryCounts,
+    existCategories,
+    handleCategoryChange,
+    handleSortChange,
+    handleSearchChange,
+  } = useStorageFilters();
 
   return (
     <Container>
@@ -131,74 +41,31 @@ function Storage() {
 
         <ContentWrapper>
           <SidebarSection>
-            <CategoryFilterWrapper>
-              <CategoryFilter
-                categoryList={[
-                  {
-                    value: '전체',
-                    label: '전체',
-                    quantity: categoryCounts?.totalCount ?? 0,
-                  },
-                  ...(existCategories?.map(({ category, count }) => ({
-                    value: category as CategoryType,
-                    label: category ?? '',
-                    quantity: count ?? 0,
-                  })) ?? []),
-                ]}
-                selectedValue={selectedCategory}
-                onSelectCategory={handleCategoryChange}
-              />
-            </CategoryFilterWrapper>
+            <CategoryFilterWithCount
+              selectedCategory={selectedCategory}
+              onCategoryChange={handleCategoryChange}
+              totalCount={categoryCounts?.totalCount ?? 0}
+              existCategories={existCategories}
+            />
             <QuickMenu />
           </SidebarSection>
           <MainContentSection>
-            <SearchInput
-              placeholder="뉴스레터 제목으로 검색하세요..."
-              value={searchInput}
-              onChange={handleSearchChange}
-            />
-            <SummaryBar>
-              <SummaryText>총 {totalElements ?? 0}개</SummaryText>
-              <Select
-                options={[
-                  { value: 'DESC', label: '최신순' },
-                  { value: 'ASC', label: '오래된순' },
-                ]}
-                selectedValue={sortFilter}
-                onSelectOption={handleSortChange}
+            {isPc ? (
+              <PCStorageContent
+                baseQueryParams={baseQueryParams}
+                searchInput={searchInput}
+                onSearchChange={handleSearchChange}
+                sortFilter={sortFilter}
+                onSortChange={handleSortChange}
               />
-            </SummaryBar>
-
-            {isLoadingOrHaveContent ? (
-              <>
-                <ArticleList>
-                  {articleList.map((article) =>
-                    article ? (
-                      <li key={article.articleId}>
-                        <ArticleCard data={article} readVariant="badge" />
-                      </li>
-                    ) : null,
-                  )}
-                </ArticleList>
-
-                {isPc ? (
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={articles?.totalPages ?? 1}
-                    onPageChange={handlePageChange}
-                  />
-                ) : (
-                  <>
-                    {/* 무한 스크롤 로딩 트리거 */}
-                    <LoadMoreTrigger ref={loadMoreRef} />
-                    {isFetchingNextPage && (
-                      <LoadingSpinner>로딩 중...</LoadingSpinner>
-                    )}
-                  </>
-                )}
-              </>
             ) : (
-              <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
+              <MobileStorageContent
+                baseQueryParams={baseQueryParams}
+                searchInput={searchInput}
+                onSearchChange={handleSearchChange}
+                sortFilter={sortFilter}
+                onSortChange={handleSortChange}
+              />
             )}
           </MainContentSection>
         </ContentWrapper>
@@ -284,46 +151,4 @@ const MainContentSection = styled.div`
   @media (width <= 1024px) {
     order: 2;
   }
-`;
-
-const CategoryFilterWrapper = styled.div`
-  width: 100%;
-  margin-bottom: 8px;
-`;
-
-const SummaryBar = styled.div`
-  width: 100%;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-const SummaryText = styled.p`
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.body2};
-`;
-
-const ArticleList = styled.ul`
-  width: 100%;
-
-  display: flex;
-  gap: 16px;
-  flex-direction: column;
-`;
-
-const LoadMoreTrigger = styled.div`
-  width: 100%;
-  height: 20px;
-`;
-
-const LoadingSpinner = styled.div`
-  padding: 20px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.body2};
 `;

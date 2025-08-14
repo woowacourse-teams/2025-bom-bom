@@ -23,7 +23,6 @@ function Storage() {
     searchInput,
     baseQueryParams,
     categoryCounts,
-    existCategories,
     handleCategoryChange,
     handleSortChange,
     handleSearchChange,
@@ -45,7 +44,9 @@ function Storage() {
               selectedCategory={selectedCategory}
               onCategoryChange={handleCategoryChange}
               totalCount={categoryCounts?.totalCount ?? 0}
-              existCategories={existCategories}
+              existCategories={categoryCounts?.categories?.filter(
+                (category) => category.count !== 0,
+              )}
             />
             <QuickMenu />
           </SidebarSection>

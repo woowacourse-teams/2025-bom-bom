@@ -37,17 +37,12 @@ export const useStorageFilters = () => {
     setSearchInput(e.target.value);
   }, []);
 
-  const existCategories = categoryCounts?.categories?.filter(
-    (category) => category.count !== 0,
-  );
-
   return {
     selectedCategory,
     sortFilter,
     searchInput,
     baseQueryParams,
     categoryCounts,
-    existCategories,
     handleCategoryChange,
     handleSortChange,
     handleSearchChange,

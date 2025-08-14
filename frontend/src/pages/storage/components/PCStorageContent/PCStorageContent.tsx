@@ -39,13 +39,12 @@ export default function PCStorageContent({
     setCurrentPage(1);
   }, [baseQueryParams.keyword, baseQueryParams.category, baseQueryParams.sort]);
 
-  const articleList = articles?.content || [];
   const totalElements = articles?.totalElements;
+  const articleList = articles?.content || [];
   const isLoadingOrHaveContent = isLoading || articleList.length > 0;
-  if (!isLoadingOrHaveContent && searchInput === '') {
-    return <EmptyLetterCard title="보관된 뉴스레터가 없어요" />;
-  }
 
+  if (!isLoadingOrHaveContent && searchInput === '')
+    return <EmptyLetterCard title="보관된 뉴스레터가 없어요" />;
   return (
     <>
       <SearchAndSort

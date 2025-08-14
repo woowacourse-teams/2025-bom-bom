@@ -8,7 +8,10 @@ import jakarta.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -17,43 +20,38 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.select.Elements;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class EmailContentExtractor {
 
-    private static final String[] BLOCK_TAGS = {
+    private static final String BLOCKS = String.join(",",
             "address","article","aside","blockquote","div","dl","fieldset","figcaption","figure","footer","form",
-            "h1","h2","h3","h4","h5","h6","header","hr","li","main","nav","ol","p","pre","section",
-            "table","thead","tbody","tfoot","tr","td","th","ul"
-    };
-
-    private static String selBlocksFollowedByBr() {
-        return Arrays.stream(BLOCK_TAGS).map(t -> t + " + br").collect(Collectors.joining(","));
-    }
-
-    private static String selBrFollowedByBlocks() {
-        return Arrays.stream(BLOCK_TAGS).map(t -> "br + " + t).collect(Collectors.joining(","));
-    }
+            "h1","h2","h3","h4","h5","h6","header","hr","li","main","nav","ol","p","pre","section","table",
+            "thead","tbody","tfoot","tr","td","th","ul"
+    );
 
     public static String extractContents(MimeMessage msg) throws MessagingException, IOException {
         try {
             log.debug("메일 본문 추출 시작 - Subject: {}", msg.getSubject());
-            
+
             String text = extractTextFromPart(msg);
             if (text == null) {
                 log.debug("추출된 텍스트가 null임");
                 return "";
             }
-            
+
             log.debug("추출된 원본 텍스트 길이: {} chars", text.length());
-            
+
             boolean isHtml = looksLikeHtml(text);
             log.debug("HTML 판별 결과: {}", isHtml);
-            
+
             String result = isHtml ? cleanHtmlBrs(text) : text.strip();
             log.debug("최종 처리된 텍스트 길이: {} chars", result.length());
-            
+
             return result;
         } catch (MessagingException | IOException e) {
             log.warn("메일 본문 추출 중 예외 발생", e);
@@ -61,102 +59,10 @@ public final class EmailContentExtractor {
         }
     }
 
-    private static boolean looksLikeHtml(String text) {
-        if (text == null) {
-            return false;
-        }
-        String lowerText = text.toLowerCase();
-        return lowerText.contains("<html")
-                || lowerText.contains("<div")
-                || lowerText.contains("<p")
-                || lowerText.contains("<br");
-    }
-
-    private static String cleanHtmlBrs(String html) {
-        try {
-            log.debug("HTML 정리 시작 - 원본 길이: {} chars", html.length());
-            
-            Document doc = Jsoup.parse(html);
-            doc.outputSettings().prettyPrint(false);
-
-            // 1) 블록 경계에 낀 br 제거
-            int removedBlockBrs = doc.select(selBlocksFollowedByBr()).size() + 
-                                 doc.select(selBrFollowedByBlocks()).size();
-            doc.select(selBlocksFollowedByBr()).remove();
-            doc.select(selBrFollowedByBlocks()).remove();
-            if (removedBlockBrs > 0) {
-                log.debug("블록 경계 br {} 개 제거", removedBlockBrs);
-            }
-
-            // 2) 빈 단락 제거
-            int removedEmptyParagraphs = doc.select("div:has(> br:only-child), p:has(> br:only-child)").size();
-            doc.select("div:has(> br:only-child), p:has(> br:only-child)").remove();
-            if (removedEmptyParagraphs > 0) {
-                log.debug("빈 단락 {} 개 제거", removedEmptyParagraphs);
-            }
-
-            // 3) 연속 br 축약 (한 번에 전체 제거, 안정화될 때까지)
-            int brRemovalCycles = 0;
-            while (!doc.select("br + br").isEmpty()) {
-                doc.select("br + br").remove();
-                brRemovalCycles++;
-            }
-            if (brRemovalCycles > 0) {
-                log.debug("연속 br 정리 {} 사이클 수행", brRemovalCycles);
-            }
-
-            // 4) 블록의 맨 앞/뒤 br 제거(중요 속성 br 보존)
-            int removedLeadingTrailing = 0;
-            int preservedImportantBrs = 0;
-            for (Element br : doc.select("br")) {
-                if (hasImportantAttrs(br)) {
-                    preservedImportantBrs++;
-                    continue;
-                }
-                Element parent = br.parent();
-                if (parent != null && parent.isBlock()) {
-                    boolean isLeading = br.previousElementSibling() == null;
-                    boolean isTrailing = br.nextElementSibling() == null;
-                    if (isLeading || isTrailing) {
-                        br.remove();
-                        removedLeadingTrailing++;
-                    }
-                }
-            }
-            if (removedLeadingTrailing > 0) {
-                log.debug("블록 앞/뒤 br {} 개 제거", removedLeadingTrailing);
-            }
-            if (preservedImportantBrs > 0) {
-                log.debug("중요 속성 br {} 개 보존", preservedImportantBrs);
-            }
-
-            String result = doc.body().html();
-            log.debug("HTML 정리 완료 - 결과 길이: {} chars", result.length());
-            
-            return result;
-        } catch (Exception ex) {
-            log.warn("HTML 정리 중 예외 발생, 원본 반환: {}", ex.getMessage());
-            return html;
-        }
-    }
-
-    private static boolean hasImportantAttrs(Element br) {
-        if (br.hasAttr("class") || br.hasAttr("id") || br.hasAttr("style")) {
-            return true;
-        }
-        for (Attribute a : br.attributes()) {
-            if (a.getKey().startsWith("data-")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
     private static String extractTextFromPart(Part part) throws MessagingException, IOException {
         String contentType = part.getContentType();
         log.debug("파트 처리 중 - Content-Type: {}", contentType);
-        
+
         if (part.isMimeType("text/html")) {
             log.debug("HTML 파트 발견");
             return (String) part.getContent();
@@ -165,6 +71,14 @@ public final class EmailContentExtractor {
         if (part.isMimeType("text/plain")) {
             log.debug("Plain text 파트 발견");
             return (String) part.getContent();
+        }
+
+
+        if (part.isMimeType("message/rfc822")) {
+            Object inner = part.getContent();
+            if (inner instanceof MimeMessage) {
+                return extractTextFromPart((MimeMessage) inner);
+            }
         }
 
         if (part.isMimeType("multipart/alternative")) {
@@ -212,10 +126,161 @@ public final class EmailContentExtractor {
                 }
             }
         }
-        
+
         log.debug("파트에서 텍스트 추출 실패 - Content-Type: {}", contentType);
         return "";
     }
+
+    private static boolean looksLikeHtml(String text) {
+        if (text == null) {
+            return false;
+        }
+        String s = text.toLowerCase(Locale.ROOT);
+        return s.contains("<html") || s.contains("<div") || s.contains("<p") || s.contains("<br")
+                || s.contains("<span") || s.contains("<table") || s.contains("<img") || s.contains("<a ");
+    }
+
+    private static String cleanHtmlBrs(String html) {
+        try {
+            log.debug("HTML 정리 시작 - 원본 길이: {} chars", html.length());
+
+            Document doc = Jsoup.parse(html);
+            doc.outputSettings().prettyPrint(false);
+
+            // ---- 0) 보호 영역: pre/code/blockquote 내부는 손대지 않도록 기준 셀렉터 준비
+            String PROTECTED_ANCESTORS = "pre,code,blockquote";
+
+            // 1) 블록 경계에 낀 br 제거
+            Set<Element> toRemove = new LinkedHashSet<>();
+
+            // (a) BLOCKS + br  => 이 셀렉터는 <br> 자신을 가리킵니다. 그대로 제거 대상에 추가
+            toRemove.addAll(doc.select(selBlocksFollowedByBr()));
+
+            // (b) br + BLOCKS  => 이 셀렉터는 '블록'을 가리킵니다. 바로 앞 형제가 <br>이면 그 <br>만 제거 대상에 추가
+            for (Element block : doc.select(selBrFollowedByBlocks())) {
+                Element prev = block.previousElementSibling();
+                if (prev != null && prev.tagName().equals("br")) {
+                    toRemove.add(prev);
+                }
+            }
+
+            int removedBoundary = 0;
+            for (Element br : toRemove) {
+                // 보호영역/중요속성 체크
+                if (!br.parents().select(PROTECTED_ANCESTORS).isEmpty()) continue;
+                if (hasImportantAttrs(br)) continue;
+                br.remove();
+                removedBoundary++;
+            }
+            if (removedBoundary > 0) {
+                log.debug("블록 경계 br {} 개 제거", removedBoundary);
+            }
+
+            // ---- 2) 빈 단락 제거: <div><br></div>, <p><br></p>
+            int removedEmptyParas = 0;
+            for (Element box : doc.select("div:has(> br:only-child), p:has(> br:only-child)")) {
+                if (!box.parents().select(PROTECTED_ANCESTORS).isEmpty()) continue;
+                Element br = box.selectFirst("> br");
+                if (br != null && hasImportantAttrs(br)) continue; // 의도적 br 보존
+                box.remove();
+                removedEmptyParas++;
+            }
+            if (removedEmptyParas > 0) {
+                log.debug("빈 단락 {} 개 제거", removedEmptyParas);
+            }
+
+            // 3) 연속 br 축약 (한 번에 전체 제거, 안정화될 때까지)
+            int cycles = 0;
+            while (true) {
+                Elements doubles = doc.select("br + br");
+                if (doubles.isEmpty()) break;
+
+                for (Element br : doubles) {
+                    if (!br.parents().select(PROTECTED_ANCESTORS).isEmpty()) continue;
+                    if (hasImportantAttrs(br)) continue;
+                    br.remove();
+                }
+                cycles++;
+            }
+            if (cycles > 0) {
+                log.debug("연속 br 정리 {} 사이클 수행", cycles);
+            }
+
+            // 4) 블록의 맨 앞/뒤 br 제거(중요 속성 br 보존)
+            int removedEdges = 0;
+            int preservedImportant = 0;
+            for (Element br : doc.select("br")) {
+                if (!br.parents().select(PROTECTED_ANCESTORS).isEmpty()) continue;
+
+                if (hasImportantAttrs(br)) { preservedImportant++; continue; }
+
+                Element p = br.parent();
+                if (p != null && p.isBlock()) {
+                    boolean hasPrevContent = hasMeaningfulPrevSibling(br);
+                    boolean hasNextContent = hasMeaningfulNextSibling(br);
+                    boolean isLeading = !hasPrevContent;
+                    boolean isTrailing = !hasNextContent;
+                    if (isLeading || isTrailing) {
+                        br.remove();
+                        removedEdges++;
+                    }
+                }
+            }
+            if (removedEdges > 0) {
+                log.debug("블록 앞/뒤 br {} 개 제거", removedEdges);
+            }
+            if (preservedImportant > 0) {
+                log.debug("중요 속성 br {} 개 보존", preservedImportant);
+            }
+
+            String result = doc.body().html();
+            log.debug("HTML 정리 완료 - 결과 길이: {} chars", result.length());
+            return result;
+
+        } catch (Exception ex) {
+            log.warn("HTML 정리 중 예외 발생, 원본 반환: {}", ex.getMessage());
+            return html;
+        }
+    }
+
+    private static boolean hasImportantAttrs(Element br) {
+        if (br.hasAttr("class") || br.hasAttr("id") || br.hasAttr("style")) {
+            return true;
+        }
+        for (Attribute a : br.attributes()) {
+            if (a.getKey().startsWith("data-")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean hasMeaningfulPrevSibling(Element el) {
+        Node n = el.previousSibling();
+        while (n != null) {
+            if (n instanceof TextNode) {
+                if (!((TextNode) n).isBlank()) return true;
+            } else if (n instanceof Element) {
+                return true;
+            }
+            n = n.previousSibling();
+        }
+        return false;
+    }
+
+    private static boolean hasMeaningfulNextSibling(Element el) {
+        Node n = el.nextSibling();
+        while (n != null) {
+            if (n instanceof TextNode) {
+                if (!((TextNode) n).isBlank()) return true;
+            } else if (n instanceof Element) {
+                return true;
+            }
+            n = n.nextSibling();
+        }
+        return false;
+    }
+
 
     private static List<Integer> sort(Multipart multipart) throws MessagingException {
         List<Integer> order = new ArrayList<>();
@@ -244,5 +309,13 @@ public final class EmailContentExtractor {
             return 70;
         }
         return 0;
+    }
+
+    private static String selBlocksFollowedByBr() {
+        return BLOCKS + " + br";
+    }
+
+    private static String selBrFollowedByBlocks() {
+        return "br + " + BLOCKS;
     }
 }

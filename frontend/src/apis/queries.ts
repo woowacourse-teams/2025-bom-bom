@@ -51,12 +51,6 @@ export const queries = {
       queryFn: () => getArticlesStatisticsNewsletters(params),
     }),
 
-  bookmarksStatisticsNewsletters: () =>
-    queryOptions({
-      queryKey: ['bookmarks', 'statistics', 'newsletters'],
-      queryFn: getBookmarksStatisticsNewsletters,
-    }),
-
   // members
   me: () =>
     queryOptions({
@@ -96,5 +90,11 @@ export const queries = {
     queryOptions({
       queryKey: ['bookmarks', 'status', 'articles', params.articleId],
       queryFn: () => getArticleBookmarkStatus(params),
+    }),
+
+  bookmarksStatisticsNewsletters: () =>
+    queryOptions({
+      queryKey: ['bookmarks', 'statistics', 'newsletters'],
+      queryFn: getBookmarksStatisticsNewsletters,
     }),
 };

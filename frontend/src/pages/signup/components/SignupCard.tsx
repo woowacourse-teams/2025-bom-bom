@@ -99,7 +99,7 @@ const SignupCard = () => {
           inputValue={emailPart}
           onInputChange={(e) => setEmailPart(e.target.value)}
           placeholder="이메일을 입력해주세요"
-          InputSuffixComponent={<Suffix>@bombom.news</Suffix>}
+          suffix={<Suffix>@bombom.news</Suffix>}
         />
 
         <FieldGroup>

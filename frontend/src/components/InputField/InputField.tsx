@@ -1,14 +1,14 @@
 import styled from '@emotion/styled';
-import { ChangeEvent, ReactNode } from 'react';
+import { ChangeEvent, ComponentProps, ReactNode } from 'react';
 
-interface InputFiledProps {
+interface InputFieldProps extends ComponentProps<'input'> {
   name?: string;
   label?: string | ReactNode;
   inputValue: string;
   onInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   errorString?: string;
-  InputSuffixComponent?: ReactNode;
+  suffix?: ReactNode;
 }
 
 const InputField = ({
@@ -18,8 +18,12 @@ const InputField = ({
   onInputChange,
   placeholder,
   errorString,
-  InputSuffixComponent,
-}: InputFiledProps) => {
+  suffix,
+  ...props
+}: InputFieldProps) => {
+  const isInvalid = Boolean(errorString);
+  const hasSuffix = Boolean(suffix);
+
   return (
     <FieldGroup>
       {typeof label === 'string' ? (
@@ -34,10 +38,11 @@ const InputField = ({
           value={inputValue}
           onChange={onInputChange}
           placeholder={placeholder ?? ''}
-          aria-invalid={!!errorString}
-          aria-describedby={errorString ? `${name}-error` : undefined}
+          aria-invalid={isInvalid}
+          hasSuffix={hasSuffix}
+          {...props}
         />
-        <InputSuffixWrapper>{InputSuffixComponent}</InputSuffixWrapper>
+        {suffix && <InputSuffixWrapper>{suffix}</InputSuffixWrapper>}
       </InputRow>
       {errorString && <Error id={`${name}-error`}>{errorString}</Error>}
     </FieldGroup>
@@ -57,10 +62,11 @@ const Label = styled.label`
   font: ${({ theme }) => theme.fonts.body2};
 `;
 
-const Input = styled.input`
+const Input = styled.input<{ hasSuffix: boolean }>`
   width: 100%;
   height: 48px;
   padding: 12px 14px;
+  padding-right: ${({ hasSuffix }) => (hasSuffix ? '132px' : undefined)};
   outline: none;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 12px;
@@ -104,6 +110,10 @@ const InputSuffixWrapper = styled.div`
   right: 10px;
   width: fit-content;
   height: calc(100% - 12px);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const Error = styled.div`

@@ -115,5 +115,6 @@ const StyledLink = styled(Link)`
 const ButtonContainer = styled.div`
   display: flex;
   gap: 16px;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
 `;

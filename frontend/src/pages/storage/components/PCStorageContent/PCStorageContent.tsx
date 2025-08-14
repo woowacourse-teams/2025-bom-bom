@@ -42,8 +42,7 @@ export default function PCStorageContent({
   const articleList = articles?.content || [];
   const totalElements = articles?.totalElements;
   const isLoadingOrHaveContent = isLoading || articleList.length > 0;
-
-  if (!isLoadingOrHaveContent) {
+  if (!isLoadingOrHaveContent && searchInput === '') {
     return <EmptyLetterCard title="보관된 뉴스레터가 없어요" />;
   }
 

@@ -11,10 +11,10 @@ export const useStorageFilters = () => {
   const debouncedSearchInput = useDebouncedValue(searchInput, 500);
 
   const baseQueryParams: GetArticlesParams = {
-    sort: `arrivedDateTime,${sortFilter}`,
-    category: selectedNewsletter === '전체' ? undefined : selectedNewsletter,
+    sort: ['arrivedDateTime', sortFilter],
     keyword: debouncedSearchInput,
     size: 6,
+    newsletter: selectedNewsletter === '전체' ? undefined : selectedNewsletter,
   };
 
   const { data: categoryCounts } = useQuery(

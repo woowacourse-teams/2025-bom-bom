@@ -1,22 +1,20 @@
 import { fetcher } from './fetcher';
 import { components, operations } from '@/types/openapi';
 
-export interface GetArticlesParams {
-  date?: Date;
-  category?: string;
-  keyword?: string;
-
-  page?: number;
-  size?: number;
-  sort?: string;
-}
+export type GetArticlesParams = Omit<
+  components['schemas']['GetArticlesOptions'],
+  'date'
+> &
+  components['schemas']['Pageable'] & {
+    date?: Date;
+  };
 
 export type GetArticlesResponse = components['schemas']['PageArticleResponse'];
 
 export const getArticles = async (params: GetArticlesParams) => {
   return await fetcher.get<GetArticlesResponse>({
     path: '/articles',
-    query: { ...params },
+    query: params,
   });
 };
 

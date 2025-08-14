@@ -40,6 +40,7 @@ function NewsLetterFilter({
             onTabSelect={onSelectNewsletter}
             StartComponent={<NewsLetterImage src={imageUrl} />}
             EndComponent={<Badge text={String(count)} />}
+            textAlign={deviceType === 'pc' ? 'start' : 'center'}
           />
         ))}
       </StyledTabs>

@@ -32,10 +32,10 @@ function Index() {
 
       <ContentWrapper deviceType={deviceType}>
         <ArticleCardList articles={todayArticles?.content ?? []} />
-        <SideCardWrapper deviceType={deviceType}>
+        <ReaderCompanion deviceType={deviceType}>
           <PetCard />
           <ReadingStatusCard />
-        </SideCardWrapper>
+        </ReaderCompanion>
       </ContentWrapper>
     </Container>
   );
@@ -86,9 +86,8 @@ const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
   justify-content: center;
 `;
 
-const SideCardWrapper = styled.div<{ deviceType: DeviceType }>`
+const ReaderCompanion = styled.div<{ deviceType: DeviceType }>`
   min-width: 300px;
-  padding: 4dvh 1dvh;
 
   display: flex;
   gap: 36px;

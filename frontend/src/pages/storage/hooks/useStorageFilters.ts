@@ -45,7 +45,6 @@ export const useStorageFilters = () => {
     selectedCategory,
     sortFilter,
     searchInput,
-    debouncedSearchInput,
     baseQueryParams,
     categoryCounts,
     existCategories,

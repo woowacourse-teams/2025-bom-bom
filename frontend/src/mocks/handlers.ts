@@ -52,14 +52,6 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 });
   }),
 
-  // 카테고리 통계
-  http.get(`${baseURL}/articles/statistics/categories`, () => {
-    return HttpResponse.json({
-      totalCount: ARTICLES.length,
-      categories: [{ category: '기술', count: ARTICLES.length }],
-    });
-  }),
-
   // 뉴스레터 통계
   http.get(`${baseURL}/articles/statistics/newsletters`, () => {
     return HttpResponse.json({

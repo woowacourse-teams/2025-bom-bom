@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 import { queries } from '@/apis/queries';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
@@ -15,6 +16,7 @@ export const Route = createFileRoute('/_bombom/bookmark')({
 function BookmarkPage() {
   const { data: articles } = useQuery(queries.bookmarks());
   const [selectedNewsletter, setSelectedNewsletter] = useState('전체');
+  const deviceType = useDeviceType();
 
   const handleNewsletterChange = useCallback((value: string) => {
     setSelectedNewsletter(value);
@@ -33,8 +35,8 @@ function BookmarkPage() {
           <Title>북마크 보관함</Title>
         </TitleWrapper>
 
-        <ContentWrapper>
-          <SidebarSection>
+        <ContentWrapper deviceType={deviceType}>
+          <SidebarSection deviceType={deviceType}>
             <NewsLetterFilter
               newsLetterList={[
                 {
@@ -51,7 +53,7 @@ function BookmarkPage() {
             />
           </SidebarSection>
 
-          <MainContentSection>
+          <MainContentSection deviceType={deviceType}>
             {articles.content?.length && articles.content?.length > 0 ? (
               <ArticleList>
                 {articles.content?.map((article) => (
@@ -101,41 +103,33 @@ const Title = styled.h1`
   font: ${({ theme }) => theme.fonts.heading2};
 `;
 
-const ContentWrapper = styled.div`
+const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
   width: 100%;
 
   display: flex;
-  gap: 32px;
+  gap: ${({ deviceType }) => (deviceType === 'pc' ? '32px' : '20px')};
+  flex-direction: ${({ deviceType }) =>
+    deviceType === 'pc' ? 'row' : 'column'};
   align-items: flex-start;
-
-  @media (width <= 1024px) {
-    gap: 20px;
-    flex-direction: column;
-  }
 `;
 
-const SidebarSection = styled.div`
-  width: 320px;
+const SidebarSection = styled.div<{ deviceType: DeviceType }>`
+  width: ${({ deviceType }) => (deviceType === 'pc' ? '320px' : '100%')};
 
   display: flex;
   gap: 20px;
   flex-direction: column;
 
-  @media (width <= 1024px) {
-    min-width: 100%;
-    order: 1;
-  }
+  order: ${({ deviceType }) => (deviceType === 'pc' ? 1 : 0)};
 `;
 
-const MainContentSection = styled.div`
+const MainContentSection = styled.div<{ deviceType: DeviceType }>`
   display: flex;
   gap: 20px;
   flex: 1;
   flex-direction: column;
 
-  @media (width <= 1024px) {
-    order: 2;
-  }
+  order: ${({ deviceType }) => (deviceType === 'pc' ? 2 : 1)};
 `;
 
 const ArticleList = styled.ul`

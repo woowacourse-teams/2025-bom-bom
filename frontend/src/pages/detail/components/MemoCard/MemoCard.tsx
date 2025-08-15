@@ -8,6 +8,10 @@ interface MemoCardProps {
   id: number;
   content: string;
   memo: string;
+  newsletterName?: string;
+  newsletterImageUrl?: string;
+  articleTitle?: string;
+  createdAt?: string;
   as?: ElementType;
   onClick?: () => void;
   onRemoveButtonClick?: (id: number) => void;
@@ -18,6 +22,10 @@ const MemoCard = ({
   id,
   content,
   memo,
+  newsletterName,
+  newsletterImageUrl,
+  articleTitle,
+  createdAt,
   as,
   onClick,
   onRemoveButtonClick,
@@ -52,9 +60,15 @@ const MemoCard = ({
   return (
     <Container as={as} onClick={onClick}>
       <HeaderBox>
-        <ColorDotWrapper>
-          <ColorDot />
-        </ColorDotWrapper>
+        {articleTitle && newsletterName && newsletterImageUrl && (
+          <NewsletterInfo>
+            <ArticleTitle>{articleTitle}</ArticleTitle>
+            <NewsletterMeta>
+              <NewsletterImage src={newsletterImageUrl} alt={newsletterName} />
+              <NewsletterName>{newsletterName}</NewsletterName>
+            </NewsletterMeta>
+          </NewsletterInfo>
+        )}
         {onRemoveButtonClick && (
           <DeleteButton onClick={handleRemoveButtonClick}>
             <DeleteIcon fill={theme.colors.black} width={20} height={20} />
@@ -66,17 +80,24 @@ const MemoCard = ({
         <MemoContentText>{content}</MemoContentText>
       </MemoContent>
 
-      {onMemoChange ? (
-        <NoteMemo
-          ref={textAreaRef}
-          name="memo"
-          rows={1}
-          value={localMemo}
-          onChange={(e) => setLocalMemo(e.target.value)}
-          placeholder="메모를 입력해주세요"
-        />
-      ) : (
-        <MemoText>{memo || '메모가 없습니다.'}</MemoText>
+      <MemoFooter>
+        {onMemoChange ? (
+          <NoteMemo
+            ref={textAreaRef}
+            name="memo"
+            rows={1}
+            value={localMemo}
+            onChange={(e) => setLocalMemo(e.target.value)}
+            placeholder="메모를 입력해주세요"
+          />
+        ) : (
+          <MemoText>{memo || '메모가 없습니다.'}</MemoText>
+        )}
+      </MemoFooter>
+      {createdAt && (
+        <CreatedAtText>
+          {new Date(createdAt).toLocaleDateString('ko-KR')}
+        </CreatedAtText>
       )}
     </Container>
   );
@@ -86,12 +107,13 @@ export default MemoCard;
 
 const Container = styled.div`
   width: 100%;
-  padding: 12px;
+  padding: 20px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 4%);
 
   display: flex;
+  gap: 16px;
   flex-direction: column;
   align-items: flex-start;
   align-self: stretch;
@@ -99,79 +121,156 @@ const Container = styled.div`
   background-color: ${({ theme }) => theme.colors.white};
   text-align: left;
 
-  transition: box-shadow 0.2s;
+  transition: all 0.2s ease-in-out;
 
   &:hover {
-    box-shadow: 0 4px 8px rgb(0 0 0 / 8%);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 8%);
+
+    border-color: ${({ theme }) => theme.colors.primary};
+
+    transform: translateY(-1px);
   }
 `;
 
 const HeaderBox = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   align-self: stretch;
   justify-content: space-between;
 `;
 
-const ColorDotWrapper = styled.div`
-  padding: 6px;
-
+const NewsletterInfo = styled.div`
   display: flex;
+  gap: 12px;
+  flex: 1;
   flex-direction: column;
+  align-items: flex-start;
 `;
 
-const ColorDot = styled.div`
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+const NewsletterImage = styled.img`
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
 
-  background-color: ${({ theme }) => theme.colors.primary};
+  object-fit: cover;
+`;
 
-  aspect-ratio: 1/1;
+const NewsletterMeta = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
+`;
+
+const NewsletterName = styled.span`
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font: ${({ theme }) => theme.fonts.caption};
+`;
+
+const ArticleTitle = styled.h3`
+  margin: 0;
+
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.body1};
+  font-weight: 600;
+  line-height: 1.4;
 `;
 
 const DeleteButton = styled.button`
-  padding: 4px;
+  margin-left: auto;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+
+  background-color: transparent;
+  color: ${({ theme }) => theme.colors.textSecondary};
+
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+`;
+
+const MemoFooter = styled.div`
+  width: 100%;
+
+  display: flex;
+  gap: 12px;
+  flex-direction: column;
+`;
+
+const CreatedAtText = styled.time`
+  margin-top: 4px;
+
+  align-self: flex-end;
+
+  color: ${({ theme }) => theme.colors.textTertiary};
+  font: ${({ theme }) => theme.fonts.caption};
 `;
 
 const MemoContent = styled.div`
   width: 100%;
-  padding: 4px 8px;
-  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid ${({ theme }) => theme.colors.stroke};
+  border-radius: 12px;
 
-  background-color: ${({ theme }) => theme.colors.disabledBackground};
+  background: linear-gradient(
+    135deg,
+    ${({ theme }) => theme.colors.disabledBackground} 0%,
+    #f8fafc 100%
+  );
+
+  transition: all 0.2s ease-in-out;
 `;
 
 const MemoContentText = styled.p`
+  margin: 0;
+
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body2};
+  line-height: 1.6;
+
+  word-break: break-all;
 `;
 
 const NoteMemo = styled.textarea`
   width: 100%;
   height: auto;
-  padding: 8px 12px;
+  padding: 16px;
   outline: none;
-  border: none;
+  border: 2px solid ${({ theme }) => theme.colors.stroke};
+  border-radius: 12px;
   box-shadow: none;
 
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-
+  background-color: ${({ theme }) => theme.colors.white};
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body2};
+  line-height: 1.5;
 
   resize: none;
+  transition: all 0.2s ease-in-out;
+
+  &:focus {
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}20;
+    border-color: ${({ theme }) => theme.colors.primary};
+  }
+
+  &::placeholder {
+    color: ${({ theme }) => theme.colors.textTertiary};
+  }
 `;
 
 const MemoText = styled.p`
   width: 100%;
-  padding: 8px 12px;
+  margin: 0;
+  padding: 16px;
+  border: 2px solid ${({ theme }) => theme.colors.stroke};
+  border-radius: 12px;
 
+  background-color: #f8fafc;
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body2};
+  line-height: 1.5;
   white-space: pre-wrap;
 
+  transition: all 0.2s ease-in-out;
   word-break: break-all;
 `;

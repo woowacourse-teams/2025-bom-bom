@@ -69,6 +69,10 @@ function MemoPage() {
                       onClick={() =>
                         navigate({ to: `/articles/${highlight.articleId}` })
                       }
+                      newsletterName="뉴닉"
+                      newsletterImageUrl="https://newneek.co/favicon.ico"
+                      articleTitle="뉴스레터 제목"
+                      createdAt="2025-01-01"
                     />
                   </li>
                 ))}

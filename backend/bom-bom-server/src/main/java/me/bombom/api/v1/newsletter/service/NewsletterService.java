@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
@@ -31,9 +32,13 @@ public class NewsletterService {
 
     public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId) {
         Newsletter newsletter = newsletterRepository.findById(newsletterId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletter")
+                        .addContext(ErrorContextKeys.NEWSLETTER_ID, newsletterId));
         NewsletterDetail newsletterDetail = newsletterDetailRepository.findById(newsletter.getDetailId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletterDetail")
+                        .addContext("newsletterDetailId", newsletter.getDetailId()));
         return NewsletterWithDetailResponse.of(newsletter, newsletterDetail);
     }
 }

@@ -3,6 +3,7 @@ package me.bombom.api.v1.member.service;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
@@ -42,7 +43,10 @@ public class MemberService {
 
     public MemberProfileResponse getProfile(Long id) {
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.MEMBER_ID, id)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
+                );
         return MemberProfileResponse.from(member);
     }
 }

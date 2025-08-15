@@ -35,7 +35,7 @@ class UpdateReadingCountListenerTest {
         Long memberId = 1L;
         Long articleId = 1L;
         boolean isTodayArticle = true;
-        given(articleService.isArrivedToday(articleId)).willReturn(isTodayArticle);
+        given(articleService.isArrivedToday(articleId, memberId)).willReturn(isTodayArticle);
 
         // when
         publisher.publishEvent(new UpdateReadingCountEvent(memberId, articleId));
@@ -43,7 +43,7 @@ class UpdateReadingCountListenerTest {
         TestTransaction.end();
 
         // then
-        verify(articleService, times(1)).isArrivedToday(articleId);
+        verify(articleService, times(1)).isArrivedToday(articleId, memberId);
         verify(readingService, times(1)).updateReadingCount(memberId, isTodayArticle);
     }
 }

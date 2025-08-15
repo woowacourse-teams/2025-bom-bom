@@ -3,6 +3,7 @@ package me.bombom.api.v1.article.service;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
@@ -21,6 +22,8 @@ import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.pet.ScorePolicyConstants;
 import me.bombom.api.v1.pet.event.AddArticleScoreEvent;
 import me.bombom.api.v1.reading.event.UpdateReadingCountEvent;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -71,8 +75,11 @@ public class ArticleService {
         }
         validateArticleOwner(article, member.getId());
         article.markAsRead();
+
         applicationEventPublisher.publishEvent(new UpdateReadingCountEvent(member.getId(), articleId));
         applicationEventPublisher.publishEvent(new AddArticleScoreEvent(member.getId()));
+        log.info("Published events: UpdateReadingCountEvent, AddArticleScoreEvent - memberId={}, articleId={}",
+                member.getId(), articleId);
     }
 
     public GetArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(Member member, String keyword) {

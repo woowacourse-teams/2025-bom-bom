@@ -75,7 +75,11 @@ public class PetService {
     @Transactional
     public void increaseCurrentScoreForGuideMail(Long memberId, int score){
         Pet pet = petRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext("scoreToAdd", score)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "Pet")
+                        .addContext(ErrorContextKeys.OPERATION, "increaseScoreForGuideMail"));
         pet.increaseCurrentScore(score);
         updatePetStage(pet);
     }

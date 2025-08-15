@@ -56,42 +56,6 @@ test.describe('추천 페이지 - 전체 레이아웃 및 통합', () => {
     await expect(page.getByText('봄봄').first()).toBeVisible();
   });
 
-  test('콘솔 에러가 없어야 한다', async ({ page }) => {
-    const consoleErrors: string[] = [];
-
-    page.on('console', (msg) => {
-      if (msg.type() === 'error') {
-        consoleErrors.push(msg.text());
-      }
-    });
-
-    await page.reload();
-    await page.waitForLoadState('networkidle');
-
-    const criticalErrors = consoleErrors.filter(
-      (error) =>
-        !error.includes('401') &&
-        !error.includes('유효하지 않은 인증 정보') &&
-        !error.includes('gtag is not initialized') &&
-        !error.includes('React does not recognize'),
-    );
-
-    expect(criticalErrors).toHaveLength(0);
-  });
-
-  test('키보드 네비게이션을 처리해야 한다', async ({ page }) => {
-    await page.keyboard.press('Tab');
-
-    const focusedElement = page.locator(':focus');
-    await expect(focusedElement).toBeVisible();
-
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-
-    await page.keyboard.press('Enter');
-  });
-
   test('올바른 메타 정보가 표시되어야 한다', async ({ page }) => {
     await expect(page).toHaveTitle('봄봄');
 

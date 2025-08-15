@@ -74,20 +74,24 @@ public final class TestFixture {
      */
     public static List<Newsletter> createNewsletters(List<Category> categories) {
         return List.of(
-                createNewsletter("뉴스픽", "news@newspick.com", categories.get(0).getId()),
-                createNewsletter("IT타임즈", "editor@ittimes.io", categories.get(1).getId()),
-                createNewsletter("비즈레터", "biz@biz.com", categories.get(2).getId())
+                createNewsletter("뉴스픽", "news@newspick.com", categories.get(0).getId(), 1L),
+                createNewsletter("IT타임즈", "editor@ittimes.io", categories.get(1).getId(), 2L),
+                createNewsletter("비즈레터", "biz@biz.com", categories.get(2).getId(), 3L)
         );
     }
 
     public static Newsletter createNewsletter(String name, String email, Long categoryId) {
+        return createNewsletter(name, email, categoryId, 1L);
+    }
+
+    public static Newsletter createNewsletter(String name, String email, Long categoryId, Long detailId) {
         return Newsletter.builder()
                 .name(name)
                 .description("설명")
                 .imageUrl("https://cdn.bombom.me/img.png")
                 .email(email)
                 .categoryId(categoryId)
-                .detailId(1L)
+                .detailId(detailId)
                 .build();
     }
 

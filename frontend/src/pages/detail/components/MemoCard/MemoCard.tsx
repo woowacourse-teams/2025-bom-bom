@@ -193,7 +193,7 @@ const DeleteButton = styled.button`
   transition: all 0.2s ease-in-out;
 
   &:hover {
-    background-color: #ef4444;
+    background-color: ${({ theme }) => theme.colors.primary};
     color: ${({ theme }) => theme.colors.white};
 
     transform: scale(1.1);
@@ -226,7 +226,7 @@ const MemoContent = styled.div`
   background: linear-gradient(
     135deg,
     ${({ theme }) => theme.colors.disabledBackground} 0%,
-    #f8fafc 100%
+    ${({ theme }) => theme.colors.white} 100%
   );
 
   transition: all 0.2s ease-in-out;
@@ -276,7 +276,7 @@ const MemoText = styled.p`
   border: 2px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 12px;
 
-  background-color: #f8fafc;
+  background-color: ${({ theme }) => theme.colors.white};
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body2};
   line-height: 1.5;

@@ -66,6 +66,7 @@ public class ArticleService {
         }
         validateArticleOwner(article, member.getId());
         article.markAsRead();
+        //다 읽음 이벤트
         applicationEventPublisher.publishEvent(new UpdateReadingCountEvent(member.getId(), articleId));
         applicationEventPublisher.publishEvent(new AddArticleScoreEvent(member.getId()));
     }
@@ -88,8 +89,11 @@ public class ArticleService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public boolean canAddArticleScore(Long memberId) {
-        int todayReadCount = articleRepository.countByMemberIdAndArrivedDateTimeAndIsRead(memberId, LocalDate.now(),
-                true);
+        int todayReadCount = articleRepository.countByMemberIdAndArrivedDateTimeAndIsRead(
+                memberId,
+                LocalDate.now(),
+                true
+        );
         return todayReadCount <= ScorePolicyConstants.MAX_TODAY_READING_COUNT;
     }
 

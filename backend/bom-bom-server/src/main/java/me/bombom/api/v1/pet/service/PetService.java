@@ -52,6 +52,14 @@ public class PetService {
         updatePetStage(pet);
     }
 
+    @Transactional
+    public void increaseCurrentScoreForGuideMail(Long memberId, int score){
+        Pet pet = petRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        pet.increaseCurrentScore(score);
+        updatePetStage(pet);
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void createPet(Long memberId) {
         petRepository.save(Pet.builder()

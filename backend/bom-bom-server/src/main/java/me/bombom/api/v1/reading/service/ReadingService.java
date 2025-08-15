@@ -92,6 +92,14 @@ public class ReadingService {
         updateWeeklyReadingCount(memberId);
     }
 
+    @Transactional
+    public void updateReadingCountForGuideMail(Long memberId) {
+        // TODO: 규칙 확정 후 연속 읽기 로직 수정
+        updateContinueReadingCount(memberId);
+        updateTodayReadingCount(memberId);
+        updateWeeklyReadingCount(memberId);
+    }
+
     public ReadingInformationResponse getReadingInformation(Member member) {
         Long memberId = member.getId();
         ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)

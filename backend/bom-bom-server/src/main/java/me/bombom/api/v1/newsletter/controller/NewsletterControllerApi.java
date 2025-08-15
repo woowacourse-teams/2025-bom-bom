@@ -15,8 +15,8 @@ import java.util.List;
 public interface NewsletterControllerApi {
 
     @Operation(
-            summary = "뉴스레터 목록 조회",
-            description = "모든 뉴스레터 목록을 조회합니다."
+        summary = "뉴스레터 목록 조회",
+        description = "모든 뉴스레터 목록을 조회합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "뉴스레터 목록 조회 성공")
@@ -24,8 +24,8 @@ public interface NewsletterControllerApi {
     List<NewsletterResponse> getNewsletters();
 
     @Operation(
-            summary = "뉴스레터 상세 조회",
-            description = "특정 뉴스레터 상세 조회를 합니다."
+        summary = "뉴스레터 상세 조회",
+        description = "특정 뉴스레터 상세 조회를 합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "뉴스레터 상세 조회 성공"),

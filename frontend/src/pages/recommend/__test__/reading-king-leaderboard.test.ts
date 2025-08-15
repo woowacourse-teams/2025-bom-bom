@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Recommend Page - Reading King Leaderboard', () => {
+test.describe('추천 페이지 - 독서왕 리더보드', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:3000/recommend');
   });
 
-  test('should display leaderboard header correctly', async ({ page }) => {
+  test('리더보드 헤더가 올바르게 표시되어야 한다', async ({ page }) => {
     // 리더보드 헤더가 표시되는지 확인
     await expect(page.getByText('이달의 독서왕')).toBeVisible();
 
@@ -16,7 +16,7 @@ test.describe('Recommend Page - Reading King Leaderboard', () => {
     }
   });
 
-  test('should display top 5 leaderboard correctly', async ({ page }) => {
+  test('상위 5명 리더보드가 올바르게 표시되어야 한다', async ({ page }) => {
     // 1위 사용자 확인 (크라운 아이콘과 챔피언 배지)
     await expect(page.getByText('👑')).toBeVisible();
     await expect(page.getByText('김독서')).toBeVisible();
@@ -43,7 +43,7 @@ test.describe('Recommend Page - Reading King Leaderboard', () => {
     await expect(page.getByText('정인사이트')).toBeVisible();
   });
 
-  test('should display user rank and stats correctly', async ({ page }) => {
+  test('사용자 순위와 통계가 올바르게 표시되어야 한다', async ({ page }) => {
     // 나의 순위 섹션이 표시되는지 확인
     await expect(page.getByText('나의 순위')).toBeVisible();
     await expect(page.getByText('12위')).toBeVisible();
@@ -53,7 +53,7 @@ test.describe('Recommend Page - Reading King Leaderboard', () => {
     await expect(page.getByText('87개')).toBeVisible();
   });
 
-  test('should display progress information correctly', async ({ page }) => {
+  test('진행 정보가 올바르게 표시되어야 한다', async ({ page }) => {
     // 다음 순위까지의 진행 상황이 표시되는지 확인
     await expect(page.getByText('다음 순위까지')).toBeVisible();
     await expect(page.getByText('13개 더 읽기')).toBeVisible();
@@ -65,7 +65,7 @@ test.describe('Recommend Page - Reading King Leaderboard', () => {
     await expect(progressSection).toBeVisible();
   });
 
-  test('should display all user avatars', async ({ page }) => {
+  test('모든 사용자 아바타가 표시되어야 한다', async ({ page }) => {
     // 모든 사용자의 아바타 이미지가 표시되는지 확인
     const avatars = page.locator('img').filter({ hasText: '' });
 
@@ -74,7 +74,7 @@ test.describe('Recommend Page - Reading King Leaderboard', () => {
     expect(avatarCount).toBeGreaterThanOrEqual(5);
   });
 
-  test('should show proper ranking icons', async ({ page }) => {
+  test('적절한 순위 아이콘들이 표시되어야 한다', async ({ page }) => {
     // 1위 크라운 아이콘
     const crownIcon = page.getByText('👑').first();
     await expect(crownIcon).toBeVisible();
@@ -92,7 +92,7 @@ test.describe('Recommend Page - Reading King Leaderboard', () => {
     await expect(page.getByText('#5')).toBeVisible();
   });
 
-  test('should display increment numbers correctly', async ({ page }) => {
+  test('증가 수치가 올바르게 표시되어야 한다', async ({ page }) => {
     // 각 사용자의 증가량이 올바르게 표시되는지 확인
     const increments = ['+15', '+12', '+8', '+6', '+4'];
 
@@ -101,7 +101,7 @@ test.describe('Recommend Page - Reading King Leaderboard', () => {
     }
   });
 
-  test('should be responsive on mobile', async ({ page }) => {
+  test('모바일에서 반응형으로 동작해야 한다', async ({ page }) => {
     // 모바일 뷰포트로 변경
     await page.setViewportSize({ width: 375, height: 667 });
 
@@ -112,7 +112,7 @@ test.describe('Recommend Page - Reading King Leaderboard', () => {
     await expect(page.getByText('12위')).toBeVisible();
   });
 
-  test('should have proper styling and layout', async ({ page }) => {
+  test('올바른 스타일과 레이아웃을 가져야 한다', async ({ page }) => {
     // 리더보드 컨테이너가 올바르게 스타일링되어 있는지 확인
     const leaderboardContainer = page
       .locator('div')
@@ -125,7 +125,7 @@ test.describe('Recommend Page - Reading King Leaderboard', () => {
     await expect(myRankSection).toBeVisible();
   });
 
-  test('should display champion badge correctly', async ({ page }) => {
+  test('챔피언 배지가 올바르게 표시되어야 한다', async ({ page }) => {
     // 1위 사용자의 챔피언 배지가 올바르게 표시되는지 확인
     const championBadge = page.getByText('👑 챔피언');
     await expect(championBadge).toBeVisible();

@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Recommend Page - Navigation', () => {
+test.describe('추천 페이지 - 네비게이션', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:3000/recommend');
   });
 
-  test('should display navigation menu correctly', async ({ page }) => {
+  test('네비게이션 메뉴가 올바르게 표시되어야 한다', async ({ page }) => {
     // 네비게이션 메뉴가 표시되는지 확인
     const navigation = page.locator('nav');
     await expect(navigation).toBeVisible();
@@ -16,7 +16,7 @@ test.describe('Recommend Page - Navigation', () => {
     await expect(page.getByText('뉴스레터 추천')).toBeVisible();
   });
 
-  test('should navigate to correct pages when clicking navigation links', async ({
+  test('네비게이션 링크를 클릭하면 올바른 페이지로 이동해야 한다', async ({
     page,
   }) => {
     // "오늘의 뉴스레터" 링크 클릭
@@ -38,14 +38,14 @@ test.describe('Recommend Page - Navigation', () => {
     await expect(page).toHaveURL('http://localhost:3000/recommend');
   });
 
-  test('should display login button', async ({ page }) => {
+  test('로그인 버튼이 표시되어야 한다', async ({ page }) => {
     // 로그인 버튼이 표시되는지 확인
     const loginButton = page.getByText('로그인');
     await expect(loginButton).toBeVisible();
     await expect(loginButton).toHaveAttribute('role', 'button');
   });
 
-  test('should display brand logo and navigate to home', async ({ page }) => {
+  test('브랜드 로고가 표시되고 홈으로 이동해야 한다', async ({ page }) => {
     // 브랜드 로고가 표시되는지 확인
     const brandLogo = page.getByText('봄봄').first();
     await expect(brandLogo).toBeVisible();

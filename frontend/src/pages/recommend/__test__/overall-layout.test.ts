@@ -1,17 +1,17 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Recommend Page - Overall Layout and Integration', () => {
+test.describe('추천 페이지 - 전체 레이아웃 및 통합', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:3000/recommend');
   });
 
-  test('should load the page successfully', async ({ page }) => {
+  test('페이지가 성공적으로 로드되어야 한다', async ({ page }) => {
     // 페이지가 성공적으로 로드되는지 확인
     await expect(page).toHaveTitle('봄봄');
     await expect(page).toHaveURL('http://localhost:3000/recommend');
   });
 
-  test('should display all main sections', async ({ page }) => {
+  test('모든 주요 섹션이 표시되어야 한다', async ({ page }) => {
     // 모든 주요 섹션이 표시되는지 확인
 
     // 헤더/네비게이션
@@ -30,7 +30,7 @@ test.describe('Recommend Page - Overall Layout and Integration', () => {
     await expect(page.getByText('이달의 독서왕')).toBeVisible();
   });
 
-  test('should have proper layout structure', async ({ page }) => {
+  test('올바른 레이아웃 구조를 가져야 한다', async ({ page }) => {
     // 메인 컨테이너가 존재하는지 확인
     const mainContainer = page.locator('div').first();
     await expect(mainContainer).toBeVisible();
@@ -40,7 +40,7 @@ test.describe('Recommend Page - Overall Layout and Integration', () => {
     await expect(page.getByText('이달의 독서왕')).toBeVisible();
   });
 
-  test('should be responsive and mobile-friendly', async ({ page }) => {
+  test('반응형이고 모바일 친화적이어야 한다', async ({ page }) => {
     // 데스크톱 뷰에서 레이아웃 확인
     await page.setViewportSize({ width: 1280, height: 720 });
     await expect(page.getByText('트렌디한 뉴스레터')).toBeVisible();
@@ -57,7 +57,7 @@ test.describe('Recommend Page - Overall Layout and Integration', () => {
     await expect(page.getByText('이달의 독서왕')).toBeVisible();
   });
 
-  test('should handle page scroll correctly', async ({ page }) => {
+  test('페이지 스크롤을 올바르게 처리해야 한다', async ({ page }) => {
     // 페이지 스크롤이 작동하는지 확인
     await page.setViewportSize({ width: 1280, height: 600 });
 
@@ -72,7 +72,7 @@ test.describe('Recommend Page - Overall Layout and Integration', () => {
     await expect(page.getByText('봄봄').first()).toBeVisible();
   });
 
-  test('should not have console errors', async ({ page }) => {
+  test('콘솔 에러가 없어야 한다', async ({ page }) => {
     const consoleErrors: string[] = [];
 
     page.on('console', (msg) => {
@@ -97,7 +97,7 @@ test.describe('Recommend Page - Overall Layout and Integration', () => {
     expect(criticalErrors).toHaveLength(0);
   });
 
-  test('should handle keyboard navigation', async ({ page }) => {
+  test('키보드 네비게이션을 처리해야 한다', async ({ page }) => {
     // 탭 키로 네비게이션이 가능한지 확인
     await page.keyboard.press('Tab');
 
@@ -114,7 +114,7 @@ test.describe('Recommend Page - Overall Layout and Integration', () => {
     await page.keyboard.press('Enter');
   });
 
-  test('should display correct meta information', async ({ page }) => {
+  test('올바른 메타 정보가 표시되어야 한다', async ({ page }) => {
     // 페이지 제목이 올바른지 확인
     await expect(page).toHaveTitle('봄봄');
 
@@ -126,7 +126,7 @@ test.describe('Recommend Page - Overall Layout and Integration', () => {
     expect(viewport).toBeTruthy();
   });
 
-  test('should load all images successfully', async ({ page }) => {
+  test('모든 이미지가 성공적으로 로드되어야 한다', async ({ page }) => {
     // 페이지의 모든 이미지가 로드되는지 확인
     const images = page.locator('img');
     const imageCount = await images.count();
@@ -145,7 +145,7 @@ test.describe('Recommend Page - Overall Layout and Integration', () => {
     }
   });
 
-  test('should maintain performance standards', async ({ page }) => {
+  test('성능 기준을 유지해야 한다', async ({ page }) => {
     // 페이지 로드 성능 확인
     const startTime = Date.now();
     await page.goto('http://localhost:3000/recommend');

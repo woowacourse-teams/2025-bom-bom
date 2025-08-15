@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Recommend Page - Newsletter Hero Section', () => {
+test.describe('추천 페이지 - 뉴스레터 히어로 섹션', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:3000/recommend');
   });
 
-  test('should display hero section for non-logged-in user', async ({
+  test('비로그인 사용자에게 히어로 섹션이 표시되어야 한다', async ({
     page,
   }) => {
     // 히어로 섹션의 기본 요소들이 표시되는지 확인
@@ -18,7 +18,7 @@ test.describe('Recommend Page - Newsletter Hero Section', () => {
     ).toBeVisible();
   });
 
-  test('should display CTA button and link to login page', async ({ page }) => {
+  test('CTA 버튼이 표시되고 로그인 페이지로 연결되어야 한다', async ({ page }) => {
     // CTA 버튼이 표시되는지 확인
     const ctaButton = page.getByText('로그인하고 맞춤 추천 받기');
     await expect(ctaButton).toBeVisible();
@@ -31,7 +31,7 @@ test.describe('Recommend Page - Newsletter Hero Section', () => {
     await expect(page).toHaveURL('http://localhost:3000/login');
   });
 
-  test('should have proper styling and layout', async ({ page }) => {
+  test('올바른 스타일과 레이아웃을 가져야 한다', async ({ page }) => {
     // 히어로 섹션이 중앙 정렬되어 있는지 확인
     const heroContent = page
       .locator('div')
@@ -44,7 +44,7 @@ test.describe('Recommend Page - Newsletter Hero Section', () => {
     await expect(ctaButton).toBeEnabled();
   });
 
-  test('should display gradient background', async ({ page }) => {
+  test('그라데이션 배경이 표시되어야 한다', async ({ page }) => {
     // 히어로 섹션의 배경 그라데이션이 적용되어 있는지 확인
     const heroContent = page
       .locator('div')
@@ -55,7 +55,7 @@ test.describe('Recommend Page - Newsletter Hero Section', () => {
     await expect(heroContent).toBeVisible();
   });
 
-  test('should be responsive on mobile', async ({ page }) => {
+  test('모바일에서 반응형으로 동작해야 한다', async ({ page }) => {
     // 모바일 뷰포트로 변경
     await page.setViewportSize({ width: 375, height: 667 });
 

@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Recommend Page - Trendy Section', () => {
+test.describe('추천 페이지 - 트렌디 섹션', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:3000/recommend');
   });
 
-  test('should display trendy section header correctly', async ({ page }) => {
+  test('트렌디 섹션 헤더가 올바르게 표시되어야 한다', async ({ page }) => {
     // 트렌디 섹션 헤더가 표시되는지 확인
     await expect(page.getByText('트렌디한 뉴스레터')).toBeVisible();
 
@@ -21,7 +21,7 @@ test.describe('Recommend Page - Trendy Section', () => {
     }
   });
 
-  test('should display category filter chips', async ({ page }) => {
+  test('카테고리 필터 칩들이 표시되어야 한다', async ({ page }) => {
     // 카테고리 필터 칩들이 표시되는지 확인
     const categoryButtons = [
       '전체',
@@ -41,7 +41,7 @@ test.describe('Recommend Page - Trendy Section', () => {
     }
   });
 
-  test('should filter newsletters when clicking category chips', async ({
+  test('카테고리 칩을 클릭하면 뉴스레터가 필터링되어야 한다', async ({
     page,
   }) => {
     // 기본적으로 "전체" 카테고리가 선택되어 있는지 확인
@@ -65,7 +65,7 @@ test.describe('Recommend Page - Trendy Section', () => {
     await expect(page.getByText('트렌디한 뉴스레터')).toBeVisible();
   });
 
-  test('should display newsletter cards', async ({ page }) => {
+  test('뉴스레터 카드들이 표시되어야 한다', async ({ page }) => {
     // 뉴스레터 카드들이 표시되는지 확인
     const newsletterCards = page
       .locator('button')
@@ -79,7 +79,7 @@ test.describe('Recommend Page - Trendy Section', () => {
     await expect(page.getByText('노마드코더')).toBeVisible();
   });
 
-  test('should handle newsletter card click', async ({ page }) => {
+  test('뉴스레터 카드 클릭을 처리해야 한다', async ({ page }) => {
     // 첫 번째 뉴스레터 카드 클릭
     const firstCard = page
       .locator('button')
@@ -98,7 +98,7 @@ test.describe('Recommend Page - Trendy Section', () => {
     await newPage.close();
   });
 
-  test('should display newsletter information correctly', async ({ page }) => {
+  test('뉴스레터 정보가 올바르게 표시되어야 한다', async ({ page }) => {
     // 뉴스레터 카드에 제목과 설명이 표시되는지 확인
     await expect(page.getByText('오! 당신이 반할 그 맛 😋')).toBeVisible();
     await expect(page.getByText('최신 개발 Dev 뉴스')).toBeVisible();
@@ -108,7 +108,7 @@ test.describe('Recommend Page - Trendy Section', () => {
     await expect(images.first()).toBeVisible();
   });
 
-  test('should be responsive on mobile', async ({ page }) => {
+  test('모바일에서 반응형으로 동작해야 한다', async ({ page }) => {
     // 모바일 뷰포트로 변경
     await page.setViewportSize({ width: 375, height: 667 });
 
@@ -123,7 +123,7 @@ test.describe('Recommend Page - Trendy Section', () => {
     await expect(page.getByText('오당맛')).toBeVisible();
   });
 
-  test('should handle email copy functionality', async ({ page }) => {
+  test('이메일 복사 기능을 처리해야 한다', async ({ page }) => {
     // 클립보드 API mock
     await page.addInitScript(() => {
       Object.assign(navigator, {

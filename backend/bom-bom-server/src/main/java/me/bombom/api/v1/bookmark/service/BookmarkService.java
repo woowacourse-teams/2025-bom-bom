@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 
 @Service
@@ -34,8 +35,8 @@ public class BookmarkService {
     public void addBookmark(Long memberId, Long articleId) {
         Article article = articleRepository.findById(articleId)
             .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                .addContext("memberId", memberId)
-                .addContext("articleId", articleId));
+                .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                .addContext(ErrorContextKeys.ARTICLE_ID, articleId));
         validateArticleOwner(memberId, article);
         if (bookmarkRepository.existsByMemberIdAndArticleId(memberId, articleId)) {
             return;
@@ -52,8 +53,8 @@ public class BookmarkService {
     public void deleteBookmark(Long memberId, Long articleId) {
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext("memberId", memberId)
-                    .addContext("articleId", articleId));
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext(ErrorContextKeys.ARTICLE_ID, articleId));
         validateArticleOwner(memberId, article);
         bookmarkRepository.deleteByMemberIdAndArticleId(memberId, articleId);
     }
@@ -61,9 +62,9 @@ public class BookmarkService {
     private void validateArticleOwner(Long memberId, Article article) {
         if (article.isNotOwner(memberId)) {
             throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
-                .addContext("memberId", memberId)
-                .addContext("articleId", article.getId())
-                .addContext("actualOwnerId", article.getMemberId());
+                .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                .addContext(ErrorContextKeys.ARTICLE_ID, article.getId())
+                .addContext(ErrorContextKeys.ACTUAL_OWNER_ID, article.getMemberId());
         }
     }
 }

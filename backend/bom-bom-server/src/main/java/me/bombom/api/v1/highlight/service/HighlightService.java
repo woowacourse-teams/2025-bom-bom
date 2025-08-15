@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
@@ -32,8 +33,8 @@ public class HighlightService {
     public HighlightResponse create(HighlightCreateRequest request, Member member) {
         Article article = articleRepository.findById(request.articleId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext("memberId", member.getId())
-                    .addContext("articleId", request.articleId()));
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext(ErrorContextKeys.ARTICLE_ID, request.articleId()));
         validateArticleOwner(member, article);
         HighlightLocation location = request.location()
                 .toHighlightLocation();
@@ -61,9 +62,9 @@ public class HighlightService {
     private void validateArticleOwner(Member member, Article article) {
         if (article.isNotOwner(member.getId())) {
             throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
-                .addContext("memberId", member.getId())
-                .addContext("articleId", article.getId())
-                .addContext("actualOwnerId", article.getMemberId());
+                .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                .addContext(ErrorContextKeys.ARTICLE_ID, article.getId())
+                .addContext(ErrorContextKeys.ACTUAL_OWNER_ID, article.getMemberId());
         }
     }
 
@@ -80,15 +81,15 @@ public class HighlightService {
     private Highlight findHighlightWithOwnerValidation(Long id, Member member) {
         Highlight highlight = highlightRepository.findById(id)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext("memberId", member.getId())
-                    .addContext("highlightId", id)
-                    .addContext("entityType", "Highlight"));
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "Highlight")
+                    .addContext("highlightId", id));
         Article article = articleRepository.findById(highlight.getArticleId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext("memberId", member.getId())
-                    .addContext("highlightId", id)
-                    .addContext("articleId", highlight.getArticleId())
-                    .addContext("entityType", "Article"));
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext(ErrorContextKeys.ARTICLE_ID, highlight.getArticleId())
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "Article")
+                    .addContext("highlightId", id));
         validateArticleOwner(member, article);
         return highlight;
     }

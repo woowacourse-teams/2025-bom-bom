@@ -69,11 +69,6 @@ const MemoCard = ({
             </NewsletterMeta>
           </NewsletterInfo>
         )}
-        {onRemoveButtonClick && (
-          <DeleteButton onClick={handleRemoveButtonClick}>
-            <DeleteIcon fill={theme.colors.black} width={20} height={20} />
-          </DeleteButton>
-        )}
       </HeaderBox>
 
       <MemoContent>
@@ -99,6 +94,12 @@ const MemoCard = ({
           {new Date(createdAt).toLocaleDateString('ko-KR')}
         </CreatedAtText>
       )}
+
+      {onRemoveButtonClick && (
+        <DeleteButton onClick={handleRemoveButtonClick}>
+          <DeleteIcon fill={theme.colors.black} width={20} height={20} />
+        </DeleteButton>
+      )}
     </Container>
   );
 };
@@ -106,6 +107,7 @@ const MemoCard = ({
 export default MemoCard;
 
 const Container = styled.div`
+  position: relative;
   width: 100%;
   padding: 20px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
@@ -177,7 +179,9 @@ const ArticleTitle = styled.h3`
 `;
 
 const DeleteButton = styled.button`
-  margin-left: auto;
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
   padding: 8px;
   border: none;
   border-radius: 8px;
@@ -187,6 +191,13 @@ const DeleteButton = styled.button`
 
   cursor: pointer;
   transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background-color: #ef4444;
+    color: ${({ theme }) => theme.colors.white};
+
+    transform: scale(1.1);
+  }
 `;
 
 const MemoFooter = styled.div`

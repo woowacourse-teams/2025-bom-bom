@@ -23,20 +23,21 @@ export const handlers = [
     const newsletter = params.get('newsletter') ?? undefined;
     const keyword = params.get('keyword') ?? undefined;
 
-    let filtered = [...ARTICLES];
+    let filteredArticles = [...ARTICLES];
 
     if (newsletter) {
-      filtered = filtered.filter(
-        (a) => a.newsletter.name.toLowerCase() === newsletter.toLowerCase(),
+      filteredArticles = filteredArticles.filter(
+        (article) =>
+          article.newsletter.name.toLowerCase() === newsletter.toLowerCase(),
       );
     }
 
     if (keyword) {
       const lower = keyword.toLowerCase();
-      filtered = filtered.filter(
-        (a) =>
-          a.title.toLowerCase().includes(lower) ||
-          a.newsletter.name.toLowerCase().includes(lower),
+      filteredArticles = filteredArticles.filter(
+        (article) =>
+          article.title.toLowerCase().includes(lower) ||
+          article.newsletter.name.toLowerCase().includes(lower),
       );
     }
 
@@ -50,18 +51,19 @@ export const handlers = [
     };
 
     if (sortField === 'arrivedDateTime') {
-      filtered.sort((a, b) => {
-        const aTime = toTime(a.arrivedDateTime);
-        const bTime = toTime(b.arrivedDateTime);
+      filteredArticles.sort((article1, article2) => {
+        const aTime = toTime(article1.arrivedDateTime);
+        const bTime = toTime(article2.arrivedDateTime);
         return sortOrder === 'ASC' ? aTime - bTime : bTime - aTime;
       });
     }
 
-    const totalElements = filtered.length;
+    const totalElements = filteredArticles.length;
     const totalPages = size > 0 ? Math.ceil(totalElements / size) : 1;
     const start = size > 0 ? page * size : 0;
-    const end = size > 0 ? start + size : filtered.length;
-    const content = size > 0 ? filtered.slice(start, end) : filtered;
+    const end = size > 0 ? start + size : filteredArticles.length;
+    const content =
+      size > 0 ? filteredArticles.slice(start, end) : filteredArticles;
 
     return HttpResponse.json({
       totalPages,

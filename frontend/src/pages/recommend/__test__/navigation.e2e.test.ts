@@ -16,7 +16,9 @@ test.describe('Recommend Page - Navigation', () => {
     await expect(page.getByText('뉴스레터 추천')).toBeVisible();
   });
 
-  test('should navigate to correct pages when clicking navigation links', async ({ page }) => {
+  test('should navigate to correct pages when clicking navigation links', async ({
+    page,
+  }) => {
     // "오늘의 뉴스레터" 링크 클릭
     await page.getByText('오늘의 뉴스레터').click();
     await expect(page).toHaveURL('http://localhost:3000/');

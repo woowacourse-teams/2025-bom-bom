@@ -8,10 +8,15 @@ test.describe('Recommend Page - Trendy Section', () => {
   test('should display trendy section header correctly', async ({ page }) => {
     // 트렌디 섹션 헤더가 표시되는지 확인
     await expect(page.getByText('트렌디한 뉴스레터')).toBeVisible();
-    
+
     // 아이콘이 표시되는지 확인
-    const iconContainer = page.locator('span').filter({ hasText: /트렌디한 뉴스레터/ }).locator('..').locator('img, svg').first();
-    if (await iconContainer.count() > 0) {
+    const iconContainer = page
+      .locator('span')
+      .filter({ hasText: /트렌디한 뉴스레터/ })
+      .locator('..')
+      .locator('img, svg')
+      .first();
+    if ((await iconContainer.count()) > 0) {
       await expect(iconContainer).toBeVisible();
     }
   });
@@ -28,7 +33,7 @@ test.describe('Recommend Page - Trendy Section', () => {
       '시사/사회',
       '취미/자기개발',
       '문화/예술',
-      '리빙/인테리어'
+      '리빙/인테리어',
     ];
 
     for (const category of categoryButtons) {
@@ -36,7 +41,9 @@ test.describe('Recommend Page - Trendy Section', () => {
     }
   });
 
-  test('should filter newsletters when clicking category chips', async ({ page }) => {
+  test('should filter newsletters when clicking category chips', async ({
+    page,
+  }) => {
     // 기본적으로 "전체" 카테고리가 선택되어 있는지 확인
     const allCategoryButton = page.getByRole('button', { name: '전체' });
     await expect(allCategoryButton).toBeVisible();
@@ -44,7 +51,7 @@ test.describe('Recommend Page - Trendy Section', () => {
     // 다른 카테고리 클릭해보기
     const itTechButton = page.getByRole('button', { name: 'IT/테크' });
     await itTechButton.click();
-    
+
     // 클릭 후 페이지가 여전히 로드되어 있는지 확인
     await expect(page.getByText('트렌디한 뉴스레터')).toBeVisible();
 
@@ -60,8 +67,10 @@ test.describe('Recommend Page - Trendy Section', () => {
 
   test('should display newsletter cards', async ({ page }) => {
     // 뉴스레터 카드들이 표시되는지 확인
-    const newsletterCards = page.locator('button').filter({ hasText: /뉴스레터 이미지/ });
-    
+    const newsletterCards = page
+      .locator('button')
+      .filter({ hasText: /뉴스레터 이미지/ });
+
     // 최소 하나의 뉴스레터 카드가 표시되는지 확인
     await expect(newsletterCards.first()).toBeVisible();
 
@@ -72,13 +81,16 @@ test.describe('Recommend Page - Trendy Section', () => {
 
   test('should handle newsletter card click', async ({ page }) => {
     // 첫 번째 뉴스레터 카드 클릭
-    const firstCard = page.locator('button').filter({ hasText: /뉴스레터 이미지/ }).first();
+    const firstCard = page
+      .locator('button')
+      .filter({ hasText: /뉴스레터 이미지/ })
+      .first();
     await expect(firstCard).toBeVisible();
-    
+
     // 새 탭이 열리는 것을 감지하기 위한 이벤트 리스너 설정
     const [newPage] = await Promise.all([
       page.waitForEvent('popup'),
-      firstCard.click()
+      firstCard.click(),
     ]);
 
     // 새 탭이 열렸는지 확인
@@ -90,7 +102,7 @@ test.describe('Recommend Page - Trendy Section', () => {
     // 뉴스레터 카드에 제목과 설명이 표시되는지 확인
     await expect(page.getByText('오! 당신이 반할 그 맛 😋')).toBeVisible();
     await expect(page.getByText('최신 개발 Dev 뉴스')).toBeVisible();
-    
+
     // 뉴스레터 이미지가 표시되는지 확인
     const images = page.locator('img[alt*="뉴스레터 이미지"]');
     await expect(images.first()).toBeVisible();
@@ -99,14 +111,14 @@ test.describe('Recommend Page - Trendy Section', () => {
   test('should be responsive on mobile', async ({ page }) => {
     // 모바일 뷰포트로 변경
     await page.setViewportSize({ width: 375, height: 667 });
-    
+
     // 모바일에서도 트렌디 섹션이 표시되는지 확인
     await expect(page.getByText('트렌디한 뉴스레터')).toBeVisible();
-    
+
     // 카테고리 버튼들이 표시되는지 확인
     await expect(page.getByText('전체')).toBeVisible();
     await expect(page.getByText('IT/테크')).toBeVisible();
-    
+
     // 뉴스레터 카드가 표시되는지 확인
     await expect(page.getByText('오당맛')).toBeVisible();
   });
@@ -122,13 +134,16 @@ test.describe('Recommend Page - Trendy Section', () => {
     });
 
     // 알림 대화상자를 처리하기 위한 리스너 설정
-    page.on('dialog', async dialog => {
+    page.on('dialog', async (dialog) => {
       expect(dialog.message()).toContain('이메일이 복사되었습니다');
       await dialog.accept();
     });
 
     // 뉴스레터 카드 클릭 (로그인되지 않은 상태에서는 알림만 표시)
-    const firstCard = page.locator('button').filter({ hasText: /뉴스레터 이미지/ }).first();
+    const firstCard = page
+      .locator('button')
+      .filter({ hasText: /뉴스레터 이미지/ })
+      .first();
     await firstCard.click();
   });
 });

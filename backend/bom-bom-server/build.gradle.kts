@@ -62,8 +62,9 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 
     // logging
-    implementation("org.springframework.cloud:spring-cloud-starter-sleuth:3.1.2")
-    implementation("net.logstash.logback:logstash-logback-encoder:7.4")
+    implementation(platform("org.springframework.cloud:spring-cloud-dependencies:2025.0.0"))
+    implementation("io.micrometer:micrometer-tracing-bridge-brave")
+    implementation("net.logstash.logback:logstash-logback-encoder:8.1")
 }
 
 tasks.withType<Test> {

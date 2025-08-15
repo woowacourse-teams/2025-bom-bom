@@ -11,6 +11,9 @@ test.describe('Storage 페이지 - 기본 UI 테스트', () => {
       await page.goto('/storage');
       await page.waitForLoadState('networkidle');
     }
+
+    await expect(page.getByRole('list')).toBeVisible();
+    await expect(page.getByRole('listitem').first()).toBeVisible();
   });
 
   test('페이지 제목과 기본 헤더가 표시되어야 한다', async ({ page }) => {
@@ -40,7 +43,9 @@ test.describe('Storage 페이지 - 기본 UI 테스트', () => {
     await expect(page.getByRole('searchbox', { name: '검색' })).toBeVisible();
 
     // 정렬 옵션 확인
-    await expect(page.getByRole('paragraph', { name: '최신순' })).toBeVisible();
+    await expect(
+      page.locator('p').filter({ hasText: '최신순' }).first(),
+    ).toBeVisible();
 
     // 총 개수 표시 확인
     await expect(page.getByText(/총 \d+개/)).toBeVisible();
@@ -59,17 +64,22 @@ test.describe('Storage 페이지 - 기본 UI 테스트', () => {
   });
 
   test('기사 메타 정보가 표시되어야 한다', async ({ page }) => {
-    // 기사 출처 정보
-    await expect(page.getByText('from UPPITY')).toBeVisible();
+    // 기사 출처 정보 (첫 기사 범위로 제한)
+    const articleList = page
+      .locator('ul')
+      .filter({ has: page.locator('a[href^="/articles/"]') })
+      .first();
+    const firstArticle = articleList.locator('li').first();
+    await expect(firstArticle.getByText('from UPPITY')).toBeVisible();
 
     // 날짜 정보
-    await expect(page.getByText('2025.07.01')).toBeVisible();
+    await expect(firstArticle.getByText('2025.07.01')).toBeVisible();
 
     // 읽기 시간 정보
-    await expect(page.getByText('5분')).toBeVisible();
+    await expect(firstArticle.getByText('5분')).toBeVisible();
 
     // 썸네일 이미지
-    await expect(page.getByAltText('아티클 썸네일').first()).toBeVisible();
+    await expect(firstArticle.getByAltText('아티클 썸네일')).toBeVisible();
   });
 
   test('읽음 상태가 표시되어야 한다', async ({ page }) => {

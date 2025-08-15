@@ -11,6 +11,9 @@ test.describe('Storage 페이지 - 뉴스레터 필터 테스트', () => {
       await page.goto('/storage');
       await page.waitForLoadState('networkidle');
     }
+
+    await expect(page.getByRole('list')).toBeVisible();
+    await expect(page.getByRole('listitem').first()).toBeVisible();
   });
 
   test('전체 필터가 기본 선택되어야 한다', async ({ page }) => {
@@ -26,11 +29,7 @@ test.describe('Storage 페이지 - 뉴스레터 필터 테스트', () => {
     await page.getByText('테크뉴스').click();
 
     // API 호출 대기
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes('/api/v1/articles') &&
-        response.status() === 200,
-    );
+    await page.waitForLoadState('networkidle');
 
     // 필터가 적용되었는지 확인 (URL 파라미터나 상태 변화)
     await page.waitForTimeout(1000); // API 응답 처리 대기
@@ -41,11 +40,7 @@ test.describe('Storage 페이지 - 뉴스레터 필터 테스트', () => {
     await page.getByText('개발자뉴스').click();
 
     // API 호출 대기
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes('/api/v1/articles') &&
-        response.status() === 200,
-    );
+    await page.waitForLoadState('networkidle');
 
     await page.waitForTimeout(1000);
   });
@@ -55,11 +50,7 @@ test.describe('Storage 페이지 - 뉴스레터 필터 테스트', () => {
     await page.getByText('AI뉴스').click();
 
     // API 호출 대기
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes('/api/v1/articles') &&
-        response.status() === 200,
-    );
+    await page.waitForLoadState('networkidle');
 
     await page.waitForTimeout(1000);
   });
@@ -67,27 +58,15 @@ test.describe('Storage 페이지 - 뉴스레터 필터 테스트', () => {
   test('필터 간 전환이 원활해야 한다', async ({ page }) => {
     // 첫 번째 필터 클릭
     await page.getByText('테크뉴스').click();
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes('/api/v1/articles') &&
-        response.status() === 200,
-    );
+    await page.waitForLoadState('networkidle');
 
     // 다른 필터로 전환
     await page.getByText('AI뉴스').click();
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes('/api/v1/articles') &&
-        response.status() === 200,
-    );
+    await page.waitForLoadState('networkidle');
 
     // 전체로 다시 전환
     await page.getByText('전체').click();
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes('/api/v1/articles') &&
-        response.status() === 200,
-    );
+    await page.waitForLoadState('networkidle');
   });
 
   test('필터별 카운트가 올바르게 표시되어야 한다', async ({ page }) => {

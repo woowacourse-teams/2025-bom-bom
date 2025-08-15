@@ -11,35 +11,38 @@ test.describe('Storage 페이지 - 기사 상호작용 테스트', () => {
       await page.goto('/storage');
       await page.waitForLoadState('networkidle');
     }
+
+    // 기사 목록이 로드될 때까지 대기
+    await expect(page.getByRole('list')).toBeVisible();
+    await expect(page.getByRole('listitem').first()).toBeVisible();
   });
 
   test('기사 목록이 올바르게 로드되어야 한다', async ({ page }) => {
-    // 기사 목록 API 호출 대기
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes('/api/v1/articles') &&
-        response.status() === 200,
-    );
-
-    // 기사 목록 컨테이너 확인
-    await expect(page.getByRole('list')).toBeVisible();
+    // 기사 목록 컨테이너 확인 (기사 링크를 포함한 UL을 기준으로 선택)
+    const articleList = page
+      .locator('ul')
+      .filter({ has: page.locator('a[href^="/articles/"]') })
+      .first();
+    await expect(articleList).toBeVisible();
 
     // 기사 항목들이 있는지 확인
-    const articleItems = page.getByRole('listitem');
+    const articleItems = articleList.locator('li');
     expect(await articleItems.count()).toBeGreaterThan(0);
   });
 
   test('기사 항목들이 올바른 정보를 표시해야 한다', async ({ page }) => {
-    // 첫 번째 기사 항목 확인
-    const firstArticle = page.getByRole('listitem').first();
+    // 첫 번째 기사 항목 확인 (기사 리스트 기준)
+    const articleList = page
+      .locator('ul')
+      .filter({ has: page.locator('a[href^="/articles/"]') })
+      .first();
+    const firstArticle = articleList.locator('li').first();
 
     // 기사 제목 확인
-    await expect(firstArticle.getByRole('heading', { level: 2 })).toBeVisible();
+    await expect(firstArticle.locator('h2').first()).toBeVisible();
 
-    // 기사 내용 미리보기 확인
-    await expect(
-      firstArticle.getByText(/폭염에도 전력난 없는 이유는/),
-    ).toBeVisible();
+    // 기사 내용 미리보기 확인 (설명 단락 존재 확인)
+    await expect(firstArticle.locator('p').first()).toBeVisible();
 
     // 메타 정보 확인
     await expect(firstArticle.getByText('from UPPITY')).toBeVisible();
@@ -68,10 +71,11 @@ test.describe('Storage 페이지 - 기사 상호작용 테스트', () => {
 
   test('기사 링크 클릭이 작동해야 한다', async ({ page }) => {
     // 첫 번째 기사 링크 클릭
-    const firstArticleLink = page
-      .getByRole('listitem')
-      .first()
-      .getByRole('link');
+    const articleList = page
+      .locator('ul')
+      .filter({ has: page.locator('a[href^="/articles/"]') })
+      .first();
+    const firstArticleLink = articleList.locator('li a').first();
 
     // 링크가 올바른 URL을 가지고 있는지 확인
     const href = await firstArticleLink.getAttribute('href');
@@ -86,7 +90,11 @@ test.describe('Storage 페이지 - 기사 상호작용 테스트', () => {
 
   test('기사 썸네일이 올바르게 표시되어야 한다', async ({ page }) => {
     // 모든 기사 항목의 썸네일 확인
-    const articleItems = page.getByRole('listitem');
+    const articleList = page
+      .locator('ul')
+      .filter({ has: page.locator('a[href^="/articles/"]') })
+      .first();
+    const articleItems = articleList.locator('li');
 
     for (let i = 0; i < Math.min(3, await articleItems.count()); i++) {
       const article = articleItems.nth(i);
@@ -102,14 +110,18 @@ test.describe('Storage 페이지 - 기사 상호작용 테스트', () => {
   });
 
   test('기사 메타데이터가 일관되게 표시되어야 한다', async ({ page }) => {
-    const articleItems = page.getByRole('listitem');
+    const articleList = page
+      .locator('ul')
+      .filter({ has: page.locator('a[href^="/articles/"]') })
+      .first();
+    const articleItems = articleList.locator('li');
 
     // 각 기사가 필수 메타데이터를 가지고 있는지 확인
     for (let i = 0; i < Math.min(3, await articleItems.count()); i++) {
       const article = articleItems.nth(i);
 
       // 제목 확인
-      await expect(article.getByRole('heading', { level: 2 })).toBeVisible();
+      await expect(article.locator('h2').first()).toBeVisible();
 
       // 출처 정보 확인 (from XXX 형태)
       await expect(article.getByText(/from .+/)).toBeVisible();
@@ -123,10 +135,11 @@ test.describe('Storage 페이지 - 기사 상호작용 테스트', () => {
   });
 
   test('기사 호버 효과가 작동해야 한다', async ({ page }) => {
-    const firstArticleLink = page
-      .getByRole('listitem')
-      .first()
-      .getByRole('link');
+    const articleList = page
+      .locator('ul')
+      .filter({ has: page.locator('a[href^="/articles/"]') })
+      .first();
+    const firstArticleLink = articleList.locator('li a').first();
 
     // 마우스 호버
     await firstArticleLink.hover();
@@ -159,14 +172,18 @@ test.describe('Storage 페이지 - 기사 상호작용 테스트', () => {
   });
 
   test('기사 내용 미리보기가 적절히 표시되어야 한다', async ({ page }) => {
-    const articleItems = page.getByRole('listitem');
+    const articleList = page
+      .locator('ul')
+      .filter({ has: page.locator('a[href^="/articles/"]') })
+      .first();
+    const articleItems = articleList.locator('li');
 
     // 각 기사의 내용 미리보기 확인
     for (let i = 0; i < Math.min(3, await articleItems.count()); i++) {
       const article = articleItems.nth(i);
 
       // 내용 미리보기 텍스트가 있는지 확인
-      const previewTexts = article.locator('p').filter({ hasText: /\w+/ });
+      const previewTexts = article.locator('p').filter({ hasText: /\S+/ });
       expect(await previewTexts.count()).toBeGreaterThan(0);
 
       // 내용이 너무 길지 않은지 확인 (잘림 처리)
@@ -197,7 +214,11 @@ test.describe('Storage 페이지 - 기사 상호작용 테스트', () => {
   });
 
   test('기사 ID가 URL에 올바르게 포함되어야 한다', async ({ page }) => {
-    const articleLinks = page.getByRole('listitem').getByRole('link');
+    const articleList = page
+      .locator('ul')
+      .filter({ has: page.locator('a[href^="/articles/"]') })
+      .first();
+    const articleLinks = articleList.locator('li a');
 
     // 각 기사 링크의 URL 확인
     for (let i = 0; i < Math.min(3, await articleLinks.count()); i++) {

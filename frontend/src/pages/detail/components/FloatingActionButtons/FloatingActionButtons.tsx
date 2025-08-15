@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
 import BookmarkActiveIcon from '#/assets/bookmark-active.svg';
 import BookmarkInactiveIcon from '#/assets/bookmark-inactive.svg';
@@ -13,7 +14,10 @@ const FloatingActionButtons = ({
   bookmarked,
   onBookmarkClick,
 }: FloatingActionButtonsProps) => {
-  if (bookmarked === null) return;
+  const deviceType = useDeviceType();
+  const isPC = deviceType === 'pc';
+
+  if (bookmarked === null || !isPC) return null;
 
   const handleBookmarkClick = () => {
     onBookmarkClick(bookmarked);
@@ -24,25 +28,23 @@ const FloatingActionButtons = ({
   };
 
   return (
-    <>
-      <Container>
-        <ActionButton type="button" onClick={handleBookmarkClick}>
-          {bookmarked ? (
-            <BookmarkActiveIcon width={28} height={28} />
-          ) : (
-            <BookmarkInactiveIcon
-              width={28}
-              height={28}
-              color={theme.colors.primary}
-            />
-          )}
-        </ActionButton>
+    <Container>
+      <ActionButton type="button" onClick={handleBookmarkClick}>
+        {bookmarked ? (
+          <BookmarkActiveIcon width={28} height={28} />
+        ) : (
+          <BookmarkInactiveIcon
+            width={28}
+            height={28}
+            color={theme.colors.primary}
+          />
+        )}
+      </ActionButton>
 
-        <ActionButton type="button">
-          <ScrollUpIcon onClick={handleScrollUp} />
-        </ActionButton>
-      </Container>
-    </>
+      <ActionButton type="button">
+        <ScrollUpIcon onClick={handleScrollUp} />
+      </ActionButton>
+    </Container>
   );
 };
 

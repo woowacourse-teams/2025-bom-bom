@@ -6,8 +6,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.rmi.ServerException;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
+
 
 import java.util.List;
 
@@ -35,4 +37,5 @@ public interface NewsletterControllerApi {
     NewsletterWithDetailResponse getNewsletterWithDetail(
             @Parameter(description = "뉴스레터 ID") Long id
     );
+    List<NewsletterResponse> getNewsletters();
 } 

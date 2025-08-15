@@ -6,11 +6,8 @@ test.describe('추천 페이지 - 네비게이션', () => {
   });
 
   test('네비게이션 메뉴가 올바르게 표시되어야 한다', async ({ page }) => {
-    // 네비게이션 메뉴가 표시되는지 확인
     const navigation = page.locator('nav');
     await expect(navigation).toBeVisible();
-
-    // 각 네비게이션 링크가 표시되는지 확인
     await expect(page.getByText('오늘의 뉴스레터')).toBeVisible();
     await expect(page.getByText('뉴스레터 보관함')).toBeVisible();
     await expect(page.getByText('뉴스레터 추천')).toBeVisible();
@@ -19,21 +16,12 @@ test.describe('추천 페이지 - 네비게이션', () => {
   test('네비게이션 링크를 클릭하면 올바른 페이지로 이동해야 한다', async ({
     page,
   }) => {
-    // "오늘의 뉴스레터" 링크 클릭
     await page.getByText('오늘의 뉴스레터').click();
     await expect(page).toHaveURL('/');
-
-    // 다시 추천 페이지로 이동
     await page.goto('/recommend');
-
-    // "뉴스레터 보관함" 링크 클릭
     await page.getByText('뉴스레터 보관함').click();
     await expect(page).toHaveURL('/storage');
-
-    // 다시 추천 페이지로 이동
     await page.goto('/recommend');
-
-    // "뉴스레터 추천" 링크는 현재 페이지이므로 클릭해도 같은 페이지
     await page.getByText('뉴스레터 추천').click();
     await expect(page).toHaveURL('/recommend');
   });
@@ -41,18 +29,13 @@ test.describe('추천 페이지 - 네비게이션', () => {
   test('로그인을 하지 않았을 때 로그인 버튼이 표시되어야 한다', async ({
     page,
   }) => {
-    // 로그인 버튼이 표시되는지 확인
-    const loginButton = page.getByText('로그인');
+    const loginButton = page.getByRole('button', { name: '로그인' });
     await expect(loginButton).toBeVisible();
-    await expect(loginButton).toHaveAttribute('role', 'button');
   });
 
   test('브랜드 로고가 표시되고 홈으로 이동해야 한다', async ({ page }) => {
-    // 브랜드 로고가 표시되는지 확인
     const brandLogo = page.getByText('봄봄').first();
     await expect(brandLogo).toBeVisible();
-
-    // 로고 클릭시 홈으로 이동
     await brandLogo.click();
     await expect(page).toHaveURL('/');
   });

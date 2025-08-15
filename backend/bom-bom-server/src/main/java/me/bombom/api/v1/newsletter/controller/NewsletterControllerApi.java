@@ -19,7 +19,7 @@ public interface NewsletterControllerApi {
         description = "모든 뉴스레터 목록을 조회합니다."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "뉴스레터 목록 조회 성공")
+        @ApiResponse(responseCode = "200", description = "뉴스레터 목록 조회 성공")
     })
     List<NewsletterResponse> getNewsletters();
 
@@ -28,9 +28,9 @@ public interface NewsletterControllerApi {
         description = "특정 뉴스레터 상세 조회를 합니다."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "뉴스레터 상세 조회 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 (유효하지 않은 ID)", content = @Content),
-            @ApiResponse(responseCode = "404", description = "뉴스레터를 찾을 수 없음", content = @Content)
+        @ApiResponse(responseCode = "200", description = "뉴스레터 상세 조회 성공"),
+        @ApiResponse(responseCode = "400", description = "잘못된 요청 (유효하지 않은 ID)", content = @Content),
+        @ApiResponse(responseCode = "404", description = "뉴스레터를 찾을 수 없음", content = @Content)
     })
     NewsletterWithDetailResponse getNewsletterWithDetail(
             @Parameter(description = "뉴스레터 ID") Long id

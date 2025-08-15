@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('추천 페이지 - 트렌디 섹션', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/recommend');
+    await page.goto('/recommend');
   });
 
   test('트렌디 섹션 헤더가 올바르게 표시되어야 한다', async ({ page }) => {

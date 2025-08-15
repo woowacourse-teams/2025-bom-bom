@@ -2,13 +2,13 @@ import { test, expect } from '@playwright/test';
 
 test.describe('추천 페이지 - 전체 레이아웃 및 통합', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/recommend');
+    await page.goto('/recommend');
   });
 
   test('페이지가 성공적으로 로드되어야 한다', async ({ page }) => {
     // 페이지가 성공적으로 로드되는지 확인
     await expect(page).toHaveTitle('봄봄');
-    await expect(page).toHaveURL('http://localhost:3000/recommend');
+    await expect(page).toHaveURL('/recommend');
   });
 
   test('모든 주요 섹션이 표시되어야 한다', async ({ page }) => {
@@ -148,7 +148,7 @@ test.describe('추천 페이지 - 전체 레이아웃 및 통합', () => {
   test('성능 기준을 유지해야 한다', async ({ page }) => {
     // 페이지 로드 성능 확인
     const startTime = Date.now();
-    await page.goto('http://localhost:3000/recommend');
+    await page.goto('/recommend');
     await page.waitForLoadState('networkidle');
     const loadTime = Date.now() - startTime;
 

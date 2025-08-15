@@ -13,6 +13,12 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './e2e',
+  // 추가 테스트 디렉토리 포함
+  testMatch: [
+    '**/e2e/**/*.{test,spec}.{js,ts}',
+    '**/src/pages/**/*.test.{js,ts}',
+  ],
+
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */

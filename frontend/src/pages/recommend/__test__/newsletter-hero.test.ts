@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('추천 페이지 - 뉴스레터 히어로 섹션', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/recommend');
+    await page.goto('/recommend');
   });
 
   test('비로그인 사용자에게 히어로 섹션이 표시되어야 한다', async ({
@@ -18,7 +18,9 @@ test.describe('추천 페이지 - 뉴스레터 히어로 섹션', () => {
     ).toBeVisible();
   });
 
-  test('CTA 버튼이 표시되고 로그인 페이지로 연결되어야 한다', async ({ page }) => {
+  test('CTA 버튼이 표시되고 로그인 페이지로 연결되어야 한다', async ({
+    page,
+  }) => {
     // CTA 버튼이 표시되는지 확인
     const ctaButton = page.getByText('로그인하고 맞춤 추천 받기');
     await expect(ctaButton).toBeVisible();
@@ -28,7 +30,7 @@ test.describe('추천 페이지 - 뉴스레터 히어로 섹션', () => {
 
     // 버튼 클릭시 로그인 페이지로 이동
     await ctaButton.click();
-    await expect(page).toHaveURL('http://localhost:3000/login');
+    await expect(page).toHaveURL('/login');
   });
 
   test('올바른 스타일과 레이아웃을 가져야 한다', async ({ page }) => {

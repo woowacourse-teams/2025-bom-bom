@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('추천 페이지 - 네비게이션', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/recommend');
+    await page.goto('/recommend');
   });
 
   test('네비게이션 메뉴가 올바르게 표시되어야 한다', async ({ page }) => {
@@ -21,24 +21,26 @@ test.describe('추천 페이지 - 네비게이션', () => {
   }) => {
     // "오늘의 뉴스레터" 링크 클릭
     await page.getByText('오늘의 뉴스레터').click();
-    await expect(page).toHaveURL('http://localhost:3000/');
+    await expect(page).toHaveURL('/');
 
     // 다시 추천 페이지로 이동
-    await page.goto('http://localhost:3000/recommend');
+    await page.goto('/recommend');
 
     // "뉴스레터 보관함" 링크 클릭
     await page.getByText('뉴스레터 보관함').click();
-    await expect(page).toHaveURL('http://localhost:3000/storage');
+    await expect(page).toHaveURL('/storage');
 
     // 다시 추천 페이지로 이동
-    await page.goto('http://localhost:3000/recommend');
+    await page.goto('/recommend');
 
     // "뉴스레터 추천" 링크는 현재 페이지이므로 클릭해도 같은 페이지
     await page.getByText('뉴스레터 추천').click();
-    await expect(page).toHaveURL('http://localhost:3000/recommend');
+    await expect(page).toHaveURL('/recommend');
   });
 
-  test('로그인 버튼이 표시되어야 한다', async ({ page }) => {
+  test('로그인을 하지 않았을 때 로그인 버튼이 표시되어야 한다', async ({
+    page,
+  }) => {
     // 로그인 버튼이 표시되는지 확인
     const loginButton = page.getByText('로그인');
     await expect(loginButton).toBeVisible();
@@ -52,6 +54,6 @@ test.describe('추천 페이지 - 네비게이션', () => {
 
     // 로고 클릭시 홈으로 이동
     await brandLogo.click();
-    await expect(page).toHaveURL('http://localhost:3000/');
+    await expect(page).toHaveURL('/');
   });
 });

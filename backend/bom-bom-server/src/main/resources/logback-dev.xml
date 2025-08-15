@@ -7,7 +7,9 @@
                 <timestamp fieldName="time" pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX"/>
                 <mdc>
                     <includeMdcKeyName>traceId</includeMdcKeyName>
+                    <includeMdcKeyName>spanId</includeMdcKeyName>
                     <includeMdcKeyName>API</includeMdcKeyName>
+                    <includeMdcKeyName>method</includeMdcKeyName>
                     <includeMdcKeyName>userId</includeMdcKeyName>
                 </mdc>
                 <message/>
@@ -15,7 +17,7 @@
                     <fieldName>trace</fieldName>
                     <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
                         <maxDepthPerThrowable>30</maxDepthPerThrowable>
-                        <maxLength>2048</maxLength>
+                        <maxLength>3000</maxLength>
                         <shortenedClassNameLength>20</shortenedClassNameLength>
                         <rootCauseFirst>true</rootCauseFirst>
                     </throwableConverter>
@@ -28,7 +30,7 @@
         <file>${LOG_PATH}/bombom-dev.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 날짜 + 인덱스 형식 -->
-            <fileNamePattern>${LOG_PATH}/bombom-dev.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <fileNamePattern>${LOG_PATH}/bombom-prod.log.%d{yyyy-MM-dd}</fileNamePattern>
             <maxHistory>7</maxHistory>
         </rollingPolicy>
         <encoder>

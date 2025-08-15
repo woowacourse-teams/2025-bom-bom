@@ -17,7 +17,7 @@
         <file>${LOG_PATH}/bombom-prod.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 날짜 + 인덱스 형식 -->
-            <fileNamePattern>${LOG_PATH}/bombom-prod.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <fileNamePattern>${LOG_PATH}/bombom-prod.log.%d{yyyy-MM-dd}</fileNamePattern>
 
             <!-- 보관 정책 -->
             <maxHistory>15</maxHistory>
@@ -29,6 +29,7 @@
                 <pattern>{"level":"%level","logger":"%logger","thread":"%thread"}</pattern>
                 <mdc>
                     <includeMdcKeyName>traceId</includeMdcKeyName>
+                    <includeMdcKeyName>spanId</includeMdcKeyName>
                     <includeMdcKeyName>API</includeMdcKeyName>
                     <includeMdcKeyName>method</includeMdcKeyName>
                     <includeMdcKeyName>userId</includeMdcKeyName>
@@ -38,7 +39,7 @@
                     <fieldName>traceStack</fieldName>
                     <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
                         <maxDepthPerThrowable>30</maxDepthPerThrowable>
-                        <maxLength>2048</maxLength>
+                        <maxLength>3000</maxLength>
                         <shortenedClassNameLength>20</shortenedClassNameLength>
                         <rootCauseFirst>true</rootCauseFirst>
                         <abbreviator class="ch.qos.logback.classic.pattern.TargetLengthBasedClassNameAbbreviator">

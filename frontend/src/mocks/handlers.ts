@@ -193,15 +193,15 @@ export const handlers = [
       newsletters: [
         {
           id: 1,
-          name: '뉴닉',
-          imageUrl: 'https://example.com/newneek.png',
-          highlightCount: 1,
+          newsletter: '뉴닉',
+          imageUrl: 'https://newneek.co/favicon.ico',
+          count: 1,
         },
         {
           id: 2,
-          name: '디에디트',
-          imageUrl: 'https://example.com/theedit.png',
-          highlightCount: 3,
+          newsletter: '디에디트',
+          imageUrl: 'https://newneek.co/favicon.ico',
+          count: 3,
         },
       ],
     };

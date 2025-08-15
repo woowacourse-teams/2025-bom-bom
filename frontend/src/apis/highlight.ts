@@ -58,9 +58,9 @@ export interface GetHighlightStatisticsNewsletterResponse {
   totalCount: number;
   newsletters: {
     id: number;
-    name: string;
+    newsletter: string;
     imageUrl: string;
-    highlightCount: number;
+    count: number;
   }[];
 }
 

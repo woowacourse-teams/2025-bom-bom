@@ -14,7 +14,7 @@ interface ArticleHeaderProps {
   arrivedDateTime: Date;
   expectedReadTime: number;
   bookmarked?: boolean;
-  onBookmarkClick?: (bookmarked: boolean) => void;
+  onBookmarkClick: (bookmarked: boolean) => void;
 }
 
 const ArticleHeader = ({
@@ -27,20 +27,17 @@ const ArticleHeader = ({
   onBookmarkClick,
 }: ArticleHeaderProps) => {
   const deviceType = useDeviceType();
-  const isNonPC = deviceType !== 'pc';
-
-  const handleBookmarkClick = () => {
-    if (onBookmarkClick && bookmarked !== null) {
-      onBookmarkClick(bookmarked);
-    }
-  };
+  const isPC = deviceType === 'pc';
 
   return (
     <Container>
       <TitleRow>
         <Title>{title}</Title>
-        {isNonPC && bookmarked !== null && onBookmarkClick && (
-          <BookmarkButton type="button" onClick={handleBookmarkClick}>
+        {!isPC && (
+          <BookmarkButton
+            type="button"
+            onClick={() => onBookmarkClick(bookmarked)}
+          >
             {bookmarked ? (
               <BookmarkActiveIcon width={24} height={24} />
             ) : (

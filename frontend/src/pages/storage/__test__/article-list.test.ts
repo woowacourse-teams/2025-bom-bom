@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('보관함 페이지 - 아티클 목록 및 읽음 상태', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/storage');
+    await page.goto('/storage');
     await page.waitForLoadState('networkidle');
   });
 

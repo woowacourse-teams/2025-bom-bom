@@ -128,7 +128,7 @@ class NewsletterServiceTest {
     @Test
     void 존재하지_않는_뉴스레터_조회시_예외가_발생한다() {
         // given
-        Long nonExistentId = 999L;
+        Long nonExistentId = 0L;
 
         // when & then
         assertThatThrownBy(() -> newsletterService.getNewsletterWithDetail(nonExistentId))
@@ -145,7 +145,7 @@ class NewsletterServiceTest {
                 .imageUrl("https://example.com/image.png")
                 .email("test@test.com")
                 .categoryId(1L)
-                .detailId(999L) // 존재하지 않는 detail ID
+                .detailId(0L) // 존재하지 않는 detail ID
                 .build();
         Newsletter savedNewsletter = newsletterRepository.save(newsletterWithoutDetail);
 

@@ -49,7 +49,7 @@ public class BookmarkRepositoryImpl implements CustomBookmarkRepository {
     public int countAllByMemberId(Long memberId) {
         Long count = jpaQueryFactory.select(bookmark.count())
                 .from(bookmark)
-                .where(createBookmarkMemberWhereClause(memberId))
+                .where(createMemberWhereClause(memberId))
                 .fetchOne();
 
         return Optional.ofNullable(count)
@@ -62,7 +62,7 @@ public class BookmarkRepositoryImpl implements CustomBookmarkRepository {
         Long count = jpaQueryFactory.select(bookmark.count())
                 .from(bookmark)
                 .join(article).on(bookmark.articleId.eq(article.id))
-                .where(createBookmarkMemberWhereClause(memberId))
+                .where(createMemberWhereClause(memberId))
                 .where(createNewsletterIdWhereClause(newsletterId))
                 .fetchOne();
 
@@ -74,7 +74,7 @@ public class BookmarkRepositoryImpl implements CustomBookmarkRepository {
     private JPAQuery<Long> getTotalQuery(Long memberId) {
         return jpaQueryFactory.select(bookmark.count())
                 .from(bookmark)
-                .where(createBookmarkMemberWhereClause(memberId));
+                .where(createMemberWhereClause(memberId));
     }
 
     private List<BookmarkResponse> getContents(Long memberId, Pageable pageable) {
@@ -95,14 +95,14 @@ public class BookmarkRepositoryImpl implements CustomBookmarkRepository {
                 .join(article).on(bookmark.articleId.eq(article.id))
                 .join(newsletter).on(article.newsletterId.eq(newsletter.id))
                 .join(category).on(newsletter.categoryId.eq(category.id))
-                .where(createBookmarkMemberWhereClause(memberId))
+                .where(createMemberWhereClause(memberId))
                 .orderBy(getOrderSpecifiers(pageable).toArray(OrderSpecifier[]::new))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
     }
 
-    private BooleanExpression createBookmarkMemberWhereClause(Long memberId) {
+    private BooleanExpression createMemberWhereClause(Long memberId) {
         return bookmark.memberId.eq(memberId);
     }
 

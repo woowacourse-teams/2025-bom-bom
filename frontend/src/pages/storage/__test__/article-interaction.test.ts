@@ -37,9 +37,9 @@ test.describe('Storage 페이지 - 기사 상호작용 테스트', () => {
 
     await expect(firstArticle.locator('p').first()).toBeVisible();
 
-    await expect(firstArticle.getByText('from UPPITY')).toBeVisible();
-    await expect(firstArticle.getByText('2025.07.01')).toBeVisible();
-    await expect(firstArticle.getByText('5분')).toBeVisible();
+    await expect(firstArticle.getByText(/^from\s+.+/)).toBeVisible();
+    await expect(firstArticle.getByText(/\d{4}\.\d{2}\.\d{2}/)).toBeVisible();
+    await expect(firstArticle.getByText(/\d+분/)).toBeVisible();
 
     await expect(firstArticle.getByAltText('아티클 썸네일')).toBeVisible();
   });

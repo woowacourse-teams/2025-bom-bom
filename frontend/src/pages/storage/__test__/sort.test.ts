@@ -39,11 +39,26 @@ test.describe('Storage 페이지 - 정렬 기능 테스트', () => {
 
     await page.getByRole('option', { name: '오래된순' }).click();
 
+    // 정렬 라벨 확인
     await page.waitForLoadState('networkidle');
-
     await expect(
       page.locator('p').filter({ hasText: '오래된순' }).first(),
     ).toBeVisible();
+
+    // 실제 목록 날짜가 오름차순인지 확인
+    const dateTexts: string[] = await page
+      .locator('ul li')
+      .locator('span', { hasText: /\d{4}\.\d{2}\.\d{2}/ })
+      .allTextContents();
+
+    const nums: number[] = dateTexts
+      .map((s) => Number(s.replaceAll('.', '')))
+      .filter((n): n is number => Number.isFinite(n));
+    for (let i = 1; i < nums.length; i++) {
+      const curr = nums[i]!;
+      const prev = nums[i - 1]!;
+      expect(curr).toBeGreaterThanOrEqual(prev);
+    }
   });
 
   test('최신순으로 다시 변경이 가능해야 한다', async ({ page }) => {
@@ -63,10 +78,24 @@ test.describe('Storage 페이지 - 정렬 기능 테스트', () => {
     await page.getByRole('option', { name: '최신순' }).click();
 
     await page.waitForLoadState('networkidle');
-
     await expect(
       page.locator('p').filter({ hasText: '최신순' }).first(),
     ).toBeVisible();
+
+    // 실제 목록 날짜가 내림차순인지 확인
+    const dateTexts: string[] = await page
+      .locator('ul li')
+      .locator('span', { hasText: /\d{4}\.\d{2}\.\d{2}/ })
+      .allTextContents();
+
+    const nums: number[] = dateTexts
+      .map((s) => Number(s.replaceAll('.', '')))
+      .filter((n): n is number => Number.isFinite(n));
+    for (let i = 1; i < nums.length; i++) {
+      const curr = nums[i]!;
+      const prev = nums[i - 1]!;
+      expect(curr).toBeLessThanOrEqual(prev);
+    }
   });
 
   test('정렬과 필터가 함께 작동해야 한다', async ({ page }) => {
@@ -80,10 +109,24 @@ test.describe('Storage 페이지 - 정렬 기능 테스트', () => {
     await page.getByRole('option', { name: '오래된순' }).click();
 
     await page.waitForLoadState('networkidle');
-
     await expect(
       page.locator('p').filter({ hasText: '오래된순' }).first(),
     ).toBeVisible();
+
+    // 필터 적용 상태에서의 정렬도 올바른지 확인
+    const dateTexts: string[] = await page
+      .locator('ul li')
+      .locator('span', { hasText: /\d{4}\.\d{2}\.\d{2}/ })
+      .allTextContents();
+
+    const nums: number[] = dateTexts
+      .map((s) => Number(s.replaceAll('.', '')))
+      .filter((n): n is number => Number.isFinite(n));
+    for (let i = 1; i < nums.length; i++) {
+      const curr = nums[i]!;
+      const prev = nums[i - 1]!;
+      expect(curr).toBeGreaterThanOrEqual(prev);
+    }
   });
 
   test('정렬과 검색이 함께 작동해야 한다', async ({ page }) => {

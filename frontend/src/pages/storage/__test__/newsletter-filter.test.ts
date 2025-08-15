@@ -23,26 +23,42 @@ test.describe('Storage 페이지 - 뉴스레터 필터 테스트', () => {
 
   test('테크뉴스 필터 클릭이 작동해야 한다', async ({ page }) => {
     await page.getByText('테크뉴스').click();
-
     await page.waitForLoadState('networkidle');
 
-    await page.waitForTimeout(1000);
+    // 필터 적용 후 카드들의 from 라벨이 모두 테크뉴스인지 확인
+    const labels = await page
+      .locator('ul li')
+      .locator('span', { hasText: /^from\s+/ })
+      .allTextContents();
+    for (const label of labels) {
+      expect(label).toContain('테크뉴스');
+    }
   });
 
   test('개발자뉴스 필터 클릭이 작동해야 한다', async ({ page }) => {
     await page.getByText('개발자뉴스').click();
-
     await page.waitForLoadState('networkidle');
 
-    await page.waitForTimeout(1000);
+    const labels = await page
+      .locator('ul li')
+      .locator('span', { hasText: /^from\s+/ })
+      .allTextContents();
+    for (const label of labels) {
+      expect(label).toContain('개발자뉴스');
+    }
   });
 
   test('AI뉴스 필터 클릭이 작동해야 한다', async ({ page }) => {
     await page.getByText('AI뉴스').click();
-
     await page.waitForLoadState('networkidle');
 
-    await page.waitForTimeout(1000);
+    const labels = await page
+      .locator('ul li')
+      .locator('span', { hasText: /^from\s+/ })
+      .allTextContents();
+    for (const label of labels) {
+      expect(label).toContain('AI뉴스');
+    }
   });
 
   test('필터 간 전환이 원활해야 한다', async ({ page }) => {

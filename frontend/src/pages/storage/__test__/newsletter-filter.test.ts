@@ -1,99 +1,66 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Storage 페이지 - 뉴스레터 필터 테스트', () => {
+test.describe('보관함 페이지 - 뉴스레터 필터링', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/storage');
-    await page.waitForLoadState('networkidle');
-
-    const currentUrl = page.url();
-    if (currentUrl.includes('/recommend') || currentUrl.includes('/login')) {
-      await page.goto('/storage');
-      await page.waitForLoadState('networkidle');
-    }
-
-    await expect(page.getByRole('list')).toBeVisible();
-    await expect(page.getByRole('listitem').first()).toBeVisible();
-  });
-
-  test('전체 필터가 기본 선택되어야 한다', async ({ page }) => {
-    await expect(page.getByText('전체')).toBeVisible();
-
-    await expect(page.getByText('3').first()).toBeVisible();
-  });
-
-  test('테크뉴스 필터 클릭이 작동해야 한다', async ({ page }) => {
-    await page.getByText('테크뉴스').click();
-    await page.waitForLoadState('networkidle');
-
-    // 필터 적용 후 카드들의 from 라벨이 모두 테크뉴스인지 확인
-    const labels = await page
-      .locator('ul li')
-      .locator('span', { hasText: /^from\s+/ })
-      .allTextContents();
-    for (const label of labels) {
-      expect(label).toContain('테크뉴스');
-    }
-  });
-
-  test('개발자뉴스 필터 클릭이 작동해야 한다', async ({ page }) => {
-    await page.getByText('개발자뉴스').click();
-    await page.waitForLoadState('networkidle');
-
-    const labels = await page
-      .locator('ul li')
-      .locator('span', { hasText: /^from\s+/ })
-      .allTextContents();
-    for (const label of labels) {
-      expect(label).toContain('개발자뉴스');
-    }
-  });
-
-  test('AI뉴스 필터 클릭이 작동해야 한다', async ({ page }) => {
-    await page.getByText('AI뉴스').click();
-    await page.waitForLoadState('networkidle');
-
-    const labels = await page
-      .locator('ul li')
-      .locator('span', { hasText: /^from\s+/ })
-      .allTextContents();
-    for (const label of labels) {
-      expect(label).toContain('AI뉴스');
-    }
-  });
-
-  test('필터 간 전환이 원활해야 한다', async ({ page }) => {
-    await page.getByText('테크뉴스').click();
-    await page.waitForLoadState('networkidle');
-
-    await page.getByText('AI뉴스').click();
-    await page.waitForLoadState('networkidle');
-
-    await page.getByText('전체').click();
+    await page.goto('http://localhost:3000/storage');
     await page.waitForLoadState('networkidle');
   });
 
-  test('필터별 카운트가 올바르게 표시되어야 한다', async ({ page }) => {
-    const filterItems = page.getByRole('tablist').getByRole('listitem');
+  test('전체 탭 선택 시 모든 뉴스레터가 표시된다', async ({ page }) => {
+    // 전체 탭 클릭
+    await page.getByText('전체7').click();
+    await page.waitForLoadState('networkidle');
 
-    const totalFilter = filterItems.filter({ hasText: '전체' });
-    await expect(totalFilter.getByText('3')).toBeVisible();
+    // 총 개수 확인
+    await expect(page.getByText('총 7개')).toBeVisible();
 
-    const techFilter = filterItems.filter({ hasText: '테크뉴스' });
-    await expect(techFilter.getByText('5')).toBeVisible();
+    // 아티클 목록이 표시되는지 확인
+    const articleList = page.getByRole('list');
+    await expect(articleList).toBeVisible();
 
-    const devFilter = filterItems.filter({ hasText: '개발자뉴스' });
-    await expect(devFilter.getByText('3')).toBeVisible();
-
-    const aiFilter = filterItems.filter({ hasText: 'AI뉴스' });
-    await expect(aiFilter.getByText('2')).toBeVisible();
+    // 여러 뉴스레터의 아티클이 있는지 확인
+    await expect(page.getByText('from 테크뉴스').first()).toBeVisible();
+    await expect(page.getByText('from UPPITY').first()).toBeVisible();
+    await expect(page.getByText('from AI뉴스').first()).toBeVisible();
   });
 
-  test('필터 아이콘이 표시되어야 한다', async ({ page }) => {
-    const filterItems = page.getByRole('tablist').getByRole('listitem');
+  test('UPPITY 뉴스레터 필터링이 정상 작동한다', async ({ page }) => {
+    // UPPITY 탭 클릭
+    await page.getByText('UPPITY3').click();
+    await page.waitForLoadState('networkidle');
 
-    for (let i = 0; i < (await filterItems.count()); i++) {
-      const item = filterItems.nth(i);
-      await expect(item.locator('img').first()).toBeVisible();
-    }
+    // 필터링된 개수 확인
+    await expect(page.getByText('총 3개')).toBeVisible();
+
+    // UPPITY 뉴스레터만 표시되는지 확인
+    const uppityArticles = page.getByText('from UPPITY');
+    await expect(uppityArticles).toHaveCount(3);
+
+    // 다른 뉴스레터는 표시되지 않는지 확인
+    await expect(page.getByText('from 테크뉴스')).not.toBeVisible();
+    await expect(page.getByText('from AI뉴스')).not.toBeVisible();
+  });
+
+  test('AI뉴스 뉴스레터 필터링이 정상 작동한다', async ({ page }) => {
+    // AI뉴스 탭 클릭
+    await page.getByText('AI뉴스1').click();
+    await page.waitForLoadState('networkidle');
+
+    // 필터링된 개수 확인
+    await expect(page.getByText('총 1개')).toBeVisible();
+
+    // AI뉴스 아티클만 표시되는지 확인
+    await expect(page.getByText('from AI뉴스')).toBeVisible();
+    await expect(page.getByText('AI가 바꿀 미래의 일자리')).toBeVisible();
+  });
+
+  test('뉴스레터 탭에 올바른 개수가 표시된다', async ({ page }) => {
+    // 각 뉴스레터 탭의 개수 확인
+    await expect(page.getByText('전체7')).toBeVisible();
+    await expect(page.getByText('UPPITY3')).toBeVisible();
+    await expect(page.getByText('AI뉴스1')).toBeVisible();
+    await expect(page.getByText('스타트업뉴스1')).toBeVisible();
+    await expect(page.getByText('개발자뉴스1')).toBeVisible();
+    await expect(page.getByText('테크뉴스1')).toBeVisible();
   });
 });

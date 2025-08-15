@@ -60,6 +60,11 @@ dependencies {
 
     // swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
+
+    // logging
+    implementation(platform("org.springframework.cloud:spring-cloud-dependencies:2025.0.0"))
+    implementation("io.micrometer:micrometer-tracing-bridge-brave")
+    implementation("net.logstash.logback:logstash-logback-encoder:8.1")
 }
 
 tasks.withType<Test> {

@@ -11,6 +11,7 @@ import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkResponse;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkStatusResponse;
+import me.bombom.api.v1.bookmark.dto.response.GetBookmarkNewsletterStatisticsResponse;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -58,6 +59,7 @@ class BookmarkServiceTest {
     private Article article;
     private List<Category> categories;
     private List<Newsletter> newsletters;
+    private List<Article> articles;
 
     @BeforeEach
     void setUp() {
@@ -67,6 +69,8 @@ class BookmarkServiceTest {
         categoryRepository.saveAll(categories);
         newsletters = TestFixture.createNewsletters(categories);
         newsletterRepository.saveAll(newsletters);
+        articles = TestFixture.createArticles(member, newsletters);
+        articleRepository.saveAll(articles);
         article = TestFixture.createArticle("테스트 아티클", member.getId(), newsletters.get(0).getId(),
                 java.time.LocalDateTime.now());
         articleRepository.save(article);
@@ -232,5 +236,28 @@ class BookmarkServiceTest {
         assertThatThrownBy(() -> bookmarkService.deleteBookmark(member.getId(), otherArticle.getId()))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
+    }
+
+    @Test
+    void 전체_뉴스레터_별_북마크_개수를_조회한다() {
+        // given
+        bookmarkService.addBookmark(member.getId(), articles.get(0).getId());
+        bookmarkService.addBookmark(member.getId(), articles.get(1).getId());
+        bookmarkService.addBookmark(member.getId(), articles.get(2).getId());
+        bookmarkService.addBookmark(member.getId(), articles.get(3).getId());
+
+        // when
+        GetBookmarkNewsletterStatisticsResponse result = bookmarkService.getBookmarkNewsletterStatistics(member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(4);
+            softly.assertThat(result.newsletters().get(0).newsletter()).isEqualTo("뉴스픽");
+            softly.assertThat(result.newsletters().get(0).count()).isEqualTo(1);
+            softly.assertThat(result.newsletters().get(1).newsletter()).isEqualTo("IT타임즈");
+            softly.assertThat(result.newsletters().get(1).count()).isEqualTo(1);
+            softly.assertThat(result.newsletters().get(2).newsletter()).isEqualTo("비즈레터");
+            softly.assertThat(result.newsletters().get(2).count()).isEqualTo(2);
+        });
     }
 } 

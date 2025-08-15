@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkResponse;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkStatusResponse;
+import me.bombom.api.v1.bookmark.dto.response.GetBookmarkNewsletterStatisticsResponse;
 import me.bombom.api.v1.bookmark.service.BookmarkService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
@@ -25,10 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/bookmarks")
-public class BookmarkController {
+public class BookmarkController implements BookmarkControllerApi {
 
     private final BookmarkService bookmarkService;
 
+    @Override
     @GetMapping
     public Page<BookmarkResponse> getBookmarks(
             @LoginMember Member member,
@@ -37,6 +39,7 @@ public class BookmarkController {
         return bookmarkService.getBookmarks(member.getId(), pageable);
     }
 
+    @Override
     @GetMapping("/status/articles/{articleId}")
     public BookmarkStatusResponse getBookmarkStatus(
             @LoginMember Member member,
@@ -45,6 +48,7 @@ public class BookmarkController {
         return bookmarkService.getBookmarkStatus(member.getId(), articleId);
     }
 
+    @Override
     @PostMapping("/articles/{articleId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addBookmark(
@@ -54,6 +58,7 @@ public class BookmarkController {
         bookmarkService.addBookmark(member.getId(), articleId);
     }
 
+    @Override
     @DeleteMapping("/articles/{articleId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBookmark(
@@ -61,5 +66,11 @@ public class BookmarkController {
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     ) {
         bookmarkService.deleteBookmark(member.getId(), articleId);
+    }
+
+    @Override
+    @GetMapping("/statistics/newsletters")
+    public GetBookmarkNewsletterStatisticsResponse getBookmarkNewsletterStatistics(@LoginMember Member member) {
+        return bookmarkService.getBookmarkNewsletterStatistics(member);
     }
 }

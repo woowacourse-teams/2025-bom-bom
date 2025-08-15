@@ -94,6 +94,7 @@ public class ArticleService {
                     );
                     return GetArticleCountPerNewsletterResponse.of(newsletter, count);
                 })
+                .filter(response -> response.count() > 0)
                 .toList();
         return GetArticleNewsletterStatisticsResponse.of(totalCount, countResponse);
     }

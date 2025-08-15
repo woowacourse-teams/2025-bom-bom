@@ -41,7 +41,6 @@ public class NewsletterDetail {
     @Column(length=512)
     private String previousNewsletterUrl;
 
-
     @Builder
     public NewsletterDetail(
             Long id,

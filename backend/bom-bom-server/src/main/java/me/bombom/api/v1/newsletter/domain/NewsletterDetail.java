@@ -35,6 +35,13 @@ public class NewsletterDetail {
     @Column(nullable = false, length = 100)
     private String sender;
 
+    @Column(length=512)
+    private String subscribePageImageUrl;
+
+    @Column(length=512)
+    private String previousNewsletterUrl;
+
+
     @Builder
     public NewsletterDetail(
             Long id,
@@ -42,7 +49,9 @@ public class NewsletterDetail {
             @NonNull String subscribeUrl,
             @NonNull String issueCycle,
             int subscribeCount,
-            @NonNull String sender
+            @NonNull String sender,
+            String subscribePageImageUrl,
+            String previousNewsletterUrl
     ) {
         this.id = id;
         this.mainPageUrl = mainPageUrl;
@@ -50,5 +59,7 @@ public class NewsletterDetail {
         this.issueCycle = issueCycle;
         this.subscribeCount = subscribeCount;
         this.sender = sender;
+        this.subscribePageImageUrl = subscribePageImageUrl;
+        this.previousNewsletterUrl = previousNewsletterUrl;
     }
 }

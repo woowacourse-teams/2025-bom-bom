@@ -22,7 +22,7 @@ function BookmarkPage() {
     setSelectedNewsletter(value);
   }, []);
 
-  const { data: newletterCounts } = useQuery(
+  const { data: newsletterCounts } = useQuery(
     queries.bookmarksStatisticsNewsletters(),
   );
 
@@ -41,10 +41,10 @@ function BookmarkPage() {
               newsLetterList={[
                 {
                   newsletter: '전체',
-                  count: newletterCounts?.totalCount ?? 0,
+                  count: newsletterCounts?.totalCount ?? 0,
                   imageUrl: '',
                 },
-                ...(newletterCounts?.newsletters.filter(
+                ...(newsletterCounts?.newsletters.filter(
                   (newsletter) => newsletter.count !== 0,
                 ) ?? []),
               ]}

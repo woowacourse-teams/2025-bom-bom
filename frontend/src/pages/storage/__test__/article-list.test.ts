@@ -3,7 +3,9 @@ import { test, expect } from '@playwright/test';
 test.describe('보관함 페이지 - 아티클 목록 및 읽음 상태', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/storage');
-    await page.waitForLoadState('networkidle');
+    await expect(
+      page.getByRole('listitem').filter({ hasText: 'from' }).first(),
+    ).toBeVisible();
   });
 
   test('아티클 목록이 올바르게 표시된다', async ({ page }) => {
@@ -39,19 +41,8 @@ test.describe('보관함 페이지 - 아티클 목록 및 읽음 상태', () => 
   });
 
   test('읽음 상태가 올바르게 표시된다', async ({ page }) => {
-    // 읽은 아티클의 "읽음" 표시 확인
-    const readArticles = page.getByText('읽음');
-    const readCount = await readArticles.count();
-    expect(readCount).toBeGreaterThan(0); // 적어도 1개의 읽은 아티클이 있어야 함
-
-    // 특정 읽은 아티클 확인
-    if (readCount > 0) {
-      const readArticle = page
-        .getByRole('listitem')
-        .filter({ hasText: '읽음' })
-        .first();
-      await expect(readArticle.getByText('읽음')).toBeVisible();
-    }
+    // 최소 1개의 "읽음" 배지가 나타날 때까지 대기 후 가시성 확인
+    await expect(page.getByText('읽음').first()).toBeVisible();
   });
 
   test('읽지 않은 아티클에는 읽음 표시가 없다', async ({ page }) => {

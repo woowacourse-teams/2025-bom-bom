@@ -3,7 +3,6 @@ import { test, expect } from '@playwright/test';
 test.describe('보관함 페이지 - 검색 기능', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/storage');
-    await page.waitForLoadState('networkidle');
   });
 
   test('검색어 입력 시 관련 아티클이 필터링된다', async ({ page }) => {
@@ -66,7 +65,6 @@ test.describe('보관함 페이지 - 검색 기능', () => {
 
   test('뉴스레터 필터와 검색이 함께 작동한다', async ({ page }) => {
     await page.getByText('UPPITY3').click();
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('총 3개')).toBeVisible();
 
     const searchInput = page.getByRole('searchbox', { name: '검색' });
@@ -75,7 +73,6 @@ test.describe('보관함 페이지 - 검색 기능', () => {
 
     await expect(page.getByText('총 0개')).toBeVisible();
     await page.getByText('전체7').click();
-    await page.waitForLoadState('networkidle');
 
     await expect(page.getByText('총 1개')).toBeVisible();
     await expect(page.getByText('AI가 바꿀 미래의 일자리')).toBeVisible();

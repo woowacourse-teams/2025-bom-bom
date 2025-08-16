@@ -3,12 +3,10 @@ import { test, expect } from '@playwright/test';
 test.describe('보관함 페이지 - 뉴스레터 필터링', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/storage');
-    await page.waitForLoadState('networkidle');
   });
 
   test('전체 탭 선택 시 모든 뉴스레터가 표시된다', async ({ page }) => {
     await page.getByText('전체7').click();
-    await page.waitForLoadState('networkidle');
 
     await expect(page.getByText('총 7개')).toBeVisible();
 
@@ -23,7 +21,6 @@ test.describe('보관함 페이지 - 뉴스레터 필터링', () => {
 
   test('UPPITY 뉴스레터 필터링이 정상 작동한다', async ({ page }) => {
     await page.getByText('UPPITY3').click();
-    await page.waitForLoadState('networkidle');
 
     await expect(page.getByText('총 3개')).toBeVisible();
 
@@ -36,7 +33,6 @@ test.describe('보관함 페이지 - 뉴스레터 필터링', () => {
 
   test('AI뉴스 뉴스레터 필터링이 정상 작동한다', async ({ page }) => {
     await page.getByText('AI뉴스1').click();
-    await page.waitForLoadState('networkidle');
 
     await expect(page.getByText('총 1개')).toBeVisible();
     await expect(page.getByText('from AI뉴스')).toBeVisible();

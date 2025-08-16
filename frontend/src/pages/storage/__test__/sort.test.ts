@@ -3,7 +3,6 @@ import { test, expect } from '@playwright/test';
 test.describe('보관함 페이지 - 정렬 기능', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/storage');
-    await page.waitForLoadState('networkidle');
   });
 
   test('기본 정렬은 최신순이다', async ({ page }) => {
@@ -27,7 +26,6 @@ test.describe('보관함 페이지 - 정렬 기능', () => {
       .click();
 
     await page.getByRole('option', { name: '오래된순' }).click();
-    await page.waitForLoadState('networkidle');
 
     await expect(page.getByText('오래된순').first()).toBeVisible();
 
@@ -47,14 +45,12 @@ test.describe('보관함 페이지 - 정렬 기능', () => {
       .filter({ hasText: /^최신순$/ })
       .click();
     await page.getByRole('option', { name: '오래된순' }).click();
-    await page.waitForLoadState('networkidle');
 
     await page
       .locator('div')
       .filter({ hasText: /^오래된순$/ })
       .click();
     await page.getByRole('option', { name: '최신순' }).click();
-    await page.waitForLoadState('networkidle');
 
     await expect(page.getByText('최신순').first()).toBeVisible();
     const firstArticle = page
@@ -70,7 +66,6 @@ test.describe('보관함 페이지 - 정렬 기능', () => {
       .filter({ hasText: /^최신순$/ })
       .click();
     await page.getByRole('option', { name: '오래된순' }).click();
-    await page.waitForLoadState('networkidle');
 
     const searchInput = page.getByRole('searchbox', { name: '검색' });
     await searchInput.fill('UPPITY');
@@ -91,10 +86,8 @@ test.describe('보관함 페이지 - 정렬 기능', () => {
       .filter({ hasText: /^최신순$/ })
       .click();
     await page.getByRole('option', { name: '오래된순' }).click();
-    await page.waitForLoadState('networkidle');
 
     await page.getByText('UPPITY3').click();
-    await page.waitForLoadState('networkidle');
 
     await expect(page.getByText('오래된순').first()).toBeVisible();
 

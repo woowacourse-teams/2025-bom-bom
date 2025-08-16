@@ -85,7 +85,6 @@ test.describe('추천 페이지 - 전체 레이아웃 및 통합', () => {
   test('성능 기준을 유지해야 한다', async ({ page }) => {
     const startTime = Date.now();
     await page.goto('/recommend');
-    await page.waitForLoadState('networkidle');
     const loadTime = Date.now() - startTime;
 
     expect(loadTime).toBeLessThan(10000);

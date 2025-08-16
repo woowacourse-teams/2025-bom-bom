@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import ArticleList from '../ArticleList/ArticleList';
 import ArticleListControls from '../ArticleListControls/ArticleListControls';
+import EmptySearchCard from '../EmptySearchCard/EmptySearchCard';
 import { GetArticlesParams } from '@/apis/articles';
 import { queries } from '@/apis/queries';
 import Pagination from '@/components/Pagination/Pagination';
@@ -54,7 +55,11 @@ export default function PCStorageContent({
         onSortChange={onSortChange}
         totalElements={totalElements}
       />
-      <ArticleList articles={articleList} />
+      {!isLoadingOrHaveContent && searchInput !== '' ? (
+        <EmptySearchCard searchQuery={searchInput} />
+      ) : (
+        <ArticleList articles={articleList} />
+      )}
       <Pagination
         currentPage={currentPage}
         totalPages={articles?.totalPages ?? 1}

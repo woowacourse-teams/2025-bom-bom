@@ -4,6 +4,7 @@ import { ARTICLE_DETAIL } from './datas/articleDetail';
 import { ARTICLES } from './datas/articles';
 import { TRENDY_NEWSLETTERS } from './datas/trendyNewsLetter';
 import { bookmarkHandlers } from './handlers/bookmark';
+import { newsletterDetailHandlers } from './handlers/newsletterDetail';
 import { HighlightType } from '@/pages/detail/types/highlight';
 
 const baseURL = ENV.baseUrl;
@@ -185,4 +186,5 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 });
   }),
   ...bookmarkHandlers,
+  ...newsletterDetailHandlers,
 ];

@@ -1,4 +1,4 @@
-export const NEWSLETTER_DETAILS = [
+export const NEWSLETTER_DETAIL = [
   {
     newsletterId: 1,
     name: 'AI뉴스',

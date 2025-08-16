@@ -39,3 +39,18 @@ export const deleteBookmark = async ({ articleId }: DeleteBookmarkParams) => {
     path: `/bookmarks/articles/${articleId}`,
   });
 };
+
+export type GetBookmarksStatisticsNewslettersResponse = {
+  totalCount: number;
+  newsletters: {
+    newsletter: string;
+    count: number;
+    imageUrl: string;
+  }[];
+};
+
+export const getBookmarksStatisticsNewsletters = async () => {
+  return await fetcher.get<GetBookmarksStatisticsNewslettersResponse>({
+    path: '/bookmarks/statistics/newsletters',
+  });
+};

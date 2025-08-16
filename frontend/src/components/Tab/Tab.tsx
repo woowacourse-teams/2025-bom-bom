@@ -8,6 +8,7 @@ export interface TabProps<T extends string> extends ComponentProps<'li'> {
   selected?: boolean;
   StartComponent?: ReactNode;
   EndComponent?: ReactNode;
+  textAlign?: 'start' | 'center' | 'end';
 }
 
 function Tab<T extends string>({
@@ -17,6 +18,7 @@ function Tab<T extends string>({
   selected = false,
   StartComponent,
   EndComponent,
+  textAlign = 'center',
   ...props
 }: TabProps<T>) {
   return (
@@ -26,7 +28,7 @@ function Tab<T extends string>({
       {...props}
     >
       {StartComponent}
-      {label}
+      <Label textAlign={textAlign}>{label}</Label>
       {EndComponent}
     </Container>
   );
@@ -62,4 +64,9 @@ const Container = styled.li<{ selected: boolean }>`
     background-color: ${({ selected, theme }) =>
       selected ? theme.colors.primary : theme.colors.disabledBackground};
   }
+`;
+
+const Label = styled.span<{ textAlign: 'start' | 'center' | 'end' }>`
+  width: 100%;
+  text-align: ${({ textAlign }) => textAlign};
 `;

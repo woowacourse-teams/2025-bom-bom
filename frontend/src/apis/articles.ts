@@ -1,22 +1,20 @@
 import { fetcher } from './fetcher';
 import { components, operations } from '@/types/openapi';
 
-export interface GetArticlesParams {
-  date?: Date;
-  category?: string;
-  keyword?: string;
-
-  page?: number;
-  size?: number;
-  sort?: string;
-}
+export type GetArticlesParams = Omit<
+  components['schemas']['GetArticlesOptions'],
+  'date'
+> &
+  components['schemas']['Pageable'] & {
+    date?: Date;
+  };
 
 export type GetArticlesResponse = components['schemas']['PageArticleResponse'];
 
 export const getArticles = async (params: GetArticlesParams) => {
   return await fetcher.get<GetArticlesResponse>({
     path: '/articles',
-    query: { ...params },
+    query: params,
   });
 };
 
@@ -40,18 +38,17 @@ export const patchArticleRead = async ({ id }: PatchArticleReadParams) => {
   });
 };
 
-export type GetStatisticsCategoriesParams = Omit<
-  operations['getArticleCategoryStatistics']['parameters']['query'],
-  'member'
->;
-export type GetStatisticsCategoriesResponse =
-  components['schemas']['GetArticleCategoryStatisticsResponse'];
+export type GetArticleStatisticsNewslettersParams =
+  operations['getArticleNewsletterStatistics']['parameters']['query'];
 
-export const getStatisticsCategories = async (
-  params: GetStatisticsCategoriesParams,
+export type GetArticlesStatisticsNewslettersResponse =
+  components['schemas']['GetArticleNewsletterStatisticsResponse'];
+
+export const getArticlesStatisticsNewsletters = async (
+  params: GetArticleStatisticsNewslettersParams,
 ) => {
-  return await fetcher.get<GetStatisticsCategoriesResponse>({
-    path: '/articles/statistics/categories',
-    query: { ...params },
+  return await fetcher.get<GetArticlesStatisticsNewslettersResponse>({
+    path: '/articles/statistics/newsletters',
+    query: params,
   });
 };

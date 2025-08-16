@@ -23,6 +23,16 @@ export const LongTitle: Story = {
       title:
         '매우 긴 제목의 예시입니다. 이런 경우 제목이 어떻게 표시되는지 확인해보겠습니다. 제목이 여러 줄로 나뉘어질 수 있습니다.',
       contentsSummary: '긴 제목을 가진 뉴스레터 아이템의 예시입니다.',
+      expectedReadTime: 3,
+      newsletter: {
+        name: 'TechNews',
+        category: 'AI',
+        imageUrl: 'https://example.com/newsletter-image.jpg',
+      },
+      arrivedDateTime: '2025-01-01T00:00:00.000Z',
+      articleId: 1,
+      thumbnailUrl: 'https://example.com/newsletter-image.jpg',
+      isRead: false,
     },
   },
 };
@@ -39,6 +49,10 @@ export const ShortContent: Story = {
         category: 'AI',
         imageUrl: 'https://example.com/newsletter-image.jpg',
       },
+      arrivedDateTime: '2025-01-01T00:00:00.000Z',
+      articleId: 1,
+      thumbnailUrl: 'https://example.com/newsletter-image.jpg',
+      isRead: false,
     },
   },
 };
@@ -56,6 +70,11 @@ export const MultipleArticles: Story = {
             category: 'Technology',
             imageUrl: 'https://example.com/newsletter-image.jpg',
           },
+          arrivedDateTime: '2025-01-01T00:00:00.000Z',
+          articleId: 1,
+          thumbnailUrl: 'https://example.com/newsletter-image.jpg',
+          expectedReadTime: 3,
+          isRead: false,
         }}
       />
       <NewsletterItemCard
@@ -69,6 +88,11 @@ export const MultipleArticles: Story = {
             category: 'Finance',
             imageUrl: 'https://example.com/newsletter-image.jpg',
           },
+          arrivedDateTime: '2025-01-01T00:00:00.000Z',
+          articleId: 2,
+          thumbnailUrl: 'https://example.com/newsletter-image.jpg',
+          expectedReadTime: 3,
+          isRead: false,
         }}
       />
       <NewsletterItemCard
@@ -82,6 +106,11 @@ export const MultipleArticles: Story = {
             category: 'Business',
             imageUrl: 'https://example.com/newsletter-image.jpg',
           },
+          arrivedDateTime: '2025-01-01T00:00:00.000Z',
+          articleId: 3,
+          thumbnailUrl: 'https://example.com/newsletter-image.jpg',
+          expectedReadTime: 3,
+          isRead: false,
         }}
       />
     </div>

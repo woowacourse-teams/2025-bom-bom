@@ -7,9 +7,11 @@ import Button from '../Button/Button';
 import ProgressBar from '../ProgressBar/ProgressBar';
 import Spacing from '../Spacing/Spacing';
 import { getPet, postPetAttendance } from '@/apis/pet';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import { queryClient } from '@/main';
 import { theme } from '@/styles/theme';
 import { calculateRate } from '@/utils/math';
+import type { CSSObject, Theme } from '@emotion/react';
 import petLv1 from '#/assets/pet-1-lv1.png';
 import petLv2 from '#/assets/pet-1-lv2.png';
 import petLv3 from '#/assets/pet-1-lv3.png';
@@ -26,6 +28,7 @@ const petImages: Record<number, string> = {
 };
 
 const PetCard = () => {
+  const deviceType = useDeviceType();
   const [isAnimating, setIsAnimating] = useState(false);
 
   const { data: pet } = useQuery({
@@ -52,13 +55,15 @@ const PetCard = () => {
   };
 
   return (
-    <Container>
-      <TitleWrapper>
-        <StatusIconWrapper>
-          <PetIcon width={16} height={16} color={theme.colors.white} />
-        </StatusIconWrapper>
-        <Title>봄이</Title>
-      </TitleWrapper>
+    <Container deviceType={deviceType}>
+      {deviceType === 'pc' && (
+        <TitleWrapper>
+          <StatusIconWrapper>
+            <PetIcon width={16} height={16} color={theme.colors.white} />
+          </StatusIconWrapper>
+          <Title>봄이</Title>
+        </TitleWrapper>
+      )}
 
       <Spacing size={16} />
 
@@ -88,7 +93,8 @@ const PetCard = () => {
       </Level>
       <Spacing size={16} />
       <ProgressBar rate={levelPercentage} caption={`${levelPercentage}%`} />
-      <Button
+      <AttendanceButton
+        deviceType={deviceType}
         text={pet?.isAttended ? '출석 완료!' : '출석체크하기'}
         onClick={handleAttendanceClick}
         disabled={pet?.isAttended}
@@ -99,12 +105,9 @@ const PetCard = () => {
 
 export default PetCard;
 
-const Container = styled.section`
+const Container = styled.section<{ deviceType: DeviceType }>`
   width: 310px;
-  padding: 34px 30px;
-  border: 1px solid ${({ theme }) => theme.colors.white};
   border-radius: 20px;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 15%);
 
   display: flex;
   flex-direction: column;
@@ -112,7 +115,7 @@ const Container = styled.section`
   align-items: center;
   justify-content: center;
 
-  background-color: ${({ theme }) => theme.colors.white};
+  ${({ deviceType, theme }) => containerStyles[deviceType](theme)}
 `;
 
 const PetImageContainer = styled.div`
@@ -189,3 +192,31 @@ const Title = styled.h2`
   font: ${({ theme }) => theme.fonts.heading5};
   text-align: center;
 `;
+
+const AttendanceButton = styled(Button)<{ deviceType: DeviceType }>`
+  height: 32px;
+
+  ${({ deviceType }) =>
+    deviceType === 'mobile' && {
+      position: 'absolute',
+      left: '50%',
+      bottom: 0,
+      width: '50%',
+      transform: 'translateX(-50%)',
+    }}
+`;
+
+const containerStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {
+  pc: () => ({
+    padding: '34px 30px',
+    border: `1px solid ${theme.colors.white}`,
+    boxShadow: '0 25px 50px -12px rgb(0 0 0 / 15%)',
+    backgroundColor: theme.colors.white,
+  }),
+  tablet: () => ({
+    flex: '1',
+  }),
+  mobile: () => ({
+    flex: '1',
+  }),
+};

@@ -7,7 +7,7 @@ type JsonBody = Record<string, unknown>;
 
 type FetcherOptions<TRequest extends JsonBody> = {
   path: string;
-  query?: Record<string, string | number | Date | undefined>;
+  query?: Record<string, string | number | Date | undefined | string[]>;
   body?: TRequest;
   headers?: HeadersInit;
 };
@@ -41,7 +41,7 @@ type FetchMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT';
 type RequestOptions<TRequest> = {
   path: string;
   method: FetchMethod;
-  query?: Record<string, string | number | Date | undefined>;
+  query?: Record<string, string | number | Date | undefined | string[]>;
   body?: TRequest;
   headers?: HeadersInit;
 };

@@ -1,7 +1,10 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import { useCallback, useState } from 'react';
 import { queries } from '@/apis/queries';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import BookmarkIcon from '#/assets/bookmark-inactive.svg';
@@ -12,26 +15,59 @@ export const Route = createFileRoute('/_bombom/bookmark')({
 
 function BookmarkPage() {
   const { data: articles } = useQuery(queries.bookmarks());
+  const [selectedNewsletter, setSelectedNewsletter] = useState('전체');
+  const deviceType = useDeviceType();
+
+  const handleNewsletterChange = useCallback((value: string) => {
+    setSelectedNewsletter(value);
+  }, []);
+
+  const { data: newsletterCounts } = useQuery(
+    queries.bookmarksStatisticsNewsletters(),
+  );
 
   if (!articles) return null;
-
   return (
     <Container>
-      <TitleWrapper>
-        <BookmarkStorageIcon />
-        <Title>북마크 보관함</Title>
-      </TitleWrapper>
-      {articles.content?.length && articles.content?.length > 0 ? (
-        <ArticleList>
-          {articles.content?.map((article) => (
-            <li key={article.articleId}>
-              <ArticleCard data={article} readVariant="badge" />
-            </li>
-          ))}
-        </ArticleList>
-      ) : (
-        <EmptyLetterCard title="북마크한 뉴스레터가 없어요" />
-      )}
+      <MainSection>
+        <TitleWrapper>
+          <BookmarkStorageIcon />
+          <Title>북마크 보관함</Title>
+        </TitleWrapper>
+
+        <ContentWrapper deviceType={deviceType}>
+          <SidebarSection deviceType={deviceType}>
+            <NewsLetterFilter
+              newsLetterList={[
+                {
+                  newsletter: '전체',
+                  count: newsletterCounts?.totalCount ?? 0,
+                  imageUrl: '',
+                },
+                ...(newsletterCounts?.newsletters.filter(
+                  (newsletter) => newsletter.count !== 0,
+                ) ?? []),
+              ]}
+              selectedNewsletter={selectedNewsletter}
+              onSelectNewsletter={handleNewsletterChange}
+            />
+          </SidebarSection>
+
+          <MainContentSection deviceType={deviceType}>
+            {articles.content && articles.content?.length > 0 ? (
+              <ArticleList>
+                {articles.content.map((article) => (
+                  <li key={article.articleId}>
+                    <ArticleCard data={article} readVariant="badge" />
+                  </li>
+                ))}
+              </ArticleList>
+            ) : (
+              <EmptyLetterCard title="북마크한 뉴스레터가 없어요" />
+            )}
+          </MainContentSection>
+        </ContentWrapper>
+      </MainSection>
     </Container>
   );
 }
@@ -44,18 +80,17 @@ const Container = styled.div`
   padding: 64px 0;
 
   display: flex;
-  gap: 24px;
-  flex-direction: column;
   align-items: flex-start;
   justify-content: center;
 `;
 
-const ArticleList = styled.ul`
+const MainSection = styled.div`
   width: 100%;
 
   display: flex;
-  gap: 16px;
+  gap: 20px;
   flex-direction: column;
+  align-items: flex-start;
 `;
 
 const TitleWrapper = styled.div`
@@ -66,6 +101,43 @@ const TitleWrapper = styled.div`
 
 const Title = styled.h1`
   font: ${({ theme }) => theme.fonts.heading2};
+`;
+
+const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
+  width: 100%;
+
+  display: flex;
+  gap: ${({ deviceType }) => (deviceType === 'pc' ? '32px' : '20px')};
+  flex-direction: ${({ deviceType }) =>
+    deviceType === 'pc' ? 'row' : 'column'};
+  align-items: flex-start;
+`;
+
+const SidebarSection = styled.div<{ deviceType: DeviceType }>`
+  width: ${({ deviceType }) => (deviceType === 'pc' ? '320px' : '100%')};
+
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+
+  order: ${({ deviceType }) => (deviceType === 'pc' ? 1 : 0)};
+`;
+
+const MainContentSection = styled.div<{ deviceType: DeviceType }>`
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  flex-direction: column;
+
+  order: ${({ deviceType }) => (deviceType === 'pc' ? 2 : 1)};
+`;
+
+const ArticleList = styled.ul`
+  width: 100%;
+
+  display: flex;
+  gap: 16px;
+  flex-direction: column;
 `;
 
 const BookmarkStorageIcon = styled(BookmarkIcon)`

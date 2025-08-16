@@ -140,7 +140,7 @@ const SidebarSection = styled.div<{ isPC: boolean }>`
   gap: 20px;
   flex-direction: column;
 
-  order: ${({ isPC }) => (isPC ? '1' : '2')};
+  order: ${({ isPC }) => (isPC ? 1 : 0)};
 `;
 
 const MainContentSection = styled.div<{ isPC: boolean }>`
@@ -151,5 +151,5 @@ const MainContentSection = styled.div<{ isPC: boolean }>`
   flex: 1;
   flex-direction: column;
 
-  order: ${({ isPC }) => (isPC ? '2' : '1')};
+  order: ${({ isPC }) => (isPC ? 2 : 1)};
 `;

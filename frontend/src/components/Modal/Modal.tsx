@@ -1,21 +1,26 @@
 import styled from '@emotion/styled';
-import { MouseEvent, RefObject } from 'react';
+import { MouseEvent, PropsWithChildren, RefObject } from 'react';
 import { theme } from '@/styles/theme';
 import CloseIcon from '#/assets/close.svg';
 
-interface UseModalParams {
+interface UseModalParams extends PropsWithChildren {
   modalRef: RefObject<HTMLDialogElement | null>;
   closeModal: () => void;
   clickOutsideModal: (event: MouseEvent<HTMLDialogElement>) => void;
 }
 
-const Modal = ({ modalRef, closeModal, clickOutsideModal }: UseModalParams) => {
+const Modal = ({
+  modalRef,
+  closeModal,
+  clickOutsideModal,
+  children,
+}: UseModalParams) => {
   return (
     <Container ref={modalRef} onClick={clickOutsideModal}>
       <CloseButton type="button" onClick={closeModal}>
         <StyledCloseIcon fill={theme.colors.black} />
       </CloseButton>
-      모달 컨텐츠
+      {children}
     </Container>
   );
 };

@@ -1,21 +1,31 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
+import NewsletterDetailModal from '../../NewsletterDetailModal/NewsletterDetailModal';
 import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
+import useModal from '@/components/Modal/useModal';
 import { CATEGORIES, CategoryType } from '@/constants/category';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { copyToClipboard } from '@/utils/copy';
+import { Newsletter } from '@/types/newsletter';
 import TrendingUpIcon from '#/assets/trending-up.svg';
 
-export default function TrendySection() {
-  const { data: newsletters } = useQuery(queries.newsletters());
-
-  const { data: userInfo } = useQuery(queries.me());
-
+const TrendySection = () => {
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryType>('전체');
+  const [selectedNewsletter, setSelectedNewsletter] =
+    useState<Newsletter | null>(null);
+
+  const { data: newsletters } = useQuery(queries.newsletters());
+
+  const {
+    modalRef: newsletterModalRef,
+    openModal: openNewsletterModal,
+    closeModal: closeNewsletterModal,
+    clickOutsideModal: clickOutsideNewsletterModal,
+  } = useModal();
 
   if (!newsletters) return null;
 
@@ -24,13 +34,9 @@ export default function TrendySection() {
       selectedCategory === '전체' || newsletter.category === selectedCategory,
   );
 
-  const handleCardClick = (url: string) => {
-    if (userInfo?.email) {
-      copyToClipboard(userInfo.email ?? '');
-      alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
-    }
-
-    window.open(url, '_blank', 'noopener,noreferrer');
+  const handleCardClick = (newsletter: Newsletter) => {
+    setSelectedNewsletter(newsletter);
+    openNewsletterModal();
   };
 
   return (
@@ -52,14 +58,14 @@ export default function TrendySection() {
         ))}
       </TagContainer>
       <TrendyGrid>
-        {filteredNewsletters.map((newsletter, index) => (
+        {filteredNewsletters.map((newsletter) => (
           <ImageInfoCard
-            key={index}
+            key={newsletter.newsletterId}
             imageUrl={newsletter.imageUrl ?? ''}
-            title={newsletter.name ?? ''}
-            description={newsletter.description ?? ''}
+            title={newsletter.name}
+            description={newsletter.description}
             onClick={() => {
-              handleCardClick(newsletter.subscribeUrl ?? '');
+              handleCardClick(newsletter);
               trackEvent({
                 category: 'Newsletter',
                 action: 'Click Trendy Newsletter Card',
@@ -70,9 +76,20 @@ export default function TrendySection() {
           />
         ))}
       </TrendyGrid>
+      {createPortal(
+        <NewsletterDetailModal
+          newsletter={selectedNewsletter}
+          modalRef={newsletterModalRef}
+          closeModal={closeNewsletterModal}
+          clickOutsideModal={clickOutsideNewsletterModal}
+        />,
+        document.body,
+      )}
     </Container>
   );
-}
+};
+
+export default TrendySection;
 
 const Container = styled.div`
   width: 100%;

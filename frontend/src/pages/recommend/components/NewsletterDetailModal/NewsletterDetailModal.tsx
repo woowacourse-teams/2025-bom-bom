@@ -50,91 +50,99 @@ export default function NewsletterDetailModal({
       modalRef={modalRef}
       closeModal={closeModal}
       clickOutsideModal={clickOutsideModal}
+      enableScroll={false}
     >
       <Container>
-        <InfoWrapper>
-          <NewsletterImage
-            src={newsletterDetail.imageUrl}
-            alt={`${newsletterDetail.name} 뉴스레터 이미지`}
-          />
-          <InfoBox>
-            <NewsletterTitle>{newsletterDetail.name}</NewsletterTitle>
-            <NewsletterInfo>
-              <Badge text={newsletter.category} />
-              <IssueCycle>{newsletterDetail.issueCycle}</IssueCycle>
-            </NewsletterInfo>
-          </InfoBox>
-        </InfoWrapper>
+        <FixedWrapper>
+          <InfoWrapper>
+            <NewsletterImage
+              src={newsletterDetail.imageUrl}
+              alt={`${newsletterDetail.name} 뉴스레터 이미지`}
+            />
+            <InfoBox>
+              <NewsletterTitle>{newsletterDetail.name}</NewsletterTitle>
+              <NewsletterInfo>
+                <Badge text={newsletter.category} />
+                <IssueCycle>{newsletterDetail.issueCycle}</IssueCycle>
+              </NewsletterInfo>
+            </InfoBox>
+          </InfoWrapper>
 
-        <Description>{newsletterDetail.description}</Description>
+          <SubscribeButton text="구독하기" onClick={goToSubscribe} />
+        </FixedWrapper>
 
-        <LinkWrapper>
-          <DetailLink onClick={goToMainSite}>
-            <HomeIcon width={18} height={18} />
-            홈페이지
-          </DetailLink>
+        <ScrollableWrapper>
+          <Description>{newsletterDetail.description}</Description>
 
-          {newsletterDetail.previousNewsletterUrl && (
-            <DetailLink onClick={goToPreviousLetters}>
-              <ArticleHistoryIcon width={18} height={18} />
-              지난 소식 보기
+          <LinkWrapper>
+            <DetailLink onClick={goToMainSite}>
+              <HomeIcon width={18} height={18} />
+              홈페이지
             </DetailLink>
+
+            {newsletterDetail.previousNewsletterUrl && (
+              <DetailLink onClick={goToPreviousLetters}>
+                <ArticleHistoryIcon width={18} height={18} />
+                지난 소식 보기
+              </DetailLink>
+            )}
+          </LinkWrapper>
+
+          {newsletterDetail.subscribePageImageUrl && (
+            <SubscribeWrapper>
+              <SubscribeHeader>
+                <SubscribeTitle>구독 방법</SubscribeTitle>
+              </SubscribeHeader>
+              <SubscribeContent>
+                <StepsWrapper>
+                  <StepItem>
+                    <StepNumber>1</StepNumber>
+                    <StepContent>
+                      <StepTitle>구독하기 버튼 클릭</StepTitle>
+                      <StepDescription>
+                        {'위의 "구독하기" 버튼을 눌러주세요.'}
+                      </StepDescription>
+                    </StepContent>
+                  </StepItem>
+                  <StepItem>
+                    <StepNumber>2</StepNumber>
+                    <StepContent>
+                      <StepTitle>구독 페이지 접속</StepTitle>
+                      <StepDescription>
+                        {'뉴스레터 공식 구독 페이지로 이동합니다.'}
+                      </StepDescription>
+                    </StepContent>
+                  </StepItem>
+                  <StepItem>
+                    <StepNumber>3</StepNumber>
+                    <StepContent>
+                      <StepTitle>봄봄 메일 붙여넣기</StepTitle>
+                      <StepDescription>
+                        {'이메일 칸에 봄봄 메일을 입력해주세요.'}
+                      </StepDescription>
+                      <StepDescription>
+                        {'봄봄을 통해 접속하였다면 즉시 붙여넣기가 가능합니다!'}
+                      </StepDescription>
+                    </StepContent>
+                  </StepItem>
+                  <StepItem>
+                    <StepNumber>4</StepNumber>
+                    <StepContent>
+                      <StepTitle>구독 완료!</StepTitle>
+                      <StepDescription>
+                        {'축하합니다! 이제 정기적으로 뉴스레터를 받아보세요.'}
+                      </StepDescription>
+                    </StepContent>
+                  </StepItem>
+                </StepsWrapper>
+                <Screenshot
+                  src={newsletterDetail.subscribePageImageUrl}
+                  alt="구독 페이지 스크린샷"
+                />
+              </SubscribeContent>
+            </SubscribeWrapper>
           )}
-        </LinkWrapper>
-
-        <SubscribeButton text="구독하기" onClick={goToSubscribe} />
-
-        {newsletterDetail.subscribePageImageUrl && (
-          <SubscribeWrapper>
-            <SubscribeHeader>
-              <SubscribeTitle>구독 방법</SubscribeTitle>
-            </SubscribeHeader>
-            <SubscribeContent>
-              <StepsWrapper>
-                <StepItem>
-                  <StepNumber>1</StepNumber>
-                  <StepContent>
-                    <StepTitle>구독하기 버튼 클릭</StepTitle>
-                    <StepDescription>
-                      {'위의 "구독하기" 버튼을 눌러주세요.'}
-                    </StepDescription>
-                  </StepContent>
-                </StepItem>
-                <StepItem>
-                  <StepNumber>2</StepNumber>
-                  <StepContent>
-                    <StepTitle>구독 페이지 접속</StepTitle>
-                    <StepDescription>
-                      {'뉴스레터 공식 구독 페이지로 이동합니다.'}
-                    </StepDescription>
-                  </StepContent>
-                </StepItem>
-                <StepItem>
-                  <StepNumber>3</StepNumber>
-                  <StepContent>
-                    <StepTitle>봄봄 메일 붙여넣기</StepTitle>
-                    <StepDescription>
-                      {'이메일 칸에 봄봄 메일을 입력해주세요.'}
-                    </StepDescription>
-                  </StepContent>
-                </StepItem>
-                <StepItem>
-                  <StepNumber>4</StepNumber>
-                  <StepContent>
-                    <StepTitle>구독 완료!</StepTitle>
-                    <StepDescription>
-                      {'축하합니다! 이제 정기적으로 뉴스레터를 받아보세요.'}
-                    </StepDescription>
-                  </StepContent>
-                </StepItem>
-              </StepsWrapper>
-              <Screenshot
-                src={newsletterDetail.subscribePageImageUrl}
-                alt="구독 페이지 스크린샷"
-              />
-            </SubscribeContent>
-          </SubscribeWrapper>
-        )}
+        </ScrollableWrapper>
       </Container>
     </Modal>
   );
@@ -142,11 +150,31 @@ export default function NewsletterDetailModal({
 
 const Container = styled.div`
   width: 100%;
+  height: 100%;
   max-width: 560px;
+
+  display: flex;
+  flex-direction: column;
+`;
+
+const FixedWrapper = styled.div`
+  padding-bottom: 24px;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.dividers};
 
   display: flex;
   gap: 24px;
   flex-direction: column;
+`;
+
+const ScrollableWrapper = styled.div`
+  padding-top: 24px;
+
+  display: flex;
+  gap: 24px;
+  flex: 1;
+  flex-direction: column;
+
+  overflow-y: auto;
 `;
 
 const InfoWrapper = styled.div`

@@ -7,12 +7,14 @@ interface UseModalParams extends PropsWithChildren {
   modalRef: RefObject<HTMLDialogElement | null>;
   closeModal: () => void;
   clickOutsideModal: (event: MouseEvent<HTMLDialogElement>) => void;
+  enableScroll?: boolean;
 }
 
 const Modal = ({
   modalRef,
   closeModal,
   clickOutsideModal,
+  enableScroll = true,
   children,
 }: UseModalParams) => {
   return (
@@ -20,7 +22,7 @@ const Modal = ({
       <CloseButton type="button" onClick={closeModal}>
         <StyledCloseIcon width={36} height={36} fill={theme.colors.black} />
       </CloseButton>
-      <ContentWrapper>{children}</ContentWrapper>
+      <ContentWrapper enableScroll={enableScroll}>{children}</ContentWrapper>
     </Container>
   );
 };
@@ -37,6 +39,7 @@ const Container = styled.dialog`
   border-radius: 12px;
 
   display: flex;
+  flex-direction: column;
 
   &::backdrop {
     background: rgb(0 0 0 / 30%);
@@ -50,19 +53,21 @@ const CloseButton = styled.button`
   right: 20px;
   border: none;
 
-  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  place-items: center;
+  background: none;
 `;
 
 const StyledCloseIcon = styled(CloseIcon)``;
 
-const ContentWrapper = styled.div`
+const ContentWrapper = styled.div<{ enableScroll: boolean }>`
   min-height: 0;
 
   flex: 1 1 auto;
 
   -webkit-overflow-scrolling: touch;
-  overflow-y: auto;
+  overflow-y: ${({ enableScroll }) => (enableScroll ? 'auto' : 'hidden')};
   overscroll-behavior: contain;
 `;

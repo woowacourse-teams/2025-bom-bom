@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import { useDeviceType } from '@/hooks/useDeviceType';
-import CategoryFilterWithCount from '@/pages/storage/components/CategoryFilterWithCount/CategoryFilterWithCount';
 import MobileStorageContent from '@/pages/storage/components/MobileStorageContent/MobileStorageContent';
+import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import PCStorageContent from '@/pages/storage/components/PCStorageContent/PCStorageContent';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import { useStorageFilters } from '@/pages/storage/hooks/useStorageFilters';
@@ -18,12 +18,12 @@ function Storage() {
   const isPC = deviceType === 'pc';
 
   const {
-    selectedCategory,
+    selectedNewsletter,
     sortFilter,
     searchInput,
     baseQueryParams,
-    categoryCounts,
-    handleCategoryChange,
+    newletterCounts,
+    handleNewsletterChange,
     handleSortChange,
     handleSearchChange,
   } = useStorageFilters();
@@ -40,13 +40,19 @@ function Storage() {
 
         <ContentWrapper isPC={isPC}>
           <SidebarSection isPC={isPC}>
-            <CategoryFilterWithCount
-              selectedCategory={selectedCategory}
-              onCategoryChange={handleCategoryChange}
-              totalCount={categoryCounts?.totalCount ?? 0}
-              existCategories={categoryCounts?.categories?.filter(
-                (category) => category.count !== 0,
-              )}
+            <NewsLetterFilter
+              newsLetterList={[
+                {
+                  newsletter: '전체',
+                  count: newletterCounts?.totalCount ?? 0,
+                  imageUrl: '',
+                },
+                ...(newletterCounts?.newsletters.filter(
+                  (newsletter) => newsletter.count !== 0,
+                ) ?? []),
+              ]}
+              selectedNewsletter={selectedNewsletter}
+              onSelectNewsletter={handleNewsletterChange}
             />
             <QuickMenu />
           </SidebarSection>

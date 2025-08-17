@@ -4,13 +4,14 @@ import {
   GetArticleByIdParams,
   getArticles,
   type GetArticlesParams,
-  getStatisticsCategories,
-  GetStatisticsCategoriesParams,
+  getArticlesStatisticsNewsletters,
+  GetArticleStatisticsNewslettersParams,
 } from './articles';
 import {
   getArticleBookmarkStatus,
   GetArticleBookmarkStatusParams,
   getBookmarks,
+  getBookmarksStatisticsNewsletters,
 } from './bookmark';
 import { getHighlights, GetHighlightsParams } from './highlight';
 import { getReadingStatus, getUserInfo } from './members';
@@ -42,10 +43,12 @@ export const queries = {
       queryFn: () => getArticleById(params),
     }),
 
-  statisticsCategories: (params?: GetStatisticsCategoriesParams) =>
+  articlesStatisticsNewsletters: (
+    params: GetArticleStatisticsNewslettersParams,
+  ) =>
     queryOptions({
-      queryKey: ['articles', 'statistics', 'categories'],
-      queryFn: () => getStatisticsCategories(params ?? {}),
+      queryKey: ['articles', 'statistics', 'newsletters', params],
+      queryFn: () => getArticlesStatisticsNewsletters(params),
     }),
 
   // members
@@ -87,5 +90,11 @@ export const queries = {
     queryOptions({
       queryKey: ['bookmarks', 'status', 'articles', params.articleId],
       queryFn: () => getArticleBookmarkStatus(params),
+    }),
+
+  bookmarksStatisticsNewsletters: () =>
+    queryOptions({
+      queryKey: ['bookmarks', 'statistics', 'newsletters'],
+      queryFn: getBookmarksStatisticsNewsletters,
     }),
 };

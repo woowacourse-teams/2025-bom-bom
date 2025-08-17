@@ -7,36 +7,32 @@ interface UseModalParams extends PropsWithChildren {
   modalRef: RefObject<HTMLDialogElement | null>;
   closeModal: () => void;
   clickOutsideModal: (event: MouseEvent<HTMLDialogElement>) => void;
-  defaultScroll?: boolean;
 }
 
 const Modal = ({
   modalRef,
   closeModal,
   clickOutsideModal,
-  defaultScroll = true,
   children,
 }: UseModalParams) => {
   return (
-    <Container
-      ref={modalRef}
-      onClick={clickOutsideModal}
-      defaultScroll={defaultScroll}
-    >
+    <Container ref={modalRef} onClick={clickOutsideModal}>
       <CloseButton type="button" onClick={closeModal}>
         <StyledCloseIcon width={36} height={36} fill={theme.colors.black} />
       </CloseButton>
-      <ContentWrapper defaultScroll={defaultScroll}>{children}</ContentWrapper>
+      <ContentWrapper>{children}</ContentWrapper>
     </Container>
   );
 };
 
 export default Modal;
 
-const Container = styled.dialog<{ defaultScroll: boolean }>`
+const Container = styled.dialog`
   overflow: hidden;
   position: relative;
   width: min(720px, 92vw);
+  height: 90vh;
+  max-height: min(720px, 90vh);
   padding: 36px 52px;
   border: 0;
   border-radius: 12px;
@@ -44,11 +40,6 @@ const Container = styled.dialog<{ defaultScroll: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  ${({ defaultScroll }) =>
-    defaultScroll
-      ? 'max-height: min(720px, 90vh)'
-      : 'height: 90vh; max-height: 90vh'}
 
   &::backdrop {
     background: rgb(0 0 0 / 30%);
@@ -71,20 +62,16 @@ const CloseButton = styled.button`
 
 const StyledCloseIcon = styled(CloseIcon)``;
 
-const ContentWrapper = styled.div<{ defaultScroll: boolean }>`
+const ContentWrapper = styled.div`
   height: 100%;
   min-height: 0;
+  margin-right: -24px;
+  padding-right: 24px;
 
   display: flex;
   flex-direction: column;
 
-  ${({ defaultScroll }) =>
-    defaultScroll &&
-    `
-        padding-right: 24px;
-        margin-right: -24px;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        scrollbar-gutter: stable;
-      `}
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 `;

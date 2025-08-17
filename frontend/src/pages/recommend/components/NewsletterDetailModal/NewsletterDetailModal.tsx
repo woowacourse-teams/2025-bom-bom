@@ -50,7 +50,6 @@ export default function NewsletterDetailModal({
       modalRef={modalRef}
       closeModal={closeModal}
       clickOutsideModal={clickOutsideModal}
-      defaultScroll={false}
     >
       <Container>
         <FixedWrapper>
@@ -178,6 +177,7 @@ const ScrollableWrapper = styled.div`
   flex-direction: column;
 
   overflow-y: auto;
+  overscroll-behavior: contain;
   scrollbar-gutter: stable;
 `;
 

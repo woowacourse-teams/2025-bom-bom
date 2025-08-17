@@ -83,7 +83,6 @@ public class ArticleService {
     }
 
     public GetArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(Member member, String keyword) {
-        int totalCount = articleRepository.countAllByMemberId(member.getId(), keyword);
         List<GetArticleCountPerNewsletterResponse> countResponse = newsletterRepository.findAll()
                 .stream()
                 .map(newsletter -> {
@@ -96,6 +95,11 @@ public class ArticleService {
                 })
                 .filter(response -> response.count() > 0)
                 .toList();
+
+        int totalCount = countResponse.stream()
+                .mapToInt(response -> (int) response.count())
+                .sum();
+
         return GetArticleNewsletterStatisticsResponse.of(totalCount, countResponse);
     }
 

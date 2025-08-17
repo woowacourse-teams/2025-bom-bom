@@ -18,7 +18,11 @@ const Modal = ({
   children,
 }: UseModalParams) => {
   return (
-    <Container ref={modalRef} onClick={clickOutsideModal}>
+    <Container
+      ref={modalRef}
+      onClick={clickOutsideModal}
+      defaultScroll={defaultScroll}
+    >
       <CloseButton type="button" onClick={closeModal}>
         <StyledCloseIcon width={36} height={36} fill={theme.colors.black} />
       </CloseButton>
@@ -29,11 +33,10 @@ const Modal = ({
 
 export default Modal;
 
-const Container = styled.dialog`
+const Container = styled.dialog<{ defaultScroll: boolean }>`
   overflow: hidden;
   position: relative;
   width: min(720px, 92vw);
-  max-height: min(720px, 80vh);
   padding: 36px 52px;
   border: 0;
   border-radius: 12px;
@@ -41,6 +44,9 @@ const Container = styled.dialog`
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  ${({ defaultScroll }) =>
+    defaultScroll ? 'max-height: min(720px, 90vh)' : 'max-height: 90vh'}
 
   &::backdrop {
     background: rgb(0 0 0 / 30%);
@@ -64,16 +70,14 @@ const CloseButton = styled.button`
 const StyledCloseIcon = styled(CloseIcon)``;
 
 const ContentWrapper = styled.div<{ defaultScroll: boolean }>`
-  min-height: 0;
-  flex: 1 1 auto;
-
   ${({ defaultScroll }) =>
     defaultScroll &&
     `
-    padding-right: 24px;
-    margin-right: -24px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-gutter: stable;
-  `}
+        min-height: 0;
+        padding-right: 24px;
+        margin-right: -24px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+      `}
 `;

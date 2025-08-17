@@ -72,7 +72,6 @@ const ContentWrapper = styled.div<{ defaultScroll: boolean }>`
     `
     padding-right: 24px;
     margin-right: -24px;
-    -webkit-overflow-scrolling: touch;
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-gutter: stable;

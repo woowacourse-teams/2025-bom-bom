@@ -55,19 +55,6 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     }
 
     @Override
-    public int countAllByMemberId(Long memberId, String keyword) {
-        Long count = jpaQueryFactory.select(article.count())
-                .from(article)
-                .where(createMemberWhereClause(memberId))
-                .where(createKeywordWhereClause(keyword))
-                .fetchOne();
-
-        return Optional.ofNullable(count)
-                .orElse(0L)
-                .intValue();
-    }
-
-    @Override
     public int countAllByNewsletterIdAndMemberId(Long memberId, Long newsletterId, String keyword) {
         Long count = jpaQueryFactory.select(article.count())
                 .from(article)

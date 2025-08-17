@@ -33,13 +33,12 @@ const Container = styled.dialog`
   width: min(720px, 92vw);
   height: 90vh;
   max-height: min(720px, 90vh);
-  padding: 36px 52px;
+  padding: 0;
   border: 0;
   border-radius: 12px;
 
   display: flex;
   flex-direction: column;
-  align-items: center;
 
   &::backdrop {
     background: rgb(0 0 0 / 30%);
@@ -65,11 +64,13 @@ const StyledCloseIcon = styled(CloseIcon)``;
 const ContentWrapper = styled.div`
   height: 100%;
   min-height: 0;
-  margin-right: -24px;
-  padding-right: 24px;
+  padding: 36px 52px;
 
   display: flex;
   flex-direction: column;
+  align-items: center;
+
+  box-sizing: border-box;
 
   overflow-y: auto;
   overscroll-behavior: contain;

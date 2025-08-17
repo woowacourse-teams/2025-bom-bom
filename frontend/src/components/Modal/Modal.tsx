@@ -37,7 +37,7 @@ export default Modal;
 
 const Container = styled.dialog<{ position: PositionType }>`
   overflow: hidden;
-  position: relative;
+  position: fixed;
   width: ${({ position }) =>
     position === 'bottom' ? '100%' : 'min(720px, 92vw)'};
   height: 90vh;

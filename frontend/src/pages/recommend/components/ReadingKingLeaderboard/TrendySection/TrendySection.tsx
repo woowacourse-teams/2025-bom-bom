@@ -21,10 +21,10 @@ const TrendySection = () => {
   const { data: newsletters } = useQuery(queries.newsletters());
 
   const {
-    modalRef: newsletterModalRef,
-    openModal: openNewsletterModal,
-    closeModal: closeNewsletterModal,
-    clickOutsideModal: clickOutsideNewsletterModal,
+    modalRef: detailModalRef,
+    openModal: openDetailModal,
+    closeModal: closeDetailModal,
+    clickOutsideModal: clickOutsideDetailModal,
   } = useModal();
 
   if (!newsletters) return null;
@@ -36,7 +36,7 @@ const TrendySection = () => {
 
   const handleCardClick = (newsletter: Newsletter) => {
     setSelectedNewsletter(newsletter);
-    openNewsletterModal();
+    openDetailModal();
   };
 
   return (
@@ -79,9 +79,9 @@ const TrendySection = () => {
       {createPortal(
         <NewsletterDetailModal
           newsletter={selectedNewsletter}
-          modalRef={newsletterModalRef}
-          closeModal={closeNewsletterModal}
-          clickOutsideModal={clickOutsideNewsletterModal}
+          modalRef={detailModalRef}
+          closeModal={closeDetailModal}
+          clickOutsideModal={clickOutsideDetailModal}
         />,
         document.body,
       )}

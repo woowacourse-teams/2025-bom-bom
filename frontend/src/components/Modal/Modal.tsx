@@ -46,7 +46,9 @@ const Container = styled.dialog<{ defaultScroll: boolean }>`
   align-items: center;
 
   ${({ defaultScroll }) =>
-    defaultScroll ? 'max-height: min(720px, 90vh)' : 'max-height: 90vh'}
+    defaultScroll
+      ? 'max-height: min(720px, 90vh)'
+      : 'height: 90vh; max-height: 90vh'}
 
   &::backdrop {
     background: rgb(0 0 0 / 30%);
@@ -70,10 +72,15 @@ const CloseButton = styled.button`
 const StyledCloseIcon = styled(CloseIcon)``;
 
 const ContentWrapper = styled.div<{ defaultScroll: boolean }>`
+  height: 100%;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
   ${({ defaultScroll }) =>
     defaultScroll &&
     `
-        min-height: 0;
         padding-right: 24px;
         margin-right: -24px;
         overflow-y: auto;

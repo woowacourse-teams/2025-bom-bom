@@ -167,7 +167,10 @@ const FixedWrapper = styled.div`
 `;
 
 const ScrollableWrapper = styled.div`
+  min-height: 0;
+  margin-right: -16px;
   padding-top: 24px;
+  padding-right: 16px;
 
   display: flex;
   gap: 24px;
@@ -175,6 +178,7 @@ const ScrollableWrapper = styled.div`
   flex-direction: column;
 
   overflow-y: auto;
+  scrollbar-gutter: stable;
 `;
 
 const InfoWrapper = styled.div`
@@ -295,7 +299,6 @@ const Screenshot = styled(ImageWithFallback)`
 `;
 
 const SubscribeContent = styled.div`
-  overflow: hidden;
   width: 100%;
   padding: 16px;
   border-top: 1px solid ${({ theme }) => theme.colors.dividers};

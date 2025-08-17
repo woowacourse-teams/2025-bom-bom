@@ -52,11 +52,56 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 });
   }),
 
-  // 카테고리 통계
-  http.get(`${baseURL}/articles/statistics/categories`, () => {
+  // 뉴스레터 통계
+  http.get(`${baseURL}/articles/statistics/newsletters`, () => {
     return HttpResponse.json({
       totalCount: ARTICLES.length,
-      categories: [{ category: '기술', count: ARTICLES.length }],
+      newsletters: [
+        {
+          newsletter: '테크뉴스',
+          count: 5,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+        {
+          newsletter: '개발자뉴스',
+          count: 3,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+        {
+          newsletter: 'AI뉴스',
+          count: 2,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+      ],
+    });
+  }),
+
+  // 북마크 뉴스레터 통계
+  http.get(`${baseURL}/bookmarks/statistics/newsletters`, () => {
+    return HttpResponse.json({
+      totalCount: 8,
+      newsletters: [
+        {
+          newsletter: '테크뉴스',
+          count: 3,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+        {
+          newsletter: '개발자뉴스',
+          count: 2,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+        {
+          newsletter: 'AI뉴스',
+          count: 1,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+        {
+          newsletter: '스타트업뉴스',
+          count: 2,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+      ],
     });
   }),
 

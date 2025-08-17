@@ -10,6 +10,7 @@ interface UseModalParams extends PropsWithChildren {
   closeModal: () => void;
   clickOutsideModal: (event: MouseEvent<HTMLDialogElement>) => void;
   position?: PositionType;
+  showCloseButton?: boolean;
 }
 
 const Modal = ({
@@ -17,13 +18,16 @@ const Modal = ({
   closeModal,
   clickOutsideModal,
   position = 'center',
+  showCloseButton = true,
   children,
 }: UseModalParams) => {
   return (
     <Container ref={modalRef} onClick={clickOutsideModal} position={position}>
-      <CloseButton type="button" onClick={closeModal}>
-        <StyledCloseIcon width={36} height={36} fill={theme.colors.black} />
-      </CloseButton>
+      {showCloseButton && (
+        <CloseButton type="button" onClick={closeModal}>
+          <StyledCloseIcon width={36} height={36} fill={theme.colors.black} />
+        </CloseButton>
+      )}
       <ContentWrapper>{children}</ContentWrapper>
     </Container>
   );

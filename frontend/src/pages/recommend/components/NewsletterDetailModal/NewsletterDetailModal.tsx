@@ -287,9 +287,11 @@ const SubscribeTitle = styled.h3`
 `;
 
 const Screenshot = styled(ImageWithFallback)`
-  overflow: hidden;
   width: 100%;
   border-radius: 12px;
+
+  object-fit: cover;
+  object-position: center;
 `;
 
 const SubscribeContent = styled.div`

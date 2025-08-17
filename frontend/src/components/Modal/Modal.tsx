@@ -18,9 +18,9 @@ const Modal = ({
   return (
     <Container ref={modalRef} onClick={clickOutsideModal}>
       <CloseButton type="button" onClick={closeModal}>
-        <StyledCloseIcon fill={theme.colors.black} />
+        <StyledCloseIcon width={36} height={36} fill={theme.colors.black} />
       </CloseButton>
-      {children}
+      <ContentWrapper>{children}</ContentWrapper>
     </Container>
   );
 };
@@ -28,10 +28,15 @@ const Modal = ({
 export default Modal;
 
 const Container = styled.dialog`
+  overflow: hidden;
   position: relative;
+  width: min(680px, 92vw);
+  max-height: min(80dvh, 720px);
   padding: 32px;
   border: 0;
   border-radius: 12px;
+
+  display: flex;
 
   &::backdrop {
     background: rgb(0 0 0 / 30%);
@@ -41,8 +46,8 @@ const Container = styled.dialog`
 
 const CloseButton = styled.button`
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 20px;
+  right: 20px;
   border: none;
 
   background: none;
@@ -51,3 +56,13 @@ const CloseButton = styled.button`
 `;
 
 const StyledCloseIcon = styled(CloseIcon)``;
+
+const ContentWrapper = styled.div`
+  min-height: 0;
+
+  flex: 1 1 auto;
+
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+`;

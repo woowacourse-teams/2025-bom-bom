@@ -50,7 +50,7 @@ export default function NewsletterDetailModal({
       modalRef={modalRef}
       closeModal={closeModal}
       clickOutsideModal={clickOutsideModal}
-      enableScroll={false}
+      defaultScroll={false}
     >
       <Container>
         <FixedWrapper>

@@ -34,12 +34,13 @@ const Container = styled.dialog`
   position: relative;
   width: min(720px, 92vw);
   max-height: min(720px, 80vh);
-  padding: 32px 52px;
+  padding: 36px 52px;
   border: 0;
   border-radius: 12px;
 
   display: flex;
   flex-direction: column;
+  align-items: center;
 
   &::backdrop {
     background: rgb(0 0 0 / 30%);
@@ -69,8 +70,11 @@ const ContentWrapper = styled.div<{ defaultScroll: boolean }>`
   ${({ defaultScroll }) =>
     defaultScroll &&
     `
+    padding-right: 24px;
+    margin-right: -24px;
     -webkit-overflow-scrolling: touch;
     overflow-y: auto;
     overscroll-behavior: contain;
+    scrollbar-gutter: stable;
   `}
 `;

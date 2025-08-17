@@ -6,6 +6,7 @@ import Badge from '@/components/Badge/Badge';
 import Button from '@/components/Button/Button';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import Modal from '@/components/Modal/Modal';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import { Newsletter } from '@/types/newsletter';
 import { copyToClipboard } from '@/utils/copy';
 import ArticleHistoryIcon from '#/assets/article-history.svg';
@@ -28,6 +29,7 @@ export default function NewsletterDetailModal({
   const { data: newsletterDetail } = useQuery(
     queries.newsletterDetail({ newsletterId: newsletter?.newsletterId ?? 0 }),
   );
+  const deviceType = useDeviceType();
 
   if (!newsletter || !newsletterDetail) return null;
 
@@ -57,6 +59,7 @@ export default function NewsletterDetailModal({
       modalRef={modalRef}
       closeModal={closeModal}
       clickOutsideModal={clickOutsideModal}
+      position={deviceType === 'mobile' ? 'bottom' : 'center'}
     >
       <Container>
         <FixedWrapper>

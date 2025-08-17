@@ -3,20 +3,24 @@ import { MouseEvent, PropsWithChildren, RefObject } from 'react';
 import { theme } from '@/styles/theme';
 import CloseIcon from '#/assets/close.svg';
 
+type PositionType = 'center' | 'bottom';
+
 interface UseModalParams extends PropsWithChildren {
   modalRef: RefObject<HTMLDialogElement | null>;
   closeModal: () => void;
   clickOutsideModal: (event: MouseEvent<HTMLDialogElement>) => void;
+  position?: PositionType;
 }
 
 const Modal = ({
   modalRef,
   closeModal,
   clickOutsideModal,
+  position = 'center',
   children,
 }: UseModalParams) => {
   return (
-    <Container ref={modalRef} onClick={clickOutsideModal}>
+    <Container ref={modalRef} onClick={clickOutsideModal} position={position}>
       <CloseButton type="button" onClick={closeModal}>
         <StyledCloseIcon width={36} height={36} fill={theme.colors.black} />
       </CloseButton>
@@ -27,10 +31,11 @@ const Modal = ({
 
 export default Modal;
 
-const Container = styled.dialog`
+const Container = styled.dialog<{ position: PositionType }>`
   overflow: hidden;
   position: relative;
-  width: min(720px, 92vw);
+  width: ${({ position }) =>
+    position === 'bottom' ? '100%' : 'min(720px, 92vw)'};
   height: 90vh;
   max-height: min(720px, 90vh);
   padding: 0;
@@ -39,6 +44,17 @@ const Container = styled.dialog`
 
   display: flex;
   flex-direction: column;
+
+  ${({ position }) =>
+    position === 'bottom' &&
+    `
+      height: 60vh;
+      max-width: 100%;
+      margin: 0;
+      margin-top: auto;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+`}
 
   &::backdrop {
     background: rgb(0 0 0 / 30%);

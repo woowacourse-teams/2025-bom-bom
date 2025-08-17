@@ -7,6 +7,7 @@ import Button from '@/components/Button/Button';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import Modal from '@/components/Modal/Modal';
 import { Newsletter } from '@/types/newsletter';
+import { copyToClipboard } from '@/utils/copy';
 import ArticleHistoryIcon from '#/assets/article-history.svg';
 import HomeIcon from '#/assets/home.svg';
 
@@ -23,6 +24,7 @@ export default function NewsletterDetailModal({
   closeModal,
   clickOutsideModal,
 }: NewsletterDetailModalProps) {
+  const { data: userInfo } = useQuery(queries.me());
   const { data: newsletterDetail } = useQuery(
     queries.newsletterDetail({ newsletterId: newsletter?.newsletterId ?? 0 }),
   );
@@ -30,6 +32,11 @@ export default function NewsletterDetailModal({
   if (!newsletter || !newsletterDetail) return null;
 
   const goToSubscribe = () => {
+    if (userInfo?.email) {
+      copyToClipboard(userInfo.email ?? '');
+      alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
+    }
+
     window.open(newsletterDetail.subscribeUrl, '_blank', 'noopener,noreferrer');
   };
 
@@ -120,7 +127,9 @@ export default function NewsletterDetailModal({
                         {'이메일 칸에 봄봄 메일을 입력해주세요.'}
                       </StepDescription>
                       <StepDescription>
-                        {'봄봄을 통해 접속하였다면 즉시 붙여넣기가 가능합니다!'}
+                        {
+                          '봄봄을 통해 접속한 유저라면 즉시 붙여넣기가 가능합니다!'
+                        }
                       </StepDescription>
                     </StepContent>
                   </StepItem>

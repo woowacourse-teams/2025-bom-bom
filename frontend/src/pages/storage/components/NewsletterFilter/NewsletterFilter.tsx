@@ -38,7 +38,9 @@ function NewsLetterFilter({
             label={newsletter}
             selected={selectedNewsletter === newsletter}
             onTabSelect={onSelectNewsletter}
-            StartComponent={<NewsLetterImage src={imageUrl} />}
+            StartComponent={
+              imageUrl ? <NewsLetterImage src={imageUrl} /> : null
+            }
             EndComponent={<Badge text={String(count)} />}
             textAlign={deviceType === 'pc' ? 'start' : 'center'}
           />

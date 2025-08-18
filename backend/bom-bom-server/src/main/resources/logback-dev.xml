@@ -1,16 +1,36 @@
-<included>
-    <!-- DEV 프로파일: Pretty JSON 콘솔 + 텍스트 파일 -->
+<configuration>
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
+
+    <!-- 콘솔(JSON) -->
     <appender name="DEV_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <prettyPrint>true</prettyPrint>
             <providers>
                 <timestamp fieldName="time" pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX"/>
+                <message/>
+            </providers>
+        </encoder>
+    </appender>
+
+    <!-- 파일(JSON) -->
+    <appender name="DEV_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/bombom-dev.log</file>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/bombom-dev.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>2GB</totalSizeCap>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp fieldName="time" pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX"/>
                 <mdc>
                     <includeMdcKeyName>traceId</includeMdcKeyName>
                     <includeMdcKeyName>spanId</includeMdcKeyName>
+                    <includeMdcKeyName>userId</includeMdcKeyName>
                     <includeMdcKeyName>API</includeMdcKeyName>
                     <includeMdcKeyName>method</includeMdcKeyName>
-                    <includeMdcKeyName>userId</includeMdcKeyName>
                 </mdc>
                 <message/>
                 <stackTrace>
@@ -26,20 +46,8 @@
         </encoder>
     </appender>
 
-    <appender name="DEV_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_PATH}/bombom-dev.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- 날짜 + 인덱스 형식 -->
-            <fileNamePattern>${LOG_PATH}/bombom-prod.log.%d{yyyy-MM-dd}</fileNamePattern>
-            <maxHistory>7</maxHistory>
-        </rollingPolicy>
-        <encoder>
-            <pattern>${FILE_PATTERN}</pattern>
-        </encoder>
-    </appender>
-
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="DEV_CONSOLE"/>
         <appender-ref ref="DEV_FILE"/>
     </root>
-</included>
+</configuration>

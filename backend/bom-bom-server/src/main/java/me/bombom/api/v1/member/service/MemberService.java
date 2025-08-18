@@ -54,13 +54,17 @@ public class MemberService {
 
     private void validateDuplicateEmail(String email) {
         if (memberRepository.existsByEmail(email)) {
-            throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_EMAIL);
+            throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_EMAIL)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "email")
+                    .addContext(ErrorContextKeys.OPERATION, "validateDuplicateEmail");
         }
     }
 
     private void validateDuplicateNickname(String nickname) {
         if (memberRepository.existsByNickname(nickname)) {
-            throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_NICKNAME);
+            throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_NICKNAME)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "nickname")
+                    .addContext(ErrorContextKeys.OPERATION, "validateDuplicateNickname");
         }
     }
 }

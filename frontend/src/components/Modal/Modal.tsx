@@ -20,14 +20,19 @@ const Modal = ({
   clickOutsideModal,
   position = 'center',
   showCloseButton = true,
-  children,
   isOpen,
+  children,
 }: UseModalParams) => {
   if (!isOpen) return null;
 
   return (
     <Backdrop onClick={clickOutsideModal}>
-      <Container ref={modalRef} position={position}>
+      <Container
+        role="dialog"
+        aria-modal="true"
+        ref={modalRef}
+        position={position}
+      >
         {showCloseButton && (
           <CloseButton type="button" onClick={closeModal}>
             <CloseIcon width={36} height={36} fill={theme.colors.black} />

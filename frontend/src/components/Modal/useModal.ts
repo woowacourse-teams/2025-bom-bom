@@ -30,6 +30,21 @@ const useModal = () => {
     [closeModal],
   );
 
+  const keydownESCModal = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    },
+    [closeModal],
+  );
+
+  useEffect(() => {
+    window.addEventListener('keydown', keydownESCModal);
+
+    return () => window.removeEventListener('keydown', keydownESCModal);
+  }, [keydownESCModal]);
+
   const toggleScrollLock = useCallback(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -47,6 +62,7 @@ const useModal = () => {
     openModal,
     closeModal,
     clickOutsideModal,
+    keydownESCModal,
     isOpen,
   };
 };

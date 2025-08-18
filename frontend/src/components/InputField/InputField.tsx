@@ -35,6 +35,7 @@ const InputField = ({
         <Input
           id={name}
           name={name}
+          type="text"
           value={inputValue}
           onChange={onInputChange}
           placeholder={placeholder ?? ''}

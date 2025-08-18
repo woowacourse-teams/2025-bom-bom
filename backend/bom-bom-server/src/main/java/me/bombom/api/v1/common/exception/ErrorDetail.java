@@ -30,6 +30,7 @@ public enum ErrorDetail {
     MISSING_OAUTH_DATA(HttpStatus.UNAUTHORIZED, "J004", "회원가입에 필요한 인증 정보가 없습니다. 다시 로그인 해주세요."),
     DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, "J005", "이미 사용 중인 닉네임입니다."),
     UNSUPPORTED_OAUTH2_PROVIDER(HttpStatus.BAD_REQUEST, "J006", "지원하지 않는 소셜 로그인 입니다."),
+    DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "J007", "이미 사용 중인 이메일입니다."),
 
     /*
     * G : 인가

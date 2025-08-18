@@ -36,7 +36,6 @@ const useFocusTrap = (containerRef: RefObject<HTMLElement | null>) => {
 
   const initFocus = useCallback(() => {
     const focusableElements = findFocusable();
-    console.log(focusableElements);
     const firstElement = focusableElements[0];
     const lastElement = focusableElements[focusableElements.length - 1];
     if (!firstElement || !lastElement) return;

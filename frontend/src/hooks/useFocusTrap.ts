@@ -1,6 +1,9 @@
-import { KeyboardEvent, RefObject, useCallback } from 'react';
+import { KeyboardEvent, RefObject, useCallback, useRef } from 'react';
 
 const useFocusTrap = (containerRef: RefObject<HTMLElement | null>) => {
+  const firstFocusableRef = useRef<HTMLElement | null>(null);
+  const lastFocusableRef = useRef<HTMLElement | null>(null);
+
   const findFocusable = useCallback(() => {
     const container = containerRef.current;
     if (!container) return [];
@@ -32,31 +35,39 @@ const useFocusTrap = (containerRef: RefObject<HTMLElement | null>) => {
   }, [containerRef]);
 
   const initFocus = useCallback(() => {
-    const [first] = findFocusable();
-    first?.focus();
+    const focusableElements = findFocusable();
+    console.log(focusableElements);
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+    if (!firstElement || !lastElement) return;
+
+    firstFocusableRef.current = firstElement;
+    lastFocusableRef.current = lastElement;
+
+    firstFocusableRef.current.focus();
   }, [findFocusable]);
 
   const keydownFocusTrapTab = useCallback(
     (event: KeyboardEvent<HTMLElement>) => {
-      if (event.key !== 'Tab') return;
+      const isTabKeyDown = !event.shiftKey && event.key === 'Tab';
+      const isShiftTabKeyDown = event.shiftKey && event.key === 'Tab';
+      if (!isTabKeyDown && !isShiftTabKeyDown) return;
 
-      const focusableElements = findFocusable();
-      if (focusableElements.length === 0) return;
-
-      const firstFocusable = focusableElements[0];
-      const lastFocusable = focusableElements[focusableElements.length - 1];
-
-      if (event.shiftKey && document.activeElement === firstFocusable) {
+      if (
+        isShiftTabKeyDown &&
+        document.activeElement === firstFocusableRef.current
+      ) {
         event.preventDefault();
-        lastFocusable?.focus();
-      }
-
-      if (!event.shiftKey && document.activeElement === lastFocusable) {
+        lastFocusableRef.current?.focus();
+      } else if (
+        isTabKeyDown &&
+        document.activeElement === lastFocusableRef.current
+      ) {
         event.preventDefault();
-        firstFocusable?.focus();
+        firstFocusableRef.current?.focus();
       }
     },
-    [findFocusable],
+    [],
   );
 
   return {

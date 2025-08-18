@@ -5,8 +5,6 @@ import { useNavigate } from '@tanstack/react-router';
 import { FormEvent, useState } from 'react';
 import { postSignup } from '@/apis/auth';
 import InputField from '@/components/InputField/InputField';
-import Tab from '@/components/Tab/Tab';
-import Tabs from '@/components/Tabs/Tabs';
 import { theme } from '@/styles/theme';
 import HelpIcon from '#/assets/help.svg';
 
@@ -16,20 +14,20 @@ const SignupCard = () => {
   const [nickname, setNickname] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [emailPart, setEmailPart] = useState('');
-  const [selectedGender, setSelectedGender] = useState<Gender>('MALE');
+  const [selectedGender, setSelectedGender] = useState<Gender | null>(null);
   const [emailHelpOpen, setEmailHelpOpen] = useState(false);
 
   const navigate = useNavigate();
 
   const email = `${emailPart.trim()}@bombom.news`;
 
-  const { mutate: mutateSignup, isPending } = useMutation({
+  const { mutate: mutateSignup } = useMutation({
     mutationKey: ['signup', nickname, email, selectedGender],
     mutationFn: () =>
       postSignup({
         nickname: nickname.trim(),
         email,
-        gender: selectedGender,
+        gender: selectedGender ?? 'MALE',
       }),
     onSuccess: () => {
       navigate({ to: '/' });
@@ -108,25 +106,23 @@ const SignupCard = () => {
 
         <FieldGroup>
           <Label as="p">성별</Label>
-          <Tabs direction="horizontal">
-            <Tab
-              value="MALE"
-              label="남성"
+          <SelectButtonWrapper>
+            <SelectButton
               selected={selectedGender === 'MALE'}
-              onTabSelect={() => setSelectedGender('MALE')}
-            />
-            <Tab
-              value="FEMALE"
-              label="여성"
+              onClick={() => setSelectedGender('MALE')}
+            >
+              남성
+            </SelectButton>
+            <SelectButton
               selected={selectedGender === 'FEMALE'}
-              onTabSelect={() => setSelectedGender('FEMALE')}
-            />
-          </Tabs>
+              onClick={() => setSelectedGender('FEMALE')}
+            >
+              여성
+            </SelectButton>
+          </SelectButtonWrapper>
         </FieldGroup>
 
-        <SubmitButton type="submit">
-          {isPending ? '가입 중…' : '회원가입'}
-        </SubmitButton>
+        <SubmitButton type="submit">회원가입</SubmitButton>
       </SignupForm>
     </Container>
   );
@@ -296,4 +292,31 @@ const SubmitButton = styled.button`
 
     cursor: not-allowed;
   }
+`;
+
+const SelectButtonWrapper = styled.div`
+  display: flex;
+  gap: 12px;
+  align-items: center;
+`;
+
+const SelectButton = styled.button<{ selected: boolean }>`
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid
+    ${({ selected, theme }) => (selected ? 'transparent' : theme.colors.stroke)};
+  border-radius: 12px;
+
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+
+  background-color: ${({ selected, theme }) =>
+    selected ? theme.colors.primary : theme.colors.white};
+  color: ${({ selected, theme }) =>
+    selected ? theme.colors.white : theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.body2};
+  font-weight: ${({ selected }) => (selected ? '600' : '400')};
+  text-align: center;
 `;

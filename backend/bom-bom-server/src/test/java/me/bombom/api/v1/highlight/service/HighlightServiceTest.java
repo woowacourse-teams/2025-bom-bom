@@ -93,11 +93,14 @@ class HighlightServiceTest {
         List<HighlightResponse> responses = highlightService.getHighlights(member, firstArticleId, null);
 
         // then
-        assertThat(responses).hasSize(2);
-        assertThat(responses.get(0).text()).isEqualTo("첫 번째 하이라이트");
-        assertThat(responses.get(1).text()).isEqualTo("두 번째 하이라이트");
-        assertThat(responses.get(0).color()).isEqualTo("#ffeb3b");
-        assertThat(responses.get(1).color()).isEqualTo("#4caf50");
+        assertSoftly(softly -> {
+                    softly.assertThat(responses).hasSize(2);
+                    softly.assertThat(responses.get(0).text()).isEqualTo("두 번째 하이라이트");
+                    softly.assertThat(responses.get(1).text()).isEqualTo("첫 번째 하이라이트");
+                    softly.assertThat(responses.get(0).color()).isEqualTo("#4caf50");
+                    softly.assertThat(responses.get(1).color()).isEqualTo("#ffeb3b");
+                }
+        );
     }
 
     @Test

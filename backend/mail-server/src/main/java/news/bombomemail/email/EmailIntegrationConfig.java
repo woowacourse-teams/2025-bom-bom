@@ -1,4 +1,4 @@
-package news.bombomemail.email.config;
+package news.bombomemail.email;
 
 import jakarta.annotation.PostConstruct;
 import java.io.File;

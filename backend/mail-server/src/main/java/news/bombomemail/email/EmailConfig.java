@@ -1,4 +1,4 @@
-package news.bombomemail.email.config;
+package news.bombomemail.email;
 
 import jakarta.mail.Session;
 import java.util.Properties;

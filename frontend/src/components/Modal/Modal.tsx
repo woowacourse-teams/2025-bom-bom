@@ -68,8 +68,7 @@ const Container = styled.div<{ position: PositionType }>`
   position: relative;
   width: ${({ position }) =>
     position === 'bottom' ? '100%' : 'min(720px, 92vw)'};
-  height: 90vh;
-  max-height: min(720px, 90vh);
+  max-height: ${({ position }) => (position === 'bottom' ? '60vh' : '90vh')};
   border-radius: 12px;
 
   display: flex;
@@ -80,7 +79,6 @@ const Container = styled.div<{ position: PositionType }>`
   ${({ position }) =>
     position === 'bottom' &&
     `
-      height: 60vh;
       align-self: flex-end;
       border-bottom-left-radius: 0;
       border-bottom-right-radius: 0;

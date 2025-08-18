@@ -17,6 +17,7 @@ import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
 import me.bombom.api.v1.highlight.dto.request.HighlightLocationRequest;
 import me.bombom.api.v1.highlight.dto.request.UpdateHighlightRequest;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
+import me.bombom.api.v1.highlight.dto.response.HighlightStatisticsResponse;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -228,5 +229,22 @@ class HighlightServiceTest {
         // when & then
         assertThatThrownBy(() -> highlightService.update(nonExistentHighlightId, request, member))
                 .isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void 전체_뉴스레터_별_하이라이트_개수를_조회한다() {
+        // when
+        HighlightStatisticsResponse result = highlightService.getHighlightNewsletterStatistics(member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(6);
+            softly.assertThat(result.newsletters().get(0).name()).isEqualTo("뉴스픽");
+            softly.assertThat(result.newsletters().get(0).highlightCount()).isEqualTo(2);
+            softly.assertThat(result.newsletters().get(1).name()).isEqualTo("IT타임즈");
+            softly.assertThat(result.newsletters().get(1).highlightCount()).isEqualTo(1);
+            softly.assertThat(result.newsletters().get(2).name()).isEqualTo("비즈레터");
+            softly.assertThat(result.newsletters().get(2).highlightCount()).isEqualTo(3);
+        });
     }
 }

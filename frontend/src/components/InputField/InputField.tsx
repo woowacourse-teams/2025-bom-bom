@@ -117,6 +117,6 @@ const InputSuffixWrapper = styled.div`
 `;
 
 const Error = styled.div`
-  color: #d72d3f;
+  color: ${({ theme }) => theme.colors.error};
   font: ${({ theme }) => theme.fonts.caption};
 `;

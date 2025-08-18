@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Positive;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
 
@@ -33,6 +34,7 @@ public interface NewsletterControllerApi {
             @ApiResponse(responseCode = "404", description = "뉴스레터를 찾을 수 없음", content = @Content)
     })
     NewsletterWithDetailResponse getNewsletterWithDetail(
+            @Positive(message = "id는 1 이상의 값이어야 합니다.")
             @Parameter(description = "뉴스레터 ID") Long id
     );
 } 

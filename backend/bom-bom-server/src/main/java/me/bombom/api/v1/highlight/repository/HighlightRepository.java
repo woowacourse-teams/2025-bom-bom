@@ -1,5 +1,6 @@
 package me.bombom.api.v1.highlight.repository;
 
+import java.util.List;
 import java.util.Optional;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
@@ -20,4 +21,6 @@ public interface HighlightRepository extends JpaRepository<Highlight, Long>, Cus
     int countByMemberId(Long memberId);
 
     int countByArticleId(Long articleId);
+
+    List<Highlight> findAllByArticleId(Long articleId);
 }

@@ -9,11 +9,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
-import me.bombom.api.v1.article.dto.GetArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
 import me.bombom.api.v1.highlight.dto.request.UpdateHighlightRequest;
-import me.bombom.api.v1.highlight.dto.response.HighlightCountPerNewsletterResponse;
+import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightStatisticsResponse;
 import me.bombom.api.v1.member.domain.Member;
@@ -45,7 +44,7 @@ public interface HighlightControllerApi {
         @ApiResponse(responseCode = "403", description = "아티클에 대한 접근 권한 없음", content = @Content),
         @ApiResponse(responseCode = "404", description = "아티클을 찾을 수 없음", content = @Content)
     })
-    HighlightResponse createHighlight(
+    ArticleHighlightResponse createHighlight(
         @Parameter(hidden = true) Member member,
         @Valid @RequestBody HighlightCreateRequest request
     );
@@ -57,7 +56,7 @@ public interface HighlightControllerApi {
         @ApiResponse(responseCode = "403", description = "하이라이트에 대한 접근 권한 없음", content = @Content),
         @ApiResponse(responseCode = "404", description = "하이라이트를 찾을 수 없음", content = @Content)
     })
-    HighlightResponse updateHighlight(
+    ArticleHighlightResponse updateHighlight(
         @Parameter(hidden = true) @LoginMember Member member,
         @Parameter(description = "하이라이트 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
         @Valid @RequestBody UpdateHighlightRequest request

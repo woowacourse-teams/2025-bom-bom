@@ -50,27 +50,6 @@ public record HighlightResponse(
     public HighlightResponse {
     }
 
-    public static List<HighlightResponse> from(List<Highlight> highlights) {
-        return highlights.stream()
-                .map(HighlightResponse::from)
-                .toList();
-    }
-
-    public static HighlightResponse from(Highlight highlight) {
-        return new HighlightResponse(
-                highlight.getId(),
-                HighlightLocationResponse.from(highlight.getHighlightLocation()),
-                highlight.getArticleId(),
-                highlight.getColor().getValue(),
-                highlight.getText(),
-                highlight.getMemo(),
-                null,
-                null,
-                null,
-                null
-        );
-    }
-
     public static HighlightResponse of(Highlight highlight, Article article, Newsletter newsletter){
         return new HighlightResponse(
                 highlight.getId(),

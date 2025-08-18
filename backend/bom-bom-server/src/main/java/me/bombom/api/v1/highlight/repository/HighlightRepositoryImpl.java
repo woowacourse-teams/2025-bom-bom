@@ -39,8 +39,8 @@ public class HighlightRepositoryImpl implements CustomHighlightRepository {
                         highlight.createdAt
                 ))
                 .from(highlight)
-                .leftJoin(article).on(article.id.eq(highlight.articleId))
-                .leftJoin(newsletter).on(newsletter.id.eq(article.newsletterId))
+                .join(article).on(article.id.eq(highlight.articleId))
+                .join(newsletter).on(newsletter.id.eq(article.newsletterId))
                 .where(createMemberIdWhereClause(memberId))
                 .where(createArticleIdWhereClause(articleId))
                 .where(createNewsletterIdWhereClause(newsletterId))

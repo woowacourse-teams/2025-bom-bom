@@ -1,6 +1,7 @@
 package me.bombom.api.v1.article.service;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,9 @@ import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.highlight.domain.Highlight;
+import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
+import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
@@ -22,8 +26,6 @@ import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.pet.ScorePolicyConstants;
 import me.bombom.api.v1.pet.event.AddArticleScoreEvent;
 import me.bombom.api.v1.reading.event.UpdateReadingCountEvent;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +42,7 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
     private final CategoryRepository categoryRepository;
     private final NewsletterRepository newsletterRepository;
+    private final HighlightRepository highlightRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public Page<ArticleResponse> getArticles(
@@ -112,6 +115,17 @@ public class ArticleService {
     public boolean isArrivedToday(Long articleId, Long memberId) {
         Article article = findArticleById(articleId, memberId);
         return article.isArrivedToday();
+    }
+
+    public List<ArticleHighlightResponse> getHighlights(Member member, Long articleId) {
+        Article article = findArticleById(articleId, member.getId());
+        validateArticleOwner(article, member.getId());
+
+        return highlightRepository.findAllByArticleId(articleId)
+                .stream()
+                .sorted(Comparator.comparing(Highlight::getCreatedAt).reversed())
+                .map(highlight -> ArticleHighlightResponse.from(highlight))
+                .toList();
     }
 
     private Article findArticleById(Long articleId, Long memberId) {

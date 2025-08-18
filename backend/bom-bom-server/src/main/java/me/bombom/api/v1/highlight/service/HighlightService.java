@@ -3,8 +3,6 @@ package me.bombom.api.v1.highlight.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.domain.Article;
-import me.bombom.api.v1.article.dto.GetArticleCountPerNewsletterResponse;
-import me.bombom.api.v1.article.dto.GetArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -13,6 +11,7 @@ import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
 import me.bombom.api.v1.highlight.dto.request.UpdateHighlightRequest;
+import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightCountPerNewsletterResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightStatisticsResponse;
@@ -37,7 +36,7 @@ public class HighlightService {
     }
 
     @Transactional
-    public HighlightResponse create(HighlightCreateRequest request, Member member) {
+    public ArticleHighlightResponse create(HighlightCreateRequest request, Member member) {
         Article article = articleRepository.findById(request.articleId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                     .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
@@ -46,10 +45,10 @@ public class HighlightService {
         HighlightLocation location = request.location()
                 .toHighlightLocation();
         return highlightRepository.findByArticleIdAndHighlightLocation(article.getId(), location)
-                .map(HighlightResponse::from)
+                .map(ArticleHighlightResponse::from)
                 .orElseGet(() -> {
                     Highlight highlight = highlightRepository.save(buildHighlight(request, location));
-                    return HighlightResponse.from(highlight);
+                    return ArticleHighlightResponse.from(highlight);
                 });
     }
 
@@ -60,10 +59,10 @@ public class HighlightService {
     }
 
     @Transactional
-    public HighlightResponse update(Long id, UpdateHighlightRequest request, Member member) {
+    public ArticleHighlightResponse update(Long id, UpdateHighlightRequest request, Member member) {
         Highlight highlight = findHighlightWithOwnerValidation(id, member);
         updateHighlight(request, highlight);
-        return HighlightResponse.from(highlight);
+        return ArticleHighlightResponse.from(highlight);
     }
 
     public HighlightStatisticsResponse getHighlightNewsletterStatistics(Member member) {

@@ -71,8 +71,4 @@ const StyledInput = styled.input`
 
     cursor: not-allowed;
   }
-
-  &:hover:not(:disabled) {
-    border-color: ${({ theme }) => theme.colors.textTertiary};
-  }
 `;

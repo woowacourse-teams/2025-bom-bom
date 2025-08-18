@@ -60,6 +60,7 @@ const Backdrop = styled.div`
 
 const Container = styled.div<{ position: PositionType }>`
   overflow: hidden;
+  position: relative;
   width: ${({ position }) =>
     position === 'bottom' ? '100%' : 'min(720px, 92vw)'};
   height: 90vh;

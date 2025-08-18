@@ -33,6 +33,15 @@ const ArticleHeader = ({
     <Container>
       <TitleRow>
         <Title>{title}</Title>
+      </TitleRow>
+      <MetaInfoRow>
+        <Chip text={newsletterCategory} />
+        <MetaInfoText>from {newsletterName}</MetaInfoText>
+        <MetaInfoText>{formatDate(arrivedDateTime)}</MetaInfoText>
+        <ReadTimeBox>
+          <ClockIcon width={16} height={16} />
+          <MetaInfoText>{expectedReadTime}분</MetaInfoText>
+        </ReadTimeBox>
         {!isPC && (
           <BookmarkButton
             type="button"
@@ -49,15 +58,6 @@ const ArticleHeader = ({
             )}
           </BookmarkButton>
         )}
-      </TitleRow>
-      <MetaInfoRow>
-        <Chip text={newsletterCategory} />
-        <MetaInfoText>from {newsletterName}</MetaInfoText>
-        <MetaInfoText>{formatDate(arrivedDateTime)}</MetaInfoText>
-        <ReadTimeBox>
-          <ClockIcon width={16} height={16} />
-          <MetaInfoText>{expectedReadTime}분</MetaInfoText>
-        </ReadTimeBox>
       </MetaInfoRow>
     </Container>
   );
@@ -90,6 +90,7 @@ const Title = styled.h2`
 `;
 
 const BookmarkButton = styled.button`
+  margin-left: auto;
   padding: 8px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 50%;
@@ -112,6 +113,7 @@ const BookmarkButton = styled.button`
 `;
 
 const MetaInfoRow = styled.div`
+  width: 100%;
   display: flex;
   gap: 8px;
   align-items: center;

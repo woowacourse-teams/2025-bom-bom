@@ -24,6 +24,7 @@ const NewsletterDetail = ({
     enabled: Boolean(newsletterId),
   });
   const deviceType = useDeviceType();
+  const isMobile = deviceType === 'mobile';
 
   if (!newsletterId || !newsletterDetail) return null;
 
@@ -50,25 +51,34 @@ const NewsletterDetail = ({
 
   return (
     <Container>
-      <FixedWrapper>
-        <InfoWrapper>
+      <FixedWrapper isMobile={isMobile}>
+        <InfoWrapper isMobile={isMobile}>
           <NewsletterImage
             src={newsletterDetail.imageUrl}
             alt={`${newsletterDetail.name} 뉴스레터 이미지`}
+            isMobile={isMobile}
           />
           <InfoBox>
-            <NewsletterTitle>{newsletterDetail.name}</NewsletterTitle>
+            <NewsletterTitle isMobile={isMobile}>
+              {newsletterDetail.name}
+            </NewsletterTitle>
             <NewsletterInfo>
               <Badge text={category} />
-              <IssueCycle>{newsletterDetail.issueCycle}</IssueCycle>
+              <IssueCycle isMobile={isMobile}>
+                {newsletterDetail.issueCycle}
+              </IssueCycle>
             </NewsletterInfo>
           </InfoBox>
         </InfoWrapper>
 
-        <SubscribeButton text="구독하기" onClick={goToSubscribe} />
+        <SubscribeButton
+          text="구독하기"
+          onClick={goToSubscribe}
+          isMobile={isMobile}
+        />
       </FixedWrapper>
 
-      <ScrollableWrapper>
+      <ScrollableWrapper isMobile={isMobile}>
         <Description>{newsletterDetail.description}</Description>
 
         <LinkWrapper>
@@ -159,23 +169,23 @@ const Container = styled.div`
   flex-direction: column;
 `;
 
-const FixedWrapper = styled.div`
-  padding-bottom: 24px;
+const FixedWrapper = styled.div<{ isMobile: boolean }>`
+  padding-bottom: ${({ isMobile }) => (isMobile ? '16px' : '24px')};
   border-bottom: 1px solid ${({ theme }) => theme.colors.dividers};
 
   display: flex;
-  gap: 24px;
+  gap: ${({ isMobile }) => (isMobile ? '16px' : '24px')};
   flex-direction: column;
 `;
 
-const ScrollableWrapper = styled.div`
+const ScrollableWrapper = styled.div<{ isMobile: boolean }>`
   min-height: 0;
   margin-right: -16px;
-  padding-top: 24px;
+  padding-top: ${({ isMobile }) => (isMobile ? '16px' : '24px')};
   padding-right: 16px;
 
   display: flex;
-  gap: 24px;
+  gap: ${({ isMobile }) => (isMobile ? '16px' : '24px')};
   flex-direction: column;
 
   overflow-y: auto;
@@ -183,17 +193,17 @@ const ScrollableWrapper = styled.div`
   scrollbar-gutter: stable;
 `;
 
-const InfoWrapper = styled.div`
+const InfoWrapper = styled.div<{ isMobile: boolean }>`
   display: flex;
-  gap: 16px;
+  gap: ${({ isMobile }) => (isMobile ? '12px' : '16px')};
   align-items: center;
   justify-content: center;
 `;
 
-const NewsletterImage = styled(ImageWithFallback)`
-  width: 80px;
-  height: 80px;
-  border-radius: 16px;
+const NewsletterImage = styled(ImageWithFallback)<{ isMobile: boolean }>`
+  width: ${({ isMobile }) => (isMobile ? '60px' : '80px')};
+  height: ${({ isMobile }) => (isMobile ? '60px' : '80px')};
+  border-radius: ${({ isMobile }) => (isMobile ? '12px' : '16px')};
 
   flex-shrink: 0;
 
@@ -208,9 +218,10 @@ const InfoBox = styled.div`
   flex-direction: column;
 `;
 
-const NewsletterTitle = styled.h2`
+const NewsletterTitle = styled.h2<{ isMobile: boolean }>`
   color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.heading4};
+  font: ${({ theme, isMobile }) =>
+    isMobile ? theme.fonts.heading5 : theme.fonts.heading4};
 `;
 
 const NewsletterInfo = styled.div`
@@ -219,9 +230,10 @@ const NewsletterInfo = styled.div`
   align-items: center;
 `;
 
-const IssueCycle = styled.p`
+const IssueCycle = styled.p<{ isMobile: boolean }>`
   color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.body2};
+  font: ${({ theme, isMobile }) =>
+    isMobile ? theme.fonts.caption : theme.fonts.body2};
   text-align: center;
 `;
 
@@ -252,13 +264,14 @@ const DetailLink = styled.a`
   }
 `;
 
-const SubscribeButton = styled(Button)`
+const SubscribeButton = styled(Button)<{ isMobile: boolean }>`
   width: 100%;
   max-width: 400px;
 
   align-self: center;
 
-  font: ${({ theme }) => theme.fonts.heading6};
+  font: ${({ theme, isMobile }) =>
+    isMobile ? theme.fonts.body2 : theme.fonts.heading6};
 
   transition: all 0.2s ease;
 

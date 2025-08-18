@@ -52,6 +52,7 @@ const NewsletterCardWithModal = ({
             keydownFocusTrapTab={keydownFocusTrapTab}
             isOpen={isOpen}
             position={deviceType === 'mobile' ? 'bottom' : 'center'}
+            showCloseButton={deviceType !== 'mobile'}
           >
             <NewsletterDetail
               newsletterId={newsletter.newsletterId}

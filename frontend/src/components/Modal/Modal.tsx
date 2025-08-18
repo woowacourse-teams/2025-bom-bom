@@ -25,6 +25,8 @@ const Modal = ({
   isOpen,
   children,
 }: UseModalParams) => {
+  const isBottom = position === 'bottom';
+
   if (!isOpen) return null;
 
   return (
@@ -33,7 +35,7 @@ const Modal = ({
         role="dialog"
         aria-modal="true"
         ref={modalRef}
-        position={position}
+        isBottom={isBottom}
         onKeyDown={keydownFocusTrapTab}
       >
         {showCloseButton && (
@@ -41,7 +43,7 @@ const Modal = ({
             <CloseIcon width={36} height={36} fill={theme.colors.black} />
           </CloseButton>
         )}
-        <ContentWrapper>{children}</ContentWrapper>
+        <ContentWrapper isBottom={isBottom}>{children}</ContentWrapper>
       </Container>
     </Backdrop>
   );
@@ -66,13 +68,12 @@ const Backdrop = styled.div`
   backdrop-filter: blur(2px);
 `;
 
-const Container = styled.div<{ position: PositionType }>`
+const Container = styled.div<{ isBottom: boolean }>`
   overflow: hidden;
   position: relative;
-  width: ${({ position }) =>
-    position === 'bottom' ? '100%' : 'min(720px, 92vw)'};
+  width: ${({ isBottom }) => (isBottom ? '100%' : 'min(720px, 92vw)')};
   height: 100%;
-  max-height: ${({ position }) => (position === 'bottom' ? '60vh' : '90vh')};
+  max-height: ${({ isBottom }) => (isBottom ? '45vh' : '90vh')};
   border-radius: 12px;
 
   display: flex;
@@ -80,8 +81,8 @@ const Container = styled.div<{ position: PositionType }>`
 
   background: ${({ theme }) => theme.colors.white};
 
-  ${({ position }) =>
-    position === 'bottom' &&
+  ${({ isBottom }) =>
+    isBottom &&
     `
       align-self: flex-end;
       border-bottom-left-radius: 0;
@@ -102,10 +103,10 @@ const CloseButton = styled.button`
   background: none;
 `;
 
-const ContentWrapper = styled.div`
+const ContentWrapper = styled.div<{ isBottom: boolean }>`
   height: 100%;
   min-height: 0;
-  padding: 36px 52px;
+  padding: ${({ isBottom }) => (isBottom ? '32px' : '36px 52px')};
 
   display: flex;
   flex-direction: column;

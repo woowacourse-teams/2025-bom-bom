@@ -1,8 +1,10 @@
 import styled from '@emotion/styled';
 import { createPortal } from 'react-dom';
-import NewsletterDetailModal from '../../NewsletterDetailModal/NewsletterDetailModal';
+import NewsletterDetail from '../../NewsletterDetail/NewsletterDetail';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
+import Modal from '@/components/Modal/Modal';
 import useModal from '@/components/Modal/useModal';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { Newsletter } from '@/types/newsletter';
 
@@ -18,8 +20,10 @@ const NewsletterCardWithModal = ({
     openModal: openDetailModal,
     closeModal: closeDetailModal,
     clickOutsideModal: clickOutsideDetailModal,
+    keydownFocusTrapTab,
     isOpen,
   } = useModal();
+  const deviceType = useDeviceType();
 
   const handleCardClick = () => {
     openDetailModal();
@@ -41,14 +45,19 @@ const NewsletterCardWithModal = ({
       />
       {isOpen &&
         createPortal(
-          <NewsletterDetailModal
-            newsletterId={newsletter.newsletterId}
-            category={newsletter.category}
+          <Modal
             modalRef={detailModalRef}
             closeModal={closeDetailModal}
             clickOutsideModal={clickOutsideDetailModal}
+            keydownFocusTrapTab={keydownFocusTrapTab}
             isOpen={isOpen}
-          />,
+            position={deviceType === 'mobile' ? 'bottom' : 'center'}
+          >
+            <NewsletterDetail
+              newsletterId={newsletter.newsletterId}
+              category={newsletter.category}
+            />
+          </Modal>,
           document.body,
         )}
     </>

@@ -35,9 +35,10 @@ public class HighlightController implements HighlightControllerApi{
     @GetMapping
     public List<HighlightResponse> getHighlights(
             @LoginMember Member member,
-            @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
+            @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId,
+            @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long newsletterId
     ) {
-        return highlightService.getHighlights(member, articleId);
+        return highlightService.getHighlights(member, articleId, newsletterId);
     }
 
     @Override

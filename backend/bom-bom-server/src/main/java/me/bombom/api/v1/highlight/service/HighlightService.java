@@ -1,5 +1,6 @@
 package me.bombom.api.v1.highlight.service;
 
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.domain.Article;
@@ -25,8 +26,8 @@ public class HighlightService {
     private final HighlightRepository highlightRepository;
     private final ArticleRepository articleRepository;
 
-    public List<HighlightResponse> getHighlights(Member member, Long articleId) {
-        return highlightRepository.findHighlights(member.getId(), articleId);
+    public List<HighlightResponse> getHighlights(Member member, Long articleId, Long newsletterId) {
+        return highlightRepository.findHighlights(member.getId(), articleId, newsletterId);
     }
 
     @Transactional

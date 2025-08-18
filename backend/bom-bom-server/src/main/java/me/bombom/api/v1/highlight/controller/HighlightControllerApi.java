@@ -31,7 +31,8 @@ public interface HighlightControllerApi {
     })
     List<HighlightResponse> getHighlights(
         @Parameter(hidden = true) Member member,
-        @Parameter(description = "아티클 ID (예: ?articleId=1)") @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
+        @Parameter(description = "아티클 ID (예: ?articleId=1)") @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId,
+        @Parameter(description = "뉴스레터 ID (예: ?newsletterId=1)") @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long newsletterId
     );
 
     @Operation(summary = "하이라이트 생성", description = "새로운 하이라이트를 생성합니다.")

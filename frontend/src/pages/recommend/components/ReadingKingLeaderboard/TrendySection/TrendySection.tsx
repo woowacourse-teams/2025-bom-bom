@@ -8,6 +8,7 @@ import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import useModal from '@/components/Modal/useModal';
 import { CATEGORIES, CategoryType } from '@/constants/category';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { Newsletter } from '@/types/newsletter';
 import TrendingUpIcon from '#/assets/trending-up.svg';
@@ -25,7 +26,9 @@ const TrendySection = () => {
     openModal: openDetailModal,
     closeModal: closeDetailModal,
     clickOutsideModal: clickOutsideDetailModal,
+    isOpen,
   } = useModal();
+  const deviceType = useDeviceType();
 
   if (!newsletters) return null;
 
@@ -57,7 +60,7 @@ const TrendySection = () => {
           />
         ))}
       </TagContainer>
-      <TrendyGrid>
+      <TrendyGrid deviceType={deviceType}>
         {filteredNewsletters.map((newsletter) => (
           <ImageInfoCard
             key={newsletter.newsletterId}
@@ -82,6 +85,7 @@ const TrendySection = () => {
           modalRef={detailModalRef}
           closeModal={closeDetailModal}
           clickOutsideModal={clickOutsideDetailModal}
+          isOpen={isOpen}
         />,
         document.body,
       )}
@@ -141,13 +145,10 @@ const TagContainer = styled.div`
   flex-wrap: wrap;
 `;
 
-const TrendyGrid = styled.div`
+const TrendyGrid = styled.div<{ deviceType: DeviceType }>`
   display: grid;
   gap: 8px;
 
-  grid-template-columns: repeat(2, 1fr);
-
-  @media (width <= 768px) {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: ${({ deviceType }) =>
+    deviceType === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
 `;

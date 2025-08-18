@@ -6,9 +6,10 @@ import CloseIcon from '#/assets/close.svg';
 type PositionType = 'center' | 'bottom';
 
 interface UseModalParams extends PropsWithChildren {
-  modalRef: RefObject<HTMLDialogElement | null>;
+  modalRef: RefObject<HTMLDivElement | null>;
   closeModal: () => void;
-  clickOutsideModal: (event: MouseEvent<HTMLDialogElement>) => void;
+  clickOutsideModal: (event: MouseEvent<HTMLDivElement>) => void;
+  isOpen: boolean;
   position?: PositionType;
   showCloseButton?: boolean;
 }
@@ -20,24 +21,45 @@ const Modal = ({
   position = 'center',
   showCloseButton = true,
   children,
+  isOpen,
 }: UseModalParams) => {
+  if (!isOpen) return null;
+
   return (
-    <Container ref={modalRef} onClick={clickOutsideModal} position={position}>
-      {showCloseButton && (
-        <CloseButton type="button" onClick={closeModal}>
-          <StyledCloseIcon width={36} height={36} fill={theme.colors.black} />
-        </CloseButton>
-      )}
-      <ContentWrapper>{children}</ContentWrapper>
-    </Container>
+    <Backdrop onClick={clickOutsideModal}>
+      <Container ref={modalRef} position={position}>
+        {showCloseButton && (
+          <CloseButton type="button" onClick={closeModal}>
+            <StyledCloseIcon width={36} height={36} fill={theme.colors.black} />
+          </CloseButton>
+        )}
+        <ContentWrapper>{children}</ContentWrapper>
+      </Container>
+    </Backdrop>
   );
 };
 
 export default Modal;
 
-const Container = styled.dialog<{ position: PositionType }>`
-  overflow: hidden;
+const Backdrop = styled.div`
   position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgb(0 0 0 / 30%);
+
+  backdrop-filter: blur(2px);
+`;
+
+const Container = styled.div<{ position: PositionType }>`
+  overflow: hidden;
   width: ${({ position }) =>
     position === 'bottom' ? '100%' : 'min(720px, 92vw)'};
   height: 90vh;
@@ -49,6 +71,8 @@ const Container = styled.dialog<{ position: PositionType }>`
   display: flex;
   flex-direction: column;
 
+  background: ${({ theme }) => theme.colors.white};
+
   ${({ position }) =>
     position === 'bottom' &&
     `
@@ -58,12 +82,8 @@ const Container = styled.dialog<{ position: PositionType }>`
       margin-top: auto;
       border-bottom-left-radius: 0;
       border-bottom-right-radius: 0;
+      align-self: flex-end;
 `}
-
-  &::backdrop {
-    background: rgb(0 0 0 / 30%);
-    backdrop-filter: blur(2px);
-  }
 `;
 
 const CloseButton = styled.button`
@@ -89,8 +109,6 @@ const ContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  box-sizing: border-box;
 
   overflow-y: auto;
   overscroll-behavior: contain;

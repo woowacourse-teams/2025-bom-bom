@@ -14,9 +14,10 @@ import HomeIcon from '#/assets/home.svg';
 
 interface NewsletterDetailModalProps {
   newsletter: Newsletter | null;
-  modalRef: RefObject<HTMLDialogElement | null>;
+  modalRef: RefObject<HTMLDivElement | null>;
   closeModal: () => void;
-  clickOutsideModal: (event: React.MouseEvent<HTMLDialogElement>) => void;
+  clickOutsideModal: (event: React.MouseEvent<HTMLDivElement>) => void;
+  isOpen: boolean;
 }
 
 const NewsletterDetailModal = ({
@@ -24,6 +25,7 @@ const NewsletterDetailModal = ({
   modalRef,
   closeModal,
   clickOutsideModal,
+  isOpen,
 }: NewsletterDetailModalProps) => {
   const { data: userInfo } = useQuery(queries.me());
   const { data: newsletterDetail } = useQuery(
@@ -59,6 +61,7 @@ const NewsletterDetailModal = ({
       modalRef={modalRef}
       closeModal={closeModal}
       clickOutsideModal={clickOutsideModal}
+      isOpen={isOpen}
       position={deviceType === 'mobile' ? 'bottom' : 'center'}
     >
       <Container>

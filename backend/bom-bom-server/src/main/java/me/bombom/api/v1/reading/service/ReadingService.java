@@ -117,6 +117,7 @@ public class ReadingService {
             updateTodayReadingCount(memberId);
         }
         updateWeeklyReadingCount(memberId);
+        updateMonthlyReadingCount(memberId);
     }
 
     @Transactional
@@ -125,6 +126,7 @@ public class ReadingService {
         updateContinueReadingCount(memberId);
         updateTodayReadingCount(memberId);
         updateWeeklyReadingCount(memberId);
+        updateMonthlyReadingCount(memberId);
     }
 
     public ReadingInformationResponse getReadingInformation(Member member) {
@@ -190,6 +192,15 @@ public class ReadingService {
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "WeeklyReading")
                     .addContext(ErrorContextKeys.OPERATION, "updateWeeklyReadingCount"));
         weeklyReading.increaseCurrentCount();
+    }
+
+    private void updateMonthlyReadingCount(Long memberId) {
+        MonthlyReading monthlyReading = monthlyReadingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReading")
+                        .addContext(ErrorContextKeys.OPERATION, "updateMonthlyReadingCount"));
+        monthlyReading.increaseCurrentCount();
     }
 
     private boolean isBonusApplicable(ContinueReading continueReading) {

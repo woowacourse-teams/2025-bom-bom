@@ -28,6 +28,7 @@ const TrendySection = () => {
     clickOutsideModal: clickOutsideDetailModal,
     isOpen,
   } = useModal();
+
   const deviceType = useDeviceType();
 
   if (!newsletters) return null;
@@ -62,7 +63,7 @@ const TrendySection = () => {
       </TagContainer>
       <TrendyGrid deviceType={deviceType}>
         {filteredNewsletters.map((newsletter) => (
-          <ImageInfoCard
+          <NewsletterCard
             key={newsletter.newsletterId}
             imageUrl={newsletter.imageUrl ?? ''}
             title={newsletter.name}
@@ -151,4 +152,14 @@ const TrendyGrid = styled.div<{ deviceType: DeviceType }>`
 
   grid-template-columns: ${({ deviceType }) =>
     deviceType === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
+`;
+
+const NewsletterCard = styled(ImageInfoCard)`
+  &:focus-visible {
+    outline: none;
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
 `;

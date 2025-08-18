@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.dto.ArticleResponse;
+import me.bombom.api.v1.highlight.dto.response.HighlightCountPerNewsletterResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
+import me.bombom.api.v1.highlight.dto.response.QHighlightCountPerNewsletterResponse;
 import me.bombom.api.v1.highlight.dto.response.QHighlightLocationResponse;
 import me.bombom.api.v1.highlight.dto.response.QHighlightResponse;
 import org.springframework.data.domain.Page;
@@ -34,6 +36,24 @@ public class HighlightRepositoryImpl implements CustomHighlightRepository {
         JPAQuery<Long> totalQuery = getTotalQuery(memberId, articleId, newsletterId);
         List<HighlightResponse> content = getContent(memberId, articleId, newsletterId, pageable);
         return PageableExecutionUtils.getPage(content, pageable, totalQuery::fetchOne);
+    }
+
+    @Override
+    public List<HighlightCountPerNewsletterResponse> countPerNewsletters(Long memberId) {
+        return jpaQueryFactory
+                .select(new QHighlightCountPerNewsletterResponse(
+                        newsletter.id,
+                        newsletter.name,
+                        newsletter.imageUrl,
+                        highlight.id.count()
+                ))
+                .from(highlight)
+                .join(article).on(article.id.eq(highlight.articleId))
+                .join(newsletter).on(newsletter.id.eq(article.newsletterId))
+                .where(createMemberIdWhereClause(memberId))
+                .groupBy(newsletter.id, newsletter.name, newsletter.imageUrl)
+                .having(highlight.id.count().gt(0))
+                .fetch();
     }
 
     private List<HighlightResponse> getContent(Long memberId, Long articleId, Long newsletterId, Pageable pageable) {

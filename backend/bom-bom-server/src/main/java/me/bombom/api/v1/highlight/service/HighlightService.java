@@ -68,15 +68,9 @@ public class HighlightService {
     }
 
     public HighlightStatisticsResponse getHighlightNewsletterStatistics(Member member) {
-        List<HighlightCountPerNewsletterResponse> countResponse = newsletterRepository.findAll()
-                .stream()
-                .map(newsletter -> mapToHighlightCountPerNewsletter(member, newsletter))
-                .filter(response -> response.highlightCount() > 0)
-                .toList();
-        int totalCount = countResponse.stream()
-                .mapToInt(response -> (int) response.highlightCount())
-                .sum();
-        return HighlightStatisticsResponse.of(totalCount, countResponse);
+        int total = highlightRepository.countByMemberId(member.getId());
+        List<HighlightCountPerNewsletterResponse> newsletters = highlightRepository.countPerNewsletters(member.getId());
+        return HighlightStatisticsResponse.of(total, newsletters);
     }
 
     private void validateArticleOwner(Member member, Article article) {

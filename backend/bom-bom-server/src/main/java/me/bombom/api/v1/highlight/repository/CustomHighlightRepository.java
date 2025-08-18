@@ -9,4 +9,6 @@ import org.springframework.data.domain.Pageable;
 public interface CustomHighlightRepository {
 
     Page<HighlightResponse> findHighlights(Long memberId, Long articleId, Long newsletterId, Pageable pageable);
+
+    List<HighlightCountPerNewsletterResponse> countPerNewsletters(Long memberId);
 }

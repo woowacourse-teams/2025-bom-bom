@@ -31,6 +31,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 @DataJpaTest
 @Import({HighlightService.class, QuerydslConfig.class})
@@ -89,17 +94,18 @@ class HighlightServiceTest {
     void 아티클_id로_하이라이트를_조회할_수_있다() {
         // given
         Long firstArticleId = articles.getFirst().getId();
+        Pageable pageable = PageRequest.of(0, 2, Sort.by(Direction.DESC, "createdAt"));
 
         // when
-        List<HighlightResponse> responses = highlightService.getHighlights(member, firstArticleId, null);
+        Page<HighlightResponse> responses = highlightService.getHighlights(member, firstArticleId, null, pageable);
 
         // then
         assertSoftly(softly -> {
-                    softly.assertThat(responses).hasSize(2);
-                    softly.assertThat(responses.get(0).text()).isEqualTo("두 번째 하이라이트");
-                    softly.assertThat(responses.get(1).text()).isEqualTo("첫 번째 하이라이트");
-                    softly.assertThat(responses.get(0).color()).isEqualTo("#4caf50");
-                    softly.assertThat(responses.get(1).color()).isEqualTo("#ffeb3b");
+                    softly.assertThat(responses.getTotalElements()).isEqualTo(2);
+                    softly.assertThat(responses.getContent().get(0).text()).isEqualTo("두 번째 하이라이트");
+                    softly.assertThat(responses.getContent().get(1).text()).isEqualTo("첫 번째 하이라이트");
+                    softly.assertThat(responses.getContent().get(0).color()).isEqualTo("#4caf50");
+                    softly.assertThat(responses.getContent().get(1).color()).isEqualTo("#ffeb3b");
                 }
         );
     }
@@ -108,22 +114,31 @@ class HighlightServiceTest {
     void 뉴스레터_id로_하이라이트를_조회할_수_있다() {
         // given
         Long thirdNewsletterId = newsletters.get(2).getId();
-        System.out.println(thirdNewsletterId);
+        Pageable pageable = PageRequest.of(0, 2, Sort.by(Direction.DESC, "createdAt"));
 
         // when
-        List<HighlightResponse> responses = highlightService.getHighlights(member, null, thirdNewsletterId);
+        Page<HighlightResponse> responses = highlightService.getHighlights(member, null, thirdNewsletterId, pageable);
 
         // then
-        assertThat(responses).hasSize(3);
+        assertSoftly(softly -> {
+            assertThat(responses).hasSize(2);
+            assertThat(responses.getTotalElements()).isEqualTo(3);
+        });
     }
 
     @Test
     void 멤버로_하이라이트를_조회할_수_있다() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2, Sort.by(Direction.DESC, "createdAt"));
+
         // when
-        List<HighlightResponse> responses = highlightService.getHighlights(member, null, null);
+        Page<HighlightResponse> responses = highlightService.getHighlights(member, null, null, pageable);
 
         // then
-        assertThat(responses).hasSize(highlights.size());
+        assertSoftly(softly -> {
+            assertThat(responses).hasSize(2);
+            assertThat(responses.getTotalElements()).isEqualTo(highlights.size());
+        });
     }
 
     @Test

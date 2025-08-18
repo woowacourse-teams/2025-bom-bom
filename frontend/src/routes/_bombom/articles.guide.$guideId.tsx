@@ -1,11 +1,9 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
 import Spacing from '@/components/Spacing/Spacing';
 import { GUIDE_MAILS } from '@/mocks/datas/guideMail';
-import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
-import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
+import GuideArticleBody from '@/pages/detail/components/GuideArcielBody';
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
 
 export const Route = createFileRoute('/_bombom/articles/guide/$guideId')({
@@ -15,12 +13,6 @@ export const Route = createFileRoute('/_bombom/articles/guide/$guideId')({
 function GuideMailPage() {
   const { guideId } = Route.useParams();
   const guideIdNumber = Number(guideId);
-
-  const [isBookmarked, setIsBookmarked] = useState(false);
-
-  const toggleBookmark = () => {
-    setIsBookmarked((prev) => !prev);
-  };
 
   const firstGuideMail = GUIDE_MAILS[0]!;
 
@@ -35,7 +27,7 @@ function GuideMailPage() {
       />
       <Divider />
 
-      <ArticleBody
+      <GuideArticleBody
         articleId={guideIdNumber}
         articleContent={firstGuideMail.contents}
       />
@@ -48,11 +40,6 @@ function GuideMailPage() {
       </ContentDescription>
 
       <TodayUnreadArticlesSection articleId={guideIdNumber} />
-
-      <FloatingActionButtons
-        bookmarked={isBookmarked}
-        onBookmarkClick={toggleBookmark}
-      />
     </Container>
   );
 }

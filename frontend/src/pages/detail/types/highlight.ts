@@ -1,4 +1,4 @@
-export interface HighlightType {
+export type HighlightType = {
   id: number;
   color: string;
   location: {
@@ -10,4 +10,4 @@ export interface HighlightType {
   articleId: number;
   text: string;
   memo: string;
-}
+};

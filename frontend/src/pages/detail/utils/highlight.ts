@@ -4,7 +4,6 @@ import {
   getXPathForNode,
 } from './selection';
 import { HighlightType } from '../types/highlight';
-import { PostHighlightParams } from '@/apis/highlight';
 import { theme } from '@/styles/theme';
 
 export const highlightNodeSegment = (
@@ -35,7 +34,7 @@ export const highlightNodeSegment = (
 export const saveSelection = (
   selection: Selection,
   articleId: number,
-): PostHighlightParams => {
+): Omit<HighlightType, 'id' | 'memo'> => {
   const range = selection.getRangeAt(0);
   const container =
     range.commonAncestorContainer.nodeType === Node.TEXT_NODE

@@ -28,9 +28,9 @@ const NewsletterDetail = ({
 
   if (!newsletterId || !newsletterDetail) return null;
 
-  const goToSubscribe = () => {
+  const goToSubscribe = async () => {
     if (userInfo?.email) {
-      copyToClipboard(userInfo.email);
+      await copyToClipboard(userInfo.email);
       alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
     }
 

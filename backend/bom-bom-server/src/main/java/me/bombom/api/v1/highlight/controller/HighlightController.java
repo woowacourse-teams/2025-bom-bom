@@ -8,6 +8,7 @@ import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
 import me.bombom.api.v1.highlight.dto.request.UpdateHighlightRequest;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
+import me.bombom.api.v1.highlight.dto.response.HighlightStatisticsResponse;
 import me.bombom.api.v1.highlight.service.HighlightService;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.http.HttpStatus;
@@ -66,5 +67,11 @@ public class HighlightController implements HighlightControllerApi{
             @Valid @RequestBody UpdateHighlightRequest request
     ) {
         return highlightService.update(id, request, member);
+    }
+
+    @Override
+    @GetMapping("/statistics/newsletters")
+    public HighlightStatisticsResponse getHighlightNewsletterStatistics(@LoginMember Member member){
+        return highlightService.getHighlightNewsletterStatistics(member);
     }
 }

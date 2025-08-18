@@ -1,9 +1,10 @@
 package me.bombom.api.v1.highlight.service;
 
-import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.domain.Article;
+import me.bombom.api.v1.article.dto.GetArticleCountPerNewsletterResponse;
+import me.bombom.api.v1.article.dto.GetArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -12,9 +13,13 @@ import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
 import me.bombom.api.v1.highlight.dto.request.UpdateHighlightRequest;
+import me.bombom.api.v1.highlight.dto.response.HighlightCountPerNewsletterResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
+import me.bombom.api.v1.highlight.dto.response.HighlightStatisticsResponse;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.newsletter.domain.Newsletter;
+import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +30,7 @@ public class HighlightService {
 
     private final HighlightRepository highlightRepository;
     private final ArticleRepository articleRepository;
+    private final NewsletterRepository newsletterRepository;
 
     public List<HighlightResponse> getHighlights(Member member, Long articleId, Long newsletterId) {
         return highlightRepository.findHighlights(member.getId(), articleId, newsletterId);
@@ -58,6 +64,16 @@ public class HighlightService {
         Highlight highlight = findHighlightWithOwnerValidation(id, member);
         updateHighlight(request, highlight);
         return HighlightResponse.from(highlight);
+    }
+
+    public HighlightStatisticsResponse getHighlightNewsletterStatistics(Member member) {
+        int totalCount = highlightRepository.countByMemberId(member.getId());
+        List<HighlightCountPerNewsletterResponse> countResponse = newsletterRepository.findAll()
+                .stream()
+                .map(newsletter -> mapToHighlightCountPerNewsletter(member, newsletter))
+                .filter(response -> response.highlightCount() > 0)
+                .toList();
+        return HighlightStatisticsResponse.of(totalCount, countResponse);
     }
 
     private void validateArticleOwner(Member member, Article article) {
@@ -102,5 +118,13 @@ public class HighlightService {
         if (request.memo() != null) {
             highlight.editMemo(request.memo());
         }
+    }
+
+    private HighlightCountPerNewsletterResponse mapToHighlightCountPerNewsletter(Member member, Newsletter newsletter) {
+        List<Article> articles = articleRepository.getAllByMemberIdAndNewsletterId(member.getId(), newsletter.getId());
+        long highlightCount = articles.stream()
+                .mapToLong(article -> highlightRepository.countByArticleId(article.getId()))
+                .sum();
+        return HighlightCountPerNewsletterResponse.of(newsletter, highlightCount);
     }
 }

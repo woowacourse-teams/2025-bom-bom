@@ -66,12 +66,14 @@ public class HighlightService {
     }
 
     public HighlightStatisticsResponse getHighlightNewsletterStatistics(Member member) {
-        int totalCount = highlightRepository.countByMemberId(member.getId());
         List<HighlightCountPerNewsletterResponse> countResponse = newsletterRepository.findAll()
                 .stream()
                 .map(newsletter -> mapToHighlightCountPerNewsletter(member, newsletter))
                 .filter(response -> response.highlightCount() > 0)
                 .toList();
+        int totalCount = countResponse.stream()
+                .mapToInt(response -> (int) response.highlightCount())
+                .sum();
         return HighlightStatisticsResponse.of(totalCount, countResponse);
     }
 

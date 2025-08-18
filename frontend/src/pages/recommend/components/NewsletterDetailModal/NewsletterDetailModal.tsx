@@ -28,10 +28,9 @@ const NewsletterDetailModal = ({
   isOpen,
 }: NewsletterDetailModalProps) => {
   const { data: userInfo } = useQuery(queries.me());
-  const { data: newsletterDetail } = useQuery({
-    ...queries.newsletterDetail({ id: newsletter?.newsletterId ?? 0 }),
-    enabled: !!newsletter?.newsletterId && newsletter.newsletterId > 0,
-  });
+  const { data: newsletterDetail } = useQuery(
+    queries.newsletterDetail({ id: newsletter?.newsletterId ?? 0 }),
+  );
   const deviceType = useDeviceType();
 
   if (!newsletter || !newsletterDetail) return null;
@@ -101,62 +100,62 @@ const NewsletterDetailModal = ({
             )}
           </LinkWrapper>
 
-          {newsletterDetail.subscribePageImageUrl && (
-            <SubscribeWrapper>
-              <SubscribeHeader>
-                <SubscribeTitle>구독 방법</SubscribeTitle>
-              </SubscribeHeader>
-              <SubscribeContent>
-                <StepsWrapper>
-                  <StepItem>
-                    <StepNumber>1</StepNumber>
-                    <StepContent>
-                      <StepTitle>구독하기 버튼 클릭</StepTitle>
-                      <StepDescription>
-                        {'위의 "구독하기" 버튼을 눌러주세요.'}
-                      </StepDescription>
-                    </StepContent>
-                  </StepItem>
-                  <StepItem>
-                    <StepNumber>2</StepNumber>
-                    <StepContent>
-                      <StepTitle>구독 페이지 접속</StepTitle>
-                      <StepDescription>
-                        {'뉴스레터 공식 구독 페이지로 이동합니다.'}
-                      </StepDescription>
-                    </StepContent>
-                  </StepItem>
-                  <StepItem>
-                    <StepNumber>3</StepNumber>
-                    <StepContent>
-                      <StepTitle>봄봄 메일 붙여넣기</StepTitle>
-                      <StepDescription>
-                        {'이메일 칸에 봄봄 메일을 입력해주세요.'}
-                      </StepDescription>
-                      <StepDescription>
-                        {
-                          '봄봄을 통해 접속한 유저라면 즉시 붙여넣기가 가능합니다!'
-                        }
-                      </StepDescription>
-                    </StepContent>
-                  </StepItem>
-                  <StepItem>
-                    <StepNumber>4</StepNumber>
-                    <StepContent>
-                      <StepTitle>구독 완료!</StepTitle>
-                      <StepDescription>
-                        {'축하합니다! 이제 정기적으로 뉴스레터를 받아보세요.'}
-                      </StepDescription>
-                    </StepContent>
-                  </StepItem>
-                </StepsWrapper>
+          <SubscribeWrapper>
+            <SubscribeHeader>
+              <SubscribeTitle>구독 방법</SubscribeTitle>
+            </SubscribeHeader>
+            <SubscribeContent>
+              <StepsWrapper>
+                <StepItem>
+                  <StepNumber>1</StepNumber>
+                  <StepContent>
+                    <StepTitle>구독하기 버튼 클릭</StepTitle>
+                    <StepDescription>
+                      {'위의 "구독하기" 버튼을 눌러주세요.'}
+                    </StepDescription>
+                  </StepContent>
+                </StepItem>
+                <StepItem>
+                  <StepNumber>2</StepNumber>
+                  <StepContent>
+                    <StepTitle>구독 페이지 접속</StepTitle>
+                    <StepDescription>
+                      {'뉴스레터 공식 구독 페이지로 이동합니다.'}
+                    </StepDescription>
+                  </StepContent>
+                </StepItem>
+                <StepItem>
+                  <StepNumber>3</StepNumber>
+                  <StepContent>
+                    <StepTitle>봄봄 메일 붙여넣기</StepTitle>
+                    <StepDescription>
+                      {'이메일 칸에 봄봄 메일을 입력해주세요.'}
+                    </StepDescription>
+                    <StepDescription>
+                      {
+                        '봄봄을 통해 접속한 유저라면 즉시 붙여넣기가 가능합니다!'
+                      }
+                    </StepDescription>
+                  </StepContent>
+                </StepItem>
+                <StepItem>
+                  <StepNumber>4</StepNumber>
+                  <StepContent>
+                    <StepTitle>구독 완료!</StepTitle>
+                    <StepDescription>
+                      {'축하합니다! 이제 정기적으로 뉴스레터를 받아보세요.'}
+                    </StepDescription>
+                  </StepContent>
+                </StepItem>
+              </StepsWrapper>
+              {newsletterDetail.subscribePageImageUrl && (
                 <Screenshot
                   src={newsletterDetail.subscribePageImageUrl}
                   alt="구독 페이지 스크린샷"
                 />
-              </SubscribeContent>
-            </SubscribeWrapper>
-          )}
+              )}
+            </SubscribeContent>
+          </SubscribeWrapper>
         </ScrollableWrapper>
       </Container>
     </Modal>

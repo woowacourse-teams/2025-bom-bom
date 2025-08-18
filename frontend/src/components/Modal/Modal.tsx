@@ -68,6 +68,7 @@ const Container = styled.div<{ position: PositionType }>`
   position: relative;
   width: ${({ position }) =>
     position === 'bottom' ? '100%' : 'min(720px, 92vw)'};
+  height: 100%;
   max-height: ${({ position }) => (position === 'bottom' ? '60vh' : '90vh')};
   border-radius: 12px;
 

@@ -27,6 +27,7 @@ const colors = {
   disabledBackground: '#EFEFEF',
   white: '#FFFFFF',
   black: '#000000',
+  error: '#FF4D4F',
 };
 
 export const theme = {

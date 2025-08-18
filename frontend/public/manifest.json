@@ -1,0 +1,98 @@
+{
+  "name": "봄봄 - 뉴스레터 읽기 플랫폼",
+  "short_name": "봄봄앱",
+  "description": "봄봄 - 뉴스레터, 아티클, 트렌드 정보를 한 곳에!",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#FF9966",
+  "orientation": "portrait-primary",
+  "categories": ["news", "productivity", "lifestyle"],
+  "lang": "ko",
+  "id": "/",
+  "icons": [
+    {
+      "src": "assets/bombom-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/bombom-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/bombom-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/bombom-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/bombom-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/bombom-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "assets/bombom-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "오늘의 아티클",
+      "short_name": "오늘의 아티클",
+      "description": "오늘의 읽을 아티클 보기",
+      "url": "/",
+      "icons": [
+        {
+          "src": "assets/bombom-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "보관함",
+      "short_name": "보관함",
+      "description": "저장된 아티클 보기",
+      "url": "/storage",
+      "icons": [
+        {
+          "src": "assets/bombom-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "추천",
+      "short_name": "추천 페이지",
+      "description": "추천 뉴스레터 보기",
+      "url": "/recommend",
+      "icons": [
+        {
+          "src": "assets/bombom-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

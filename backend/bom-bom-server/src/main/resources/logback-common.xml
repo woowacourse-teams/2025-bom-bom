@@ -1,6 +1,6 @@
 <included>
     <!-- 공통 프로퍼티 -->
-    <property name="LOG_PATH" value="logs"/>
+    <property name="LOG_PATH" value="/logs"/>
     <property name="FILE_PATTERN" value="%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} [%thread] %-5level %logger{36} - %msg%n"/>
 
     <!-- Hibernate SQL/파라미터 로깅 분리 -->

@@ -16,6 +16,7 @@ import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
 import me.bombom.api.v1.highlight.dto.request.HighlightLocationRequest;
 import me.bombom.api.v1.highlight.dto.request.UpdateHighlightRequest;
+import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightStatisticsResponse;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
@@ -187,7 +188,7 @@ class HighlightServiceTest {
         UpdateHighlightRequest request = new UpdateHighlightRequest(Color.from("#9c27b0"), null);
 
         // when
-        HighlightResponse updated = highlightService.update(highlightId, request, member);
+        ArticleHighlightResponse updated = highlightService.update(highlightId, request, member);
 
         // then
         assertThat(updated.color()).isEqualTo(request.color().getValue());
@@ -200,7 +201,7 @@ class HighlightServiceTest {
         UpdateHighlightRequest request = new UpdateHighlightRequest(null, "새로운 메모입니다.");
 
         // when
-        HighlightResponse updated = highlightService.update(highlightId, request, member);
+        ArticleHighlightResponse updated = highlightService.update(highlightId, request, member);
 
         // then
         assertThat(updated.memo()).isEqualTo(request.memo());
@@ -213,7 +214,7 @@ class HighlightServiceTest {
         UpdateHighlightRequest request = new UpdateHighlightRequest(Color.from("#9c27b0"), "새로운 메모입니다.");
 
         // when
-        HighlightResponse updated = highlightService.update(highlightId, request, member);
+        ArticleHighlightResponse updated = highlightService.update(highlightId, request, member);
 
         // then
         assertSoftly(softly -> {

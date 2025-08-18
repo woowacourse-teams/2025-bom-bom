@@ -19,6 +19,8 @@ import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +33,8 @@ public class HighlightService {
     private final ArticleRepository articleRepository;
     private final NewsletterRepository newsletterRepository;
 
-    public List<HighlightResponse> getHighlights(Member member, Long articleId, Long newsletterId) {
-        return highlightRepository.findHighlights(member.getId(), articleId, newsletterId);
+    public Page<HighlightResponse> getHighlights(Member member, Long articleId, Long newsletterId, Pageable pageable) {
+        return highlightRepository.findHighlights(member.getId(), articleId, newsletterId, pageable);
     }
 
     @Transactional

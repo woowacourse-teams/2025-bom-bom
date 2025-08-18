@@ -16,6 +16,8 @@ import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightStatisticsResponse;
 import me.bombom.api.v1.member.domain.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,10 +33,11 @@ public interface HighlightControllerApi {
         @ApiResponse(responseCode = "200", description = "하이라이트 목록 조회 성공"),
         @ApiResponse(responseCode = "400", description = "잘못된 요청 값", content = @Content)
     })
-    List<HighlightResponse> getHighlights(
+    Page<HighlightResponse> getHighlights(
         @Parameter(hidden = true) Member member,
         @Parameter(description = "아티클 ID (예: ?articleId=1)") @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId,
-        @Parameter(description = "뉴스레터 ID (예: ?newsletterId=1)") @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long newsletterId
+        @Parameter(description = "뉴스레터 ID (예: ?newsletterId=1)") @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long newsletterId,
+        @Parameter(description = "페이징 관련 요청 (예: ?page=0&size=10)") Pageable pageable
     );
 
     @Operation(summary = "하이라이트 생성", description = "새로운 하이라이트를 생성합니다.")

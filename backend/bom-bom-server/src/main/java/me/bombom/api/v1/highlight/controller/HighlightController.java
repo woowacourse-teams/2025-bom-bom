@@ -12,6 +12,10 @@ import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightStatisticsResponse;
 import me.bombom.api.v1.highlight.service.HighlightService;
 import me.bombom.api.v1.member.domain.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,12 +39,13 @@ public class HighlightController implements HighlightControllerApi{
 
     @Override
     @GetMapping
-    public List<HighlightResponse> getHighlights(
+    public Page<HighlightResponse> getHighlights(
             @LoginMember Member member,
             @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId,
-            @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long newsletterId
+            @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long newsletterId,
+            @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable
     ) {
-        return highlightService.getHighlights(member, articleId, newsletterId);
+        return highlightService.getHighlights(member, articleId, newsletterId, pageable);
     }
 
     @Override

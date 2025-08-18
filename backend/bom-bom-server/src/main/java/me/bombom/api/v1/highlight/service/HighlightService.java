@@ -116,12 +116,4 @@ public class HighlightService {
             highlight.editMemo(request.memo());
         }
     }
-
-    private HighlightCountPerNewsletterResponse mapToHighlightCountPerNewsletter(Member member, Newsletter newsletter) {
-        List<Article> articles = articleRepository.getAllByMemberIdAndNewsletterId(member.getId(), newsletter.getId());
-        long highlightCount = articles.stream()
-                .mapToLong(article -> highlightRepository.countByArticleId(article.getId()))
-                .sum();
-        return HighlightCountPerNewsletterResponse.of(newsletter, highlightCount);
-    }
 }

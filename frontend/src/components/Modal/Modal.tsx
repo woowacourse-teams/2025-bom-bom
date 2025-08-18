@@ -30,7 +30,7 @@ const Modal = ({
       <Container ref={modalRef} position={position}>
         {showCloseButton && (
           <CloseButton type="button" onClick={closeModal}>
-            <StyledCloseIcon width={36} height={36} fill={theme.colors.black} />
+            <CloseIcon width={36} height={36} fill={theme.colors.black} />
           </CloseButton>
         )}
         <ContentWrapper>{children}</ContentWrapper>
@@ -64,8 +64,6 @@ const Container = styled.div<{ position: PositionType }>`
     position === 'bottom' ? '100%' : 'min(720px, 92vw)'};
   height: 90vh;
   max-height: min(720px, 90vh);
-  padding: 0;
-  border: 0;
   border-radius: 12px;
 
   display: flex;
@@ -77,12 +75,9 @@ const Container = styled.div<{ position: PositionType }>`
     position === 'bottom' &&
     `
       height: 60vh;
-      max-width: 100%;
-      margin: 0;
-      margin-top: auto;
+      align-self: flex-end;
       border-bottom-left-radius: 0;
       border-bottom-right-radius: 0;
-      align-self: flex-end;
 `}
 `;
 
@@ -98,8 +93,6 @@ const CloseButton = styled.button`
 
   background: none;
 `;
-
-const StyledCloseIcon = styled(CloseIcon)``;
 
 const ContentWrapper = styled.div`
   height: 100%;

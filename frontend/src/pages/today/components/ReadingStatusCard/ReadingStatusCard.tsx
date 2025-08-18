@@ -1,74 +1,68 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import ReadingStatusCardSkeleton from './ReadingStatusCardSkeleton';
+import StreakCounter from '../StreakCounter/StreakCounter';
 import { queries } from '@/apis/queries';
 import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
+import type { CSSObject, Theme } from '@emotion/react';
 import GoalIcon from '#/assets/goal.svg';
 import StatusIcon from '#/assets/reading-status.svg';
-import StreakIcon from '#/assets/streak.svg';
 
 function ReadingStatusCard() {
+  const deviceType = useDeviceType();
   const { data, isLoading } = useQuery(queries.readingStatus());
 
   if (isLoading) return <ReadingStatusCardSkeleton />;
   if (!data) return null;
 
   const { streakReadDay, today, weekly } = data;
+  const todayProgressDescription =
+    today.readCount < today.totalCount ? '목표까지 조금 더!' : '목표 달성!';
+  const weeklyGoalDescription =
+    weekly.readCount < weekly.goalCount
+      ? `목표까지 ${weekly.goalCount - weekly.readCount}개 남음`
+      : '목표 달성!';
 
   return (
-    <Container>
-      <TitleWrapper>
-        <StatusIconWrapper>
-          <StatusIcon width={20} height={20} color={theme.colors.white} />
-        </StatusIconWrapper>
-        <Title>읽기 현황</Title>
-      </TitleWrapper>
+    <Container deviceType={deviceType}>
+      {deviceType === 'pc' && (
+        <TitleWrapper>
+          <StatusIconWrapper>
+            <StatusIcon width={20} height={20} color={theme.colors.white} />
+          </StatusIconWrapper>
+          <Title>읽기 현황</Title>
+        </TitleWrapper>
+      )}
 
-      <StreakWrapper>
-        <StreakIconWrapper>
-          <StreakIcon
-            width={34}
-            height={34}
-            fill={theme.colors.white}
-            color={theme.colors.primary}
-          />
-        </StreakIconWrapper>
-        <StreakDay>{`${streakReadDay}일`}</StreakDay>
-        <StreakDescription>연속 읽기 중!🔥</StreakDescription>
-        <StreakHelperText>Great Job!</StreakHelperText>
+      <StreakWrapper deviceType={deviceType}>
+        <StreakCounter streakReadDay={streakReadDay} />
+        <StreakDescription deviceType={deviceType}>
+          연속 읽기 중!
+        </StreakDescription>
       </StreakWrapper>
 
       <ProgressWithLabel
         label="오늘의 진행률"
-        Icon={GoalIcon}
         value={{
-          currentCount: today?.readCount ?? 0,
-          totalCount: today?.totalCount ?? 0,
+          currentCount: today.readCount,
+          totalCount: today.totalCount,
         }}
-        description={
-          today?.readCount &&
-          today?.totalCount &&
-          today?.readCount < today?.totalCount
-            ? '목표까지 조금 더!'
-            : '목표 달성!'
-        }
+        {...(deviceType === 'pc'
+          ? { Icon: GoalIcon, description: todayProgressDescription }
+          : { showGraph: false })}
       />
       <ProgressWithLabel
         label="주간 목표"
-        Icon={GoalIcon}
         value={{
-          currentCount: weekly?.readCount ?? 0,
-          totalCount: weekly?.goalCount ?? 0,
+          currentCount: weekly.readCount,
+          totalCount: weekly.goalCount,
         }}
-        description={
-          weekly?.readCount &&
-          weekly?.goalCount &&
-          weekly?.readCount < weekly?.goalCount
-            ? `목표까지 ${weekly?.goalCount - weekly?.readCount}개 남음`
-            : '목표 달성!'
-        }
         rateFormat="ratio"
+        {...(deviceType === 'pc'
+          ? { Icon: GoalIcon, description: weeklyGoalDescription }
+          : { showGraph: false })}
       />
     </Container>
   );
@@ -76,21 +70,17 @@ function ReadingStatusCard() {
 
 export default ReadingStatusCard;
 
-const Container = styled.section`
+const Container = styled.section<{ deviceType: DeviceType }>`
   width: 310px;
-  padding: 34px 30px;
-  border: 1px solid ${({ theme }) => theme.colors.white};
   border-radius: 20px;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 15%);
 
   display: flex;
   gap: 26px;
   flex-direction: column;
-  flex-shrink: 0;
   align-items: center;
   justify-content: center;
 
-  background-color: ${({ theme }) => theme.colors.white};
+  ${({ deviceType, theme }) => containerStyles[deviceType](theme)}
 `;
 
 const TitleWrapper = styled.div`
@@ -120,45 +110,36 @@ const Title = styled.h2`
   text-align: center;
 `;
 
-const StreakWrapper = styled.div`
+const StreakWrapper = styled.div<{ deviceType: DeviceType }>`
   display: flex;
-  gap: 10px;
+  gap: ${({ deviceType }) => (deviceType === 'pc' ? '8px' : '0px')};
   flex-direction: column;
   align-items: center;
   justify-content: center;
 `;
 
-const StreakIconWrapper = styled.div`
-  width: 70px;
-  height: 70px;
-  padding: 18px;
-  border-radius: 36px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background-color: ${({ theme }) => theme.colors.primaryLight};
-`;
-
-const StreakDay = styled.p`
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font-size: 28px;
-  text-align: center;
-`;
-
-const StreakDescription = styled.p`
+const StreakDescription = styled.p<{ deviceType: DeviceType }>`
   color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.body1};
+  font: ${({ deviceType, theme }) =>
+    deviceType === 'pc' ? theme.fonts.body1 : theme.fonts.body2};
   text-align: center;
 `;
 
-const StreakHelperText = styled.div`
-  padding: 4px 8px;
-  border-radius: 8px;
-
-  background-color: ${({ theme }) => theme.colors.primary};
-  color: ${({ theme }) => theme.colors.white};
-  font: ${({ theme }) => theme.fonts.body2};
-  text-align: center;
-`;
+const containerStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {
+  pc: (theme) => ({
+    padding: '34px 30px',
+    backgroundColor: theme.colors.white,
+    border: `1px solid ${theme.colors.white}`,
+    boxShadow: '0 25px 50px -12px rgb(0 0 0 / 15%)',
+  }),
+  tablet: () => ({
+    height: '200px',
+    flex: '1',
+    gap: '12px',
+  }),
+  mobile: () => ({
+    height: '200px',
+    flex: '1',
+    gap: '12px',
+  }),
+};

@@ -6,6 +6,8 @@ import ArticleCardList from '../../pages/today/components/ArticleCardList/Articl
 import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/ReadingStatusCard';
 import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import type { CSSObject, Theme } from '@emotion/react';
 
 export const Route = createFileRoute('/_bombom/')({
   component: Index,
@@ -14,34 +16,45 @@ export const Route = createFileRoute('/_bombom/')({
 function Index() {
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
+  const deviceType = useDeviceType();
 
   return (
-    <Container>
-      <TitleBox>
-        <Title>오늘의 뉴스레터</Title>
-        <TitleDescription>
-          {todayArticles?.content?.length ?? 0}개의 새로운 뉴스레터가 도착했어요
-        </TitleDescription>
-      </TitleBox>
-      <ContentWrapper>
+    <Container deviceType={deviceType}>
+      {deviceType !== 'mobile' && (
+        <TitleBox>
+          <Title>오늘의 뉴스레터</Title>
+          <TitleDescription>
+            {todayArticles?.content?.length ?? 0}개의 새로운 뉴스레터가
+            도착했어요
+          </TitleDescription>
+        </TitleBox>
+      )}
+
+      <ContentWrapper deviceType={deviceType}>
         <ArticleCardList articles={todayArticles?.content ?? []} />
-        <SideCardWrapper>
+        <ReaderCompanion deviceType={deviceType}>
           <PetCard />
           <ReadingStatusCard />
-        </SideCardWrapper>
+        </ReaderCompanion>
       </ContentWrapper>
     </Container>
   );
 }
 
-const Container = styled.div`
-  width: 1280px;
-  padding-top: 64px;
+const Container = styled.div<{ deviceType: DeviceType }>`
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  padding-top: ${({ deviceType }) =>
+    deviceType === 'mobile' ? '0px' : '64px'};
 
   display: flex;
-  gap: 24px;
+  gap: 44px;
   flex-direction: column;
   align-items: flex-start;
+
+  box-sizing: border-box;
 `;
 
 const TitleBox = styled.div`
@@ -60,22 +73,50 @@ const TitleDescription = styled.p`
   font: ${({ theme }) => theme.fonts.caption};
 `;
 
-const ContentWrapper = styled.div`
+const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
   width: 100%;
 
   display: flex;
   gap: 24px;
-  align-items: flex-start;
+  flex-direction: ${({ deviceType }) =>
+    deviceType === 'pc' ? 'row' : 'column-reverse'};
+  align-items: ${({ deviceType }) =>
+    deviceType === 'pc' ? 'flex-start' : 'center'};
   align-self: stretch;
   justify-content: center;
 `;
 
-const SideCardWrapper = styled.div`
-  width: 310px;
+const ReaderCompanion = styled.div<{ deviceType: DeviceType }>`
+  min-width: 300px;
 
   display: flex;
-  gap: 24px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
+  gap: 36px;
+
+  box-sizing: border-box;
+
+  ${({ deviceType, theme }) => sideCardWrapperStyles[deviceType](theme)}
 `;
+
+const sideCardWrapperStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {
+  pc: (theme) => ({
+    width: '310px',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    gap: '24px',
+    border: `1px solid ${theme.colors.white}`,
+  }),
+  tablet: () => ({
+    width: '100%',
+    maxWidth: 'calc(100% - 200px)',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  }),
+  mobile: () => ({
+    position: 'relative',
+    paddingBottom: '44px',
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  }),
+};

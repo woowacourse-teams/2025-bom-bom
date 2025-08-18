@@ -6,13 +6,14 @@ import ProgressBar from '../ProgressBar/ProgressBar';
 
 interface ProgressWithLabelProps {
   label: string;
-  Icon: ComponentType<SVGProps<SVGSVGElement>>;
+  Icon?: ComponentType<SVGProps<SVGSVGElement>>;
   value: {
     currentCount: number;
     totalCount: number;
   };
-  description: string;
+  description?: string;
   rateFormat?: RateFormatType;
+  showGraph?: boolean;
 }
 
 function ProgressWithLabel({
@@ -21,6 +22,7 @@ function ProgressWithLabel({
   value: { currentCount, totalCount },
   description,
   rateFormat = 'percentage',
+  showGraph = true,
 }: ProgressWithLabelProps) {
   const { rate, formattedRate } = getProgressInfo({
     currentCount,
@@ -31,12 +33,12 @@ function ProgressWithLabel({
   return (
     <Container>
       <ProgressInfo>
-        <StyledIcon as={Icon} />
+        {Icon && <StyledIcon as={Icon} />}
         <ProgressLabel>{label}</ProgressLabel>
         <ProgressRate>{formattedRate}</ProgressRate>
       </ProgressInfo>
-      <ProgressBar rate={rate} />
-      <ProgressDescription>{description}</ProgressDescription>
+      {showGraph && <ProgressBar rate={rate} />}
+      {description && <ProgressDescription>{description}</ProgressDescription>}
     </Container>
   );
 }
@@ -55,7 +57,7 @@ const ProgressInfo = styled.div`
   width: 100%;
 
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
 `;
 
@@ -76,8 +78,9 @@ const ProgressLabel = styled.h3`
 const ProgressRate = styled.span`
   margin-left: auto;
 
-  color: ${({ theme }) => theme.colors.textPrimary};
+  color: ${({ theme }) => theme.colors.primary};
   font: ${({ theme }) => theme.fonts.body2};
+  font-weight: 600;
   text-align: center;
 `;
 

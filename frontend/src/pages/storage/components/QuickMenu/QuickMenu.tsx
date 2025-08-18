@@ -1,27 +1,50 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
+import FloatingActionButton from '@/components/FloatingActionButton/FloatingActionButton';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
 import BookmarkIcon from '#/assets/bookmark-inactive.svg';
+import LinkIcon from '#/assets/link.svg';
 import MemoIcon from '#/assets/memo.svg';
-import QuickMenuIcon from '#/assets/quick-menu.svg';
 
 const QuickMenu = () => {
+  const deviceType = useDeviceType();
+
+  if (deviceType !== 'pc') {
+    return (
+      <FloatingActionButton
+        icon={<LinkIcon width={24} height={24} fill={theme.colors.white} />}
+      >
+        <StyledLink to="/bookmark">
+          <StyledBookmarkIcon />
+          <LinkText>북마크</LinkText>
+        </StyledLink>
+        <StyledLink to="/memo">
+          <MemoIcon width={20} height={20} fill={theme.colors.primary} />
+          <LinkText>메모</LinkText>
+        </StyledLink>
+      </FloatingActionButton>
+    );
+  }
+
   return (
     <Container>
       <TitleWrapper>
         <QuickMenuIconWrapper>
-          <StyledQuickMenuIcon />
+          <StyledLinkIcon />
         </QuickMenuIconWrapper>
         <Title>바로 가기</Title>
       </TitleWrapper>
-      <ButtonWrapper>
-        <StyledBookmarkIcon />
-        <LinkButton to={'/bookmark'}>북마크</LinkButton>
-      </ButtonWrapper>
-      <ButtonWrapper>
-        <MemoIcon width={20} height={20} fill={theme.colors.primary} />
-        <LinkButton to={'/memo'}>메모</LinkButton>
-      </ButtonWrapper>
+      <ButtonContainer>
+        <StyledLink to="/bookmark">
+          <StyledBookmarkIcon />
+          <LinkText>북마크</LinkText>
+        </StyledLink>
+        <StyledLink to="/memo">
+          <MemoIcon width={20} height={20} fill={theme.colors.primary} />
+          <LinkText>메모</LinkText>
+        </StyledLink>
+      </ButtonContainer>
     </Container>
   );
 };
@@ -29,7 +52,7 @@ const QuickMenu = () => {
 export default QuickMenu;
 
 const Container = styled.nav`
-  width: 310px;
+  width: 100%;
   padding: 16px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 20px;
@@ -57,7 +80,7 @@ const QuickMenuIconWrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
 `;
 
-const StyledQuickMenuIcon = styled(QuickMenuIcon)`
+const StyledLinkIcon = styled(LinkIcon)`
   width: 16px;
   height: 16px;
 
@@ -68,12 +91,6 @@ const Title = styled.h3`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const ButtonWrapper = styled.div`
-  display: flex;
-  gap: 4px;
-  align-items: center;
-`;
-
 const StyledBookmarkIcon = styled(BookmarkIcon)`
   width: 20px;
   height: 20px;
@@ -81,6 +98,23 @@ const StyledBookmarkIcon = styled(BookmarkIcon)`
   color: ${({ theme }) => theme.colors.primary};
 `;
 
-const LinkButton = styled(Link)`
+const LinkText = styled.span`
   font: ${({ theme }) => theme.fonts.body1};
+`;
+
+const StyledLink = styled(Link)`
+  padding: 8px;
+  border-radius: 8px;
+
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 16px;
+  flex-direction: column;
+  align-items: flex-start;
 `;

@@ -1,22 +1,23 @@
 import { fetcher } from './fetcher';
 import { components, operations } from '@/types/openapi';
 
-export type GetBookmarkArticlesResponse =
-  components['schemas']['PageArticleResponse'];
+export type GetBookmarksResponse = components['schemas']['PageArticleResponse'];
 
-export const getBookmarkArticles = async () => {
-  return await fetcher.get<GetBookmarkArticlesResponse>({
+export const getBookmarks = async () => {
+  return await fetcher.get<GetBookmarksResponse>({
     path: '/bookmarks',
   });
 };
 
-export type GetBookmarkedParams =
+export type GetArticleBookmarkStatusParams =
   operations['getBookmarkStatus']['parameters']['path'];
-export type GetBookmarkedResponse =
+export type GetArticleBookmarkStatusResponse =
   components['schemas']['BookmarkStatusResponse'];
 
-export const getBookmarked = async ({ articleId }: GetBookmarkedParams) => {
-  return await fetcher.get<GetBookmarkedResponse>({
+export const getArticleBookmarkStatus = async ({
+  articleId,
+}: GetArticleBookmarkStatusParams) => {
+  return await fetcher.get<GetArticleBookmarkStatusResponse>({
     path: `/bookmarks/status/articles/${articleId}`,
   });
 };
@@ -36,5 +37,20 @@ export type DeleteBookmarkParams =
 export const deleteBookmark = async ({ articleId }: DeleteBookmarkParams) => {
   return await fetcher.delete({
     path: `/bookmarks/articles/${articleId}`,
+  });
+};
+
+export type GetBookmarksStatisticsNewslettersResponse = {
+  totalCount: number;
+  newsletters: {
+    newsletter: string;
+    count: number;
+    imageUrl: string;
+  }[];
+};
+
+export const getBookmarksStatisticsNewsletters = async () => {
+  return await fetcher.get<GetBookmarksStatisticsNewslettersResponse>({
+    path: '/bookmarks/statistics/newsletters',
   });
 };

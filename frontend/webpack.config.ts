@@ -1,5 +1,6 @@
 import path from 'path';
 import { tanstackRouter } from '@tanstack/router-plugin/webpack';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 import dotenv from 'dotenv';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack from 'webpack';
@@ -8,6 +9,8 @@ import 'webpack-dev-server';
 dotenv.config();
 
 export default (env, argv) => {
+  const isProduction = argv.mode === 'production';
+
   const config: webpack.Configuration = {
     mode: argv.mode,
     entry: './src/main.tsx',
@@ -74,6 +77,22 @@ export default (env, argv) => {
         favicon: './public/assets/bombom.png',
         hash: true,
       }),
+      // 프로덕션 빌드 시에만 public 폴더 정적 자산을 dist로 복사
+      ...(isProduction
+        ? [
+            new CopyWebpackPlugin({
+              patterns: [
+                {
+                  from: path.resolve(__dirname, 'public'),
+                  to: path.resolve(__dirname, 'dist'),
+                  globOptions: {
+                    ignore: ['**/index.html'], // index.html은 HtmlWebpackPlugin에서 처리하므로 제외
+                  },
+                },
+              ],
+            }),
+          ]
+        : []),
       tanstackRouter({
         target: 'react',
         autoCodeSplitting: true,

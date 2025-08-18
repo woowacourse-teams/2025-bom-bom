@@ -15,14 +15,10 @@ public record HighlightCountPerNewsletterResponse(
         @NotNull
         String imageUrl,
 
-        @Schema(type = "integer", format = "int64", description = "아티클 수", required = true)
+        @Schema(type = "integer", format = "int32", description = "아티클 수", required = true)
         long highlightCount
 ) {
 
     @QueryProjection
     public HighlightCountPerNewsletterResponse {}
-
-    public static HighlightCountPerNewsletterResponse of(Newsletter newsletter, long highlightCount) {
-        return new HighlightCountPerNewsletterResponse(newsletter.getId(), newsletter.getName(), newsletter.getImageUrl(), highlightCount);
-    }
 }

@@ -1,10 +1,11 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import Spacing from '@/components/Spacing/Spacing';
-import { GUIDE_MAILS } from '@/mocks/datas/guideMail';
+import { GuideMail } from '@/mocks/datas/guideMail';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
 import GuideArticleBody from '@/pages/detail/components/GuideArcielBody';
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
+import { createStorage } from '@/utils/localStorage';
 
 export const Route = createFileRoute('/_bombom/articles/guide/$guideId')({
   component: GuideMailPage,
@@ -13,23 +14,27 @@ export const Route = createFileRoute('/_bombom/articles/guide/$guideId')({
 function GuideMailPage() {
   const { guideId } = Route.useParams();
   const guideIdNumber = Number(guideId);
+  const guideArticles = createStorage<GuideMail[], string>('guideMail').get();
+  const guideArticle = guideArticles.find(
+    (article) => article.articleId === guideIdNumber,
+  );
 
-  const firstGuideMail = GUIDE_MAILS[0]!;
+  if (!guideArticle) return null;
 
   return (
     <Container>
       <ArticleHeader
-        title={firstGuideMail.title}
-        newsletterCategory={firstGuideMail.newsletter.category}
-        newsletterName={firstGuideMail.newsletter.name}
-        arrivedDateTime={new Date(firstGuideMail.arrivedDateTime)}
-        expectedReadTime={firstGuideMail.expectedReadTime}
+        title={guideArticle.title}
+        newsletterCategory={guideArticle.newsletter.category}
+        newsletterName={guideArticle.newsletter.name}
+        arrivedDateTime={new Date(guideArticle.arrivedDateTime)}
+        expectedReadTime={guideArticle.expectedReadTime}
       />
       <Divider />
 
       <GuideArticleBody
         articleId={guideIdNumber}
-        articleContent={firstGuideMail.contents}
+        articleContent={guideArticle.contents}
       />
       <Spacing size={24} />
       <Divider />

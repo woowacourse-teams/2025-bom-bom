@@ -25,7 +25,8 @@ function Index() {
       ...article,
       type: 'article' as const,
     })) ?? []),
-    ...guideArticles.map((guide) => ({ ...guide, type: 'guide' as const })),
+    ...(guideArticles?.map((guide) => ({ ...guide, type: 'guide' as const })) ??
+      []),
   ];
 
   const deviceType = useDeviceType();

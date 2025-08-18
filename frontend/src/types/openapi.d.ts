@@ -57,7 +57,15 @@ export interface paths {
     };
     get?: never;
     put?: never;
+    /**
+     * 북마크 추가
+     * @description 특정 아티클을 북마크에 추가합니다.
+     */
     post: operations['addBookmark'];
+    /**
+     * 북마크 삭제
+     * @description 특정 아티클을 북마크에서 삭제합니다.
+     */
     delete: operations['deleteBookmark'];
     options?: never;
     head?: never;
@@ -188,6 +196,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/newsletters/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 뉴스레터 상세 조회
+     * @description 특정 뉴스레터 상세 조회를 합니다.
+     */
+    get: operations['getNewsletterWithDetail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/members/me': {
     parameters: {
       query?: never;
@@ -255,6 +283,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * 북마크 목록 조회
+     * @description 북마크 목록을 페이징하여 조회합니다. (정렬 기본값: ?page=0&size=10&sort=createdAt,desc)
+     */
     get: operations['getBookmarks'];
     put?: never;
     post?: never;
@@ -271,7 +303,31 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * 북마크 상태 조회
+     * @description 특정 아티클의 북마크 상태를 조회합니다.
+     */
     get: operations['getBookmarkStatus'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/bookmarks/statistics/newsletters': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 뉴스레터별 북마크 개수 조회
+     * @description 뉴스레터별 북마크 개수 정보를 조회합니다.
+     */
+    get: operations['getBookmarkNewsletterStatistics'];
     put?: never;
     post?: never;
     delete?: never;
@@ -473,6 +529,18 @@ export interface components {
       /** @description 카테고리 */
       category: string;
     };
+    NewsletterWithDetailResponse: {
+      name: string;
+      description: string;
+      imageUrl: string;
+      /** Format: int64 */
+      categoryId: number;
+      mainPageUrl: string;
+      subscribeUrl: string;
+      issueCycle: string;
+      subscribePageImageUrl?: string;
+      previousNewsletterUrl?: string;
+    };
     MemberProfileResponse: {
       /**
        * Format: int64
@@ -627,6 +695,27 @@ export interface components {
     BookmarkStatusResponse: {
       /** @description 북마크 상태 */
       bookmarkStatus: boolean;
+    };
+    /** @description 뉴스레터별 통계 */
+    GetBookmarkCountPerNewsletterResponse: {
+      /** @description 뉴스레터명 */
+      newsletter: string;
+      /** @description 이미지 url */
+      imageUrl: string;
+      /**
+       * Format: int64
+       * @description 아티클 수
+       */
+      count: number;
+    };
+    GetBookmarkNewsletterStatisticsResponse: {
+      /**
+       * Format: int32
+       * @description 전체 북마크 수
+       */
+      totalCount: number;
+      /** @description 뉴스레터별 통계 */
+      newsletters: components['schemas']['GetBookmarkCountPerNewsletterResponse'][];
     };
     GetArticlesOptions: {
       /** Format: date */
@@ -868,14 +957,29 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
+        /** @description 아티클 ID */
         articleId: number;
       };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description No Content */
+      /** @description 북마크 추가 성공 */
       204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 아티클에 대한 접근 권한 없음 */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 아티클을 찾을 수 없음 */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -888,14 +992,29 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
+        /** @description 아티클 ID */
         articleId: number;
       };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description No Content */
+      /** @description 북마크 삭제 성공 */
       204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 아티클에 대한 접근 권한 없음 */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 아티클을 찾을 수 없음 */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -1157,6 +1276,43 @@ export interface operations {
       };
     };
   };
+  getNewsletterWithDetail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description 뉴스레터 ID */
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 뉴스레터 상세 조회 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['NewsletterWithDetailResponse'];
+        };
+      };
+      /** @description 잘못된 요청 (유효하지 않은 ID) */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 뉴스레터를 찾을 수 없음 */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   getMember: {
     parameters: {
       query?: never;
@@ -1243,6 +1399,7 @@ export interface operations {
   getBookmarks: {
     parameters: {
       query: {
+        /** @description 페이징 관련 요청 (예: ?page=0&size=10&sort=createdAt,desc) */
         pageable: components['schemas']['Pageable'];
       };
       header?: never;
@@ -1251,7 +1408,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description OK */
+      /** @description 북마크 목록 조회 성공 */
       200: {
         headers: {
           [name: string]: unknown;
@@ -1260,6 +1417,13 @@ export interface operations {
           '*/*': components['schemas']['PageBookmarkResponse'];
         };
       };
+      /** @description 잘못된 정렬 파라미터 요청 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   getBookmarkStatus: {
@@ -1267,19 +1431,40 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
+        /** @description 아티클 ID */
         articleId: number;
       };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description OK */
+      /** @description 북마크 상태 조회 성공 */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
           '*/*': components['schemas']['BookmarkStatusResponse'];
+        };
+      };
+    };
+  };
+  getBookmarkNewsletterStatistics: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 뉴스레터별 개수 조회 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['GetBookmarkNewsletterStatisticsResponse'];
         };
       };
     };

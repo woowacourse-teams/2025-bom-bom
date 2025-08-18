@@ -1,65 +1,66 @@
-import { KeyboardEvent, useCallback, useRef } from 'react';
+import { KeyboardEvent, RefObject, useCallback } from 'react';
 
-const useFocusTrap = () => {
-  const firstFocusableRef = useRef<HTMLElement | null>(null);
-  const lastFocusableRef = useRef<HTMLElement | null>(null);
+const useFocusTrap = (containerRef: RefObject<HTMLElement | null>) => {
+  const findFocusable = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return [];
 
-  const findFocusable = (
-    element: HTMLElement,
-    focusableList: HTMLElement[] = [],
-  ) => {
-    if (!element || !element.childNodes) return focusableList;
+    const walker = document.createTreeWalker(
+      container,
+      NodeFilter.SHOW_ELEMENT,
+      {
+        acceptNode(node) {
+          const element = node as HTMLElement;
+          if (
+            element.tabIndex >= 0 &&
+            !element.hasAttribute('disabled') &&
+            element.offsetParent !== null
+          ) {
+            return NodeFilter.FILTER_ACCEPT;
+          }
+          return NodeFilter.FILTER_SKIP;
+        },
+      },
+    );
 
-    for (const child of Array.from(element.children) as HTMLElement[]) {
-      if (child.tabIndex >= 0) {
-        focusableList.push(child);
-      }
-
-      findFocusable(child, focusableList);
+    const focusableElements: HTMLElement[] = [];
+    while (walker.nextNode()) {
+      focusableElements.push(walker.currentNode as HTMLElement);
     }
 
-    return focusableList;
-  };
+    return focusableElements;
+  }, [containerRef]);
 
-  const setFocusRef = <T extends HTMLElement>(element: T) => {
-    if (!element || element.style.visibility === 'hidden') return;
-
-    const focusableList = findFocusable(element);
-    if (focusableList.length === 0) return;
-
-    const [firstFocusable] = focusableList;
-    const lastFocusable = focusableList[focusableList.length - 1];
-
-    firstFocusableRef.current = firstFocusable;
-    lastFocusableRef.current = lastFocusable;
-
-    firstFocusable.focus();
-  };
+  const initFocus = useCallback(() => {
+    const [first] = findFocusable();
+    first?.focus();
+  }, [findFocusable]);
 
   const keydownFocusTrapTab = useCallback(
     (event: KeyboardEvent<HTMLElement>) => {
-      if (event.key !== 'Tab') {
-        return;
+      if (event.key !== 'Tab') return;
+
+      const focusableElements = findFocusable();
+      if (focusableElements.length === 0) return;
+
+      const firstFocusable = focusableElements[0];
+      const lastFocusable = focusableElements[focusableElements.length - 1];
+
+      if (event.shiftKey && document.activeElement === firstFocusable) {
+        event.preventDefault();
+        lastFocusable?.focus();
       }
 
-      if (
-        event.shiftKey &&
-        document.activeElement === firstFocusableRef.current
-      ) {
+      if (!event.shiftKey && document.activeElement === lastFocusable) {
         event.preventDefault();
-        lastFocusableRef.current?.focus();
-      }
-
-      if (document.activeElement === lastFocusableRef.current) {
-        event.preventDefault();
-        firstFocusableRef.current?.focus();
+        firstFocusable?.focus();
       }
     },
-    [],
+    [findFocusable],
   );
 
   return {
-    setFocusRef,
+    initFocus,
     keydownFocusTrapTab,
   };
 };

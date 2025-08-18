@@ -11,7 +11,7 @@ import useFocusTrap from '@/hooks/useFocusTrap';
 const useModal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
-  const { setFocusRef, keydownFocusTrapTab } = useFocusTrap();
+  const { initFocus, keydownFocusTrapTab } = useFocusTrap(modalRef);
   const bodyScrollStatus = useMemo(() => document.body.style.overflow, []);
 
   const openModal = useCallback(() => {
@@ -65,8 +65,8 @@ const useModal = () => {
       return;
     }
 
-    setFocusRef(modal);
-  }, [isOpen, setFocusRef]);
+    initFocus();
+  }, [initFocus, isOpen]);
 
   return {
     modalRef,

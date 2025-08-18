@@ -11,38 +11,28 @@ import me.bombom.api.v1.newsletter.domain.Newsletter;
 
 public record HighlightResponse(
         @NotNull
-        @Schema(type = "integer", format = "int64", description = "하이라이트 ID", required = true)
         Long id,
 
         @NotNull
-        @Schema(type = "object", description = "하이라이트 위치 정보", required = true)
         HighlightLocationResponse location,
 
         @NotNull
-        @Schema(type = "integer", format = "int64", description = "아티클 ID", required = true)
         Long articleId,
 
         @NotNull
-        @Schema(type = "string", description = "하이라이트 색상", required = true)
         String color,
 
         @NotNull
-        @Schema(type = "string", description = "하이라이트된 텍스트", required = true)
         String text,
         
-        @Schema(type = "string", description = "메모")
         String memo,
 
-        @Schema(type = "string", description = "뉴스레터 이름")
         String newsletterName,
 
-        @Schema(type = "string", description = "뉴스레터 이미지 url")
         String newsletterImageUrl,
 
-        @Schema(type = "string", description = "아티클 제목")
         String ariticleTitle,
 
-        @Schema(type = "string", format = "date-time", description = "하이라이트 생성 일시")
         LocalDateTime createdAt
 ) {
 

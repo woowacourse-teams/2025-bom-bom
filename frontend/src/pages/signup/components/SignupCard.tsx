@@ -32,7 +32,7 @@ const SignupCard = () => {
         gender: selectedGender,
       }),
     onSuccess: () => {
-      navigate({ to: '/login' });
+      navigate({ to: '/' });
     },
   });
 

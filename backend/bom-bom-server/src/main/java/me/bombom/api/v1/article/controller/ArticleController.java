@@ -72,14 +72,15 @@ public class ArticleController implements ArticleControllerApi{
     public GetArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(
             @LoginMember Member member,
             @RequestParam(required = false) String keyword
-    ){
+    ) {
         return articleService.getArticleNewsletterStatistics(member, keyword);
     }
 
     @GetMapping("/{articleId}/highlights")
     public List<ArticleHighlightResponse> getHighlights(
             @LoginMember Member member,
-            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId){
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
+    ) {
         return articleService.getHighlights(member, articleId);
     }
 }

@@ -41,8 +41,8 @@ const SignupCard = () => {
     mutateSignup();
   };
 
-  const openWhy = () => setEmailHelpOpen(true);
-  const closeWhy = () => setEmailHelpOpen(false);
+  const openEmailHelp = () => setEmailHelpOpen(true);
+  const closeEmailHelp = () => setEmailHelpOpen(false);
 
   return (
     <Container>
@@ -78,10 +78,10 @@ const SignupCard = () => {
                 aria-label="이메일을 수집하는 이유 안내"
                 aria-expanded={emailHelpOpen}
                 aria-describedby="email-why-tooltip"
-                onMouseEnter={openWhy}
-                onMouseLeave={closeWhy}
-                onFocus={openWhy}
-                onBlur={closeWhy}
+                onMouseEnter={openEmailHelp}
+                onMouseLeave={closeEmailHelp}
+                onFocus={openEmailHelp}
+                onBlur={closeEmailHelp}
               >
                 <EmailHelpIcon fill={theme.colors.primary} />
               </InfoButton>

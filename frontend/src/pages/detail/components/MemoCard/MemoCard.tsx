@@ -175,7 +175,6 @@ const ArticleTitle = styled.h3`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body1};
   font-weight: 600;
-  line-height: 1.4;
 `;
 
 const DeleteButton = styled.button`
@@ -237,7 +236,6 @@ const MemoContentText = styled.p`
 
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body2};
-  line-height: 1.6;
 
   word-break: break-all;
 `;
@@ -254,7 +252,6 @@ const NoteMemo = styled.textarea`
   background-color: ${({ theme }) => theme.colors.white};
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body2};
-  line-height: 1.5;
 
   resize: none;
   transition: all 0.2s ease-in-out;
@@ -279,7 +276,6 @@ const MemoText = styled.p`
   background-color: ${({ theme }) => theme.colors.white};
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body2};
-  line-height: 1.5;
   white-space: pre-wrap;
 
   transition: all 0.2s ease-in-out;

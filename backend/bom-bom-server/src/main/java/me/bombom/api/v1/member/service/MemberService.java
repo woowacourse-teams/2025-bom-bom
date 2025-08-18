@@ -24,9 +24,11 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    // TODO : 회원가입 입력 정보 양식 반영
     @Transactional
     public Member signup(PendingOAuth2Member pendingMember, MemberSignupRequest signupRequest) {
+        validateDuplicateEmail(signupRequest.email());
+        validateDuplicateNickname(signupRequest.nickname());
+
         Member newMember = Member.builder()
                 .provider(pendingMember.getProvider())
                 .providerId(pendingMember.getProviderId())
@@ -48,5 +50,21 @@ public class MemberService {
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
                 );
         return MemberProfileResponse.from(member);
+    }
+
+    private void validateDuplicateEmail(String email) {
+        if (memberRepository.existsByEmail(email)) {
+            throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_EMAIL)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "email")
+                    .addContext(ErrorContextKeys.OPERATION, "validateDuplicateEmail");
+        }
+    }
+
+    private void validateDuplicateNickname(String nickname) {
+        if (memberRepository.existsByNickname(nickname)) {
+            throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_NICKNAME)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "nickname")
+                    .addContext(ErrorContextKeys.OPERATION, "validateDuplicateNickname");
+        }
     }
 }

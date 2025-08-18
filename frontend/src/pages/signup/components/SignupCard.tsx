@@ -14,7 +14,7 @@ const SignupCard = () => {
   const [nickname, setNickname] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [emailPart, setEmailPart] = useState('');
-  const [selectedGender, setSelectedGender] = useState<Gender | null>(null);
+  const [gender, setGender] = useState<Gender | null>(null);
   const [emailHelpOpen, setEmailHelpOpen] = useState(false);
 
   const navigate = useNavigate();
@@ -22,12 +22,12 @@ const SignupCard = () => {
   const email = `${emailPart.trim()}@bombom.news`;
 
   const { mutate: mutateSignup } = useMutation({
-    mutationKey: ['signup', nickname, email, selectedGender],
+    mutationKey: ['signup', nickname, email, gender],
     mutationFn: () =>
       postSignup({
         nickname: nickname.trim(),
         email,
-        gender: selectedGender ?? 'MALE',
+        gender: gender ?? 'MALE',
       }),
     onSuccess: () => {
       navigate({ to: '/' });
@@ -113,11 +113,11 @@ const SignupCard = () => {
                 name="gender"
                 value="MALE"
                 type="radio"
-                checked={selectedGender === 'MALE'}
-                onChange={(e) => setSelectedGender(e.target.value as Gender)}
+                checked={gender === 'MALE'}
+                onChange={(e) => setGender(e.target.value as Gender)}
               />
               <RadioButtonLabel
-                selected={selectedGender === 'MALE'}
+                selected={gender === 'MALE'}
                 htmlFor="gender-male"
               >
                 남성
@@ -130,11 +130,11 @@ const SignupCard = () => {
                 name="gender"
                 value="FEMALE"
                 type="radio"
-                checked={selectedGender === 'FEMALE'}
-                onChange={(e) => setSelectedGender(e.target.value as Gender)}
+                checked={gender === 'FEMALE'}
+                onChange={(e) => setGender(e.target.value as Gender)}
               />
               <RadioButtonLabel
-                selected={selectedGender === 'FEMALE'}
+                selected={gender === 'FEMALE'}
                 htmlFor="gender-female"
               >
                 여성

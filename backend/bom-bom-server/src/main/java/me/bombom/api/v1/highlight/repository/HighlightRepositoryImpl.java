@@ -44,6 +44,7 @@ public class HighlightRepositoryImpl implements CustomHighlightRepository {
                 .where(createMemberIdWhereClause(memberId))
                 .where(createArticleIdWhereClause(articleId))
                 .where(createNewsletterIdWhereClause(newsletterId))
+                .orderBy(highlight.createdAt.desc())
                 .fetch();
     }
 

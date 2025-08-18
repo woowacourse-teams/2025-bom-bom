@@ -1,5 +1,5 @@
 import { fetcher } from './fetcher';
-import { components } from '@/types/openapi';
+import { components, operations } from '@/types/openapi';
 
 type GetNewslettersResponse = components['schemas']['NewsletterResponse'][];
 
@@ -9,26 +9,15 @@ export const getNewsletters = async () => {
   });
 };
 
-export interface NewsletterDetailResponse {
-  name: string;
-  description: string;
-  imageUrl: string;
-  categoryId: number;
-  mainPageUrl: string;
-  subscribeUrl: string;
-  issueCycle: string;
-  subscribePageImageUrl?: string;
-  previousNewsletterUrl?: string;
-}
-
-export interface GetNewsletterDetailParams {
-  newsletterId: number;
-}
+export type GetNewsletterDetailParams =
+  operations['getNewsletterWithDetail']['parameters']['path'];
+export type GetNewsletterWithDetailResponse =
+  components['schemas']['NewsletterWithDetailResponse'];
 
 export const getNewsletterDetail = async ({
-  newsletterId,
+  id,
 }: GetNewsletterDetailParams) => {
-  return await fetcher.get<NewsletterDetailResponse>({
-    path: `/newsletters/${newsletterId}`,
+  return await fetcher.get<GetNewsletterWithDetailResponse>({
+    path: `/newsletters/${id}`,
   });
 };

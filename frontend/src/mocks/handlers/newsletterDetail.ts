@@ -5,10 +5,10 @@ import { NEWSLETTER_DETAIL } from '../datas/newsletterDetail';
 const baseURL = ENV.baseUrl;
 
 export const newsletterDetailHandlers = [
-  http.get(`${baseURL}/newsletters/:newsletterId`, ({ params }) => {
-    const { newsletterId } = params;
+  http.get(`${baseURL}/newsletters/:id`, ({ params }) => {
+    const { id } = params;
     const newsletterDetail = NEWSLETTER_DETAIL.find(
-      (newsletter) => newsletter.newsletterId === Number(newsletterId),
+      (newsletter) => newsletter.id === Number(id),
     );
 
     if (!newsletterDetail) {

@@ -78,7 +78,7 @@ export const queries = {
 
   newsletterDetail: (params: GetNewsletterDetailParams) =>
     queryOptions({
-      queryKey: ['newsletters', params.newsletterId],
+      queryKey: ['newsletters', params.id],
       queryFn: () => getNewsletterDetail(params),
     }),
 

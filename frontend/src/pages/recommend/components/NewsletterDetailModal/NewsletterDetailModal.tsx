@@ -29,7 +29,7 @@ const NewsletterDetailModal = ({
 }: NewsletterDetailModalProps) => {
   const { data: userInfo } = useQuery(queries.me());
   const { data: newsletterDetail } = useQuery(
-    queries.newsletterDetail({ newsletterId: newsletter?.newsletterId ?? 0 }),
+    queries.newsletterDetail({ id: newsletter?.newsletterId ?? 0 }),
   );
   const deviceType = useDeviceType();
 

@@ -17,7 +17,7 @@ import me.bombom.api.v1.common.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TodayReading extends BaseEntity {
 
-    private static final int INITIAL_TOTAL_COUNT = 0;
+    private static final int INITIAL_TOTAL_COUNT = 3;
     private static final int INITIAL_CURRENT_COUNT = 0;
     private static final int RESET_TOTAL_COUNT = 0;
     private static final int RESET_CURRENT_COUNT = 0;

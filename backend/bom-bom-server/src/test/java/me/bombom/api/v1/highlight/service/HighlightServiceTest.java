@@ -89,7 +89,7 @@ class HighlightServiceTest {
         Long firstArticleId = articles.getFirst().getId();
 
         // when
-        List<HighlightResponse> responses = highlightService.getHighlights(member, firstArticleId);
+        List<HighlightResponse> responses = highlightService.getHighlights(member, firstArticleId, null);
 
         // then
         assertThat(responses).hasSize(2);
@@ -100,9 +100,22 @@ class HighlightServiceTest {
     }
 
     @Test
+    void 뉴스레터_id로_하이라이트를_조회할_수_있다() {
+        // given
+        Long thirdNewsletterId = newsletters.get(2).getId();
+        System.out.println(thirdNewsletterId);
+
+        // when
+        List<HighlightResponse> responses = highlightService.getHighlights(member, null, thirdNewsletterId);
+
+        // then
+        assertThat(responses).hasSize(3);
+    }
+
+    @Test
     void 멤버로_하이라이트를_조회할_수_있다() {
         // when
-        List<HighlightResponse> responses = highlightService.getHighlights(member, null);
+        List<HighlightResponse> responses = highlightService.getHighlights(member, null, null);
 
         // then
         assertThat(responses).hasSize(highlights.size());
@@ -175,6 +188,7 @@ class HighlightServiceTest {
         // then
         assertThat(updated.color()).isEqualTo(request.color().getValue());
     }
+
     @Test
     void 하이라이트_메모를_변경할_수_있다() {
         // given
@@ -199,8 +213,8 @@ class HighlightServiceTest {
 
         // then
         assertSoftly(softly -> {
-                assertThat(updated.color()).isEqualTo(request.color().getValue());
-                assertThat(updated.memo()).isEqualTo(request.memo());
+            assertThat(updated.color()).isEqualTo(request.color().getValue());
+            assertThat(updated.memo()).isEqualTo(request.memo());
         });
     }
 
@@ -210,7 +224,6 @@ class HighlightServiceTest {
         // given
         Long nonExistentHighlightId = 0L;
         UpdateHighlightRequest request = new UpdateHighlightRequest(Color.from("#9c27b0"), null);
-
 
         // when & then
         assertThatThrownBy(() -> highlightService.update(nonExistentHighlightId, request, member))

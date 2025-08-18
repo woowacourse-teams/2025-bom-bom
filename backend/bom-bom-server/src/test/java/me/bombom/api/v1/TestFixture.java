@@ -193,6 +193,7 @@ public final class TestFixture {
     public static List<Highlight> createHighlightFixtures(List<Article> articles) {
         Long firstArticleId = articles.get(0).getId();
         Long secondArticleId = articles.get(1).getId();
+        Long thirdArticleId = articles.get(2).getId();
         return List.of(
                 Highlight.builder()
                         .highlightLocation(new HighlightLocation(0, "div[0]/p[0]", 10, "div[0]/p[0]"))
@@ -213,6 +214,27 @@ public final class TestFixture {
                         .articleId(secondArticleId)
                         .color(Color.from("#2196f3"))
                         .text("세 번째 하이라이트")
+                        .memo("메모")
+                        .build(),
+                Highlight.builder()
+                        .highlightLocation(new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
+                        .articleId(thirdArticleId)
+                        .color(Color.from("#0016fb"))
+                        .text("네 번째 하이라이트")
+                        .memo("메모")
+                        .build(),
+                Highlight.builder()
+                        .highlightLocation(new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
+                        .articleId(thirdArticleId)
+                        .color(Color.from("#21b6f3"))
+                        .text("디섯 번째 하이라이트")
+                        .memo("메모")
+                        .build(),
+                Highlight.builder()
+                        .highlightLocation(new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
+                        .articleId(thirdArticleId)
+                        .color(Color.from("#b196f2"))
+                        .text("여섯 번째 하이라이트")
                         .memo("메모")
                         .build()
         );

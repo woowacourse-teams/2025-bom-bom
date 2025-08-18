@@ -52,6 +52,17 @@ public final class TestFixture {
                 .build();
     }
 
+    public static Member createMemberFixture(String email, String nickname) {
+        return Member.builder()
+                .provider("provider")
+                .providerId("providerId")
+                .email(email)
+                .nickname(nickname)
+                .gender(Gender.FEMALE)
+                .roleId(1L)
+                .build();
+    }
+
     /**
      * Category
      */

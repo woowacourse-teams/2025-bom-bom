@@ -8,12 +8,12 @@ import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback'
 import Modal from '@/components/Modal/Modal';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { copyToClipboard } from '@/utils/copy';
-import type { Newsletter } from '@/types/newsletter';
 import ArticleHistoryIcon from '#/assets/article-history.svg';
 import HomeIcon from '#/assets/home.svg';
 
 interface NewsletterDetailModalProps {
-  newsletter: Newsletter | null;
+  newsletterId: number;
+  category: string;
   modalRef: RefObject<HTMLDivElement | null>;
   closeModal: () => void;
   clickOutsideModal: (event: React.MouseEvent<HTMLDivElement>) => void;
@@ -21,19 +21,21 @@ interface NewsletterDetailModalProps {
 }
 
 const NewsletterDetailModal = ({
-  newsletter,
+  newsletterId,
+  category,
   modalRef,
   closeModal,
   clickOutsideModal,
   isOpen,
 }: NewsletterDetailModalProps) => {
   const { data: userInfo } = useQuery(queries.me());
-  const { data: newsletterDetail } = useQuery(
-    queries.newsletterDetail({ id: newsletter?.newsletterId ?? 0 }),
-  );
+  const { data: newsletterDetail } = useQuery({
+    ...queries.newsletterDetail({ id: newsletterId }),
+    enabled: Boolean(newsletterId),
+  });
   const deviceType = useDeviceType();
 
-  if (!newsletter || !newsletterDetail) return null;
+  if (!newsletterId || !newsletterDetail) return null;
 
   const goToSubscribe = () => {
     if (userInfo?.email) {
@@ -74,7 +76,7 @@ const NewsletterDetailModal = ({
             <InfoBox>
               <NewsletterTitle>{newsletterDetail.name}</NewsletterTitle>
               <NewsletterInfo>
-                <Badge text={newsletter.category} />
+                <Badge text={category} />
                 <IssueCycle>{newsletterDetail.issueCycle}</IssueCycle>
               </NewsletterInfo>
             </InfoBox>

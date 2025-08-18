@@ -7,8 +7,8 @@ import Button from '@/components/Button/Button';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import Modal from '@/components/Modal/Modal';
 import { useDeviceType } from '@/hooks/useDeviceType';
-import { Newsletter } from '@/types/newsletter';
 import { copyToClipboard } from '@/utils/copy';
+import type { Newsletter } from '@/types/newsletter';
 import ArticleHistoryIcon from '#/assets/article-history.svg';
 import HomeIcon from '#/assets/home.svg';
 
@@ -28,9 +28,10 @@ const NewsletterDetailModal = ({
   isOpen,
 }: NewsletterDetailModalProps) => {
   const { data: userInfo } = useQuery(queries.me());
-  const { data: newsletterDetail } = useQuery(
-    queries.newsletterDetail({ id: newsletter?.newsletterId ?? 0 }),
-  );
+  const { data: newsletterDetail } = useQuery({
+    ...queries.newsletterDetail({ id: newsletter?.newsletterId ?? 0 }),
+    enabled: !!newsletter?.newsletterId && newsletter.newsletterId > 0,
+  });
   const deviceType = useDeviceType();
 
   if (!newsletter || !newsletterDetail) return null;

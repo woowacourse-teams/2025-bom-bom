@@ -106,20 +106,41 @@ const SignupCard = () => {
 
         <FieldGroup>
           <Label as="p">성별</Label>
-          <SelectButtonWrapper>
-            <SelectButton
-              selected={selectedGender === 'MALE'}
-              onClick={() => setSelectedGender('MALE')}
-            >
-              남성
-            </SelectButton>
-            <SelectButton
-              selected={selectedGender === 'FEMALE'}
-              onClick={() => setSelectedGender('FEMALE')}
-            >
-              여성
-            </SelectButton>
-          </SelectButtonWrapper>
+          <RadioGroup role="radiogroup" aria-describedby="gender-hint">
+            <RadioItem>
+              <HiddenRadio
+                id="gender-male"
+                name="gender"
+                value="MALE"
+                type="radio"
+                checked={selectedGender === 'MALE'}
+                onChange={(e) => setSelectedGender(e.target.value as Gender)}
+              />
+              <RadioButtonLabel
+                selected={selectedGender === 'MALE'}
+                htmlFor="gender-male"
+              >
+                남성
+              </RadioButtonLabel>
+            </RadioItem>
+
+            <RadioItem>
+              <HiddenRadio
+                id="gender-female"
+                name="gender"
+                value="FEMALE"
+                type="radio"
+                checked={selectedGender === 'FEMALE'}
+                onChange={(e) => setSelectedGender(e.target.value as Gender)}
+              />
+              <RadioButtonLabel
+                selected={selectedGender === 'FEMALE'}
+                htmlFor="gender-female"
+              >
+                여성
+              </RadioButtonLabel>
+            </RadioItem>
+          </RadioGroup>
         </FieldGroup>
 
         <SubmitButton type="submit">회원가입</SubmitButton>
@@ -294,23 +315,42 @@ const SubmitButton = styled.button`
   }
 `;
 
-const SelectButtonWrapper = styled.div`
+const RadioGroup = styled.div`
   display: flex;
   gap: 12px;
   align-items: center;
 `;
 
-const SelectButton = styled.button<{ selected: boolean }>`
+const RadioItem = styled.div`
+  position: relative;
+`;
+
+const HiddenRadio = styled.input`
+  position: absolute;
   width: 100%;
+  height: 100%;
+  margin: 0;
+
+  appearance: none;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+
+  &:focus-visible + label {
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primaryLight};
+  }
+`;
+
+const RadioButtonLabel = styled.label<{ selected: boolean }>`
+  min-width: 60px;
   padding: 10px 12px;
   border: 2px solid
-    ${({ selected, theme }) => (selected ? 'transparent' : theme.colors.stroke)};
+    ${({ theme, selected }) => (selected ? 'transparent' : theme.colors.stroke)};
   border-radius: 12px;
 
-  display: flex;
-  gap: 8px;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 
   background-color: ${({ selected, theme }) =>
     selected ? theme.colors.primary : theme.colors.white};
@@ -319,4 +359,6 @@ const SelectButton = styled.button<{ selected: boolean }>`
   font: ${({ theme }) => theme.fonts.body2};
   font-weight: ${({ selected }) => (selected ? '600' : '400')};
   text-align: center;
+
+  user-select: none;
 `;

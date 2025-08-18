@@ -19,12 +19,12 @@ interface NewsletterDetailModalProps {
   clickOutsideModal: (event: React.MouseEvent<HTMLDialogElement>) => void;
 }
 
-export default function NewsletterDetailModal({
+const NewsletterDetailModal = ({
   newsletter,
   modalRef,
   closeModal,
   clickOutsideModal,
-}: NewsletterDetailModalProps) {
+}: NewsletterDetailModalProps) => {
   const { data: userInfo } = useQuery(queries.me());
   const { data: newsletterDetail } = useQuery(
     queries.newsletterDetail({ newsletterId: newsletter?.newsletterId ?? 0 }),
@@ -157,7 +157,9 @@ export default function NewsletterDetailModal({
       </Container>
     </Modal>
   );
-}
+};
+
+export default NewsletterDetailModal;
 
 const Container = styled.div`
   width: 100%;

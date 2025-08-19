@@ -33,33 +33,15 @@ export default function PCMemoContent({
   const navigate = useNavigate();
 
   const { data: highlights, isLoading } = useQuery({
-    ...queries.highlights(),
+    ...queries.highlights(baseQueryParams),
     enabled: true,
   });
 
-  const filteredHighlights =
-    highlights?.content?.filter((highlight) => {
-      const matchesNewsletter =
-        !baseQueryParams.newsletterId ||
-        highlight.id === baseQueryParams.newsletterId;
-
-      return matchesNewsletter;
-    }) || [];
-
-  const sortedHighlights = filteredHighlights.sort((a, b) => {
-    const dateA = new Date(a.createdAt ?? '').getTime();
-    const dateB = new Date(b.createdAt ?? '').getTime();
-
-    return sortFilter === 'DESC' ? dateB - dateA : dateA - dateB;
-  });
-
   const totalPages = highlights?.totalPages ?? 1;
-  const startIndex = page * baseQueryParams.size;
-  const endIndex = startIndex + baseQueryParams.size;
-  const currentPageHighlights = sortedHighlights.slice(startIndex, endIndex);
 
   const totalElements = highlights?.totalElements ?? 0;
-  const isLoadingOrHaveContent = isLoading || currentPageHighlights.length > 0;
+  const isLoadingOrHaveContent =
+    isLoading || (highlights?.content?.length ?? 0) > 0;
 
   if (!isLoadingOrHaveContent)
     return <EmptyLetterCard title="메모한 뉴스레터가 없어요" />;
@@ -78,9 +60,9 @@ export default function PCMemoContent({
         />
       </SummaryBar>
 
-      {currentPageHighlights.length > 0 ? (
+      {(highlights?.content?.length ?? 0) > 0 ? (
         <MemoList>
-          {currentPageHighlights.map((highlight) => (
+          {highlights?.content?.map((highlight) => (
             <li key={highlight.id}>
               <ReadOnlyMemoCard
                 id={highlight.id}

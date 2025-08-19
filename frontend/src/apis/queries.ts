@@ -83,7 +83,7 @@ export const queries = {
   // highlights
   highlights: (params?: GetHighlightsParams) =>
     queryOptions({
-      queryKey: ['highlights', params?.articleId],
+      queryKey: ['highlights', params],
       queryFn: () => getHighlights(params ?? {}),
     }),
 

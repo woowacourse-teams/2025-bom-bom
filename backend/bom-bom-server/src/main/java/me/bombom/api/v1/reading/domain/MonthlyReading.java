@@ -27,7 +27,7 @@ public class MonthlyReading {
     @Column(nullable = false, unique = true)
     private Long memberId;
 
-    @Column(nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private int currentCount;
 
     @Builder

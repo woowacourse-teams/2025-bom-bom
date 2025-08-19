@@ -52,7 +52,7 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    @Column(nullable = false, columnDefinition = "BIGINT")
     private Long roleId = 0L;
 
     @Builder

@@ -34,7 +34,7 @@ public class YearlyReading {
     @Column(nullable = false)
     private Long memberId;
 
-    @Column(nullable = false, columnDefinition = "SMALLINT DEFAULT 0")
+    @Column(nullable = false, columnDefinition = "SMALLINT")
     private int currentCount;
 
     @Column(nullable = false)

@@ -34,7 +34,7 @@ public class TodayReading extends BaseEntity {
     private int totalCount;
 
 
-    @Column(nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private int currentCount;
 
     @Builder

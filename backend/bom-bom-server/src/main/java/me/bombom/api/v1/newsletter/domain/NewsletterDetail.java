@@ -29,7 +29,7 @@ public class NewsletterDetail {
     @Column(nullable = false)
     private String issueCycle;
 
-    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    @Column(nullable = false, columnDefinition = "BIGINT")
     private int subscribeCount;
 
     @Column(nullable = false, length = 100)

@@ -32,6 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ReadingService {
 
+    private static final int LAST_MONTH_OFFSET = 1;
+
     private final MemberRepository memberRepository;
     private final ContinueReadingRepository continueReadingRepository;
     private final TodayReadingRepository todayReadingRepository;
@@ -81,7 +83,7 @@ public class ReadingService {
     public void passMonthlyCountToYearly() {
         monthlyReadingRepository.findAll().forEach(monthlyReading -> {
             Long memberId = monthlyReading.getMemberId();
-            int targetYear = LocalDate.now().minusMonths(1).getYear();
+            int targetYear = LocalDate.now().minusMonths(LAST_MONTH_OFFSET).getYear();
             YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndReadingYear(memberId, targetYear)
                     .orElseGet(() -> {
                         YearlyReading newYearlyReading = YearlyReading.create(memberId, targetYear);

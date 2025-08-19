@@ -20,7 +20,6 @@ const NewsletterCardWithModal = ({
     openModal: openDetailModal,
     closeModal: closeDetailModal,
     clickOutsideModal: clickOutsideDetailModal,
-    keydownFocusTrapTab,
     isOpen,
   } = useModal();
   const deviceType = useDeviceType();
@@ -49,7 +48,6 @@ const NewsletterCardWithModal = ({
             modalRef={detailModalRef}
             closeModal={closeDetailModal}
             clickOutsideModal={clickOutsideDetailModal}
-            keydownFocusTrapTab={keydownFocusTrapTab}
             isOpen={isOpen}
             position={deviceType === 'mobile' ? 'bottom' : 'center'}
             showCloseButton={deviceType !== 'mobile'}

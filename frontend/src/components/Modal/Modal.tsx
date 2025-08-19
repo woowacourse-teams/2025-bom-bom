@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { KeyboardEvent, MouseEvent, PropsWithChildren, RefObject } from 'react';
+import { MouseEvent, PropsWithChildren, RefObject } from 'react';
 import { theme } from '@/styles/theme';
 import CloseIcon from '#/assets/close.svg';
 
@@ -9,7 +9,6 @@ interface UseModalParams extends PropsWithChildren {
   modalRef: RefObject<HTMLDivElement | null>;
   closeModal: () => void;
   clickOutsideModal: (event: MouseEvent<HTMLDivElement>) => void;
-  keydownFocusTrapTab: (event: KeyboardEvent<HTMLElement>) => void;
   isOpen: boolean;
   position?: PositionType;
   showCloseButton?: boolean;
@@ -19,7 +18,6 @@ const Modal = ({
   modalRef,
   closeModal,
   clickOutsideModal,
-  keydownFocusTrapTab,
   position = 'center',
   showCloseButton = true,
   isOpen,
@@ -36,7 +34,6 @@ const Modal = ({
         aria-modal="true"
         ref={modalRef}
         isBottom={isBottom}
-        onKeyDown={keydownFocusTrapTab}
       >
         {showCloseButton && (
           <CloseButton type="button" onClick={closeModal}>

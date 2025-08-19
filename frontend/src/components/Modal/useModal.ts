@@ -6,12 +6,10 @@ import {
   useEffect,
   useMemo,
 } from 'react';
-import useFocusTrap from '@/hooks/useFocusTrap';
 
 const useModal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
-  const { initFocus, keydownFocusTrapTab } = useFocusTrap(modalRef);
   const bodyScrollStatus = useMemo(() => document.body.style.overflow, []);
 
   const openModal = useCallback(() => {
@@ -59,21 +57,11 @@ const useModal = () => {
     toggleScrollLock();
   }, [isOpen, toggleScrollLock]);
 
-  useEffect(() => {
-    const modal = modalRef.current;
-    if (!modal || !isOpen) {
-      return;
-    }
-
-    initFocus();
-  }, [initFocus, isOpen]);
-
   return {
     modalRef,
     openModal,
     closeModal,
     clickOutsideModal,
-    keydownFocusTrapTab,
     isOpen,
   };
 };

@@ -18,7 +18,7 @@ export const Route = createFileRoute('/_bombom/')({
 function Index() {
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
-  const guideArticles = createStorage<Article[], string>('guideMail').get();
+  const guideArticles = createStorage<Article[], string>('guide-mail').get();
 
   const mergedArticles = [
     ...(todayArticles?.content?.map((article) => ({

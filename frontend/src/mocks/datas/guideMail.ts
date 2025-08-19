@@ -3,6 +3,7 @@ import { GetArticleByIdResponse } from '@/apis/articles';
 export type GuideMail = GetArticleByIdResponse & {
   articleId: number;
   contentSummary: string;
+  createdAt: string;
 };
 
 export const GUIDE_MAILS: GuideMail[] = [
@@ -16,6 +17,7 @@ export const GUIDE_MAILS: GuideMail[] = [
     arrivedDateTime: '2025-08-18T11:00:00+09:00',
     expectedReadTime: 2,
     isRead: false,
+    createdAt: '2025-08-18T11:00:00+09:00',
     newsletter: {
       email: 'bombom-guide@bombom.news',
       category: '가이드',
@@ -32,6 +34,7 @@ export const GUIDE_MAILS: GuideMail[] = [
     arrivedDateTime: '2025-08-18T11:05:00+09:00',
     expectedReadTime: 2,
     isRead: false,
+    createdAt: '2025-08-18T11:00:00+09:00',
     newsletter: {
       email: 'bombom-guide@bombom.news',
       category: '가이드',
@@ -48,6 +51,7 @@ export const GUIDE_MAILS: GuideMail[] = [
     arrivedDateTime: '2025-08-18T11:10:00+09:00',
     expectedReadTime: 3,
     isRead: false,
+    createdAt: '2025-08-18T11:00:00+09:00',
     newsletter: {
       email: 'bombom-guide@bombom.news',
       category: '가이드',

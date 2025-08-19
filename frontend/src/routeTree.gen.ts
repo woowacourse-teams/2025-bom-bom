@@ -16,6 +16,7 @@ import { Route as BombomIndexRouteImport } from './routes/_bombom/index';
 import { Route as BombomStorageRouteImport } from './routes/_bombom/storage';
 import { Route as BombomRecommendRouteImport } from './routes/_bombom/recommend';
 import { Route as BombomMemoRouteImport } from './routes/_bombom/memo';
+import { Route as BombomGuideRouteImport } from './routes/_bombom/guide';
 import { Route as BombomBookmarkRouteImport } from './routes/_bombom/bookmark';
 import { Route as BombomArticlesArticleIdRouteImport } from './routes/_bombom/articles.$articleId';
 import { Route as BombomArticlesGuideGuideIdRouteImport } from './routes/_bombom/articles.guide.$guideId';
@@ -54,6 +55,11 @@ const BombomMemoRoute = BombomMemoRouteImport.update({
   path: '/memo',
   getParentRoute: () => BombomRoute,
 } as any);
+const BombomGuideRoute = BombomGuideRouteImport.update({
+  id: '/guide',
+  path: '/guide',
+  getParentRoute: () => BombomRoute,
+} as any);
 const BombomBookmarkRoute = BombomBookmarkRouteImport.update({
   id: '/bookmark',
   path: '/bookmark',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute;
   '/signup': typeof SignupRoute;
   '/bookmark': typeof BombomBookmarkRoute;
+  '/guide': typeof BombomGuideRoute;
   '/memo': typeof BombomMemoRoute;
   '/recommend': typeof BombomRecommendRoute;
   '/storage': typeof BombomStorageRoute;
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute;
   '/signup': typeof SignupRoute;
   '/bookmark': typeof BombomBookmarkRoute;
+  '/guide': typeof BombomGuideRoute;
   '/memo': typeof BombomMemoRoute;
   '/recommend': typeof BombomRecommendRoute;
   '/storage': typeof BombomStorageRoute;
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute;
   '/signup': typeof SignupRoute;
   '/_bombom/bookmark': typeof BombomBookmarkRoute;
+  '/_bombom/guide': typeof BombomGuideRoute;
   '/_bombom/memo': typeof BombomMemoRoute;
   '/_bombom/recommend': typeof BombomRecommendRoute;
   '/_bombom/storage': typeof BombomStorageRoute;
@@ -112,6 +121,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/bookmark'
+    | '/guide'
     | '/memo'
     | '/recommend'
     | '/storage'
@@ -123,6 +133,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/bookmark'
+    | '/guide'
     | '/memo'
     | '/recommend'
     | '/storage'
@@ -135,6 +146,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/_bombom/bookmark'
+    | '/_bombom/guide'
     | '/_bombom/memo'
     | '/_bombom/recommend'
     | '/_bombom/storage'
@@ -200,6 +212,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BombomMemoRouteImport;
       parentRoute: typeof BombomRoute;
     };
+    '/_bombom/guide': {
+      id: '/_bombom/guide';
+      path: '/guide';
+      fullPath: '/guide';
+      preLoaderRoute: typeof BombomGuideRouteImport;
+      parentRoute: typeof BombomRoute;
+    };
     '/_bombom/bookmark': {
       id: '/_bombom/bookmark';
       path: '/bookmark';
@@ -226,6 +245,7 @@ declare module '@tanstack/react-router' {
 
 interface BombomRouteChildren {
   BombomBookmarkRoute: typeof BombomBookmarkRoute;
+  BombomGuideRoute: typeof BombomGuideRoute;
   BombomMemoRoute: typeof BombomMemoRoute;
   BombomRecommendRoute: typeof BombomRecommendRoute;
   BombomStorageRoute: typeof BombomStorageRoute;
@@ -236,6 +256,7 @@ interface BombomRouteChildren {
 
 const BombomRouteChildren: BombomRouteChildren = {
   BombomBookmarkRoute: BombomBookmarkRoute,
+  BombomGuideRoute: BombomGuideRoute,
   BombomMemoRoute: BombomMemoRoute,
   BombomRecommendRoute: BombomRecommendRoute,
   BombomStorageRoute: BombomStorageRoute,

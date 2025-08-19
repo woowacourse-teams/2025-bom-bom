@@ -31,55 +31,53 @@ function Storage() {
 
   return (
     <Container>
-      <MainSection>
-        {!isMobile && (
-          <TitleWrapper>
-            <TitleIconBox>
-              <StorageIcon color={theme.colors.white} />
-            </TitleIconBox>
-            <Title>뉴스레터 보관함</Title>
-          </TitleWrapper>
-        )}
+      {!isMobile && (
+        <TitleWrapper>
+          <TitleIconBox>
+            <StorageIcon color={theme.colors.white} />
+          </TitleIconBox>
+          <Title>뉴스레터 보관함</Title>
+        </TitleWrapper>
+      )}
 
-        <ContentWrapper isPC={isPC}>
-          <SidebarSection isPC={isPC}>
-            <NewsLetterFilter
-              newsLetterList={[
-                {
-                  newsletter: '전체',
-                  count: newsletterCounts?.totalCount ?? 0,
-                  imageUrl: '',
-                },
-                ...(newsletterCounts?.newsletters.filter(
-                  (newsletter) => newsletter.count !== 0,
-                ) ?? []),
-              ]}
-              selectedNewsletter={selectedNewsletter}
-              onSelectNewsletter={handleNewsletterChange}
+      <ContentWrapper isPC={isPC}>
+        <SidebarSection isPC={isPC}>
+          <NewsLetterFilter
+            newsLetterList={[
+              {
+                newsletter: '전체',
+                count: newsletterCounts?.totalCount ?? 0,
+                imageUrl: '',
+              },
+              ...(newsletterCounts?.newsletters.filter(
+                (newsletter) => newsletter.count !== 0,
+              ) ?? []),
+            ]}
+            selectedNewsletter={selectedNewsletter}
+            onSelectNewsletter={handleNewsletterChange}
+          />
+          <QuickMenu />
+        </SidebarSection>
+        <MainContentSection isPC={isPC}>
+          {isPC ? (
+            <PCStorageContent
+              baseQueryParams={baseQueryParams}
+              searchInput={searchInput}
+              onSearchChange={handleSearchChange}
+              sortFilter={sortFilter}
+              onSortChange={handleSortChange}
             />
-            <QuickMenu />
-          </SidebarSection>
-          <MainContentSection isPC={isPC}>
-            {isPC ? (
-              <PCStorageContent
-                baseQueryParams={baseQueryParams}
-                searchInput={searchInput}
-                onSearchChange={handleSearchChange}
-                sortFilter={sortFilter}
-                onSortChange={handleSortChange}
-              />
-            ) : (
-              <MobileStorageContent
-                baseQueryParams={baseQueryParams}
-                searchInput={searchInput}
-                onSearchChange={handleSearchChange}
-                sortFilter={sortFilter}
-                onSortChange={handleSortChange}
-              />
-            )}
-          </MainContentSection>
-        </ContentWrapper>
-      </MainSection>
+          ) : (
+            <MobileStorageContent
+              baseQueryParams={baseQueryParams}
+              searchInput={searchInput}
+              onSearchChange={handleSearchChange}
+              sortFilter={sortFilter}
+              onSortChange={handleSortChange}
+            />
+          )}
+        </MainContentSection>
+      </ContentWrapper>
     </Container>
   );
 }
@@ -87,20 +85,13 @@ function Storage() {
 const Container = styled.div`
   width: 100%;
   max-width: 1280px;
-  padding: 64px 0;
+  padding: 64px 24px;
 
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-`;
-
-const MainSection = styled.div`
-  width: 100%;
-
-  display: flex;
-  gap: 20px;
+  gap: 24px;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
 `;
 
 const TitleWrapper = styled.div`

@@ -7,7 +7,9 @@ import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/Re
 import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { theme } from '@/styles/theme';
 import type { CSSObject, Theme } from '@emotion/react';
+import HomeIcon from '#/assets/home.svg';
 
 export const Route = createFileRoute('/_bombom/')({
   component: Index,
@@ -21,13 +23,18 @@ function Index() {
   return (
     <Container deviceType={deviceType}>
       {deviceType !== 'mobile' && (
-        <TitleBox>
-          <Title>오늘의 뉴스레터</Title>
-          <TitleDescription>
+        <>
+          <TitleWrapper>
+            <TitleIconBox>
+              <HomeIcon width={20} height={20} color={theme.colors.white} />
+            </TitleIconBox>
+            <Title>오늘의 뉴스레터</Title>
+          </TitleWrapper>
+          <ArticleCountSummary>
             {todayArticles?.content?.length ?? 0}개의 새로운 뉴스레터가
             도착했어요
-          </TitleDescription>
-        </TitleBox>
+          </ArticleCountSummary>
+        </>
       )}
 
       <ContentWrapper deviceType={deviceType}>
@@ -50,25 +57,38 @@ const Container = styled.div<{ deviceType: DeviceType }>`
     deviceType === 'mobile' ? '0px' : '64px'};
 
   display: flex;
-  gap: 44px;
+  gap: 24px;
   flex-direction: column;
   align-items: flex-start;
 
   box-sizing: border-box;
 `;
 
-const TitleBox = styled.div`
+const TitleWrapper = styled.div`
   display: flex;
   gap: 8px;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
+`;
+
+const TitleIconBox = styled.div`
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+
+  background-color: ${({ theme }) => theme.colors.primary};
 `;
 
 const Title = styled.h1`
   font: ${({ theme }) => theme.fonts.heading2};
 `;
 
-const TitleDescription = styled.p`
+const ArticleCountSummary = styled.p`
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.caption};
 `;

@@ -5,7 +5,9 @@ import { queries } from '@/apis/queries';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 export const useStorageFilters = () => {
-  const [selectedNewsletter, setSelectedNewsletter] = useState('전체');
+  const [selectedNewsletterId, setSelectedNewsletterId] = useState<
+    number | null
+  >(null);
   const [sortFilter, setSortFilter] = useState<'DESC' | 'ASC'>('DESC');
   const [searchInput, setSearchInput] = useState('');
   const [page, setPage] = useState(0);
@@ -15,7 +17,9 @@ export const useStorageFilters = () => {
     sort: ['arrivedDateTime', sortFilter],
     keyword: debouncedSearchInput,
     size: 6,
-    newsletter: selectedNewsletter === '전체' ? undefined : selectedNewsletter,
+    newsletterId: selectedNewsletterId
+      ? Number(selectedNewsletterId)
+      : undefined,
     page,
   };
 
@@ -25,8 +29,9 @@ export const useStorageFilters = () => {
     }),
   );
 
-  const handleNewsletterChange = useCallback((value: string) => {
-    setSelectedNewsletter(value);
+  const handleNewsletterChange = useCallback((id: number | null) => {
+    console.log(id);
+    setSelectedNewsletterId(id);
   }, []);
 
   const handleSortChange = useCallback((value: 'DESC' | 'ASC') => {
@@ -46,7 +51,7 @@ export const useStorageFilters = () => {
   }, []);
 
   return {
-    selectedNewsletter,
+    selectedNewsletterId,
     sortFilter,
     searchInput,
     baseQueryParams,

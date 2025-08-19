@@ -18,7 +18,7 @@ function Storage() {
   const isPC = deviceType === 'pc';
 
   const {
-    selectedNewsletter,
+    selectedNewsletterId,
     sortFilter,
     searchInput,
     baseQueryParams,
@@ -53,11 +53,11 @@ function Storage() {
                 ...(newletterCounts?.newsletters
                   .map((newsletter) => ({
                     ...newsletter,
-                    count: newsletter.articleCount ?? 0,
+                    articleCount: newsletter.articleCount ?? 0,
                   }))
-                  .filter((newsletter) => newsletter.count !== 0) ?? []),
+                  .filter((newsletter) => newsletter.articleCount !== 0) ?? []),
               ]}
-              selectedNewsletter={selectedNewsletter}
+              selectedNewsletterId={selectedNewsletterId}
               onSelectNewsletter={handleNewsletterChange}
             />
             <QuickMenu />

@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
-import { ComponentProps, ReactNode } from 'react';
+import { ReactNode, LiHTMLAttributes } from 'react';
 
-export interface TabProps<T extends string> extends ComponentProps<'li'> {
+export interface TabProps<T>
+  extends Omit<LiHTMLAttributes<HTMLLIElement>, 'value'> {
   value: T;
   label: string;
   onTabSelect: (value: T) => void;
@@ -11,7 +12,7 @@ export interface TabProps<T extends string> extends ComponentProps<'li'> {
   textAlign?: 'start' | 'center' | 'end';
 }
 
-function Tab<T extends string>({
+function Tab<T>({
   value,
   label,
   onTabSelect,

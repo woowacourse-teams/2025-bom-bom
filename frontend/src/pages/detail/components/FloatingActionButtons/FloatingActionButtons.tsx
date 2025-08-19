@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import useMediaQuery from '@/hooks/useMediaQuery';
 import { theme } from '@/styles/theme';
 import BookmarkActiveIcon from '#/assets/bookmark-active.svg';
 import BookmarkInactiveIcon from '#/assets/bookmark-inactive.svg';
@@ -14,10 +14,12 @@ const FloatingActionButtons = ({
   bookmarked,
   onBookmarkClick,
 }: FloatingActionButtonsProps) => {
-  const deviceType = useDeviceType();
-  const isPC = deviceType === 'pc';
+  const isBookmarkButtonVisible = useMediaQuery({
+    key: 'min-width',
+    value: 1350,
+  });
 
-  if (bookmarked === null || !isPC) return null;
+  if (bookmarked === null || !isBookmarkButtonVisible) return null;
 
   const handleBookmarkClick = () => {
     onBookmarkClick(bookmarked);

@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import Chip from '@/components/Chip/Chip';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import useMediaQuery from '@/hooks/useMediaQuery';
 import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
 import BookmarkActiveIcon from '#/assets/bookmark-active.svg';
@@ -26,8 +26,10 @@ const ArticleHeader = ({
   bookmarked = false,
   onBookmarkClick,
 }: ArticleHeaderProps) => {
-  const deviceType = useDeviceType();
-  const isPC = deviceType === 'pc';
+  const isBookmarkButtonVisible = useMediaQuery({
+    key: 'max-width',
+    value: 1350,
+  });
 
   return (
     <Container>
@@ -42,7 +44,7 @@ const ArticleHeader = ({
           <ClockIcon width={16} height={16} />
           <MetaInfoText>{expectedReadTime}분</MetaInfoText>
         </ReadTimeBox>
-        {!isPC && (
+        {isBookmarkButtonVisible && (
           <BookmarkButton
             type="button"
             onClick={() => onBookmarkClick(bookmarked)}
@@ -114,6 +116,7 @@ const BookmarkButton = styled.button`
 
 const MetaInfoRow = styled.div`
   width: 100%;
+
   display: flex;
   gap: 8px;
   align-items: center;

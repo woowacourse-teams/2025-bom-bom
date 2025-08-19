@@ -7,7 +7,6 @@ import static me.bombom.api.v1.newsletter.domain.QNewsletter.newsletter;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -19,9 +18,9 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.article.dto.ArticleResponse;
-import me.bombom.api.v1.article.dto.GetArticlesOptions;
-import me.bombom.api.v1.article.dto.QArticleResponse;
+import me.bombom.api.v1.article.dto.response.ArticleResponse;
+import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.article.dto.response.QArticleResponse;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.newsletter.dto.QNewsletterSummaryResponse;
@@ -44,9 +43,9 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<ArticleResponse> findByMemberId(
+    public Page<ArticleResponse> findArticles(
             Long memberId,
-            GetArticlesOptions options,
+            ArticlesOptionsRequest options,
             Pageable pageable
     ) {
         JPAQuery<Long> totalQuery = getTotalQuery(memberId, options);
@@ -83,7 +82,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .intValue();
     }
 
-    private JPAQuery<Long> getTotalQuery(Long memberId, GetArticlesOptions options) {
+    private JPAQuery<Long> getTotalQuery(Long memberId, ArticlesOptionsRequest options) {
         return jpaQueryFactory.select(article.count())
                 .from(article)
                 .join(newsletter).on(article.newsletterId.eq(newsletter.id))
@@ -91,10 +90,10 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .where(createMemberWhereClause(memberId))
                 .where(createDateWhereClause(options.date()))
                 .where(createKeywordWhereClause(options.keyword()))
-                .where(createNewsletterNameWhereClause(options.newsletter()));
+                .where(createNewsletterIdWhereClause(options.newsletterId()));
     }
 
-    private List<ArticleResponse> getContent(Long memberId, GetArticlesOptions options, Pageable pageable) {
+    private List<ArticleResponse> getContent(Long memberId, ArticlesOptionsRequest options, Pageable pageable) {
         return jpaQueryFactory.select(new QArticleResponse(
                         article.id,
                         article.title,
@@ -111,7 +110,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .where(createMemberWhereClause(memberId))
                 .where(createDateWhereClause(options.date()))
                 .where(createKeywordWhereClause(options.keyword()))
-                .where(createNewsletterNameWhereClause(options.newsletter()))
+                .where(createNewsletterIdWhereClause(options.newsletterId()))
                 .orderBy(getOrderSpecifiers(pageable).toArray(OrderSpecifier[]::new))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -122,22 +121,13 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         return article.memberId.eq(memberId);
     }
 
-    private Predicate createNewsletterNameWhereClause(String newsletterName) {
-        return Optional.ofNullable(newsletterName)
-                .map(String::trim)
-                .filter(name -> !name.isEmpty())
-                .map(newsletter.name::eq)
-                .orElse(null);
-    }
-
-
-    private Predicate createNewsletterIdWhereClause(Long newsletterId) {
+    private BooleanExpression createNewsletterIdWhereClause(Long newsletterId) {
         return Optional.ofNullable(newsletterId)
                 .map(newsletter.id::eq)
                 .orElse(null);
     }
 
-    private Predicate createDateWhereClause(LocalDate date) {
+    private BooleanExpression createDateWhereClause(LocalDate date) {
         return Optional.ofNullable(date)
                 .map(d -> article.arrivedDateTime.between(
                         d.atTime(LocalTime.MIN),
@@ -145,7 +135,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .orElse(null);
     }
 
-    private Predicate createKeywordWhereClause(String keyword) {
+    private BooleanExpression createKeywordWhereClause(String keyword) {
         return StringUtils.hasText(keyword) ? article.title.like("%" + keyword.strip() + "%") : null;
     }
   

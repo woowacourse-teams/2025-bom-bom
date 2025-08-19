@@ -6,11 +6,11 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.domain.Article;
-import me.bombom.api.v1.article.dto.ArticleDetailResponse;
-import me.bombom.api.v1.article.dto.ArticleResponse;
-import me.bombom.api.v1.article.dto.GetArticleCountPerNewsletterResponse;
-import me.bombom.api.v1.article.dto.GetArticleNewsletterStatisticsResponse;
-import me.bombom.api.v1.article.dto.GetArticlesOptions;
+import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
+import me.bombom.api.v1.article.dto.response.ArticleResponse;
+import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
+import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
+import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -47,11 +47,11 @@ public class ArticleService {
 
     public Page<ArticleResponse> getArticles(
             Member member,
-            GetArticlesOptions getArticlesOptions,
+            ArticlesOptionsRequest articlesOptionsRequest,
             Pageable pageable
     ) {
-        validateNewsletterName(getArticlesOptions.newsletter());
-        return articleRepository.findByMemberId(member.getId(), getArticlesOptions, pageable);
+        validateNewsletterId(articlesOptionsRequest.newsletterId());
+        return articleRepository.findArticles(member.getId(), articlesOptionsRequest, pageable);
     }
 
     public ArticleDetailResponse getArticleDetail(Long id, Member member) {
@@ -85,8 +85,8 @@ public class ArticleService {
                 member.getId(), articleId);
     }
 
-    public GetArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(Member member, String keyword) {
-        List<GetArticleCountPerNewsletterResponse> countResponse = newsletterRepository.findAll()
+    public ArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(Member member, String keyword) {
+        List<ArticleCountPerNewsletterResponse> countResponse = newsletterRepository.findAll()
                 .stream()
                 .map(newsletter -> {
                     int count = articleRepository.countAllByNewsletterIdAndMemberId(
@@ -94,16 +94,16 @@ public class ArticleService {
                             newsletter.getId(),
                             keyword
                     );
-                    return GetArticleCountPerNewsletterResponse.of(newsletter, count);
+                    return ArticleCountPerNewsletterResponse.of(newsletter, count);
                 })
-                .filter(response -> response.count() > 0)
+                .filter(response -> response.articleCount() > 0)
                 .toList();
 
         int totalCount = countResponse.stream()
-                .mapToInt(response -> (int) response.count())
+                .mapToInt(response -> (int) response.articleCount())
                 .sum();
 
-        return GetArticleNewsletterStatisticsResponse.of(totalCount, countResponse);
+        return ArticleNewsletterStatisticsResponse.of(totalCount, countResponse);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
@@ -140,11 +140,11 @@ public class ArticleService {
                         .addContext(ErrorContextKeys.ARTICLE_ID, articleId));
     }
 
-    private void validateNewsletterName(String newsletterName) {
-        if (newsletterName != null && !newsletterRepository.existsByName(newsletterName)) {
+    private void validateNewsletterId(Long newsletterId) {
+        if (newsletterId != null && !newsletterRepository.existsById(newsletterId)) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.OPERATION, "validateNewsletterName")
-                    .addContext("newsletterName", newsletterName);
+                    .addContext(ErrorContextKeys.OPERATION, "validateNewsletterId")
+                    .addContext(ErrorContextKeys.NEWSLETTER_ID, newsletterId);
         }
     }
 

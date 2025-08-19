@@ -6,7 +6,7 @@ import CloseIcon from '#/assets/close.svg';
 type PositionType = 'center' | 'bottom';
 
 interface UseModalParams extends PropsWithChildren {
-  clickOutsideModalRef: RefObject<HTMLDivElement | null>;
+  modalRef: RefObject<HTMLDivElement | null>;
   closeModal: () => void;
   isOpen: boolean;
   position?: PositionType;
@@ -14,7 +14,7 @@ interface UseModalParams extends PropsWithChildren {
 }
 
 const Modal = ({
-  clickOutsideModalRef,
+  modalRef,
   closeModal,
   position = 'center',
   showCloseButton = true,
@@ -30,7 +30,7 @@ const Modal = ({
       <Container
         role="dialog"
         aria-modal="true"
-        ref={clickOutsideModalRef}
+        ref={modalRef}
         isBottom={isBottom}
       >
         {showCloseButton && (

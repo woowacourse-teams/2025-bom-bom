@@ -13,7 +13,7 @@ const useModal = () => {
     setIsOpen(false);
   }, []);
 
-  const clickOutsideModalRef = useClickOutsideRef<HTMLDivElement>(closeModal);
+  const modalRef = useClickOutsideRef<HTMLDivElement>(closeModal);
 
   const keydownESCModal = useCallback(
     (event: KeyboardEvent) => {
@@ -43,7 +43,7 @@ const useModal = () => {
   }, [isOpen, toggleScrollLock]);
 
   return {
-    clickOutsideModalRef,
+    modalRef,
     openModal,
     closeModal,
     isOpen,

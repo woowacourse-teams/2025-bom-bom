@@ -22,7 +22,7 @@ const TrendySection = () => {
 
   const { data: newsletters } = useQuery(queries.newsletters());
   const {
-    clickOutsideModalRef: detailModalRef,
+    modalRef: detailModalRef,
     openModal: openDetailModal,
     closeModal: closeDetailModal,
     isOpen,
@@ -81,7 +81,7 @@ const TrendySection = () => {
       </Container>
       {createPortal(
         <Modal
-          clickOutsideModalRef={detailModalRef}
+          modalRef={detailModalRef}
           closeModal={closeDetailModal}
           isOpen={isOpen}
           position={deviceType === 'mobile' ? 'bottom' : 'center'}

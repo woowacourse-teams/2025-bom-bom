@@ -46,18 +46,6 @@ public class BookmarkRepositoryImpl implements CustomBookmarkRepository {
     }
 
     @Override
-    public int countAllByMemberId(Long memberId) {
-        Long count = jpaQueryFactory.select(bookmark.count())
-                .from(bookmark)
-                .where(createMemberWhereClause(memberId))
-                .fetchOne();
-
-        return Optional.ofNullable(count)
-                .orElse(0L)
-                .intValue();
-    }
-
-    @Override
     public int countAllByMemberIdAndNewsletterId(Long memberId, Long newsletterId) {
         Long count = jpaQueryFactory.select(bookmark.count())
                 .from(bookmark)

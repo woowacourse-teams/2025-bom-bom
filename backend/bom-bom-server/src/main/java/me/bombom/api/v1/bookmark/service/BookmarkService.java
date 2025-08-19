@@ -11,6 +11,7 @@ import me.bombom.api.v1.bookmark.dto.response.GetBookmarkCountPerNewsletterRespo
 import me.bombom.api.v1.bookmark.dto.response.GetBookmarkNewsletterStatisticsResponse;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
@@ -18,9 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import me.bombom.api.v1.common.exception.CIllegalArgumentException;
-import me.bombom.api.v1.common.exception.ErrorContextKeys;
-import me.bombom.api.v1.common.exception.ErrorDetail;
 
 @Service
 @RequiredArgsConstructor
@@ -77,7 +75,6 @@ public class BookmarkService {
     }
 
     public GetBookmarkNewsletterStatisticsResponse getBookmarkNewsletterStatistics(Member member) {
-        int totalCount = bookmarkRepository.countAllByMemberId(member.getId());
         List<GetBookmarkCountPerNewsletterResponse> countResponse = newsletterRepository.findAll()
                 .stream()
                 .map(newsletter -> {
@@ -87,6 +84,11 @@ public class BookmarkService {
                 })
                 .filter(response -> response.count() > 0)
                 .toList();
+
+        int totalCount = countResponse.stream()
+                .mapToInt(response -> (int) response.count())
+                .sum();
+
         return GetBookmarkNewsletterStatisticsResponse.of(totalCount, countResponse);
     }
 }

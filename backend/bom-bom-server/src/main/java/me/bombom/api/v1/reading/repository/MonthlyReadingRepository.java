@@ -24,5 +24,5 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
         ORDER BY mr.current_count DESC, m.nickname ASC
         LIMIT :limit
     """, nativeQuery = true)
-    List<MonthlyReadingRankResponse> findRankWithMember(@Param("limit") int limit);
+    List<MonthlyReadingRankResponse> findMonthlyRanking(@Param("limit") int limit);
 }

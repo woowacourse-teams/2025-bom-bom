@@ -158,7 +158,7 @@ public class ReadingService {
     }
 
     public List<MonthlyReadingRankResponse> getMonthlyReadingRank(int limit) {
-        return monthlyReadingRepository.findRankWithMember(limit);
+        return monthlyReadingRepository.findMonthlyRanking(limit);
     }
 
     private boolean shouldResetContinueReadingCount(TodayReading todayReading) {

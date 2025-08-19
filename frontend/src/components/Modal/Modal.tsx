@@ -1,23 +1,21 @@
 import styled from '@emotion/styled';
-import { MouseEvent, PropsWithChildren, RefObject } from 'react';
+import { PropsWithChildren, RefObject } from 'react';
 import { theme } from '@/styles/theme';
 import CloseIcon from '#/assets/close.svg';
 
 type PositionType = 'center' | 'bottom';
 
 interface UseModalParams extends PropsWithChildren {
-  modalRef: RefObject<HTMLDivElement | null>;
+  clickOutsideModalRef: RefObject<HTMLDivElement | null>;
   closeModal: () => void;
-  clickOutsideModal: (event: MouseEvent<HTMLDivElement>) => void;
   isOpen: boolean;
   position?: PositionType;
   showCloseButton?: boolean;
 }
 
 const Modal = ({
-  modalRef,
+  clickOutsideModalRef,
   closeModal,
-  clickOutsideModal,
   position = 'center',
   showCloseButton = true,
   isOpen,
@@ -28,11 +26,11 @@ const Modal = ({
   if (!isOpen) return null;
 
   return (
-    <Backdrop onClick={clickOutsideModal}>
+    <Backdrop>
       <Container
         role="dialog"
         aria-modal="true"
-        ref={modalRef}
+        ref={clickOutsideModalRef}
         isBottom={isBottom}
       >
         {showCloseButton && (

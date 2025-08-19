@@ -16,10 +16,9 @@ const NewsletterCardWithModal = ({
   newsletter,
 }: NewsletterCardWithModalProps) => {
   const {
-    modalRef: detailModalRef,
+    clickOutsideModalRef: detailModalRef,
     openModal: openDetailModal,
     closeModal: closeDetailModal,
-    clickOutsideModal: clickOutsideDetailModal,
     isOpen,
   } = useModal();
   const deviceType = useDeviceType();
@@ -45,9 +44,8 @@ const NewsletterCardWithModal = ({
       {isOpen &&
         createPortal(
           <Modal
-            modalRef={detailModalRef}
+            clickOutsideModalRef={detailModalRef}
             closeModal={closeDetailModal}
-            clickOutsideModal={clickOutsideDetailModal}
             isOpen={isOpen}
             position={deviceType === 'mobile' ? 'bottom' : 'center'}
             showCloseButton={deviceType !== 'mobile'}

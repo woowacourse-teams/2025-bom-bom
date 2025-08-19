@@ -1,15 +1,8 @@
-import {
-  MouseEvent,
-  useRef,
-  useCallback,
-  useState,
-  useEffect,
-  useMemo,
-} from 'react';
+import { useCallback, useState, useEffect, useMemo } from 'react';
+import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
 
 const useModal = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const modalRef = useRef<HTMLDivElement>(null);
   const bodyScrollStatus = useMemo(() => document.body.style.overflow, []);
 
   const openModal = useCallback(() => {
@@ -20,15 +13,7 @@ const useModal = () => {
     setIsOpen(false);
   }, []);
 
-  const clickOutsideModal = useCallback(
-    (event: MouseEvent<HTMLDivElement>) => {
-      const { target, currentTarget } = event;
-      if (target === currentTarget) {
-        closeModal();
-      }
-    },
-    [closeModal],
-  );
+  const clickOutsideModalRef = useClickOutsideRef<HTMLDivElement>(closeModal);
 
   const keydownESCModal = useCallback(
     (event: KeyboardEvent) => {
@@ -58,10 +43,9 @@ const useModal = () => {
   }, [isOpen, toggleScrollLock]);
 
   return {
-    modalRef,
+    clickOutsideModalRef,
     openModal,
     closeModal,
-    clickOutsideModal,
     isOpen,
   };
 };

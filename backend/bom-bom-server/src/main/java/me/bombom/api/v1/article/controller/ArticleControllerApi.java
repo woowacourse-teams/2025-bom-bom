@@ -14,6 +14,7 @@ import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -77,5 +78,17 @@ public interface ArticleControllerApi {
     ArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(
         @Parameter(hidden = true) Member member,
         @Parameter(description = "검색 키워드 (선택)") @RequestParam(required = false) String keyword
+    );
+
+    @Operation(
+            summary = "아티클의 하이라이트 목록 조회",
+            description = "특정 아티클의 하이라이트 목록을 조회합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "아티클의 하이라이트 목록 조회 성공")
+    })
+    List<ArticleHighlightResponse> getHighlights(
+            @Parameter(hidden = true) Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     );
 }

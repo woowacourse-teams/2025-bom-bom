@@ -26,6 +26,9 @@ function Storage() {
     handleNewsletterChange,
     handleSortChange,
     handleSearchChange,
+    handlePageChange,
+    page,
+    resetPage,
   } = useStorageFilters();
 
   return (
@@ -64,6 +67,9 @@ function Storage() {
                 onSearchChange={handleSearchChange}
                 sortFilter={sortFilter}
                 onSortChange={handleSortChange}
+                onPageChange={handlePageChange}
+                page={page}
+                resetPage={resetPage}
               />
             ) : (
               <MobileStorageContent
@@ -72,6 +78,9 @@ function Storage() {
                 onSearchChange={handleSearchChange}
                 sortFilter={sortFilter}
                 onSortChange={handleSortChange}
+                onPageChange={handlePageChange}
+                page={page}
+                resetPage={resetPage}
               />
             )}
           </MainContentSection>

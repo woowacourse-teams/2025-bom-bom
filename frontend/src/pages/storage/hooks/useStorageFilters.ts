@@ -8,6 +8,7 @@ export const useStorageFilters = () => {
   const [selectedNewsletter, setSelectedNewsletter] = useState('전체');
   const [sortFilter, setSortFilter] = useState<'DESC' | 'ASC'>('DESC');
   const [searchInput, setSearchInput] = useState('');
+  const [page, setPage] = useState(0);
   const debouncedSearchInput = useDebouncedValue(searchInput, 500);
 
   const baseQueryParams: GetArticlesParams = {
@@ -15,6 +16,7 @@ export const useStorageFilters = () => {
     keyword: debouncedSearchInput,
     size: 6,
     newsletter: selectedNewsletter === '전체' ? undefined : selectedNewsletter,
+    page,
   };
 
   const { data: newletterCounts } = useQuery(
@@ -35,6 +37,14 @@ export const useStorageFilters = () => {
     setSearchInput(e.target.value);
   }, []);
 
+  const handlePageChange = useCallback((value: number) => {
+    setPage(value);
+  }, []);
+
+  const resetPage = useCallback(() => {
+    setPage(0);
+  }, []);
+
   return {
     selectedNewsletter,
     sortFilter,
@@ -44,5 +54,8 @@ export const useStorageFilters = () => {
     handleNewsletterChange,
     handleSortChange,
     handleSearchChange,
+    handlePageChange,
+    resetPage,
+    page,
   };
 };

@@ -1,13 +1,14 @@
 package me.bombom.api.v1.article.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
-import me.bombom.api.v1.article.dto.response.ArticleResponse;
-import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
+import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
+import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
+import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
@@ -27,11 +28,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/articles")
-public class ArticleController implements ArticleControllerApi{
+public class ArticleController implements ArticleControllerApi {
 
     private final ArticleService articleService;
 
@@ -39,7 +41,7 @@ public class ArticleController implements ArticleControllerApi{
     @GetMapping
     public Page<ArticleResponse> getArticles(
             @LoginMember Member member,
-            @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
+            @Valid @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
             @PageableDefault(sort = "arrivedDateTime", direction = Direction.DESC) Pageable pageable
     ) {
         return articleService.getArticles(

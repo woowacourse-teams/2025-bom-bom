@@ -2,7 +2,7 @@ import { fetcher } from './fetcher';
 import { components, operations } from '@/types/openapi';
 
 export type GetArticlesParams = Omit<
-  components['schemas']['GetArticlesOptions'],
+  components['schemas']['ArticlesOptionsRequest'],
   'date'
 > &
   components['schemas']['Pageable'] & {

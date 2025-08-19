@@ -46,7 +46,6 @@ function Storage() {
             <NewsLetterFilter
               newsLetterList={[
                 {
-                  newsletter: '전체',
                   name: '전체',
                   articleCount: newletterCounts?.totalCount ?? 0,
                   imageUrl: '',

@@ -47,7 +47,8 @@ function BookmarkPage() {
                 ...(newsletterCounts?.newsletters
                   .map((newsletter) => ({
                     ...newsletter,
-                    articleCount: newsletter.articleCount ?? 0,
+                    name: newsletter.newsletter,
+                    articleCount: newsletter.count ?? 0,
                   }))
                   .filter((newsletter) => newsletter.articleCount !== 0) ?? []),
               ]}

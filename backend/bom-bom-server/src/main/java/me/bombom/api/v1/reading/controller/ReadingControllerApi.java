@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
@@ -42,6 +43,8 @@ public interface ReadingControllerApi {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "이달의 독서왕 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 값", content = @Content)
     })
-    List<MonthlyReadingRankResponse> getMonthlyReadingRank(@RequestParam int limit);
-} 
+    List<MonthlyReadingRankResponse> getMonthlyReadingRank(
+            @Parameter(description = "최대 조회 개수 (예: ?limit=10)") @RequestParam @Positive(message = "limit는 1 이상의 값이어야 합니다.") int limit);
+}

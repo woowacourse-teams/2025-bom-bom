@@ -28,7 +28,7 @@ function MemoPage() {
     queries.highlightStatisticsNewsletter(),
   );
 
-  console.log(highlights);
+  console.log(newletterCounts);
 
   if (!highlights) return null;
 

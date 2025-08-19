@@ -39,10 +39,12 @@ function ArticleCardList({ articles }: ArticleCardListProps) {
           </li>
         ))}
       </CardList>
-      <ListTitleBox>
-        <CheckIcon width={32} height={32} color={theme.colors.black} />
-        <ListTitle>읽은 뉴스레터 ({grouped.read.length}개)</ListTitle>
-      </ListTitleBox>
+      {grouped.read.length > 0 && (
+        <ListTitleBox>
+          <CheckIcon width={32} height={32} color={theme.colors.black} />
+          <ListTitle>읽은 뉴스레터 ({grouped.read.length}개)</ListTitle>
+        </ListTitleBox>
+      )}
       <CardList>
         {grouped.read.map((article) => (
           <li key={article.articleId}>

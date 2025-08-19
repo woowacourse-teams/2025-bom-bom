@@ -13,7 +13,7 @@ import me.bombom.api.v1.reading.domain.ContinueReading;
 import me.bombom.api.v1.reading.domain.MonthlyReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
-import me.bombom.api.v1.reading.dto.response.MonthlyTopReadingResponse;
+import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
@@ -150,7 +150,7 @@ class ReadingServiceTest {
                 .build());
         
         // when
-        List<MonthlyTopReadingResponse> result = readingService.getMonthlyReadingRank(limit);
+        List<MonthlyReadingRankResponse> result = readingService.getMonthlyReadingRank(limit);
         
         // then
         assertSoftly(softly -> {

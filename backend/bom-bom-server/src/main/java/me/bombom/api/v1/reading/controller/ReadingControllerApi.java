@@ -10,7 +10,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
-import me.bombom.api.v1.reading.dto.response.MonthlyTopReadingResponse;
+import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,5 +43,5 @@ public interface ReadingControllerApi {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "이달의 독서왕 조회 성공"),
     })
-    List<MonthlyTopReadingResponse> getMonthlyReadingRank(@RequestParam int limit);
+    List<MonthlyReadingRankResponse> getMonthlyReadingRank(@RequestParam int limit);
 } 

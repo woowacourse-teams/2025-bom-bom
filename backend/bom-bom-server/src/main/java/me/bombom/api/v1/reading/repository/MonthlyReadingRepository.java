@@ -3,7 +3,7 @@ package me.bombom.api.v1.reading.repository;
 import java.util.List;
 import java.util.Optional;
 import me.bombom.api.v1.reading.domain.MonthlyReading;
-import me.bombom.api.v1.reading.dto.response.MonthlyTopReadingResponse;
+import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,5 +22,5 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
         ORDER BY mr.current_count DESC, m.nickname ASC
         LIMIT :limit
     """, nativeQuery = true)
-    List<MonthlyTopReadingResponse> findRankWithMember(@Param("limit") int limit);
+    List<MonthlyReadingRankResponse> findRankWithMember(@Param("limit") int limit);
 }

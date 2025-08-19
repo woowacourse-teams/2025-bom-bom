@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
-import me.bombom.api.v1.reading.dto.response.MonthlyTopReadingResponse;
+import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.reading.service.ReadingService;
@@ -38,7 +38,7 @@ public class ReadingController implements ReadingControllerApi{
 
     @Override
     @GetMapping("/month/rank")
-    public List<MonthlyTopReadingResponse> getMonthlyReadingRank(@RequestParam int limit) {
+    public List<MonthlyReadingRankResponse> getMonthlyReadingRank(@RequestParam int limit) {
         return readingService.getMonthlyReadingRank(limit);
     }
 }

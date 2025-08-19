@@ -12,7 +12,7 @@ public record MonthlyReadingRankResponse(
         String nickname,
 
         @Schema(type = "integer", format = "int32", required = true)
-        long rank,
+        int rank,
 
         @Schema(type = "integer", format = "int32", required = true)
         int readCount

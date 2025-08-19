@@ -5,13 +5,13 @@ import GoogleIcon from '#/assets/google.svg';
 import SparklesIcon from '#/assets/sparkles.svg';
 
 interface LoginCardProps {
-  isPC: boolean;
+  isMobile: boolean;
 }
 
-const LoginCard = ({ isPC }: LoginCardProps) => {
+const LoginCard = ({ isMobile }: LoginCardProps) => {
   return (
-    <Container isPC={isPC}>
-      <GreetingWrapper isPC={isPC}>
+    <Container isMobile={isMobile}>
+      <GreetingWrapper isMobile={isMobile}>
         <IconWrapper>
           <SparklesIcon
             width={24}
@@ -21,7 +21,7 @@ const LoginCard = ({ isPC }: LoginCardProps) => {
           />
         </IconWrapper>
         <GreetingTitle>봄봄에 오신 걸 환영해요</GreetingTitle>
-        <GreetingMessage isPC={isPC}>
+        <GreetingMessage isMobile={isMobile}>
           당신의 하루에 찾아오는 작은 설렘{'\n'}뉴스레터를 한 곳에서 쉽게
           관리하세요
         </GreetingMessage>
@@ -48,7 +48,7 @@ const LoginCard = ({ isPC }: LoginCardProps) => {
 
 export default LoginCard;
 
-const Container = styled.section<{ isPC: boolean }>`
+const Container = styled.section<{ isMobile: boolean }>`
   width: min(100%, 420px);
   padding: 28px;
 
@@ -58,8 +58,8 @@ const Container = styled.section<{ isPC: boolean }>`
   align-items: center;
   justify-content: center;
 
-  ${({ isPC }) =>
-    isPC &&
+  ${({ isMobile }) =>
+    !isMobile &&
     `
     border-radius: 20px;
     box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
@@ -68,9 +68,9 @@ const Container = styled.section<{ isPC: boolean }>`
   `}
 `;
 
-const GreetingWrapper = styled.div<{ isPC: boolean }>`
+const GreetingWrapper = styled.div<{ isMobile: boolean }>`
   display: flex;
-  gap: ${({ isPC }) => (isPC ? '20px' : '16px')};
+  gap: ${({ isMobile }) => (isMobile ? '16px' : '20px')};
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -99,8 +99,8 @@ const GreetingTitle = styled.h2`
   -webkit-text-fill-color: transparent;
 `;
 
-const GreetingMessage = styled.p<{ isPC: boolean }>`
-  margin: ${({ isPC }) => (isPC ? '34px' : '24px')};
+const GreetingMessage = styled.p<{ isMobile: boolean }>`
+  margin: ${({ isMobile }) => (isMobile ? '24px' : '34px')};
 
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.heading5};

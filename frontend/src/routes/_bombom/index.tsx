@@ -7,7 +7,8 @@ import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/Re
 import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
-import { Article } from '@/types/articles';
+import { LocalGuideMail } from '@/types/guide';
+import { isToday } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
 import type { CSSObject, Theme } from '@emotion/react';
 
@@ -18,15 +19,18 @@ export const Route = createFileRoute('/_bombom/')({
 function Index() {
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
-  const guideArticles = createStorage<Article[], string>('guide-mail').get();
+  const guideArticles = createStorage<LocalGuideMail[], string>(
+    'guide-mail',
+  ).get();
 
   const mergedArticles = [
     ...(todayArticles?.content?.map((article) => ({
       ...article,
       type: 'article' as const,
     })) ?? []),
-    ...(guideArticles?.map((guide) => ({ ...guide, type: 'guide' as const })) ??
-      []),
+    ...(guideArticles
+      ?.filter((guide) => isToday(new Date(guide.createdAt)))
+      .map((guide) => ({ ...guide, type: 'guide' as const })) ?? []),
   ];
 
   const deviceType = useDeviceType();

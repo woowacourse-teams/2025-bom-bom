@@ -37,7 +37,6 @@ function Tab<T extends string>({
 export default Tab;
 
 const Container = styled.li<{ selected: boolean }>`
-  width: 100%;
   min-width: fit-content;
   padding: 10px 12px;
   border: 2px solid

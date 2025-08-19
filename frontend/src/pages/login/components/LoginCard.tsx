@@ -1,18 +1,17 @@
 import styled from '@emotion/styled';
 import { ENV } from '@/apis/env';
-import { DeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
 import GoogleIcon from '#/assets/google.svg';
 import SparklesIcon from '#/assets/sparkles.svg';
 
 interface LoginCardProps {
-  deviceType: DeviceType;
+  isPC: boolean;
 }
 
-const LoginCard = ({ deviceType }: LoginCardProps) => {
+const LoginCard = ({ isPC }: LoginCardProps) => {
   return (
-    <Container deviceType={deviceType}>
-      <GreetingWrapper>
+    <Container isPC={isPC}>
+      <GreetingWrapper isPC={isPC}>
         <IconWrapper>
           <SparklesIcon
             width={24}
@@ -22,7 +21,7 @@ const LoginCard = ({ deviceType }: LoginCardProps) => {
           />
         </IconWrapper>
         <GreetingTitle>봄봄에 오신 걸 환영해요</GreetingTitle>
-        <GreetingMessage>
+        <GreetingMessage isPC={isPC}>
           당신의 하루에 찾아오는 작은 설렘{'\n'}뉴스레터를 한 곳에서 쉽게
           관리하세요
         </GreetingMessage>
@@ -49,7 +48,7 @@ const LoginCard = ({ deviceType }: LoginCardProps) => {
 
 export default LoginCard;
 
-const Container = styled.section<{ deviceType: DeviceType }>`
+const Container = styled.section<{ isPC: boolean }>`
   width: min(100%, 420px);
   padding: 28px;
 
@@ -59,8 +58,8 @@ const Container = styled.section<{ deviceType: DeviceType }>`
   align-items: center;
   justify-content: center;
 
-  ${({ deviceType }) =>
-    deviceType === 'pc' &&
+  ${({ isPC }) =>
+    isPC &&
     `
     border-radius: 20px;
     box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
@@ -69,9 +68,9 @@ const Container = styled.section<{ deviceType: DeviceType }>`
   `}
 `;
 
-const GreetingWrapper = styled.div`
+const GreetingWrapper = styled.div<{ isPC: boolean }>`
   display: flex;
-  gap: 22px;
+  gap: ${({ isPC }) => (isPC ? '20px' : '16px')};
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -100,8 +99,8 @@ const GreetingTitle = styled.h2`
   -webkit-text-fill-color: transparent;
 `;
 
-const GreetingMessage = styled.p`
-  margin: 34px 0;
+const GreetingMessage = styled.p<{ isPC: boolean }>`
+  margin: ${({ isPC }) => (isPC ? '34px' : '24px')};
 
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.heading5};

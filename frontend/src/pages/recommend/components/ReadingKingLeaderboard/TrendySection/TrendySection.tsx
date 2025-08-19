@@ -1,19 +1,32 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import NewsletterCardWithModal from './NewsletterCardWithModal';
+import { createPortal } from 'react-dom';
+import NewsletterDetail from '../../NewsletterDetail/NewsletterDetail';
 import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
+import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
+import Modal from '@/components/Modal/Modal';
+import useModal from '@/components/Modal/useModal';
 import { CATEGORIES, CategoryType } from '@/constants/category';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
+import { Newsletter } from '@/types/newsletter';
 import TrendingUpIcon from '#/assets/trending-up.svg';
 
 const TrendySection = () => {
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryType>('전체');
+  const [selectedNewsletter, setSelectedNewsletter] =
+    useState<Newsletter | null>(null);
 
   const { data: newsletters } = useQuery(queries.newsletters());
-
+  const {
+    clickOutsideModalRef: detailModalRef,
+    openModal: openDetailModal,
+    closeModal: closeDetailModal,
+    isOpen,
+  } = useModal();
   const deviceType = useDeviceType();
 
   if (!newsletters) return null;
@@ -23,33 +36,67 @@ const TrendySection = () => {
       selectedCategory === '전체' || newsletter.category === selectedCategory,
   );
 
+  const handleCardClick = (newsletter: Newsletter) => {
+    setSelectedNewsletter(newsletter);
+    openDetailModal();
+
+    trackEvent({
+      category: 'Newsletter',
+      action: 'Click Trendy Newsletter Card',
+      label: newsletter.name ?? 'Unknown Newsletter',
+    });
+  };
+
   return (
-    <Container>
-      <SectionHeader>
-        <SectionIconBox>
-          <TrendingUpIcon width={16} height={16} />
-        </SectionIconBox>
-        <SectionTitle>트렌디한 뉴스레터</SectionTitle>
-      </SectionHeader>
-      <TagContainer>
-        {CATEGORIES.map((category, index) => (
-          <Chip
-            key={index}
-            text={category}
-            selected={selectedCategory === category}
-            onSelect={() => setSelectedCategory(category)}
-          />
-        ))}
-      </TagContainer>
-      <TrendyGrid deviceType={deviceType}>
-        {filteredNewsletters.map((newsletter) => (
-          <NewsletterCardWithModal
-            key={newsletter.newsletterId}
-            newsletter={newsletter}
-          />
-        ))}
-      </TrendyGrid>
-    </Container>
+    <>
+      <Container>
+        <SectionHeader>
+          <SectionIconBox>
+            <TrendingUpIcon width={16} height={16} />
+          </SectionIconBox>
+          <SectionTitle>트렌디한 뉴스레터</SectionTitle>
+        </SectionHeader>
+        <TagContainer>
+          {CATEGORIES.map((category, index) => (
+            <Chip
+              key={index}
+              text={category}
+              selected={selectedCategory === category}
+              onSelect={() => setSelectedCategory(category)}
+            />
+          ))}
+        </TagContainer>
+        <TrendyGrid deviceType={deviceType}>
+          {filteredNewsletters.map((newsletter) => (
+            <NewsletterCard
+              key={newsletter.newsletterId}
+              imageUrl={newsletter.imageUrl ?? ''}
+              title={newsletter.name}
+              description={newsletter.description}
+              onClick={() => handleCardClick(newsletter)}
+              as="button"
+            />
+          ))}
+        </TrendyGrid>
+      </Container>
+      {createPortal(
+        <Modal
+          clickOutsideModalRef={detailModalRef}
+          closeModal={closeDetailModal}
+          isOpen={isOpen}
+          position={deviceType === 'mobile' ? 'bottom' : 'center'}
+          showCloseButton={deviceType !== 'mobile'}
+        >
+          {selectedNewsletter && (
+            <NewsletterDetail
+              newsletterId={selectedNewsletter.newsletterId}
+              category={selectedNewsletter.category}
+            />
+          )}
+        </Modal>,
+        document.body,
+      )}
+    </>
   );
 };
 
@@ -111,4 +158,14 @@ const TrendyGrid = styled.div<{ deviceType: DeviceType }>`
 
   grid-template-columns: ${({ deviceType }) =>
     deviceType === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
+`;
+
+const NewsletterCard = styled(ImageInfoCard)`
+  &:focus-visible {
+    outline: none;
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
 `;

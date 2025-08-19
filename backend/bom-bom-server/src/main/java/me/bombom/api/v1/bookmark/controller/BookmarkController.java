@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,9 +35,10 @@ public class BookmarkController implements BookmarkControllerApi {
     @GetMapping
     public Page<BookmarkResponse> getBookmarks(
             @LoginMember Member member,
+            @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long newsletterId,
             @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable
     ) {
-        return bookmarkService.getBookmarks(member.getId(), pageable);
+        return bookmarkService.getBookmarks(member.getId(), newsletterId, pageable);
     }
 
     @Override

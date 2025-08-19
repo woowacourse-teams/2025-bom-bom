@@ -82,12 +82,32 @@ class BookmarkServiceTest {
         bookmarkService.addBookmark(member.getId(), article.getId());
 
         // when
-        Page<BookmarkResponse> bookmarks = bookmarkService.getBookmarks(member.getId(), PageRequest.of(0, 10));
+        Page<BookmarkResponse> bookmarks = bookmarkService.getBookmarks(member.getId(), null, PageRequest.of(0, 10));
 
         // then
         assertSoftly(softly -> {
             softly.assertThat(bookmarks.getContent()).hasSize(1);
             softly.assertThat(bookmarks.getContent().getFirst().articleId()).isEqualTo(article.getId());
+        });
+    }
+
+    @Test
+    void 북마크_목록_조회_뉴스레터_필터링_테스트() {
+        // given
+        Newsletter newsletterToFilter = newsletters.get(0);
+        Article article1 = articles.stream().filter(a -> a.getNewsletterId().equals(newsletterToFilter.getId())).findFirst().get();
+        Article article2 = articles.stream().filter(a -> !a.getNewsletterId().equals(newsletterToFilter.getId())).findFirst().get();
+
+        bookmarkService.addBookmark(member.getId(), article1.getId());
+        bookmarkService.addBookmark(member.getId(), article2.getId());
+
+        // when
+        Page<BookmarkResponse> bookmarks = bookmarkService.getBookmarks(member.getId(), newsletterToFilter.getId(), PageRequest.of(0, 10));
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(bookmarks.getContent()).hasSize(1);
+            softly.assertThat(bookmarks.getContent().getFirst().newsletter().name()).isEqualTo(newsletterToFilter.getName());
         });
     }
 
@@ -149,6 +169,7 @@ class BookmarkServiceTest {
         // when: DESC 정렬
         Page<BookmarkResponse> descBookmarks = bookmarkService.getBookmarks(
                 member.getId(),
+                null,
                 PageRequest.of(0, 10, Sort.by(Direction.DESC, "createdAt"))
         );
 
@@ -180,6 +201,7 @@ class BookmarkServiceTest {
         // when: ASC 정렬
         Page<BookmarkResponse> ascBookmarks = bookmarkService.getBookmarks(
                 member.getId(),
+                null,
                 PageRequest.of(0, 10, Sort.by(Direction.ASC, "createdAt"))
         );
 

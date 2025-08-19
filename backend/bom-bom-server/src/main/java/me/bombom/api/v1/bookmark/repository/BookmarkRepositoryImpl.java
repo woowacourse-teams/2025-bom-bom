@@ -8,6 +8,7 @@ import static me.bombom.api.v1.newsletter.domain.QNewsletter.newsletter;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -39,9 +40,9 @@ public class BookmarkRepositoryImpl implements CustomBookmarkRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<BookmarkResponse> findByMemberId(Long memberId, Pageable pageable) {
-        JPAQuery<Long> totalQuery = getTotalQuery(memberId);
-        List<BookmarkResponse> content = getContents(memberId, pageable);
+    public Page<BookmarkResponse> findByMemberId(Long memberId, Long newsletterId, Pageable pageable) {
+        JPAQuery<Long> totalQuery = getTotalQuery(memberId, newsletterId);
+        List<BookmarkResponse> content = getContents(memberId, newsletterId, pageable);
         return PageableExecutionUtils.getPage(content, pageable, totalQuery::fetchOne);
     }
 
@@ -50,6 +51,7 @@ public class BookmarkRepositoryImpl implements CustomBookmarkRepository {
         Long count = jpaQueryFactory.select(bookmark.count())
                 .from(bookmark)
                 .join(article).on(bookmark.articleId.eq(article.id))
+                .join(newsletter).on(article.newsletterId.eq(newsletterId))
                 .where(createMemberWhereClause(memberId))
                 .where(createNewsletterIdWhereClause(newsletterId))
                 .fetchOne();
@@ -59,13 +61,15 @@ public class BookmarkRepositoryImpl implements CustomBookmarkRepository {
                 .intValue();
     }
 
-    private JPAQuery<Long> getTotalQuery(Long memberId) {
+    private JPAQuery<Long> getTotalQuery(Long memberId, Long newsletterId) {
         return jpaQueryFactory.select(bookmark.count())
                 .from(bookmark)
-                .where(createMemberWhereClause(memberId));
+                .join(article).on(bookmark.articleId.eq(article.id))
+                .where(createMemberWhereClause(memberId))
+                .where(createNewsletterIdWhereClause(newsletterId));
     }
 
-    private List<BookmarkResponse> getContents(Long memberId, Pageable pageable) {
+    private List<BookmarkResponse> getContents(Long memberId, Long newsletterId, Pageable pageable) {
         return jpaQueryFactory.select(new QBookmarkResponse(
                         bookmark.id,
                         new QArticleResponse(
@@ -84,6 +88,7 @@ public class BookmarkRepositoryImpl implements CustomBookmarkRepository {
                 .join(newsletter).on(article.newsletterId.eq(newsletter.id))
                 .join(category).on(newsletter.categoryId.eq(category.id))
                 .where(createMemberWhereClause(memberId))
+                .where(createNewsletterIdWhereClause(newsletterId))
                 .orderBy(getOrderSpecifiers(pageable).toArray(OrderSpecifier[]::new))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -94,8 +99,10 @@ public class BookmarkRepositoryImpl implements CustomBookmarkRepository {
         return bookmark.memberId.eq(memberId);
     }
 
-    private BooleanExpression createNewsletterIdWhereClause(Long newsletterId) {
-        return article.newsletterId.eq(newsletterId);
+    private Predicate createNewsletterIdWhereClause(Long newsletterId) {
+        return Optional.ofNullable(newsletterId)
+                .map(newsletter.id::eq)
+                .orElse(null);
     }
 
     private List<OrderSpecifier<?>> getOrderSpecifiers(Pageable pageable) {

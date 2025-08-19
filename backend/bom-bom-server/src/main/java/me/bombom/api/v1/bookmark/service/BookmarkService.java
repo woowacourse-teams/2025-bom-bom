@@ -29,8 +29,8 @@ public class BookmarkService {
     private final ArticleRepository articleRepository;
     private final NewsletterRepository newsletterRepository;
 
-    public Page<BookmarkResponse> getBookmarks(Long id, Pageable pageable) {
-        return bookmarkRepository.findByMemberId(id, pageable);
+    public Page<BookmarkResponse> getBookmarks(Long id, Long newsletterId, Pageable pageable) {
+        return bookmarkRepository.findByMemberId(id, newsletterId, pageable);
     }
 
     public BookmarkStatusResponse getBookmarkStatus(Long memberId, Long articleId) {

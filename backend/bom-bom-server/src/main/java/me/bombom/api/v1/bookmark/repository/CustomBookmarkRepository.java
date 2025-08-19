@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface CustomBookmarkRepository {
 
-    Page<BookmarkResponse> findByMemberId(Long memberId, Pageable pageable);
+    Page<BookmarkResponse> findByMemberId(Long memberId, Long newsletterId, Pageable pageable);
 
     int countAllByMemberIdAndNewsletterId(Long memberId, Long newsletterId);
 }

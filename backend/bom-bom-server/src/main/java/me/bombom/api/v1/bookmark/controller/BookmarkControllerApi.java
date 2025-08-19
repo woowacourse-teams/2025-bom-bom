@@ -29,6 +29,7 @@ public interface BookmarkControllerApi {
     })
     Page<BookmarkResponse> getBookmarks(
             @Parameter(hidden = true) Member member,
+            @Parameter(description = "뉴스레터 ID (선택)") Long newsletterId,
             @Parameter(description = "페이징 관련 요청 (예: ?page=0&size=10&sort=createdAt,desc)") Pageable pageable
     );
 

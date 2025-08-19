@@ -1,6 +1,7 @@
 package me.bombom.api.v1.reading.service;
 
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -14,6 +15,7 @@ import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
 import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
+import me.bombom.api.v1.reading.dto.response.MonthlyTopReadingResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
@@ -144,6 +146,10 @@ public class ReadingService {
                     .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "WeeklyReading"));
         return ReadingInformationResponse.of(continueReading, todayReading, weeklyReading);
+    }
+
+    public List<MonthlyTopReadingResponse> getMonthlyReadingRank(int limit) {
+        return monthlyReadingRepository.findRankWithMember(limit);
     }
 
     private boolean shouldResetContinueReadingCount(TodayReading todayReading) {

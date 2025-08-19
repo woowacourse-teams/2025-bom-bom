@@ -1,9 +1,26 @@
 package me.bombom.api.v1.reading.repository;
 
+import java.util.List;
 import java.util.Optional;
 import me.bombom.api.v1.reading.domain.MonthlyReading;
+import me.bombom.api.v1.reading.dto.response.MonthlyTopReadingResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, Long> {
     Optional<MonthlyReading> findByMemberId(Long memberId);
+
+    @Query(value = """
+        SELECT
+            m.id AS memberId,
+            m.nickname AS nickname,
+            RANK() OVER (ORDER BY mr.current_count DESC) AS rank,
+            mr.current_count AS readCount
+        FROM monthly_reading mr
+        JOIN member m ON mr.member_id = m.id
+        ORDER BY mr.current_count DESC, m.nickname ASC
+        LIMIT :limit
+    """, nativeQuery = true)
+    List<MonthlyTopReadingResponse> findRankWithMember(@Param("limit") int limit);
 }

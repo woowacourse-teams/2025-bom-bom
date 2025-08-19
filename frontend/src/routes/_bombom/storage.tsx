@@ -16,6 +16,7 @@ export const Route = createFileRoute('/_bombom/storage')({
 function Storage() {
   const deviceType = useDeviceType();
   const isPC = deviceType === 'pc';
+  const isMobile = deviceType === 'mobile';
 
   const {
     selectedNewsletter,
@@ -31,12 +32,14 @@ function Storage() {
   return (
     <Container>
       <MainSection>
-        <TitleWrapper>
-          <TitleIconBox>
-            <StorageIcon color={theme.colors.white} />
-          </TitleIconBox>
-          <Title>뉴스레터 보관함</Title>
-        </TitleWrapper>
+        {!isMobile && (
+          <TitleWrapper>
+            <TitleIconBox>
+              <StorageIcon color={theme.colors.white} />
+            </TitleIconBox>
+            <Title>뉴스레터 보관함</Title>
+          </TitleWrapper>
+        )}
 
         <ContentWrapper isPC={isPC}>
           <SidebarSection isPC={isPC}>

@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
+import { GetHighlightsParams } from '@/apis/highlight';
 import { queries } from '@/apis/queries';
 import Pagination from '@/components/Pagination/Pagination';
 import Select from '@/components/Select/Select';
@@ -8,13 +9,7 @@ import ReadOnlyMemoCard from '@/pages/detail/components/MemoCard/ReadOnlyMemoCar
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 
 interface PCMemoContentProps {
-  baseQueryParams: {
-    sort: [string, 'DESC' | 'ASC'];
-    keyword: string;
-    size: number;
-    newsletterId?: number;
-    page: number;
-  };
+  baseQueryParams: GetHighlightsParams;
   sortFilter: 'DESC' | 'ASC';
   onSortChange: (value: 'DESC' | 'ASC') => void;
   onPageChange: (page: number) => void;
@@ -28,7 +23,6 @@ export default function PCMemoContent({
   onSortChange,
   onPageChange,
   page,
-  resetPage,
 }: PCMemoContentProps) {
   const navigate = useNavigate();
 
@@ -38,10 +32,11 @@ export default function PCMemoContent({
   });
 
   const totalPages = highlights?.totalPages ?? 1;
-
   const totalElements = highlights?.totalElements ?? 0;
-  const isLoadingOrHaveContent =
-    isLoading || (highlights?.content?.length ?? 0) > 0;
+
+  const highlightContent = highlights?.content ?? [];
+
+  const isLoadingOrHaveContent = isLoading || highlightContent.length > 0;
 
   if (!isLoadingOrHaveContent)
     return <EmptyLetterCard title="메모한 뉴스레터가 없어요" />;
@@ -60,9 +55,9 @@ export default function PCMemoContent({
         />
       </SummaryBar>
 
-      {(highlights?.content?.length ?? 0) > 0 ? (
+      {highlightContent.length > 0 ? (
         <MemoList>
-          {highlights?.content?.map((highlight) => (
+          {highlightContent.map((highlight) => (
             <li key={highlight.id}>
               <ReadOnlyMemoCard
                 id={highlight.id}

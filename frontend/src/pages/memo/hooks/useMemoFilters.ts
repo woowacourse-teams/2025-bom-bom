@@ -10,7 +10,7 @@ export const useMemoFilters = () => {
   const [page, setPage] = useState(0);
 
   const baseQueryParams = {
-    sort: ['createdAt', sortFilter] as [string, 'DESC' | 'ASC'],
+    sort: ['createdAt', sortFilter],
     keyword: '',
     size: 6,
     newsletterId: selectedNewsletterId

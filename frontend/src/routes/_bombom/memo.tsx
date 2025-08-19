@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import { useDeviceType } from '@/hooks/useDeviceType';
-import MobileMemoContent from '@/pages/memo/components/MobileMemoContent/MobileMemoContent';
 import PCMemoContent from '@/pages/memo/components/PCMemoContent/PCMemoContent';
 import { useMemoFilters } from '@/pages/memo/hooks/useMemoFilters';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
@@ -60,23 +59,14 @@ function MemoPage() {
           </SidebarSection>
 
           <MainContentSection isPC={isPC}>
-            {isPC ? (
-              <PCMemoContent
-                baseQueryParams={baseQueryParams}
-                sortFilter={sortFilter}
-                onSortChange={handleSortChange}
-                onPageChange={handlePageChange}
-                page={page}
-                resetPage={resetPage}
-              />
-            ) : (
-              <MobileMemoContent
-                baseQueryParams={baseQueryParams}
-                sortFilter={sortFilter}
-                onSortChange={handleSortChange}
-                resetPage={resetPage}
-              />
-            )}
+            <PCMemoContent
+              baseQueryParams={baseQueryParams}
+              sortFilter={sortFilter}
+              onSortChange={handleSortChange}
+              onPageChange={handlePageChange}
+              page={page}
+              resetPage={resetPage}
+            />
           </MainContentSection>
         </ContentWrapper>
       </MainSection>

@@ -17,7 +17,6 @@ const RootComponent = () => {
 
   useEffect(() => {
     if (ENV.nodeEnv === 'production' && 'serviceWorker' in navigator) {
-      console.log(1);
       navigator.serviceWorker
         .register('/sw.js')
         .then((registration) => {

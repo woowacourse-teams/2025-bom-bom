@@ -50,7 +50,7 @@ public class ArticleService {
             GetArticlesOptions getArticlesOptions,
             Pageable pageable
     ) {
-        validateNewsletterName(getArticlesOptions.newsletter());
+        validateNewsletterId(getArticlesOptions.newsletterId());
         return articleRepository.findByMemberId(member.getId(), getArticlesOptions, pageable);
     }
 
@@ -140,11 +140,11 @@ public class ArticleService {
                         .addContext(ErrorContextKeys.ARTICLE_ID, articleId));
     }
 
-    private void validateNewsletterName(String newsletterName) {
-        if (newsletterName != null && !newsletterRepository.existsByName(newsletterName)) {
+    private void validateNewsletterId(Long newsletterId) {
+        if (newsletterId != null && !newsletterRepository.existsById(newsletterId)) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.OPERATION, "validateNewsletterName")
-                    .addContext("newsletterName", newsletterName);
+                    .addContext(ErrorContextKeys.OPERATION, "validateNewsletterId")
+                    .addContext(ErrorContextKeys.NEWSLETTER_ID, newsletterId);
         }
     }
 

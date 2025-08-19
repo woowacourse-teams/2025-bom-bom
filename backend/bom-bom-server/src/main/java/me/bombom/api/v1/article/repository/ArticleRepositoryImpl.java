@@ -91,7 +91,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .where(createMemberWhereClause(memberId))
                 .where(createDateWhereClause(options.date()))
                 .where(createKeywordWhereClause(options.keyword()))
-                .where(createNewsletterNameWhereClause(options.newsletter()));
+                .where(createNewsletterIdWhereClause(options.newsletterId()));
     }
 
     private List<ArticleResponse> getContent(Long memberId, GetArticlesOptions options, Pageable pageable) {
@@ -111,7 +111,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .where(createMemberWhereClause(memberId))
                 .where(createDateWhereClause(options.date()))
                 .where(createKeywordWhereClause(options.keyword()))
-                .where(createNewsletterNameWhereClause(options.newsletter()))
+                .where(createNewsletterIdWhereClause(options.newsletterId()))
                 .orderBy(getOrderSpecifiers(pageable).toArray(OrderSpecifier[]::new))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -121,15 +121,6 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     private BooleanExpression createMemberWhereClause(Long memberId) {
         return article.memberId.eq(memberId);
     }
-
-    private Predicate createNewsletterNameWhereClause(String newsletterName) {
-        return Optional.ofNullable(newsletterName)
-                .map(String::trim)
-                .filter(name -> !name.isEmpty())
-                .map(newsletter.name::eq)
-                .orElse(null);
-    }
-
 
     private Predicate createNewsletterIdWhereClause(Long newsletterId) {
         return Optional.ofNullable(newsletterId)

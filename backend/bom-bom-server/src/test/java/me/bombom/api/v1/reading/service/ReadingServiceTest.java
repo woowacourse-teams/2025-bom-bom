@@ -154,14 +154,16 @@ class ReadingServiceTest {
                 .memberId(member3.getId())
                 .currentCount(20)
                 .build());
-        
+        weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member2));
+        weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member3));
+
         // when
         List<MonthlyReadingRankResponse> result = readingService.getMonthlyReadingRank(limit);
         
         // then
         assertSoftly(softly -> {
             assertThat(result.size()).isEqualTo(limit);
-            assertThat(result.get(0).readCount()).isGreaterThanOrEqualTo(result.get(1).readCount());
+            assertThat(result.get(0).monthlyReadCount()).isGreaterThanOrEqualTo(result.get(1).monthlyReadCount());
         });
     }
 

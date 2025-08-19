@@ -1,11 +1,13 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import Spacing from '@/components/Spacing/Spacing';
+import { useLocalStorageState } from '@/hooks/useLocalStorageState';
+import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import { GuideMail } from '@/mocks/datas/guideMail';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
 import GuideArticleBody from '@/pages/detail/components/GuideArcielBody';
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
-import { createStorage } from '@/utils/localStorage';
+import useGuideAsReadMutation from '@/pages/detail/hooks/useGuideAsReadMutation';
 
 export const Route = createFileRoute('/_bombom/articles/guide/$guideId')({
   component: GuideMailPage,
@@ -14,10 +16,32 @@ export const Route = createFileRoute('/_bombom/articles/guide/$guideId')({
 function GuideMailPage() {
   const { guideId } = Route.useParams();
   const guideIdNumber = Number(guideId);
-  const guideArticles = createStorage<GuideMail[], string>('guideMail').get();
+  const [guideArticles, setGuideArticles] = useLocalStorageState<
+    GuideMail[],
+    string
+  >('guide-mail');
   const guideArticle = guideArticles.find(
     (article) => article.articleId === guideIdNumber,
   );
+  const updateGuideStateAsRead = () => {
+    setGuideArticles((prev) =>
+      prev.map((article) =>
+        article.articleId === guideIdNumber
+          ? { ...article, isRead: true }
+          : article,
+      ),
+    );
+  };
+  const { mutate: updateGuideAsRead } = useGuideAsReadMutation({
+    onSuccess: updateGuideStateAsRead,
+  });
+
+  useScrollThreshold({
+    enabled: !guideArticle?.isRead && !!guideArticle,
+    threshold: 70,
+    throttleMs: 500,
+    onTrigger: updateGuideAsRead,
+  });
 
   if (!guideArticle) return null;
 

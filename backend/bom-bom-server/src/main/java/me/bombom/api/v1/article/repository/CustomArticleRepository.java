@@ -1,14 +1,14 @@
 package me.bombom.api.v1.article.repository;
 
 import java.time.LocalDate;
-import me.bombom.api.v1.article.dto.ArticleResponse;
-import me.bombom.api.v1.article.dto.GetArticlesOptions;
+import me.bombom.api.v1.article.dto.response.ArticleResponse;
+import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface CustomArticleRepository {
 
-    Page<ArticleResponse> findByMemberId(Long memberId, GetArticlesOptions options, Pageable pageable);
+    Page<ArticleResponse> findArticles(Long memberId, ArticlesOptionsRequest options, Pageable pageable);
 
     int countAllByNewsletterIdAndMemberId(Long memberId, Long newsletterId, String keyword);
 

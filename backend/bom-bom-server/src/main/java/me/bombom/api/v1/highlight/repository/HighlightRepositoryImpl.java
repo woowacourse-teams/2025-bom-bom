@@ -4,14 +4,12 @@ import static me.bombom.api.v1.article.domain.QArticle.article;
 import static me.bombom.api.v1.highlight.domain.QHighlight.highlight;
 import static me.bombom.api.v1.newsletter.domain.QNewsletter.newsletter;
 
-import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.article.dto.ArticleResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightCountPerNewsletterResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
 import me.bombom.api.v1.highlight.dto.response.QHighlightCountPerNewsletterResponse;

@@ -19,12 +19,10 @@ function MemoPage() {
   const {
     selectedNewsletterId,
     sortFilter,
-    searchInput,
     baseQueryParams,
     newletterCounts,
     handleNewsletterChange,
     handleSortChange,
-    handleSearchChange,
     handlePageChange,
     page,
     resetPage,
@@ -65,8 +63,6 @@ function MemoPage() {
             {isPC ? (
               <PCMemoContent
                 baseQueryParams={baseQueryParams}
-                searchInput={searchInput}
-                onSearchChange={handleSearchChange}
                 sortFilter={sortFilter}
                 onSortChange={handleSortChange}
                 onPageChange={handlePageChange}
@@ -76,8 +72,6 @@ function MemoPage() {
             ) : (
               <MobileMemoContent
                 baseQueryParams={baseQueryParams}
-                searchInput={searchInput}
-                onSearchChange={handleSearchChange}
                 sortFilter={sortFilter}
                 onSortChange={handleSortChange}
                 resetPage={resetPage}

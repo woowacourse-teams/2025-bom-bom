@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
 import Pagination from '@/components/Pagination/Pagination';
-import SearchInput from '@/components/SearchInput/SearchInput';
 import Select from '@/components/Select/Select';
 import ReadOnlyMemoCard from '@/pages/detail/components/MemoCard/ReadOnlyMemoCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
@@ -16,8 +15,6 @@ interface PCMemoContentProps {
     newsletterId?: number;
     page: number;
   };
-  searchInput: string;
-  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   sortFilter: 'DESC' | 'ASC';
   onSortChange: (value: 'DESC' | 'ASC') => void;
   onPageChange: (page: number) => void;
@@ -27,8 +24,6 @@ interface PCMemoContentProps {
 
 export default function PCMemoContent({
   baseQueryParams,
-  searchInput,
-  onSearchChange,
   sortFilter,
   onSortChange,
   onPageChange,
@@ -48,22 +43,7 @@ export default function PCMemoContent({
         !baseQueryParams.newsletterId ||
         highlight.id === baseQueryParams.newsletterId;
 
-      const matchesKeyword =
-        !baseQueryParams.keyword ||
-        highlight.text
-          .toLowerCase()
-          .includes(baseQueryParams.keyword.toLowerCase()) ||
-        highlight.memo
-          ?.toLowerCase()
-          .includes(baseQueryParams.keyword.toLowerCase()) ||
-        highlight.newsletterName
-          ?.toLowerCase()
-          .includes(baseQueryParams.keyword.toLowerCase()) ||
-        highlight.articleTitle
-          ?.toLowerCase()
-          .includes(baseQueryParams.keyword.toLowerCase());
-
-      return matchesNewsletter && matchesKeyword;
+      return matchesNewsletter;
     }) || [];
 
   const sortedHighlights = filteredHighlights.sort((a, b) => {
@@ -73,27 +53,19 @@ export default function PCMemoContent({
     return sortFilter === 'DESC' ? dateB - dateA : dateA - dateB;
   });
 
-  const totalPages = Math.ceil(sortedHighlights.length / baseQueryParams.size);
+  const totalPages = highlights?.totalPages ?? 1;
   const startIndex = page * baseQueryParams.size;
   const endIndex = startIndex + baseQueryParams.size;
   const currentPageHighlights = sortedHighlights.slice(startIndex, endIndex);
 
-  const totalElements = sortedHighlights.length;
+  const totalElements = highlights?.totalElements ?? 0;
   const isLoadingOrHaveContent = isLoading || currentPageHighlights.length > 0;
 
-  if (!isLoadingOrHaveContent && searchInput === '')
+  if (!isLoadingOrHaveContent)
     return <EmptyLetterCard title="메모한 뉴스레터가 없어요" />;
 
   return (
     <>
-      <ControlsWrapper>
-        <SearchInput
-          value={searchInput}
-          onChange={onSearchChange}
-          placeholder="메모 내용이나 뉴스레터 제목으로 검색하세요"
-        />
-      </ControlsWrapper>
-
       <SummaryBar>
         <ResultsInfo>총 {totalElements}개의 메모</ResultsInfo>
         <Select
@@ -127,7 +99,7 @@ export default function PCMemoContent({
           ))}
         </MemoList>
       ) : (
-        <EmptyLetterCard title="검색 결과가 없어요" />
+        <EmptyLetterCard title="메모한 뉴스레터가 없어요" />
       )}
 
       {totalPages > 1 && (
@@ -140,14 +112,6 @@ export default function PCMemoContent({
     </>
   );
 }
-
-const ControlsWrapper = styled.div`
-  margin-bottom: 20px;
-
-  display: flex;
-  gap: 20px;
-  flex-direction: column;
-`;
 
 const SummaryBar = styled.div`
   width: 100%;

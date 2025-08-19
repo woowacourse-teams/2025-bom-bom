@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import { useNavigate } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 import useInfiniteMemos from '../../hooks/useInfiniteMemos';
-import SearchInput from '@/components/SearchInput/SearchInput';
 import Select from '@/components/Select/Select';
 import ReadOnlyMemoCard from '@/pages/detail/components/MemoCard/ReadOnlyMemoCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
@@ -15,8 +14,6 @@ interface MobileMemoContentProps {
     newsletterId?: number;
     page: number;
   };
-  searchInput: string;
-  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   sortFilter: 'DESC' | 'ASC';
   onSortChange: (value: 'DESC' | 'ASC') => void;
   resetPage: () => void;
@@ -24,8 +21,6 @@ interface MobileMemoContentProps {
 
 export default function MobileMemoContent({
   baseQueryParams,
-  searchInput,
-  onSearchChange,
   sortFilter,
   onSortChange,
   resetPage,
@@ -73,19 +68,11 @@ export default function MobileMemoContent({
   const totalElements = allMemos?.length ?? 0;
   const isLoadingOrHaveContent = isLoading || visibleMemos.length > 0;
 
-  if (!isLoadingOrHaveContent && searchInput === '')
+  if (!isLoadingOrHaveContent)
     return <EmptyLetterCard title="메모한 뉴스레터가 없어요" />;
 
   return (
     <>
-      <ControlsWrapper>
-        <SearchInput
-          value={searchInput}
-          onChange={onSearchChange}
-          placeholder="메모 내용이나 뉴스레터 제목으로 검색하세요"
-        />
-      </ControlsWrapper>
-
       <SummaryBar>
         <ResultsInfo>총 {totalElements}개의 메모</ResultsInfo>
         <Select
@@ -127,19 +114,11 @@ export default function MobileMemoContent({
           )}
         </>
       ) : (
-        <EmptyLetterCard title="검색 결과가 없어요" />
+        <EmptyLetterCard title="메모한 뉴스레터가 없어요" />
       )}
     </>
   );
 }
-
-const ControlsWrapper = styled.div`
-  margin-bottom: 20px;
-
-  display: flex;
-  gap: 12px;
-  flex-direction: column;
-`;
 
 const SummaryBar = styled.div`
   width: 100%;

@@ -17,7 +17,11 @@ const useInfiniteMemos = ({
   baseQueryParams,
   isPc,
 }: UseInfiniteMemosParams) => {
-  const { data: highlights, isLoading, error } = useQuery({
+  const {
+    data: highlights,
+    isLoading,
+    error,
+  } = useQuery({
     ...queries.highlights(),
     enabled: !isPc,
   });
@@ -26,22 +30,17 @@ const useInfiniteMemos = ({
     if (!highlights?.content) return null;
 
     const filteredHighlights = highlights.content.filter((highlight) => {
-      const matchesNewsletter = !baseQueryParams.newsletterId || 
-        highlight.newsletterId === baseQueryParams.newsletterId;
-      
-      const matchesKeyword = !baseQueryParams.keyword || 
-        highlight.text.toLowerCase().includes(baseQueryParams.keyword.toLowerCase()) ||
-        highlight.memo?.toLowerCase().includes(baseQueryParams.keyword.toLowerCase()) ||
-        highlight.newsletterName?.toLowerCase().includes(baseQueryParams.keyword.toLowerCase()) ||
-        highlight.articleTitle?.toLowerCase().includes(baseQueryParams.keyword.toLowerCase());
-      
-      return matchesNewsletter && matchesKeyword;
+      const matchesNewsletter =
+        !baseQueryParams.newsletterId ||
+        highlight.id === baseQueryParams.newsletterId;
+
+      return matchesNewsletter;
     });
 
     const sortedHighlights = filteredHighlights.sort((a, b) => {
       const dateA = new Date(a.createdAt ?? '').getTime();
       const dateB = new Date(b.createdAt ?? '').getTime();
-      
+
       return baseQueryParams.sort[1] === 'DESC' ? dateB - dateA : dateA - dateB;
     });
 

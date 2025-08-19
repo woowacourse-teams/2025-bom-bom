@@ -3,15 +3,19 @@ package me.bombom.api.v1.reading.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.util.List;
 import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.MonthlyReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
+import me.bombom.api.v1.reading.dto.response.MonthlyTopReadingResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
+import me.bombom.api.v1.reading.repository.MonthlyReadingRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,10 +48,14 @@ class ReadingServiceTest {
     @Autowired
     private WeeklyReadingRepository weeklyReadingRepository;
 
+    @Autowired
+    private MonthlyReadingRepository monthlyReadingRepository;
+
     private Member member;
     private TodayReading todayReading;
     private ContinueReading continueReading;
     private WeeklyReading weeklyReading;
+    private MonthlyReading monthlyReading;
 
     @BeforeEach
     void setUp() {
@@ -58,6 +66,7 @@ class ReadingServiceTest {
         todayReading = todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));
         continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
         weeklyReading = weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member));
+        monthlyReading = monthlyReadingRepository.save(TestFixture.monthlyReadingFixture(member));
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -119,6 +128,34 @@ class ReadingServiceTest {
             softly.assertThat(updatedTodayReading.getCurrentCount()).isEqualTo(initialTodayCount);
             softly.assertThat(updatedContinueReading.getDayCount()).isEqualTo(initialContinueCount);
             softly.assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(initialWeeklyCount + 1);
+        });
+    }
+
+    @Test
+    void limit에_따라_월별_읽기_카운트_순위를_받을_수_있다() {
+        // given
+        int limit = 2;
+
+        //첫번쨰 member는 BeforeEach에서 생성됨
+        Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname2", "providerId2"));
+        Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname3", "providerId3"));
+
+        monthlyReadingRepository.save(MonthlyReading.builder()
+                .memberId(member2.getId())
+                .currentCount(15)
+                .build());
+        monthlyReadingRepository.save(MonthlyReading.builder()
+                .memberId(member3.getId())
+                .currentCount(20)
+                .build());
+        
+        // when
+        List<MonthlyTopReadingResponse> result = readingService.getMonthlyReadingRank(limit);
+        
+        // then
+        assertSoftly(softly -> {
+            assertThat(result.size()).isEqualTo(limit);
+            assertThat(result.get(0).readCount()).isGreaterThanOrEqualTo(result.get(1).readCount());
         });
     }
 }

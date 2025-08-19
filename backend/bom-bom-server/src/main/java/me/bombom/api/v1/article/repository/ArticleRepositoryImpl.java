@@ -7,7 +7,6 @@ import static me.bombom.api.v1.newsletter.domain.QNewsletter.newsletter;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -122,13 +121,13 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         return article.memberId.eq(memberId);
     }
 
-    private Predicate createNewsletterIdWhereClause(Long newsletterId) {
+    private BooleanExpression createNewsletterIdWhereClause(Long newsletterId) {
         return Optional.ofNullable(newsletterId)
                 .map(newsletter.id::eq)
                 .orElse(null);
     }
 
-    private Predicate createDateWhereClause(LocalDate date) {
+    private BooleanExpression createDateWhereClause(LocalDate date) {
         return Optional.ofNullable(date)
                 .map(d -> article.arrivedDateTime.between(
                         d.atTime(LocalTime.MIN),
@@ -136,7 +135,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .orElse(null);
     }
 
-    private Predicate createKeywordWhereClause(String keyword) {
+    private BooleanExpression createKeywordWhereClause(String keyword) {
         return StringUtils.hasText(keyword) ? article.title.like("%" + keyword.strip() + "%") : null;
     }
   

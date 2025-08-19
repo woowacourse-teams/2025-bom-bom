@@ -30,9 +30,14 @@ const colors = {
   error: '#FF4D4F',
 };
 
+const heights = {
+  bottomNav: '64px',
+};
+
 export const theme = {
   fonts,
   colors,
+  heights,
 };
 
 export type AppTheme = typeof theme;

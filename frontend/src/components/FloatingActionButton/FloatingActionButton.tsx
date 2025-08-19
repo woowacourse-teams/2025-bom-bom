@@ -40,7 +40,10 @@ export default FloatingActionButton;
 const FloatingButton = styled.button<{ deviceType: DeviceType }>`
   position: fixed;
   right: 20px;
-  bottom: calc(84px + env(safe-area-inset-bottom));
+  bottom: calc(
+    ${({ theme }) => theme.heights.bottomNav} + env(safe-area-inset-bottom) +
+      24px
+  );
   z-index: 1000;
   width: 56px;
   height: 56px;
@@ -63,6 +66,10 @@ const FloatingMenu = styled.div<{ deviceType: DeviceType }>`
   position: fixed;
   right: 20px;
   bottom: calc(152px + env(safe-area-inset-bottom));
+  bottom: calc(
+    ${({ theme }) => theme.heights.bottomNav} + env(safe-area-inset-bottom) +
+      92px
+  );
   z-index: 999;
   min-width: 120px;
   padding: 12px;

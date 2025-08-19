@@ -8,7 +8,7 @@ import { Newsletter } from '@/types/articles';
 import NewsIcon from '#/assets/news.svg';
 
 interface NewsLetterFilterProps {
-  newsLetterList: Newsletter[];
+  newsLetterList: Newsletter['newsletters'];
   selectedNewsletter: string;
   onSelectNewsletter: (value: string) => void;
 }
@@ -19,6 +19,8 @@ function NewsLetterFilter({
   onSelectNewsletter,
 }: NewsLetterFilterProps) {
   const deviceType = useDeviceType();
+
+  console.log(newsLetterList);
 
   return (
     <Container aria-label="뉴스레터" isPc={deviceType === 'pc'}>
@@ -31,17 +33,17 @@ function NewsLetterFilter({
         </TitleWrapper>
       )}
       <StyledTabs direction={deviceType === 'pc' ? 'vertical' : 'horizontal'}>
-        {newsLetterList.map(({ newsletter, count, imageUrl }) => (
+        {newsLetterList.map(({ name, articleCount, imageUrl }) => (
           <Tab
-            key={newsletter}
-            value={newsletter}
-            label={newsletter}
-            selected={selectedNewsletter === newsletter}
+            key={name}
+            value={name}
+            label={name}
+            selected={selectedNewsletter === name}
             onTabSelect={onSelectNewsletter}
             StartComponent={
               imageUrl ? <NewsLetterImage src={imageUrl} /> : null
             }
-            EndComponent={<Badge text={String(count)} />}
+            EndComponent={<Badge text={String(articleCount)} />}
             textAlign={deviceType === 'pc' ? 'start' : 'center'}
           />
         ))}

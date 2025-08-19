@@ -47,7 +47,8 @@ function Storage() {
               newsLetterList={[
                 {
                   newsletter: '전체',
-                  count: newletterCounts?.totalCount ?? 0,
+                  name: '전체',
+                  articleCount: newletterCounts?.totalCount ?? 0,
                   imageUrl: '',
                 },
                 ...(newletterCounts?.newsletters

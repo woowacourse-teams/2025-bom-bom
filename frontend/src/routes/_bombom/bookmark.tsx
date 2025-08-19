@@ -40,13 +40,16 @@ function BookmarkPage() {
             <NewsLetterFilter
               newsLetterList={[
                 {
-                  newsletter: '전체',
-                  count: newsletterCounts?.totalCount ?? 0,
+                  name: '전체',
+                  articleCount: newsletterCounts?.totalCount ?? 0,
                   imageUrl: '',
                 },
-                ...(newsletterCounts?.newsletters.filter(
-                  (newsletter) => newsletter.count !== 0,
-                ) ?? []),
+                ...(newsletterCounts?.newsletters
+                  .map((newsletter) => ({
+                    ...newsletter,
+                    articleCount: newsletter.articleCount ?? 0,
+                  }))
+                  .filter((newsletter) => newsletter.articleCount !== 0) ?? []),
               ]}
               selectedNewsletter={selectedNewsletter}
               onSelectNewsletter={handleNewsletterChange}

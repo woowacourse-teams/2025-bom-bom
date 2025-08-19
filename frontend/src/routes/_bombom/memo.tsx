@@ -45,15 +45,15 @@ function MemoPage() {
             <NewsLetterFilter
               newsLetterList={[
                 {
-                  newsletter: '전체',
-                  count: newletterCounts?.totalCount ?? 0,
+                  name: '전체',
+                  articleCount: newletterCounts?.totalCount ?? 0,
                   imageUrl: '',
                 },
                 ...(newletterCounts?.newsletters
                   .filter((newsletter) => newsletter.highlightCount > 0)
                   .map((newsletter) => ({
-                    newsletter: newsletter.name,
-                    count: newsletter.highlightCount,
+                    name: newsletter.name,
+                    articleCount: newsletter.highlightCount,
                     imageUrl: newsletter.imageUrl,
                   })) ?? []),
               ]}
@@ -77,7 +77,7 @@ function MemoPage() {
                       }
                       newsletterName={highlight.newsletterName ?? ''}
                       newsletterImageUrl={highlight.newsletterImageUrl ?? ''}
-                      articleTitle={highlight.ariticleTitle ?? ''}
+                      articleTitle={highlight.articleTitle ?? ''}
                       createdAt={highlight.createdAt ?? ''}
                     />
                   </li>

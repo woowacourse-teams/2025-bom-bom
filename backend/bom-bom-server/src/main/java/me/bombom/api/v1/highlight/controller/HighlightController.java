@@ -7,9 +7,15 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
 import me.bombom.api.v1.highlight.dto.request.UpdateHighlightRequest;
+import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
+import me.bombom.api.v1.highlight.dto.response.HighlightStatisticsResponse;
 import me.bombom.api.v1.highlight.service.HighlightService;
 import me.bombom.api.v1.member.domain.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,17 +39,19 @@ public class HighlightController implements HighlightControllerApi{
 
     @Override
     @GetMapping
-    public List<HighlightResponse> getHighlights(
+    public Page<HighlightResponse> getHighlights(
             @LoginMember Member member,
-            @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
+            @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId,
+            @RequestParam(required = false) @Positive(message = "id는 1 이상의 값이어야 합니다.") Long newsletterId,
+            @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable
     ) {
-        return highlightService.getHighlights(member, articleId);
+        return highlightService.getHighlights(member, articleId, newsletterId, pageable);
     }
 
     @Override
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public HighlightResponse createHighlight(@LoginMember Member member, @Valid @RequestBody HighlightCreateRequest createRequest) {
+    public ArticleHighlightResponse createHighlight(@LoginMember Member member, @Valid @RequestBody HighlightCreateRequest createRequest) {
         return highlightService.create(createRequest, member);
     }
 
@@ -59,11 +67,17 @@ public class HighlightController implements HighlightControllerApi{
 
     @Override
     @PatchMapping("/{id}")
-    public HighlightResponse updateHighlight(
+    public ArticleHighlightResponse updateHighlight(
             @LoginMember Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
             @Valid @RequestBody UpdateHighlightRequest request
     ) {
         return highlightService.update(id, request, member);
+    }
+
+    @Override
+    @GetMapping("/statistics/newsletters")
+    public HighlightStatisticsResponse getHighlightNewsletterStatistics(@LoginMember Member member){
+        return highlightService.getHighlightNewsletterStatistics(member);
     }
 }

@@ -10,14 +10,12 @@ public record HighlightLocationResponse(
         int startOffset,
 
         @NotNull
-        @Schema(type = "string", description = "시작 XPath", required = true)
         String startXPath,
         
         @Schema(type = "integer", format = "int32", description = "끝 오프셋", required = true)
         int endOffset,
 
         @NotNull
-        @Schema(type = "string", description = "끝 XPath", required = true)
         String endXPath
 ) {
 

@@ -14,8 +14,12 @@ import java.util.Map;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler;
+import me.bombom.api.v1.highlight.domain.Highlight;
+import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
+import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
@@ -62,7 +66,13 @@ class ArticleControllerTest {
     private NewsletterRepository newsletterRepository;
 
     @Autowired
+    private HighlightRepository highlightRepository;
+
+    @Autowired
     private NewsletterDetailRepository newsletterDetailRepository;
+
+    @Autowired
+    private ArticleService articleService;
 
     @MockitoBean
     private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
@@ -94,6 +104,9 @@ class ArticleControllerTest {
 
         articles = TestFixture.createArticles(member, newsletters);
         articleRepository.saveAll(articles);
+
+        List<Highlight> highlights = TestFixture.createHighlightFixtures(articles);
+        highlightRepository.saveAll(highlights);
 
         // Argument Resolver를 위해 CustomOAuth2User 생성
         Map<String, Object> attributes = Map.of(
@@ -362,5 +375,24 @@ class ArticleControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void 아티클에_대한_하이라이트_목록_조회() {
+        // given
+        Long firstArticleId = articles.getFirst().getId();
+
+        // when
+        List<ArticleHighlightResponse> responses = articleService.getHighlights(member, firstArticleId);
+
+        // then
+        assertSoftly(softly -> {
+                    softly.assertThat(responses).hasSize(2);
+                    softly.assertThat(responses.get(0).text()).isEqualTo("두 번째 하이라이트");
+                    softly.assertThat(responses.get(1).text()).isEqualTo("첫 번째 하이라이트");
+                    softly.assertThat(responses.get(0).color()).isEqualTo("#4caf50");
+                    softly.assertThat(responses.get(1).color()).isEqualTo("#ffeb3b");
+                }
+        );
     }
 }

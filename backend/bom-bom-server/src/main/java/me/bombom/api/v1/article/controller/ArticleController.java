@@ -1,6 +1,7 @@
 package me.bombom.api.v1.article.controller;
 
 import jakarta.validation.constraints.Positive;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.dto.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.ArticleResponse;
@@ -8,6 +9,7 @@ import me.bombom.api.v1.article.dto.GetArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.GetArticlesOptions;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -70,7 +72,15 @@ public class ArticleController implements ArticleControllerApi{
     public GetArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(
             @LoginMember Member member,
             @RequestParam(required = false) String keyword
-    ){
+    ) {
         return articleService.getArticleNewsletterStatistics(member, keyword);
+    }
+
+    @GetMapping("/{articleId}/highlights")
+    public List<ArticleHighlightResponse> getHighlights(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
+    ) {
+        return articleService.getHighlights(member, articleId);
     }
 }

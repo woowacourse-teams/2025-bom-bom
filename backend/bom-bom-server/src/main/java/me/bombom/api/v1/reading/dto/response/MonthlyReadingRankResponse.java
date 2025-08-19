@@ -6,15 +6,15 @@ import jakarta.validation.constraints.NotNull;
 public record MonthlyReadingRankResponse(
 
         @NotNull
-        Long memberId,
-
-        @NotNull
         String nickname,
 
         @Schema(required = true)
         int rank,
 
         @Schema(required = true)
-        int readCount
+        int monthlyReadCount,
+
+        @Schema(required = true)
+        int weeklyReadCount
 ) {
 }

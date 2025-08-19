@@ -14,12 +14,13 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
 
     @Query(value = """
         SELECT
-            m.id AS memberId,
             m.nickname AS nickname,
             CAST(RANK() OVER (ORDER BY mr.current_count DESC) AS INT) AS rank,
-            mr.current_count AS readCount
+            mr.current_count AS monthlyReadCount,
+            wr.current_count AS weeklyReadCount
         FROM monthly_reading mr
         JOIN member m ON mr.member_id = m.id
+        JOIN weekly_reading wr ON m.id = wr.member_id
         ORDER BY mr.current_count DESC, m.nickname ASC
         LIMIT :limit
     """, nativeQuery = true)

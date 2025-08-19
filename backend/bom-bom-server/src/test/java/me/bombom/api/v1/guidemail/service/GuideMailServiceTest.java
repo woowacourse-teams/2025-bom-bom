@@ -13,9 +13,11 @@ import me.bombom.api.v1.pet.repository.PetRepository;
 import me.bombom.api.v1.pet.repository.StageRepository;
 import me.bombom.api.v1.pet.service.PetService;
 import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.MonthlyReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
+import me.bombom.api.v1.reading.repository.MonthlyReadingRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.reading.service.ReadingService;
@@ -55,6 +57,9 @@ class GuideMailServiceTest {
     private TodayReading todayReading;
     private WeeklyReading weeklyReading;
     private ContinueReading continueReading;
+    private MonthlyReading monthlyReading;
+    @Autowired
+    private MonthlyReadingRepository monthlyReadingRepository;
 
     @BeforeEach
     void setUp() {
@@ -67,6 +72,7 @@ class GuideMailServiceTest {
         todayReading = todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));
         weeklyReading = weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member));
         continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
+        monthlyReading = monthlyReadingRepository.save(TestFixture.monthlyReadingFixture(member));
     }
 
     @Test

@@ -2,7 +2,6 @@ package me.bombom.api.v1.guidemail.service;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.member.domain.Member;
@@ -52,21 +51,19 @@ class GuideMailServiceTest {
     @Autowired
     private ContinueReadingRepository continueReadingRepository;
 
+    @Autowired
+    private MonthlyReadingRepository monthlyReadingRepository;
+
     private Member member;
     private Pet pet;
     private TodayReading todayReading;
     private WeeklyReading weeklyReading;
     private ContinueReading continueReading;
     private MonthlyReading monthlyReading;
-    @Autowired
-    private MonthlyReadingRepository monthlyReadingRepository;
 
     @BeforeEach
     void setUp() {
-        String nickname = "test_nickname_" + UUID.randomUUID();
-        String providerId = "test_providerId_" + UUID.randomUUID();
-
-        member = memberRepository.save(TestFixture.createUniqueMember(nickname, providerId));
+        member = memberRepository.save(TestFixture.createUniqueMember("nickname", "providerId"));
         Stage stage = stageRepository.save(TestFixture.createStage(1, 0));
         pet = petRepository.save(TestFixture.createPet(member, stage.getId()));
         todayReading = todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));

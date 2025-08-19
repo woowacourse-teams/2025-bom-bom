@@ -12,8 +12,6 @@ interface MobileStorageContentProps {
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   sortFilter: 'DESC' | 'ASC';
   onSortChange: (value: 'DESC' | 'ASC') => void;
-  onPageChange: (page: number) => void;
-  page: number;
   resetPage: () => void;
 }
 
@@ -23,8 +21,6 @@ export default function MobileStorageContent({
   onSearchChange,
   sortFilter,
   onSortChange,
-  onPageChange,
-  page,
   resetPage,
 }: MobileStorageContentProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -43,7 +39,7 @@ export default function MobileStorageContent({
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
-          onPageChange(page + 1);
+          fetchNextPage();
         }
       },
       { threshold: 0.1 },
@@ -52,7 +48,7 @@ export default function MobileStorageContent({
     observer.observe(loadMoreRef.current);
 
     return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage, onPageChange, page]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   useEffect(() => {
     resetPage();

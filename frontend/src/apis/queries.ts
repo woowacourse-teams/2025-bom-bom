@@ -32,11 +32,15 @@ export const queries = {
   infiniteArticles: (params?: GetArticlesParams) =>
     infiniteQueryOptions({
       queryKey: ['articles', 'infinite', params],
-      queryFn: () => getArticles(params ?? {}),
-      getNextPageParam: (lastPage, allPages) => {
-        if (!lastPage?.totalPages) return undefined;
-        const nextPage = allPages.length;
-        return nextPage < lastPage.totalPages ? nextPage : undefined;
+      queryFn: ({ pageParam }) =>
+        getArticles({
+          ...(params ?? {}),
+          page: typeof pageParam === 'number' ? pageParam : 0,
+        }),
+      getNextPageParam: (lastPage) => {
+        if (!lastPage) return undefined;
+        if (lastPage.last) return undefined;
+        return (lastPage.number ?? 0) + 1;
       },
       initialPageParam: 0,
     }),

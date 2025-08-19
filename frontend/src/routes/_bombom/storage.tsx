@@ -78,8 +78,6 @@ function Storage() {
                 onSearchChange={handleSearchChange}
                 sortFilter={sortFilter}
                 onSortChange={handleSortChange}
-                onPageChange={handlePageChange}
-                page={page}
                 resetPage={resetPage}
               />
             )}

@@ -1,12 +1,17 @@
 import styled from '@emotion/styled';
 import { ENV } from '@/apis/env';
+import { DeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
 import GoogleIcon from '#/assets/google.svg';
 import SparklesIcon from '#/assets/sparkles.svg';
 
-function LoginCard() {
+interface LoginCardProps {
+  deviceType: DeviceType;
+}
+
+const LoginCard = ({ deviceType }: LoginCardProps) => {
   return (
-    <Container>
+    <Container deviceType={deviceType}>
       <GreetingWrapper>
         <IconWrapper>
           <SparklesIcon
@@ -40,15 +45,13 @@ function LoginCard() {
       </Terms>
     </Container>
   );
-}
+};
 
 export default LoginCard;
 
-const Container = styled.section`
+const Container = styled.section<{ deviceType: DeviceType }>`
   width: min(100%, 420px);
   padding: 28px;
-  border-radius: 20px;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
 
   display: flex;
   gap: 16px;
@@ -56,7 +59,14 @@ const Container = styled.section`
   align-items: center;
   justify-content: center;
 
-  background-color: ${({ theme }) => theme.colors.white};
+  ${({ deviceType }) =>
+    deviceType === 'pc' &&
+    `
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+    background-color: ${theme.colors.white};
+  
+  `}
 `;
 
 const GreetingWrapper = styled.div`

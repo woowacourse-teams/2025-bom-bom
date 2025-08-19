@@ -11,10 +11,10 @@ public record MonthlyReadingRankResponse(
         @NotNull
         String nickname,
 
-        @Schema(type = "integer", format = "int32", required = true)
+        @Schema(required = true)
         int rank,
 
-        @Schema(type = "integer", format = "int32", required = true)
+        @Schema(required = true)
         int readCount
 ) {
 }

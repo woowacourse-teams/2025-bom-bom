@@ -252,12 +252,12 @@ class BookmarkServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(result.totalCount()).isEqualTo(4);
-            softly.assertThat(result.newsletters().get(0).newsletter()).isEqualTo("뉴스픽");
-            softly.assertThat(result.newsletters().get(0).count()).isEqualTo(1);
-            softly.assertThat(result.newsletters().get(1).newsletter()).isEqualTo("IT타임즈");
-            softly.assertThat(result.newsletters().get(1).count()).isEqualTo(1);
-            softly.assertThat(result.newsletters().get(2).newsletter()).isEqualTo("비즈레터");
-            softly.assertThat(result.newsletters().get(2).count()).isEqualTo(2);
+            softly.assertThat(result.newsletters().get(0).name()).isEqualTo("뉴스픽");
+            softly.assertThat(result.newsletters().get(0).bookmarkCount()).isEqualTo(1);
+            softly.assertThat(result.newsletters().get(1).name()).isEqualTo("IT타임즈");
+            softly.assertThat(result.newsletters().get(1).bookmarkCount()).isEqualTo(1);
+            softly.assertThat(result.newsletters().get(2).name()).isEqualTo("비즈레터");
+            softly.assertThat(result.newsletters().get(2).bookmarkCount()).isEqualTo(2);
         });
     }
 } 

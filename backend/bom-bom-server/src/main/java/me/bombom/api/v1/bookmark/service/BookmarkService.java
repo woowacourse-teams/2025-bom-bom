@@ -82,11 +82,11 @@ public class BookmarkService {
                             newsletter.getId());
                     return GetBookmarkCountPerNewsletterResponse.of(newsletter, count);
                 })
-                .filter(response -> response.count() > 0)
+                .filter(response -> response.bookmarkCount() > 0)
                 .toList();
 
         int totalCount = countResponse.stream()
-                .mapToInt(response -> (int) response.count())
+                .mapToInt(response -> (int) response.bookmarkCount())
                 .sum();
 
         return GetBookmarkNewsletterStatisticsResponse.of(totalCount, countResponse);

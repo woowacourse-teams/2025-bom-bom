@@ -10,7 +10,11 @@ import HelpIcon from '#/assets/help.svg';
 
 type Gender = 'MALE' | 'FEMALE';
 
-const SignupCard = () => {
+interface SignupCardProps {
+  isMobile: boolean;
+}
+
+const SignupCard = ({ isMobile }: SignupCardProps) => {
   const [nickname, setNickname] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [emailPart, setEmailPart] = useState('');
@@ -43,7 +47,7 @@ const SignupCard = () => {
   const closeEmailHelp = () => setEmailHelpOpen(false);
 
   return (
-    <Container>
+    <Container isMobile={isMobile}>
       <SignupForm onSubmit={handleSubmit}>
         <HeaderWrapper>
           <Title>회원가입</Title>
@@ -151,13 +155,18 @@ const SignupCard = () => {
 
 export default SignupCard;
 
-const Container = styled.div`
+const Container = styled.div<{ isMobile: boolean }>`
   width: min(100%, 420px);
   padding: 28px 24px;
-  border-radius: 20px;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
 
   background-color: ${({ theme }) => theme.colors.white};
+
+  ${({ isMobile }) =>
+    !isMobile &&
+    `
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+  `}
 `;
 
 const SignupForm = styled.form`

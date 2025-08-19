@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import SignupCard from '@/pages/signup/components/SignupCard';
 
 export const Route = createFileRoute('/signup')({
@@ -7,14 +8,17 @@ export const Route = createFileRoute('/signup')({
 });
 
 function RouteComponent() {
+  const deviceType = useDeviceType();
+  const isMobile = deviceType === 'mobile';
+
   return (
-    <Container>
-      <SignupCard />
+    <Container isMobile={isMobile}>
+      <SignupCard isMobile={isMobile} />
     </Container>
   );
 }
 
-const Container = styled.div`
+const Container = styled.div<{ isMobile: boolean }>`
   min-height: 100vh;
 
   display: flex;
@@ -23,5 +27,6 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
 
-  background-color: ${({ theme }) => theme.colors.primary};
+  background-color: ${({ isMobile, theme }) =>
+    isMobile ? theme.colors.white : theme.colors.primary};
 `;

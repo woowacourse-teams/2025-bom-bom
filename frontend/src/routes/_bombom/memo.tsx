@@ -1,12 +1,10 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState, useCallback } from 'react';
-import { queries } from '@/apis/queries';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
-import ReadOnlyMemoCard from '@/pages/detail/components/MemoCard/ReadOnlyMemoCard';
+import { createFileRoute } from '@tanstack/react-router';
+import { useDeviceType } from '@/hooks/useDeviceType';
+import MobileMemoContent from '@/pages/memo/components/MobileMemoContent/MobileMemoContent';
+import PCMemoContent from '@/pages/memo/components/PCMemoContent/PCMemoContent';
+import { useMemoFilters } from '@/pages/memo/hooks/useMemoFilters';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
-import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import { theme } from '@/styles/theme';
 import MemoIcon from '#/assets/memo.svg';
 
@@ -15,22 +13,22 @@ export const Route = createFileRoute('/_bombom/memo')({
 });
 
 function MemoPage() {
-  const navigate = useNavigate();
-  const { data: highlights } = useQuery(queries.highlights());
-  const [selectedNewsletter, setSelectedNewsletter] = useState('전체');
   const deviceType = useDeviceType();
+  const isPC = deviceType === 'pc';
 
-  const handleNewsletterChange = useCallback((value: string) => {
-    setSelectedNewsletter(value);
-  }, []);
-
-  const { data: newletterCounts } = useQuery(
-    queries.highlightStatisticsNewsletter(),
-  );
-
-  console.log(newletterCounts);
-
-  if (!highlights) return null;
+  const {
+    selectedNewsletterId,
+    sortFilter,
+    searchInput,
+    baseQueryParams,
+    newletterCounts,
+    handleNewsletterChange,
+    handleSortChange,
+    handleSearchChange,
+    handlePageChange,
+    page,
+    resetPage,
+  } = useMemoFilters();
 
   return (
     <Container>
@@ -40,8 +38,8 @@ function MemoPage() {
           <Title>메모 보관함</Title>
         </TitleWrapper>
 
-        <ContentWrapper deviceType={deviceType}>
-          <SidebarSection deviceType={deviceType}>
+        <ContentWrapper isPC={isPC}>
+          <SidebarSection isPC={isPC}>
             <NewsLetterFilter
               newsLetterList={[
                 {
@@ -52,39 +50,38 @@ function MemoPage() {
                 ...(newletterCounts?.newsletters
                   .filter((newsletter) => newsletter.highlightCount > 0)
                   .map((newsletter) => ({
+                    id: newsletter.id,
                     name: newsletter.name,
                     articleCount: newsletter.highlightCount,
                     imageUrl: newsletter.imageUrl,
                   })) ?? []),
               ]}
-              selectedNewsletter={selectedNewsletter}
+              selectedNewsletterId={selectedNewsletterId}
               onSelectNewsletter={handleNewsletterChange}
             />
           </SidebarSection>
 
-          <MainContentSection deviceType={deviceType}>
-            {highlights.content && highlights.content.length > 0 ? (
-              <MemoList>
-                {highlights.content.map((highlight) => (
-                  <li key={highlight.articleId}>
-                    <ReadOnlyMemoCard
-                      id={highlight.id}
-                      content={highlight.text}
-                      memo={highlight.memo}
-                      as="button"
-                      onClick={() =>
-                        navigate({ to: `/articles/${highlight.articleId}` })
-                      }
-                      newsletterName={highlight.newsletterName ?? ''}
-                      newsletterImageUrl={highlight.newsletterImageUrl ?? ''}
-                      articleTitle={highlight.articleTitle ?? ''}
-                      createdAt={highlight.createdAt ?? ''}
-                    />
-                  </li>
-                ))}
-              </MemoList>
+          <MainContentSection isPC={isPC}>
+            {isPC ? (
+              <PCMemoContent
+                baseQueryParams={baseQueryParams}
+                searchInput={searchInput}
+                onSearchChange={handleSearchChange}
+                sortFilter={sortFilter}
+                onSortChange={handleSortChange}
+                onPageChange={handlePageChange}
+                page={page}
+                resetPage={resetPage}
+              />
             ) : (
-              <EmptyLetterCard title="메모한 뉴스레터가 없어요" />
+              <MobileMemoContent
+                baseQueryParams={baseQueryParams}
+                searchInput={searchInput}
+                onSearchChange={handleSearchChange}
+                sortFilter={sortFilter}
+                onSortChange={handleSortChange}
+                resetPage={resetPage}
+              />
             )}
           </MainContentSection>
         </ContentWrapper>
@@ -124,33 +121,35 @@ const Title = styled.h1`
   font: ${({ theme }) => theme.fonts.heading2};
 `;
 
-const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
+const ContentWrapper = styled.div<{ isPC: boolean }>`
   width: 100%;
 
   display: flex;
-  gap: ${({ deviceType }) => (deviceType === 'pc' ? '32px' : '20px')};
-  flex-direction: ${({ deviceType }) =>
-    deviceType === 'pc' ? 'row' : 'column'};
+  gap: ${({ isPC }) => (isPC ? 32 : 20)}px;
+  flex-direction: ${({ isPC }) => (isPC ? 'row' : 'column')};
   align-items: flex-start;
 `;
 
-const SidebarSection = styled.div<{ deviceType: DeviceType }>`
-  width: ${({ deviceType }) => (deviceType === 'pc' ? '320px' : '100%')};
+const SidebarSection = styled.div<{ isPC: boolean }>`
+  width: 320px;
+  min-width: ${({ isPC }) => (isPC ? 320 : '100%')}px;
 
   display: flex;
   gap: 20px;
   flex-direction: column;
 
-  order: ${({ deviceType }) => (deviceType === 'pc' ? 1 : 0)};
+  order: ${({ isPC }) => (isPC ? 1 : 0)};
 `;
 
-const MainContentSection = styled.div<{ deviceType: DeviceType }>`
+const MainContentSection = styled.div<{ isPC: boolean }>`
+  width: 100%;
+
   display: flex;
-  gap: 20px;
+  gap: 40px;
   flex: 1;
   flex-direction: column;
 
-  order: ${({ deviceType }) => (deviceType === 'pc' ? 2 : 1)};
+  order: ${({ isPC }) => (isPC ? 2 : 1)};
 `;
 
 const BookmarkStorageIcon = styled(MemoIcon)`
@@ -166,13 +165,4 @@ const BookmarkStorageIcon = styled(MemoIcon)`
   background-color: ${({ theme }) => theme.colors.primary};
   color: ${({ theme }) => theme.colors.white};
   text-align: center;
-`;
-
-const MemoList = styled.ul`
-  width: 100%;
-
-  display: grid;
-  gap: 16px;
-
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 `;

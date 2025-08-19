@@ -5,11 +5,10 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 public record GetBookmarkNewsletterStatisticsResponse(
-        @Schema(type = "integer", format = "int32", description = "전체 북마크 수", required = true)
+        @Schema(required = true)
         int totalCount,
 
         @NotNull
-        @Schema(type = "array", description = "뉴스레터별 통계", required = true)
         List<GetBookmarkCountPerNewsletterResponse> newsletters
 ) {
 

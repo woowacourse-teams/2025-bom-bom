@@ -5,18 +5,16 @@ import jakarta.validation.constraints.NotNull;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 
 public record GetBookmarkCountPerNewsletterResponse(
-        @Schema(type = "integer", format = "int64", description = "뉴스레터 id", required = true)
+        @Schema(required = true)
         long id,
 
         @NotNull
-        @Schema(type = "string", description = "뉴스레터명", required = true)
         String name,
 
         @NotNull
-        @Schema(type = "string", description = "이미지 url", required = true)
         String imageUrl,
 
-        @Schema(type = "integer", format = "int64", description = "아티클 수", required = true)
+        @Schema(required = true)
         long bookmarkCount
 ) {
 

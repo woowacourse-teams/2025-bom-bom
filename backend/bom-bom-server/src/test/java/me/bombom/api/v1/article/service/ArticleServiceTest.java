@@ -130,12 +130,12 @@ class ArticleServiceTest {
         // given
         Pageable pageable = PageRequest.of(0, 10);
         Newsletter newsletter = newsletters.getFirst();
-        String newsletterName = newsletter.getName();
+        Long newsletterId = newsletter.getId();
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, newsletterName, null),
+                GetArticlesOptions.of(null, newsletterId, null),
                 pageable
         );
 
@@ -190,14 +190,14 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 아티클_목록_조회_카테고리가_존재하지_않으면_예외() {
+    void 아티클_목록_조회_뉴스레터가_존재하지_않으면_예외() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
 
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, "Invalid Category Name", null),
+                GetArticlesOptions.of(null, 0L, null),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);

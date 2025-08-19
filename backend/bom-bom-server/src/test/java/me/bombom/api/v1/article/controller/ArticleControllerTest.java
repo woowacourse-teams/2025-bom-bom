@@ -154,11 +154,13 @@ class ArticleControllerTest {
     void 뉴스레터_아티클_목록_조회() throws Exception {
         // given
         setAuthentication();
-        String newsletterName = newsletters.get(2).getName();
+        Newsletter newsletter = newsletters.get(2);
+        Long newsletterId = newsletter.getId();
+        String newsletterName = newsletter.getName();
 
         // when & then
         mockMvc.perform(get("/api/v1/articles")
-                        .param("newsletter", newsletterName))
+                        .param("newsletterId", newsletterId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.totalElements").value(2))
@@ -346,15 +348,16 @@ class ArticleControllerTest {
     }
 
     @Test
-    void 카테고리_키워드_날짜_복합_필터링_아티클_목록_조회() throws Exception {
+    void 뉴스레터_키워드_날짜_복합_필터링_아티클_목록_조회() throws Exception {
         // given
         setAuthentication();
-        String foodCategory = categories.get(2).getName(); // "푸드"
+        Newsletter newsletter = newsletters.get(2);
+        Long newsletterId = newsletter.getId();
         LocalDate baseDate = LocalDate.of(2025, 7, 15);
 
-        // when & then - 카테고리 + 키워드 + 날짜 복합 필터링
+        // when & then - 뉴스레터 + 키워드 + 날짜 복합 필터링
         mockMvc.perform(get("/api/v1/articles")
-                        .param("category", foodCategory)
+                        .param("newsletterId", newsletterId.toString())
                         .param("keyword", "레터")
                         .param("date", baseDate.toString())
                         .param("sorted", "desc")
@@ -364,7 +367,7 @@ class ArticleControllerTest {
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.totalElements").value(1)) // 조건에 맞는 1개
                 .andExpect(jsonPath("$.content[0].title").value("레터"))
-                .andExpect(jsonPath("$.content[0].newsletter.category").value("푸드"));
+                .andExpect(jsonPath("$.content[0].newsletter.name").value(newsletter.getName()));
     }
 
     @Test

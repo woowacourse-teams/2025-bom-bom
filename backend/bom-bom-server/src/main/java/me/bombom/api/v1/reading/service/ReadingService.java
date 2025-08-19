@@ -15,7 +15,7 @@ import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
 import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
-import me.bombom.api.v1.reading.dto.response.MonthlyTopReadingResponse;
+import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
@@ -78,11 +78,18 @@ public class ReadingService {
     }
 
     @Transactional
-    public void resetMonthlyReadingCount() {
-        todayReadingRepository.findAll()
-                .stream()
-                .filter(this::shouldResetContinueReadingCount)
-                .forEach(this::applyResetContinueReadingCount);
+    public void passMonthlyCountToYearly() {
+        monthlyReadingRepository.findAll().forEach(monthlyReading -> {
+            Long memberId = monthlyReading.getMemberId();
+            int targetYear = LocalDate.now().minusMonths(1).getYear();
+            YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndYear(memberId, targetYear)
+                    .orElseGet(() -> {
+                        YearlyReading newYearlyReading = YearlyReading.create(memberId, targetYear);
+                        return yearlyReadingRepository.save(newYearlyReading);
+                    });
+            yearlyReading.increaseCurrentCount(monthlyReading.getCurrentCount());
+            monthlyReading.resetCurrentCount();
+        });
     }
 
     @Transactional
@@ -148,7 +155,7 @@ public class ReadingService {
         return ReadingInformationResponse.of(continueReading, todayReading, weeklyReading);
     }
 
-    public List<MonthlyTopReadingResponse> getMonthlyReadingRank(int limit) {
+    public List<MonthlyReadingRankResponse> getMonthlyReadingRank(int limit) {
         return monthlyReadingRepository.findRankWithMember(limit);
     }
 

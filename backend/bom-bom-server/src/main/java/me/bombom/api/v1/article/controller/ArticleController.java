@@ -1,5 +1,6 @@
 package me.bombom.api.v1.article.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -76,6 +77,7 @@ public class ArticleController implements ArticleControllerApi{
         return articleService.getArticleNewsletterStatistics(member, keyword);
     }
 
+    @Override
     @GetMapping("/{articleId}/highlights")
     public List<ArticleHighlightResponse> getHighlights(
             @LoginMember Member member,

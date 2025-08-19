@@ -3,6 +3,7 @@ package me.bombom.api.v1.reading.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
@@ -13,11 +14,13 @@ import me.bombom.api.v1.reading.domain.ContinueReading;
 import me.bombom.api.v1.reading.domain.MonthlyReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
+import me.bombom.api.v1.reading.domain.YearlyReading;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
+import me.bombom.api.v1.reading.repository.YearlyReadingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +53,9 @@ class ReadingServiceTest {
 
     @Autowired
     private MonthlyReadingRepository monthlyReadingRepository;
+    
+    @Autowired
+    private YearlyReadingRepository yearlyReadingRepository;
 
     private Member member;
     private TodayReading todayReading;
@@ -158,4 +164,24 @@ class ReadingServiceTest {
             assertThat(result.get(0).readCount()).isGreaterThanOrEqualTo(result.get(1).readCount());
         });
     }
+
+    @Test
+    void 매월_읽기_수를_연간_읽기_수에_반영하고_월간은_초기화한다() {
+        // given
+        int monthlyCountBefore = monthlyReadingRepository.findByMemberId(member.getId()).get().getCurrentCount();
+
+        // when
+        readingService.passMonthlyCountToYearly();
+
+        // then
+        MonthlyReading monthlyReading = monthlyReadingRepository.findByMemberId(member.getId()).get();
+        YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndYear(member.getId(), LocalDate.now().minusMonths(1).getYear()).get();
+
+        assertSoftly(softly -> {
+            softly.assertThat(yearlyReading.getCurrentCount()).isEqualTo(monthlyCountBefore);
+            softly.assertThat(monthlyReading.getCurrentCount()).isEqualTo(0);
+        });
+    }
+
+
 }

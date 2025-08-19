@@ -9,4 +9,20 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const PC: Story = {
+  args: {
+    isMobile: false,
+  },
+};
+
+export const Tablet: Story = {
+  args: {
+    isMobile: false,
+  },
+};
+
+export const Mobile: Story = {
+  args: {
+    isMobile: true,
+  },
+};

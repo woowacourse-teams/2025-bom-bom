@@ -1,10 +1,8 @@
 package me.bombom.api.v1.highlight.dto.response;
 
 import com.querydsl.core.annotations.QueryProjection;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.List;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
@@ -31,7 +29,7 @@ public record HighlightResponse(
 
         String newsletterImageUrl,
 
-        String ariticleTitle,
+        String articleTitle,
 
         LocalDateTime createdAt
 ) {

@@ -4,7 +4,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState, useCallback } from 'react';
 import { queries } from '@/apis/queries';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
-import MemoCard from '@/pages/detail/components/MemoCard/MemoCard';
+import ReadOnlyMemoCard from '@/pages/detail/components/MemoCard/ReadOnlyMemoCard';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import { theme } from '@/styles/theme';
@@ -67,7 +67,7 @@ function MemoPage() {
               <MemoList>
                 {highlights.content.map((highlight) => (
                   <li key={highlight.articleId}>
-                    <MemoCard
+                    <ReadOnlyMemoCard
                       id={highlight.id}
                       content={highlight.text}
                       memo={highlight.memo}
@@ -75,10 +75,10 @@ function MemoPage() {
                       onClick={() =>
                         navigate({ to: `/articles/${highlight.articleId}` })
                       }
-                      newsletterName={highlight.newsletterName}
-                      newsletterImageUrl={highlight.newsletterImageUrl}
-                      articleTitle={highlight.ariticleTitle}
-                      createdAt={highlight.createdAt}
+                      newsletterName={highlight.newsletterName ?? ''}
+                      newsletterImageUrl={highlight.newsletterImageUrl ?? ''}
+                      articleTitle={highlight.ariticleTitle ?? ''}
+                      createdAt={highlight.createdAt ?? ''}
                     />
                   </li>
                 ))}

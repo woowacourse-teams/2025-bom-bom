@@ -19,7 +19,7 @@ import lombok.NonNull;
 @Table(
         uniqueConstraints = @UniqueConstraint(
                 name = "unique_member_id_year",
-                columnNames = {"member_id", "year"}
+                columnNames = {"member_id", "readingYear"}
         )
 )
 public class YearlyReading {
@@ -38,25 +38,25 @@ public class YearlyReading {
     private int currentCount;
 
     @Column(nullable = false)
-    private int year;
+    private int readingYear;
 
     @Builder
     public YearlyReading(
             Long id,
             @NonNull Long memberId,
             int currentCount,
-            int year
+            int readingYear
     ) {
         this.id = id;
         this.memberId = memberId;
         this.currentCount = currentCount;
-        this.year = year;
+        this.readingYear = readingYear;
     }
 
     public static YearlyReading create(Long memberId, int year) {
         return YearlyReading.builder()
                 .memberId(memberId)
-                .year(year)
+                .readingYear(year)
                 .currentCount(INITIAL_CURRENT_COUNT)
                 .build();
     }

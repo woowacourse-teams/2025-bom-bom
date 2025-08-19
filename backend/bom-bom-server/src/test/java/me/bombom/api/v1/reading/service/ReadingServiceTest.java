@@ -175,13 +175,11 @@ class ReadingServiceTest {
 
         // then
         MonthlyReading monthlyReading = monthlyReadingRepository.findByMemberId(member.getId()).get();
-        YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndYear(member.getId(), LocalDate.now().minusMonths(1).getYear()).get();
+        YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndReadingYear(member.getId(), LocalDate.now().minusMonths(1).getYear()).get();
 
         assertSoftly(softly -> {
             softly.assertThat(yearlyReading.getCurrentCount()).isEqualTo(monthlyCountBefore);
             softly.assertThat(monthlyReading.getCurrentCount()).isEqualTo(0);
         });
     }
-
-
 }

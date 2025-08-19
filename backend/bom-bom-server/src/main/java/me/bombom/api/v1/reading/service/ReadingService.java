@@ -82,7 +82,7 @@ public class ReadingService {
         monthlyReadingRepository.findAll().forEach(monthlyReading -> {
             Long memberId = monthlyReading.getMemberId();
             int targetYear = LocalDate.now().minusMonths(1).getYear();
-            YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndYear(memberId, targetYear)
+            YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndReadingYear(memberId, targetYear)
                     .orElseGet(() -> {
                         YearlyReading newYearlyReading = YearlyReading.create(memberId, targetYear);
                         return yearlyReadingRepository.save(newYearlyReading);

@@ -96,11 +96,11 @@ public class ArticleService {
                     );
                     return GetArticleCountPerNewsletterResponse.of(newsletter, count);
                 })
-                .filter(response -> response.count() > 0)
+                .filter(response -> response.articleCount() > 0)
                 .toList();
 
         int totalCount = countResponse.stream()
-                .mapToInt(response -> (int) response.count())
+                .mapToInt(response -> (int) response.articleCount())
                 .sum();
 
         return GetArticleNewsletterStatisticsResponse.of(totalCount, countResponse);

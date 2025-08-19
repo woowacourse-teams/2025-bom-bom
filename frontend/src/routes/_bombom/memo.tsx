@@ -16,7 +16,7 @@ export const Route = createFileRoute('/_bombom/memo')({
 
 function MemoPage() {
   const navigate = useNavigate();
-  const { data: highlights } = useQuery(queries.highlights({}));
+  const { data: highlights } = useQuery(queries.highlights());
   const [selectedNewsletter, setSelectedNewsletter] = useState('전체');
   const deviceType = useDeviceType();
 
@@ -47,9 +47,13 @@ function MemoPage() {
                   count: newletterCounts?.totalCount ?? 0,
                   imageUrl: '',
                 },
-                ...(newletterCounts?.newsletters.filter(
-                  (newsletter) => newsletter.count !== 0,
-                ) ?? []),
+                ...(newletterCounts?.newsletters
+                  .filter((newsletter) => newsletter.highlightCount > 0)
+                  .map((newsletter) => ({
+                    newsletter: newsletter.name,
+                    count: newsletter.highlightCount,
+                    imageUrl: newsletter.imageUrl,
+                  })) ?? []),
               ]}
               selectedNewsletter={selectedNewsletter}
               onSelectNewsletter={handleNewsletterChange}

@@ -77,10 +77,10 @@ export const queries = {
     }),
 
   // highlights
-  highlights: (params: GetHighlightsParams) =>
+  highlights: (params?: GetHighlightsParams) =>
     queryOptions({
       queryKey: ['highlights', params?.articleId],
-      queryFn: () => getHighlights(params),
+      queryFn: () => getHighlights(params ?? {}),
     }),
 
   // bookmarks

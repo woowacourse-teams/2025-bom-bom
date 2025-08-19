@@ -59,8 +59,8 @@ public class TodayReading extends BaseEntity {
     }
 
     public void resetCount() {
-        totalCount = RESET_TOTAL_COUNT;
-        currentCount = RESET_CURRENT_COUNT;
+        this.totalCount = RESET_TOTAL_COUNT;
+        this.currentCount = RESET_CURRENT_COUNT;
     }
 
     public void increaseCurrentCount() {

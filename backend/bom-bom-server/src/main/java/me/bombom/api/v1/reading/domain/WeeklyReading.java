@@ -57,7 +57,7 @@ public class WeeklyReading extends BaseEntity {
     }
 
     public void resetCurrentCount() {
-        currentCount = RESET_CURRENT_COUNT;
+        this.currentCount = RESET_CURRENT_COUNT;
     }
 
     public void updateGoalCount(int goalCount) {

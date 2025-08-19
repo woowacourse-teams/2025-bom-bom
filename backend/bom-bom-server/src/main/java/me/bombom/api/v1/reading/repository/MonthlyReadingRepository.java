@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, Long> {
+
     Optional<MonthlyReading> findByMemberId(Long memberId);
 
     @Query(value = """

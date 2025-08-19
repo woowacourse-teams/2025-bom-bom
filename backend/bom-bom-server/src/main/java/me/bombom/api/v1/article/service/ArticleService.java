@@ -51,7 +51,7 @@ public class ArticleService {
             Pageable pageable
     ) {
         validateNewsletterId(getArticlesOptions.newsletterId());
-        return articleRepository.findByMemberId(member.getId(), getArticlesOptions, pageable);
+        return articleRepository.findArticles(member.getId(), getArticlesOptions, pageable);
     }
 
     public ArticleDetailResponse getArticleDetail(Long id, Member member) {

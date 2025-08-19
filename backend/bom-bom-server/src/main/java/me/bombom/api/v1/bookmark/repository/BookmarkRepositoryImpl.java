@@ -40,7 +40,7 @@ public class BookmarkRepositoryImpl implements CustomBookmarkRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<BookmarkResponse> findByMemberId(Long memberId, Long newsletterId, Pageable pageable) {
+    public Page<BookmarkResponse> findBookmarks(Long memberId, Long newsletterId, Pageable pageable) {
         JPAQuery<Long> totalQuery = getTotalQuery(memberId, newsletterId);
         List<BookmarkResponse> content = getContents(memberId, newsletterId, pageable);
         return PageableExecutionUtils.getPage(content, pageable, totalQuery::fetchOne);

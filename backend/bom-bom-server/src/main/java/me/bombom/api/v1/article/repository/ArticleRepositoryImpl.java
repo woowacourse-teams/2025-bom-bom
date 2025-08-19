@@ -44,7 +44,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<ArticleResponse> findByMemberId(
+    public Page<ArticleResponse> findArticles(
             Long memberId,
             GetArticlesOptions options,
             Pageable pageable

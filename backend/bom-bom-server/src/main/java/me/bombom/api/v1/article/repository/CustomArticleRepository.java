@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface CustomArticleRepository {
 
-    Page<ArticleResponse> findByMemberId(Long memberId, GetArticlesOptions options, Pageable pageable);
+    Page<ArticleResponse> findArticles(Long memberId, GetArticlesOptions options, Pageable pageable);
 
     int countAllByNewsletterIdAndMemberId(Long memberId, Long newsletterId, String keyword);
 

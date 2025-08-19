@@ -7,10 +7,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
-import me.bombom.api.v1.article.dto.ArticleDetailResponse;
-import me.bombom.api.v1.article.dto.ArticleResponse;
-import me.bombom.api.v1.article.dto.GetArticleNewsletterStatisticsResponse;
-import me.bombom.api.v1.article.dto.GetArticlesOptions;
+import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
+import me.bombom.api.v1.article.dto.response.ArticleResponse;
+import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
+import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +33,7 @@ public interface ArticleControllerApi {
     })
     public Page<ArticleResponse> getArticles(
             @Parameter(hidden = true) Member member,
-            @Parameter(description = "필터링 관련 요청") @ModelAttribute GetArticlesOptions getArticlesOptions,
+            @Parameter(description = "필터링 관련 요청") @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
             @Parameter(description = "페이징 관련 요청 (예: ?page=0&size=10&sort=createdAt,desc)") Pageable pageable
     );
 
@@ -74,7 +74,7 @@ public interface ArticleControllerApi {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "뉴스레터별 개수 조회 성공")
     })
-    GetArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(
+    ArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(
         @Parameter(hidden = true) Member member,
         @Parameter(description = "검색 키워드 (선택)") @RequestParam(required = false) String keyword
     );

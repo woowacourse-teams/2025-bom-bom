@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.article.dto.QArticleResponse;
+import me.bombom.api.v1.article.dto.response.QArticleResponse;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkResponse;
 import me.bombom.api.v1.bookmark.dto.response.QBookmarkResponse;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;

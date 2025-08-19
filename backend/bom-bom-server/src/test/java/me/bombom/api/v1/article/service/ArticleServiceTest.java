@@ -7,10 +7,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
-import me.bombom.api.v1.article.dto.ArticleDetailResponse;
-import me.bombom.api.v1.article.dto.ArticleResponse;
-import me.bombom.api.v1.article.dto.GetArticleNewsletterStatisticsResponse;
-import me.bombom.api.v1.article.dto.GetArticlesOptions;
+import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
+import me.bombom.api.v1.article.dto.response.ArticleResponse;
+import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
+import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -89,7 +89,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null, null),
                 pageable
         );
 
@@ -111,7 +111,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null, null),
                 pageable
         );
 
@@ -135,7 +135,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, newsletterId, null),
+                ArticlesOptionsRequest.of(null, newsletterId, null),
                 pageable
         );
 
@@ -157,7 +157,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(BASE_TIME.toLocalDate(), null, null),
+                ArticlesOptionsRequest.of(BASE_TIME.toLocalDate(), null, null),
                 pageable
         );
 
@@ -176,7 +176,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(BASE_TIME.toLocalDate(), null, "뉴스"),
+                ArticlesOptionsRequest.of(BASE_TIME.toLocalDate(), null, "뉴스"),
                 pageable
         );
 
@@ -197,7 +197,7 @@ class ArticleServiceTest {
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, 0L, null),
+                ArticlesOptionsRequest.of(null, 0L, null),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
@@ -215,7 +215,7 @@ class ArticleServiceTest {
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null, null),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
@@ -229,7 +229,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null, null),
                 firstPage
         );
 
@@ -255,7 +255,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null, null),
                 secondPage
         );
 
@@ -281,7 +281,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null, null),
                 pageable
         );
 
@@ -303,7 +303,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null, null),
                 pageable
         );
 
@@ -445,7 +445,7 @@ class ArticleServiceTest {
         );
         articleRepository.saveAll(testArticles);
 
-        GetArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
                 member,
                 keyword
         );
@@ -463,7 +463,7 @@ class ArticleServiceTest {
     @Test
     void 전체_뉴스레터_별_아티클_개수를_조회한다() {
         // when
-        GetArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
                 member,
                 null
         );

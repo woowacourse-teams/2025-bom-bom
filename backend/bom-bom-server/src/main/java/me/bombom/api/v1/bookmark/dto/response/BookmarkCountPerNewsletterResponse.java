@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 
-public record GetBookmarkCountPerNewsletterResponse(
+public record BookmarkCountPerNewsletterResponse(
         @Schema(required = true)
         long id,
 
@@ -18,7 +18,7 @@ public record GetBookmarkCountPerNewsletterResponse(
         long bookmarkCount
 ) {
 
-    public static GetBookmarkCountPerNewsletterResponse of(Newsletter newsletter, long count) {
-        return new GetBookmarkCountPerNewsletterResponse(newsletter.getId(), newsletter.getName(), newsletter.getImageUrl(), count);
+    public static BookmarkCountPerNewsletterResponse of(Newsletter newsletter, long count) {
+        return new BookmarkCountPerNewsletterResponse(newsletter.getId(), newsletter.getName(), newsletter.getImageUrl(), count);
     }
 }

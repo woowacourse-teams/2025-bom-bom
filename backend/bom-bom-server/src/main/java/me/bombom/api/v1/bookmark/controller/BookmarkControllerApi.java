@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkResponse;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkStatusResponse;
-import me.bombom.api.v1.bookmark.dto.response.GetBookmarkNewsletterStatisticsResponse;
+import me.bombom.api.v1.bookmark.dto.response.BookmarkNewsletterStatisticsResponse;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -80,7 +80,7 @@ public interface BookmarkControllerApi {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "뉴스레터별 개수 조회 성공")
     })
-    GetBookmarkNewsletterStatisticsResponse getBookmarkNewsletterStatistics(
+    BookmarkNewsletterStatisticsResponse getBookmarkNewsletterStatistics(
             @Parameter(hidden = true) Member member
     );
 }

@@ -1,4 +1,4 @@
-package me.bombom.api.v1.article.dto;
+package me.bombom.api.v1.article.dto.request;
 
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
-public record GetArticlesOptions(
+public record ArticlesOptionsRequest(
         @DateTimeFormat(iso = ISO.DATE)
         LocalDate date,
 
@@ -19,7 +19,7 @@ public record GetArticlesOptions(
         String keyword
 ) {
 
-    public static GetArticlesOptions of(LocalDate date, Long newsletterId, String keyword) {
-        return new GetArticlesOptions(date, newsletterId, keyword);
+    public static ArticlesOptionsRequest of(LocalDate date, Long newsletterId, String keyword) {
+        return new ArticlesOptionsRequest(date, newsletterId, keyword);
     }
 }

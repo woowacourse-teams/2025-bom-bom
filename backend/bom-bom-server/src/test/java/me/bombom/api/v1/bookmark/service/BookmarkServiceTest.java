@@ -11,7 +11,7 @@ import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkResponse;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkStatusResponse;
-import me.bombom.api.v1.bookmark.dto.response.GetBookmarkNewsletterStatisticsResponse;
+import me.bombom.api.v1.bookmark.dto.response.BookmarkNewsletterStatisticsResponse;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -269,7 +269,7 @@ class BookmarkServiceTest {
         bookmarkService.addBookmark(member.getId(), articles.get(3).getId());
 
         // when
-        GetBookmarkNewsletterStatisticsResponse result = bookmarkService.getBookmarkNewsletterStatistics(member);
+        BookmarkNewsletterStatisticsResponse result = bookmarkService.getBookmarkNewsletterStatistics(member);
 
         // then
         assertSoftly(softly -> {

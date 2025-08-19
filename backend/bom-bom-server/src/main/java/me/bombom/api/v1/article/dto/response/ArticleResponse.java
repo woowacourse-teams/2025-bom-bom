@@ -1,4 +1,4 @@
-package me.bombom.api.v1.article.dto;
+package me.bombom.api.v1.article.dto.response;
 
 import com.querydsl.core.annotations.QueryProjection;
 import io.swagger.v3.oas.annotations.media.Schema;

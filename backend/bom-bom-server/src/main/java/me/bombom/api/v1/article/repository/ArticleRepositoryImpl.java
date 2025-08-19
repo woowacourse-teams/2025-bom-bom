@@ -18,9 +18,9 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.article.dto.ArticleResponse;
-import me.bombom.api.v1.article.dto.GetArticlesOptions;
-import me.bombom.api.v1.article.dto.QArticleResponse;
+import me.bombom.api.v1.article.dto.response.ArticleResponse;
+import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.article.dto.response.QArticleResponse;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.newsletter.dto.QNewsletterSummaryResponse;
@@ -45,7 +45,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     @Override
     public Page<ArticleResponse> findArticles(
             Long memberId,
-            GetArticlesOptions options,
+            ArticlesOptionsRequest options,
             Pageable pageable
     ) {
         JPAQuery<Long> totalQuery = getTotalQuery(memberId, options);
@@ -82,7 +82,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .intValue();
     }
 
-    private JPAQuery<Long> getTotalQuery(Long memberId, GetArticlesOptions options) {
+    private JPAQuery<Long> getTotalQuery(Long memberId, ArticlesOptionsRequest options) {
         return jpaQueryFactory.select(article.count())
                 .from(article)
                 .join(newsletter).on(article.newsletterId.eq(newsletter.id))
@@ -93,7 +93,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .where(createNewsletterIdWhereClause(options.newsletterId()));
     }
 
-    private List<ArticleResponse> getContent(Long memberId, GetArticlesOptions options, Pageable pageable) {
+    private List<ArticleResponse> getContent(Long memberId, ArticlesOptionsRequest options, Pageable pageable) {
         return jpaQueryFactory.select(new QArticleResponse(
                         article.id,
                         article.title,

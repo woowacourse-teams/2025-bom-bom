@@ -3,10 +3,10 @@ package me.bombom.api.v1.article.controller;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.article.dto.ArticleDetailResponse;
-import me.bombom.api.v1.article.dto.ArticleResponse;
-import me.bombom.api.v1.article.dto.GetArticleNewsletterStatisticsResponse;
-import me.bombom.api.v1.article.dto.GetArticlesOptions;
+import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
+import me.bombom.api.v1.article.dto.response.ArticleResponse;
+import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
+import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
@@ -38,12 +38,12 @@ public class ArticleController implements ArticleControllerApi{
     @GetMapping
     public Page<ArticleResponse> getArticles(
             @LoginMember Member member,
-            @ModelAttribute GetArticlesOptions getArticlesOptions,
+            @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
             @PageableDefault(sort = "arrivedDateTime", direction = Direction.DESC) Pageable pageable
     ) {
         return articleService.getArticles(
                 member,
-                getArticlesOptions,
+                articlesOptionsRequest,
                 pageable
         );
     }
@@ -69,7 +69,7 @@ public class ArticleController implements ArticleControllerApi{
 
     @Override
     @GetMapping("/statistics/newsletters")
-    public GetArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(
+    public ArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(
             @LoginMember Member member,
             @RequestParam(required = false) String keyword
     ) {

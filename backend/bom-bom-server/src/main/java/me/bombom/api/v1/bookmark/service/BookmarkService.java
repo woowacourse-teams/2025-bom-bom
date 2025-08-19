@@ -7,8 +7,8 @@ import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkResponse;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkStatusResponse;
-import me.bombom.api.v1.bookmark.dto.response.GetBookmarkCountPerNewsletterResponse;
-import me.bombom.api.v1.bookmark.dto.response.GetBookmarkNewsletterStatisticsResponse;
+import me.bombom.api.v1.bookmark.dto.response.BookmarkCountPerNewsletterResponse;
+import me.bombom.api.v1.bookmark.dto.response.BookmarkNewsletterStatisticsResponse;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -74,13 +74,13 @@ public class BookmarkService {
         }
     }
 
-    public GetBookmarkNewsletterStatisticsResponse getBookmarkNewsletterStatistics(Member member) {
-        List<GetBookmarkCountPerNewsletterResponse> countResponse = newsletterRepository.findAll()
+    public BookmarkNewsletterStatisticsResponse getBookmarkNewsletterStatistics(Member member) {
+        List<BookmarkCountPerNewsletterResponse> countResponse = newsletterRepository.findAll()
                 .stream()
                 .map(newsletter -> {
                     int count = bookmarkRepository.countAllByMemberIdAndNewsletterId(member.getId(),
                             newsletter.getId());
-                    return GetBookmarkCountPerNewsletterResponse.of(newsletter, count);
+                    return BookmarkCountPerNewsletterResponse.of(newsletter, count);
                 })
                 .filter(response -> response.bookmarkCount() > 0)
                 .toList();
@@ -89,6 +89,6 @@ public class BookmarkService {
                 .mapToInt(response -> (int) response.bookmarkCount())
                 .sum();
 
-        return GetBookmarkNewsletterStatisticsResponse.of(totalCount, countResponse);
+        return BookmarkNewsletterStatisticsResponse.of(totalCount, countResponse);
     }
 }

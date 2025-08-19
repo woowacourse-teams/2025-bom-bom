@@ -18,7 +18,7 @@ export const Route = createFileRoute('/_bombom')({
         if (isFirstVisit) {
           return redirect({ to: '/recommend' });
         }
-        throw new Response(DEFAULT_ERROR_MESSAGES[401], { status: 401 });
+        // throw new Response(DEFAULT_ERROR_MESSAGES[401], { status: 401 });
       }
     } finally {
       isFirstVisit = false;

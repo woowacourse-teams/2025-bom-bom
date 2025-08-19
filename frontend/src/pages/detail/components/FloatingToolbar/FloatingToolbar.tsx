@@ -36,7 +36,7 @@ export default function FloatingToolbar({
   onHighlightClick,
   onMemoClick,
 }: FloatingToolBarProps) {
-  const selectionRef = useRef<Selection>(null);
+  const selectionRef = useRef<Selection | null>(null);
   const [selectedHighlightId, setSelectedHighlightId] = useState<number | null>(
     null,
   );
@@ -74,8 +74,16 @@ export default function FloatingToolbar({
     };
 
     const handleTextSelection = (selection: Selection) => {
+      if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
+        return;
+      }
       selectionRef.current = selection;
-      const range = selection.getRangeAt(0);
+      let range: Range;
+      try {
+        range = selection.getRangeAt(0);
+      } catch {
+        return;
+      }
       if (!selectionTargetRef.current?.contains(range.commonAncestorContainer))
         return;
 
@@ -93,24 +101,64 @@ export default function FloatingToolbar({
       showToolbarAt(rect);
     };
 
-    const handleDocumentClick = (e: MouseEvent) => {
-      const selection = window.getSelection();
-      if (selection && !selection.isCollapsed) {
+    const handlePointerUp = (e: PointerEvent | MouseEvent | TouchEvent) => {
+      // Increased timeout for mobile browsers to finalize selection
+      const timeout = e.type === 'touchend' ? 100 : 0;
+      setTimeout(() => {
+        const selection = window.getSelection();
+        if (selection && !selection.isCollapsed) {
+          handleTextSelection(selection);
+          return;
+        }
+
+        const target = e.target as HTMLElement;
+        if (target && target.tagName === 'MARK') {
+          handleHighlightClick(target);
+          return;
+        }
+
+        hideToolbar();
+      }, timeout);
+    };
+
+    const handleSelectionChange = () => {
+      // 모바일에서 selectionchange 이벤트의 안정성을 위한 디바운싱
+      setTimeout(() => {
+        const selection = window.getSelection();
+        if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
+          return;
+        }
         handleTextSelection(selection);
-        return;
-      }
+      }, 50);
+    };
 
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'MARK') {
-        handleHighlightClick(target);
-        return;
-      }
-
+    // 모바일 터치 이벤트 추가
+    const handleTouchStart = () => {
+      // 터치 시작 시 기존 툴바 숨기기
       hideToolbar();
     };
 
-    document.addEventListener('mouseup', handleDocumentClick);
-    return () => document.removeEventListener('mouseup', handleDocumentClick);
+    document.addEventListener('selectionchange', handleSelectionChange);
+    document.addEventListener('pointerup', handlePointerUp as EventListener);
+    document.addEventListener('mouseup', handlePointerUp as EventListener);
+    document.addEventListener('touchend', handlePointerUp as EventListener);
+    document.addEventListener('touchstart', handleTouchStart as EventListener);
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+      document.removeEventListener(
+        'pointerup',
+        handlePointerUp as EventListener,
+      );
+      document.removeEventListener('mouseup', handlePointerUp as EventListener);
+      document.removeEventListener(
+        'touchend',
+        handlePointerUp as EventListener,
+      );
+      document.removeEventListener(
+        'touchstart',
+        handleTouchStart as EventListener,
+      );
+    };
   }, [selectionTargetRef]);
 
   return (

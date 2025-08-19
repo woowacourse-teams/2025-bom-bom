@@ -8,7 +8,38 @@ import { HighlightType } from '@/pages/detail/types/highlight';
 
 const baseURL = ENV.baseUrl;
 
-const HIGHLIGHTS: HighlightType[] = [];
+const HIGHLIGHTS: HighlightType[] = [
+  {
+    location: {
+      startXPath:
+        './html[1]/body[1]/div[1]/div[1]/div[1]/div[3]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[1]/div[8]/table[1]/tbody[1]/tr[1]/td[1]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/span[1]',
+      startOffset: 1,
+      endXPath:
+        './html[1]/body[1]/div[1]/div[1]/div[1]/div[3]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[1]/div[8]/table[1]/tbody[1]/tr[1]/td[1]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/span[1]',
+      endOffset: 97,
+    },
+    articleId: 5,
+    color: '#FFD6C2',
+    text: '주말 동안 경남 산청과 경기 가평에서 산사태와 급류로 최소 12명이 숨졌습니다. 닷새간 계속된 ‘괴물급’ 폭우로 전국 누적 사망자는 17명, 실종자는 10명으로 늘었습니다.',
+    id: 1,
+    memo: '허걱. 12명이 숨졌다니... 안타까워 ㅜㅜ',
+  },
+  {
+    location: {
+      startXPath:
+        './html[1]/body[1]/div[1]/div[1]/div[1]/div[3]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[1]/div[8]/table[1]/tbody[1]/tr[1]/td[1]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/span[1]',
+      startOffset: 115,
+      endXPath:
+        './html[1]/body[1]/div[1]/div[1]/div[1]/div[3]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[1]/div[8]/table[1]/tbody[1]/tr[1]/td[1]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/span[1]',
+      endOffset: 142,
+    },
+    articleId: 5,
+    color: '#FFD6C2',
+    text: '산사태 위험지역 관리를 강화할 필요가 있다는 분석',
+    id: 2,
+    memo: '얼른 위험지역 관리를 강화해주었으면 좋겠다.',
+  },
+];
 
 export const handlers = [
   http.get(`${baseURL}/articles`, () => {
@@ -142,12 +173,12 @@ export const handlers = [
   // ------------------ 하이라이트 CRUD ------------------
 
   // 전체 조회
-  http.get(`${baseURL}/highlight`, () => {
+  http.get(`${baseURL}/highlights`, () => {
     return HttpResponse.json(HIGHLIGHTS);
   }),
 
   // 생성
-  http.post(`${baseURL}/highlight`, async ({ request }) => {
+  http.post(`${baseURL}/highlights`, async ({ request }) => {
     const newHighlight = (await request.json()) as HighlightType;
     // ID가 없는 경우 임의 ID 생성
     newHighlight.id = HIGHLIGHTS.length + 1;
@@ -156,7 +187,7 @@ export const handlers = [
   }),
 
   // 수정
-  http.patch(`${baseURL}/highlight/:id`, async ({ request, params }) => {
+  http.patch(`${baseURL}/highlights/:id`, async ({ request, params }) => {
     const { id } = params;
     const updated = (await request.json()) as Partial<
       Omit<HighlightType, 'id'>

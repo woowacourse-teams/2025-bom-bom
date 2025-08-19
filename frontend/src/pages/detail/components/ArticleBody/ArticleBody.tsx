@@ -30,7 +30,7 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
   }) => {
     const isNewHighlight = mode === 'new';
 
-    if (isNewHighlight && selection) {
+    if (isNewHighlight && selection && selection.rangeCount > 0) {
       const highlightData = saveSelection(selection, articleId);
       addHighlight(highlightData);
     }
@@ -48,7 +48,7 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
   }) => {
     const isNewHighlight = mode === 'new';
 
-    if (isNewHighlight && selection) {
+    if (isNewHighlight && selection && selection.rangeCount > 0) {
       const highlightData = saveSelection(selection, articleId);
       addHighlight(highlightData);
     }

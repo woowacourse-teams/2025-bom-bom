@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { HighlightType } from '../../types/highlight';
+import { Highlight } from '../../types/highlight';
 import MemoCard from '../MemoCard/MemoCard';
 import ChevronIcon from '@/components/icons/ChevronIcon';
 import { theme } from '@/styles/theme';
@@ -8,7 +8,7 @@ import MemoIcon from '#/assets/memo.svg';
 
 interface MemoPanelProps {
   open: boolean;
-  memos: HighlightType[];
+  memos: Highlight[];
   removeHighlight: (id: number) => void;
   updateMemo: (id: number, memo: string) => void;
   handleClose: () => void;

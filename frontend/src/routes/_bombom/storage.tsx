@@ -23,7 +23,7 @@ function Storage() {
     sortFilter,
     searchInput,
     baseQueryParams,
-    newletterCounts,
+    newsletterCounts,
     handleNewsletterChange,
     handleSortChange,
     handleSearchChange,
@@ -47,10 +47,10 @@ function Storage() {
               newsLetterList={[
                 {
                   newsletter: '전체',
-                  count: newletterCounts?.totalCount ?? 0,
+                  count: newsletterCounts?.totalCount ?? 0,
                   imageUrl: '',
                 },
-                ...(newletterCounts?.newsletters.filter(
+                ...(newsletterCounts?.newsletters.filter(
                   (newsletter) => newsletter.count !== 0,
                 ) ?? []),
               ]}

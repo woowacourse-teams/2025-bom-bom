@@ -28,6 +28,8 @@ function MemoPage() {
     queries.highlightStatisticsNewsletter(),
   );
 
+  console.log(highlights);
+
   if (!highlights) return null;
 
   return (
@@ -61,9 +63,9 @@ function MemoPage() {
           </SidebarSection>
 
           <MainContentSection deviceType={deviceType}>
-            {highlights && highlights.length > 0 ? (
+            {highlights.content && highlights.content.length > 0 ? (
               <MemoList>
-                {highlights.map((highlight) => (
+                {highlights.content.map((highlight) => (
                   <li key={highlight.articleId}>
                     <MemoCard
                       id={highlight.id}

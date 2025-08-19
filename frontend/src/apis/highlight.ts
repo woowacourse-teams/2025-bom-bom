@@ -6,7 +6,8 @@ export type GetHighlightsParams = Omit<
   operations['getHighlights']['parameters']['query'],
   'pageable'
 >;
-export type GetHighlightsResponse = HighlightType[];
+export type GetHighlightsResponse =
+  components['schemas']['PageHighlightResponse'];
 
 export const getHighlights = async (params: GetHighlightsParams) => {
   return await fetcher.get<GetHighlightsResponse>({

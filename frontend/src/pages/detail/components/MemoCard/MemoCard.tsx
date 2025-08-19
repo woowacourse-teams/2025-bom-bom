@@ -7,7 +7,7 @@ import DeleteIcon from '#/assets/delete.svg';
 interface MemoCardProps {
   id: number;
   content: string;
-  memo: string;
+  memo?: string;
   newsletterName?: string;
   newsletterImageUrl?: string;
   articleTitle?: string;
@@ -41,7 +41,7 @@ const MemoCard = ({
 
   useEffect(() => {
     if (debouncedMemo !== memo) {
-      onMemoChange?.(id, debouncedMemo);
+      onMemoChange?.(id, debouncedMemo ?? '');
     }
     // 의존성 배열에 updateMemo, id, memo를 넣으면
     // memo가 변경될 때마다(예: 서버 응답으로 값이 업데이트될 때) 불필요하게 effect가 재실행됨.

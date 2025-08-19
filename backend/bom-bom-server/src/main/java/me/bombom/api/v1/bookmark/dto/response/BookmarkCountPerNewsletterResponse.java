@@ -5,8 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 
 public record BookmarkCountPerNewsletterResponse(
-        @Schema(required = true)
-        long id,
+        Long id,
 
         @NotNull
         String name,
@@ -15,10 +14,10 @@ public record BookmarkCountPerNewsletterResponse(
         String imageUrl,
 
         @Schema(required = true)
-        long bookmarkCount
+        int bookmarkCount
 ) {
 
-    public static BookmarkCountPerNewsletterResponse of(Newsletter newsletter, long count) {
+    public static BookmarkCountPerNewsletterResponse of(Newsletter newsletter, int count) {
         return new BookmarkCountPerNewsletterResponse(newsletter.getId(), newsletter.getName(), newsletter.getImageUrl(), count);
     }
 }

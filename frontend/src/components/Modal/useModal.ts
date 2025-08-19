@@ -1,5 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
+import useKeydownEscape from '@/hooks/useKeydownEscapeRef';
 
 const useModal = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,21 +15,7 @@ const useModal = () => {
   }, []);
 
   const modalRef = useClickOutsideRef<HTMLDivElement>(closeModal);
-
-  const keydownESCModal = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        closeModal();
-      }
-    },
-    [closeModal],
-  );
-
-  useEffect(() => {
-    window.addEventListener('keydown', keydownESCModal);
-
-    return () => window.removeEventListener('keydown', keydownESCModal);
-  }, [keydownESCModal]);
+  useKeydownEscape(closeModal);
 
   const toggleScrollLock = useCallback(() => {
     if (isOpen) {

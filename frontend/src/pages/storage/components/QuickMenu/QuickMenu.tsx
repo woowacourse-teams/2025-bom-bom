@@ -24,6 +24,10 @@ const QuickMenu = () => {
           <MemoIcon width={20} height={20} fill={theme.colors.primary} />
           <LinkText>메모</LinkText>
         </StyledLink>
+        <StyledLink to="/guide">
+          <HelpIcon width={20} height={20} fill={theme.colors.primary} />
+          <LinkText>가이드</LinkText>
+        </StyledLink>
       </FloatingActionButton>
     );
   }
@@ -114,7 +118,7 @@ const StyledLink = styled(Link)`
   display: flex;
   gap: 4px;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 `;
 
 const ButtonContainer = styled.div`

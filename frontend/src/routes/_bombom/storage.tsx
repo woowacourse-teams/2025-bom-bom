@@ -50,9 +50,12 @@ function Storage() {
                   count: newletterCounts?.totalCount ?? 0,
                   imageUrl: '',
                 },
-                ...(newletterCounts?.newsletters.filter(
-                  (newsletter) => newsletter.count !== 0,
-                ) ?? []),
+                ...(newletterCounts?.newsletters
+                  .map((newsletter) => ({
+                    ...newsletter,
+                    count: newsletter.articleCount ?? 0,
+                  }))
+                  .filter((newsletter) => newsletter.count !== 0) ?? []),
               ]}
               selectedNewsletter={selectedNewsletter}
               onSelectNewsletter={handleNewsletterChange}

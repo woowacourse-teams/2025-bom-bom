@@ -4,26 +4,6 @@
  */
 
 export interface paths {
-  '/guide/read': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * 가이드 메일 읽음 처리
-     * @description 가이드 메일 읽었을 시, 키우기/읽기 점수 증가
-     */
-    post: operations['updateRead'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   '/api/v1/members/me/pet/attendance': {
     parameters: {
       query?: never;
@@ -174,6 +154,26 @@ export interface paths {
      * @description 특정 하이라이트의 내용(텍스트)이나 위치를 수정합니다.
      */
     patch: operations['updateHighlight'];
+    trace?: never;
+  };
+  '/api/v1/guide/read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * 가이드 메일 읽음 처리
+     * @description 가이드 메일 읽었을 시, 키우기/읽기 점수 증가
+     */
+    patch: operations['updateRead'];
     trace?: never;
   };
   '/api/v1/articles/{id}/read': {
@@ -443,6 +443,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * 아티클의 하이라이트 목록 조회
+     * @description 특정 아티클의 하이라이트 목록을 조회합니다.
+     */
     get: operations['getHighlights_1'];
     put?: never;
     post?: never;
@@ -671,7 +675,7 @@ export interface components {
       memo?: string;
       newsletterName?: string;
       newsletterImageUrl?: string;
-      ariticleTitle?: string;
+      articleTitle?: string;
       /** Format: date-time */
       createdAt?: string;
     };
@@ -734,38 +738,20 @@ export interface components {
       newsletters: components['schemas']['HighlightCountPerNewsletterResponse'][];
     };
     BookmarkResponse: {
-      /**
-       * Format: int64
-       * @description 북마크 ID
-       */
+      /** Format: int64 */
       id: number;
-      /**
-       * Format: int64
-       * @description 아티클 ID
-       */
+      /** Format: int64 */
       articleId: number;
-      /** @description 아티클 제목 */
       title: string;
-      /** @description 아티클 내용 요약 */
       contentsSummary: string;
-      /**
-       * Format: date-time
-       * @description 도착 시간
-       */
+      /** Format: date-time */
       arrivedDateTime: string;
-      /** @description 썸네일 URL */
       thumbnailUrl?: string;
-      /**
-       * Format: int32
-       * @description 예상 읽기 시간(분)
-       */
+      /** Format: int32 */
       expectedReadTime: number;
-      /** @description 읽음 여부 */
       isRead: boolean;
-      /** @description 뉴스레터 정보 */
       newsletter: components['schemas']['NewsletterSummaryResponse'];
     };
-    /** @description 뉴스레터 정보 */
     NewsletterSummaryResponse: {
       /** @description 뉴스레터명 */
       name: string;
@@ -793,59 +779,38 @@ export interface components {
       empty?: boolean;
     };
     BookmarkStatusResponse: {
-      /** @description 북마크 상태 */
       bookmarkStatus: boolean;
     };
-    /** @description 뉴스레터별 통계 */
-    GetBookmarkCountPerNewsletterResponse: {
-      /** @description 뉴스레터명 */
-      newsletter: string;
-      /** @description 이미지 url */
+    BookmarkCountPerNewsletterResponse: {
+      /** Format: int64 */
+      id?: number;
+      name: string;
       imageUrl: string;
-      /**
-       * Format: int64
-       * @description 아티클 수
-       */
-      count: number;
+      /** Format: int32 */
+      bookmarkCount: number;
     };
-    GetBookmarkNewsletterStatisticsResponse: {
-      /**
-       * Format: int32
-       * @description 전체 북마크 수
-       */
+    BookmarkNewsletterStatisticsResponse: {
+      /** Format: int32 */
       totalCount: number;
-      /** @description 뉴스레터별 통계 */
-      newsletters: components['schemas']['GetBookmarkCountPerNewsletterResponse'][];
+      newsletters: components['schemas']['BookmarkCountPerNewsletterResponse'][];
     };
-    GetArticlesOptions: {
+    ArticlesOptionsRequest: {
       /** Format: date */
       date?: string;
-      newsletter?: string;
+      /** Format: int64 */
+      newsletterId?: number;
       keyword?: string;
     };
     ArticleResponse: {
-      /**
-       * Format: int64
-       * @description 아티클 ID
-       */
+      /** Format: int64 */
       articleId: number;
-      /** @description 아티클 제목 */
       title: string;
-      /** @description 아티클 내용 요약 */
       contentsSummary: string;
-      /**
-       * Format: date-time
-       * @description 도착 시간
-       */
+      /** Format: date-time */
       arrivedDateTime: string;
-      /** @description 썸네일 URL */
       thumbnailUrl?: string;
-      /**
-       * Format: int32
-       * @description 예상 읽기 시간(분)
-       */
+      /** Format: int32 */
       expectedReadTime: number;
-      /** @description 읽음 여부 */
       isRead: boolean;
       /** @description 뉴스레터 정보 */
       newsletter: components['schemas']['NewsletterSummaryResponse'];
@@ -869,26 +834,15 @@ export interface components {
       empty?: boolean;
     };
     ArticleDetailResponse: {
-      /** @description 아티클 제목 */
       title: string;
-      /** @description 아티클 내용 */
       contents: string;
-      /**
-       * Format: date-time
-       * @description 도착 시간
-       */
+      /** Format: date-time */
       arrivedDateTime: string;
-      /**
-       * Format: int32
-       * @description 예상 읽기 시간(분)
-       */
+      /** Format: int32 */
       expectedReadTime: number;
-      /** @description 읽음 여부 */
       isRead: boolean;
-      /** @description 뉴스레터 정보 */
       newsletter: components['schemas']['NewsletterBasicResponse'];
     };
-    /** @description 뉴스레터 정보 */
     NewsletterBasicResponse: {
       /** @description 뉴스레터명 */
       name: string;
@@ -899,26 +853,18 @@ export interface components {
       /** @description 카테고리 */
       category: string;
     };
-    /** @description 뉴스레터별 통계 */
-    GetArticleCountPerNewsletterResponse: {
-      /** @description 뉴스레터명 */
-      newsletter: string;
-      /** @description 이미지 url */
+    ArticleCountPerNewsletterResponse: {
+      /** Format: int64 */
+      id?: number;
+      name: string;
       imageUrl: string;
-      /**
-       * Format: int64
-       * @description 아티클 수
-       */
-      count: number;
+      /** Format: int32 */
+      articleCount: number;
     };
-    GetArticleNewsletterStatisticsResponse: {
-      /**
-       * Format: int32
-       * @description 전체 아티클 수
-       */
+    ArticleNewsletterStatisticsResponse: {
+      /** Format: int32 */
       totalCount: number;
-      /** @description 뉴스레터별 통계 */
-      newsletters: components['schemas']['GetArticleCountPerNewsletterResponse'][];
+      newsletters: components['schemas']['ArticleCountPerNewsletterResponse'][];
     };
   };
   responses: never;
@@ -929,31 +875,6 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  updateRead: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description 읽음 처리 성공 */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description 멤버의 읽기 정보가 없을 경우 */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
   attend: {
     parameters: {
       query?: never;
@@ -1347,6 +1268,31 @@ export interface operations {
       };
     };
   };
+  updateRead: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 읽음 처리 성공 */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 멤버의 읽기 정보가 없을 경우 */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   updateIsRead: {
     parameters: {
       query?: never;
@@ -1555,6 +1501,8 @@ export interface operations {
   getBookmarks: {
     parameters: {
       query: {
+        /** @description 뉴스레터 ID (선택) */
+        newsletterId?: number;
         /** @description 페이징 관련 요청 (예: ?page=0&size=10&sort=createdAt,desc) */
         pageable: components['schemas']['Pageable'];
       };
@@ -1620,7 +1568,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          '*/*': components['schemas']['GetBookmarkNewsletterStatisticsResponse'];
+          '*/*': components['schemas']['BookmarkNewsletterStatisticsResponse'];
         };
       };
     };
@@ -1655,7 +1603,7 @@ export interface operations {
     parameters: {
       query: {
         /** @description 필터링 관련 요청 */
-        getArticlesOptions: components['schemas']['GetArticlesOptions'];
+        articlesOptionsRequest: components['schemas']['ArticlesOptionsRequest'];
         /** @description 페이징 관련 요청 (예: ?page=0&size=10&sort=createdAt,desc) */
         pageable: components['schemas']['Pageable'];
       };
@@ -1731,7 +1679,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description OK */
+      /** @description 아티클의 하이라이트 목록 조회 성공 */
       200: {
         headers: {
           [name: string]: unknown;
@@ -1760,7 +1708,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          '*/*': components['schemas']['GetArticleNewsletterStatisticsResponse'];
+          '*/*': components['schemas']['ArticleNewsletterStatisticsResponse'];
         };
       };
     };

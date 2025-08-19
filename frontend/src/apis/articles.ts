@@ -42,7 +42,7 @@ export type GetArticleStatisticsNewslettersParams =
   operations['getArticleNewsletterStatistics']['parameters']['query'];
 
 export type GetArticlesStatisticsNewslettersResponse =
-  components['schemas']['GetArticleNewsletterStatisticsResponse'];
+  components['schemas']['ArticleNewsletterStatisticsResponse'];
 
 export const getArticlesStatisticsNewsletters = async (
   params: GetArticleStatisticsNewslettersParams,

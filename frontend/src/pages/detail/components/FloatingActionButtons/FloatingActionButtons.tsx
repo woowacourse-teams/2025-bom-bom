@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import useMediaQuery from '@/hooks/useMediaQuery';
 import { theme } from '@/styles/theme';
 import BookmarkActiveIcon from '#/assets/bookmark-active.svg';
 import BookmarkInactiveIcon from '#/assets/bookmark-inactive.svg';
@@ -13,7 +14,12 @@ const FloatingActionButtons = ({
   bookmarked,
   onBookmarkClick,
 }: FloatingActionButtonsProps) => {
-  if (bookmarked === null) return;
+  const isBookmarkButtonVisible = useMediaQuery({
+    key: 'min-width',
+    value: 1350,
+  });
+
+  if (bookmarked === null || !isBookmarkButtonVisible) return null;
 
   const handleBookmarkClick = () => {
     onBookmarkClick(bookmarked);
@@ -24,25 +30,23 @@ const FloatingActionButtons = ({
   };
 
   return (
-    <>
-      <Container>
-        <ActionButton type="button" onClick={handleBookmarkClick}>
-          {bookmarked ? (
-            <BookmarkActiveIcon width={28} height={28} />
-          ) : (
-            <BookmarkInactiveIcon
-              width={28}
-              height={28}
-              color={theme.colors.primary}
-            />
-          )}
-        </ActionButton>
+    <Container>
+      <ActionButton type="button" onClick={handleBookmarkClick}>
+        {bookmarked ? (
+          <BookmarkActiveIcon width={28} height={28} />
+        ) : (
+          <BookmarkInactiveIcon
+            width={28}
+            height={28}
+            color={theme.colors.primary}
+          />
+        )}
+      </ActionButton>
 
-        <ActionButton type="button">
-          <ScrollUpIcon onClick={handleScrollUp} />
-        </ActionButton>
-      </Container>
-    </>
+      <ActionButton type="button">
+        <ScrollUpIcon onClick={handleScrollUp} />
+      </ActionButton>
+    </Container>
   );
 };
 

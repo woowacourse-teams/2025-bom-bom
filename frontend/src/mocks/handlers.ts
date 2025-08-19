@@ -4,11 +4,11 @@ import { ARTICLE_DETAIL } from './datas/articleDetail';
 import { ARTICLES } from './datas/articles';
 import { TRENDY_NEWSLETTERS } from './datas/trendyNewsLetter';
 import { bookmarkHandlers } from './handlers/bookmark';
-import { HighlightType } from '@/pages/detail/types/highlight';
+import { Highlight } from '@/pages/detail/types/highlight';
 
 const baseURL = ENV.baseUrl;
 
-const HIGHLIGHTS: HighlightType[] = [];
+const HIGHLIGHTS: Highlight[] = [];
 
 export const handlers = [
   http.get(`${baseURL}/articles`, () => {
@@ -148,7 +148,7 @@ export const handlers = [
 
   // 생성
   http.post(`${baseURL}/highlight`, async ({ request }) => {
-    const newHighlight = (await request.json()) as HighlightType;
+    const newHighlight = (await request.json()) as Highlight;
     // ID가 없는 경우 임의 ID 생성
     newHighlight.id = HIGHLIGHTS.length + 1;
     HIGHLIGHTS.push(newHighlight);
@@ -158,9 +158,7 @@ export const handlers = [
   // 수정
   http.patch(`${baseURL}/highlight/:id`, async ({ request, params }) => {
     const { id } = params;
-    const updated = (await request.json()) as Partial<
-      Omit<HighlightType, 'id'>
-    >;
+    const updated = (await request.json()) as Partial<Omit<Highlight, 'id'>>;
 
     const index = HIGHLIGHTS.findIndex((h) => h.id === Number(id));
     if (index === -1 || !HIGHLIGHTS[index]) {
@@ -185,4 +183,26 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 });
   }),
   ...bookmarkHandlers,
+
+  // 뉴스레터별 하이라이트 통계
+  http.get(`${baseURL}/highlights/statistics/newsletters`, () => {
+    const newsletterStats = {
+      totalCount: 4,
+      newsletters: [
+        {
+          id: 1,
+          newsletter: '뉴닉',
+          imageUrl: 'https://newneek.co/favicon.ico',
+          count: 1,
+        },
+        {
+          id: 2,
+          newsletter: '디에디트',
+          imageUrl: 'https://newneek.co/favicon.ico',
+          count: 3,
+        },
+      ],
+    };
+    return HttpResponse.json(newsletterStats);
+  }),
 ];

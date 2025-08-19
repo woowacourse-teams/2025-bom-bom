@@ -3,7 +3,7 @@ import {
   getTextNodesInRange,
   getXPathForNode,
 } from './selection';
-import { HighlightType } from '../types/highlight';
+import { Highlight } from '../types/highlight';
 import { theme } from '@/styles/theme';
 
 export const highlightNodeSegment = (
@@ -34,7 +34,7 @@ export const highlightNodeSegment = (
 export const saveSelection = (
   selection: Selection,
   articleId: number,
-): Omit<HighlightType, 'id' | 'memo'> => {
+): Omit<Highlight, 'id' | 'memo'> => {
   const range = selection.getRangeAt(0);
   const container =
     range.commonAncestorContainer.nodeType === Node.TEXT_NODE
@@ -127,7 +127,7 @@ function getHighlightRange(container: Node, start: number, end: number) {
 /**
  * 초기 복원 시 모든 하이라이트 그리기
  */
-export const restoreHighlightAll = (highlights: HighlightType[]) => {
+export const restoreHighlightAll = (highlights: Highlight[]) => {
   highlights.forEach((highlight) => {
     try {
       addHighlightToDOM(highlight);
@@ -140,7 +140,7 @@ export const restoreHighlightAll = (highlights: HighlightType[]) => {
 /**
  * 단일 하이라이트 DOM에 추가
  */
-export const addHighlightToDOM = (data: HighlightType) => {
+export const addHighlightToDOM = (data: Highlight) => {
   const element = getNodeByXPath(data.location.startXPath);
   if (!element) return;
 

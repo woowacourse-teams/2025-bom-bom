@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { HighlightType } from '../types/highlight';
+import { Highlight } from '../types/highlight';
 import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 
 type StorageKeyType = `guide-highlight-${string}`;
@@ -7,12 +7,12 @@ type StorageKeyType = `guide-highlight-${string}`;
 export const useLocalHighlighData = ({ articleId }: { articleId: number }) => {
   const storageKey: StorageKeyType = `guide-highlight-${articleId}`;
   const [highlights, setHighlights] = useLocalStorageState<
-    HighlightType[],
+    Highlight[],
     typeof storageKey
   >(storageKey);
 
   const addHighlight = useCallback(
-    (highlight: Omit<HighlightType, 'id' | 'memo'>) => {
+    (highlight: Omit<Highlight, 'id' | 'memo'>) => {
       setHighlights((prev) => {
         if (!prev) {
           return [{ ...highlight, id: Date.now(), memo: '' }];

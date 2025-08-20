@@ -348,7 +348,7 @@ const StepItem = styled.div`
 `;
 
 const StepNumber = styled.span`
-  z-index: 1;
+  z-index: ${({ theme }) => theme.zIndex.content};
   width: 32px;
   height: 32px;
   border: 2px solid ${({ theme }) => theme.colors.white};

@@ -37,7 +37,7 @@ const Container = styled.div`
 `;
 
 const HeroContent = styled.div`
-  z-index: 2;
+  z-index: ${({ theme }) => theme.zIndex.content};
   width: 100%;
   padding: 56px;
 

@@ -18,8 +18,8 @@ const meta = {
       control: 'object',
       description: '카테고리 목록',
     },
-    selectedNewsletter: {
-      control: 'text',
+    selectedNewsletterId: {
+      control: 'number',
       description: '선택된 카테고리',
     },
     onSelectNewsletter: {
@@ -40,7 +40,7 @@ const meta = {
       { name: '푸드', articleCount: 3, imageUrl: '' },
       { name: '교육', articleCount: 0, imageUrl: '' },
     ],
-    selectedNewsletter: '전체',
+    selectedNewsletterId: null,
     onSelectNewsletter: () => {},
   },
 } satisfies Meta<typeof NewsletterFilter>;
@@ -50,16 +50,17 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => {
-    const { selectedNewsletter: initialNewsletter, ...rest } = args;
-    const [currentSelected, setCurrentSelected] =
-      useState<string>(initialNewsletter);
+    const { selectedNewsletterId: initialNewsletterId, ...rest } = args;
+    const [currentSelected, setCurrentSelected] = useState<number | null>(
+      initialNewsletterId,
+    );
 
     return (
       <NewsletterFilter
         {...rest}
-        selectedNewsletter={currentSelected}
-        onSelectNewsletter={(id: string | number) => {
-          setCurrentSelected(String(id));
+        selectedNewsletterId={currentSelected}
+        onSelectNewsletter={(id: number | null) => {
+          setCurrentSelected(id);
         }}
       />
     );

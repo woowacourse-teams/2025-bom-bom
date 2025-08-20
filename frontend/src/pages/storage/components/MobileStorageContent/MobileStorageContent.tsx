@@ -54,7 +54,7 @@ export default function MobileStorageContent({
     resetPage();
   }, [
     baseQueryParams.keyword,
-    baseQueryParams.newsletter,
+    baseQueryParams.newsletterId,
     baseQueryParams.sort,
     resetPage,
   ]);

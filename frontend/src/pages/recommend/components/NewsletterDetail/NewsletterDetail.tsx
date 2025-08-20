@@ -29,7 +29,7 @@ const NewsletterDetail = ({
 
   if (!newsletterId || !newsletterDetail) return null;
 
-  const goToSubscribe = () => {
+  const openSubscribe = () => {
     if (userInfo?.email) {
       copyToClipboard(userInfo.email);
       alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
@@ -71,7 +71,7 @@ const NewsletterDetail = ({
 
         <SubscribeButton
           text="구독하기"
-          onClick={goToSubscribe}
+          onClick={openSubscribe}
           isMobile={isMobile}
         />
       </FixedWrapper>

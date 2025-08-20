@@ -14,12 +14,16 @@ export const Route = createFileRoute('/_bombom/bookmark')({
 });
 
 function BookmarkPage() {
-  const { data: articles } = useQuery(queries.bookmarks());
-  const [selectedNewsletter, setSelectedNewsletter] = useState('전체');
+  const [selectedNewsletterId, setSelectedNewsletterId] = useState<
+    number | null
+  >(null);
+  const { data: articles } = useQuery(
+    queries.bookmarks({ newsletterId: selectedNewsletterId ?? undefined }),
+  );
   const deviceType = useDeviceType();
 
-  const handleNewsletterChange = useCallback((value: string) => {
-    setSelectedNewsletter(value);
+  const handleNewsletterChange = useCallback((id: number | null) => {
+    setSelectedNewsletterId(id);
   }, []);
 
   const { data: newsletterCounts } = useQuery(
@@ -44,15 +48,13 @@ function BookmarkPage() {
                   articleCount: newsletterCounts?.totalCount ?? 0,
                   imageUrl: '',
                 },
-                ...(newsletterCounts?.newsletters
-                  .map((newsletter) => ({
-                    ...newsletter,
-                    name: newsletter.newsletter,
-                    articleCount: newsletter.count ?? 0,
-                  }))
-                  .filter((newsletter) => newsletter.articleCount !== 0) ?? []),
+                ...(newsletterCounts?.newsletters.map((newsletter) => ({
+                  ...newsletter,
+                  name: newsletter.name,
+                  articleCount: newsletter.bookmarkCount ?? 0,
+                })) ?? []),
               ]}
-              selectedNewsletter={selectedNewsletter}
+              selectedNewsletterId={selectedNewsletterId}
               onSelectNewsletter={handleNewsletterChange}
             />
           </SidebarSection>

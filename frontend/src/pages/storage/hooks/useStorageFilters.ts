@@ -10,7 +10,7 @@ export const useStorageFilters = () => {
   >(null);
   const [sortFilter, setSortFilter] = useState<'DESC' | 'ASC'>('DESC');
   const [searchInput, setSearchInput] = useState('');
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const debouncedSearchInput = useDebouncedValue(searchInput, 500);
 
   const baseQueryParams: GetArticlesParams = {
@@ -18,7 +18,7 @@ export const useStorageFilters = () => {
     keyword: debouncedSearchInput,
     size: 6,
     newsletterId: selectedNewsletterId
-      ? Number(selectedNewsletterId)
+      ? Number(selectedNewsletterId) - 1
       : undefined,
     page,
   };
@@ -30,7 +30,6 @@ export const useStorageFilters = () => {
   );
 
   const handleNewsletterChange = useCallback((id: number | null) => {
-    console.log(id);
     setSelectedNewsletterId(id);
   }, []);
 
@@ -47,7 +46,7 @@ export const useStorageFilters = () => {
   }, []);
 
   const resetPage = useCallback(() => {
-    setPage(0);
+    setPage(1);
   }, []);
 
   return {

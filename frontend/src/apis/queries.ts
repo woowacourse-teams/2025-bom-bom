@@ -11,6 +11,7 @@ import {
   getArticleBookmarkStatus,
   GetArticleBookmarkStatusParams,
   getBookmarks,
+  GetBookmarksParams,
   getBookmarksStatisticsNewsletters,
 } from './bookmark';
 import {
@@ -88,10 +89,10 @@ export const queries = {
     }),
 
   // bookmarks
-  bookmarks: () =>
+  bookmarks: (params?: GetBookmarksParams) =>
     queryOptions({
-      queryKey: ['bookmarks'],
-      queryFn: () => getBookmarks(),
+      queryKey: ['bookmarks', params],
+      queryFn: () => getBookmarks(params),
     }),
 
   articleBookmarkStatus: (params: GetArticleBookmarkStatusParams) =>

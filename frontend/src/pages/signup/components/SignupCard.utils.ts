@@ -5,20 +5,22 @@ const emailLocalRegex = /^[a-zA-Z0-9](?:[a-zA-Z0-9._-]{0,62}[a-zA-Z0-9])?$/; // 
 const consecutiveDots = /\.\./;
 
 export const validateNickname = (nickname: string): FieldError => {
-  const v = nickname.trim();
-  if (!v) return '닉네임을 입력해주세요.';
-  if (!nicknameRegex.test(v))
+  const trimmedNickname = nickname.trim();
+  if (!trimmedNickname) return '닉네임을 입력해주세요.';
+  if (!nicknameRegex.test(trimmedNickname))
     return '닉네임은 2–12자, 한글/영문/숫자/밑줄만 가능합니다.';
   return null;
 };
 
 export const validateEmailLocal = (emailLocal: string): FieldError => {
-  const v = emailLocal.trim();
-  if (!v) return '이메일을 입력해주세요.';
-  if (v.length > 64) return '이메일 로컬파트 길이는 64자 이하여야 합니다.';
-  if (consecutiveDots.test(v))
+  const trimmedEmailLocal = emailLocal.trim();
+  if (!trimmedEmailLocal) return '이메일을 입력해주세요.';
+  if (trimmedEmailLocal.length > 64)
+    return '이메일 로컬파트 길이는 64자 이하여야 합니다.';
+  if (consecutiveDots.test(trimmedEmailLocal))
     return '이메일에 연속된 마침표(..)는 사용할 수 없습니다.';
-  if (!emailLocalRegex.test(v)) return '이메일 형식이 올바르지 않습니다.';
+  if (!emailLocalRegex.test(trimmedEmailLocal))
+    return '이메일 형식이 올바르지 않습니다.';
   return null;
 };
 
@@ -37,26 +39,21 @@ export const validateBirthDate = (input: string): FieldError => {
   }
 
   const [yStr, mStr, dStr] = trimmedInput.split('-');
-  const y = Number(yStr);
-  const m = Number(mStr);
-  const d = Number(dStr);
+  const year = Number(yStr);
+  const month = Number(mStr);
+  const day = Number(dStr);
 
-  const dt = new Date(trimmedInput);
+  const inputDate = new Date(trimmedInput);
   const isValid =
-    !Number.isNaN(dt.getTime()) &&
-    dt.getUTCFullYear() === y &&
-    dt.getUTCMonth() + 1 === m &&
-    dt.getUTCDate() === d;
+    !Number.isNaN(inputDate.getTime()) &&
+    inputDate.getUTCFullYear() === year &&
+    inputDate.getUTCMonth() + 1 === month &&
+    inputDate.getUTCDate() === day;
   if (!isValid) return '존재하지 않는 날짜입니다.';
 
-  const today = new Date();
-  const todayYMD = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
-  ).getTime();
-  const dateYMD = new Date(y, m - 1, d).getTime();
-  if (dateYMD > todayYMD) return '미래 날짜는 입력할 수 없습니다.';
+  const today = Date.now();
+  const inputTime = inputDate.getTime();
+  if (inputTime > today) return '미래 날짜는 입력할 수 없습니다.';
 
   return null;
 };

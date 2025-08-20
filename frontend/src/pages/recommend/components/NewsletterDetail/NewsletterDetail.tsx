@@ -187,7 +187,6 @@ const ScrollableWrapper = styled.div<{ isMobile: boolean }>`
   flex-direction: column;
 
   overflow-y: auto;
-  overscroll-behavior: contain;
   scrollbar-gutter: stable;
 `;
 

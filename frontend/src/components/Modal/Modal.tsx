@@ -101,6 +101,5 @@ const ContentWrapper = styled.div<{ isBottom: boolean }>`
   align-items: center;
 
   overflow-y: auto;
-  overscroll-behavior: contain;
   scrollbar-gutter: stable;
 `;

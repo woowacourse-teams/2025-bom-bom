@@ -20,7 +20,11 @@ import {
   getHighlightStatisticsNewsletter,
 } from './highlight';
 import { getReadingStatus, getUserInfo } from './members';
-import { getNewsletters } from './newsLetters';
+import {
+  getNewsletterDetail,
+  GetNewsletterDetailParams,
+  getNewsletters,
+} from './newsLetters';
 
 export const queries = {
   // articles
@@ -79,6 +83,12 @@ export const queries = {
     queryOptions({
       queryKey: ['newsletters'],
       queryFn: getNewsletters,
+    }),
+
+  newsletterDetail: (params: GetNewsletterDetailParams) =>
+    queryOptions({
+      queryKey: ['newsletters', params.id],
+      queryFn: () => getNewsletterDetail(params),
     }),
 
   // highlights

@@ -19,8 +19,8 @@ const HeaderProfile = ({ deviceType }: HeaderProfileProps) => {
   const handleCopyEmail = () => {
     if (!userInfo?.email) return;
 
-    alert(`이메일이 복사되었습니다.`);
     copyToClipboard(userInfo?.email);
+    alert(`이메일이 복사되었습니다.`);
   };
 
   const isLoggedIn = isFetching || userInfo;

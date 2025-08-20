@@ -83,7 +83,7 @@ const Container = styled.aside<{ isOpen: boolean }>`
   position: fixed;
   top: 0;
   right: 0;
-  z-index: 40;
+  z-index: ${({ theme }) => theme.zIndex.panel};
   width: 342px;
   height: 100%;
   padding-top: 72px;

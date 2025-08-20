@@ -41,7 +41,7 @@ export default function Header({ activeNav }: HeaderProps) {
 const MobileHeaderContainer = styled.header`
   position: fixed;
   top: 0;
-  z-index: 100;
+  z-index: ${({ theme }) => theme.zIndex.header};
   width: 100%;
   height: calc(56px + env(safe-area-inset-top));
   padding: 8px 12px;
@@ -60,7 +60,7 @@ const MobileHeaderContainer = styled.header`
 const HeaderContainer = styled.header`
   position: fixed;
   top: 0;
-  z-index: 100;
+  z-index: ${({ theme }) => theme.zIndex.header};
   width: 100%;
   height: 72px;
   padding: 8px 16px;
@@ -101,7 +101,7 @@ const BottomNavWrapper = styled.nav`
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 100;
+  z-index: ${({ theme }) => theme.zIndex.header};
   height: calc(
     ${({ theme }) => theme.heights.bottomNav} + env(safe-area-inset-bottom)
   );

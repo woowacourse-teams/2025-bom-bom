@@ -6,7 +6,7 @@ import Button from '@/components/Button/Button';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { copyToClipboard } from '@/utils/copy';
-import { accessExternalLink } from '@/utils/externalLink';
+import { openExternalLink } from '@/utils/externalLink';
 import ArticleHistoryIcon from '#/assets/article-history.svg';
 import HomeIcon from '#/assets/home.svg';
 
@@ -35,16 +35,16 @@ const NewsletterDetail = ({
       alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
     }
 
-    accessExternalLink(newsletterDetail.subscribeUrl);
+    openExternalLink(newsletterDetail.subscribeUrl);
   };
 
-  const accessMainSite = () => {
-    accessExternalLink(newsletterDetail.mainPageUrl);
+  const openMainSite = () => {
+    openExternalLink(newsletterDetail.mainPageUrl);
   };
 
-  const accessPreviousLetters = () => {
+  const openPreviousLetters = () => {
     if (!newsletterDetail.previousNewsletterUrl) return;
-    accessExternalLink(newsletterDetail.previousNewsletterUrl);
+    openExternalLink(newsletterDetail.previousNewsletterUrl);
   };
 
   return (
@@ -80,13 +80,13 @@ const NewsletterDetail = ({
         <Description>{newsletterDetail.description}</Description>
 
         <LinkWrapper>
-          <DetailLink onClick={accessMainSite}>
+          <DetailLink onClick={openMainSite}>
             <HomeIcon width={18} height={18} />
             홈페이지
           </DetailLink>
 
           {newsletterDetail.previousNewsletterUrl && (
-            <DetailLink onClick={accessPreviousLetters}>
+            <DetailLink onClick={openPreviousLetters}>
               <ArticleHistoryIcon width={18} height={18} />
               지난 소식 보기
             </DetailLink>

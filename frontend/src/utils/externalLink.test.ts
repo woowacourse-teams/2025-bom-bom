@@ -1,6 +1,6 @@
-import { accessExternalLink } from './externalLink';
+import { openExternalLink } from './externalLink';
 
-describe('accessExternalLink', () => {
+describe('openExternalLink', () => {
   let mockOpen: jest.SpyInstance;
 
   beforeEach(() => {
@@ -14,7 +14,7 @@ describe('accessExternalLink', () => {
   it('매개변수로 받은 링크를 이용해 새 탭을 연다.', () => {
     const TEST_LINK = 'https://example.com';
 
-    accessExternalLink(TEST_LINK);
+    openExternalLink(TEST_LINK);
 
     expect(mockOpen).toHaveBeenCalledWith(
       TEST_LINK,
@@ -27,8 +27,8 @@ describe('accessExternalLink', () => {
     const LINK1 = 'https://example1.com';
     const LINK2 = 'https://example2.com';
 
-    accessExternalLink(LINK1);
-    accessExternalLink(LINK2);
+    openExternalLink(LINK1);
+    openExternalLink(LINK2);
 
     expect(mockOpen).toHaveBeenCalledTimes(2);
     expect(mockOpen).toHaveBeenNthCalledWith(

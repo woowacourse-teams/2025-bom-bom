@@ -12,9 +12,6 @@ public record MonthlyReadingRankResponse(
         int rank,
 
         @Schema(required = true)
-        int monthlyReadCount,
-
-        @Schema(required = true)
-        int weeklyReadCount
+        int monthlyReadCount
 ) {
 }

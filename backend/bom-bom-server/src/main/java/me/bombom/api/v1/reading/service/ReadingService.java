@@ -107,7 +107,6 @@ public class ReadingService {
         return WeeklyGoalCountResponse.from(weeklyReading);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public int calculateArticleScore(Long memberId) {
         int score = ScorePolicyConstants.ARTICLE_READING_SCORE;
         ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)

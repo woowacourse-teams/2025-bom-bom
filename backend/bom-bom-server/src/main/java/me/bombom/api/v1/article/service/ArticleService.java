@@ -10,6 +10,7 @@ import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
+import me.bombom.api.v1.article.event.MarkAsReadEvent;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -23,15 +24,12 @@ import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.pet.ScorePolicyConstants;
-import me.bombom.api.v1.pet.event.AddArticleScoreEvent;
 import me.bombom.api.v1.reading.domain.TodayReading;
-import me.bombom.api.v1.reading.event.UpdateReadingCountEvent;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -81,9 +79,8 @@ public class ArticleService {
         validateArticleOwner(article, member.getId());
         article.markAsRead();
 
-        applicationEventPublisher.publishEvent(new UpdateReadingCountEvent(member.getId(), articleId));
-        applicationEventPublisher.publishEvent(new AddArticleScoreEvent(member.getId()));
-        log.info("Published events: UpdateReadingCountEvent, AddArticleScoreEvent - memberId={}, articleId={}",
+        applicationEventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), articleId));
+        log.info("Published event: MarkAsReadEvent - memberId={}, articleId={}",
                 member.getId(), articleId);
     }
 
@@ -108,7 +105,6 @@ public class ArticleService {
         return ArticleNewsletterStatisticsResponse.of(totalCount, countResponse);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public boolean canAddArticleScore(Long memberId) {
         TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)

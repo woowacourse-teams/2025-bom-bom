@@ -31,6 +31,8 @@ const colors = {
 };
 
 const heights = {
+  headerPC: '72px',
+  headerMobile: '56px',
   bottomNav: '64px',
 };
 

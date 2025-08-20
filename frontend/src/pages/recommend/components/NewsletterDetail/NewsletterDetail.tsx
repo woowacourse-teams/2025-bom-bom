@@ -57,7 +57,7 @@ const NewsletterDetail = ({
             isMobile={isMobile}
           />
           <InfoBox>
-            <TitleWrapper>
+            <TitleWrapper isMobile={isMobile}>
               <NewsletterTitle isMobile={isMobile}>
                 {newsletterDetail.name}
               </NewsletterTitle>
@@ -214,9 +214,9 @@ const InfoBox = styled.div`
   flex-direction: column;
 `;
 
-const TitleWrapper = styled.div`
+const TitleWrapper = styled.div<{ isMobile: boolean }>`
   display: flex;
-  gap: 8px;
+  gap: ${({ isMobile }) => (isMobile ? '4px' : '8px')};
 `;
 
 const NewsletterTitle = styled.h2<{ isMobile: boolean }>`
@@ -226,8 +226,8 @@ const NewsletterTitle = styled.h2<{ isMobile: boolean }>`
 `;
 
 const StyledHomeIcon = styled(HomeIcon)<{ isMobile: boolean }>`
-  width: ${({ isMobile }) => (isMobile ? '8px' : '24px')};
-  height: ${({ isMobile }) => (isMobile ? '8px' : '24px')};
+  width: ${({ isMobile }) => (isMobile ? '20px' : '24px')};
+  height: ${({ isMobile }) => (isMobile ? '20px' : '24px')};
 
   fill: ${({ theme }) => theme.colors.primary};
 `;

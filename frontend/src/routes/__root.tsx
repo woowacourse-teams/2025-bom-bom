@@ -7,6 +7,7 @@ import { theme } from '../styles/theme';
 import { ENV } from '@/apis/env';
 import { usePageTracking } from '@/libs/googleAnalytics/usePageTracking';
 import { queryClient } from '@/main';
+import { initServiceWorkers } from '@/utils/serviceWorkerUtils';
 
 interface BomBomRouterContext {
   queryClient: QueryClient;
@@ -16,19 +17,8 @@ const RootComponent = () => {
   usePageTracking();
 
   useEffect(() => {
-    if (ENV.nodeEnv === 'production' && 'serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((registration) => {
-          console.log(
-            'Service Worker registered successfully:',
-            registration.scope,
-          );
-        })
-        .catch((error) => {
-          console.log('Service Worker registration failed:', error);
-        });
-    }
+    // 서비스 워커 충돌 방지 초기화
+    initServiceWorkers(ENV.enableMsw === 'true', ENV.nodeEnv === 'production');
   }, []);
 
   return (

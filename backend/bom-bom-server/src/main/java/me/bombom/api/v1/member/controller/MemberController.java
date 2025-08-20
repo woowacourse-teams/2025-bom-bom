@@ -21,4 +21,9 @@ public class MemberController implements MemberControllerApi{
     public MemberProfileResponse getMember(@LoginMember Member member) {
         return memberService.getProfile(member.getId());
     }
+
+    @GetMapping("/test")
+    public String test() {
+        return "test";
+    }
 }

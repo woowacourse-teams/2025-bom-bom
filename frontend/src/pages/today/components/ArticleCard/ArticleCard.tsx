@@ -123,7 +123,6 @@ const Title = styled.h2<{ isMobile: boolean }>`
   font-weight: 600;
 
   -webkit-box-orient: vertical;
-
   -webkit-line-clamp: 2;
 `;
 
@@ -136,7 +135,6 @@ const Description = styled.p<{ isMobile: boolean }>`
   font: ${({ theme }) => theme.fonts.body2};
 
   -webkit-box-orient: vertical;
-
   -webkit-line-clamp: 2;
 `;
 

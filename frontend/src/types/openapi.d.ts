@@ -276,6 +276,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/members/me/reading/month/rank': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 이달의 독서왕 조회
+     * @description 현재 읽기 카운트를 기준으로 내림차순하여 순위와 함께 조회합니다.
+     */
+    get: operations['getMonthlyReadingRank'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/members/me/pet': {
     parameters: {
       query?: never;
@@ -638,6 +658,13 @@ export interface components {
        */
       goalCount: number;
     };
+    MonthlyReadingRankResponse: {
+      nickname: string;
+      /** Format: int32 */
+      rank: number;
+      /** Format: int32 */
+      monthlyReadCount: number;
+    };
     PetResponse: {
       /**
        * Format: int32
@@ -794,28 +821,7 @@ export interface components {
       totalCount: number;
       newsletters: components['schemas']['BookmarkCountPerNewsletterResponse'][];
     };
-    /** @description 뉴스레터별 통계 */
-    GetBookmarkCountPerNewsletterResponse: {
-      /** @description 뉴스레터명 */
-      newsletter: string;
-      /** @description 이미지 url */
-      imageUrl: string;
-      /**
-       * Format: int64
-       * @description 아티클 수
-       */
-      count: number;
-    };
-    GetBookmarkNewsletterStatisticsResponse: {
-      /**
-       * Format: int32
-       * @description 전체 북마크 수
-       */
-      totalCount: number;
-      /** @description 뉴스레터별 통계 */
-      newsletters: components['schemas']['GetBookmarkCountPerNewsletterResponse'][];
-    };
-    GetArticlesOptions: {
+    ArticlesOptionsRequest: {
       /** Format: date */
       date?: string;
       /** Format: int64 */
@@ -1463,6 +1469,43 @@ export interface operations {
       };
     };
   };
+  getMonthlyReadingRank: {
+    parameters: {
+      query: {
+        /** @description 최대 조회 개수 (예: ?limit=10) */
+        limit: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 이달의 독서왕 조회 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['MonthlyReadingRankResponse'][];
+        };
+      };
+      /** @description 잘못된 요청 값 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 인증 실패 (로그인 필요) */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   getPet: {
     parameters: {
       query?: never;
@@ -1570,6 +1613,26 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['BookmarkStatusResponse'];
+        };
+      };
+    };
+  };
+  getBookmarkNewsletterStatistics: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 뉴스레터별 개수 조회 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['BookmarkNewsletterStatisticsResponse'];
         };
       };
     };

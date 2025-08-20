@@ -59,7 +59,7 @@ public class MemberService {
                 .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
             );
-        member.softDelete();
+        memberRepository.delete(member);
     }
 
     private void validateDuplicateEmail(String email) {

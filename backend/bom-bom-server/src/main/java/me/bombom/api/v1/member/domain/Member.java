@@ -18,16 +18,18 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import me.bombom.api.v1.common.BaseEntity;
 import me.bombom.api.v1.member.enums.Gender;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
+@SQLRestriction("deleted_at IS NULL")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE member SET deleted_at = now() WHERE id = ?")
 @Table(
         name = "member",
         uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "providerId"})
 )
-@SQLRestriction("deleted_at IS NULL")
 public class Member extends BaseEntity {
 
     @Id
@@ -83,11 +85,8 @@ public class Member extends BaseEntity {
         this.roleId = roleId;
     }
 
-    public void softDelete() {
-        this.deletedAt = LocalDateTime.now();
-    }
-
     public boolean isWithdrawnMember() {
         return this.deletedAt != null;
     }
 }
+

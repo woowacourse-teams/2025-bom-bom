@@ -185,6 +185,28 @@ export const handlers = [
     HIGHLIGHTS.splice(index, 1);
     return new HttpResponse(null, { status: 204 });
   }),
-  ...bookmarkHandlers,
+
+  // 뉴스레터별 하이라이트 통계
+  http.get(`${baseURL}/highlights/statistics/newsletters`, () => {
+    const newsletterStats = {
+      totalCount: 4,
+      newsletters: [
+        {
+          id: 1,
+          newsletter: '뉴닉',
+          imageUrl: 'https://newneek.co/favicon.ico',
+          count: 1,
+        },
+        {
+          id: 2,
+          newsletter: '디에디트',
+          imageUrl: 'https://newneek.co/favicon.ico',
+          count: 3,
+        },
+      ],
+    };
+    return HttpResponse.json(newsletterStats);
+  }),
   ...newsletterDetailHandlers,
+  ...bookmarkHandlers,
 ];

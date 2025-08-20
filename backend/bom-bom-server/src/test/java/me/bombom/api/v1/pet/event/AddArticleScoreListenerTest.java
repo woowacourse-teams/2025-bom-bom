@@ -2,11 +2,7 @@ package me.bombom.api.v1.pet.event;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
-import java.time.LocalDateTime;
-import java.util.List;
 import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.article.domain.Article;
-import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
@@ -18,7 +14,9 @@ import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.pet.repository.PetRepository;
 import me.bombom.api.v1.pet.repository.StageRepository;
 import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
+import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,9 +45,6 @@ public class AddArticleScoreListenerTest {
     private CategoryRepository categoryRepository;
 
     @Autowired
-    private ArticleRepository articleRepository;
-
-    @Autowired
     private PetRepository petRepository;
 
     @Autowired
@@ -57,6 +52,9 @@ public class AddArticleScoreListenerTest {
 
     @Autowired
     private ContinueReadingRepository continueReadingRepository;
+
+    @Autowired
+    private TodayReadingRepository todayReadingRepository;
 
     @Autowired
     private EntityManager entityManager;
@@ -81,13 +79,14 @@ public class AddArticleScoreListenerTest {
     @Test
     void 연속_읽기_보너스_점수와_아티클_점수를_받을_수_있는_경우() {
         // given
-        articleRepository.saveAll(List.of(
-                        createArticle(member.getId(), true, newsletter.getId(), LocalDateTime.now()),
-                        createArticle(member.getId(), true, newsletter.getId(), LocalDateTime.now()),
-                        createArticle(member.getId(), true, newsletter.getId(), LocalDateTime.now()),
-                        createArticle(member.getId(), false, newsletter.getId(), LocalDateTime.now())
-                )
+        todayReadingRepository.save(
+                TodayReading.builder()
+                        .memberId(member.getId())
+                        .currentCount(3)
+                        .totalCount(3)
+                        .build()
         );
+
         continueReadingRepository.save(
                 ContinueReading.builder()
                         .memberId(member.getId())
@@ -111,12 +110,12 @@ public class AddArticleScoreListenerTest {
     @Test
     void 아티클_점수만_받을_수_있는_경우() {
         // given
-        articleRepository.saveAll(List.of(
-                        createArticle(member.getId(), true, newsletter.getId(), LocalDateTime.now()),
-                        createArticle(member.getId(), true, newsletter.getId(), LocalDateTime.now()),
-                        createArticle(member.getId(), true, newsletter.getId(), LocalDateTime.now()),
-                        createArticle(member.getId(), false, newsletter.getId(), LocalDateTime.now())
-                )
+        todayReadingRepository.save(
+                TodayReading.builder()
+                        .memberId(member.getId())
+                        .currentCount(3)
+                        .totalCount(3)
+                        .build()
         );
         continueReadingRepository.save(
                 ContinueReading.builder()
@@ -141,12 +140,12 @@ public class AddArticleScoreListenerTest {
     @Test
     void 아티클_점수를_받을_수_없는_경우() {
         // given
-        articleRepository.saveAll(List.of(
-                        createArticle(member.getId(), true, newsletter.getId(), LocalDateTime.now()),
-                        createArticle(member.getId(), true, newsletter.getId(), LocalDateTime.now()),
-                        createArticle(member.getId(), true, newsletter.getId(), LocalDateTime.now()),
-                        createArticle(member.getId(), true, newsletter.getId(), LocalDateTime.now())
-                )
+        todayReadingRepository.save(
+                TodayReading.builder()
+                        .memberId(member.getId())
+                        .currentCount(4)
+                        .totalCount(3)
+                        .build()
         );
 
         TestTransaction.flagForCommit();
@@ -159,19 +158,5 @@ public class AddArticleScoreListenerTest {
         // then
         pet = petRepository.findById(pet.getId()).orElseThrow();
         Assertions.assertThat(pet.getCurrentScore()).isEqualTo(0);
-    }
-
-    private Article createArticle(Long memberId, boolean isRead, Long newsletterId, LocalDateTime arrivedTime) {
-        return Article.builder()
-                .title("title")
-                .contents("<h1>아티클</h1>")
-                .thumbnailUrl("https://example.com/images/thumb.png")
-                .expectedReadTime(5)
-                .contentsSummary("요약")
-                .isRead(isRead)
-                .memberId(memberId)
-                .newsletterId(newsletterId)
-                .arrivedDateTime(arrivedTime)
-                .build();
     }
 }

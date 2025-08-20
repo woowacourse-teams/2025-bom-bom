@@ -26,8 +26,8 @@ public class MemberService {
 
     @Transactional
     public Member signup(PendingOAuth2Member pendingMember, MemberSignupRequest signupRequest) {
-        validateDuplicateEmail(signupRequest.email());
         validateDuplicateNickname(signupRequest.nickname());
+        validateDuplicateEmail(signupRequest.email());
 
         Member newMember = Member.builder()
                 .provider(pendingMember.getProvider())

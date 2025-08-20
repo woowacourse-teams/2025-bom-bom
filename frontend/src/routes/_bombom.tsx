@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 import { DEFAULT_ERROR_MESSAGES } from '@/apis/constants/defaultErrorMessage';
+import { ENV } from '@/apis/env';
 import { queries } from '@/apis/queries';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import RequireLoginCard from '@/components/RequireLoginCard/RequireLoginCard';
@@ -15,9 +16,9 @@ export const Route = createFileRoute('/_bombom')({
       await queryClient.fetchQuery(queries.me());
     } catch {
       if (location.pathname !== '/recommend') {
-        if (isFirstVisit) {
-          return redirect({ to: '/recommend' });
-        }
+        if (ENV.enableMsw) return;
+        if (isFirstVisit) return redirect({ to: '/recommend' });
+
         throw new Response(DEFAULT_ERROR_MESSAGES[401], { status: 401 });
       }
     } finally {

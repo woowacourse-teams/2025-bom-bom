@@ -11,34 +11,87 @@ const baseURL = ENV.baseUrl;
 const HIGHLIGHTS: HighlightType[] = [];
 
 export const handlers = [
-  http.get(`${baseURL}/articles`, () => {
+  http.get(`${baseURL}/articles`, ({ request }) => {
+    const url = new URL(request.url);
+    const params = url.searchParams;
+
+    const page = Number(params.get('page') ?? '0');
+    const size = Number(params.get('size') ?? String(ARTICLES.length));
+    const sortParam = params.get('sort') ?? 'arrivedDateTime,DESC';
+    const [sortField, sortOrderRaw] = sortParam.split(',');
+    const sortOrder = (sortOrderRaw ?? 'DESC').toUpperCase();
+    const newsletter = params.get('newsletter') ?? undefined;
+    const keyword = params.get('keyword') ?? undefined;
+
+    let filteredArticles = [...ARTICLES];
+
+    if (newsletter) {
+      filteredArticles = filteredArticles.filter(
+        (article) =>
+          article.newsletter.name.toLowerCase() === newsletter.toLowerCase(),
+      );
+    }
+
+    if (keyword) {
+      const lower = keyword.toLowerCase();
+      filteredArticles = filteredArticles.filter(
+        (article) =>
+          article.title.toLowerCase().includes(lower) ||
+          article.newsletter.name.toLowerCase().includes(lower),
+      );
+    }
+
+    const toTime = (dateStr: string) => {
+      const parts = dateStr.split('.');
+      if (parts.length >= 3) {
+        const [y, m, d] = parts;
+        return new Date(`${y}-${m}-${d}`).getTime();
+      }
+      return new Date(dateStr).getTime();
+    };
+
+    if (sortField === 'arrivedDateTime') {
+      filteredArticles.sort((article1, article2) => {
+        const aTime = toTime(article1.arrivedDateTime);
+        const bTime = toTime(article2.arrivedDateTime);
+        return sortOrder === 'ASC' ? aTime - bTime : bTime - aTime;
+      });
+    }
+
+    const totalElements = filteredArticles.length;
+    const totalPages = size > 0 ? Math.ceil(totalElements / size) : 1;
+    const start = size > 0 ? page * size : 0;
+    const end = size > 0 ? start + size : filteredArticles.length;
+    const content =
+      size > 0 ? filteredArticles.slice(start, end) : filteredArticles;
+
     return HttpResponse.json({
-      totalPages: 1,
-      totalElements: ARTICLES.length,
-      first: true,
-      last: true,
-      size: ARTICLES.length,
-      content: ARTICLES,
-      number: 0,
+      totalPages,
+      totalElements,
+      first: page === 0,
+      last: page + 1 >= totalPages,
+      size,
+      content,
+      number: page,
       sort: {
-        empty: true,
-        unsorted: true,
-        sorted: true,
+        empty: !sortParam,
+        unsorted: !sortParam,
+        sorted: !!sortParam,
       },
       pageable: {
-        offset: 0,
+        offset: start,
         sort: {
-          empty: true,
-          unsorted: true,
-          sorted: true,
+          empty: !sortParam,
+          unsorted: !sortParam,
+          sorted: !!sortParam,
         },
-        unpaged: true,
+        unpaged: false,
         paged: true,
-        pageNumber: 0,
-        pageSize: ARTICLES.length,
+        pageNumber: page,
+        pageSize: size,
       },
-      numberOfElements: ARTICLES.length,
-      empty: ARTICLES.length === 0,
+      numberOfElements: content.length,
+      empty: content.length === 0,
     });
   }),
 
@@ -58,18 +111,28 @@ export const handlers = [
       totalCount: ARTICLES.length,
       newsletters: [
         {
-          newsletter: '테크뉴스',
-          count: 5,
-          imageUrl: 'https://newneek.co/favicon.ico',
-        },
-        {
-          newsletter: '개발자뉴스',
+          newsletter: 'UPPITY',
           count: 3,
           imageUrl: 'https://newneek.co/favicon.ico',
         },
         {
           newsletter: 'AI뉴스',
-          count: 2,
+          count: 1,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+        {
+          newsletter: '스타트업뉴스',
+          count: 1,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+        {
+          newsletter: '개발자뉴스',
+          count: 1,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+        {
+          newsletter: '테크뉴스',
+          count: 1,
           imageUrl: 'https://newneek.co/favicon.ico',
         },
       ],
@@ -82,13 +145,8 @@ export const handlers = [
       totalCount: 8,
       newsletters: [
         {
-          newsletter: '테크뉴스',
+          newsletter: 'UPPITY',
           count: 3,
-          imageUrl: 'https://newneek.co/favicon.ico',
-        },
-        {
-          newsletter: '개발자뉴스',
-          count: 2,
           imageUrl: 'https://newneek.co/favicon.ico',
         },
         {
@@ -98,7 +156,17 @@ export const handlers = [
         },
         {
           newsletter: '스타트업뉴스',
-          count: 2,
+          count: 1,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+        {
+          newsletter: '개발자뉴스',
+          count: 1,
+          imageUrl: 'https://newneek.co/favicon.ico',
+        },
+        {
+          newsletter: '테크뉴스',
+          count: 1,
           imageUrl: 'https://newneek.co/favicon.ico',
         },
       ],

@@ -57,20 +57,21 @@ const NewsletterDetail = ({
             isMobile={isMobile}
           />
           <InfoBox>
-            <NewsletterTitle isMobile={isMobile}>
-              {newsletterDetail.name}
-            </NewsletterTitle>
+            <TitleWrapper>
+              <NewsletterTitle isMobile={isMobile}>
+                {newsletterDetail.name}
+              </NewsletterTitle>
+              <DetailLink onClick={openMainSite}>
+                <StyledHomeIcon isMobile={isMobile} />
+              </DetailLink>
+            </TitleWrapper>
+
             <NewsletterInfo isMobile={isMobile}>
               <StyledBadge text={category} isMobile={isMobile} />
               <IssueCycle>{newsletterDetail.issueCycle}</IssueCycle>
             </NewsletterInfo>
 
             <LinkWrapper isMobile={isMobile}>
-              <DetailLink onClick={openMainSite}>
-                <HomeIcon width={16} height={16} />
-                홈페이지
-              </DetailLink>
-
               {newsletterDetail.previousNewsletterUrl && (
                 <DetailLink onClick={openPreviousLetters}>
                   <ArticleHistoryIcon width={16} height={16} />
@@ -91,7 +92,7 @@ const NewsletterDetail = ({
       <ScrollableWrapper isMobile={isMobile}>
         <Description>{newsletterDetail.description}</Description>
 
-        {deviceType !== 'mobile' && (
+        {!isMobile && (
           <SubscribeWrapper>
             <SubscribeHeader>
               <SubscribeTitle>구독 방법</SubscribeTitle>
@@ -196,8 +197,8 @@ const InfoWrapper = styled.div<{ isMobile: boolean }>`
 `;
 
 const NewsletterImage = styled(ImageWithFallback)<{ isMobile: boolean }>`
-  width: ${({ isMobile }) => (isMobile ? '88px' : '112px')};
-  height: ${({ isMobile }) => (isMobile ? '88px' : '112px')};
+  width: ${({ isMobile }) => (isMobile ? '88px' : '104px')};
+  height: ${({ isMobile }) => (isMobile ? '88px' : '104px')};
   border-radius: ${({ isMobile }) => (isMobile ? '12px' : '16px')};
 
   flex-shrink: 0;
@@ -213,10 +214,22 @@ const InfoBox = styled.div`
   flex-direction: column;
 `;
 
+const TitleWrapper = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
 const NewsletterTitle = styled.h2<{ isMobile: boolean }>`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme, isMobile }) =>
-    isMobile ? theme.fonts.heading5 : theme.fonts.heading4};
+    isMobile ? theme.fonts.heading4 : theme.fonts.heading3};
+`;
+
+const StyledHomeIcon = styled(HomeIcon)<{ isMobile: boolean }>`
+  width: ${({ isMobile }) => (isMobile ? '8px' : '24px')};
+  height: ${({ isMobile }) => (isMobile ? '8px' : '24px')};
+
+  fill: ${({ theme }) => theme.colors.primary};
 `;
 
 const NewsletterInfo = styled.div<{ isMobile: boolean }>`

@@ -2,28 +2,48 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useState } from 'react';
+import { FieldError } from './SignupCard.types';
+import {
+  formatBirthDate,
+  validateBirthDate,
+  validateEmailLocal,
+  validateNickname,
+} from './SignupCard.utils';
 import { postSignup } from '@/apis/auth';
 import InputField from '@/components/InputField/InputField';
 import { theme } from '@/styles/theme';
 import HelpIcon from '#/assets/help.svg';
 
 type Gender = 'MALE' | 'FEMALE';
+const EMAIL_DOMAIN = '@bombom.news';
 
 interface SignupCardProps {
   isMobile: boolean;
 }
 
 const SignupCard = ({ isMobile }: SignupCardProps) => {
+  const navigate = useNavigate();
   const [nickname, setNickname] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [emailPart, setEmailPart] = useState('');
   const [gender, setGender] = useState<Gender | null>(null);
   const [emailHelpOpen, setEmailHelpOpen] = useState(false);
 
-  const navigate = useNavigate();
+  const [nicknameError, setNicknameError] = useState<FieldError>(null);
+  const [birthDateError, setBirthDateError] = useState<FieldError>(null);
+  const [emailError, setEmailError] = useState<FieldError>(null);
 
-  const email = `${emailPart.trim()}@bombom.news`;
+  const email = `${emailPart.trim()}${EMAIL_DOMAIN}`;
+
+  const isFormValid =
+    !nicknameError &&
+    !birthDateError &&
+    !emailError &&
+    nickname &&
+    emailPart &&
+    birthDate &&
+    gender;
 
   const { mutate: mutateSignup } = useMutation({
     mutationKey: ['signup', nickname, email, gender],
@@ -32,11 +52,35 @@ const SignupCard = ({ isMobile }: SignupCardProps) => {
         nickname: nickname.trim(),
         email,
         gender: gender ?? 'MALE',
+        birthDate: birthDate,
       }),
     onSuccess: () => {
       navigate({ to: '/' });
     },
   });
+
+  const handleNicknameBlur = () => {
+    setNicknameError(validateNickname(nickname));
+  };
+
+  const handleEmailBlur = () => {
+    setEmailError(validateEmailLocal(emailPart));
+  };
+
+  const handleBirthDateBlur = () => {
+    setBirthDateError(validateBirthDate(birthDate));
+  };
+
+  const handleBirthDateChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const target = e.currentTarget;
+    const formatted = formatBirthDate(target.value);
+    setBirthDate(formatted);
+    if (birthDateError) setBirthDateError(null);
+  };
+
+  const handleGenderChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setGender(e.target.value as Gender);
+  };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -59,6 +103,8 @@ const SignupCard = ({ isMobile }: SignupCardProps) => {
           label="닉네임"
           inputValue={nickname}
           onInputChange={(e) => setNickname(e.target.value)}
+          onBlur={handleNicknameBlur}
+          errorString={nicknameError}
           placeholder="닉네임을 입력해주세요"
         />
 
@@ -66,8 +112,10 @@ const SignupCard = ({ isMobile }: SignupCardProps) => {
           name="생년월일"
           label="생년월일"
           inputValue={birthDate}
-          onInputChange={(e) => setBirthDate(e.target.value)}
-          placeholder="YYYY/MM/DD"
+          onInputChange={handleBirthDateChange}
+          onBlur={handleBirthDateBlur}
+          errorString={birthDateError}
+          placeholder="YYYY-MM-DD"
         />
 
         <InputField
@@ -95,7 +143,7 @@ const SignupCard = ({ isMobile }: SignupCardProps) => {
                 open={emailHelpOpen}
               >
                 봄봄은 <b>개인 메일</b>이 아닌 <b>봄봄 전용 메일</b>(
-                <b>@bombom.news</b>)로 뉴스레터를 <b>수신</b>해요.
+                <b>{EMAIL_DOMAIN}</b>)로 뉴스레터를 <b>수신</b>해요.
                 <br />- 뉴스레터 전용이라 깔끔하게 관리돼요.
                 <br />- 구독/알림/차단 같은 관리 기능에 이 주소를 사용해요.
                 <br />- 일반 메일 송수신은 지원하지 않아요. (수신 전용)
@@ -104,8 +152,10 @@ const SignupCard = ({ isMobile }: SignupCardProps) => {
           }
           inputValue={emailPart}
           onInputChange={(e) => setEmailPart(e.target.value)}
+          onBlur={handleEmailBlur}
+          errorString={emailError}
           placeholder="이메일을 입력해주세요"
-          suffix={<Suffix>@bombom.news</Suffix>}
+          suffix={<Suffix>{EMAIL_DOMAIN}</Suffix>}
         />
 
         <FieldGroup>
@@ -118,7 +168,7 @@ const SignupCard = ({ isMobile }: SignupCardProps) => {
                 value="MALE"
                 type="radio"
                 checked={gender === 'MALE'}
-                onChange={(e) => setGender(e.target.value as Gender)}
+                onChange={handleGenderChange}
               />
               <RadioButtonLabel
                 selected={gender === 'MALE'}
@@ -147,7 +197,9 @@ const SignupCard = ({ isMobile }: SignupCardProps) => {
           </RadioGroup>
         </FieldGroup>
 
-        <SubmitButton type="submit">회원가입</SubmitButton>
+        <SubmitButton type="submit" disabled={!isFormValid}>
+          회원가입
+        </SubmitButton>
       </SignupForm>
     </Container>
   );

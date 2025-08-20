@@ -122,18 +122,16 @@ public class ReadingService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateReadingCount(Long memberId, boolean isTodayArticle) {
-        // TODO: 규칙 확정 후 연속 읽기 로직 수정
         if (isTodayArticle) {
             updateContinueReadingCount(memberId);
             updateTodayReadingCount(memberId);
+            updateWeeklyReadingCount(memberId);
         }
-        updateWeeklyReadingCount(memberId);
         updateMonthlyReadingCount(memberId);
     }
 
     @Transactional
     public void updateReadingCountForGuideMail(Long memberId) {
-        // TODO: 규칙 확정 후 연속 읽기 로직 수정
         updateContinueReadingCount(memberId);
         updateTodayReadingCount(memberId);
         updateWeeklyReadingCount(memberId);

@@ -75,7 +75,7 @@ export default MemoPage;
 const Container = styled.div`
   width: 100%;
   max-width: 1280px;
-  padding: 64px 0;
+  padding: 0 16px;
 
   display: flex;
   align-items: flex-start;

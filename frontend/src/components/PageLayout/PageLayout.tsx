@@ -39,8 +39,6 @@ const Container = styled.div`
   width: 100%;
   min-height: 100vh;
   padding: 72px 0; /* header 높이 */
-  padding-right: 16px;
-  padding-left: 16px;
 
   display: flex;
   flex-direction: column;

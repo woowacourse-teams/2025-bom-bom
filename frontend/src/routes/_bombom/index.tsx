@@ -68,9 +68,7 @@ const Container = styled.div<{ deviceType: DeviceType }>`
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: ${({ deviceType }) => (deviceType === 'mobile' ? '0px' : '24px')};
-  padding-top: ${({ deviceType }) =>
-    deviceType === 'mobile' ? '0px' : '64px'};
+  padding: ${({ deviceType }) => (deviceType === 'mobile' ? '0 16px' : '24px')};
 
   display: flex;
   gap: 24px;

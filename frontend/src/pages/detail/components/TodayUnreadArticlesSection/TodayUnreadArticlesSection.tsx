@@ -49,12 +49,12 @@ const TodayArticleTitle = styled.h3`
   align-self: flex-start;
 
   color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.heading4};
+  font: ${({ theme }) => theme.fonts.heading5};
 `;
 
 const TodayArticleList = styled.div`
   display: grid;
   gap: 20px;
 
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(1, 1fr);
 `;

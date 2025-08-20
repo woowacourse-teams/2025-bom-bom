@@ -79,8 +79,7 @@ function ArticleDetailPage() {
 const Container = styled.div`
   max-width: 700px;
   margin: 0 auto;
-  margin-top: 20px;
-  padding: 28px;
+  padding: 8px;
   border-right: 1px solid ${({ theme }) => theme.colors.stroke};
   border-left: 1px solid ${({ theme }) => theme.colors.stroke};
 

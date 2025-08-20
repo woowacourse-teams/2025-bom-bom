@@ -3,14 +3,17 @@ import { createFileRoute } from '@tanstack/react-router';
 import NewsletterHero from '../../pages/recommend/components/ReadingKingLeaderboard/NewsletterHero/NewsletterHero';
 import ReadingKingLeaderboard from '../../pages/recommend/components/ReadingKingLeaderboard/ReadingKingLeaderboard';
 import TrendySection from '../../pages/recommend/components/ReadingKingLeaderboard/TrendySection/TrendySection';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 
 export const Route = createFileRoute('/_bombom/recommend')({
   component: Recommend,
 });
 
 function Recommend() {
+  const deviceType = useDeviceType();
+
   return (
-    <Container>
+    <Container deviceType={deviceType}>
       <MainSection>
         <NewsletterHero />
         <TrendySection />
@@ -22,10 +25,10 @@ function Recommend() {
   );
 }
 
-const Container = styled.div`
+const Container = styled.div<{ deviceType: DeviceType }>`
   width: 100%;
   max-width: 1280px;
-  padding: 64px 20px 0;
+  padding: ${({ deviceType }) => (deviceType === 'mobile' ? '0 16px' : '24px')};
 
   display: flex;
   gap: 24px;

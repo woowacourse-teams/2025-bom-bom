@@ -1,3 +1,5 @@
+import { components } from '@/types/openapi';
+
 export interface HighlightType {
   id: number;
   color: string;
@@ -10,4 +12,10 @@ export interface HighlightType {
   articleId: number;
   text: string;
   memo: string;
+  newsletterName: string;
+  newsletterImageUrl: string;
+  articleTitle: string;
+  createdAt: string;
 }
+
+export type Highlight = components['schemas']['HighlightResponse'];

@@ -18,8 +18,8 @@ const meta = {
       control: 'object',
       description: '카테고리 목록',
     },
-    selectedNewsletter: {
-      control: 'text',
+    selectedNewsletterId: {
+      control: 'number',
       description: '선택된 카테고리',
     },
     onSelectNewsletter: {
@@ -29,18 +29,18 @@ const meta = {
   },
   args: {
     newsLetterList: [
-      { newsletter: '기술', count: 1, imageUrl: '' },
-      { newsletter: '경제', count: 2, imageUrl: '' },
-      { newsletter: '디자인', count: 3, imageUrl: '' },
-      { newsletter: '마케팅', count: 4, imageUrl: '' },
-      { newsletter: '비즈니스', count: 5, imageUrl: '' },
-      { newsletter: '문화', count: 3, imageUrl: '' },
-      { newsletter: '건강', count: 2, imageUrl: '' },
-      { newsletter: '여행', count: 1, imageUrl: '' },
-      { newsletter: '푸드', count: 3, imageUrl: '' },
-      { newsletter: '교육', count: 0, imageUrl: '' },
+      { name: '기술', articleCount: 1, imageUrl: '' },
+      { name: '경제', articleCount: 2, imageUrl: '' },
+      { name: '디자인', articleCount: 3, imageUrl: '' },
+      { name: '마케팅', articleCount: 4, imageUrl: '' },
+      { name: '비즈니스', articleCount: 5, imageUrl: '' },
+      { name: '문화', articleCount: 3, imageUrl: '' },
+      { name: '건강', articleCount: 2, imageUrl: '' },
+      { name: '여행', articleCount: 1, imageUrl: '' },
+      { name: '푸드', articleCount: 3, imageUrl: '' },
+      { name: '교육', articleCount: 0, imageUrl: '' },
     ],
-    selectedNewsletter: '전체',
+    selectedNewsletterId: null,
     onSelectNewsletter: () => {},
   },
 } satisfies Meta<typeof NewsletterFilter>;
@@ -50,16 +50,17 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => {
-    const { selectedNewsletter: initialNewsletter, ...rest } = args;
-    const [currentSelected, setCurrentSelected] =
-      useState<string>(initialNewsletter);
+    const { selectedNewsletterId: initialNewsletterId, ...rest } = args;
+    const [currentSelected, setCurrentSelected] = useState<number | null>(
+      initialNewsletterId,
+    );
 
     return (
       <NewsletterFilter
         {...rest}
-        selectedNewsletter={currentSelected}
-        onSelectNewsletter={(id: string | number) => {
-          setCurrentSelected(String(id));
+        selectedNewsletterId={currentSelected}
+        onSelectNewsletter={(id: number | null) => {
+          setCurrentSelected(id);
         }}
       />
     );

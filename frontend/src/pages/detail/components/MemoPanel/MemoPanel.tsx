@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { HighlightType } from '../../types/highlight';
-import MemoCard from '../MemoCard/MemoCard';
+import { Highlight } from '../../types/highlight';
+import EditableMemoCard from '../MemoCard/EditableMemoCard';
 import ChevronIcon from '@/components/icons/ChevronIcon';
 import { theme } from '@/styles/theme';
 import CloseIcon from '#/assets/close.svg';
@@ -8,7 +8,7 @@ import MemoIcon from '#/assets/memo.svg';
 
 interface MemoPanelProps {
   open: boolean;
-  memos: HighlightType[];
+  memos: Highlight[];
   removeHighlight: (id: number) => void;
   updateMemo: (id: number, memo: string) => void;
   handleClose: () => void;
@@ -61,8 +61,8 @@ const MemoPanel = ({
             </HeaderTitleCaption>
           </EmptyWrapper>
         ) : (
-          memos.map((note) => (
-            <MemoCard
+          memos?.map((note) => (
+            <EditableMemoCard
               key={note.id}
               id={note.id}
               content={note.text}

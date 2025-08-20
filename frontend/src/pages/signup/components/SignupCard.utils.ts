@@ -1,7 +1,7 @@
 import { FieldError, Gender } from './SignupCard.types';
 
-const nicknameRegex = /^[가-힣a-zA-Z0-9_]{2,12}$/; // 2-12자, 허용 문자만
-const emailLocalRegex = /^[a-zA-Z0-9](?:[a-zA-Z0-9._-]{0,62}[a-zA-Z0-9])?$/; // 시작/끝 영숫자
+const nicknameRegex = /^[가-힣a-zA-Z0-9_]{2,12}$/;
+const emailLocalRegex = /^[A-Za-z0-9._-]{3,30}$/;
 const consecutiveDots = /\.\./;
 
 export const validateNickname = (nickname: string): FieldError => {

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 
 public record ArticleCountPerNewsletterResponse(
+        @NotNull
         Long id,
 
         @NotNull
@@ -18,6 +19,11 @@ public record ArticleCountPerNewsletterResponse(
 ) {
 
     public static ArticleCountPerNewsletterResponse of(Newsletter newsletter, int count) {
-        return new ArticleCountPerNewsletterResponse(newsletter.getId(), newsletter.getName(), newsletter.getImageUrl(), count);
+        return new ArticleCountPerNewsletterResponse(
+                newsletter.getId(),
+                newsletter.getName(),
+                newsletter.getImageUrl(),
+                count
+        );
     }
 }

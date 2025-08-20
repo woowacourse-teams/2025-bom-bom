@@ -13,6 +13,8 @@ export const Route = createFileRoute('/_bombom/guide')({
 function GuidePage() {
   const guideArticles = createStorage<Article[], string>('guide-mail').get();
 
+  if (!guideArticles) return null;
+
   return (
     <Container>
       <TitleWrapper>

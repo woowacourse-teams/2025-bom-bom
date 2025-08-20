@@ -115,8 +115,7 @@ const ContentWrapper = styled.div<{ isPC: boolean }>`
 `;
 
 const SidebarSection = styled.div<{ isPC: boolean }>`
-  width: 320px;
-  min-width: ${({ isPC }) => (isPC ? 320 : '100%')}px;
+  width: ${({ isPC }) => (isPC ? '320px' : '100%')};
 
   display: flex;
   gap: 20px;

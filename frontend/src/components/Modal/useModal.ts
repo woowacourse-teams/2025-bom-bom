@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
-import useKeydownEscape from '@/hooks/useKeydownEscapeRef';
+import useKeydownEscape from '@/hooks/useKeydownEscape';
 
 const useModal = () => {
   const [isOpen, setIsOpen] = useState(false);

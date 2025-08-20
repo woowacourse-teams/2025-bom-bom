@@ -17,11 +17,9 @@ function MemoPage() {
 
   const {
     selectedNewsletterId,
-    sortFilter,
     baseQueryParams,
     newletterCounts,
     handleNewsletterChange,
-    handleSortChange,
     handlePageChange,
     page,
     resetPage,
@@ -61,8 +59,6 @@ function MemoPage() {
           <MainContentSection isPC={isPC}>
             <PCMemoContent
               baseQueryParams={baseQueryParams}
-              sortFilter={sortFilter}
-              onSortChange={handleSortChange}
               onPageChange={handlePageChange}
               page={page}
               resetPage={resetPage}

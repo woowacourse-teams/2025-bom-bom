@@ -4,14 +4,11 @@ import { useNavigate } from '@tanstack/react-router';
 import { GetHighlightsParams } from '@/apis/highlight';
 import { queries } from '@/apis/queries';
 import Pagination from '@/components/Pagination/Pagination';
-import Select from '@/components/Select/Select';
 import ReadOnlyMemoCard from '@/pages/detail/components/MemoCard/ReadOnlyMemoCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 
 interface PCMemoContentProps {
   baseQueryParams: GetHighlightsParams;
-  sortFilter: 'DESC' | 'ASC';
-  onSortChange: (value: 'DESC' | 'ASC') => void;
   onPageChange: (page: number) => void;
   page: number;
   resetPage: () => void;
@@ -19,8 +16,6 @@ interface PCMemoContentProps {
 
 export default function PCMemoContent({
   baseQueryParams,
-  sortFilter,
-  onSortChange,
   onPageChange,
   page,
 }: PCMemoContentProps) {
@@ -45,14 +40,6 @@ export default function PCMemoContent({
     <>
       <SummaryBar>
         <ResultsInfo>총 {totalElements}개의 메모</ResultsInfo>
-        <Select
-          options={[
-            { value: 'DESC', label: '최신순' },
-            { value: 'ASC', label: '오래된순' },
-          ]}
-          selectedValue={sortFilter}
-          onSelectOption={onSortChange}
-        />
       </SummaryBar>
 
       <MemoList>

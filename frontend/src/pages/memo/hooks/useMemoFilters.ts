@@ -6,11 +6,9 @@ export const useMemoFilters = () => {
   const [selectedNewsletterId, setSelectedNewsletterId] = useState<
     number | null
   >(null);
-  const [sortFilter, setSortFilter] = useState<'DESC' | 'ASC'>('DESC');
   const [page, setPage] = useState(0);
 
   const baseQueryParams = {
-    sort: ['createdAt', sortFilter],
     keyword: '',
     size: 12,
     newsletterId: selectedNewsletterId
@@ -27,10 +25,6 @@ export const useMemoFilters = () => {
     setSelectedNewsletterId(id);
   }, []);
 
-  const handleSortChange = useCallback((value: 'DESC' | 'ASC') => {
-    setSortFilter(value);
-  }, []);
-
   const handlePageChange = useCallback((value: number) => {
     setPage(value);
   }, []);
@@ -41,11 +35,9 @@ export const useMemoFilters = () => {
 
   return {
     selectedNewsletterId,
-    sortFilter,
     baseQueryParams,
     newletterCounts,
     handleNewsletterChange,
-    handleSortChange,
     handlePageChange,
     resetPage,
     page,

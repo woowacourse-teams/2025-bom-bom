@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,6 +18,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import me.bombom.api.v1.common.BaseEntity;
 import me.bombom.api.v1.member.enums.Gender;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
@@ -25,6 +27,7 @@ import me.bombom.api.v1.member.enums.Gender;
         name = "member",
         uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "providerId"})
 )
+@SQLRestriction("deleted_at IS NULL")
 public class Member extends BaseEntity {
 
     @Id
@@ -55,6 +58,8 @@ public class Member extends BaseEntity {
     @Column(nullable = false, columnDefinition = "BIGINT")
     private Long roleId = 0L;
 
+    private LocalDateTime deletedAt;
+
     @Builder
     public Member(
             Long id,
@@ -77,5 +82,12 @@ public class Member extends BaseEntity {
         this.gender = gender;
         this.roleId = roleId;
     }
-}
 
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    public boolean isWithdrawnMember() {
+        return this.deletedAt != null;
+    }
+}

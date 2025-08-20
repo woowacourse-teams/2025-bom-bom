@@ -52,6 +52,16 @@ public class MemberService {
         return MemberProfileResponse.from(member);
     }
 
+    @Transactional
+    public void withdraw(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
+            );
+        member.softDelete();
+    }
+
     private void validateDuplicateEmail(String email) {
         if (memberRepository.existsByEmail(email)) {
             throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_EMAIL)

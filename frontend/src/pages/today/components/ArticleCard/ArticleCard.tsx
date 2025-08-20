@@ -82,11 +82,7 @@ const Container = styled(Link)<{
   readVariant: ReadVariantType;
   isMobile: boolean;
 }>`
-  padding: ${({ isMobile }) => (isMobile ? '16px' : '20px')};
-  border-bottom: ${({ theme, isRead }) =>
-    `${isRead ? '0' : '4px'} solid ${theme.colors.primary}`};
-  border-radius: ${({ isMobile }) => (isMobile ? '16px' : '20px')};
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%);
+  padding: ${({ isMobile }) => (isMobile ? '8px 0' : '20px')};
 
   display: flex;
   gap: ${({ isMobile }) => (isMobile ? '8px' : '12px')};
@@ -101,6 +97,14 @@ const Container = styled(Link)<{
     isRead && readVariant === 'transparent' ? 0.5 : 1};
 
   text-decoration: none;
+
+  ${({ isMobile, isRead, theme }) =>
+    !isMobile &&
+    `
+    border-bottom: ${isRead ? '0' : '4px'} solid ${theme.colors.primary};
+    border-radius: 20px;
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%);
+  `};
 `;
 
 const InfoWrapper = styled.div<{ isMobile: boolean }>`
@@ -129,7 +133,7 @@ const Title = styled.h2<{ isMobile: boolean }>`
 const Description = styled.p<{ isMobile: boolean }>`
   overflow: hidden;
 
-  display: ${({ isMobile }) => (isMobile ? 'none' : '-webkit-box')};
+  display: -webkit-box;
 
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body2};
@@ -162,7 +166,7 @@ const ThumbnailWrapper = styled.div<{ isMobile: boolean }>`
 `;
 
 const Thumbnail = styled(ImageWithFallback)<{ isMobile: boolean }>`
-  width: ${({ isMobile }) => (isMobile ? '80px' : '126px')};
+  width: ${({ isMobile }) => (isMobile ? '64px' : '126px')};
   border-radius: ${({ isMobile }) => (isMobile ? '8px' : '12px')};
 
   flex-shrink: 0;

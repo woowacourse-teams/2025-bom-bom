@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import ArticleCard from '../ArticleCard/ArticleCard';
 import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
 import { Article } from '@/types/articles';
 import CheckIcon from '#/assets/check.svg';
@@ -17,6 +17,8 @@ interface ArticleCardListProps {
 
 const ArticleCardList = ({ articles }: ArticleCardListProps) => {
   const deviceType = useDeviceType();
+  const isMobile = deviceType === 'mobile';
+
   const grouped = articles.reduce<{
     read: ExtendedArticle[];
     unread: ExtendedArticle[];
@@ -33,51 +35,61 @@ const ArticleCardList = ({ articles }: ArticleCardListProps) => {
     return <EmptyLetterCard title="새로운 뉴스레터가 없어요" />;
 
   return (
-    <Container>
-      <ListTitleBox>
-        <LetterIcon width={32} height={32} color={theme.colors.white} />
-        <ListTitle>새로운 뉴스레터 ({grouped.unread.length}개)</ListTitle>
-      </ListTitleBox>
-      <CardList deviceType={deviceType}>
-        {grouped.unread.map((article) => (
-          <li key={article.articleId}>
-            <ArticleCard
-              data={article}
-              to={
-                article.type === 'guide'
-                  ? `/articles/guide/${article.articleId}`
-                  : `/articles/${article.articleId}`
-              }
-            />
-          </li>
-        ))}
-      </CardList>
-      {grouped.read.length > 0 && (
+    <Container isMobile={isMobile}>
+      <LettersWrapper isMobile={isMobile}>
         <ListTitleBox>
-          <CheckIcon width={32} height={32} color={theme.colors.black} />
-          <ListTitle>읽은 뉴스레터 ({grouped.read.length}개)</ListTitle>
+          <LetterIcon width={32} height={32} color={theme.colors.white} />
+          <ListTitle>새로운 뉴스레터 ({grouped.unread.length}개)</ListTitle>
         </ListTitleBox>
-      )}
-      <CardList deviceType={deviceType}>
-        {grouped.read.map((article) => (
-          <li key={article.articleId}>
-            <ArticleCard data={article} />
-          </li>
-        ))}
-      </CardList>
+        <CardList isMobile={isMobile}>
+          {grouped.unread.map((article) => (
+            <li key={article.articleId}>
+              <ArticleCard
+                data={article}
+                to={
+                  article.type === 'guide'
+                    ? `/articles/guide/${article.articleId}`
+                    : `/articles/${article.articleId}`
+                }
+              />
+            </li>
+          ))}
+        </CardList>
+      </LettersWrapper>
+      <LettersWrapper isMobile={isMobile}>
+        {grouped.read.length > 0 && (
+          <ListTitleBox>
+            <CheckIcon width={32} height={32} color={theme.colors.black} />
+            <ListTitle>읽은 뉴스레터 ({grouped.read.length}개)</ListTitle>
+          </ListTitleBox>
+        )}
+        <CardList isMobile={isMobile}>
+          {grouped.read.map((article) => (
+            <li key={article.articleId}>
+              <ArticleCard data={article} />
+            </li>
+          ))}
+        </CardList>
+      </LettersWrapper>
     </Container>
   );
 };
 
 export default ArticleCardList;
 
-const Container = styled.div`
+const Container = styled.div<{ isMobile: boolean }>`
   width: 100%;
 
   display: flex;
-  gap: 16px;
+  gap: ${({ isMobile }) => (isMobile ? '24px' : '48px')};
   flex-direction: column;
   align-items: flex-start;
+`;
+
+const LettersWrapper = styled.div<{ isMobile: boolean }>`
+  display: flex;
+  gap: ${({ isMobile }) => (isMobile ? '8px' : '24px')};
+  flex-direction: column;
 `;
 
 const ListTitleBox = styled.div`
@@ -91,15 +103,15 @@ const ListTitle = styled.h5`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const CardList = styled.ul<{ deviceType: DeviceType }>`
+const CardList = styled.ul<{ isMobile: boolean }>`
   width: 100%;
 
   display: flex;
-  gap: ${({ deviceType }) => (deviceType === 'mobile' ? '0' : '16px')};
+  gap: ${({ isMobile }) => (isMobile ? '0' : '16px')};
   flex-direction: column;
 
-  ${({ deviceType, theme }) =>
-    deviceType === 'mobile' &&
+  ${({ isMobile, theme }) =>
+    isMobile &&
     `
     li {
       padding: 8px 0;

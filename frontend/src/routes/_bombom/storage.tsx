@@ -95,7 +95,6 @@ function Storage() {
 const Container = styled.div`
   width: 100%;
   max-width: 1280px;
-  padding: 64px 24px;
 
   display: flex;
   gap: 24px;

@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { useRouterState } from '@tanstack/react-router';
 import { PropsWithChildren, useEffect, useRef } from 'react';
 import Header from '../Header/Header';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import { NavType } from '@/types/nav';
 
 const navMap: Record<string, NavType> = {
@@ -14,6 +15,8 @@ const PageLayout = ({ children }: PropsWithChildren) => {
   const location = useRouterState({
     select: (state) => state.location.pathname,
   });
+  const deviceType = useDeviceType();
+  const isMobile = deviceType === 'mobile';
 
   const previousNavRef = useRef<NavType>('today');
 
@@ -26,7 +29,7 @@ const PageLayout = ({ children }: PropsWithChildren) => {
   const activeNav = navMap[location] || previousNavRef.current;
 
   return (
-    <Container>
+    <Container isMobile={isMobile}>
       <Header activeNav={activeNav} />
       {children}
     </Container>
@@ -35,12 +38,22 @@ const PageLayout = ({ children }: PropsWithChildren) => {
 
 export default PageLayout;
 
-const Container = styled.div`
+const Container = styled.div<{ isMobile: boolean }>`
   width: 100%;
   min-height: 100vh;
-  padding: 72px 0; /* header 높이 */
-  padding-right: 16px;
-  padding-left: 16px;
+  padding: ${({ isMobile, theme }) => {
+    const sidePadding = isMobile ? '12px' : '24px';
+    const headerHeight = isMobile
+      ? theme.heights.headerMobile
+      : theme.heights.headerPC;
+
+    const topPadding = `calc(${headerHeight} + env(safe-area-inset-top) + ${sidePadding})`;
+    const bottomPadding = isMobile
+      ? `calc(${theme.heights.bottomNav} + env(safe-area-inset-bottom) + ${sidePadding})`
+      : `calc(env(safe-area-inset-bottom) + ${sidePadding})`;
+
+    return `${topPadding} ${sidePadding} ${bottomPadding} ${sidePadding}`;
+  }};
 
   display: flex;
   flex-direction: column;

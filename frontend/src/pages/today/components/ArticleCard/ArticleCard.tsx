@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
+import { ComponentProps } from 'react';
 import Badge from '@/components/Badge/Badge';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
@@ -9,12 +10,17 @@ import ClockIcon from '#/assets/clock.svg';
 
 type ReadVariantType = 'transparent' | 'badge';
 
-interface ArticleCardProps {
+interface ArticleCardProps extends ComponentProps<typeof Link> {
   data: components['schemas']['ArticleResponse'];
   readVariant?: ReadVariantType;
 }
 
-function ArticleCard({ data, readVariant = 'transparent' }: ArticleCardProps) {
+function ArticleCard({
+  data,
+  readVariant = 'transparent',
+  to,
+  ...props
+}: ArticleCardProps) {
   const {
     articleId,
     title,
@@ -30,7 +36,7 @@ function ArticleCard({ data, readVariant = 'transparent' }: ArticleCardProps) {
     <Container
       isRead={isRead ?? false}
       readVariant={readVariant}
-      to={`/articles/${articleId}`}
+      to={to ?? `/articles/${articleId}`}
       onClick={() => {
         trackEvent({
           category: 'Article',
@@ -38,6 +44,7 @@ function ArticleCard({ data, readVariant = 'transparent' }: ArticleCardProps) {
           label: `${newsletter?.name} - [${articleId}]${title}`,
         });
       }}
+      {...props}
     >
       <InfoWrapper>
         <Title>{title}</Title>

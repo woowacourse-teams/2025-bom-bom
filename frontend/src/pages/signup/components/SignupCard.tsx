@@ -5,7 +5,10 @@ import { useNavigate } from '@tanstack/react-router';
 import { FormEvent, useState } from 'react';
 import { postSignup } from '@/apis/auth';
 import InputField from '@/components/InputField/InputField';
+import { GUIDE_MAILS } from '@/mocks/datas/guideMail';
 import { theme } from '@/styles/theme';
+import { formatDate } from '@/utils/date';
+import { createStorage } from '@/utils/localStorage';
 import HelpIcon from '#/assets/help.svg';
 
 type Gender = 'MALE' | 'FEMALE';
@@ -38,9 +41,18 @@ const SignupCard = ({ isMobile }: SignupCardProps) => {
     },
   });
 
+  const addGuideMail = () => {
+    const guideMail = GUIDE_MAILS.map((mail) => ({
+      ...mail,
+      createdAt: formatDate(new Date()),
+    }));
+    createStorage('guide-mail').set(guideMail);
+  };
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     mutateSignup();
+    addGuideMail();
   };
 
   const openEmailHelp = () => setEmailHelpOpen(true);

@@ -16,7 +16,7 @@ const storage = window.localStorage;
 
 export const createStorage = <T extends SerializableType, K extends string>(
   key: K,
-  defaultData: T,
+  defaultData?: T,
 ): StorageType<T> => ({
   get() {
     const data = storage.getItem(key);

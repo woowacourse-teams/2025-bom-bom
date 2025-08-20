@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { ComponentProps } from 'react';
 import Badge from '@/components/Badge/Badge';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { components } from '@/types/openapi';
 import { formatDate } from '@/utils/date';
@@ -31,11 +32,14 @@ function ArticleCard({
     isRead,
     newsletter,
   } = data;
+  const deviceType = useDeviceType();
+  const isMobile = deviceType === 'mobile';
 
   return (
     <Container
       isRead={isRead ?? false}
       readVariant={readVariant}
+      isMobile={isMobile}
       to={to ?? `/articles/${articleId}`}
       onClick={() => {
         trackEvent({
@@ -46,10 +50,12 @@ function ArticleCard({
       }}
       {...props}
     >
-      <InfoWrapper>
-        <Title>{title}</Title>
-        <Description>{contentsSummary || title}</Description>
-        <MetaInfoRow>
+      <InfoWrapper isMobile={isMobile}>
+        <Title isMobile={isMobile}>{title}</Title>
+        <Description isMobile={isMobile}>
+          {contentsSummary || title}
+        </Description>
+        <MetaInfoRow isMobile={isMobile}>
           <MetaInfoText>from {newsletter?.name ?? ''}</MetaInfoText>
           <MetaInfoText>
             {formatDate(new Date(arrivedDateTime ?? ''))}
@@ -60,8 +66,9 @@ function ArticleCard({
           </ReadTimeBox>
         </MetaInfoRow>
       </InfoWrapper>
-      <ThumbnailWrapper>
+      <ThumbnailWrapper isMobile={isMobile}>
         <Thumbnail
+          isMobile={isMobile}
           src={thumbnailUrl ?? newsletter?.imageUrl ?? ''}
           alt="아티클 썸네일"
         />
@@ -80,15 +87,12 @@ export default ArticleCard;
 const Container = styled(Link)<{
   isRead: boolean;
   readVariant: ReadVariantType;
+  isMobile: boolean;
 }>`
-  padding: 20px;
-  border-bottom: ${({ theme, isRead }) =>
-    `${isRead ? '0' : '4px'} solid ${theme.colors.primary}`};
-  border-radius: 20px;
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%);
+  padding: ${({ isMobile }) => (isMobile ? '8px 0' : '20px')};
 
   display: flex;
-  gap: 12px;
+  gap: ${({ isMobile }) => (isMobile ? '8px' : '12px')};
   align-items: center;
 
   background-color: ${({ theme }) => theme.colors.white};
@@ -100,30 +104,40 @@ const Container = styled(Link)<{
     isRead && readVariant === 'transparent' ? 0.5 : 1};
 
   text-decoration: none;
+
+  ${({ isMobile, isRead, theme }) =>
+    !isMobile &&
+    `
+    border-bottom: ${isRead ? '0' : '4px'} solid ${theme.colors.primary};
+    border-radius: 20px;
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%);
+  `};
 `;
 
-const InfoWrapper = styled.div`
+const InfoWrapper = styled.div<{ isMobile: boolean }>`
   width: 100%;
 
   display: flex;
-  gap: 12px;
+  gap: ${({ isMobile }) => (isMobile ? '8px' : '12px')};
   flex-direction: column;
   align-items: flex-start;
 `;
 
-const Title = styled.h2`
+const Title = styled.h2<{ isMobile: boolean }>`
   overflow: hidden;
+  min-height: fit-content;
 
   display: -webkit-box;
 
-  font: ${({ theme }) => theme.fonts.heading4};
+  font: ${({ theme, isMobile }) =>
+    isMobile ? theme.fonts.body1 : theme.fonts.heading4};
+  font-weight: 600;
 
   -webkit-box-orient: vertical;
-
   -webkit-line-clamp: 2;
 `;
 
-const Description = styled.p`
+const Description = styled.p<{ isMobile: boolean }>`
   overflow: hidden;
 
   display: -webkit-box;
@@ -132,13 +146,13 @@ const Description = styled.p`
   font: ${({ theme }) => theme.fonts.body2};
 
   -webkit-box-orient: vertical;
-
   -webkit-line-clamp: 2;
 `;
 
-const MetaInfoRow = styled.div`
+const MetaInfoRow = styled.div<{ isMobile: boolean }>`
   display: flex;
-  gap: 8px;
+  gap: ${({ isMobile }) => (isMobile ? '6px' : '8px')};
+  flex-wrap: ${({ isMobile }) => (isMobile ? 'wrap' : 'nowrap')};
   align-items: center;
 `;
 
@@ -153,13 +167,14 @@ const ReadTimeBox = styled.div`
   align-items: center;
 `;
 
-const ThumbnailWrapper = styled.div`
+const ThumbnailWrapper = styled.div<{ isMobile: boolean }>`
   position: relative;
+  flex-shrink: 0;
 `;
 
-const Thumbnail = styled(ImageWithFallback)`
-  width: 126px;
-  border-radius: 12px;
+const Thumbnail = styled(ImageWithFallback)<{ isMobile: boolean }>`
+  width: ${({ isMobile }) => (isMobile ? '64px' : '126px')};
+  border-radius: ${({ isMobile }) => (isMobile ? '8px' : '12px')};
 
   flex-shrink: 0;
   align-self: stretch;

@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useRouterState } from '@tanstack/react-router';
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useEffect, useRef } from 'react';
 import Header from '../Header/Header';
 import { NavType } from '@/types/nav';
 
@@ -10,18 +10,28 @@ const navMap: Record<string, NavType> = {
   '/recommend': 'recommend',
 };
 
-function PageLayout({ children }: PropsWithChildren) {
+const PageLayout = ({ children }: PropsWithChildren) => {
   const location = useRouterState({
     select: (state) => state.location.pathname,
   });
 
+  const previousNavRef = useRef<NavType>('today');
+
+  useEffect(() => {
+    if (navMap[location]) {
+      previousNavRef.current = navMap[location];
+    }
+  }, [location]);
+
+  const activeNav = navMap[location] || previousNavRef.current;
+
   return (
     <Container>
-      <Header activeNav={navMap[location] || 'today'} />
+      <Header activeNav={activeNav} />
       {children}
     </Container>
   );
-}
+};
 
 export default PageLayout;
 

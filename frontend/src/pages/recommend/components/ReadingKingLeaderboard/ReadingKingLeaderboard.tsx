@@ -1,4 +1,6 @@
 import styled from '@emotion/styled';
+import { useQuery } from '@tanstack/react-query';
+import { getMonthlyReadingRank } from '@/apis/members';
 import ArrowIcon from '@/components/icons/ArrowIcon';
 import AvatarIcon from '#/assets/avatar.svg';
 
@@ -125,6 +127,13 @@ export default function ReadingKingLeaderboard({
   data = leaderboardData,
   userRank = myRank,
 }: ReadingKingLeaderboardProps) {
+  const { data: monthlyReadingRank } = useQuery({
+    queryKey: ['monthlyReadingRank'],
+    queryFn: getMonthlyReadingRank,
+  });
+
+  console.log(monthlyReadingRank);
+
   return (
     <Container>
       <Header>

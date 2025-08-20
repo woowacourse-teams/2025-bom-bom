@@ -38,3 +38,12 @@ export const patchWeeklyReadingGoal = async ({
     },
   });
 };
+
+type GetMonthlyReadingRankResponse =
+  components['schemas']['MonthlyReadingRankResponse'];
+
+export const getMonthlyReadingRank = async () => {
+  return await fetcher.get<GetMonthlyReadingRankResponse>({
+    path: '/members/me/reading/month/rank',
+  });
+};

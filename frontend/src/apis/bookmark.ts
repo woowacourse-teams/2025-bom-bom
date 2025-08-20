@@ -4,7 +4,8 @@ import { components, operations } from '@/types/openapi';
 export type GetBookmarksParams = Omit<
   operations['getBookmarks']['parameters']['query'],
   'pageable'
->;
+> &
+  components['schemas']['Pageable'];
 export type GetBookmarksResponse = components['schemas']['PageArticleResponse'];
 
 export const getBookmarks = async (params?: GetBookmarksParams) => {

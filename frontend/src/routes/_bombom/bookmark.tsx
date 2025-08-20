@@ -18,9 +18,14 @@ function BookmarkPage() {
     number | null
   >(null);
   const { data: articles } = useQuery(
-    queries.bookmarks({ newsletterId: selectedNewsletterId ?? undefined }),
+    queries.bookmarks({
+      newsletterId: selectedNewsletterId ?? undefined,
+      size: 100, // 페이지네이션 없이 구현
+    }),
   );
   const deviceType = useDeviceType();
+
+  const totalElements = articles?.totalElements ?? 0;
 
   const handleNewsletterChange = useCallback((id: number | null) => {
     setSelectedNewsletterId(id);
@@ -60,6 +65,9 @@ function BookmarkPage() {
           </SidebarSection>
 
           <MainContentSection deviceType={deviceType}>
+            <SummaryBar>
+              <ResultsInfo>총 {totalElements}개의 메모</ResultsInfo>
+            </SummaryBar>
             {articles.content && articles.content?.length > 0 ? (
               <ArticleList>
                 {articles.content.map((article) => (
@@ -159,4 +167,18 @@ const BookmarkStorageIcon = styled(BookmarkIcon)`
   background-color: ${({ theme }) => theme.colors.primary};
   color: ${({ theme }) => theme.colors.white};
   text-align: center;
+`;
+
+const SummaryBar = styled.div`
+  width: 100%;
+  margin-bottom: 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const ResultsInfo = styled.div`
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font: ${({ theme }) => theme.fonts.body2};
 `;

@@ -3,7 +3,6 @@ package me.bombom.api.v1.pet.event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.service.ArticleService;
-import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.pet.service.PetService;
 import me.bombom.api.v1.reading.service.ReadingService;
 import org.springframework.stereotype.Component;

@@ -1,16 +1,15 @@
 package me.bombom.api.v1.article.service;
 
-import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.domain.Article;
-import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
-import me.bombom.api.v1.article.dto.response.ArticleResponse;
-import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
-import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
+import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
+import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
+import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -25,7 +24,9 @@ import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.pet.ScorePolicyConstants;
 import me.bombom.api.v1.pet.event.AddArticleScoreEvent;
+import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.event.UpdateReadingCountEvent;
+import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
+    private final TodayReadingRepository todayReadingRepository;
     private final CategoryRepository categoryRepository;
     private final NewsletterRepository newsletterRepository;
     private final HighlightRepository highlightRepository;
@@ -108,12 +110,12 @@ public class ArticleService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public boolean canAddArticleScore(Long memberId) {
-        int todayReadCount = articleRepository.countByMemberIdAndArrivedDateTimeAndIsRead(
-                memberId,
-                LocalDate.now(),
-                true
-        );
-        return todayReadCount <= ScorePolicyConstants.MAX_TODAY_READING_COUNT;
+        TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "TodayReading"));
+
+        return todayReading.getCurrentCount() <= ScorePolicyConstants.MAX_TODAY_READING_COUNT;
     }
 
     public boolean isArrivedToday(Long articleId, Long memberId) {

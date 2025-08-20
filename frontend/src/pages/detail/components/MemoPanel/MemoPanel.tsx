@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { Highlight } from '../../types/highlight';
-import MemoCard from '../MemoCard/MemoCard';
+import EditableMemoCard from '../MemoCard/EditableMemoCard';
 import ChevronIcon from '@/components/icons/ChevronIcon';
 import { theme } from '@/styles/theme';
 import CloseIcon from '#/assets/close.svg';
@@ -61,8 +61,8 @@ const MemoPanel = ({
             </HeaderTitleCaption>
           </EmptyWrapper>
         ) : (
-          memos.map((note) => (
-            <MemoCard
+          memos?.map((note) => (
+            <EditableMemoCard
               key={note.id}
               id={note.id}
               content={note.text}

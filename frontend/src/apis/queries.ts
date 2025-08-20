@@ -11,9 +11,14 @@ import {
   getArticleBookmarkStatus,
   GetArticleBookmarkStatusParams,
   getBookmarks,
+  GetBookmarksParams,
   getBookmarksStatisticsNewsletters,
 } from './bookmark';
-import { getHighlights, GetHighlightsParams } from './highlight';
+import {
+  getHighlights,
+  GetHighlightsParams,
+  getHighlightStatisticsNewsletter,
+} from './highlight';
 import { getReadingStatus, getUserInfo } from './members';
 import { getNewsletters } from './newsLetters';
 
@@ -28,11 +33,15 @@ export const queries = {
   infiniteArticles: (params?: GetArticlesParams) =>
     infiniteQueryOptions({
       queryKey: ['articles', 'infinite', params],
-      queryFn: () => getArticles(params ?? {}),
-      getNextPageParam: (lastPage, allPages) => {
-        if (!lastPage?.totalPages) return undefined;
-        const nextPage = allPages.length;
-        return nextPage < lastPage.totalPages ? nextPage : undefined;
+      queryFn: ({ pageParam }) =>
+        getArticles({
+          ...(params ?? {}),
+          page: typeof pageParam === 'number' ? pageParam : 0,
+        }),
+      getNextPageParam: (lastPage) => {
+        if (!lastPage) return undefined;
+        if (lastPage.last) return undefined;
+        return (lastPage.number ?? 0) + 1;
       },
       initialPageParam: 0,
     }),
@@ -73,17 +82,17 @@ export const queries = {
     }),
 
   // highlights
-  highlights: (params: GetHighlightsParams) =>
+  highlights: (params?: GetHighlightsParams) =>
     queryOptions({
-      queryKey: ['highlights', params?.articleId],
-      queryFn: () => getHighlights(params),
+      queryKey: ['highlights', params],
+      queryFn: () => getHighlights(params ?? {}),
     }),
 
   // bookmarks
-  bookmarks: () =>
+  bookmarks: (params?: GetBookmarksParams) =>
     queryOptions({
-      queryKey: ['bookmarks'],
-      queryFn: () => getBookmarks(),
+      queryKey: ['bookmarks', params],
+      queryFn: () => getBookmarks(params),
     }),
 
   articleBookmarkStatus: (params: GetArticleBookmarkStatusParams) =>
@@ -96,5 +105,11 @@ export const queries = {
     queryOptions({
       queryKey: ['bookmarks', 'statistics', 'newsletters'],
       queryFn: getBookmarksStatisticsNewsletters,
+    }),
+
+  highlightStatisticsNewsletter: () =>
+    queryOptions({
+      queryKey: ['highlights', 'statistics', 'newsletters'],
+      queryFn: getHighlightStatisticsNewsletter,
     }),
 };

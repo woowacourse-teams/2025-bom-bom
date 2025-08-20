@@ -1,10 +1,12 @@
 import { fetcher } from './fetcher';
 import { components, operations } from '@/types/openapi';
 
-export type GetHighlightsParams =
-  operations['getHighlights']['parameters']['query'];
+export type GetHighlightsParams = Omit<
+  operations['getHighlights']['parameters']['query'],
+  'pageable'
+>;
 export type GetHighlightsResponse =
-  components['schemas']['HighlightResponse'][];
+  components['schemas']['PageHighlightResponse'];
 
 export const getHighlights = async (params: GetHighlightsParams) => {
   return await fetcher.get<GetHighlightsResponse>({
@@ -49,5 +51,14 @@ export type DeleteHighlightParams =
 export const deleteHighlight = async ({ id }: DeleteHighlightParams) => {
   return await fetcher.delete({
     path: `/highlights/${id.toString()}`,
+  });
+};
+
+export type GetHighlightStatisticsNewsletterResponse =
+  components['schemas']['HighlightStatisticsResponse'];
+
+export const getHighlightStatisticsNewsletter = async () => {
+  return await fetcher.get<GetHighlightStatisticsNewsletterResponse>({
+    path: '/highlights/statistics/newsletters',
   });
 };

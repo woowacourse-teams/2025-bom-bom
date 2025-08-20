@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import ArticleList from '../ArticleList/ArticleList';
 import ArticleListControls from '../ArticleListControls/ArticleListControls';
 import { GetArticlesParams } from '@/apis/articles';
@@ -13,6 +13,9 @@ interface PCStorageContentProps {
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   sortFilter: 'DESC' | 'ASC';
   onSortChange: (value: 'DESC' | 'ASC') => void;
+  onPageChange: (page: number) => void;
+  page: number;
+  resetPage: () => void;
 }
 
 export default function PCStorageContent({
@@ -21,27 +24,20 @@ export default function PCStorageContent({
   onSearchChange,
   sortFilter,
   onSortChange,
+  onPageChange,
+  page,
+  resetPage,
 }: PCStorageContentProps) {
-  const [currentPage, setCurrentPage] = useState(1);
-
   const { data: articles, isLoading } = useQuery(
     queries.articles({
       ...baseQueryParams,
-      page: currentPage - 1,
+      page: page - 1,
     }),
   );
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
   useEffect(() => {
-    setCurrentPage(1);
-  }, [
-    baseQueryParams.keyword,
-    baseQueryParams.newsletter,
-    baseQueryParams.sort,
-  ]);
+    resetPage();
+  }, [baseQueryParams.keyword, resetPage]);
 
   const totalElements = articles?.totalElements;
   const articleList = articles?.content || [];
@@ -60,9 +56,9 @@ export default function PCStorageContent({
       />
       <ArticleList articles={articleList} />
       <Pagination
-        currentPage={currentPage}
+        currentPage={page}
         totalPages={articles?.totalPages ?? 1}
-        onPageChange={handlePageChange}
+        onPageChange={onPageChange}
       />
     </>
   );

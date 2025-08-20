@@ -4,6 +4,7 @@ import {
   getXPathForNode,
 } from './selection';
 import { Highlight } from '../types/highlight';
+import { PostHighlightParams } from '@/apis/highlight';
 import { theme } from '@/styles/theme';
 
 export const highlightNodeSegment = (

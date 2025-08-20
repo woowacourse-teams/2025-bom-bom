@@ -15,6 +15,7 @@ export const useHighlightData = ({ articleId }: { articleId: number }) => {
     queryKey: ['highlight'],
     queryFn: () => getHighlights({ articleId }),
   });
+
   const { mutate: addHighlight } = useMutation({
     mutationKey: ['addHighlights'],
     mutationFn: (params: PostHighlightParams) => postHighlight(params),
@@ -62,7 +63,7 @@ export const useHighlightData = ({ articleId }: { articleId: number }) => {
   };
 
   return {
-    highlights,
+    highlights: highlights?.content ?? [],
     addHighlight,
     updateMemo,
     removeHighlight,

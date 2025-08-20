@@ -12,6 +12,7 @@ interface MobileStorageContentProps {
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   sortFilter: 'DESC' | 'ASC';
   onSortChange: (value: 'DESC' | 'ASC') => void;
+  resetPage: () => void;
 }
 
 export default function MobileStorageContent({
@@ -20,6 +21,7 @@ export default function MobileStorageContent({
   onSearchChange,
   sortFilter,
   onSortChange,
+  resetPage,
 }: MobileStorageContentProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -47,6 +49,15 @@ export default function MobileStorageContent({
 
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  useEffect(() => {
+    resetPage();
+  }, [
+    baseQueryParams.keyword,
+    baseQueryParams.newsletterId,
+    baseQueryParams.sort,
+    resetPage,
+  ]);
 
   const infiniteArticlesPages = infiniteArticles?.pages || [];
   const articleList = infiniteArticlesPages.flatMap(

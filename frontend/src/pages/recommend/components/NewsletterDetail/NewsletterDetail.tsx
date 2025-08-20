@@ -68,7 +68,7 @@ const NewsletterDetail = ({
 
             <NewsletterInfo isMobile={isMobile}>
               <StyledBadge text={category} isMobile={isMobile} />
-              <IssueCycle>{newsletterDetail.issueCycle}</IssueCycle>
+              <IssueCycle>{`${newsletterDetail.issueCycle} 발행`}</IssueCycle>
             </NewsletterInfo>
           </InfoBox>
         </InfoWrapper>

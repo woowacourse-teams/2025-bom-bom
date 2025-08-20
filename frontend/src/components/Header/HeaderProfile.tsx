@@ -16,10 +16,10 @@ const HeaderProfile = ({ deviceType }: HeaderProfileProps) => {
   const navigate = useNavigate();
   const { data: userInfo, isFetching } = useQuery(queries.me());
 
-  const handleCopyEmail = async () => {
+  const handleCopyEmail = () => {
     if (!userInfo?.email) return;
 
-    await copyToClipboard(userInfo?.email);
+    copyToClipboard(userInfo?.email);
     alert(`이메일이 복사되었습니다.`);
   };
 

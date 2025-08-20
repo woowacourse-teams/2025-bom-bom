@@ -12,7 +12,7 @@ export const useMemoFilters = () => {
   const baseQueryParams = {
     sort: ['createdAt', sortFilter],
     keyword: '',
-    size: 6,
+    size: 12,
     newsletterId: selectedNewsletterId
       ? Number(selectedNewsletterId)
       : undefined,

@@ -19,7 +19,7 @@ function Storage() {
   const isMobile = deviceType === 'mobile';
 
   const {
-    selectedNewsletter,
+    selectedNewsletterId,
     sortFilter,
     searchInput,
     baseQueryParams,
@@ -27,6 +27,9 @@ function Storage() {
     handleNewsletterChange,
     handleSortChange,
     handleSearchChange,
+    handlePageChange,
+    page,
+    resetPage,
   } = useStorageFilters();
 
   return (
@@ -45,15 +48,18 @@ function Storage() {
           <NewsLetterFilter
             newsLetterList={[
               {
-                newsletter: '전체',
-                count: newsletterCounts?.totalCount ?? 0,
+                name: '전체',
+                articleCount: newsletterCounts?.totalCount ?? 0,
                 imageUrl: '',
               },
-              ...(newsletterCounts?.newsletters.filter(
-                (newsletter) => newsletter.count !== 0,
-              ) ?? []),
+              ...(newsletterCounts?.newsletters
+                .map((newsletter) => ({
+                  ...newsletter,
+                  articleCount: newsletter.articleCount ?? 0,
+                }))
+                .filter((newsletter) => newsletter.articleCount !== 0) ?? []),
             ]}
-            selectedNewsletter={selectedNewsletter}
+            selectedNewsletterId={selectedNewsletterId}
             onSelectNewsletter={handleNewsletterChange}
           />
           <QuickMenu />
@@ -66,6 +72,9 @@ function Storage() {
               onSearchChange={handleSearchChange}
               sortFilter={sortFilter}
               onSortChange={handleSortChange}
+              onPageChange={handlePageChange}
+              page={page}
+              resetPage={resetPage}
             />
           ) : (
             <MobileStorageContent
@@ -74,6 +83,7 @@ function Storage() {
               onSearchChange={handleSearchChange}
               sortFilter={sortFilter}
               onSortChange={handleSortChange}
+              resetPage={resetPage}
             />
           )}
         </MainContentSection>
@@ -134,7 +144,7 @@ const SidebarSection = styled.div<{ isPC: boolean }>`
   gap: 20px;
   flex-direction: column;
 
-  order: ${({ isPC }) => (isPC ? '1' : '2')};
+  order: ${({ isPC }) => (isPC ? 1 : 0)};
 `;
 
 const MainContentSection = styled.div<{ isPC: boolean }>`
@@ -145,5 +155,5 @@ const MainContentSection = styled.div<{ isPC: boolean }>`
   flex: 1;
   flex-direction: column;
 
-  order: ${({ isPC }) => (isPC ? '2' : '1')};
+  order: ${({ isPC }) => (isPC ? 2 : 1)};
 `;

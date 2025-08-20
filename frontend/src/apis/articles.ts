@@ -2,7 +2,7 @@ import { fetcher } from './fetcher';
 import { components, operations } from '@/types/openapi';
 
 export type GetArticlesParams = Omit<
-  components['schemas']['GetArticlesOptions'],
+  components['schemas']['ArticlesOptionsRequest'],
   'date'
 > &
   components['schemas']['Pageable'] & {
@@ -42,7 +42,7 @@ export type GetArticleStatisticsNewslettersParams =
   operations['getArticleNewsletterStatistics']['parameters']['query'];
 
 export type GetArticlesStatisticsNewslettersResponse =
-  components['schemas']['GetArticleNewsletterStatisticsResponse'];
+  components['schemas']['ArticleNewsletterStatisticsResponse'];
 
 export const getArticlesStatisticsNewsletters = async (
   params: GetArticleStatisticsNewslettersParams,

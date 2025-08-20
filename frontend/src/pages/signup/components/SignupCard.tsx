@@ -57,6 +57,13 @@ const SignupCard = ({ isMobile }: SignupCardProps) => {
     onSuccess: () => {
       navigate({ to: '/' });
     },
+    onError: (e) => {
+      const errorMessage = e.message;
+      if (errorMessage === '이미 사용 중인 닉네임입니다.')
+        setNicknameError(errorMessage);
+      if (errorMessage === '이미 사용 중인 이메일입니다.')
+        setEmailError(errorMessage);
+    },
   });
 
   const handleNicknameBlur = () => {

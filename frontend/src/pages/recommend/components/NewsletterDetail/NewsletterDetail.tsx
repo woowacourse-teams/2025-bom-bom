@@ -60,12 +60,24 @@ const NewsletterDetail = ({
             <NewsletterTitle isMobile={isMobile}>
               {newsletterDetail.name}
             </NewsletterTitle>
-            <NewsletterInfo>
-              <Badge text={category} />
-              <IssueCycle isMobile={isMobile}>
-                {newsletterDetail.issueCycle}
-              </IssueCycle>
+            <NewsletterInfo isMobile={isMobile}>
+              <StyledBadge text={category} isMobile={isMobile} />
+              <IssueCycle>{newsletterDetail.issueCycle}</IssueCycle>
             </NewsletterInfo>
+
+            <LinkWrapper isMobile={isMobile}>
+              <DetailLink onClick={openMainSite}>
+                <HomeIcon width={16} height={16} />
+                홈페이지
+              </DetailLink>
+
+              {newsletterDetail.previousNewsletterUrl && (
+                <DetailLink onClick={openPreviousLetters}>
+                  <ArticleHistoryIcon width={16} height={16} />
+                  지난 소식 보기
+                </DetailLink>
+              )}
+            </LinkWrapper>
           </InfoBox>
         </InfoWrapper>
 
@@ -78,20 +90,6 @@ const NewsletterDetail = ({
 
       <ScrollableWrapper isMobile={isMobile}>
         <Description>{newsletterDetail.description}</Description>
-
-        <LinkWrapper>
-          <DetailLink onClick={openMainSite}>
-            <HomeIcon width={18} height={18} />
-            홈페이지
-          </DetailLink>
-
-          {newsletterDetail.previousNewsletterUrl && (
-            <DetailLink onClick={openPreviousLetters}>
-              <ArticleHistoryIcon width={18} height={18} />
-              지난 소식 보기
-            </DetailLink>
-          )}
-        </LinkWrapper>
 
         {deviceType !== 'mobile' && (
           <SubscribeWrapper>
@@ -198,8 +196,8 @@ const InfoWrapper = styled.div<{ isMobile: boolean }>`
 `;
 
 const NewsletterImage = styled(ImageWithFallback)<{ isMobile: boolean }>`
-  width: ${({ isMobile }) => (isMobile ? '60px' : '80px')};
-  height: ${({ isMobile }) => (isMobile ? '60px' : '80px')};
+  width: ${({ isMobile }) => (isMobile ? '88px' : '112px')};
+  height: ${({ isMobile }) => (isMobile ? '88px' : '112px')};
   border-radius: ${({ isMobile }) => (isMobile ? '12px' : '16px')};
 
   flex-shrink: 0;
@@ -221,30 +219,36 @@ const NewsletterTitle = styled.h2<{ isMobile: boolean }>`
     isMobile ? theme.fonts.heading5 : theme.fonts.heading4};
 `;
 
-const NewsletterInfo = styled.div`
+const NewsletterInfo = styled.div<{ isMobile: boolean }>`
   display: flex;
   gap: 12px;
   align-items: center;
+
+  font: ${({ theme, isMobile }) =>
+    isMobile ? theme.fonts.body3 : theme.fonts.body2};
 `;
 
-const IssueCycle = styled.p<{ isMobile: boolean }>`
+const StyledBadge = styled(Badge)<{ isMobile: boolean }>`
+  font: ${({ theme, isMobile }) =>
+    isMobile ? theme.fonts.body3 : theme.fonts.body2};
+`;
+
+const IssueCycle = styled.p`
+  color: ${({ theme }) => theme.colors.textSecondary};
+  text-align: center;
+`;
+
+const LinkWrapper = styled.div<{ isMobile: boolean }>`
+  display: flex;
+  gap: 12px;
+
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme, isMobile }) =>
-    isMobile ? theme.fonts.caption : theme.fonts.body2};
-  text-align: center;
+    isMobile ? theme.fonts.body3 : theme.fonts.body2};
 `;
 
 const Description = styled.p`
   color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.body1};
-`;
-
-const LinkWrapper = styled.div`
-  display: flex;
-  gap: 8px;
-  flex-direction: column;
-
-  color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body1};
 `;
 

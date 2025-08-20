@@ -69,20 +69,13 @@ const Container = styled.div<{ isBottom: boolean }>`
   width: ${({ isBottom }) => (isBottom ? '100%' : '720px')};
   height: 100%;
   max-height: ${({ isBottom }) => (isBottom ? '45vh' : '90vh')};
-  border-radius: 12px;
+  border-radius: ${({ isBottom }) => (isBottom ? '12px 12px 0 0' : '12px')};
 
   display: flex;
   flex-direction: column;
+  align-self: ${({ isBottom }) => (isBottom ? 'flex-end' : 'auto')};
 
   background: ${({ theme }) => theme.colors.white};
-
-  ${({ isBottom }) =>
-    isBottom &&
-    `
-      align-self: flex-end;
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
-  `}
 `;
 
 const CloseButton = styled.button`

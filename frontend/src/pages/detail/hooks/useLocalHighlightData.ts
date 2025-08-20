@@ -4,7 +4,7 @@ import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 
 type StorageKeyType = `guide-highlight-${string}`;
 
-export const useLocalHighlighData = ({ articleId }: { articleId: number }) => {
+export const useLocalHighlightData = ({ articleId }: { articleId: number }) => {
   const storageKey: StorageKeyType = `guide-highlight-${articleId}`;
   const [highlights, setHighlights] = useLocalStorageState<
     Highlight[],

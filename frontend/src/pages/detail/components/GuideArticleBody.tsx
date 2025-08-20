@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useHighlightHoverEffect } from '../hooks/useHighlightHoverEffect';
 import { ArticleDetail } from '../types/articleDetail';
 import { FloatingToolbarMode } from './FloatingToolbar/FloatingToolbar.types';
-import { useLocalHighlighData } from '../hooks/useLocalHighlightData';
+import { useLocalHighlightData } from '../hooks/useLocalHighlightData';
 import { restoreHighlightAll, saveSelection } from '../utils/highlight';
 import ArticleContent from './ArticleContent/ArticleContent';
 import FloatingToolbar from './FloatingToolbar/FloatingToolbar';
@@ -17,7 +17,7 @@ const GuideArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
   const [panelOpen, setPanelOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const { highlights, addHighlight, updateMemo, removeHighlight } =
-    useLocalHighlighData({ articleId });
+    useLocalHighlightData({ articleId });
 
   const handleHighlightClick = ({
     mode,

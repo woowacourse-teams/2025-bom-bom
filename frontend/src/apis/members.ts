@@ -1,5 +1,5 @@
 import { fetcher } from './fetcher';
-import { components } from '@/types/openapi';
+import { components, operations } from '@/types/openapi';
 
 type GetReadingStatusResponse =
   components['schemas']['ReadingInformationResponse'];
@@ -41,9 +41,14 @@ export const patchWeeklyReadingGoal = async ({
 
 type GetMonthlyReadingRankResponse =
   components['schemas']['MonthlyReadingRankResponse'];
+type GetMonthlyReadingRankParams =
+  operations['getMonthlyReadingRank']['parameters']['query'];
 
-export const getMonthlyReadingRank = async () => {
+export const getMonthlyReadingRank = async (
+  params: GetMonthlyReadingRankParams,
+) => {
   return await fetcher.get<GetMonthlyReadingRankResponse>({
     path: '/members/me/reading/month/rank',
+    query: params,
   });
 };

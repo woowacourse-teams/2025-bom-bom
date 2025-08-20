@@ -129,7 +129,7 @@ export default function ReadingKingLeaderboard({
 }: ReadingKingLeaderboardProps) {
   const { data: monthlyReadingRank } = useQuery({
     queryKey: ['monthlyReadingRank'],
-    queryFn: getMonthlyReadingRank,
+    queryFn: () => getMonthlyReadingRank({ limit: 5 }),
   });
 
   console.log(monthlyReadingRank);

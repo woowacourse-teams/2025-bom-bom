@@ -61,7 +61,7 @@ const NewsletterDetail = ({
               <NewsletterTitle isMobile={isMobile}>
                 {newsletterDetail.name}
               </NewsletterTitle>
-              <DetailLink onClick={openMainSite}>
+              <DetailLink onClick={openMainSite} isMobile={isMobile}>
                 <StyledHomeIcon isMobile={isMobile} />
               </DetailLink>
             </TitleWrapper>
@@ -70,15 +70,6 @@ const NewsletterDetail = ({
               <StyledBadge text={category} isMobile={isMobile} />
               <IssueCycle>{newsletterDetail.issueCycle}</IssueCycle>
             </NewsletterInfo>
-
-            <LinkWrapper isMobile={isMobile}>
-              {newsletterDetail.previousNewsletterUrl && (
-                <DetailLink onClick={openPreviousLetters}>
-                  <ArticleHistoryIcon width={16} height={16} />
-                  지난 소식 보기
-                </DetailLink>
-              )}
-            </LinkWrapper>
           </InfoBox>
         </InfoWrapper>
 
@@ -90,7 +81,16 @@ const NewsletterDetail = ({
       </FixedWrapper>
 
       <ScrollableWrapper isMobile={isMobile}>
-        <Description>{newsletterDetail.description}</Description>
+        <Description isMobile={isMobile}>
+          {newsletterDetail.description}
+        </Description>
+
+        {newsletterDetail.previousNewsletterUrl && (
+          <DetailLink onClick={openPreviousLetters} isMobile={isMobile}>
+            <ArticleHistoryIcon width={16} height={16} />
+            지난 소식 보기
+          </DetailLink>
+        )}
 
         {!isMobile && (
           <SubscribeWrapper>
@@ -251,24 +251,20 @@ const IssueCycle = styled.p`
   text-align: center;
 `;
 
-const LinkWrapper = styled.div<{ isMobile: boolean }>`
+const Description = styled.p<{ isMobile: boolean }>`
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font: ${({ isMobile, theme }) =>
+    isMobile ? theme.fonts.body2 : theme.fonts.body1};
+`;
+
+const DetailLink = styled.a<{ isMobile: boolean }>`
   display: flex;
-  gap: 12px;
+  gap: 4px;
+  align-items: center;
 
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme, isMobile }) =>
     isMobile ? theme.fonts.body3 : theme.fonts.body2};
-`;
-
-const Description = styled.p`
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.body1};
-`;
-
-const DetailLink = styled.a`
-  display: flex;
-  gap: 4px;
-  align-items: center;
 
   transition: all 0.2s ease;
 

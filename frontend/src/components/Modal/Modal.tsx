@@ -66,7 +66,7 @@ const Backdrop = styled.div`
 const Container = styled.div<{ isBottom: boolean }>`
   overflow: hidden;
   position: relative;
-  width: ${({ isBottom }) => (isBottom ? '100%' : 'min(720px, 92vw)')};
+  width: ${({ isBottom }) => (isBottom ? '100%' : '720px')};
   height: 100%;
   max-height: ${({ isBottom }) => (isBottom ? '45vh' : '90vh')};
   border-radius: 12px;

@@ -26,43 +26,31 @@ jobs:
         uses: actions/checkout@v4
         with:
           # 최소한의 히스토리만 가져오기
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: 버전 태그 결정
         id: version
         run: |
-          if [ -n "${{ github.event.inputs.version_tag }}" ]; then
-            VERSION_TAG="${{ github.event.inputs.version_tag }}"
-            echo "수동 입력 버전: $VERSION_TAG"
+          LATEST_SERVER_TAG=$(git tag --list "server-*" --sort=-version:refname | head -1 || echo "server-v0.0.0")
+          echo "최신 서버 태그: $LATEST_SERVER_TAG"
+            
+          if [[ "$LATEST_SERVER_TAG" =~ ^server-v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            
+            NEW_PATCH=$((PATCH + 1))
+            VERSION_TAG="server-v${MAJOR}.${MINOR}.${NEW_PATCH}"
+            echo "새 서버 버전 생성: $LATEST_SERVER_TAG → $VERSION_TAG"
           else
-            # 최신 태그만 확인 (전체 히스토리 불필요)
-            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "server-v0.0.0")
-            echo "최신 태그: $LATEST_TAG"
-          
-            if [[ "$LATEST_TAG" =~ ^server-v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-              MAJOR="${BASH_REMATCH[1]}"
-              MINOR="${BASH_REMATCH[2]}"
-              PATCH="${BASH_REMATCH[3]}"
-              NEW_PATCH=$((PATCH + 1))
-              VERSION_TAG="server-v${MAJOR}.${MINOR}.${NEW_PATCH}"
-              echo "새 버전 생성: $LATEST_TAG → $VERSION_TAG"
-            else
-              VERSION_TAG="server-v1.0.0"
-              echo "새 버전 시작: $VERSION_TAG"
-            fi
-          
-            # 태그 충돌 해결: 기존 태그가 있으면 삭제 후 재생성
-            if git ls-remote --tags origin | grep -q "refs/tags/${VERSION_TAG}$"; then
-              echo "⚠️  태그 ${VERSION_TAG}가 이미 존재합니다. 삭제 후 재생성합니다."
-              git push origin --delete ${VERSION_TAG} 2>/dev/null || echo "원격 태그 삭제 실패 (무시)"
-              git tag -d ${VERSION_TAG} 2>/dev/null || echo "로컬 태그 삭제 실패 (무시)"
-            fi
-          
-            # 새 태그 생성 및 푸시
-            git tag ${VERSION_TAG}
-            git push origin ${VERSION_TAG}
-            echo "새 태그 ${VERSION_TAG} 생성 및 푸시 완료"
+            VERSION_TAG="server-v1.0.0"
+            echo "서버 버전 시작: $VERSION_TAG"
           fi
+            
+          # 새 태그 생성 및 푸시
+          git tag $VERSION_TAG
+          git push origin $VERSION_TAG
+          echo "새 서버 태그 $VERSION_TAG 생성 및 푸시 완료"
           
           echo "tag=$VERSION_TAG" >> $GITHUB_OUTPUT
           echo "최종 버전: $VERSION_TAG"

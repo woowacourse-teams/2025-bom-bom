@@ -4,10 +4,14 @@ import { theme } from '@/styles/theme';
 import GoogleIcon from '#/assets/google.svg';
 import SparklesIcon from '#/assets/sparkles.svg';
 
-function LoginCard() {
+interface LoginCardProps {
+  isMobile: boolean;
+}
+
+const LoginCard = ({ isMobile }: LoginCardProps) => {
   return (
-    <Container>
-      <GreetingWrapper>
+    <Container isMobile={isMobile}>
+      <GreetingWrapper isMobile={isMobile}>
         <IconWrapper>
           <SparklesIcon
             width={24}
@@ -17,7 +21,7 @@ function LoginCard() {
           />
         </IconWrapper>
         <GreetingTitle>봄봄에 오신 걸 환영해요</GreetingTitle>
-        <GreetingMessage>
+        <GreetingMessage isMobile={isMobile}>
           당신의 하루에 찾아오는 작은 설렘{'\n'}뉴스레터를 한 곳에서 쉽게
           관리하세요
         </GreetingMessage>
@@ -40,15 +44,13 @@ function LoginCard() {
       </Terms>
     </Container>
   );
-}
+};
 
 export default LoginCard;
 
-const Container = styled.section`
+const Container = styled.section<{ isMobile: boolean }>`
   width: min(100%, 420px);
   padding: 28px;
-  border-radius: 20px;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
 
   display: flex;
   gap: 16px;
@@ -56,12 +58,19 @@ const Container = styled.section`
   align-items: center;
   justify-content: center;
 
-  background-color: ${({ theme }) => theme.colors.white};
+  ${({ isMobile }) =>
+    !isMobile &&
+    `
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+    background-color: ${theme.colors.white};
+  
+  `}
 `;
 
-const GreetingWrapper = styled.div`
+const GreetingWrapper = styled.div<{ isMobile: boolean }>`
   display: flex;
-  gap: 22px;
+  gap: ${({ isMobile }) => (isMobile ? '16px' : '20px')};
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -90,8 +99,8 @@ const GreetingTitle = styled.h2`
   -webkit-text-fill-color: transparent;
 `;
 
-const GreetingMessage = styled.p`
-  margin: 34px 0;
+const GreetingMessage = styled.p<{ isMobile: boolean }>`
+  margin: ${({ isMobile }) => (isMobile ? '24px' : '34px')};
 
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.heading5};

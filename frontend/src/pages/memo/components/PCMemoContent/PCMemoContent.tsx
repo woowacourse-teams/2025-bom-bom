@@ -36,9 +36,9 @@ export default function PCMemoContent({
 
   const highlightContent = highlights?.content ?? [];
 
-  const isLoadingOrHaveContent = isLoading || highlightContent.length > 0;
+  const haveNoContent = !isLoading && highlightContent.length === 0;
 
-  if (!isLoadingOrHaveContent)
+  if (haveNoContent)
     return <EmptyLetterCard title="메모한 뉴스레터가 없어요" />;
 
   return (
@@ -55,29 +55,25 @@ export default function PCMemoContent({
         />
       </SummaryBar>
 
-      {highlightContent.length > 0 ? (
-        <MemoList>
-          {highlightContent.map((highlight) => (
-            <li key={highlight.id}>
-              <ReadOnlyMemoCard
-                id={highlight.id}
-                content={highlight.text}
-                memo={highlight.memo}
-                as="button"
-                onClick={() =>
-                  navigate({ to: `/articles/${highlight.articleId}` })
-                }
-                newsletterName={highlight.newsletterName ?? ''}
-                newsletterImageUrl={highlight.newsletterImageUrl ?? ''}
-                articleTitle={highlight.articleTitle ?? ''}
-                createdAt={highlight.createdAt ?? ''}
-              />
-            </li>
-          ))}
-        </MemoList>
-      ) : (
-        <EmptyLetterCard title="메모한 뉴스레터가 없어요" />
-      )}
+      <MemoList>
+        {highlightContent.map((highlight) => (
+          <li key={highlight.id}>
+            <ReadOnlyMemoCard
+              id={highlight.id}
+              content={highlight.text}
+              memo={highlight.memo}
+              as="button"
+              onClick={() =>
+                navigate({ to: `/articles/${highlight.articleId}` })
+              }
+              newsletterName={highlight.newsletterName ?? ''}
+              newsletterImageUrl={highlight.newsletterImageUrl ?? ''}
+              articleTitle={highlight.articleTitle ?? ''}
+              createdAt={highlight.createdAt ?? ''}
+            />
+          </li>
+        ))}
+      </MemoList>
 
       {totalPages > 1 && (
         <Pagination

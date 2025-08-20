@@ -3,19 +3,23 @@ import ArticleCard from '../ArticleCard/ArticleCard';
 import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
-import { components } from '@/types/openapi';
+import { Article } from '@/types/articles';
 import CheckIcon from '#/assets/check.svg';
 import LetterIcon from '#/assets/letter.svg';
 
+type ExtendedArticle = Article & {
+  type: 'guide' | 'article';
+};
+
 interface ArticleCardListProps {
-  articles: components['schemas']['ArticleResponse'][];
+  articles: ExtendedArticle[];
 }
 
 const ArticleCardList = ({ articles }: ArticleCardListProps) => {
   const deviceType = useDeviceType();
   const grouped = articles.reduce<{
-    read: components['schemas']['ArticleResponse'][];
-    unread: components['schemas']['ArticleResponse'][];
+    read: ExtendedArticle[];
+    unread: ExtendedArticle[];
   }>(
     (acc, article) => {
       if (article.isRead) acc.read.push(article);
@@ -37,14 +41,23 @@ const ArticleCardList = ({ articles }: ArticleCardListProps) => {
       <CardList deviceType={deviceType}>
         {grouped.unread.map((article) => (
           <li key={article.articleId}>
-            <ArticleCard data={article} />
+            <ArticleCard
+              data={article}
+              to={
+                article.type === 'guide'
+                  ? `/articles/guide/${article.articleId}`
+                  : `/articles/${article.articleId}`
+              }
+            />
           </li>
         ))}
       </CardList>
-      <ListTitleBox>
-        <CheckIcon width={32} height={32} color={theme.colors.black} />
-        <ListTitle>읽은 뉴스레터 ({grouped.read.length}개)</ListTitle>
-      </ListTitleBox>
+      {grouped.read.length > 0 && (
+        <ListTitleBox>
+          <CheckIcon width={32} height={32} color={theme.colors.black} />
+          <ListTitle>읽은 뉴스레터 ({grouped.read.length}개)</ListTitle>
+        </ListTitleBox>
+      )}
       <CardList deviceType={deviceType}>
         {grouped.read.map((article) => (
           <li key={article.articleId}>

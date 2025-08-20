@@ -139,7 +139,7 @@ const Container = styled.div<{ position: ToolbarPosition; visible: boolean }>`
   position: fixed;
   top: ${({ position }) => position.y}px;
   left: ${({ position }) => position.x}px;
-  z-index: 1000;
+  z-index: ${({ theme }) => theme.zIndex.overlay};
   padding: 6px 10px 4px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgb(0 0 0 / 20%);

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { HighlightType } from '../types/highlight';
+import { Highlight } from '../types/highlight';
 import { removeHighlightFromDOM } from '../utils/highlight';
 import {
   deleteHighlight,
@@ -15,6 +15,7 @@ export const useHighlightData = ({ articleId }: { articleId: number }) => {
     queryKey: ['highlight'],
     queryFn: () => getHighlights({ articleId }),
   });
+
   const { mutate: addHighlight } = useMutation({
     mutationKey: ['addHighlights'],
     mutationFn: (params: PostHighlightParams) => postHighlight(params),
@@ -36,7 +37,7 @@ export const useHighlightData = ({ articleId }: { articleId: number }) => {
       memo?: string;
     }) => patchHighlight({ id, color, memo }),
     onSuccess: (updatedHighlight, variables) => {
-      queryClient.setQueryData<HighlightType[]>(['highlight'], (prev) => {
+      queryClient.setQueryData<Highlight[]>(['highlight'], (prev) => {
         if (!prev) return [];
         return prev.map((highlight) =>
           highlight.id === variables.id
@@ -62,7 +63,7 @@ export const useHighlightData = ({ articleId }: { articleId: number }) => {
   };
 
   return {
-    highlights,
+    highlights: highlights?.content ?? [],
     addHighlight,
     updateMemo,
     removeHighlight,

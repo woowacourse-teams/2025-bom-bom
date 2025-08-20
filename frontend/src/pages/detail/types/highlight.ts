@@ -1,13 +1,3 @@
-export interface HighlightType {
-  id: number;
-  color: string;
-  location: {
-    startXPath: string;
-    startOffset: number;
-    endXPath: string;
-    endOffset: number;
-  };
-  articleId: number;
-  text: string;
-  memo: string;
-}
+import { components } from '@/types/openapi';
+
+export type Highlight = components['schemas']['HighlightResponse'];

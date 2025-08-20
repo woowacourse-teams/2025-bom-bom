@@ -9,9 +9,9 @@ interface BadgeProps extends ComponentProps<'div'> {
   variant?: VariantType;
 }
 
-function Badge({ text, variant = 'default', className, ...props }: BadgeProps) {
+function Badge({ text, variant = 'default', ...props }: BadgeProps) {
   return (
-    <Container variant={variant} className={className} {...props}>
+    <Container variant={variant} {...props}>
       {text}
     </Container>
   );

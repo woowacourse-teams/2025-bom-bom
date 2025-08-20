@@ -73,9 +73,11 @@ function ArticleCard({
           alt="아티클 썸네일"
         />
         {isRead && readVariant === 'badge' && (
-          <BadgeWrapper>
-            <Badge text="읽음" variant="outlinePrimary" />
-          </BadgeWrapper>
+          <ReadingBadge
+            text="읽음"
+            variant="outlinePrimary"
+            isMobile={isMobile}
+          />
         )}
       </ThumbnailWrapper>
     </Container>
@@ -183,8 +185,9 @@ const Thumbnail = styled(ImageWithFallback)<{ isMobile: boolean }>`
   object-fit: cover;
 `;
 
-const BadgeWrapper = styled.div`
+const ReadingBadge = styled(Badge)<{ isMobile: boolean }>`
   position: absolute;
   top: 4px;
   right: 4px;
+  padding: ${({ isMobile }) => (isMobile ? '2px 4px' : '4px 8px')};
 `;

@@ -2,7 +2,6 @@ package me.bombom.api.v1.guidemail.service;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.member.domain.Member;
@@ -13,9 +12,11 @@ import me.bombom.api.v1.pet.repository.PetRepository;
 import me.bombom.api.v1.pet.repository.StageRepository;
 import me.bombom.api.v1.pet.service.PetService;
 import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.MonthlyReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
+import me.bombom.api.v1.reading.repository.MonthlyReadingRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.reading.service.ReadingService;
@@ -50,23 +51,25 @@ class GuideMailServiceTest {
     @Autowired
     private ContinueReadingRepository continueReadingRepository;
 
+    @Autowired
+    private MonthlyReadingRepository monthlyReadingRepository;
+
     private Member member;
     private Pet pet;
     private TodayReading todayReading;
     private WeeklyReading weeklyReading;
     private ContinueReading continueReading;
+    private MonthlyReading monthlyReading;
 
     @BeforeEach
     void setUp() {
-        String nickname = "test_nickname_" + UUID.randomUUID();
-        String providerId = "test_providerId_" + UUID.randomUUID();
-
-        member = memberRepository.save(TestFixture.createUniqueMember(nickname, providerId));
+        member = memberRepository.save(TestFixture.createUniqueMember("nickname", "providerId"));
         Stage stage = stageRepository.save(TestFixture.createStage(1, 0));
         pet = petRepository.save(TestFixture.createPet(member, stage.getId()));
         todayReading = todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));
         weeklyReading = weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member));
         continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
+        monthlyReading = monthlyReadingRepository.save(TestFixture.monthlyReadingFixture(member));
     }
 
     @Test

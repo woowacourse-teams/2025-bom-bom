@@ -28,7 +28,7 @@ public class ContinueReading extends BaseEntity {
     @Column(nullable = false, unique = true)
     private Long memberId;
 
-    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    @Column(nullable = false, columnDefinition = "SMALLINT")
     private int dayCount;
 
     @Builder

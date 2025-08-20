@@ -16,6 +16,7 @@ import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.pet.domain.Pet;
 import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.MonthlyReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 
@@ -202,9 +203,18 @@ public final class TestFixture {
     }
 
     /**
+     * MonthlyReading
+     */
+    public static MonthlyReading monthlyReadingFixture(Member member) {
+        return MonthlyReading.builder()
+                .memberId(member.getId())
+                .currentCount(10)
+                .build();
+    }
+
+    /**
      * Highlight
      */
-
     public static List<Highlight> createHighlightFixtures(List<Article> articles) {
         Long firstArticleId = articles.get(0).getId();
         Long secondArticleId = articles.get(1).getId();

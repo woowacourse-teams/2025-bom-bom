@@ -1,5 +1,7 @@
 package me.bombom.api.v1.reading.service;
 
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -8,14 +10,19 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.pet.ScorePolicyConstants;
 import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.MonthlyReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
+import me.bombom.api.v1.reading.domain.YearlyReading;
 import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
+import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
+import me.bombom.api.v1.reading.repository.MonthlyReadingRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
+import me.bombom.api.v1.reading.repository.YearlyReadingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,10 +32,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ReadingService {
 
+    private static final int LAST_MONTH_OFFSET = 1;
+
     private final MemberRepository memberRepository;
     private final ContinueReadingRepository continueReadingRepository;
     private final TodayReadingRepository todayReadingRepository;
     private final WeeklyReadingRepository weeklyReadingRepository;
+    private final MonthlyReadingRepository monthlyReadingRepository;
+    private final YearlyReadingRepository yearlyReadingRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void initializeReadingInformation(Long memberId) {
@@ -40,6 +51,12 @@ public class ReadingService {
 
         WeeklyReading newWeeklyReading = WeeklyReading.create(memberId);
         weeklyReadingRepository.save(newWeeklyReading);
+
+        MonthlyReading newMonthlyReading = MonthlyReading.create(memberId);
+        monthlyReadingRepository.save(newMonthlyReading);
+
+        YearlyReading newYearlyReading = YearlyReading.create(memberId, LocalDate.now().getYear());
+        yearlyReadingRepository.save(newYearlyReading);
     }
 
     @Transactional
@@ -60,6 +77,21 @@ public class ReadingService {
                 .stream()
                 .filter(this::shouldResetContinueReadingCount)
                 .forEach(this::applyResetContinueReadingCount);
+    }
+
+    @Transactional
+    public void passMonthlyCountToYearly() {
+        monthlyReadingRepository.findAll().forEach(monthlyReading -> {
+            Long memberId = monthlyReading.getMemberId();
+            int targetYear = LocalDate.now().minusMonths(LAST_MONTH_OFFSET).getYear();
+            YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndReadingYear(memberId, targetYear)
+                    .orElseGet(() -> {
+                        YearlyReading newYearlyReading = YearlyReading.create(memberId, targetYear);
+                        return yearlyReadingRepository.save(newYearlyReading);
+                    });
+            yearlyReading.increaseCurrentCount(monthlyReading.getCurrentCount());
+            monthlyReading.resetCurrentCount();
+        });
     }
 
     @Transactional
@@ -96,6 +128,7 @@ public class ReadingService {
             updateTodayReadingCount(memberId);
         }
         updateWeeklyReadingCount(memberId);
+        updateMonthlyReadingCount(memberId);
     }
 
     @Transactional
@@ -104,6 +137,7 @@ public class ReadingService {
         updateContinueReadingCount(memberId);
         updateTodayReadingCount(memberId);
         updateWeeklyReadingCount(memberId);
+        updateMonthlyReadingCount(memberId);
     }
 
     public ReadingInformationResponse getReadingInformation(Member member) {
@@ -121,6 +155,10 @@ public class ReadingService {
                     .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "WeeklyReading"));
         return ReadingInformationResponse.of(continueReading, todayReading, weeklyReading);
+    }
+
+    public List<MonthlyReadingRankResponse> getMonthlyReadingRank(int limit) {
+        return monthlyReadingRepository.findMonthlyRanking(limit);
     }
 
     private boolean shouldResetContinueReadingCount(TodayReading todayReading) {
@@ -169,6 +207,15 @@ public class ReadingService {
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "WeeklyReading")
                     .addContext(ErrorContextKeys.OPERATION, "updateWeeklyReadingCount"));
         weeklyReading.increaseCurrentCount();
+    }
+
+    private void updateMonthlyReadingCount(Long memberId) {
+        MonthlyReading monthlyReading = monthlyReadingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReading")
+                        .addContext(ErrorContextKeys.OPERATION, "updateMonthlyReadingCount"));
+        monthlyReading.increaseCurrentCount();
     }
 
     private boolean isBonusApplicable(ContinueReading continueReading) {

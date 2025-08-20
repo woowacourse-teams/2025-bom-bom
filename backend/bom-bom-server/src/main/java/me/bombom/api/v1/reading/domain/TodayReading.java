@@ -33,8 +33,7 @@ public class TodayReading extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TINYINT")
     private int totalCount;
 
-
-    @Column(nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private int currentCount;
 
     @Builder
@@ -59,8 +58,8 @@ public class TodayReading extends BaseEntity {
     }
 
     public void resetCount() {
-        totalCount = RESET_TOTAL_COUNT;
-        currentCount = RESET_CURRENT_COUNT;
+        this.totalCount = RESET_TOTAL_COUNT;
+        this.currentCount = RESET_CURRENT_COUNT;
     }
 
     public void increaseCurrentCount() {

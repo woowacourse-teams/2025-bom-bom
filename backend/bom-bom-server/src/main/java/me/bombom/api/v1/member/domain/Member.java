@@ -9,7 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,13 +46,13 @@ public class Member extends BaseEntity {
     @Column(length = 512)
     private String profileImageUrl;
 
-    private LocalDateTime birthDate;
+    private LocalDate birthDate;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    @Column(nullable = false, columnDefinition = "BIGINT")
     private Long roleId = 0L;
 
     @Builder
@@ -63,7 +63,7 @@ public class Member extends BaseEntity {
             @NonNull String email,
             @NonNull String nickname,
             String profileImageUrl,
-            LocalDateTime birthDate,
+            LocalDate birthDate,
             @NonNull Gender gender,
             @NonNull Long roleId
     ) {

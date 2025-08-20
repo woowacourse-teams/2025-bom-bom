@@ -10,14 +10,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import me.bombom.api.v1.common.BaseEntity;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class WeeklyReading extends BaseEntity {
+public class MonthlyReading {
 
-    private static final int INITIAL_GOAL_COUNT = 3;
     private static final int INITIAL_CURRENT_COUNT = 0;
     private static final int RESET_CURRENT_COUNT = 0;
     private static final int INCREASE_CURRENT_COUNT = 1;
@@ -29,39 +27,29 @@ public class WeeklyReading extends BaseEntity {
     @Column(nullable = false, unique = true)
     private Long memberId;
 
-    @Column(nullable = false, columnDefinition = "TINYINT")
-    private int goalCount;
-
-    @Column(nullable = false, columnDefinition = "TINYINT")
+    @Column(nullable = false, columnDefinition = "SMALLINT")
     private int currentCount;
 
     @Builder
-    public WeeklyReading(
+    public MonthlyReading(
             Long id,
             @NonNull Long memberId,
-            int goalCount,
             int currentCount
     ) {
         this.id = id;
         this.memberId = memberId;
-        this.goalCount = goalCount;
         this.currentCount = currentCount;
     }
 
-    public static WeeklyReading create(Long memberId) {
-        return WeeklyReading.builder()
+    public static MonthlyReading create(Long memberId) {
+        return MonthlyReading.builder()
                 .memberId(memberId)
-                .goalCount(INITIAL_GOAL_COUNT)
                 .currentCount(INITIAL_CURRENT_COUNT)
                 .build();
     }
 
     public void resetCurrentCount() {
         this.currentCount = RESET_CURRENT_COUNT;
-    }
-
-    public void updateGoalCount(int goalCount) {
-        this.goalCount = goalCount;
     }
 
     public void increaseCurrentCount() {

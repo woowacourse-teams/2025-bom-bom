@@ -82,7 +82,7 @@ const Container = styled.div<{ isBottom: boolean }>`
       align-self: flex-end;
       border-bottom-left-radius: 0;
       border-bottom-right-radius: 0;
-`}
+  `}
 `;
 
 const CloseButton = styled.button`

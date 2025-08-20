@@ -276,6 +276,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/members/me/reading/month/rank': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 이달의 독서왕 조회
+     * @description 현재 읽기 카운트를 기준으로 내림차순하여 순위와 함께 조회합니다.
+     */
+    get: operations['getMonthlyReadingRank'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/members/me/pet': {
     parameters: {
       query?: never;
@@ -637,6 +657,13 @@ export interface components {
        * @description 목표 읽기 수
        */
       goalCount: number;
+    };
+    MonthlyReadingRankResponse: {
+      nickname: string;
+      /** Format: int32 */
+      rank: number;
+      /** Format: int32 */
+      monthlyReadCount: number;
     };
     PetResponse: {
       /**
@@ -1432,6 +1459,43 @@ export interface operations {
         content: {
           '*/*': components['schemas']['ReadingInformationResponse'];
         };
+      };
+      /** @description 인증 실패 (로그인 필요) */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getMonthlyReadingRank: {
+    parameters: {
+      query: {
+        /** @description 최대 조회 개수 (예: ?limit=10) */
+        limit: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 이달의 독서왕 조회 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['MonthlyReadingRankResponse'][];
+        };
+      };
+      /** @description 잘못된 요청 값 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description 인증 실패 (로그인 필요) */
       401: {

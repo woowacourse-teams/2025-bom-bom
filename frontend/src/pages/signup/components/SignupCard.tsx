@@ -260,7 +260,7 @@ const Tooltip = styled.div<{ open: boolean }>`
   position: absolute;
   bottom: 28px;
   left: 0;
-  z-index: 10;
+  z-index: ${({ theme }) => theme.zIndex.elevated};
   width: 100%;
   padding: 10px 12px;
   border-radius: 10px;

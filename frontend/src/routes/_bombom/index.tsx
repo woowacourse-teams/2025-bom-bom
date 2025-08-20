@@ -7,6 +7,9 @@ import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/Re
 import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { LocalGuideMail } from '@/types/guide';
+import { isToday } from '@/utils/date';
+import { createStorage } from '@/utils/localStorage';
 import type { CSSObject, Theme } from '@emotion/react';
 
 export const Route = createFileRoute('/_bombom/')({
@@ -16,6 +19,20 @@ export const Route = createFileRoute('/_bombom/')({
 function Index() {
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
+  const guideArticles = createStorage<LocalGuideMail[], string>(
+    'guide-mail',
+  ).get();
+
+  const mergedArticles = [
+    ...(todayArticles?.content?.map((article) => ({
+      ...article,
+      type: 'article' as const,
+    })) ?? []),
+    ...(guideArticles
+      ?.filter((guide) => isToday(new Date(guide.createdAt)))
+      .map((guide) => ({ ...guide, type: 'guide' as const })) ?? []),
+  ];
+
   const deviceType = useDeviceType();
 
   return (
@@ -24,14 +41,13 @@ function Index() {
         <TitleBox>
           <Title>오늘의 뉴스레터</Title>
           <TitleDescription>
-            {todayArticles?.content?.length ?? 0}개의 새로운 뉴스레터가
-            도착했어요
+            {mergedArticles.length ?? 0}개의 새로운 뉴스레터가 도착했어요
           </TitleDescription>
         </TitleBox>
       )}
 
       <ContentWrapper deviceType={deviceType}>
-        <ArticleCardList articles={todayArticles?.content ?? []} />
+        <ArticleCardList articles={mergedArticles} />
         <ReaderCompanion deviceType={deviceType}>
           <PetCard />
           <ReadingStatusCard />

@@ -9,8 +9,8 @@ import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
 import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
+import useArticleAsReadMutation from '@/pages/detail/hooks/useArticleAsReadMutation';
 import { useArticleBookmark } from '@/pages/detail/hooks/useArticleBookmark';
-import useMarkArticleAsReadMutation from '@/pages/detail/hooks/useMarkArticleAsReadMutation';
 
 export const Route = createFileRoute('/_bombom/articles/$articleId')({
   component: ArticleDetailPage,
@@ -23,7 +23,7 @@ function ArticleDetailPage() {
   const { data: currentArticle } = useQuery(
     queries.articleById({ id: articleIdNumber }),
   );
-  const { mutate: updateArticleAsRead } = useMarkArticleAsReadMutation({
+  const { mutate: updateArticleAsRead } = useArticleAsReadMutation({
     articleId: articleIdNumber,
   });
   const { isBookmarked, toggleBookmark } = useArticleBookmark({

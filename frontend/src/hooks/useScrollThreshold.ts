@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useThrottle } from './useThrottle';
+import { useDebounce } from './useDebounce';
 import { READ_THRESHOLD } from '@/constants/article';
 import { getScrollPercent } from '@/utils/scroll';
 
@@ -18,7 +18,7 @@ export function useScrollThreshold({
 }: UseScrollThresholdParams) {
   const startTimeRef = useRef(Date.now());
 
-  const throttledHandleScroll = useThrottle(() => {
+  const throttledHandleScroll = useDebounce(() => {
     if (!enabled) return;
 
     const scrollPercent = getScrollPercent();
@@ -27,7 +27,7 @@ export function useScrollThreshold({
     if (scrollPercent >= threshold && durationMs >= throttleMs) {
       onTrigger();
     }
-  }, 500);
+  }, 100);
 
   useEffect(() => {
     if (enabled && getScrollPercent() === 100) {

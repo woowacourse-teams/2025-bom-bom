@@ -44,7 +44,7 @@ const FloatingButton = styled.button<{ deviceType: DeviceType }>`
     ${({ theme }) => theme.heights.bottomNav} + env(safe-area-inset-bottom) +
       24px
   );
-  z-index: 1000;
+  z-index: ${({ theme }) => theme.zIndex.overlay};
   width: 56px;
   height: 56px;
   border: none;
@@ -70,7 +70,7 @@ const FloatingMenu = styled.div<{ deviceType: DeviceType }>`
     ${({ theme }) => theme.heights.bottomNav} + env(safe-area-inset-bottom) +
       92px
   );
-  z-index: 999;
+  z-index: ${({ theme }) => theme.zIndex.floating};
   min-width: 120px;
   padding: 12px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};

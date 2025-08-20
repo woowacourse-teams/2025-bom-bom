@@ -37,7 +37,7 @@ const toastAnimation = keyframes`
 const Container = styled.div<{ duration: number }>`
   position: fixed;
   top: 100px;
-  z-index: 1000;
+  z-index: ${({ theme }) => theme.zIndex.toast};
   width: 250px;
   padding: 12px 0;
 

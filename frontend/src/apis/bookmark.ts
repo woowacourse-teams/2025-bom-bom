@@ -1,11 +1,17 @@
 import { fetcher } from './fetcher';
 import { components, operations } from '@/types/openapi';
 
+export type GetBookmarksParams = Omit<
+  operations['getBookmarks']['parameters']['query'],
+  'pageable'
+> &
+  components['schemas']['Pageable'];
 export type GetBookmarksResponse = components['schemas']['PageArticleResponse'];
 
-export const getBookmarks = async () => {
+export const getBookmarks = async (params?: GetBookmarksParams) => {
   return await fetcher.get<GetBookmarksResponse>({
     path: '/bookmarks',
+    query: params,
   });
 };
 
@@ -40,14 +46,8 @@ export const deleteBookmark = async ({ articleId }: DeleteBookmarkParams) => {
   });
 };
 
-export type GetBookmarksStatisticsNewslettersResponse = {
-  totalCount: number;
-  newsletters: {
-    newsletter: string;
-    count: number;
-    imageUrl: string;
-  }[];
-};
+export type GetBookmarksStatisticsNewslettersResponse =
+  components['schemas']['BookmarkNewsletterStatisticsResponse'];
 
 export const getBookmarksStatisticsNewsletters = async () => {
   return await fetcher.get<GetBookmarksStatisticsNewslettersResponse>({

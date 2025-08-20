@@ -105,7 +105,7 @@ const SelectMenu = styled.div<{ open: boolean }>`
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 10;
+  z-index: ${({ theme }) => theme.zIndex.elevated};
 
   display: ${({ open }) => (open ? 'block' : 'none')};
 

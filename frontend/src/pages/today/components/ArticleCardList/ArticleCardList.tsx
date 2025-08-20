@@ -2,18 +2,22 @@ import styled from '@emotion/styled';
 import ArticleCard from '../ArticleCard/ArticleCard';
 import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
 import { theme } from '@/styles/theme';
-import { components } from '@/types/openapi';
+import { Article } from '@/types/articles';
 import CheckIcon from '#/assets/check.svg';
 import LetterIcon from '#/assets/letter.svg';
 
+type ExtendedArticle = Article & {
+  type: 'guide' | 'article';
+};
+
 interface ArticleCardListProps {
-  articles: components['schemas']['ArticleResponse'][];
+  articles: ExtendedArticle[];
 }
 
 function ArticleCardList({ articles }: ArticleCardListProps) {
   const grouped = articles.reduce<{
-    read: components['schemas']['ArticleResponse'][];
-    unread: components['schemas']['ArticleResponse'][];
+    read: ExtendedArticle[];
+    unread: ExtendedArticle[];
   }>(
     (acc, article) => {
       if (article.isRead) acc.read.push(article);
@@ -35,7 +39,14 @@ function ArticleCardList({ articles }: ArticleCardListProps) {
       <CardList>
         {grouped.unread.map((article) => (
           <li key={article.articleId}>
-            <ArticleCard data={article} />
+            <ArticleCard
+              data={article}
+              to={
+                article.type === 'guide'
+                  ? `/articles/guide/${article.articleId}`
+                  : `/articles/${article.articleId}`
+              }
+            />
           </li>
         ))}
       </CardList>

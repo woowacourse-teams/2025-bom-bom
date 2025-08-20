@@ -14,7 +14,7 @@ interface ArticleHeaderProps {
   arrivedDateTime: Date;
   expectedReadTime: number;
   bookmarked?: boolean;
-  onBookmarkClick: (bookmarked: boolean) => void;
+  onBookmarkClick?: (bookmarked: boolean) => void;
 }
 
 const ArticleHeader = ({
@@ -47,7 +47,7 @@ const ArticleHeader = ({
         {isBookmarkButtonVisible && (
           <BookmarkButton
             type="button"
-            onClick={() => onBookmarkClick(bookmarked)}
+            onClick={() => onBookmarkClick?.(bookmarked)}
           >
             {bookmarked ? (
               <BookmarkActiveIcon width={24} height={24} />

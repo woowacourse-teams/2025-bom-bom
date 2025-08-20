@@ -2,13 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { patchArticleRead } from '@/apis/articles';
 import { queries } from '@/apis/queries';
 
-interface UseMarkArticleAsReadMutationParams {
+interface UseArticleAsReadMutationParams {
   articleId: number;
 }
 
-const useMarkArticleAsReadMutation = ({
+const useArticleAsReadMutation = ({
   articleId,
-}: UseMarkArticleAsReadMutationParams) => {
+}: UseArticleAsReadMutationParams) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -26,4 +26,4 @@ const useMarkArticleAsReadMutation = ({
   });
 };
 
-export default useMarkArticleAsReadMutation;
+export default useArticleAsReadMutation;

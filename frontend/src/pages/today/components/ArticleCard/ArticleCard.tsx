@@ -39,6 +39,7 @@ function ArticleCard({
     <Container
       isRead={isRead ?? false}
       readVariant={readVariant}
+      isMobile={isMobile}
       to={to ?? `/articles/${articleId}`}
       onClick={() => {
         trackEvent({

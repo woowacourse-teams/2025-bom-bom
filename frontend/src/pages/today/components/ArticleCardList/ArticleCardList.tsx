@@ -82,6 +82,17 @@ const CardList = styled.ul<{ deviceType: DeviceType }>`
   width: 100%;
 
   display: flex;
-  gap: ${({ deviceType }) => (deviceType === 'mobile' ? '8px' : '16px')};
+  gap: ${({ deviceType }) => (deviceType === 'mobile' ? '0' : '16px')};
   flex-direction: column;
+
+  ${({ deviceType, theme }) =>
+    deviceType === 'mobile' &&
+    `
+    li {
+      padding: 8px 0;
+    }
+    li:not(:last-child) {
+      border-bottom: 2px solid ${theme.colors.dividers};
+    }
+  `}
 `;

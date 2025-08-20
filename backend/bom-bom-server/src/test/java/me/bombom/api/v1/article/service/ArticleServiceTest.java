@@ -453,10 +453,10 @@ class ArticleServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(result.totalCount()).isEqualTo(3);
-            softly.assertThat(result.newsletters().get(0).name()).isEqualTo("뉴스픽");
-            softly.assertThat(result.newsletters().get(0).articleCount()).isEqualTo(1);
-            softly.assertThat(result.newsletters().get(1).name()).isEqualTo("IT타임즈");
-            softly.assertThat(result.newsletters().get(1).articleCount()).isEqualTo(2);
+            softly.assertThat(result.newsletters().get(0).name()).isEqualTo("IT타임즈");
+            softly.assertThat(result.newsletters().get(0).articleCount()).isEqualTo(2);
+            softly.assertThat(result.newsletters().get(1).name()).isEqualTo("뉴스픽");
+            softly.assertThat(result.newsletters().get(1).articleCount()).isEqualTo(1);
         });
     }
 
@@ -471,12 +471,149 @@ class ArticleServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(result.totalCount()).isEqualTo(4);
-            softly.assertThat(result.newsletters().get(0).name()).isEqualTo("뉴스픽");
-            softly.assertThat(result.newsletters().get(0).articleCount()).isEqualTo(1);
-            softly.assertThat(result.newsletters().get(1).name()).isEqualTo("IT타임즈");
+            softly.assertThat(result.newsletters().get(0).name()).isEqualTo("비즈레터");
+            softly.assertThat(result.newsletters().get(0).articleCount()).isEqualTo(2);
+            softly.assertThat(result.newsletters().get(1).name()).isEqualTo("뉴스픽");
             softly.assertThat(result.newsletters().get(1).articleCount()).isEqualTo(1);
-            softly.assertThat(result.newsletters().get(2).name()).isEqualTo("비즈레터");
-            softly.assertThat(result.newsletters().get(2).articleCount()).isEqualTo(2);
+            softly.assertThat(result.newsletters().get(2).name()).isEqualTo("IT타임즈");
+            softly.assertThat(result.newsletters().get(2).articleCount()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void 키워드가_빈_문자열인_경우_전체_조회한다() {
+        // when
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+                member,
+                ""
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(4);
+            softly.assertThat(result.newsletters()).hasSize(3); // 모든 뉴스레터
+        });
+    }
+
+    @Test
+    void 키워드가_공백만_있는_경우_전체_조회한다() {
+        // when
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+                member,
+                "   "
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(4);
+            softly.assertThat(result.newsletters()).hasSize(3); // 모든 뉴스레터
+        });
+    }
+
+    @Test
+    void 키워드_앞뒤_공백이_제거되어_검색된다() {
+        // given
+        List<Article> testArticles = List.of(
+                TestFixture.createArticle("AI 기술", member.getId(), newsletters.get(0).getId(), BASE_TIME),
+                TestFixture.createArticle("머신러닝", member.getId(), newsletters.get(1).getId(), BASE_TIME)
+        );
+        articleRepository.saveAll(testArticles);
+
+        // when
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+                member,
+                "  AI  "  // 앞뒤 공백
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(1);
+            softly.assertThat(result.newsletters().get(0).articleCount()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void 키워드에_일치하는_아티클이_없는_경우() {
+        // when
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+                member,
+                "존재하지않는키워드"
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(0);
+            softly.assertThat(result.newsletters()).isEmpty();
+        });
+    }
+
+    @Test
+    void 대소문자_구분없이_키워드_검색이_된다() {
+        // given
+        List<Article> testArticles = List.of(
+                TestFixture.createArticle("AI Technology", member.getId(), newsletters.get(0).getId(), BASE_TIME),
+                TestFixture.createArticle("ai development", member.getId(), newsletters.get(1).getId(), BASE_TIME)
+        );
+        articleRepository.saveAll(testArticles);
+
+        // when
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+                member,
+                "ai"
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(2);
+            softly.assertThat(result.newsletters()).hasSize(2);
+        });
+    }
+
+    @Test
+    void 부분_문자열로_키워드_검색이_된다() {
+        // given
+        List<Article> testArticles = List.of(
+                TestFixture.createArticle("프로그래밍 언어", member.getId(), newsletters.get(0).getId(), BASE_TIME),
+                TestFixture.createArticle("그래픽 디자인", member.getId(), newsletters.get(1).getId(), BASE_TIME),
+                TestFixture.createArticle("데이터베이스", member.getId(), newsletters.get(2).getId(), BASE_TIME)
+        );
+        articleRepository.saveAll(testArticles);
+
+        // when
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+                member,
+                "그래"  // "프로그래밍", "그래픽" 모두 매치
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(2);
+            softly.assertThat(result.newsletters()).hasSize(2);
+        });
+    }
+
+    @Test
+    void 특정_뉴스레터에만_키워드가_매치되는_경우() {
+        // given
+        List<Article> testArticles = List.of(
+                TestFixture.createArticle("특별한 이벤트", member.getId(), newsletters.get(0).getId(), BASE_TIME),
+                TestFixture.createArticle("일반적인 뉴스", member.getId(), newsletters.get(1).getId(), BASE_TIME),
+                TestFixture.createArticle("또 다른 뉴스", member.getId(), newsletters.get(2).getId(), BASE_TIME)
+        );
+        articleRepository.saveAll(testArticles);
+
+        // when
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+                member,
+                "특별한"
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(1);
+            softly.assertThat(result.newsletters()).hasSize(1);
+            softly.assertThat(result.newsletters().get(0).name()).isEqualTo("뉴스픽"); // newsletters.get(0)에 해당
+            softly.assertThat(result.newsletters().get(0).articleCount()).isEqualTo(1);
         });
     }
 }

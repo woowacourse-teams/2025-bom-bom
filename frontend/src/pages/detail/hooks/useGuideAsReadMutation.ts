@@ -10,7 +10,7 @@ const useGuideAsReadMutation = ({
 }: UseGuideAsReadMutationParams) => {
   return useMutation({
     mutationFn: patchGuideArticleRead,
-    onSuccess: onSuccess,
+    onSuccess,
   });
 };
 

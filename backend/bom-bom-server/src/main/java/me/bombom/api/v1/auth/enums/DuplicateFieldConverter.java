@@ -11,6 +11,6 @@ public class DuplicateFieldConverter implements Converter<String, DuplicateCheck
         if (source == null) {
             return null;
         }
-        return DuplicateCheckField.valueOf(source.trim().toUpperCase());
+        return DuplicateCheckField.valueOf(source.strip().toUpperCase());
     }
 }

@@ -1,27 +1,32 @@
 import styled from '@emotion/styled';
+import { ComponentProps } from 'react';
 import type { Theme } from '@emotion/react';
 
 type VariantType = 'default' | 'outlinePrimary';
 
-interface BadgeProps {
+interface BadgeProps extends ComponentProps<'div'> {
   text: string;
   variant?: VariantType;
 }
 
-function Badge({ text, variant = 'default' }: BadgeProps) {
-  return <Container variant={variant}>{text}</Container>;
+function Badge({ text, variant = 'default', ...props }: BadgeProps) {
+  return (
+    <Container variant={variant} {...props}>
+      {text}
+    </Container>
+  );
 }
 
 export default Badge;
 
 const Container = styled.div<{ variant: VariantType }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   width: fit-content;
   padding: 4px 8px;
   border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   font: ${({ theme }) => theme.fonts.caption};
 

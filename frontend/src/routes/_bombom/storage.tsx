@@ -95,7 +95,6 @@ function Storage() {
 const Container = styled.div`
   width: 100%;
   max-width: 1280px;
-  padding: 64px 24px;
 
   display: flex;
   gap: 24px;
@@ -124,7 +123,7 @@ const TitleIconBox = styled.div`
 `;
 
 const Title = styled.h1`
-  font: ${({ theme }) => theme.fonts.heading2};
+  font: ${({ theme }) => theme.fonts.heading3};
 `;
 
 const ContentWrapper = styled.div<{ isPC: boolean }>`
@@ -151,7 +150,7 @@ const MainContentSection = styled.div<{ isPC: boolean }>`
   width: 100%;
 
   display: flex;
-  gap: 40px;
+  gap: 32px;
   flex: 1;
   flex-direction: column;
 

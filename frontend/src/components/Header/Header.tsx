@@ -43,7 +43,9 @@ const MobileHeaderContainer = styled.header`
   top: 0;
   z-index: ${({ theme }) => theme.zIndex.header};
   width: 100%;
-  height: calc(56px + env(safe-area-inset-top));
+  height: calc(
+    ${({ theme }) => theme.heights.headerMobile} + env(safe-area-inset-top)
+  );
   padding: 8px 12px;
   padding-top: calc(8px + env(safe-area-inset-top));
   box-shadow:
@@ -62,7 +64,7 @@ const HeaderContainer = styled.header`
   top: 0;
   z-index: ${({ theme }) => theme.zIndex.header};
   width: 100%;
-  height: 72px;
+  height: ${({ theme }) => theme.heights.headerPC};
   padding: 8px 16px;
   border-radius: 0 0 8px 8px;
   box-shadow:

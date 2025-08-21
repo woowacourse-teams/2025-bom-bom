@@ -57,14 +57,18 @@ const NewsletterDetail = ({
             isMobile={isMobile}
           />
           <InfoBox>
-            <NewsletterTitle isMobile={isMobile}>
-              {newsletterDetail.name}
-            </NewsletterTitle>
-            <NewsletterInfo>
-              <Badge text={category} />
-              <IssueCycle isMobile={isMobile}>
-                {newsletterDetail.issueCycle}
-              </IssueCycle>
+            <TitleWrapper isMobile={isMobile}>
+              <NewsletterTitle isMobile={isMobile}>
+                {newsletterDetail.name}
+              </NewsletterTitle>
+              <DetailLink onClick={openMainSite} isMobile={isMobile}>
+                <StyledHomeIcon isMobile={isMobile} />
+              </DetailLink>
+            </TitleWrapper>
+
+            <NewsletterInfo isMobile={isMobile}>
+              <StyledBadge text={category} isMobile={isMobile} />
+              <IssueCycle>{`${newsletterDetail.issueCycle} 발행`}</IssueCycle>
             </NewsletterInfo>
           </InfoBox>
         </InfoWrapper>
@@ -77,23 +81,18 @@ const NewsletterDetail = ({
       </FixedWrapper>
 
       <ScrollableWrapper isMobile={isMobile}>
-        <Description>{newsletterDetail.description}</Description>
+        <Description isMobile={isMobile}>
+          {newsletterDetail.description}
+        </Description>
 
-        <LinkWrapper>
-          <DetailLink onClick={openMainSite}>
-            <HomeIcon width={18} height={18} />
-            홈페이지
+        {newsletterDetail.previousNewsletterUrl && (
+          <DetailLink onClick={openPreviousLetters} isMobile={isMobile}>
+            <ArticleHistoryIcon width={16} height={16} />
+            지난 소식 보기
           </DetailLink>
+        )}
 
-          {newsletterDetail.previousNewsletterUrl && (
-            <DetailLink onClick={openPreviousLetters}>
-              <ArticleHistoryIcon width={18} height={18} />
-              지난 소식 보기
-            </DetailLink>
-          )}
-        </LinkWrapper>
-
-        {deviceType !== 'mobile' && (
+        {!isMobile && (
           <SubscribeWrapper>
             <SubscribeHeader>
               <SubscribeTitle>구독 방법</SubscribeTitle>
@@ -198,8 +197,8 @@ const InfoWrapper = styled.div<{ isMobile: boolean }>`
 `;
 
 const NewsletterImage = styled(ImageWithFallback)<{ isMobile: boolean }>`
-  width: ${({ isMobile }) => (isMobile ? '60px' : '80px')};
-  height: ${({ isMobile }) => (isMobile ? '60px' : '80px')};
+  width: ${({ isMobile }) => (isMobile ? '88px' : '104px')};
+  height: ${({ isMobile }) => (isMobile ? '88px' : '104px')};
   border-radius: ${({ isMobile }) => (isMobile ? '12px' : '16px')};
 
   flex-shrink: 0;
@@ -215,43 +214,57 @@ const InfoBox = styled.div`
   flex-direction: column;
 `;
 
+const TitleWrapper = styled.div<{ isMobile: boolean }>`
+  display: flex;
+  gap: ${({ isMobile }) => (isMobile ? '4px' : '8px')};
+`;
+
 const NewsletterTitle = styled.h2<{ isMobile: boolean }>`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme, isMobile }) =>
-    isMobile ? theme.fonts.heading5 : theme.fonts.heading4};
+    isMobile ? theme.fonts.heading4 : theme.fonts.heading3};
 `;
 
-const NewsletterInfo = styled.div`
+const StyledHomeIcon = styled(HomeIcon)<{ isMobile: boolean }>`
+  width: ${({ isMobile }) => (isMobile ? '20px' : '24px')};
+  height: ${({ isMobile }) => (isMobile ? '20px' : '24px')};
+
+  fill: ${({ theme }) => theme.colors.primary};
+`;
+
+const NewsletterInfo = styled.div<{ isMobile: boolean }>`
   display: flex;
   gap: 12px;
   align-items: center;
+
+  font: ${({ theme, isMobile }) =>
+    isMobile ? theme.fonts.body3 : theme.fonts.body2};
 `;
 
-const IssueCycle = styled.p<{ isMobile: boolean }>`
-  color: ${({ theme }) => theme.colors.textSecondary};
+const StyledBadge = styled(Badge)<{ isMobile: boolean }>`
   font: ${({ theme, isMobile }) =>
-    isMobile ? theme.fonts.caption : theme.fonts.body2};
+    isMobile ? theme.fonts.body3 : theme.fonts.body2};
+`;
+
+const IssueCycle = styled.p`
+  color: ${({ theme }) => theme.colors.textSecondary};
   text-align: center;
 `;
 
-const Description = styled.p`
+const Description = styled.p<{ isMobile: boolean }>`
   color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.body1};
+  font: ${({ isMobile, theme }) =>
+    isMobile ? theme.fonts.body2 : theme.fonts.body1};
 `;
 
-const LinkWrapper = styled.div`
-  display: flex;
-  gap: 8px;
-  flex-direction: column;
-
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.body1};
-`;
-
-const DetailLink = styled.a`
+const DetailLink = styled.a<{ isMobile: boolean }>`
   display: flex;
   gap: 4px;
   align-items: center;
+
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font: ${({ theme, isMobile }) =>
+    isMobile ? theme.fonts.body3 : theme.fonts.body2};
 
   transition: all 0.2s ease;
 

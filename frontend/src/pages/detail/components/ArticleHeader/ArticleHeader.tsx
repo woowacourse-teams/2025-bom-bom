@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import Chip from '@/components/Chip/Chip';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import useMediaQuery from '@/hooks/useMediaQuery';
 import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
@@ -30,11 +31,12 @@ const ArticleHeader = ({
     key: 'max-width',
     value: 1350,
   });
+  const deviceType = useDeviceType();
 
   return (
     <Container>
       <TitleRow>
-        <Title>{title}</Title>
+        <Title deviceType={deviceType}>{title}</Title>
       </TitleRow>
       <MetaInfoRow>
         <Chip text={newsletterCategory} />
@@ -84,11 +86,12 @@ const TitleRow = styled.div`
   justify-content: space-between;
 `;
 
-const Title = styled.h2`
+const Title = styled.h2<{ deviceType: DeviceType }>`
   flex: 1;
 
   color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.heading2};
+  font: ${({ theme, deviceType }) =>
+    deviceType === 'mobile' ? theme.fonts.heading4 : theme.fonts.heading3};
 `;
 
 const BookmarkButton = styled.button`

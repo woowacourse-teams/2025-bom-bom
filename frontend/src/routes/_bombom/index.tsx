@@ -47,9 +47,6 @@ function Index() {
             </TitleIconBox>
             <Title>오늘의 뉴스레터</Title>
           </TitleWrapper>
-          <ArticleCountSummary>
-            {mergedArticles.length ?? 0}개의 새로운 뉴스레터가 도착했어요
-          </ArticleCountSummary>
         </>
       )}
 
@@ -68,9 +65,6 @@ const Container = styled.div<{ deviceType: DeviceType }>`
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: ${({ deviceType }) => (deviceType === 'mobile' ? '0px' : '24px')};
-  padding-top: ${({ deviceType }) =>
-    deviceType === 'mobile' ? '0px' : '64px'};
 
   display: flex;
   gap: 24px;
@@ -101,12 +95,7 @@ const TitleIconBox = styled.div`
 `;
 
 const Title = styled.h1`
-  font: ${({ theme }) => theme.fonts.heading2};
-`;
-
-const ArticleCountSummary = styled.p`
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.caption};
+  font: ${({ theme }) => theme.fonts.heading3};
 `;
 
 const ContentWrapper = styled.div<{ deviceType: DeviceType }>`

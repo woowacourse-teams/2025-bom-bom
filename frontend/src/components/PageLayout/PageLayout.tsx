@@ -18,7 +18,7 @@ const PageLayout = ({ children }: PropsWithChildren) => {
   const deviceType = useDeviceType();
   const isMobile = deviceType === 'mobile';
 
-  const previousNavRef = useRef<NavType>('today');
+  const previousNavRef = useRef<NavType>(null);
 
   useEffect(() => {
     if (navMap[location]) {

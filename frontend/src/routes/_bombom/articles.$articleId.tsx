@@ -2,6 +2,8 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
+import ProgressBar from '@/components/ProgressBar/ProgressBar';
+import useScrollProgress from '@/components/ScrollProgress/useScrollProgress';
 import Spacing from '@/components/Spacing/Spacing';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
@@ -32,6 +34,8 @@ function ArticleDetailPage() {
     articleId: articleIdNumber,
   });
 
+  const { progressPercentage } = useScrollProgress();
+
   useScrollThreshold({
     enabled: !currentArticle?.isRead && !!currentArticle,
     threshold: 70,
@@ -44,37 +48,45 @@ function ArticleDetailPage() {
   if (!currentArticle) return null;
 
   return (
-    <Container deviceType={deviceType}>
-      <ArticleHeader
-        title={currentArticle.title ?? ''}
-        newsletterCategory={currentArticle.newsletter?.category ?? ''}
-        newsletterName={currentArticle.newsletter?.name ?? ''}
-        arrivedDateTime={new Date(currentArticle.arrivedDateTime ?? '')}
-        expectedReadTime={currentArticle.expectedReadTime ?? 1}
-        bookmarked={isBookmarked}
-        onBookmarkClick={toggleBookmark}
+    <>
+      <ArticleProgressBar
+        rate={progressPercentage}
+        transition={false}
+        variant="rectangular"
+        deviceType={deviceType}
       />
-      <Divider />
+      <Container deviceType={deviceType}>
+        <ArticleHeader
+          title={currentArticle.title ?? ''}
+          newsletterCategory={currentArticle.newsletter?.category ?? ''}
+          newsletterName={currentArticle.newsletter?.name ?? ''}
+          arrivedDateTime={new Date(currentArticle.arrivedDateTime ?? '')}
+          expectedReadTime={currentArticle.expectedReadTime ?? 1}
+          bookmarked={isBookmarked}
+          onBookmarkClick={toggleBookmark}
+        />
+        <Divider />
 
-      <ArticleBody
-        articleId={articleIdNumber}
-        articleContent={currentArticle.contents}
-      />
-      <Spacing size={24} />
-      <Divider />
+        <ArticleBody
+          articleId={articleIdNumber}
+          articleContent={currentArticle.contents}
+        />
+        <Spacing size={24} />
+        <Divider />
 
-      <ContentDescription>
-        이 뉴스레터가 유용했다면 동료들과 공유해주세요. 피드백이나 제안사항이
-        있으시면 언제든 연락 주시기 바랍니다.
-      </ContentDescription>
+        <ContentDescription>
+          이 뉴스레터가 유용했다면 동료들과 공유해주세요. 피드백이나 제안사항이
+          있으시면 언제든 연락 주시기 바랍니다.
+        </ContentDescription>
 
-      <TodayUnreadArticlesSection articleId={articleIdNumber} />
+        <TodayUnreadArticlesSection articleId={articleIdNumber} />
 
-      <FloatingActionButtons
-        bookmarked={isBookmarked}
-        onBookmarkClick={toggleBookmark}
-      />
-    </Container>
+        <FloatingActionButtons
+          bookmarked={isBookmarked}
+          onBookmarkClick={toggleBookmark}
+        />
+      </Container>
+    </>
   );
 }
 
@@ -94,6 +106,15 @@ const Container = styled.div<{ deviceType: DeviceType }>`
   gap: 20px;
   flex-direction: column;
   align-items: center;
+`;
+
+const ArticleProgressBar = styled(ProgressBar)<{ deviceType: DeviceType }>`
+  position: fixed;
+  top: ${({ deviceType, theme }) =>
+    deviceType === 'mobile'
+      ? `calc(${theme.heights.headerMobile} + env(safe-area-inset-top))`
+      : `calc(${theme.heights.headerPC} + env(safe-area-inset-top))`};
+  z-index: ${({ theme }) => theme.zIndex.floating};
 `;
 
 const Divider = styled.div`

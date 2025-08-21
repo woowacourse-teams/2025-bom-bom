@@ -396,6 +396,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/auth/signup/check': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 회원가입 필드 중복 체크
+     * @description 회원가입에 사용되는 필드의 중복을 체크하여 true/false를 반환합니다.
+     */
+    get: operations['checkSignupDuplicate'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/auth/login/{provider}': {
     parameters: {
       query?: never;
@@ -660,7 +680,7 @@ export interface components {
     };
     MonthlyReadingRankResponse: {
       nickname: string;
-      /** Format: int32 */
+      /** Format: int64 */
       rank: number;
       /** Format: int32 */
       monthlyReadCount: number;
@@ -810,7 +830,7 @@ export interface components {
     };
     BookmarkCountPerNewsletterResponse: {
       /** Format: int64 */
-      id?: number;
+      id: number;
       name: string;
       imageUrl: string;
       /** Format: int32 */
@@ -820,6 +840,11 @@ export interface components {
       /** Format: int32 */
       totalCount: number;
       newsletters: components['schemas']['BookmarkCountPerNewsletterResponse'][];
+    };
+    DuplicateCheckRequest: {
+      /** @enum {string} */
+      field: 'NICKNAME' | 'EMAIL';
+      userInput: string;
     };
     ArticlesOptionsRequest: {
       /** Format: date */
@@ -880,9 +905,12 @@ export interface components {
       /** @description 카테고리 */
       category: string;
     };
+    ArticleNewsletterStatisticOptionsRequest: {
+      keyword?: string;
+    };
     ArticleCountPerNewsletterResponse: {
       /** Format: int64 */
-      id?: number;
+      id: number;
       name: string;
       imageUrl: string;
       /** Format: int32 */
@@ -1637,6 +1665,38 @@ export interface operations {
       };
     };
   };
+  checkSignupDuplicate: {
+    parameters: {
+      query: {
+        /** @description 중복 체크 요청 데이터 */
+        request: components['schemas']['DuplicateCheckRequest'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 중복 체크 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': boolean;
+        };
+      };
+      /** @description 잘못된 요청 데이터 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': boolean;
+        };
+      };
+    };
+  };
   login: {
     parameters: {
       query?: {
@@ -1756,9 +1816,9 @@ export interface operations {
   };
   getArticleNewsletterStatistics: {
     parameters: {
-      query?: {
-        /** @description 검색 키워드 (선택) */
-        keyword?: string;
+      query: {
+        /** @description 검색 옵션 */
+        request: components['schemas']['ArticleNewsletterStatisticOptionsRequest'];
       };
       header?: never;
       path?: never;

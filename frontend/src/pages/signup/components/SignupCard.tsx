@@ -10,7 +10,8 @@ import {
   validateEmailLocal,
   validateNickname,
 } from './SignupCard.utils';
-import { postSignup } from '@/apis/auth';
+import { getSignupCheck, GetSignupCheckParams, postSignup } from '@/apis/auth';
+import { SIGNUP_CHECK_ERROR_MESSAGE } from '@/apis/constants/checkErrorMessage';
 import InputField from '@/components/InputField/InputField';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import { GUIDE_MAILS } from '@/mocks/datas/guideMail';
@@ -34,6 +35,9 @@ const SignupCard = () => {
   const [nicknameError, setNicknameError] = useState<FieldError>(null);
   const [birthDateError, setBirthDateError] = useState<FieldError>(null);
   const [emailError, setEmailError] = useState<FieldError>(null);
+  const { mutateAsync: checkDuplicate } = useMutation({
+    mutationFn: (params: GetSignupCheckParams) => getSignupCheck(params),
+  });
 
   const email = `${emailPart.trim()}${EMAIL_DOMAIN}`;
 
@@ -61,18 +65,28 @@ const SignupCard = () => {
     onError: (e) => {
       const errorMessage = e.message;
       if (errorMessage === '이미 사용 중인 닉네임입니다.')
-        setNicknameError(errorMessage);
+        setNicknameError(SIGNUP_CHECK_ERROR_MESSAGE.nickname);
       if (errorMessage === '이미 사용 중인 이메일입니다.')
-        setEmailError(errorMessage);
+        setEmailError(SIGNUP_CHECK_ERROR_MESSAGE.email);
     },
   });
 
-  const handleNicknameBlur = () => {
+  const handleNicknameBlur = async () => {
     setNicknameError(validateNickname(nickname));
+    const isDuplicate = await checkDuplicate({
+      field: 'NICKNAME',
+      userInput: nickname,
+    });
+    if (isDuplicate) setNicknameError(SIGNUP_CHECK_ERROR_MESSAGE.nickname);
   };
 
-  const handleEmailBlur = () => {
+  const handleEmailBlur = async () => {
     setEmailError(validateEmailLocal(emailPart));
+    const isDuplicate = await checkDuplicate({
+      field: 'EMAIL',
+      userInput: email,
+    });
+    if (isDuplicate) setEmailError(SIGNUP_CHECK_ERROR_MESSAGE.email);
   };
 
   const handleBirthDateBlur = () => {

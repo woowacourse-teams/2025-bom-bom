@@ -36,7 +36,7 @@ public interface ArticleControllerApi {
     })
     public Page<ArticleResponse> getArticles(
         @Parameter(hidden = true) Member member,
-        @Parameter(description = "필터링 관련 요청") @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
+        @Parameter(description = "필터링 관련 요청") @Valid @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
         @Parameter(description = "페이징 관련 요청 (예: ?page=0&size=10&sort=createdAt,desc)") Pageable pageable
     );
 

@@ -26,6 +26,14 @@ const petImages: Record<number, string> = {
   5: petLv5,
 };
 
+const petWidth = {
+  1: 80,
+  2: 100,
+  3: 90,
+  4: 120,
+  5: 136,
+} as const;
+
 const PetCard = () => {
   const deviceType = useDeviceType();
   const [isAnimating, setIsAnimating] = useState(false);
@@ -53,16 +61,8 @@ const PetCard = () => {
     mutatePetAttendance();
   };
 
-  const petWidth: Record<number, number> = {
-    1: 80,
-    2: 100,
-    3: 90,
-    4: 120,
-    5: 136,
-  };
-
   const currentLevel = pet?.level ?? 1;
-  const width = petWidth[currentLevel] ?? 80;
+  const width = petWidth[currentLevel as keyof typeof petWidth] ?? 80;
 
   return (
     <Container deviceType={deviceType}>

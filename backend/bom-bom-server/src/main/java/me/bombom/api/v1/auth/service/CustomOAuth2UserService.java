@@ -32,7 +32,7 @@
             String providerId = oAuth2User.getAttribute(oAuth2Provider.getIdKey());
             String profileUrl = oAuth2User.getAttribute(oAuth2Provider.getProfileImageKey());
 
-            Optional<Member> member = memberRepository.findByProviderAndProviderId(provider, providerId);
+            Optional<Member> member = memberRepository.findByProviderAndProviderIdIncludeDeleted(provider, providerId);
 
             if (member.isPresent() && member.get().isWithdrawnMember()) {
                 throw new UnauthorizedException(ErrorDetail.WITHDRAWN_MEMBER);

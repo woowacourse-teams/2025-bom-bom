@@ -96,7 +96,6 @@ const ProfileInfo = styled.div`
 
 const ProfileName = styled.div`
   color: ${({ theme }) => theme.colors.textPrimary};
-  font-weight: 600;
 `;
 
 const ProfileEmail = styled.div`
@@ -108,7 +107,6 @@ const ProfileEmail = styled.div`
 `;
 
 const EmailText = styled.div`
-  font: ${({ theme }) => theme.fonts.caption};
   color: ${({ theme }) => theme.colors.textSecondary};
-  font-weight: 500;
+  font: ${({ theme }) => theme.fonts.caption};
 `;

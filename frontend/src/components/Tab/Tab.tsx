@@ -55,7 +55,6 @@ const Container = styled.li<{ selected: boolean }>`
   color: ${({ selected, theme }) =>
     selected ? theme.colors.white : theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body2};
-  font-weight: ${({ selected }) => (selected ? '600' : '400')};
 
   cursor: pointer;
   transition: all 0.2s ease-in-out;

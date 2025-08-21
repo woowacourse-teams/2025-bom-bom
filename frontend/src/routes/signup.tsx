@@ -19,8 +19,6 @@ function RouteComponent() {
 }
 
 const Container = styled.div<{ isMobile: boolean }>`
-  min-height: 100vh;
-
   display: flex;
   gap: 28px;
   flex-direction: column;

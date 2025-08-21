@@ -72,7 +72,10 @@ const SignupCard = () => {
   });
 
   const handleNicknameBlur = async () => {
-    setNicknameError(validateNickname(nickname));
+    const error = validateNickname(nickname);
+    setNicknameError(error);
+    if (error) return;
+
     const isDuplicate = await checkDuplicate({
       field: 'NICKNAME',
       userInput: nickname,
@@ -81,7 +84,10 @@ const SignupCard = () => {
   };
 
   const handleEmailBlur = async () => {
+    const error = validateEmailLocal(emailPart);
     setEmailError(validateEmailLocal(emailPart));
+    if (error) return;
+
     const isDuplicate = await checkDuplicate({
       field: 'EMAIL',
       userInput: email,

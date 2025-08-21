@@ -104,37 +104,44 @@ export default TrendySection;
 
 const Container = styled.div`
   width: 100%;
-  padding: 24px;
-  border: 1px solid ${({ theme }) => theme.colors.stroke};
-  border-radius: 20px;
+  padding: 28px;
+  border: 1px solid ${({ theme }) => theme.colors.dividers};
+  border-radius: 24px;
   box-shadow:
-    0 10px 15px -3px rgb(0 0 0 / 10%),
-    0 4px 6px -4px rgb(0 0 0 / 10%);
+    0 4px 20px -4px rgba(0, 0, 0, 0.08),
+    0 2px 8px -2px rgba(0, 0, 0, 0.04);
 
   background: ${({ theme }) => theme.colors.white};
 
-  backdrop-filter: blur(10px);
+  @media (width <= 768px) {
+    padding: 20px;
+    border-radius: 20px;
+  }
 `;
 
 const SectionHeader = styled.div`
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
 `;
 
 const SectionIconBox = styled.span`
-  width: 28px;
-  height: 28px;
-  border-radius: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  background: ${({ theme }) => theme.colors.primary};
-  font: ${({ theme }) => theme.fonts.body1};
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary}, ${({ theme }) => theme.colors.primaryLight});
+  box-shadow: 0 2px 8px rgba(255, 153, 102, 0.3);
+  
+  svg {
+    color: white;
+  }
 `;
 
 const SectionTitle = styled.h2`
@@ -145,24 +152,50 @@ const SectionTitle = styled.h2`
 `;
 
 const TagContainer = styled.div`
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+
+  @media (width <= 768px) {
+    margin-bottom: 16px;
+  }
 `;
 
 const TrendyGrid = styled.div<{ deviceType: DeviceType }>`
   display: grid;
-  gap: 8px;
+  gap: 16px;
 
   grid-template-columns: ${({ deviceType }) =>
     deviceType === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
+
+  @media (width <= 1024px) and (width > 768px) {
+    gap: 12px;
+  }
 `;
 
 const NewsletterCard = styled(ImageInfoCard)`
+  padding: 16px;
+  border: 1px solid ${({ theme }) => theme.colors.dividers};
+  border-radius: 16px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: ${({ theme }) => theme.colors.white};
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.12);
+    border-color: ${({ theme }) => theme.colors.primary};
+  }
+
+  &:active {
+    transform: translateY(-2px);
+  }
+
   &:focus-visible {
-    outline: none;
+    outline: 2px solid ${({ theme }) => theme.colors.primary};
+    outline-offset: 2px;
   }
 
   &:focus:not(:focus-visible) {

@@ -39,7 +39,8 @@ const PageLayout = ({ children }: PropsWithChildren) => {
 export default PageLayout;
 
 const Container = styled.div<{ isMobile: boolean }>`
-  min-height: 100dvh;
+  width: 100%;
+  min-height: 100vh;
   padding: ${({ isMobile, theme }) => {
     const sidePadding = isMobile ? '12px' : '24px';
     const headerHeight = isMobile
@@ -59,6 +60,4 @@ const Container = styled.div<{ isMobile: boolean }>`
   align-items: center;
 
   background-color: ${({ theme }) => theme.colors.white};
-
-  scrollbar-gutter: stable;
 `;

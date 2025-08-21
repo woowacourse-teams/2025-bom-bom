@@ -94,6 +94,10 @@ const NewsLetterImage = styled.img`
   width: 24px;
   height: 24px;
   border-radius: 50%;
+
+  flex-shrink: 0;
+
+  object-fit: cover;
 `;
 
 const StyledTabs = styled(Tabs)`

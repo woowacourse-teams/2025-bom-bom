@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import SlideCardList from '../../SlideCardList/SlideCardList';
 import { queries } from '@/apis/queries';
+import logo from '#/assets/logo.png';
 
 export default function NewsletterHero() {
   const { data: userInfo } = useQuery(queries.me());
@@ -14,7 +15,9 @@ export default function NewsletterHero() {
       ) : (
         <Container>
           <HeroContent>
-            <HeroIcon>🌸</HeroIcon>
+            <HeroIcon>
+              <img src={logo} alt="logo" width={48} height={48} />
+            </HeroIcon>
             <HeroTitle>새로운 뉴스레터를 발견해보세요! 📚</HeroTitle>
             <HeroSubtitle>
               당신의 관심사에 맞는 최고의 뉴스레터를 추천해드립니다.

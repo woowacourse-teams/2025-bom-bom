@@ -1,18 +1,25 @@
 import styled from '@emotion/styled';
 import { useNavigate } from '@tanstack/react-router';
 import Button from '../Button/Button';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import LockIcon from '#/assets/lock.svg';
 
 const RequireLoginCard = () => {
   const navigate = useNavigate();
+  const deviceType = useDeviceType();
+  const isMobile = deviceType === 'mobile';
 
   return (
-    <Container>
+    <Container isMobile={isMobile}>
       <StyledLockIcon />
       <Title>로그인이 필요해요</Title>
       <DescriptionWrapper>
-        <Lead>현재 페이지를 이용하시려면 먼저 로그인해 주세요</Lead>
-        <Support>봄봄에서 더 많은 특별한 기능들을 만나보실 수 있어요!</Support>
+        <Lead isMobile={isMobile}>
+          현재 페이지를 이용하시려면 먼저 로그인해 주세요
+        </Lead>
+        <Support isMobile={isMobile}>
+          봄봄에서 더 많은 특별한 기능들을 만나보실 수 있어요!
+        </Support>
       </DescriptionWrapper>
       <GoToLoginButton
         text="봄봄 시작하기"
@@ -26,13 +33,11 @@ const RequireLoginCard = () => {
 
 export default RequireLoginCard;
 
-const Container = styled.section`
-  width: 380px;
+const Container = styled.section<{ isMobile: boolean }>`
+  width: ${({ isMobile }) => (isMobile ? '100%' : '380px')};
   height: 500px;
   margin: auto 0;
-  padding: 28px;
-  border-radius: 20px;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+  padding: ${({ isMobile }) => (isMobile ? '16px' : '28px')};
 
   display: flex;
   gap: 24px;
@@ -41,6 +46,14 @@ const Container = styled.section`
   justify-content: center;
 
   background-color: ${({ theme }) => theme.colors.white};
+
+  ${({ isMobile }) =>
+    !isMobile &&
+    `
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+  
+  `}
 `;
 
 const StyledLockIcon = styled(LockIcon)`
@@ -60,19 +73,23 @@ const DescriptionWrapper = styled.div`
   flex-direction: column;
 `;
 
-const Lead = styled.p`
+const Lead = styled.p<{ isMobile: boolean }>`
   color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.body1};
+  font: ${({ isMobile, theme }) =>
+    isMobile ? theme.fonts.body2 : theme.fonts.body1};
   text-align: center;
 `;
 
-const Support = styled.p`
+const Support = styled.p<{ isMobile: boolean }>`
   color: ${({ theme }) => theme.colors.textTertiary};
-  font: ${({ theme }) => theme.fonts.body2};
+  font: ${({ isMobile, theme }) =>
+    isMobile ? theme.fonts.body3 : theme.fonts.body2};
   text-align: center;
 `;
 
 const GoToLoginButton = styled(Button)`
   width: 100%;
+  max-width: 380px;
+
   font: ${({ theme }) => theme.fonts.heading5};
 `;

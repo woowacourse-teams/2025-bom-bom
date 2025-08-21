@@ -39,7 +39,7 @@ export const patchArticleRead = async ({ id }: PatchArticleReadParams) => {
 };
 
 export type GetArticleStatisticsNewslettersParams =
-  operations['getArticleNewsletterStatistics']['parameters']['query'];
+  operations['getArticleNewsletterStatistics']['parameters']['query']['request'];
 
 export type GetArticlesStatisticsNewslettersResponse =
   components['schemas']['ArticleNewsletterStatisticsResponse'];

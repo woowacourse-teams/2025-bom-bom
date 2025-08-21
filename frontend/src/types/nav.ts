@@ -1,1 +1,1 @@
-export type NavType = 'today' | 'recommend' | 'storage';
+export type NavType = 'today' | 'recommend' | 'storage' | null;

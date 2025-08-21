@@ -10,12 +10,12 @@ dotenv.config();
 
 export default (env, argv) => {
   const isProduction = argv.mode === 'production';
-
   const config: webpack.Configuration = {
     mode: argv.mode,
     entry: './src/main.tsx',
     output: {
-      filename: 'bundle.js',
+      filename: 'js/[name].[contenthash:8].js',
+      chunkFilename: 'js/[name].[contenthash:8].chunk.js',
       path: path.resolve(__dirname, 'dist'),
       publicPath: '/',
     },
@@ -75,7 +75,6 @@ export default (env, argv) => {
         filename: 'index.html', // 출력될 HTML 파일 이름
         inject: true, // <script> 태그 자동 삽입
         favicon: './public/assets/bombom.png',
-        hash: true,
       }),
       // 프로덕션 빌드 시에만 public 폴더 정적 자산을 dist로 복사
       ...(isProduction

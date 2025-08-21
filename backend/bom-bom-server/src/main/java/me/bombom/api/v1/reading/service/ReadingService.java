@@ -15,6 +15,7 @@ import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
 import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
+import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
@@ -158,6 +159,15 @@ public class ReadingService {
         return monthlyReadingRepository.findMonthlyRanking(limit);
     }
 
+    public MemberMonthlyReadingRankResponse getMemberMonthlyReadingRank(Member member) {
+        return monthlyReadingRepository.findMemberRankAndTotal(member.getId());
+    }
+
+    @Transactional
+    public void updateMonthlyRanking() {
+        monthlyReadingRepository.updateMonthlyRanking();
+    }
+
     private boolean shouldResetContinueReadingCount(TodayReading todayReading) {
         return (todayReading.getTotalCount() != 0) && (todayReading.getCurrentCount() == 0);
     }
@@ -222,5 +232,6 @@ public class ReadingService {
     private boolean canIncreaseContinueReadingCount(TodayReading todayReading) {
         return todayReading.getCurrentCount() == 0;
     }
+
 }
 

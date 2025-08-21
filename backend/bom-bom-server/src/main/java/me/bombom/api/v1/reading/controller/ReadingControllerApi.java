@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Positive;
 import java.util.List;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
+import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
@@ -47,4 +48,10 @@ public interface ReadingControllerApi {
     })
     List<MonthlyReadingRankResponse> getMonthlyReadingRank(
             @Parameter(description = "최대 조회 개수 (예: ?limit=10)") @RequestParam @Positive(message = "limit는 1 이상의 값이어야 합니다.") int limit);
+
+    @Operation(summary = "나의 월간 순위 조회", description = "저장된 rank 기반으로 나의 순위와 총 랭킹 참여자 수를 반환합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "나의 월간 순위 조회 성공")
+    })
+    MemberMonthlyReadingRankResponse getMemberMonthlyRank(@Parameter(hidden = true) Member member);
 }

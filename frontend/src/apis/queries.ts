@@ -7,6 +7,7 @@ import {
   getArticlesStatisticsNewsletters,
   GetArticleStatisticsNewslettersParams,
 } from './articles';
+import { getSignupCheck, GetSignupCheckParams } from './auth';
 import {
   getArticleBookmarkStatus,
   GetArticleBookmarkStatusParams,
@@ -132,5 +133,13 @@ export const queries = {
     queryOptions({
       queryKey: ['highlights', 'statistics', 'newsletters'],
       queryFn: getHighlightStatisticsNewsletter,
+    }),
+
+  // auth
+  signupCheck: (params: GetSignupCheckParams) =>
+    queryOptions({
+      queryKey: ['auth', 'signup', 'check', params],
+      queryFn: () => getSignupCheck(params),
+      enabled: false,
     }),
 };

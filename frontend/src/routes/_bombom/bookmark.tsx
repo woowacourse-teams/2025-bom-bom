@@ -19,7 +19,7 @@ function BookmarkPage() {
   >(null);
   const { data: articles } = useQuery(
     queries.bookmarks({
-      newsletterId: selectedNewsletterId ?? undefined,
+      newsletterId: selectedNewsletterId || undefined,
       size: 100, // 페이지네이션 없이 구현
     }),
   );
@@ -49,6 +49,7 @@ function BookmarkPage() {
             <NewsLetterFilter
               newsLetterList={[
                 {
+                  id: 0,
                   name: '전체',
                   articleCount: newsletterCounts?.totalCount ?? 0,
                   imageUrl: '',

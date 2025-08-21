@@ -119,7 +119,7 @@ class ReadingServiceTest {
     }
 
     @Test
-    void 오늘_도착하지_않은_아티클을_읽으면_주간_읽기_횟수만_증가한다() {
+    void 오늘_도착하지_않은_아티클을_읽으면_읽기_횟수가_증가하지_않는다() {
         int initialTodayCount = todayReading.getCurrentCount();
         int initialContinueCount = continueReading.getDayCount();
         int initialWeeklyCount = weeklyReading.getCurrentCount();
@@ -133,7 +133,7 @@ class ReadingServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(updatedTodayReading.getCurrentCount()).isEqualTo(initialTodayCount);
             softly.assertThat(updatedContinueReading.getDayCount()).isEqualTo(initialContinueCount);
-            softly.assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(initialWeeklyCount + 1);
+            softly.assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(initialWeeklyCount);
         });
     }
 

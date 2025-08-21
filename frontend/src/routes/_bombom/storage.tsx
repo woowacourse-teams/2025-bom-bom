@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import MobileStorageContent from '@/pages/storage/components/MobileStorageContent/MobileStorageContent';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import PCStorageContent from '@/pages/storage/components/PCStorageContent/PCStorageContent';
@@ -33,7 +33,7 @@ function Storage() {
   } = useStorageFilters();
 
   return (
-    <Container deviceType={deviceType}>
+    <Container>
       {!isMobile && (
         <TitleWrapper>
           <TitleIconBox>
@@ -92,10 +92,10 @@ function Storage() {
   );
 }
 
-const Container = styled.div<{ deviceType: DeviceType }>`
+const Container = styled.div`
   width: 100%;
   max-width: 1280px;
-  padding: ${({ deviceType }) => (deviceType === 'mobile' ? '0 16px' : '24px')};
+  padding: 64px 24px;
 
   display: flex;
   gap: 24px;

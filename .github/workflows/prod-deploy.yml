@@ -175,7 +175,7 @@ jobs:
           echo "서비스 헬스체크 시작..."
           sleep 10
           for i in {1..5}; do
-            if curl -f -s http://localhost/actuator/health > /dev/null; then
+            if curl -f -s http://localhost:8081/actuator/health > /dev/null; then
               echo "✅ 서비스 정상 동작"
               break
             else

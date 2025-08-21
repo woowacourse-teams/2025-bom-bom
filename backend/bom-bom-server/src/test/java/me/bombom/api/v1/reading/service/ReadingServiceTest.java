@@ -15,6 +15,7 @@ import me.bombom.api.v1.reading.domain.MonthlyReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
+import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRepository;
@@ -138,32 +139,56 @@ class ReadingServiceTest {
     }
 
     @Test
-    void limit에_따라_월별_읽기_카운트_순위를_받을_수_있다() {
-        // given
-        int limit = 2;
-
-        //첫번쨰 member는 BeforeEach에서 생성됨
-        Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname2", "providerId2"));
-        Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname3", "providerId3"));
+    void 저장된_rank를_사용해_상위_N명의_랭킹을_조회할_수_있다() {
+        // given: 기본 멤버는 currentCount 10
+        Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_r2", "pid_r2"));
+        Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_r3", "pid_r3"));
 
         monthlyReadingRepository.save(MonthlyReading.builder()
                 .memberId(member2.getId())
-                .currentCount(15)
+                .currentCount(30)
                 .build());
         monthlyReadingRepository.save(MonthlyReading.builder()
                 .memberId(member3.getId())
                 .currentCount(20)
                 .build());
-        weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member2));
-        weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member3));
 
-        // when
+        // when: 순위 저장 배치 실행 후, 저장된 순위 기반 조회
+        readingService.updateMonthlyRanking();
+        int limit = 2;
         List<MonthlyReadingRankResponse> result = readingService.getMonthlyReadingRank(limit);
-        
+
         // then
         assertSoftly(softly -> {
-            assertThat(result.size()).isEqualTo(limit);
-            assertThat(result.get(0).monthlyReadCount()).isGreaterThanOrEqualTo(result.get(1).monthlyReadCount());
+            softly.assertThat(result.size()).isEqualTo(limit);
+            softly.assertThat(result.get(0).rank()).isLessThanOrEqualTo(result.get(1).rank());
+            softly.assertThat(result.get(0).monthlyReadCount()).isGreaterThanOrEqualTo(result.get(1).monthlyReadCount());
+        });
+    }
+
+    @Test
+    void 나의_월간_순위와_전체_참여자_수를_조회할_수_있다() {
+        // given: 기본 멤버는 currentCount 10
+        Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));
+        Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr3", "pid_mr3"));
+
+        monthlyReadingRepository.save(MonthlyReading.builder()
+                .memberId(member2.getId())
+                .currentCount(30)
+                .build());
+        monthlyReadingRepository.save(MonthlyReading.builder()
+                .memberId(member3.getId())
+                .currentCount(20)
+                .build());
+
+        // when: 순위 반영 후 내 순위를 조회
+        readingService.updateMonthlyRanking();
+        MemberMonthlyReadingRankResponse memberRank = readingService.getMemberMonthlyReadingRank(member);
+
+        // then: 30->1, 20->2, 10->3 이므로 내 rank=3, totalMembers=3
+        assertSoftly(softly -> {
+            softly.assertThat(memberRank.rank()).isEqualTo(3L);
+            softly.assertThat(memberRank.totalMembers()).isEqualTo(3L);
         });
     }
 

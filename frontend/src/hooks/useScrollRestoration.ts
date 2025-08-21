@@ -10,11 +10,13 @@ type StorageKeyType = `scroll-${string}`;
 
 interface UseScrollRestorationParams {
   pathname: string;
+  enabled: boolean;
   threshold?: number;
 }
 
 const useScrollRestoration = ({
   pathname,
+  enabled,
   threshold = READ_THRESHOLD,
 }: UseScrollRestorationParams) => {
   const storageKey: StorageKeyType = `scroll-${pathname}`;
@@ -47,12 +49,12 @@ const useScrollRestoration = ({
 
   useEffect(() => {
     const scrollLocation = scrollStorage.get();
-    if (scrollLocation) {
+    if (scrollLocation && enabled) {
       restoreScroll(scrollLocation);
     }
     // store 생성될 때마다 다시 복구하는 이슈
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [restoreScroll]);
+  }, [restoreScroll, enabled]);
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);

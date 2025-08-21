@@ -15,7 +15,7 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
     @Query(value = """
         SELECT
             m.nickname AS nickname,
-            CAST(RANK() OVER (ORDER BY mr.current_count DESC) AS SIGNED) AS rank,
+            RANK() OVER (ORDER BY mr.current_count DESC) AS `rank`,
             mr.current_count AS monthlyReadCount
         FROM monthly_reading mr
         JOIN member m ON mr.member_id = m.id

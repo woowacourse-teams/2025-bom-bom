@@ -20,7 +20,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
            OR LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
            OR LOWER(a.contentsSummary) LIKE LOWER(CONCAT('%', :keyword, '%')))
     GROUP BY n.id, n.name, n.imageUrl
-    HAVING COUNT(a.id) > 0
     ORDER BY COUNT(a.id) DESC
     """)
     List<ArticleCountPerNewsletterResponse> countPerNewsletter(

@@ -23,7 +23,6 @@ function Recommend() {
 const Container = styled.div`
   width: 100%;
   max-width: 1280px;
-  padding: 64px 20px 0;
 
   display: flex;
   gap: 24px;

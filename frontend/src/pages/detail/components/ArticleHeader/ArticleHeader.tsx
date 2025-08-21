@@ -1,5 +1,4 @@
 import styled from '@emotion/styled';
-import { useLocation } from '@tanstack/react-router';
 import Chip from '@/components/Chip/Chip';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import useMediaQuery from '@/hooks/useMediaQuery';
@@ -33,7 +32,6 @@ const ArticleHeader = ({
     value: 1350,
   });
   const deviceType = useDeviceType();
-  const { pathname } = useLocation();
 
   return (
     <Container>
@@ -48,23 +46,22 @@ const ArticleHeader = ({
           <ClockIcon width={16} height={16} />
           <MetaInfoText>{expectedReadTime}분</MetaInfoText>
         </ReadTimeBox>
-        {isBookmarkButtonVisible &&
-          !pathname.startsWith('/articles/guide/') && (
-            <BookmarkButton
-              type="button"
-              onClick={() => onBookmarkClick?.(bookmarked)}
-            >
-              {bookmarked ? (
-                <BookmarkActiveIcon width={24} height={24} />
-              ) : (
-                <BookmarkInactiveIcon
-                  width={24}
-                  height={24}
-                  color={theme.colors.primary}
-                />
-              )}
-            </BookmarkButton>
-          )}
+        {isBookmarkButtonVisible && onBookmarkClick && (
+          <BookmarkButton
+            type="button"
+            onClick={() => onBookmarkClick?.(bookmarked)}
+          >
+            {bookmarked ? (
+              <BookmarkActiveIcon width={24} height={24} />
+            ) : (
+              <BookmarkInactiveIcon
+                width={24}
+                height={24}
+                color={theme.colors.primary}
+              />
+            )}
+          </BookmarkButton>
+        )}
       </MetaInfoRow>
     </Container>
   );

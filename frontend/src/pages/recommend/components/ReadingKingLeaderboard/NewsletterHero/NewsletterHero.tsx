@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
+import SlideCardList from '../../SlideCardList/SlideCardList';
 import { queries } from '@/apis/queries';
 import logo from '#/assets/logo.png';
 
@@ -9,7 +10,9 @@ export default function NewsletterHero() {
 
   return (
     <>
-      {!userInfo && (
+      {userInfo ? (
+        <SlideCardList />
+      ) : (
         <Container>
           <HeroContent>
             <HeroIcon>

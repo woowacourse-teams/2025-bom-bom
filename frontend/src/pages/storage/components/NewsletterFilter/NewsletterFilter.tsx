@@ -43,7 +43,13 @@ function NewsLetterFilter({
             }
             onTabSelect={onSelectNewsletter}
             StartComponent={
-              imageUrl ? <NewsLetterImage src={imageUrl} /> : null
+              imageUrl ? (
+                <NewsLetterImage
+                  src={
+                    'https://the-edit.co.kr/wp-content/themes/theedit-data/resources/images/ccatalog_v3/01_title.png'
+                  }
+                />
+              ) : null
             }
             EndComponent={<Badge text={String(articleCount)} />}
             textAlign={deviceType === 'pc' ? 'start' : 'center'}
@@ -94,6 +100,10 @@ const NewsLetterImage = styled.img`
   width: 24px;
   height: 24px;
   border-radius: 50%;
+
+  flex-shrink: 0;
+
+  object-fit: cover;
 `;
 
 const StyledTabs = styled(Tabs)`

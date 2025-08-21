@@ -232,6 +232,4 @@ public class ReadingService {
     private boolean canIncreaseContinueReadingCount(TodayReading todayReading) {
         return todayReading.getCurrentCount() == 0;
     }
-
 }
-

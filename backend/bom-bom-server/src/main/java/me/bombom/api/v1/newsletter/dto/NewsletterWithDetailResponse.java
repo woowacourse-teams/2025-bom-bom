@@ -5,6 +5,7 @@ import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 
 public record NewsletterWithDetailResponse(
+
         @NotNull
         String name,
 

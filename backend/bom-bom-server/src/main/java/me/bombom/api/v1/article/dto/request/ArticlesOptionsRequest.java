@@ -8,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 public record ArticlesOptionsRequest(
+
         @DateTimeFormat(iso = ISO.DATE)
         LocalDate date,
 

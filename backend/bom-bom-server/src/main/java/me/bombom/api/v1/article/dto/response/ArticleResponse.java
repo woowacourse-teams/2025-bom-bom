@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import me.bombom.api.v1.newsletter.dto.NewsletterSummaryResponse;
 
 public record ArticleResponse(
+
         @NotNull
         Long articleId,
 

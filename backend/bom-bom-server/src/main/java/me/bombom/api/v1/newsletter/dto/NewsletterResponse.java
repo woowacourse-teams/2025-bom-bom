@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
 public record NewsletterResponse(
+
         @NotNull
         @Schema(type = "integer", format = "int64", description = "뉴스레터 ID", required = true)
         Long newsletterId,

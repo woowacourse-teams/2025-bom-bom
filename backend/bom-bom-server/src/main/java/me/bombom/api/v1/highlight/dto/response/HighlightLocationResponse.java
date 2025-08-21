@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
 
 public record HighlightLocationResponse(
+
         @Schema(type = "integer", format = "int32", description = "시작 오프셋", required = true)
         int startOffset,
 

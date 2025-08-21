@@ -87,6 +87,8 @@ const Container = styled.div<{ isMobile: boolean }>`
 `;
 
 const LettersWrapper = styled.div<{ isMobile: boolean }>`
+  width: 100%;
+
   display: flex;
   gap: 8px;
   flex-direction: column;

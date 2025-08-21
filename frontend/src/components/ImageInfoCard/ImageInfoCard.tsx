@@ -44,39 +44,38 @@ const Image = styled(ImageWithFallback)`
   width: 64px;
   height: 64px;
   border-radius: 16px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
 
   flex-shrink: 0;
 
   object-fit: cover;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const InfoBox = styled.div`
-  flex: 1;
   min-height: 64px;
 
   display: flex;
   gap: 8px;
+  flex: 1;
   flex-direction: column;
   justify-content: center;
 `;
 
 const Title = styled.h3`
   margin: 0;
+
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.heading6};
-  line-height: 1.3;
 `;
 
 const Description = styled.p`
-  margin: 0;
   overflow: hidden;
+  margin: 0;
 
   display: -webkit-box;
 
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body2};
-  line-height: 1.4;
 
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;

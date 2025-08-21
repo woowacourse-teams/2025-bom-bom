@@ -24,18 +24,25 @@ public class MarkAsReadListener {
     public void on(MarkAsReadEvent event) {
         log.info("MarkAsReadEvent received - memberId={}, articleId={}", event.memberId(), event.articleId());
         try {
-            boolean isTodayArticle = articleService.isArrivedToday(event.articleId(), event.memberId());
-            readingService.updateReadingCount(event.memberId(), isTodayArticle);
-            log.info("읽기 횟수 갱신 성공 - memberId={}, articleId={}, isTodayArticle={}",
-                    event.memberId(), event.articleId(), isTodayArticle);
-
-            if(articleService.canAddArticleScore(event.memberId())) {
-                int score = readingService.calculateArticleScore(event.memberId());
-                petService.increaseCurrentScore(event.memberId(), score);
-                log.info("아티클 점수 추가 성공 - memberId={}", event.memberId());
-            }
+            updateReadingCount(event);
+            updatePetScore(event);
         } catch (Exception e) {
             log.error("MarkAsReadEvent 처리 실패 - memberId={}, articleId={}", event.memberId(), event.articleId(), e);
+        }
+    }
+
+    private void updateReadingCount(MarkAsReadEvent event) {
+        boolean isTodayArticle = articleService.isArrivedToday(event.articleId(), event.memberId());
+        readingService.updateReadingCount(event.memberId(), isTodayArticle);
+        log.info("읽기 횟수 갱신 성공 - memberId={}, articleId={}, isTodayArticle={}",
+                event.memberId(), event.articleId(), isTodayArticle);
+    }
+
+    private void updatePetScore(MarkAsReadEvent event) {
+        if(articleService.canAddArticleScore(event.memberId())) {
+            int score = readingService.calculateArticleScore(event.memberId());
+            petService.increaseCurrentScore(event.memberId(), score);
+            log.info("아티클 점수 추가 성공 - memberId={}", event.memberId());
         }
     }
 }

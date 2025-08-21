@@ -26,6 +26,14 @@ const petImages: Record<number, string> = {
   5: petLv5,
 };
 
+const petWidth = {
+  1: 80,
+  2: 100,
+  3: 90,
+  4: 120,
+  5: 136,
+} as const;
+
 const PetCard = () => {
   const deviceType = useDeviceType();
   const [isAnimating, setIsAnimating] = useState(false);
@@ -53,6 +61,9 @@ const PetCard = () => {
     mutatePetAttendance();
   };
 
+  const currentLevel = pet?.level ?? 1;
+  const width = petWidth[currentLevel as keyof typeof petWidth] ?? 80;
+
   return (
     <Container deviceType={deviceType}>
       {deviceType === 'pc' && (
@@ -66,9 +77,9 @@ const PetCard = () => {
 
       <PetImageContainer>
         <PetImage
-          src={petImages[pet?.level ?? 1]}
+          src={petImages[currentLevel ?? 1]}
           alt="pet"
-          width={80}
+          width={width}
           height={120}
           isAnimating={isAnimating}
           onAnimationEnd={() => setIsAnimating(false)}
@@ -85,8 +96,8 @@ const PetCard = () => {
       </PetImageContainer>
 
       <Level>
-        레벨 {pet?.level} :{' '}
-        {PET_LEVEL[(pet?.level ?? 1) as keyof typeof PET_LEVEL]}
+        레벨 {currentLevel} :{' '}
+        {PET_LEVEL[(currentLevel ?? 1) as keyof typeof PET_LEVEL]}
       </Level>
 
       <ProgressBar rate={levelPercentage} caption={`${levelPercentage}%`} />

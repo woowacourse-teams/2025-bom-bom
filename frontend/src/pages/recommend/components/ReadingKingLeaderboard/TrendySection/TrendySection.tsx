@@ -108,8 +108,8 @@ const Container = styled.div`
   border: 1px solid ${({ theme }) => theme.colors.dividers};
   border-radius: 24px;
   box-shadow:
-    0 4px 20px -4px rgba(0, 0, 0, 0.08),
-    0 2px 8px -2px rgba(0, 0, 0, 0.04);
+    0 4px 20px -4px rgb(0 0 0 / 8%),
+    0 2px 8px -2px rgb(0 0 0 / 4%);
 
   background: ${({ theme }) => theme.colors.white};
 
@@ -131,14 +131,18 @@ const SectionIconBox = styled.span`
   width: 32px;
   height: 32px;
   border-radius: 16px;
+  box-shadow: 0 2px 8px rgb(255 153 102 / 30%);
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary}, ${({ theme }) => theme.colors.primaryLight});
-  box-shadow: 0 2px 8px rgba(255, 153, 102, 0.3);
-  
+  background: linear-gradient(
+    135deg,
+    ${({ theme }) => theme.colors.primary},
+    ${({ theme }) => theme.colors.primaryLight}
+  );
+
   svg {
     color: white;
   }
@@ -179,14 +183,17 @@ const NewsletterCard = styled(ImageInfoCard)`
   padding: 16px;
   border: 1px solid ${({ theme }) => theme.colors.dividers};
   border-radius: 16px;
-  transition: all 0.2s ease;
-  cursor: pointer;
+
   background: ${({ theme }) => theme.colors.white};
 
+  cursor: pointer;
+  transition: all 0.2s ease;
+
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 25px -8px rgb(0 0 0 / 12%);
+
     border-color: ${({ theme }) => theme.colors.primary};
+    transform: translateY(-4px);
   }
 
   &:active {

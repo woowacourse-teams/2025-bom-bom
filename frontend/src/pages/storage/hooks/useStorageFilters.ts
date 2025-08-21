@@ -18,7 +18,7 @@ export const useStorageFilters = () => {
     keyword: debouncedSearchInput,
     size: 6,
     newsletterId: selectedNewsletterId
-      ? Number(selectedNewsletterId) - 1
+      ? Number(selectedNewsletterId)
       : undefined,
     page,
   };

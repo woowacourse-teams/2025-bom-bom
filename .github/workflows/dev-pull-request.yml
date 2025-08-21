@@ -27,7 +27,7 @@ jobs:
           mkdir -p src/main/resources
           echo "${{ secrets.APPLICATION_DEV_PROPERTIES }}" > src/main/resources/application.yml
           mkdir -p src/test/resources
-          echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
+          echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application-test.yml
 
       - name: 빌드하기 및 테스트 하기
         run: ./gradlew clean build

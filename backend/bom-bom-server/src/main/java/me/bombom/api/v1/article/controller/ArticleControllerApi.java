@@ -25,19 +25,19 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface ArticleControllerApi {
 
     @Operation(
-            summary = "아티클 목록 조회",
-            description = "조건에 맞는 아티클 목록을 페이징하여 조회합니다. "
-                    + "(정렬 기본값: ?page=0&size=10&sort=arrivedDateTime,desc)"
+        summary = "아티클 목록 조회",
+        description = "조건에 맞는 아티클 목록을 페이징하여 조회합니다. "
+                + "(정렬 기본값: ?page=0&size=10&sort=arrivedDateTime,desc)"
 
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "아티클 목록 조회 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 정렬 파라미터 요청", content = @Content)
+        @ApiResponse(responseCode = "200", description = "아티클 목록 조회 성공"),
+        @ApiResponse(responseCode = "400", description = "잘못된 정렬 파라미터 요청", content = @Content)
     })
     public Page<ArticleResponse> getArticles(
-            @Parameter(hidden = true) Member member,
-            @Parameter(description = "필터링 관련 요청") @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
-            @Parameter(description = "페이징 관련 요청 (예: ?page=0&size=10&sort=createdAt,desc)") Pageable pageable
+        @Parameter(hidden = true) Member member,
+        @Parameter(description = "필터링 관련 요청") @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
+        @Parameter(description = "페이징 관련 요청 (예: ?page=0&size=10&sort=createdAt,desc)") Pageable pageable
     );
 
     @Operation(
@@ -83,14 +83,14 @@ public interface ArticleControllerApi {
     );
 
     @Operation(
-            summary = "아티클의 하이라이트 목록 조회",
-            description = "특정 아티클의 하이라이트 목록을 조회합니다."
+        summary = "아티클의 하이라이트 목록 조회",
+        description = "특정 아티클의 하이라이트 목록을 조회합니다."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "아티클의 하이라이트 목록 조회 성공")
+        @ApiResponse(responseCode = "200", description = "아티클의 하이라이트 목록 조회 성공")
     })
     List<ArticleHighlightResponse> getHighlights(
-            @Parameter(hidden = true) Member member,
-            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
+        @Parameter(hidden = true) Member member,
+        @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     );
 }

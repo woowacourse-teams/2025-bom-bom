@@ -49,7 +49,6 @@ public class MonthlyReading {
         return MonthlyReading.builder()
                 .memberId(memberId)
                 .currentCount(INITIAL_CURRENT_COUNT)
-                .rank(null)
                 .build();
     }
 

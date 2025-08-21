@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
-import NewsletterHero from '../../pages/recommend/components/ReadingKingLeaderboard/NewsletterHero/NewsletterHero';
 import ReadingKingLeaderboard from '../../pages/recommend/components/ReadingKingLeaderboard/ReadingKingLeaderboard';
 import TrendySection from '../../pages/recommend/components/ReadingKingLeaderboard/TrendySection/TrendySection';
 
@@ -12,7 +11,6 @@ function Recommend() {
   return (
     <Container>
       <MainSection>
-        <NewsletterHero />
         <TrendySection />
       </MainSection>
       <SideSection>

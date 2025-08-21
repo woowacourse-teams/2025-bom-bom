@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
 import Spacing from '@/components/Spacing/Spacing';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
@@ -19,6 +20,7 @@ export const Route = createFileRoute('/_bombom/articles/$articleId')({
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
   const articleIdNumber = Number(articleId);
+  const deviceType = useDeviceType();
 
   const { data: currentArticle } = useQuery(
     queries.articleById({ id: articleIdNumber }),
@@ -42,7 +44,7 @@ function ArticleDetailPage() {
   if (!currentArticle) return null;
 
   return (
-    <Container>
+    <Container deviceType={deviceType}>
       <ArticleHeader
         title={currentArticle.title ?? ''}
         newsletterCategory={currentArticle.newsletter?.category ?? ''}
@@ -76,13 +78,17 @@ function ArticleDetailPage() {
   );
 }
 
-const Container = styled.div`
+const Container = styled.div<{ deviceType: DeviceType }>`
   max-width: 700px;
   margin: 0 auto;
   margin-top: 20px;
-  padding: 28px;
-  border-right: 1px solid ${({ theme }) => theme.colors.stroke};
-  border-left: 1px solid ${({ theme }) => theme.colors.stroke};
+  padding: ${({ deviceType }) => (deviceType === 'mobile' ? '0' : '0 16px')};
+  border-right: 1px solid
+    ${({ theme, deviceType }) =>
+      deviceType === 'mobile' ? 'transparent' : theme.colors.stroke};
+  border-left: 1px solid
+    ${({ theme, deviceType }) =>
+      deviceType === 'mobile' ? 'transparent' : theme.colors.stroke};
 
   display: flex;
   gap: 20px;

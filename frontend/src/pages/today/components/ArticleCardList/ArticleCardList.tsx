@@ -81,7 +81,7 @@ const Container = styled.div<{ isMobile: boolean }>`
   width: 100%;
 
   display: flex;
-  gap: ${({ isMobile }) => (isMobile ? '24px' : '48px')};
+  gap: ${({ isMobile }) => (isMobile ? '24px' : 0)};
   flex-direction: column;
   align-items: flex-start;
 `;

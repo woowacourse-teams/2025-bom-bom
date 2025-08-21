@@ -123,7 +123,7 @@ const TitleIconBox = styled.div`
 `;
 
 const Title = styled.h1`
-  font: ${({ theme }) => theme.fonts.heading2};
+  font: ${({ theme }) => theme.fonts.heading3};
 `;
 
 const ContentWrapper = styled.div<{ isPC: boolean }>`

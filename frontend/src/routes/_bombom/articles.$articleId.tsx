@@ -82,7 +82,7 @@ const Container = styled.div<{ deviceType: DeviceType }>`
   max-width: 700px;
   margin: 0 auto;
   margin-top: 20px;
-  padding: 28px 0;
+  padding: ${({ deviceType }) => (deviceType === 'mobile' ? '0' : '0 16px')};
   border-right: 1px solid
     ${({ theme, deviceType }) =>
       deviceType === 'mobile' ? 'transparent' : theme.colors.stroke};

@@ -150,7 +150,7 @@ const MainContentSection = styled.div<{ isPC: boolean }>`
   width: 100%;
 
   display: flex;
-  gap: 32px;
+  gap: 16px;
   flex: 1;
   flex-direction: column;
 

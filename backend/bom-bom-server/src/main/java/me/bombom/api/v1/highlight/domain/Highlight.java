@@ -36,7 +36,7 @@ public class Highlight extends BaseEntity {
     @AttributeOverride(name = "value", column = @Column(nullable = false, name = "color", length = 10))
     private Color color;
 
-    @Column(nullable = false, columnDefinition = "text")
+    @Column(name = "highlight_text", nullable = false, columnDefinition = "text")
     private String text;
 
     @Column(length = 500)

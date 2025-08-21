@@ -58,7 +58,7 @@ CREATE TABLE highlight (
                            end_x_path VARCHAR(255),
                            article_id BIGINT NOT NULL,
                            color VARCHAR(10) NOT NULL,
-                           text TEXT NOT NULL,
+                           highlight_text TEXT NOT NULL,
                            memo VARCHAR(500),
                            created_at DATETIME(6) NOT NULL,
                            updated_at DATETIME(6) NOT NULL

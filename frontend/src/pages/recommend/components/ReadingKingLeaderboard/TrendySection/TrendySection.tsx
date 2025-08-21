@@ -154,13 +154,29 @@ const TagContainer = styled.div`
 
 const TrendyGrid = styled.div<{ deviceType: DeviceType }>`
   display: grid;
-  gap: 8px;
-
   grid-template-columns: ${({ deviceType }) =>
     deviceType === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
 `;
 
 const NewsletterCard = styled(ImageInfoCard)`
+  padding: 8px;
+  border-radius: 16px;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 8px 25px -8px rgb(0 0 0 / 12%);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(-1px);
+  }
+
   &:focus-visible {
     outline: none;
   }

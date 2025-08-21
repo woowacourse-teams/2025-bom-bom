@@ -1,9 +1,8 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
-import HomeIcon from '../../../public/assets/home.svg';
 import { DeviceType } from '@/hooks/useDeviceType';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { theme } from '@/styles/theme';
+import logo from '#/assets/logo.png';
 
 interface HeaderLogoProps {
   deviceType: DeviceType;
@@ -21,9 +20,7 @@ const HeaderLogo = ({ deviceType }: HeaderLogoProps) => {
         })
       }
     >
-      <LogoBox>
-        <HomeIcon width={24} height={24} color={theme.colors.white} />
-      </LogoBox>
+      <Logo src={logo} alt="logo" />
       <TitleBox>
         <Title>봄봄</Title>
         {deviceType === 'pc' && (
@@ -36,25 +33,16 @@ const HeaderLogo = ({ deviceType }: HeaderLogoProps) => {
 
 export default HeaderLogo;
 
-const Container = styled(Link)`
-  display: flex;
-  align-items: center;
+const Logo = styled.img`
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
 `;
 
-const LogoBox = styled.div`
-  width: 40px;
-  height: 40px;
-  margin-right: 12px;
-  border-radius: 14px;
-  box-shadow:
-    0 10px 15px -3px rgb(0 0 0 / 10%),
-    0 4px 6px -4px rgb(0 0 0 / 10%);
-
+const Container = styled(Link)`
   display: flex;
+  gap: 12px;
   align-items: center;
-  justify-content: center;
-
-  background: ${({ theme }) => theme.colors.primary};
 `;
 
 const TitleBox = styled.div`

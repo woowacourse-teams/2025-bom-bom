@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import me.bombom.api.v1.auth.enums.DuplicateCheckField;
 
 public record DuplicateCheckRequest(
+
         @NotNull
         DuplicateCheckField field,
         

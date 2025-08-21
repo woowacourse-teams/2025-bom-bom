@@ -1,9 +1,6 @@
 name: Backend Prod Server CI/CD
 
 on:
-  push:
-    branches:
-      - server
   workflow_dispatch:
     inputs:
       version_tag:

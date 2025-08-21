@@ -17,9 +17,7 @@ export const useStorageFilters = () => {
     sort: ['arrivedDateTime', sortFilter],
     keyword: debouncedSearchInput,
     size: 6,
-    newsletterId: selectedNewsletterId
-      ? Number(selectedNewsletterId)
-      : undefined,
+    newsletterId: selectedNewsletterId ?? undefined,
     page,
   };
 

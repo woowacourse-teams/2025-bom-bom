@@ -62,7 +62,7 @@ jobs:
       - name: 롤백 전 헬스체크
         run: |
           echo "=== 롤백 전 서비스 상태 확인 ==="
-          if curl -f -s http://localhost/actuator/health > /dev/null; then
+          if curl -f -s http://localhost:8081/actuator/health > /dev/null; then
             echo "✅ 롤백 전 헬스체크 성공"
           else
             echo "⚠️ 롤백 전 헬스체크 실패"
@@ -98,7 +98,7 @@ jobs:
           sleep 30
           for i in {1..10}; do
             echo "헬스체크 시도: $i/10"
-            if curl -f -s http://localhost/actuator/health > /dev/null; then
+            if curl -f -s http://localhost:8081/actuator/health > /dev/null; then
               echo "✅ 헬스체크 성공"; exit 0
             else
               echo "⏳ 헬스체크 실패, 10초 후 재시도..."; sleep 10

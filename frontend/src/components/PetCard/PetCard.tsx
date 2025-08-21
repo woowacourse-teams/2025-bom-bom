@@ -5,7 +5,6 @@ import { PET_LEVEL } from './PetCard.constants';
 import { heartAnimation, jumpAnimation } from './PetCard.keyframes';
 import Button from '../Button/Button';
 import ProgressBar from '../ProgressBar/ProgressBar';
-import Spacing from '../Spacing/Spacing';
 import { getPet, postPetAttendance } from '@/apis/pet';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import { queryClient } from '@/main';
@@ -65,8 +64,6 @@ const PetCard = () => {
         </TitleWrapper>
       )}
 
-      <Spacing size={16} />
-
       <PetImageContainer>
         <PetImage
           src={petImages[pet?.level ?? 1]}
@@ -91,8 +88,9 @@ const PetCard = () => {
         레벨 {pet?.level} :{' '}
         {PET_LEVEL[(pet?.level ?? 1) as keyof typeof PET_LEVEL]}
       </Level>
-      <Spacing size={16} />
+
       <ProgressBar rate={levelPercentage} caption={`${levelPercentage}%`} />
+
       <AttendanceButton
         deviceType={deviceType}
         text={pet?.isAttended ? '출석 완료!' : '출석체크하기'}
@@ -110,6 +108,7 @@ const Container = styled.section<{ deviceType: DeviceType }>`
   border-radius: 20px;
 
   display: flex;
+  gap: 16px;
   flex-direction: column;
   flex-shrink: 0;
   align-items: center;

@@ -86,24 +86,13 @@ public class ArticleService {
     }
 
     public ArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(Member member, String keyword) {
-        List<ArticleCountPerNewsletterResponse> countResponse = newsletterRepository.findAll()
-                .stream()
-                .map(newsletter -> {
-                    int count = articleRepository.countAllByNewsletterIdAndMemberId(
-                            member.getId(),
-                            newsletter.getId(),
-                            keyword
-                    );
-                    return ArticleCountPerNewsletterResponse.of(newsletter, count);
-                })
-                .filter(response -> response.articleCount() > 0)
-                .toList();
+        String trimmedKeyword = (keyword == null || keyword.isBlank()) ? null : keyword.strip();
 
-        int totalCount = countResponse.stream()
-                .mapToInt(response -> (int) response.articleCount())
+        List<ArticleCountPerNewsletterResponse> rows = articleRepository.countPerNewsletter(member.getId(), trimmedKeyword);
+        int total = rows.stream()
+                .mapToInt(ArticleCountPerNewsletterResponse::articleCount)
                 .sum();
-
-        return ArticleNewsletterStatisticsResponse.of(totalCount, countResponse);
+        return ArticleNewsletterStatisticsResponse.of(total, rows);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)

@@ -1,89 +1,30 @@
 import styled from '@emotion/styled';
+import { useQuery } from '@tanstack/react-query';
+import { queries } from '@/apis/queries';
 import ArrowIcon from '@/components/icons/ArrowIcon';
 import AvatarIcon from '#/assets/avatar.svg';
-
-// Mock data for the leaderboard
-const leaderboardData = [
-  {
-    id: 1,
-    rank: 1,
-    name: '김독서',
-    avatar: 'https://via.placeholder.com/35/87CEEB/000000?text=김',
-    readCount: 248,
-    increment: 15,
-    isCrown: true,
-    badgeText: '👑 챔피언',
-  },
-  {
-    id: 2,
-    rank: 2,
-    name: '박뉴스',
-    avatar: 'https://via.placeholder.com/35/FFB6C1/000000?text=박',
-    readCount: 223,
-    increment: 12,
-    isCrown: false,
-  },
-  {
-    id: 3,
-    rank: 3,
-    name: '이정보',
-    avatar: 'https://via.placeholder.com/35/DDA0DD/000000?text=이',
-    readCount: 201,
-    increment: 8,
-    isCrown: false,
-  },
-  {
-    id: 4,
-    rank: 4,
-    name: '최트렌드',
-    avatar: 'https://via.placeholder.com/35/98FB98/000000?text=최',
-    readCount: 189,
-    increment: 6,
-    isCrown: false,
-  },
-  {
-    id: 5,
-    rank: 5,
-    name: '정인사이트',
-    avatar: 'https://via.placeholder.com/35/F0E68C/000000?text=정',
-    readCount: 167,
-    increment: 4,
-    isCrown: false,
-  },
-];
-
-const myRank = {
-  rank: 12,
-  readCount: 87,
-  nextRankDifference: 13,
-  progressPercentage: 65,
-};
 
 interface LeaderboardItemProps {
   rank: number;
   name: string;
-  avatar: string;
   readCount: number;
-  increment: number;
   isCrown: boolean;
   badgeText?: string;
 }
 
-interface ReadingKingLeaderboardProps {
-  data?: LeaderboardItemProps[];
-  userRank?: {
-    rank: number;
-    readCount: number;
-    nextRankDifference: number;
-    progressPercentage: number;
-  };
-}
+// interface ReadingKingLeaderboardProps {
+//   userRank?: {
+//     rank: number;
+//     readCount: number;
+//     nextRankDifference: number;
+//     progressPercentage: number;
+//   };
+// }
 
 const LeaderboardItem = ({
   rank,
   name,
   readCount,
-  increment,
   isCrown,
   badgeText,
 }: LeaderboardItemProps) => (
@@ -111,7 +52,6 @@ const LeaderboardItem = ({
       </NameContainer>
       <StatsContainer>
         <ReadCount>{readCount}개 읽음</ReadCount>
-        <Increment>+{increment}</Increment>
       </StatsContainer>
     </UserInfo>
 
@@ -121,10 +61,35 @@ const LeaderboardItem = ({
   </ItemContainer>
 );
 
-export default function ReadingKingLeaderboard({
-  data = leaderboardData,
-  userRank = myRank,
-}: ReadingKingLeaderboardProps) {
+export default function ReadingKingLeaderboard() {
+  const { data: monthlyReadingRank, isLoading } = useQuery(
+    queries.monthlyReadingRank({ limit: 5 }),
+  );
+
+  // Calculate default user rank data if not provided
+  // const defaultUserRank = {
+  //   rank: 12,
+  //   readCount: 87,
+  //   nextRankDifference: 13,
+  //   progressPercentage: 65,
+  // };
+
+  if (isLoading) {
+    return (
+      <Container>
+        <Header>
+          <TitleContainer>
+            <HeaderIcon>
+              <ArrowIcon direction="upRight" />
+            </HeaderIcon>
+            <Title>이달의 독서왕</Title>
+          </TitleContainer>
+        </Header>
+        <LoadingMessage>데이터를 불러오는 중...</LoadingMessage>
+      </Container>
+    );
+  }
+
   return (
     <Container>
       <Header>
@@ -137,21 +102,31 @@ export default function ReadingKingLeaderboard({
       </Header>
 
       <LeaderboardList>
-        {data.map((item) => (
-          <LeaderboardItem key={item.rank} {...item} />
-        ))}
+        {monthlyReadingRank &&
+          monthlyReadingRank.length > 0 &&
+          monthlyReadingRank.map((item) => (
+            <LeaderboardItem
+              key={item.rank}
+              rank={item.rank}
+              name={item.nickname}
+              readCount={item.monthlyReadCount}
+              isCrown={item.rank === 1}
+            />
+          ))}
       </LeaderboardList>
 
-      <MyRankSection>
+      {/* <MyRankSection>
         <MyRankContainer>
           <MyRankBox>
             <MyRankInfo>
               <MyRankLabel>나의 순위</MyRankLabel>
-              <MyRankValue>{userRank.rank}위</MyRankValue>
+              <MyRankValue>{(userRank || defaultUserRank).rank}위</MyRankValue>
             </MyRankInfo>
             <MyReadInfo>
               <MyReadLabel>읽은 뉴스레터</MyReadLabel>
-              <MyReadValue>{userRank.readCount}개</MyReadValue>
+              <MyReadValue>
+                {(userRank || defaultUserRank).readCount}개
+              </MyReadValue>
             </MyReadInfo>
           </MyRankBox>
 
@@ -159,17 +134,19 @@ export default function ReadingKingLeaderboard({
             <ProgressInfo>
               <ProgressLabel>다음 순위까지</ProgressLabel>
               <ProgressValue>
-                {userRank.nextRankDifference}개 더 읽기
+                {(userRank || defaultUserRank).nextRankDifference}개 더 읽기
               </ProgressValue>
             </ProgressInfo>
             <ProgressBar>
               <ProgressFill
-                style={{ width: `${userRank.progressPercentage}%` }}
+                style={{
+                  width: `${(userRank || defaultUserRank).progressPercentage}%`,
+                }}
               />
             </ProgressBar>
           </ProgressSection>
         </MyRankContainer>
-      </MyRankSection>
+      </MyRankSection> */}
     </Container>
   );
 }
@@ -337,133 +314,134 @@ const ReadCount = styled.div`
   line-height: 17.5px;
 `;
 
-const Increment = styled.div`
-  color: #f96;
-  font-family: Inter, sans-serif;
-  font-weight: 400;
-  font-size: 12.1px;
-  line-height: 17.5px;
-`;
-
 const BookIconContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
 `;
 
-const MyRankSection = styled.div`
-  padding-top: 36px;
-  border-top: 1px solid #f1f5f9;
-`;
+// const MyRankSection = styled.div`
+//   padding-top: 36px;
+//   border-top: 1px solid #f1f5f9;
+// `;
 
-const MyRankContainer = styled.div`
-  margin-bottom: 10.5px;
-  padding: 13px 14px 14px;
-  border-radius: 14px;
+// const MyRankContainer = styled.div`
+//   margin-bottom: 10.5px;
+//   padding: 13px 14px 14px;
+//   border-radius: 14px;
 
-  display: flex;
-  gap: 12px;
-  flex-direction: column;
-  justify-content: space-between;
+//   display: flex;
+//   gap: 12px;
+//   flex-direction: column;
+//   justify-content: space-between;
 
-  background: linear-gradient(
-    to right,
-    rgb(255 153 102 / 10%),
-    rgb(255 237 212 / 50%)
-  );
-`;
+//   background: linear-gradient(
+//     to right,
+//     rgb(255 153 102 / 10%),
+//     rgb(255 237 212 / 50%)
+//   );
+// `;
 
-const MyRankInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
+// const MyRankInfo = styled.div`
+//   display: flex;
+//   flex-direction: column;
+// `;
 
-const MyRankBox = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
+// const MyRankBox = styled.div`
+//   display: flex;
+//   align-items: center;
+//   justify-content: space-between;
+// `;
 
-const MyRankLabel = styled.div`
+// const MyRankLabel = styled.div`
+//   color: #45556c;
+//   font-family: Inter, 'Noto Sans KR', sans-serif;
+//   font-weight: 400;
+//   font-size: 12.3px;
+//   line-height: 17.5px;
+// `;
+
+// const MyRankValue = styled.div`
+//   color: #0f172b;
+//   font-family: Inter, 'Noto Sans KR', sans-serif;
+//   font-weight: 400;
+//   font-size: 21px;
+//   line-height: 28px;
+// `;
+
+// const MyReadInfo = styled.div`
+//   display: flex;
+//   flex-direction: column;
+//   align-items: flex-end;
+// `;
+
+// const MyReadLabel = styled.div`
+//   color: #45556c;
+//   font-family: Inter, 'Noto Sans KR', sans-serif;
+//   font-weight: 400;
+//   font-size: 12.3px;
+//   line-height: 17.5px;
+// `;
+
+// const MyReadValue = styled.div`
+//   color: #f96;
+//   font-family: Inter, 'Noto Sans KR', sans-serif;
+//   font-weight: 400;
+//   font-size: 21px;
+//   line-height: 28px;
+// `;
+
+// const ProgressSection = styled.div`
+//   display: flex;
+//   gap: 3.5px;
+//   flex-direction: column;
+// `;
+
+// const ProgressInfo = styled.div`
+//   display: flex;
+//   align-items: center;
+//   justify-content: space-between;
+// `;
+
+// const ProgressLabel = styled.div`
+//   color: #45556c;
+//   font-family: Inter, 'Noto Sans KR', sans-serif;
+//   font-weight: 400;
+//   font-size: 10.5px;
+//   line-height: 14px;
+// `;
+
+// const ProgressValue = styled.div`
+//   color: #45556c;
+//   font-family: Inter, 'Noto Sans KR', sans-serif;
+//   font-weight: 400;
+//   font-size: 10.5px;
+//   line-height: 14px;
+// `;
+
+// const ProgressBar = styled.div`
+//   overflow: hidden;
+//   width: 100%;
+//   height: 7px;
+//   border-radius: 50px;
+
+//   background: #e2e8f0;
+// `;
+
+// const ProgressFill = styled.div`
+//   height: 100%;
+//   border-radius: 50px;
+
+//   background: #f96;
+
+//   transition: width 0.3s ease;
+// `;
+
+const LoadingMessage = styled.div`
+  padding: 40px 20px;
+
   color: #45556c;
   font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 12.3px;
-  line-height: 17.5px;
-`;
-
-const MyRankValue = styled.div`
-  color: #0f172b;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 21px;
-  line-height: 28px;
-`;
-
-const MyReadInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-`;
-
-const MyReadLabel = styled.div`
-  color: #45556c;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 12.3px;
-  line-height: 17.5px;
-`;
-
-const MyReadValue = styled.div`
-  color: #f96;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 21px;
-  line-height: 28px;
-`;
-
-const ProgressSection = styled.div`
-  display: flex;
-  gap: 3.5px;
-  flex-direction: column;
-`;
-
-const ProgressInfo = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-const ProgressLabel = styled.div`
-  color: #45556c;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 10.5px;
-  line-height: 14px;
-`;
-
-const ProgressValue = styled.div`
-  color: #45556c;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 10.5px;
-  line-height: 14px;
-`;
-
-const ProgressBar = styled.div`
-  overflow: hidden;
-  width: 100%;
-  height: 7px;
-  border-radius: 50px;
-
-  background: #e2e8f0;
-`;
-
-const ProgressFill = styled.div`
-  height: 100%;
-  border-radius: 50px;
-
-  background: #f96;
-
-  transition: width 0.3s ease;
+  font-size: 14px;
+  text-align: center;
 `;

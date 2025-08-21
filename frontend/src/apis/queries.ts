@@ -19,7 +19,12 @@ import {
   GetHighlightsParams,
   getHighlightStatisticsNewsletter,
 } from './highlight';
-import { getReadingStatus, getUserInfo } from './members';
+import {
+  getMonthlyReadingRank,
+  GetMonthlyReadingRankParams,
+  getReadingStatus,
+  getUserInfo,
+} from './members';
 import {
   getNewsletterDetail,
   GetNewsletterDetailParams,
@@ -76,6 +81,12 @@ export const queries = {
     queryOptions({
       queryKey: ['members', 'me', 'reading'],
       queryFn: getReadingStatus,
+    }),
+
+  monthlyReadingRank: (params: GetMonthlyReadingRankParams) =>
+    queryOptions({
+      queryKey: ['members', 'me', 'reading', 'month', 'rank', params],
+      queryFn: () => getMonthlyReadingRank(params),
     }),
 
   // newsletters

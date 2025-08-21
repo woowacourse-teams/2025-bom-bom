@@ -31,6 +31,7 @@ public enum ErrorDetail {
     DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, "J005", "이미 사용 중인 닉네임입니다."),
     UNSUPPORTED_OAUTH2_PROVIDER(HttpStatus.BAD_REQUEST, "J006", "지원하지 않는 소셜 로그인 입니다."),
     DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "J007", "이미 사용 중인 이메일입니다."),
+    WITHDRAWN_MEMBER(HttpStatus.BAD_REQUEST, "J008", "이미 탈퇴한 회원입니다."),
 
     /*
     * G : 인가

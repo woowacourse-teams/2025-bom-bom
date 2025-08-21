@@ -31,6 +31,7 @@ export default function PCStorageContent({
   const { data: articles, isLoading } = useQuery(
     queries.articles({
       ...baseQueryParams,
+      newsletterId: baseQueryParams.newsletterId || undefined,
       page: page - 1,
     }),
   );

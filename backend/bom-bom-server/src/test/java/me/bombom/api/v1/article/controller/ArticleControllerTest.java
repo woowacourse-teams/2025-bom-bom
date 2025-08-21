@@ -14,8 +14,12 @@ import java.util.Map;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler;
+import me.bombom.api.v1.highlight.domain.Highlight;
+import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
+import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
@@ -62,7 +66,13 @@ class ArticleControllerTest {
     private NewsletterRepository newsletterRepository;
 
     @Autowired
+    private HighlightRepository highlightRepository;
+
+    @Autowired
     private NewsletterDetailRepository newsletterDetailRepository;
+
+    @Autowired
+    private ArticleService articleService;
 
     @MockitoBean
     private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
@@ -94,6 +104,9 @@ class ArticleControllerTest {
 
         articles = TestFixture.createArticles(member, newsletters);
         articleRepository.saveAll(articles);
+
+        List<Highlight> highlights = TestFixture.createHighlightFixtures(articles);
+        highlightRepository.saveAll(highlights);
 
         // Argument Resolver를 위해 CustomOAuth2User 생성
         Map<String, Object> attributes = Map.of(
@@ -138,19 +151,21 @@ class ArticleControllerTest {
     }
 
     @Test
-    void 푸드_카테고리_아티클_목록_조회() throws Exception {
+    void 뉴스레터_아티클_목록_조회() throws Exception {
         // given
         setAuthentication();
-        String foodCategory = categories.get(2).getName(); // "푸드"
+        Newsletter newsletter = newsletters.get(2);
+        Long newsletterId = newsletter.getId();
+        String newsletterName = newsletter.getName();
 
         // when & then
         mockMvc.perform(get("/api/v1/articles")
-                        .param("category", foodCategory))
+                        .param("newsletterId", newsletterId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.totalElements").value(2))
-                .andExpect(jsonPath("$.content[0].newsletter.category").value("푸드"))
-                .andExpect(jsonPath("$.content[1].newsletter.category").value("푸드"));
+                .andExpect(jsonPath("$.content[0].newsletter.name").value(newsletterName))
+                .andExpect(jsonPath("$.content[1].newsletter.name").value(newsletterName));
     }
 
     @Test
@@ -333,15 +348,16 @@ class ArticleControllerTest {
     }
 
     @Test
-    void 카테고리_키워드_날짜_복합_필터링_아티클_목록_조회() throws Exception {
+    void 뉴스레터_키워드_날짜_복합_필터링_아티클_목록_조회() throws Exception {
         // given
         setAuthentication();
-        String foodCategory = categories.get(2).getName(); // "푸드"
+        Newsletter newsletter = newsletters.get(2);
+        Long newsletterId = newsletter.getId();
         LocalDate baseDate = LocalDate.of(2025, 7, 15);
 
-        // when & then - 카테고리 + 키워드 + 날짜 복합 필터링
+        // when & then - 뉴스레터 + 키워드 + 날짜 복합 필터링
         mockMvc.perform(get("/api/v1/articles")
-                        .param("category", foodCategory)
+                        .param("newsletterId", newsletterId.toString())
                         .param("keyword", "레터")
                         .param("date", baseDate.toString())
                         .param("sorted", "desc")
@@ -351,7 +367,7 @@ class ArticleControllerTest {
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.totalElements").value(1)) // 조건에 맞는 1개
                 .andExpect(jsonPath("$.content[0].title").value("레터"))
-                .andExpect(jsonPath("$.content[0].newsletter.category").value("푸드"));
+                .andExpect(jsonPath("$.content[0].newsletter.name").value(newsletter.getName()));
     }
 
     @Test
@@ -362,5 +378,24 @@ class ArticleControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void 아티클에_대한_하이라이트_목록_조회() {
+        // given
+        Long firstArticleId = articles.getFirst().getId();
+
+        // when
+        List<ArticleHighlightResponse> responses = articleService.getHighlights(member, firstArticleId);
+
+        // then
+        assertSoftly(softly -> {
+                    softly.assertThat(responses).hasSize(2);
+                    softly.assertThat(responses.get(0).text()).isEqualTo("두 번째 하이라이트");
+                    softly.assertThat(responses.get(1).text()).isEqualTo("첫 번째 하이라이트");
+                    softly.assertThat(responses.get(0).color()).isEqualTo("#4caf50");
+                    softly.assertThat(responses.get(1).color()).isEqualTo("#ffeb3b");
+                }
+        );
     }
 }

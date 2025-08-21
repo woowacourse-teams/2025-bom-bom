@@ -16,6 +16,7 @@ import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.pet.domain.Pet;
 import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.MonthlyReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 
@@ -52,6 +53,17 @@ public final class TestFixture {
                 .build();
     }
 
+    public static Member createMemberFixture(String email, String nickname) {
+        return Member.builder()
+                .provider("provider")
+                .providerId("providerId")
+                .email(email)
+                .nickname(nickname)
+                .gender(Gender.FEMALE)
+                .roleId(1L)
+                .build();
+    }
+
     /**
      * Category
      */
@@ -74,20 +86,24 @@ public final class TestFixture {
      */
     public static List<Newsletter> createNewsletters(List<Category> categories) {
         return List.of(
-                createNewsletter("뉴스픽", "news@newspick.com", categories.get(0).getId()),
-                createNewsletter("IT타임즈", "editor@ittimes.io", categories.get(1).getId()),
-                createNewsletter("비즈레터", "biz@biz.com", categories.get(2).getId())
+                createNewsletter("뉴스픽", "news@newspick.com", categories.get(0).getId(), 1L),
+                createNewsletter("IT타임즈", "editor@ittimes.io", categories.get(1).getId(), 2L),
+                createNewsletter("비즈레터", "biz@biz.com", categories.get(2).getId(), 3L)
         );
     }
 
     public static Newsletter createNewsletter(String name, String email, Long categoryId) {
+        return createNewsletter(name, email, categoryId, 1L);
+    }
+
+    public static Newsletter createNewsletter(String name, String email, Long categoryId, Long detailId) {
         return Newsletter.builder()
                 .name(name)
                 .description("설명")
                 .imageUrl("https://cdn.bombom.me/img.png")
                 .email(email)
                 .categoryId(categoryId)
-                .detailId(1L)
+                .detailId(detailId)
                 .build();
     }
 
@@ -187,12 +203,22 @@ public final class TestFixture {
     }
 
     /**
+     * MonthlyReading
+     */
+    public static MonthlyReading monthlyReadingFixture(Member member) {
+        return MonthlyReading.builder()
+                .memberId(member.getId())
+                .currentCount(10)
+                .build();
+    }
+
+    /**
      * Highlight
      */
-
     public static List<Highlight> createHighlightFixtures(List<Article> articles) {
         Long firstArticleId = articles.get(0).getId();
         Long secondArticleId = articles.get(1).getId();
+        Long thirdArticleId = articles.get(2).getId();
         return List.of(
                 Highlight.builder()
                         .highlightLocation(new HighlightLocation(0, "div[0]/p[0]", 10, "div[0]/p[0]"))
@@ -213,6 +239,27 @@ public final class TestFixture {
                         .articleId(secondArticleId)
                         .color(Color.from("#2196f3"))
                         .text("세 번째 하이라이트")
+                        .memo("메모")
+                        .build(),
+                Highlight.builder()
+                        .highlightLocation(new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
+                        .articleId(thirdArticleId)
+                        .color(Color.from("#0016fb"))
+                        .text("네 번째 하이라이트")
+                        .memo("메모")
+                        .build(),
+                Highlight.builder()
+                        .highlightLocation(new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
+                        .articleId(thirdArticleId)
+                        .color(Color.from("#21b6f3"))
+                        .text("디섯 번째 하이라이트")
+                        .memo("메모")
+                        .build(),
+                Highlight.builder()
+                        .highlightLocation(new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
+                        .articleId(thirdArticleId)
+                        .color(Color.from("#b196f2"))
+                        .text("여섯 번째 하이라이트")
                         .memo("메모")
                         .build()
         );

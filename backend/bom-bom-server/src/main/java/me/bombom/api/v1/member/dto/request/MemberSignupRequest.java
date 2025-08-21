@@ -2,15 +2,30 @@ package me.bombom.api.v1.member.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 import me.bombom.api.v1.member.enums.Gender;
+import org.hibernate.validator.constraints.Length;
 
 public record MemberSignupRequest(
-        @NotBlank String nickname,
-        @NotNull @Email String email,
-        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate birthDate,
-        @NotNull Gender gender
+
+        @NotNull
+        @Length(min = 2, max = 12)
+        @Pattern(regexp = "^[a-zA-Z0-9가-힣]*$")
+        String nickname,
+
+        @Email
+        @NotNull
+        @Length(min = 15, max = 42)
+        @Pattern(regexp = "[a-zA-Z0-9]+@bombom\\.news$")
+        String email,
+
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        LocalDate birthDate,
+
+        @NotNull
+        Gender gender
 ) {
 }

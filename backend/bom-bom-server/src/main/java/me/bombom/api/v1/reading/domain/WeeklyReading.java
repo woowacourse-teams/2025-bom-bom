@@ -32,7 +32,7 @@ public class WeeklyReading extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TINYINT")
     private int goalCount;
 
-    @Column(nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private int currentCount;
 
     @Builder
@@ -57,7 +57,7 @@ public class WeeklyReading extends BaseEntity {
     }
 
     public void resetCurrentCount() {
-        currentCount = RESET_CURRENT_COUNT;
+        this.currentCount = RESET_CURRENT_COUNT;
     }
 
     public void updateGoalCount(int goalCount) {

@@ -2,7 +2,9 @@ package me.bombom.api.v1.member.service;
 
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
+import me.bombom.api.v1.auth.enums.DuplicateCheckField;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
@@ -23,9 +25,11 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    // TODO : 회원가입 입력 정보 양식 반영
     @Transactional
     public Member signup(PendingOAuth2Member pendingMember, MemberSignupRequest signupRequest) {
+        validateDuplicateNickname(signupRequest.nickname());
+        validateDuplicateEmail(signupRequest.email());
+
         Member newMember = Member.builder()
                 .provider(pendingMember.getProvider())
                 .providerId(pendingMember.getProviderId())
@@ -40,9 +44,45 @@ public class MemberService {
         return savedMember;
     }
 
+    public boolean checkSignupDuplicate(DuplicateCheckField field, String value) {
+        return switch (field) {
+            case NICKNAME -> memberRepository.existsByNickname(value);
+            case EMAIL -> memberRepository.existsByEmail(value);
+        };
+    }
+
     public MemberProfileResponse getProfile(Long id) {
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.MEMBER_ID, id)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
+                );
         return MemberProfileResponse.from(member);
     }
+
+    @Transactional
+    public void withdraw(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
+            );
+        memberRepository.delete(member);
+    }
+
+    private void validateDuplicateEmail(String email) {
+        if (memberRepository.existsByEmail(email)) {
+            throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_EMAIL)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "email")
+                    .addContext(ErrorContextKeys.OPERATION, "validateDuplicateEmail");
+        }
+    }
+    private void validateDuplicateNickname(String nickname) {
+        if (memberRepository.existsByNickname(nickname)) {
+            throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_NICKNAME)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "nickname")
+                    .addContext(ErrorContextKeys.OPERATION, "validateDuplicateNickname");
+        }
+    }
+
 }

@@ -11,6 +11,7 @@ import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkResponse;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkStatusResponse;
+import me.bombom.api.v1.bookmark.dto.response.BookmarkNewsletterStatisticsResponse;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -58,6 +59,7 @@ class BookmarkServiceTest {
     private Article article;
     private List<Category> categories;
     private List<Newsletter> newsletters;
+    private List<Article> articles;
 
     @BeforeEach
     void setUp() {
@@ -67,6 +69,8 @@ class BookmarkServiceTest {
         categoryRepository.saveAll(categories);
         newsletters = TestFixture.createNewsletters(categories);
         newsletterRepository.saveAll(newsletters);
+        articles = TestFixture.createArticles(member, newsletters);
+        articleRepository.saveAll(articles);
         article = TestFixture.createArticle("테스트 아티클", member.getId(), newsletters.get(0).getId(),
                 java.time.LocalDateTime.now());
         articleRepository.save(article);
@@ -78,12 +82,32 @@ class BookmarkServiceTest {
         bookmarkService.addBookmark(member.getId(), article.getId());
 
         // when
-        Page<BookmarkResponse> bookmarks = bookmarkService.getBookmarks(member.getId(), PageRequest.of(0, 10));
+        Page<BookmarkResponse> bookmarks = bookmarkService.getBookmarks(member.getId(), null, PageRequest.of(0, 10));
 
         // then
         assertSoftly(softly -> {
             softly.assertThat(bookmarks.getContent()).hasSize(1);
             softly.assertThat(bookmarks.getContent().getFirst().articleId()).isEqualTo(article.getId());
+        });
+    }
+
+    @Test
+    void 북마크_목록_조회_뉴스레터_필터링_테스트() {
+        // given
+        Newsletter newsletterToFilter = newsletters.get(0);
+        Article article1 = articles.stream().filter(a -> a.getNewsletterId().equals(newsletterToFilter.getId())).findFirst().get();
+        Article article2 = articles.stream().filter(a -> !a.getNewsletterId().equals(newsletterToFilter.getId())).findFirst().get();
+
+        bookmarkService.addBookmark(member.getId(), article1.getId());
+        bookmarkService.addBookmark(member.getId(), article2.getId());
+
+        // when
+        Page<BookmarkResponse> bookmarks = bookmarkService.getBookmarks(member.getId(), newsletterToFilter.getId(), PageRequest.of(0, 10));
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(bookmarks.getContent()).hasSize(1);
+            softly.assertThat(bookmarks.getContent().getFirst().newsletter().name()).isEqualTo(newsletterToFilter.getName());
         });
     }
 
@@ -145,6 +169,7 @@ class BookmarkServiceTest {
         // when: DESC 정렬
         Page<BookmarkResponse> descBookmarks = bookmarkService.getBookmarks(
                 member.getId(),
+                null,
                 PageRequest.of(0, 10, Sort.by(Direction.DESC, "createdAt"))
         );
 
@@ -176,6 +201,7 @@ class BookmarkServiceTest {
         // when: ASC 정렬
         Page<BookmarkResponse> ascBookmarks = bookmarkService.getBookmarks(
                 member.getId(),
+                null,
                 PageRequest.of(0, 10, Sort.by(Direction.ASC, "createdAt"))
         );
 
@@ -232,5 +258,28 @@ class BookmarkServiceTest {
         assertThatThrownBy(() -> bookmarkService.deleteBookmark(member.getId(), otherArticle.getId()))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
+    }
+
+    @Test
+    void 전체_뉴스레터_별_북마크_개수를_조회한다() {
+        // given
+        bookmarkService.addBookmark(member.getId(), articles.get(0).getId());
+        bookmarkService.addBookmark(member.getId(), articles.get(1).getId());
+        bookmarkService.addBookmark(member.getId(), articles.get(2).getId());
+        bookmarkService.addBookmark(member.getId(), articles.get(3).getId());
+
+        // when
+        BookmarkNewsletterStatisticsResponse result = bookmarkService.getBookmarkNewsletterStatistics(member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(4);
+            softly.assertThat(result.newsletters().get(0).name()).isEqualTo("뉴스픽");
+            softly.assertThat(result.newsletters().get(0).bookmarkCount()).isEqualTo(1);
+            softly.assertThat(result.newsletters().get(1).name()).isEqualTo("IT타임즈");
+            softly.assertThat(result.newsletters().get(1).bookmarkCount()).isEqualTo(1);
+            softly.assertThat(result.newsletters().get(2).name()).isEqualTo("비즈레터");
+            softly.assertThat(result.newsletters().get(2).bookmarkCount()).isEqualTo(2);
+        });
     }
 } 

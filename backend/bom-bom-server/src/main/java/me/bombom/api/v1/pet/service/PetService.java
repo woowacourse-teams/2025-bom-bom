@@ -3,6 +3,7 @@ package me.bombom.api.v1.pet.service;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.CServerErrorException;
+import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.pet.ScorePolicyConstants;
@@ -25,29 +26,60 @@ public class PetService {
 
     public PetResponse getPet(Member member) {
         Pet pet = petRepository.findByMemberId(member.getId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "Pet"));
         Stage currentStage = stageRepository.findById(pet.getStageId())
-                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
+                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext("stageId", pet.getStageId())
+                    .addContext(ErrorContextKeys.OPERATION, "findCurrentStage")
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "Pet"));
         Stage nextStage = stageRepository.findNextStageByCurrentScore(pet.getCurrentScore())
-                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
+                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext("currentScore", pet.getCurrentScore())
+                    .addContext(ErrorContextKeys.OPERATION, "findNextStage")
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "Pet"));
         return PetResponse.of(pet, currentStage, nextStage);
     }
 
     @Transactional
     public void attend(Member member) {
         Pet pet = petRepository.findByMemberId(member.getId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "Pet")
+                    .addContext(ErrorContextKeys.OPERATION, "attendance"));
         if(pet.isAttended()){
-            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE);
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                .addContext("alreadyAttended", true);
         }
         pet.markAsAttended();
         increaseCurrentScore(member.getId(), ScorePolicyConstants.ATTENDANCE_SCORE);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void increaseCurrentScore(Long memberId, int score){
         Pet pet = petRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext("scoreToAdd", score)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "Pet")
+                    .addContext(ErrorContextKeys.OPERATION, "increaseScore"));
+        pet.increaseCurrentScore(score);
+        updatePetStage(pet);
+    }
+
+    @Transactional
+    public void increaseCurrentScoreForGuideMail(Long memberId, int score){
+        Pet pet = petRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext("scoreToAdd", score)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "Pet")
+                        .addContext(ErrorContextKeys.OPERATION, "increaseScoreForGuideMail"));
         pet.increaseCurrentScore(score);
         updatePetStage(pet);
     }
@@ -67,7 +99,10 @@ public class PetService {
 
     private void updatePetStage(Pet pet) {
         Stage stageByScore = stageRepository.findCurrentStageByCurrentScore(pet.getCurrentScore())
-                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR));
+                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
+                    .addContext(ErrorContextKeys.MEMBER_ID, pet.getMemberId())
+                    .addContext("currentScore", pet.getCurrentScore())
+                    .addContext(ErrorContextKeys.OPERATION, "updatePetStage"));
         pet.updateStage(stageByScore);
     }
 }

@@ -17,7 +17,7 @@ import me.bombom.api.v1.common.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TodayReading extends BaseEntity {
 
-    private static final int INITIAL_TOTAL_COUNT = 0;
+    private static final int INITIAL_TOTAL_COUNT = 3;
     private static final int INITIAL_CURRENT_COUNT = 0;
     private static final int RESET_TOTAL_COUNT = 0;
     private static final int RESET_CURRENT_COUNT = 0;
@@ -33,8 +33,7 @@ public class TodayReading extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TINYINT")
     private int totalCount;
 
-
-    @Column(nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private int currentCount;
 
     @Builder
@@ -59,8 +58,8 @@ public class TodayReading extends BaseEntity {
     }
 
     public void resetCount() {
-        totalCount = RESET_TOTAL_COUNT;
-        currentCount = RESET_CURRENT_COUNT;
+        this.totalCount = RESET_TOTAL_COUNT;
+        this.currentCount = RESET_CURRENT_COUNT;
     }
 
     public void increaseCurrentCount() {

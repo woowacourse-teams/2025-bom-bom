@@ -7,10 +7,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
-import me.bombom.api.v1.article.dto.ArticleDetailResponse;
-import me.bombom.api.v1.article.dto.ArticleResponse;
-import me.bombom.api.v1.article.dto.GetArticleCategoryStatisticsResponse;
-import me.bombom.api.v1.article.dto.GetArticlesOptions;
+import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
+import me.bombom.api.v1.article.dto.response.ArticleResponse;
+import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
+import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -22,8 +22,6 @@ import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
-import me.bombom.api.v1.reading.domain.TodayReading;
-import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.reading.service.ReadingService;
@@ -91,7 +89,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null, null),
                 pageable
         );
 
@@ -113,7 +111,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null, null),
                 pageable
         );
 
@@ -128,16 +126,16 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 아티클_목록_조회_카테고리_필터링_테스트() {
+    void 아티클_목록_조회_뉴스레터_필터링_테스트() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
-        Category category = categories.getFirst();
-        String categoryName = category.getName();
+        Newsletter newsletter = newsletters.getFirst();
+        Long newsletterId = newsletter.getId();
 
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, categoryName, null),
+                ArticlesOptionsRequest.of(null, newsletterId, null),
                 pageable
         );
 
@@ -146,8 +144,8 @@ class ArticleServiceTest {
             softly.assertThat(result.getTotalElements()).isEqualTo(1);
             softly.assertThat(result.getContent()).hasSize(1);
             softly.assertThat(result.getContent()).extracting("newsletter")
-                    .extracting("category")
-                    .containsExactly(category.getName());
+                    .extracting("name")
+                    .containsExactly(newsletter.getName());
         });
     }
 
@@ -159,7 +157,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(BASE_TIME.toLocalDate(), null, null),
+                ArticlesOptionsRequest.of(BASE_TIME.toLocalDate(), null, null),
                 pageable
         );
 
@@ -178,7 +176,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(BASE_TIME.toLocalDate(), null, "뉴스"),
+                ArticlesOptionsRequest.of(BASE_TIME.toLocalDate(), null, "뉴스"),
                 pageable
         );
 
@@ -192,14 +190,14 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 아티클_목록_조회_카테고리가_존재하지_않으면_예외() {
+    void 아티클_목록_조회_뉴스레터가_존재하지_않으면_예외() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
 
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, "Invalid Category Name", null),
+                ArticlesOptionsRequest.of(null, 0L, null),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
@@ -217,7 +215,7 @@ class ArticleServiceTest {
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null, null),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
@@ -231,7 +229,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null, null),
                 firstPage
         );
 
@@ -257,7 +255,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null, null),
                 secondPage
         );
 
@@ -283,7 +281,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null, null),
                 pageable
         );
 
@@ -305,7 +303,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                GetArticlesOptions.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null, null),
                 pageable
         );
 
@@ -434,7 +432,7 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 제목_필터링_된_카테고리_별_아티클_개수를_조회한다() {
+    void 제목_필터링_된_뉴스레터_별_아티클_개수를_조회한다() {
         // when
         String keyword = "AI";
 
@@ -447,7 +445,7 @@ class ArticleServiceTest {
         );
         articleRepository.saveAll(testArticles);
 
-        GetArticleCategoryStatisticsResponse result = articleService.getArticleCategoryStatistics(
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
                 member,
                 keyword
         );
@@ -455,18 +453,17 @@ class ArticleServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(result.totalCount()).isEqualTo(3);
-            softly.assertThat(result.categories()).hasSize(3);
-            softly.assertThat(result.categories().get(0).category()).isEqualTo("경제");
-            softly.assertThat(result.categories().get(0).count()).isEqualTo(1);
-            softly.assertThat(result.categories().get(1).category()).isEqualTo("테크");
-            softly.assertThat(result.categories().get(1).count()).isEqualTo(2);
+            softly.assertThat(result.newsletters().get(0).name()).isEqualTo("IT타임즈");
+            softly.assertThat(result.newsletters().get(0).articleCount()).isEqualTo(2);
+            softly.assertThat(result.newsletters().get(1).name()).isEqualTo("뉴스픽");
+            softly.assertThat(result.newsletters().get(1).articleCount()).isEqualTo(1);
         });
     }
 
     @Test
-    void 전체_카테고리_별_아티클_개수를_조회한다() {
+    void 전체_뉴스레터_별_아티클_개수를_조회한다() {
         // when
-        GetArticleCategoryStatisticsResponse result = articleService.getArticleCategoryStatistics(
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
                 member,
                 null
         );
@@ -474,11 +471,149 @@ class ArticleServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(result.totalCount()).isEqualTo(4);
-            softly.assertThat(result.categories()).hasSize(3);
-            softly.assertThat(result.categories().get(1).category()).isEqualTo("테크");
-            softly.assertThat(result.categories().get(1).count()).isEqualTo(1);
-            softly.assertThat(result.categories().get(2).category()).isEqualTo("푸드");
-            softly.assertThat(result.categories().get(2).count()).isEqualTo(2);
+            softly.assertThat(result.newsletters().get(0).name()).isEqualTo("비즈레터");
+            softly.assertThat(result.newsletters().get(0).articleCount()).isEqualTo(2);
+            softly.assertThat(result.newsletters().get(1).name()).isEqualTo("뉴스픽");
+            softly.assertThat(result.newsletters().get(1).articleCount()).isEqualTo(1);
+            softly.assertThat(result.newsletters().get(2).name()).isEqualTo("IT타임즈");
+            softly.assertThat(result.newsletters().get(2).articleCount()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void 키워드가_빈_문자열인_경우_전체_조회한다() {
+        // when
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+                member,
+                ""
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(4);
+            softly.assertThat(result.newsletters()).hasSize(3); // 모든 뉴스레터
+        });
+    }
+
+    @Test
+    void 키워드가_공백만_있는_경우_전체_조회한다() {
+        // when
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+                member,
+                "   "
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(4);
+            softly.assertThat(result.newsletters()).hasSize(3); // 모든 뉴스레터
+        });
+    }
+
+    @Test
+    void 키워드_앞뒤_공백이_제거되어_검색된다() {
+        // given
+        List<Article> testArticles = List.of(
+                TestFixture.createArticle("AI 기술", member.getId(), newsletters.get(0).getId(), BASE_TIME),
+                TestFixture.createArticle("머신러닝", member.getId(), newsletters.get(1).getId(), BASE_TIME)
+        );
+        articleRepository.saveAll(testArticles);
+
+        // when
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+                member,
+                "  AI  "  // 앞뒤 공백
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(1);
+            softly.assertThat(result.newsletters().get(0).articleCount()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void 키워드에_일치하는_아티클이_없는_경우() {
+        // when
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+                member,
+                "존재하지않는키워드"
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(0);
+            softly.assertThat(result.newsletters()).isEmpty();
+        });
+    }
+
+    @Test
+    void 대소문자_구분없이_키워드_검색이_된다() {
+        // given
+        List<Article> testArticles = List.of(
+                TestFixture.createArticle("AI Technology", member.getId(), newsletters.get(0).getId(), BASE_TIME),
+                TestFixture.createArticle("ai development", member.getId(), newsletters.get(1).getId(), BASE_TIME)
+        );
+        articleRepository.saveAll(testArticles);
+
+        // when
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+                member,
+                "ai"
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(2);
+            softly.assertThat(result.newsletters()).hasSize(2);
+        });
+    }
+
+    @Test
+    void 부분_문자열로_키워드_검색이_된다() {
+        // given
+        List<Article> testArticles = List.of(
+                TestFixture.createArticle("프로그래밍 언어", member.getId(), newsletters.get(0).getId(), BASE_TIME),
+                TestFixture.createArticle("그래픽 디자인", member.getId(), newsletters.get(1).getId(), BASE_TIME),
+                TestFixture.createArticle("데이터베이스", member.getId(), newsletters.get(2).getId(), BASE_TIME)
+        );
+        articleRepository.saveAll(testArticles);
+
+        // when
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+                member,
+                "그래"  // "프로그래밍", "그래픽" 모두 매치
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(2);
+            softly.assertThat(result.newsletters()).hasSize(2);
+        });
+    }
+
+    @Test
+    void 특정_뉴스레터에만_키워드가_매치되는_경우() {
+        // given
+        List<Article> testArticles = List.of(
+                TestFixture.createArticle("특별한 이벤트", member.getId(), newsletters.get(0).getId(), BASE_TIME),
+                TestFixture.createArticle("일반적인 뉴스", member.getId(), newsletters.get(1).getId(), BASE_TIME),
+                TestFixture.createArticle("또 다른 뉴스", member.getId(), newsletters.get(2).getId(), BASE_TIME)
+        );
+        articleRepository.saveAll(testArticles);
+
+        // when
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+                member,
+                "특별한"
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(1);
+            softly.assertThat(result.newsletters()).hasSize(1);
+            softly.assertThat(result.newsletters().get(0).name()).isEqualTo("뉴스픽"); // newsletters.get(0)에 해당
+            softly.assertThat(result.newsletters().get(0).articleCount()).isEqualTo(1);
         });
     }
 }

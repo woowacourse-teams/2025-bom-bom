@@ -41,6 +41,6 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             }
             return member;
         }
-        throw new  UnauthorizedException(ErrorDetail.INVALID_TOKEN);
+        throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN);
     }
 }

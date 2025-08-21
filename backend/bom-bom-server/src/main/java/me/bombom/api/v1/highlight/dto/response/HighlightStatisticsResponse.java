@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 public record HighlightStatisticsResponse(
+
         @Schema(type = "integer", format = "int32", description = "전체 하이라이트 수", required = true)
         int totalCount,
 

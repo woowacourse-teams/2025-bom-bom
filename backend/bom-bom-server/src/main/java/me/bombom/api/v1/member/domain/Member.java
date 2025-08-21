@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,10 +18,14 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import me.bombom.api.v1.common.BaseEntity;
 import me.bombom.api.v1.member.enums.Gender;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
+@SQLRestriction("deleted_at IS NULL")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE member SET deleted_at = now() WHERE id = ?")
 @Table(
         name = "member",
         uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "providerId"})
@@ -55,6 +60,8 @@ public class Member extends BaseEntity {
     @Column(nullable = false, columnDefinition = "BIGINT")
     private Long roleId = 0L;
 
+    private LocalDateTime deletedAt;
+
     @Builder
     public Member(
             Long id,
@@ -76,6 +83,10 @@ public class Member extends BaseEntity {
         this.birthDate = birthDate;
         this.gender = gender;
         this.roleId = roleId;
+    }
+
+    public boolean isWithdrawnMember() {
+        return this.deletedAt != null;
     }
 }
 

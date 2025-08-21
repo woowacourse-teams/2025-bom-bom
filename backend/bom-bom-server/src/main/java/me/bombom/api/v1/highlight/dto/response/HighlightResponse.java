@@ -8,6 +8,7 @@ import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 
 public record HighlightResponse(
+
         @NotNull
         Long id,
 

@@ -9,6 +9,7 @@ import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.dto.NewsletterBasicResponse;
 
 public record ArticleDetailResponse(
+
         @NotNull
         String title,
 

@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 
 public record BookmarkCountPerNewsletterResponse(
+
+        @NotNull
         Long id,
 
         @NotNull

@@ -10,6 +10,7 @@ import me.bombom.api.v1.member.enums.Gender;
 import org.hibernate.validator.constraints.Length;
 
 public record MemberSignupRequest(
+
         @NotNull
         @Length(min = 2, max = 12)
         @Pattern(regexp = "^[a-zA-Z0-9가-힣]*$")
@@ -21,8 +22,6 @@ public record MemberSignupRequest(
         @Pattern(regexp = "[a-zA-Z0-9]+@bombom\\.news$")
         String email,
 
-        @Past
-        @NotNull
         @JsonFormat(pattern = "yyyy-MM-dd")
         LocalDate birthDate,
 

@@ -5,6 +5,7 @@ import me.bombom.api.v1.pet.domain.Pet;
 import me.bombom.api.v1.pet.domain.Stage;
 
 public record PetResponse(
+
     @Schema(type = "integer", format = "int32", description = "펫 레벨", required = true)
     int level,
     

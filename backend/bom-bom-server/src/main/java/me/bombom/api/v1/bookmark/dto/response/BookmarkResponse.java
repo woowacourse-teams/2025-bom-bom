@@ -8,6 +8,7 @@ import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterSummaryResponse;
 
 public record BookmarkResponse(
+
         @NotNull
         Long id,
 

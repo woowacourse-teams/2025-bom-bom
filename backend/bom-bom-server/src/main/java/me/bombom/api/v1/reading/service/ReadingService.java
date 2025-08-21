@@ -107,7 +107,6 @@ public class ReadingService {
         return WeeklyGoalCountResponse.from(weeklyReading);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public int calculateArticleScore(Long memberId) {
         int score = ScorePolicyConstants.ARTICLE_READING_SCORE;
         ContinueReading continueReading = continueReadingRepository.findByMemberId(memberId)
@@ -122,18 +121,16 @@ public class ReadingService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateReadingCount(Long memberId, boolean isTodayArticle) {
-        // TODO: 규칙 확정 후 연속 읽기 로직 수정
         if (isTodayArticle) {
             updateContinueReadingCount(memberId);
             updateTodayReadingCount(memberId);
+            updateWeeklyReadingCount(memberId);
         }
-        updateWeeklyReadingCount(memberId);
         updateMonthlyReadingCount(memberId);
     }
 
     @Transactional
     public void updateReadingCountForGuideMail(Long memberId) {
-        // TODO: 규칙 확정 후 연속 읽기 로직 수정
         updateContinueReadingCount(memberId);
         updateTodayReadingCount(memberId);
         updateWeeklyReadingCount(memberId);

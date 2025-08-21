@@ -9,7 +9,7 @@ public record MonthlyReadingRankResponse(
         String nickname,
 
         @Schema(required = true)
-        int rank,
+        long rank,
 
         @Schema(required = true)
         int monthlyReadCount

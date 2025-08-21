@@ -6,6 +6,7 @@ import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 
 public record NewsletterBasicResponse(
+
         @NotNull
         @Schema(type = "string", description = "뉴스레터명", required = true)
         String name,

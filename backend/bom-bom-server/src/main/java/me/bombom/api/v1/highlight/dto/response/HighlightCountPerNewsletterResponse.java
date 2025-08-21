@@ -3,9 +3,9 @@ package me.bombom.api.v1.highlight.dto.response;
 import com.querydsl.core.annotations.QueryProjection;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import me.bombom.api.v1.newsletter.domain.Newsletter;
 
 public record HighlightCountPerNewsletterResponse(
+
         @Schema(type = "integer", format = "int64", description = "뉴스레터 id", required = true)
         long id,
 

@@ -18,8 +18,8 @@ public class MemberCleanupScheduler {
 
     private final MemberRepository memberRepository;
 
-    @Scheduled(cron = DAILY_CRON,  zone = TIME_ZONE)
     @Transactional
+    @Scheduled(cron = DAILY_CRON,  zone = TIME_ZONE)
     public void cleanupDeletedMembers() {
         log.info("탈퇴 후 1년 지난 회원 삭제");
         LocalDateTime oneYearAgo = LocalDateTime.now().minusYears(1);

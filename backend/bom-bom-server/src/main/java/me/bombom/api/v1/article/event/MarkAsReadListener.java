@@ -22,20 +22,20 @@ public class MarkAsReadListener {
     @TransactionalEventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void on(MarkAsReadEvent event) {
-        log.info("MarkAsReadEvent received - memberId={}, articleId={}", event.getMemberId(), event.getArticleId());
+        log.info("MarkAsReadEvent received - memberId={}, articleId={}", event.memberId(), event.articleId());
         try {
-            boolean isTodayArticle = articleService.isArrivedToday(event.getArticleId(), event.getMemberId());
-            readingService.updateReadingCount(event.getMemberId(), isTodayArticle);
+            boolean isTodayArticle = articleService.isArrivedToday(event.articleId(), event.memberId());
+            readingService.updateReadingCount(event.memberId(), isTodayArticle);
             log.info("읽기 횟수 갱신 성공 - memberId={}, articleId={}, isTodayArticle={}",
-                    event.getMemberId(), event.getArticleId(), isTodayArticle);
+                    event.memberId(), event.articleId(), isTodayArticle);
 
-            if(articleService.canAddArticleScore(event.getMemberId())) {
-                int score = readingService.calculateArticleScore(event.getMemberId());
-                petService.increaseCurrentScore(event.getMemberId(), score);
-                log.info("아티클 점수 추가 성공 - memberId={}", event.getMemberId());
+            if(articleService.canAddArticleScore(event.memberId())) {
+                int score = readingService.calculateArticleScore(event.memberId());
+                petService.increaseCurrentScore(event.memberId(), score);
+                log.info("아티클 점수 추가 성공 - memberId={}", event.memberId());
             }
         } catch (Exception e) {
-            log.error("MarkAsReadEvent 처리 실패 - memberId={}, articleId={}", event.getMemberId(), event.getArticleId(), e);
+            log.error("MarkAsReadEvent 처리 실패 - memberId={}, articleId={}", event.memberId(), event.articleId(), e);
         }
     }
 }

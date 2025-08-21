@@ -24,7 +24,8 @@ function Login() {
 }
 
 const Container = styled.div<{ isMobile: boolean }>`
-  min-height: 100vh;
+  overflow: hidden;
+  height: 100dvh;
   padding: 12px;
 
   display: flex;

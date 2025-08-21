@@ -49,14 +49,14 @@ const TrendySection = () => {
 
   return (
     <>
-      <Container>
+      <Container deviceType={deviceType}>
         <SectionHeader>
           <SectionIconBox>
             <TrendingUpIcon width={16} height={16} />
           </SectionIconBox>
           <SectionTitle>트렌디한 뉴스레터</SectionTitle>
         </SectionHeader>
-        <TagContainer>
+        <TagContainer deviceType={deviceType}>
           {CATEGORIES.map((category, index) => (
             <Chip
               key={index}
@@ -102,21 +102,17 @@ const TrendySection = () => {
 
 export default TrendySection;
 
-const Container = styled.div`
+const Container = styled.div<{ deviceType: DeviceType }>`
   width: 100%;
-  padding: 28px;
+  padding: ${({ deviceType }) => (deviceType === 'mobile' ? '20px' : '28px')};
   border: 1px solid ${({ theme }) => theme.colors.dividers};
-  border-radius: 24px;
+  border-radius: ${({ deviceType }) =>
+    deviceType === 'mobile' ? '20px' : '24px'};
   box-shadow:
     0 4px 20px -4px rgb(0 0 0 / 8%),
     0 2px 8px -2px rgb(0 0 0 / 4%);
 
   background: ${({ theme }) => theme.colors.white};
-
-  @media (width <= 768px) {
-    padding: 20px;
-    border-radius: 20px;
-  }
 `;
 
 const SectionHeader = styled.div`
@@ -155,28 +151,21 @@ const SectionTitle = styled.h2`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const TagContainer = styled.div`
-  margin-bottom: 20px;
+const TagContainer = styled.div<{ deviceType: DeviceType }>`
+  margin-bottom: ${({ deviceType }) =>
+    deviceType === 'mobile' ? '16px' : '20px'};
 
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-
-  @media (width <= 768px) {
-    margin-bottom: 16px;
-  }
 `;
 
 const TrendyGrid = styled.div<{ deviceType: DeviceType }>`
   display: grid;
-  gap: 16px;
+  gap: ${({ deviceType }) => (deviceType === 'tablet' ? '12px' : '16px')};
 
   grid-template-columns: ${({ deviceType }) =>
     deviceType === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
-
-  @media (width <= 1024px) and (width > 768px) {
-    gap: 12px;
-  }
 `;
 
 const NewsletterCard = styled(ImageInfoCard)`

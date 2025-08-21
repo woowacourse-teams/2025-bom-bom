@@ -2,72 +2,55 @@ import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import ReadingKingLeaderboard from '../../pages/recommend/components/ReadingKingLeaderboard/ReadingKingLeaderboard';
 import TrendySection from '../../pages/recommend/components/ReadingKingLeaderboard/TrendySection/TrendySection';
+import { useDeviceType, type DeviceType } from '@/hooks/useDeviceType';
 
 export const Route = createFileRoute('/_bombom/recommend')({
   component: Recommend,
 });
 
 function Recommend() {
+  const device = useDeviceType();
+
   return (
-    <Container>
-      <MainSection>
+    <Container device={device}>
+      <MainSection device={device}>
         <TrendySection />
       </MainSection>
-      <SideSection>
+      <SideSection device={device}>
         <ReadingKingLeaderboard />
       </SideSection>
     </Container>
   );
 }
 
-const Container = styled.div`
+const Container = styled.div<{ device: DeviceType }>`
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 24px 20px;
 
   display: flex;
-  gap: 32px;
+  gap: ${({ device }) =>
+    device === 'mobile' ? '20px' : device === 'tablet' ? '24px' : '32px'};
+  flex-direction: ${({ device }) => (device === 'mobile' ? 'column' : 'row')};
   align-items: flex-start;
-
-  @media (width <= 1024px) {
-    gap: 24px;
-    padding: 20px 16px;
-  }
-
-  @media (width <= 768px) {
-    flex-direction: column;
-    gap: 20px;
-    padding: 16px;
-  }
 `;
 
-const MainSection = styled.section`
-  flex: 1;
-  max-width: 840px;
+const MainSection = styled.section<{ device: DeviceType }>`
+  width: ${({ device }) => (device === 'mobile' ? '100%' : 'auto')};
   min-width: 0;
-  
+  max-width: ${({ device }) => (device === 'mobile' ? 'none' : '840px')};
+
   display: flex;
   gap: 24px;
+  flex: 1;
   flex-direction: column;
-
-  @media (width <= 768px) {
-    max-width: none;
-    width: 100%;
-  }
 `;
 
-const SideSection = styled.div`
-  width: 400px;
+const SideSection = styled.div<{ device: DeviceType }>`
+  width: ${({ device }) =>
+    device === 'mobile' ? '100%' : device === 'tablet' ? '360px' : '400px'};
+  max-width: ${({ device }) => (device === 'mobile' ? '400px' : 'none')};
+  margin: ${({ device }) => (device === 'mobile' ? '0 auto' : '0')};
+
   flex-shrink: 0;
-
-  @media (width <= 1024px) {
-    width: 360px;
-  }
-
-  @media (width <= 768px) {
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
-  }
 `;

@@ -8,12 +8,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import me.bombom.api.v1.auth.dto.request.DuplicateCheckRequest;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.io.IOException;
 
 @Tag(name = "Auth", description = "인증 관련 API")
 public interface AuthControllerApi {
@@ -30,6 +31,18 @@ public interface AuthControllerApi {
     void signup(
         @Parameter(description = "회원가입 요청 데이터") @RequestBody MemberSignupRequest signupRequest,
         HttpServletRequest request
+    );
+
+    @Operation(
+            summary = "회원가입 필드 중복 체크",
+            description = "회원가입에 사용되는 필드의 중복을 체크하여 true/false를 반환합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "중복 체크 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
+    })
+    boolean checkSignupDuplicate(
+            @Parameter(description = "중복 체크 요청 데이터") @ModelAttribute DuplicateCheckRequest request
     );
 
     @Operation(

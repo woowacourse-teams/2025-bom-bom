@@ -2,6 +2,7 @@ package me.bombom.api.v1.member.service;
 
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
+import me.bombom.api.v1.auth.enums.DuplicateCheckField;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -43,6 +44,13 @@ public class MemberService {
         return savedMember;
     }
 
+    public boolean checkSignupDuplicate(DuplicateCheckField field, String value) {
+        return switch (field) {
+            case NICKNAME -> memberRepository.existsByNickname(value);
+            case EMAIL -> memberRepository.existsByEmail(value);
+        };
+    }
+
     public MemberProfileResponse getProfile(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
@@ -59,7 +67,6 @@ public class MemberService {
                     .addContext(ErrorContextKeys.OPERATION, "validateDuplicateEmail");
         }
     }
-
     private void validateDuplicateNickname(String nickname) {
         if (memberRepository.existsByNickname(nickname)) {
             throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_NICKNAME)
@@ -67,4 +74,5 @@ public class MemberService {
                     .addContext(ErrorContextKeys.OPERATION, "validateDuplicateNickname");
         }
     }
+
 }

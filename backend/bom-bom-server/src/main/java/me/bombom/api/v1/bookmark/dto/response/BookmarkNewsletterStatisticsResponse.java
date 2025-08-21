@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 public record BookmarkNewsletterStatisticsResponse(
+
         @Schema(required = true)
         int totalCount,
 

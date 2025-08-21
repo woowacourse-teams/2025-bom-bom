@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 
 public record WeeklyReadingResponse(
+
         @Schema(type = "integer", format = "int32", description = "읽은 아티클 수", required = true)
         int readCount,
         

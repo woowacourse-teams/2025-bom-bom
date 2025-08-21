@@ -7,6 +7,7 @@ import me.bombom.api.v1.member.domain.Member;
 
 @Builder
 public record MemberProfileResponse(
+
         @NotNull
         @Schema(type = "integer", format = "int64", description = "회원 ID", required = true)
         Long id,

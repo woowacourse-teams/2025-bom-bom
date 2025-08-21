@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 
 public record WeeklyGoalCountResponse(
+
         @NotNull
         @Schema(type = "integer", format = "int64", description = "주간 읽기 ID", required = true)
         Long weeklyReadingId,

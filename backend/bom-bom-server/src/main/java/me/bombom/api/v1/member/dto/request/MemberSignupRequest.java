@@ -8,9 +8,18 @@ import java.time.LocalDate;
 import me.bombom.api.v1.member.enums.Gender;
 
 public record MemberSignupRequest(
-        @NotBlank String nickname,
-        @NotNull @Email String email,
-        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate birthDate,
-        @NotNull Gender gender
+
+        @NotBlank
+        String nickname,
+
+        @Email
+        @NotNull
+        String email,
+
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        LocalDate birthDate,
+
+        @NotNull
+        Gender gender
 ) {
 }

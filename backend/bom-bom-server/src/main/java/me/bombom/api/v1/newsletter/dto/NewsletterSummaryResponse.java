@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
 public record NewsletterSummaryResponse(
+
         @NotNull
         @Schema(type = "string", description = "뉴스레터명", required = true)
         String name,

@@ -1,0 +1,89 @@
+name: Setup Opened PR
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  add-reviews:
+    runs-on: ubuntu-latest
+    outputs:
+      assigned-reviewers: ${{ steps.get-assigned-reviewers.outputs.reviewers }}
+    steps:
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v39
+
+      - name: Frontend Review Assignment
+        if: contains(steps.changed-files.outputs.all_changed_files, 'frontend/')
+        uses: kentaro-m/auto-assign-action@v2.0.0
+        with:
+          configuration-path: ".github/auto_assign_frontend.yml"
+
+      - name: Backend Review Assignment
+        if: contains(steps.changed-files.outputs.all_changed_files, 'backend/')
+        uses: kentaro-m/auto-assign-action@v2.0.0
+        with:
+          configuration-path: ".github/auto_assign_backend.yml"
+
+      - name: Get Assigned Reviewers
+        id: get-assigned-reviewers
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            const reviewers = pr.requested_reviewers.map(reviewer => reviewer.login);
+            console.log('Assigned reviewers:', reviewers);
+
+            core.setOutput('reviewers', reviewers.join(','));
+
+      - name: Send notification
+        env:
+          SLACK_WEBHOOK_URL_FE: ${{ secrets.SLACK_WEBHOOK_URL_FE_NOTIFY }}
+          SLACK_WEBHOOK_URL_BE: ${{ secrets.SLACK_WEBHOOK_URL_BE_NOTIFY }}
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+          URL="${{ github.event.pull_request.html_url }}"
+
+          if [[ "$TITLE" == "[FE]"* ]]; then
+            WEBHOOK_URL=$SLACK_WEBHOOK_URL_FE
+          elif [[ "$TITLE" == "[BE]"* ]]; then
+            WEBHOOK_URL=$SLACK_WEBHOOK_URL_BE
+          else
+            exit 0
+          fi
+
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{
+              \"text\": \"📦 새로운 Pull Request가 생성되었습니다!\",
+              \"attachments\": [
+                {
+                  \"title\": \"${TITLE}\",
+                  \"title_link\": \"${URL}\",
+                  \"color\": \"#FF9966\",
+                  \"fields\": [
+                    {
+                      \"title\": \"작성자\",
+                      \"value\": \"${AUTHOR}\",
+                      \"short\": true
+                    },
+                  ],
+                  \"footer\": \"작은 리뷰 하나가 큰 개선이 됩니다 🙌\",
+                  \"actions\": [
+                    {
+                      \"type\": \"button\",
+                      \"text\": \"지금 확인하기\",
+                      \"url\": \"${URL}\",
+                      \"style\": \"primary\"
+                    }
+                  ]
+                }
+              ]
+            }" \
+            "$WEBHOOK_URL"

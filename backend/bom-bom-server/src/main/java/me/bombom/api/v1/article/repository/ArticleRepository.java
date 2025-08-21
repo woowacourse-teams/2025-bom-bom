@@ -11,17 +11,17 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
 
     @Query("""
     SELECT new me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse(
-        n.id, n.name, coalesce(n.imageUrl, ''), cast(count(a.id) as int)
+        n.id, n.name, COALESCE(n.imageUrl, ''), CAST(COUNT(a.id) as int)
     )
     FROM Article a
     JOIN Newsletter n ON n.id = a.newsletterId
     WHERE a.memberId = :memberId
       AND (:keyword is null or :keyword = ''
-           OR lower(a.title) LIKE lower(concat('%', :keyword, '%'))
-           OR lower(a.contentsSummary) LIKE lower(concat('%', :keyword, '%')))
+           OR LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+           OR LOWER(a.contentsSummary) LIKE LOWER(CONCAT('%', :keyword, '%')))
     GROUP BY n.id, n.name, n.imageUrl
-    HAVING count(a.id) > 0
-    ORDER BY count(a.id) DESC
+    HAVING COUNT(a.id) > 0
+    ORDER BY COUNT(a.id) DESC
     """)
     List<ArticleCountPerNewsletterResponse> countPerNewsletter(
             @Param("memberId") Long memberId,

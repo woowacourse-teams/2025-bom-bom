@@ -6,6 +6,8 @@
     import me.bombom.api.v1.auth.dto.CustomOAuth2User;
     import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
     import me.bombom.api.v1.auth.enums.OAuth2Provider;
+    import me.bombom.api.v1.common.exception.ErrorDetail;
+    import me.bombom.api.v1.common.exception.UnauthorizedException;
     import me.bombom.api.v1.member.domain.Member;
     import me.bombom.api.v1.member.repository.MemberRepository;
     import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -30,7 +32,11 @@
             String providerId = oAuth2User.getAttribute(oAuth2Provider.getIdKey());
             String profileUrl = oAuth2User.getAttribute(oAuth2Provider.getProfileImageKey());
 
-            Optional<Member> member = memberRepository.findByProviderAndProviderId(provider, providerId);
+            Optional<Member> member = memberRepository.findByProviderAndProviderIdIncludeDeleted(provider, providerId);
+
+            if (member.isPresent() && member.get().isWithdrawnMember()) {
+                throw new UnauthorizedException(ErrorDetail.WITHDRAWN_MEMBER);
+            }
 
             if (member.isEmpty()) {
                 PendingOAuth2Member pendingMember = PendingOAuth2Member.builder()

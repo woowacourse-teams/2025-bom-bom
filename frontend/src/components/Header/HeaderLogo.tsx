@@ -72,5 +72,6 @@ const Title = styled.div`
 `;
 
 const SubTitle = styled.div`
+  color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body2};
 `;

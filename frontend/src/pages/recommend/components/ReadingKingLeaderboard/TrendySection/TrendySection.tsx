@@ -49,14 +49,14 @@ const TrendySection = () => {
 
   return (
     <>
-      <Container>
+      <Container deviceType={deviceType}>
         <SectionHeader>
           <SectionIconBox>
             <TrendingUpIcon width={16} height={16} />
           </SectionIconBox>
           <SectionTitle>트렌디한 뉴스레터</SectionTitle>
         </SectionHeader>
-        <TagContainer>
+        <TagContainer deviceType={deviceType}>
           {CATEGORIES.map((category, index) => (
             <Chip
               key={index}
@@ -102,39 +102,46 @@ const TrendySection = () => {
 
 export default TrendySection;
 
-const Container = styled.div`
+const Container = styled.div<{ deviceType: DeviceType }>`
   width: 100%;
-  padding: 24px;
-  border: 1px solid ${({ theme }) => theme.colors.stroke};
-  border-radius: 20px;
+  padding: ${({ deviceType }) => (deviceType === 'mobile' ? '20px' : '28px')};
+  border: 1px solid ${({ theme }) => theme.colors.dividers};
+  border-radius: ${({ deviceType }) =>
+    deviceType === 'mobile' ? '20px' : '24px'};
   box-shadow:
-    0 10px 15px -3px rgb(0 0 0 / 10%),
-    0 4px 6px -4px rgb(0 0 0 / 10%);
+    0 4px 20px -4px rgb(0 0 0 / 8%),
+    0 2px 8px -2px rgb(0 0 0 / 4%);
 
   background: ${({ theme }) => theme.colors.white};
-
-  backdrop-filter: blur(10px);
 `;
 
 const SectionHeader = styled.div`
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
 `;
 
 const SectionIconBox = styled.span`
-  width: 28px;
-  height: 28px;
-  border-radius: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgb(255 153 102 / 30%);
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  background: ${({ theme }) => theme.colors.primary};
-  font: ${({ theme }) => theme.fonts.body1};
+  background: linear-gradient(
+    135deg,
+    ${({ theme }) => theme.colors.primary},
+    ${({ theme }) => theme.colors.primaryLight}
+  );
+
+  svg {
+    color: white;
+  }
 `;
 
 const SectionTitle = styled.h2`
@@ -144,8 +151,9 @@ const SectionTitle = styled.h2`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const TagContainer = styled.div`
-  margin-bottom: 16px;
+const TagContainer = styled.div<{ deviceType: DeviceType }>`
+  margin-bottom: ${({ deviceType }) =>
+    deviceType === 'mobile' ? '16px' : '20px'};
 
   display: flex;
   gap: 8px;
@@ -154,15 +162,36 @@ const TagContainer = styled.div`
 
 const TrendyGrid = styled.div<{ deviceType: DeviceType }>`
   display: grid;
-  gap: 8px;
+  gap: ${({ deviceType }) => (deviceType === 'tablet' ? '12px' : '16px')};
 
   grid-template-columns: ${({ deviceType }) =>
-    deviceType === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
+    deviceType === 'pc' ? 'repeat(2, 1fr)' : '1fr'};
 `;
 
 const NewsletterCard = styled(ImageInfoCard)`
+  padding: 16px;
+  border: 1px solid ${({ theme }) => theme.colors.dividers};
+  border-radius: 16px;
+
+  background: ${({ theme }) => theme.colors.white};
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 8px 25px -8px rgb(0 0 0 / 12%);
+
+    border-color: ${({ theme }) => theme.colors.primary};
+    transform: translateY(-4px);
+  }
+
+  &:active {
+    transform: translateY(-2px);
+  }
+
   &:focus-visible {
-    outline: none;
+    outline: 2px solid ${({ theme }) => theme.colors.primary};
+    outline-offset: 2px;
   }
 
   &:focus:not(:focus-visible) {

@@ -41,7 +41,7 @@ export default function ArticleListControls({
 
 const Container = styled.div`
   display: flex;
-  gap: 20px;
+  gap: 8px;
   flex-direction: column;
 `;
 

@@ -30,50 +30,53 @@ function ImageInfoCard({
 export default ImageInfoCard;
 
 const Container = styled.div`
-  width: fit-content;
-  padding: 12px 8px;
+  width: 100%;
+  padding: 0;
 
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
-  justify-content: center;
 
   text-align: left;
 `;
 
 const Image = styled(ImageWithFallback)`
-  width: 58px;
-  border-radius: 12px;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
 
   flex-shrink: 0;
 
-  aspect-ratio: 1/1;
   object-fit: cover;
 `;
 
 const InfoBox = styled.div`
-  height: 60px;
+  min-height: 64px;
 
   display: flex;
-  gap: 4px;
+  gap: 8px;
+  flex: 1;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
 `;
 
 const Title = styled.h3`
+  margin: 0;
+
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.heading6};
 `;
 
 const Description = styled.p`
   overflow: hidden;
+  margin: 0;
 
   display: -webkit-box;
 
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.caption};
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font: ${({ theme }) => theme.fonts.body2};
 
   -webkit-box-orient: vertical;
-
   -webkit-line-clamp: 2;
 `;

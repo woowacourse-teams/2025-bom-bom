@@ -43,13 +43,7 @@ function NewsLetterFilter({
             }
             onTabSelect={onSelectNewsletter}
             StartComponent={
-              imageUrl ? (
-                <NewsLetterImage
-                  src={
-                    'https://the-edit.co.kr/wp-content/themes/theedit-data/resources/images/ccatalog_v3/01_title.png'
-                  }
-                />
-              ) : null
+              imageUrl ? <NewsLetterImage src={imageUrl} /> : null
             }
             EndComponent={<Badge text={String(articleCount)} />}
             textAlign={deviceType === 'pc' ? 'start' : 'center'}

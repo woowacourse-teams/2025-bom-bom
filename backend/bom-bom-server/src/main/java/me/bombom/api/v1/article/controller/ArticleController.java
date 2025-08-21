@@ -39,7 +39,7 @@ public class ArticleController implements ArticleControllerApi{
     @GetMapping
     public Page<ArticleResponse> getArticles(
             @LoginMember Member member,
-            @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
+            @Valid @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
             @PageableDefault(sort = "arrivedDateTime", direction = Direction.DESC) Pageable pageable
     ) {
         return articleService.getArticles(

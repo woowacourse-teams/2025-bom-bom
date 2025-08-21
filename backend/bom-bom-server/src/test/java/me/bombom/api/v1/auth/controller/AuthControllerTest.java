@@ -41,7 +41,7 @@ class AuthControllerTest {
     void 닉네임_중복_체크_TRUE() throws Exception {
         mockMvc.perform(get("/api/v1/auth/signup/check")
                         .param("field", "NICKNAME")
-                        .param("value", member.getNickname())
+                        .param("userInput", member.getNickname())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string("true"));
@@ -51,7 +51,7 @@ class AuthControllerTest {
     void 닉네임_중복_체크_FALSE() throws Exception {
         mockMvc.perform(get("/api/v1/auth/signup/check")
                         .param("field", "nickname")
-                        .param("value", "anotherNickname")
+                        .param("userInput", "anotherNickname")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string("false"));
@@ -61,7 +61,7 @@ class AuthControllerTest {
     void 이메일_중복_체크_TRUE() throws Exception {
         mockMvc.perform(get("/api/v1/auth/signup/check")
                         .param("field", "EMAIL")
-                        .param("value", member.getEmail())
+                        .param("userInput", member.getEmail())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string("true"));
@@ -71,7 +71,7 @@ class AuthControllerTest {
     void 유효하지_않은_필드_입력_시_예외() throws Exception {
         mockMvc.perform(get("/api/v1/auth/signup/check")
                         .param("field", "INVALID")
-                        .param("value", member.getEmail())
+                        .param("userInput", member.getEmail())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andDo(print());

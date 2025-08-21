@@ -12,14 +12,14 @@ interface LeaderboardItemProps {
   badgeText?: string;
 }
 
-interface ReadingKingLeaderboardProps {
-  userRank?: {
-    rank: number;
-    readCount: number;
-    nextRankDifference: number;
-    progressPercentage: number;
-  };
-}
+// interface ReadingKingLeaderboardProps {
+//   userRank?: {
+//     rank: number;
+//     readCount: number;
+//     nextRankDifference: number;
+//     progressPercentage: number;
+//   };
+// }
 
 const LeaderboardItem = ({
   rank,
@@ -61,20 +61,18 @@ const LeaderboardItem = ({
   </ItemContainer>
 );
 
-export default function ReadingKingLeaderboard({
-  userRank,
-}: ReadingKingLeaderboardProps) {
+export default function ReadingKingLeaderboard() {
   const { data: monthlyReadingRank, isLoading } = useQuery(
     queries.monthlyReadingRank({ limit: 5 }),
   );
 
   // Calculate default user rank data if not provided
-  const defaultUserRank = {
-    rank: 12,
-    readCount: 87,
-    nextRankDifference: 13,
-    progressPercentage: 65,
-  };
+  // const defaultUserRank = {
+  //   rank: 12,
+  //   readCount: 87,
+  //   nextRankDifference: 13,
+  //   progressPercentage: 65,
+  // };
 
   if (isLoading) {
     return (
@@ -117,7 +115,7 @@ export default function ReadingKingLeaderboard({
           ))}
       </LeaderboardList>
 
-      <MyRankSection>
+      {/* <MyRankSection>
         <MyRankContainer>
           <MyRankBox>
             <MyRankInfo>
@@ -148,7 +146,7 @@ export default function ReadingKingLeaderboard({
             </ProgressBar>
           </ProgressSection>
         </MyRankContainer>
-      </MyRankSection>
+      </MyRankSection> */}
     </Container>
   );
 }
@@ -322,122 +320,122 @@ const BookIconContainer = styled.div`
   justify-content: center;
 `;
 
-const MyRankSection = styled.div`
-  padding-top: 36px;
-  border-top: 1px solid #f1f5f9;
-`;
+// const MyRankSection = styled.div`
+//   padding-top: 36px;
+//   border-top: 1px solid #f1f5f9;
+// `;
 
-const MyRankContainer = styled.div`
-  margin-bottom: 10.5px;
-  padding: 13px 14px 14px;
-  border-radius: 14px;
+// const MyRankContainer = styled.div`
+//   margin-bottom: 10.5px;
+//   padding: 13px 14px 14px;
+//   border-radius: 14px;
 
-  display: flex;
-  gap: 12px;
-  flex-direction: column;
-  justify-content: space-between;
+//   display: flex;
+//   gap: 12px;
+//   flex-direction: column;
+//   justify-content: space-between;
 
-  background: linear-gradient(
-    to right,
-    rgb(255 153 102 / 10%),
-    rgb(255 237 212 / 50%)
-  );
-`;
+//   background: linear-gradient(
+//     to right,
+//     rgb(255 153 102 / 10%),
+//     rgb(255 237 212 / 50%)
+//   );
+// `;
 
-const MyRankInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
+// const MyRankInfo = styled.div`
+//   display: flex;
+//   flex-direction: column;
+// `;
 
-const MyRankBox = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
+// const MyRankBox = styled.div`
+//   display: flex;
+//   align-items: center;
+//   justify-content: space-between;
+// `;
 
-const MyRankLabel = styled.div`
-  color: #45556c;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 12.3px;
-  line-height: 17.5px;
-`;
+// const MyRankLabel = styled.div`
+//   color: #45556c;
+//   font-family: Inter, 'Noto Sans KR', sans-serif;
+//   font-weight: 400;
+//   font-size: 12.3px;
+//   line-height: 17.5px;
+// `;
 
-const MyRankValue = styled.div`
-  color: #0f172b;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 21px;
-  line-height: 28px;
-`;
+// const MyRankValue = styled.div`
+//   color: #0f172b;
+//   font-family: Inter, 'Noto Sans KR', sans-serif;
+//   font-weight: 400;
+//   font-size: 21px;
+//   line-height: 28px;
+// `;
 
-const MyReadInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-`;
+// const MyReadInfo = styled.div`
+//   display: flex;
+//   flex-direction: column;
+//   align-items: flex-end;
+// `;
 
-const MyReadLabel = styled.div`
-  color: #45556c;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 12.3px;
-  line-height: 17.5px;
-`;
+// const MyReadLabel = styled.div`
+//   color: #45556c;
+//   font-family: Inter, 'Noto Sans KR', sans-serif;
+//   font-weight: 400;
+//   font-size: 12.3px;
+//   line-height: 17.5px;
+// `;
 
-const MyReadValue = styled.div`
-  color: #f96;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 21px;
-  line-height: 28px;
-`;
+// const MyReadValue = styled.div`
+//   color: #f96;
+//   font-family: Inter, 'Noto Sans KR', sans-serif;
+//   font-weight: 400;
+//   font-size: 21px;
+//   line-height: 28px;
+// `;
 
-const ProgressSection = styled.div`
-  display: flex;
-  gap: 3.5px;
-  flex-direction: column;
-`;
+// const ProgressSection = styled.div`
+//   display: flex;
+//   gap: 3.5px;
+//   flex-direction: column;
+// `;
 
-const ProgressInfo = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
+// const ProgressInfo = styled.div`
+//   display: flex;
+//   align-items: center;
+//   justify-content: space-between;
+// `;
 
-const ProgressLabel = styled.div`
-  color: #45556c;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 10.5px;
-  line-height: 14px;
-`;
+// const ProgressLabel = styled.div`
+//   color: #45556c;
+//   font-family: Inter, 'Noto Sans KR', sans-serif;
+//   font-weight: 400;
+//   font-size: 10.5px;
+//   line-height: 14px;
+// `;
 
-const ProgressValue = styled.div`
-  color: #45556c;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 10.5px;
-  line-height: 14px;
-`;
+// const ProgressValue = styled.div`
+//   color: #45556c;
+//   font-family: Inter, 'Noto Sans KR', sans-serif;
+//   font-weight: 400;
+//   font-size: 10.5px;
+//   line-height: 14px;
+// `;
 
-const ProgressBar = styled.div`
-  overflow: hidden;
-  width: 100%;
-  height: 7px;
-  border-radius: 50px;
+// const ProgressBar = styled.div`
+//   overflow: hidden;
+//   width: 100%;
+//   height: 7px;
+//   border-radius: 50px;
 
-  background: #e2e8f0;
-`;
+//   background: #e2e8f0;
+// `;
 
-const ProgressFill = styled.div`
-  height: 100%;
-  border-radius: 50px;
+// const ProgressFill = styled.div`
+//   height: 100%;
+//   border-radius: 50px;
 
-  background: #f96;
+//   background: #f96;
 
-  transition: width 0.3s ease;
-`;
+//   transition: width 0.3s ease;
+// `;
 
 const LoadingMessage = styled.div`
   padding: 40px 20px;

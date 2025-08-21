@@ -46,7 +46,7 @@ const ArticleHeader = ({
           <ClockIcon width={16} height={16} />
           <MetaInfoText>{expectedReadTime}분</MetaInfoText>
         </ReadTimeBox>
-        {isBookmarkButtonVisible && (
+        {isBookmarkButtonVisible && onBookmarkClick && (
           <BookmarkButton
             type="button"
             onClick={() => onBookmarkClick?.(bookmarked)}

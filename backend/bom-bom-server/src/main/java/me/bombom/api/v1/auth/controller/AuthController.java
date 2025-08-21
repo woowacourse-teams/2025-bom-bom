@@ -65,7 +65,7 @@ public class AuthController implements AuthControllerApi{
     @Override
     @GetMapping("/signup/check")
     public boolean checkSignupDuplicate(@Valid @ModelAttribute DuplicateCheckRequest request) {
-        return memberService.checkSignupDuplicate(request.field(), request.value());
+        return memberService.checkSignupDuplicate(request.field(), request.userInput());
     }
 
     @Override

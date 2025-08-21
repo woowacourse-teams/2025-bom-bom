@@ -130,7 +130,7 @@ const ContentWrapper = styled.div<{ isPC: boolean }>`
   width: 100%;
 
   display: flex;
-  gap: ${({ isPC }) => (isPC ? 32 : 20)}px;
+  gap: ${({ isPC }) => (isPC ? '32px' : 0)};
   flex-direction: ${({ isPC }) => (isPC ? 'row' : 'column')};
   align-items: flex-start;
 `;
@@ -140,7 +140,7 @@ const SidebarSection = styled.div<{ isPC: boolean }>`
   min-width: ${({ isPC }) => (isPC ? 320 : '100%')};
 
   display: flex;
-  gap: 20px;
+  gap: ${({ isPC }) => (isPC ? '20px' : '8px')};
   flex-direction: column;
 
   order: ${({ isPC }) => (isPC ? 1 : 0)};
@@ -150,7 +150,7 @@ const MainContentSection = styled.div<{ isPC: boolean }>`
   width: 100%;
 
   display: flex;
-  gap: 32px;
+  gap: 16px;
   flex: 1;
   flex-direction: column;
 

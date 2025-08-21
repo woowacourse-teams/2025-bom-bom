@@ -43,7 +43,7 @@ const zIndex = {
   elevated: 10, // 드롭다운, 툴팁, 폼 요소
   panel: 50, // 패널, 사이드바
   header: 100, // 헤더, 네비게이션
-  floating: 500, // 플로팅 요소
+  floating: 800, // 플로팅 요소
   overlay: 1000, // 모달, 오버레이, 플로팅 버튼
   toast: 9000, // 토스트, 알림 (최상위)
 };

@@ -81,14 +81,16 @@ const Container = styled.div<{ isMobile: boolean }>`
   width: 100%;
 
   display: flex;
-  gap: ${({ isMobile }) => (isMobile ? '24px' : 0)};
+  gap: 24px;
   flex-direction: column;
   align-items: flex-start;
 `;
 
 const LettersWrapper = styled.div<{ isMobile: boolean }>`
+  width: 100%;
+
   display: flex;
-  gap: ${({ isMobile }) => (isMobile ? '8px' : '24px')};
+  gap: 8px;
   flex-direction: column;
 `;
 

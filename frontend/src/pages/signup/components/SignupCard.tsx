@@ -12,6 +12,7 @@ import {
 } from './SignupCard.utils';
 import { postSignup } from '@/apis/auth';
 import InputField from '@/components/InputField/InputField';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import { GUIDE_MAILS } from '@/mocks/datas/guideMail';
 import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
@@ -21,11 +22,8 @@ import HelpIcon from '#/assets/help.svg';
 type Gender = 'MALE' | 'FEMALE';
 const EMAIL_DOMAIN = '@bombom.news';
 
-interface SignupCardProps {
-  isMobile: boolean;
-}
-
-const SignupCard = ({ isMobile }: SignupCardProps) => {
+const SignupCard = () => {
+  const deviceType = useDeviceType();
   const navigate = useNavigate();
   const [nickname, setNickname] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -110,7 +108,7 @@ const SignupCard = ({ isMobile }: SignupCardProps) => {
   const closeEmailHelp = () => setEmailHelpOpen(false);
 
   return (
-    <Container isMobile={isMobile}>
+    <Container deviceType={deviceType}>
       <SignupForm onSubmit={handleSubmit}>
         <HeaderWrapper>
           <Title>회원가입</Title>
@@ -226,14 +224,14 @@ const SignupCard = ({ isMobile }: SignupCardProps) => {
 
 export default SignupCard;
 
-const Container = styled.div<{ isMobile: boolean }>`
+const Container = styled.div<{ deviceType: DeviceType }>`
   width: min(100%, 420px);
   padding: 28px 24px;
 
   background-color: ${({ theme }) => theme.colors.white};
 
-  ${({ isMobile }) =>
-    !isMobile &&
+  ${({ deviceType }) =>
+    deviceType !== 'mobile' &&
     `
     border-radius: 20px;
     box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);

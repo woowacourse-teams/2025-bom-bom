@@ -57,6 +57,7 @@ const TodayArticleTitle = styled.h3`
 const TodayArticleList = styled.div<{ deviceType: DeviceType }>`
   display: grid;
   gap: 20px;
+  justify-items: center;
 
   grid-template-columns: ${({ deviceType }) =>
     `repeat(${deviceType === 'pc' ? 2 : 1}, 1fr)`};

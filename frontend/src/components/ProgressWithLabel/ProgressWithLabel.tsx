@@ -80,7 +80,6 @@ const ProgressRate = styled.span`
 
   color: ${({ theme }) => theme.colors.primary};
   font: ${({ theme }) => theme.fonts.body2};
-  font-weight: 600;
   text-align: center;
 `;
 

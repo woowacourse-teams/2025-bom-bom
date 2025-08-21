@@ -74,9 +74,8 @@ const Container = styled.div`
   overflow: hidden;
   position: relative;
   width: 100%;
-  height: 320px;
+  height: 280px;
   margin: 0 auto 20px;
-  border-radius: 16px;
 
   background: transparent;
 `;

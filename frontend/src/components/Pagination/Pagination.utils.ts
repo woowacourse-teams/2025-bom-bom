@@ -32,7 +32,7 @@ export const getPageNumbers = (
     return [
       1,
       ELLIPSIS,
-      ...Array.from({ length: 5 }, (_, i) => totalPages - 4 + i + 1),
+      ...Array.from({ length: 5 }, (_, i) => totalPages - 4 + i),
     ];
   }
 

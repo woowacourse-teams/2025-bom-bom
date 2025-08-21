@@ -10,6 +10,6 @@ public record DuplicateCheckRequest(
         DuplicateCheckField field,
         
         @NotBlank
-        String value
+        String userInput
 ) {
 }

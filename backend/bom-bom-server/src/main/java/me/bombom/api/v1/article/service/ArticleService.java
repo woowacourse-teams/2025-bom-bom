@@ -86,9 +86,9 @@ public class ArticleService {
     }
 
     public ArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(Member member, String keyword) {
-        String normalized = (keyword == null || keyword.isBlank()) ? null : keyword.strip();
+        String trimmedKeyword = (keyword == null || keyword.isBlank()) ? null : keyword.strip();
 
-        List<ArticleCountPerNewsletterResponse> rows = articleRepository.countPerNewsletter(member.getId(), normalized);
+        List<ArticleCountPerNewsletterResponse> rows = articleRepository.countPerNewsletter(member.getId(), trimmedKeyword);
         int total = rows.stream()
                 .mapToInt(ArticleCountPerNewsletterResponse::articleCount)
                 .sum();

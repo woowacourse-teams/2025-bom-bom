@@ -165,7 +165,7 @@ const TrendyGrid = styled.div<{ deviceType: DeviceType }>`
   gap: ${({ deviceType }) => (deviceType === 'tablet' ? '12px' : '16px')};
 
   grid-template-columns: ${({ deviceType }) =>
-    deviceType === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
+    deviceType === 'pc' ? 'repeat(2, 1fr)' : '1fr'};
 `;
 
 const NewsletterCard = styled(ImageInfoCard)`

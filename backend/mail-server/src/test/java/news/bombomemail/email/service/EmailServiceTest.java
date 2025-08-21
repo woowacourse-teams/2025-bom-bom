@@ -54,6 +54,7 @@ class EmailServiceTest {
             .provider("google")
             .gender(Gender.MALE)
             .roleId(1L)
+            .birthDate(java.time.LocalDate.of(1990, 1, 1)) // 생년월일 추가
             .build());
 
         newsletterRepository.save(Newsletter.builder()
@@ -226,6 +227,23 @@ class EmailServiceTest {
             assertThatCode(() -> emailService.processEmailFile(dir))
                     .doesNotThrowAnyException();
             assertThat(articleRepository.findAll()).isEmpty();
+        });
+    }
+
+    @Test
+    void 이메일_처리시_아티클이_저장되고_이벤트가_발생한다() throws Exception {
+        // given
+        File emlFile = copySampleEmlToTemp();
+
+        // when
+        emailService.processEmailFile(emlFile);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(articleRepository.findAll()).hasSize(1);
+            Article article = articleRepository.findAll().get(0);
+            softly.assertThat(article.getTitle()).isEqualTo("테스트 이메일 제목");
+            softly.assertThat(article.getContents()).contains("이것은 테스트용 이메일 본문입니다");
         });
     }
 

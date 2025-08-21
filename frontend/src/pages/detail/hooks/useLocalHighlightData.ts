@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { Highlight } from '../types/highlight';
+import { removeHighlightFromDOM } from '../utils/highlight';
 import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 
 type StorageKeyType = `guide-highlight-${string}`;
@@ -26,6 +27,7 @@ export const useLocalHighlightData = ({ articleId }: { articleId: number }) => {
   const removeHighlight = useCallback(
     (id: number) => {
       setHighlights((prev) => prev.filter((h) => h.id !== id));
+      removeHighlightFromDOM(id);
     },
     [setHighlights],
   );

@@ -96,6 +96,7 @@ const NavButton = styled(Link)<{ active?: boolean; deviceType: DeviceType }>`
   font: ${({ deviceType, theme }) =>
     deviceType === 'mobile' ? theme.fonts.body3 : theme.fonts.body2};
   font-weight: ${({ active }) => (active ? '600' : '500')};
+
   text-shadow: ${({ active }) =>
     active ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.1)'};
   transition: all 0.2s ease;

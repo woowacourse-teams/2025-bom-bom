@@ -7,7 +7,12 @@ import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/Re
 import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { theme } from '@/styles/theme';
+import { LocalGuideMail } from '@/types/guide';
+import { isToday } from '@/utils/date';
+import { createStorage } from '@/utils/localStorage';
 import type { CSSObject, Theme } from '@emotion/react';
+import HomeIcon from '#/assets/home.svg';
 
 export const Route = createFileRoute('/_bombom/')({
   component: Index,
@@ -16,22 +21,37 @@ export const Route = createFileRoute('/_bombom/')({
 function Index() {
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
+  const guideArticles = createStorage<LocalGuideMail[], string>(
+    'guide-mail',
+  ).get();
+
+  const mergedArticles = [
+    ...(todayArticles?.content?.map((article) => ({
+      ...article,
+      type: 'article' as const,
+    })) ?? []),
+    ...(guideArticles
+      ?.filter((guide) => isToday(new Date(guide.createdAt)))
+      .map((guide) => ({ ...guide, type: 'guide' as const })) ?? []),
+  ];
+
   const deviceType = useDeviceType();
 
   return (
     <Container deviceType={deviceType}>
       {deviceType !== 'mobile' && (
-        <TitleBox>
-          <Title>오늘의 뉴스레터</Title>
-          <TitleDescription>
-            {todayArticles?.content?.length ?? 0}개의 새로운 뉴스레터가
-            도착했어요
-          </TitleDescription>
-        </TitleBox>
+        <>
+          <TitleWrapper>
+            <TitleIconBox>
+              <HomeIcon width={20} height={20} color={theme.colors.white} />
+            </TitleIconBox>
+            <Title>오늘의 뉴스레터</Title>
+          </TitleWrapper>
+        </>
       )}
 
       <ContentWrapper deviceType={deviceType}>
-        <ArticleCardList articles={todayArticles?.content ?? []} />
+        <ArticleCardList articles={mergedArticles} />
         <ReaderCompanion deviceType={deviceType}>
           <PetCard />
           <ReadingStatusCard />
@@ -45,32 +65,37 @@ const Container = styled.div<{ deviceType: DeviceType }>`
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 24px;
-  padding-top: ${({ deviceType }) =>
-    deviceType === 'mobile' ? '0px' : '64px'};
 
   display: flex;
-  gap: 44px;
+  gap: 24px;
   flex-direction: column;
   align-items: flex-start;
 
   box-sizing: border-box;
 `;
 
-const TitleBox = styled.div`
+const TitleWrapper = styled.div`
   display: flex;
   gap: 8px;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
+`;
+
+const TitleIconBox = styled.div`
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+
+  background-color: ${({ theme }) => theme.colors.primary};
 `;
 
 const Title = styled.h1`
-  font: ${({ theme }) => theme.fonts.heading2};
-`;
-
-const TitleDescription = styled.p`
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.caption};
+  font: ${({ theme }) => theme.fonts.heading3};
 `;
 
 const ContentWrapper = styled.div<{ deviceType: DeviceType }>`

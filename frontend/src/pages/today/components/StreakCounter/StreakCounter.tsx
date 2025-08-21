@@ -12,7 +12,7 @@ export default StreakCounter;
 
 const CircleIcon = styled.span`
   position: relative;
-  z-index: 0;
+  z-index: ${({ theme }) => theme.zIndex.base};
   width: 68px;
   height: 68px;
   margin: 4px;
@@ -30,7 +30,7 @@ const CircleIcon = styled.span`
     position: absolute;
     top: 50%;
     left: 50%;
-    z-index: -1;
+    z-index: ${({ theme }) => theme.zIndex.behind};
     width: calc(100% - 16px);
     height: calc(100% - 16px);
     border-radius: 50%;
@@ -43,6 +43,6 @@ const CircleIcon = styled.span`
 
   > * {
     position: relative;
-    z-index: 1;
+    z-index: ${({ theme }) => theme.zIndex.content};
   }
 `;

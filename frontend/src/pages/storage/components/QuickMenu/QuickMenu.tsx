@@ -4,6 +4,7 @@ import FloatingActionButton from '@/components/FloatingActionButton/FloatingActi
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
 import BookmarkIcon from '#/assets/bookmark-inactive.svg';
+import HelpIcon from '#/assets/help.svg';
 import LinkIcon from '#/assets/link.svg';
 import MemoIcon from '#/assets/memo.svg';
 
@@ -22,6 +23,10 @@ const QuickMenu = () => {
         <StyledLink to="/memo">
           <MemoIcon width={20} height={20} fill={theme.colors.primary} />
           <LinkText>메모</LinkText>
+        </StyledLink>
+        <StyledLink to="/guide">
+          <HelpIcon width={20} height={20} fill={theme.colors.primary} />
+          <LinkText>가이드</LinkText>
         </StyledLink>
       </FloatingActionButton>
     );
@@ -43,6 +48,10 @@ const QuickMenu = () => {
         <StyledLink to="/memo">
           <MemoIcon width={20} height={20} fill={theme.colors.primary} />
           <LinkText>메모</LinkText>
+        </StyledLink>
+        <StyledLink to="/guide">
+          <HelpIcon width={20} height={20} fill={theme.colors.primary} />
+          <LinkText>가이드</LinkText>
         </StyledLink>
       </ButtonContainer>
     </Container>
@@ -109,7 +118,7 @@ const StyledLink = styled(Link)`
   display: flex;
   gap: 4px;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 `;
 
 const ButtonContainer = styled.div`

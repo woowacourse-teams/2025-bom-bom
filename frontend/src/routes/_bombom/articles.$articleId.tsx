@@ -3,14 +3,15 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
 import Spacing from '@/components/Spacing/Spacing';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
 import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
+import useArticleAsReadMutation from '@/pages/detail/hooks/useArticleAsReadMutation';
 import { useArticleBookmark } from '@/pages/detail/hooks/useArticleBookmark';
-import useMarkArticleAsReadMutation from '@/pages/detail/hooks/useMarkArticleAsReadMutation';
 
 export const Route = createFileRoute('/_bombom/articles/$articleId')({
   component: ArticleDetailPage,
@@ -19,11 +20,12 @@ export const Route = createFileRoute('/_bombom/articles/$articleId')({
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
   const articleIdNumber = Number(articleId);
+  const deviceType = useDeviceType();
 
   const { data: currentArticle } = useQuery(
     queries.articleById({ id: articleIdNumber }),
   );
-  const { mutate: updateArticleAsRead } = useMarkArticleAsReadMutation({
+  const { mutate: updateArticleAsRead } = useArticleAsReadMutation({
     articleId: articleIdNumber,
   });
   const { isBookmarked, toggleBookmark } = useArticleBookmark({
@@ -42,13 +44,15 @@ function ArticleDetailPage() {
   if (!currentArticle) return null;
 
   return (
-    <Container>
+    <Container deviceType={deviceType}>
       <ArticleHeader
         title={currentArticle.title ?? ''}
         newsletterCategory={currentArticle.newsletter?.category ?? ''}
         newsletterName={currentArticle.newsletter?.name ?? ''}
         arrivedDateTime={new Date(currentArticle.arrivedDateTime ?? '')}
         expectedReadTime={currentArticle.expectedReadTime ?? 1}
+        bookmarked={isBookmarked}
+        onBookmarkClick={toggleBookmark}
       />
       <Divider />
 
@@ -74,13 +78,17 @@ function ArticleDetailPage() {
   );
 }
 
-const Container = styled.div`
+const Container = styled.div<{ deviceType: DeviceType }>`
   max-width: 700px;
   margin: 0 auto;
   margin-top: 20px;
-  padding: 28px;
-  border-right: 1px solid ${({ theme }) => theme.colors.stroke};
-  border-left: 1px solid ${({ theme }) => theme.colors.stroke};
+  padding: ${({ deviceType }) => (deviceType === 'mobile' ? '0' : '0 16px')};
+  border-right: 1px solid
+    ${({ theme, deviceType }) =>
+      deviceType === 'mobile' ? 'transparent' : theme.colors.stroke};
+  border-left: 1px solid
+    ${({ theme, deviceType }) =>
+      deviceType === 'mobile' ? 'transparent' : theme.colors.stroke};
 
   display: flex;
   gap: 20px;

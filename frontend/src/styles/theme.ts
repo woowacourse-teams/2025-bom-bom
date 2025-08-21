@@ -30,9 +30,29 @@ const colors = {
   error: '#FF4D4F',
 };
 
+const heights = {
+  headerPC: '72px',
+  headerMobile: '56px',
+  bottomNav: '64px',
+};
+
+const zIndex = {
+  behind: -1, // 뒤쪽 배경 요소
+  base: 0, // 기본 레벨
+  content: 1, // 일반 콘텐츠 요소
+  elevated: 10, // 드롭다운, 툴팁, 폼 요소
+  panel: 50, // 패널, 사이드바
+  header: 100, // 헤더, 네비게이션
+  floating: 500, // 플로팅 요소
+  overlay: 1000, // 모달, 오버레이, 플로팅 버튼
+  toast: 9000, // 토스트, 알림 (최상위)
+};
+
 export const theme = {
   fonts,
   colors,
+  heights,
+  zIndex,
 };
 
 export type AppTheme = typeof theme;

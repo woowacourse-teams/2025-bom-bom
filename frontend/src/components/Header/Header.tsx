@@ -41,9 +41,11 @@ export default function Header({ activeNav }: HeaderProps) {
 const MobileHeaderContainer = styled.header`
   position: fixed;
   top: 0;
-  z-index: 100;
+  z-index: ${({ theme }) => theme.zIndex.header};
   width: 100%;
-  height: calc(56px + env(safe-area-inset-top));
+  height: calc(
+    ${({ theme }) => theme.heights.headerMobile} + env(safe-area-inset-top)
+  );
   padding: 8px 12px;
   padding-top: calc(8px + env(safe-area-inset-top));
   box-shadow:
@@ -60,9 +62,9 @@ const MobileHeaderContainer = styled.header`
 const HeaderContainer = styled.header`
   position: fixed;
   top: 0;
-  z-index: 100;
+  z-index: ${({ theme }) => theme.zIndex.header};
   width: 100%;
-  height: 72px;
+  height: ${({ theme }) => theme.heights.headerPC};
   padding: 8px 16px;
   border-radius: 0 0 8px 8px;
   box-shadow:
@@ -101,8 +103,10 @@ const BottomNavWrapper = styled.nav`
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 100;
-  height: calc(64px + env(safe-area-inset-bottom));
+  z-index: ${({ theme }) => theme.zIndex.header};
+  height: calc(
+    ${({ theme }) => theme.heights.bottomNav} + env(safe-area-inset-bottom)
+  );
   padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
   border-top: 1px solid ${({ theme }) => theme.colors.stroke};
   box-shadow: 0 -8px 12px -6px rgb(0 0 0 / 10%);

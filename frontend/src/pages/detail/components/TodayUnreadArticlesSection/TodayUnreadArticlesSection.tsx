@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import EmptyUnreadCard from '../EmptyUnreadCard/EmptyUnreadCard';
 import NewsletterItemCard from '../NewsletterItemCard/NewsletterItemCard';
 import { queries } from '@/apis/queries';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 
 interface TodayUnreadArticlesSectionProps {
   articleId: number;
@@ -14,6 +15,7 @@ const TodayUnreadArticlesSection = ({
 }: TodayUnreadArticlesSectionProps) => {
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
+  const deviceType = useDeviceType();
 
   const unreadArticles = todayArticles?.content?.filter(
     (article) => !article.isRead && article.articleId !== articleId,
@@ -23,7 +25,7 @@ const TodayUnreadArticlesSection = ({
     <Container>
       <TodayArticleTitle>오늘 읽지 않은 다른 아티클</TodayArticleTitle>
       {unreadArticles?.length && unreadArticles.length > 0 ? (
-        <TodayArticleList>
+        <TodayArticleList deviceType={deviceType}>
           {unreadArticles?.map((article) => (
             <NewsletterItemCard key={article.articleId} data={article} />
           ))}
@@ -49,12 +51,13 @@ const TodayArticleTitle = styled.h3`
   align-self: flex-start;
 
   color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.heading4};
+  font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const TodayArticleList = styled.div`
+const TodayArticleList = styled.div<{ deviceType: DeviceType }>`
   display: grid;
   gap: 20px;
 
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: ${({ deviceType }) =>
+    `repeat(${deviceType === 'pc' ? 2 : 1}, 1fr)`};
 `;

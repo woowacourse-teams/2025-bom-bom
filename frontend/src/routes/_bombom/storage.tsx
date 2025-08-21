@@ -16,67 +16,78 @@ export const Route = createFileRoute('/_bombom/storage')({
 function Storage() {
   const deviceType = useDeviceType();
   const isPC = deviceType === 'pc';
+  const isMobile = deviceType === 'mobile';
 
   const {
-    selectedNewsletter,
+    selectedNewsletterId,
     sortFilter,
     searchInput,
     baseQueryParams,
-    newletterCounts,
+    newsletterCounts,
     handleNewsletterChange,
     handleSortChange,
     handleSearchChange,
+    handlePageChange,
+    page,
+    resetPage,
   } = useStorageFilters();
 
   return (
     <Container>
-      <MainSection>
+      {!isMobile && (
         <TitleWrapper>
           <TitleIconBox>
             <StorageIcon color={theme.colors.white} />
           </TitleIconBox>
           <Title>뉴스레터 보관함</Title>
         </TitleWrapper>
+      )}
 
-        <ContentWrapper isPC={isPC}>
-          <SidebarSection isPC={isPC}>
-            <NewsLetterFilter
-              newsLetterList={[
-                {
-                  newsletter: '전체',
-                  count: newletterCounts?.totalCount ?? 0,
-                  imageUrl: '',
-                },
-                ...(newletterCounts?.newsletters.filter(
-                  (newsletter) => newsletter.count !== 0,
-                ) ?? []),
-              ]}
-              selectedNewsletter={selectedNewsletter}
-              onSelectNewsletter={handleNewsletterChange}
+      <ContentWrapper isPC={isPC}>
+        <SidebarSection isPC={isPC}>
+          <NewsLetterFilter
+            newsLetterList={[
+              {
+                name: '전체',
+                articleCount: newsletterCounts?.totalCount ?? 0,
+                imageUrl: '',
+              },
+              ...(newsletterCounts?.newsletters
+                .map((newsletter) => ({
+                  ...newsletter,
+                  articleCount: newsletter.articleCount ?? 0,
+                }))
+                .filter((newsletter) => newsletter.articleCount !== 0) ?? []),
+            ]}
+            selectedNewsletterId={selectedNewsletterId}
+            onSelectNewsletter={handleNewsletterChange}
+          />
+          <QuickMenu />
+        </SidebarSection>
+        <MainContentSection isPC={isPC}>
+          {isPC ? (
+            <PCStorageContent
+              baseQueryParams={baseQueryParams}
+              searchInput={searchInput}
+              onSearchChange={handleSearchChange}
+              sortFilter={sortFilter}
+              onSortChange={handleSortChange}
+              onPageChange={handlePageChange}
+              page={page}
+              resetPage={resetPage}
             />
-            <QuickMenu />
-          </SidebarSection>
-          <MainContentSection isPC={isPC}>
-            {isPC ? (
-              <PCStorageContent
-                baseQueryParams={baseQueryParams}
-                searchInput={searchInput}
-                onSearchChange={handleSearchChange}
-                sortFilter={sortFilter}
-                onSortChange={handleSortChange}
-              />
-            ) : (
-              <MobileStorageContent
-                baseQueryParams={baseQueryParams}
-                searchInput={searchInput}
-                onSearchChange={handleSearchChange}
-                sortFilter={sortFilter}
-                onSortChange={handleSortChange}
-              />
-            )}
-          </MainContentSection>
-        </ContentWrapper>
-      </MainSection>
+          ) : (
+            <MobileStorageContent
+              baseQueryParams={baseQueryParams}
+              searchInput={searchInput}
+              onSearchChange={handleSearchChange}
+              sortFilter={sortFilter}
+              onSortChange={handleSortChange}
+              resetPage={resetPage}
+            />
+          )}
+        </MainContentSection>
+      </ContentWrapper>
     </Container>
   );
 }
@@ -84,20 +95,12 @@ function Storage() {
 const Container = styled.div`
   width: 100%;
   max-width: 1280px;
-  padding: 64px 0;
 
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-`;
-
-const MainSection = styled.div`
-  width: 100%;
-
-  display: flex;
-  gap: 20px;
+  gap: 24px;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
 `;
 
 const TitleWrapper = styled.div`
@@ -120,7 +123,7 @@ const TitleIconBox = styled.div`
 `;
 
 const Title = styled.h1`
-  font: ${({ theme }) => theme.fonts.heading2};
+  font: ${({ theme }) => theme.fonts.heading3};
 `;
 
 const ContentWrapper = styled.div<{ isPC: boolean }>`
@@ -140,16 +143,16 @@ const SidebarSection = styled.div<{ isPC: boolean }>`
   gap: 20px;
   flex-direction: column;
 
-  order: ${({ isPC }) => (isPC ? '1' : '2')};
+  order: ${({ isPC }) => (isPC ? 1 : 0)};
 `;
 
 const MainContentSection = styled.div<{ isPC: boolean }>`
   width: 100%;
 
   display: flex;
-  gap: 40px;
+  gap: 32px;
   flex: 1;
   flex-direction: column;
 
-  order: ${({ isPC }) => (isPC ? '2' : '1')};
+  order: ${({ isPC }) => (isPC ? 2 : 1)};
 `;

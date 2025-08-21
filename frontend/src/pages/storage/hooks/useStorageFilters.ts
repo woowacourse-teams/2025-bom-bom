@@ -5,26 +5,32 @@ import { queries } from '@/apis/queries';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 export const useStorageFilters = () => {
-  const [selectedNewsletter, setSelectedNewsletter] = useState('전체');
+  const [selectedNewsletterId, setSelectedNewsletterId] = useState<
+    number | null
+  >(null);
   const [sortFilter, setSortFilter] = useState<'DESC' | 'ASC'>('DESC');
   const [searchInput, setSearchInput] = useState('');
+  const [page, setPage] = useState(1);
   const debouncedSearchInput = useDebouncedValue(searchInput, 500);
 
   const baseQueryParams: GetArticlesParams = {
     sort: ['arrivedDateTime', sortFilter],
     keyword: debouncedSearchInput,
     size: 6,
-    newsletter: selectedNewsletter === '전체' ? undefined : selectedNewsletter,
+    newsletterId: selectedNewsletterId
+      ? Number(selectedNewsletterId) - 1
+      : undefined,
+    page,
   };
 
-  const { data: newletterCounts } = useQuery(
+  const { data: newsletterCounts } = useQuery(
     queries.articlesStatisticsNewsletters({
       keyword: debouncedSearchInput,
     }),
   );
 
-  const handleNewsletterChange = useCallback((value: string) => {
-    setSelectedNewsletter(value);
+  const handleNewsletterChange = useCallback((id: number | null) => {
+    setSelectedNewsletterId(id);
   }, []);
 
   const handleSortChange = useCallback((value: 'DESC' | 'ASC') => {
@@ -35,14 +41,25 @@ export const useStorageFilters = () => {
     setSearchInput(e.target.value);
   }, []);
 
+  const handlePageChange = useCallback((value: number) => {
+    setPage(value);
+  }, []);
+
+  const resetPage = useCallback(() => {
+    setPage(1);
+  }, []);
+
   return {
-    selectedNewsletter,
+    selectedNewsletterId,
     sortFilter,
     searchInput,
     baseQueryParams,
-    newletterCounts,
+    newsletterCounts,
     handleNewsletterChange,
     handleSortChange,
     handleSearchChange,
+    handlePageChange,
+    resetPage,
+    page,
   };
 };

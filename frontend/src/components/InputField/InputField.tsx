@@ -7,7 +7,7 @@ interface InputFieldProps extends ComponentProps<'input'> {
   inputValue: string;
   onInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
-  errorString?: string;
+  errorString?: string | null;
   suffix?: ReactNode;
 }
 

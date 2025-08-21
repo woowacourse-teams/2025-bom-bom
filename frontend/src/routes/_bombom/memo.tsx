@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { queries } from '@/apis/queries';
-import MemoCard from '@/pages/detail/components/MemoCard/MemoCard';
-import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
+import { createFileRoute } from '@tanstack/react-router';
+import { useDeviceType } from '@/hooks/useDeviceType';
+import PCMemoContent from '@/pages/memo/components/PCMemoContent/PCMemoContent';
+import { useMemoFilters } from '@/pages/memo/hooks/useMemoFilters';
+import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import { theme } from '@/styles/theme';
 import MemoIcon from '#/assets/memo.svg';
 
@@ -12,34 +12,60 @@ export const Route = createFileRoute('/_bombom/memo')({
 });
 
 function MemoPage() {
-  const navigate = useNavigate();
-  const { data: highlights } = useQuery(queries.highlights({}));
+  const deviceType = useDeviceType();
+  const isPC = deviceType === 'pc';
+
+  const {
+    selectedNewsletterId,
+    baseQueryParams,
+    newletterCounts,
+    handleNewsletterChange,
+    handlePageChange,
+    page,
+    resetPage,
+  } = useMemoFilters();
 
   return (
     <Container>
-      <TitleWrapper>
-        <BookmarkStorageIcon fill={theme.colors.white} />
-        <Title>메모 보관함</Title>
-      </TitleWrapper>
-      {highlights && highlights.length > 0 ? (
-        <MemoList>
-          {highlights.map((highlight) => (
-            <li key={highlight.articleId}>
-              <MemoCard
-                id={highlight.id}
-                content={highlight.text}
-                memo={highlight.memo}
-                as="button"
-                onClick={() =>
-                  navigate({ to: `/articles/${highlight.articleId}` })
-                }
-              />
-            </li>
-          ))}
-        </MemoList>
-      ) : (
-        <EmptyLetterCard title="메모한 뉴스레터가 없어요" />
-      )}
+      <MainSection>
+        <TitleWrapper>
+          <BookmarkStorageIcon fill={theme.colors.white} />
+          <Title>메모 보관함</Title>
+        </TitleWrapper>
+
+        <ContentWrapper isPC={isPC}>
+          <SidebarSection isPC={isPC}>
+            <NewsLetterFilter
+              newsLetterList={[
+                {
+                  name: '전체',
+                  articleCount: newletterCounts?.totalCount ?? 0,
+                  imageUrl: '',
+                },
+                ...(newletterCounts?.newsletters
+                  .filter((newsletter) => newsletter.highlightCount > 0)
+                  .map((newsletter) => ({
+                    id: newsletter.id,
+                    name: newsletter.name,
+                    articleCount: newsletter.highlightCount,
+                    imageUrl: newsletter.imageUrl,
+                  })) ?? []),
+              ]}
+              selectedNewsletterId={selectedNewsletterId}
+              onSelectNewsletter={handleNewsletterChange}
+            />
+          </SidebarSection>
+
+          <MainContentSection isPC={isPC}>
+            <PCMemoContent
+              baseQueryParams={baseQueryParams}
+              onPageChange={handlePageChange}
+              page={page}
+              resetPage={resetPage}
+            />
+          </MainContentSection>
+        </ContentWrapper>
+      </MainSection>
     </Container>
   );
 }
@@ -52,10 +78,17 @@ const Container = styled.div`
   padding: 64px 0;
 
   display: flex;
-  gap: 24px;
-  flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+`;
+
+const MainSection = styled.div`
+  width: 100%;
+
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+  align-items: flex-start;
 `;
 
 const TitleWrapper = styled.div`
@@ -66,6 +99,35 @@ const TitleWrapper = styled.div`
 
 const Title = styled.h1`
   font: ${({ theme }) => theme.fonts.heading2};
+`;
+
+const ContentWrapper = styled.div<{ isPC: boolean }>`
+  width: 100%;
+
+  display: flex;
+  gap: ${({ isPC }) => (isPC ? 32 : 20)}px;
+  flex-direction: ${({ isPC }) => (isPC ? 'row' : 'column')};
+  align-items: flex-start;
+`;
+
+const SidebarSection = styled.div<{ isPC: boolean }>`
+  width: ${({ isPC }) => (isPC ? '320px' : '100%')};
+
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+
+  order: ${({ isPC }) => (isPC ? 1 : 0)};
+`;
+
+const MainContentSection = styled.div<{ isPC: boolean }>`
+  width: 100%;
+
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  order: ${({ isPC }) => (isPC ? 2 : 1)};
 `;
 
 const BookmarkStorageIcon = styled(MemoIcon)`
@@ -81,13 +143,4 @@ const BookmarkStorageIcon = styled(MemoIcon)`
   background-color: ${({ theme }) => theme.colors.primary};
   color: ${({ theme }) => theme.colors.white};
   text-align: center;
-`;
-
-const MemoList = styled.ul`
-  width: 100%;
-
-  display: grid;
-  gap: 16px;
-
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 `;

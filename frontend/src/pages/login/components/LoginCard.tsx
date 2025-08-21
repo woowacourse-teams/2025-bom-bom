@@ -1,14 +1,14 @@
 import styled from '@emotion/styled';
 import { ENV } from '@/apis/env';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
 import GoogleIcon from '#/assets/google.svg';
 import SparklesIcon from '#/assets/sparkles.svg';
 
-interface LoginCardProps {
-  isMobile: boolean;
-}
+const LoginCard = () => {
+  const deviceType = useDeviceType();
+  const isMobile = deviceType === 'mobile';
 
-const LoginCard = ({ isMobile }: LoginCardProps) => {
   return (
     <Container isMobile={isMobile}>
       <GreetingWrapper isMobile={isMobile}>

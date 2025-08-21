@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import LoginCard from '../pages/login/components/LoginCard';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDeviceType, DeviceType } from '@/hooks/useDeviceType';
+import { getResponsiveValue } from '@/utils/responsive';
 
 export const Route = createFileRoute('/login')({
   component: Login,
@@ -9,37 +10,55 @@ export const Route = createFileRoute('/login')({
 
 function Login() {
   const deviceType = useDeviceType();
-  const isMobile = deviceType === 'mobile';
 
   return (
-    <Container isMobile={isMobile}>
-      <LoginCard isMobile={isMobile} />
-      <InfoText isMobile={isMobile}>
-        {isMobile
-          ? '이미 계정이 있으신가요? \n Google로 로그인하면 자동으로 연결됩니다.'
-          : '이미 계정이 있으신가요? Google로 로그인하면 자동으로 연결됩니다.'}
-      </InfoText>
+    <Container deviceType={deviceType}>
+      <ContentWrapper deviceType={deviceType}>
+        <LoginCard />
+        <InfoText deviceType={deviceType}>
+          {deviceType === 'mobile'
+            ? '이미 계정이 있으신가요? \n Google로 로그인하면 자동으로 연결됩니다.'
+            : '이미 계정이 있으신가요? Google로 로그인하면 자동으로 연결됩니다.'}
+        </InfoText>
+      </ContentWrapper>
     </Container>
   );
 }
 
-const Container = styled.div<{ isMobile: boolean }>`
+const Container = styled.main<{ deviceType: DeviceType }>`
   min-height: 100vh;
-  padding: 12px;
+  padding: ${({ deviceType }) => getResponsiveValue(deviceType, 16, 24, 32)};
 
   display: flex;
-  gap: ${({ isMobile }) => (isMobile ? '16px' : '28px')};
-  flex-direction: column;
   align-items: center;
   justify-content: center;
 
-  background-color: ${({ isMobile, theme }) =>
-    isMobile ? theme.colors.white : theme.colors.primary};
+  background: ${({ deviceType, theme }) =>
+    deviceType === 'mobile'
+      ? theme.colors.white
+      : `linear-gradient(135deg, ${theme.colors.primary} 0%, #f74 25%, ${theme.colors.primaryLight} 100%)`};
 `;
 
-const InfoText = styled.p<{ isMobile: boolean }>`
-  color: ${({ isMobile, theme }) =>
-    isMobile ? theme.colors.textSecondary : theme.colors.white};
+const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: ${({ deviceType }) =>
+    getResponsiveValue(deviceType, 400, 520, 600)};
+
+  display: flex;
+  gap: ${({ deviceType }) => getResponsiveValue(deviceType, 20, 28, 32)};
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
+const InfoText = styled.p<{ deviceType: DeviceType }>`
+  max-width: 320px;
+  margin: 0;
+
+  color: ${({ deviceType, theme }) =>
+    deviceType === 'mobile' ? theme.colors.textSecondary : theme.colors.white};
   font: ${({ theme }) => theme.fonts.body2};
   text-align: center;
   white-space: pre-line;

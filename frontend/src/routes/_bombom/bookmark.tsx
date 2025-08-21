@@ -91,7 +91,6 @@ export default BookmarkPage;
 const Container = styled.div`
   width: 100%;
   max-width: 1280px;
-  padding: 64px 0;
 
   display: flex;
   align-items: flex-start;
@@ -114,7 +113,7 @@ const TitleWrapper = styled.div`
 `;
 
 const Title = styled.h1`
-  font: ${({ theme }) => theme.fonts.heading2};
+  font: ${({ theme }) => theme.fonts.heading3};
 `;
 
 const ContentWrapper = styled.div<{ deviceType: DeviceType }>`

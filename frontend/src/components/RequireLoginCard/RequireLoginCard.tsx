@@ -89,5 +89,7 @@ const Support = styled.p<{ isMobile: boolean }>`
 
 const GoToLoginButton = styled(Button)`
   width: 100%;
+  max-width: 380px;
+
   font: ${({ theme }) => theme.fonts.heading5};
 `;

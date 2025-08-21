@@ -115,6 +115,7 @@ const ArticleProgressBar = styled(ProgressBar)<{ deviceType: DeviceType }>`
       ? `calc(${theme.heights.headerMobile} + env(safe-area-inset-top))`
       : `calc(${theme.heights.headerPC} + env(safe-area-inset-top))`};
   z-index: ${({ theme }) => theme.zIndex.floating};
+  height: 4px;
 `;
 
 const Divider = styled.div`

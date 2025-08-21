@@ -42,11 +42,12 @@ export default ProgressBar;
 
 const Container = styled.div`
   width: 100%;
+  height: 10px;
 `;
 
 const ProgressOverlay = styled.div<{ variant: 'rounded' | 'rectangular' }>`
   width: 100%;
-  height: 10px;
+  height: 100%;
   border-radius: ${({ variant }) => (variant === 'rounded' ? '10px' : '0')};
 
   background-color: ${({ theme }) => theme.colors.primaryLight};

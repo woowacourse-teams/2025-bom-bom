@@ -3,8 +3,8 @@ name: Backend Prod Server CI/CD  # ✅ dev → prod 이름 변경
 on:
   push:
     branches:
-      - server   
-  workflow_dispatch:    # ✅ GitHub UI에서 수동 배포
+      - server-sub   
+  workflow_dispatch:   
 
 jobs:
   build:

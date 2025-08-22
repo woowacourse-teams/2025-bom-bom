@@ -94,7 +94,7 @@ jobs:
       - name: 컨테이너 재실행
         run: |
           sudo docker compose \
-            -f docker-compose-prod.yml \
+            -f docker-compose-prod-sub.yml \
             --env-file .env \
             up -d --remove-orphans --pull=always
 

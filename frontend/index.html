@@ -13,16 +13,6 @@
     <meta name="theme-color" content="#FF9966" />
     <link rel="icon" type="image/png" href="/public/assets/bombom.png" />
 
-    <!-- PWA 설정 -->
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="봄봄" />
-    <link rel="apple-touch-icon" href="/assets/bombom-192x192.png" />
-    <meta name="msapplication-TileColor" content="#FF9966" />
-    <meta name="msapplication-TileImage" content="/assets/bombom-144x144.png" />
-
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="봄봄" />
@@ -44,5 +34,23 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Service Worker 등록
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {
+              console.log(
+                'Service Worker registered successfully:',
+                registration.scope,
+              );
+            })
+            .catch((error) => {
+              console.log('Service Worker registration failed:', error);
+            });
+        });
+      }
+    </script>
   </body>
 </html>

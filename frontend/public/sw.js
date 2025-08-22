@@ -74,63 +74,19 @@ self.addEventListener('activate', (event) => {
 
 // Fetch 이벤트 - Network First 전략 (오프라인 지원)
 self.addEventListener('fetch', (event) => {
-  // API 요청은 항상 네트워크를 통해 가져오기
-  if (event.request.url.includes('/api/')) {
+  if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => {
-        // 오프라인 시 기본 에러 응답
-        return new Response(
-          JSON.stringify({
-            error: 'Offline',
-            message: '인터넷 연결을 확인해주세요.',
-          }),
-          {
-            status: 503,
-            statusText: 'Service Unavailable',
-            headers: { 'Content-Type': 'application/json' },
-          },
-        );
+        return caches.match('/offline.html');
       }),
     );
-    return;
+  } else {
+    event.respondWith(
+      caches.match(event.request).then((response) => {
+        return response || fetch(event.request);
+      }),
+    );
   }
-
-  // 정적 자원은 Cache First 전략
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      // 캐시에 있으면 캐시에서 반환
-      if (response) {
-        return response;
-      }
-
-      // 없으면 네트워크에서 가져오기
-      return fetch(event.request)
-        .then((response) => {
-          // 유효한 응답이 아니면 그대로 반환
-          if (
-            !response ||
-            response.status !== 200 ||
-            response.type !== 'basic'
-          ) {
-            return response;
-          }
-
-          // 응답을 복사하여 캐시에 저장
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-
-          return response;
-        })
-        .catch(() => {
-          // 오프라인 시 기본 HTML 페이지 반환 (SPA이므로 index.html로 fallback)
-          if (event.request.mode === 'navigate') {
-            return caches.match('/');
-          }
-        });
-    }),
-  );
 });
 
 // 푸시 알림 이벤트 (향후 확장 가능)
@@ -165,6 +121,8 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   if (event.action === 'view') {
-    event.waitUntil(self.clients.openWindow(event.notification.data.url || '/'));
+    event.waitUntil(
+      self.clients.openWindow(event.notification.data.url || '/'),
+    );
   }
 });

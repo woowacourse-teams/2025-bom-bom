@@ -14,25 +14,3 @@ export const unregisterServiceWorkers = async () => {
     }
   }
 };
-
-/**
- * MSW와 PWA 서비스 워커 충돌 방지를 위한 초기화
- */
-export const initServiceWorkers = async (
-  enableMsw: boolean,
-  isProduction: boolean,
-) => {
-  if (enableMsw) {
-    // MSW 사용 시 기존 PWA 서비스 워커 해제
-    await unregisterServiceWorkers();
-    console.log('MSW enabled: PWA service workers unregistered');
-  } else if (isProduction && 'serviceWorker' in navigator) {
-    // 프로덕션에서 MSW 미사용 시 PWA 서비스 워커 등록
-    try {
-      const registration = await navigator.serviceWorker.register('/sw.js');
-      console.log('PWA Service Worker registered:', registration.scope);
-    } catch (error) {
-      console.error('PWA Service Worker registration failed:', error);
-    }
-  }
-};

@@ -143,12 +143,39 @@ export const handlers = [
   // ------------------ 하이라이트 CRUD ------------------
 
   // 전체 조회
-  http.get(`${baseURL}/highlight`, () => {
-    return HttpResponse.json(HIGHLIGHTS);
+  http.get(`${baseURL}/highlights`, () => {
+    return HttpResponse.json({
+      content: [...HIGHLIGHTS],
+      pageable: {
+        pageNumber: 0,
+        pageSize: 10,
+        sort: {
+          empty: false,
+          sorted: true,
+          unsorted: false,
+        },
+        offset: 0,
+        paged: true,
+        unpaged: false,
+      },
+      totalElements: 2,
+      totalPages: 1,
+      last: true,
+      size: 10,
+      number: 0,
+      sort: {
+        empty: false,
+        sorted: true,
+        unsorted: false,
+      },
+      numberOfElements: 2,
+      first: true,
+      empty: false,
+    });
   }),
 
   // 생성
-  http.post(`${baseURL}/highlight`, async ({ request }) => {
+  http.post(`${baseURL}/highlights`, async ({ request }) => {
     const newHighlight = (await request.json()) as Highlight;
     // ID가 없는 경우 임의 ID 생성
     newHighlight.id = HIGHLIGHTS.length + 1;
@@ -157,7 +184,7 @@ export const handlers = [
   }),
 
   // 수정
-  http.patch(`${baseURL}/highlight/:id`, async ({ request, params }) => {
+  http.patch(`${baseURL}/highlights/:id`, async ({ request, params }) => {
     const { id } = params;
     const updated = (await request.json()) as Partial<Omit<Highlight, 'id'>>;
 
@@ -174,7 +201,7 @@ export const handlers = [
   }),
 
   // 삭제
-  http.delete(`${baseURL}/highlight/:id`, ({ params }) => {
+  http.delete(`${baseURL}/highlights/:id`, ({ params }) => {
     const { id } = params;
     const index = HIGHLIGHTS.findIndex((h) => h.id === Number(id));
     if (index === -1) {

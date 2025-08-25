@@ -102,7 +102,7 @@ export default function FloatingToolbar({
       showToolbarAt(rect);
     };
 
-    const handleClickUp = (e: PointerEvent | MouseEvent) => {
+    const handleSelectionEnd = (e: PointerEvent | MouseEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === 'MARK') {
         handleHighlightClick(target);
@@ -118,11 +118,11 @@ export default function FloatingToolbar({
       hideToolbar();
     };
 
-    document.addEventListener('mouseup', handleClickUp);
-    document.addEventListener('pointerup', handleClickUp);
+    document.addEventListener('mouseup', handleSelectionEnd);
+    document.addEventListener('pointerup', handleSelectionEnd);
     return () => {
-      document.removeEventListener('mouseup', handleClickUp);
-      document.removeEventListener('pointerup', handleClickUp);
+      document.removeEventListener('mouseup', handleSelectionEnd);
+      document.removeEventListener('pointerup', handleSelectionEnd);
     };
   }, [deviceType, selectionTargetRef]);
 

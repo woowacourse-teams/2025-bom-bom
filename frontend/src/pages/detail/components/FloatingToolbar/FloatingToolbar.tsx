@@ -16,19 +16,19 @@ interface FloatingToolBarProps {
   selectionTargetRef: RefObject<HTMLDivElement | null>;
   onHighlightClick: ({
     mode,
-    selection,
+    selectionRange,
     highlightId,
   }: {
     mode: FloatingToolbarMode;
-    selection: Selection | null;
+    selectionRange: Range | null;
     highlightId: number | null;
   }) => void;
   onMemoClick: ({
     mode,
-    selection,
+    selectionRange,
   }: {
     mode: FloatingToolbarMode;
-    selection: Selection | null;
+    selectionRange: Range | null;
   }) => void;
 }
 
@@ -37,7 +37,7 @@ export default function FloatingToolbar({
   onHighlightClick,
   onMemoClick,
 }: FloatingToolBarProps) {
-  const selectionRef = useRef<Selection>(null);
+  const rangeRef = useRef<Range>(null);
   const [selectedHighlightId, setSelectedHighlightId] = useState<number | null>(
     null,
   );
@@ -58,7 +58,7 @@ export default function FloatingToolbar({
     hideToolbar();
     onHighlightClick({
       mode: currentMode,
-      selection: selectionRef.current,
+      selectionRange: rangeRef.current,
       highlightId: selectedHighlightId,
     });
     window.getSelection()?.removeAllRanges();
@@ -68,7 +68,7 @@ export default function FloatingToolbar({
     hideToolbar();
     onMemoClick({
       mode: currentMode,
-      selection: selectionRef.current,
+      selectionRange: rangeRef.current,
     });
     window.getSelection()?.removeAllRanges();
   };
@@ -83,8 +83,8 @@ export default function FloatingToolbar({
     };
 
     const handleTextSelection = (selection: Selection) => {
-      selectionRef.current = selection;
       const range = selection.getRangeAt(0);
+      if (selection.rangeCount > 0) rangeRef.current = range;
       if (!selectionTargetRef.current?.contains(range.commonAncestorContainer))
         return;
 

@@ -1,7 +1,8 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { PointerEvent, RefObject, useEffect, useRef, useState } from 'react';
+import { PointerEvent, RefObject, useRef, useState } from 'react';
 import { FloatingToolbarMode } from './FloatingToolbar.types';
+import { useFloatingToolbarSelection } from './useFloatingToolbarSelection';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import MemoIcon from '#/assets/comment.svg';
 import HighlightOffIcon from '#/assets/edit-off.svg';
@@ -45,16 +46,15 @@ export default function FloatingToolbar({
   const [position, setPosition] = useState<ToolbarPosition>({ x: 0, y: 0 });
   const deviceType = useDeviceType();
 
-  const hideToolbar = () => setIsVisible(false);
-  const currentMode: FloatingToolbarMode = selectedHighlightId
-    ? 'existing'
-    : 'new';
-
   const handlePointerDownOnToolbar = (e: PointerEvent) => {
     e.preventDefault();
   };
 
-  const handleHighlightClick = () => {
+  const currentMode: FloatingToolbarMode = selectedHighlightId
+    ? 'existing'
+    : 'new';
+
+  const handleHighlightButtonClick = () => {
     hideToolbar();
     onHighlightClick({
       mode: currentMode,
@@ -64,7 +64,7 @@ export default function FloatingToolbar({
     window.getSelection()?.removeAllRanges();
   };
 
-  const handleMemoClick = () => {
+  const handleMemoButtonClick = () => {
     hideToolbar();
     onMemoClick({
       mode: currentMode,
@@ -73,58 +73,26 @@ export default function FloatingToolbar({
     window.getSelection()?.removeAllRanges();
   };
 
-  useEffect(() => {
-    const showToolbarAt = (rect: DOMRect) => {
-      setPosition({
-        x: rect.left + rect.width / 2,
-        y: deviceType === 'mobile' ? rect.bottom + 40 : rect.top,
-      });
-      setIsVisible(true);
-    };
+  const showToolbarAt = (x: number, y: number) => {
+    setPosition({ x, y });
+    setIsVisible(true);
+  };
+  const hideToolbar = () => setIsVisible(false);
+  const isInSelectionTarget = (range: Range) =>
+    selectionTargetRef.current?.contains(range.commonAncestorContainer) ??
+    false;
+  const setRange = (range: Range) => (rangeRef.current = range);
+  const updateSelectedHighlighId = (id: number | null) =>
+    setSelectedHighlightId(id);
 
-    const handleTextSelection = (selection: Selection) => {
-      const range = selection.getRangeAt(0);
-      if (selection.rangeCount > 0) rangeRef.current = range;
-      if (!selectionTargetRef.current?.contains(range.commonAncestorContainer))
-        return;
-
-      const rect = range.getBoundingClientRect();
-      setSelectedHighlightId(null);
-      showToolbarAt(rect);
-    };
-
-    const handleHighlightClick = (target: HTMLElement) => {
-      const id = target.dataset.highlightId;
-      if (!id) return;
-
-      setSelectedHighlightId(Number(id));
-      const rect = target.getBoundingClientRect();
-      showToolbarAt(rect);
-    };
-
-    const handleSelectionEnd = (e: PointerEvent | MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'MARK') {
-        handleHighlightClick(target);
-        return;
-      }
-
-      const selection = window.getSelection();
-      if (selection && !selection.isCollapsed && selection.rangeCount > 0) {
-        handleTextSelection(selection);
-        return;
-      }
-
-      hideToolbar();
-    };
-
-    document.addEventListener('mouseup', handleSelectionEnd);
-    document.addEventListener('pointerup', handleSelectionEnd);
-    return () => {
-      document.removeEventListener('mouseup', handleSelectionEnd);
-      document.removeEventListener('pointerup', handleSelectionEnd);
-    };
-  }, [deviceType, selectionTargetRef]);
+  useFloatingToolbarSelection({
+    deviceType,
+    showToolbarAt,
+    hideToolbar,
+    isInSelectionTarget,
+    setRange,
+    updateSelectedHighlighId,
+  });
 
   return (
     <Container
@@ -132,10 +100,10 @@ export default function FloatingToolbar({
       visible={isVisible}
       onPointerDown={handlePointerDownOnToolbar}
     >
-      <ToolbarButton onClick={handleHighlightClick}>
+      <ToolbarButton onClick={handleHighlightButtonClick}>
         {currentMode === 'new' ? <HighlightIcon /> : <HighlightOffIcon />}
       </ToolbarButton>
-      <ToolbarButton onClick={handleMemoClick}>
+      <ToolbarButton onClick={handleMemoButtonClick}>
         <MemoIcon />
       </ToolbarButton>
     </Container>

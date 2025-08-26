@@ -43,6 +43,10 @@ const Container = styled.div`
   position: fixed;
   z-index: ${({ theme }) => theme.zIndex.toast};
 
+const Container = styled.div`
+  position: fixed;
+  z-index: ${({ theme }) => theme.zIndex.toast};
+
   inset: 0;
   pointer-events: none;
 `;

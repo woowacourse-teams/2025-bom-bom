@@ -4,6 +4,7 @@ import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { theme } from '../styles/theme';
 import { usePageTracking } from '@/libs/googleAnalytics/usePageTracking';
+import { Toast } from '@/libs/toast/Toast';
 import { queryClient } from '@/main';
 
 interface BomBomRouterContext {
@@ -17,6 +18,7 @@ const RootComponent = () => {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={theme}>
           <Outlet />
+          <Toast />
         </ThemeProvider>
       </QueryClientProvider>
       <TanStackRouterDevtools />

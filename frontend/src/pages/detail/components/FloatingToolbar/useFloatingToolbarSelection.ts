@@ -1,23 +1,26 @@
-import { useCallback, useEffect } from 'react';
-import { DeviceType } from '@/hooks/useDeviceType';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useDeviceType } from '@/hooks/useDeviceType';
+
+export interface ToolbarPosition {
+  x: number;
+  y: number;
+}
 
 interface UseFloatingToolbarSelectionParams {
-  deviceType: DeviceType;
-  showToolbarAt: (x: number, y: number) => void;
-  hideToolbar: () => void;
   isInSelectionTarget: (range: Range) => boolean;
-  setRange: (range: Range) => void;
-  updateSelectedHighlighId: (id: number | null) => void;
 }
 
 export const useFloatingToolbarSelection = ({
-  deviceType,
-  showToolbarAt,
-  hideToolbar,
   isInSelectionTarget,
-  setRange,
-  updateSelectedHighlighId,
 }: UseFloatingToolbarSelectionParams) => {
+  const rangeRef = useRef<Range>(null);
+  const selectedHighlightIdRef = useRef<number>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [position, setPosition] = useState<ToolbarPosition>({ x: 0, y: 0 });
+  const deviceType = useDeviceType();
+
+  const hideToolbar = useCallback(() => setIsVisible(false), []);
+
   const showToolbar = useCallback(
     (selection: Selection) => {
       if (selection.rangeCount === 0) return;
@@ -25,22 +28,17 @@ export const useFloatingToolbarSelection = ({
       const range = selection.getRangeAt(0);
       if (!isInSelectionTarget(range)) return;
 
-      setRange(range);
+      rangeRef.current = range;
 
       const rect = range.getBoundingClientRect();
-      updateSelectedHighlighId(null);
-      showToolbarAt(
-        rect.left + rect.width / 2,
-        deviceType === 'mobile' ? rect.bottom + 40 : rect.top,
-      );
+      selectedHighlightIdRef.current = null;
+      setPosition({
+        x: rect.left + rect.width / 2,
+        y: deviceType === 'mobile' ? rect.bottom + 40 : rect.top,
+      });
+      setIsVisible(true);
     },
-    [
-      deviceType,
-      isInSelectionTarget,
-      setRange,
-      showToolbarAt,
-      updateSelectedHighlighId,
-    ],
+    [deviceType, isInSelectionTarget],
   );
 
   const handleHighlightClick = useCallback(
@@ -48,14 +46,15 @@ export const useFloatingToolbarSelection = ({
       const id = target.dataset.highlightId;
       if (!id) return;
 
-      updateSelectedHighlighId(Number(id));
+      selectedHighlightIdRef.current = Number(id);
       const rect = target.getBoundingClientRect();
-      showToolbarAt(
-        rect.left + rect.width / 2,
-        deviceType === 'mobile' ? rect.bottom + 40 : rect.top,
-      );
+      setPosition({
+        x: rect.left + rect.width / 2,
+        y: deviceType === 'mobile' ? rect.bottom + 40 : rect.top,
+      });
+      setIsVisible(true);
     },
-    [deviceType, showToolbarAt, updateSelectedHighlighId],
+    [deviceType],
   );
 
   const handleSelectionEnd = useCallback(
@@ -85,4 +84,12 @@ export const useFloatingToolbarSelection = ({
       document.removeEventListener('pointerup', handleSelectionEnd);
     };
   }, [handleSelectionEnd]);
+
+  return {
+    isVisible,
+    position,
+    selectionRange: rangeRef.current,
+    selectedHighlightId: selectedHighlightIdRef.current,
+    hideToolbar,
+  };
 };

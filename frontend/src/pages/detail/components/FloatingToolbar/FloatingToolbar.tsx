@@ -1,17 +1,14 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { PointerEvent, RefObject, useRef, useState } from 'react';
+import { PointerEvent, RefObject } from 'react';
 import { FloatingToolbarMode } from './FloatingToolbar.types';
-import { useFloatingToolbarSelection } from './useFloatingToolbarSelection';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import {
+  ToolbarPosition,
+  useFloatingToolbarSelection,
+} from './useFloatingToolbarSelection';
 import MemoIcon from '#/assets/comment.svg';
 import HighlightOffIcon from '#/assets/edit-off.svg';
 import HighlightIcon from '#/assets/edit.svg';
-
-interface ToolbarPosition {
-  x: number;
-  y: number;
-}
 
 interface FloatingToolBarProps {
   selectionTargetRef: RefObject<HTMLDivElement | null>;
@@ -38,17 +35,19 @@ export default function FloatingToolbar({
   onHighlightClick,
   onMemoClick,
 }: FloatingToolBarProps) {
-  const rangeRef = useRef<Range>(null);
-  const [selectedHighlightId, setSelectedHighlightId] = useState<number | null>(
-    null,
-  );
-  const [isVisible, setIsVisible] = useState(false);
-  const [position, setPosition] = useState<ToolbarPosition>({ x: 0, y: 0 });
-  const deviceType = useDeviceType();
+  const isInSelectionTarget = (range: Range) =>
+    selectionTargetRef.current?.contains(range.commonAncestorContainer) ??
+    false;
 
-  const handlePointerDownOnToolbar = (e: PointerEvent) => {
-    e.preventDefault();
-  };
+  const {
+    isVisible,
+    position,
+    selectionRange,
+    selectedHighlightId,
+    hideToolbar,
+  } = useFloatingToolbarSelection({
+    isInSelectionTarget,
+  });
 
   const currentMode: FloatingToolbarMode = selectedHighlightId
     ? 'existing'
@@ -58,7 +57,7 @@ export default function FloatingToolbar({
     hideToolbar();
     onHighlightClick({
       mode: currentMode,
-      selectionRange: rangeRef.current,
+      selectionRange,
       highlightId: selectedHighlightId,
     });
     window.getSelection()?.removeAllRanges();
@@ -68,31 +67,14 @@ export default function FloatingToolbar({
     hideToolbar();
     onMemoClick({
       mode: currentMode,
-      selectionRange: rangeRef.current,
+      selectionRange,
     });
     window.getSelection()?.removeAllRanges();
   };
 
-  const showToolbarAt = (x: number, y: number) => {
-    setPosition({ x, y });
-    setIsVisible(true);
+  const handlePointerDownOnToolbar = (e: PointerEvent) => {
+    e.preventDefault();
   };
-  const hideToolbar = () => setIsVisible(false);
-  const isInSelectionTarget = (range: Range) =>
-    selectionTargetRef.current?.contains(range.commonAncestorContainer) ??
-    false;
-  const setRange = (range: Range) => (rangeRef.current = range);
-  const updateSelectedHighlighId = (id: number | null) =>
-    setSelectedHighlightId(id);
-
-  useFloatingToolbarSelection({
-    deviceType,
-    showToolbarAt,
-    hideToolbar,
-    isInSelectionTarget,
-    setRange,
-    updateSelectedHighlighId,
-  });
 
   return (
     <Container

@@ -68,8 +68,8 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
       <ArticleContent ref={contentRef} content={articleContent} />
       <FloatingToolbar
         selectionTargetRef={contentRef}
-        onHighlightClick={handleHighlightClick}
-        onMemoClick={handleMemoClick}
+        onHighlightButtonClick={handleHighlightClick}
+        onMemoButtonClick={handleMemoClick}
       />
       <MemoPanel
         open={panelOpen}

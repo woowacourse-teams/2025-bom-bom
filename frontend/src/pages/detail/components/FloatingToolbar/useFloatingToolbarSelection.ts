@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { FloatingToolbarMode } from './FloatingToolbar.types';
 import { useDeviceType } from '@/hooks/useDeviceType';
 
 export interface ToolbarPosition {
@@ -8,10 +9,28 @@ export interface ToolbarPosition {
 
 interface UseFloatingToolbarSelectionParams {
   isInSelectionTarget: (range: Range) => boolean;
+  onHighlightButtonClick: ({
+    mode,
+    selectionRange,
+    highlightId,
+  }: {
+    mode: FloatingToolbarMode;
+    selectionRange: Range | null;
+    highlightId: number | null;
+  }) => void;
+  onMemoButtonClick: ({
+    mode,
+    selectionRange,
+  }: {
+    mode: FloatingToolbarMode;
+    selectionRange: Range | null;
+  }) => void;
 }
 
 export const useFloatingToolbarSelection = ({
   isInSelectionTarget,
+  onHighlightButtonClick,
+  onMemoButtonClick,
 }: UseFloatingToolbarSelectionParams) => {
   const rangeRef = useRef<Range>(null);
   const selectedHighlightIdRef = useRef<number>(null);
@@ -20,6 +39,28 @@ export const useFloatingToolbarSelection = ({
   const deviceType = useDeviceType();
 
   const hideToolbar = useCallback(() => setIsVisible(false), []);
+  const currentMode: FloatingToolbarMode = selectedHighlightIdRef.current
+    ? 'existing'
+    : 'new';
+
+  const handleHighlightButtonClick = () => {
+    hideToolbar();
+    onHighlightButtonClick({
+      mode: currentMode,
+      selectionRange: rangeRef.current,
+      highlightId: selectedHighlightIdRef.current,
+    });
+    window.getSelection()?.removeAllRanges();
+  };
+
+  const handleMemoButtonClick = () => {
+    hideToolbar();
+    onMemoButtonClick({
+      mode: currentMode,
+      selectionRange: rangeRef.current,
+    });
+    window.getSelection()?.removeAllRanges();
+  };
 
   const showToolbar = useCallback(
     (selection: Selection) => {
@@ -88,8 +129,8 @@ export const useFloatingToolbarSelection = ({
   return {
     isVisible,
     position,
-    selectionRange: rangeRef.current,
-    selectedHighlightId: selectedHighlightIdRef.current,
-    hideToolbar,
+    currentMode,
+    handleHighlightButtonClick,
+    handleMemoButtonClick,
   };
 };

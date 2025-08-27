@@ -12,7 +12,7 @@ import HighlightIcon from '#/assets/edit.svg';
 
 interface FloatingToolBarProps {
   selectionTargetRef: RefObject<HTMLDivElement | null>;
-  onHighlightClick: ({
+  onHighlightButtonClick: ({
     mode,
     selectionRange,
     highlightId,
@@ -21,7 +21,7 @@ interface FloatingToolBarProps {
     selectionRange: Range | null;
     highlightId: number | null;
   }) => void;
-  onMemoClick: ({
+  onMemoButtonClick: ({
     mode,
     selectionRange,
   }: {
@@ -32,8 +32,8 @@ interface FloatingToolBarProps {
 
 export default function FloatingToolbar({
   selectionTargetRef,
-  onHighlightClick,
-  onMemoClick,
+  onHighlightButtonClick,
+  onMemoButtonClick,
 }: FloatingToolBarProps) {
   const isInSelectionTarget = (range: Range) =>
     selectionTargetRef.current?.contains(range.commonAncestorContainer) ??
@@ -42,35 +42,14 @@ export default function FloatingToolbar({
   const {
     isVisible,
     position,
-    selectionRange,
-    selectedHighlightId,
-    hideToolbar,
+    currentMode,
+    handleHighlightButtonClick,
+    handleMemoButtonClick,
   } = useFloatingToolbarSelection({
     isInSelectionTarget,
+    onHighlightButtonClick,
+    onMemoButtonClick,
   });
-
-  const currentMode: FloatingToolbarMode = selectedHighlightId
-    ? 'existing'
-    : 'new';
-
-  const handleHighlightButtonClick = () => {
-    hideToolbar();
-    onHighlightClick({
-      mode: currentMode,
-      selectionRange,
-      highlightId: selectedHighlightId,
-    });
-    window.getSelection()?.removeAllRanges();
-  };
-
-  const handleMemoButtonClick = () => {
-    hideToolbar();
-    onMemoClick({
-      mode: currentMode,
-      selectionRange,
-    });
-    window.getSelection()?.removeAllRanges();
-  };
 
   const handlePointerDownOnToolbar = (e: PointerEvent) => {
     e.preventDefault();

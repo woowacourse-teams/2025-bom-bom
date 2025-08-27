@@ -21,17 +21,17 @@ const GuideArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
 
   const handleHighlightClick = ({
     mode,
-    selection,
+    selectionRange,
     highlightId,
   }: {
     mode: FloatingToolbarMode;
-    selection: Selection | null;
+    selectionRange: Range | null;
     highlightId: number | null;
   }) => {
     const isNewHighlight = mode === 'new';
 
-    if (isNewHighlight && selection) {
-      const highlightData = saveSelection(selection, articleId);
+    if (isNewHighlight && selectionRange) {
+      const highlightData = saveSelection(selectionRange, articleId);
       addHighlight(highlightData);
     }
     if (!isNewHighlight && highlightId) {
@@ -41,15 +41,15 @@ const GuideArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
 
   const handleMemoClick = ({
     mode,
-    selection,
+    selectionRange,
   }: {
     mode: FloatingToolbarMode;
-    selection: Selection | null;
+    selectionRange: Range | null;
   }) => {
     const isNewHighlight = mode === 'new';
 
-    if (isNewHighlight && selection) {
-      const highlightData = saveSelection(selection, articleId);
+    if (isNewHighlight && selectionRange) {
+      const highlightData = saveSelection(selectionRange, articleId);
       addHighlight(highlightData);
     }
     setPanelOpen(true);
@@ -68,8 +68,8 @@ const GuideArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
       <ArticleContent ref={contentRef} content={articleContent} />
       <FloatingToolbar
         selectionTargetRef={contentRef}
-        onHighlightClick={handleHighlightClick}
-        onMemoClick={handleMemoClick}
+        onHighlightButtonClick={handleHighlightClick}
+        onMemoButtonClick={handleMemoClick}
       />
       <MemoPanel
         open={panelOpen}

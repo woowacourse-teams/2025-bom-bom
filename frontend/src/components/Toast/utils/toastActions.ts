@@ -58,10 +58,3 @@ export const updateToast = (toast: ToastData, store: Store = toastStore) => {
 export const cleanToasts = (store: Store = toastStore) => {
   updateToastsState(store, () => []);
 };
-
-export const toasts = {
-  show: showToast,
-  hide: hideToast,
-  update: updateToast,
-  clean: cleanToasts,
-} as const;

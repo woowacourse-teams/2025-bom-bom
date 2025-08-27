@@ -20,8 +20,9 @@ export const useFloatingToolbarSelection = ({
 }: UseFloatingToolbarSelectionParams) => {
   const showToolbar = useCallback(
     (selection: Selection) => {
-      const range = selection.getRangeAt(0);
       if (selection.rangeCount === 0) return;
+
+      const range = selection.getRangeAt(0);
       if (!isInSelectionTarget(range)) return;
 
       setRange(range);

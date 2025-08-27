@@ -8,17 +8,17 @@ import { ToastPosition } from './Toast.types';
 import ToastItem from './ToastItem';
 import { useToasts } from './useToasts';
 
-type Props = {
+type ToastProps = {
   limit?: number;
   duration?: number;
   position?: ToastPosition;
 };
 
-export const Toast = ({
+const Toast = ({
   limit = DEFAULT_LIMIT,
   duration = DEFAULT_DURATION,
   position = DEFAULT_POSITION,
-}: Props) => {
+}: ToastProps) => {
   const { toasts } = useToasts(limit);
 
   return (
@@ -36,6 +36,8 @@ export const Toast = ({
     </Container>
   );
 };
+
+export default Toast;
 
 const Container = styled.div`
   position: fixed;

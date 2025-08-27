@@ -1,7 +1,7 @@
 import { ThemeProvider } from '@emotion/react';
-import { toast } from './toast';
-import { Toast } from './Toast.tsx';
+import Toast from './Toast';
 import Button from '../Button/Button';
+import { toast } from './utils/toastActions';
 import { theme } from '@/styles/theme';
 import type { ToastPosition } from './Toast.types';
 import type { Meta, StoryObj } from '@storybook/react-webpack5';

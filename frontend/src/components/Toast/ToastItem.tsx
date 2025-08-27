@@ -11,15 +11,13 @@ const iconMap: Record<ToastType, string> = {
   success: '/assets/check-circle.svg',
 };
 
-const ToastItem = ({
-  toast,
-  isTop,
-  duration,
-}: {
+interface ToastItemProps {
   toast: ToastData;
   isTop: boolean;
   duration: number;
-}) => {
+}
+
+const ToastItem = ({ toast, isTop, duration }: ToastItemProps) => {
   useEffect(() => {
     const timerId = setTimeout(() => {
       if (toast.id) hideToast(toast.id);

@@ -94,11 +94,6 @@ const Playground = (args: StoryArgs) => {
         limit={args.limit}
       />
       <Controls />
-      <div
-        style={{
-          height: '100vh',
-        }}
-      />
     </ThemeProvider>
   );
 };

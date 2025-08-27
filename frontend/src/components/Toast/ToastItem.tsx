@@ -1,14 +1,17 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { useEffect } from 'react';
+import { FunctionComponent, SVGProps, useEffect } from 'react';
 import { ToastData, ToastType } from './Toast.types';
 import { hideToast } from './utils/toastActions';
 import { theme } from '@/styles/theme';
+import ErrorIcon from '#/assets/cancel-circle.svg';
+import SuccessIcon from '#/assets/check-circle.svg';
+import InfoIcon from '#/assets/info-circle.svg';
 
-const iconMap: Record<ToastType, string> = {
-  error: '/assets/cancel-circle.svg',
-  info: '/assets/info-circle.svg',
-  success: '/assets/check-circle.svg',
+const iconMap: Record<ToastType, FunctionComponent<SVGProps<SVGSVGElement>>> = {
+  error: ErrorIcon,
+  info: InfoIcon,
+  success: SuccessIcon,
 };
 
 interface ToastItemProps {
@@ -18,6 +21,8 @@ interface ToastItemProps {
 }
 
 const ToastItem = ({ toast, isTop, duration }: ToastItemProps) => {
+  const ToastIcon = iconMap[toast.type];
+
   useEffect(() => {
     const timerId = setTimeout(() => {
       if (toast.id) hideToast(toast.id);
@@ -29,7 +34,7 @@ const ToastItem = ({ toast, isTop, duration }: ToastItemProps) => {
 
   return (
     <Container enterFromTop={isTop} type={toast.type}>
-      <ToastIcon src={iconMap[toast.type]} />
+      <ToastIcon />
       <Content>{toast.message}</Content>
       <ProgressBar type={toast.type} duration={duration / 1000} />
     </Container>
@@ -79,8 +84,6 @@ const Container = styled.div<{
       160ms ease-out both;
   }
 `;
-
-const ToastIcon = styled.img``;
 
 const Content = styled.div`
   font-size: 14px;

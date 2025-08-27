@@ -1,52 +1,77 @@
-import { keyframes } from '@emotion/react';
+/** @jsxImportSource @emotion/react */
 import styled from '@emotion/styled';
+import {
+  DEFAULT_DURATION,
+  DEFAULT_LIMIT,
+  DEFAULT_POSITION,
+} from './Toast.constants';
+import { ToastPosition } from './Toast.types';
+import ToastItem from './ToastItem';
+import { useToasts } from './useToasts';
 
-interface ToastProps {
-  message: string;
-  duration: number;
-  isVisible: boolean;
-}
-
-const Toast = ({ message, duration, isVisible }: ToastProps) => {
-  if (!isVisible) return;
-
-  return <Container duration={duration}>{message}</Container>;
+type Props = {
+  limit?: number;
+  duration?: number;
+  position?: ToastPosition;
 };
 
-export default Toast;
+export const Toast = ({
+  limit = DEFAULT_LIMIT,
+  duration = DEFAULT_DURATION,
+  position = DEFAULT_POSITION,
+}: Props) => {
+  const { toasts } = useToasts(limit);
 
-const toastAnimation = keyframes`
-  0% {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  20% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  80% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
+  return (
+    <Container role="region" aria-label="Notifications">
+      <StackWrapper position={position}>
+        {toasts.map((toast) => (
+          <ToastItem
+            key={toast.id}
+            toast={toast}
+            isTop={position.startsWith('top')}
+            duration={duration}
+          />
+        ))}
+      </StackWrapper>
+    </Container>
+  );
+};
+
+const Container = styled.div`
+  position: fixed;
+  z-index: ${({ theme }) => theme.zIndex.toast};
+
+  inset: 0;
+  pointer-events: none;
 `;
 
-const Container = styled.div<{ duration: number }>`
+const mapPosition = (p: ToastPosition) => {
+  const base = {
+    top: 'auto',
+    bottom: 'auto',
+    left: 'auto',
+    right: 'auto',
+    transform: '',
+  };
+  if (p.startsWith('top')) base.top = '16px';
+  if (p.startsWith('bottom')) base.bottom = '16px';
+  if (p.endsWith('left')) base.left = '16px';
+  if (p.endsWith('right')) base.right = '16px';
+  if (p.endsWith('center')) {
+    base.left = '50%';
+    base.transform = 'translateX(-50%)';
+  }
+  return base;
+};
+
+const StackWrapper = styled.div<{ position: ToastPosition }>`
   position: fixed;
-  top: 100px;
-  z-index: ${({ theme }) => theme.zIndex.toast};
-  width: 250px;
-  padding: 12px 0;
 
-  background-color: ${({ theme }) => theme.colors.primaryLight};
-  color: ${({ theme }) => theme.colors.textPrimary};
-  text-align: center;
+  display: flex;
+  ${({ position }) => mapPosition(position)}
+  gap: 12px;
+  flex-direction: column;
 
-  animation: ${toastAnimation} ${({ duration }) => duration}ms ease-in-out
-    forwards;
-
-  box-sizing: border-box;
+  pointer-events: none;
 `;

@@ -1,5 +1,5 @@
+import { ToastData } from '../Toast.types';
 import { Store } from './createStore';
-import { ToastData } from './toast.type';
 import { toastStore } from './toastStore';
 
 export const getDistributedToasts = (data: ToastData[], limit: number) => {

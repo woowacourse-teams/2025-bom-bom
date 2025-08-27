@@ -1,4 +1,4 @@
-import { ToastData } from './toast.type';
+import { ToastData } from '../Toast.types';
 
 type StoreSubscriber = (state: ToastData[]) => void;
 

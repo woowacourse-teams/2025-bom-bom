@@ -1,8 +1,8 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useEffect } from 'react';
-import { ToastData, ToastType } from './toast.type';
-import { hideToast } from './toastActions';
+import { ToastData, ToastType } from './Toast.types';
+import { hideToast } from './utils/toastActions';
 import { theme } from '@/styles/theme';
 
 const iconMap: Record<ToastType, string> = {

@@ -28,6 +28,8 @@ const colors = {
   white: '#FFFFFF',
   black: '#000000',
   error: '#FF4D4F',
+  info: '#0D6EFD',
+  success: '#198754',
 };
 
 const heights = {

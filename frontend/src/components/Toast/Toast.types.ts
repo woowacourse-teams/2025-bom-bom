@@ -1,0 +1,17 @@
+import { ReactNode } from 'react';
+
+export type ToastType = 'info' | 'success' | 'error';
+
+export type ToastPosition =
+  | 'top-left'
+  | 'top-right'
+  | 'top-center'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'bottom-center';
+
+export type ToastData = {
+  id?: string;
+  type: ToastType;
+  message: ReactNode;
+};

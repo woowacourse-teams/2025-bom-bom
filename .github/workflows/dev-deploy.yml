@@ -100,9 +100,9 @@ jobs:
 
       - name: .env 파일 생성
         run: |
-          echo "DEV_SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/bombom?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=utf8 >> .env
-          echo "DEV_SPRING_DATASOURCE_USERNAME=root" >> .env
-          echo "DEV_SPRING_DATASOURCE_PASSWORD=bombom77@@" >> .env
+          echo "SPRING_DATASOURCE_HIKARI_JDBC_URL=${{ secrets.DEV_SPRING_DATASOURCE_URL }}" >> .env
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.DEV_SPRING_DATASOURCE_USERNAME }}" >> .env
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.DEV_SPRING_DATASOURCE_PASSWORD }}" >> .env
           echo "LOGGING_FILE_NAME=/logs/bombom-dev.log" >> .env
 
       - name: 환경변수 검증

@@ -1,5 +1,10 @@
 /** @jsxImportSource @emotion/react */
 import styled from '@emotion/styled';
+import {
+  DEFAULT_DURATION,
+  DEFAULT_LIMIT,
+  DEFAULT_POSITION,
+} from './toast.constant';
 import { ToastPosition } from './toast.type';
 import ToastItem from './ToastItem';
 import { useToasts } from './useToasts';
@@ -11,15 +16,15 @@ type Props = {
 };
 
 export const Toast = ({
-  limit = 3,
-  duration = 1000,
-  position = 'top-right',
+  limit = DEFAULT_LIMIT,
+  duration = DEFAULT_DURATION,
+  position = DEFAULT_POSITION,
 }: Props) => {
   const { toasts } = useToasts(limit);
 
   return (
-    <Layer role="region" aria-label="Notifications">
-      <Stack $position={position}>
+    <Container role="region" aria-label="Notifications">
+      <StackWrapper position={position}>
         {toasts.map((toast) => (
           <ToastItem
             key={toast.id}
@@ -28,14 +33,14 @@ export const Toast = ({
             duration={duration}
           />
         ))}
-      </Stack>
-    </Layer>
+      </StackWrapper>
+    </Container>
   );
 };
 
-const Layer = styled.div`
+const Container = styled.div`
   position: fixed;
-  z-index: 9999;
+  z-index: ${({ theme }) => theme.zIndex.toast};
 
   inset: 0;
   pointer-events: none;
@@ -60,11 +65,11 @@ const mapPosition = (p: ToastPosition) => {
   return base;
 };
 
-const Stack = styled.div<{ $position: ToastPosition }>`
+const StackWrapper = styled.div<{ position: ToastPosition }>`
   position: fixed;
 
   display: flex;
-  ${({ $position }) => mapPosition($position)}
+  ${({ position }) => mapPosition(position)}
   gap: 12px;
   flex-direction: column;
 

@@ -100,7 +100,7 @@ jobs:
 
       - name: .env 파일 생성
         run: |
-          echo "DEV_SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/bombom?useSSL=false&serverTimezone=Asia/Seoul" >> .env
+          echo "DEV_SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/bombom?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=utf8 >> .env
           echo "DEV_SPRING_DATASOURCE_USERNAME=root" >> .env
           echo "DEV_SPRING_DATASOURCE_PASSWORD=bombom77@@" >> .env
           echo "LOGGING_FILE_NAME=/logs/bombom-dev.log" >> .env

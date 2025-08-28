@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
+import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
@@ -43,5 +44,10 @@ public class ReadingController implements ReadingControllerApi{
     @GetMapping("/month/rank")
     public List<MonthlyReadingRankResponse> getMonthlyReadingRank(@RequestParam @Positive(message = "limit는 1 이상의 값이어야 합니다.") int limit) {
         return readingService.getMonthlyReadingRank(limit);
+    }
+
+    @GetMapping("/month/rank/me")
+    public MemberMonthlyReadingRankResponse getMemberMonthlyRank(@LoginMember Member member) {
+        return readingService.getMemberMonthlyReadingRank(member);
     }
 }

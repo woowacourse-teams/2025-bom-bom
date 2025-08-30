@@ -14,6 +14,14 @@ services:
     restart: always
     volumes:
       - /home/ec2-user/bombom-dev/logs:/logs
+      - /home/ec2-user/bombom-dev/opentelemetry/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
+
+      # OpenTelemetry 설정
+      JAVA_TOOL_OPTIONS: "-javaagent:/otel/opentelemetry-javaagent.jar"
+      OTEL_SERVICE_NAME: "bombom-server-dev"
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${DEV_OTEL_ENDPOINT} 
+      OTEL_METRICS_EXPORTER: "none"
+
 
 networks:
   default:

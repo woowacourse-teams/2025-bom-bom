@@ -14,9 +14,13 @@ services:
 
       # OpenTelemetry 설정
       JAVA_TOOL_OPTIONS: -javaagent:/otel/opentelemetry-javaagent.jar
-      OTEL_SERVICE_NAME: "bombom-server-dev"
+      OTEL_SERVICE_NAME: bombom-server-dev
       OTEL_EXPORTER_OTLP_ENDPOINT: ${DEV_OTEL_ENDPOINT} 
-      OTEL_METRICS_EXPORTER: "none"
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc                
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_TRACES_SAMPLER: always_on
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
     restart: always
     volumes:
       - /home/ec2-user/bombom-dev/logs:/logs

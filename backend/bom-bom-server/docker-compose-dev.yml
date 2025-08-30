@@ -13,7 +13,7 @@ services:
       LOGGING_FILE_NAME: /logs/bombom-dev.log
 
       # OpenTelemetry 설정
-      JAVA_TOOL_OPTIONS: "-javaagent:/otel/opentelemetry-javaagent.jar"
+      JAVA_TOOL_OPTIONS: -javaagent:/otel/opentelemetry-javaagent.jar
       OTEL_SERVICE_NAME: "bombom-server-dev"
       OTEL_EXPORTER_OTLP_ENDPOINT: ${DEV_OTEL_ENDPOINT} 
       OTEL_METRICS_EXPORTER: "none"

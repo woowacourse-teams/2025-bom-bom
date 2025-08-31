@@ -18,38 +18,38 @@ const FOCUSABLE_ELEMENTS = [
   'details[open] summary:not(:first-child)',
 ].join(',');
 
+const isElementVisible = (element: HTMLElement): boolean => {
+  const style = window.getComputedStyle(element);
+  return (
+    style.display !== 'none' &&
+    style.visibility !== 'hidden' &&
+    style.opacity !== '0' &&
+    element.offsetWidth > 0 &&
+    element.offsetHeight > 0
+  );
+};
+
+const isElementNotInert = (element: HTMLElement): boolean => {
+  return !element.closest('[inert]');
+};
+
+const isFocusable = (element: HTMLElement) => {
+  return isElementVisible(element) && isElementNotInert(element);
+};
+
 const useFocusTrap = <T extends HTMLElement>({
   isActive,
 }: UseFocusTrapParams) => {
   const containerRef = useRef<T>(null);
 
-  const isElementVisible = useCallback((element: HTMLElement): boolean => {
-    const style = window.getComputedStyle(element);
-    return (
-      style.display !== 'none' &&
-      style.visibility !== 'hidden' &&
-      style.opacity !== '0' &&
-      element.offsetWidth > 0 &&
-      element.offsetHeight > 0
-    );
-  }, []);
-
-  const isElementNotInert = useCallback((element: HTMLElement): boolean => {
-    return !element.closest('[inert]');
-  }, []);
-
   const getFocusableElements = useCallback((): HTMLElement[] => {
-    if (!containerRef.current) return [];
+    const container = containerRef.current;
+    if (!container) return [];
 
-    const elements = containerRef.current.querySelectorAll(FOCUSABLE_ELEMENTS);
-    return Array.from(elements).filter((element) => {
-      return (
-        element instanceof HTMLElement &&
-        isElementVisible(element) &&
-        isElementNotInert(element)
-      );
-    }) as HTMLElement[];
-  }, [isElementNotInert, isElementVisible]);
+    const elements =
+      container.querySelectorAll<HTMLElement>(FOCUSABLE_ELEMENTS);
+    return Array.from(elements).filter(isFocusable);
+  }, []);
 
   const focusFirstElement = useCallback(() => {
     const focusableElements = getFocusableElements();

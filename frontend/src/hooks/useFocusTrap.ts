@@ -4,6 +4,17 @@ interface UseFocusTrapParams {
   isActive?: boolean;
 }
 
+interface FocusElements {
+  first: HTMLElement;
+  last: HTMLElement;
+  current: HTMLElement;
+}
+
+interface CycleFocusParams {
+  event: KeyboardEvent;
+  elements: FocusElements;
+}
+
 const FOCUSABLE_ELEMENTS = [
   'input:not([disabled])',
   'select:not([disabled])',
@@ -58,63 +69,47 @@ const useFocusTrap = <T extends HTMLElement>({
     targetElement?.focus();
   }, []);
 
-  const cycleFocus = useCallback(
-    (cycleFocusParams: {
-      event: KeyboardEvent;
-      firstElement: HTMLElement;
-      lastElement: HTMLElement;
-      activeElement: HTMLElement;
-    }) => {
-      const { event, firstElement, lastElement, activeElement } =
-        cycleFocusParams;
+  const cycleFocus = useCallback(({ event, elements }: CycleFocusParams) => {
+    const { first, last, current } = elements;
 
-      if (activeElement === lastElement && !event.shiftKey) {
-        event.preventDefault();
-        firstElement?.focus();
-      } else if (activeElement === firstElement && event.shiftKey) {
-        event.preventDefault();
-        lastElement?.focus();
-      }
-    },
-    [],
-  );
+    if (current === last && !event.shiftKey) {
+      event.preventDefault();
+      first.focus();
+    } else if (current === first && event.shiftKey) {
+      event.preventDefault();
+      last.focus();
+    }
+  }, []);
 
-  const onKeydownTabInFocusTrap = useCallback(
+  const handleKeyDownTab = useCallback(
     (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+
       const focusableElements = getFocusableElements();
       if (focusableElements.length === 0) return;
 
-      const firstElement = focusableElements[0] as HTMLElement;
-      const lastElement = focusableElements[
+      const first = focusableElements[0] as HTMLElement;
+      const last = focusableElements[
         focusableElements.length - 1
       ] as HTMLElement;
-      const activeElement = document.activeElement as HTMLElement;
+      const current = document.activeElement as HTMLElement;
 
-      if (!focusableElements.includes(activeElement)) {
+      if (!focusableElements.includes(current)) {
         event.preventDefault();
         restoreFocus(focusableElements);
         return;
       }
 
-      cycleFocus({ event, firstElement, lastElement, activeElement });
+      cycleFocus({ event, elements: { first, last, current } });
     },
     [getFocusableElements, restoreFocus, cycleFocus],
   );
 
-  const handleKeyDownTab = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === 'Tab') {
-        onKeydownTabInFocusTrap(event);
-      }
-    },
-    [onKeydownTabInFocusTrap],
-  );
-
   const trackFocus = useCallback(() => {
     const focusableElements = getFocusableElements();
-    const activeElement = document.activeElement as HTMLElement;
-    if (focusableElements.includes(activeElement)) {
-      previousFocusing.current = activeElement;
+    const current = document.activeElement as HTMLElement;
+    if (focusableElements.includes(current)) {
+      previousFocusing.current = current;
     }
   }, [getFocusableElements]);
 

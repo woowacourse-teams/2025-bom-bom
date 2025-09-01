@@ -43,7 +43,7 @@ const useFocusTrap = <T extends HTMLElement>({
   const containerRef = useRef<T>(null);
   const previousFocusing = useRef<HTMLElement>(null);
 
-  const getFocusableElements = useCallback((): HTMLElement[] => {
+  const getFocusableElements = useCallback(() => {
     const container = containerRef.current;
     if (!container) return [];
 
@@ -52,21 +52,21 @@ const useFocusTrap = <T extends HTMLElement>({
     return Array.from(elements).filter(isFocusable);
   }, []);
 
-  const keydownShift = useCallback(
-    (event: KeyboardEvent) => {
-      const focusableElements = getFocusableElements();
-      if (focusableElements.length === 0) return;
+  const restoreFocus = useCallback((focusableElements: HTMLElement[]) => {
+    const firstElement = focusableElements[0];
+    const targetElement = previousFocusing.current || firstElement;
+    targetElement?.focus();
+  }, []);
 
-      const firstElement = focusableElements[0];
-      const lastElement = focusableElements[focusableElements.length - 1];
-      const activeElement = document.activeElement as HTMLElement;
-
-      if (!focusableElements.includes(activeElement)) {
-        event.preventDefault();
-        const targetElement = previousFocusing.current || firstElement;
-        targetElement?.focus();
-        return;
-      }
+  const cycleFocus = useCallback(
+    (cycleFocusParams: {
+      event: KeyboardEvent;
+      firstElement: HTMLElement;
+      lastElement: HTMLElement;
+      activeElement: HTMLElement;
+    }) => {
+      const { event, firstElement, lastElement, activeElement } =
+        cycleFocusParams;
 
       if (activeElement === lastElement && !event.shiftKey) {
         event.preventDefault();
@@ -76,16 +76,38 @@ const useFocusTrap = <T extends HTMLElement>({
         lastElement?.focus();
       }
     },
-    [getFocusableElements],
+    [],
   );
 
-  const keydownTab = useCallback(
+  const onKeydownTabInFocusTrap = useCallback(
+    (event: KeyboardEvent) => {
+      const focusableElements = getFocusableElements();
+      if (focusableElements.length === 0) return;
+
+      const firstElement = focusableElements[0] as HTMLElement;
+      const lastElement = focusableElements[
+        focusableElements.length - 1
+      ] as HTMLElement;
+      const activeElement = document.activeElement as HTMLElement;
+
+      if (!focusableElements.includes(activeElement)) {
+        event.preventDefault();
+        restoreFocus(focusableElements);
+        return;
+      }
+
+      cycleFocus({ event, firstElement, lastElement, activeElement });
+    },
+    [getFocusableElements, restoreFocus, cycleFocus],
+  );
+
+  const handleKeyDownTab = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === 'Tab') {
-        keydownShift(event);
+        onKeydownTabInFocusTrap(event);
       }
     },
-    [keydownShift],
+    [onKeydownTabInFocusTrap],
   );
 
   const trackFocus = useCallback(() => {
@@ -108,14 +130,14 @@ const useFocusTrap = <T extends HTMLElement>({
 
     focusFirstElement();
 
-    document.addEventListener('keydown', keydownTab);
+    document.addEventListener('keydown', handleKeyDownTab);
     document.addEventListener('focusin', trackFocus);
 
     return () => {
-      document.removeEventListener('keydown', keydownTab);
+      document.removeEventListener('keydown', handleKeyDownTab);
       document.removeEventListener('focusin', trackFocus);
     };
-  }, [isActive, focusFirstElement, keydownTab, trackFocus]);
+  }, [isActive, focusFirstElement, handleKeyDownTab, trackFocus]);
 
   return {
     containerRef,

@@ -81,30 +81,20 @@ const useFocusTrap = <T extends HTMLElement>({
 
   const keydownTab = useCallback(
     (event: KeyboardEvent) => {
-      if (!isActive || !containerRef.current) return;
-
       if (event.key === 'Tab') {
         keydownShift(event);
       }
     },
-    [isActive, keydownShift],
+    [keydownShift],
   );
-
-  const restoreFocus = useCallback(() => {
-    if (!isActive || !containerRef.current) return;
-
-    if (previousFocusing.current) {
-      previousFocusing.current.focus();
-    }
-  }, [isActive]);
 
   const trackFocus = useCallback(() => {
     const focusableElements = getFocusableElements();
     const activeElement = document.activeElement as HTMLElement;
-    if (isActive && focusableElements.includes(activeElement)) {
+    if (focusableElements.includes(activeElement)) {
       previousFocusing.current = activeElement;
     }
-  }, [getFocusableElements, isActive]);
+  }, [getFocusableElements]);
 
   const focusFirstElement = useCallback(() => {
     const focusableElements = getFocusableElements();
@@ -125,7 +115,7 @@ const useFocusTrap = <T extends HTMLElement>({
       document.removeEventListener('keydown', keydownTab);
       document.removeEventListener('focusin', trackFocus);
     };
-  }, [isActive, focusFirstElement, keydownTab, trackFocus, restoreFocus]);
+  }, [isActive, focusFirstElement, keydownTab, trackFocus]);
 
   return {
     containerRef,

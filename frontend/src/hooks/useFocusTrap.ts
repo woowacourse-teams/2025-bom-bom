@@ -38,7 +38,7 @@ const isFocusable = (element: HTMLElement) => {
 };
 
 const useFocusTrap = <T extends HTMLElement>({
-  isActive,
+  isActive = true,
 }: UseFocusTrapParams) => {
   const containerRef = useRef<T>(null);
   const previousFocusing = useRef<HTMLElement>(null);

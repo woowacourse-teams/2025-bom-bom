@@ -21,7 +21,7 @@ services:
       OTEL_TRACES_SAMPLER: always_on
       OTEL_METRICS_EXPORTER: none
       OTEL_LOGS_EXPORTER: none
-      OTEL_INSTRUMENTATION_COMMON_EXCLUDE_URLS: /actuator/*
+      OTEL_INSTRUMENTATION_COMMON_EXCLUDE_URLS: /actuator/prometheus,/actuator/health
     restart: always
     volumes:
       - /home/ec2-user/bombom-dev/logs:/logs

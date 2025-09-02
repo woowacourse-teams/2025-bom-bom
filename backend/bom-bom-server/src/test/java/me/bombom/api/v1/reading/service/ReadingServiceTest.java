@@ -179,13 +179,18 @@ class ReadingServiceTest {
         // given: 기본 멤버는 currentCount 10
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr3", "pid_mr3"));
+        Member member4 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr4", "pid_mr4"));
 
         monthlyReadingRepository.save(MonthlyReading.builder()
                 .memberId(member2.getId())
                 .currentCount(30)
                 .build());
-        MonthlyReading member2Reading = monthlyReadingRepository.save(MonthlyReading.builder()
+        MonthlyReading member3Reading = monthlyReadingRepository.save(MonthlyReading.builder()
                 .memberId(member3.getId())
+                .currentCount(20)
+                .build());
+        monthlyReadingRepository.save(MonthlyReading.builder()
+                .memberId(member4.getId())
                 .currentCount(20)
                 .build());
 
@@ -197,8 +202,31 @@ class ReadingServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(memberRank.rank()).isGreaterThan(0L);
             softly.assertThat(memberRank.readCount()).isEqualTo(monthlyReading.getCurrentCount());
-            softly.assertThat(memberRank.nextRankDifference()).isEqualTo(member2Reading.getCurrentCount() - monthlyReading.getCurrentCount());
+            softly.assertThat(memberRank.nextRankDifference()).isEqualTo(member3Reading.getCurrentCount() - monthlyReading.getCurrentCount());
         });
+    }
+
+    @Test
+    void 일등일_경우_앞_사람과의_차이는_0이다() {
+        // given: 기본 멤버는 currentCount 10
+        Member first = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));
+        Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr3", "pid_mr3"));
+
+        monthlyReadingRepository.save(MonthlyReading.builder()
+                .memberId(first.getId())
+                .currentCount(30)
+                .build());
+        monthlyReadingRepository.save(MonthlyReading.builder()
+                .memberId(member3.getId())
+                .currentCount(20)
+                .build());
+
+        // when: 순위 반영 후 내 순위를 조회
+        readingService.updateMonthlyRanking();
+        MemberMonthlyReadingRankResponse memberRank = readingService.getMemberMonthlyReadingRank(first);
+
+        // then
+        assertThat(memberRank.nextRankDifference()).isEqualTo(0);
     }
 
     @Test

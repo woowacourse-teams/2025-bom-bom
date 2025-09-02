@@ -33,7 +33,7 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
 		SET mr.rank = (
 		    SELECT rnk FROM (
 		      SELECT member_id,
-		             RANK() OVER (ORDER BY current_count DESC, member_id ASC) AS rnk
+		             DENSE_RANK() OVER (ORDER BY current_count DESC, member_id ASC) AS rnk
 		      FROM monthly_reading
 		    ) r
 		    WHERE r.member_id = mr.member_id
@@ -43,11 +43,13 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
 
 	@Query("""
 		SELECT new me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse(
-			COALESCE((SELECT mr.rank FROM MonthlyReading mr WHERE mr.memberId = :memberId), 0),
-			(SELECT COUNT(m2) FROM MonthlyReading m2 WHERE m2.rank IS NOT NULL)
+		  COALESCE(mr.rank, 0) AS rank,
+		  mr.currentCount AS readCount,
+		  COALESCE(ABS(mr.currentCount - prev.currentCount), 0) AS nextRankDifference
 		)
-		FROM MonthlyReading m
-		WHERE m.memberId = :memberId
+		FROM MonthlyReading mr
+		LEFT JOIN MonthlyReading prev ON prev.rank = mr.rank - 1
+		WHERE mr.memberId = :memberId
 	""")
 	MemberMonthlyReadingRankResponse findMemberRankAndTotal(@Param("memberId") Long memberId);
 }

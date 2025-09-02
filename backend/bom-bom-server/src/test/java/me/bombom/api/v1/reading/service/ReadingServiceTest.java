@@ -28,8 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.context.transaction.TestTransaction;
+import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @Transactional
@@ -184,7 +184,7 @@ class ReadingServiceTest {
                 .memberId(member2.getId())
                 .currentCount(30)
                 .build());
-        monthlyReadingRepository.save(MonthlyReading.builder()
+        MonthlyReading member2Reading = monthlyReadingRepository.save(MonthlyReading.builder()
                 .memberId(member3.getId())
                 .currentCount(20)
                 .build());
@@ -196,8 +196,8 @@ class ReadingServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(memberRank.rank()).isGreaterThan(0L);
-            softly.assertThat(memberRank.totalMembers()).isEqualTo(3L);
-            softly.assertThat(memberRank.rank()).isLessThanOrEqualTo(memberRank.totalMembers());
+            softly.assertThat(memberRank.readCount()).isEqualTo(monthlyReading.getCurrentCount());
+            softly.assertThat(memberRank.nextRankDifference()).isEqualTo(member2Reading.getCurrentCount() - monthlyReading.getCurrentCount());
         });
     }
 

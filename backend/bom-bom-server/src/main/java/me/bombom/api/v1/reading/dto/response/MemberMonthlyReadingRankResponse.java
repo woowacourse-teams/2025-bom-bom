@@ -8,6 +8,9 @@ public record MemberMonthlyReadingRankResponse(
         long rank,
 
         @Schema(required = true)
-        long totalMembers
+        long readCount,
+
+        @Schema(required = true)
+        long nextRankDifference
 ) {
 }

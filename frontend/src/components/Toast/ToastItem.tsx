@@ -3,7 +3,6 @@ import styled from '@emotion/styled';
 import { FunctionComponent, SVGProps, useEffect } from 'react';
 import { ToastData, ToastType } from './Toast.types';
 import { hideToast } from './utils/toastActions';
-import { theme } from '@/styles/theme';
 import ErrorIcon from '#/assets/cancel-circle.svg';
 import SuccessIcon from '#/assets/check-circle.svg';
 import InfoIcon from '#/assets/info-circle.svg';
@@ -74,7 +73,7 @@ const Container = styled.div<{
 
   background-color: ${({ theme }) => theme.colors.white};
 
-  border-color: ${({ type }) => theme.colors[type]};
+  border-color: ${({ theme, type }) => theme.colors[type]};
 
   pointer-events: auto;
   will-change: transform, opacity;
@@ -86,8 +85,7 @@ const Container = styled.div<{
 `;
 
 const Content = styled.div`
-  font-size: 14px;
-  line-height: 1.45;
+  font: ${({ theme }) => theme.fonts.body2};
 `;
 
 const ProgressBar = styled.div<{ type: ToastType; duration: number }>`
@@ -97,7 +95,7 @@ const ProgressBar = styled.div<{ type: ToastType; duration: number }>`
   width: 100%;
   height: 4px;
 
-  background-color: ${({ type }) => theme.colors[type]};
+  background-color: ${({ theme, type }) => theme.colors[type]};
 
   animation: ${progressShrink} ${({ duration }) => duration}s linear forwards;
 `;

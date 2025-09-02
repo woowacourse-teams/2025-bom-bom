@@ -22,7 +22,7 @@ const Toast = ({
   const { toasts } = useToasts(limit);
 
   return (
-    <Container role="region" aria-label="Notifications">
+    <Container role="log" aria-label="Notifications">
       <StackWrapper position={position}>
         {toasts.map((toast) => (
           <ToastItem

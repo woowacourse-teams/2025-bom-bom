@@ -22,6 +22,7 @@ services:
       OTEL_METRICS_EXPORTER: none
       OTEL_LOGS_EXPORTER: none
       OTEL_INSTRUMENTATION_COMMON_EXCLUDE_URLS: .*/actuator/.*
+      OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDED_URLS: .*/actuator/.*
 
     restart: always
     volumes:

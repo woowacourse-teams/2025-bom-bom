@@ -8,11 +8,11 @@ import { ToastPosition } from './Toast.types';
 import ToastItem from './ToastItem';
 import { useToasts } from './useToasts';
 
-type ToastProps = {
+interface ToastProps {
   limit?: number;
   duration?: number;
   position?: ToastPosition;
-};
+}
 
 const Toast = ({
   limit = DEFAULT_LIMIT,

@@ -31,8 +31,14 @@ export const showToast = (toast: ToastData, store: Store = toastStore) => {
   const id = crypto.randomUUID();
 
   updateToastsState(store, (toasts) => {
-    if (toasts.some((storedToast) => storedToast.id === toast.id)) {
-      return toasts; // 중복 방지
+    if (
+      toasts.some(
+        (storedToast) =>
+          storedToast.message === toast.message &&
+          storedToast.type === toast.type,
+      )
+    ) {
+      return toasts;
     }
     return [...toasts, { ...toast, id }];
   });

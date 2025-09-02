@@ -21,9 +21,12 @@ services:
       OTEL_TRACES_SAMPLER: always_on
       OTEL_METRICS_EXPORTER: none
       OTEL_LOGS_EXPORTER: none
+
+      # exclude 설정
       OTEL_INSTRUMENTATION_COMMON_EXCLUDE_URLS: .*/actuator/.*
       OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDED_URLS: .*/actuator/.*
       OTEL_INSTRUMENTATION_SERVLET_EXCLUDE_URLS: .*/actuator/.*
+      OTEL_INSTRUMENTATION_SPRING_WEB_EXCLUDE_PATTERNS: .*/actuator/.*
 
     restart: always
     volumes:

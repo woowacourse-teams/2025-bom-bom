@@ -45,7 +45,7 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
 		SELECT new me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse(
 		  COALESCE(mr.rank, 0) AS rank,
 		  mr.currentCount AS readCount,
-		  COALESCE(ABS(mr.currentCount - prev.currentCount), 0) AS nextRankDifference
+		  COALESCE((MIN(prev.currentCount) - mr.currentCount), 0) AS nextRankDifference
 		)
 		FROM MonthlyReading mr
 		LEFT JOIN MonthlyReading prev ON prev.rank = mr.rank - 1

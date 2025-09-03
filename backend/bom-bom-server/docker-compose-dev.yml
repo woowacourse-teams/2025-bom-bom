@@ -28,6 +28,9 @@ services:
       OTEL_INSTRUMENTATION_SERVLET_EXCLUDE_URLS: .*/actuator/.*
       OTEL_INSTRUMENTATION_SPRING_WEB_EXCLUDE_PATTERNS: .*/actuator/.*
 
+      # Micrometer trace 자체 끄기 (핵심)
+      OTEL_INSTRUMENTATION_MICROMETER_ENABLED: false
+
     restart: always
     volumes:
       - /home/ec2-user/bombom-dev/logs:/logs

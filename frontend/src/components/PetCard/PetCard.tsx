@@ -44,17 +44,19 @@ const PetCard = () => {
     },
   });
 
+  if (!pet) return null;
+
   const levelPercentage = calculateRate(
-    pet?.currentStageScore ?? 0,
-    pet?.requiredStageScore ?? 1,
+    pet.currentStageScore,
+    pet.requiredStageScore,
   );
 
   const handleAttendanceClick = () => {
     mutatePetAttendance();
   };
 
-  const currentLevel = pet?.level ?? LEVEL.min;
-  const width = PET_WIDTH[currentLevel] ?? PET_WIDTH[LEVEL.min];
+  const currentLevel = pet.level;
+  const width = PET_WIDTH[currentLevel];
 
   return (
     <Container deviceType={deviceType}>
@@ -95,16 +97,16 @@ const PetCard = () => {
         rate={currentLevel === LEVEL.max ? 100 : levelPercentage}
         caption={
           currentLevel === LEVEL.max
-            ? `${pet?.currentStageScore}점`
+            ? `${pet.currentStageScore}점`
             : `${levelPercentage}%`
         }
       />
 
       <AttendanceButton
         deviceType={deviceType}
-        text={pet?.isAttended ? '출석 완료!' : '출석체크하기'}
+        text={pet.isAttended ? '출석 완료!' : '출석체크하기'}
         onClick={handleAttendanceClick}
-        disabled={pet?.isAttended}
+        disabled={pet.isAttended}
       />
     </Container>
   );

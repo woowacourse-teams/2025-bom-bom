@@ -105,7 +105,7 @@ const useFocusTrap = <T extends HTMLElement>({
     [getFocusableElements, restoreFocus, cycleFocus],
   );
 
-  const trackFocus = useCallback(() => {
+  const handleTrackFocus = useCallback(() => {
     const focusableElements = getFocusableElements();
     const current = document.activeElement as HTMLElement;
     if (focusableElements.includes(current)) {
@@ -124,13 +124,13 @@ const useFocusTrap = <T extends HTMLElement>({
     if (!isActive) return;
 
     document.addEventListener('keydown', handleKeyDownTab);
-    document.addEventListener('focusin', trackFocus);
+    document.addEventListener('focusin', handleTrackFocus);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDownTab);
-      document.removeEventListener('focusin', trackFocus);
+      document.removeEventListener('focusin', handleTrackFocus);
     };
-  }, [isActive, handleKeyDownTab, trackFocus]);
+  }, [isActive, handleKeyDownTab, handleTrackFocus]);
 
   return {
     containerRef,

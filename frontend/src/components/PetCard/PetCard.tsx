@@ -46,17 +46,12 @@ const PetCard = () => {
 
   if (!pet) return null;
 
-  const levelPercentage = calculateRate(
-    pet.currentStageScore,
-    pet.requiredStageScore,
-  );
+  const { level, isAttended, currentStageScore, requiredStageScore } = pet;
+  const levelPercentage = calculateRate(currentStageScore, requiredStageScore);
 
   const handleAttendanceClick = () => {
     mutatePetAttendance();
   };
-
-  const currentLevel = pet.level;
-  const width = PET_WIDTH[currentLevel];
 
   return (
     <Container deviceType={deviceType}>
@@ -71,9 +66,9 @@ const PetCard = () => {
 
       <PetImageContainer>
         <PetImage
-          src={petImages[currentLevel ?? 1]}
+          src={petImages[level ?? 1]}
           alt="pet"
-          width={width}
+          width={PET_WIDTH[level]}
           height={120}
           isAnimating={isAnimating}
           onAnimationEnd={() => setIsAnimating(false)}
@@ -90,23 +85,21 @@ const PetCard = () => {
       </PetImageContainer>
 
       <Level>
-        레벨 {currentLevel} : {PET_LABEL[currentLevel ?? LEVEL.min]}
+        레벨 {level} : {PET_LABEL[level ?? LEVEL.min]}
       </Level>
 
       <ProgressBar
-        rate={currentLevel === LEVEL.max ? 100 : levelPercentage}
+        rate={level === LEVEL.max ? 100 : levelPercentage}
         caption={
-          currentLevel === LEVEL.max
-            ? `${pet.currentStageScore}점`
-            : `${levelPercentage}%`
+          level === LEVEL.max ? `${currentStageScore}점` : `${levelPercentage}%`
         }
       />
 
       <AttendanceButton
         deviceType={deviceType}
-        text={pet.isAttended ? '출석 완료!' : '출석체크하기'}
+        text={isAttended ? '출석 완료!' : '출석체크하기'}
         onClick={handleAttendanceClick}
-        disabled={pet.isAttended}
+        disabled={isAttended}
       />
     </Container>
   );

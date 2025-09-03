@@ -29,7 +29,7 @@ services:
       OTEL_INSTRUMENTATION_SPRING_WEB_EXCLUDE_PATTERNS: .*/actuator/.*
 
       # Micrometer trace 자체 끄기 (핵심)
-      OTEL_INSTRUMENTATION_MICROMETER_ENABLED: false
+      OTEL_JAVAAGENT_DISABLED_INSTRUMENTATIONS: micrometer
 
     restart: always
     volumes:

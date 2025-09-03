@@ -70,6 +70,8 @@ const ArticleHeader = ({
 export default ArticleHeader;
 
 const Container = styled.div`
+  padding: 20px 0;
+
   display: flex;
   gap: 12px;
   flex-direction: column;

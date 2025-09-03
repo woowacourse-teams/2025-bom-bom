@@ -48,14 +48,21 @@ function ArticleDetailPage() {
   if (!currentArticle) return null;
 
   return (
-    <>
-      <ArticleProgressBar
-        rate={progressPercentage}
-        transition={false}
-        variant="rectangular"
-        deviceType={deviceType}
-      />
-      <Container deviceType={deviceType}>
+    <Container>
+      {deviceType === 'pc' && (
+        <ArticleActionButtons
+          bookmarked={isBookmarked}
+          onBookmarkClick={toggleBookmark}
+        />
+      )}
+
+      <ArticleContent deviceType={deviceType}>
+        <ArticleProgressBar
+          rate={progressPercentage}
+          transition={false}
+          variant="rectangular"
+          deviceType={deviceType}
+        />
         <ArticleHeader
           title={currentArticle.title ?? ''}
           newsletterCategory={currentArticle.newsletter?.category ?? ''}
@@ -80,20 +87,23 @@ function ArticleDetailPage() {
         </ContentDescription>
 
         <TodayUnreadArticlesSection articleId={articleIdNumber} />
-
-        <FloatingActionButtons
-          bookmarked={isBookmarked}
-          onBookmarkClick={toggleBookmark}
-        />
-      </Container>
-    </>
+      </ArticleContent>
+    </Container>
   );
 }
 
-const Container = styled.div<{ deviceType: DeviceType }>`
+const Container = styled.div`
+  position: relative;
+`;
+
+const ArticleActionButtons = styled(FloatingActionButtons)`
+  position: sticky;
+  top: 50vh;
+`;
+
+const ArticleContent = styled.div<{ deviceType: DeviceType }>`
   max-width: 700px;
   margin: 0 auto;
-  margin-top: 20px;
   padding: ${({ deviceType }) => (deviceType === 'mobile' ? '0' : '0 16px')};
   border-right: 1px solid
     ${({ theme, deviceType }) =>

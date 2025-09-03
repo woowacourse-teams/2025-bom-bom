@@ -50,13 +50,12 @@ class MarkAsReadListenerTest {
     }
 
     @Test
-    void 스코어를_추가할_수_없는_경우_읽기_횟수만_갱신한다() {
+    void 오늘_도착하지_않은_아티클인_경우_읽기_횟수만_갱신한다() {
         // given
         Long memberId = 1L;
         Long articleId = 1L;
         MarkAsReadEvent event = new MarkAsReadEvent(memberId, articleId);
         given(articleService.isArrivedToday(articleId, memberId)).willReturn(false);
-        given(articleService.canAddArticleScore(memberId)).willReturn(false);
 
         // when
         markAsReadListener.on(event);
@@ -64,5 +63,24 @@ class MarkAsReadListenerTest {
         // then
         verify(readingService, times(1)).updateReadingCount(memberId, false);
         verify(petService, never()).increaseCurrentScore(anyLong(), anyInt());
+        verify(articleService, never()).canAddArticleScore(anyLong()); // 호출되지 않음을 확인
+    }
+
+    @Test
+    void 오늘_도착한_아티클이지만_점수_추가_불가능한_경우_읽기_횟수만_갱신한다() {
+        // given
+        Long memberId = 1L;
+        Long articleId = 1L;
+        MarkAsReadEvent event = new MarkAsReadEvent(memberId, articleId);
+        given(articleService.isArrivedToday(articleId, memberId)).willReturn(true);
+        given(articleService.canAddArticleScore(memberId)).willReturn(false);
+
+        // when
+        markAsReadListener.on(event);
+
+        // then
+        verify(readingService, times(1)).updateReadingCount(memberId, true);
+        verify(petService, never()).increaseCurrentScore(anyLong(), anyInt());
+        verify(articleService, times(1)).canAddArticleScore(memberId); // 호출되지만 false 반환
     }
 }

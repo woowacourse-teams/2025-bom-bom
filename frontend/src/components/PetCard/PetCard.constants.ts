@@ -1,4 +1,4 @@
-export const PET_LEVEL: Record<number, string> = {
+export const PET_LABEL: Record<number, string> = {
   1: '아기 봄이',
   2: '호기심 많은 봄이',
   3: '활발한 봄이',
@@ -12,4 +12,9 @@ export const PET_WIDTH: Record<number, number> = {
   3: 90,
   4: 120,
   5: 136,
+};
+
+export const LEVEL = {
+  min: 1,
+  max: 5,
 };

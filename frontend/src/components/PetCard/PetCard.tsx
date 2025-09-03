@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { PET_LEVEL, PET_WIDTH } from './PetCard.constants';
+import { PET_LABEL, PET_WIDTH, LEVEL } from './PetCard.constants';
 import { heartAnimation, jumpAnimation } from './PetCard.keyframes';
 import Button from '../Button/Button';
 import ProgressBar from '../ProgressBar/ProgressBar';
@@ -53,8 +53,8 @@ const PetCard = () => {
     mutatePetAttendance();
   };
 
-  const currentLevel = pet?.level ?? 1;
-  const width = PET_WIDTH[currentLevel] ?? 80;
+  const currentLevel = pet?.level ?? LEVEL.min;
+  const width = PET_WIDTH[currentLevel] ?? PET_WIDTH[LEVEL.min];
 
   return (
     <Container deviceType={deviceType}>
@@ -88,11 +88,17 @@ const PetCard = () => {
       </PetImageContainer>
 
       <Level>
-        레벨 {currentLevel} :{' '}
-        {PET_LEVEL[(currentLevel ?? 1) as keyof typeof PET_LEVEL]}
+        레벨 {currentLevel} : {PET_LABEL[currentLevel ?? LEVEL.min]}
       </Level>
 
-      <ProgressBar rate={levelPercentage} caption={`${levelPercentage}%`} />
+      <ProgressBar
+        rate={currentLevel === LEVEL.max ? 100 : levelPercentage}
+        caption={
+          currentLevel === LEVEL.max
+            ? `${pet?.currentStageScore}점`
+            : `${levelPercentage}%`
+        }
+      />
 
       <AttendanceButton
         deviceType={deviceType}

@@ -230,6 +230,30 @@ class ReadingServiceTest {
     }
 
     @Test
+    void currentCount가_같으면_순위가_같다() {
+        // given: 기본 멤버는 currentCount 10
+        Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));
+        Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr3", "pid_mr3"));
+
+        monthlyReadingRepository.save(MonthlyReading.builder()
+                .memberId(member2.getId())
+                .currentCount(20)
+                .build());
+        monthlyReadingRepository.save(MonthlyReading.builder()
+                .memberId(member3.getId())
+                .currentCount(20)
+                .build());
+
+        // when: 순위 반영 후 내 순위를 조회
+        readingService.updateMonthlyRanking();
+        MemberMonthlyReadingRankResponse memberRank2 = readingService.getMemberMonthlyReadingRank(member2);
+        MemberMonthlyReadingRankResponse memberRank3 = readingService.getMemberMonthlyReadingRank(member3);
+
+        // then
+        assertThat(memberRank2.rank()).isEqualTo(memberRank3.rank());
+    }
+
+    @Test
     void 매월_읽기_수를_연간_읽기_수에_반영하고_월간은_초기화한다() {
         // given
         int monthlyCountBefore = monthlyReadingRepository.findByMemberId(member.getId()).get().getCurrentCount();

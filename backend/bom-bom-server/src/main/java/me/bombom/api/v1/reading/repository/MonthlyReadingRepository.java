@@ -33,7 +33,7 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
 		SET mr.rank = (
 		    SELECT rnk FROM (
 		      SELECT member_id,
-		             DENSE_RANK() OVER (ORDER BY current_count DESC, member_id ASC) AS rnk
+		             DENSE_RANK() OVER (ORDER BY current_count DESC) AS rnk
 		      FROM monthly_reading
 		    ) r
 		    WHERE r.member_id = mr.member_id

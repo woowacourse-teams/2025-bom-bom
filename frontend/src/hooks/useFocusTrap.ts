@@ -113,7 +113,7 @@ const useFocusTrap = <T extends HTMLElement>({
     }
   }, [getFocusableElements]);
 
-  const focusFirstElement = useCallback(() => {
+  useEffect(() => {
     const focusableElements = getFocusableElements();
     if (focusableElements.length > 0) {
       focusableElements[0]?.focus();
@@ -123,8 +123,6 @@ const useFocusTrap = <T extends HTMLElement>({
   useEffect(() => {
     if (!isActive) return;
 
-    focusFirstElement();
-
     document.addEventListener('keydown', handleKeyDownTab);
     document.addEventListener('focusin', trackFocus);
 
@@ -132,7 +130,7 @@ const useFocusTrap = <T extends HTMLElement>({
       document.removeEventListener('keydown', handleKeyDownTab);
       document.removeEventListener('focusin', trackFocus);
     };
-  }, [isActive, focusFirstElement, handleKeyDownTab, trackFocus]);
+  }, [isActive, handleKeyDownTab, trackFocus]);
 
   return {
     containerRef,

@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { PET_LEVEL } from './PetCard.constants';
+import { PET_LEVEL, PET_WIDTH } from './PetCard.constants';
 import { heartAnimation, jumpAnimation } from './PetCard.keyframes';
 import Button from '../Button/Button';
 import ProgressBar from '../ProgressBar/ProgressBar';
@@ -25,14 +25,6 @@ const petImages: Record<number, string> = {
   4: petLv4,
   5: petLv5,
 };
-
-const petWidth = {
-  1: 80,
-  2: 100,
-  3: 90,
-  4: 120,
-  5: 136,
-} as const;
 
 const PetCard = () => {
   const deviceType = useDeviceType();
@@ -62,7 +54,7 @@ const PetCard = () => {
   };
 
   const currentLevel = pet?.level ?? 1;
-  const width = petWidth[currentLevel as keyof typeof petWidth] ?? 80;
+  const width = PET_WIDTH[currentLevel] ?? 80;
 
   return (
     <Container deviceType={deviceType}>

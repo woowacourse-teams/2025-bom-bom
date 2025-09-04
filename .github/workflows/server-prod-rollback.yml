@@ -1,0 +1,131 @@
+name: Server Prod Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: '롤백 사유'
+        required: true
+        type: string
+      target_image:
+        description: '롤백할 이미지 태그 (예: v1.0.0)'
+        required: true
+        type: string
+      force_rollback:
+        description: '강제 롤백 (헬스체크 실패 시에도 진행)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  rollback_prod:
+    name: Docker 이미지 롤백 (prod)
+    runs-on: [self-hosted, prod]
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+
+    steps:
+      - name: 롤백 정보 확인
+        run: |
+          echo "=== 롤백 정보 ==="
+          echo "롤백 사유: ${{ github.event.inputs.reason }}"
+          echo "롤백 대상: ${{ github.event.inputs.target_image }}"
+          echo "롤백 환경: prod"
+          echo "롤백 타입: image_tag"
+
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 이미지 존재 확인
+        run: |
+          TARGET_TAG="${{ github.event.inputs.target_image }}"
+          ROLLBACK_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:server-${TARGET_TAG}"
+          echo "롤백 대상 이미지: $ROLLBACK_IMAGE"
+          echo "ROLLBACK_IMAGE=$ROLLBACK_IMAGE" >> $GITHUB_ENV
+
+          if ! docker manifest inspect $ROLLBACK_IMAGE >/dev/null 2>&1; then
+            echo "❌ 롤백 대상 이미지가 존재하지 않습니다: $ROLLBACK_IMAGE"
+            exit 1
+          fi
+          echo "✅ 롤백 대상 이미지 확인 완료"
+
+      - name: 현재 서비스 상태 확인
+        run: |
+          echo "=== 현재 컨테이너 상태 ===" 
+          sudo docker ps --filter "name=bom-bom-server-prod" --format "table {{.Names}}\t{{.Status}}\t{{.Image}}"
+
+      - name: 롤백 전 헬스체크
+        run: |
+          echo "=== 롤백 전 서비스 상태 확인 ==="
+          if curl -f -s http://localhost:8081/actuator/health > /dev/null; then
+            echo "✅ 롤백 전 헬스체크 성공"
+          else
+            echo "⚠️ 롤백 전 헬스체크 실패"
+          fi
+
+      - name: .env 파일 생성
+        run: |
+          cat <<EOF > .env
+          RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
+          DATABASE=${{ secrets.PROD_DATABASE }}
+          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          DOCKER_IMAGE=${{ env.ROLLBACK_IMAGE }}
+          EOF
+          echo "롤백할 이미지: ${{ env.ROLLBACK_IMAGE }}"
+
+      - name: 서비스 롤백 실행
+        run: |
+          echo "=== 백엔드 서비스 롤백 시작 ==="
+          echo "롤백 사유: ${{ github.event.inputs.reason }}"
+          echo "롤백 대상: ${{ env.ROLLBACK_IMAGE }}"
+          
+          sudo docker compose -f docker-compose-prod.yml down
+          sudo docker compose \
+            -f docker-compose-prod.yml \
+            --env-file .env \
+            up -d --remove-orphans --pull=always
+          echo "롤백 실행 완료"
+
+      - name: 롤백 후 헬스체크
+        run: |
+          echo "=== 롤백 후 헬스체크 시작 ==="
+          sleep 30
+          for i in {1..10}; do
+            echo "헬스체크 시도: $i/10"
+            if curl -f -s http://localhost:8081/actuator/health > /dev/null; then
+              echo "✅ 헬스체크 성공"; exit 0
+            else
+              echo "⏳ 헬스체크 실패, 10초 후 재시도..."; sleep 10
+            fi
+          done
+          echo "❌ 롤백 후 헬스체크가 계속 실패합니다"
+          if [[ "${{ github.event.inputs.force_rollback }}" == "true" ]]; then
+            echo "⚠️  강제 롤백 모드: 헬스체크 실패에도 롤백을 진행합니다"; exit 0
+          else
+            echo "=== 컨테이너 로그 확인 ==="; sudo docker logs bom-bom-server-prod --tail=50 || true; exit 1
+          fi
+
+      - name: 롤백 결과 알림
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ prod 환경 롤백 성공"
+            echo "- 롤백 사유: ${{ github.event.inputs.reason }}"
+            echo "- 롤백 대상: ${{ env.ROLLBACK_IMAGE }}"
+          else
+            echo "❌ prod 환경 롤백 실패"
+          fi
+
+      - name: Docker 리소스 정리
+        if: success()
+        run: |
+          echo "=== Docker 리소스 정리 ==="
+          sudo docker container prune -f --filter "until=1h"
+          sudo docker image prune -f --filter "until=1h"
+          echo "리소스 정리 완료"

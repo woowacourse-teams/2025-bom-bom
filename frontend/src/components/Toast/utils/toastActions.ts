@@ -2,21 +2,6 @@ import { ToastData } from '../Toast.types';
 import { Store } from './createStore';
 import { toastStore } from './toastStore';
 
-export const getDistributedToasts = (data: ToastData[], limit: number) => {
-  const toasts: ToastData[] = [];
-  let count = 0;
-
-  data.forEach((item) => {
-    count += 1;
-
-    if (count <= limit) {
-      toasts.push(item);
-    }
-  });
-
-  return { toasts };
-};
-
 export const updateToastsState = (
   store: Store,
   update: (toasts: ToastData[]) => ToastData[],

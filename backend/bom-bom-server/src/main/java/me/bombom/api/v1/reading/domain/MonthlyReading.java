@@ -51,11 +51,12 @@ public class MonthlyReading {
         this.nextRankDifference = nextRankDifference;
     }
 
-    public static MonthlyReading create(Long memberId, long lowestRank) {
+    public static MonthlyReading create(Long memberId, long lowestRank, long lowestDifference) {
         return MonthlyReading.builder()
                 .memberId(memberId)
                 .currentCount(INITIAL_CURRENT_COUNT)
                 .rank(lowestRank)
+                .nextRankDifference(lowestDifference)
                 .build();
     }
 

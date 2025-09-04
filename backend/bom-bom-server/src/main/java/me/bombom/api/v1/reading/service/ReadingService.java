@@ -10,6 +10,7 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.pet.ScorePolicyConstants;
 import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.LowestRankWithDifference;
 import me.bombom.api.v1.reading.domain.MonthlyReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
@@ -53,7 +54,12 @@ public class ReadingService {
         WeeklyReading newWeeklyReading = WeeklyReading.create(memberId);
         weeklyReadingRepository.save(newWeeklyReading);
 
-        MonthlyReading newMonthlyReading = MonthlyReading.create(memberId, initializeReadingRank());
+        LowestRankWithDifference lowestRankWithDifference = computeLowestRankWithDifference();
+        MonthlyReading newMonthlyReading = MonthlyReading.create(
+                memberId,
+                lowestRankWithDifference.rank(),
+                lowestRankWithDifference.difference()
+        );
         monthlyReadingRepository.save(newMonthlyReading);
 
         YearlyReading newYearlyReading = YearlyReading.create(memberId, LocalDate.now().getYear());
@@ -168,12 +174,18 @@ public class ReadingService {
         monthlyReadingRepository.updateMonthlyRanking();
     }
 
-    private long initializeReadingRank() {
+    private LowestRankWithDifference computeLowestRankWithDifference() {
         MonthlyReading lowestRankMonthlyReading = monthlyReadingRepository.findTopByOrderByRankDesc();
         if (lowestRankMonthlyReading.getCurrentCount() == 0) {
-            return lowestRankMonthlyReading.getRank();
+            return LowestRankWithDifference.of(
+                    lowestRankMonthlyReading.getRank(),
+                    lowestRankMonthlyReading.getNextRankDifference()
+            );
         }
-        return lowestRankMonthlyReading.getRank() + 1;
+        return LowestRankWithDifference.of(
+                lowestRankMonthlyReading.getRank() + 1,
+                lowestRankMonthlyReading.getCurrentCount()
+        );
     }
 
     private boolean shouldResetContinueReadingCount(TodayReading todayReading) {

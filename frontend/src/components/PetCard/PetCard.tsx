@@ -66,7 +66,7 @@ const PetCard = () => {
 
       <PetImageContainer>
         <PetImage
-          src={petImages[level ?? 1]}
+          src={petImages[level]}
           alt="pet"
           width={PET_WIDTH[level]}
           height={120}
@@ -85,7 +85,7 @@ const PetCard = () => {
       </PetImageContainer>
 
       <Level>
-        레벨 {level} : {PET_LABEL[level ?? LEVEL.min]}
+        레벨 {level} : {PET_LABEL[level]}
       </Level>
 
       <ProgressBar

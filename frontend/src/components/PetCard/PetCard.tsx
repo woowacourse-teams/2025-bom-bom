@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { PET_LEVEL } from './PetCard.constants';
+import { PET_LABEL, PET_WIDTH, LEVEL } from './PetCard.constants';
 import { heartAnimation, jumpAnimation } from './PetCard.keyframes';
 import Button from '../Button/Button';
 import ProgressBar from '../ProgressBar/ProgressBar';
@@ -26,14 +26,6 @@ const petImages: Record<number, string> = {
   5: petLv5,
 };
 
-const petWidth = {
-  1: 80,
-  2: 100,
-  3: 90,
-  4: 120,
-  5: 136,
-} as const;
-
 const PetCard = () => {
   const deviceType = useDeviceType();
   const [isAnimating, setIsAnimating] = useState(false);
@@ -52,17 +44,14 @@ const PetCard = () => {
     },
   });
 
-  const levelPercentage = calculateRate(
-    pet?.currentStageScore ?? 0,
-    pet?.requiredStageScore ?? 1,
-  );
+  if (!pet) return null;
+
+  const { level, isAttended, currentStageScore, requiredStageScore } = pet;
+  const levelPercentage = calculateRate(currentStageScore, requiredStageScore);
 
   const handleAttendanceClick = () => {
     mutatePetAttendance();
   };
-
-  const currentLevel = pet?.level ?? 1;
-  const width = petWidth[currentLevel as keyof typeof petWidth] ?? 80;
 
   return (
     <Container deviceType={deviceType}>
@@ -77,9 +66,9 @@ const PetCard = () => {
 
       <PetImageContainer>
         <PetImage
-          src={petImages[currentLevel ?? 1]}
+          src={petImages[level]}
           alt="pet"
-          width={width}
+          width={PET_WIDTH[level]}
           height={120}
           isAnimating={isAnimating}
           onAnimationEnd={() => setIsAnimating(false)}
@@ -96,17 +85,21 @@ const PetCard = () => {
       </PetImageContainer>
 
       <Level>
-        레벨 {currentLevel} :{' '}
-        {PET_LEVEL[(currentLevel ?? 1) as keyof typeof PET_LEVEL]}
+        레벨 {level} : {PET_LABEL[level]}
       </Level>
 
-      <ProgressBar rate={levelPercentage} caption={`${levelPercentage}%`} />
+      <ProgressBar
+        rate={level === LEVEL.max ? 100 : levelPercentage}
+        caption={
+          level === LEVEL.max ? `${currentStageScore}점` : `${levelPercentage}%`
+        }
+      />
 
       <AttendanceButton
         deviceType={deviceType}
-        text={pet?.isAttended ? '출석 완료!' : '출석체크하기'}
+        text={isAttended ? '출석 완료!' : '출석체크하기'}
         onClick={handleAttendanceClick}
-        disabled={pet?.isAttended}
+        disabled={isAttended}
       />
     </Container>
   );

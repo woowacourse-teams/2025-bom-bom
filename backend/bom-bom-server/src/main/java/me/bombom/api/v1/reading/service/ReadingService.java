@@ -53,7 +53,7 @@ public class ReadingService {
         WeeklyReading newWeeklyReading = WeeklyReading.create(memberId);
         weeklyReadingRepository.save(newWeeklyReading);
 
-        MonthlyReading newMonthlyReading = MonthlyReading.create(memberId);
+        MonthlyReading newMonthlyReading = MonthlyReading.create(memberId, initializeReadingRank());
         monthlyReadingRepository.save(newMonthlyReading);
 
         YearlyReading newYearlyReading = YearlyReading.create(memberId, LocalDate.now().getYear());
@@ -166,6 +166,14 @@ public class ReadingService {
     @Transactional
     public void updateMonthlyRanking() {
         monthlyReadingRepository.updateMonthlyRanking();
+    }
+
+    private long initializeReadingRank() {
+        MonthlyReading lowestRankMonthlyReading = monthlyReadingRepository.findTopByOrderByRankDesc();
+        if (lowestRankMonthlyReading.getCurrentCount() == 0) {
+            return lowestRankMonthlyReading.getRank();
+        }
+        return lowestRankMonthlyReading.getRank() + 1;
     }
 
     private boolean shouldResetContinueReadingCount(TodayReading todayReading) {

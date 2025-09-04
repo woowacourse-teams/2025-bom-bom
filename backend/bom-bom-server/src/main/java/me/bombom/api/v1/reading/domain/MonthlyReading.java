@@ -30,14 +30,14 @@ public class MonthlyReading {
     @Column(nullable = false, columnDefinition = "SMALLINT")
     private int currentCount;
 
-    private Long rank;
+    private long rank;
 
     @Builder
     public MonthlyReading(
             Long id,
             @NonNull Long memberId,
             int currentCount,
-            Long rank
+            long rank
     ) {
         this.id = id;
         this.memberId = memberId;
@@ -45,10 +45,11 @@ public class MonthlyReading {
         this.rank = rank;
     }
 
-    public static MonthlyReading create(Long memberId) {
+    public static MonthlyReading create(Long memberId, long lowestRank) {
         return MonthlyReading.builder()
                 .memberId(memberId)
                 .currentCount(INITIAL_CURRENT_COUNT)
+                .rank(lowestRank)
                 .build();
     }
 

@@ -52,4 +52,6 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
 		WHERE mr.memberId = :memberId
 	""")
 	MemberMonthlyReadingRankResponse findMemberRankAndTotal(@Param("memberId") Long memberId);
+
+	MonthlyReading findTopByOrderByRankDesc();
 }

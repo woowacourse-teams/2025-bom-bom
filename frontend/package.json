@@ -29,6 +29,7 @@
     "@babel/preset-env": "^7.28.0",
     "@babel/preset-react": "^7.27.1",
     "@babel/preset-typescript": "^7.27.1",
+    "@capacitor/cli": "^7.4.3",
     "@jest/globals": "^30.0.4",
     "@playwright/test": "^1.54.1",
     "@storybook/addon-docs": "^9.0.17",
@@ -79,6 +80,7 @@
     "webpack-dev-server": "^5.2.2"
   },
   "dependencies": {
+    "@capacitor/core": "^7.4.3",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@microsoft/clarity": "^1.0.0",

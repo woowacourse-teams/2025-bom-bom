@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkfrontend_=self.webpackChunkfrontend_||[]).push([[471],{1471:(n,e,r)=>{r.r(e),r.d(e,{component:()=>u});var s=r(5113),t=r(6180),c=r(4800),u=function(){return(0,c.jsx)(t.A,{children:(0,c.jsx)(s.sv,{})})}}}]);

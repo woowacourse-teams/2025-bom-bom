@@ -30,19 +30,25 @@ public class MonthlyReading {
     @Column(nullable = false, columnDefinition = "SMALLINT")
     private int currentCount;
 
+    @Column(nullable = false)
     private long rank;
+
+    @Column(nullable = false, columnDefinition = "SMALLINT")
+    private long nextRankDifference;
 
     @Builder
     public MonthlyReading(
             Long id,
             @NonNull Long memberId,
             int currentCount,
-            long rank
+            long rank,
+            long nextRankDifference
     ) {
         this.id = id;
         this.memberId = memberId;
         this.currentCount = currentCount;
         this.rank = rank;
+        this.nextRankDifference = nextRankDifference;
     }
 
     public static MonthlyReading create(Long memberId, long lowestRank) {

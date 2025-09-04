@@ -160,7 +160,7 @@ public class ReadingService {
     }
 
     public MemberMonthlyReadingRankResponse getMemberMonthlyReadingRank(Member member) {
-        return monthlyReadingRepository.findMemberRankAndTotal(member.getId());
+        return monthlyReadingRepository.findMemberRankAndGap(member.getId());
     }
 
     @Transactional

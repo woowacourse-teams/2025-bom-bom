@@ -30,28 +30,30 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Query(value = """
 		UPDATE monthly_reading mr
-		SET mr.rank = (
-		    SELECT rnk FROM (
-		      SELECT member_id,
-		             DENSE_RANK() OVER (ORDER BY current_count DESC) AS rnk
-		      FROM monthly_reading
-		    ) r
-		    WHERE r.member_id = mr.member_id
-		)
+		JOIN (
+		 SELECT
+		   mr2.member_id,
+		   RANK() OVER (ORDER BY mr2.current_count DESC) AS rnk,
+		   COALESCE(
+			    (SELECT MIN(x.current_count)
+			    FROM monthly_reading x
+			    WHERE x.current_count > mr2.current_count) - mr2.current_count, 0) AS next_rank_difference
+		 FROM monthly_reading mr2) c 
+		ON c.member_id = mr.member_id
+		SET mr.rank = c.rnk, mr.next_rank_difference = c.next_rank_difference;
 	""", nativeQuery = true)
 	void updateMonthlyRanking();
 
 	@Query("""
 		SELECT new me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse(
-		  COALESCE(mr.rank, 0) AS rank,
+		  mr.rank AS rank,
 		  mr.currentCount AS readCount,
-		  COALESCE((MIN(prev.currentCount) - mr.currentCount), 0) AS nextRankDifference
+		  mr.nextRankDifference AS nextRankDifference
 		)
 		FROM MonthlyReading mr
-		LEFT JOIN MonthlyReading prev ON prev.rank = mr.rank - 1
 		WHERE mr.memberId = :memberId
 	""")
-	MemberMonthlyReadingRankResponse findMemberRankAndTotal(@Param("memberId") Long memberId);
+	MemberMonthlyReadingRankResponse findMemberRankAndGap(@Param("memberId") Long memberId);
 
 	MonthlyReading findTopByOrderByRankDesc();
 }

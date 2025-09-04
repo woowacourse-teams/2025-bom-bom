@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class ReadingScheduler {
 
     private static final String TIME_ZONE = "Asia/Seoul";
-    private static final String HOURLY_CRON = "0 0 * * * *";
+    public static final String EVERY_TEN_MINUTES_CRON = "0 */10 * * * *";
     private static final String DAILY_CRON = "0 0 0 * * *";
     private static final String WEEKLY_CRON = "0 0 0 * * MON";
     private static final String MONTHLY_CRON = "0 0 0 1 * ?";
@@ -43,7 +43,7 @@ public class ReadingScheduler {
         readingService.passMonthlyCountToYearly();
     }
 
-    @Scheduled(cron = HOURLY_CRON, zone = TIME_ZONE)
+    @Scheduled(cron = EVERY_TEN_MINUTES_CRON, zone = "Asia/Seoul")
     public void hourlyCalculateMemberRank() {
         log.info("이달의 독서왕 순위 업데이트");
         readingService.updateMonthlyRanking();

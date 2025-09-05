@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
+import { isElementVisible } from '@/utils/element';
 
 interface UseFocusTrapParams {
   isActive?: boolean;
@@ -28,17 +29,6 @@ const FOCUSABLE_ELEMENTS = [
   'details > summary:first-of-type',
   'details[open] summary:not(:first-child)',
 ].join(',');
-
-const isElementVisible = (element: HTMLElement): boolean => {
-  const style = window.getComputedStyle(element);
-  return (
-    style.display !== 'none' &&
-    style.visibility !== 'hidden' &&
-    style.opacity !== '0' &&
-    element.offsetWidth > 0 &&
-    element.offsetHeight > 0
-  );
-};
 
 const isElementNotInert = (element: HTMLElement): boolean => {
   return !element.closest('[inert]');

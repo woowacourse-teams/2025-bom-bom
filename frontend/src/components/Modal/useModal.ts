@@ -16,7 +16,7 @@ const useModal = () => {
   }, []);
 
   const clickOutsideRef = useClickOutsideRef<HTMLDivElement>(closeModal);
-  const { containerRef: focusTrapRef } = useFocusTrap<HTMLDivElement>({
+  const focusTrapRef = useFocusTrap<HTMLDivElement>({
     isActive: isOpen,
   });
 

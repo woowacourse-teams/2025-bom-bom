@@ -132,9 +132,7 @@ const useFocusTrap = <T extends HTMLElement>({
     };
   }, [isActive, handleKeyDownTab, handleTrackFocus]);
 
-  return {
-    containerRef,
-  };
+  return containerRef;
 };
 
 export default useFocusTrap;

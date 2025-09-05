@@ -43,7 +43,7 @@ public class ReadingScheduler {
         readingService.passMonthlyCountToYearly();
     }
 
-    @Scheduled(cron = EVERY_TEN_MINUTES_CRON, zone = "Asia/Seoul")
+    @Scheduled(cron = EVERY_TEN_MINUTES_CRON, zone = TIME_ZONE)
     public void hourlyCalculateMemberRank() {
         log.info("이달의 독서왕 순위 업데이트");
         readingService.updateMonthlyRanking();

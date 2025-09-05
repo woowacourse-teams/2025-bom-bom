@@ -20,3 +20,4 @@ JOIN (
     ) c
 ON c.member_id = mr.member_id
 SET mr.rank = c.rnk, mr.next_rank_difference = c.gap;
+WHERE mr.rank IS NULL;

@@ -29,10 +29,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.transaction.TestTransaction;
-import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
-@Transactional
 @ActiveProfiles("test")
 @Import({ReadingService.class, QuerydslConfig.class})
 class ReadingServiceTest {

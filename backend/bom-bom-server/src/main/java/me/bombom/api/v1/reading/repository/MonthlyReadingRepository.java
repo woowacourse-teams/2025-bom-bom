@@ -17,12 +17,12 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
 	@Query(value = """
 		SELECT
 			m.nickname AS nickname,
-			mr.rank AS rank,
+			mr.`rank` AS `rank`,
 			mr.current_count AS monthlyReadCount
 		FROM monthly_reading mr
 		JOIN member m ON mr.member_id = m.id
-		WHERE mr.rank IS NOT NULL
-		ORDER BY mr.rank ASC, m.nickname ASC
+		WHERE mr.`rank` IS NOT NULL
+		ORDER BY mr.`rank` ASC, m.nickname ASC
 		LIMIT :limit
 	""", nativeQuery = true)
 	List<MonthlyReadingRankResponse> findMonthlyRanking(@Param("limit") int limit);
@@ -30,7 +30,7 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Query(value = """
 		UPDATE monthly_reading mr
-		SET mr.rank = 
+		SET mr.`rank` = 
 			    (SELECT r.rnk
 				 FROM (SELECT m.member_id, RANK() OVER (ORDER BY m.current_count DESC) AS rnk
 				 FROM monthly_reading m) r

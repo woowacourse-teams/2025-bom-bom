@@ -1,12 +1,12 @@
 import styled from '@emotion/styled';
-import { PropsWithChildren, RefObject } from 'react';
+import { PropsWithChildren, Ref } from 'react';
 import { theme } from '@/styles/theme';
 import CloseIcon from '#/assets/close.svg';
 
 type PositionType = 'center' | 'bottom';
 
 interface UseModalParams extends PropsWithChildren {
-  modalRef: RefObject<HTMLDivElement | null>;
+  modalRef: Ref<HTMLDivElement | null>;
   closeModal: () => void;
   isOpen: boolean;
   position?: PositionType;

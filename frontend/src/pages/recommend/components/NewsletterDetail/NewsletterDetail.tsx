@@ -257,7 +257,7 @@ const Description = styled.p<{ isMobile: boolean }>`
     isMobile ? theme.fonts.body2 : theme.fonts.body1};
 `;
 
-const DetailLink = styled.a<{ isMobile: boolean }>`
+const DetailLink = styled.button<{ isMobile: boolean }>`
   display: flex;
   gap: 4px;
   align-items: center;

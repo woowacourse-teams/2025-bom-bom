@@ -2,6 +2,7 @@ import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
 import useFocusTrap from '@/hooks/useFocusTrap';
 import useKeydownEscape from '@/hooks/useKeydownEscape';
+import { compoundRefs } from '@/utils/element';
 
 const useModal = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,13 +21,7 @@ const useModal = () => {
     isActive: isOpen,
   });
 
-  const modalRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      clickOutsideRef.current = node;
-      focusTrapRef.current = node;
-    },
-    [clickOutsideRef, focusTrapRef],
-  );
+  const modalRef = compoundRefs<HTMLDivElement>(clickOutsideRef, focusTrapRef);
 
   const toggleScrollLock = useCallback(() => {
     if (isOpen) {

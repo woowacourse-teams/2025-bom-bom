@@ -25,9 +25,10 @@
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
                 <timestamp fieldName="time" pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX"/>
+                <pattern>{"level":"%level","logger":"%logger","thread":"%thread"}</pattern>
                 <mdc>
-                    <includeMdcKeyName>traceId</includeMdcKeyName>
-                    <includeMdcKeyName>spanId</includeMdcKeyName>
+                    <includeMdcKeyName>trace_id</includeMdcKeyName>
+                    <includeMdcKeyName>span_id</includeMdcKeyName>
                     <includeMdcKeyName>userId</includeMdcKeyName>
                     <includeMdcKeyName>API</includeMdcKeyName>
                     <includeMdcKeyName>method</includeMdcKeyName>

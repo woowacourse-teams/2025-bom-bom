@@ -79,8 +79,8 @@ const Container = styled.div<{ deviceType: DeviceType }>`
     `
       position: fixed;
       top: env(safe-area-inset-top);
-      right: 0;
       left: 0;
+      right: 0;
       z-index: ${theme.zIndex.header};
       border-bottom: 1px solid ${theme.colors.stroke};
       background-color: ${theme.colors.white};

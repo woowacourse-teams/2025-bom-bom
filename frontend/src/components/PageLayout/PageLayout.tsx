@@ -33,7 +33,7 @@ const PageLayout = ({ children }: PropsWithChildren) => {
 
   return (
     <Container isMobile={isMobile} isHeaderInvisible={isHeaderInvisible}>
-      {!isHeaderInvisible && <Header activeNav={activeNav} />}
+      <Header activeNav={activeNav} hideTopHeader={isHeaderInvisible} />
       {children}
     </Container>
   );

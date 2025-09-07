@@ -7,17 +7,20 @@ import { NavType } from '@/types/nav';
 
 interface HeaderProps {
   activeNav: NavType;
+  hideTopHeader?: boolean;
 }
 
-export default function Header({ activeNav }: HeaderProps) {
+const Header = ({ activeNav, hideTopHeader = false }: HeaderProps) => {
   const deviceType = useDeviceType();
 
   return deviceType === 'mobile' ? (
     <>
-      <MobileHeaderContainer>
-        <HeaderLogo deviceType={deviceType} />
-        <HeaderProfile deviceType={deviceType} />
-      </MobileHeaderContainer>
+      {!hideTopHeader && (
+        <MobileHeaderContainer>
+          <HeaderLogo deviceType={deviceType} />
+          <HeaderProfile deviceType={deviceType} />
+        </MobileHeaderContainer>
+      )}
 
       <BottomNavWrapper>
         <HeaderNavButtons activeNav={activeNav} deviceType={deviceType} />
@@ -36,7 +39,9 @@ export default function Header({ activeNav }: HeaderProps) {
       </HeaderInner>
     </HeaderContainer>
   );
-}
+};
+
+export default Header;
 
 const MobileHeaderContainer = styled.header`
   position: fixed;

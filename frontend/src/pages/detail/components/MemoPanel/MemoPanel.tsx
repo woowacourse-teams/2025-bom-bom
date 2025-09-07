@@ -101,7 +101,7 @@ const Container = styled.aside<{ isOpen: boolean }>`
 
 const ToggleButton = styled.button<{ isOpen: boolean }>`
   position: absolute;
-  top: 50%;
+  top: 80vh;
   left: -40px;
   width: 40px;
   height: 80px;

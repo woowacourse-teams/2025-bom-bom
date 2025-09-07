@@ -106,7 +106,7 @@ const ArticleActionButtons = styled(FloatingActionButtons)`
 const ArticleContent = styled.div<{ deviceType: DeviceType }>`
   max-width: 700px;
   margin: 0 auto;
-  padding: ${({ deviceType }) => (deviceType === 'mobile' ? '0' : '0 16px')};
+  padding: ${({ deviceType }) => (deviceType !== 'pc' ? '120px 0' : '0 16px')};
   border-right: 1px solid
     ${({ theme, deviceType }) =>
       deviceType === 'mobile' ? 'transparent' : theme.colors.stroke};

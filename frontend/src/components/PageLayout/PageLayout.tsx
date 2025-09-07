@@ -28,9 +28,12 @@ const PageLayout = ({ children }: PropsWithChildren) => {
 
   const activeNav = navMap[location] || previousNavRef.current;
 
+  const isArticlePage = location.startsWith('/articles/');
+  const isHeaderInvisible = isArticlePage && deviceType !== 'pc';
+
   return (
-    <Container isMobile={isMobile}>
-      <Header activeNav={activeNav} />
+    <Container isMobile={isMobile} isHeaderInvisible={isHeaderInvisible}>
+      {!isHeaderInvisible && <Header activeNav={activeNav} />}
       {children}
     </Container>
   );
@@ -38,15 +41,20 @@ const PageLayout = ({ children }: PropsWithChildren) => {
 
 export default PageLayout;
 
-const Container = styled.div<{ isMobile: boolean }>`
+const Container = styled.div<{
+  isMobile: boolean;
+  isHeaderInvisible: boolean;
+}>`
   min-height: 100dvh;
-  padding: ${({ isMobile, theme }) => {
+  padding: ${({ isMobile, theme, isHeaderInvisible }) => {
     const sidePadding = isMobile ? '12px' : '24px';
     const headerHeight = isMobile
       ? theme.heights.headerMobile
       : theme.heights.headerPC;
 
-    const topPadding = `calc(${headerHeight} + env(safe-area-inset-top) + ${sidePadding})`;
+    const topPadding = isHeaderInvisible
+      ? `calc(env(safe-area-inset-top) + ${sidePadding})`
+      : `calc(${headerHeight} + env(safe-area-inset-top) + ${sidePadding})`;
     const bottomPadding = isMobile
       ? `calc(${theme.heights.bottomNav} + env(safe-area-inset-bottom) + ${sidePadding})`
       : `calc(env(safe-area-inset-bottom) + ${sidePadding})`;

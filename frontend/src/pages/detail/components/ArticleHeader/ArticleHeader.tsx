@@ -29,7 +29,7 @@ const ArticleHeader = ({
   const deviceType = useDeviceType();
 
   return (
-    <Container>
+    <Container deviceType={deviceType}>
       <TitleRow>
         <Title deviceType={deviceType}>{title}</Title>
       </TitleRow>
@@ -64,14 +64,27 @@ const ArticleHeader = ({
 
 export default ArticleHeader;
 
-const Container = styled.div`
-  padding: 20px 0;
+const Container = styled.div<{ deviceType: DeviceType }>`
+  padding: ${({ deviceType }) =>
+    deviceType === 'pc' ? '20px 0' : '20px 12px'};
 
   display: flex;
   gap: 12px;
   flex-direction: column;
   align-items: flex-start;
   align-self: stretch;
+
+  ${({ theme, deviceType }) =>
+    deviceType !== 'pc' &&
+    `
+      position: fixed;
+      top: env(safe-area-inset-top);
+      right: 0;
+      left: 0;
+      z-index: ${theme.zIndex.header};
+      border-bottom: 1px solid ${theme.colors.stroke};
+      background-color: ${theme.colors.white};
+    `}
 `;
 
 const TitleRow = styled.div`

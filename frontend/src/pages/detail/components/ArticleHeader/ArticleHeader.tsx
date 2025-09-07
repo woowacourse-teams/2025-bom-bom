@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import Chip from '@/components/Chip/Chip';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
-import useMediaQuery from '@/hooks/useMediaQuery';
 import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
 import BookmarkActiveIcon from '#/assets/bookmark-active.svg';
@@ -27,10 +26,6 @@ const ArticleHeader = ({
   bookmarked = false,
   onBookmarkClick,
 }: ArticleHeaderProps) => {
-  const isBookmarkButtonVisible = useMediaQuery({
-    key: 'max-width',
-    value: 1350,
-  });
   const deviceType = useDeviceType();
 
   return (
@@ -46,7 +41,7 @@ const ArticleHeader = ({
           <ClockIcon width={16} height={16} />
           <MetaInfoText>{expectedReadTime}분</MetaInfoText>
         </ReadTimeBox>
-        {isBookmarkButtonVisible && onBookmarkClick && (
+        {deviceType !== 'pc' && onBookmarkClick && (
           <BookmarkButton
             type="button"
             onClick={() => onBookmarkClick?.(bookmarked)}

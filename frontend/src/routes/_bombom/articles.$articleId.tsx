@@ -99,6 +99,8 @@ const Container = styled.div`
 const ArticleActionButtons = styled(FloatingActionButtons)`
   position: fixed;
   top: 70vh;
+
+  transform: translateX(-200%);
 `;
 
 const ArticleContent = styled.div<{ deviceType: DeviceType }>`

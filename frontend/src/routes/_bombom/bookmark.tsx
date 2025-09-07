@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react';
 import { queries } from '@/apis/queries';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
+import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import BookmarkIcon from '#/assets/bookmark-inactive.svg';
@@ -63,6 +64,7 @@ function BookmarkPage() {
               selectedNewsletterId={selectedNewsletterId}
               onSelectNewsletter={handleNewsletterChange}
             />
+            <QuickMenu />
           </SidebarSection>
 
           <MainContentSection deviceType={deviceType}>

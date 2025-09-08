@@ -1,8 +1,5 @@
 package me.bombom.api.v1.common.config;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.interfaces.ECPrivateKey;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
@@ -105,18 +102,9 @@ public class SecurityConfig {
 
     @Bean
     public ECPrivateKey applePrivateKey(
-            @Value("${oauth2.apple.private-key-path}") String privateKeyPath,
             @Value("${oauth2.apple.private-key}") String privateKeyPem
     ) {
-        String pem = privateKeyPem;
-        if (privateKeyPath != null && !privateKeyPath.isBlank()) {
-            try {
-                pem = Files.readString(Path.of(privateKeyPath), StandardCharsets.UTF_8);
-            } catch (Exception e) {
-                throw new IllegalStateException("Failed to read Apple .p8 from path: " + privateKeyPath, e);
-            }
-        }
-        return new ApplePrivateKeyLoader().loadFromPem(pem);
+        return new ApplePrivateKeyLoader().loadFromPem(privateKeyPem);
     }
 
     @Bean

@@ -37,5 +37,11 @@ jobs:
           printf '%s' "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
 
       - name: 빌드하기 및 테스트 하기
-        run: ./gradlew clean build
+        shell: bash
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          set -euo pipefail
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          ./gradlew clean build
           

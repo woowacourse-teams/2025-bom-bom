@@ -90,7 +90,7 @@ public class NewsletterSubscriptionCount {
         return Math.min(decade, MAX_DECADE); // 6 == 60+
     }
 
-    public void incrementByDecade(int decade) {
+    public void increaseByDecade(int decade) {
         switch (decade) {
             case 0 -> this.age0s++;
             case 1 -> this.age10s++;

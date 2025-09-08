@@ -29,6 +29,6 @@ public class NewsletterSubscriptionCountService {
                 .getYear();
         NewsletterSubscriptionCount newsletterSubscriptionCount = newsletterSubscriptionCountRepository.findByNewsletterId(newsletterId)
                 .orElseGet(() -> newsletterSubscriptionCountRepository.save(NewsletterSubscriptionCount.from(newsletterId)));
-        newsletterSubscriptionCount.incrementByDecade(NewsletterSubscriptionCount.toDecadeBucket(LocalDate.now().getYear(), birthYear));
+        newsletterSubscriptionCount.increaseByDecade(NewsletterSubscriptionCount.toDecadeBucket(LocalDate.now().getYear(), birthYear));
     }
 }

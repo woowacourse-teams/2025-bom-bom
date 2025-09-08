@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { ENV } from '@/apis/env';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
+import AppleIcon from '#/assets/apple.svg';
 import GoogleIcon from '#/assets/google.svg';
 import SparklesIcon from '#/assets/sparkles.svg';
 
@@ -27,7 +28,7 @@ const LoginCard = () => {
         </GreetingMessage>
       </GreetingWrapper>
       <Divider />
-      <GoogleButton
+      <LoginButton
         onClick={() => {
           const envQuery = ENV.nodeEnv === 'development' ? '?env=local' : '';
           window.location.href = `${ENV.baseUrl}/auth/login/google${envQuery}`;
@@ -36,7 +37,16 @@ const LoginCard = () => {
       >
         <GoogleIcon width={24} height={24} fill="black" />
         Google로 시작하기
-      </GoogleButton>
+      </LoginButton>
+      <LoginButton
+        onClick={() => {
+          window.location.href = `${ENV.baseUrl}/auth/login/apple`;
+        }}
+        type="button"
+      >
+        <AppleIcon width={24} height={24} fill="black" />
+        Apple로 시작하기
+      </LoginButton>
       <Terms>
         로그인하시면 봄봄의 <Highlight>서비스 약관</Highlight>과
         <Highlight>개인정보 처리방침</Highlight>에{'\n'}
@@ -122,7 +132,7 @@ const Divider = styled.div`
   );
 `;
 
-const GoogleButton = styled.button`
+const LoginButton = styled.button`
   width: 100%;
   padding: 12px;
   border: 2px solid ${({ theme }) => theme.colors.dividers};
@@ -130,7 +140,7 @@ const GoogleButton = styled.button`
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 5%);
 
   display: flex;
-  gap: 18px;
+  gap: 12px;
   align-items: center;
   justify-content: center;
 

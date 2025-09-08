@@ -20,7 +20,6 @@ public class NewsletterSubscriptionCountService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateNewsletterSubscriptionCount(Long newsletterId, Long memberId) {
-
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("멤버가 존재하지 않습니다."));
         if (member.getBirthDate() == null) {
@@ -28,9 +27,7 @@ public class NewsletterSubscriptionCountService {
         }
         int birthYear = member.getBirthDate()
                 .getYear();
-
-        NewsletterSubscriptionCount newsletterSubscriptionCount = newsletterSubscriptionCountRepository.findByNewsletterId(
-                        newsletterId)
+        NewsletterSubscriptionCount newsletterSubscriptionCount = newsletterSubscriptionCountRepository.findByNewsletterId(newsletterId)
                 .orElseGet(() -> newsletterSubscriptionCountRepository.save(NewsletterSubscriptionCount.from(newsletterId)));
         newsletterSubscriptionCount.incrementByDecade(NewsletterSubscriptionCount.toDecadeBucket(LocalDate.now().getYear(), birthYear));
     }

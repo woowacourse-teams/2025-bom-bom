@@ -40,7 +40,7 @@ jobs:
           mkdir -p src/test/resources
           printf '%s' "$APPLICATION_TEST_PROPERTIES" > src/test/resources/application.yml
 
-      - name: Build & Test (verbose)
+      - name: Build & Test
         shell: bash
         env:
           SPRING_PROFILES_ACTIVE: test
@@ -48,14 +48,5 @@ jobs:
         run: |
           set -euo pipefail
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
-      
-          set +e
-          ./gradlew clean build --no-daemon -i --stacktrace \
-            -Dlogging.level.org.springframework.core.env=TRACE \
-            -Dlogging.level.org.springframework.beans=DEBUG \
-            -Dlogging.level.org.springframework.context.support=DEBUG | tee build.log
-          ec=${PIPESTATUS[0]}
-          echo "===== Scan important errors ====="
-          grep -E "Could not resolve placeholder|PlaceholderResolutionException|BeanCreationException|NoSuchBeanDefinitionException" -n build.log || true
-          exit $ec
+          ./gradlew clean build --no-daemon
           

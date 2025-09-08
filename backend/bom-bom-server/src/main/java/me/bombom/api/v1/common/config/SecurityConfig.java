@@ -101,15 +101,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public ECPrivateKey applePrivateKey(@Value("${apple.private-key:-----BEGIN PRIVATE KEY-----\nMIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgdrWTOOPhsxyHh45Q\nAHR9+rg8HD1tS2PVUn9rzPwl5cKgCgYIKoZIzj0DAQehRANCAAQadK733l7Y2WJ6\nOjWCkisTN2p7FBkT7d1ba3odHu/cLPfb6biTFdrTpl5DNlvSx0WZFDdyQcH989X4\nltZ+V7Nw\n-----END PRIVATE KEY-----}") String privateKeyPem) {
+    public ECPrivateKey applePrivateKey(@Value("${oauth2.apple.private-key:-----BEGIN PRIVATE KEY-----\nMIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgdrWTOOPhsxyHh45Q\nAHR9+rg8HD1tS2PVUn9rzPwl5cKgCgYIKoZIzj0DAQehRANCAAQadK733l7Y2WJ6\nOjWCkisTN2p7FBkT7d1ba3odHu/cLPfb6biTFdrTpl5DNlvSx0WZFDdyQcH989X4\nltZ+V7Nw\n-----END PRIVATE KEY-----}") String privateKeyPem) {
         return new ApplePrivateKeyLoader().loadFromPem(privateKeyPem);
     }
 
     @Bean
     public Supplier<String> appleClientSecretSupplier(
-            @Value("${apple.team-id:TEST_TEAM_ID}") String teamId,
-            @Value("${apple.key-id:TEST_KEY_ID}") String keyId,
-            @Value("${spring.security.oauth2.client.registration.apple.client-id:test.apple.client.id}") String clientId,
+            @Value("${oauth2.apple.team-id:TEST_TEAM_ID}") String teamId,
+            @Value("${oauth2.apple.key-id:TEST_KEY_ID}") String keyId,
+            @Value("${oauth2.apple.client-id:test.apple.client.id}") String clientId,
             ECPrivateKey applePrivateKey
     ) {
         return new AppleClientSecretSupplier(teamId, keyId, clientId, applePrivateKey);

@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
 import ProgressBar from '@/components/ProgressBar/ProgressBar';
 import Spacing from '@/components/Spacing/Spacing';
@@ -23,6 +23,7 @@ function ArticleDetailPage() {
   const { articleId } = Route.useParams();
   const articleIdNumber = Number(articleId);
   const deviceType = useDeviceType();
+  const router = useRouter();
 
   const { data: currentArticle } = useQuery(
     queries.articleById({ id: articleIdNumber }),
@@ -44,6 +45,10 @@ function ArticleDetailPage() {
   });
 
   useScrollRestoration({ pathname: articleId, enabled: !!currentArticle });
+
+  const handleBackClick = () => {
+    router.history.back();
+  };
 
   if (!currentArticle) return null;
 
@@ -71,6 +76,7 @@ function ArticleDetailPage() {
           expectedReadTime={currentArticle.expectedReadTime ?? 1}
           bookmarked={isBookmarked}
           onBookmarkClick={toggleBookmark}
+          onBackClick={handleBackClick}
         />
         <Divider />
 

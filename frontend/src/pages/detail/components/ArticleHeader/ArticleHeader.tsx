@@ -5,6 +5,7 @@ import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
 import BookmarkActiveIcon from '#/assets/bookmark-active.svg';
 import BookmarkInactiveIcon from '#/assets/bookmark-inactive.svg';
+import ChevronLeftIcon from '#/assets/chevron-left.svg';
 import ClockIcon from '#/assets/clock.svg';
 
 interface ArticleHeaderProps {
@@ -15,6 +16,7 @@ interface ArticleHeaderProps {
   expectedReadTime: number;
   bookmarked?: boolean;
   onBookmarkClick?: (bookmarked: boolean) => void;
+  onBackClick?: () => void;
 }
 
 const ArticleHeader = ({
@@ -25,11 +27,17 @@ const ArticleHeader = ({
   expectedReadTime,
   bookmarked = false,
   onBookmarkClick,
+  onBackClick,
 }: ArticleHeaderProps) => {
   const deviceType = useDeviceType();
 
   return (
     <Container deviceType={deviceType}>
+      {deviceType !== 'pc' && onBackClick && (
+        <BackButton type="button" onClick={onBackClick}>
+          <ChevronLeftIcon width={20} height={20} />
+        </BackButton>
+      )}
       <TitleRow>
         <Title deviceType={deviceType}>{title}</Title>
       </TitleRow>
@@ -41,7 +49,7 @@ const ArticleHeader = ({
           <ClockIcon width={16} height={16} />
           <MetaInfoText>{expectedReadTime}분</MetaInfoText>
         </ReadTimeBox>
-        {deviceType !== 'pc' && onBookmarkClick && (
+        {deviceType !== 'pc' && (
           <BookmarkButton
             type="button"
             onClick={() => onBookmarkClick?.(bookmarked)}
@@ -93,7 +101,6 @@ const TitleRow = styled.div`
   display: flex;
   gap: 12px;
   align-items: flex-start;
-  justify-content: space-between;
 `;
 
 const Title = styled.h2<{ deviceType: DeviceType }>`
@@ -102,6 +109,18 @@ const Title = styled.h2<{ deviceType: DeviceType }>`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme, deviceType }) =>
     deviceType === 'mobile' ? theme.fonts.heading4 : theme.fonts.heading3};
+`;
+
+const BackButton = styled.button`
+  padding: 4px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: transparent;
+  color: ${({ theme }) => theme.colors.icons};
 `;
 
 const BookmarkButton = styled.button`

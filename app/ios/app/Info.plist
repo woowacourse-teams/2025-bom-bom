@@ -28,7 +28,7 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>app</string>
-          <string>com.anonymous.app</string>
+          <string>com.antarctica.bombom</string>
         </array>
       </dict>
     </array>
@@ -58,7 +58,7 @@
     <key>UIRequiresFullScreen</key>
     <false/>
     <key>UIStatusBarStyle</key>
-    <string/>
+    <string>UIStatusBarStyleDefault</string>
     <key>UISupportedInterfaceOrientations</key>
     <array>
       <string>UIInterfaceOrientationPortrait</string>

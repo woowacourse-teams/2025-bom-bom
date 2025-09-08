@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.antarctica.bombom.app"
+      "bundleIdentifier": "com.antarctica.bombom"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +18,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.antarctica.bombom.app"
+      "package": "com.antarctica.bombom"
     },
     "web": {
       "bundler": "metro",

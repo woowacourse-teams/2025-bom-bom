@@ -22,12 +22,19 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: application.yml 파일 만들기
+      - name: Write main application.yml
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p src/main/resources
-          echo "${{ secrets.APPLICATION_DEV_PROPERTIES }}" > src/main/resources/application.yml
+          printf '%s' "${{ secrets.APPLICATION_MAIN_PROPERTIES }}" > src/main/resources/application.yml
+
+      - name: Write test application.yml
+        shell: bash
+        run: |
+          set -euo pipefail
           mkdir -p src/test/resources
-          echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
+          printf '%s' "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
 
       - name: 빌드하기 및 테스트 하기
         run: ./gradlew clean build

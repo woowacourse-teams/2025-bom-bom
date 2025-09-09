@@ -9,7 +9,11 @@ const CHROME_USER_AGENT =
 export default function RootLayout() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <WebView source={{ uri: 'https://dev.bombom.news' }} userAgent={CHROME_USER_AGENT} />
+      <WebView
+        source={{ uri: 'https://dev.bombom.news' }}
+        userAgent={CHROME_USER_AGENT}
+        allowsBackForwardNavigationGestures={true}
+      />
     </SafeAreaView>
   );
 }

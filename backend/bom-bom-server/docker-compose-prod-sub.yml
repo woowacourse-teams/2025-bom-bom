@@ -7,6 +7,7 @@ services:
       - 80:8080
       - 8081:8081
     environment:
+      SPRING_PROFILES_ACTIVE: prod
       SPRING_DATASOURCE_URL: jdbc:mysql://${RDS_ENDPOINT}:3306/${DATABASE}?useSSL=false&serverTimezone=Asia/Seoul
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}

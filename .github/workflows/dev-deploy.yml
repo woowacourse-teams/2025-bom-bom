@@ -30,7 +30,7 @@ jobs:
           APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICATION_TEST_PROPERTIES }}
         run: |
           mkdir -p src/main/resources src/test/resources
-          printf '%s' "${APPLICATION_MAIN_PROPERTIES:-}" > src/main/resources/application.yml
+          printf '%s' "${APPLICATION_DEV_PROPERTIES:-}" > src/main/resources/application.yml
           printf '%s' "${APPLICATION_TEST_PROPERTIES:-}" > src/test/resources/application.yml
 
       - name: 빌드 및 테스트

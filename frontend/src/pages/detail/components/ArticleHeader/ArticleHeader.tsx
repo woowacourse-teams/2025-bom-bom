@@ -32,7 +32,7 @@ const ArticleHeader = ({
   const deviceType = useDeviceType();
 
   return (
-    <Container deviceType={deviceType}>
+    <Container>
       {deviceType !== 'pc' && onBackClick && (
         <BackButton type="button" onClick={onBackClick}>
           <ChevronLeftIcon width={20} height={20} />
@@ -72,27 +72,14 @@ const ArticleHeader = ({
 
 export default ArticleHeader;
 
-const Container = styled.div<{ deviceType: DeviceType }>`
-  padding: ${({ deviceType }) =>
-    deviceType === 'pc' ? '20px 0' : '20px 12px'};
+const Container = styled.div`
+  padding: 20px 0;
 
   display: flex;
   gap: 12px;
   flex-direction: column;
   align-items: flex-start;
   align-self: stretch;
-
-  ${({ theme, deviceType }) =>
-    deviceType !== 'pc' &&
-    `
-      position: fixed;
-      top: env(safe-area-inset-top);
-      left: 0;
-      right: 0;
-      z-index: ${theme.zIndex.header};
-      border-bottom: 1px solid ${theme.colors.stroke};
-      background-color: ${theme.colors.white};
-    `}
 `;
 
 const TitleRow = styled.div`

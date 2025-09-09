@@ -112,7 +112,7 @@ const ArticleActionButtons = styled(FloatingActionButtons)`
 const ArticleContent = styled.div<{ deviceType: DeviceType }>`
   max-width: 700px;
   margin: 0 auto;
-  padding: ${({ deviceType }) => (deviceType !== 'pc' ? '120px 0' : '0 16px')};
+  padding: ${({ deviceType }) => (deviceType === 'mobile' ? '0' : '0 16px')};
   border-right: 1px solid
     ${({ theme, deviceType }) =>
       deviceType === 'mobile' ? 'transparent' : theme.colors.stroke};
@@ -129,11 +129,9 @@ const ArticleContent = styled.div<{ deviceType: DeviceType }>`
 const ArticleProgressBar = styled(ProgressBar)<{ deviceType: DeviceType }>`
   position: fixed;
   top: ${({ deviceType, theme }) =>
-    deviceType === 'pc'
-      ? `calc(${theme.heights.headerPC} + env(safe-area-inset-top))`
-      : `calc(env(safe-area-inset-top) + 160px);`};
-  right: 0;
-  left: 0;
+    deviceType === 'mobile'
+      ? `calc(${theme.heights.headerMobile} + env(safe-area-inset-top))`
+      : `calc(${theme.heights.headerPC} + env(safe-area-inset-top))`};
   z-index: ${({ theme }) => theme.zIndex.floating};
   height: 4px;
 `;

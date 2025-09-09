@@ -30,7 +30,10 @@
             String provider = userRequest.getClientRegistration().getRegistrationId();
             OAuth2Provider oAuth2Provider = OAuth2Provider.from(provider);
             String providerId = oAuth2User.getAttribute(oAuth2Provider.getIdKey());
-            String profileUrl = oAuth2User.getAttribute(oAuth2Provider.getProfileImageKey());
+            String profileUrl = "";
+            if (oAuth2Provider == OAuth2Provider.GOOGLE) {
+                profileUrl = oAuth2User.getAttribute(oAuth2Provider.getProfileImageKey());
+            }
 
             Optional<Member> member = memberRepository.findByProviderAndProviderIdIncludeDeleted(provider, providerId);
 

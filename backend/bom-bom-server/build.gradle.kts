@@ -45,6 +45,7 @@ dependencies {
     // spring security
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("com.nimbusds:nimbus-jose-jwt:10.4.2")
 
     // prometheus
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -72,6 +73,13 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    // CI 안정성: 테스트 프로필/DB/Flyway 비활성 강제
+    systemProperty("spring.profiles.active", System.getProperty("spring.profiles.active") ?: "test")
+    systemProperty("spring.flyway.enabled", "false")
+    systemProperty("spring.datasource.url", System.getProperty("spring.datasource.url") ?: "jdbc:h2:mem:test;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1")
+    systemProperty("spring.datasource.driver-class-name", System.getProperty("spring.datasource.driver-class-name") ?: "org.h2.Driver")
+    systemProperty("spring.datasource.username", System.getProperty("spring.datasource.username") ?: "sa")
+    systemProperty("spring.datasource.password", System.getProperty("spring.datasource.password") ?: "")
 }
 
 // Querydsl 생성된 파일 정리

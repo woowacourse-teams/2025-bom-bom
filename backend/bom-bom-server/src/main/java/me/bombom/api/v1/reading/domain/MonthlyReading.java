@@ -31,7 +31,7 @@ public class MonthlyReading {
     private int currentCount;
 
     @Column(nullable = false)
-    private long rank;
+    private long rankOrder;
 
     @Column(nullable = false, columnDefinition = "SMALLINT")
     private long nextRankDifference;
@@ -41,13 +41,13 @@ public class MonthlyReading {
             Long id,
             @NonNull Long memberId,
             int currentCount,
-            long rank,
+            long rankOrder,
             long nextRankDifference
     ) {
         this.id = id;
         this.memberId = memberId;
         this.currentCount = currentCount;
-        this.rank = rank;
+        this.rankOrder = rankOrder;
         this.nextRankDifference = nextRankDifference;
     }
 
@@ -55,7 +55,7 @@ public class MonthlyReading {
         return MonthlyReading.builder()
                 .memberId(memberId)
                 .currentCount(INITIAL_CURRENT_COUNT)
-                .rank(lowestRank)
+                .rankOrder(lowestRank)
                 .nextRankDifference(lowestDifference)
                 .build();
     }

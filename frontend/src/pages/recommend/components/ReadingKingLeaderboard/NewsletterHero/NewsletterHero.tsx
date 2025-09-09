@@ -49,7 +49,7 @@ const HeroContent = styled.div`
   align-items: center;
   justify-content: center;
 
-  background: linear-gradient(135deg, #f96 0%, #ffb366 100%);
+  background: linear-gradient(135deg, #f96 0%, #fe5e04 100%);
   text-align: center;
 `;
 

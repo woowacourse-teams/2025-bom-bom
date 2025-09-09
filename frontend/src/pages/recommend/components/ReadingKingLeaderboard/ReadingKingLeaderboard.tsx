@@ -189,7 +189,7 @@ const HeaderIcon = styled.div`
   align-items: center;
   justify-content: center;
 
-  background: #f96;
+  background-color: ${({ theme }) => theme.colors.primary};
 
   svg {
     width: 14px;

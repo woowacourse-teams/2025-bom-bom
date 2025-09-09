@@ -99,7 +99,7 @@ jobs:
       - name: 컨테이너 재실행 (p8 ENV 주입)
         shell: bash
         env:
-          APPLE_P8_ESCAPED: ${{ secrets.PROD_APPLE_P8_ESCAPED }}
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           set -euo pipefail
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"

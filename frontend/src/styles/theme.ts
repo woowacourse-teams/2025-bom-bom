@@ -15,7 +15,7 @@ const fonts = {
 };
 
 const colors = {
-  primary: '#FF9966',
+  primary: '#FE5E04',
   primaryLight: '#FFD6C2',
   textPrimary: '#181818',
   textSecondary: '#5C5C5C',

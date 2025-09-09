@@ -1,26 +1,29 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="30 seconds">
 
+    <!-- 콘솔: DEBUG 이상 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>NEUTRAL</onMismatch>
+        </filter>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
+    <!-- 파일(JSON): INFO 이상 -->
     <appender name="ALL_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <!-- 재시작시 덮어쓰지 않도록 -->
         <append>true</append>
-
-        <!-- 현재 활성 파일 -->
         <file>${LOG_PATH}/bombom-prod.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- 날짜 + 인덱스 형식 -->
             <fileNamePattern>${LOG_PATH}/bombom-prod.log.%d{yyyy-MM-dd}</fileNamePattern>
-
-            <!-- 보관 정책 -->
             <maxHistory>15</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
                 <timestamp fieldName="time" pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX"/>
@@ -40,9 +43,7 @@
                         <maxLength>3000</maxLength>
                         <shortenedClassNameLength>20</shortenedClassNameLength>
                         <rootCauseFirst>true</rootCauseFirst>
-                        <abbreviator class="ch.qos.logback.classic.pattern.TargetLengthBasedClassNameAbbreviator">
-                            <targetLength>20</targetLength>
-                        </abbreviator>
+                        <!-- abbreviator는 버전에 따라 지원 안될 수 있음 -->
                         <exclude>sun\.reflect\..*</exclude>
                         <exclude>java\.lang\.reflect\..*</exclude>
                         <exclude>org\.springframework\.aop\..*</exclude>
@@ -59,7 +60,9 @@
         <discardingThreshold>0</discardingThreshold>
     </appender>
 
-    <root level="INFO">
+    <!-- Root는 DEBUG, Appender별 필터가 실제 출력 레벨을 조정 -->
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT"/>
         <appender-ref ref="ASYNC_ALL_JSON"/>
     </root>
 </configuration>

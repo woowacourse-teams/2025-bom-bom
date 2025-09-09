@@ -44,6 +44,8 @@ const useModal = (options: UseModalOptions = {}) => {
 
   useKeydownEscape(isOpen ? closeModal : null);
 
+  useKeydownEscape(isOpen ? closeModal : null);
+
   return {
     modalRef,
     openModal,

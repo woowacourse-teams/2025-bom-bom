@@ -40,16 +40,6 @@ jobs:
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "${APPLE_P8_ESCAPED:?APPLE_P8_ESCAPED 시크릿이 없습니다}")"
           ./gradlew clean build --no-daemon
 
-      - name: 테스트 리포트 업로드
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: junit-and-html-reports
-          path: |
-            backend/bom-bom-server/build/reports/tests/test
-            backend/bom-bom-server/build/test-results/test
-          if-no-files-found: warn
-
       - name: Docker Buildx 설정
         uses: docker/setup-buildx-action@v3
 
@@ -113,11 +103,9 @@ jobs:
         run: |
           set -euo pipefail
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
-          OAUTH2_APPLE_PRIVATE_KEY="$OAUTH2_APPLE_PRIVATE_KEY" \
-          sudo docker compose \
-            -f docker-compose-prod-sub.yml \
-            --env-file .env \
-            up -d --remove-orphans --pull=always
+          sudo env OAUTH2_APPLE_PRIVATE_KEY="$OAUTH2_APPLE_PRIVATE_KEY" \
+            docker compose -f docker-compose-prod-sub.yml --env-file .env \
+            up -d --remove-orphans --pull=always --force-recreate
               
       - name: Docker 리소스 정리
         run: |

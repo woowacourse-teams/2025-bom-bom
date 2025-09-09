@@ -29,6 +29,12 @@ public class CustomOAuth2User implements OAuth2User {
 
     @Override
     public String getName() {
-        return attributes.get("name").toString();
+        Object name = attributes.get("name");
+        if (name != null) {
+            return name.toString();
+        }
+        // Apple의 경우 name이 없을 수 있으므로 sub를 사용
+        Object sub = attributes.get("sub");
+        return sub != null ? sub.toString() : "Unknown";
     }
 }

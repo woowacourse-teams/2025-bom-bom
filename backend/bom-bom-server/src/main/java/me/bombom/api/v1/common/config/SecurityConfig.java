@@ -45,7 +45,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain apiSecurityFilterChain(
             HttpSecurity http,
-            AppleAuthRequestEntityConverter appleConverter) throws Exception {
+            AppleAuthRequestEntityConverter appleConverter
+    ) throws Exception {
         var tokenClient = new RestClientAuthorizationCodeTokenResponseClient();
         var requestEntityConverter = new DefaultOAuth2TokenRequestParametersConverter();
         tokenClient.setParametersConverter(request -> {

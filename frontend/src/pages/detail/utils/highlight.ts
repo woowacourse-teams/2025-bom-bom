@@ -32,10 +32,9 @@ export const highlightNodeSegment = (
 };
 
 export const saveSelection = (
-  selection: Selection,
+  range: Range,
   articleId: number,
 ): Omit<Highlight, 'id' | 'memo'> => {
-  const range = selection.getRangeAt(0);
   const container =
     range.commonAncestorContainer.nodeType === Node.TEXT_NODE
       ? range.commonAncestorContainer.parentElement!
@@ -53,7 +52,7 @@ export const saveSelection = (
     },
     articleId,
     color: theme.colors.primaryLight,
-    text: selection.toString(), // 선택된 텍스트 저장
+    text: range.toString(), // 선택된 텍스트 저장
   };
 };
 

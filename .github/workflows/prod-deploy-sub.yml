@@ -26,16 +26,16 @@ jobs:
 
       - name: application.yml 생성 (Prod 환경)
         run: |
-          echo "Create application.yml(prod) from secret"
-          mkdir -p src/main/resources
-          echo "${{ secrets.APPLICATION_PROD_PROPERTIES }}" > src/main/resources/application.yml  # ✅ DEV → PROD
-          
-          echo "Create application.yml(test) from secret"
-          mkdir -p src/test/resources
-          echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
+          mkdir -p src/main/resources src/test/resources
+          printf '%s' "${{ secrets.APPLICATION_PROD_PROPERTIES }}" > src/main/resources/application.yml
+          printf '%s' "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
 
-      - name: JAR 빌드
-        run: ./gradlew build --no-daemon
+      - name: 빌드 및 테스트
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "${APPLE_P8_ESCAPED:?APPLE_P8_ESCAPED 시크릿이 없습니다}")"
+          ./gradlew clean build --no-daemon
 
       - name: Docker Buildx 설정
         uses: docker/setup-buildx-action@v3

@@ -176,15 +176,15 @@ public class ReadingService {
     }
 
     private LowestRankWithDifference computeLowestRankWithDifference() {
-        MonthlyReading lowestRankMonthlyReading = monthlyReadingRepository.findTopByOrderByRankDesc();
+        MonthlyReading lowestRankMonthlyReading = monthlyReadingRepository.findTopByOrderByRankOrderDesc();
         if (lowestRankMonthlyReading.getCurrentCount() == 0) {
             return LowestRankWithDifference.of(
-                    lowestRankMonthlyReading.getRank(),
+                    lowestRankMonthlyReading.getRankOrder(),
                     lowestRankMonthlyReading.getNextRankDifference()
             );
         }
         return LowestRankWithDifference.of(
-                lowestRankMonthlyReading.getRank() + 1,
+                lowestRankMonthlyReading.getRankOrder() + 1,
                 lowestRankMonthlyReading.getCurrentCount()
         );
     }

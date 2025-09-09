@@ -17,12 +17,12 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
 	@Query(value = """
 		SELECT
 			m.nickname AS nickname,
-			mr.`rank` AS `rank`,
+			mr.rank_order AS `rank`,
 			mr.current_count AS monthlyReadCount
 		FROM monthly_reading mr
 		JOIN member m ON mr.member_id = m.id
-		WHERE mr.`rank` IS NOT NULL
-		ORDER BY mr.`rank` ASC, m.nickname ASC
+		WHERE mr.rank_order IS NOT NULL
+		ORDER BY mr.rank_order ASC, m.nickname ASC
 		LIMIT :limit
 	""", nativeQuery = true)
 	List<MonthlyReadingRankResponse> findMonthlyRanking(@Param("limit") int limit);
@@ -30,7 +30,7 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Query(value = """
 		UPDATE monthly_reading mr
-		SET mr.`rank` = 
+		SET mr.rank_order = 
 			    (SELECT r.rnk
 				 FROM (SELECT m.member_id, RANK() OVER (ORDER BY m.current_count DESC) AS rnk
 				 FROM monthly_reading m) r
@@ -44,7 +44,7 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
 
 	@Query("""
 		SELECT new me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse(
-		  mr.rank AS rank,
+		  mr.rankOrder AS rank,
 		  mr.currentCount AS readCount,
 		  mr.nextRankDifference AS nextRankDifference
 		)
@@ -53,5 +53,5 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
 	""")
 	MemberMonthlyReadingRankResponse findMemberRankAndGap(@Param("memberId") Long memberId);
 
-	MonthlyReading findTopByOrderByRankDesc();
+	MonthlyReading findTopByOrderByRankOrderDesc();
 }

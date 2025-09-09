@@ -51,4 +51,11 @@
         <appender-ref ref="DEV_CONSOLE"/>
         <appender-ref ref="DEV_FILE"/>
     </root>
+
+    <!-- 원인 추적용 선택적 상세 로그 -->
+    <logger name="org.springframework.beans" level="DEBUG"/>
+    <logger name="org.springframework.core.env" level="TRACE"/>
+    <logger name="org.springframework.security" level="INFO"/>
+    <logger name="org.hibernate.SQL" level="DEBUG" additivity="false"/>
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE"/>
 </configuration>

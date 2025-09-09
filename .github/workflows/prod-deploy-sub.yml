@@ -92,12 +92,16 @@ jobs:
           EOF
 
       - name: 컨테이너 재실행
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.PROD_APPLE_P8_ESCAPED }}
         run: |
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          OAUTH2_APPLE_PRIVATE_KEY="$OAUTH2_APPLE_PRIVATE_KEY" \
           sudo docker compose \
             -f docker-compose-prod-sub.yml \
             --env-file .env \
             up -d --remove-orphans --pull=always
-
+          
       - name: Docker 리소스 정리
         run: |
           sudo docker container prune -f --filter "until=24h"

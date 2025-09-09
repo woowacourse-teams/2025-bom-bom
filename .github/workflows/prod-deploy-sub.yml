@@ -46,8 +46,9 @@ jobs:
         with:
           name: junit-and-html-reports
           path: |
-            build/reports/tests/test
-            build/test-results/test
+            backend/bom-bom-server/build/reports/tests/test
+            backend/bom-bom-server/build/test-results/test
+          if-no-files-found: warn
 
       - name: Docker Buildx 설정
         uses: docker/setup-buildx-action@v3

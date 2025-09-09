@@ -22,31 +22,22 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Write main application.yml
+      - name: 설정 파일 생성(메인/테스트)
         shell: bash
         env:
           APPLICATION_MAIN_PROPERTIES: ${{ secrets.APPLICATION_MAIN_PROPERTIES }}
-        run: |
-          set -euo pipefail
-          mkdir -p src/main/resources
-          printf '%s' "$APPLICATION_MAIN_PROPERTIES" > src/main/resources/application.yml
-
-      - name: Write test application.yml
-        shell: bash
-        env:
           APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICATION_TEST_PROPERTIES }}
         run: |
-          set -euo pipefail
-          mkdir -p src/test/resources
+          mkdir -p src/main/resources src/test/resources
+          printf '%s' "$APPLICATION_MAIN_PROPERTIES" > src/main/resources/application.yml
           printf '%s' "$APPLICATION_TEST_PROPERTIES" > src/test/resources/application.yml
 
-      - name: Build & Test
+      - name: 빌드 및 테스트
         shell: bash
         env:
           SPRING_PROFILES_ACTIVE: test
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
-          set -euo pipefail
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
           ./gradlew clean build --no-daemon
           

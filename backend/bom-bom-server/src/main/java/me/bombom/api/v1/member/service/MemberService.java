@@ -38,6 +38,7 @@ public class MemberService {
                 .nickname(signupRequest.nickname())
                 .gender(signupRequest.gender())
                 .roleId(MEMBER_ROLE_ID)
+                .birthDate(signupRequest.birthDate())
                 .build();
         Member savedMember = memberRepository.save(newMember);
         applicationEventPublisher.publishEvent(new MemberSignupEvent(savedMember.getId()));

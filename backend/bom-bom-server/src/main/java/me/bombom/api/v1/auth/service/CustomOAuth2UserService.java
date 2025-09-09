@@ -1,6 +1,9 @@
     package me.bombom.api.v1.auth.service;
 
+    import com.nimbusds.jwt.JWT;
+    import com.nimbusds.jwt.JWTParser;
     import jakarta.servlet.http.HttpSession;
+    import java.util.Map;
     import java.util.Optional;
     import lombok.RequiredArgsConstructor;
     import me.bombom.api.v1.auth.dto.CustomOAuth2User;
@@ -20,17 +23,37 @@
     @RequiredArgsConstructor
     public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
+        private static final String ID_TOKEN_KEY = "id_token";
+
         private final MemberRepository memberRepository;
         private final HttpSession session;
 
         @Override
         public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-            OAuth2User oAuth2User = super.loadUser(userRequest);
-
             String provider = userRequest.getClientRegistration().getRegistrationId();
             OAuth2Provider oAuth2Provider = OAuth2Provider.from(provider);
-            String providerId = oAuth2User.getAttribute(oAuth2Provider.getIdKey());
-            String profileUrl = oAuth2User.getAttribute(oAuth2Provider.getProfileImageKey());
+            
+            Map<String, Object> attributes;
+            String providerId;
+            String profileUrl = "";
+            
+            if (oAuth2Provider == OAuth2Provider.APPLE) {
+                // Apple의 경우 ID Token에서 사용자 정보 추출
+                try {
+                    String idToken = userRequest.getAdditionalParameters().get(ID_TOKEN_KEY).toString();
+                    JWT jwt = JWTParser.parse(idToken);
+                    attributes = jwt.getJWTClaimsSet().getClaims();
+                    providerId = (String) attributes.get(oAuth2Provider.getIdKey());
+                } catch (Exception e) {
+                    throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN);
+                }
+            } else {
+                // Google 등 다른 제공자는 기본 OAuth2UserService 사용
+                OAuth2User oAuth2User = super.loadUser(userRequest);
+                attributes = oAuth2User.getAttributes();
+                providerId = oAuth2User.getAttribute(oAuth2Provider.getIdKey());
+                profileUrl = oAuth2User.getAttribute(oAuth2Provider.getProfileImageKey());
+            }
 
             Optional<Member> member = memberRepository.findByProviderAndProviderIdIncludeDeleted(provider, providerId);
 
@@ -47,6 +70,6 @@
                 session.setAttribute("pendingMember", pendingMember);
             }
 
-            return new CustomOAuth2User(oAuth2User.getAttributes(), member.orElse(null));
+            return new CustomOAuth2User(attributes, member.orElse(null));
         }
     }

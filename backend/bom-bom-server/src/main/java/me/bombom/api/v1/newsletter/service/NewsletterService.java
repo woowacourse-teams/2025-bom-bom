@@ -1,6 +1,5 @@
 package me.bombom.api.v1.newsletter.service;
 
-import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -26,7 +25,7 @@ public class NewsletterService {
     public List<NewsletterResponse> getNewsletters() {
         //임시로 repository 메서드 내부에 Detail 정보 가져오는 것이 불필요
         List<NewsletterResponse> newsletters = newsletterRepository.findNewslettersInfo();
-        Collections.shuffle(newsletters); //초기엔 셔플해서 랜덤 순서로 보여주기
+//        Collections.shuffle(newsletters); //초기엔 셔플해서 랜덤 순서로 보여주기
         return newsletters;
     }
 

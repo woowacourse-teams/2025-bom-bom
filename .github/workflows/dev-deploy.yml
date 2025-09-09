@@ -23,19 +23,25 @@ jobs:
           distribution: temurin
           cache: gradle
 
-      - name: application.yml 생성
+      - name: application.yml(메인/테스트) 생성
+        shell: bash
+        env:
+          APPLICATION_DEV_PROPERTIES: ${{ secrets.APPLICATION_DEV_PROPERTIES }}
+          APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICATION_TEST_PROPERTIES }}
         run: |
-          echo "Create application.yml(prod) from secret"
-          mkdir -p src/main/resources
-          echo "${{ secrets.APPLICATION_DEV_PROPERTIES }}" > src/main/resources/application.yml
-          
-          echo "Create application.yml(test) from secret"
-          mkdir -p src/test/resources
-          echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
+          mkdir -p src/main/resources src/test/resources
+          printf '%s' "${APPLICATION_DEV_PROPERTIES:-}" > src/main/resources/application.yml
+          printf '%s' "${APPLICATION_TEST_PROPERTIES:-}" > src/test/resources/application.yml
 
-      - name: JAR 빌드
-        run: ./gradlew clean build --no-daemon
-
+      - name: 빌드 및 테스트
+        shell: bash
+        env:
+          SPRING_PROFILES_ACTIVE: test
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "${APPLE_P8_ESCAPED:?APPLE_P8_ESCAPED 시크릿이 없습니다}")"
+          ./gradlew clean build --no-daemon
+    
       - name: Docker Buildx 설정
         uses: docker/setup-buildx-action@v3
 
@@ -73,46 +79,49 @@ jobs:
       - name: Docker 이미지 Pull
         run: |
           IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
-          docker pull $IMAGE
+          docker pull "$IMAGE"
 
       - name: 이미지 변경 여부 확인
         id: compare_digest
         run: |
           IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
           NEW=$(docker inspect --format='{{.Id}}' "$IMAGE")
-          
-          # 기존 컨테이너가 존재하는지 확인
           if docker inspect bombom-server-dev &>/dev/null; then
-          CURRENT=$(docker inspect --format='{{.Image}}' bombom-server-dev)
+            CURRENT=$(docker inspect --format='{{.Image}}' bombom-server-dev)
           else
-          CURRENT="not_found"
+            CURRENT="not_found"
           fi
-          
           echo "new_image_id=$NEW" >> $GITHUB_OUTPUT
           echo "current_image_id=$CURRENT" >> $GITHUB_OUTPUT
-          
           if [ "$NEW" = "$CURRENT" ]; then
-          echo "Image unchanged. Skipping deployment."
-          echo "skip_deploy=true" >> $GITHUB_ENV
+            echo "Image unchanged. Skipping deployment."
+            echo "skip_deploy=true" >> $GITHUB_ENV
           else
-          echo "skip_deploy=false" >> $GITHUB_ENV
+            echo "skip_deploy=false" >> $GITHUB_ENV
           fi
 
       - name: .env 파일 생성
         run: |
-          echo "DEV_SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/bombom?useSSL=false&serverTimezone=Asia/Seoul" >> .env
-          echo "DEV_SPRING_DATASOURCE_USERNAME=root" >> .env
-          echo "DEV_SPRING_DATASOURCE_PASSWORD=bombom77@@" >> .env
-          echo "LOGGING_FILE_NAME=/logs/bombom-dev.log" >> .env
+          echo "DEV_SPRING_DATASOURCE_URL=${{ secrets.DEV_SPRING_DATASOURCE_URL }}" >> .env
+          echo "DEV_SPRING_DATASOURCE_USERNAME=${{ secrets.DEV_SPRING_DATASOURCE_USERNAME }}" >> .env
+          echo "DEV_SPRING_DATASOURCE_PASSWORD=${{ secrets.DEV_SPRING_DATASOURCE_PASSWORD }}" >> .env
+          echo "DEV_OTEL_ENDPOINT=${{ secrets.DEV_OTEL_ENDPOINT }}" >> .env
 
       - name: 환경변수 검증
         run: |
-          docker compose -f docker-compose-dev.yml --env-file .env config | grep SPRING_
+          docker compose -f docker-compose-dev.yml --env-file .env config | grep -E 'SPRING_' || true
 
-      - name: 컨테이너 재실행
+      - name: 컨테이너 재실행 (p8 ENV 주입)
+        shell: bash
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
+          set -euo pipefail
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
           docker compose --env-file .env -f docker-compose-dev.yml down || true
+          OAUTH2_APPLE_PRIVATE_KEY="$OAUTH2_APPLE_PRIVATE_KEY" \
           docker compose --env-file .env -f docker-compose-dev.yml up -d
+          # compose 서비스에 environment: - OAUTH2_APPLE_PRIVATE_KEY 가 선언되어 있어야 컨테이너로 전달됩니다.
 
       - name: Docker 리소스 정리
         if: env.skip_deploy == 'false'

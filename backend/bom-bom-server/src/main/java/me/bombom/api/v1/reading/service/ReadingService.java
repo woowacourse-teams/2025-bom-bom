@@ -1,3 +1,4 @@
+
 package me.bombom.api.v1.reading.service;
 
 import java.time.LocalDate;
@@ -10,11 +11,13 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.pet.ScorePolicyConstants;
 import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.LowestRankWithDifference;
 import me.bombom.api.v1.reading.domain.MonthlyReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
 import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
+import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
@@ -52,7 +55,12 @@ public class ReadingService {
         WeeklyReading newWeeklyReading = WeeklyReading.create(memberId);
         weeklyReadingRepository.save(newWeeklyReading);
 
-        MonthlyReading newMonthlyReading = MonthlyReading.create(memberId);
+        LowestRankWithDifference lowestRankWithDifference = computeLowestRankWithDifference();
+        MonthlyReading newMonthlyReading = MonthlyReading.create(
+                memberId,
+                lowestRankWithDifference.rank(),
+                lowestRankWithDifference.difference()
+        );
         monthlyReadingRepository.save(newMonthlyReading);
 
         YearlyReading newYearlyReading = YearlyReading.create(memberId, LocalDate.now().getYear());
@@ -158,6 +166,29 @@ public class ReadingService {
         return monthlyReadingRepository.findMonthlyRanking(limit);
     }
 
+    public MemberMonthlyReadingRankResponse getMemberMonthlyReadingRank(Member member) {
+        return monthlyReadingRepository.findMemberRankAndGap(member.getId());
+    }
+
+    @Transactional
+    public void updateMonthlyRanking() {
+        monthlyReadingRepository.updateMonthlyRanking();
+    }
+
+    private LowestRankWithDifference computeLowestRankWithDifference() {
+        MonthlyReading lowestRankMonthlyReading = monthlyReadingRepository.findTopByOrderByRankOrderDesc();
+        if (lowestRankMonthlyReading.getCurrentCount() == 0) {
+            return LowestRankWithDifference.of(
+                    lowestRankMonthlyReading.getRankOrder(),
+                    lowestRankMonthlyReading.getNextRankDifference()
+            );
+        }
+        return LowestRankWithDifference.of(
+                lowestRankMonthlyReading.getRankOrder() + 1,
+                lowestRankMonthlyReading.getCurrentCount()
+        );
+    }
+
     private boolean shouldResetContinueReadingCount(TodayReading todayReading) {
         return (todayReading.getTotalCount() != 0) && (todayReading.getCurrentCount() == 0);
     }
@@ -223,4 +254,3 @@ public class ReadingService {
         return todayReading.getCurrentCount() == 0;
     }
 }
-

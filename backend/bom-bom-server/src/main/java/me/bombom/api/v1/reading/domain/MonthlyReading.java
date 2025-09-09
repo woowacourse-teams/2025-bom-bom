@@ -30,21 +30,33 @@ public class MonthlyReading {
     @Column(nullable = false, columnDefinition = "SMALLINT")
     private int currentCount;
 
+    @Column(nullable = false)
+    private long rankOrder;
+
+    @Column(nullable = false, columnDefinition = "SMALLINT")
+    private long nextRankDifference;
+
     @Builder
     public MonthlyReading(
             Long id,
             @NonNull Long memberId,
-            int currentCount
+            int currentCount,
+            long rankOrder,
+            long nextRankDifference
     ) {
         this.id = id;
         this.memberId = memberId;
         this.currentCount = currentCount;
+        this.rankOrder = rankOrder;
+        this.nextRankDifference = nextRankDifference;
     }
 
-    public static MonthlyReading create(Long memberId) {
+    public static MonthlyReading create(Long memberId, long lowestRank, long lowestDifference) {
         return MonthlyReading.builder()
                 .memberId(memberId)
                 .currentCount(INITIAL_CURRENT_COUNT)
+                .rankOrder(lowestRank)
+                .nextRankDifference(lowestDifference)
                 .build();
     }
 

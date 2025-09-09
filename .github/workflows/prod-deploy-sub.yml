@@ -25,18 +25,29 @@ jobs:
           cache: gradle
 
       - name: application.yml 생성 (Prod 환경)
+        shell: bash
         run: |
           mkdir -p src/main/resources src/test/resources
           printf '%s' "${{ secrets.APPLICATION_PROD_PROPERTIES }}" > src/main/resources/application.yml
           printf '%s' "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
 
       - name: 빌드 및 테스트
+        shell: bash
         env:
           SPRING_PROFILES_ACTIVE: test
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "${APPLE_P8_ESCAPED:?APPLE_P8_ESCAPED 시크릿이 없습니다}")"
           ./gradlew clean build --no-daemon
+
+      - name: 테스트 리포트 업로드
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-and-html-reports
+          path: |
+            build/reports/tests/test
+            build/test-results/test
 
       - name: Docker Buildx 설정
         uses: docker/setup-buildx-action@v3
@@ -90,19 +101,23 @@ jobs:
           DATABASE=${{ secrets.PROD_DATABASE }}
           MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
           MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          SPRING_PROFILES_ACTIVE=prod
+          PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
           EOF
 
-      - name: 컨테이너 재실행
+      - name: 컨테이너 재실행 (p8 ENV 주입)
+        shell: bash
         env:
           APPLE_P8_ESCAPED: ${{ secrets.PROD_APPLE_P8_ESCAPED }}
         run: |
+          set -euo pipefail
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
           OAUTH2_APPLE_PRIVATE_KEY="$OAUTH2_APPLE_PRIVATE_KEY" \
           sudo docker compose \
             -f docker-compose-prod-sub.yml \
             --env-file .env \
             up -d --remove-orphans --pull=always
-          
+              
       - name: Docker 리소스 정리
         run: |
           sudo docker container prune -f --filter "until=24h"

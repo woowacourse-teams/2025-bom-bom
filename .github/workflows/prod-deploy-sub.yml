@@ -32,6 +32,7 @@ jobs:
 
       - name: 빌드 및 테스트
         env:
+          SPRING_PROFILES_ACTIVE: test
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "${APPLE_P8_ESCAPED:?APPLE_P8_ESCAPED 시크릿이 없습니다}")"

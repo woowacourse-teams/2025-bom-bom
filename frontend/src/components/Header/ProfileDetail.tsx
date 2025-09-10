@@ -128,6 +128,11 @@ const ProfileEmail = styled.div`
   background: ${({ theme }) => theme.colors.dividers};
 
   cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.stroke};
+    transition: all 0.2s ease-in-out;
+  }
 `;
 
 const EmailText = styled.div`

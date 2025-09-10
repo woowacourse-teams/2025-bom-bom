@@ -8,7 +8,6 @@ import 'webpack-dev-server';
 dotenv.config();
 
 export default (env, argv) => {
-  const isProduction = argv.mode === 'production';
   const config: webpack.Configuration = {
     mode: argv.mode,
     entry: './src/main.tsx',

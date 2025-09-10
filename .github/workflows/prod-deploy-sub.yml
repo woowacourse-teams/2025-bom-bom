@@ -63,17 +63,17 @@ jobs:
             -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod \
             --push .
 
-  deploy:
-    name: Production Server 배포
+  deploy-server-sub:
+    name: Production Server sub 배포
     needs: build
-    runs-on: [ self-hosted, prod-sub ]  # ✅ main → prod (runner에 따라 조정)
+    runs-on: [ self-hosted, prod-sub ] 
     defaults:
       run:
         working-directory: ./backend/bom-bom-server
 
     environment:
       name: production
-      url: https://api.bombom.news # ✅ 실제 운영 서비스 URL
+      url: https://api.bombom.news 
 
     steps:
       - name: 코드 체크아웃
@@ -119,3 +119,61 @@ jobs:
         run: |
           sudo docker container prune -f --filter "until=24h"
           sudo docker image prune     -f --filter "until=24h"
+
+  deploy-server-main:
+    name: Production Server main 배포
+    needs: build
+    runs-on: [ self-hosted, prod ]  
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+
+    environment:
+      name: production
+      url: https://api.bombom.news 
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: .env file 생성
+        run: |
+          cat <<EOF > .env
+          RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
+          DATABASE=${{ secrets.PROD_DATABASE }}
+          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          SPRING_PROFILES_ACTIVE=prod
+          PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
+          EOF
+
+      - name: 컨테이너 재실행 (p8 ENV 주입)
+        shell: bash
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          set -euo pipefail
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
+          
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env down || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env \
+            up -d --remove-orphans --pull=always --force-recreate
+              
+      - name: Docker 리소스 정리
+        run: |
+          sudo docker container prune -f --filter "until=24h"
+          sudo docker image prune     -f --filter "until=24h"
+

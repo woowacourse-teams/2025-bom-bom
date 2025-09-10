@@ -1,10 +1,7 @@
 package me.bombom.api.v1.auth.client;
 
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.common.exception.CServerErrorException;
-import me.bombom.api.v1.common.exception.ErrorDetail;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -26,27 +23,14 @@ public class AppleRevokeClient implements RevokeClient {
 
     @Override
     public RevokeResult revoke(String token, String clientSecret) {
-        try {
-            MultiValueMap<String, String> formData = createRevokeFormData(token, clientSecret);
-            
-            restClient.post()
-                    .uri(APPLE_REVOKE_URL)
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .body(formData)
-                    .retrieve()
-                    .toBodilessEntity();
-
-            return RevokeResult.ofSuccess();
-
-        } catch (org.springframework.web.client.HttpClientErrorException e) {
-            if (e.getStatusCode() == HttpStatus.BAD_REQUEST) {
-                throw new CServerErrorException(ErrorDetail.INVALID_TOKEN);
-            } else {
-                throw new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR);
-            }
-        } catch (Exception e) {
-            throw new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR);
-        }
+        MultiValueMap<String, String> formData = createRevokeFormData(token, clientSecret);
+        restClient.post()
+                .uri(APPLE_REVOKE_URL)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(formData)
+                .retrieve()
+                .toBodilessEntity();
+        return RevokeResult.ofSuccess();
     }
 
     private MultiValueMap<String, String> createRevokeFormData(String refreshToken, String clientSecret) {

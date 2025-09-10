@@ -23,7 +23,9 @@ function ReadingStatusCard() {
   const { mutate: updateWeeklyGoal, isPending } = useMutation({
     mutationFn: patchWeeklyReadingGoal,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reading-status'] });
+      queryClient.invalidateQueries({
+        queryKey: queries.readingStatus().queryKey,
+      });
       setIsEditing(false);
     },
     onError: (error) => {
@@ -139,7 +141,7 @@ function ReadingStatusCard() {
                 // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
                 disabled={isPending}
-                placeholder="1-999"
+                placeholder="1-127"
                 aria-label="주간 목표 수정"
               />
             ) : (
@@ -224,7 +226,7 @@ const WeeklyGoalSection = styled.div`
 const EditSection = styled.div`
   position: absolute;
   top: 0;
-  right: 0;
+  right: -20px;
   height: 22px;
 
   display: flex;

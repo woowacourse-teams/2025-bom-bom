@@ -8,6 +8,7 @@ import me.bombom.api.v1.auth.AppleClientSecretSupplier;
 import me.bombom.api.v1.auth.ApplePrivateKeyLoader;
 import me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler;
 import me.bombom.api.v1.auth.service.CustomOAuth2UserService;
+import me.bombom.api.v1.auth.service.CustomOidcUserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,7 +47,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain apiSecurityFilterChain(
             HttpSecurity http,
-            AppleAuthRequestEntityConverter appleConverter
+            AppleAuthRequestEntityConverter appleConverter,
+            CustomOidcUserService customOidcUserService
     ) throws Exception {
         var tokenClient = new RestClientAuthorizationCodeTokenResponseClient();
         var requestEntityConverter = new DefaultOAuth2TokenRequestParametersConverter();
@@ -68,7 +70,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .oauth2Login(oauth2 -> oauth2
                         .tokenEndpoint(token -> token.accessTokenResponseClient(tokenClient))
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                                .oidcUserService(customOidcUserService))
                         .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler((request, response, exception) -> {
                             System.out.println("=== OAuth2 로그인 실패 ===");

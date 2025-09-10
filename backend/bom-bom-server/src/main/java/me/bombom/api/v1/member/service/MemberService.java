@@ -87,6 +87,35 @@ public class MemberService {
         memberRepository.delete(member);
     }
 
+    @Transactional
+    public Member findOrCreateMemberByAppleId(String appleId, String email, String name) {
+        System.out.println("=== Apple ID로 회원 조회/생성 ===");
+        System.out.println("appleId: " + appleId);
+        System.out.println("email: " + email);
+        System.out.println("name: " + name);
+        
+        // Apple ID로 기존 회원 조회
+        return memberRepository.findByProviderAndProviderId("apple", appleId)
+                .orElseGet(() -> {
+                    System.out.println("기존 회원 없음 - 새 회원 생성");
+                    
+                    // Apple ID Token에서 이메일이 제공되지 않은 경우 처리
+                    String memberEmail = email != null ? email : appleId + "@apple.privaterelay.appleid.com";
+                    
+                    Member newMember = Member.builder()
+                            .provider("apple")
+                            .providerId(appleId)
+                            .email(memberEmail)
+                            .nickname(name != null ? name : "Apple User")
+                            .roleId(MEMBER_ROLE_ID)
+                            .build();
+                    
+                    Member savedMember = memberRepository.save(newMember);
+                    System.out.println("새 회원 생성 완료 - memberId: " + savedMember.getId());
+                    return savedMember;
+                });
+    }
+
     private void validateDuplicateEmail(String email) {
         if (memberRepository.existsByEmail(email)) {
             throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_EMAIL)

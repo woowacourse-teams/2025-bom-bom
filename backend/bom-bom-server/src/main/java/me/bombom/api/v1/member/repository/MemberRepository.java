@@ -23,4 +23,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByNickname(String nickname);
 
     void deleteByDeletedAtBefore(LocalDateTime threshold);
+
+    Optional<Member> findByProviderAndProviderId(String provider, String providerId);
 }

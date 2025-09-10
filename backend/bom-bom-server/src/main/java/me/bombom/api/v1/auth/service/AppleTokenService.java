@@ -28,7 +28,14 @@ public class AppleTokenService {
 
     private final ObjectMapper objectMapper;
     
-    private final RestClient restClient = RestClient.create();
+    private final RestClient restClient = RestClient.builder()
+            .defaultStatusHandler(status -> status.is4xxClientError(), (request, response) -> {
+                log.error("기본 4xx 에러 핸들러: {}", response.getStatusText());
+            })
+            .defaultStatusHandler(status -> status.is5xxServerError(), (request, response) -> {
+                log.error("기본 5xx 에러 핸들러: {}", response.getStatusText());
+            })
+            .build();
 
     @Value("${oauth2.apple.client-id}")
     private String clientId;
@@ -100,6 +107,7 @@ public class AppleTokenService {
 
             log.info("Apple Token 요청 URL: {}", APPLE_TOKEN_URL);
             log.info("요청 데이터: {}", data);
+            log.info("=== Apple 서버 요청 시작 ===");
 
             // Apple 서버에 요청 (RestClient 사용)
             String responseBody = restClient.post()
@@ -109,13 +117,17 @@ public class AppleTokenService {
                     .retrieve()
                     .onStatus(status -> status.is4xxClientError(), (request, response) -> {
                         log.error("Apple Token 발급 4xx 에러: {}", response.getStatusText());
+                        log.error("에러 응답 본문: {}", response.getBody());
                         throw new RuntimeException("Apple Token 발급 실패: " + response.getStatusText());
                     })
                     .onStatus(status -> status.is5xxServerError(), (request, response) -> {
                         log.error("Apple Token 발급 5xx 에러: {}", response.getStatusText());
+                        log.error("에러 응답 본문: {}", response.getBody());
                         throw new RuntimeException("Apple Token 발급 실패: " + response.getStatusText());
                     })
                     .body(String.class);
+                    
+            log.info("=== Apple 서버 응답 수신 완료 ===");
 
             log.info("Apple Token 응답 본문: {}", responseBody);
 

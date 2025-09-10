@@ -86,8 +86,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             String refreshToken = (oAuth2Provider == OAuth2ProviderInfo.APPLE) 
                 ? extractRefreshToken(userRequest) : null;
             
+            System.out.println("=== Apple 로그인 Refresh Token 추출 결과 ===");
+            System.out.println("추출된 refreshToken: " + (refreshToken != null ? "있음 (길이: " + refreshToken.length() + ")" : "없음"));
+            
             // Apple 로그인이고 Refresh Token이 없는 경우, Authorization Code로 발급 시도
             if (oAuth2Provider == OAuth2ProviderInfo.APPLE && refreshToken == null) {
+                System.out.println("=== Authorization Code로 Refresh Token 발급 시도 ===");
                 refreshToken = tryGetRefreshTokenFromAuthorizationCode(userRequest);
             }
             

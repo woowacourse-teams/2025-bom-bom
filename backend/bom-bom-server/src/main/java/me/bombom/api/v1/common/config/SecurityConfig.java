@@ -130,8 +130,4 @@ public class SecurityConfig {
         return new AppleAuthRequestEntityConverter(appleClientSecretSupplier);
     }
 
-    @Bean
-    public ClientRegistrationRepository oidcClientRegistrationRepository() {
-        return new InMemoryClientRegistrationRepository();
-    }
 }

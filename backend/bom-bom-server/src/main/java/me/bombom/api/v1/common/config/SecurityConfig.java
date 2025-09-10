@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.client.endpoint.DefaultOAuth2TokenReq
 import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -121,5 +122,10 @@ public class SecurityConfig {
     @Bean
     public AppleAuthRequestEntityConverter appleAuthRequestEntityConverter(Supplier<String> appleClientSecretSupplier) {
         return new AppleAuthRequestEntityConverter(appleClientSecretSupplier);
+    }
+
+    @Bean
+    public RestClient restClient() {
+        return RestClient.create();
     }
 }

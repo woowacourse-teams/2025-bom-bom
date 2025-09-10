@@ -3,6 +3,9 @@ package me.bombom.api.v1.member.service;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.enums.DuplicateCheckField;
+import me.bombom.api.v1.auth.enums.OAuth2ProviderInfo;
+import me.bombom.api.v1.auth.provider.OAuth2Provider;
+import me.bombom.api.v1.auth.provider.OAuth2ProviderFactory;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -24,6 +27,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final OAuth2ProviderFactory providerFactory;
 
     @Transactional
     public Member signup(PendingOAuth2Member pendingMember, MemberSignupRequest signupRequest) {
@@ -62,12 +66,15 @@ public class MemberService {
     }
 
     @Transactional
-    public void withdraw(Long memberId) {
+    public void revoke(Long memberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                 .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
             );
+        OAuth2ProviderInfo providerType = OAuth2ProviderInfo.fromCode(member.getProvider());
+        OAuth2Provider provider = providerFactory.getProvider(providerType);
+        provider.processWithdrawal(member);
         memberRepository.delete(member);
     }
 
@@ -78,6 +85,7 @@ public class MemberService {
                     .addContext(ErrorContextKeys.OPERATION, "validateDuplicateEmail");
         }
     }
+
     private void validateDuplicateNickname(String nickname) {
         if (memberRepository.existsByNickname(nickname)) {
             throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_NICKNAME)
@@ -85,5 +93,4 @@ public class MemberService {
                     .addContext(ErrorContextKeys.OPERATION, "validateDuplicateNickname");
         }
     }
-
 }

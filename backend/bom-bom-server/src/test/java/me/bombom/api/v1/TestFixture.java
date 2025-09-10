@@ -44,7 +44,7 @@ public final class TestFixture {
 
     public static Member normalMemberFixture() {
         return Member.builder()
-                .provider("provider")
+                .provider("apple")
                 .providerId("providerId")
                 .email("email")
                 .nickname("nickname")

@@ -62,6 +62,8 @@ public class AppleClientSecretSupplier implements Supplier<String> {
             signedJWT.sign(signer);
             String clientSecret = signedJWT.serialize();
             System.out.println("Apple Client Secret 생성 성공, 길이: " + clientSecret.length());
+            System.out.println("JWT Header: " + signedJWT.getHeader().toString());
+            System.out.println("JWT Claims: " + signedJWT.getJWTClaimsSet().toString());
             System.out.println("=== Apple Client Secret 생성 완료 ===");
             return clientSecret;
         } catch (Exception e) {

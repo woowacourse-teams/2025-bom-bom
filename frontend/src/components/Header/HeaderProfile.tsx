@@ -17,7 +17,7 @@ const HeaderProfile = ({ userInfo, deviceType }: HeaderProfileProps) => {
     openModal: openProfileModal,
     closeModal: closeProfileModal,
     isOpen,
-  } = useModal();
+  } = useModal({ scrollLock: false });
 
   if (!userInfo) return null;
 

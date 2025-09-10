@@ -68,7 +68,12 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .tokenEndpoint(token -> token.accessTokenResponseClient(tokenClient))
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .successHandler(oAuth2LoginSuccessHandler));
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler((request, response, exception) -> {
+                            System.out.println("=== OAuth2 로그인 실패 ===");
+                            System.out.println("에러: " + exception.getMessage());
+                            exception.printStackTrace();
+                        }));
         return http.build();
     }
 

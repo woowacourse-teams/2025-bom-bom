@@ -30,8 +30,13 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             HttpServletResponse response,
             Authentication authentication
     ) throws IOException {
+        System.out.println("=== OAuth2LoginSuccessHandler 호출됨 ===");
+        System.out.println("authentication: " + authentication.getClass().getSimpleName());
+        
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         Member member = oAuth2User.getMember();
+        
+        System.out.println("member: " + (member != null ? "있음 (ID: " + member.getId() + ")" : "없음"));
 
         String redirectUrl = getBaseUrlByEnv(request);
         if (member == null) {

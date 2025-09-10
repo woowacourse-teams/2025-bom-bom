@@ -35,6 +35,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        log.info("OAuth2 로그인 시작 - provider: {}", userRequest.getClientRegistration().getRegistrationId());
         String provider = userRequest.getClientRegistration().getRegistrationId();
         OAuth2ProviderInfo oAuth2Provider = OAuth2ProviderInfo.from(provider);
 
@@ -70,13 +71,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             profileUrl = oAuth2User.getAttribute(oAuth2Provider.getProfileImageKey());
         }
 
+        log.info("기존 회원 조회 시작 - provider: {}, providerId: {}", provider, providerId);
         Optional<Member> member = memberRepository.findByProviderAndProviderIdIncludeDeleted(provider, providerId);
+        log.info("기존 회원 조회 완료 - member 존재: {}", member.isPresent());
 
         if (member.isPresent() && member.get().isWithdrawnMember()) {
+            log.warn("탈퇴한 회원 로그인 시도 - memberId: {}", member.get().getId());
             throw new UnauthorizedException(ErrorDetail.WITHDRAWN_MEMBER);
         }
 
         if (member.isEmpty()) {
+            log.info("신규 회원 처리 시작 - provider: {}, providerId: {}", provider, providerId);
             // Apple 로그인인 경우에만 Refresh Token 추출
             String refreshToken = (oAuth2Provider == OAuth2ProviderInfo.APPLE) 
                 ? extractRefreshToken(userRequest) : null;
@@ -87,10 +92,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .appleRefreshToken(refreshToken)
                     .build();
             session.setAttribute("pendingMember", pendingMember);
+            log.info("신규 회원 세션 저장 완료");
         } else {
+            log.info("기존 회원 Refresh Token 업데이트 시작 - memberId: {}", member.get().getId());
             updateRefreshTokenIfNeeded(member.get(), userRequest);
+            log.info("기존 회원 Refresh Token 업데이트 완료");
         }
 
+        log.info("OAuth2 로그인 완료 - provider: {}, providerId: {}", provider, providerId);
         return new CustomOAuth2User(attributes, member.orElse(null));
     }
 

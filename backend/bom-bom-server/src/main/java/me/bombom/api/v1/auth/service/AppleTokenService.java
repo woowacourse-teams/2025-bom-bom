@@ -1,9 +1,18 @@
 package me.bombom.api.v1.auth.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.function.Supplier;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.crypto.ECDSASigner;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import java.security.interfaces.ECPrivateKey;
+import java.time.Instant;
+import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.auth.ApplePrivateKeyLoader;
 import me.bombom.api.v1.auth.dto.response.AppleTokenResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -17,15 +26,59 @@ import org.springframework.web.client.RestClient;
 @RequiredArgsConstructor
 public class AppleTokenService {
 
-    private final RestClient restClient;
     private final ObjectMapper objectMapper;
-    private final Supplier<String> appleClientSecretSupplier;
+    
+    private final RestClient restClient = RestClient.create();
 
     @Value("${oauth2.apple.client-id}")
     private String clientId;
+    
+    @Value("${oauth2.apple.team-id}")
+    private String teamId;
+    
+    @Value("${oauth2.apple.key-id}")
+    private String keyId;
+    
+    @Value("${oauth2.apple.private-key}")
+    private String privateKeyPem;
 
     private static final String APPLE_TOKEN_URL = "https://appleid.apple.com/auth/token";
     private static final String APPLE_REVOKE_URL = "https://appleid.apple.com/auth/revoke";
+    
+    /**
+     * Apple Client Secret 생성
+     */
+    private String generateClientSecret() {
+        try {
+            ApplePrivateKeyLoader keyLoader = new ApplePrivateKeyLoader();
+            ECPrivateKey privateKey = keyLoader.loadFromPem(privateKeyPem);
+            
+            Instant now = Instant.now();
+            Date issuedAt = Date.from(now);
+            Date expiresAt = Date.from(now.plusSeconds(3600)); // 1시간 후 만료
+
+            JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                    .issuer(teamId)
+                    .issueTime(issuedAt)
+                    .expirationTime(expiresAt)
+                    .audience("https://appleid.apple.com")
+                    .subject(clientId)
+                    .build();
+
+            JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.ES256)
+                    .keyID(keyId)
+                    .build();
+
+            SignedJWT signedJWT = new SignedJWT(header, claimsSet);
+            JWSSigner signer = new ECDSASigner(privateKey);
+            signedJWT.sign(signer);
+
+            return signedJWT.serialize();
+        } catch (Exception e) {
+            log.error("Apple Client Secret 생성 실패", e);
+            throw new RuntimeException("Apple Client Secret 생성 실패", e);
+        }
+    }
 
     /**
      * Authorization Code로 Refresh Token 발급받기
@@ -35,7 +88,7 @@ public class AppleTokenService {
             log.info("=== Apple Refresh Token 발급 시작 ===");
             log.info("authorizationCode: {}", authorizationCode);
             
-            String clientSecret = appleClientSecretSupplier.get();
+            String clientSecret = generateClientSecret();
             log.info("clientSecret 길이: {}", clientSecret.length());
 
             // 요청 데이터 설정
@@ -87,7 +140,7 @@ public class AppleTokenService {
             log.info("=== Apple Access Token 갱신 시작 ===");
             log.info("refreshToken: {}", refreshToken);
 
-            String clientSecret = appleClientSecretSupplier.get();
+            String clientSecret = generateClientSecret();
 
             // 요청 데이터 설정
             MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
@@ -132,7 +185,7 @@ public class AppleTokenService {
             log.info("=== Apple Token 철회 시작 ===");
             log.info("refreshToken: {}", refreshToken);
 
-            String clientSecret = appleClientSecretSupplier.get();
+            String clientSecret = generateClientSecret();
 
             // 요청 데이터 설정
             MultiValueMap<String, String> data = new LinkedMultiValueMap<>();

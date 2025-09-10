@@ -15,7 +15,7 @@ public class AppleRevokeClient implements RevokeClient {
     private static final String APPLE_REVOKE_URL = "https://appleid.apple.com/auth/revoke";
     private static final String TOKEN_TYPE_HINT = "refresh_token";
 
-    private final RestClient restClient;
+    private final RestClient restClient = RestClient.create();
 
     @Value("${oauth2.apple.client-id}")
     private String clientId;

@@ -12,15 +12,6 @@ interface LeaderboardItemProps {
   badgeText?: string;
 }
 
-// interface ReadingKingLeaderboardProps {
-//   userRank?: {
-//     rank: number;
-//     readCount: number;
-//     nextRankDifference: number;
-//     progressPercentage: number;
-//   };
-// }
-
 const LeaderboardItem = ({
   rank,
   name,
@@ -65,14 +56,9 @@ export default function ReadingKingLeaderboard() {
   const { data: monthlyReadingRank, isLoading } = useQuery(
     queries.monthlyReadingRank({ limit: 5 }),
   );
+  const { data: userRank } = useQuery(queries.myMonthlyReadingRank());
 
-  // Calculate default user rank data if not provided
-  // const defaultUserRank = {
-  //   rank: 12,
-  //   readCount: 87,
-  //   nextRankDifference: 13,
-  //   progressPercentage: 65,
-  // };
+  console.log(userRank);
 
   if (isLoading) {
     return (
@@ -115,38 +101,38 @@ export default function ReadingKingLeaderboard() {
           ))}
       </LeaderboardList>
 
-      {/* <MyRankSection>
-        <MyRankContainer>
-          <MyRankBox>
-            <MyRankInfo>
-              <MyRankLabel>나의 순위</MyRankLabel>
-              <MyRankValue>{(userRank || defaultUserRank).rank}위</MyRankValue>
-            </MyRankInfo>
-            <MyReadInfo>
-              <MyReadLabel>읽은 뉴스레터</MyReadLabel>
-              <MyReadValue>
-                {(userRank || defaultUserRank).readCount}개
-              </MyReadValue>
-            </MyReadInfo>
-          </MyRankBox>
+      {userRank && (
+        <MyRankSection>
+          <MyRankContainer>
+            <MyRankBox>
+              <MyRankInfo>
+                <MyRankLabel>나의 순위</MyRankLabel>
+                <MyRankValue>{userRank.rank}위</MyRankValue>
+              </MyRankInfo>
+              <MyReadInfo>
+                <MyReadLabel>읽은 뉴스레터</MyReadLabel>
+                <MyReadValue>{userRank.readCount}개</MyReadValue>
+              </MyReadInfo>
+            </MyRankBox>
 
-          <ProgressSection>
-            <ProgressInfo>
-              <ProgressLabel>다음 순위까지</ProgressLabel>
-              <ProgressValue>
-                {(userRank || defaultUserRank).nextRankDifference}개 더 읽기
-              </ProgressValue>
-            </ProgressInfo>
-            <ProgressBar>
-              <ProgressFill
-                style={{
-                  width: `${(userRank || defaultUserRank).progressPercentage}%`,
-                }}
-              />
-            </ProgressBar>
-          </ProgressSection>
-        </MyRankContainer>
-      </MyRankSection> */}
+            <ProgressSection>
+              <ProgressInfo>
+                <ProgressLabel>다음 순위까지</ProgressLabel>
+                <ProgressValue>
+                  {userRank.nextRankDifference}개 더 읽기
+                </ProgressValue>
+              </ProgressInfo>
+              {/* <ProgressBar>
+                <ProgressFill
+                  style={{
+                    width: `${userRank.progressPercentage}%`,
+                  }}
+                />
+              </ProgressBar> */}
+            </ProgressSection>
+          </MyRankContainer>
+        </MyRankSection>
+      )}
     </Container>
   );
 }
@@ -320,104 +306,104 @@ const BookIconContainer = styled.div`
   justify-content: center;
 `;
 
-// const MyRankSection = styled.div`
-//   padding-top: 36px;
-//   border-top: 1px solid #f1f5f9;
-// `;
+const MyRankSection = styled.div`
+  padding-top: 36px;
+  border-top: 1px solid #f1f5f9;
+`;
 
-// const MyRankContainer = styled.div`
-//   margin-bottom: 10.5px;
-//   padding: 13px 14px 14px;
-//   border-radius: 14px;
+const MyRankContainer = styled.div`
+  margin-bottom: 10.5px;
+  padding: 13px 14px 14px;
+  border-radius: 14px;
 
-//   display: flex;
-//   gap: 12px;
-//   flex-direction: column;
-//   justify-content: space-between;
+  display: flex;
+  gap: 12px;
+  flex-direction: column;
+  justify-content: space-between;
 
-//   background: linear-gradient(
-//     to right,
-//     rgb(255 153 102 / 10%),
-//     rgb(255 237 212 / 50%)
-//   );
-// `;
+  background: linear-gradient(
+    to right,
+    rgb(255 153 102 / 10%),
+    rgb(255 237 212 / 50%)
+  );
+`;
 
-// const MyRankInfo = styled.div`
-//   display: flex;
-//   flex-direction: column;
-// `;
+const MyRankInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
 
-// const MyRankBox = styled.div`
-//   display: flex;
-//   align-items: center;
-//   justify-content: space-between;
-// `;
+const MyRankBox = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
 
-// const MyRankLabel = styled.div`
-//   color: #45556c;
-//   font-family: Inter, 'Noto Sans KR', sans-serif;
-//   font-weight: 400;
-//   font-size: 12.3px;
-//   line-height: 17.5px;
-// `;
+const MyRankLabel = styled.div`
+  color: #45556c;
+  font-family: Inter, 'Noto Sans KR', sans-serif;
+  font-weight: 400;
+  font-size: 12.3px;
+  line-height: 17.5px;
+`;
 
-// const MyRankValue = styled.div`
-//   color: #0f172b;
-//   font-family: Inter, 'Noto Sans KR', sans-serif;
-//   font-weight: 400;
-//   font-size: 21px;
-//   line-height: 28px;
-// `;
+const MyRankValue = styled.div`
+  color: #0f172b;
+  font-family: Inter, 'Noto Sans KR', sans-serif;
+  font-weight: 400;
+  font-size: 21px;
+  line-height: 28px;
+`;
 
-// const MyReadInfo = styled.div`
-//   display: flex;
-//   flex-direction: column;
-//   align-items: flex-end;
-// `;
+const MyReadInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+`;
 
-// const MyReadLabel = styled.div`
-//   color: #45556c;
-//   font-family: Inter, 'Noto Sans KR', sans-serif;
-//   font-weight: 400;
-//   font-size: 12.3px;
-//   line-height: 17.5px;
-// `;
+const MyReadLabel = styled.div`
+  color: #45556c;
+  font-family: Inter, 'Noto Sans KR', sans-serif;
+  font-weight: 400;
+  font-size: 12.3px;
+  line-height: 17.5px;
+`;
 
-// const MyReadValue = styled.div`
-//   color: #f96;
-//   font-family: Inter, 'Noto Sans KR', sans-serif;
-//   font-weight: 400;
-//   font-size: 21px;
-//   line-height: 28px;
-// `;
+const MyReadValue = styled.div`
+  color: #f96;
+  font-family: Inter, 'Noto Sans KR', sans-serif;
+  font-weight: 400;
+  font-size: 21px;
+  line-height: 28px;
+`;
 
-// const ProgressSection = styled.div`
-//   display: flex;
-//   gap: 3.5px;
-//   flex-direction: column;
-// `;
+const ProgressSection = styled.div`
+  display: flex;
+  gap: 3.5px;
+  flex-direction: column;
+`;
 
-// const ProgressInfo = styled.div`
-//   display: flex;
-//   align-items: center;
-//   justify-content: space-between;
-// `;
+const ProgressInfo = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
 
-// const ProgressLabel = styled.div`
-//   color: #45556c;
-//   font-family: Inter, 'Noto Sans KR', sans-serif;
-//   font-weight: 400;
-//   font-size: 10.5px;
-//   line-height: 14px;
-// `;
+const ProgressLabel = styled.div`
+  color: #45556c;
+  font-family: Inter, 'Noto Sans KR', sans-serif;
+  font-weight: 400;
+  font-size: 10.5px;
+  line-height: 14px;
+`;
 
-// const ProgressValue = styled.div`
-//   color: #45556c;
-//   font-family: Inter, 'Noto Sans KR', sans-serif;
-//   font-weight: 400;
-//   font-size: 10.5px;
-//   line-height: 14px;
-// `;
+const ProgressValue = styled.div`
+  color: #45556c;
+  font-family: Inter, 'Noto Sans KR', sans-serif;
+  font-weight: 400;
+  font-size: 10.5px;
+  line-height: 14px;
+`;
 
 // const ProgressBar = styled.div`
 //   overflow: hidden;

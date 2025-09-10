@@ -16,6 +16,12 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
     alert(`이메일이 복사되었습니다.`);
   };
 
+  const handleResignClick = () => {
+    alert(
+      '회원 탈퇴 시, 회원님의 모든 정보가 삭제됩니다. 정말 탈퇴하시겠습니까?',
+    );
+  };
+
   if (!userInfo) return null;
 
   return (
@@ -45,7 +51,9 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
 
       <Divider />
 
-      <DeleteButton>회원 탈퇴</DeleteButton>
+      <ResignButton type="button" onClick={handleResignClick}>
+        회원 탈퇴
+      </ResignButton>
     </Container>
   );
 };
@@ -127,7 +135,7 @@ const EmailText = styled.div`
   font: ${({ theme }) => theme.fonts.body2};
 `;
 
-const DeleteButton = styled.button`
+const ResignButton = styled.button`
   display: flex;
   align-items: center;
 

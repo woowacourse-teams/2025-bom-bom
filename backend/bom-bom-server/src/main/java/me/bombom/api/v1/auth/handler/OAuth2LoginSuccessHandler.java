@@ -8,6 +8,8 @@ import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -33,10 +35,27 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         System.out.println("=== OAuth2LoginSuccessHandler 호출됨 ===");
         System.out.println("authentication: " + authentication.getClass().getSimpleName());
         
-        CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-        Member member = oAuth2User.getMember();
+        Object principal = authentication.getPrincipal();
+        System.out.println("principal type: " + principal.getClass().getSimpleName());
         
-        System.out.println("member: " + (member != null ? "있음 (ID: " + member.getId() + ")" : "없음"));
+        Member member = null;
+        
+        if (principal instanceof CustomOAuth2User) {
+            CustomOAuth2User oAuth2User = (CustomOAuth2User) principal;
+            member = oAuth2User.getMember();
+            System.out.println("CustomOAuth2User - member: " + (member != null ? "있음 (ID: " + member.getId() + ")" : "없음"));
+        } else if (principal instanceof OidcUser) {
+            OidcUser oidcUser = (OidcUser) principal;
+            System.out.println("OidcUser - sub: " + oidcUser.getSubject());
+            System.out.println("OidcUser - email: " + oidcUser.getEmail());
+            System.out.println("OidcUser - name: " + oidcUser.getFullName());
+            // Apple OIDC의 경우 CustomOAuth2UserService가 호출되지 않았을 수 있음
+            System.out.println("Apple OIDC 로그인 - CustomOAuth2UserService 호출되지 않음");
+        } else if (principal instanceof OAuth2User) {
+            OAuth2User oAuth2User = (OAuth2User) principal;
+            System.out.println("OAuth2User - name: " + oAuth2User.getName());
+            System.out.println("OAuth2User - attributes: " + oAuth2User.getAttributes());
+        }
 
         String redirectUrl = getBaseUrlByEnv(request);
         if (member == null) {

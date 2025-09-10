@@ -35,9 +35,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        log.info("OAuth2 로그인 시작 - provider: {}", userRequest.getClientRegistration().getRegistrationId());
-        String provider = userRequest.getClientRegistration().getRegistrationId();
-        OAuth2ProviderInfo oAuth2Provider = OAuth2ProviderInfo.from(provider);
+        try {
+            log.info("OAuth2 로그인 시작 - provider: {}", userRequest.getClientRegistration().getRegistrationId());
+            String provider = userRequest.getClientRegistration().getRegistrationId();
+            OAuth2ProviderInfo oAuth2Provider = OAuth2ProviderInfo.from(provider);
 
         Map<String, Object> attributes;
         String providerId;
@@ -110,8 +111,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             log.info("기존 회원 Refresh Token 업데이트 완료");
         }
 
-        log.info("OAuth2 로그인 완료 - provider: {}, providerId: {}", provider, providerId);
-        return new CustomOAuth2User(attributes, member.orElse(null));
+            log.info("OAuth2 로그인 완료 - provider: {}, providerId: {}", provider, providerId);
+            return new CustomOAuth2User(attributes, member.orElse(null));
+        } catch (Exception e) {
+            log.error("OAuth2 로그인 중 예외 발생 - provider: {}, error: {}", 
+                    userRequest.getClientRegistration().getRegistrationId(), e.getMessage(), e);
+            throw new OAuth2AuthenticationException("OAuth2 로그인 처리 중 오류가 발생했습니다: " + e.getMessage());
+        }
     }
 
     private String extractRefreshToken(OAuth2UserRequest userRequest) {

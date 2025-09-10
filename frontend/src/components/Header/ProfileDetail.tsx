@@ -43,7 +43,7 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
           <StyledMailIcon />
           <EmailTitle>봄봄 구독 이메일</EmailTitle>
         </EmailTitleWrapper>
-        <ProfileEmail onClick={handleCopyEmail}>
+        <ProfileEmail type="button" onClick={handleCopyEmail}>
           <EmailText>{userInfo.email}</EmailText>
           <CopyIcon width={16} height={16} />
         </ProfileEmail>
@@ -117,7 +117,7 @@ const EmailTitle = styled.p`
   font: ${({ theme }) => theme.fonts.body2};
 `;
 
-const ProfileEmail = styled.div`
+const ProfileEmail = styled.button`
   padding: 4px 8px;
   border-radius: 8px;
 
@@ -126,8 +126,6 @@ const ProfileEmail = styled.div`
   align-items: center;
 
   background: ${({ theme }) => theme.colors.dividers};
-
-  cursor: pointer;
 
   &:hover {
     background: ${({ theme }) => theme.colors.stroke};

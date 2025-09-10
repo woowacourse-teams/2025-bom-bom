@@ -13,10 +13,8 @@ interface HeaderProps {
 }
 
 export default function Header({ activeNav }: HeaderProps) {
-  const { data: userInfo, isFetching } = useQuery(queries.me());
+  const { data: userInfo } = useQuery(queries.me());
   const deviceType = useDeviceType();
-
-  const isLoggedIn = isFetching || userInfo;
 
   return (
     <>
@@ -24,7 +22,7 @@ export default function Header({ activeNav }: HeaderProps) {
         <>
           <MobileHeaderContainer>
             <HeaderLogo deviceType={deviceType} />
-            {isLoggedIn && userInfo ? (
+            {userInfo ? (
               <HeaderProfile userInfo={userInfo} deviceType={deviceType} />
             ) : (
               <LoginButton />
@@ -43,7 +41,7 @@ export default function Header({ activeNav }: HeaderProps) {
               <HeaderNavButtons activeNav={activeNav} deviceType={deviceType} />
             </NavWrapper>
 
-            {isLoggedIn && userInfo ? (
+            {userInfo ? (
               <HeaderProfile userInfo={userInfo} deviceType={deviceType} />
             ) : (
               <LoginButton />

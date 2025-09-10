@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { useMutation } from '@tanstack/react-query';
+import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 import { postLogout } from '@/apis/auth';
 import { UserInfo } from '@/types/me';
 import { copyToClipboard } from '@/utils/copy';
@@ -95,7 +96,7 @@ const Profile = styled.div`
   align-items: center;
 `;
 
-const ProfileImg = styled.img`
+const ProfileImg = styled(ImageWithFallback)`
   width: 34px;
   height: 34px;
   border-radius: 50%;

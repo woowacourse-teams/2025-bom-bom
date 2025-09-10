@@ -30,14 +30,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        System.out.println("=== CustomOAuth2UserService.loadUser 호출됨 ===");
         String provider = userRequest.getClientRegistration().getRegistrationId();
+        System.out.println("provider: " + provider);
         OAuth2ProviderInfo oAuth2Provider = OAuth2ProviderInfo.from(provider);
+        System.out.println("oAuth2Provider: " + oAuth2Provider);
         
         OAuth2User oAuth2User;
         String providerId;
         String profileUrl = "";
         
         if (oAuth2Provider == OAuth2ProviderInfo.APPLE) {
+            System.out.println("=== Apple 로그인 처리 시작 ===");
             // Apple의 경우 super.loadUser() 호출하지 않음 (Apple은 user-info 엔드포인트가 없음)
             try {
                 // Apple ID Token에서 사용자 정보 추출

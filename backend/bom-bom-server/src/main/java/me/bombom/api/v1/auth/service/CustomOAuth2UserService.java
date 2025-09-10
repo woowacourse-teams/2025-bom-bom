@@ -45,36 +45,36 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String profileUrl = "";
 
         if (oAuth2Provider == OAuth2ProviderInfo.APPLE) {
-            try {
-                log.info("Apple OAuth2 처리 시작 - additionalParameters: {}", userRequest.getAdditionalParameters().keySet());
+            log.info("Apple OAuth2 처리 시작 - additionalParameters: {}", userRequest.getAdditionalParameters().keySet());
+            
+            // Apple의 경우 ID Token을 additionalParameters에서 찾기
+            Object idTokenObj = userRequest.getAdditionalParameters().get(ID_TOKEN_KEY);
+            
+            if (idTokenObj == null) {
+                log.warn("Apple ID Token이 additionalParameters에 없음");
                 
-                // Apple의 경우 ID Token을 여러 곳에서 찾기
-                Object idTokenObj = userRequest.getAdditionalParameters().get(ID_TOKEN_KEY);
+                // Apple OAuth2에서는 ID Token이 없을 수 있으므로 기본값으로 처리
+                String uniqueId = "apple_" + System.currentTimeMillis() + "_" + (int)(Math.random() * 1000);
+                attributes = Map.of("sub", uniqueId);
+                providerId = uniqueId;
+                log.info("Apple ID Token 없음 - 기본값으로 처리 - providerId: {}", providerId);
+            } else {
+                String idToken = idTokenObj.toString();
+                log.info("Apple ID Token 발견 - token length: {}", idToken.length());
                 
-                if (idTokenObj == null) {
-                    log.warn("Apple ID Token이 additionalParameters에 없음");
-                    
-                    // Apple OAuth2에서는 ID Token이 없을 수 있으므로 기본값으로 처리
-                    String uniqueId = "apple_" + System.currentTimeMillis() + "_" + (int)(Math.random() * 1000);
-                    attributes = Map.of("sub", uniqueId);
-                    providerId = uniqueId;
-                    log.info("Apple ID Token 없음 - 기본값으로 처리 - providerId: {}", providerId);
-                } else {
-                    String idToken = idTokenObj.toString();
-                    log.info("Apple ID Token 발견 - token length: {}", idToken.length());
-                    
+                try {
                     JWT jwt = JWTParser.parse(idToken);
                     attributes = jwt.getJWTClaimsSet().getClaims();
                     providerId = (String) attributes.get(oAuth2Provider.getIdKey());
                     log.info("Apple ID Token 파싱 성공 - providerId: {}", providerId);
+                } catch (Exception jwtException) {
+                    log.error("Apple ID Token 파싱 실패 - error: {}", jwtException.getMessage(), jwtException);
+                    // JWT 파싱 실패 시 기본값으로 처리
+                    String fallbackId = "apple_jwt_fallback_" + System.currentTimeMillis();
+                    attributes = Map.of("sub", fallbackId);
+                    providerId = fallbackId;
+                    log.info("Apple JWT 파싱 실패 - fallback으로 처리 - providerId: {}", providerId);
                 }
-            } catch (Exception e) {
-                log.error("Apple 사용자 정보 조회 실패 - error: {}", e.getMessage(), e);
-                // 예외가 발생해도 기본값으로 처리하여 로그인을 계속 진행
-                String fallbackId = "apple_fallback_" + System.currentTimeMillis();
-                attributes = Map.of("sub", fallbackId);
-                providerId = fallbackId;
-                log.info("Apple 예외 발생 - fallback으로 처리 - providerId: {}", providerId);
             }
         } else {
             OAuth2User oAuth2User = super.loadUser(userRequest);

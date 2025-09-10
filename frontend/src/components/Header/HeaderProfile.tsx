@@ -57,6 +57,7 @@ export default HeaderProfile;
 const Container = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
 `;
 
 const HeaderProfileWrapper = styled.button`
@@ -80,13 +81,12 @@ const ProfileImg = styled(ImageWithFallback)`
 
 const ProfileInfo = styled.div`
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
   justify-content: center;
-
-  font: ${({ theme }) => theme.fonts.caption};
 `;
 
 const ProfileName = styled.div`
   color: ${({ theme }) => theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.body1};
 `;

@@ -105,7 +105,6 @@ const ContentWrapper = styled.div<{ position: PositionType }>`
 
 const containerStyles = {
   dropdown: {
-    width: '200px',
     height: 'auto',
     maxHeight: '300px',
     borderRadius: '8px',

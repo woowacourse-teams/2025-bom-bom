@@ -123,7 +123,7 @@ jobs:
   deploy-server-main:
     name: Production Server main 배포
     needs: build
-    runs-on: [ self-hosted, prod ]  
+    runs-on: [ self-hosted, prod-main ]  
     defaults:
       run:
         working-directory: ./backend/bom-bom-server

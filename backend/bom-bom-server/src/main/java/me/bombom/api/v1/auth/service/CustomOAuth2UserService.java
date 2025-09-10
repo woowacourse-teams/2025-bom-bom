@@ -84,6 +84,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             // Apple 로그인인 경우에만 Refresh Token 추출
             String refreshToken = (oAuth2Provider == OAuth2ProviderInfo.APPLE) 
                 ? extractRefreshToken(userRequest) : null;
+            System.out.println("=== 신규 회원 처리 ===");
+            System.out.println("provider: " + provider);
+            System.out.println("providerId: " + providerId);
+            System.out.println("refreshToken: " + (refreshToken != null ? "있음" : "없음"));
+            
             PendingOAuth2Member pendingMember = PendingOAuth2Member.builder()
                     .provider(provider)
                     .providerId(providerId)
@@ -102,8 +107,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private String extractRefreshToken(OAuth2UserRequest userRequest) {
         try {
             Object refreshTokenObj = userRequest.getAdditionalParameters().get(REFRESH_TOKEN_KEY);
+            System.out.println("=== Apple Refresh Token 추출 ===");
+            System.out.println("additionalParameters keys: " + userRequest.getAdditionalParameters().keySet());
+            System.out.println("refreshToken 존재: " + (refreshTokenObj != null));
+            if (refreshTokenObj != null) {
+                System.out.println("refreshToken length: " + refreshTokenObj.toString().length());
+            }
             return refreshTokenObj != null ? refreshTokenObj.toString() : null;
         } catch (Exception e) {
+            System.out.println("Refresh Token 추출 실패: " + e.getMessage());
             return null;
         }
     }
@@ -111,15 +123,26 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private void updateRefreshTokenIfNeeded(Member member, OAuth2UserRequest userRequest) {
         try {
             String refreshToken = extractRefreshToken(userRequest);
+            System.out.println("=== 기존 회원 Refresh Token 업데이트 ===");
+            System.out.println("memberId: " + member.getId());
+            System.out.println("provider: " + member.getProvider());
+            System.out.println("새로운 refreshToken: " + (refreshToken != null ? "있음" : "없음"));
+            System.out.println("기존 appleRefreshToken: " + (member.getAppleRefreshToken() != null ? "있음" : "없음"));
             
             if (refreshToken != null && member.getProvider().equals(OAuth2ProviderInfo.APPLE.getProvider())) {
                 if (!refreshToken.equals(member.getAppleRefreshToken())) {
+                    System.out.println("Apple Refresh Token 업데이트 실행");
                     member.updateAppleRefreshToken(refreshToken);
                     memberRepository.save(member);
+                    System.out.println("Apple Refresh Token 업데이트 완료");
+                } else {
+                    System.out.println("Apple Refresh Token 동일 - 업데이트 불필요");
                 }
+            } else {
+                System.out.println("Refresh Token 업데이트 조건 불만족");
             }
         } catch (Exception e) {
-            // 실패해도 로그인은 계속 진행
+            System.out.println("Refresh Token 업데이트 실패: " + e.getMessage());
         }
     }
 }

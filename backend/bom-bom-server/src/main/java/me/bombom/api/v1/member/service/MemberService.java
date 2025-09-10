@@ -34,6 +34,11 @@ public class MemberService {
         validateDuplicateNickname(signupRequest.nickname());
         validateDuplicateEmail(signupRequest.email());
 
+        System.out.println("=== 회원가입 시 Refresh Token 저장 ===");
+        System.out.println("provider: " + pendingMember.getProvider());
+        System.out.println("providerId: " + pendingMember.getProviderId());
+        System.out.println("appleRefreshToken: " + (pendingMember.getAppleRefreshToken() != null ? "있음" : "없음"));
+
         Member newMember = Member.builder()
                 .provider(pendingMember.getProvider())
                 .providerId(pendingMember.getProviderId())
@@ -46,6 +51,9 @@ public class MemberService {
                 .appleRefreshToken(pendingMember.getAppleRefreshToken())
                 .build();
         Member savedMember = memberRepository.save(newMember);
+        System.out.println("회원가입 완료 - memberId: " + savedMember.getId() + ", appleRefreshToken: " + 
+                (savedMember.getAppleRefreshToken() != null ? "저장됨" : "없음"));
+        
         applicationEventPublisher.publishEvent(new MemberSignupEvent(savedMember.getId()));
         return savedMember;
     }

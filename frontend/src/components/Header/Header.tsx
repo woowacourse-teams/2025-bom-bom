@@ -1,7 +1,10 @@
 import styled from '@emotion/styled';
+import { useQuery } from '@tanstack/react-query';
 import HeaderLogo from './HeaderLogo';
 import HeaderNavButtons from './HeaderNavButtons';
 import HeaderProfile from './HeaderProfile';
+import LoginButton from './LoginButton';
+import { queries } from '@/apis/queries';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import { NavType } from '@/types/nav';
 
@@ -10,31 +13,46 @@ interface HeaderProps {
 }
 
 export default function Header({ activeNav }: HeaderProps) {
+  const { data: userInfo, isFetching } = useQuery(queries.me());
+
   const deviceType = useDeviceType();
 
-  return deviceType === 'mobile' ? (
+  const isLoggedIn = isFetching || userInfo;
+
+  return (
     <>
-      <MobileHeaderContainer>
-        <HeaderLogo deviceType={deviceType} />
-        <HeaderProfile deviceType={deviceType} />
-      </MobileHeaderContainer>
+      {deviceType === 'mobile' ? (
+        <>
+          <MobileHeaderContainer>
+            <HeaderLogo deviceType={deviceType} />
+            {isLoggedIn && userInfo ? (
+              <HeaderProfile userInfo={userInfo} deviceType={deviceType} />
+            ) : (
+              <LoginButton />
+            )}
+          </MobileHeaderContainer>
+          <BottomNavWrapper>
+            <HeaderNavButtons activeNav={activeNav} deviceType={deviceType} />
+          </BottomNavWrapper>
+        </>
+      ) : (
+        <HeaderContainer>
+          <HeaderInner>
+            <HeaderLogo deviceType={deviceType} />
 
-      <BottomNavWrapper>
-        <HeaderNavButtons activeNav={activeNav} deviceType={deviceType} />
-      </BottomNavWrapper>
+            <NavWrapper deviceType={deviceType}>
+              <HeaderNavButtons activeNav={activeNav} deviceType={deviceType} />
+            </NavWrapper>
+
+            {isLoggedIn && userInfo ? (
+              <HeaderProfile userInfo={userInfo} deviceType={deviceType} />
+            ) : (
+              <LoginButton />
+            )}
+          </HeaderInner>
+        </HeaderContainer>
+      )}
     </>
-  ) : (
-    <HeaderContainer>
-      <HeaderInner>
-        <HeaderLogo deviceType={deviceType} />
-
-        <NavWrapper deviceType={deviceType}>
-          <HeaderNavButtons activeNav={activeNav} deviceType={deviceType} />
-        </NavWrapper>
-
-        <HeaderProfile deviceType={deviceType} />
-      </HeaderInner>
-    </HeaderContainer>
   );
 }
 

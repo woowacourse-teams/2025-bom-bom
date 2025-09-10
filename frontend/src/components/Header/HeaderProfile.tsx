@@ -1,21 +1,16 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
-import Button from '../Button/Button';
-import { queries } from '@/apis/queries';
+import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 import { DeviceType } from '@/hooks/useDeviceType';
+import { UserInfo } from '@/types/me';
 import { copyToClipboard } from '@/utils/copy';
-import defaultImage from '#/assets/bombom.png';
 import CopyIcon from '#/assets/copy.svg';
 
 interface HeaderProfileProps {
+  userInfo: UserInfo;
   deviceType: DeviceType;
 }
 
-const HeaderProfile = ({ deviceType }: HeaderProfileProps) => {
-  const navigate = useNavigate();
-  const { data: userInfo, isFetching } = useQuery(queries.me());
-
+const HeaderProfile = ({ userInfo, deviceType }: HeaderProfileProps) => {
   const handleCopyEmail = () => {
     if (!userInfo?.email) return;
 
@@ -23,38 +18,29 @@ const HeaderProfile = ({ deviceType }: HeaderProfileProps) => {
     alert(`이메일이 복사되었습니다.`);
   };
 
-  const isLoggedIn = isFetching || userInfo;
+  if (!userInfo) return null;
 
   return (
     <Container>
-      {isLoggedIn ? (
-        <ProfileInfo>
+      <ProfileInfo>
+        {deviceType !== 'mobile' && (
+          <ProfileImg
+            src={userInfo.profileImageUrl ?? ''}
+            alt="profile"
+            width={32}
+            height={32}
+          />
+        )}
+        <ProfileTextBox>
           {deviceType !== 'mobile' && (
-            <ProfileImg
-              src={userInfo?.profileImageUrl ?? defaultImage}
-              alt="profile"
-              width={32}
-              height={32}
-            />
+            <ProfileName>{userInfo.nickname}</ProfileName>
           )}
-          <ProfileTextBox>
-            {deviceType !== 'mobile' && (
-              <ProfileName>{userInfo?.nickname}</ProfileName>
-            )}
-            <ProfileEmail onClick={handleCopyEmail}>
-              <EmailText>{userInfo?.email}</EmailText>
-              <CopyIcon width={16} height={16} />
-            </ProfileEmail>
-          </ProfileTextBox>
-        </ProfileInfo>
-      ) : (
-        <Button
-          text="로그인"
-          onClick={() => {
-            navigate({ to: '/login' });
-          }}
-        />
-      )}
+          <ProfileEmail onClick={handleCopyEmail}>
+            <EmailText>{userInfo.email}</EmailText>
+            <CopyIcon width={16} height={16} />
+          </ProfileEmail>
+        </ProfileTextBox>
+      </ProfileInfo>
     </Container>
   );
 };
@@ -74,7 +60,7 @@ const Container = styled.div`
   background: ${({ theme }) => theme.colors.white};
 `;
 
-const ProfileImg = styled.img`
+const ProfileImg = styled(ImageWithFallback)`
   width: 34px;
   height: 34px;
   border-radius: 50%;

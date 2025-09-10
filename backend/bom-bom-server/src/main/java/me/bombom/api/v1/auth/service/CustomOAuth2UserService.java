@@ -29,12 +29,50 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oAuth2User = super.loadUser(userRequest);
-
         String provider = userRequest.getClientRegistration().getRegistrationId();
         OAuth2ProviderInfo oAuth2Provider = OAuth2ProviderInfo.from(provider);
-        String providerId = oAuth2User.getAttribute(oAuth2Provider.getIdKey());
-        String profileUrl = oAuth2User.getAttribute(oAuth2Provider.getProfileImageKey());
+        
+        OAuth2User oAuth2User;
+        String providerId;
+        String profileUrl = "";
+        
+        if (oAuth2Provider == OAuth2ProviderInfo.APPLE) {
+            // Apple의 경우 super.loadUser() 호출하지 않음 (Apple은 user-info 엔드포인트가 없음)
+            try {
+                // Apple ID Token에서 사용자 정보 추출
+                Object idTokenObj = userRequest.getAdditionalParameters().get("id_token");
+                if (idTokenObj != null) {
+                    // ID Token이 있는 경우 간단한 파싱
+                    String idToken = idTokenObj.toString();
+                    // 간단한 JWT 디코딩 (서명 검증 없이)
+                    String[] parts = idToken.split("\\.");
+                    if (parts.length >= 2) {
+                        String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+                        // JSON 파싱 없이 간단하게 sub 추출
+                        if (payload.contains("\"sub\"")) {
+                            int subStart = payload.indexOf("\"sub\":\"") + 7;
+                            int subEnd = payload.indexOf("\"", subStart);
+                            providerId = payload.substring(subStart, subEnd);
+                        } else {
+                            providerId = "apple_" + System.currentTimeMillis();
+                        }
+                    } else {
+                        providerId = "apple_" + System.currentTimeMillis();
+                    }
+                } else {
+                    providerId = "apple_" + System.currentTimeMillis();
+                }
+                oAuth2User = new CustomOAuth2User(java.util.Map.of("sub", providerId), null);
+            } catch (Exception e) {
+                providerId = "apple_fallback_" + System.currentTimeMillis();
+                oAuth2User = new CustomOAuth2User(java.util.Map.of("sub", providerId), null);
+            }
+        } else {
+            // Google 등 다른 provider는 기존 방식 사용
+            oAuth2User = super.loadUser(userRequest);
+            providerId = oAuth2User.getAttribute(oAuth2Provider.getIdKey());
+            profileUrl = oAuth2User.getAttribute(oAuth2Provider.getProfileImageKey());
+        }
 
         Optional<Member> member = memberRepository.findByProviderAndProviderIdIncludeDeleted(provider, providerId);
 

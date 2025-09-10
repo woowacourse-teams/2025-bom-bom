@@ -25,6 +25,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final MemberRepository memberRepository;
     private final HttpSession session;
+    private final AppleTokenService appleTokenService;
 
     @Override
     @Transactional
@@ -84,6 +85,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             // Apple 로그인인 경우에만 Refresh Token 추출
             String refreshToken = (oAuth2Provider == OAuth2ProviderInfo.APPLE) 
                 ? extractRefreshToken(userRequest) : null;
+            
+            // Apple 로그인이고 Refresh Token이 없는 경우, Authorization Code로 발급 시도
+            if (oAuth2Provider == OAuth2ProviderInfo.APPLE && refreshToken == null) {
+                refreshToken = tryGetRefreshTokenFromAuthorizationCode(userRequest);
+            }
+            
             System.out.println("=== 신규 회원 처리 ===");
             System.out.println("provider: " + provider);
             System.out.println("providerId: " + providerId);
@@ -120,6 +127,34 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
     }
 
+    private String tryGetRefreshTokenFromAuthorizationCode(OAuth2UserRequest userRequest) {
+        try {
+            System.out.println("=== Authorization Code로 Refresh Token 발급 시도 ===");
+            
+            // Authorization Code 추출
+            String authorizationCode = userRequest.getAdditionalParameters().get("code").toString();
+            System.out.println("authorizationCode: " + authorizationCode);
+            
+            // Apple Token Service를 통해 Refresh Token 발급
+            var tokenResponse = appleTokenService.getRefreshToken(authorizationCode);
+            
+            if (tokenResponse.getRefreshToken() != null) {
+                System.out.println("=== Authorization Code로 Refresh Token 발급 성공 ===");
+                System.out.println("refreshToken 길이: " + tokenResponse.getRefreshToken().length());
+                return tokenResponse.getRefreshToken();
+            } else {
+                System.out.println("=== Authorization Code로 Refresh Token 발급 실패 ===");
+                System.out.println("에러: " + tokenResponse.getError());
+                System.out.println("에러 설명: " + tokenResponse.getErrorDescription());
+                return null;
+            }
+            
+        } catch (Exception e) {
+            System.out.println("Authorization Code로 Refresh Token 발급 중 오류: " + e.getMessage());
+            return null;
+        }
+    }
+
     private void updateRefreshTokenIfNeeded(Member member, OAuth2UserRequest userRequest) {
         try {
             String refreshToken = extractRefreshToken(userRequest);
@@ -139,7 +174,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     System.out.println("Apple Refresh Token 동일 - 업데이트 불필요");
                 }
             } else {
-                System.out.println("Refresh Token 업데이트 조건 불만족");
+                System.out.println(" Refresh Token 업데이트 조건 불만족");
             }
         } catch (Exception e) {
             System.out.println("Refresh Token 업데이트 실패: " + e.getMessage());

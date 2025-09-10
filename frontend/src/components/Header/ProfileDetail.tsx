@@ -1,7 +1,10 @@
 import styled from '@emotion/styled';
+import { useMutation } from '@tanstack/react-query';
+import { postLogout } from '@/apis/auth';
 import { UserInfo } from '@/types/me';
 import { copyToClipboard } from '@/utils/copy';
 import CopyIcon from '#/assets/copy.svg';
+import LogoutIcon from '#/assets/logout.svg';
 import MailIcon from '#/assets/mail.svg';
 
 interface ProfileDetailProps {
@@ -9,6 +12,17 @@ interface ProfileDetailProps {
 }
 
 const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
+  const { mutate: mutateLogout } = useMutation({
+    mutationKey: ['logout'],
+    mutationFn: postLogout,
+    onSuccess: () => {
+      window.location.reload();
+    },
+    onError: () => {
+      alert('로그아웃에 실패했습니다. 다시 시도해주세요.');
+    },
+  });
+
   const handleCopyEmail = () => {
     if (!userInfo.email) return;
 
@@ -20,6 +34,10 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
     alert(
       '회원 탈퇴 시, 회원님의 모든 정보가 삭제됩니다. 정말 탈퇴하시겠습니까?',
     );
+  };
+
+  const handleLogoutClick = () => {
+    mutateLogout();
   };
 
   if (!userInfo) return null;
@@ -50,6 +68,11 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
       </EmailWrapper>
 
       <Divider />
+
+      <LogoutButton type="button" onClick={handleLogoutClick}>
+        <LogoutIcon width={16} height={16} />
+        로그아웃
+      </LogoutButton>
 
       <ResignButton type="button" onClick={handleResignClick}>
         회원 탈퇴
@@ -136,6 +159,20 @@ const ProfileEmail = styled.button`
 const EmailText = styled.div`
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body2};
+`;
+
+const LogoutButton = styled.button`
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
+  color: ${({ theme }) => theme.colors.primary};
+  font: ${({ theme }) => theme.fonts.body2};
+
+  &:hover {
+    text-decoration: underline;
+    transition: all 0.2s ease-in-out;
+  }
 `;
 
 const ResignButton = styled.button`

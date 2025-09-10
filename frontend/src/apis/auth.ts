@@ -19,3 +19,9 @@ export const getSignupCheck = (params: GetSignupCheckParams) => {
     query: params,
   });
 };
+
+export const postLogout = () => {
+  return fetcher.post({
+    path: '/auth/logout',
+  });
+};

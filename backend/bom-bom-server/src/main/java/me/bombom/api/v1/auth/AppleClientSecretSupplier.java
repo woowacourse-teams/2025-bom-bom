@@ -34,6 +34,12 @@ public class AppleClientSecretSupplier implements Supplier<String> {
 
     @Override
     public String get() {
+        System.out.println("=== Apple Client Secret 생성 시작 ===");
+        System.out.println("teamId: " + teamId);
+        System.out.println("keyId: " + keyId);
+        System.out.println("clientId: " + clientId);
+        System.out.println("privateKey 존재: " + (privateKey != null));
+        
         Instant now = Instant.now();
         Instant exp = now.plus(TOKEN_TTL);
 
@@ -54,8 +60,13 @@ public class AppleClientSecretSupplier implements Supplier<String> {
         try {
             JWSSigner signer = new ECDSASigner(privateKey);
             signedJWT.sign(signer);
-            return signedJWT.serialize();
+            String clientSecret = signedJWT.serialize();
+            System.out.println("Apple Client Secret 생성 성공, 길이: " + clientSecret.length());
+            System.out.println("=== Apple Client Secret 생성 완료 ===");
+            return clientSecret;
         } catch (Exception e) {
+            System.out.println("Apple Client Secret 생성 실패: " + e.getMessage());
+            e.printStackTrace();
             throw new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR);
         }
     }

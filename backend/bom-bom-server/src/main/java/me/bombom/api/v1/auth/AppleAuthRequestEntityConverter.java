@@ -21,11 +21,25 @@ public class AppleAuthRequestEntityConverter implements Converter<OAuth2Authoriz
 
     @Override
     public MultiValueMap<String, String> convert(OAuth2AuthorizationCodeGrantRequest request) {
+        System.out.println("=== Apple OAuth2 요청 파라미터 생성 ===");
+        
         MultiValueMap<String, String> params = delegate.convert(request);
-        params.set("client_id", request.getClientRegistration().getClientId());
-        params.set("client_secret", clientSecretSupplier.get());
-        params.set("redirect_uri", request.getAuthorizationExchange().getAuthorizationRequest().getRedirectUri());
+        
+        String clientId = request.getClientRegistration().getClientId();
+        String clientSecret = clientSecretSupplier.get();
+        String redirectUri = request.getAuthorizationExchange().getAuthorizationRequest().getRedirectUri();
+        
+        System.out.println("client_id: " + clientId);
+        System.out.println("client_secret 길이: " + (clientSecret != null ? clientSecret.length() : "null"));
+        System.out.println("redirect_uri: " + redirectUri);
+        System.out.println("grant_type: " + AUTHORIZATION_CODE);
+        
+        params.set("client_id", clientId);
+        params.set("client_secret", clientSecret);
+        params.set("redirect_uri", redirectUri);
         params.set("grant_type", AUTHORIZATION_CODE);
+        
+        System.out.println("=== Apple OAuth2 요청 파라미터 완료 ===");
         return params;
     }
 }

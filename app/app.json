@@ -38,7 +38,7 @@
           "image": "./app/assets/images/logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#FE5E04"
         }
       ]
     ],

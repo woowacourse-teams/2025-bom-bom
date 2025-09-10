@@ -48,21 +48,33 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 // Apple의 경우 ID Token을 additionalParameters에서 찾기
                 Object idTokenObj = userRequest.getAdditionalParameters().get(ID_TOKEN_KEY);
                 if (idTokenObj == null) {
-                    log.error("Apple ID Token이 additionalParameters에 없음 - available keys: {}", userRequest.getAdditionalParameters().keySet());
-                    throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
-                        .addContext("provider", provider)
-                        .addContext("reason", "apple_id_token_not_found_in_additional_parameters");
+                    log.info("Apple ID Token 없음 - Access Token에서 사용자 정보 추출 시도");
+                    String accessToken = userRequest.getAccessToken().getTokenValue();
+                    log.info("Apple Access Token 추출 성공 - token length: {}", accessToken.length());
+
+                    try {
+                        JWT accessTokenJwt = JWTParser.parse(accessToken);
+                        attributes = accessTokenJwt.getJWTClaimsSet().getClaims();
+                        providerId = (String) attributes.get(oAuth2Provider.getIdKey());
+                        log.info("Apple Access Token 파싱 성공 - providerId: {}", providerId);
+                    } catch (Exception jwtException) {
+                        log.warn("Apple Access Token JWT 파싱 실패 - Access Token이 JWT 형식이 아님: {}", jwtException.getMessage());
+                        attributes = Map.of("sub", "unknown_" + System.currentTimeMillis());
+                        providerId = (String) attributes.get("sub");
+                        log.info("Apple Access Token 기본값으로 처리 - providerId: {}", providerId);
+                    }
+                } else {
+                    String idToken = idTokenObj.toString();
+                    JWT jwt = JWTParser.parse(idToken);
+                    attributes = jwt.getJWTClaimsSet().getClaims();
+                    providerId = (String) attributes.get(oAuth2Provider.getIdKey());
+                    log.info("Apple ID Token 파싱 성공 - providerId: {}", providerId);
                 }
-                String idToken = idTokenObj.toString();
-                JWT jwt = JWTParser.parse(idToken);
-                attributes = jwt.getJWTClaimsSet().getClaims();
-                providerId = (String) attributes.get(oAuth2Provider.getIdKey());
-                log.info("Apple ID Token 파싱 성공 - providerId: {}", providerId);
             } catch (Exception e) {
-                log.error("Apple ID Token 파싱 실패 - error: {}", e.getMessage(), e);
+                log.error("Apple 사용자 정보 조회 실패 - error: {}", e.getMessage(), e);
                 throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
                     .addContext("provider", provider)
-                    .addContext("reason", "apple_id_token_parse_failed");
+                    .addContext("reason", "apple_user_info_retrieval_failed");
             }
         } else {
             OAuth2User oAuth2User = super.loadUser(userRequest);

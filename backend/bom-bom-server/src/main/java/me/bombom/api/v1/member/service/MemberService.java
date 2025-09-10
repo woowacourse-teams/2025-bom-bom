@@ -89,13 +89,33 @@ public class MemberService {
 
     @Transactional
     public Member findOrCreateMemberByAppleId(String appleId, String email, String name) {
+        return findOrCreateMemberByAppleId(appleId, email, name, null);
+    }
+
+    @Transactional
+    public Member findOrCreateMemberByAppleId(String appleId, String email, String name, String refreshToken) {
         System.out.println("=== Apple ID로 회원 조회/생성 ===");
         System.out.println("appleId: " + appleId);
         System.out.println("email: " + email);
         System.out.println("name: " + name);
+        System.out.println("refreshToken: " + (refreshToken != null ? "있음" : "없음"));
         
         // Apple ID로 기존 회원 조회
         return memberRepository.findByProviderAndProviderId("apple", appleId)
+                .map(existingMember -> {
+                    System.out.println("기존 회원 발견 - memberId: " + existingMember.getId());
+                    
+                    // Refresh Token이 있으면 업데이트
+                    if (refreshToken != null && !refreshToken.equals(existingMember.getAppleRefreshToken())) {
+                        System.out.println("Apple Refresh Token 업데이트");
+                        existingMember.updateAppleRefreshToken(refreshToken);
+                        Member updatedMember = memberRepository.save(existingMember);
+                        System.out.println("Apple Refresh Token 업데이트 완료");
+                        return updatedMember;
+                    }
+                    
+                    return existingMember;
+                })
                 .orElseGet(() -> {
                     System.out.println("기존 회원 없음 - 새 회원 생성");
                     
@@ -108,10 +128,12 @@ public class MemberService {
                             .email(memberEmail)
                             .nickname(name != null ? name : "Apple User")
                             .roleId(MEMBER_ROLE_ID)
+                            .appleRefreshToken(refreshToken)
                             .build();
                     
                     Member savedMember = memberRepository.save(newMember);
                     System.out.println("새 회원 생성 완료 - memberId: " + savedMember.getId());
+                    System.out.println("새 회원 Apple Refresh Token: " + (savedMember.getAppleRefreshToken() != null ? "저장됨" : "없음"));
                     return savedMember;
                 });
     }

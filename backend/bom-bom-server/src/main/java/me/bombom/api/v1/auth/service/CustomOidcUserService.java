@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class CustomOidcUserService extends OidcUserService {
 
     private final MemberService memberService;
+    private final AppleTokenService appleTokenService;
 
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
@@ -47,10 +48,24 @@ public class CustomOidcUserService extends OidcUserService {
                 
                 System.out.println("Apple 사용자 정보 - sub: " + sub + ", email: " + email + ", name: " + name);
                 
-                // 기존 회원 조회 또는 새 회원 생성
-                Member member = memberService.findOrCreateMemberByAppleId(sub, email, name);
+                // Apple Refresh Token 가져오기 시도
+                String refreshToken = null;
+                try {
+                    System.out.println("=== Apple Refresh Token 가져오기 시도 ===");
+                    // Authorization Code가 필요하지만, OIDC에서는 Access Token만 있음
+                    // Apple의 경우 Refresh Token은 첫 로그인 시에만 제공되므로 여기서는 null로 처리
+                    System.out.println("Apple OIDC에서는 Refresh Token을 별도로 가져올 수 없음");
+                    System.out.println("Apple Refresh Token: 없음 (OIDC 특성상 첫 로그인 시에만 제공)");
+                } catch (Exception e) {
+                    System.out.println("Apple Refresh Token 가져오기 실패: " + e.getMessage());
+                    log.warn("Apple Refresh Token 가져오기 실패", e);
+                }
+                
+                // 기존 회원 조회 또는 새 회원 생성 (Refresh Token 포함)
+                Member member = memberService.findOrCreateMemberByAppleId(sub, email, name, refreshToken);
                 
                 System.out.println("member: " + (member != null ? "있음 (ID: " + member.getId() + ")" : "없음"));
+                System.out.println("member appleRefreshToken: " + (member != null && member.getAppleRefreshToken() != null ? "저장됨" : "없음"));
                 
                 // CustomOAuth2User로 래핑하여 반환
                 return new CustomOAuth2User(oidcUser, member);

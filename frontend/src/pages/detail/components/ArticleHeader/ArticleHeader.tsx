@@ -1,11 +1,7 @@
 import styled from '@emotion/styled';
 import Chip from '@/components/Chip/Chip';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
-import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
-import BookmarkActiveIcon from '#/assets/bookmark-active.svg';
-import BookmarkInactiveIcon from '#/assets/bookmark-inactive.svg';
-import ChevronLeftIcon from '#/assets/chevron-left.svg';
 import ClockIcon from '#/assets/clock.svg';
 
 interface ArticleHeaderProps {
@@ -16,7 +12,6 @@ interface ArticleHeaderProps {
   expectedReadTime: number;
   bookmarked?: boolean;
   onBookmarkClick?: (bookmarked: boolean) => void;
-  onBackClick?: () => void;
 }
 
 const ArticleHeader = ({
@@ -25,19 +20,11 @@ const ArticleHeader = ({
   newsletterName,
   arrivedDateTime,
   expectedReadTime,
-  bookmarked = false,
-  onBookmarkClick,
-  onBackClick,
 }: ArticleHeaderProps) => {
   const deviceType = useDeviceType();
 
   return (
     <Container>
-      {deviceType !== 'pc' && onBackClick && (
-        <BackButton type="button" onClick={onBackClick}>
-          <ChevronLeftIcon width={20} height={20} />
-        </BackButton>
-      )}
       <TitleRow>
         <Title deviceType={deviceType}>{title}</Title>
       </TitleRow>
@@ -49,22 +36,6 @@ const ArticleHeader = ({
           <ClockIcon width={16} height={16} />
           <MetaInfoText>{expectedReadTime}분</MetaInfoText>
         </ReadTimeBox>
-        {deviceType !== 'pc' && (
-          <BookmarkButton
-            type="button"
-            onClick={() => onBookmarkClick?.(bookmarked)}
-          >
-            {bookmarked ? (
-              <BookmarkActiveIcon width={24} height={24} />
-            ) : (
-              <BookmarkInactiveIcon
-                width={24}
-                height={24}
-                color={theme.colors.primary}
-              />
-            )}
-          </BookmarkButton>
-        )}
       </MetaInfoRow>
     </Container>
   );
@@ -96,41 +67,6 @@ const Title = styled.h2<{ deviceType: DeviceType }>`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme, deviceType }) =>
     deviceType === 'mobile' ? theme.fonts.heading4 : theme.fonts.heading3};
-`;
-
-const BackButton = styled.button`
-  padding: 4px;
-  border-radius: 50%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background-color: transparent;
-  color: ${({ theme }) => theme.colors.icons};
-`;
-
-const BookmarkButton = styled.button`
-  margin-left: auto;
-  padding: 8px;
-  border: 1px solid ${({ theme }) => theme.colors.stroke};
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
-
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-
-  background-color: ${({ theme }) => theme.colors.white};
-
-  & > svg {
-    transition: transform 0.2s ease;
-  }
-
-  &:hover > svg {
-    transform: scale(1.1);
-  }
 `;
 
 const MetaInfoRow = styled.div`

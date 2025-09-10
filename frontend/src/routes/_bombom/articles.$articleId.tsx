@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, useRouter } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
 import ProgressBar from '@/components/ProgressBar/ProgressBar';
 import Spacing from '@/components/Spacing/Spacing';
@@ -11,6 +11,7 @@ import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
 import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
+import PageHeader from '@/pages/detail/components/PageHeader/PageHeader';
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
 import useArticleAsReadMutation from '@/pages/detail/hooks/useArticleAsReadMutation';
 import { useArticleBookmark } from '@/pages/detail/hooks/useArticleBookmark';
@@ -23,7 +24,6 @@ function ArticleDetailPage() {
   const { articleId } = Route.useParams();
   const articleIdNumber = Number(articleId);
   const deviceType = useDeviceType();
-  const router = useRouter();
 
   const { data: currentArticle } = useQuery(
     queries.articleById({ id: articleIdNumber }),
@@ -46,55 +46,59 @@ function ArticleDetailPage() {
 
   useScrollRestoration({ pathname: articleId, enabled: !!currentArticle });
 
-  const handleBackClick = () => {
-    router.history.back();
-  };
-
   if (!currentArticle) return null;
 
   return (
-    <Container>
-      {deviceType === 'pc' && (
-        <ArticleActionButtons
+    <>
+      {deviceType !== 'pc' && (
+        <PageHeader
           bookmarked={isBookmarked}
           onBookmarkClick={toggleBookmark}
         />
       )}
 
-      <ArticleContent deviceType={deviceType}>
-        <ArticleProgressBar
-          rate={progressPercentage}
-          transition={false}
-          variant="rectangular"
-          deviceType={deviceType}
-        />
-        <ArticleHeader
-          title={currentArticle.title ?? ''}
-          newsletterCategory={currentArticle.newsletter?.category ?? ''}
-          newsletterName={currentArticle.newsletter?.name ?? ''}
-          arrivedDateTime={new Date(currentArticle.arrivedDateTime ?? '')}
-          expectedReadTime={currentArticle.expectedReadTime ?? 1}
-          bookmarked={isBookmarked}
-          onBookmarkClick={toggleBookmark}
-          onBackClick={handleBackClick}
-        />
-        <Divider />
+      <Container>
+        {deviceType === 'pc' && (
+          <ArticleActionButtons
+            bookmarked={isBookmarked}
+            onBookmarkClick={toggleBookmark}
+          />
+        )}
 
-        <ArticleBody
-          articleId={articleIdNumber}
-          articleContent={currentArticle.contents}
-        />
-        <Spacing size={24} />
-        <Divider />
+        <ArticleContent deviceType={deviceType}>
+          <ArticleProgressBar
+            rate={progressPercentage}
+            transition={false}
+            variant="rectangular"
+            deviceType={deviceType}
+          />
+          <ArticleHeader
+            title={currentArticle.title ?? ''}
+            newsletterCategory={currentArticle.newsletter?.category ?? ''}
+            newsletterName={currentArticle.newsletter?.name ?? ''}
+            arrivedDateTime={new Date(currentArticle.arrivedDateTime ?? '')}
+            expectedReadTime={currentArticle.expectedReadTime ?? 1}
+            bookmarked={isBookmarked}
+            onBookmarkClick={toggleBookmark}
+          />
+          <Divider />
 
-        <ContentDescription>
-          이 뉴스레터가 유용했다면 동료들과 공유해주세요. 피드백이나 제안사항이
-          있으시면 언제든 연락 주시기 바랍니다.
-        </ContentDescription>
+          <ArticleBody
+            articleId={articleIdNumber}
+            articleContent={currentArticle.contents}
+          />
+          <Spacing size={24} />
+          <Divider />
 
-        <TodayUnreadArticlesSection articleId={articleIdNumber} />
-      </ArticleContent>
-    </Container>
+          <ContentDescription>
+            이 뉴스레터가 유용했다면 동료들과 공유해주세요. 피드백이나
+            제안사항이 있으시면 언제든 연락 주시기 바랍니다.
+          </ContentDescription>
+
+          <TodayUnreadArticlesSection articleId={articleIdNumber} />
+        </ArticleContent>
+      </Container>
+    </>
   );
 }
 

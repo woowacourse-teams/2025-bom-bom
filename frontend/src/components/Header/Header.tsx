@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { useLocation } from '@tanstack/react-router';
 import HeaderLogo from './HeaderLogo';
 import HeaderNavButtons from './HeaderNavButtons';
 import HeaderProfile from './HeaderProfile';
@@ -7,21 +8,17 @@ import { NavType } from '@/types/nav';
 
 interface HeaderProps {
   activeNav: NavType;
-  hideTopHeader?: boolean;
 }
 
-const Header = ({ activeNav, hideTopHeader = false }: HeaderProps) => {
+const Header = ({ activeNav }: HeaderProps) => {
   const deviceType = useDeviceType();
+  const { pathname } = useLocation();
 
-  return deviceType === 'mobile' ? (
+  const isArticlePage = pathname.startsWith('/articles/');
+  const isHeaderInvisible = isArticlePage && deviceType !== 'pc';
+
+  return isHeaderInvisible ? (
     <>
-      {!hideTopHeader && (
-        <MobileHeaderContainer>
-          <HeaderLogo deviceType={deviceType} />
-          <HeaderProfile deviceType={deviceType} />
-        </MobileHeaderContainer>
-      )}
-
       <BottomNavWrapper>
         <HeaderNavButtons activeNav={activeNav} deviceType={deviceType} />
       </BottomNavWrapper>
@@ -42,27 +39,6 @@ const Header = ({ activeNav, hideTopHeader = false }: HeaderProps) => {
 };
 
 export default Header;
-
-const MobileHeaderContainer = styled.header`
-  position: fixed;
-  top: 0;
-  z-index: ${({ theme }) => theme.zIndex.header};
-  width: 100%;
-  height: calc(
-    ${({ theme }) => theme.heights.headerMobile} + env(safe-area-inset-top)
-  );
-  padding: 8px 12px;
-  padding-top: calc(8px + env(safe-area-inset-top));
-  box-shadow:
-    0 8px 12px -6px rgb(0 0 0 / 10%),
-    0 3px 5px -4px rgb(0 0 0 / 10%);
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  background: ${({ theme }) => theme.colors.white};
-`;
 
 const HeaderContainer = styled.header`
   position: fixed;

@@ -2,44 +2,32 @@ import styled from '@emotion/styled';
 import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 import { DeviceType } from '@/hooks/useDeviceType';
 import { UserInfo } from '@/types/me';
-import { copyToClipboard } from '@/utils/copy';
-import CopyIcon from '#/assets/copy.svg';
 
 interface HeaderProfileProps {
   userInfo: UserInfo;
   deviceType: DeviceType;
+  openProfileModal: () => void;
 }
 
-const HeaderProfile = ({ userInfo, deviceType }: HeaderProfileProps) => {
-  const handleCopyEmail = () => {
-    if (!userInfo?.email) return;
-
-    copyToClipboard(userInfo?.email);
-    alert(`이메일이 복사되었습니다.`);
-  };
-
+const HeaderProfile = ({
+  userInfo,
+  deviceType,
+  openProfileModal,
+}: HeaderProfileProps) => {
   if (!userInfo) return null;
 
   return (
-    <Container>
+    <Container type="button" onClick={openProfileModal}>
       <ProfileInfo>
+        <ProfileImg
+          src={userInfo.profileImageUrl ?? ''}
+          alt="profile"
+          width={32}
+          height={32}
+        />
         {deviceType !== 'mobile' && (
-          <ProfileImg
-            src={userInfo.profileImageUrl ?? ''}
-            alt="profile"
-            width={32}
-            height={32}
-          />
+          <ProfileName>{userInfo.nickname}</ProfileName>
         )}
-        <ProfileTextBox>
-          {deviceType !== 'mobile' && (
-            <ProfileName>{userInfo.nickname}</ProfileName>
-          )}
-          <ProfileEmail onClick={handleCopyEmail}>
-            <EmailText>{userInfo.email}</EmailText>
-            <CopyIcon width={16} height={16} />
-          </ProfileEmail>
-        </ProfileTextBox>
       </ProfileInfo>
     </Container>
   );
@@ -47,7 +35,7 @@ const HeaderProfile = ({ userInfo, deviceType }: HeaderProfileProps) => {
 
 export default HeaderProfile;
 
-const Container = styled.div`
+const Container = styled.button`
   min-width: 200px;
   padding: 8px 12px;
   border-radius: 12px;
@@ -66,11 +54,6 @@ const ProfileImg = styled(ImageWithFallback)`
   border-radius: 50%;
 `;
 
-const ProfileTextBox = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
 const ProfileInfo = styled.div`
   display: flex;
   gap: 8px;
@@ -82,17 +65,4 @@ const ProfileInfo = styled.div`
 
 const ProfileName = styled.div`
   color: ${({ theme }) => theme.colors.textPrimary};
-`;
-
-const ProfileEmail = styled.div`
-  display: flex;
-  gap: 4px;
-  align-items: center;
-
-  cursor: pointer;
-`;
-
-const EmailText = styled.div`
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.caption};
 `;

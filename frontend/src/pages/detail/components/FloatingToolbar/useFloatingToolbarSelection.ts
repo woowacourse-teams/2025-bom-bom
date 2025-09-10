@@ -75,7 +75,7 @@ export const useFloatingToolbarSelection = ({
       selectedHighlightIdRef.current = null;
       setPosition({
         x: rect.left + rect.width / 2,
-        y: deviceType === 'mobile' ? rect.bottom + 40 : rect.top,
+        y: deviceType !== 'pc' ? rect.bottom + 40 : rect.top,
       });
       setIsVisible(true);
     },

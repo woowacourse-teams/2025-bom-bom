@@ -11,4 +11,5 @@ public class PendingOAuth2Member implements Serializable {
     private final String provider;
     private final String providerId;
     private final String profileUrl;
+    private final String appleRefreshToken;
 }

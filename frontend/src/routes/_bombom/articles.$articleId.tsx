@@ -133,9 +133,9 @@ const ArticleContent = styled.div<{ deviceType: DeviceType }>`
 const ArticleProgressBar = styled(ProgressBar)<{ deviceType: DeviceType }>`
   position: fixed;
   top: ${({ deviceType, theme }) =>
-    deviceType === 'mobile'
-      ? `calc(${theme.heights.headerMobile} + env(safe-area-inset-top))`
-      : `calc(${theme.heights.headerPC} + env(safe-area-inset-top))`};
+    deviceType === 'pc'
+      ? `calc(${theme.heights.headerPC} + env(safe-area-inset-top))`
+      : `calc(${theme.heights.headerMobile} + env(safe-area-inset-top))`};
   z-index: ${({ theme }) => theme.zIndex.floating};
   height: 4px;
 `;

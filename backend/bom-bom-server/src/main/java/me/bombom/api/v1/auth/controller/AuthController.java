@@ -14,6 +14,7 @@ import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.dto.request.DuplicateCheckRequest;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
+import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.service.MemberService;
@@ -87,6 +88,12 @@ public class AuthController implements AuthControllerApi{
         if (request.getSession(false) != null) {
             request.getSession(false).invalidate();
         }
+    }
+
+    @Override
+    @PostMapping("/withdraw")
+    public void withdraw(@LoginMember Member member) {
+        memberService.revoke(member.getId());
     }
 
     private OAuth2AuthenticationToken createAuthenticationToken(Member member) {

@@ -18,7 +18,7 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
   if (!userInfo) return null;
 
   return (
-    <Content>
+    <>
       <ProfileImg
         src={userInfo.profileImageUrl ?? ''}
         alt="profile"
@@ -32,13 +32,11 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
           <CopyIcon width={16} height={16} />
         </ProfileEmail>
       </ProfileTextBox>
-    </Content>
+    </>
   );
 };
 
 export default ProfileDetail;
-
-const Content = styled.section``;
 
 const ProfileImg = styled.img`
   width: 34px;

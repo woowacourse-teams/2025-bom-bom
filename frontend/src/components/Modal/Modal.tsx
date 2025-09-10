@@ -12,7 +12,6 @@ interface UseModalParams extends PropsWithChildren {
   position?: PositionType;
   showCloseButton?: boolean;
   showBackdrop?: boolean;
-  dropdownPosition?: { top: number; left: number };
 }
 
 const Modal = ({
@@ -21,7 +20,6 @@ const Modal = ({
   position = 'center',
   showCloseButton = true,
   showBackdrop = true,
-  dropdownPosition,
   isOpen,
   children,
 }: UseModalParams) => {
@@ -35,7 +33,6 @@ const Modal = ({
         aria-modal="true"
         ref={modalRef}
         position={position}
-        dropdownPosition={dropdownPosition}
       >
         {showCloseButton && (
           <CloseButton type="button" onClick={closeModal}>
@@ -69,7 +66,6 @@ const Backdrop = styled.div`
 
 const Container = styled.div<{
   position: PositionType;
-  dropdownPosition?: { top: number; left: number };
 }>`
   position: fixed;
   z-index: ${({ theme }) => theme.zIndex.overlay};
@@ -79,13 +75,7 @@ const Container = styled.div<{
 
   background: ${({ theme }) => theme.colors.white};
 
-  ${({ position, dropdownPosition }) =>
-    position === 'dropdown' && dropdownPosition
-      ? {
-          ...containerStyles.dropdown,
-          transform: `translate(${dropdownPosition.left}px, ${dropdownPosition.top}px)`,
-        }
-      : containerStyles[position]}
+  ${({ position }) => containerStyles[position]}
 `;
 
 const CloseButton = styled.button`

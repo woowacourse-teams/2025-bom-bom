@@ -1,13 +1,9 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { createPortal } from 'react-dom';
 import HeaderLogo from './HeaderLogo';
 import HeaderNavButtons from './HeaderNavButtons';
 import HeaderProfile from './HeaderProfile';
 import LoginButton from './LoginButton';
-import ProfileDetail from './ProfileDetail';
-import Modal from '../Modal/Modal';
-import useModal from '../Modal/useModal';
 import { queries } from '@/apis/queries';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import { NavType } from '@/types/nav';
@@ -18,12 +14,6 @@ interface HeaderProps {
 
 export default function Header({ activeNav }: HeaderProps) {
   const { data: userInfo, isFetching } = useQuery(queries.me());
-  const {
-    modalRef: profileModalRef,
-    openModal: openProfileModal,
-    closeModal: closeProfileModal,
-    isOpen,
-  } = useModal();
   const deviceType = useDeviceType();
 
   const isLoggedIn = isFetching || userInfo;
@@ -35,11 +25,7 @@ export default function Header({ activeNav }: HeaderProps) {
           <MobileHeaderContainer>
             <HeaderLogo deviceType={deviceType} />
             {isLoggedIn && userInfo ? (
-              <HeaderProfile
-                userInfo={userInfo}
-                deviceType={deviceType}
-                openProfileModal={openProfileModal}
-              />
+              <HeaderProfile userInfo={userInfo} deviceType={deviceType} />
             ) : (
               <LoginButton />
             )}
@@ -58,30 +44,13 @@ export default function Header({ activeNav }: HeaderProps) {
             </NavWrapper>
 
             {isLoggedIn && userInfo ? (
-              <HeaderProfile
-                userInfo={userInfo}
-                deviceType={deviceType}
-                openProfileModal={openProfileModal}
-              />
+              <HeaderProfile userInfo={userInfo} deviceType={deviceType} />
             ) : (
               <LoginButton />
             )}
           </HeaderInner>
         </HeaderContainer>
       )}
-      {userInfo &&
-        createPortal(
-          <Modal
-            modalRef={profileModalRef}
-            closeModal={closeProfileModal}
-            isOpen={isOpen}
-            position={deviceType === 'mobile' ? 'bottom' : 'center'}
-            showCloseButton={false}
-          >
-            <ProfileDetail userInfo={userInfo} />
-          </Modal>,
-          document.body,
-        )}
     </>
   );
 }

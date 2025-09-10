@@ -72,6 +72,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/auth/withdraw': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 회원 탈퇴
+     * @description 현재 로그인한 회원의 계정을 삭제합니다. Apple 로그인 사용자의 경우 Apple 토큰도 함께 철회됩니다.
+     */
+    post: operations['withdraw'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/auth/signup': {
     parameters: {
       query?: never;
@@ -288,6 +308,26 @@ export interface paths {
      * @description 현재 읽기 카운트를 기준으로 내림차순하여 순위와 함께 조회합니다.
      */
     get: operations['getMonthlyReadingRank'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/members/me/reading/month/rank/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 나의 월간 순위 조회
+     * @description 저장된 rank 기반으로 나의 순위와 총 랭킹 참여자 수를 반환합니다.
+     */
+    get: operations['getMemberMonthlyRank'];
     put?: never;
     post?: never;
     delete?: never;
@@ -685,6 +725,14 @@ export interface components {
       /** Format: int32 */
       monthlyReadCount: number;
     };
+    MemberMonthlyReadingRankResponse: {
+      /** Format: int64 */
+      rank: number;
+      /** Format: int64 */
+      readCount: number;
+      /** Format: int64 */
+      nextRankDifference: number;
+    };
     PetResponse: {
       /**
        * Format: int32
@@ -737,28 +785,28 @@ export interface components {
       /** Format: int32 */
       number?: number;
       sort?: components['schemas']['SortObject'];
+      first?: boolean;
+      last?: boolean;
       /** Format: int32 */
       numberOfElements?: number;
       pageable?: components['schemas']['PageableObject'];
-      first?: boolean;
-      last?: boolean;
       empty?: boolean;
     };
     PageableObject: {
       /** Format: int64 */
       offset?: number;
       sort?: components['schemas']['SortObject'];
+      unpaged?: boolean;
+      /** Format: int32 */
+      pageSize?: number;
       paged?: boolean;
       /** Format: int32 */
       pageNumber?: number;
-      /** Format: int32 */
-      pageSize?: number;
-      unpaged?: boolean;
     };
     SortObject: {
       empty?: boolean;
-      sorted?: boolean;
       unsorted?: boolean;
+      sorted?: boolean;
     };
     /** @description 뉴스레터 별 하이라이트 개수 통계 */
     HighlightCountPerNewsletterResponse: {
@@ -818,11 +866,11 @@ export interface components {
       /** Format: int32 */
       number?: number;
       sort?: components['schemas']['SortObject'];
+      first?: boolean;
+      last?: boolean;
       /** Format: int32 */
       numberOfElements?: number;
       pageable?: components['schemas']['PageableObject'];
-      first?: boolean;
-      last?: boolean;
       empty?: boolean;
     };
     BookmarkStatusResponse: {
@@ -878,11 +926,11 @@ export interface components {
       /** Format: int32 */
       number?: number;
       sort?: components['schemas']['SortObject'];
+      first?: boolean;
+      last?: boolean;
       /** Format: int32 */
       numberOfElements?: number;
       pageable?: components['schemas']['PageableObject'];
-      first?: boolean;
-      last?: boolean;
       empty?: boolean;
     };
     ArticleDetailResponse: {
@@ -1120,6 +1168,31 @@ export interface operations {
       };
       /** @description 아티클을 찾을 수 없음 */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  withdraw: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 탈퇴 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 인증되지 않은 사용자 */
+      401: {
         headers: {
           [name: string]: unknown;
         };
@@ -1518,12 +1591,39 @@ export interface operations {
           '*/*': components['schemas']['MonthlyReadingRankResponse'][];
         };
       };
-      /** @description 잘못된 요청 값 */
+      /** @description 잘못된 요청 값 (limit는 1 이상의 값이어야 함) */
       400: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description 인증 실패 (로그인 필요) */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getMemberMonthlyRank: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 나의 월간 순위 조회 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['MemberMonthlyReadingRankResponse'];
+        };
       };
       /** @description 인증 실패 (로그인 필요) */
       401: {

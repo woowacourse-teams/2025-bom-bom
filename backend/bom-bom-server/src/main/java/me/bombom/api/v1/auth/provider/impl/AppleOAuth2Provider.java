@@ -28,7 +28,6 @@ public class AppleOAuth2Provider implements OAuth2Provider {
                 appleRevokeClient.revoke(member.getAppleRefreshToken(), appleClientSecretSupplier.get());
             } catch (Exception e) {
                 // Apple API 호출 실패해도 탈퇴는 계속 진행
-                // 로그만 남기고 예외를 던지지 않음
             }
         }
         // Refresh Token이 없어도 탈퇴는 가능 (내부 데이터만 삭제)

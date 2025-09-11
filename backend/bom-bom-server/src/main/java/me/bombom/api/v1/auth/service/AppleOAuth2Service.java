@@ -44,7 +44,7 @@ public class AppleOAuth2Service implements OAuth2LoginService {
     
     @Value("${oauth2.apple.client-id}")
     private String clientId;
-    
+
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -65,7 +65,8 @@ public class AppleOAuth2Service implements OAuth2LoginService {
             String providerId = (String) attributes.get("sub");
             String email = (String) attributes.get("email");
             log.info("Apple ID Token 파싱 성공 - providerId: {}, email: {}", providerId, email);
-
+            
+            // Apple Access Token 세션에 저장
             String accessToken = extractAccessToken(userRequest);
             if (accessToken != null) {
                 session.setAttribute("appleAccessToken", accessToken);
@@ -73,7 +74,8 @@ public class AppleOAuth2Service implements OAuth2LoginService {
             } else {
                 log.warn("Apple Access Token 추출 실패");
             }
-
+            
+            // 기존 회원 확인
             Optional<Member> member = memberRepository.findByProviderAndProviderId("apple", providerId);
             
             if (member.isEmpty()) {
@@ -87,6 +89,7 @@ public class AppleOAuth2Service implements OAuth2LoginService {
             } else {
                 log.info("Apple 기존 회원 - 로그인 성공, memberId: {}", member.get().getId());
             }
+            
             return new CustomOAuth2User(attributes, member.orElse(null));
         } catch (Exception e) {
             log.error("Apple OIDC 로그인 처리 실패 - error: {}", e.getMessage(), e);
@@ -123,7 +126,6 @@ public class AppleOAuth2Service implements OAuth2LoginService {
         } else {
             log.warn("Apple Access Token 없음 - memberId: {}, 탈퇴는 계속 진행", member.getId());
         }
-
         log.info("Apple 사용자 탈퇴 처리 완료 - memberId: {}", member.getId());
     }
 
@@ -140,11 +142,13 @@ public class AppleOAuth2Service implements OAuth2LoginService {
             requestBody.add("token", accessToken);
             requestBody.add("client_id", clientId);
             requestBody.add("client_secret", appleClientSecretSupplier.get());
+
             restClient.post()
                 .uri(APPLE_REVOKE_URL)
                 .body(requestBody)
                 .retrieve()
                 .toBodilessEntity();
+
             log.info("Apple Token Revoke 성공");
             return true;
 
@@ -153,7 +157,12 @@ public class AppleOAuth2Service implements OAuth2LoginService {
             return false;
         }
     }
-
+    
+    /**
+     * Apple Access Token을 추출합니다
+     * @param userRequest OAuth2 사용자 요청
+     * @return Access Token 또는 null
+     */
     private String extractAccessToken(OAuth2UserRequest userRequest) {
         try {
             Object accessTokenObj = userRequest.getAdditionalParameters().get(ACCESS_TOKEN_KEY);

@@ -22,12 +22,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class GoogleOAuth2LoginService implements OAuth2LoginService {
-    
+
     private final DefaultOAuth2UserService defaultOAuth2UserService = new DefaultOAuth2UserService();
     private final MemberRepository memberRepository;
     private final HttpSession session;
-    
+
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -38,10 +39,10 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
         String email = oAuth2User.getAttribute("email");
         String profileUrl = oAuth2User.getAttribute("picture");
         String name = oAuth2User.getAttribute("name");
-        
+
         // 기존 회원 확인
         Optional<Member> member = memberRepository.findByProviderAndProviderId("google", providerId);
-        
+
         if (member.isEmpty()) {
             PendingOAuth2Member pendingMember = PendingOAuth2Member.builder()
                     .provider("google")
@@ -55,12 +56,12 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
         }
         return new CustomOAuth2User(oAuth2User.getAttributes(), member.orElse(null));
     }
-    
+
     @Override
     public String getProviderType() {
         return "google";
     }
-    
+
     @Override
     public boolean supports(String provider) {
         return "google".equals(provider);

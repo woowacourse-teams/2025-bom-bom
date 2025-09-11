@@ -1,8 +1,11 @@
 package me.bombom.api.v1.member.service;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.enums.DuplicateCheckField;
+import me.bombom.api.v1.auth.service.AppleOAuth2Service;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -15,6 +18,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -24,6 +28,8 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final AppleOAuth2Service appleOAuth2Service;
+    private final HttpSession session;
 
     @Transactional
     public Member signup(PendingOAuth2Member pendingMember, MemberSignupRequest signupRequest) {
@@ -76,6 +82,12 @@ public class MemberService {
                 .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
             );
+
+        if ("apple".equals(member.getProvider())) {
+            log.info("Apple 연동 회원 탈퇴 - 토큰 철회를 시도합니다. memberId: {}", memberId);
+            String accessToken = (String) session.getAttribute("appleAccessToken");
+            appleOAuth2Service.processWithdrawal(member, accessToken);
+        }
         memberRepository.delete(member);
     }
 

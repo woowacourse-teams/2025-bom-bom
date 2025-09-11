@@ -107,22 +107,10 @@ public class AuthController implements AuthControllerApi{
             response.sendRedirect("/oauth2/authorization/apple");
             return;
         }
-        
         log.info("회원 탈퇴 진행 - memberId: {}, provider: {}", member.getId(), member.getProvider());
-        
-        // Apple 로그인 사용자인 경우 Token Revoke 처리
-        if (member.getProvider().equals("apple")) {
-            appleOAuth2Service.processWithdrawal(member, appleAccessToken);
-        }
-        
-        // 회원 데이터 소프트 삭제
-        memberService.revoke(member.getId());
-        
-        // 세션 무효화
+        memberService.revoke(member.getId(), appleAccessToken);
         session.invalidate();
-        
-        // 탈퇴 완료 후 메인 페이지로 리다이렉트
-        response.sendRedirect("/?withdraw=success");
+        response.sendRedirect("/");
     }
 
     private OAuth2AuthenticationToken createAuthenticationToken(Member member) {

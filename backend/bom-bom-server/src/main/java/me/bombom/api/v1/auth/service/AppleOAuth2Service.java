@@ -110,26 +110,6 @@ public class AppleOAuth2Service implements OAuth2LoginService {
     }
 
     /**
-     * Apple 사용자 탈퇴 처리
-     * @param member 탈퇴할 회원
-     * @param accessToken Apple Access Token
-     */
-    public void processWithdrawal(Member member, String accessToken) {
-        log.info("Apple 사용자 탈퇴 처리 시작 - memberId: {}", member.getId());
-        if (accessToken != null) {
-            boolean revokeSuccess = revokeToken(accessToken);
-            if (revokeSuccess) {
-                log.info("Apple Token Revoke 성공 - memberId: {}", member.getId());
-            } else {
-                log.warn("Apple Token Revoke 실패 - memberId: {}, 탈퇴는 계속 진행", member.getId());
-            }
-        } else {
-            log.warn("Apple Access Token 없음 - memberId: {}, 탈퇴는 계속 진행", member.getId());
-        }
-        log.info("Apple 사용자 탈퇴 처리 완료 - memberId: {}", member.getId());
-    }
-
-    /**
      * Apple Access Token을 철회합니다
      * @param accessToken 철회할 Access Token
      * @return 철회 성공 여부

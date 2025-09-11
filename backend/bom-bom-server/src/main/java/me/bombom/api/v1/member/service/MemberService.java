@@ -1,6 +1,5 @@
 package me.bombom.api.v1.member.service;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
@@ -29,7 +28,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final AppleOAuth2Service appleOAuth2Service;
-    private final HttpSession session;
 
     @Transactional
     public Member signup(PendingOAuth2Member pendingMember, MemberSignupRequest signupRequest) {
@@ -76,19 +74,25 @@ public class MemberService {
     }
 
     @Transactional
-    public void revoke(Long memberId) {
+    public void revoke(Long memberId, String appleAccessToken) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                 .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
             );
-
+        
+        // Apple 연동 회원인 경우 토큰 철회 로직 호출
         if ("apple".equals(member.getProvider())) {
             log.info("Apple 연동 회원 탈퇴 - 토큰 철회를 시도합니다. memberId: {}", memberId);
-            String accessToken = (String) session.getAttribute("appleAccessToken");
-            appleOAuth2Service.processWithdrawal(member, accessToken);
+            boolean revokeSuccess = appleOAuth2Service.revokeToken(appleAccessToken);
+            if (revokeSuccess) {
+                log.info("Apple Token Revoke 성공 - memberId: {}", memberId);
+            } else {
+                log.warn("Apple Token Revoke 실패 - memberId: {}, 탈퇴는 계속 진행됩니다", memberId);
+            }
         }
         memberRepository.delete(member);
+        log.info("회원 탈퇴 처리 완료. MemberId: {}", memberId);
     }
 
 

@@ -122,7 +122,7 @@ public class AuthController implements AuthControllerApi{
         
         memberService.revoke(member.getId());
         session.invalidate();
-        response.sendRedirect("/");
+//        response.sendRedirect("/");
     }
 
     private OAuth2AuthenticationToken createAuthenticationToken(Member member) {

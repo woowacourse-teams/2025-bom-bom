@@ -1,5 +1,6 @@
 package me.bombom.api.v1.auth.controller;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -122,7 +123,19 @@ public class AuthController implements AuthControllerApi{
         
         memberService.revoke(member.getId());
         session.invalidate();
-//        response.sendRedirect("/");
+        expireSessionCookie(response);
+        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+    }
+
+    private void expireSessionCookie(HttpServletResponse response) {
+        Cookie jsid = new Cookie("JSESSIONID", "");
+        jsid.setMaxAge(0);
+        jsid.setPath("/");
+        jsid.setHttpOnly(true);
+        jsid.setSecure(true);
+        response.addCookie(jsid);
+        // Ensure SameSite=None for cross-site
+        response.addHeader("Set-Cookie", "JSESSIONID=; Max-Age=0; Path=/; Secure; HttpOnly; SameSite=None");
     }
 
     private OAuth2AuthenticationToken createAuthenticationToken(Member member) {

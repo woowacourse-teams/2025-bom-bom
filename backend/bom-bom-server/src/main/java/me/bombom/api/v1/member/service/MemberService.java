@@ -39,7 +39,6 @@ public class MemberService {
                 .gender(signupRequest.gender())
                 .roleId(MEMBER_ROLE_ID)
                 .birthDate(signupRequest.birthDate())
-                .appleRefreshToken(pendingMember.getAppleRefreshToken())
                 .build();
         Member savedMember = memberRepository.save(newMember);
         applicationEventPublisher.publishEvent(new MemberSignupEvent(savedMember.getId()));

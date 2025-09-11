@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { useRouter } from '@tanstack/react-router';
+import ChevronIcon from '@/components/icons/ChevronIcon';
 import BookmarkActiveIcon from '#/assets/bookmark-active.svg';
 import BookmarkInactiveIcon from '#/assets/bookmark-inactive.svg';
-import ChevronLeftIcon from '#/assets/chevron-left.svg';
 
 interface PageHeaderProps {
   bookmarked?: boolean;
@@ -22,16 +22,16 @@ const PageHeader = ({
   return (
     <Container>
       <BackButton type="button" onClick={handleBackClick} aria-label="뒤로가기">
-        <ChevronLeftIcon width={28} height={28} />
+        <BackIcon direction="left" />
       </BackButton>
       <BookmarkButton
         type="button"
         onClick={() => onBookmarkClick?.(bookmarked)}
       >
         {bookmarked ? (
-          <BookmarkActiveIcon width={32} height={32} />
+          <BookmarkActiveIcon width={28} height={28} />
         ) : (
-          <StyledBookmarkInactiveIcon width={32} height={32} />
+          <StyledBookmarkInactiveIcon width={28} height={28} />
         )}
       </BookmarkButton>
     </Container>
@@ -48,7 +48,8 @@ const Container = styled.header`
   height: calc(
     ${({ theme }) => theme.heights.headerMobile} + env(safe-area-inset-top)
   );
-  padding: 4px 12px;
+
+  /* padding: 4px 8px; */
   padding-top: calc(4px + env(safe-area-inset-top));
   box-shadow:
     0 8px 12px -6px rgb(0 0 0 / 10%),
@@ -62,7 +63,7 @@ const Container = styled.header`
 `;
 
 const BackButton = styled.button`
-  padding: 8px;
+  padding: 4px;
 
   display: flex;
   align-items: center;
@@ -100,4 +101,9 @@ const BookmarkButton = styled.button`
 
 const StyledBookmarkInactiveIcon = styled(BookmarkInactiveIcon)`
   color: ${({ theme }) => theme.colors.primary};
+`;
+
+const BackIcon = styled(ChevronIcon)`
+  width: 32px;
+  height: 32px;
 `;

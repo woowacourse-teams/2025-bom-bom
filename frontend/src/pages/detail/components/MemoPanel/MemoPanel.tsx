@@ -27,9 +27,19 @@ const MemoPanel = ({
     <Container isOpen={open}>
       <ToggleButton isOpen={open} onClick={handleToggle}>
         {open ? (
-          <ChevronIcon direction="right" color={theme.colors.primary} />
+          <ChevronIcon
+            direction="right"
+            width={24}
+            height={24}
+            color={theme.colors.primary}
+          />
         ) : (
-          <ChevronIcon direction="left" color={theme.colors.primary} />
+          <ChevronIcon
+            direction="left"
+            width={24}
+            height={24}
+            color={theme.colors.primary}
+          />
         )}
       </ToggleButton>
 

@@ -66,7 +66,9 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .tokenEndpoint(token -> token.accessTokenResponseClient(appleOAuth2AccessTokenResponseClient))
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService) // 일반 OAuth2(Google) 로그인을 위한 서비스 설정
+                                .userService(customOAuth2UserService) // Google 등 OAuth2
+                                .oidcUserService(oidcReq -> (org.springframework.security.oauth2.core.oidc.user.OidcUser)
+                                        customOAuth2UserService.loadUser(oidcReq)) // Apple 등 OIDC → 커스텀 라우팅
                         )
                         .successHandler(oAuth2LoginSuccessHandler));
 

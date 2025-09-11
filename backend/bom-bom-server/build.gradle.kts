@@ -59,6 +59,9 @@ dependencies {
     runtimeOnly("com.mysql:mysql-connector-j")
     runtimeOnly("com.h2database:h2")
 
+    // spring session jdbc
+    implementation ("org.springframework.session:spring-session-jdbc")
+
     // flyway
     implementation ("org.flywaydb:flyway-core")
     implementation ("org.flywaydb:flyway-mysql")

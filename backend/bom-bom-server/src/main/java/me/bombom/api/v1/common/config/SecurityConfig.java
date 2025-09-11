@@ -23,8 +23,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
-import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoderFactory;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.security.oauth2.jwt.JwtValidators;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.client.RestClient;
@@ -47,81 +54,8 @@ public class SecurityConfig {
             HttpSecurity http,
             CustomOAuth2UserService customOAuth2UserService,
             OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
-            AppleOAuth2AccessTokenResponseClient appleOAuth2AccessTokenResponseClient,
-            Supplier<String> appleClientSecretSupplier,   // 추가
-            RestClient restClient                        // 추가
+            AppleOAuth2AccessTokenResponseClient appleOAuth2AccessTokenResponseClient
     ) throws Exception {
-        // Spring 기본 클라이언트 (Apple 이외 공급자용)
-        var defaultTokenClient =
-                new org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient();
-
-        // Apple 전용 위임 토큰 클라이언트
-        OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> tokenClient =
-            authorizationGrantRequest -> {
-                String registrationId = authorizationGrantRequest.getClientRegistration().getRegistrationId();
-                if (!"apple".equals(registrationId)) {
-                    return defaultTokenClient.getTokenResponse(authorizationGrantRequest);
-                }
-
-                var clientRegistration = authorizationGrantRequest.getClientRegistration();
-                var authzExchange = authorizationGrantRequest.getAuthorizationExchange();
-
-                // Apple 요구 포맷 (x-www-form-urlencoded)
-                org.springframework.util.LinkedMultiValueMap<String, String> params =
-                        new org.springframework.util.LinkedMultiValueMap<>();
-                params.add("client_id", clientRegistration.getClientId());
-                params.add("client_secret", appleClientSecretSupplier.get()); // 호출 "직전" 동적 생성
-                params.add("grant_type", "authorization_code");
-                params.add("code", authzExchange.getAuthorizationResponse().getCode());
-                params.add("redirect_uri", authzExchange.getAuthorizationRequest().getRedirectUri());
-
-                String tokenUri = clientRegistration.getProviderDetails().getTokenUri();
-
-                // Apple 응답(JSON Map) 수신
-                java.util.Map<String, Object> body = restClient.post()
-                        .uri(tokenUri)
-                        .contentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED)
-                        .body(params)
-                        .retrieve()
-                        .body(new org.springframework.core.ParameterizedTypeReference<java.util.Map<String, Object>>() {
-                        });
-
-                if (body == null || !body.containsKey("access_token")) {
-                    throw new org.springframework.security.oauth2.core.OAuth2AuthenticationException(
-                            new org.springframework.security.oauth2.core.OAuth2Error("invalid_token_response"),
-                            "Apple token response is null or missing access_token");
-                }
-
-                String accessToken = (String) body.get("access_token");
-                String tokenTypeValue = (String) body.getOrDefault("token_type", "Bearer");
-                org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType tokenType =
-                        "bearer".equalsIgnoreCase(tokenTypeValue)
-                                ? org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER
-                                : org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER;
-
-                long expiresIn = 0L;
-                Object expiresObj = body.get("expires_in");
-                if (expiresObj instanceof Number n) {
-                    expiresIn = n.longValue();
-                } else if (expiresObj instanceof String s) {
-                    try {
-                        expiresIn = Long.parseLong(s);
-                    } catch (NumberFormatException ignore) {
-                    }
-                }
-
-                String refreshToken = (String) body.get("refresh_token");
-
-                return org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse
-                        .withToken(accessToken)
-                        .tokenType(tokenType)
-                        .expiresIn(expiresIn)
-                        .scopes(clientRegistration.getScopes())
-                        .refreshToken(refreshToken)
-                        .additionalParameters(body)
-                        .build();
-            };
-
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -131,7 +65,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .oauth2Login(oauth2 -> oauth2
                         .tokenEndpoint(token -> token.accessTokenResponseClient(appleOAuth2AccessTokenResponseClient))
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService) // 일반 OAuth2(Google) 로그인을 위한 서비스 설정
+                        )
                         .successHandler(oAuth2LoginSuccessHandler));
 
         return http.build();
@@ -202,5 +138,40 @@ public class SecurityConfig {
             AppleOAuth2Service appleService
     ) {
         return List.of(googleService, appleService);
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder(
+            @Value("${spring.security.oauth2.client.provider.apple.jwk-set-uri}") String jwkSetUri,
+            @Value("${spring.security.oauth2.client.registration.apple.client-id}") String audience) {
+
+        NimbusJwtDecoder jwtDecoder = JwtDecoders.fromOidcIssuerLocation("https://appleid.apple.com");
+
+        // Audience(aud) 클레임 검증을 위한 Validator 추가
+        OAuth2TokenValidator<Jwt> audienceValidator = token -> {
+            return token.getAudience().contains(audience)
+                    ? org.springframework.security.oauth2.core.OAuth2TokenValidatorResult.success()
+                    : org.springframework.security.oauth2.core.OAuth2TokenValidatorResult.failure(new org.springframework.security.oauth2.core.OAuth2Error("invalid_token", "The required audience is missing", null));
+        };
+
+        OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer("https://appleid.apple.com");
+        OAuth2TokenValidator<Jwt> withAudience = new DelegatingOAuth2TokenValidator<>(withIssuer, audienceValidator);
+
+        jwtDecoder.setJwtValidator(withAudience);
+        return jwtDecoder;
+    }
+
+    @Bean
+    public JwtDecoderFactory<ClientRegistration> idTokenDecoderFactory(JwtDecoder jwtDecoder) {
+        // JwtDecoderFactory를 Bean으로 직접 등록합니다.
+        // Spring Security는 이 Bean을 자동으로 사용하여 ID 토큰을 검증합니다.
+        return clientRegistration -> {
+            if (clientRegistration.getRegistrationId().equals("apple")) {
+                // "apple" 로그인일 경우, 우리가 만든 audience 검증 기능이 포함된 JwtDecoder를 사용합니다.
+                return jwtDecoder;
+            }
+            // 다른 OIDC 제공자(예: Google)는 Spring Security의 기본 디코더를 사용합니다.
+            return JwtDecoders.fromOidcIssuerLocation(clientRegistration.getProviderDetails().getIssuerUri());
+        };
     }
 }

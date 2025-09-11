@@ -104,5 +104,6 @@ const ArticleList = styled.ul`
 
   display: flex;
   gap: 16px;
+  flex: 1;
   flex-direction: column;
 `;

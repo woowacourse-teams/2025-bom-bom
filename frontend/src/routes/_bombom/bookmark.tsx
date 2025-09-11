@@ -135,8 +135,6 @@ const SidebarSection = styled.div<{ deviceType: DeviceType }>`
   display: flex;
   gap: 20px;
   flex-direction: column;
-
-  order: ${({ deviceType }) => (deviceType === 'pc' ? 1 : 0)};
 `;
 
 const MainContentSection = styled.div<{ deviceType: DeviceType }>`

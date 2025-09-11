@@ -17,6 +17,8 @@ const Header = ({ activeNav }: HeaderProps) => {
   const isArticlePage = pathname.startsWith('/articles/');
   const isHeaderInvisible = isArticlePage && deviceType !== 'pc';
 
+  if (isHeaderInvisible) return null;
+
   return deviceType === 'pc' ? (
     <HeaderContainer>
       <HeaderInner>
@@ -31,13 +33,10 @@ const Header = ({ activeNav }: HeaderProps) => {
     </HeaderContainer>
   ) : (
     <>
-      {!isHeaderInvisible && (
-        <MobileHeaderContainer>
-          <HeaderLogo deviceType={deviceType} />
-          <HeaderProfile deviceType={deviceType} />
-        </MobileHeaderContainer>
-      )}
-
+      <MobileHeaderContainer>
+        <HeaderLogo deviceType={deviceType} />
+        <HeaderProfile deviceType={deviceType} />
+      </MobileHeaderContainer>
       <BottomNavWrapper>
         <HeaderNavButtons activeNav={activeNav} deviceType={deviceType} />
       </BottomNavWrapper>

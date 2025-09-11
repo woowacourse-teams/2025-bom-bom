@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
-import me.bombom.api.v1.auth.provider.OAuth2ProviderFactory;
+import me.bombom.api.v1.auth.service.AppleOAuth2Service;
 import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -31,7 +31,7 @@ class MemberServiceTest {
     private MemberService memberService;
 
     @MockitoBean
-    private OAuth2ProviderFactory oAuth2ProviderFactory;
+    private AppleOAuth2Service appleOAuth2Service;
 
     @MockitoBean
     private ApplicationEventPublisher applicationEventPublisher;

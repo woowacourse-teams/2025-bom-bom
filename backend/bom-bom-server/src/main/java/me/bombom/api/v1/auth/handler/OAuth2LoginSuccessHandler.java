@@ -42,9 +42,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         Long withdrawMemberId = (Long) session.getAttribute("withdrawMemberId");
 
         if (pendingWithdraw != null && pendingWithdraw && withdrawMemberId != null) {
-            String appleAccessToken = (String) session.getAttribute("appleAccessToken");
             try {
-                memberService.revoke(withdrawMemberId, appleAccessToken);
+                // 재인증 후 탈퇴 처리 (Apple 토큰 철회는 이미 AuthController에서 처리됨)
+                memberService.revoke(withdrawMemberId);
                 session.invalidate();
                 String redirectUrl = getBaseUrlByEnv(request);
                 response.sendRedirect(redirectUrl);

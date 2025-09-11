@@ -3,7 +3,6 @@ package me.bombom.api.v1.common.config;
 import java.security.interfaces.ECPrivateKey;
 import java.util.List;
 import java.util.function.Supplier;
-import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.auth.AppleAuthRequestEntityConverter;
 import me.bombom.api.v1.auth.AppleClientSecretSupplier;
 import me.bombom.api.v1.auth.ApplePrivateKeyLoader;
@@ -35,11 +34,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
-
-    private final CustomOAuth2UserService customOAuth2UserService;
-    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Value("${swagger.admin.username}")
     private String adminUsername;
@@ -50,7 +45,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain apiSecurityFilterChain(
             HttpSecurity http,
-            AppleAuthRequestEntityConverter appleConverter
+            AppleAuthRequestEntityConverter appleConverter,
+            CustomOAuth2UserService customOAuth2UserService,
+            OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler
     ) throws Exception {
         var tokenClient = new RestClientAuthorizationCodeTokenResponseClient();
         var requestEntityConverter = new DefaultOAuth2TokenRequestParametersConverter();

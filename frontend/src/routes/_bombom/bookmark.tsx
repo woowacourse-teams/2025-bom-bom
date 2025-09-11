@@ -69,7 +69,7 @@ function BookmarkPage() {
 
           <MainContentSection deviceType={deviceType}>
             <SummaryBar>
-              <ResultsInfo>총 {totalElements}개의 메모</ResultsInfo>
+              <ResultsInfo>총 {totalElements}개의 북마크</ResultsInfo>
             </SummaryBar>
             {articles.content && articles.content?.length > 0 ? (
               <ArticleList>

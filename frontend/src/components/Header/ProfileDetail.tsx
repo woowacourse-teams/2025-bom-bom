@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation } from '@tanstack/react-query';
 import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
+import { toast } from '../Toast/utils/toastActions';
 import { postLogout } from '@/apis/auth';
 import { UserInfo } from '@/types/me';
 import { copyToClipboard } from '@/utils/copy';
@@ -20,7 +21,7 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
       window.location.reload();
     },
     onError: () => {
-      alert('로그아웃에 실패했습니다. 다시 시도해주세요.');
+      toast.error('로그아웃에 실패했습니다.');
     },
   });
 
@@ -28,7 +29,7 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
     if (!userInfo.email) return;
 
     copyToClipboard(userInfo.email);
-    alert(`이메일이 복사되었습니다.`);
+    toast.success('이메일이 복사되었습니다.');
   };
 
   const handleResignClick = () => {

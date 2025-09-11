@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.dto.request.DuplicateCheckRequest;
+import me.bombom.api.v1.auth.service.AppleOAuth2Service;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.common.resolver.LoginMember;
@@ -38,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController implements AuthControllerApi{
 
     private final MemberService memberService;
+    private final AppleOAuth2Service appleOAuth2Service;
 
     @Override
     @PostMapping("/signup")
@@ -92,8 +94,35 @@ public class AuthController implements AuthControllerApi{
 
     @Override
     @PostMapping("/withdraw")
-    public void withdraw(@LoginMember Member member) {
+    public void withdraw(@LoginMember Member member, HttpSession session, HttpServletResponse response) throws IOException {
+        String appleAccessToken = (String) session.getAttribute("appleAccessToken");
+        
+        // Apple 로그인 사용자이고 Access Token이 없는 경우
+        if (member.getProvider().equals("apple") && appleAccessToken == null) {
+            log.info("Apple Access Token 없음 - memberId: {}, 세션ID: {}", member.getId(), session.getId());
+            
+            // 탈퇴 플래그 저장 후 재로그인 요구
+            session.setAttribute("pendingWithdraw", true);
+            session.setAttribute("withdrawMemberId", member.getId());
+            response.sendRedirect("/oauth2/authorization/apple");
+            return;
+        }
+        
+        log.info("회원 탈퇴 진행 - memberId: {}, provider: {}", member.getId(), member.getProvider());
+        
+        // Apple 로그인 사용자인 경우 Token Revoke 처리
+        if (member.getProvider().equals("apple")) {
+            appleOAuth2Service.processWithdrawal(member, appleAccessToken);
+        }
+        
+        // 회원 데이터 소프트 삭제
         memberService.revoke(member.getId());
+        
+        // 세션 무효화
+        session.invalidate();
+        
+        // 탈퇴 완료 후 메인 페이지로 리다이렉트
+        response.sendRedirect("/?withdraw=success");
     }
 
     private OAuth2AuthenticationToken createAuthenticationToken(Member member) {

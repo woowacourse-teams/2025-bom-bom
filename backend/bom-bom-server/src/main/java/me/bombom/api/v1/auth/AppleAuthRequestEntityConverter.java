@@ -10,8 +10,7 @@ public class AppleAuthRequestEntityConverter implements Converter<OAuth2Authoriz
 
     private static final String AUTHORIZATION_CODE = "authorization_code";
 
-    private final DefaultOAuth2TokenRequestParametersConverter delegate =
-            new DefaultOAuth2TokenRequestParametersConverter();
+    private final DefaultOAuth2TokenRequestParametersConverter delegate = new DefaultOAuth2TokenRequestParametersConverter();
 
     private final Supplier<String> clientSecretSupplier;
 

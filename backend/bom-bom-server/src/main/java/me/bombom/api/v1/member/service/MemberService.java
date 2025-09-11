@@ -30,11 +30,6 @@ public class MemberService {
         validateDuplicateNickname(signupRequest.nickname());
         validateDuplicateEmail(signupRequest.email());
 
-        System.out.println("=== 회원가입 시 Refresh Token 저장 ===");
-        System.out.println("provider: " + pendingMember.getProvider());
-        System.out.println("providerId: " + pendingMember.getProviderId());
-        System.out.println("appleRefreshToken: " + (pendingMember.getAppleRefreshToken() != null ? "있음" : "없음"));
-
         Member newMember = Member.builder()
                 .provider(pendingMember.getProvider())
                 .providerId(pendingMember.getProviderId())
@@ -47,9 +42,6 @@ public class MemberService {
                 .appleRefreshToken(pendingMember.getAppleRefreshToken())
                 .build();
         Member savedMember = memberRepository.save(newMember);
-        System.out.println("회원가입 완료 - memberId: " + savedMember.getId() + ", appleRefreshToken: " + 
-                (savedMember.getAppleRefreshToken() != null ? "저장됨" : "없음"));
-        
         applicationEventPublisher.publishEvent(new MemberSignupEvent(savedMember.getId()));
         return savedMember;
     }
@@ -70,6 +62,14 @@ public class MemberService {
         return MemberProfileResponse.from(member);
     }
 
+    public Member findById(Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.MEMBER_ID, id)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
+                );
+    }
+
     @Transactional
     public void revoke(Long memberId) {
         Member member = memberRepository.findById(memberId)
@@ -77,62 +77,9 @@ public class MemberService {
                 .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
             );
-//        OAuth2ProviderInfo providerType = OAuth2ProviderInfo.fromCode(member.getProvider());
-//        OAuth2Provider provider = providerFactory.getProvider(providerType);
-//        provider.processWithdrawal(member);
         memberRepository.delete(member);
     }
 
-    @Transactional
-    public Member findOrCreateMemberByAppleId(String appleId, String email, String name) {
-        return findOrCreateMemberByAppleId(appleId, email, name, null);
-    }
-
-    @Transactional
-    public Member findOrCreateMemberByAppleId(String appleId, String email, String name, String refreshToken) {
-        System.out.println("=== Apple ID로 회원 조회/생성 ===");
-        System.out.println("appleId: " + appleId);
-        System.out.println("email: " + email);
-        System.out.println("name: " + name);
-        System.out.println("refreshToken: " + (refreshToken != null ? "있음" : "없음"));
-        
-        // Apple ID로 기존 회원 조회
-        return memberRepository.findByProviderAndProviderId("apple", appleId)
-                .map(existingMember -> {
-                    System.out.println("기존 회원 발견 - memberId: " + existingMember.getId());
-                    
-                    // Refresh Token이 있으면 업데이트
-                    if (refreshToken != null && !refreshToken.equals(existingMember.getAppleRefreshToken())) {
-                        System.out.println("Apple Refresh Token 업데이트");
-                        existingMember.updateAppleRefreshToken(refreshToken);
-                        Member updatedMember = memberRepository.save(existingMember);
-                        System.out.println("Apple Refresh Token 업데이트 완료");
-                        return updatedMember;
-                    }
-                    
-                    return existingMember;
-                })
-                .orElseGet(() -> {
-                    System.out.println("기존 회원 없음 - 새 회원 생성");
-                    
-                    // Apple ID Token에서 이메일이 제공되지 않은 경우 처리
-                    String memberEmail = email != null ? email : appleId + "@apple.privaterelay.appleid.com";
-                    
-                    Member newMember = Member.builder()
-                            .provider("apple")
-                            .providerId(appleId)
-                            .email(memberEmail)
-                            .nickname(name != null ? name : "Apple User")
-                            .roleId(MEMBER_ROLE_ID)
-                            .appleRefreshToken(refreshToken)
-                            .build();
-                    
-                    Member savedMember = memberRepository.save(newMember);
-                    System.out.println("새 회원 생성 완료 - memberId: " + savedMember.getId());
-                    System.out.println("새 회원 Apple Refresh Token: " + (savedMember.getAppleRefreshToken() != null ? "저장됨" : "없음"));
-                    return savedMember;
-                });
-    }
 
     private void validateDuplicateEmail(String email) {
         if (memberRepository.existsByEmail(email)) {

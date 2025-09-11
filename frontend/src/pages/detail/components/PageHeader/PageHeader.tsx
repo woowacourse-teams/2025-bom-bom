@@ -21,7 +21,7 @@ const PageHeader = ({
 
   return (
     <Container>
-      <BackButton type="button" onClick={handleBackClick}>
+      <BackButton type="button" onClick={handleBackClick} aria-label="뒤로가기">
         <ChevronLeftIcon width={28} height={28} />
       </BackButton>
       <BookmarkButton
@@ -61,7 +61,22 @@ const Container = styled.header`
   background: ${({ theme }) => theme.colors.white};
 `;
 
-const BackButton = styled.button``;
+const BackButton = styled.button`
+  padding: 8px;
+
+  display: flex;
+  align-items: center;
+
+  color: ${({ theme }) => theme.colors.textPrimary};
+
+  & > svg {
+    transition: transform 0.2s ease;
+  }
+
+  &:hover > svg {
+    transform: scale(1.1);
+  }
+`;
 
 const BookmarkButton = styled.button`
   margin-left: auto;

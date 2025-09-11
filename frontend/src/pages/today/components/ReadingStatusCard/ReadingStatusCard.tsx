@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import ReadingStatusCardSkeleton from './ReadingStatusCardSkeleton';
 import StreakCounter from '../StreakCounter/StreakCounter';
 import { patchWeeklyReadingGoal } from '@/apis/members';
@@ -67,7 +67,7 @@ function ReadingStatusCard() {
     setGoal(weekly.goalCount);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || /^[1-9][0-9]{0,2}$/.test(value)) {
       setGoal(Number(value));

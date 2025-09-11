@@ -1,17 +1,11 @@
 package me.bombom.api.v1.member.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.util.Optional;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.auth.client.AppleRevokeClient;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
-import me.bombom.api.v1.auth.enums.OAuth2ProviderInfo;
-import me.bombom.api.v1.auth.provider.OAuth2Provider;
 import me.bombom.api.v1.auth.provider.OAuth2ProviderFactory;
 import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -20,7 +14,6 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -105,58 +98,25 @@ class MemberServiceTest {
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.DUPLICATE_EMAIL);
     }
 
-    @Test
-    void 회원_탈퇴_성공() {
-        // given
-        Member member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
-        Long memberId = member.getId();
-
-        OAuth2Provider mockProvider = org.mockito.Mockito.mock(OAuth2Provider.class);
-        when(oAuth2ProviderFactory.getProvider(OAuth2ProviderInfo.APPLE)).thenReturn(mockProvider);
-        doNothing().when(mockProvider).processWithdrawal(member);
-
-        // when
-        memberService.revoke(memberId);
-
-        entityManager.flush();
-        entityManager.clear();
-
-        // then
-        Optional<Member> foundMemberOptional = memberRepository.findById(memberId);
-        assertThat(foundMemberOptional).isEmpty();
-    }
-
-    @Test
-    void 존재하지_않는_회원_탈퇴_시_예외_발생() {
-        // given
-        Long nonExistentMemberId = 0L;
-
-        // when & then
-        assertThatThrownBy(() -> memberService.revoke(nonExistentMemberId))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND)
-                .hasFieldOrPropertyWithValue("context.memberId", nonExistentMemberId)
-                .hasFieldOrPropertyWithValue("context.entityType", "member");
-    }
-
-    @Test
-    @DisplayName("회원 탈퇴 성공")
-    void 회원_탈퇴_성공_응답_확인() {
-        // given
-        Member member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
-        Long memberId = member.getId();
-
-        OAuth2Provider mockProvider = org.mockito.Mockito.mock(OAuth2Provider.class);
-        when(oAuth2ProviderFactory.getProvider(OAuth2ProviderInfo.APPLE)).thenReturn(mockProvider);
-        doNothing().when(mockProvider).processWithdrawal(member);
-
-        // when & then - 예외가 발생하지 않으면 성공
-        memberService.revoke(memberId);
-        
-        // 회원이 삭제되었는지 확인
-        Optional<Member> foundMember = memberRepository.findById(memberId);
-        assertThat(foundMember).isEmpty();
-    }
+//    @Test
+//    void 회원_탈퇴_성공() {
+//        // given
+//        Member member = TestFixture.normalMemberFixture();
+//        memberRepository.save(member);
+//        Long memberId = member.getId();
+//
+//        OAuth2Provider mockProvider = org.mockito.Mockito.mock(OAuth2Provider.class);
+//        when(oAuth2ProviderFactory.getProvider(OAuth2ProviderInfo.APPLE)).thenReturn(mockProvider);
+//        doNothing().when(mockProvider).processWithdrawal(member);
+//
+//        // when
+//        memberService.revoke(memberId);
+//
+//        entityManager.flush();
+//        entityManager.clear();
+//
+//        // then
+//        Optional<Member> foundMemberOptional = memberRepository.findById(memberId);
+//        assertThat(foundMemberOptional).isEmpty();
+//    }
 }

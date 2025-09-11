@@ -23,6 +23,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
@@ -54,7 +57,7 @@ public class SecurityConfig {
             HttpSecurity http,
             CustomOAuth2UserService customOAuth2UserService,
             OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
-            AppleOAuth2AccessTokenResponseClient appleOAuth2AccessTokenResponseClient
+            OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegatingAccessTokenClient
     ) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -64,7 +67,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .oauth2Login(oauth2 -> oauth2
-                        .tokenEndpoint(token -> token.accessTokenResponseClient(appleOAuth2AccessTokenResponseClient))
+                        .tokenEndpoint(token -> token.accessTokenResponseClient(delegatingAccessTokenClient))
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService) // Google 등 OAuth2
                                 .oidcUserService(oidcReq -> (org.springframework.security.oauth2.core.oidc.user.OidcUser)
@@ -127,6 +130,20 @@ public class SecurityConfig {
             RestClient.Builder restClientBuilder
     ) {
         return new AppleOAuth2AccessTokenResponseClient(appleClientSecretSupplier, restClientBuilder.build());
+    }
+
+    @Bean
+    public OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegatingAccessTokenClient(
+            AppleOAuth2AccessTokenResponseClient appleClient
+    ) {
+        DefaultAuthorizationCodeTokenResponseClient defaultClient = new DefaultAuthorizationCodeTokenResponseClient();
+        return request -> {
+            String registrationId = request.getClientRegistration().getRegistrationId();
+            if ("apple".equals(registrationId)) {
+                return appleClient.getTokenResponse(request);
+            }
+            return defaultClient.getTokenResponse(request);
+        };
     }
 
     @Bean

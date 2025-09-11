@@ -6,21 +6,17 @@ import java.util.Map;
 import lombok.Getter;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.core.oidc.OidcIdToken;
-import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 @Getter
-public class CustomOAuth2User implements OidcUser {
+public class CustomOAuth2User implements OAuth2User {
 
     private final Map<String, Object> attributes;
     private final Member member;
-    private final OidcUser oidcUser;
 
     public CustomOAuth2User(Map<String, Object> attributes, Member member) {
         this.attributes = attributes;
         this.member = member;
-        this.oidcUser = null;
     }
 
     @Override
@@ -30,7 +26,6 @@ public class CustomOAuth2User implements OidcUser {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // TODO: 권한 처리 필요시 구현
         return Collections.emptyList();
     }
 
@@ -40,23 +35,7 @@ public class CustomOAuth2User implements OidcUser {
         if (name != null) {
             return name.toString();
         }
-        // Apple의 경우 name이 없을 수 있으므로 sub를 사용
         Object sub = attributes.get("sub");
         return sub != null ? sub.toString() : "Unknown";
-    }
-
-    @Override
-    public OidcIdToken getIdToken() {
-        return oidcUser != null ? oidcUser.getIdToken() : null;
-    }
-
-    @Override
-    public OidcUserInfo getUserInfo() {
-        return oidcUser != null ? oidcUser.getUserInfo() : null;
-    }
-
-    @Override
-    public Map<String, Object> getClaims() {
-        return oidcUser != null ? oidcUser.getClaims() : attributes;
     }
 }

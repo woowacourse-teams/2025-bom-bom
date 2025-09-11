@@ -60,6 +60,7 @@ public class Member extends BaseEntity {
     @Column(nullable = false, columnDefinition = "BIGINT")
     private Long roleId = 0L;
 
+
     private LocalDateTime deletedAt;
 
     @Builder
@@ -89,4 +90,3 @@ public class Member extends BaseEntity {
         return this.deletedAt != null;
     }
 }
-

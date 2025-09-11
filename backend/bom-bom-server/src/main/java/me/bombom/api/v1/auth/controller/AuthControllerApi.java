@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import me.bombom.api.v1.auth.dto.request.DuplicateCheckRequest;
+import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,4 +70,14 @@ public interface AuthControllerApi {
         @ApiResponse(responseCode = "204", description = "로그아웃 성공")
     })
     void logout(HttpServletRequest request);
+
+    @Operation(
+        summary = "회원 탈퇴",
+        description = "현재 로그인한 회원의 계정을 삭제합니다. Apple 로그인 사용자의 경우 Apple 토큰도 함께 철회됩니다."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "탈퇴 성공"),
+        @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+    })
+    void withdraw(@Parameter(hidden = true) @LoginMember Member member, HttpSession session, HttpServletResponse response) throws IOException;
 } 

@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import me.bombom.api.v1.common.BaseEntity;
 
 @Entity
 @Getter
@@ -22,7 +23,7 @@ import lombok.NonNull;
                 columnNames = {"member_id", "readingYear"}
         )
 )
-public class YearlyReading {
+public class YearlyReading extends BaseEntity {
 
     private static final int INITIAL_CURRENT_COUNT = 0;
     private static final int RESET_CURRENT_COUNT = 0;

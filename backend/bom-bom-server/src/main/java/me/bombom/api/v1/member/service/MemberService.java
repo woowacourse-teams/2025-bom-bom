@@ -1,6 +1,7 @@
 package me.bombom.api.v1.member.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.enums.DuplicateCheckField;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -15,6 +16,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -61,15 +63,26 @@ public class MemberService {
         return MemberProfileResponse.from(member);
     }
 
+    public Member findById(Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.MEMBER_ID, id)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
+                );
+    }
+
     @Transactional
-    public void withdraw(Long memberId) {
+    public void revoke(Long memberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                 .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
             );
+        
         memberRepository.delete(member);
+        log.info("회원 탈퇴 처리 완료. MemberId: {}", memberId);
     }
+
 
     private void validateDuplicateEmail(String email) {
         if (memberRepository.existsByEmail(email)) {
@@ -78,6 +91,7 @@ public class MemberService {
                     .addContext(ErrorContextKeys.OPERATION, "validateDuplicateEmail");
         }
     }
+
     private void validateDuplicateNickname(String nickname) {
         if (memberRepository.existsByNickname(nickname)) {
             throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_NICKNAME)
@@ -85,5 +99,4 @@ public class MemberService {
                     .addContext(ErrorContextKeys.OPERATION, "validateDuplicateNickname");
         }
     }
-
 }

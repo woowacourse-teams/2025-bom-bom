@@ -3,8 +3,8 @@ package me.bombom.api.v1.common.config;
 import java.security.interfaces.ECPrivateKey;
 import java.util.List;
 import java.util.function.Supplier;
-import me.bombom.api.v1.auth.AppleAuthRequestEntityConverter;
 import me.bombom.api.v1.auth.AppleClientSecretSupplier;
+import me.bombom.api.v1.auth.AppleOAuth2AccessTokenResponseClient;
 import me.bombom.api.v1.auth.ApplePrivateKeyLoader;
 import me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler;
 import me.bombom.api.v1.auth.service.AppleOAuth2Service;
@@ -23,8 +23,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.endpoint.DefaultOAuth2TokenRequestParametersConverter;
-import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.client.RestClient;
@@ -45,32 +45,95 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain apiSecurityFilterChain(
             HttpSecurity http,
-            AppleAuthRequestEntityConverter appleConverter,
             CustomOAuth2UserService customOAuth2UserService,
-            OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler
+            OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
+            AppleOAuth2AccessTokenResponseClient appleOAuth2AccessTokenResponseClient,
+            Supplier<String> appleClientSecretSupplier,   // 추가
+            RestClient restClient                        // 추가
     ) throws Exception {
-        var tokenClient = new RestClientAuthorizationCodeTokenResponseClient();
-        var requestEntityConverter = new DefaultOAuth2TokenRequestParametersConverter();
-        tokenClient.setParametersConverter(request -> {
-            String registrationId = request.getClientRegistration().getRegistrationId();
-            if ("apple".equals(registrationId)) {
-                return appleConverter.convert(request);
-            }
-            return requestEntityConverter.convert(request);
-        });
+        // Spring 기본 클라이언트 (Apple 이외 공급자용)
+        var defaultTokenClient =
+                new org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient();
+
+        // Apple 전용 위임 토큰 클라이언트
+        OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> tokenClient =
+            authorizationGrantRequest -> {
+                String registrationId = authorizationGrantRequest.getClientRegistration().getRegistrationId();
+                if (!"apple".equals(registrationId)) {
+                    return defaultTokenClient.getTokenResponse(authorizationGrantRequest);
+                }
+
+                var clientRegistration = authorizationGrantRequest.getClientRegistration();
+                var authzExchange = authorizationGrantRequest.getAuthorizationExchange();
+
+                // Apple 요구 포맷 (x-www-form-urlencoded)
+                org.springframework.util.LinkedMultiValueMap<String, String> params =
+                        new org.springframework.util.LinkedMultiValueMap<>();
+                params.add("client_id", clientRegistration.getClientId());
+                params.add("client_secret", appleClientSecretSupplier.get()); // 호출 "직전" 동적 생성
+                params.add("grant_type", "authorization_code");
+                params.add("code", authzExchange.getAuthorizationResponse().getCode());
+                params.add("redirect_uri", authzExchange.getAuthorizationRequest().getRedirectUri());
+
+                String tokenUri = clientRegistration.getProviderDetails().getTokenUri();
+
+                // Apple 응답(JSON Map) 수신
+                java.util.Map<String, Object> body = restClient.post()
+                        .uri(tokenUri)
+                        .contentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED)
+                        .body(params)
+                        .retrieve()
+                        .body(new org.springframework.core.ParameterizedTypeReference<java.util.Map<String, Object>>() {
+                        });
+
+                if (body == null || !body.containsKey("access_token")) {
+                    throw new org.springframework.security.oauth2.core.OAuth2AuthenticationException(
+                            new org.springframework.security.oauth2.core.OAuth2Error("invalid_token_response"),
+                            "Apple token response is null or missing access_token");
+                }
+
+                String accessToken = (String) body.get("access_token");
+                String tokenTypeValue = (String) body.getOrDefault("token_type", "Bearer");
+                org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType tokenType =
+                        "bearer".equalsIgnoreCase(tokenTypeValue)
+                                ? org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER
+                                : org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER;
+
+                long expiresIn = 0L;
+                Object expiresObj = body.get("expires_in");
+                if (expiresObj instanceof Number n) {
+                    expiresIn = n.longValue();
+                } else if (expiresObj instanceof String s) {
+                    try {
+                        expiresIn = Long.parseLong(s);
+                    } catch (NumberFormatException ignore) {
+                    }
+                }
+
+                String refreshToken = (String) body.get("refresh_token");
+
+                return org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse
+                        .withToken(accessToken)
+                        .tokenType(tokenType)
+                        .expiresIn(expiresIn)
+                        .scopes(clientRegistration.getScopes())
+                        .refreshToken(refreshToken)
+                        .additionalParameters(body)
+                        .build();
+            };
 
         http
-                // 모든 설정 열어둠
                 .csrf(AbstractHttpConfigurer::disable)
-                .headers(headers -> headers.frameOptions(FrameOptionsConfig::disable))
-                .cors(configurer -> configurer.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .headers(headers -> headers.frameOptions(FrameOptionsConfig::sameOrigin))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .oauth2Login(oauth2 -> oauth2
-                        .tokenEndpoint(token -> token.accessTokenResponseClient(tokenClient))
+                        .tokenEndpoint(token -> token.accessTokenResponseClient(appleOAuth2AccessTokenResponseClient))
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler(oAuth2LoginSuccessHandler));
+
         return http.build();
     }
 
@@ -121,8 +184,11 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AppleAuthRequestEntityConverter appleAuthRequestEntityConverter(Supplier<String> appleClientSecretSupplier) {
-        return new AppleAuthRequestEntityConverter(appleClientSecretSupplier);
+    public AppleOAuth2AccessTokenResponseClient appleOAuth2AccessTokenResponseClient(
+            Supplier<String> appleClientSecretSupplier,
+            RestClient.Builder restClientBuilder
+    ) {
+        return new AppleOAuth2AccessTokenResponseClient(appleClientSecretSupplier, restClientBuilder.build());
     }
 
     @Bean

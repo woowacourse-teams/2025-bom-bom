@@ -36,9 +36,7 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
         OAuth2User oAuth2User = defaultOAuth2UserService.loadUser(userRequest);
 
         String providerId = oAuth2User.getAttribute("sub");
-        String email = oAuth2User.getAttribute("email");
         String profileUrl = oAuth2User.getAttribute("picture");
-        String name = oAuth2User.getAttribute("name");
 
         // 기존 회원 확인
         Optional<Member> member = memberRepository.findByProviderAndProviderId("google", providerId);

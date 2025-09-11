@@ -115,6 +115,11 @@ public class AppleOAuth2Service implements OAuth2LoginService {
      * @return 철회 성공 여부
      */
     public boolean revokeToken(String accessToken) {
+        if (accessToken == null || accessToken.isBlank()) {
+            log.warn("철회할 Apple Access Token이 없습니다.");
+            return false;
+        }
+
         try {
             log.info("Apple Token Revoke 시작 - clientId: {}", clientId);
 
@@ -122,6 +127,7 @@ public class AppleOAuth2Service implements OAuth2LoginService {
             requestBody.add("token", accessToken);
             requestBody.add("client_id", clientId);
             requestBody.add("client_secret", appleClientSecretSupplier.get());
+            requestBody.add("token_type_hint", "access_token");
 
             restClient.post()
                 .uri(APPLE_REVOKE_URL)

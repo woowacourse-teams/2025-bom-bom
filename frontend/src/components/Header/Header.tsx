@@ -74,7 +74,6 @@ const HeaderContainer = styled.header`
   width: 100%;
   height: ${({ theme }) => theme.heights.headerPC};
   padding: 8px 16px;
-  border-radius: 0 0 8px 8px;
   box-shadow:
     0 10px 15px -3px rgb(0 0 0 / 10%),
     0 4px 6px -4px rgb(0 0 0 / 10%);

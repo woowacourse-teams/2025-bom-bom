@@ -39,7 +39,7 @@ public class AppleOAuth2Service implements OAuth2LoginService {
     
     private final MemberRepository memberRepository;
     private final HttpSession session;
-    private final RestClient restClient;
+    private final RestClient.Builder restClientBuilder;
     private final Supplier<String> appleClientSecretSupplier;
     
     @Value("${oauth2.apple.client-id}")
@@ -128,7 +128,7 @@ public class AppleOAuth2Service implements OAuth2LoginService {
             requestBody.add("client_secret", appleClientSecretSupplier.get());
             requestBody.add("token_type_hint", "access_token");
 
-            restClient.post()
+            restClientBuilder.build().post()
                 .uri(APPLE_REVOKE_URL)
                 .body(requestBody)
                 .retrieve()

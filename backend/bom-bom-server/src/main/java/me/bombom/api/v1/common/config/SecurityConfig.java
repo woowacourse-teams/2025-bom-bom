@@ -128,11 +128,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    public RestClient restClient() {
-        return RestClient.create();
-    }
-
-    @Bean
     public List<OAuth2LoginService> loginServices(
             GoogleOAuth2LoginService googleService,
             AppleOAuth2Service appleService

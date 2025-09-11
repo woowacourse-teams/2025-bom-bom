@@ -79,5 +79,5 @@ public interface AuthControllerApi {
         @ApiResponse(responseCode = "200", description = "탈퇴 성공"),
         @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
     })
-    void withdraw(@Parameter(hidden = true) @LoginMember Member member);
+    void withdraw(@Parameter(hidden = true) @LoginMember Member member, HttpSession session, HttpServletResponse response) throws IOException;
 } 

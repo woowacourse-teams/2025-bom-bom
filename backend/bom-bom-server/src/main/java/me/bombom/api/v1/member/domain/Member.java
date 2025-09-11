@@ -60,8 +60,6 @@ public class Member extends BaseEntity {
     @Column(nullable = false, columnDefinition = "BIGINT")
     private Long roleId = 0L;
 
-    @Column(name = "apple_refresh_token", length = 1000)
-    private String appleRefreshToken;
 
     private LocalDateTime deletedAt;
 
@@ -75,8 +73,7 @@ public class Member extends BaseEntity {
             String profileImageUrl,
             LocalDate birthDate,
             @NonNull Gender gender,
-            @NonNull Long roleId,
-            String appleRefreshToken
+            @NonNull Long roleId
     ) {
         this.id = id;
         this.provider = provider;
@@ -87,14 +84,9 @@ public class Member extends BaseEntity {
         this.birthDate = birthDate;
         this.gender = gender;
         this.roleId = roleId;
-        this.appleRefreshToken = appleRefreshToken;
     }
 
     public boolean isWithdrawnMember() {
         return this.deletedAt != null;
-    }
-
-    public void updateAppleRefreshToken(String appleRefreshToken) {
-        this.appleRefreshToken = appleRefreshToken;
     }
 }

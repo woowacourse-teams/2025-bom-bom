@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
-import { Link, useLocation, useNavigate } from '@tanstack/react-router';
+import { useLocation, useNavigate } from '@tanstack/react-router';
 import FloatingActionButton from '@/components/FloatingActionButton/FloatingActionButton';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
 import BookmarkIcon from '#/assets/bookmark-inactive.svg';
 import HelpIcon from '#/assets/help.svg';
@@ -45,12 +45,30 @@ const QuickMenu = () => {
       <FloatingActionButton
         icon={<LinkIcon width={24} height={24} fill={theme.colors.white} />}
       >
-        {MENU_ITEMS.map(({ key, label, path, Icon }) => (
-          <StyledLink key={key} to={path}>
-            <StyledIcon as={Icon} />
-            <LinkText>{label}</LinkText>
-          </StyledLink>
-        ))}
+        <Tabs direction="vertical">
+          {MENU_ITEMS.map(({ key, label, path, Icon }) => {
+            const isSelected = location.pathname.startsWith(path);
+
+            return (
+              <StyledTab
+                key={key}
+                value={key}
+                label={label}
+                selected={isSelected}
+                onTabSelect={() => handleTabSelect(path)}
+                StartComponent={
+                  <StyledIcon
+                    as={Icon}
+                    selected={isSelected}
+                    deviceType={deviceType}
+                  />
+                }
+                textAlign="start"
+                deviceType={deviceType}
+              />
+            );
+          })}
+        </Tabs>
       </FloatingActionButton>
     );
   }
@@ -68,14 +86,21 @@ const QuickMenu = () => {
           const isSelected = location.pathname.startsWith(path);
 
           return (
-            <Tab
+            <StyledTab
               key={key}
               value={key}
               label={label}
               selected={isSelected}
               onTabSelect={() => handleTabSelect(path)}
-              StartComponent={<StyledIcon as={Icon} selected={isSelected} />}
+              StartComponent={
+                <StyledIcon
+                  as={Icon}
+                  selected={isSelected}
+                  deviceType={deviceType}
+                />
+              }
               textAlign="start"
+              deviceType={deviceType}
             />
           );
         })}
@@ -126,24 +151,15 @@ const Title = styled.h3`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const LinkText = styled.span`
-  font: ${({ theme }) => theme.fonts.body1};
-`;
-
-const StyledLink = styled(Link)`
-  padding: 8px;
-  border-radius: 8px;
-
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  justify-content: flex-start;
-`;
-
-const StyledIcon = styled.div<{ selected?: boolean }>`
-  width: 20px;
-  height: 20px;
+const StyledIcon = styled.div<{ deviceType: DeviceType; selected?: boolean }>`
+  width: ${({ deviceType }) => (deviceType === 'pc' ? '24px' : '28px')};
+  height: ${({ deviceType }) => (deviceType === 'pc' ? '24px' : '28px')};
 
   color: ${({ theme, selected = false }) =>
     selected ? theme.colors.white : theme.colors.primary};
+`;
+
+const StyledTab = styled(Tab)<{ deviceType: DeviceType }>`
+  font: ${({ theme, deviceType }) =>
+    deviceType === 'pc' ? theme.fonts.body2 : theme.fonts.body1};
 `;

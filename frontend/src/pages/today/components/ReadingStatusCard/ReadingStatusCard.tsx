@@ -45,16 +45,17 @@ function ReadingStatusCard() {
   };
 
   const handleSave = () => {
-    const newGoal = Number(goal);
-    if (isNaN(newGoal) || newGoal < 1 || newGoal > 999) {
+    if (goal === null) return;
+
+    if (isNaN(goal) || goal < 1 || goal > 999) {
       setGoal(weekly.goalCount);
       return;
     }
 
-    if (newGoal !== weekly.goalCount) {
+    if (goal !== weekly.goalCount) {
       updateWeeklyGoal({
         memberId: 17, // TODO: 실제 회원 ID로 변경 필요
-        weeklyGoalCount: newGoal,
+        weeklyGoalCount: goal,
       });
     } else {
       setIsEditing(false);

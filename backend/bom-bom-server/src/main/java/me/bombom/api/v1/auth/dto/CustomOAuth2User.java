@@ -23,12 +23,6 @@ public class CustomOAuth2User implements OidcUser {
         this.oidcUser = null;
     }
 
-    public CustomOAuth2User(OidcUser oidcUser, Member member) {
-        this.attributes = oidcUser.getAttributes();
-        this.member = member;
-        this.oidcUser = oidcUser;
-    }
-
     @Override
     public Map<String, Object> getAttributes() {
         return attributes;

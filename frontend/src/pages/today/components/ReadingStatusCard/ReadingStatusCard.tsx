@@ -18,7 +18,7 @@ function ReadingStatusCard() {
   const deviceType = useDeviceType();
   const { data, isLoading } = useQuery(queries.readingStatus());
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState('');
+  const [goal, setGoal] = useState<number | null>(null);
 
   const { mutate: updateWeeklyGoal, isPending } = useMutation({
     mutationFn: patchWeeklyReadingGoal,
@@ -30,7 +30,7 @@ function ReadingStatusCard() {
     },
     onError: (error) => {
       console.error('주간 목표 수정 실패:', error);
-      setEditValue(weekly.goalCount.toString());
+      setGoal(weekly.goalCount);
     },
   });
 
@@ -41,13 +41,13 @@ function ReadingStatusCard() {
 
   const handleEditClick = () => {
     setIsEditing(true);
-    setEditValue(weekly.goalCount.toString());
+    setGoal(weekly.goalCount);
   };
 
   const handleSave = () => {
-    const newGoal = parseInt(editValue, 10);
+    const newGoal = Number(goal);
     if (isNaN(newGoal) || newGoal < 1 || newGoal > 999) {
-      setEditValue(weekly.goalCount.toString());
+      setGoal(weekly.goalCount);
       return;
     }
 
@@ -63,13 +63,13 @@ function ReadingStatusCard() {
 
   const handleCancel = () => {
     setIsEditing(false);
-    setEditValue(weekly.goalCount.toString());
+    setGoal(weekly.goalCount);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || /^[1-9][0-9]{0,2}$/.test(value)) {
-      setEditValue(value);
+      setGoal(Number(value));
     }
   };
 
@@ -120,9 +120,7 @@ function ReadingStatusCard() {
           label="주간 목표"
           value={{
             currentCount: weekly.readCount,
-            totalCount: isEditing
-              ? parseInt(editValue, 10) || weekly.goalCount
-              : weekly.goalCount,
+            totalCount: isEditing ? goal || weekly.goalCount : weekly.goalCount,
           }}
           rateFormat="ratio"
           {...(deviceType === 'pc'
@@ -134,7 +132,7 @@ function ReadingStatusCard() {
             {isEditing ? (
               <EditInput
                 type="text"
-                value={editValue}
+                value={goal || ''}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 onBlur={handleSave}

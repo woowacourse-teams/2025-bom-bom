@@ -11,6 +11,7 @@ import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
 import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
+import PageHeader from '@/pages/detail/components/PageHeader/PageHeader';
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
 import useArticleAsReadMutation from '@/pages/detail/hooks/useArticleAsReadMutation';
 import { useArticleBookmark } from '@/pages/detail/hooks/useArticleBookmark';
@@ -49,51 +50,72 @@ function ArticleDetailPage() {
 
   return (
     <>
-      <ArticleProgressBar
-        rate={progressPercentage}
-        transition={false}
-        variant="rectangular"
-        deviceType={deviceType}
-      />
-      <Container deviceType={deviceType}>
-        <ArticleHeader
-          title={currentArticle.title ?? ''}
-          newsletterCategory={currentArticle.newsletter?.category ?? ''}
-          newsletterName={currentArticle.newsletter?.name ?? ''}
-          arrivedDateTime={new Date(currentArticle.arrivedDateTime ?? '')}
-          expectedReadTime={currentArticle.expectedReadTime ?? 1}
+      {deviceType !== 'pc' && (
+        <PageHeader
           bookmarked={isBookmarked}
           onBookmarkClick={toggleBookmark}
         />
-        <Divider />
+      )}
 
-        <ArticleBody
-          articleId={articleIdNumber}
-          articleContent={currentArticle.contents}
-        />
-        <Spacing size={24} />
-        <Divider />
+      <Container>
+        {deviceType === 'pc' && (
+          <ArticleActionButtons
+            bookmarked={isBookmarked}
+            onBookmarkClick={toggleBookmark}
+          />
+        )}
 
-        <ContentDescription>
-          이 뉴스레터가 유용했다면 동료들과 공유해주세요. 피드백이나 제안사항이
-          있으시면 언제든 연락 주시기 바랍니다.
-        </ContentDescription>
+        <ArticleContent deviceType={deviceType}>
+          <ArticleProgressBar
+            rate={progressPercentage}
+            transition={false}
+            variant="rectangular"
+            deviceType={deviceType}
+          />
+          <ArticleHeader
+            title={currentArticle.title ?? ''}
+            newsletterCategory={currentArticle.newsletter?.category ?? ''}
+            newsletterName={currentArticle.newsletter?.name ?? ''}
+            arrivedDateTime={new Date(currentArticle.arrivedDateTime ?? '')}
+            expectedReadTime={currentArticle.expectedReadTime ?? 1}
+            bookmarked={isBookmarked}
+            onBookmarkClick={toggleBookmark}
+          />
+          <Divider />
 
-        <TodayUnreadArticlesSection articleId={articleIdNumber} />
+          <ArticleBody
+            articleId={articleIdNumber}
+            articleContent={currentArticle.contents}
+          />
+          <Spacing size={24} />
+          <Divider />
 
-        <FloatingActionButtons
-          bookmarked={isBookmarked}
-          onBookmarkClick={toggleBookmark}
-        />
+          <ContentDescription>
+            이 뉴스레터가 유용했다면 동료들과 공유해주세요. 피드백이나
+            제안사항이 있으시면 언제든 연락 주시기 바랍니다.
+          </ContentDescription>
+
+          <TodayUnreadArticlesSection articleId={articleIdNumber} />
+        </ArticleContent>
       </Container>
     </>
   );
 }
 
-const Container = styled.div<{ deviceType: DeviceType }>`
+const Container = styled.div`
+  position: relative;
+`;
+
+const ArticleActionButtons = styled(FloatingActionButtons)`
+  position: fixed;
+  top: 80vh;
+
+  transform: translate(-200%, -50%);
+`;
+
+const ArticleContent = styled.div<{ deviceType: DeviceType }>`
   max-width: 700px;
   margin: 0 auto;
-  margin-top: 20px;
   padding: ${({ deviceType }) => (deviceType === 'mobile' ? '0' : '0 16px')};
   border-right: 1px solid
     ${({ theme, deviceType }) =>
@@ -111,9 +133,9 @@ const Container = styled.div<{ deviceType: DeviceType }>`
 const ArticleProgressBar = styled(ProgressBar)<{ deviceType: DeviceType }>`
   position: fixed;
   top: ${({ deviceType, theme }) =>
-    deviceType === 'mobile'
-      ? `calc(${theme.heights.headerMobile} + env(safe-area-inset-top))`
-      : `calc(${theme.heights.headerPC} + env(safe-area-inset-top))`};
+    deviceType === 'pc'
+      ? `calc(${theme.heights.headerPC} + env(safe-area-inset-top))`
+      : `calc(${theme.heights.headerMobile} + env(safe-area-inset-top))`};
   z-index: ${({ theme }) => theme.zIndex.floating};
   height: 4px;
 `;

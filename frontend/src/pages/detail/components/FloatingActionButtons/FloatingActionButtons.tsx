@@ -1,5 +1,4 @@
 import styled from '@emotion/styled';
-import useMediaQuery from '@/hooks/useMediaQuery';
 import { theme } from '@/styles/theme';
 import BookmarkActiveIcon from '#/assets/bookmark-active.svg';
 import BookmarkInactiveIcon from '#/assets/bookmark-inactive.svg';
@@ -13,13 +12,9 @@ interface FloatingActionButtonsProps {
 const FloatingActionButtons = ({
   bookmarked,
   onBookmarkClick,
+  ...props
 }: FloatingActionButtonsProps) => {
-  const isBookmarkButtonVisible = useMediaQuery({
-    key: 'min-width',
-    value: 1350,
-  });
-
-  if (bookmarked === null || !isBookmarkButtonVisible) return null;
+  if (bookmarked === null) return null;
 
   const handleBookmarkClick = () => {
     onBookmarkClick(bookmarked);
@@ -30,7 +25,7 @@ const FloatingActionButtons = ({
   };
 
   return (
-    <Container>
+    <Container {...props}>
       <ActionButton type="button" onClick={handleBookmarkClick}>
         {bookmarked ? (
           <BookmarkActiveIcon width={28} height={28} />
@@ -53,9 +48,7 @@ const FloatingActionButtons = ({
 export default FloatingActionButtons;
 
 const Container = styled.div`
-  position: fixed;
-  top: 60%;
-  left: 20%;
+  z-index: ${({ theme }) => theme.zIndex.floating};
   width: 56px;
   padding: 4px 0;
   border: 1px solid ${({ theme }) => theme.colors.stroke};

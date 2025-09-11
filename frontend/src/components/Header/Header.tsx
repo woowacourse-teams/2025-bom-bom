@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { useLocation } from '@tanstack/react-router';
 import HeaderLogo from './HeaderLogo';
 import HeaderNavButtons from './HeaderNavButtons';
 import HeaderProfile from './HeaderProfile';
@@ -9,21 +10,16 @@ interface HeaderProps {
   activeNav: NavType;
 }
 
-export default function Header({ activeNav }: HeaderProps) {
+const Header = ({ activeNav }: HeaderProps) => {
   const deviceType = useDeviceType();
+  const { pathname } = useLocation();
 
-  return deviceType === 'mobile' ? (
-    <>
-      <MobileHeaderContainer>
-        <HeaderLogo deviceType={deviceType} />
-        <HeaderProfile deviceType={deviceType} />
-      </MobileHeaderContainer>
+  const isArticlePage = pathname.startsWith('/articles/');
+  const isHeaderInvisible = isArticlePage && deviceType !== 'pc';
 
-      <BottomNavWrapper>
-        <HeaderNavButtons activeNav={activeNav} deviceType={deviceType} />
-      </BottomNavWrapper>
-    </>
-  ) : (
+  if (isHeaderInvisible) return null;
+
+  return deviceType === 'pc' ? (
     <HeaderContainer>
       <HeaderInner>
         <HeaderLogo deviceType={deviceType} />
@@ -35,8 +31,20 @@ export default function Header({ activeNav }: HeaderProps) {
         <HeaderProfile deviceType={deviceType} />
       </HeaderInner>
     </HeaderContainer>
+  ) : (
+    <>
+      <MobileHeaderContainer>
+        <HeaderLogo deviceType={deviceType} />
+        <HeaderProfile deviceType={deviceType} />
+      </MobileHeaderContainer>
+      <BottomNavWrapper>
+        <HeaderNavButtons activeNav={activeNav} deviceType={deviceType} />
+      </BottomNavWrapper>
+    </>
   );
-}
+};
+
+export default Header;
 
 const MobileHeaderContainer = styled.header`
   position: fixed;
@@ -66,7 +74,6 @@ const HeaderContainer = styled.header`
   width: 100%;
   height: ${({ theme }) => theme.heights.headerPC};
   padding: 8px 16px;
-  border-radius: 0 0 8px 8px;
   box-shadow:
     0 10px 15px -3px rgb(0 0 0 / 10%),
     0 4px 6px -4px rgb(0 0 0 / 10%);

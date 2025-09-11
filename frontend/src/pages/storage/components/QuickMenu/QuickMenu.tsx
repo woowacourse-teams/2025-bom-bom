@@ -1,6 +1,8 @@
 import styled from '@emotion/styled';
-import { Link } from '@tanstack/react-router';
+import { Link, useLocation, useNavigate } from '@tanstack/react-router';
 import FloatingActionButton from '@/components/FloatingActionButton/FloatingActionButton';
+import Tab from '@/components/Tab/Tab';
+import Tabs from '@/components/Tabs/Tabs';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
 import BookmarkIcon from '#/assets/bookmark-inactive.svg';
@@ -8,26 +10,47 @@ import HelpIcon from '#/assets/help.svg';
 import LinkIcon from '#/assets/link.svg';
 import MemoIcon from '#/assets/memo.svg';
 
+const MENU_ITEMS = [
+  {
+    key: 'bookmark',
+    label: '북마크',
+    path: '/bookmark',
+    Icon: BookmarkIcon,
+  },
+  {
+    key: 'memo',
+    label: '메모',
+    path: '/memo',
+    Icon: MemoIcon,
+  },
+  {
+    key: 'guide',
+    label: '가이드',
+    path: '/guide',
+    Icon: HelpIcon,
+  },
+] as const;
+
 const QuickMenu = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const deviceType = useDeviceType();
+
+  const handleTabSelect = (path: string) => {
+    navigate({ to: path });
+  };
 
   if (deviceType !== 'pc') {
     return (
       <FloatingActionButton
         icon={<LinkIcon width={24} height={24} fill={theme.colors.white} />}
       >
-        <StyledLink to="/bookmark">
-          <StyledBookmarkIcon />
-          <LinkText>북마크</LinkText>
-        </StyledLink>
-        <StyledLink to="/memo">
-          <MemoIcon width={20} height={20} fill={theme.colors.primary} />
-          <LinkText>메모</LinkText>
-        </StyledLink>
-        <StyledLink to="/guide">
-          <HelpIcon width={20} height={20} fill={theme.colors.primary} />
-          <LinkText>가이드</LinkText>
-        </StyledLink>
+        {MENU_ITEMS.map(({ key, label, path, Icon }) => (
+          <StyledLink key={key} to={path}>
+            <StyledIcon as={Icon} />
+            <LinkText>{label}</LinkText>
+          </StyledLink>
+        ))}
       </FloatingActionButton>
     );
   }
@@ -40,20 +63,23 @@ const QuickMenu = () => {
         </QuickMenuIconWrapper>
         <Title>바로 가기</Title>
       </TitleWrapper>
-      <ButtonContainer>
-        <StyledLink to="/bookmark">
-          <StyledBookmarkIcon />
-          <LinkText>북마크</LinkText>
-        </StyledLink>
-        <StyledLink to="/memo">
-          <MemoIcon width={20} height={20} fill={theme.colors.primary} />
-          <LinkText>메모</LinkText>
-        </StyledLink>
-        <StyledLink to="/guide">
-          <HelpIcon width={20} height={20} fill={theme.colors.primary} />
-          <LinkText>가이드</LinkText>
-        </StyledLink>
-      </ButtonContainer>
+      <Tabs direction="vertical">
+        {MENU_ITEMS.map(({ key, label, path, Icon }) => {
+          const isSelected = location.pathname.startsWith(path);
+
+          return (
+            <Tab
+              key={key}
+              value={key}
+              label={label}
+              selected={isSelected}
+              onTabSelect={() => handleTabSelect(path)}
+              StartComponent={<StyledIcon as={Icon} selected={isSelected} />}
+              textAlign="start"
+            />
+          );
+        })}
+      </Tabs>
     </Container>
   );
 };
@@ -100,13 +126,6 @@ const Title = styled.h3`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const StyledBookmarkIcon = styled(BookmarkIcon)`
-  width: 20px;
-  height: 20px;
-
-  color: ${({ theme }) => theme.colors.primary};
-`;
-
 const LinkText = styled.span`
   font: ${({ theme }) => theme.fonts.body1};
 `;
@@ -121,9 +140,10 @@ const StyledLink = styled(Link)`
   justify-content: flex-start;
 `;
 
-const ButtonContainer = styled.div`
-  display: flex;
-  gap: 16px;
-  flex-direction: column;
-  align-items: flex-start;
+const StyledIcon = styled.div<{ selected?: boolean }>`
+  width: 20px;
+  height: 20px;
+
+  color: ${({ theme, selected = false }) =>
+    selected ? theme.colors.white : theme.colors.primary};
 `;

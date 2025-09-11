@@ -70,11 +70,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             profileUrl = oAuth2User.getAttribute(oAuth2Provider.getProfileImageKey());
         }
 
-        Optional<Member> member = memberRepository.findByProviderAndProviderIdIncludeDeleted(provider, providerId);
-
-        if (member.isPresent() && member.get().isWithdrawnMember()) {
-            throw new UnauthorizedException(ErrorDetail.WITHDRAWN_MEMBER);
-        }
+        Optional<Member> member = memberRepository.findByProviderAndProviderId(provider, providerId);
 
         if (member.isEmpty()) {
             // Apple 로그인인 경우에만 Refresh Token 추출

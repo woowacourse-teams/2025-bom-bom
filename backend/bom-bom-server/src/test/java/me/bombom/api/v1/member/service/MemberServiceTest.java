@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.auth.client.AppleRevokeClient;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.provider.OAuth2ProviderFactory;
 import me.bombom.api.v1.common.config.QuerydslConfig;
@@ -30,9 +29,6 @@ class MemberServiceTest {
 
     @Autowired
     private MemberService memberService;
-
-    @MockitoBean
-    private AppleRevokeClient appleRevokeClient;
 
     @MockitoBean
     private OAuth2ProviderFactory oAuth2ProviderFactory;
@@ -98,25 +94,4 @@ class MemberServiceTest {
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.DUPLICATE_EMAIL);
     }
 
-//    @Test
-//    void 회원_탈퇴_성공() {
-//        // given
-//        Member member = TestFixture.normalMemberFixture();
-//        memberRepository.save(member);
-//        Long memberId = member.getId();
-//
-//        OAuth2Provider mockProvider = org.mockito.Mockito.mock(OAuth2Provider.class);
-//        when(oAuth2ProviderFactory.getProvider(OAuth2ProviderInfo.APPLE)).thenReturn(mockProvider);
-//        doNothing().when(mockProvider).processWithdrawal(member);
-//
-//        // when
-//        memberService.revoke(memberId);
-//
-//        entityManager.flush();
-//        entityManager.clear();
-//
-//        // then
-//        Optional<Member> foundMemberOptional = memberRepository.findById(memberId);
-//        assertThat(foundMemberOptional).isEmpty();
-//    }
 }

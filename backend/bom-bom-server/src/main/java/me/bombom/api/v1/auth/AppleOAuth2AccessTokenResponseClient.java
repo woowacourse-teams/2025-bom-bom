@@ -1,8 +1,11 @@
 package me.bombom.api.v1.auth;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
@@ -37,22 +40,47 @@ public class AppleOAuth2AccessTokenResponseClient implements OAuth2AccessTokenRe
 
         try {
             log.info("Apple 토큰 교환 요청 시작 - URI: {}", tokenUri);
-            OAuth2AccessTokenResponse tokenResponse = restClient.post()
+            Map<String, Object> responseMap = restClient.post()
                     .uri(tokenUri)
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                     .body(params)
                     .retrieve()
-                    .body(OAuth2AccessTokenResponse.class);
+                    .body(new ParameterizedTypeReference<>() {});
 
-            if (tokenResponse == null) {
-                throw new OAuth2AuthenticationException(new OAuth2Error("token_response_is_null"), "Apple로부터 받은 토큰 응답이 null입니다.");
+            if (responseMap == null) {
+                throw new OAuth2AuthenticationException(new OAuth2Error("invalid_token_response"), "Apple로부터 받은 토큰 응답이 null입니다.");
+            }
+
+            // Apple이 에러를 반환했는지 확인
+            if (responseMap.containsKey("error")) {
+                String error = responseMap.get("error").toString();
+                String errorDescription = responseMap.getOrDefault("error_description", "No description").toString();
+                log.error("Apple 토큰 교환 실패 - error: {}, description: {}", error, errorDescription);
+                throw new OAuth2AuthenticationException(new OAuth2Error(error), "Apple 인증 실패: " + errorDescription);
+            }
+
+            // 성공 응답을 OAuth2AccessTokenResponse 객체로 수동 변환
+            OAuth2AccessTokenResponse tokenResponse = OAuth2AccessTokenResponse.withToken(responseMap.get("access_token").toString())
+                    .tokenType(org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER)
+                    .expiresIn(Long.parseLong(responseMap.get("expires_in").toString()))
+                    .scopes(Set.of(clientRegistration.getScopes().toArray(new String[0])))
+                    .refreshToken(responseMap.get("refresh_token") != null ? responseMap.get("refresh_token").toString() : null)
+                    .additionalParameters(responseMap)
+                    .build();
+
+            // id_token은 additionalParameters에 있으므로, 여기서 access_token이 null인지 확인할 필요는 없음.
+            // Spring Security의 다음 단계(OidcUserService)에서 id_token을 사용함.
+            if (tokenResponse.getAccessToken() == null) {
+                throw new OAuth2AuthenticationException(
+                        new OAuth2Error("invalid_token_response"),
+                        "Apple로부터 받은 응답에 access_token이 없습니다."
+                );
             }
 
             log.info("Apple 토큰 교환 성공. AccessToken Type: {}", tokenResponse.getAccessToken().getTokenType().getValue());
             return tokenResponse;
 
         } catch (Exception ex) {
-            // Apple이 보내준 실제 에러 메시지를 로그에 남깁니다. (e.g., invalid_grant, invalid_client)
             log.error("Apple 토큰 교환 실패: {}", ex.getMessage(), ex);
             OAuth2Error oauth2Error = new OAuth2Error("invalid_token_response",
                     "Apple 토큰 엔드포인트 요청에 실패했습니다. 응답: " + ex.getMessage(), null);

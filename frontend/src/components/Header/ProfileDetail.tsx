@@ -1,8 +1,9 @@
 import styled from '@emotion/styled';
 import { useMutation } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 import { toast } from '../Toast/utils/toastActions';
-import { postLogout } from '@/apis/auth';
+import { postLogout, postWithdraw } from '@/apis/auth';
 import { UserInfo } from '@/types/me';
 import { copyToClipboard } from '@/utils/copy';
 import CopyIcon from '#/assets/copy.svg';
@@ -14,6 +15,8 @@ interface ProfileDetailProps {
 }
 
 const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
+  const navigate = useNavigate();
+
   const { mutate: mutateLogout } = useMutation({
     mutationKey: ['logout'],
     mutationFn: postLogout,
@@ -25,6 +28,17 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
     },
   });
 
+  const { mutate: mutateWithdraw } = useMutation({
+    mutationKey: ['withdraw'],
+    mutationFn: postWithdraw,
+    onSuccess: () => {
+      navigate({ to: '/recommend' });
+    },
+    onError: () => {
+      toast.error('회원탈퇴에 실패했습니다. 다시 시도해주세요.');
+    },
+  });
+
   const handleCopyEmail = () => {
     if (!userInfo.email) return;
 
@@ -33,9 +47,13 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
   };
 
   const handleResignClick = () => {
-    alert(
+    const confirmWithdraw = confirm(
       '회원 탈퇴 시, 회원님의 모든 정보가 삭제됩니다. 정말 탈퇴하시겠습니까?',
     );
+
+    if (confirmWithdraw) {
+      mutateWithdraw();
+    }
   };
 
   const handleLogoutClick = () => {

@@ -25,3 +25,9 @@ export const postLogout = () => {
     path: '/auth/logout',
   });
 };
+
+export const postWithdraw = () => {
+  return fetcher.post({
+    path: '/auth/withdraw',
+  });
+};

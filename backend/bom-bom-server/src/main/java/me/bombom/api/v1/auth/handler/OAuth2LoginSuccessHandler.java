@@ -58,15 +58,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 return;
             }
         }
-        CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-        Member member = oAuth2User.getMember();
+        Member member = null;
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomOAuth2User) {
+            member = ((CustomOAuth2User) principal).getMember();
+        }
 
         String redirectUrl = getBaseUrlByEnv(request);
-        if (member == null) {
-            redirectUrl += SIGNUP_PATH;
-        } else {
-            redirectUrl += HOME_PATH;
-        }
+        redirectUrl += (member == null) ? SIGNUP_PATH : HOME_PATH;
         response.sendRedirect(redirectUrl);
     }
 

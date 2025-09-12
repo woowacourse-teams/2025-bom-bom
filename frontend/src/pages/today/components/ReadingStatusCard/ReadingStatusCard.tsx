@@ -288,7 +288,6 @@ const EditInput = styled.input`
 
   &::placeholder {
     color: ${({ theme }) => theme.colors.textTertiary};
-    font-size: 11px;
   }
 `;
 

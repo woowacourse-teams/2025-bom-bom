@@ -61,6 +61,9 @@ export function WeeklyGoalInput({
       disabled={isPending}
       placeholder="1-127"
       aria-label="주간 목표 수정"
+      onFocus={(e) => {
+        e.target.select();
+      }}
     />
   );
 }

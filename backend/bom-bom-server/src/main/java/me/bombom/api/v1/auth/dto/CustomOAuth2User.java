@@ -7,7 +7,9 @@ import java.util.Map;
 import lombok.Getter;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 @Getter
 public class CustomOAuth2User implements OidcUser, Serializable {

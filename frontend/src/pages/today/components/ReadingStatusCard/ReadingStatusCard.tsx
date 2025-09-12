@@ -98,9 +98,11 @@ function ReadingStatusCard() {
             {deviceType === 'pc' && <StyledIcon as={GoalIcon} />}
             <ProgressLabel>주간 목표</ProgressLabel>
             <WeeklyGoalEditor
+              isEditing={isEditing}
               isPending={isPending}
               deviceType={deviceType}
               onEditStart={handleEditStart}
+              onSave={handleSave}
             />
             {isEditing ? (
               <InputContainer>

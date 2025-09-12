@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { ChangeEvent, KeyboardEvent } from 'react';
 import { DeviceType } from '@/hooks/useDeviceType';
+import CheckIcon from '#/assets/check.svg';
 import EditIcon from '#/assets/edit.svg';
 
 interface WeeklyGoalEditorProps {
@@ -65,23 +66,39 @@ export function WeeklyGoalInput({
 }
 
 function WeeklyGoalEditor({
+  isEditing,
   isPending,
   deviceType,
   onEditStart,
-}: Pick<WeeklyGoalEditorProps, 'isPending' | 'deviceType' | 'onEditStart'>) {
+  onSave,
+}: Pick<
+  WeeklyGoalEditorProps,
+  'isEditing' | 'isPending' | 'deviceType' | 'onEditStart' | 'onSave'
+>) {
   return (
     <EditSection deviceType={deviceType}>
       <EditButton
         deviceType={deviceType}
         type="button"
-        onClick={onEditStart}
-        aria-label="주간 목표 편집"
+        onClick={isEditing ? onSave : onEditStart}
+        aria-label={isEditing ? '주간 목표 저장' : '주간 목표 편집'}
         disabled={isPending}
+        isEditing={isEditing}
       >
-        <EditIcon
-          width={deviceType === 'pc' ? 14 : 12}
-          height={deviceType === 'pc' ? 14 : 12}
-        />
+        {isEditing ? (
+          <>
+            <CheckIcon
+              width={deviceType === 'pc' ? 12 : 10}
+              height={deviceType === 'pc' ? 12 : 10}
+            />
+            <ButtonText deviceType={deviceType}>수정 완료</ButtonText>
+          </>
+        ) : (
+          <EditIcon
+            width={deviceType === 'pc' ? 14 : 12}
+            height={deviceType === 'pc' ? 14 : 12}
+          />
+        )}
       </EditButton>
     </EditSection>
   );
@@ -96,18 +113,23 @@ const EditSection = styled.section<{ deviceType: DeviceType }>`
   align-items: center;
 `;
 
-const EditButton = styled.button<{ deviceType: DeviceType }>`
-  ${({ deviceType }) =>
+const EditButton = styled.button<{
+  deviceType: DeviceType;
+  isEditing?: boolean;
+}>`
+  ${({ deviceType, isEditing }) =>
     deviceType === 'pc'
       ? `
-        width: 20px;
+        width: ${isEditing ? 'auto' : '20px'};
         height: 20px;
-        padding: 2px;
+        padding: ${isEditing ? '4px 8px' : '2px'};
+        min-width: ${isEditing ? '72px' : '20px'};
       `
       : `
-        width: 18px;
+        width: ${isEditing ? 'auto' : '18px'};
         height: 18px;
-        padding: 2px;
+        padding: ${isEditing ? '3px 6px' : '2px'};
+        min-width: ${isEditing ? '60px' : '18px'};
       `}
   border: none;
   border-radius: 3px;
@@ -115,16 +137,20 @@ const EditButton = styled.button<{ deviceType: DeviceType }>`
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 4px;
 
-  background: transparent;
-  color: ${({ theme }) => theme.colors.textTertiary};
+  background: ${({ theme, isEditing }) =>
+    isEditing ? theme.colors.primary : 'transparent'};
+  color: ${({ theme, isEditing }) =>
+    isEditing ? theme.colors.white : theme.colors.textTertiary};
 
   cursor: pointer;
 
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${({ theme }) => theme.colors.dividers};
+    background: ${({ theme, isEditing }) =>
+      isEditing ? theme.colors.primary : theme.colors.dividers};
   }
 
   &:disabled {
@@ -135,6 +161,13 @@ const EditButton = styled.button<{ deviceType: DeviceType }>`
   svg {
     fill: currentcolor;
   }
+`;
+
+const ButtonText = styled.span<{ deviceType: DeviceType }>`
+  font: ${({ theme, deviceType }) =>
+    deviceType === 'pc' ? theme.fonts.caption : theme.fonts.caption};
+  font-size: ${({ deviceType }) => (deviceType === 'pc' ? '11px' : '10px')};
+  white-space: nowrap;
 `;
 
 const EditInput = styled.input<{ deviceType: DeviceType }>`

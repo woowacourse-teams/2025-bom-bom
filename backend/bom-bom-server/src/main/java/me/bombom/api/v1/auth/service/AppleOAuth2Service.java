@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
+import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
@@ -65,7 +66,14 @@ public class AppleOAuth2Service extends OidcUserService {
             // 기존 회원 확인
             Optional<Member> member = memberRepository.findByProviderAndProviderId("apple", providerId);
             if (member.isEmpty()) {
-                log.info("Apple OIDC 신규 사용자 - providerId: {}", providerId);
+                // Apple OIDC 신규 사용자 - PendingOAuth2Member를 세션에 저장
+                PendingOAuth2Member pendingMember = PendingOAuth2Member.builder()
+                        .provider("apple")
+                        .providerId(providerId)
+                        .profileUrl(null) // Apple은 profileUrl이 없음
+                        .build();
+                session.setAttribute("pendingMember", pendingMember);
+                log.info("Apple OIDC 신규 사용자 - 회원가입 대기 상태로 설정, providerId: {}", providerId);
                 return new CustomOAuth2User(oidcUser.getAttributes(), null, oidcUser.getIdToken(), oidcUser.getUserInfo());
             }
             

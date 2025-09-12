@@ -20,7 +20,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./app/assets/images/logo.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#FE5E04"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.antarctica.bombom"
@@ -40,10 +40,29 @@
           "resizeMode": "contain",
           "backgroundColor": "#FE5E04"
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableSeparateBuildPerCPUArchitecture": true,
+            "enableMinifyInReleaseBuilds": true,
+            "version": "1.0.0",
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0"
+          }
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "028392dc-6a98-48a9-8874-30f193313eda"
+      }
     }
   }
 }

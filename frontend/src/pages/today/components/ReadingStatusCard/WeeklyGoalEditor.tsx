@@ -87,11 +87,10 @@ function WeeklyGoalEditor({
       >
         {isEditing ? (
           <>
-            <CheckIcon
-              width={deviceType === 'pc' ? 12 : 10}
-              height={deviceType === 'pc' ? 12 : 10}
-            />
-            <ButtonText deviceType={deviceType}>수정 완료</ButtonText>
+            <CheckIcon width={12} height={12} />
+            {deviceType === 'pc' && (
+              <ButtonText deviceType={deviceType}>수정 완료</ButtonText>
+            )}
           </>
         ) : (
           <EditIcon
@@ -129,7 +128,7 @@ const EditButton = styled.button<{
         width: ${isEditing ? 'auto' : '18px'};
         height: 18px;
         padding: ${isEditing ? '3px 6px' : '2px'};
-        min-width: ${isEditing ? '60px' : '18px'};
+        min-width: 18px;
       `}
   border: none;
   border-radius: 3px;

@@ -41,7 +41,7 @@ function ReadingStatusCard() {
   const handleSave = () => {
     if (goal === null) return;
 
-    if (isNaN(goal) || goal < 1 || goal > 999) {
+    if (isNaN(goal) || goal < 1 || goal > 127) {
       setGoal(weekly.goalCount);
       return;
     }

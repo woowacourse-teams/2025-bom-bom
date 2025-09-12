@@ -1,5 +1,6 @@
 package me.bombom.api.v1.auth.dto;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -11,22 +12,20 @@ import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 @Getter
-public class CustomOAuth2User implements OidcUser {
+public class CustomOAuth2User implements OidcUser, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final Map<String, Object> attributes;
     private final Member member;
-    private final OidcUser oidcUser;
+    private final OidcIdToken idToken;
+    private final OidcUserInfo userInfo;
 
-    public CustomOAuth2User(Map<String, Object> attributes, Member member) {
+    public CustomOAuth2User(Map<String, Object> attributes, Member member, OidcIdToken idToken, OidcUserInfo userInfo) {
         this.attributes = attributes;
         this.member = member;
-        this.oidcUser = null;
-    }
-
-    public CustomOAuth2User(OidcUser oidcUser, Member member) {
-        this.attributes = oidcUser.getAttributes();
-        this.member = member;
-        this.oidcUser = oidcUser;
+        this.idToken = idToken;
+        this.userInfo = userInfo;
     }
 
     @Override
@@ -53,16 +52,16 @@ public class CustomOAuth2User implements OidcUser {
 
     @Override
     public OidcIdToken getIdToken() {
-        return oidcUser != null ? oidcUser.getIdToken() : null;
+        return idToken;
     }
 
     @Override
     public OidcUserInfo getUserInfo() {
-        return oidcUser != null ? oidcUser.getUserInfo() : null;
+        return userInfo;
     }
 
     @Override
     public Map<String, Object> getClaims() {
-        return oidcUser != null ? oidcUser.getClaims() : attributes;
+        return attributes;
     }
 }

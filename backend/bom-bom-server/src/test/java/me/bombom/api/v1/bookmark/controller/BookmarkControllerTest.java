@@ -106,7 +106,7 @@ class BookmarkControllerTest {
                 "email", member.getEmail(),
                 "name", member.getNickname()
         );
-        customOAuth2User = new CustomOAuth2User(attributes, member);
+        customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
     }
 
     private void setAuthentication() {

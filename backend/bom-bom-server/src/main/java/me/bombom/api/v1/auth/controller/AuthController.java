@@ -146,7 +146,7 @@ public class AuthController implements AuthControllerApi{
         attributes.put("provider", member.getProvider());
         attributes.put("providerId", member.getProviderId());
 
-        CustomOAuth2User customOAuth2User = new CustomOAuth2User(attributes, member);
+        CustomOAuth2User customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
         return new OAuth2AuthenticationToken(
                 customOAuth2User,
                 customOAuth2User.getAuthorities(),

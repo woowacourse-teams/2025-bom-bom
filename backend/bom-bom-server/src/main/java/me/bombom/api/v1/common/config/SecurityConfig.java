@@ -56,6 +56,7 @@ public class SecurityConfig {
     public SecurityFilterChain apiSecurityFilterChain(
             HttpSecurity http,
             CustomOAuth2UserService customOAuth2UserService,
+            AppleOAuth2Service appleOAuth2Service,
             OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
             OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegatingAccessTokenClient
     ) throws Exception {
@@ -69,10 +70,8 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .tokenEndpoint(token -> token.accessTokenResponseClient(delegatingAccessTokenClient))
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService) // Google 등 OAuth2
-                                .oidcUserService(oidcReq -> (org.springframework.security.oauth2.core.oidc.user.OidcUser)
-                                        customOAuth2UserService.loadUser(oidcReq)) // Apple 등 OIDC → 커스텀 라우팅
-                        )
+                                .userService(customOAuth2UserService)
+                                .oidcUserService(appleOAuth2Service))
                         .successHandler(oAuth2LoginSuccessHandler));
 
         return http.build();
@@ -148,10 +147,9 @@ public class SecurityConfig {
 
     @Bean
     public List<OAuth2LoginService> loginServices(
-            GoogleOAuth2LoginService googleService,
-            AppleOAuth2Service appleService
+            GoogleOAuth2LoginService googleService
     ) {
-        return List.of(googleService, appleService);
+        return List.of(googleService);
     }
 
     @Bean

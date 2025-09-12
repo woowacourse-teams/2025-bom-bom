@@ -119,27 +119,13 @@ const EditButton = styled.button<{
   deviceType: DeviceType;
   isEditing?: boolean;
 }>`
-  ${({ deviceType, isEditing }) =>
-    deviceType === 'pc'
-      ? `
-        width: ${isEditing ? 'auto' : '20px'};
-        height: 20px;
-        padding: ${isEditing ? '4px 8px' : '2px'};
-        min-width: ${isEditing ? '72px' : '20px'};
-      `
-      : `
-        width: ${isEditing ? 'auto' : '18px'};
-        height: 18px;
-        padding: ${isEditing ? '3px 6px' : '2px'};
-        min-width: 18px;
-      `}
   border: none;
   border-radius: 3px;
 
   display: flex;
+  gap: 4px;
   align-items: center;
   justify-content: center;
-  gap: 4px;
 
   background: ${({ theme, isEditing }) =>
     isEditing ? theme.colors.primary : 'transparent'};
@@ -163,6 +149,21 @@ const EditButton = styled.button<{
   svg {
     fill: currentcolor;
   }
+
+  ${({ deviceType, isEditing }) =>
+    deviceType === 'pc'
+      ? `
+        width: ${isEditing ? 'auto' : '20px'};
+        height: 20px;
+        padding: ${isEditing ? '4px 8px' : '2px'};
+        min-width: ${isEditing ? '72px' : '20px'};
+      `
+      : `
+        width: ${isEditing ? 'auto' : '18px'};
+        height: 18px;
+        padding: ${isEditing ? '3px 6px' : '2px'};
+        min-width: 18px;
+      `}
 `;
 
 const ButtonText = styled.span<{ deviceType: DeviceType }>`

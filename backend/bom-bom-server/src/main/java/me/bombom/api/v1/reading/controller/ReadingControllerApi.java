@@ -6,16 +6,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "Reading", description = "읽기 정보 관련 API")
@@ -36,7 +33,10 @@ public interface ReadingControllerApi {
         @ApiResponse(responseCode = "400", description = "잘못된 요청 값", content = @Content),
         @ApiResponse(responseCode = "404", description = "주간 읽기 정보를 찾을 수 없음", content = @Content)
     })
-    WeeklyGoalCountResponse updateWeeklyGoalCount(@Valid @RequestBody UpdateWeeklyGoalCountRequest request);
+    WeeklyGoalCountResponse updateWeeklyGoalCount(
+            @Parameter(hidden = true) Member member,
+            Integer weeklyGoalCount
+    );
 
     @Operation(
             summary = "이달의 독서왕 조회",

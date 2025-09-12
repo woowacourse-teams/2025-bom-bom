@@ -30,7 +30,7 @@ public class ReadingController implements ReadingControllerApi{
     @PatchMapping("/progress/week/goal")
     public WeeklyGoalCountResponse updateWeeklyGoalCount(
             @LoginMember Member member,
-            @NotNull(message = "주간 목표 개수는 필수 입력 값입니다.") Integer weeklyGoalCount){
+            @NotNull(message = "주간 목표 개수는 필수 입력 값입니다.") @Positive(message = "주간 목표 개수는 양수여야 합니다.") Integer weeklyGoalCount){
         return readingService.updateWeeklyGoalCount(member.getId(), weeklyGoalCount);
     }
 

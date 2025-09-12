@@ -52,7 +52,7 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
         } else {
             log.info("Google 기존 회원 - 로그인 성공, memberId: {}", member.get().getId());
         }
-        return new CustomOAuth2User(oAuth2User.getAttributes(), member.orElse(null));
+        return new CustomOAuth2User(oAuth2User.getAttributes(), member.orElse(null), null, null);
     }
 
     @Override

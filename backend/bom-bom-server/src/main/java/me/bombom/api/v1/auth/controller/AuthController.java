@@ -53,6 +53,7 @@ public class AuthController implements AuthControllerApi{
                 .addContext("requestedEmail", signupRequest.email());
         }
         PendingOAuth2Member pendingMember = (PendingOAuth2Member) session.getAttribute("pendingMember");
+        log.info("회원가입 요청 - sessionId: {}, pendingMember: {}", session.getId(), pendingMember);
         if (pendingMember == null) {
             throw new UnauthorizedException(ErrorDetail.MISSING_OAUTH_DATA)
                 .addContext("sessionExists", true)
@@ -146,7 +147,7 @@ public class AuthController implements AuthControllerApi{
         attributes.put("provider", member.getProvider());
         attributes.put("providerId", member.getProviderId());
 
-        CustomOAuth2User customOAuth2User = new CustomOAuth2User(attributes, member);
+        CustomOAuth2User customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
         return new OAuth2AuthenticationToken(
                 customOAuth2User,
                 customOAuth2User.getAuthorities(),

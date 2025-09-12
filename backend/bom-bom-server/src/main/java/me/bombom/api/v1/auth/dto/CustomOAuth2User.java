@@ -7,19 +7,25 @@ import java.util.Map;
 import lombok.Getter;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 @Getter
-public class CustomOAuth2User implements OAuth2User, Serializable {
+public class CustomOAuth2User implements OidcUser, Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private final Map<String, Object> attributes;
     private final Member member;
+    private final OidcIdToken idToken;
+    private final OidcUserInfo userInfo;
 
-    public CustomOAuth2User(Map<String, Object> attributes, Member member) {
+    public CustomOAuth2User(Map<String, Object> attributes, Member member, OidcIdToken idToken, OidcUserInfo userInfo) {
         this.attributes = attributes;
         this.member = member;
+        this.idToken = idToken;
+        this.userInfo = userInfo;
     }
 
     @Override
@@ -40,5 +46,20 @@ public class CustomOAuth2User implements OAuth2User, Serializable {
         }
         Object sub = attributes.get("sub");
         return sub != null ? sub.toString() : "Unknown";
+    }
+
+    @Override
+    public OidcIdToken getIdToken() {
+        return idToken;
+    }
+
+    @Override
+    public OidcUserInfo getUserInfo() {
+        return userInfo;
+    }
+
+    @Override
+    public Map<String, Object> getClaims() {
+        return attributes;
     }
 }

@@ -1,9 +1,6 @@
 package me.bombom.api.v1.auth.service;
 
-import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.JWTParser;
 import jakarta.servlet.http.HttpSession;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +12,12 @@ import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
@@ -31,7 +29,7 @@ import org.springframework.web.client.RestClient;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AppleOAuth2Service implements OAuth2LoginService {
+public class AppleOAuth2Service extends OidcUserService {
     
     private static final String ID_TOKEN_KEY = "id_token";
     private static final String ACCESS_TOKEN_KEY = "access_token";
@@ -46,28 +44,18 @@ public class AppleOAuth2Service implements OAuth2LoginService {
     private String clientId;
 
     @Override
-    @Transactional
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+    public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
         log.info("Apple OIDC 로그인 처리 시작");
         
         try {
-            Object idTokenObj = userRequest.getAdditionalParameters().get(ID_TOKEN_KEY);
-            if (idTokenObj == null) {
-                log.error("Apple ID Token이 additionalParameters에 없음 - available keys: {}", userRequest.getAdditionalParameters().keySet());
-                throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
-                    .addContext("provider", "apple")
-                    .addContext("reason", "apple_id_token_not_found_in_additional_parameters");
-            }
+            // 기본 OidcUser 로드
+            OidcUser oidcUser = super.loadUser(userRequest);
             
-            String idToken = idTokenObj.toString();
-            JWT jwt = JWTParser.parse(idToken);
-            Map<String, Object> attributes = jwt.getJWTClaimsSet().getClaims();
-            String providerId = (String) attributes.get("sub");
-            String email = (String) attributes.get("email");
-            log.info("Apple ID Token 파싱 성공 - providerId: {}, email: {}", providerId, email);
+            String providerId = oidcUser.getSubject();
+            log.info("Apple OIDC 사용자 정보 - providerId: {}", providerId);
             
-            // Apple Access Token 세션에 저장
-            String accessToken = extractAccessToken(userRequest);
+            // Apple Access Token 추출 및 세션에 저장
+            String accessToken = extractAccessTokenFromOidcRequest(userRequest);
             if (accessToken != null) {
                 session.setAttribute("appleAccessToken", accessToken);
                 log.info("Apple Access Token 세션에 저장 완료");
@@ -77,36 +65,27 @@ public class AppleOAuth2Service implements OAuth2LoginService {
             
             // 기존 회원 확인
             Optional<Member> member = memberRepository.findByProviderAndProviderId("apple", providerId);
-            
             if (member.isEmpty()) {
+                // Apple OIDC 신규 사용자 - PendingOAuth2Member를 세션에 저장
                 PendingOAuth2Member pendingMember = PendingOAuth2Member.builder()
                         .provider("apple")
                         .providerId(providerId)
-                        .profileUrl("")
+                        .profileUrl(null) // Apple은 profileUrl이 없음
                         .build();
                 session.setAttribute("pendingMember", pendingMember);
-                log.info("Apple 신규 회원 - 회원가입 대기 상태로 설정");
-            } else {
-                log.info("Apple 기존 회원 - 로그인 성공, memberId: {}", member.get().getId());
+                log.info("Apple OIDC 신규 사용자 - 회원가입 대기 상태로 설정, providerId: {}", providerId);
+                log.info("세션에 pendingMember 저장 완료 - sessionId: {}, pendingMember: {}", session.getId(), pendingMember);
+                return new CustomOAuth2User(oidcUser.getAttributes(), null, oidcUser.getIdToken(), oidcUser.getUserInfo());
             }
             
-            return new CustomOAuth2User(attributes, member.orElse(null));
+            log.info("Apple OIDC 기존 사용자 - memberId: {}", member.get().getId());
+            return new CustomOAuth2User(oidcUser.getAttributes(), member.get(), oidcUser.getIdToken(), oidcUser.getUserInfo());
         } catch (Exception e) {
             log.error("Apple OIDC 로그인 처리 실패 - error: {}", e.getMessage(), e);
             throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
                 .addContext("provider", "apple")
                 .addContext("reason", "apple_oidc_processing_failed");
         }
-    }
-    
-    @Override
-    public String getProviderType() {
-        return "apple";
-    }
-    
-    @Override
-    public boolean supports(String provider) {
-        return "apple".equals(provider);
     }
 
     /**
@@ -144,7 +123,26 @@ public class AppleOAuth2Service implements OAuth2LoginService {
     }
     
     /**
-     * Apple Access Token을 추출합니다
+     * Apple Access Token을 추출합니다 (OidcUserRequest용)
+     * @param userRequest OIDC 사용자 요청
+     * @return Access Token 또는 null
+     */
+    private String extractAccessTokenFromOidcRequest(OidcUserRequest userRequest) {
+        try {
+            Object accessTokenObj = userRequest.getAdditionalParameters().get(ACCESS_TOKEN_KEY);
+            if (accessTokenObj != null) {
+                log.info("Apple Access Token 추출 성공");
+                return accessTokenObj.toString();
+            }
+            return null;
+        } catch (Exception e) {
+            log.warn("Apple Access Token 추출 실패 - error: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Apple Access Token을 추출합니다 (OAuth2UserRequest용)
      * @param userRequest OAuth2 사용자 요청
      * @return Access Token 또는 null
      */

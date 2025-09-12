@@ -4,18 +4,12 @@
           xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 
                   http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
-  <!-- 메인 페이지 -->
-  <url>
-    <loc>https://www.bombom.news/</loc>
-    <lastmod>2025-09-12T00:00:00+00:00</lastmod>
-    <changefreq>daily</changefreq>
-  </url>
-  
-  <!-- 추천 페이지 -->
+  <!-- 추천 페이지(현 랜딩 페이지) -->
   <url>
     <loc>https://www.bombom.news/recommend</loc>
     <lastmod>2025-09-12T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
+    <priority>1.0</priority>
   </url>
   
   <!-- 로그인 페이지 -->
@@ -23,5 +17,6 @@
     <loc>https://www.bombom.news/login</loc>
     <lastmod>2025-09-12T00:00:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset>

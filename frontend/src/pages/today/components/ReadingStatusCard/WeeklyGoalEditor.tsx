@@ -14,16 +14,23 @@ interface WeeklyGoalEditorProps {
   onGoalChange: (value: number | null) => void;
 }
 
-function WeeklyGoalEditor({
-  isEditing,
+interface WeeklyGoalInputProps {
+  goalValue: number | null;
+  isPending: boolean;
+  deviceType: DeviceType;
+  onSave: () => void;
+  onCancel: () => void;
+  onGoalChange: (value: number | null) => void;
+}
+
+export function WeeklyGoalInput({
   goalValue,
   isPending,
   deviceType,
-  onEditStart,
   onSave,
   onCancel,
   onGoalChange,
-}: WeeklyGoalEditorProps) {
+}: WeeklyGoalInputProps) {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || /^[1-9][0-9]{0,2}$/.test(value)) {
@@ -40,35 +47,39 @@ function WeeklyGoalEditor({
   };
 
   return (
+    <EditInput
+      deviceType={deviceType}
+      type="text"
+      value={goalValue || ''}
+      onChange={handleInputChange}
+      onKeyDown={handleKeyDown}
+      onBlur={onSave}
+      disabled={isPending}
+      placeholder="1-127"
+      aria-label="주간 목표 수정"
+    />
+  );
+}
+
+function WeeklyGoalEditor({
+  isPending,
+  deviceType,
+  onEditStart,
+}: Pick<WeeklyGoalEditorProps, 'isPending' | 'deviceType' | 'onEditStart'>) {
+  return (
     <EditSection deviceType={deviceType}>
-      {isEditing ? (
-        <EditInput
-          deviceType={deviceType}
-          type="text"
-          value={goalValue || ''}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          onBlur={onSave}
-          // eslint-disable-next-line jsx-a11y/no-autofocus
-          autoFocus
-          disabled={isPending}
-          placeholder="1-127"
-          aria-label="주간 목표 수정"
+      <EditButton
+        deviceType={deviceType}
+        type="button"
+        onClick={onEditStart}
+        aria-label="주간 목표 편집"
+        disabled={isPending}
+      >
+        <EditIcon
+          width={deviceType === 'pc' ? 16 : 14}
+          height={deviceType === 'pc' ? 16 : 14}
         />
-      ) : (
-        <EditButton
-          deviceType={deviceType}
-          type="button"
-          onClick={onEditStart}
-          aria-label="주간 목표 편집"
-          disabled={isPending}
-        >
-          <EditIcon
-            width={deviceType === 'pc' ? 16 : 14}
-            height={deviceType === 'pc' ? 16 : 14}
-          />
-        </EditButton>
-      )}
+      </EditButton>
     </EditSection>
   );
 }
@@ -137,30 +148,22 @@ const EditButton = styled.button<{ deviceType: DeviceType }>`
 `;
 
 const EditInput = styled.input<{ deviceType: DeviceType }>`
-  ${({ deviceType }) =>
-    deviceType === 'pc'
-      ? `
-        width: 60px;
-        height: 24px;
-        padding: 2px 8px;
-      `
-      : `
-        width: 50px;
-        height: 20px;
-        padding: 2px 6px;
-      `}
+  width: 40px;
+  height: auto;
+  margin: 0;
+  padding: 2px 4px;
   border: 1px solid ${({ theme }) => theme.colors.primary};
-  border-radius: 4px;
+  border-radius: 3px;
 
   background-color: ${({ theme }) => theme.colors.white};
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme, deviceType }) =>
-    deviceType === 'pc' ? theme.fonts.body2 : theme.fonts.caption};
+  color: ${({ theme }) => theme.colors.primary};
+  font: ${({ theme }) => theme.fonts.body2};
+  line-height: 1;
   text-align: center;
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary}20;
+    box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.primary}40;
   }
 
   &:disabled {
@@ -170,5 +173,6 @@ const EditInput = styled.input<{ deviceType: DeviceType }>`
 
   &::placeholder {
     color: ${({ theme }) => theme.colors.textTertiary};
+    font-size: 10px;
   }
 `;

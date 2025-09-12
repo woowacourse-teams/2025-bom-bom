@@ -2,9 +2,10 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import ReadingStatusCardSkeleton from './ReadingStatusCardSkeleton';
-import WeeklyGoalEditor from './WeeklyGoalEditor';
+import WeeklyGoalEditor, { WeeklyGoalInput } from './WeeklyGoalEditor';
 import StreakCounter from '../StreakCounter/StreakCounter';
 import { queries } from '@/apis/queries';
+import ProgressBar from '@/components/ProgressBar/ProgressBar';
 import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import useUpdateWeeklyGoalMutation from '@/pages/today/hooks/useUpdateWeeklyGoalMutation';
@@ -92,26 +93,37 @@ function ReadingStatusCard() {
           : { showGraph: false })}
       />
       <WeeklyGoalSection>
-        <ProgressWithLabel
-          label="주간 목표"
-          value={{
-            currentCount: weekly.readCount,
-            totalCount: weekly.goalCount,
-          }}
-          rateFormat="ratio"
-          {...(deviceType === 'pc'
-            ? { Icon: GoalIcon, description: weeklyGoalDescription }
-            : { showGraph: false })}
-        />
+        <WeeklyProgressContainer>
+          <ProgressInfo>
+            {deviceType === 'pc' && <StyledIcon as={GoalIcon} />}
+            <ProgressLabel>주간 목표</ProgressLabel>
+            {isEditing ? (
+              <InputContainer>
+                <span>{weekly.readCount}/</span>
+                <WeeklyGoalInput
+                  goalValue={goal}
+                  isPending={isPending}
+                  deviceType={deviceType}
+                  onSave={handleSave}
+                  onCancel={handleCancel}
+                  onGoalChange={handleGoalChange}
+                />
+              </InputContainer>
+            ) : (
+              <ProgressRate>{`${weekly.readCount}/${weekly.goalCount}`}</ProgressRate>
+            )}
+          </ProgressInfo>
+          {deviceType === 'pc' && (
+            <ProgressBar rate={(weekly.readCount / weekly.goalCount) * 100} />
+          )}
+          {deviceType === 'pc' && weeklyGoalDescription && (
+            <ProgressDescription>{weeklyGoalDescription}</ProgressDescription>
+          )}
+        </WeeklyProgressContainer>
         <WeeklyGoalEditor
-          isEditing={isEditing}
-          goalValue={goal}
           isPending={isPending}
           deviceType={deviceType}
           onEditStart={handleEditStart}
-          onSave={handleSave}
-          onCancel={handleCancel}
-          onGoalChange={handleGoalChange}
         />
       </WeeklyGoalSection>
     </Container>
@@ -178,6 +190,65 @@ const StreakDescription = styled.p<{ deviceType: DeviceType }>`
 const WeeklyGoalSection = styled.div`
   position: relative;
   width: 100%;
+`;
+
+const WeeklyProgressContainer = styled.div`
+  width: 100%;
+
+  display: flex;
+  gap: 14px;
+  flex-direction: column;
+`;
+
+const ProgressInfo = styled.div`
+  width: 100%;
+
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
+const StyledIcon = styled.img`
+  width: 16px;
+  height: 16px;
+
+  object-fit: cover;
+  object-position: center;
+`;
+
+const ProgressLabel = styled.h3`
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.body2};
+  text-align: center;
+`;
+
+const ProgressRate = styled.span`
+  margin-left: auto;
+
+  color: ${({ theme }) => theme.colors.primary};
+  font: ${({ theme }) => theme.fonts.body2};
+  text-align: center;
+`;
+
+const ProgressDescription = styled.p`
+  color: ${({ theme }) => theme.colors.textTertiary};
+  font: ${({ theme }) => theme.fonts.caption};
+`;
+
+const InputContainer = styled.div`
+  margin-left: auto;
+
+  display: flex;
+  gap: 0;
+  align-items: center;
+
+  color: ${({ theme }) => theme.colors.primary};
+  font: ${({ theme }) => theme.fonts.body2};
+
+  span {
+    color: ${({ theme }) => theme.colors.primary};
+    font: ${({ theme }) => theme.fonts.body2};
+  }
 `;
 
 const containerStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {

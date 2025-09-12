@@ -97,6 +97,11 @@ function ReadingStatusCard() {
           <ProgressInfo>
             {deviceType === 'pc' && <StyledIcon as={GoalIcon} />}
             <ProgressLabel>주간 목표</ProgressLabel>
+            <WeeklyGoalEditor
+              isPending={isPending}
+              deviceType={deviceType}
+              onEditStart={handleEditStart}
+            />
             {isEditing ? (
               <InputContainer>
                 <span>{weekly.readCount}/</span>
@@ -120,11 +125,6 @@ function ReadingStatusCard() {
             <ProgressDescription>{weeklyGoalDescription}</ProgressDescription>
           )}
         </WeeklyProgressContainer>
-        <WeeklyGoalEditor
-          isPending={isPending}
-          deviceType={deviceType}
-          onEditStart={handleEditStart}
-        />
       </WeeklyGoalSection>
     </Container>
   );
@@ -187,7 +187,7 @@ const StreakDescription = styled.p<{ deviceType: DeviceType }>`
   text-align: center;
 `;
 
-const WeeklyGoalSection = styled.div`
+const WeeklyGoalSection = styled.section`
   position: relative;
   width: 100%;
 `;

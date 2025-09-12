@@ -50,6 +50,9 @@ export function WeeklyGoalInput({
     <EditInput
       deviceType={deviceType}
       type="text"
+      // eslint-disable-next-line jsx-a11y/no-autofocus
+      autoFocus
+      autoComplete="off"
       value={goalValue || ''}
       onChange={handleInputChange}
       onKeyDown={handleKeyDown}
@@ -76,8 +79,8 @@ function WeeklyGoalEditor({
         disabled={isPending}
       >
         <EditIcon
-          width={deviceType === 'pc' ? 16 : 14}
-          height={deviceType === 'pc' ? 16 : 14}
+          width={deviceType === 'pc' ? 14 : 12}
+          height={deviceType === 'pc' ? 14 : 12}
         />
       </EditButton>
     </EditSection>
@@ -86,20 +89,8 @@ function WeeklyGoalEditor({
 
 export default WeeklyGoalEditor;
 
-const EditSection = styled.div<{ deviceType: DeviceType }>`
-  position: absolute;
-  ${({ deviceType }) =>
-    deviceType === 'pc'
-      ? `
-      top: 0;
-      right: -20px;
-      height: 22px;
-    `
-      : `
-      top: -2px;
-      right: 0;
-      height: 20px;
-    `}
+const EditSection = styled.section<{ deviceType: DeviceType }>`
+  margin-left: 4px;
 
   display: flex;
   align-items: center;
@@ -109,17 +100,17 @@ const EditButton = styled.button<{ deviceType: DeviceType }>`
   ${({ deviceType }) =>
     deviceType === 'pc'
       ? `
-        width: 24px;
-        height: 24px;
-        padding: 4px;
-      `
-      : `
         width: 20px;
         height: 20px;
-        padding: 3px;
+        padding: 2px;
+      `
+      : `
+        width: 18px;
+        height: 18px;
+        padding: 2px;
       `}
   border: none;
-  border-radius: 4px;
+  border-radius: 3px;
 
   display: flex;
   align-items: center;
@@ -132,9 +123,8 @@ const EditButton = styled.button<{ deviceType: DeviceType }>`
 
   transition: all 0.2s ease;
 
-  &:focus {
-    outline: 2px solid ${({ theme }) => theme.colors.primary};
-    outline-offset: 2px;
+  &:hover {
+    background: ${({ theme }) => theme.colors.dividers};
   }
 
   &:disabled {

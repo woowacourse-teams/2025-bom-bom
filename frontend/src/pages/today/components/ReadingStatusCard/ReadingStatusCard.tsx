@@ -23,9 +23,6 @@ function ReadingStatusCard() {
     onSuccess: () => {
       setIsEditing(false);
     },
-    onError: () => {
-      setGoal(weekly.goalCount);
-    },
   });
 
   if (isLoading) return <ReadingStatusCardSkeleton />;
@@ -40,11 +37,6 @@ function ReadingStatusCard() {
 
   const handleSave = () => {
     if (goal === null) return;
-
-    if (isNaN(goal) || goal < 1 || goal > 127) {
-      setGoal(weekly.goalCount);
-      return;
-    }
 
     if (goal !== weekly.goalCount) {
       updateWeeklyGoal({

@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { ChangeEvent, KeyboardEvent, useState } from 'react';
+import { useState } from 'react';
 import ReadingStatusCardSkeleton from './ReadingStatusCardSkeleton';
+import WeeklyGoalEditor from './WeeklyGoalEditor';
 import StreakCounter from '../StreakCounter/StreakCounter';
 import { queries } from '@/apis/queries';
 import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
@@ -9,7 +10,6 @@ import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import useUpdateWeeklyGoalMutation from '@/pages/today/hooks/useUpdateWeeklyGoalMutation';
 import { theme } from '@/styles/theme';
 import type { CSSObject, Theme } from '@emotion/react';
-import EditIcon from '#/assets/edit.svg';
 import GoalIcon from '#/assets/goal.svg';
 import StatusIcon from '#/assets/reading-status.svg';
 
@@ -33,7 +33,7 @@ function ReadingStatusCard() {
 
   const { streakReadDay, today, weekly } = data;
 
-  const handleEditClick = () => {
+  const handleEditStart = () => {
     setIsEditing(true);
     setGoal(weekly.goalCount);
   };
@@ -61,19 +61,8 @@ function ReadingStatusCard() {
     setGoal(weekly.goalCount);
   };
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === '' || /^[1-9][0-9]{0,2}$/.test(value)) {
-      setGoal(Number(value));
-    }
-  };
-
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSave();
-    } else if (e.key === 'Escape') {
-      handleCancel();
-    }
+  const handleGoalChange = (value: number | null) => {
+    setGoal(value);
   };
   const todayProgressDescription =
     today.readCount < today.totalCount ? '목표까지 조금 더!' : '목표 달성!';
@@ -115,40 +104,23 @@ function ReadingStatusCard() {
           label="주간 목표"
           value={{
             currentCount: weekly.readCount,
-            totalCount: isEditing ? goal || weekly.goalCount : weekly.goalCount,
+            totalCount: weekly.goalCount,
           }}
           rateFormat="ratio"
           {...(deviceType === 'pc'
             ? { Icon: GoalIcon, description: weeklyGoalDescription }
             : { showGraph: false })}
         />
-        {deviceType === 'pc' && (
-          <EditSection>
-            {isEditing ? (
-              <EditInput
-                type="text"
-                value={goal || ''}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyDown}
-                onBlur={handleSave}
-                // eslint-disable-next-line jsx-a11y/no-autofocus
-                autoFocus
-                disabled={isPending}
-                placeholder="1-127"
-                aria-label="주간 목표 수정"
-              />
-            ) : (
-              <EditButton
-                type="button"
-                onClick={handleEditClick}
-                aria-label="주간 목표 편집"
-                disabled={isPending}
-              >
-                <EditIcon width={16} height={16} />
-              </EditButton>
-            )}
-          </EditSection>
-        )}
+        <WeeklyGoalEditor
+          isEditing={isEditing}
+          goalValue={goal}
+          isPending={isPending}
+          deviceType={deviceType}
+          onEditStart={handleEditStart}
+          onSave={handleSave}
+          onCancel={handleCancel}
+          onGoalChange={handleGoalChange}
+        />
       </WeeklyGoalSection>
     </Container>
   );
@@ -214,81 +186,6 @@ const StreakDescription = styled.p<{ deviceType: DeviceType }>`
 const WeeklyGoalSection = styled.div`
   position: relative;
   width: 100%;
-`;
-
-const EditSection = styled.div`
-  position: absolute;
-  top: 0;
-  right: -20px;
-  height: 22px;
-
-  display: flex;
-  align-items: center;
-`;
-
-const EditButton = styled.button`
-  width: 24px;
-  height: 24px;
-  padding: 4px;
-  border: none;
-  border-radius: 4px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: transparent;
-  color: ${({ theme }) => theme.colors.textTertiary};
-
-  cursor: pointer;
-
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.dividers};
-    color: ${({ theme }) => theme.colors.textSecondary};
-  }
-
-  &:focus {
-    outline: 2px solid ${({ theme }) => theme.colors.primary};
-    outline-offset: 2px;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-
-  svg {
-    fill: currentcolor;
-  }
-`;
-
-const EditInput = styled.input`
-  width: 60px;
-  height: 24px;
-  padding: 2px 8px;
-  border: 1px solid ${({ theme }) => theme.colors.primary};
-  border-radius: 4px;
-
-  background-color: ${({ theme }) => theme.colors.white};
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.body2};
-  text-align: center;
-
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary}20;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-
-  &::placeholder {
-    color: ${({ theme }) => theme.colors.textTertiary};
-  }
 `;
 
 const containerStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {

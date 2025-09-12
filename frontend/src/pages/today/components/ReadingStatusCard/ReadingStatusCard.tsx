@@ -1,13 +1,12 @@
 import styled from '@emotion/styled';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import ReadingStatusCardSkeleton from './ReadingStatusCardSkeleton';
 import StreakCounter from '../StreakCounter/StreakCounter';
-import { patchWeeklyReadingGoal } from '@/apis/members';
 import { queries } from '@/apis/queries';
 import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
-import { queryClient } from '@/main';
+import useUpdateWeeklyGoalMutation from '@/pages/today/hooks/useUpdateWeeklyGoalMutation';
 import { theme } from '@/styles/theme';
 import type { CSSObject, Theme } from '@emotion/react';
 import EditIcon from '#/assets/edit.svg';
@@ -20,16 +19,11 @@ function ReadingStatusCard() {
   const [isEditing, setIsEditing] = useState(false);
   const [goal, setGoal] = useState<number | null>(null);
 
-  const { mutate: updateWeeklyGoal, isPending } = useMutation({
-    mutationFn: patchWeeklyReadingGoal,
+  const { mutate: updateWeeklyGoal, isPending } = useUpdateWeeklyGoalMutation({
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: queries.readingStatus().queryKey,
-      });
       setIsEditing(false);
     },
-    onError: (error) => {
-      console.error('주간 목표 수정 실패:', error);
+    onError: () => {
       setGoal(weekly.goalCount);
     },
   });

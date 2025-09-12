@@ -16,7 +16,6 @@ import me.bombom.api.v1.reading.domain.MonthlyReading;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
-import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
@@ -103,15 +102,15 @@ public class ReadingService {
     }
 
     @Transactional
-    public WeeklyGoalCountResponse updateWeeklyGoalCount(UpdateWeeklyGoalCountRequest request) {
-        Member member = memberRepository.findById(request.memberId())
+    public WeeklyGoalCountResponse updateWeeklyGoalCount(Long memberId, Integer weeklyGoalCount) {
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, request.memberId()));
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId));
         WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(member.getId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                     .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "WeeklyReading"));
-        weeklyReading.updateGoalCount(request.weeklyGoalCount());
+        weeklyReading.updateGoalCount(weeklyGoalCount);
         return WeeklyGoalCountResponse.from(weeklyReading);
     }
 

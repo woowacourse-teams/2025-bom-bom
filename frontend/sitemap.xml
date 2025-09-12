@@ -24,11 +24,4 @@
     <lastmod>2025-09-12T00:00:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
   </url>
-  
-  <!-- 회원가입 페이지 -->
-  <url>
-    <loc>https://www.bombom.news/signup</loc>
-    <lastmod>2025-09-12T00:00:00+00:00</lastmod>
-    <changefreq>monthly</changefreq>
-  </url>
 </urlset>

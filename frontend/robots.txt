@@ -6,6 +6,7 @@ Disallow: /bookmark
 Disallow: /memo
 Disallow: /storage
 Disallow: /guide
+Disallow: /signup
 
 # Block API endpoints
 Disallow: /api/

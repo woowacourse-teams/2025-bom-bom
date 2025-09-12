@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import ReadingStatusCardSkeleton from './ReadingStatusCardSkeleton';
 import StreakCounter from '../StreakCounter/StreakCounter';
 import { patchWeeklyReadingGoal } from '@/apis/members';
@@ -74,7 +74,7 @@ function ReadingStatusCard() {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSave();
     } else if (e.key === 'Escape') {

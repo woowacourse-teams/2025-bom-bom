@@ -53,6 +53,7 @@ public class AuthController implements AuthControllerApi{
                 .addContext("requestedEmail", signupRequest.email());
         }
         PendingOAuth2Member pendingMember = (PendingOAuth2Member) session.getAttribute("pendingMember");
+        log.info("회원가입 요청 - sessionId: {}, pendingMember: {}", session.getId(), pendingMember);
         if (pendingMember == null) {
             throw new UnauthorizedException(ErrorDetail.MISSING_OAUTH_DATA)
                 .addContext("sessionExists", true)

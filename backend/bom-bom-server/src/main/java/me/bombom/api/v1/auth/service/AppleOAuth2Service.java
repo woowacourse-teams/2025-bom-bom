@@ -74,6 +74,7 @@ public class AppleOAuth2Service extends OidcUserService {
                         .build();
                 session.setAttribute("pendingMember", pendingMember);
                 log.info("Apple OIDC 신규 사용자 - 회원가입 대기 상태로 설정, providerId: {}", providerId);
+                log.info("세션에 pendingMember 저장 완료 - sessionId: {}, pendingMember: {}", session.getId(), pendingMember);
                 return new CustomOAuth2User(oidcUser.getAttributes(), null, oidcUser.getIdToken(), oidcUser.getUserInfo());
             }
             

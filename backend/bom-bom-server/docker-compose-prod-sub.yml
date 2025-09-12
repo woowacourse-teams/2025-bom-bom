@@ -1,0 +1,40 @@
+version: "3.8"
+services:
+  bombom-server-prod:
+    image: bombomnewsletter/bom-bom:prod
+    container_name: bombom-server-prod-sub
+    ports:
+      - 80:8080
+      - 8081:8081
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://${RDS_ENDPOINT}:3306/${DATABASE}?useSSL=false&serverTimezone=Asia/Seoul
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      LOGGING_FILE_NAME: /logs/bombom-prod.log
+
+      # Apple p8 (ENV로 주입)
+      OAUTH2_APPLE_PRIVATE_KEY: ${OAUTH2_APPLE_PRIVATE_KEY}
+
+      # OpenTelemetry
+      JAVA_TOOL_OPTIONS: -javaagent:/otel/opentelemetry-javaagent.jar
+      OTEL_SERVICE_NAME: bombom-server-prod
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${PROD_OTEL_ENDPOINT}
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_TRACES_SAMPLER: always_on
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+
+      # exclude
+      OTEL_INSTRUMENTATION_COMMON_EXCLUDE_URLS: .*/actuator/.*
+      OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDED_URLS: .*/actuator/.*
+      OTEL_INSTRUMENTATION_SERVLET_EXCLUDE_URLS: .*/actuator/.*
+      OTEL_INSTRUMENTATION_SPRING_WEB_EXCLUDE_PATTERNS: .*/actuator/.*
+
+      # Micrometer trace off
+      OTEL_JAVAAGENT_DISABLED_INSTRUMENTATIONS: micrometer
+
+    volumes:
+      - /home/ec2-user/bombom-prod/logs:/logs
+      - /home/ec2-user/bombom-prod/opentelemetry/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar

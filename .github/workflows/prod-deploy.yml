@@ -3,7 +3,7 @@ name: Backend Prod Server CI/CD  # ✅ dev → prod 이름 변경
 on:
   push:
     branches:
-      - server   # ✅ server-dev → server
+      - server   
   workflow_dispatch:    # ✅ GitHub UI에서 수동 배포
 
 jobs:

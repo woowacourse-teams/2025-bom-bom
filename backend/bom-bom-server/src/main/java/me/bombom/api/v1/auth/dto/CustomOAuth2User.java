@@ -7,9 +7,7 @@ import java.util.Map;
 import lombok.Getter;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.core.oidc.OidcIdToken;
-import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 @Getter
 public class CustomOAuth2User implements OidcUser, Serializable {
@@ -35,7 +33,6 @@ public class CustomOAuth2User implements OidcUser, Serializable {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // TODO: 권한 처리 필요시 구현
         return Collections.emptyList();
     }
 
@@ -45,7 +42,6 @@ public class CustomOAuth2User implements OidcUser, Serializable {
         if (name != null) {
             return name.toString();
         }
-        // Apple의 경우 name이 없을 수 있으므로 sub를 사용
         Object sub = attributes.get("sub");
         return sub != null ? sub.toString() : "Unknown";
     }

@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
@@ -30,7 +31,9 @@ import org.hibernate.annotations.SQLRestriction;
         name = "member",
         uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "providerId"})
 )
-public class Member extends BaseEntity {
+public class Member extends BaseEntity implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -30,15 +30,23 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Query(value = """
 		UPDATE monthly_reading mr
-		SET mr.rank_order = 
-			    (SELECT r.rnk
-				 FROM (SELECT m.member_id, RANK() OVER (ORDER BY m.current_count DESC) AS rnk
-				 FROM monthly_reading m) r
-			  	 WHERE r.member_id = mr.member_id),
-			mr.next_rank_difference = 
-				COALESCE((SELECT MIN(x.current_count)
-						  FROM monthly_reading x
-						  WHERE x.current_count > mr.current_count) -  mr.current_count, 0);
+  		INNER JOIN (
+  		  SELECT
+  			  member_id,
+  			  RANK() OVER (ORDER BY current_count DESC) AS calculated_rank
+  		  FROM monthly_reading
+  		) ranks ON mr.member_id = ranks.member_id
+  		LEFT JOIN (
+  		  SELECT DISTINCT
+  			  mr1.member_id,
+  			  COALESCE(MIN(mr2.current_count) - mr1.current_count, 0) AS next_diff
+  		  FROM monthly_reading mr1
+  		  LEFT JOIN monthly_reading mr2 ON mr2.current_count > mr1.current_count
+  		  GROUP BY mr1.member_id, mr1.current_count
+  		) diffs ON mr.member_id = diffs.member_id
+  		SET
+  		  mr.rank_order = ranks.calculated_rank,
+  		  mr.next_rank_difference = diffs.next_diff;
 	""", nativeQuery = true)
 	void updateMonthlyRanking();
 

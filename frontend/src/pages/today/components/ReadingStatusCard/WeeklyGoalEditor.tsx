@@ -121,11 +121,6 @@ const EditButton = styled.button<{ deviceType: DeviceType }>`
 
   transition: all 0.2s ease;
 
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.dividers};
-    color: ${({ theme }) => theme.colors.textSecondary};
-  }
-
   &:focus {
     outline: 2px solid ${({ theme }) => theme.colors.primary};
     outline-offset: 2px;

@@ -1,22 +1,6 @@
 User-agent: *
 Allow: /
 
-# Block private/protected routes (requires authentication)
-Disallow: /bookmark
-Disallow: /memo
-Disallow: /storage
-Disallow: /guide
-Disallow: /signup
-
-# Block API endpoints
-Disallow: /api/
-
-# Block development and service files
-Disallow: /mockServiceWorker.js
-Disallow: /sw.js
-Disallow: /_storybook/
-Disallow: /storybook-static/
-
 # Block SEO crawlers
 User-agent: AhrefsBot
 Disallow: /

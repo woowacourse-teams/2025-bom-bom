@@ -1,59 +1,52 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
-import Button from '../Button/Button';
-import { queries } from '@/apis/queries';
+import ProfileDetail from './ProfileDetail';
+import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
+import Modal from '../Modal/Modal';
+import useModal from '../Modal/useModal';
 import { DeviceType } from '@/hooks/useDeviceType';
-import { copyToClipboard } from '@/utils/copy';
-import defaultImage from '#/assets/bombom.png';
-import CopyIcon from '#/assets/copy.svg';
+import { UserInfo } from '@/types/me';
 
 interface HeaderProfileProps {
+  userInfo: UserInfo;
   deviceType: DeviceType;
 }
 
-const HeaderProfile = ({ deviceType }: HeaderProfileProps) => {
-  const navigate = useNavigate();
-  const { data: userInfo, isFetching } = useQuery(queries.me());
+const HeaderProfile = ({ userInfo, deviceType }: HeaderProfileProps) => {
+  const {
+    modalRef: profileModalRef,
+    openModal: openProfileModal,
+    closeModal: closeProfileModal,
+    isOpen,
+  } = useModal({ scrollLock: false });
 
-  const handleCopyEmail = () => {
-    if (!userInfo?.email) return;
-
-    copyToClipboard(userInfo?.email);
-    alert(`이메일이 복사되었습니다.`);
-  };
-
-  const isLoggedIn = isFetching || userInfo;
+  if (!userInfo) return null;
 
   return (
     <Container>
-      {isLoggedIn ? (
+      <HeaderProfileWrapper type="button" onClick={openProfileModal}>
         <ProfileInfo>
+          <ProfileImg
+            src={userInfo.profileImageUrl ?? ''}
+            alt="profile"
+            width={32}
+            height={32}
+          />
           {deviceType !== 'mobile' && (
-            <ProfileImg
-              src={userInfo?.profileImageUrl ?? defaultImage}
-              alt="profile"
-              width={32}
-              height={32}
-            />
+            <ProfileName>{userInfo.nickname}</ProfileName>
           )}
-          <ProfileTextBox>
-            {deviceType !== 'mobile' && (
-              <ProfileName>{userInfo?.nickname}</ProfileName>
-            )}
-            <ProfileEmail onClick={handleCopyEmail}>
-              <EmailText>{userInfo?.email}</EmailText>
-              <CopyIcon width={16} height={16} />
-            </ProfileEmail>
-          </ProfileTextBox>
         </ProfileInfo>
-      ) : (
-        <Button
-          text="로그인"
-          onClick={() => {
-            navigate({ to: '/login' });
-          }}
-        />
+      </HeaderProfileWrapper>
+      {userInfo && (
+        <Modal
+          modalRef={profileModalRef}
+          closeModal={closeProfileModal}
+          isOpen={isOpen}
+          position="dropdown"
+          showCloseButton={false}
+          showBackdrop={false}
+        >
+          <ProfileDetail userInfo={userInfo} />
+        </Modal>
       )}
     </Container>
   );
@@ -62,6 +55,12 @@ const HeaderProfile = ({ deviceType }: HeaderProfileProps) => {
 export default HeaderProfile;
 
 const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+`;
+
+const HeaderProfileWrapper = styled.button`
   min-width: 200px;
   padding: 8px 12px;
   border-radius: 12px;
@@ -74,39 +73,20 @@ const Container = styled.div`
   background: ${({ theme }) => theme.colors.white};
 `;
 
-const ProfileImg = styled.img`
+const ProfileImg = styled(ImageWithFallback)`
   width: 34px;
   height: 34px;
   border-radius: 50%;
 `;
 
-const ProfileTextBox = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
 const ProfileInfo = styled.div`
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
   justify-content: center;
-
-  font: ${({ theme }) => theme.fonts.caption};
 `;
 
 const ProfileName = styled.div`
   color: ${({ theme }) => theme.colors.textPrimary};
-`;
-
-const ProfileEmail = styled.div`
-  display: flex;
-  gap: 4px;
-  align-items: center;
-
-  cursor: pointer;
-`;
-
-const EmailText = styled.div`
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.caption};
+  font: ${({ theme }) => theme.fonts.body1};
 `;

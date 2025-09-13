@@ -36,7 +36,7 @@ public interface ReadingControllerApi {
     })
     WeeklyGoalCountResponse updateWeeklyGoalCount(
             @Parameter(hidden = true) Member member,
-            @NotNull @Positive Integer weeklyGoalCount
+            @NotNull(message = "주간 목표 개수는 필수 입력 값입니다.") @Positive(message = "주간 목표 개수는 양수여야 합니다.") Integer weeklyGoalCount
     );
 
     @Operation(

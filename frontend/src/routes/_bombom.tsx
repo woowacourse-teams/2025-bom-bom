@@ -14,12 +14,12 @@ export const Route = createFileRoute('/_bombom')({
 
     try {
       const user = await queryClient.fetchQuery(queries.me());
-      if (typeof window.gtag === 'function') {
-        if (user) {
-          window.gtag('config', GOOGLE_ANALYTICS_ID, { user_id: user.id });
-        } else {
-          window.gtag('config', GOOGLE_ANALYTICS_ID, { user_id: null });
-        }
+
+      if (typeof window.gtag !== 'function') return;
+      if (user) {
+        window.gtag('config', GOOGLE_ANALYTICS_ID, { user_id: user.id });
+      } else {
+        window.gtag('config', GOOGLE_ANALYTICS_ID, { user_id: null });
       }
     } catch {
       if (location.pathname !== '/recommend') {

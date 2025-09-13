@@ -3,7 +3,7 @@ import { PropsWithChildren, Ref } from 'react';
 import { theme } from '@/styles/theme';
 import CloseIcon from '#/assets/close.svg';
 
-type PositionType = 'center' | 'bottom';
+type PositionType = 'center' | 'bottom' | 'dropdown';
 
 interface UseModalParams extends PropsWithChildren {
   modalRef: Ref<HTMLDivElement | null>;
@@ -11,6 +11,7 @@ interface UseModalParams extends PropsWithChildren {
   isOpen: boolean;
   position?: PositionType;
   showCloseButton?: boolean;
+  showBackdrop?: boolean;
 }
 
 const Modal = ({
@@ -18,29 +19,29 @@ const Modal = ({
   closeModal,
   position = 'center',
   showCloseButton = true,
+  showBackdrop = true,
   isOpen,
   children,
 }: UseModalParams) => {
-  const isBottom = position === 'bottom';
-
   if (!isOpen) return null;
 
   return (
-    <Backdrop>
+    <>
+      {showBackdrop && <Backdrop onClick={closeModal} />}
       <Container
         role="dialog"
         aria-modal="true"
         ref={modalRef}
-        isBottom={isBottom}
+        position={position}
       >
         {showCloseButton && (
           <CloseButton type="button" onClick={closeModal}>
             <CloseIcon width={36} height={36} fill={theme.colors.black} />
           </CloseButton>
         )}
-        <ContentWrapper isBottom={isBottom}>{children}</ContentWrapper>
+        <ContentWrapper position={position}>{children}</ContentWrapper>
       </Container>
-    </Backdrop>
+    </>
   );
 };
 
@@ -63,19 +64,18 @@ const Backdrop = styled.div`
   backdrop-filter: blur(2px);
 `;
 
-const Container = styled.div<{ isBottom: boolean }>`
-  overflow: hidden;
-  position: relative;
-  width: ${({ isBottom }) => (isBottom ? '100%' : '720px')};
-  height: 100%;
-  max-height: ${({ isBottom }) => (isBottom ? '45vh' : '90vh')};
-  border-radius: ${({ isBottom }) => (isBottom ? '12px 12px 0 0' : '12px')};
+const Container = styled.div<{
+  position: PositionType;
+}>`
+  position: fixed;
+  z-index: ${({ theme }) => theme.zIndex.overlay};
 
   display: flex;
   flex-direction: column;
-  align-self: ${({ isBottom }) => (isBottom ? 'flex-end' : 'auto')};
 
   background: ${({ theme }) => theme.colors.white};
+
+  ${({ position }) => containerStyles[position]}
 `;
 
 const CloseButton = styled.button`
@@ -91,15 +91,61 @@ const CloseButton = styled.button`
   background: none;
 `;
 
-const ContentWrapper = styled.div<{ isBottom: boolean }>`
-  height: 100%;
+const ContentWrapper = styled.div<{ position: PositionType }>`
   min-height: 0;
-  padding: ${({ isBottom }) => (isBottom ? '32px' : '36px 52px')};
 
   display: flex;
   flex-direction: column;
-  align-items: center;
 
   overflow-y: auto;
   scrollbar-gutter: stable;
+
+  ${({ position }) => contentWrapperStyles[position]}
 `;
+
+const containerStyles = {
+  dropdown: {
+    height: 'auto',
+    maxHeight: '300px',
+    borderRadius: '8px',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+  },
+  bottom: {
+    bottom: 0,
+    left: 0,
+    right: 0,
+    width: '100%',
+    height: '100%',
+    maxHeight: '45vh',
+    borderRadius: '12px 12px 0 0',
+    boxShadow: 'none',
+  },
+  center: {
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '720px',
+    height: '100%',
+    maxHeight: '90vh',
+    borderRadius: '12px',
+    boxShadow: 'none',
+  },
+};
+
+const contentWrapperStyles = {
+  dropdown: {
+    height: 'auto',
+    padding: '16px',
+    alignItems: 'stretch',
+  },
+  bottom: {
+    height: '100%',
+    padding: '32px',
+    alignItems: 'center',
+  },
+  center: {
+    height: '100%',
+    padding: '36px 52px',
+    alignItems: 'center',
+  },
+};

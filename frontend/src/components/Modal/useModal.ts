@@ -4,7 +4,12 @@ import useFocusTrap from '@/hooks/useFocusTrap';
 import useKeydownEscape from '@/hooks/useKeydownEscape';
 import { compoundRefs } from '@/utils/element';
 
-const useModal = () => {
+interface UseModalOptions {
+  scrollLock?: boolean;
+}
+
+const useModal = (options: UseModalOptions = {}) => {
+  const { scrollLock = true } = options;
   const [isOpen, setIsOpen] = useState(false);
   const bodyScrollStatus = useMemo(() => document.body.style.overflow, []);
 
@@ -32,8 +37,10 @@ const useModal = () => {
   }, [isOpen, bodyScrollStatus]);
 
   useEffect(() => {
+    if (!scrollLock) return;
+
     toggleScrollLock();
-  }, [isOpen, toggleScrollLock]);
+  }, [isOpen, scrollLock, toggleScrollLock]);
 
   useKeydownEscape(isOpen ? closeModal : null);
 

@@ -1,8 +1,11 @@
 import styled from '@emotion/styled';
+import { useQuery } from '@tanstack/react-query';
 import { useLocation } from '@tanstack/react-router';
 import HeaderLogo from './HeaderLogo';
 import HeaderNavButtons from './HeaderNavButtons';
 import HeaderProfile from './HeaderProfile';
+import LoginButton from './LoginButton';
+import { queries } from '@/apis/queries';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import { NavType } from '@/types/nav';
 
@@ -11,6 +14,7 @@ interface HeaderProps {
 }
 
 const Header = ({ activeNav }: HeaderProps) => {
+  const { data: userInfo } = useQuery(queries.me());
   const deviceType = useDeviceType();
   const { pathname } = useLocation();
 
@@ -28,14 +32,22 @@ const Header = ({ activeNav }: HeaderProps) => {
           <HeaderNavButtons activeNav={activeNav} deviceType={deviceType} />
         </NavWrapper>
 
-        <HeaderProfile deviceType={deviceType} />
+        {userInfo ? (
+          <HeaderProfile userInfo={userInfo} deviceType={deviceType} />
+        ) : (
+          <LoginButton />
+        )}
       </HeaderInner>
     </HeaderContainer>
   ) : (
     <>
       <MobileHeaderContainer>
         <HeaderLogo deviceType={deviceType} />
-        <HeaderProfile deviceType={deviceType} />
+        {userInfo ? (
+          <HeaderProfile userInfo={userInfo} deviceType={deviceType} />
+        ) : (
+          <LoginButton />
+        )}
       </MobileHeaderContainer>
       <BottomNavWrapper>
         <HeaderNavButtons activeNav={activeNav} deviceType={deviceType} />

@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { useEffect, useRef, useState } from 'react';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { theme } from '@/styles/theme';
 import DeleteIcon from '#/assets/delete.svg';
 
@@ -25,11 +26,21 @@ const EditableMemoCard = ({
 
   const handleRemoveButtonClick = () => {
     onRemoveButtonClick(id);
+    trackEvent({
+      category: 'Memo',
+      action: '메모 패널 - 하이라이트 삭제',
+      label: '아티클 본문',
+    });
   };
 
   useEffect(() => {
     if (debouncedMemo !== memo) {
       onMemoChange(id, debouncedMemo ?? '');
+      trackEvent({
+        category: 'Memo',
+        action: '메모 패널 - 메모 수정',
+        label: '아티클 본문',
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedMemo]);

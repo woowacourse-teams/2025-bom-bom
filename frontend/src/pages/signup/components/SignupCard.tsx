@@ -14,6 +14,7 @@ import { getSignupCheck, GetSignupCheckParams, postSignup } from '@/apis/auth';
 import { SIGNUP_CHECK_ERROR_MESSAGE } from '@/apis/constants/checkErrorMessage';
 import InputField from '@/components/InputField/InputField';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { GUIDE_MAILS } from '@/mocks/datas/guideMail';
 import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
@@ -61,6 +62,11 @@ const SignupCard = () => {
       }),
     onSuccess: () => {
       navigate({ to: '/' });
+      trackEvent({
+        category: 'Authentication',
+        action: '회원가입 성공',
+        label: '회원가입 완료 후 메인 페이지 이동',
+      });
     },
     onError: (e) => {
       const errorMessage = e.message;
@@ -68,6 +74,11 @@ const SignupCard = () => {
         setNicknameError(SIGNUP_CHECK_ERROR_MESSAGE.nickname);
       if (errorMessage === '이미 사용 중인 이메일입니다.')
         setEmailError(SIGNUP_CHECK_ERROR_MESSAGE.email);
+      trackEvent({
+        category: 'Authentication',
+        action: '회원가입 실패',
+        label: `회원가입 실패 에러메시지: ${errorMessage}`,
+      });
     },
   });
 

@@ -5,6 +5,7 @@ import Badge from '@/components/Badge/Badge';
 import Button from '@/components/Button/Button';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { useDeviceType } from '@/hooks/useDeviceType';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { copyToClipboard } from '@/utils/copy';
 import { openExternalLink } from '@/utils/externalLink';
 import ArticleHistoryIcon from '#/assets/article-history.svg';
@@ -34,6 +35,12 @@ const NewsletterDetail = ({
       copyToClipboard(userInfo.email);
       alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
     }
+
+    trackEvent({
+      category: 'Newsletter',
+      action: '구독하기 버튼 클릭',
+      label: newsletterDetail.name ?? 'Unknown Newsletter',
+    });
 
     openExternalLink(newsletterDetail.subscribeUrl);
   };

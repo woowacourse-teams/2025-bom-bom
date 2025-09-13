@@ -1,13 +1,15 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
-import { queries } from '@/apis/queries';
 import ProgressBar from '@/components/ProgressBar/ProgressBar';
 
-const ReadingKingMyRank = () => {
-  const { data: userRank } = useQuery(queries.myMonthlyReadingRank());
+interface ReadingKingMyRankProps {
+  userRank: {
+    rank: number;
+    readCount: number;
+    nextRankDifference: number;
+  };
+}
 
-  if (!userRank) return null;
-
+const ReadingKingMyRank = ({ userRank }: ReadingKingMyRankProps) => {
   return (
     <Container>
       <MyRankInfo>

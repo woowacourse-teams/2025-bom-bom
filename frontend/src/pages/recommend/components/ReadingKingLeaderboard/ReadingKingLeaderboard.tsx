@@ -9,6 +9,7 @@ export default function ReadingKingLeaderboard() {
   const { data: monthlyReadingRank, isLoading } = useQuery(
     queries.monthlyReadingRank({ limit: 5 }),
   );
+  const { data: userRank } = useQuery(queries.myMonthlyReadingRank());
 
   if (isLoading) {
     return (
@@ -50,9 +51,12 @@ export default function ReadingKingLeaderboard() {
           ))}
       </LeaderboardList>
 
-      <Divider />
-
-      <ReadingKingMyRank />
+      {userRank && (
+        <>
+          <Divider />
+          <ReadingKingMyRank userRank={userRank} />
+        </>
+      )}
     </Container>
   );
 }

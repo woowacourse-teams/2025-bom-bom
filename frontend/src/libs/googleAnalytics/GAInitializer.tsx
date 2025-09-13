@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
+import { GOOGLE_ANALYTICS_ID } from './constants';
 import { initGA } from './initGA';
 import { isProduction } from '@/utils/environment';
-
-const GOOGLE_ANALYTICS_ID = 'G-GXQCT7B1GM';
 
 const GAInitializer = () => {
   useEffect(() => {

@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { Highlight } from '../../types/highlight';
 import EditableMemoCard from '../MemoCard/EditableMemoCard';
 import ChevronIcon from '@/components/icons/ChevronIcon';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { theme } from '@/styles/theme';
 import CloseIcon from '#/assets/close.svg';
 import MemoIcon from '#/assets/memo.svg';
@@ -25,7 +26,17 @@ const MemoPanel = ({
 }: MemoPanelProps) => {
   return (
     <Container isOpen={open}>
-      <ToggleButton isOpen={open} onClick={handleToggle}>
+      <ToggleButton
+        isOpen={open}
+        onClick={() => {
+          handleToggle();
+          trackEvent({
+            category: 'Memo',
+            action: open ? '메모 패널 닫기' : '메모 패널 열기',
+            label: '아티클 본문',
+          });
+        }}
+      >
         {open ? (
           <ChevronIcon direction="right" color={theme.colors.primary} />
         ) : (

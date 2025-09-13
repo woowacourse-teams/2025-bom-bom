@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import ReadingKingLeaderboard from '../../pages/recommend/components/ReadingKingLeaderboard/ReadingKingLeaderboard';
-import TrendySection from '../../pages/recommend/components/ReadingKingLeaderboard/TrendySection/TrendySection';
 import { useDeviceType, type DeviceType } from '@/hooks/useDeviceType';
-import NewsletterHero from '@/pages/recommend/components/ReadingKingLeaderboard/NewsletterHero/NewsletterHero';
+import NewsletterHero from '@/pages/recommend/components/NewsletterHero/NewsletterHero';
+import TrendySection from '@/pages/recommend/components/TrendySection/TrendySection';
 
 export const Route = createFileRoute('/_bombom/recommend')({
   component: Recommend,

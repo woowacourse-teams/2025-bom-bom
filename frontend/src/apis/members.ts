@@ -52,3 +52,12 @@ export const getMonthlyReadingRank = async (
     query: params,
   });
 };
+
+export type GetMyMonthlyReadingRankResponse =
+  components['schemas']['MemberMonthlyReadingRankResponse'];
+
+export const getMyMonthlyReadingRank = async () => {
+  return await fetcher.get<GetMyMonthlyReadingRankResponse>({
+    path: '/members/me/reading/month/rank/me',
+  });
+};

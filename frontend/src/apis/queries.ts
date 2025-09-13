@@ -23,6 +23,7 @@ import {
 import {
   getMonthlyReadingRank,
   GetMonthlyReadingRankParams,
+  getMyMonthlyReadingRank,
   getReadingStatus,
   getUserInfo,
 } from './members';
@@ -88,6 +89,12 @@ export const queries = {
     queryOptions({
       queryKey: ['members', 'me', 'reading', 'month', 'rank', params],
       queryFn: () => getMonthlyReadingRank(params),
+    }),
+
+  myMonthlyReadingRank: () =>
+    queryOptions({
+      queryKey: ['members', 'me', 'reading', 'month', 'rank', 'me'],
+      queryFn: () => getMyMonthlyReadingRank(),
     }),
 
   // newsletters

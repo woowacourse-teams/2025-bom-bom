@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import LeaderboardItem from '../ReadingKingLeaderboardItem/ReadingKingLeaderboardItem';
-import ReadingKingMyRank from '../ReadingKingMyRank/ReadingKingMyRank';
+import LeaderboardItem from './ReadingKingLeaderboardItem';
+import ReadingKingMyRank from './ReadingKingMyRank';
 import { queries } from '@/apis/queries';
 import ArrowIcon from '@/components/icons/ArrowIcon';
 

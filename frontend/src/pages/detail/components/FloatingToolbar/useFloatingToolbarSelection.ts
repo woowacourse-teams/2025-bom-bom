@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FloatingToolbarMode } from './FloatingToolbar.types';
 import { useDeviceType } from '@/hooks/useDeviceType';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 
 export interface ToolbarPosition {
   x: number;
@@ -94,6 +95,11 @@ export const useFloatingToolbarSelection = ({
         y: deviceType === 'mobile' ? rect.bottom + 40 : rect.top,
       });
       setIsVisible(true);
+      trackEvent({
+        category: 'Memo',
+        action: '하이라이트 선택',
+        label: '아티클 본문',
+      });
     },
     [deviceType],
   );

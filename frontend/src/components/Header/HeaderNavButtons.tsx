@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
 import HomeIcon from '../../../public/assets/home.svg';
 import { DeviceType } from '@/hooks/useDeviceType';
-import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { NavType } from '@/types/nav';
 import CompassIcon from '#/assets/compass.svg';
 import StorageIcon from '#/assets/storage.svg';
@@ -15,18 +14,7 @@ interface HeaderNavButtonsProps {
 const HeaderNavButtons = ({ activeNav, deviceType }: HeaderNavButtonsProps) => {
   return (
     <>
-      <NavButton
-        active={activeNav === 'today'}
-        deviceType={deviceType}
-        to="/"
-        onClick={() => {
-          trackEvent({
-            category: 'Navigation',
-            action: 'Click Today Nav',
-            label: 'Go to Today',
-          });
-        }}
-      >
+      <NavButton active={activeNav === 'today'} deviceType={deviceType} to="/">
         <HomeIcon
           width={24}
           height={24}
@@ -38,13 +26,6 @@ const HeaderNavButtons = ({ activeNav, deviceType }: HeaderNavButtonsProps) => {
         active={activeNav === 'storage'}
         deviceType={deviceType}
         to="/storage"
-        onClick={() => {
-          trackEvent({
-            category: 'Navigation',
-            action: 'Click Storage Nav',
-            label: 'Go to Storage',
-          });
-        }}
       >
         <StorageIcon
           width={24}
@@ -57,13 +38,6 @@ const HeaderNavButtons = ({ activeNav, deviceType }: HeaderNavButtonsProps) => {
         active={activeNav === 'recommend'}
         deviceType={deviceType}
         to="/recommend"
-        onClick={() => {
-          trackEvent({
-            category: 'Navigation',
-            action: 'Click Recommend Nav',
-            label: 'Go to Recommend',
-          });
-        }}
       >
         <CompassIcon
           width={24}

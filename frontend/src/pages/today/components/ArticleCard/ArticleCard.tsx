@@ -4,7 +4,6 @@ import { ComponentProps } from 'react';
 import Badge from '@/components/Badge/Badge';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { useDeviceType } from '@/hooks/useDeviceType';
-import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { components } from '@/types/openapi';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
@@ -41,13 +40,6 @@ function ArticleCard({
       readVariant={readVariant}
       isMobile={isMobile}
       to={to ?? `/articles/${articleId}`}
-      onClick={() => {
-        trackEvent({
-          category: 'Article',
-          action: 'Click Article Card',
-          label: `${newsletter?.name} - [${articleId}]${title}`,
-        });
-      }}
       {...props}
     >
       <InfoWrapper isMobile={isMobile}>

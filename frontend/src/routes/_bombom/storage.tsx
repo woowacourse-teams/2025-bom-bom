@@ -10,6 +10,14 @@ import { theme } from '@/styles/theme';
 import StorageIcon from '#/assets/storage.svg';
 
 export const Route = createFileRoute('/_bombom/storage')({
+  head: () => ({
+    meta: [
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
+    ],
+  }),
   component: Storage,
 });
 

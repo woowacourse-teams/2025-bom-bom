@@ -15,6 +15,14 @@ import type { CSSObject, Theme } from '@emotion/react';
 import HomeIcon from '#/assets/home.svg';
 
 export const Route = createFileRoute('/_bombom/')({
+  head: () => ({
+    meta: [
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
+    ],
+  }),
   component: Index,
 });
 

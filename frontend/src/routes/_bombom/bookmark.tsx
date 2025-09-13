@@ -10,6 +10,14 @@ import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLette
 import BookmarkIcon from '#/assets/bookmark-inactive.svg';
 
 export const Route = createFileRoute('/_bombom/bookmark')({
+  head: () => ({
+    meta: [
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
+    ],
+  }),
   component: BookmarkPage,
 });
 

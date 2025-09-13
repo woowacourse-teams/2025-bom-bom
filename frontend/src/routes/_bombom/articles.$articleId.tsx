@@ -16,6 +16,14 @@ import useArticleAsReadMutation from '@/pages/detail/hooks/useArticleAsReadMutat
 import { useArticleBookmark } from '@/pages/detail/hooks/useArticleBookmark';
 
 export const Route = createFileRoute('/_bombom/articles/$articleId')({
+  head: () => ({
+    meta: [
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
+    ],
+  }),
   component: ArticleDetailPage,
 });
 

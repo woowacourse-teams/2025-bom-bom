@@ -5,6 +5,14 @@ import SignupCard from '@/pages/signup/components/SignupCard';
 import { getResponsiveValue } from '@/utils/responsive';
 
 export const Route = createFileRoute('/signup')({
+  head: () => ({
+    meta: [
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
+    ],
+  }),
   component: RouteComponent,
 });
 

@@ -8,6 +8,14 @@ import { theme } from '@/styles/theme';
 import MemoIcon from '#/assets/memo.svg';
 
 export const Route = createFileRoute('/_bombom/memo')({
+  head: () => ({
+    meta: [
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
+    ],
+  }),
   component: MemoPage,
 });
 

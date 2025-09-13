@@ -7,6 +7,14 @@ import { createStorage } from '@/utils/localStorage';
 import HelpIcon from '#/assets/help.svg';
 
 export const Route = createFileRoute('/_bombom/guide')({
+  head: () => ({
+    meta: [
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
+    ],
+  }),
   component: GuidePage,
 });
 

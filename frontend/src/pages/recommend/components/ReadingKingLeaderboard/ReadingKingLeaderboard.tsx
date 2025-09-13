@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
+import ReadingKingMyRank from '../ReadingKingMyRank/ReadingKingMyRank';
 import { queries } from '@/apis/queries';
 import ArrowIcon from '@/components/icons/ArrowIcon';
 import AvatarIcon from '#/assets/avatar.svg';
@@ -101,38 +102,9 @@ export default function ReadingKingLeaderboard() {
           ))}
       </LeaderboardList>
 
-      {userRank && (
-        <MyRankSection>
-          <MyRankContainer>
-            <MyRankBox>
-              <MyRankInfo>
-                <MyRankLabel>나의 순위</MyRankLabel>
-                <MyRankValue>{userRank.rank}위</MyRankValue>
-              </MyRankInfo>
-              <MyReadInfo>
-                <MyReadLabel>읽은 뉴스레터</MyReadLabel>
-                <MyReadValue>{userRank.readCount}개</MyReadValue>
-              </MyReadInfo>
-            </MyRankBox>
+      <Divider />
 
-            <ProgressSection>
-              <ProgressInfo>
-                <ProgressLabel>다음 순위까지</ProgressLabel>
-                <ProgressValue>
-                  {userRank.nextRankDifference}개 더 읽기
-                </ProgressValue>
-              </ProgressInfo>
-              {/* <ProgressBar>
-                <ProgressFill
-                  style={{
-                    width: `${userRank.progressPercentage}%`,
-                  }}
-                />
-              </ProgressBar> */}
-            </ProgressSection>
-          </MyRankContainer>
-        </MyRankSection>
-      )}
+      <ReadingKingMyRank />
     </Container>
   );
 }
@@ -306,123 +278,6 @@ const BookIconContainer = styled.div`
   justify-content: center;
 `;
 
-const MyRankSection = styled.div`
-  padding-top: 36px;
-  border-top: 1px solid #f1f5f9;
-`;
-
-const MyRankContainer = styled.div`
-  margin-bottom: 10.5px;
-  padding: 13px 14px 14px;
-  border-radius: 14px;
-
-  display: flex;
-  gap: 12px;
-  flex-direction: column;
-  justify-content: space-between;
-
-  background: linear-gradient(
-    to right,
-    rgb(255 153 102 / 10%),
-    rgb(255 237 212 / 50%)
-  );
-`;
-
-const MyRankInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const MyRankBox = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-const MyRankLabel = styled.div`
-  color: #45556c;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 12.3px;
-  line-height: 17.5px;
-`;
-
-const MyRankValue = styled.div`
-  color: #0f172b;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 21px;
-  line-height: 28px;
-`;
-
-const MyReadInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-`;
-
-const MyReadLabel = styled.div`
-  color: #45556c;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 12.3px;
-  line-height: 17.5px;
-`;
-
-const MyReadValue = styled.div`
-  color: #f96;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 21px;
-  line-height: 28px;
-`;
-
-const ProgressSection = styled.div`
-  display: flex;
-  gap: 3.5px;
-  flex-direction: column;
-`;
-
-const ProgressInfo = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-const ProgressLabel = styled.div`
-  color: #45556c;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 10.5px;
-  line-height: 14px;
-`;
-
-const ProgressValue = styled.div`
-  color: #45556c;
-  font-family: Inter, 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 10.5px;
-  line-height: 14px;
-`;
-
-// const ProgressBar = styled.div`
-//   overflow: hidden;
-//   width: 100%;
-//   height: 7px;
-//   border-radius: 50px;
-
-//   background: #e2e8f0;
-// `;
-
-// const ProgressFill = styled.div`
-//   height: 100%;
-//   border-radius: 50px;
-
-//   background: #f96;
-
-//   transition: width 0.3s ease;
-// `;
-
 const LoadingMessage = styled.div`
   padding: 40px 20px;
 
@@ -430,4 +285,8 @@ const LoadingMessage = styled.div`
   font-family: Inter, 'Noto Sans KR', sans-serif;
   font-size: 14px;
   text-align: center;
+`;
+
+const Divider = styled.div`
+  border-top: 1px solid ${({ theme }) => theme.colors.dividers};
 `;

@@ -1,5 +1,5 @@
 import { useLocation } from '@tanstack/react-router';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 const TITLE_MAP: Record<string, string> = {
   '/': '오늘의 뉴스레터',
@@ -14,20 +14,30 @@ const TITLE_MAP: Record<string, string> = {
 
 const PageTitle = () => {
   const location = useLocation();
+  const prevPathRef = useRef<string>(null);
 
   useEffect(() => {
-    let title = '내 서비스';
+    if (typeof window.gtag !== 'function') return;
+    const currentPath = location.pathname;
 
-    if (location.pathname.startsWith('/articles/')) {
-      if (location.pathname.includes('/guide')) {
+    let title = '내 서비스';
+    if (currentPath.startsWith('/articles/')) {
+      if (currentPath.includes('/guide')) {
         title = '가이드 메일 상세';
       } else {
         title = '아티클 상세';
       }
     } else {
-      title = TITLE_MAP[location.pathname] ?? '내 서비스';
+      title = TITLE_MAP[currentPath] ?? '내 서비스';
     }
     document.title = title;
+
+    window.gtag('event', 'page_view', {
+      page_path: currentPath,
+      page_title: title,
+      previous_path: prevPathRef.current,
+    });
+    prevPathRef.current = currentPath;
   }, [location.pathname]);
 
   return null;

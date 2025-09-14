@@ -1,3 +1,5 @@
+import { GOOGLE_ANALYTICS_ID } from './constants';
+
 declare global {
   interface Window {
     dataLayer: unknown[];
@@ -28,4 +30,7 @@ export const initGA = (
   };
 
   window.gtag('js', new Date());
+  window.gtag('config', GOOGLE_ANALYTICS_ID, {
+    send_page_view: false,
+  });
 };

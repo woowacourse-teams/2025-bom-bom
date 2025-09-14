@@ -133,7 +133,7 @@ function ReadingStatusCard() {
 
 export default ReadingStatusCard;
 
-const Container = styled.section<{ deviceType: DeviceType }>`
+const Container = styled.div<{ deviceType: DeviceType }>`
   width: 310px;
   border-radius: 20px;
 

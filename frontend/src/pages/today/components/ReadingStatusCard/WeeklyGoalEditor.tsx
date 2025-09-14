@@ -79,7 +79,7 @@ function WeeklyGoalEditor({
   'isEditing' | 'isPending' | 'deviceType' | 'onEditStart' | 'onSave'
 >) {
   return (
-    <EditSection deviceType={deviceType}>
+    <Container deviceType={deviceType}>
       <EditButton
         deviceType={deviceType}
         type="button"
@@ -102,13 +102,13 @@ function WeeklyGoalEditor({
           />
         )}
       </EditButton>
-    </EditSection>
+    </Container>
   );
 }
 
 export default WeeklyGoalEditor;
 
-const EditSection = styled.section<{ deviceType: DeviceType }>`
+const Container = styled.div<{ deviceType: DeviceType }>`
   margin-left: 4px;
 
   display: flex;

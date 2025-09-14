@@ -36,7 +36,3 @@ services:
     volumes:
       - /home/ec2-user/bombom-prod/logs:/logs
       - /home/ec2-user/bombom-prod/opentelemetry/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar 
-
-    volumes:
-      - /home/ec2-user/bombom-prod/logs:/logs
-      - /home/ec2-user/bombom-prod/opentelemetry/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar

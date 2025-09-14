@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { ENV } from '@/apis/env';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
+import { isLocal } from '@/utils/environment';
 import AppleIcon from '#/assets/apple.svg';
 import GoogleIcon from '#/assets/google.svg';
 import SparklesIcon from '#/assets/sparkles.svg';
@@ -30,7 +31,7 @@ const LoginCard = () => {
       <Divider />
       <LoginButton
         onClick={() => {
-          const envQuery = ENV.nodeEnv === 'development' ? '?env=local' : '';
+          const envQuery = isLocal ? '?env=local' : '';
           window.location.href = `${ENV.baseUrl}/auth/login/google${envQuery}`;
         }}
         type="button"

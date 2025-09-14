@@ -13,6 +13,8 @@ export default function RootLayout() {
         source={{ uri: 'https://www.bombom.news' }}
         userAgent={CHROME_USER_AGENT}
         allowsBackForwardNavigationGestures={true}
+        sharedCookiesEnabled={true}
+        thirdPartyCookiesEnabled={true}
       />
     </SafeAreaView>
   );

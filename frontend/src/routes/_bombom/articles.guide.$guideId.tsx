@@ -10,6 +10,14 @@ import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArt
 import useGuideAsReadMutation from '@/pages/detail/hooks/useGuideAsReadMutation';
 
 export const Route = createFileRoute('/_bombom/articles/guide/$guideId')({
+  head: () => ({
+    meta: [
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
+    ],
+  }),
   component: GuideMailPage,
 });
 

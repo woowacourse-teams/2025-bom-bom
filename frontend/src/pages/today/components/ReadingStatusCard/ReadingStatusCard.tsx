@@ -11,14 +11,14 @@ import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import useUpdateWeeklyGoalMutation from '@/pages/today/hooks/useUpdateWeeklyGoalMutation';
 import { theme } from '@/styles/theme';
 import type { CSSObject, Theme } from '@emotion/react';
-import GoalIcon from '#/assets/goal.svg';
+import GoalIcon from '#/assets/goalCount.svg';
 import StatusIcon from '#/assets/reading-status.svg';
 
 function ReadingStatusCard() {
   const deviceType = useDeviceType();
   const { data, isLoading } = useQuery(queries.readingStatus());
   const [isEditing, setIsEditing] = useState(false);
-  const [goal, setGoal] = useState<number | null>(null);
+  const [goalCount, setGoalCount] = useState<number | null>(null);
 
   const { mutate: updateWeeklyGoal, isPending } = useUpdateWeeklyGoalMutation({
     onSuccess: () => {
@@ -33,15 +33,15 @@ function ReadingStatusCard() {
 
   const handleEditStart = () => {
     setIsEditing(true);
-    setGoal(weekly.goalCount);
+    setGoalCount(weekly.goalCount);
   };
 
   const handleSave = () => {
-    if (goal === null) return;
+    if (goalCount === null) return;
 
-    if (goal !== weekly.goalCount) {
+    if (goalCount !== weekly.goalCount) {
       updateWeeklyGoal({
-        weeklyGoalCount: goal,
+        weeklyGoalCount: goalCount,
       });
     } else {
       setIsEditing(false);
@@ -50,11 +50,11 @@ function ReadingStatusCard() {
 
   const handleCancel = () => {
     setIsEditing(false);
-    setGoal(weekly.goalCount);
+    setGoalCount(weekly.goalCount);
   };
 
   const handleGoalChange = (value: number | null) => {
-    setGoal(value);
+    setGoalCount(value);
   };
   const todayProgressDescription =
     today.readCount < today.totalCount ? '목표까지 조금 더!' : '목표 달성!';
@@ -107,7 +107,7 @@ function ReadingStatusCard() {
               <InputContainer>
                 <span>{weekly.readCount}/</span>
                 <WeeklyGoalInput
-                  goalValue={goal}
+                  goalValue={goalCount}
                   isPending={isPending}
                   deviceType={deviceType}
                   onSave={handleSave}

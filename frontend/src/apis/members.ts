@@ -19,21 +19,19 @@ export const getUserInfo = async () => {
 };
 
 type PatchWeeklyReadingGoalParams =
-  components['schemas']['UpdateWeeklyGoalCountRequest'];
+  operations['updateWeeklyGoalCount']['parameters']['query'];
 type PatchWeeklyReadingGoalResponse =
   components['schemas']['WeeklyGoalCountResponse'];
 
 export const patchWeeklyReadingGoal = async ({
   weeklyGoalCount,
-  memberId,
 }: PatchWeeklyReadingGoalParams) => {
   return await fetcher.patch<
     PatchWeeklyReadingGoalParams,
     PatchWeeklyReadingGoalResponse
   >({
     path: '/members/me/reading/progress/week/goal',
-    body: {
-      memberId,
+    query: {
       weeklyGoalCount,
     },
   });

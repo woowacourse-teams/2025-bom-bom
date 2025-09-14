@@ -41,7 +41,6 @@ function ReadingStatusCard() {
 
     if (goal !== weekly.goalCount) {
       updateWeeklyGoal({
-        memberId: 17, // TODO: 실제 회원 ID로 변경 필요
         weeklyGoalCount: goal,
       });
     } else {

@@ -35,17 +35,6 @@ jobs:
         run: npm run lint
       - name: Type check
         run: npm run type-check
-      - name: Copy SEO files for client branch
-        if: github.ref == 'refs/heads/client'
-        run: |
-          cp public/robots.prod.txt public/robots.txt
-          cp public/sitemap.xml public/sitemap.xml
-
-      - name: Copy SEO files for client-dev branch
-        if: github.ref == 'refs/heads/client-dev'
-        run: |
-          cp public/robots.dev.txt public/robots.txt
-
       - name: Build
         run: npm run build
 

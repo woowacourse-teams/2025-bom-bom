@@ -46,7 +46,7 @@ PODS:
     - ExpoModulesCore
     - GoogleSignIn (~> 9.0)
     - React-Core
-  - ExpoAppleAuthentication (8.0.7):
+  - ExpoAppleAuthentication (7.2.4):
     - ExpoModulesCore
   - ExpoAsset (11.1.7):
     - ExpoModulesCore
@@ -2486,7 +2486,7 @@ SPEC CHECKSUMS:
   EXConstants: 9d62a46a36eae6d28cb978efcbc68aef354d1704
   Expo: f715b0c058ac26efde6fb3b4f18ffdd8bd933605
   ExpoAdapterGoogleSignIn: bf36536501f7d1472951f2e227492435c7add98b
-  ExpoAppleAuthentication: 414e4316f8e25a2afbc3943cf725579c910f24b8
+  ExpoAppleAuthentication: 7e358fcbcbacb7685cddb0bbeede0acd677e58f6
   ExpoAsset: 7bdbbacf4e6752ae6e3cf70555cee076f6229e6e
   ExpoBlur: 846780b2c90f59e964b9a50385d4deb67174ebfb
   ExpoCrypto: 4c50a152f5939e16a2ca10be77b002a3a391c4d3

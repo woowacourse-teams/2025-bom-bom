@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useLocation } from '@tanstack/react-router';
 import HeaderLogo from './HeaderLogo';
 import HeaderNavButtons from './HeaderNavButtons';
 import HeaderProfile from './HeaderProfile';
@@ -16,12 +15,6 @@ interface HeaderProps {
 const Header = ({ activeNav }: HeaderProps) => {
   const { data: userInfo } = useQuery(queries.me());
   const deviceType = useDeviceType();
-  const { pathname } = useLocation();
-
-  const isArticlePage = pathname.startsWith('/articles/');
-  const isHeaderInvisible = isArticlePage && deviceType !== 'pc';
-
-  if (isHeaderInvisible) return null;
 
   return deviceType === 'pc' ? (
     <HeaderContainer>

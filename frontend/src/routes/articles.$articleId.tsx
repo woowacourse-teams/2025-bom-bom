@@ -2,21 +2,23 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
+import Header from '@/components/Header/Header';
 import ProgressBar from '@/components/ProgressBar/ProgressBar';
 import Spacing from '@/components/Spacing/Spacing';
+import { useActiveNav } from '@/hooks/useActiveNav';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import useScrollProgress from '@/hooks/useScrollProgress';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
+import DetailPageHeader from '@/pages/detail/components/DetailPageHeader/DetailPageHeader';
 import FloatingActionButtons from '@/pages/detail/components/FloatingActionButtons/FloatingActionButtons';
-import PageHeader from '@/pages/detail/components/PageHeader/PageHeader';
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
 import useArticleAsReadMutation from '@/pages/detail/hooks/useArticleAsReadMutation';
 import { useArticleBookmark } from '@/pages/detail/hooks/useArticleBookmark';
 
-export const Route = createFileRoute('/_bombom/articles/$articleId')({
+export const Route = createFileRoute('/articles/$articleId')({
   component: ArticleDetailPage,
 });
 
@@ -24,6 +26,7 @@ function ArticleDetailPage() {
   const { articleId } = Route.useParams();
   const articleIdNumber = Number(articleId);
   const deviceType = useDeviceType();
+  const activeNav = useActiveNav();
 
   const { data: currentArticle } = useQuery(
     queries.articleById({ id: articleIdNumber }),
@@ -50,8 +53,10 @@ function ArticleDetailPage() {
 
   return (
     <>
-      {deviceType !== 'pc' && (
-        <PageHeader
+      {deviceType === 'pc' ? (
+        <Header activeNav={activeNav} />
+      ) : (
+        <DetailPageHeader
           bookmarked={isBookmarked}
           onBookmarkClick={toggleBookmark}
         />

@@ -22,7 +22,7 @@ const DetailPageHeader = ({
   return (
     <Container>
       <BackButton type="button" onClick={handleBackClick} aria-label="뒤로가기">
-        <BackIcon direction="left" />
+        <StyledChevronIcon direction="left" />
       </BackButton>
       <BookmarkButton
         type="button"
@@ -103,7 +103,7 @@ const BookmarkIcon = styled.svg`
   color: ${({ theme }) => theme.colors.primary};
 `;
 
-const BackIcon = styled(ChevronIcon)`
+const StyledChevronIcon = styled(ChevronIcon)`
   width: 32px;
   height: 32px;
 `;

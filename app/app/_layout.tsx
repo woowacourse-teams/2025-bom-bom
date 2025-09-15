@@ -1,30 +1,34 @@
-import { useRef } from "react";
+import React from "react";
 import "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 
-import WebView from "react-native-webview";
+import { AuthProvider, useAuth } from "../contexts/AuthContext";
+import { SplashScreen } from "../components/SplashScreen";
+import { LoginScreen } from "../components/LoginScreen";
+import { MainScreen } from "../components/MainScreen";
 
-const CHROME_USER_AGENT =
-  "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/96.0.4664.116 Mobile/15E148 Safari/604.1";
+function AppContent() {
+  const { user, isLoading, isAuthenticated } = useAuth();
+
+  // 로딩 중일 때 스플래시 화면 표시
+  if (isLoading) {
+    return <SplashScreen />;
+  }
+
+  // 인증되지 않은 경우 로그인 화면 표시
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
+
+  // 인증된 경우 메인 화면 표시
+  return <MainScreen />;
+}
 
 export default function RootLayout() {
-  const webviewRef = useRef<WebView>(null);
-
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <WebView
-        ref={webviewRef}
-        source={{ uri: "https://www.bombom.news" }}
-        userAgent={CHROME_USER_AGENT}
-        allowsBackForwardNavigationGestures
-        sharedCookiesEnabled
-        thirdPartyCookiesEnabled
-        webviewDebuggingEnabled
-        pullToRefreshEnabled
-        onContentProcessDidTerminate={() => {
-          webviewRef.current?.reload();
-        }}
-      />
-    </SafeAreaView>
+    <AuthProvider>
+      <StatusBar style="auto" />
+      <AppContent />
+    </AuthProvider>
   );
 }

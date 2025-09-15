@@ -1,6 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  GoogleSignin,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 import * as AppleAuthentication from "expo-apple-authentication";
-import * as AuthSession from "expo-auth-session";
 import React, {
   createContext,
   ReactNode,
@@ -8,17 +11,12 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { Platform } from "react-native";
 
 import { ApiClient } from "../services/api";
 import { AuthContextType, User } from "../types/auth";
 
-// Google OAuth 설정
-const GOOGLE_CLIENT_ID = {
-  ios: "707832268313-ip23n0d1ni0l22lm5mf3hovuv3kcmmng.apps.googleusercontent.com", // iOS 클라이언트 ID 필요
-  android:
-    "707832268313-ip23n0d1ni0l22lm5mf3hovuv3kcmmng.apps.googleusercontent.com", // Android 클라이언트 ID 필요
-};
+const CLIENT_ID =
+  "190361254930-1464b7md34crhu077urc0hsvtsmb5ks5.apps.googleusercontent.com";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -34,17 +32,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const isAuthenticated = !!user;
 
-  // 앱 시작 시 저장된 토큰으로 자동 로그인 시도
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        GoogleSignin.configure({
+          webClientId: CLIENT_ID,
+          offlineAccess: true,
+          hostedDomain: "",
+          forceCodeForRefreshToken: true,
+          accountName: "",
+          iosClientId: CLIENT_ID,
+          googleServicePlistPath: "",
+          profileImageSize: 120,
+        });
+
         const token = await AsyncStorage.getItem("authToken");
         if (token) {
           const response = await ApiClient.verifyToken();
           setUser(response.user);
         }
       } catch (error) {
-        // 토큰이 유효하지 않으면 삭제
         await AsyncStorage.removeItem("authToken");
         console.log("Token verification failed:", error);
       } finally {
@@ -57,47 +64,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const clearError = () => setError(null);
 
-  // Google 로그인
   const loginWithGoogle = async (): Promise<void> => {
     try {
       setIsLoading(true);
       setError(null);
 
-      // Google OAuth 설정
-      const redirectUri = AuthSession.makeRedirectUri({
-        scheme: "com.antarctica.bombom.app",
-        path: "auth",
-      });
+      await GoogleSignin.hasPlayServices();
 
-      const request = new AuthSession.AuthRequest({
-        clientId:
-          Platform.OS === "ios"
-            ? GOOGLE_CLIENT_ID.ios
-            : GOOGLE_CLIENT_ID.android,
-        scopes: ["openid", "profile", "email"],
-        responseType: AuthSession.ResponseType.IdToken,
-        redirectUri,
-        extraParams: {},
-      });
+      const userInfo = await GoogleSignin.signIn();
 
-      const result = await request.promptAsync({
-        authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-      });
+      console.log(userInfo);
 
-      if (result.type === "success" && result.params.id_token) {
-        const response = await ApiClient.loginWithGoogle(
-          result.params.id_token
-        );
+      if (userInfo?.data?.idToken) {
+        const response = await ApiClient.loginWithGoogle(userInfo.data.idToken);
 
-        // 토큰 저장
         await AsyncStorage.setItem("authToken", response.token);
         setUser(response.user);
       } else {
-        throw new Error("Google 로그인이 취소되었습니다.");
+        throw new Error("ID 토큰을 가져올 수 없습니다.");
       }
-    } catch (err: any) {
-      setError(err.message || "Google 로그인에 실패했습니다.");
-      throw err;
+    } catch (error: any) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        setError("Google 로그인이 취소되었습니다.");
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        setError("로그인이 이미 진행 중입니다.");
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        setError("Google Play Services를 사용할 수 없습니다.");
+      } else {
+        setError(error.message || "Google 로그인에 실패했습니다.");
+      }
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -126,7 +122,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           credential.authorizationCode
         );
 
-        // 토큰 저장
         await AsyncStorage.setItem("authToken", response.token);
         setUser(response.user);
       } else {
@@ -148,7 +143,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
 
+      // API 서버 로그아웃
       await ApiClient.logout();
+
+      // Google Sign-In 로그아웃
+      try {
+        await GoogleSignin.signOut();
+      } catch (error) {
+        console.log("Google signOut error:", error);
+      }
 
       await AsyncStorage.removeItem("authToken");
       setUser(null);
@@ -156,6 +159,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (err: any) {
       console.error("Logout error:", err);
       // 로그아웃 요청이 실패해도 로컬 상태는 정리
+      try {
+        await GoogleSignin.signOut();
+      } catch (error) {
+        console.log("Google signOut error:", error);
+      }
       await AsyncStorage.removeItem("authToken");
       setUser(null);
       setError(null);

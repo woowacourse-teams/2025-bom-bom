@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./app/assets/images/logo.png",
-    "scheme": "app",
+    "scheme": "com.antarctica.bombom",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -15,7 +15,8 @@
           "NSAllowsArbitraryLoads": true
         }
       },
-      "bundleIdentifier": "com.antarctica.bombom"
+      "bundleIdentifier": "com.antarctica.bombom",
+      "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {

@@ -11,7 +11,7 @@ import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import useUpdateWeeklyGoalMutation from '@/pages/today/hooks/useUpdateWeeklyGoalMutation';
 import { theme } from '@/styles/theme';
 import type { CSSObject, Theme } from '@emotion/react';
-import GoalIcon from '#/assets/goalCount.svg';
+import GoalIcon from '#/assets/goal.svg';
 import StatusIcon from '#/assets/reading-status.svg';
 
 function ReadingStatusCard() {

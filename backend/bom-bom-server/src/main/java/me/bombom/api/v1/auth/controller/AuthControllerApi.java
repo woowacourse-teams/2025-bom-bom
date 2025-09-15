@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import me.bombom.api.v1.auth.dto.request.DuplicateCheckRequest;
+import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
@@ -60,6 +61,21 @@ public interface AuthControllerApi {
         @RequestParam(defaultValue = "deploy") String env,
         HttpServletResponse response,
         HttpSession httpSession
+    ) throws IOException;
+
+    @Operation(
+        summary = "네이티브 OAuth2 로그인",
+        description = "모바일 앱에서 받은 id_token과 authorization_code로 서버에서 토큰 교환 및 로그인 분기를 수행합니다. 기존 회원이면 '/'로, 신규면 '/signup'으로 리다이렉트합니다."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "302", description = "리다이렉트 수행 (기존: '/', 신규: '/signup')"),
+        @ApiResponse(responseCode = "400", description = "지원하지 않는 제공자"),
+        @ApiResponse(responseCode = "401", description = "토큰 검증 실패 또는 교환 실패")
+    })
+    void nativeLogin(
+        @PathVariable("provider") String provider,
+        @RequestBody NativeLoginRequest request,
+        HttpServletResponse response
     ) throws IOException;
 
     @Operation(

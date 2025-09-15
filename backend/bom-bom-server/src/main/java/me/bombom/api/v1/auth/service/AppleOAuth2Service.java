@@ -14,6 +14,7 @@ import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
@@ -175,12 +176,24 @@ public class AppleOAuth2Service extends OidcUserService {
         if (redirectUri != null) {
             body.add("redirect_uri", redirectUri);
         }
-        return restClientBuilder.build().post()
+        Map<String, Object> responseMap = restClientBuilder.build().post()
                 .uri("https://appleid.apple.com/auth/token")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(body)
                 .retrieve()
-                .body(Map.class);
+                .body(new ParameterizedTypeReference<>() {});
+
+        if (responseMap == null) {
+            throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN).addContext("reason", "apple_token_response_is_null");
+        }
+
+        if (responseMap.containsKey("error")) {
+            log.error("Apple 토큰 교환 실패 - error: {}, description: {}", responseMap.get("error"), responseMap.get("error_description"));
+            throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
+                    .addContext("reason", responseMap.get("error_description"));
+        }
+
+        return responseMap;
     }
 
     // 공통: 기존 회원 조회 + 신규면 pendingMember 세션 저장

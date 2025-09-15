@@ -15,6 +15,9 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   error: string | null;
   clearError: () => void;
+  // WebView 통신 관련
+  showWebViewLogin: boolean;
+  setShowWebViewLogin: (show: boolean) => void;
 }
 
 export interface LoginResponse {

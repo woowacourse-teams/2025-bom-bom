@@ -24,6 +24,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showWebViewLogin, setShowWebViewLogin] = useState(false);
 
   const isAuthenticated = !!user;
 
@@ -184,6 +185,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     error,
     clearError,
+    showWebViewLogin,
+    setShowWebViewLogin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

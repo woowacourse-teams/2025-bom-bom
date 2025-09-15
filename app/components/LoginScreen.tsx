@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Alert,
   Dimensions,
@@ -16,7 +16,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { Button } from "./Button";
 import { Input } from "./Input";
 
-const { width } = Dimensions.get("window");
+// const { width } = Dimensions.get("window"); // Unused variable
 
 export const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -90,17 +90,17 @@ export const LoginScreen: React.FC = () => {
     }
   };
 
-  const showErrorAlert = () => {
+  const showErrorAlert = useCallback(() => {
     if (error) {
       Alert.alert("로그인 오류", error);
     }
-  };
+  }, [error]);
 
   React.useEffect(() => {
     if (error) {
       showErrorAlert();
     }
-  }, [error]);
+  }, [error, showErrorAlert]);
 
   return (
     <SafeAreaView style={styles.container}>

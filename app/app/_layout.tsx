@@ -8,7 +8,7 @@ import { SplashScreen } from "../components/SplashScreen";
 import { AuthProvider, useAuth } from "../contexts/AuthContext";
 
 function AppContent() {
-  const { user, isLoading, isAuthenticated } = useAuth();
+  const { isLoading, isAuthenticated } = useAuth();
 
   // 로딩 중일 때 스플래시 화면 표시
   if (isLoading) {

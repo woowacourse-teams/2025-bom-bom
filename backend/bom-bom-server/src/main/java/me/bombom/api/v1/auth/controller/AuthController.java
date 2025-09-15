@@ -13,7 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.dto.request.DuplicateCheckRequest;
+import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
 import me.bombom.api.v1.auth.service.AppleOAuth2Service;
+import me.bombom.api.v1.auth.service.GoogleOAuth2LoginService;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.common.resolver.LoginMember;
@@ -41,6 +43,7 @@ public class AuthController implements AuthControllerApi{
 
     private final MemberService memberService;
     private final AppleOAuth2Service appleOAuth2Service;
+    private final GoogleOAuth2LoginService googleOAuth2LoginService;
 
     @Override
     @PostMapping("/signup")
@@ -83,6 +86,34 @@ public class AuthController implements AuthControllerApi{
     ) throws IOException {
         httpSession.setAttribute("env", env);
         response.sendRedirect("/oauth2/authorization/" + provider);
+    }
+
+    // 통합 네이티브 엔드포인트: /login/{provider}/native
+    @PostMapping("/login/{provider}/native")
+    public void nativeLogin(
+            @PathVariable("provider") String provider,
+            @Valid @RequestBody NativeLoginRequest request,
+            HttpServletResponse response
+    ) throws IOException {
+        if ("apple".equalsIgnoreCase(provider)) {
+            handleNativeResult(appleOAuth2Service.loginWithNative(request), response);
+            return;
+        }
+        if ("google".equalsIgnoreCase(provider)) {
+            handleNativeResult(googleOAuth2LoginService.loginWithNative(request), response);
+            return;
+        }
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    }
+
+    private void handleNativeResult(java.util.Optional<Member> existing, HttpServletResponse response) throws IOException {
+        if (existing.isPresent()) {
+            OAuth2AuthenticationToken authentication = createAuthenticationToken(existing.get());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            response.sendRedirect("/");
+        } else {
+            response.sendRedirect("/signup");
+        }
     }
 
     @Override

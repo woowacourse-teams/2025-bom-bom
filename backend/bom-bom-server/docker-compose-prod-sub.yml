@@ -27,7 +27,7 @@ services:
       OTEL_LOGS_EXPORTER: none
 
       # exclude
-      OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDE_URLS: /actuator/prometheus
+      OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDE_URLS: /actuator/.*
       OTEL_JAVAAGENT_DEBUG: "true"
 
       # Micrometer trace off

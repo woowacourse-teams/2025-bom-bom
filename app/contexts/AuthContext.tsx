@@ -57,25 +57,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const clearError = () => setError(null);
 
-  // 이메일/비밀번호 로그인
-  const login = async (email: string, password: string): Promise<void> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await ApiClient.loginWithEmail(email, password);
-
-      // 토큰 저장
-      await AsyncStorage.setItem("authToken", response.token);
-      setUser(response.user);
-    } catch (err: any) {
-      setError(err.message || "로그인에 실패했습니다.");
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // Google 로그인
   const loginWithGoogle = async (): Promise<void> => {
     try {
@@ -187,7 +168,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     isLoading,
     isAuthenticated,
-    login,
     loginWithGoogle,
     loginWithApple,
     logout,

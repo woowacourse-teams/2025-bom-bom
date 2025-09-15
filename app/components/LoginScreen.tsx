@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import {
   Alert,
   Dimensions,
@@ -14,63 +14,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAuth } from "../contexts/AuthContext";
 import { Button } from "./Button";
-import { Input } from "./Input";
 
 // const { width } = Dimensions.get("window"); // Unused variable
 
 export const LoginScreen: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isEmailLogin, setIsEmailLogin] = useState(false);
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-
-  const {
-    login,
-    loginWithGoogle,
-    loginWithApple,
-    isLoading,
-    error,
-    clearError,
-  } = useAuth();
-
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^s@]+@[^s@]+.[^s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const handleEmailLogin = async () => {
-    // 입력값 검증
-    setEmailError("");
-    setPasswordError("");
-    clearError();
-
-    if (!email) {
-      setEmailError("이메일을 입력해주세요.");
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      setEmailError("올바른 이메일 주소를 입력해주세요.");
-      return;
-    }
-
-    if (!password) {
-      setPasswordError("비밀번호를 입력해주세요.");
-      return;
-    }
-
-    if (password.length < 6) {
-      setPasswordError("비밀번호는 6자 이상 입력해주세요.");
-      return;
-    }
-
-    try {
-      await login(email, password);
-    } catch (err) {
-      console.error("Email login error:", err);
-    }
-  };
+  const { loginWithGoogle, loginWithApple, isLoading, error, clearError } =
+    useAuth();
 
   const handleGoogleLogin = async () => {
     try {
@@ -130,73 +79,32 @@ export const LoginScreen: React.FC = () => {
 
           {/* 로그인 섹션 */}
           <View style={styles.loginSection}>
-            {/* 이메일 로그인 폼 */}
-            {isEmailLogin && (
-              <View style={styles.emailForm}>
-                <Input
-                  label="이메일"
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholder="이메일을 입력하세요"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  leftIcon="mail"
-                  error={emailError}
-                />
-                <Input
-                  label="비밀번호"
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder="비밀번호를 입력하세요"
-                  isPassword
-                  leftIcon="lock-closed"
-                  error={passwordError}
-                />
-                <Button
-                  title="로그인"
-                  onPress={handleEmailLogin}
-                  loading={isLoading}
-                  style={styles.loginButton}
-                />
-                <Button
-                  title="다른 방법으로 로그인"
-                  onPress={() => setIsEmailLogin(false)}
-                  variant="secondary"
-                  style={styles.switchButton}
-                />
-              </View>
-            )}
-
             {/* 소셜 로그인 버튼들 */}
-            {!isEmailLogin && (
-              <View style={styles.socialLogin}>
-                {/* Google 로그인 */}
+            <View style={styles.socialLogin}>
+              {/* Google 로그인 */}
+              <Button
+                title="Google로 시작하기"
+                onPress={handleGoogleLogin}
+                variant="social"
+                loading={isLoading}
+                icon={<Ionicons name="logo-google" size={24} color="#4285F4" />}
+                style={styles.socialButton}
+              />
+
+              {/* Apple 로그인 (iOS에서만 표시) */}
+              {Platform.OS === "ios" && (
                 <Button
-                  title="Google로 시작하기"
-                  onPress={handleGoogleLogin}
+                  title="Apple로 시작하기"
+                  onPress={handleAppleLogin}
                   variant="social"
                   loading={isLoading}
                   icon={
-                    <Ionicons name="logo-google" size={24} color="#4285F4" />
+                    <Ionicons name="logo-apple" size={24} color="#000000" />
                   }
                   style={styles.socialButton}
                 />
-
-                {/* Apple 로그인 (iOS에서만 표시) */}
-                {Platform.OS === "ios" && (
-                  <Button
-                    title="Apple로 시작하기"
-                    onPress={handleAppleLogin}
-                    variant="social"
-                    loading={isLoading}
-                    icon={
-                      <Ionicons name="logo-apple" size={24} color="#000000" />
-                    }
-                    style={styles.socialButton}
-                  />
-                )}
-              </View>
-            )}
+              )}
+            </View>
           </View>
 
           {/* 약관 안내 */}

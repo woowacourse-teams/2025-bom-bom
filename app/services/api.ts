@@ -35,23 +35,9 @@ export class ApiClient {
     return response.json();
   }
 
-  // 이메일 로그인
-  static async loginWithEmail(
-    email: string,
-    password: string
-  ): Promise<LoginResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: "POST",
-      headers: await this.getAuthHeaders(),
-      body: JSON.stringify({ email, password }),
-    });
-
-    return this.handleResponse<LoginResponse>(response);
-  }
-
   // Google 로그인
   static async loginWithGoogle(idToken: string): Promise<LoginResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/login/google`, {
+    const response = await fetch(`${API_BASE_URL}/auth/login/google/native`, {
       method: "POST",
       headers: await this.getAuthHeaders(),
       body: JSON.stringify({ idToken }),
@@ -65,7 +51,7 @@ export class ApiClient {
     identityToken: string,
     authorizationCode: string
   ): Promise<LoginResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/login/apple`, {
+    const response = await fetch(`${API_BASE_URL}/auth/login/apple/native`, {
       method: "POST",
       headers: await this.getAuthHeaders(),
       body: JSON.stringify({

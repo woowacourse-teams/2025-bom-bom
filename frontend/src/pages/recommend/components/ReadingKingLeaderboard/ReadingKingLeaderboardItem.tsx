@@ -17,7 +17,7 @@ const LeaderboardItem = ({ rank, name, readCount }: LeaderboardItemProps) => (
     <RankIconWrapper>{RANK_ICON_MAP[rank] ?? `#${rank}`}</RankIconWrapper>
 
     <UserInfoBox>
-      <UserName weight={rank === 1 ? 'normal' : 'medium'}>{name}</UserName>
+      <UserName>{name}</UserName>
       <ReadCount>{readCount}개 읽음</ReadCount>
     </UserInfoBox>
   </Container>
@@ -52,12 +52,12 @@ const UserInfoBox = styled.div`
   flex-direction: column;
 `;
 
-const UserName = styled.div<{ weight: 'normal' | 'medium' }>`
+const UserName = styled.p`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body2};
 `;
 
-const ReadCount = styled.div`
+const ReadCount = styled.p`
   color: ${({ theme }) => theme.colors.textTertiary};
   font: ${({ theme }) => theme.fonts.body3};
 `;

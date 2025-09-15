@@ -28,11 +28,11 @@ const DetailPageHeader = ({
         type="button"
         onClick={() => onBookmarkClick?.(bookmarked)}
       >
-        {bookmarked ? (
-          <BookmarkActiveIcon width={28} height={28} />
-        ) : (
-          <StyledBookmarkInactiveIcon width={28} height={28} />
-        )}
+        <BookmarkIcon
+          as={bookmarked ? BookmarkActiveIcon : BookmarkInactiveIcon}
+          width={28}
+          height={28}
+        />
       </BookmarkButton>
     </Container>
   );
@@ -99,7 +99,7 @@ const BookmarkButton = styled.button`
   }
 `;
 
-const StyledBookmarkInactiveIcon = styled(BookmarkInactiveIcon)`
+const BookmarkIcon = styled.svg`
   color: ${({ theme }) => theme.colors.primary};
 `;
 

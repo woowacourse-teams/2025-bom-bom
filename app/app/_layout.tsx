@@ -14,7 +14,7 @@ export default function RootLayout() {
     <SafeAreaView style={{ flex: 1 }}>
       <WebView
         ref={webviewRef}
-        source={{ uri: "https://dev.bombom.news" }}
+        source={{ uri: "https://www.bombom.news" }}
         userAgent={CHROME_USER_AGENT}
         allowsBackForwardNavigationGestures
         sharedCookiesEnabled

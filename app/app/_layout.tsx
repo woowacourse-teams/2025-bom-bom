@@ -10,17 +10,8 @@ import { AuthProvider, useAuth } from "../contexts/AuthContext";
 function AppContent() {
   const { isLoading, isAuthenticated } = useAuth();
 
-  // 로딩 중일 때 스플래시 화면 표시
-  if (isLoading) {
-    return <SplashScreen />;
-  }
-
-  // 인증되지 않은 경우 로그인 화면 표시
-  if (!isAuthenticated) {
-    return <LoginScreen />;
-  }
-
-  // 인증된 경우 메인 화면 표시
+  if (isLoading) return <SplashScreen />;
+  if (!isAuthenticated) return <LoginScreen />;
   return <MainScreen />;
 }
 

@@ -9,8 +9,7 @@ import { RNToWebMessage, WebToRNMessage } from "../types/webview";
 import { LoginScreenOverlay } from "./LoginScreenOverlay";
 
 export const MainScreen: React.FC = () => {
-  const { user, logout, isLoading, showWebViewLogin, setShowWebViewLogin } =
-    useAuth();
+  const { user, logout, showWebViewLogin, setShowWebViewLogin } = useAuth();
   const webViewRef = useRef<WebView>(null);
 
   // WebView에서 온 메시지 처리
@@ -89,48 +88,9 @@ export const MainScreen: React.FC = () => {
     });
   }, [user, setShowWebViewLogin]);
 
-  // 로그인 성공 감지
   React.useEffect(() => {
-    if (user && showWebViewLogin) {
-      handleLoginSuccess();
-    }
+    if (user && showWebViewLogin) handleLoginSuccess();
   }, [user, showWebViewLogin, handleLoginSuccess]);
-
-  const getProviderIcon = (provider: string) => {
-    switch (provider) {
-      case "google":
-        return "logo-google";
-      case "apple":
-        return "logo-apple";
-      default:
-        return "mail";
-    }
-  };
-
-  const getProviderName = (provider: string) => {
-    switch (provider) {
-      case "google":
-        return "Google";
-      case "apple":
-        return "Apple";
-      default:
-        return "이메일";
-    }
-  };
-
-  const handleLogout = () => {
-    Alert.alert("로그아웃", "정말 로그아웃하시겠습니까?", [
-      {
-        text: "취소",
-        style: "cancel",
-      },
-      {
-        text: "로그아웃",
-        style: "destructive",
-        onPress: logout,
-      },
-    ]);
-  };
 
   return (
     <SafeAreaView style={styles.container}>

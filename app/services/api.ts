@@ -1,13 +1,13 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LoginResponse } from '../types/auth';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LoginResponse } from "../types/auth";
 
-const API_BASE_URL = 'https://api-dev.bombom.news/api/v1';
+const API_BASE_URL = "https://api-dev.bombom.news/api/v1";
 
 export class ApiClient {
   private static async getAuthHeaders(): Promise<Record<string, string>> {
-    const token = await AsyncStorage.getItem('authToken');
+    const token = await AsyncStorage.getItem("authToken");
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
 
     if (token) {
@@ -19,7 +19,7 @@ export class ApiClient {
 
   private static async handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
-      let errorMessage = 'An error occurred';
+      let errorMessage = "An error occurred";
       try {
         const errorData = await response.json();
         errorMessage = errorData.message || errorMessage;
@@ -36,9 +36,12 @@ export class ApiClient {
   }
 
   // 이메일 로그인
-  static async loginWithEmail(email: string, password: string): Promise<LoginResponse> {
+  static async loginWithEmail(
+    email: string,
+    password: string
+  ): Promise<LoginResponse> {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
+      method: "POST",
       headers: await this.getAuthHeaders(),
       body: JSON.stringify({ email, password }),
     });
@@ -49,7 +52,7 @@ export class ApiClient {
   // Google 로그인
   static async loginWithGoogle(idToken: string): Promise<LoginResponse> {
     const response = await fetch(`${API_BASE_URL}/auth/login/google`, {
-      method: 'POST',
+      method: "POST",
       headers: await this.getAuthHeaders(),
       body: JSON.stringify({ idToken }),
     });
@@ -58,13 +61,16 @@ export class ApiClient {
   }
 
   // Apple 로그인
-  static async loginWithApple(identityToken: string, authorizationCode: string): Promise<LoginResponse> {
+  static async loginWithApple(
+    identityToken: string,
+    authorizationCode: string
+  ): Promise<LoginResponse> {
     const response = await fetch(`${API_BASE_URL}/auth/login/apple`, {
-      method: 'POST',
+      method: "POST",
       headers: await this.getAuthHeaders(),
       body: JSON.stringify({
         identityToken,
-        authorizationCode
+        authorizationCode,
       }),
     });
 
@@ -75,23 +81,22 @@ export class ApiClient {
   static async logout(): Promise<void> {
     try {
       await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: 'POST',
+        method: "POST",
         headers: await this.getAuthHeaders(),
       });
     } catch (error) {
       // 로그아웃 요청이 실패해도 로컬 토큰은 삭제해야 함
-      console.warn('Logout request failed:', error);
+      console.warn("Logout request failed:", error);
     }
   }
 
   // 토큰 검증
   static async verifyToken(): Promise<LoginResponse> {
     const response = await fetch(`${API_BASE_URL}/auth/verify`, {
-      method: 'GET',
+      method: "GET",
       headers: await this.getAuthHeaders(),
     });
 
     return this.handleResponse<LoginResponse>(response);
   }
 }
-

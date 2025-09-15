@@ -1,17 +1,21 @@
 import styled from '@emotion/styled';
+import { useLocation } from '@tanstack/react-router';
 import { PropsWithChildren } from 'react';
 import Header from '../Header/Header';
-import { useActiveNav } from '@/hooks/useActiveNav';
 import { useDeviceType } from '@/hooks/useDeviceType';
 
 const PageLayout = ({ children }: PropsWithChildren) => {
-  const activeNav = useActiveNav();
   const deviceType = useDeviceType();
+  const location = useLocation();
   const isMobile = deviceType === 'mobile';
+
+  const isHeaderInvisible =
+    deviceType !== 'pc' && location.pathname.startsWith('/articles/$articleId');
+  const headerVariant = isHeaderInvisible ? 'none' : deviceType;
 
   return (
     <Container isMobile={isMobile}>
-      <Header activeNav={activeNav} />
+      <Header variant={headerVariant} />
       {children}
     </Container>
   );

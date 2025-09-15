@@ -26,21 +26,12 @@ const MemoPanel = ({
   return (
     <Container isOpen={open}>
       <ToggleButton isOpen={open} onClick={handleToggle}>
-        {open ? (
-          <ChevronIcon
-            direction="right"
-            width={24}
-            height={24}
-            color={theme.colors.primary}
-          />
-        ) : (
-          <ChevronIcon
-            direction="left"
-            width={24}
-            height={24}
-            color={theme.colors.primary}
-          />
-        )}
+        <ChevronIcon
+          direction={open ? 'right' : 'left'}
+          width={24}
+          height={24}
+          color={theme.colors.primary}
+        />
       </ToggleButton>
 
       <Header>

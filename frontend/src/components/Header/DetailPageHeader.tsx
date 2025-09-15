@@ -4,15 +4,15 @@ import ChevronIcon from '@/components/icons/ChevronIcon';
 import BookmarkActiveIcon from '#/assets/bookmark-active.svg';
 import BookmarkInactiveIcon from '#/assets/bookmark-inactive.svg';
 
-interface PageHeaderProps {
+interface DetailPageHeaderProps {
   bookmarked?: boolean;
   onBookmarkClick?: (bookmarked: boolean) => void;
 }
 
-const PageHeader = ({
+const DetailPageHeader = ({
   bookmarked = false,
   onBookmarkClick,
-}: PageHeaderProps) => {
+}: DetailPageHeaderProps) => {
   const router = useRouter();
 
   const handleBackClick = () => {
@@ -38,7 +38,7 @@ const PageHeader = ({
   );
 };
 
-export default PageHeader;
+export default DetailPageHeader;
 
 const Container = styled.header`
   position: fixed;

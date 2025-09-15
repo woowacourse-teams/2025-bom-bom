@@ -1,35 +1,12 @@
 import styled from '@emotion/styled';
 import { useLocation, useNavigate } from '@tanstack/react-router';
+import { MENU_ITEMS } from './QuickMenu.constants';
 import FloatingActionButton from '@/components/FloatingActionButton/FloatingActionButton';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
-import BookmarkIcon from '#/assets/bookmark-inactive.svg';
-import HelpIcon from '#/assets/help.svg';
 import LinkIcon from '#/assets/link.svg';
-import MemoIcon from '#/assets/memo.svg';
-
-const MENU_ITEMS = [
-  {
-    key: 'bookmark',
-    label: '북마크',
-    path: '/bookmark',
-    Icon: BookmarkIcon,
-  },
-  {
-    key: 'memo',
-    label: '메모',
-    path: '/memo',
-    Icon: MemoIcon,
-  },
-  {
-    key: 'guide',
-    label: '가이드',
-    path: '/guide',
-    Icon: HelpIcon,
-  },
-] as const;
 
 const QuickMenu = () => {
   const navigate = useNavigate();

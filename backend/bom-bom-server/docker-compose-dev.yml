@@ -27,7 +27,7 @@ services:
       OTEL_LOGS_EXPORTER: none
 
       # exclude
-      OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDED_URLS: /actuator.*
+      OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDE_URLS: /actuator/.*
       OTEL_JAVAAGENT_DEBUG: "true"  
 
       # Micrometer trace off

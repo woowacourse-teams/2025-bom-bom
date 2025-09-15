@@ -1,11 +1,11 @@
+import { StatusBar } from "expo-status-bar";
 import React from "react";
 import "react-native-reanimated";
-import { StatusBar } from "expo-status-bar";
 
-import { AuthProvider, useAuth } from "../contexts/AuthContext";
-import { SplashScreen } from "../components/SplashScreen";
-import { LoginScreen } from "../components/LoginScreen";
+import { LoginScreen } from "@/components/LoginScreen";
 import { MainScreen } from "../components/MainScreen";
+import { SplashScreen } from "../components/SplashScreen";
+import { AuthProvider, useAuth } from "../contexts/AuthContext";
 
 function AppContent() {
   const { user, isLoading, isAuthenticated } = useAuth();

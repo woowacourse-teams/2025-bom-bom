@@ -1,89 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import WebView from "react-native-webview";
 
-import { useAuth } from "../contexts/AuthContext";
-
 export const MainScreen: React.FC = () => {
-  const { user, logout, isLoading } = useAuth();
-
-  const handleLogout = () => {
-    Alert.alert("로그아웃", "정말 로그아웃하시겠습니까?", [
-      {
-        text: "취소",
-        style: "cancel",
-      },
-      {
-        text: "로그아웃",
-        style: "destructive",
-        onPress: logout,
-      },
-    ]);
-  };
-
-  const getProviderIcon = (provider: string) => {
-    switch (provider) {
-      case "google":
-        return "logo-google";
-      case "apple":
-        return "logo-apple";
-      default:
-        return "mail";
-    }
-  };
-
-  const getProviderName = (provider: string) => {
-    switch (provider) {
-      case "google":
-        return "Google";
-      case "apple":
-        return "Apple";
-      default:
-        return "이메일";
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container}>
-      {/* 헤더 */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <View style={styles.iconContainer}>
-            <Ionicons name="sparkles" size={20} color="#FFFFFF" />
-          </View>
-          <Text style={styles.headerTitle}>봄봄</Text>
-        </View>
-
-        <TouchableOpacity
-          style={styles.profileButton}
-          onPress={handleLogout}
-          disabled={isLoading}
-        >
-          <View style={styles.userInfo}>
-            <Text style={styles.userName} numberOfLines={1}>
-              {user?.name || user?.email}
-            </Text>
-            <View style={styles.providerInfo}>
-              <Ionicons
-                name={getProviderIcon(user?.provider || "email")}
-                size={12}
-                color="#8E8E93"
-              />
-              <Text style={styles.providerText}>
-                {getProviderName(user?.provider || "email")}
-              </Text>
-            </View>
-          </View>
-          <Ionicons name="log-out-outline" size={20} color="#8E8E93" />
-        </TouchableOpacity>
-      </View>
-
-      {/* 웹뷰 */}
       <View style={styles.webViewContainer}>
         <WebView
-          source={{ uri: "https://www.bombom.news" }}
+          source={{ uri: "http://localhost:3000" }}
           style={styles.webView}
           userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/96.0.4664.116 Mobile/15E148 Safari/604.1"
           allowsBackForwardNavigationGestures

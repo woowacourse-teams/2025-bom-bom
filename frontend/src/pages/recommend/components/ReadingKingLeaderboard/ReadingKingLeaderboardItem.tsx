@@ -1,5 +1,11 @@
 import styled from '@emotion/styled';
 
+const RANK_ICON_MAP: Record<number, string> = {
+  1: '👑',
+  2: '🥈',
+  3: '🥉',
+};
+
 interface LeaderboardItemProps {
   rank: number;
   name: string;
@@ -8,9 +14,7 @@ interface LeaderboardItemProps {
 
 const LeaderboardItem = ({ rank, name, readCount }: LeaderboardItemProps) => (
   <Container>
-    <RankIconWrapper>
-      {rank === 1 ? '👑' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`}
-    </RankIconWrapper>
+    <RankIconWrapper>{RANK_ICON_MAP[rank] ?? `#${rank}`}</RankIconWrapper>
 
     <UserInfoBox>
       <UserName weight={rank === 1 ? 'normal' : 'medium'}>{name}</UserName>

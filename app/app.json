@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./app/assets/images/logo.png",
-    "scheme": "com.antarctica.bombom",
+    "scheme": "com.antarctica.bombom.app",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {

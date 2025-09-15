@@ -15,9 +15,9 @@ import { AuthContextType, User } from "../types/auth";
 
 // Google OAuth 설정
 const GOOGLE_CLIENT_ID = {
-  ios: "1065103736736-6mgha0t4ejp8mvt2pn5dqmmbp0lh7u8k.apps.googleusercontent.com", // iOS 클라이언트 ID 필요
+  ios: "707832268313-ip23n0d1ni0l22lm5mf3hovuv3kcmmng.apps.googleusercontent.com", // iOS 클라이언트 ID 필요
   android:
-    "1065103736736-6mgha0t4ejp8mvt2pn5dqmmbp0lh7u8k.apps.googleusercontent.com", // Android 클라이언트 ID 필요
+    "707832268313-ip23n0d1ni0l22lm5mf3hovuv3kcmmng.apps.googleusercontent.com", // Android 클라이언트 ID 필요
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -65,7 +65,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Google OAuth 설정
       const redirectUri = AuthSession.makeRedirectUri({
-        scheme: "com.antarctica.bombom",
+        scheme: "com.antarctica.bombom.app",
         path: "auth",
       });
 
@@ -164,7 +164,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const value: AuthContextType = {
+  const value = {
     user,
     isLoading,
     isAuthenticated,
@@ -180,7 +180,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");

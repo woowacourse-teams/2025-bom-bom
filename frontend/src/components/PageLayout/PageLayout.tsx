@@ -1,32 +1,13 @@
 import styled from '@emotion/styled';
-import { useRouterState } from '@tanstack/react-router';
-import { PropsWithChildren, useEffect, useRef } from 'react';
+import { PropsWithChildren } from 'react';
 import Header from '../Header/Header';
+import { useActiveNav } from '@/hooks/useActiveNav';
 import { useDeviceType } from '@/hooks/useDeviceType';
-import { NavType } from '@/types/nav';
-
-const navMap: Record<string, NavType> = {
-  '/': 'today',
-  '/storage': 'storage',
-  '/recommend': 'recommend',
-};
 
 const PageLayout = ({ children }: PropsWithChildren) => {
-  const location = useRouterState({
-    select: (state) => state.location.pathname,
-  });
+  const activeNav = useActiveNav();
   const deviceType = useDeviceType();
   const isMobile = deviceType === 'mobile';
-
-  const previousNavRef = useRef<NavType>(null);
-
-  useEffect(() => {
-    if (navMap[location]) {
-      previousNavRef.current = navMap[location];
-    }
-  }, [location]);
-
-  const activeNav = navMap[location] || previousNavRef.current;
 
   return (
     <Container isMobile={isMobile}>

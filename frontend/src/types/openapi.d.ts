@@ -613,12 +613,6 @@ export interface components {
       /** @enum {string} */
       gender: 'MALE' | 'FEMALE';
     };
-    UpdateWeeklyGoalCountRequest: {
-      /** Format: int64 */
-      memberId: number;
-      /** Format: int32 */
-      weeklyGoalCount: number;
-    };
     WeeklyGoalCountResponse: {
       /**
        * Format: int64
@@ -796,12 +790,12 @@ export interface components {
       /** Format: int64 */
       offset?: number;
       sort?: components['schemas']['SortObject'];
-      unpaged?: boolean;
       /** Format: int32 */
       pageSize?: number;
       paged?: boolean;
       /** Format: int32 */
       pageNumber?: number;
+      unpaged?: boolean;
     };
     SortObject: {
       empty?: boolean;
@@ -1256,16 +1250,14 @@ export interface operations {
   };
   updateWeeklyGoalCount: {
     parameters: {
-      query?: never;
+      query: {
+        weeklyGoalCount: number;
+      };
       header?: never;
       path?: never;
       cookie?: never;
     };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateWeeklyGoalCountRequest'];
-      };
-    };
+    requestBody?: never;
     responses: {
       /** @description 주간 목표 개수 수정 성공 */
       200: {

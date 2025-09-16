@@ -90,22 +90,6 @@ export default (env, argv) => {
             from: path.resolve(__dirname, 'public', 'system'),
             to: path.resolve(__dirname, 'dist', 'system'),
           },
-          {
-            from: path.resolve(
-              __dirname,
-              'public',
-              `robots.${process.env.SERVER_TYPE}.txt`,
-            ),
-            to: path.resolve(__dirname, 'dist', 'robots.txt'),
-          },
-          ...(process.env.SERVER_TYPE === 'prod'
-            ? [
-                {
-                  from: path.resolve(__dirname, 'public', 'sitemap.xml'),
-                  to: path.resolve(__dirname, 'dist', 'sitemap.xml'),
-                },
-              ]
-            : []),
         ],
       }),
     ],

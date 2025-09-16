@@ -2,16 +2,15 @@ import { StatusBar } from "expo-status-bar";
 import React from "react";
 import "react-native-reanimated";
 
-import { LoginScreen } from "@/components/LoginScreen";
+import { SplashScreen } from "@/components/SplashScreen";
 import { MainScreen } from "../components/MainScreen";
-import { SplashScreen } from "../components/SplashScreen";
 import { AuthProvider, useAuth } from "../contexts/AuthContext";
 
 function AppContent() {
   const { isLoading, isAuthenticated } = useAuth();
 
   if (isLoading) return <SplashScreen />;
-  if (!isAuthenticated) return <LoginScreen />;
+  // if (!isAuthenticated) return <LoginScreen />;
   return <MainScreen />;
 }
 

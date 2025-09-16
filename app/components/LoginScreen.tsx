@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
   Alert,
   Dimensions,
@@ -12,12 +12,19 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../contexts/AuthContext";
 import { Button } from "./Button";
 
 export const LoginScreen: React.FC = () => {
-  const { loginWithGoogle, loginWithApple, isLoading, error, clearError } =
-    useAuth();
+  const {
+    loginWithGoogle,
+    loginWithApple,
+    isLoading,
+    error,
+    clearError,
+    sendMessageToWeb,
+  } = useAuth();
 
   const handleGoogleLogin = async () => {
     try {
@@ -48,6 +55,21 @@ export const LoginScreen: React.FC = () => {
       showErrorAlert();
     }
   }, [error, showErrorAlert]);
+
+  useEffect(() => {
+    (async () => {
+      const userInfo = await AsyncStorage.getItem("serverAuthCode");
+      const idToken = await AsyncStorage.getItem("authToken");
+
+      sendMessageToWeb({
+        type: "GOOGLE_LOGIN_TOKEN",
+        payload: {
+          idToken: idToken,
+          serverAuthCode: userInfo,
+        },
+      });
+    })();
+  }, [isLoading, sendMessageToWeb]);
 
   return (
     <SafeAreaView style={styles.container}>

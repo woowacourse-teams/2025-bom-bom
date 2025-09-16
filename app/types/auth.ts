@@ -17,6 +17,9 @@ export interface AuthContextType {
   // WebView 통신 관련
   showWebViewLogin: boolean;
   setShowWebViewLogin: (show: boolean) => void;
+  webViewRef: React.RefObject<any>;
+  handleWebViewMessage: (event: any) => void;
+  sendMessageToWeb: (message: any) => void;
 }
 
 export interface LoginResponse {

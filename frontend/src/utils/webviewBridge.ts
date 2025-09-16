@@ -1,12 +1,26 @@
 // WebView와 React Native 간 통신을 위한 유틸리티 함수들
 
 export interface WebToRNMessage {
-  type: 'SHOW_LOGIN_SCREEN' | 'LOGOUT_REQUEST' | 'USER_ACTION';
-  payload?: unknown;
+  type:
+    | 'SHOW_LOGIN_SCREEN'
+    | 'LOGOUT_REQUEST'
+    | 'USER_ACTION'
+    | 'LOGIN_SUCCESS'
+    | 'LOGIN_FAILED';
+  payload?: {
+    isAuthenticated?: boolean;
+    provider?: string;
+    error?: string;
+  };
 }
 
 export interface RNToWebMessage {
-  type: 'LOGIN_SUCCESS' | 'LOGOUT_SUCCESS' | 'AUTH_STATE_CHANGED';
+  type:
+    | 'LOGIN_SUCCESS'
+    | 'LOGOUT_SUCCESS'
+    | 'AUTH_STATE_CHANGED'
+    | 'GOOGLE_LOGIN_TOKEN'
+    | 'APPLE_LOGIN_TOKEN';
   payload?: {
     user?: {
       id: string;
@@ -16,6 +30,12 @@ export interface RNToWebMessage {
     };
     token?: string;
     isAuthenticated: boolean;
+    // Google 로그인 토큰
+    idToken?: string;
+    serverAuthCode?: string;
+    // Apple 로그인 토큰
+    identityToken?: string;
+    authorizationCode?: string;
   };
 }
 

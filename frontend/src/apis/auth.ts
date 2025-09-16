@@ -31,3 +31,31 @@ export const postWithdraw = () => {
     path: '/auth/withdraw',
   });
 };
+
+// Google 로그인 (앱에서 받은 idToken으로)
+export const postGoogleLogin = async (
+  idToken: string,
+  serverAuthCode?: string,
+) => {
+  return await fetcher.post({
+    path: '/auth/login/google/native',
+    body: {
+      identityToken: idToken,
+      authorizationCode: serverAuthCode || '',
+    },
+  });
+};
+
+// Apple 로그인 (앱에서 받은 identityToken으로)
+export const postAppleLogin = async (
+  identityToken: string,
+  authorizationCode: string,
+) => {
+  return await fetcher.post({
+    path: '/auth/login/apple/native',
+    body: {
+      identityToken,
+      authorizationCode,
+    },
+  });
+};

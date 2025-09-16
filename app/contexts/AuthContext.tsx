@@ -9,11 +9,14 @@ import React, {
   ReactNode,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
+import { WebView } from "react-native-webview";
 
 import { ApiClient } from "../services/api";
 import { AuthContextType, User } from "../types/auth";
+import { RNToWebMessage } from "../types/webview";
 
 const CLIENT_ID =
   "190361254930-1464b7md34crhu077urc0hsvtsmb5ks5.apps.googleusercontent.com";
@@ -29,6 +32,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showWebViewLogin, setShowWebViewLogin] = useState(false);
+  const webViewRef = useRef<WebView>(null);
 
   const isAuthenticated = !!user;
 
@@ -66,6 +70,51 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const clearError = () => setError(null);
 
+  // WebView로 메시지 전송 (타입 안전)
+  const sendMessageToWeb = (message: RNToWebMessage) => {
+    try {
+      const messageString = JSON.stringify(message);
+      webViewRef.current?.postMessage(messageString);
+      console.log("WebView로 메시지 전송:", message);
+    } catch (error) {
+      console.error("WebView 메시지 전송 실패:", error);
+    }
+  };
+
+  // 웹뷰에서 오는 메시지 처리
+  const handleWebViewMessage = (event: any) => {
+    try {
+      const message = JSON.parse(event.nativeEvent.data);
+
+      switch (message.type) {
+        case "LOGIN_SUCCESS":
+          alert("LOGIN_SUCCESS");
+          console.log("웹뷰에서 로그인 성공 알림 수신:", message.payload);
+          setShowWebViewLogin(false);
+          setUser({
+            id: "web-user", // 실제로는 서버에서 받은 유저 정보 사용
+            email: "",
+            name: "",
+            provider: message.payload?.provider || "unknown",
+          });
+          setIsLoading(false);
+          break;
+
+        case "LOGIN_FAILED":
+          console.log("웹뷰에서 로그인 실패 알림 수신:", message.payload);
+          setShowWebViewLogin(false);
+          setError(message.payload?.error || "로그인에 실패했습니다.");
+          setIsLoading(false);
+          break;
+
+        default:
+          console.warn("알 수 없는 웹뷰 메시지:", message);
+      }
+    } catch (error) {
+      console.error("웹뷰 메시지 파싱 오류:", error);
+    }
+  };
+
   const loginWithGoogle = async (): Promise<void> => {
     try {
       setIsLoading(true);
@@ -76,14 +125,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userInfo = await GoogleSignin.signIn();
 
       if (userInfo?.data?.idToken) {
-        const response = await ApiClient.loginWithGoogle(
-          userInfo.data.idToken,
+        // 웹뷰 로그인 화면 표시
+        setShowWebViewLogin(true);
+
+        setUser({
+          id: "web-user",
+          email: "",
+          name: "",
+          provider: "google",
+        });
+
+        await AsyncStorage.setItem("authToken", userInfo.data.idToken);
+        await AsyncStorage.setItem(
+          "serverAuthCode",
           userInfo.data.serverAuthCode || ""
         );
-
-        if (response?.sessionId) {
-          await AsyncStorage.setItem("sessionId", response.sessionId);
-        }
       } else {
         throw new Error("ID 토큰을 가져올 수 없습니다.");
       }
@@ -121,14 +177,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (credential.identityToken && credential.authorizationCode) {
-        const response = await ApiClient.loginWithApple(
-          credential.identityToken,
-          credential.authorizationCode
-        );
+        // 웹뷰 로그인 화면 표시
+        setShowWebViewLogin(true);
 
-        if (response?.sessionId) {
-          await AsyncStorage.setItem("sessionId", response.sessionId);
-        }
+        // 웹뷰에 Apple 로그인 토큰 전송
+        sendMessageToWeb({
+          type: "APPLE_LOGIN_TOKEN",
+          payload: {
+            identityToken: credential.identityToken,
+            authorizationCode: credential.authorizationCode,
+          },
+        });
       } else {
         throw new Error("Apple 로그인 정보를 가져올 수 없습니다.");
       }
@@ -188,6 +247,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     clearError,
     showWebViewLogin,
     setShowWebViewLogin,
+    webViewRef,
+    handleWebViewMessage,
+    sendMessageToWeb,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

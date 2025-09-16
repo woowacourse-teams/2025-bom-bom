@@ -1,16 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useCallback, useRef } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import WebView from "react-native-webview";
 
 import { useAuth } from "../contexts/AuthContext";
-import { RNToWebMessage, WebToRNMessage } from "../types/webview";
+import { WebToRNMessage } from "../types/webview";
 import { LoginScreenOverlay } from "./LoginScreenOverlay";
 
 export const MainScreen: React.FC = () => {
-  const { user, logout, showWebViewLogin, setShowWebViewLogin } = useAuth();
-  const webViewRef = useRef<WebView>(null);
+  const { showWebViewLogin, setShowWebViewLogin, webViewRef } = useAuth();
 
   // WebView에서 온 메시지 처리
   const handleWebViewMessage = (event: any) => {
@@ -22,9 +21,6 @@ export const MainScreen: React.FC = () => {
         case "SHOW_LOGIN_SCREEN":
           setShowWebViewLogin(true);
           break;
-        case "LOGOUT_REQUEST":
-          handleWebViewLogout();
-          break;
         default:
           console.warn("알 수 없는 메시지 타입:", message.type);
       }
@@ -32,65 +28,6 @@ export const MainScreen: React.FC = () => {
       console.error("WebView 메시지 파싱 실패:", error);
     }
   };
-
-  // WebView에서 로그아웃 요청 시 처리
-  const handleWebViewLogout = () => {
-    Alert.alert("로그아웃", "정말 로그아웃하시겠습니까?", [
-      {
-        text: "취소",
-        style: "cancel",
-      },
-      {
-        text: "로그아웃",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await logout();
-            sendMessageToWeb({
-              type: "LOGOUT_SUCCESS",
-              payload: { isAuthenticated: false },
-            });
-          } catch (error) {
-            console.error("로그아웃 실패:", error);
-          }
-        },
-      },
-    ]);
-  };
-
-  // WebView로 메시지 전송
-  const sendMessageToWeb = (message: RNToWebMessage) => {
-    try {
-      const messageString = JSON.stringify(message);
-      webViewRef.current?.postMessage(messageString);
-      console.log("WebView로 메시지 전송:", message);
-    } catch (error) {
-      console.error("WebView 메시지 전송 실패:", error);
-    }
-  };
-
-  // 로그인 성공 시 WebView로 알림
-  const handleLoginSuccess = useCallback(() => {
-    setShowWebViewLogin(false);
-    sendMessageToWeb({
-      type: "LOGIN_SUCCESS",
-      payload: {
-        user: user
-          ? {
-              id: user.id,
-              email: user.email || "",
-              name: user.name,
-              provider: user.provider,
-            }
-          : undefined,
-        isAuthenticated: !!user,
-      },
-    });
-  }, [user, setShowWebViewLogin]);
-
-  React.useEffect(() => {
-    if (user && showWebViewLogin) handleLoginSuccess();
-  }, [user, showWebViewLogin, handleLoginSuccess]);
 
   return (
     <SafeAreaView style={styles.container}>

@@ -1,25 +1,35 @@
 import styled from '@emotion/styled';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import maintenanceBom from '#/assets/maintenance-bom.png';
 
 const MaintenanceCard = () => {
+  const deviceType = useDeviceType();
+  const isMobile = deviceType === 'mobile';
+
   return (
     <Container>
-      <MaintenanceImage src={maintenanceBom} alt="점검 중 이미지" />
+      <MaintenanceImage
+        src={maintenanceBom}
+        alt="점검 중 이미지"
+        isMobile={isMobile}
+      />
 
-      <Title>서비스 점검 중입니다</Title>
+      <Title isMobile={isMobile}>서비스 점검 중입니다</Title>
 
-      <DescriptionWrapper>
+      <DescriptionWrapper isMobile={isMobile}>
         <Description>
-          더 나은 서비스 제공을 위해 시스템 점검을 진행하고 있습니다.
+          더 나은 서비스 제공을 위해 시스템을 점검하고 있습니다.
         </Description>
         <Description>
           잠시만 기다려 주시면 곧 정상 서비스로 돌아오겠습니다.
         </Description>
       </DescriptionWrapper>
 
-      <ContactWrapper>
-        <Contact href="https://e0pq0.channel.io/">💬 채널톡 바로가기</Contact>
+      <ContactWrapper isMobile={isMobile}>
+        <Contact href="https://e0pq0.channel.io/" isMobile={isMobile}>
+          💬 채널톡 바로가기
+        </Contact>
         <ContactDescription>
           긴급한 문의사항이 있으시면
           <br />
@@ -43,36 +53,38 @@ const Container = styled.section`
   justify-content: center;
 `;
 
-const MaintenanceImage = styled(ImageWithFallback)`
-  width: 360px;
-  height: 360px;
+const MaintenanceImage = styled(ImageWithFallback)<{ isMobile: boolean }>`
+  width: ${({ isMobile }) => (isMobile ? '240px' : '320px')};
+  height: ${({ isMobile }) => (isMobile ? '240px' : '320px')};
 `;
 
-const Title = styled.h1`
+const Title = styled.h1<{ isMobile: boolean }>`
   color: ${({ theme }) => theme.colors.primary};
-  font: ${({ theme }) => theme.fonts.heading2};
+  font: ${({ theme, isMobile }) =>
+    isMobile ? theme.fonts.heading4 : theme.fonts.heading2};
 `;
 
-const DescriptionWrapper = styled.div`
+const DescriptionWrapper = styled.div<{ isMobile: boolean }>`
   display: flex;
-  gap: 8px;
+  gap: ${({ isMobile }) => (isMobile ? '4px' : '8px')};
   flex-direction: column;
   align-items: center;
   justify-content: center;
-`;
 
-const Description = styled.p`
   color: ${({ theme }) => theme.colors.textTertiary};
-  font: ${({ theme }) => theme.fonts.body1};
+  font: ${({ theme, isMobile }) =>
+    isMobile ? theme.fonts.body2 : theme.fonts.body1};
 `;
 
-const ContactWrapper = styled.div`
+const Description = styled.p``;
+
+const ContactWrapper = styled.div<{ isMobile: boolean }>`
   padding: 24px;
   border-radius: 20px;
   box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
 
   display: flex;
-  gap: 12px;
+  gap: ${({ isMobile }) => (isMobile ? '8px' : '12px')};
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -81,12 +93,13 @@ const ContactWrapper = styled.div`
   text-align: center;
 `;
 
-const Contact = styled.a`
+const Contact = styled.a<{ isMobile: boolean }>`
   padding: 8px 16px;
   border-radius: 12px;
 
   color: ${({ theme }) => theme.colors.primary};
-  font: ${({ theme }) => theme.fonts.body1};
+  font: ${({ theme, isMobile }) =>
+    isMobile ? theme.fonts.body2 : theme.fonts.body1};
 
   text-decoration: none;
 

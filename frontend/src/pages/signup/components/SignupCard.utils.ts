@@ -1,4 +1,4 @@
-import { FieldError, Gender } from './SignupCard.types';
+import { FieldError } from './SignupCard.types';
 
 const nicknameRegex = /^[가-힣a-zA-Z0-9_]{2,12}$/;
 const emailLocalRegex = /^[A-Za-z0-9._-]{3,30}$/;
@@ -26,7 +26,7 @@ export const validateEmailLocal = (emailLocal: string): FieldError => {
 
 export const validateBirthDate = (input: string): FieldError => {
   const trimmedInput = input.trim();
-  if (!trimmedInput) return '생년월일을 입력해주세요.';
+  if (!trimmedInput) return null;
   if (trimmedInput.length < 7 || trimmedInput[4] !== '-') {
     return '생년월일 형식이 올바르지 않습니다. 예) 1999-01-23';
   }
@@ -55,11 +55,6 @@ export const validateBirthDate = (input: string): FieldError => {
   const inputTime = inputDate.getTime();
   if (inputTime > today) return '미래 날짜는 입력할 수 없습니다.';
 
-  return null;
-};
-
-export const validateGender = (gender: Gender | null): FieldError => {
-  if (!gender) return '성별을 선택해주세요.';
   return null;
 };
 

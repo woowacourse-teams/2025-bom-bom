@@ -1,18 +1,24 @@
 {
   "expo": {
-    "name": "app",
-    "slug": "app",
+    "name": "봄봄",
+    "slug": "bombom",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./app/assets/images/logo.png",
-    "scheme": "app",
+    "scheme": "bombom",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
         "NSAppTransportSecurity": {
-          "NSAllowsArbitraryLoads": true
+          "NSExceptionDomains": {
+            "bombom.news": {
+              "NSIncludesSubdomains": true,
+              "NSTemporaryExceptionAllowsInsecureHTTPLoads": true,
+              "NSTemporaryExceptionMinimumTLSVersion": "TLSv1.2"
+            }
+          }
         }
       },
       "bundleIdentifier": "com.antarctica.bombom"
@@ -20,7 +26,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./app/assets/images/logo.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#FE5E04"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.antarctica.bombom"
@@ -44,6 +50,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "028392dc-6a98-48a9-8874-30f193313eda"
+      }
     }
   }
 }

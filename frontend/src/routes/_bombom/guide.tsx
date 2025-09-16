@@ -1,5 +1,7 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
+import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import { theme } from '@/styles/theme';
 import { Article } from '@/types/articles';
@@ -21,6 +23,7 @@ export const Route = createFileRoute('/_bombom/guide')({
 function GuidePage() {
   const guideArticles = createStorage<Article[], string>('guide-mail').get();
 
+  const deviceType = useDeviceType();
   if (!guideArticles) return null;
 
   return (
@@ -29,17 +32,24 @@ function GuidePage() {
         <GuideIcon fill={theme.colors.white} />
         <Title>가이드 메일 보관함</Title>
       </TitleWrapper>
-      <ArticleList>
-        {guideArticles.map((article) => (
-          <li key={article.articleId}>
-            <ArticleCard
-              data={article}
-              readVariant="badge"
-              to={`/articles/guide/${article.articleId}`}
-            />
-          </li>
-        ))}
-      </ArticleList>
+
+      <ContentWrapper deviceType={deviceType}>
+        <SidebarSection deviceType={deviceType}>
+          <QuickMenu />
+        </SidebarSection>
+
+        <ArticleList>
+          {guideArticles.map((article) => (
+            <li key={article.articleId}>
+              <ArticleCard
+                data={article}
+                readVariant="badge"
+                to={`/articles/guide/${article.articleId}`}
+              />
+            </li>
+          ))}
+        </ArticleList>
+      </ContentWrapper>
     </Container>
   );
 }
@@ -80,10 +90,28 @@ const GuideIcon = styled(HelpIcon)`
   text-align: center;
 `;
 
+const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
+  width: 100%;
+
+  display: flex;
+  gap: ${({ deviceType }) => (deviceType === 'pc' ? '32px' : '20px')};
+  flex-direction: ${({ deviceType }) =>
+    deviceType === 'pc' ? 'row' : 'column'};
+`;
+
+const SidebarSection = styled.div<{ deviceType: DeviceType }>`
+  width: ${({ deviceType }) => (deviceType === 'pc' ? '320px' : '100%')};
+
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+`;
+
 const ArticleList = styled.ul`
   width: 100%;
 
   display: flex;
   gap: 16px;
+  flex: 1;
   flex-direction: column;
 `;

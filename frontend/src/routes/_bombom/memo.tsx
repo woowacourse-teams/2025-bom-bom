@@ -4,6 +4,7 @@ import { useDeviceType } from '@/hooks/useDeviceType';
 import PCMemoContent from '@/pages/memo/components/PCMemoContent/PCMemoContent';
 import { useMemoFilters } from '@/pages/memo/hooks/useMemoFilters';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
+import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import { theme } from '@/styles/theme';
 import MemoIcon from '#/assets/memo.svg';
 
@@ -63,6 +64,7 @@ function MemoPage() {
               selectedNewsletterId={selectedNewsletterId}
               onSelectNewsletter={handleNewsletterChange}
             />
+            <QuickMenu />
           </SidebarSection>
 
           <MainContentSection isPC={isPC}>

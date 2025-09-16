@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { ChangeEvent, FormEvent, useState } from 'react';
-import { FieldError } from './SignupCard.types';
+import { FieldError, Gender } from './SignupCard.types';
 import {
   formatBirthDate,
   validateBirthDate,
@@ -21,7 +21,6 @@ import { formatDate } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
 import HelpIcon from '#/assets/help.svg';
 
-type Gender = 'MALE' | 'FEMALE';
 const EMAIL_DOMAIN = '@bombom.news';
 
 const SignupCard = () => {
@@ -30,7 +29,7 @@ const SignupCard = () => {
   const [nickname, setNickname] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [emailPart, setEmailPart] = useState('');
-  const [gender, setGender] = useState<Gender | null>(null);
+  const [gender, setGender] = useState<Gender>('NONE');
   const [emailHelpOpen, setEmailHelpOpen] = useState(false);
 
   const [nicknameError, setNicknameError] = useState<FieldError>(null);
@@ -44,12 +43,10 @@ const SignupCard = () => {
 
   const isFormValid =
     !nicknameError &&
-    !birthDateError &&
     !emailError &&
     nickname &&
     emailPart &&
-    birthDate &&
-    gender;
+    (!birthDate || !birthDateError);
 
   const { mutate: mutateSignup } = useMutation({
     mutationKey: ['signup', nickname, email, gender],
@@ -57,8 +54,8 @@ const SignupCard = () => {
       postSignup({
         nickname: nickname.trim(),
         email,
-        gender: gender ?? 'MALE',
-        birthDate: birthDate,
+        gender,
+        birthDate,
       }),
     onSuccess: () => {
       navigate({ to: '/' });
@@ -148,7 +145,7 @@ const SignupCard = () => {
 
         <InputField
           name="닉네임"
-          label="닉네임"
+          label={<Label required={true}>닉네임</Label>}
           inputValue={nickname}
           onInputChange={(e) => setNickname(e.target.value)}
           onBlur={handleNicknameBlur}
@@ -157,20 +154,12 @@ const SignupCard = () => {
         />
 
         <InputField
-          name="생년월일"
-          label="생년월일"
-          inputValue={birthDate}
-          onInputChange={handleBirthDateChange}
-          onBlur={handleBirthDateBlur}
-          errorString={birthDateError}
-          placeholder="YYYY-MM-DD"
-        />
-
-        <InputField
           name="email"
           label={
             <LabelRow>
-              <Label htmlFor="email">이메일</Label>
+              <Label htmlFor="email" required={true}>
+                이메일
+              </Label>
               <InfoButton
                 type="button"
                 aria-label="이메일을 수집하는 이유 안내"
@@ -204,6 +193,16 @@ const SignupCard = () => {
           errorString={emailError}
           placeholder="이메일을 입력해주세요"
           suffix={<Suffix>{EMAIL_DOMAIN}</Suffix>}
+        />
+
+        <InputField
+          name="생년월일"
+          label="생년월일"
+          inputValue={birthDate}
+          onInputChange={handleBirthDateChange}
+          onBlur={handleBirthDateBlur}
+          errorString={birthDateError}
+          placeholder="YYYY-MM-DD"
         />
 
         <FieldGroup>
@@ -299,9 +298,21 @@ const FieldGroup = styled.div`
   flex-direction: column;
 `;
 
-const Label = styled.label`
+const Label = styled.label<{ required?: boolean }>`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body2};
+
+  ${({ required, theme }) =>
+    required &&
+    `
+    &::after {
+      margin-left: 2px;
+
+      color: ${theme.colors.red};
+
+      content: '*';
+    }
+  `}
 `;
 
 const LabelRow = styled.div`

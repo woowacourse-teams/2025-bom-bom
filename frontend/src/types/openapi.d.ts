@@ -132,6 +132,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/auth/login/{provider}/native': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 네이티브 OAuth2 로그인
+     * @description 모바일 앱에서 받은 id_token과 authorization_code로 서버에서 토큰 교환 및 로그인 분기를 수행합니다. 기존 회원이면 '/'로, 신규면 '/signup'으로 리다이렉트합니다.
+     */
+    post: operations['nativeLogin'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/members/me/reading/progress/week/goal': {
     parameters: {
       query?: never;
@@ -611,13 +631,11 @@ export interface components {
       /** Format: date */
       birthDate?: string;
       /** @enum {string} */
-      gender: 'MALE' | 'FEMALE';
+      gender?: 'MALE' | 'FEMALE' | 'NONE';
     };
-    UpdateWeeklyGoalCountRequest: {
-      /** Format: int64 */
-      memberId: number;
-      /** Format: int32 */
-      weeklyGoalCount: number;
+    NativeLoginRequest: {
+      identityToken: string;
+      authorizationCode: string;
     };
     WeeklyGoalCountResponse: {
       /**
@@ -797,16 +815,16 @@ export interface components {
       offset?: number;
       sort?: components['schemas']['SortObject'];
       unpaged?: boolean;
-      /** Format: int32 */
-      pageSize?: number;
       paged?: boolean;
       /** Format: int32 */
       pageNumber?: number;
+      /** Format: int32 */
+      pageSize?: number;
     };
     SortObject: {
       empty?: boolean;
-      sorted?: boolean;
       unsorted?: boolean;
+      sorted?: boolean;
     };
     /** @description 뉴스레터 별 하이라이트 개수 통계 */
     HighlightCountPerNewsletterResponse: {
@@ -1254,18 +1272,60 @@ export interface operations {
       };
     };
   };
-  updateWeeklyGoalCount: {
+  nativeLogin: {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        provider: string;
+      };
       cookie?: never;
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['UpdateWeeklyGoalCountRequest'];
+        'application/json': components['schemas']['NativeLoginRequest'];
       };
     };
+    responses: {
+      /** @description 리다이렉트 수행 (기존: '/', 신규: '/signup') */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': string;
+        };
+      };
+      /** @description 지원하지 않는 제공자 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': string;
+        };
+      };
+      /** @description 토큰 검증 실패 또는 교환 실패 */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': string;
+        };
+      };
+    };
+  };
+  updateWeeklyGoalCount: {
+    parameters: {
+      query: {
+        weeklyGoalCount: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
     responses: {
       /** @description 주간 목표 개수 수정 성공 */
       200: {

@@ -37,11 +37,12 @@ const MemoPanel = ({
           });
         }}
       >
-        {open ? (
-          <ChevronIcon direction="right" color={theme.colors.primary} />
-        ) : (
-          <ChevronIcon direction="left" color={theme.colors.primary} />
-        )}
+        <ChevronIcon
+          direction={open ? 'right' : 'left'}
+          width={24}
+          height={24}
+          color={theme.colors.primary}
+        />
       </ToggleButton>
 
       <Header>
@@ -112,7 +113,7 @@ const Container = styled.aside<{ isOpen: boolean }>`
 
 const ToggleButton = styled.button<{ isOpen: boolean }>`
   position: absolute;
-  top: 50%;
+  top: 80vh;
   left: -40px;
   width: 40px;
   height: 80px;

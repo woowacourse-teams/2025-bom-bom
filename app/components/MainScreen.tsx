@@ -105,6 +105,7 @@ export const MainScreen: React.FC = () => {
           sharedCookiesEnabled
           thirdPartyCookiesEnabled
           webviewDebuggingEnabled
+          domStorageEnabled
           pullToRefreshEnabled
           onMessage={handleWebViewMessage}
           onContentProcessDidTerminate={(syntheticEvent) => {

@@ -20,7 +20,7 @@ services:
       JAVA_TOOL_OPTIONS: -javaagent:/otel/opentelemetry-javaagent.jar
       OTEL_SERVICE_NAME: bombom-server-prod
       OTEL_EXPORTER_OTLP_ENDPOINT: ${PROD_OTEL_ENDPOINT}
-      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
       OTEL_TRACES_EXPORTER: otlp
       OTEL_TRACES_SAMPLER: always_on
       OTEL_METRICS_EXPORTER: none
@@ -29,9 +29,6 @@ services:
       # exclude
       OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDE_URLS: /actuator/.*
       OTEL_JAVAAGENT_DEBUG: "true"
-
-      # Micrometer trace off
-      OTEL_JAVAAGENT_DISABLED_INSTRUMENTATIONS: micrometer
 
     volumes:
       - /home/ec2-user/bombom-prod/logs:/logs

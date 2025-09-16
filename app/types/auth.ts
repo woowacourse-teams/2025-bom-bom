@@ -20,6 +20,7 @@ export interface AuthContextType {
 }
 
 export interface LoginResponse {
-  token: string;
-  user: User;
+  message: string;
+  sessionId: string;
+  status: string;
 }

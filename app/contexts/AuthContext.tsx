@@ -49,7 +49,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const token = await AsyncStorage.getItem("authToken");
         if (token) {
           const response = await ApiClient.verifyToken();
-          setUser(response.user);
+          if (response?.sessionId) {
+            await AsyncStorage.setItem("sessionId", response.sessionId);
+          }
         }
       } catch (error) {
         await AsyncStorage.removeItem("authToken");
@@ -79,8 +81,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           userInfo.data.serverAuthCode || ""
         );
 
-        await AsyncStorage.setItem("authToken", response.token);
-        setUser(response.user);
+        if (response?.sessionId) {
+          await AsyncStorage.setItem("sessionId", response.sessionId);
+        }
       } else {
         throw new Error("ID 토큰을 가져올 수 없습니다.");
       }
@@ -123,8 +126,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           credential.authorizationCode
         );
 
-        await AsyncStorage.setItem("authToken", response.token);
-        setUser(response.user);
+        if (response?.sessionId) {
+          await AsyncStorage.setItem("sessionId", response.sessionId);
+        }
       } else {
         throw new Error("Apple 로그인 정보를 가져올 수 없습니다.");
       }

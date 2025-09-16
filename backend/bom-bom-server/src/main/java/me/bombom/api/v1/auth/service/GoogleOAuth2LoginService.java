@@ -1,7 +1,6 @@
 package me.bombom.api.v1.auth.service;
 
 import jakarta.servlet.http.HttpSession;
-import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -75,8 +74,8 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
     @Transactional
     public Optional<Member> loginWithNative(NativeLoginRequest request) {
         try {
-            Map<String, Object> tokenResponse = exchangeGoogleToken(request.authorizationCode());
-            saveGoogleAccessToken(tokenResponse);
+//            Map<String, Object> tokenResponse = exchangeGoogleToken(request.authorizationCode());
+//            saveGoogleAccessToken(tokenResponse);
 
             String sub = validateAndExtractGoogleSubject(request.identityToken());
             return findMemberAndSetPendingIfNew(sub);

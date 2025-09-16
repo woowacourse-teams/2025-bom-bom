@@ -21,7 +21,6 @@ export const LoginScreenOverlay: React.FC<LoginScreenOverlayProps> = ({
       onRequestClose={onClose}
     >
       <View style={styles.container}>
-        {/* 닫기 버튼 */}
         <TouchableOpacity
           style={styles.closeButton}
           onPress={onClose}
@@ -30,7 +29,6 @@ export const LoginScreenOverlay: React.FC<LoginScreenOverlayProps> = ({
           <Ionicons name="close" size={24} color="#8E8E93" />
         </TouchableOpacity>
 
-        {/* 로그인 화면 */}
         <LoginScreen />
       </View>
     </Modal>

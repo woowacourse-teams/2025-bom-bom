@@ -15,8 +15,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../contexts/AuthContext";
 import { Button } from "./Button";
 
-// const { width } = Dimensions.get("window"); // Unused variable
-
 export const LoginScreen: React.FC = () => {
   const { loginWithGoogle, loginWithApple, isLoading, error, clearError } =
     useAuth();

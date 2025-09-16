@@ -73,10 +73,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const userInfo = await GoogleSignin.signIn();
 
-      console.log(userInfo);
-
       if (userInfo?.data?.idToken) {
-        const response = await ApiClient.loginWithGoogle(userInfo.data.idToken);
+        const response = await ApiClient.loginWithGoogle(
+          userInfo.data.idToken,
+          userInfo.data.serverAuthCode || ""
+        );
 
         await AsyncStorage.setItem("authToken", response.token);
         setUser(response.user);

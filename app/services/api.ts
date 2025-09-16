@@ -36,14 +36,30 @@ export class ApiClient {
   }
 
   // Google 로그인
-  static async loginWithGoogle(idToken: string): Promise<LoginResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/login/google/native`, {
-      method: "POST",
-      headers: await this.getAuthHeaders(),
-      body: JSON.stringify({ idToken }),
-    });
+  static async loginWithGoogle(
+    idToken: string,
+    serverAuthCode: string
+  ): Promise<LoginResponse> {
+    try {
+      const url = `${API_BASE_URL}/auth/login/google/native`;
 
-    return this.handleResponse<LoginResponse>(response);
+      const response = await fetch(url, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          identityToken: idToken,
+          authorizationCode: serverAuthCode,
+        }),
+      });
+
+      return this.handleResponse<LoginResponse>(response);
+    } catch (error) {
+      console.error("Login with Google failed:", error);
+      throw error;
+    }
   }
 
   // Apple 로그인
@@ -53,12 +69,15 @@ export class ApiClient {
   ): Promise<LoginResponse> {
     const response = await fetch(`${API_BASE_URL}/auth/login/apple/native`, {
       method: "POST",
+      credentials: "include",
       headers: await this.getAuthHeaders(),
       body: JSON.stringify({
         identityToken,
         authorizationCode,
       }),
     });
+
+    console.log({ response });
 
     return this.handleResponse<LoginResponse>(response);
   }

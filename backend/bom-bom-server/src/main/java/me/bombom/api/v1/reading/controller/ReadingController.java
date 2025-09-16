@@ -1,12 +1,11 @@
 package me.bombom.api.v1.reading.controller;
 
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.reading.dto.request.UpdateWeeklyGoalCountRequest;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
@@ -15,7 +14,6 @@ import me.bombom.api.v1.reading.service.ReadingService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,8 +28,10 @@ public class ReadingController implements ReadingControllerApi{
 
     @Override
     @PatchMapping("/progress/week/goal")
-    public WeeklyGoalCountResponse updateWeeklyGoalCount(@Valid @RequestBody UpdateWeeklyGoalCountRequest request){
-        return readingService.updateWeeklyGoalCount(request);
+    public WeeklyGoalCountResponse updateWeeklyGoalCount(
+            @LoginMember Member member,
+            @NotNull(message = "주간 목표 개수는 필수 입력 값입니다.") @Positive(message = "주간 목표 개수는 양수여야 합니다.") Integer weeklyGoalCount){
+        return readingService.updateWeeklyGoalCount(member.getId(), weeklyGoalCount);
     }
 
     @Override

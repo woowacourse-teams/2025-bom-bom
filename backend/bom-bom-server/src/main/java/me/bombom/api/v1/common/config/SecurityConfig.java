@@ -23,9 +23,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
+import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
@@ -37,6 +37,8 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.session.web.http.CookieSerializer;
+import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -114,7 +116,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public Supplier<String> appleClientSecretSupplier(
+    public AppleClientSecretSupplier appleClientSecretSupplier(
             @Value("${oauth2.apple.team-id}") String teamId,
             @Value("${oauth2.apple.key-id}") String keyId,
             @Value("${oauth2.apple.client-id}") String clientId,
@@ -135,7 +137,7 @@ public class SecurityConfig {
     public OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegatingAccessTokenClient(
             AppleOAuth2AccessTokenResponseClient appleClient
     ) {
-        DefaultAuthorizationCodeTokenResponseClient defaultClient = new DefaultAuthorizationCodeTokenResponseClient();
+        var defaultClient = new RestClientAuthorizationCodeTokenResponseClient();
         return request -> {
             String registrationId = request.getClientRegistration().getRegistrationId();
             if ("apple".equals(registrationId)) {
@@ -185,5 +187,16 @@ public class SecurityConfig {
             // 다른 OIDC 제공자(예: Google)는 Spring Security의 기본 디코더를 사용합니다.
             return JwtDecoders.fromOidcIssuerLocation(clientRegistration.getProviderDetails().getIssuerUri());
         };
+    }
+
+    @Bean
+    public CookieSerializer cookieSerializer() {
+        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+        serializer.setCookieName("JSESSIONID");
+        serializer.setUseHttpOnlyCookie(true);
+        serializer.setUseSecureCookie(true);
+        serializer.setSameSite("None");
+        serializer.setCookiePath("/");
+        return serializer;
     }
 }

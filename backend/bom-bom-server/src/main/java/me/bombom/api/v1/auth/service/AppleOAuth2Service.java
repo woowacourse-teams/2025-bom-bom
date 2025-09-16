@@ -1,20 +1,23 @@
 package me.bombom.api.v1.auth.service;
 
 import jakarta.servlet.http.HttpSession;
+import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.auth.AppleClientSecretSupplier;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
+import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
@@ -38,10 +41,16 @@ public class AppleOAuth2Service extends OidcUserService {
     private final MemberRepository memberRepository;
     private final HttpSession session;
     private final RestClient.Builder restClientBuilder;
-    private final Supplier<String> appleClientSecretSupplier;
-    
+    private final AppleClientSecretSupplier appleClientSecretSupplier;
+    private final IdTokenValidator idTokenValidator;
+
+    //웹 로그인에서 사용
     @Value("${oauth2.apple.client-id}")
     private String clientId;
+
+    //앱 로그인에서 사용
+    @Value("${oauth2.apple.bundle-id:}")
+    private String bundleId;
 
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
@@ -58,28 +67,15 @@ public class AppleOAuth2Service extends OidcUserService {
             String accessToken = extractAccessTokenFromOidcRequest(userRequest);
             if (accessToken != null) {
                 session.setAttribute("appleAccessToken", accessToken);
+                session.setAttribute("appleClientId", clientId);
                 log.info("Apple Access Token 세션에 저장 완료");
             } else {
                 log.warn("Apple Access Token 추출 실패");
             }
             
             // 기존 회원 확인
-            Optional<Member> member = memberRepository.findByProviderAndProviderId("apple", providerId);
-            if (member.isEmpty()) {
-                // Apple OIDC 신규 사용자 - PendingOAuth2Member를 세션에 저장
-                PendingOAuth2Member pendingMember = PendingOAuth2Member.builder()
-                        .provider("apple")
-                        .providerId(providerId)
-                        .profileUrl(null) // Apple은 profileUrl이 없음
-                        .build();
-                session.setAttribute("pendingMember", pendingMember);
-                log.info("Apple OIDC 신규 사용자 - 회원가입 대기 상태로 설정, providerId: {}", providerId);
-                log.info("세션에 pendingMember 저장 완료 - sessionId: {}, pendingMember: {}", session.getId(), pendingMember);
-                return new CustomOAuth2User(oidcUser.getAttributes(), null, oidcUser.getIdToken(), oidcUser.getUserInfo());
-            }
-            
-            log.info("Apple OIDC 기존 사용자 - memberId: {}", member.get().getId());
-            return new CustomOAuth2User(oidcUser.getAttributes(), member.get(), oidcUser.getIdToken(), oidcUser.getUserInfo());
+            Optional<Member> member = findMemberAndSetPendingIfNew(providerId);
+            return new CustomOAuth2User(oidcUser.getAttributes(), member.orElse(null), oidcUser.getIdToken(), oidcUser.getUserInfo());
         } catch (Exception e) {
             log.error("Apple OIDC 로그인 처리 실패 - error: {}", e.getMessage(), e);
             throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
@@ -99,16 +95,22 @@ public class AppleOAuth2Service extends OidcUserService {
             return false;
         }
         try {
-            log.info("Apple Token Revoke 시작 - clientId: {}", clientId);
+            String revokeClientId = (String) session.getAttribute("appleClientId");
+            if (revokeClientId == null || revokeClientId.isBlank()) {
+                revokeClientId = clientId;
+            }
+            log.info("Apple Token Revoke 시작 - clientId: {}", revokeClientId);
 
             MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
             requestBody.add("token", accessToken);
-            requestBody.add("client_id", clientId);
-            requestBody.add("client_secret", appleClientSecretSupplier.get());
+            requestBody.add("client_id", revokeClientId);
+            String revokeClientSecret = revokeClientId.equals(this.clientId) ? appleClientSecretSupplier.get() : appleClientSecretSupplier.generateFor(revokeClientId);
+            requestBody.add("client_secret", revokeClientSecret);
             requestBody.add("token_type_hint", "access_token");
 
             restClientBuilder.build().post()
                 .uri(APPLE_REVOKE_URL)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(requestBody)
                 .retrieve()
                 .toBodilessEntity();
@@ -121,7 +123,28 @@ public class AppleOAuth2Service extends OidcUserService {
             return false;
         }
     }
-    
+
+    /**
+     *  iOS 네이티브 로그인 처리: 번들 ID로 client_secret 생성하여 코드 교환
+     */
+    public Optional<Member> loginWithNative(NativeLoginRequest request) {
+        try {
+            if (bundleId == null || bundleId.isBlank()) {
+                throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
+                        .addContext("reason", "bundleId_not_configured");
+            }
+            // id_token 서명/iss/aud 검증 후 sub 획득 (aud는 번들 ID)
+            String subject = idTokenValidator.validateAppleAndGetSubject(request.identityToken(), bundleId);
+            Map<String, Object> token = requestAppleToken(request.authorizationCode(), bundleId, null);
+            session.setAttribute("appleAccessToken", token != null ? token.get("access_token") : null);
+            session.setAttribute("appleClientId", bundleId);
+            return findMemberAndSetPendingIfNew(subject);
+        } catch (Exception e) {
+            throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
+                    .addContext("reason", "apple_native_exchange_failed");
+        }
+    }
+
     /**
      * Apple Access Token을 추출합니다 (OidcUserRequest용)
      * @param userRequest OIDC 사용자 요청
@@ -141,22 +164,52 @@ public class AppleOAuth2Service extends OidcUserService {
         }
     }
 
-    /**
-     * Apple Access Token을 추출합니다 (OAuth2UserRequest용)
-     * @param userRequest OAuth2 사용자 요청
-     * @return Access Token 또는 null
-     */
-    private String extractAccessToken(OAuth2UserRequest userRequest) {
-        try {
-            Object accessTokenObj = userRequest.getAdditionalParameters().get(ACCESS_TOKEN_KEY);
-            if (accessTokenObj != null) {
-                log.info("Apple Access Token 추출 성공");
-                return accessTokenObj.toString();
-            }
-            return null;
-        } catch (Exception e) {
-            log.warn("Apple Access Token 추출 실패 - error: {}", e.getMessage());
-            return null;
+    private Map<String, Object> requestAppleToken(String code, String clientIdForExchange, String redirectUri) {
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "authorization_code");
+        body.add("code", code);
+        body.add("client_id", clientIdForExchange);
+        String clientSecret = clientIdForExchange != null && !clientIdForExchange.equals(this.clientId)
+                ? appleClientSecretSupplier.generateFor(clientIdForExchange)
+                : appleClientSecretSupplier.get();
+        body.add("client_secret", clientSecret);
+        if (redirectUri != null) {
+            body.add("redirect_uri", redirectUri);
         }
+        Map<String, Object> responseMap = restClientBuilder.build().post()
+                .uri("https://appleid.apple.com/auth/token")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(body)
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+
+        if (responseMap == null) {
+            throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN).addContext("reason", "apple_token_response_is_null");
+        }
+
+        if (responseMap.containsKey("error")) {
+            log.error("Apple 토큰 교환 실패 - error: {}, description: {}", responseMap.get("error"), responseMap.get("error_description"));
+            throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
+                    .addContext("reason", responseMap.get("error_description"));
+        }
+
+        return responseMap;
+    }
+
+    // 공통: 기존 회원 조회 + 신규면 pendingMember 세션 저장
+    private Optional<Member> findMemberAndSetPendingIfNew(String providerId) {
+        Optional<Member> member = memberRepository.findByProviderAndProviderId("apple", providerId);
+        if (member.isEmpty()) {
+            PendingOAuth2Member pendingMember = PendingOAuth2Member.builder()
+                    .provider("apple")
+                    .providerId(providerId)
+                    .profileUrl(null)
+                    .build();
+            session.setAttribute("pendingMember", pendingMember);
+            log.info("Apple 신규 사용자 - 회원가입 대기 상태로 설정, providerId: {}", providerId);
+        } else {
+            log.info("Apple 기존 사용자 - memberId: {}", member.get().getId());
+        }
+        return member;
     }
 }

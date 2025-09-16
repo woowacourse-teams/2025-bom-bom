@@ -8,12 +8,16 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
+import me.bombom.api.v1.auth.dto.NativeLoginResponse;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.dto.request.DuplicateCheckRequest;
+import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
 import me.bombom.api.v1.auth.service.AppleOAuth2Service;
+import me.bombom.api.v1.auth.service.GoogleOAuth2LoginService;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.common.resolver.LoginMember;
@@ -21,6 +25,7 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.service.MemberService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +46,7 @@ public class AuthController implements AuthControllerApi{
 
     private final MemberService memberService;
     private final AppleOAuth2Service appleOAuth2Service;
+    private final GoogleOAuth2LoginService googleOAuth2LoginService;
 
     @Override
     @PostMapping("/signup")
@@ -85,10 +91,28 @@ public class AuthController implements AuthControllerApi{
         response.sendRedirect("/oauth2/authorization/" + provider);
     }
 
+    // 통합 네이티브 엔드포인트: /login/{provider}/native
+    @Override
+    @PostMapping("/login/{provider}/native")
+    public ResponseEntity nativeLogin(
+            @PathVariable("provider") String provider,
+            @Valid @RequestBody NativeLoginRequest nativeLoginRequest,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        if ("apple".equalsIgnoreCase(provider)) {
+            return handleNativeResult(appleOAuth2Service.loginWithNative(nativeLoginRequest), request);
+        }
+        if ("google".equalsIgnoreCase(provider)) {
+            return handleNativeResult(googleOAuth2LoginService.loginWithNative(nativeLoginRequest), request);
+        }
+        return ResponseEntity.badRequest().body(new NativeLoginResponse("ERROR", "지원하지 않는 제공자입니다.", null));
+    }
+
     @Override
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void logout(HttpServletRequest request) {
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
         if (request.getSession(false) != null) {
             request.getSession(false).invalidate();
         }
@@ -98,11 +122,11 @@ public class AuthController implements AuthControllerApi{
     @PostMapping("/withdraw")
     public void withdraw(@LoginMember Member member, HttpSession session, HttpServletResponse response) throws IOException {
         String appleAccessToken = (String) session.getAttribute("appleAccessToken");
-        
+
         // Apple 로그인 사용자이고 Access Token이 없는 경우
         if (member.getProvider().equals("apple") && appleAccessToken == null) {
             log.info("Apple Access Token 없음 - memberId: {}, 세션ID: {}", member.getId(), session.getId());
-            
+
             // 탈퇴 플래그 저장 후 재로그인 요구
             session.setAttribute("pendingWithdraw", true);
             session.setAttribute("withdrawMemberId", member.getId());
@@ -110,7 +134,7 @@ public class AuthController implements AuthControllerApi{
             return;
         }
         log.info("회원 탈퇴 진행 - memberId: {}, provider: {}", member.getId(), member.getProvider());
-        
+
         // Apple 연동 회원인 경우 토큰 철회 로직 호출
         if ("apple".equals(member.getProvider())) {
             log.info("Apple 연동 회원 탈퇴 - 토큰 철회를 시도합니다. memberId: {}", member.getId());
@@ -121,11 +145,27 @@ public class AuthController implements AuthControllerApi{
                 log.warn("Apple Token Revoke 실패 - memberId: {}, 탈퇴는 계속 진행됩니다", member.getId());
             }
         }
-        
+
         memberService.revoke(member.getId());
         session.invalidate();
         expireSessionCookie(response);
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+    }
+
+    private ResponseEntity handleNativeResult(Optional<Member> existing, HttpServletRequest request) {
+        // 세션 생성 트리거 (컨테이너가 Set-Cookie: JSESSIONID를 설정)
+        String sessionId = request.getSession(true).getId();
+        SecurityContextHolder.getContext().getAuthentication();
+
+        if (existing.isPresent()) {
+            OAuth2AuthenticationToken authentication = createAuthenticationToken(existing.get());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            return ResponseEntity.ok()
+                    .body(new NativeLoginResponse("SUCCESS", "로그인에 성공했습니다", sessionId));
+        } else {
+            return ResponseEntity.ok()
+                    .body(new NativeLoginResponse("SIGNUP_REQUIRED", "신규 회원입니다. 회원가입이 필요합니다", sessionId));
+        }
     }
 
     private void expireSessionCookie(HttpServletResponse response) {

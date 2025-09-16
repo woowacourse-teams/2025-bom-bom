@@ -75,7 +75,8 @@ public interface AuthControllerApi {
     })
     ResponseEntity nativeLogin(
         @PathVariable("provider") String provider,
-        @RequestBody NativeLoginRequest request,
+        @RequestBody NativeLoginRequest nativeLoginRequest,
+        HttpServletRequest request,
         HttpServletResponse response
     ) throws IOException;
 

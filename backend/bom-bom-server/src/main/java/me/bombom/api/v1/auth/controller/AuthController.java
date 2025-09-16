@@ -96,16 +96,17 @@ public class AuthController implements AuthControllerApi{
     @PostMapping("/login/{provider}/native")
     public ResponseEntity nativeLogin(
             @PathVariable("provider") String provider,
-            @Valid @RequestBody NativeLoginRequest request,
+            @Valid @RequestBody NativeLoginRequest nativeLoginRequest,
+            HttpServletRequest request,
             HttpServletResponse response
     ) {
         if ("apple".equalsIgnoreCase(provider)) {
-            return handleNativeResult(appleOAuth2Service.loginWithNative(request));
+            return handleNativeResult(appleOAuth2Service.loginWithNative(nativeLoginRequest), request);
         }
         if ("google".equalsIgnoreCase(provider)) {
-            return handleNativeResult(googleOAuth2LoginService.loginWithNative(request));
+            return handleNativeResult(googleOAuth2LoginService.loginWithNative(nativeLoginRequest), request);
         }
-        return ResponseEntity.badRequest().body(new NativeLoginResponse("ERROR", "지원하지 않는 제공자입니다."));
+        return ResponseEntity.badRequest().body(new NativeLoginResponse("ERROR", "지원하지 않는 제공자입니다.", null));
     }
 
     @Override
@@ -151,13 +152,26 @@ public class AuthController implements AuthControllerApi{
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 
-    private ResponseEntity handleNativeResult(Optional<Member> existing) {
+    private ResponseEntity handleNativeResult(Optional<Member> existing, HttpServletRequest request) {
+        // 세션 생성 트리거 (컨테이너가 Set-Cookie: JSESSIONID를 설정)
+        String sessionId = request.getSession(true).getId();
+        boolean isAuthenticatedBefore = SecurityContextHolder.getContext().getAuthentication() != null;
+        log.info("[NativeLogin] session created/exists - id: {}, authBeforeSet: {}", sessionId, isAuthenticatedBefore);
+
         if (existing.isPresent()) {
             OAuth2AuthenticationToken authentication = createAuthenticationToken(existing.get());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            return ResponseEntity.ok(new NativeLoginResponse("SUCCESS", "로그인에 성공했습니다"));
+            log.info("[NativeLogin] auth set - memberId: {}, provider: {}",
+                    existing.get().getId(), existing.get().getProvider());
+            return ResponseEntity.ok()
+                    .header("X-Debug-Session", sessionId)
+                    .header("X-Debug-Auth", existing.get().getId().toString())
+                    .body(new NativeLoginResponse("SUCCESS", "로그인에 성공했습니다", sessionId));
         } else {
-            return ResponseEntity.ok(new NativeLoginResponse("SIGNUP_REQUIRED", "신규 회원입니다. 회원가입이 필요합니다"));
+            log.info("[NativeLogin] signup required - sessionId: {}", sessionId);
+            return ResponseEntity.ok()
+                    .header("X-Debug-Session", sessionId)
+                    .body(new NativeLoginResponse("SIGNUP_REQUIRED", "신규 회원입니다. 회원가입이 필요합니다", sessionId));
         }
     }
 

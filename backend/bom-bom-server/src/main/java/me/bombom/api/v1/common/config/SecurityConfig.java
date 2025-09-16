@@ -37,6 +37,8 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.session.web.http.CookieSerializer;
+import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -185,5 +187,16 @@ public class SecurityConfig {
             // 다른 OIDC 제공자(예: Google)는 Spring Security의 기본 디코더를 사용합니다.
             return JwtDecoders.fromOidcIssuerLocation(clientRegistration.getProviderDetails().getIssuerUri());
         };
+    }
+
+    @Bean
+    public CookieSerializer cookieSerializer() {
+        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+        serializer.setCookieName("JSESSIONID");
+        serializer.setUseHttpOnlyCookie(true);
+        serializer.setUseSecureCookie(true);
+        serializer.setSameSite("None");
+        serializer.setCookiePath("/");
+        return serializer;
     }
 }

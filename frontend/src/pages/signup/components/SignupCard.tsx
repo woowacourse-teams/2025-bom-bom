@@ -146,16 +146,6 @@ const SignupCard = () => {
         />
 
         <InputField
-          name="생년월일"
-          label="생년월일"
-          inputValue={birthDate}
-          onInputChange={handleBirthDateChange}
-          onBlur={handleBirthDateBlur}
-          errorString={birthDateError}
-          placeholder="YYYY-MM-DD"
-        />
-
-        <InputField
           name="email"
           label={
             <LabelRow>
@@ -193,6 +183,16 @@ const SignupCard = () => {
           errorString={emailError}
           placeholder="이메일을 입력해주세요"
           suffix={<Suffix>{EMAIL_DOMAIN}</Suffix>}
+        />
+
+        <InputField
+          name="생년월일"
+          label="생년월일"
+          inputValue={birthDate}
+          onInputChange={handleBirthDateChange}
+          onBlur={handleBirthDateBlur}
+          errorString={birthDateError}
+          placeholder="YYYY-MM-DD"
         />
 
         <FieldGroup>

@@ -14,6 +14,7 @@ import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -72,7 +73,7 @@ public interface AuthControllerApi {
         @ApiResponse(responseCode = "400", description = "지원하지 않는 제공자"),
         @ApiResponse(responseCode = "401", description = "토큰 검증 실패 또는 교환 실패")
     })
-    void nativeLogin(
+    ResponseEntity nativeLogin(
         @PathVariable("provider") String provider,
         @RequestBody NativeLoginRequest request,
         HttpServletResponse response

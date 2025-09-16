@@ -3,7 +3,6 @@ import { DEFAULT_ERROR_MESSAGES } from '@/apis/constants/defaultErrorMessage';
 import { queries } from '@/apis/queries';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import RequireLoginCard from '@/components/RequireLoginCard/RequireLoginCard';
-import { GOOGLE_ANALYTICS_ID } from '@/libs/googleAnalytics/constants';
 
 let isFirstVisit = true;
 
@@ -15,14 +14,12 @@ export const Route = createFileRoute('/_bombom')({
     try {
       const user = await queryClient.fetchQuery(queries.me());
 
-      if (typeof window.gtag !== 'function') return;
-      if (user) {
-        window.gtag('config', GOOGLE_ANALYTICS_ID, { user_id: user.id });
-      } else {
-        window.gtag('config', GOOGLE_ANALYTICS_ID, { user_id: null });
-      }
+      window.gtag?.('set', { user_id: user ? user.id : 'guest' });
     } catch {
+      window.gtag?.('set', { user_id: 'guest' });
+
       if (location.pathname !== '/recommend') {
+        console.log('not first visit');
         if (isFirstVisit) {
           return redirect({ to: '/recommend' });
         }

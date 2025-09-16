@@ -1,12 +1,16 @@
 package me.bombom.api.v1.auth.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
+import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +31,9 @@ class AuthControllerTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private Member member;
 
@@ -75,5 +82,19 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andDo(print());
+    }
+
+    @Test
+    void gender_none일_시_NONE으로_자동세팅() throws Exception {
+        String json = """
+                {
+                    "nickname": "newUser",
+                    "email": "newuser123@bombom.news",
+                    "birthDate": "2000-01-01"
+                }
+                """;
+
+        MemberSignupRequest request = objectMapper.readValue(json, MemberSignupRequest.class);
+        assertThat(Gender.NONE).isEqualTo(request.gender());
     }
 }

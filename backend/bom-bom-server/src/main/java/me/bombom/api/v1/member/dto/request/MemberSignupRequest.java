@@ -25,7 +25,11 @@ public record MemberSignupRequest(
         @JsonFormat(pattern = "yyyy-MM-dd")
         LocalDate birthDate,
 
-        @NotNull
         Gender gender
 ) {
+        public MemberSignupRequest {
+                if (gender == null) {
+                        gender = Gender.NONE;
+                }
+        }
 }

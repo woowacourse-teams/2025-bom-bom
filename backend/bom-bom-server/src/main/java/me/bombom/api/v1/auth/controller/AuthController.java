@@ -89,6 +89,7 @@ public class AuthController implements AuthControllerApi{
     }
 
     // 통합 네이티브 엔드포인트: /login/{provider}/native
+    @Override
     @PostMapping("/login/{provider}/native")
     public void nativeLogin(
             @PathVariable("provider") String provider,
@@ -110,7 +111,7 @@ public class AuthController implements AuthControllerApi{
         if (existing.isPresent()) {
             OAuth2AuthenticationToken authentication = createAuthenticationToken(existing.get());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            response.sendRedirect("/");
+//            response.sendRedirect("/");
         } else {
             response.sendRedirect("/signup");
         }
@@ -119,7 +120,7 @@ public class AuthController implements AuthControllerApi{
     @Override
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void logout(HttpServletRequest request) {
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
         if (request.getSession(false) != null) {
             request.getSession(false).invalidate();
         }

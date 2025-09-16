@@ -85,7 +85,7 @@ public interface AuthControllerApi {
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "로그아웃 성공")
     })
-    void logout(HttpServletRequest request);
+    void logout(HttpServletRequest request, HttpServletResponse response);
 
     @Operation(
         summary = "회원 탈퇴",

@@ -1,13 +1,10 @@
 package me.bombom.api.v1.auth.service;
 
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
-import me.bombom.api.v1.member.domain.Member;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -41,15 +38,5 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 });
 
         return loginService.loadUser(userRequest);
-    }
-
-    @Transactional
-    public Optional<Member> loginWithNative(String provider, NativeLoginRequest request) {
-        OAuth2LoginService loginService = loginServices.stream()
-                .filter(service -> service.supports(provider))
-                .findFirst()
-                .orElseThrow(() -> new UnauthorizedException(ErrorDetail.UNSUPPORTED_OAUTH2_PROVIDER)
-                        .addContext("provider", provider));
-        return loginService.loginWithNative(request);
     }
 }

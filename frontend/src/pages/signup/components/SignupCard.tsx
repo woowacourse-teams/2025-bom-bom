@@ -134,7 +134,7 @@ const SignupCard = () => {
 
         <InputField
           name="닉네임"
-          label={<RequiredLabel>닉네임</RequiredLabel>}
+          label={<Label required={true}>닉네임</Label>}
           inputValue={nickname}
           onInputChange={(e) => setNickname(e.target.value)}
           onBlur={handleNicknameBlur}
@@ -146,7 +146,9 @@ const SignupCard = () => {
           name="email"
           label={
             <LabelRow>
-              <RequiredLabel htmlFor="email">이메일</RequiredLabel>
+              <Label htmlFor="email" required={true}>
+                이메일
+              </Label>
               <InfoButton
                 type="button"
                 aria-label="이메일을 수집하는 이유 안내"
@@ -285,19 +287,21 @@ const FieldGroup = styled.div`
   flex-direction: column;
 `;
 
-const Label = styled.label`
+const Label = styled.label<{ required?: boolean }>`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body2};
-`;
 
-const RequiredLabel = styled(Label)`
-  &::after {
-    margin-left: 2px;
+  ${({ required, theme }) =>
+    required &&
+    `
+    &::after {
+      margin-left: 2px;
 
-    color: ${({ theme }) => theme.colors.red};
+      color: ${theme.colors.red};
 
-    content: '*';
-  }
+      content: '*';
+    }
+  `}
 `;
 
 const LabelRow = styled.div`

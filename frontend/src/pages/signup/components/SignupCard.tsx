@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { ChangeEvent, FormEvent, useState } from 'react';
-import { FieldError } from './SignupCard.types';
+import { FieldError, Gender } from './SignupCard.types';
 import {
   formatBirthDate,
   validateBirthDate,
@@ -20,7 +20,6 @@ import { formatDate } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
 import HelpIcon from '#/assets/help.svg';
 
-type Gender = 'MALE' | 'FEMALE';
 const EMAIL_DOMAIN = '@bombom.news';
 
 const SignupCard = () => {
@@ -29,7 +28,7 @@ const SignupCard = () => {
   const [nickname, setNickname] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [emailPart, setEmailPart] = useState('');
-  const [gender, setGender] = useState<Gender | null>(null);
+  const [gender, setGender] = useState<Gender>('NONE');
   const [emailHelpOpen, setEmailHelpOpen] = useState(false);
 
   const [nicknameError, setNicknameError] = useState<FieldError>(null);
@@ -43,12 +42,10 @@ const SignupCard = () => {
 
   const isFormValid =
     !nicknameError &&
-    !birthDateError &&
     !emailError &&
     nickname &&
     emailPart &&
-    birthDate &&
-    gender;
+    (!birthDate || !birthDateError);
 
   const { mutate: mutateSignup } = useMutation({
     mutationKey: ['signup', nickname, email, gender],
@@ -56,8 +53,8 @@ const SignupCard = () => {
       postSignup({
         nickname: nickname.trim(),
         email,
-        gender: gender ?? 'MALE',
-        birthDate: birthDate,
+        gender,
+        birthDate,
       }),
     onSuccess: () => {
       navigate({ to: '/' });

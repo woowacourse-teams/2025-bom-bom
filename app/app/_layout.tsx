@@ -16,6 +16,7 @@ function AppContent() {
 }
 
 export default function RootLayout() {
+
   return (
     <AuthProvider>
       <StatusBar style="auto" />

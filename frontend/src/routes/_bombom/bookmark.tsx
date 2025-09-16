@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react';
 import { queries } from '@/apis/queries';
 import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
+import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import BookmarkIcon from '#/assets/bookmark-inactive.svg';
@@ -63,11 +64,12 @@ function BookmarkPage() {
               selectedNewsletterId={selectedNewsletterId}
               onSelectNewsletter={handleNewsletterChange}
             />
+            <QuickMenu />
           </SidebarSection>
 
           <MainContentSection deviceType={deviceType}>
             <SummaryBar>
-              <ResultsInfo>총 {totalElements}개의 메모</ResultsInfo>
+              <ResultsInfo>총 {totalElements}개의 북마크</ResultsInfo>
             </SummaryBar>
             {articles.content && articles.content?.length > 0 ? (
               <ArticleList>
@@ -133,8 +135,6 @@ const SidebarSection = styled.div<{ deviceType: DeviceType }>`
   display: flex;
   gap: 20px;
   flex-direction: column;
-
-  order: ${({ deviceType }) => (deviceType === 'pc' ? 1 : 0)};
 `;
 
 const MainContentSection = styled.div<{ deviceType: DeviceType }>`

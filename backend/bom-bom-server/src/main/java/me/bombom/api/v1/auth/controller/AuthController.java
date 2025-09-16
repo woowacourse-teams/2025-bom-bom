@@ -155,22 +155,15 @@ public class AuthController implements AuthControllerApi{
     private ResponseEntity handleNativeResult(Optional<Member> existing, HttpServletRequest request) {
         // 세션 생성 트리거 (컨테이너가 Set-Cookie: JSESSIONID를 설정)
         String sessionId = request.getSession(true).getId();
-        boolean isAuthenticatedBefore = SecurityContextHolder.getContext().getAuthentication() != null;
-        log.info("[NativeLogin] session created/exists - id: {}, authBeforeSet: {}", sessionId, isAuthenticatedBefore);
+        SecurityContextHolder.getContext().getAuthentication();
 
         if (existing.isPresent()) {
             OAuth2AuthenticationToken authentication = createAuthenticationToken(existing.get());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.info("[NativeLogin] auth set - memberId: {}, provider: {}",
-                    existing.get().getId(), existing.get().getProvider());
             return ResponseEntity.ok()
-                    .header("X-Debug-Session", sessionId)
-                    .header("X-Debug-Auth", existing.get().getId().toString())
                     .body(new NativeLoginResponse("SUCCESS", "로그인에 성공했습니다", sessionId));
         } else {
-            log.info("[NativeLogin] signup required - sessionId: {}", sessionId);
             return ResponseEntity.ok()
-                    .header("X-Debug-Session", sessionId)
                     .body(new NativeLoginResponse("SIGNUP_REQUIRED", "신규 회원입니다. 회원가입이 필요합니다", sessionId));
         }
     }

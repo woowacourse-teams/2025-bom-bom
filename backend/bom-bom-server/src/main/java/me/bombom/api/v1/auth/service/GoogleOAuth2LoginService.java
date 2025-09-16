@@ -45,6 +45,9 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
     @Value("${spring.security.oauth2.client.registration.google.client-secret}")
     private String googleClientSecret;
 
+    @Value("${oauth2.google.app-client-id}")
+    private String googleAppClientId;
+
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -123,7 +126,7 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
     }
 
     private String validateAndExtractGoogleSubject(String idToken) {
-        return idTokenValidator.validateGoogleAndGetSubject(idToken, googleClientId);
+        return idTokenValidator.validateGoogleAndGetSubject(idToken, googleAppClientId);
     }
 
     private Optional<Member> findMemberAndSetPendingIfNew(String sub) {

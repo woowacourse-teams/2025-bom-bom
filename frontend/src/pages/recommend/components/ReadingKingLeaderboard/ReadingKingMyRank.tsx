@@ -1,12 +1,9 @@
 import styled from '@emotion/styled';
 import ProgressBar from '@/components/ProgressBar/ProgressBar';
+import { components } from '@/types/openapi';
 
 interface ReadingKingMyRankProps {
-  userRank: {
-    rank: number;
-    readCount: number;
-    nextRankDifference: number;
-  };
+  userRank: components['schemas']['MemberMonthlyReadingRankResponse'];
 }
 
 const ReadingKingMyRank = ({ userRank }: ReadingKingMyRankProps) => {

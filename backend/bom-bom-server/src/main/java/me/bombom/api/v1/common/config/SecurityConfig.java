@@ -23,9 +23,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
+import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
@@ -114,7 +114,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public Supplier<String> appleClientSecretSupplier(
+    public AppleClientSecretSupplier appleClientSecretSupplier(
             @Value("${oauth2.apple.team-id}") String teamId,
             @Value("${oauth2.apple.key-id}") String keyId,
             @Value("${oauth2.apple.client-id}") String clientId,
@@ -135,7 +135,7 @@ public class SecurityConfig {
     public OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegatingAccessTokenClient(
             AppleOAuth2AccessTokenResponseClient appleClient
     ) {
-        DefaultAuthorizationCodeTokenResponseClient defaultClient = new DefaultAuthorizationCodeTokenResponseClient();
+        var defaultClient = new RestClientAuthorizationCodeTokenResponseClient();
         return request -> {
             String registrationId = request.getClientRegistration().getRegistrationId();
             if ("apple".equals(registrationId)) {

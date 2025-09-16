@@ -27,6 +27,7 @@ const colors = {
   disabledBackground: '#EFEFEF',
   white: '#FFFFFF',
   black: '#000000',
+  red: '#f00000',
   error: '#FF4D4F',
   info: '#0D6EFD',
   success: '#198754',

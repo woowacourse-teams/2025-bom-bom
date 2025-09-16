@@ -29,9 +29,9 @@
 
       .container {
         width: 100%;
-        height: 100vh;
+        height: 100dvh;
         display: flex;
-        gap: 24px;
+        gap: 16px;
         flex-direction: column;
         align-items: center;
         justify-content: center;
@@ -39,8 +39,8 @@
       }
 
       .maintenance-image {
-        width: 320px;
-        height: 320px;
+        width: 280px;
+        height: 280px;
         object-fit: contain;
       }
 
@@ -61,7 +61,7 @@
 
       .description-wrapper {
         display: flex;
-        gap: 8px;
+        gap: 4px;
         flex-direction: column;
         align-items: center;
         justify-content: center;
@@ -78,11 +78,8 @@
         text-align: center;
       }
 
-      .description {
-        margin: 0;
-      }
-
       .contact-wrapper {
+        margin-top: 12px;
         padding: 24px;
         border-radius: 20px;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -132,6 +129,10 @@
       }
 
       @media (max-width: 768px) {
+        .container {
+          gap: 12px;
+        }
+
         .maintenance-image {
           width: 240px;
           height: 240px;
@@ -150,7 +151,6 @@
         }
 
         .description-wrapper {
-          gap: 4px;
           font:
             400 14px/22px Inter,
             -apple-system,
@@ -163,6 +163,7 @@
         }
 
         .contact-wrapper {
+          margin-top: 8px;
           gap: 8px;
         }
 

@@ -8,7 +8,7 @@ const MaintenanceCard = () => {
   const isMobile = deviceType === 'mobile';
 
   return (
-    <Container>
+    <Container isMobile={isMobile}>
       <MaintenanceImage
         src={maintenanceBom}
         alt="점검 중 이미지"
@@ -42,20 +42,20 @@ const MaintenanceCard = () => {
 
 export default MaintenanceCard;
 
-const Container = styled.section`
+const Container = styled.section<{ isMobile: boolean }>`
   width: 100%;
   height: 100dvh;
 
   display: flex;
-  gap: 24px;
+  gap: ${({ isMobile }) => (isMobile ? '12px' : '16px')};
   flex-direction: column;
   align-items: center;
   justify-content: center;
 `;
 
 const MaintenanceImage = styled(ImageWithFallback)<{ isMobile: boolean }>`
-  width: ${({ isMobile }) => (isMobile ? '240px' : '320px')};
-  height: ${({ isMobile }) => (isMobile ? '240px' : '320px')};
+  width: ${({ isMobile }) => (isMobile ? '240px' : '280px')};
+  height: ${({ isMobile }) => (isMobile ? '240px' : '280px')};
 `;
 
 const Title = styled.h1<{ isMobile: boolean }>`
@@ -66,7 +66,7 @@ const Title = styled.h1<{ isMobile: boolean }>`
 
 const DescriptionWrapper = styled.div<{ isMobile: boolean }>`
   display: flex;
-  gap: ${({ isMobile }) => (isMobile ? '4px' : '8px')};
+  gap: 4px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -79,6 +79,7 @@ const DescriptionWrapper = styled.div<{ isMobile: boolean }>`
 const Description = styled.p``;
 
 const ContactWrapper = styled.div<{ isMobile: boolean }>`
+  margin-top: ${({ isMobile }) => (isMobile ? '8px' : '12px')};
   padding: 24px;
   border-radius: 20px;
   box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
@@ -99,7 +100,7 @@ const Contact = styled.a<{ isMobile: boolean }>`
 
   color: ${({ theme }) => theme.colors.primary};
   font: ${({ theme, isMobile }) =>
-    isMobile ? theme.fonts.body2 : theme.fonts.body1};
+    isMobile ? theme.fonts.body2 : theme.fonts.heading6};
 
   text-decoration: none;
 

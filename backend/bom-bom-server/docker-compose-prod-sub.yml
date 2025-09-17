@@ -17,12 +17,7 @@ services:
       OAUTH2_APPLE_PRIVATE_KEY: ${OAUTH2_APPLE_PRIVATE_KEY}
 
       # OpenTelemetry
-      JAVA_TOOL_OPTIONS: >
-        -javaagent:/otel/opentelemetry-javaagent.jar
-        -Dotel.instrumentation.jdbc.enabled=false
-        -Dotel.instrumentation.spring-data.enabled=false
-        -Dotel.instrumentation.spring-tx.enabled=false
-        -Dotel.instrumentation.hibernate.enabled=false
+      JAVA_TOOL_OPTIONS: "-javaagent:/otel/opentelemetry-javaagent.jar -Dotel.instrumentation.jdbc.enabled=false -Dotel.instrumentation.spring-data.enabled=false -Dotel.instrumentation.hibernate.enabled=false -Dotel.instrumentation.spring-tx.enabled=false"
       OTEL_SERVICE_NAME: bombom-server-prod
       OTEL_EXPORTER_OTLP_ENDPOINT: ${PROD_OTEL_ENDPOINT}
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf

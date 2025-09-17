@@ -75,7 +75,7 @@ export const WebViewMessenger: React.FC = () => {
                 message.payload?.identityToken &&
                 message.payload?.authorizationCode
               ) {
-                const response = await postAppleLogin(
+                await postAppleLogin(
                   message.payload.identityToken,
                   message.payload.authorizationCode,
                 );

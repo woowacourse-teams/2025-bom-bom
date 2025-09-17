@@ -32,6 +32,7 @@ import {
   GetNewsletterDetailParams,
   getNewsletters,
 } from './newsLetters';
+import { getServerStatus } from './server';
 
 export const queries = {
   // articles
@@ -148,5 +149,12 @@ export const queries = {
       queryKey: ['auth', 'signup', 'check', params],
       queryFn: () => getSignupCheck(params),
       enabled: false,
+    }),
+
+  // server
+  serverStatus: () =>
+    queryOptions({
+      queryKey: ['actuator', 'health'],
+      queryFn: () => getServerStatus(),
     }),
 };

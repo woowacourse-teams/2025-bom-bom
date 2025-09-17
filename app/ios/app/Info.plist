@@ -28,8 +28,8 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>bombom</string>
-          <string>com.antarctica.bombom</string>
-          <string>com.antarctica.bombom</string>
+          <string>com.antarctica.bombom.app</string>
+          <string>com.antarctica.bombom.app</string>
         </array>
       </dict>
       <dict>

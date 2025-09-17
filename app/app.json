@@ -21,7 +21,7 @@
           }
         }
       },
-      "bundleIdentifier": "com.antarctica.bombom",
+      "bundleIdentifier": "com.antarctica.bombom.app",
       "usesAppleSignIn": true
     },
     "android": {
@@ -30,7 +30,7 @@
         "backgroundColor": "#FE5E04"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.antarctica.bombom"
+      "package": "com.antarctica.bombom.app"
     },
     "web": {
       "bundler": "metro",
@@ -54,7 +54,9 @@
           "iosUrlScheme": "com.googleusercontent.apps.190361254930-1464b7md34crhu077urc0hsvtsmb5ks5"
         }
       ],
-      "expo-apple-authentication"
+      ["expo-apple-authentication",{
+        "appleTeamId": "F6XK836QA8"
+      }]
     ],
     "experiments": {
       "typedRoutes": true

@@ -32,7 +32,6 @@ export const postWithdraw = () => {
   });
 };
 
-// Google 로그인 (앱에서 받은 idToken으로)
 export const postGoogleLogin = async ({
   identityToken,
   authorizationCode,
@@ -46,7 +45,6 @@ export const postGoogleLogin = async ({
   });
 };
 
-// Apple 로그인 (앱에서 받은 identityToken으로)
 export const postAppleLogin = async ({
   identityToken,
   authorizationCode,

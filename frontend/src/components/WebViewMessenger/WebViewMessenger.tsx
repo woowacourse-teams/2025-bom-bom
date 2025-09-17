@@ -6,24 +6,16 @@ import {
   sendMessageToRN,
 } from '@/utils/webviewBridge';
 
-/**
- * WebView와 React Native 간의 메시지를 수신하고 처리하는 컴포넌트
- * 앱의 최상위 레벨에서 사용되어야 합니다.
- */
 export const WebViewMessenger: React.FC = () => {
   useEffect(() => {
-    // React Native에서 온 메시지를 수신하는 리스너 등록
     const cleanup = addWebViewMessageListener(
       async (message: RNToWebMessage) => {
         switch (message.type) {
           case 'GOOGLE_LOGIN_TOKEN':
-            console.log('Google 로그인 토큰 수신:', message.payload);
             if (!message.payload?.idToken || !message.payload?.serverAuthCode)
               return;
 
             try {
-              alert(JSON.stringify(message.payload));
-
               await postGoogleLogin({
                 identityToken: message.payload.idToken,
                 authorizationCode: message.payload.serverAuthCode,
@@ -51,12 +43,10 @@ export const WebViewMessenger: React.FC = () => {
             break;
 
           case 'APPLE_LOGIN_TOKEN':
-            console.log('Apple 로그인 토큰 수신:', message.payload);
             if (!message.payload?.idToken || !message.payload?.serverAuthCode)
               return;
-            try {
-              alert(JSON.stringify(message.payload));
 
+            try {
               await postAppleLogin({
                 identityToken: message.payload.idToken,
                 authorizationCode: message.payload.serverAuthCode,
@@ -92,6 +82,5 @@ export const WebViewMessenger: React.FC = () => {
     return cleanup;
   }, []);
 
-  // 이 컴포넌트는 UI를 렌더링하지 않습니다
   return null;
 };

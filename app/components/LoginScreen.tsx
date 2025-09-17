@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
-  Alert,
   Dimensions,
   KeyboardAvoidingView,
   Platform,
@@ -20,15 +19,12 @@ export const LoginScreen: React.FC = () => {
   const {
     loginWithGoogle,
     loginWithApple,
-    error,
-    clearError,
     sendMessageToWeb,
     setShowWebViewLogin,
   } = useAuth();
 
   const handleGoogleLogin = async () => {
     try {
-      clearError();
       await loginWithGoogle();
     } catch (err) {
       console.error('Google login error:', err);
@@ -37,24 +33,11 @@ export const LoginScreen: React.FC = () => {
 
   const handleAppleLogin = async () => {
     try {
-      clearError();
       await loginWithApple();
     } catch (err) {
       console.error('Apple login error:', err);
     }
   };
-
-  const showErrorAlert = useCallback(() => {
-    if (error) {
-      Alert.alert('로그인 오류', error);
-    }
-  }, [error]);
-
-  React.useEffect(() => {
-    if (error) {
-      showErrorAlert();
-    }
-  }, [error, showErrorAlert]);
 
   useEffect(() => {
     (async () => {

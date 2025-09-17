@@ -8,9 +8,6 @@ export interface User {
 export interface AuthContextType {
   loginWithGoogle: () => Promise<void>;
   loginWithApple: () => Promise<void>;
-  logout: () => Promise<void>;
-  error: string | null;
-  clearError: () => void;
   // WebView 통신 관련
   showWebViewLogin: boolean;
   setShowWebViewLogin: (show: boolean) => void;

@@ -81,27 +81,4 @@ export class ApiClient {
 
     return this.handleResponse<LoginResponse>(response);
   }
-
-  // 로그아웃 (서버에 토큰 무효화 요청)
-  static async logout(): Promise<void> {
-    try {
-      await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: 'POST',
-        headers: await this.getAuthHeaders(),
-      });
-    } catch (error) {
-      // 로그아웃 요청이 실패해도 로컬 토큰은 삭제해야 함
-      console.warn('Logout request failed:', error);
-    }
-  }
-
-  // 토큰 검증
-  static async verifyToken(): Promise<LoginResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/verify`, {
-      method: 'GET',
-      headers: await this.getAuthHeaders(),
-    });
-
-    return this.handleResponse<LoginResponse>(response);
-  }
 }

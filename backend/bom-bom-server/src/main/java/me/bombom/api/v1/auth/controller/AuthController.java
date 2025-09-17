@@ -174,10 +174,12 @@ public class AuthController implements AuthControllerApi{
             session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
             
             // 기존 회원 -> 홈으로 리다이렉트
-            response.sendRedirect("/");
+            response.setStatus(200);
+            response.setHeader("Location", "/");
         } else {
             // 신규 회원 -> 회원가입 페이지로 리다이렉트
-            response.sendRedirect("/signup");
+            response.setStatus(202);
+            response.setHeader("Location", "/signup");
         }
     }
 

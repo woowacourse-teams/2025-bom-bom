@@ -39,24 +39,22 @@ export const WebViewMessenger: React.FC = () => {
             console.log('Google 로그인 토큰 수신:', message.payload);
             try {
               if (message.payload?.idToken) {
-                const response = await postGoogleLogin(
+                await postGoogleLogin(
                   message.payload.idToken,
                   message.payload.serverAuthCode,
                 );
 
-                alert(JSON.stringify(response));
-
                 // 로그인 성공을 앱에 알림
-                sendMessageToRN({
-                  type: 'LOGIN_SUCCESS',
-                  payload: {
-                    isAuthenticated: true,
-                    provider: 'google',
-                  },
-                });
+                // sendMessageToRN({
+                //   type: 'LOGIN_SUCCESS',
+                //   payload: {
+                //     isAuthenticated: true,
+                //     provider: 'google',
+                //   },
+                // });
 
                 // 페이지 새로고침으로 인증 상태 업데이트
-                window.location.reload();
+                // window.location.reload();
               }
             } catch (error) {
               console.error('Google 로그인 실패:', error);

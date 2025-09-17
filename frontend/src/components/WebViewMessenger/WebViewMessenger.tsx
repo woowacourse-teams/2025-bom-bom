@@ -12,13 +12,16 @@ export const WebViewMessenger: React.FC = () => {
       async (message: RNToWebMessage) => {
         switch (message.type) {
           case 'GOOGLE_LOGIN_TOKEN':
-            if (!message.payload?.idToken || !message.payload?.serverAuthCode)
+            if (
+              !message.payload?.identityToken ||
+              !message.payload?.authorizationCode
+            )
               return;
 
             try {
               await postGoogleLogin({
-                identityToken: message.payload.idToken,
-                authorizationCode: message.payload.serverAuthCode,
+                identityToken: message.payload.identityToken,
+                authorizationCode: message.payload.authorizationCode,
               });
 
               window.location.reload();
@@ -43,13 +46,16 @@ export const WebViewMessenger: React.FC = () => {
             break;
 
           case 'APPLE_LOGIN_TOKEN':
-            if (!message.payload?.idToken || !message.payload?.serverAuthCode)
+            if (
+              !message.payload?.identityToken ||
+              !message.payload?.authorizationCode
+            )
               return;
 
             try {
               await postAppleLogin({
-                identityToken: message.payload.idToken,
-                authorizationCode: message.payload.serverAuthCode,
+                identityToken: message.payload.identityToken,
+                authorizationCode: message.payload.authorizationCode,
               });
 
               window.location.reload();

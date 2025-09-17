@@ -41,11 +41,11 @@ export const LoginScreen = () => {
 
   useEffect(() => {
     (async () => {
-      const serverAuthCode = await AsyncStorage.getItem('serverAuthCode');
-      const idToken = await AsyncStorage.getItem('authToken');
-      const provider = await AsyncStorage.getItem('provider');
+      const auth = await AsyncStorage.getItem('auth');
+      if (!auth) return;
+      const { provider, identityToken, authorizationCode } = JSON.parse(auth);
 
-      if (!serverAuthCode || !idToken || !provider) {
+      if (!authorizationCode || !identityToken || !provider) {
         return;
       }
 
@@ -53,23 +53,21 @@ export const LoginScreen = () => {
         sendMessageToWeb({
           type: 'GOOGLE_LOGIN_TOKEN',
           payload: {
-            idToken,
-            serverAuthCode,
+            identityToken,
+            authorizationCode,
           },
         });
       } else if (provider === 'apple') {
         sendMessageToWeb({
           type: 'APPLE_LOGIN_TOKEN',
           payload: {
-            idToken,
-            serverAuthCode,
+            identityToken,
+            authorizationCode,
           },
         });
       }
 
-      AsyncStorage.removeItem('provider');
-      AsyncStorage.removeItem('authToken');
-      AsyncStorage.removeItem('serverAuthCode');
+      AsyncStorage.removeItem('auth');
 
       setShowWebViewLogin(false);
     })();

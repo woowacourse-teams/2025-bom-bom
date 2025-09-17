@@ -50,11 +50,13 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     if (userInfo?.data?.idToken) {
       setShowWebViewLogin(true);
 
-      await AsyncStorage.setItem('provider', 'google');
-      await AsyncStorage.setItem('authToken', userInfo.data.idToken);
       await AsyncStorage.setItem(
-        'serverAuthCode',
-        userInfo.data.serverAuthCode || '',
+        'auth',
+        JSON.stringify({
+          identityToken: userInfo.data.idToken,
+          authorizationCode: userInfo.data.serverAuthCode,
+          provider: 'google',
+        }),
       );
     } else {
       throw new Error('ID 토큰을 가져올 수 없습니다.');
@@ -76,11 +78,13 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     if (credential.identityToken && credential.authorizationCode) {
       setShowWebViewLogin(true);
 
-      await AsyncStorage.setItem('provider', 'apple');
-      await AsyncStorage.setItem('authToken', credential.identityToken);
       await AsyncStorage.setItem(
-        'serverAuthCode',
-        credential.authorizationCode || '',
+        'auth',
+        JSON.stringify({
+          identityToken: credential.identityToken,
+          authorizationCode: credential.authorizationCode,
+          provider: 'apple',
+        }),
       );
     } else {
       throw new Error('Apple 로그인 정보를 가져올 수 없습니다.');

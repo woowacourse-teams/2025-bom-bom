@@ -4,6 +4,7 @@ import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { useEffect } from 'react';
 import { theme } from '../styles/theme';
+import { ENV } from '@/apis/env';
 import Toast from '@/components/Toast/Toast';
 import ChannelService from '@/libs/channelTalk/ChannelService';
 import { usePageTracking } from '@/libs/googleAnalytics/usePageTracking';
@@ -20,9 +21,10 @@ const RootComponent = () => {
     ChannelService.loadScript();
 
     ChannelService.boot({
-      pluginKey: '27b076bb-fee2-4ae5-afa7-6967003ca634',
+      pluginKey: ENV.pluginKey,
     });
-  });
+  }, []);
+
   return (
     <>
       <QueryClientProvider client={queryClient}>

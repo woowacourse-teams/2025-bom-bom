@@ -6,7 +6,6 @@ import { toast } from '../Toast/utils/toastActions';
 import { postLogout, postWithdraw } from '@/apis/auth';
 import { UserInfo } from '@/types/me';
 import { copyToClipboard } from '@/utils/copy';
-import { isRunningInWebView, requestLogout } from '@/utils/webviewBridge';
 import CopyIcon from '#/assets/copy.svg';
 import LogoutIcon from '#/assets/logout.svg';
 import MailIcon from '#/assets/mail.svg';
@@ -58,13 +57,7 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
   };
 
   const handleLogoutClick = () => {
-    // WebView 환경에서는 React Native로 로그아웃 메시지 전송
-    if (isRunningInWebView()) {
-      requestLogout();
-    } else {
-      // 일반 웹 환경에서는 기존 로직
-      mutateLogout();
-    }
+    mutateLogout();
   };
 
   if (!userInfo) return null;

@@ -1,17 +1,17 @@
 // 웹뷰에서 React Native로 전송하는 메시지 타입
 export interface WebToRNMessage {
-  type: "SHOW_LOGIN_SCREEN" | "LOGOUT_REQUEST" | "USER_ACTION";
+  type:
+    | 'SHOW_LOGIN_SCREEN'
+    | 'LOGOUT_REQUEST'
+    | 'USER_ACTION'
+    | 'LOGIN_SUCCESS'
+    | 'LOGIN_FAILED';
   payload?: any;
 }
 
 // React Native에서 웹뷰로 전송하는 메시지 타입
 export interface RNToWebMessage {
-  type:
-    | "LOGIN_SUCCESS"
-    | "LOGOUT_SUCCESS"
-    | "AUTH_STATE_CHANGED"
-    | "GOOGLE_LOGIN_TOKEN"
-    | "APPLE_LOGIN_TOKEN";
+  type: 'GOOGLE_LOGIN_TOKEN' | 'APPLE_LOGIN_TOKEN';
   payload?: {
     user?: {
       id: string;
@@ -37,6 +37,6 @@ export interface WebViewMessageHandler {
   sendAuthStateToWeb: (
     isAuthenticated: boolean,
     user?: any,
-    token?: string
+    token?: string,
   ) => void;
 }

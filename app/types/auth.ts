@@ -2,13 +2,10 @@ export interface User {
   id: string;
   name?: string;
   email?: string;
-  provider: "google" | "apple";
+  provider: 'google' | 'apple';
 }
 
 export interface AuthContextType {
-  user: User | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
   loginWithGoogle: () => Promise<void>;
   loginWithApple: () => Promise<void>;
   logout: () => Promise<void>;
@@ -18,7 +15,6 @@ export interface AuthContextType {
   showWebViewLogin: boolean;
   setShowWebViewLogin: (show: boolean) => void;
   webViewRef: React.RefObject<any>;
-  handleWebViewMessage: (event: any) => void;
   sendMessageToWeb: (message: any) => void;
 }
 

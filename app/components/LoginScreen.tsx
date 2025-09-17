@@ -53,8 +53,8 @@ export const LoginScreen: React.FC = () => {
         sendMessageToWeb({
           type: 'GOOGLE_LOGIN_TOKEN',
           payload: {
-            idToken: idToken,
-            serverAuthCode: serverAuthCode,
+            idToken,
+            serverAuthCode,
           },
         });
       } else if (provider === 'apple') {

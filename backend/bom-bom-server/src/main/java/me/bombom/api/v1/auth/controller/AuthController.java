@@ -122,6 +122,8 @@ public class AuthController implements AuthControllerApi{
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         if (request.getSession(false) != null) {
             request.getSession(false).invalidate();
+            SecurityContextHolder.clearContext();
+            expireSessionCookie(response);
         }
     }
 
@@ -156,6 +158,7 @@ public class AuthController implements AuthControllerApi{
         memberService.revoke(member.getId());
         session.invalidate();
         expireSessionCookie(response);
+        SecurityContextHolder.clearContext();
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 

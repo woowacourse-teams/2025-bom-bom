@@ -11,6 +11,7 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.service.MemberService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -46,6 +47,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 // 재인증 후 탈퇴 처리 (Apple 토큰 철회는 이미 AuthController에서 처리됨)
                 memberService.revoke(withdrawMemberId);
                 session.invalidate();
+                SecurityContextHolder.clearContext();
                 String redirectUrl = getBaseUrlByEnv(request);
                 response.sendRedirect(redirectUrl);
                 return;

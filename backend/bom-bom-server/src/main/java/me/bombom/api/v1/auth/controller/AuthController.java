@@ -169,11 +169,11 @@ public class AuthController implements AuthControllerApi{
             session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
             
             return ResponseEntity.ok()
-                    .header("Set-Cookie", "JSESSIONID=" + sessionId + "; Path=/; Secure; SameSite=None")
+//                    .header("Set-Cookie", "JSESSIONID=" + sessionId + "; Path=/; Secure; SameSite=None")
                     .body(new NativeLoginResponse("SUCCESS", "로그인에 성공했습니다", sessionId));
         } else {
             return ResponseEntity.ok()
-                    .header("Set-Cookie", "JSESSIONID=" + sessionId + "; Path=/; Secure; SameSite=None")
+//                    .header("Set-Cookie", "JSESSIONID=" + sessionId + "; Path=/; Secure; SameSite=None")
                     .body(new NativeLoginResponse("SIGNUP_REQUIRED", "신규 회원입니다. 회원가입이 필요합니다", sessionId));
         }
     }

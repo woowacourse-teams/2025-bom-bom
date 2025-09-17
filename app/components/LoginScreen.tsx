@@ -23,6 +23,7 @@ export const LoginScreen: React.FC = () => {
     error,
     clearError,
     sendMessageToWeb,
+    setShowWebViewLogin,
   } = useAuth();
 
   const handleGoogleLogin = async () => {
@@ -61,6 +62,10 @@ export const LoginScreen: React.FC = () => {
       const idToken = await AsyncStorage.getItem('authToken');
       const provider = await AsyncStorage.getItem('provider');
 
+      if (!serverAuthCode || !idToken || !provider) {
+        return;
+      }
+
       if (provider === 'google') {
         sendMessageToWeb({
           type: 'GOOGLE_LOGIN_TOKEN',
@@ -69,8 +74,7 @@ export const LoginScreen: React.FC = () => {
             serverAuthCode: serverAuthCode,
           },
         });
-      }
-      if (provider === 'apple') {
+      } else if (provider === 'apple') {
         sendMessageToWeb({
           type: 'APPLE_LOGIN_TOKEN',
           payload: {
@@ -79,8 +83,14 @@ export const LoginScreen: React.FC = () => {
           },
         });
       }
+
+      AsyncStorage.removeItem('provider');
+      AsyncStorage.removeItem('authToken');
+      AsyncStorage.removeItem('serverAuthCode');
+
+      setShowWebViewLogin(false);
     })();
-  }, [sendMessageToWeb]);
+  }, [sendMessageToWeb, setShowWebViewLogin]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -93,7 +103,6 @@ export const LoginScreen: React.FC = () => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* 헤더 섹션 */}
           <View style={styles.header}>
             <View style={styles.iconContainer}>
               <Ionicons name="sparkles" size={24} color="#FFFFFF" />

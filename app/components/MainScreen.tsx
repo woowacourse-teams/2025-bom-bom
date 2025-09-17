@@ -23,12 +23,12 @@ export const MainScreen: React.FC = () => {
 
         case 'LOGIN_SUCCESS':
           console.log('웹뷰에서 로그인 성공 알림 수신:', message.payload);
-          // setShowWebViewLogin(false);
+          setShowWebViewLogin(false);
           break;
 
         case 'LOGIN_FAILED':
           console.log('웹뷰에서 로그인 실패 알림 수신:', message.payload);
-          // setShowWebViewLogin(false);
+          setShowWebViewLogin(false);
           break;
 
         default:

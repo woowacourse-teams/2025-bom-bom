@@ -44,6 +44,8 @@ export const Route = createRootRouteWithContext<BomBomRouterContext>()({
           return redirect({ to: '/maintenance' });
         }
       }
+
+      return null;
     } catch {
       if (location.pathname !== '/maintenance') {
         return redirect({ to: '/maintenance' });

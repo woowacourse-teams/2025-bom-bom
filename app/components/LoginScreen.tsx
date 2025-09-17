@@ -1,5 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
-import React, { useCallback, useEffect } from "react";
+import { Ionicons } from '@expo/vector-icons';
+import React, { useCallback, useEffect } from 'react';
 import {
   Alert,
   Dimensions,
@@ -9,18 +9,17 @@ import {
   StyleSheet,
   Text,
   View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useAuth } from "../contexts/AuthContext";
-import { Button } from "./Button";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../contexts/AuthContext';
+import { Button } from './Button';
 
 export const LoginScreen: React.FC = () => {
   const {
     loginWithGoogle,
     loginWithApple,
-    isLoading,
     error,
     clearError,
     sendMessageToWeb,
@@ -31,7 +30,7 @@ export const LoginScreen: React.FC = () => {
       clearError();
       await loginWithGoogle();
     } catch (err) {
-      console.error("Google login error:", err);
+      console.error('Google login error:', err);
     }
   };
 
@@ -40,13 +39,13 @@ export const LoginScreen: React.FC = () => {
       clearError();
       await loginWithApple();
     } catch (err) {
-      console.error("Apple login error:", err);
+      console.error('Apple login error:', err);
     }
   };
 
   const showErrorAlert = useCallback(() => {
     if (error) {
-      Alert.alert("로그인 오류", error);
+      Alert.alert('로그인 오류', error);
     }
   }, [error]);
 
@@ -58,35 +57,35 @@ export const LoginScreen: React.FC = () => {
 
   useEffect(() => {
     (async () => {
-      const serverAuthCode = await AsyncStorage.getItem("serverAuthCode");
-      const idToken = await AsyncStorage.getItem("authToken");
-      const provider = await AsyncStorage.getItem("provider");
+      const serverAuthCode = await AsyncStorage.getItem('serverAuthCode');
+      const idToken = await AsyncStorage.getItem('authToken');
+      const provider = await AsyncStorage.getItem('provider');
 
-      if (provider === "google") {
-      sendMessageToWeb({
-        type: "GOOGLE_LOGIN_TOKEN",
-        payload: {
-          idToken: idToken,
-          serverAuthCode: serverAuthCode,
-        },
-      });
+      if (provider === 'google') {
+        sendMessageToWeb({
+          type: 'GOOGLE_LOGIN_TOKEN',
+          payload: {
+            idToken: idToken,
+            serverAuthCode: serverAuthCode,
+          },
+        });
       }
-      if (provider === "apple") {
-      sendMessageToWeb({
-        type: "APPLE_LOGIN_TOKEN",
-        payload: {
-          idToken,
+      if (provider === 'apple') {
+        sendMessageToWeb({
+          type: 'APPLE_LOGIN_TOKEN',
+          payload: {
+            idToken,
             serverAuthCode,
           },
         });
       }
     })();
-  }, [isLoading, sendMessageToWeb]);
+  }, [sendMessageToWeb]);
 
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
       >
         <ScrollView
@@ -101,35 +100,28 @@ export const LoginScreen: React.FC = () => {
             </View>
             <Text style={styles.title}>봄봄에 오신 걸 환영해요</Text>
             <Text style={styles.subtitle}>
-              당신의 하루에 찾아오는 작은 설렘{"n"}뉴스레터를 한 곳에서 쉽게
+              당신의 하루에 찾아오는 작은 설렘{'n'}뉴스레터를 한 곳에서 쉽게
               관리하세요
             </Text>
           </View>
 
-          {/* 구분선 */}
           <View style={styles.divider} />
 
-          {/* 로그인 섹션 */}
           <View style={styles.loginSection}>
-            {/* 소셜 로그인 버튼들 */}
             <View style={styles.socialLogin}>
-              {/* Google 로그인 */}
               <Button
                 title="Google로 시작하기"
                 onPress={handleGoogleLogin}
                 variant="social"
-                loading={isLoading}
                 icon={<Ionicons name="logo-google" size={24} color="#4285F4" />}
                 style={styles.socialButton}
               />
 
-              {/* Apple 로그인 (iOS에서만 표시) */}
-              {Platform.OS === "ios" && (
+              {Platform.OS === 'ios' && (
                 <Button
                   title="Apple로 시작하기"
                   onPress={handleAppleLogin}
                   variant="social"
-                  loading={isLoading}
                   icon={
                     <Ionicons name="logo-apple" size={24} color="#000000" />
                   }
@@ -139,12 +131,11 @@ export const LoginScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* 약관 안내 */}
           <View style={styles.termsContainer}>
             <Text style={styles.termsText}>
-              로그인하시면 봄봄의{" "}
-              <Text style={styles.termsLink}>서비스 약관</Text>과{" "}
-              <Text style={styles.termsLink}>개인정보 처리방침</Text>에{"n"}
+              로그인하시면 봄봄의{' '}
+              <Text style={styles.termsLink}>서비스 약관</Text>과{' '}
+              <Text style={styles.termsLink}>개인정보 처리방침</Text>에{'n'}
               동의하는 것으로 간주됩니다.
             </Text>
           </View>
@@ -157,7 +148,7 @@ export const LoginScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -165,22 +156,22 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingHorizontal: 28,
-    justifyContent: "center",
-    minHeight: Dimensions.get("window").height - 100,
+    justifyContent: 'center',
+    minHeight: Dimensions.get('window').height - 100,
   },
   header: {
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 32,
   },
   iconContainer: {
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: "#FE5E04",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: '#FE5E04',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 20,
-    shadowColor: "#FE5E04",
+    shadowColor: '#FE5E04',
     shadowOffset: {
       width: 0,
       height: 8,
@@ -191,20 +182,20 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: "700",
-    color: "#1C1C1E",
-    textAlign: "center",
+    fontWeight: '700',
+    color: '#1C1C1E',
+    textAlign: 'center',
     marginBottom: 16,
   },
   subtitle: {
     fontSize: 16,
-    color: "#8E8E93",
-    textAlign: "center",
+    color: '#8E8E93',
+    textAlign: 'center',
     lineHeight: 24,
   },
   divider: {
     height: 2,
-    backgroundColor: "#E5E5EA",
+    backgroundColor: '#E5E5EA',
     marginBottom: 32,
     opacity: 0.5,
   },
@@ -224,23 +215,23 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   socialButton: {
-    width: "100%",
+    width: '100%',
   },
   emailButton: {
     marginTop: 8,
   },
   termsContainer: {
-    marginTop: "auto",
+    marginTop: 'auto',
     paddingTop: 24,
   },
   termsText: {
     fontSize: 14,
-    color: "#8E8E93",
-    textAlign: "center",
+    color: '#8E8E93',
+    textAlign: 'center',
     lineHeight: 20,
   },
   termsLink: {
-    color: "#FE5E04",
-    fontWeight: "600",
+    color: '#FE5E04',
+    fontWeight: '600',
   },
 });

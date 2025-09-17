@@ -1,41 +1,50 @@
-import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import WebView from "react-native-webview";
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import WebView from 'react-native-webview';
 
-import { useAuth } from "../contexts/AuthContext";
-import { WebToRNMessage } from "../types/webview";
-import { LoginScreenOverlay } from "./LoginScreenOverlay";
+import { useAuth } from '../contexts/AuthContext';
+import { WebToRNMessage } from '../types/webview';
+import { LoginScreenOverlay } from './LoginScreenOverlay';
 
 export const MainScreen: React.FC = () => {
   const { showWebViewLogin, setShowWebViewLogin, webViewRef } = useAuth();
 
-  // WebView에서 온 메시지 처리
   const handleWebViewMessage = (event: any) => {
     try {
       const message: WebToRNMessage = JSON.parse(event.nativeEvent.data);
-      console.log("WebView에서 메시지 수신:", message);
+      console.log('WebView에서 메시지 수신:', message);
 
       switch (message.type) {
-        case "SHOW_LOGIN_SCREEN":
+        case 'SHOW_LOGIN_SCREEN':
           setShowWebViewLogin(true);
           break;
+
+        case 'LOGIN_SUCCESS':
+          console.log('웹뷰에서 로그인 성공 알림 수신:', message.payload);
+          // setShowWebViewLogin(false);
+          break;
+
+        case 'LOGIN_FAILED':
+          console.log('웹뷰에서 로그인 실패 알림 수신:', message.payload);
+          // setShowWebViewLogin(false);
+          break;
+
         default:
-          console.warn("알 수 없는 메시지 타입:", message.type);
+          console.warn('알 수 없는 메시지 타입:', message.type);
       }
     } catch (error) {
-      console.error("WebView 메시지 파싱 실패:", error);
+      console.error('WebView 메시지 파싱 실패:', error);
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* 웹뷰 */}
       <View style={styles.webViewContainer}>
         <WebView
           ref={webViewRef}
-          source={{ uri: "http://localhost:3000" }}
+          source={{ uri: 'https://dev.bombom.news/' }}
           style={styles.webView}
           userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/96.0.4664.116 Mobile/15E148 Safari/604.1"
           allowsBackForwardNavigationGestures
@@ -43,22 +52,22 @@ export const MainScreen: React.FC = () => {
           thirdPartyCookiesEnabled
           webviewDebuggingEnabled
           domStorageEnabled
+          startInLoadingState
           pullToRefreshEnabled
           onMessage={handleWebViewMessage}
           onContentProcessDidTerminate={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent;
-            console.warn("WebView Content Process Did Terminate:", nativeEvent);
+            console.warn('WebView Content Process Did Terminate:', nativeEvent);
             webViewRef.current?.reload();
           }}
           onError={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent;
-            console.error("WebView Error:", nativeEvent);
+            console.error('WebView Error:', nativeEvent);
           }}
           onHttpError={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent;
-            console.error("WebView HTTP Error:", nativeEvent);
+            console.error('WebView HTTP Error:', nativeEvent);
           }}
-          startInLoadingState
           renderLoading={() => (
             <View style={styles.loadingContainer}>
               <View style={styles.loadingIcon}>
@@ -82,43 +91,43 @@ export const MainScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E5EA",
+    borderBottomColor: '#E5E5EA',
   },
   headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     flex: 1,
   },
   iconContainer: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#FE5E04",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: '#FE5E04',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 8,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: "700",
-    color: "#1C1C1E",
+    fontWeight: '700',
+    color: '#1C1C1E',
   },
   profileButton: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 8,
     borderRadius: 8,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: '#F2F2F7',
     gap: 8,
     maxWidth: 200,
   },
@@ -127,18 +136,18 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#1C1C1E",
+    fontWeight: '600',
+    color: '#1C1C1E',
     marginBottom: 2,
   },
   providerInfo: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 4,
   },
   providerText: {
     fontSize: 12,
-    color: "#8E8E93",
+    color: '#8E8E93',
   },
   webViewContainer: {
     flex: 1,
@@ -148,16 +157,16 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
   },
   loadingIcon: {
     marginBottom: 16,
   },
   loadingText: {
     fontSize: 16,
-    color: "#8E8E93",
-    fontWeight: "500",
+    color: '#8E8E93',
+    fontWeight: '500',
   },
 });

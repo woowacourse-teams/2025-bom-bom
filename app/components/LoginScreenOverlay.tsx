@@ -1,8 +1,8 @@
-import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { Modal, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { LoginScreen } from "./LoginScreen";
+import { LoginScreen } from './LoginScreen';
 
 interface LoginScreenOverlayProps {
   visible: boolean;
@@ -38,20 +38,20 @@ export const LoginScreenOverlay: React.FC<LoginScreenOverlayProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    position: "relative",
+    position: 'relative',
   },
   closeButton: {
-    position: "absolute",
+    position: 'absolute',
     top: 60,
     right: 20,
     zIndex: 1000,
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#F2F2F7",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
+    backgroundColor: '#F2F2F7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,

@@ -18,14 +18,16 @@ export const WebViewMessenger: React.FC = () => {
         switch (message.type) {
           case 'GOOGLE_LOGIN_TOKEN':
             console.log('Google 로그인 토큰 수신:', message.payload);
-            if (!message.payload?.idToken) return;
+            if (!message.payload?.idToken || !message.payload?.serverAuthCode)
+              return;
+
             try {
               alert(JSON.stringify(message.payload));
 
-              await postGoogleLogin(
-                message.payload.idToken,
-                message.payload.serverAuthCode,
-              );
+              await postGoogleLogin({
+                identityToken: message.payload.idToken,
+                authorizationCode: message.payload.serverAuthCode,
+              });
 
               window.location.reload();
 
@@ -50,16 +52,15 @@ export const WebViewMessenger: React.FC = () => {
 
           case 'APPLE_LOGIN_TOKEN':
             console.log('Apple 로그인 토큰 수신:', message.payload);
+            if (!message.payload?.idToken || !message.payload?.serverAuthCode)
+              return;
             try {
-              if (!message.payload?.idToken || !message.payload?.serverAuthCode)
-                return;
-
               alert(JSON.stringify(message.payload));
 
-              await postAppleLogin(
-                message.payload.idToken,
-                message.payload.serverAuthCode,
-              );
+              await postAppleLogin({
+                identityToken: message.payload.idToken,
+                authorizationCode: message.payload.serverAuthCode,
+              });
 
               window.location.reload();
 

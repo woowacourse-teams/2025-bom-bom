@@ -37,6 +37,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const loginWithGoogle = async (): Promise<void> => {
+    GoogleSignin.configure({
+      webClientId: CLIENT_ID,
+      offlineAccess: true,
+      hostedDomain: '',
+      forceCodeForRefreshToken: true,
+      accountName: '',
+      iosClientId: CLIENT_ID,
+      googleServicePlistPath: '',
+      profileImageSize: 120,
+    });
+
     await GoogleSignin.hasPlayServices();
 
     const userInfo = await GoogleSignin.signIn();

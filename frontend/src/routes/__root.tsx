@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { theme } from '../styles/theme';
+import { ENV } from '@/apis/env';
 import Toast from '@/components/Toast/Toast';
 import { usePageTracking } from '@/libs/googleAnalytics/usePageTracking';
 import { queryClient } from '@/main';
@@ -36,7 +37,7 @@ export const Route = createRootRouteWithContext<BomBomRouterContext>()({
     const maintenancePath = '/maintenance';
 
     try {
-      const res = await fetch('https://monitoring.bombom.news/status/dev', {
+      const res = await fetch(ENV.monitoringStatusUrl, {
         cache: 'no-store',
       });
 

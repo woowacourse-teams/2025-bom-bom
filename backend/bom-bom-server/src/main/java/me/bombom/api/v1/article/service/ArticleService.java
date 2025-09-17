@@ -1,6 +1,5 @@
 package me.bombom.api.v1.article.service;
 
-import io.opentelemetry.instrumentation.annotations.WithSpan;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

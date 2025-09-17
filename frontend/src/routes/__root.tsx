@@ -9,6 +9,7 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { theme } from '../styles/theme';
 import { ENV } from '@/apis/env';
 import Toast from '@/components/Toast/Toast';
+import { SERVER_STATUS } from '@/constants/serverStatus';
 import { usePageTracking } from '@/libs/googleAnalytics/usePageTracking';
 import { queryClient } from '@/main';
 
@@ -46,9 +47,10 @@ export const Route = createRootRouteWithContext<BomBomRouterContext>()({
       }
 
       const serverStatus = await res.json();
-      const status = serverStatus?.data?.result?.[0]?.value[1] ?? '0';
+      const status =
+        serverStatus?.data?.result?.[0]?.value[1] ?? SERVER_STATUS.off;
 
-      const isUp = status === '1';
+      const isUp = status === SERVER_STATUS.on;
 
       if (!isUp && location.pathname !== maintenancePath) {
         return redirect({ to: maintenancePath });

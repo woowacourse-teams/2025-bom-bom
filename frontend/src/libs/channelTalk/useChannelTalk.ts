@@ -166,7 +166,7 @@ export const useChannelTalk = ({
     loadScript();
 
     boot({ pluginKey: PLUGIN_KEY, ...bootOption }, bootCallback);
-  }, [boot, bootCallback, bootOption, loadScript]);
+  }, []);
 
   return {
     boot,

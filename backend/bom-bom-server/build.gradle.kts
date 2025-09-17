@@ -62,6 +62,9 @@ dependencies {
     // spring session jdbc
     implementation ("org.springframework.session:spring-session-jdbc")
 
+    // @WithSpan 어노테이션 지원
+    implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.20.0")
+
     // flyway
     implementation ("org.flywaydb:flyway-core")
     implementation ("org.flywaydb:flyway-mysql")

@@ -1,5 +1,6 @@
 package me.bombom.api.v1.article.event;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.service.ArticleService;
@@ -19,6 +20,8 @@ public class MarkAsReadListener {
     private final ReadingService readingService;
     private final PetService petService;
 
+
+    @WithSpan
     @TransactionalEventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void on(MarkAsReadEvent event) {
@@ -32,12 +35,14 @@ public class MarkAsReadListener {
         }
     }
 
+    @WithSpan
     private void updateReadingCount(MarkAsReadEvent event, boolean isTodayArticle) {
         readingService.updateReadingCount(event.memberId(), isTodayArticle);
         log.info("읽기 횟수 갱신 성공 - memberId={}, articleId={}, isTodayArticle={}",
                 event.memberId(), event.articleId(), isTodayArticle);
     }
 
+    @WithSpan
     private void updatePetScore(MarkAsReadEvent event, boolean isTodayArticle) {
         if (isTodayArticle && articleService.canAddArticleScore(event.memberId())) {
             int score = readingService.calculateArticleScore(event.memberId());

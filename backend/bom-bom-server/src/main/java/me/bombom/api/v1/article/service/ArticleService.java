@@ -1,5 +1,6 @@
 package me.bombom.api.v1.article.service;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -70,6 +71,7 @@ public class ArticleService {
         return ArticleDetailResponse.of(article, newsletter, category);
     }
 
+    @WithSpan
     @Transactional
     public void markAsRead(Long articleId, Member member) {
         Article article = findArticleById(articleId, member.getId());

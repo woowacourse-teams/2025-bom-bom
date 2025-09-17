@@ -69,8 +69,12 @@ public class AuthController implements AuthControllerApi{
         Member newMember = memberService.signup(pendingMember, signupRequest);
         session.removeAttribute("pendingMember");
 
+        // 회원가입 후 로그인 처리 - 세션에 인증 정보 저장
         OAuth2AuthenticationToken authentication = createAuthenticationToken(newMember);
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        
+        // 세션에 인증 정보 저장 (다음 요청에서도 로그인 상태 유지)
+        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
     }
 
     @Override
@@ -152,14 +156,18 @@ public class AuthController implements AuthControllerApi{
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 
-    private ResponseEntity handleNativeResult(Optional<Member> existing, HttpServletRequest request) {
+    private ResponseEntity handleNativeResult(Optional<Member> member, HttpServletRequest request) {
         // 세션 생성 트리거 (컨테이너가 Set-Cookie: JSESSIONID를 설정)
         String sessionId = request.getSession(true).getId();
         SecurityContextHolder.getContext().getAuthentication();
 
-        if (existing.isPresent()) {
-            OAuth2AuthenticationToken authentication = createAuthenticationToken(existing.get());
+        if (member.isPresent()) {
+            OAuth2AuthenticationToken authentication = createAuthenticationToken(member.get());
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            HttpSession session = request.getSession();
+            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+            
             return ResponseEntity.ok()
                     .header("Set-Cookie", "JSESSIONID=" + sessionId + "; Path=/; Secure; SameSite=None")
                     .body(new NativeLoginResponse("SUCCESS", "로그인에 성공했습니다", sessionId));

@@ -135,6 +135,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           provider: "google",
         });
 
+        await AsyncStorage.setItem("provider", "google");
         await AsyncStorage.setItem("authToken", userInfo.data.idToken);
         await AsyncStorage.setItem(
           "serverAuthCode",
@@ -176,18 +177,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         ],
       });
 
+      
       if (credential.identityToken && credential.authorizationCode) {
         // 웹뷰 로그인 화면 표시
         setShowWebViewLogin(true);
 
-        // 웹뷰에 Apple 로그인 토큰 전송
-        sendMessageToWeb({
-          type: "APPLE_LOGIN_TOKEN",
-          payload: {
-            identityToken: credential.identityToken,
-            authorizationCode: credential.authorizationCode,
-          },
-        });
+        await AsyncStorage.setItem("provider", "apple");
+        await AsyncStorage.setItem("authToken", credential.identityToken);
+        await AsyncStorage.setItem(
+          "serverAuthCode",
+          credential.authorizationCode || ""
+        );
+
       } else {
         throw new Error("Apple 로그인 정보를 가져올 수 없습니다.");
       }

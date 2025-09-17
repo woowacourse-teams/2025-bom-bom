@@ -58,16 +58,28 @@ export const LoginScreen: React.FC = () => {
 
   useEffect(() => {
     (async () => {
-      const userInfo = await AsyncStorage.getItem("serverAuthCode");
+      const serverAuthCode = await AsyncStorage.getItem("serverAuthCode");
       const idToken = await AsyncStorage.getItem("authToken");
+      const provider = await AsyncStorage.getItem("provider");
 
+      if (provider === "google") {
       sendMessageToWeb({
         type: "GOOGLE_LOGIN_TOKEN",
         payload: {
           idToken: idToken,
-          serverAuthCode: userInfo,
+          serverAuthCode: serverAuthCode,
         },
       });
+      }
+      if (provider === "apple") {
+      sendMessageToWeb({
+        type: "APPLE_LOGIN_TOKEN",
+        payload: {
+          idToken,
+            serverAuthCode,
+          },
+        });
+      }
     })();
   }, [isLoading, sendMessageToWeb]);
 

@@ -39,10 +39,12 @@ export const WebViewMessenger: React.FC = () => {
             console.log('Google 로그인 토큰 수신:', message.payload);
             try {
               if (message.payload?.idToken) {
-                await postGoogleLogin(
+                const response = await postGoogleLogin(
                   message.payload.idToken,
                   message.payload.serverAuthCode,
                 );
+
+                alert(JSON.stringify(response));
 
                 // 로그인 성공을 앱에 알림
                 // sendMessageToRN({
@@ -53,8 +55,7 @@ export const WebViewMessenger: React.FC = () => {
                 //   },
                 // });
 
-                // 페이지 새로고침으로 인증 상태 업데이트
-                // window.location.reload();
+                window.location.reload();
               }
             } catch (error) {
               console.error('Google 로그인 실패:', error);
@@ -69,16 +70,16 @@ export const WebViewMessenger: React.FC = () => {
             break;
 
           case 'APPLE_LOGIN_TOKEN':
+            alert(JSON.stringify(message.payload));
             console.log('Apple 로그인 토큰 수신:', message.payload);
             try {
-              if (
-                message.payload?.identityToken &&
-                message.payload?.authorizationCode
-              ) {
-                await postAppleLogin(
-                  message.payload.identityToken,
-                  message.payload.authorizationCode,
+              if (message.payload?.idToken && message.payload?.serverAuthCode) {
+                const response = await postAppleLogin(
+                  message.payload.idToken,
+                  message.payload.serverAuthCode,
                 );
+
+                alert(JSON.stringify(response));
 
                 // 로그인 성공을 앱에 알림
                 sendMessageToRN({

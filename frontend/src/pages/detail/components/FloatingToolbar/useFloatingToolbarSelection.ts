@@ -1,85 +1,43 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { FloatingToolbarMode } from './FloatingToolbar.types';
+import { useCallback, useEffect } from 'react';
+import { FloatingToolbarMode, ToolbarPosition } from './FloatingToolbar.types';
 import { useDeviceType } from '@/hooks/useDeviceType';
-
-export interface ToolbarPosition {
-  x: number;
-  y: number;
-}
 
 interface UseFloatingToolbarSelectionParams {
   isInSelectionTarget: (range: Range) => boolean;
-  onHighlightButtonClick: ({
-    mode,
-    selectionRange,
-    highlightId,
-  }: {
+  onShow: (params: {
+    position: ToolbarPosition;
     mode: FloatingToolbarMode;
-    selectionRange: Range | null;
     highlightId: number | null;
+    range: Range | null;
   }) => void;
-  onMemoButtonClick: ({
-    mode,
-    selectionRange,
-  }: {
-    mode: FloatingToolbarMode;
-    selectionRange: Range | null;
-  }) => void;
+  onHide: () => void;
 }
 
 export const useFloatingToolbarSelection = ({
   isInSelectionTarget,
-  onHighlightButtonClick,
-  onMemoButtonClick,
+  onShow,
+  onHide,
 }: UseFloatingToolbarSelectionParams) => {
-  const rangeRef = useRef<Range>(null);
-  const selectedHighlightIdRef = useRef<number>(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const [position, setPosition] = useState<ToolbarPosition>({ x: 0, y: 0 });
   const deviceType = useDeviceType();
-
-  const hideToolbar = useCallback(() => setIsVisible(false), []);
-  const currentMode: FloatingToolbarMode = selectedHighlightIdRef.current
-    ? 'existing'
-    : 'new';
-
-  const handleHighlightButtonClick = () => {
-    hideToolbar();
-    onHighlightButtonClick({
-      mode: currentMode,
-      selectionRange: rangeRef.current,
-      highlightId: selectedHighlightIdRef.current,
-    });
-    window.getSelection()?.removeAllRanges();
-  };
-
-  const handleMemoButtonClick = () => {
-    hideToolbar();
-    onMemoButtonClick({
-      mode: currentMode,
-      selectionRange: rangeRef.current,
-    });
-    window.getSelection()?.removeAllRanges();
-  };
 
   const showToolbar = useCallback(
     (selection: Selection) => {
-      if (selection.rangeCount === 0) return;
-
       const range = selection.getRangeAt(0);
       if (!isInSelectionTarget(range)) return;
 
-      rangeRef.current = range;
-
       const rect = range.getBoundingClientRect();
-      selectedHighlightIdRef.current = null;
-      setPosition({
-        x: rect.left + rect.width / 2,
-        y: deviceType !== 'pc' ? rect.bottom + 40 : rect.top,
+
+      onShow({
+        position: {
+          x: rect.left + rect.width / 2,
+          y: deviceType !== 'pc' ? rect.bottom + 40 : rect.top,
+        },
+        mode: 'new',
+        highlightId: null,
+        range,
       });
-      setIsVisible(true);
     },
-    [deviceType, isInSelectionTarget],
+    [deviceType, isInSelectionTarget, onShow],
   );
 
   const handleHighlightClick = useCallback(
@@ -87,15 +45,18 @@ export const useFloatingToolbarSelection = ({
       const id = target.dataset.highlightId;
       if (!id) return;
 
-      selectedHighlightIdRef.current = Number(id);
       const rect = target.getBoundingClientRect();
-      setPosition({
-        x: rect.left + rect.width / 2,
-        y: deviceType === 'mobile' ? rect.bottom + 40 : rect.top,
+      onShow({
+        position: {
+          x: rect.left + rect.width / 2,
+          y: deviceType === 'mobile' ? rect.bottom + 40 : rect.top,
+        },
+        mode: 'existing',
+        highlightId: Number(id),
+        range: null,
       });
-      setIsVisible(true);
     },
-    [deviceType],
+    [deviceType, onShow],
   );
 
   const handleSelectionEnd = useCallback(
@@ -112,9 +73,9 @@ export const useFloatingToolbarSelection = ({
         return;
       }
 
-      hideToolbar();
+      onHide();
     },
-    [handleHighlightClick, hideToolbar, showToolbar],
+    [handleHighlightClick, onHide, showToolbar],
   );
 
   useEffect(() => {
@@ -125,12 +86,4 @@ export const useFloatingToolbarSelection = ({
       document.removeEventListener('pointerup', handleSelectionEnd);
     };
   }, [handleSelectionEnd]);
-
-  return {
-    isVisible,
-    position,
-    currentMode,
-    handleHighlightButtonClick,
-    handleMemoButtonClick,
-  };
 };

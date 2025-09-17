@@ -1,56 +1,26 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { PointerEvent, RefObject } from 'react';
-import { FloatingToolbarMode } from './FloatingToolbar.types';
-import {
-  ToolbarPosition,
-  useFloatingToolbarSelection,
-} from './useFloatingToolbarSelection';
+import { PointerEvent } from 'react';
+import { FloatingToolbarMode, ToolbarPosition } from './FloatingToolbar.types';
 import MemoIcon from '#/assets/comment.svg';
 import HighlightOffIcon from '#/assets/edit-off.svg';
 import HighlightIcon from '#/assets/edit.svg';
 
 interface FloatingToolBarProps {
-  selectionTargetRef: RefObject<HTMLDivElement | null>;
-  onHighlightButtonClick: ({
-    mode,
-    selectionRange,
-    highlightId,
-  }: {
-    mode: FloatingToolbarMode;
-    selectionRange: Range | null;
-    highlightId: number | null;
-  }) => void;
-  onMemoButtonClick: ({
-    mode,
-    selectionRange,
-  }: {
-    mode: FloatingToolbarMode;
-    selectionRange: Range | null;
-  }) => void;
+  visible: boolean;
+  position: ToolbarPosition;
+  mode: FloatingToolbarMode;
+  onHighlightButtonClick: () => void;
+  onMemoButtonClick: () => void;
 }
 
 export default function FloatingToolbar({
-  selectionTargetRef,
+  visible,
+  position,
+  mode,
   onHighlightButtonClick,
   onMemoButtonClick,
 }: FloatingToolBarProps) {
-  const isInSelectionTarget = (range: Range) =>
-    selectionTargetRef.current?.contains(range.commonAncestorContainer) ??
-    false;
-
-  const {
-    isVisible,
-    position,
-    currentMode,
-    handleHighlightButtonClick,
-    handleMemoButtonClick,
-  } = useFloatingToolbarSelection({
-    isInSelectionTarget,
-    onHighlightButtonClick,
-    onMemoButtonClick,
-  });
-
   const handlePointerDownOnToolbar = (e: PointerEvent) => {
     e.preventDefault();
   };
@@ -58,13 +28,23 @@ export default function FloatingToolbar({
   return (
     <Container
       position={position}
-      visible={isVisible}
+      visible={visible}
       onPointerDown={handlePointerDownOnToolbar}
     >
-      <ToolbarButton onClick={handleHighlightButtonClick}>
-        {currentMode === 'new' ? <HighlightIcon /> : <HighlightOffIcon />}
+      <ToolbarButton
+        onClick={() => {
+          console.log('toolbar highlight');
+          onHighlightButtonClick();
+        }}
+      >
+        {mode === 'new' ? <HighlightIcon /> : <HighlightOffIcon />}
       </ToolbarButton>
-      <ToolbarButton onClick={handleMemoButtonClick}>
+      <ToolbarButton
+        onClick={() => {
+          console.log('toolbar memo');
+          onMemoButtonClick();
+        }}
+      >
         <MemoIcon />
       </ToolbarButton>
     </Container>

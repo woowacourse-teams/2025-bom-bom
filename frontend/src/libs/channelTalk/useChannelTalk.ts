@@ -36,140 +36,154 @@ export const useChannelTalk = ({
     window.ChannelIO = ch;
   }, []);
 
-  const loadChannelIOScript = useCallback(() => {
+  const initChannelTalk = useCallback(() => {
     if (window.ChannelIOInitialized) return;
-    window.ChannelIOInitialized = true;
 
+    loadScript();
+
+    window.ChannelIOInitialized = true;
     const script = document.createElement('script');
     script.type = 'text/javascript';
     script.async = true;
     script.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
 
+    script.onload = () => {
+      window.ChannelIO?.(
+        'boot',
+        { pluginKey: PLUGIN_KEY, ...bootOption },
+        bootCallback,
+      );
+    };
+
     const firstScript = document.getElementsByTagName('script')[0];
     if (firstScript?.parentNode) {
       firstScript.parentNode.insertBefore(script, firstScript);
     }
+  }, [bootOption, bootCallback, loadScript]);
+
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const callChannelIO = useCallback((method: string, ...args: any[]) => {
+    window.ChannelIO?.(method, ...args);
   }, []);
 
-  const boot = useCallback((option: BootOption, callback?: Callback) => {
-    window.ChannelIO?.('boot', option, callback);
-  }, []);
+  const shutdown = useCallback(
+    () => callChannelIO('shutdown'),
+    [callChannelIO],
+  );
+  const showMessenger = useCallback(
+    () => callChannelIO('showMessenger'),
+    [callChannelIO],
+  );
+  const hideMessenger = useCallback(
+    () => callChannelIO('hideMessenger'),
+    [callChannelIO],
+  );
+  const clearCallbacks = useCallback(
+    () => callChannelIO('clearCallbacks'),
+    [callChannelIO],
+  );
+  const resetPage = useCallback(
+    () => callChannelIO('resetPage'),
+    [callChannelIO],
+  );
+  const showChannelButton = useCallback(
+    () => callChannelIO('showChannelButton'),
+    [callChannelIO],
+  );
+  const hideChannelButton = useCallback(
+    () => callChannelIO('hideChannelButton'),
+    [callChannelIO],
+  );
 
-  const shutdown = useCallback(() => {
-    window.ChannelIO?.('shutdown');
-  }, []);
-
-  const openChat = useCallback((chatId?: string | number, message?: string) => {
-    window.ChannelIO?.('openChat', chatId, message);
-  }, []);
-
-  const showMessenger = useCallback(() => {
-    window.ChannelIO?.('showMessenger');
-  }, []);
-
-  const hideMessenger = useCallback(() => {
-    window.ChannelIO?.('hideMessenger');
-  }, []);
-
-  const onShowMessenger = useCallback((callback: () => void) => {
-    window.ChannelIO?.('onShowMessenger', callback);
-  }, []);
-
-  const onHideMessenger = useCallback((callback: () => void) => {
-    window.ChannelIO?.('onHideMessenger', callback);
-  }, []);
+  const openChat = useCallback(
+    (chatId?: string | number, message?: string) =>
+      callChannelIO('openChat', chatId, message),
+    [callChannelIO],
+  );
 
   const track = useCallback(
-    (eventName: string, eventProperty?: EventProperty) => {
-      window.ChannelIO?.('track', eventName, eventProperty);
-    },
-    [],
+    (eventName: string, eventProperty?: EventProperty) =>
+      callChannelIO('track', eventName, eventProperty),
+    [callChannelIO],
+  );
+
+  const updateUser = useCallback(
+    (userInfo: UpdateUserInfo, callback?: Callback) =>
+      callChannelIO('updateUser', userInfo, callback),
+    [callChannelIO],
+  );
+
+  const addTags = useCallback(
+    (tags: string[], callback?: Callback) =>
+      callChannelIO('addTags', tags, callback),
+    [callChannelIO],
+  );
+
+  const removeTags = useCallback(
+    (tags: string[], callback?: Callback) =>
+      callChannelIO('removeTags', tags, callback),
+    [callChannelIO],
+  );
+
+  const setPage = useCallback(
+    (page: string) => callChannelIO('setPage', page),
+    [callChannelIO],
+  );
+
+  const setAppearance = useCallback(
+    (appearance: Appearance) => callChannelIO('setAppearance', appearance),
+    [callChannelIO],
+  );
+
+  const onShowMessenger = useCallback(
+    (callback: () => void) => callChannelIO('onShowMessenger', callback),
+    [callChannelIO],
+  );
+
+  const onHideMessenger = useCallback(
+    (callback: () => void) => callChannelIO('onHideMessenger', callback),
+    [callChannelIO],
   );
 
   const onBadgeChanged = useCallback(
-    (callback: (unread: number, alert: number) => void) => {
-      window.ChannelIO?.('onBadgeChanged', callback);
-    },
-    [],
+    (callback: (unread: number, alert: number) => void) =>
+      callChannelIO('onBadgeChanged', callback),
+    [callChannelIO],
   );
 
-  const onChatCreated = useCallback((callback: () => void) => {
-    window.ChannelIO?.('onChatCreated', callback);
-  }, []);
+  const onChatCreated = useCallback(
+    (callback: () => void) => callChannelIO('onChatCreated', callback),
+    [callChannelIO],
+  );
 
   const onFollowUpChanged = useCallback(
-    (callback: (profile: FollowUpProfile) => void) => {
-      window.ChannelIO?.('onFollowUpChanged', callback);
-    },
-    [],
+    (callback: (profile: FollowUpProfile) => void) =>
+      callChannelIO('onFollowUpChanged', callback),
+    [callChannelIO],
   );
 
-  const onUrlClicked = useCallback((callback: (url: string) => void) => {
-    window.ChannelIO?.('onUrlClicked', callback);
-  }, []);
-
-  const clearCallbacks = useCallback(() => {
-    window.ChannelIO?.('clearCallbacks');
-  }, []);
-
-  const updateUser = useCallback(
-    (userInfo: UpdateUserInfo, callback?: Callback) => {
-      window.ChannelIO?.('updateUser', userInfo, callback);
-    },
-    [],
+  const onUrlClicked = useCallback(
+    (callback: (url: string) => void) =>
+      callChannelIO('onUrlClicked', callback),
+    [callChannelIO],
   );
-
-  const addTags = useCallback((tags: string[], callback?: Callback) => {
-    window.ChannelIO?.('addTags', tags, callback);
-  }, []);
-
-  const removeTags = useCallback((tags: string[], callback?: Callback) => {
-    window.ChannelIO?.('removeTags', tags, callback);
-  }, []);
-
-  const setPage = useCallback((page: string) => {
-    window.ChannelIO?.('setPage', page);
-  }, []);
-
-  const resetPage = useCallback(() => {
-    window.ChannelIO?.('resetPage');
-  }, []);
-
-  const showChannelButton = useCallback(() => {
-    window.ChannelIO?.('showChannelButton');
-  }, []);
-
-  const hideChannelButton = useCallback(() => {
-    window.ChannelIO?.('hideChannelButton');
-  }, []);
-
-  const setAppearance = useCallback((appearance: Appearance) => {
-    window.ChannelIO?.('setAppearance', appearance);
-  }, []);
 
   useEffect(() => {
     if (document.readyState === 'complete') {
-      loadChannelIOScript();
+      initChannelTalk();
       return;
     }
 
-    window.addEventListener('DOMContentLoaded', loadChannelIOScript);
-    window.addEventListener('load', loadChannelIOScript);
+    window.addEventListener('DOMContentLoaded', initChannelTalk);
+    window.addEventListener('load', initChannelTalk);
 
     return () => {
-      window.removeEventListener('DOMContentLoaded', loadChannelIOScript);
-      window.removeEventListener('load', loadChannelIOScript);
+      window.removeEventListener('DOMContentLoaded', initChannelTalk);
+      window.removeEventListener('load', initChannelTalk);
     };
-  }, [loadChannelIOScript]);
-
-  useEffect(() => {
-    loadScript();
-
-    boot({ pluginKey: PLUGIN_KEY, ...bootOption }, bootCallback);
-  }, []);
+  }, [initChannelTalk]);
 
   return {
-    boot,
     shutdown,
     showMessenger,
     hideMessenger,

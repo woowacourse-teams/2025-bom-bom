@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { useDeviceType } from '@/hooks/useDeviceType';
-import maintenanceBom from '#/system/maintenance/maintenance-bom.png';
+import maintenanceBom from '#/assets/maintenance-bom.png';
 
 const MaintenanceCard = () => {
   const deviceType = useDeviceType();

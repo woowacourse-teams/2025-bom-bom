@@ -1,6 +1,5 @@
 import path from 'path';
 import { tanstackRouter } from '@tanstack/router-plugin/webpack';
-import CopyWebpackPlugin from 'copy-webpack-plugin';
 import dotenv from 'dotenv';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack from 'webpack';
@@ -83,14 +82,6 @@ export default (env, argv) => {
       new webpack.DefinePlugin({
         'process.env': JSON.stringify(process.env),
         'process.env.ENABLE_MSW': JSON.stringify(env.ENABLE_MSW),
-      }),
-      new CopyWebpackPlugin({
-        patterns: [
-          {
-            from: path.resolve(__dirname, 'public', 'system'),
-            to: path.resolve(__dirname, 'dist', 'system'),
-          },
-        ],
       }),
     ],
     devServer: {

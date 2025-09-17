@@ -71,7 +71,6 @@ public class ArticleService {
         return ArticleDetailResponse.of(article, newsletter, category);
     }
 
-    @WithSpan
     @Transactional
     public void markAsRead(Long articleId, Member member) {
         Article article = findArticleById(articleId, member.getId());

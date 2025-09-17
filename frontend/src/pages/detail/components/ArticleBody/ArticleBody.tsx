@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useHighlightData } from '../../hooks/useHighlightData';
-import { useHighlightHoverEffect } from '../../hooks/useHighlightHoverEffect';
 import { restoreHighlightAll, saveSelection } from '../../utils/highlight';
 import ArticleContent from '../ArticleContent/ArticleContent';
 import FloatingToolbar from '../FloatingToolbar/FloatingToolbar';
@@ -18,7 +17,6 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const { highlights, addHighlight, updateMemo, removeHighlight } =
     useHighlightData({ articleId });
-
   const handleHighlightClick = ({
     mode,
     selectionRange,
@@ -54,8 +52,6 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
     }
     setPanelOpen(true);
   };
-
-  useHighlightHoverEffect();
 
   useEffect(() => {
     if (!highlights || !articleContent) return;

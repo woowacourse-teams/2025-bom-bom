@@ -26,8 +26,8 @@ export const useChannelTalk = ({
       return console.error('ChannelIO script included twice.');
     }
 
-    const ch: IChannelIO = function () {
-      ch.c?.(arguments);
+    const ch: IChannelIO = function (...args) {
+      ch.c?.(args);
     };
     ch.q = [];
     ch.c = function (args) {

@@ -34,7 +34,9 @@ const RootComponent = () => {
 
 export const Route = createRootRouteWithContext<BomBomRouterContext>()({
   component: RootComponent,
-  beforeLoad: async ({ location }) => {
+  beforeLoad: async ({
+    location,
+  }): Promise<void | ReturnType<typeof redirect>> => {
     const maintenancePath = '/maintenance';
 
     try {

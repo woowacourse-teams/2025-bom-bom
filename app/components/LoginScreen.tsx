@@ -45,27 +45,15 @@ export const LoginScreen = () => {
       if (!auth) return;
       const { provider, identityToken, authorizationCode } = JSON.parse(auth);
 
-      if (!authorizationCode || !identityToken || !provider) {
-        return;
-      }
+      if (!authorizationCode || !identityToken || !provider) return;
 
-      if (provider === 'google') {
-        sendMessageToWeb({
-          type: 'GOOGLE_LOGIN_TOKEN',
-          payload: {
-            identityToken,
-            authorizationCode,
-          },
-        });
-      } else if (provider === 'apple') {
-        sendMessageToWeb({
-          type: 'APPLE_LOGIN_TOKEN',
-          payload: {
-            identityToken,
-            authorizationCode,
-          },
-        });
-      }
+      sendMessageToWeb({
+        type: `${provider.toUpperCase()}_LOGIN_TOKEN`,
+        payload: {
+          identityToken,
+          authorizationCode,
+        },
+      });
 
       AsyncStorage.removeItem('auth');
 

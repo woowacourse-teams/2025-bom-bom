@@ -7,7 +7,6 @@ import {
 } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { theme } from '../styles/theme';
-import { queries } from '@/apis/queries';
 import Toast from '@/components/Toast/Toast';
 import { usePageTracking } from '@/libs/googleAnalytics/usePageTracking';
 import { queryClient } from '@/main';
@@ -33,23 +32,33 @@ const RootComponent = () => {
 
 export const Route = createRootRouteWithContext<BomBomRouterContext>()({
   component: RootComponent,
-  beforeLoad: async ({ context, location }) => {
-    const { queryClient } = context;
+  beforeLoad: async ({ location }) => {
+    const maintenancePath = '/maintenance';
 
     try {
-      const serverStatus = await queryClient.fetchQuery(queries.serverStatus());
+      const res = await fetch('https://monitoring.bombom.news/status/dev', {
+        cache: 'no-store',
+      });
 
-      if (serverStatus !== 'UP') {
-        if (location.pathname !== '/maintenance') {
-          return redirect({ to: '/maintenance' });
-        }
+      if (!res.ok) {
+        throw new Error(`Failed to fetch status: ${res.status}`);
       }
 
-      return null;
-    } catch {
-      if (location.pathname !== '/maintenance') {
-        return redirect({ to: '/maintenance' });
+      const serverStatus = await res.json();
+      const status = serverStatus?.data?.result?.[0]?.value[1] ?? '0';
+
+      const isUp = status === '1';
+
+      if (!isUp && location.pathname !== maintenancePath) {
+        return redirect({ to: maintenancePath });
+      }
+    } catch (err) {
+      console.error('Server status check failed:', err);
+      if (location.pathname !== maintenancePath) {
+        return redirect({ to: maintenancePath });
       }
     }
+
+    return;
   },
 });

@@ -8,7 +8,8 @@
     "android": "expo run:android",
     "ios": "expo prebuild --clean && expo run:ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",

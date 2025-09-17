@@ -49,11 +49,13 @@ public class IdTokenValidator {
     private String validateAndGetSub(JwtDecoder decoder, String issuer, String idToken, String expectedAudience, String provider) {
         try {
             Jwt jwt = decoder.decode(idToken);
+            log.info("ID Token 검증 - provider: {}, actualAud: {}, expectedAud: {}", provider, jwt.getAudience(), expectedAudience);
             if (jwt.getAudience() == null || jwt.getAudience().isEmpty() || !jwt.getAudience().contains(expectedAudience)) {
                 throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
                         .addContext("provider", provider)
                         .addContext("reason", "invalid_audience")
-                        .addContext("expectedAud", expectedAudience);
+                        .addContext("expectedAud", expectedAudience)
+                        .addContext("actualAud", jwt.getAudience().toString());
             }
             return jwt.getSubject();
         } catch (UnauthorizedException e) {

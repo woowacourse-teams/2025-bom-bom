@@ -100,10 +100,22 @@ public class AuthController implements AuthControllerApi{
     @PostMapping("/login/{provider}/native")
     public ResponseEntity nativeLogin(
             @PathVariable("provider") String provider,
-            @Valid @RequestBody NativeLoginRequest nativeLoginRequest,
+            @RequestBody(required = false) NativeLoginRequest nativeLoginRequest,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
+        log.error("=== 네이티브 로그인 메서드 시작 ===");
+        log.error("Provider: {}", provider);
+        log.error("Content-Type: {}", request.getContentType());
+        log.error("Request body null: {}", nativeLoginRequest == null);
+        
+        if (nativeLoginRequest == null) {
+            log.error("RequestBody가 null입니다!");
+            return ResponseEntity.badRequest().body("Request body is missing");
+        }
+        
+        log.error("IdentityToken null: {}", nativeLoginRequest.identityToken() == null);
+        log.error("AuthorizationCode null: {}", nativeLoginRequest.authorizationCode() == null);
         if ("apple".equalsIgnoreCase(provider)) {
             return handleNativeResult(appleOAuth2Service.loginWithNative(nativeLoginRequest), request);
         }

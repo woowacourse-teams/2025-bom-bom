@@ -3,7 +3,7 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import React, {
   createContext,
-  ReactNode,
+  PropsWithChildren,
   useContext,
   useRef,
   useState,
@@ -15,11 +15,7 @@ import { RNToWebMessage } from '../types/webview';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [showWebViewLogin, setShowWebViewLogin] = useState(false);
   const webViewRef = useRef<WebView>(null);
 
@@ -65,7 +61,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Apple 로그인
   const loginWithApple = async (): Promise<void> => {
     if (!AppleAuthentication.isAvailableAsync()) {
       throw new Error('Apple 로그인을 사용할 수 없습니다.');
@@ -79,7 +74,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
 
     if (credential.identityToken && credential.authorizationCode) {
-      // 웹뷰 로그인 화면 표시
       setShowWebViewLogin(true);
 
       await AsyncStorage.setItem('provider', 'apple');
@@ -93,16 +87,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const value = {
-    loginWithGoogle,
-    loginWithApple,
-    showWebViewLogin,
-    setShowWebViewLogin,
-    webViewRef,
-    sendMessageToWeb,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        loginWithGoogle,
+        loginWithApple,
+        showWebViewLogin,
+        setShowWebViewLogin,
+        webViewRef,
+        sendMessageToWeb,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {

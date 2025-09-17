@@ -1,11 +1,11 @@
 import React from 'react';
 import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  ViewStyle,
-  TextStyle,
   ActivityIndicator,
+  StyleSheet,
+  Text,
+  TextStyle,
+  TouchableOpacity,
+  ViewStyle,
 } from 'react-native';
 
 interface ButtonProps {
@@ -19,7 +19,7 @@ interface ButtonProps {
   icon?: React.ReactNode;
 }
 
-export const Button: React.FC<ButtonProps> = ({
+export const Button = ({
   title,
   onPress,
   variant = 'primary',
@@ -28,7 +28,7 @@ export const Button: React.FC<ButtonProps> = ({
   style,
   textStyle,
   icon,
-}) => {
+}: ButtonProps) => {
   const getButtonStyle = (): ViewStyle => {
     const baseStyle = styles.button;
 

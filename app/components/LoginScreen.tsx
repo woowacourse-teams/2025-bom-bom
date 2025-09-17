@@ -15,7 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from './Button';
 
-export const LoginScreen: React.FC = () => {
+export const LoginScreen = () => {
   const {
     loginWithGoogle,
     loginWithApple,
@@ -92,7 +92,7 @@ export const LoginScreen: React.FC = () => {
             </View>
             <Text style={styles.title}>봄봄에 오신 걸 환영해요</Text>
             <Text style={styles.subtitle}>
-              당신의 하루에 찾아오는 작은 설렘{'n'}뉴스레터를 한 곳에서 쉽게
+              당신의 하루에 찾아오는 작은 설렘{'\n'}뉴스레터를 한 곳에서 쉽게
               관리하세요
             </Text>
           </View>

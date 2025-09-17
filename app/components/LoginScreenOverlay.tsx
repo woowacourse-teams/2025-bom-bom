@@ -9,10 +9,10 @@ interface LoginScreenOverlayProps {
   onClose: () => void;
 }
 
-export const LoginScreenOverlay: React.FC<LoginScreenOverlayProps> = ({
+export const LoginScreenOverlay = ({
   visible,
   onClose,
-}) => {
+}: LoginScreenOverlayProps) => {
   return (
     <Modal
       visible={visible}

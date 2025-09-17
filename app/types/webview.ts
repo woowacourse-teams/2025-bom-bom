@@ -8,14 +8,8 @@ export interface WebToRNMessage {
 export interface RNToWebMessage {
   type: 'GOOGLE_LOGIN_TOKEN' | 'APPLE_LOGIN_TOKEN';
   payload?: {
-    token?: string;
-    isAuthenticated?: boolean;
-    // Google 로그인 토큰
     idToken?: string;
     serverAuthCode?: string;
-    // Apple 로그인 토큰
-    identityToken?: string;
-    authorizationCode?: string;
   };
 }
 

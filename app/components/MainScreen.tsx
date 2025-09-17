@@ -8,7 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { WebToRNMessage } from '../types/webview';
 import { LoginScreenOverlay } from './LoginScreenOverlay';
 
-export const MainScreen: React.FC = () => {
+export const MainScreen = () => {
   const { showWebViewLogin, setShowWebViewLogin, webViewRef } = useAuth();
 
   const handleWebViewMessage = (event: any) => {
@@ -79,7 +79,6 @@ export const MainScreen: React.FC = () => {
         />
       </View>
 
-      {/* 웹뷰 로그인 오버레이 */}
       <LoginScreenOverlay
         visible={showWebViewLogin}
         onClose={() => setShowWebViewLogin(false)}

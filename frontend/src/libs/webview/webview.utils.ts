@@ -1,4 +1,8 @@
-import type { RNToWebMessage, WebToRNMessage, WindowWithWebkit } from './types';
+import type {
+  RNToWebMessage,
+  WebToRNMessage,
+  WindowWithWebkit,
+} from './webview.types';
 
 export const isAndroid = (): boolean => !!window.ReactNativeWebView;
 export const isIOS = (): boolean =>
@@ -47,3 +51,11 @@ export const addWebViewMessageListener = (
     window.removeEventListener('message', messageHandler);
   };
 };
+
+declare global {
+  interface Window {
+    ReactNativeWebView?: {
+      postMessage: (message: string) => void;
+    };
+  }
+}

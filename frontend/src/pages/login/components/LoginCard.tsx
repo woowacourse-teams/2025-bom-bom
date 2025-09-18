@@ -37,7 +37,7 @@ const LoginCard = () => {
         type="button"
       >
         <GoogleIcon width={24} height={24} fill="black" />
-        Google로 시작하기
+        Google로 계속하기
       </LoginButton>
       <LoginButton
         onClick={() => {
@@ -46,7 +46,7 @@ const LoginCard = () => {
         type="button"
       >
         <AppleIcon width={24} height={24} fill="black" />
-        Apple로 시작하기
+        Apple로 계속하기
       </LoginButton>
       <Terms>
         로그인하시면 봄봄의 <Highlight>서비스 약관</Highlight>과

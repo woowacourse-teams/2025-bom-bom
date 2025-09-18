@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { useFloatingToolbarState } from '../../hooks/useFloatingToolbarState';
 import { useHighlightData } from '../../hooks/useHighlightData';
 import { restoreHighlightAll, saveSelection } from '../../utils/highlight';
 import ArticleContent from '../ArticleContent/ArticleContent';
 import FloatingToolbar from '../FloatingToolbar/FloatingToolbar';
-import {
-  FloatingToolbarMode,
-  ToolbarPosition,
-} from '../FloatingToolbar/FloatingToolbar.types';
 import { useFloatingToolbarSelection } from '../FloatingToolbar/useFloatingToolbarSelection';
 import MemoPanel from '../MemoPanel/MemoPanel';
 import { GetArticleByIdResponse } from '@/apis/articles';
@@ -17,9 +14,8 @@ interface ArticleBodyProps {
 }
 
 const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const [position, setPosition] = useState<ToolbarPosition>({ x: 0, y: 0 });
-  const [mode, setMode] = useState<FloatingToolbarMode>('new');
+  const { visible, position, mode, showToolbar, hideToolbar } =
+    useFloatingToolbarState();
   const rangeRef = useRef<Range>(null);
   const selectedHighlightIdRef = useRef<number>(null);
 
@@ -27,8 +23,6 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const { highlights, addHighlight, updateMemo, removeHighlight } =
     useHighlightData({ articleId });
-
-  const hideToolbar = () => setIsVisible(false);
 
   const handleHighlightClick = () => {
     const isNewHighlight = mode === 'new';
@@ -60,15 +54,11 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
     isInSelectionTarget: (range) =>
       contentRef.current?.contains(range.commonAncestorContainer) ?? false,
     onShow: ({ position, mode, highlightId, range }) => {
-      setPosition(position);
-      setMode(mode);
+      showToolbar({ position, mode });
       selectedHighlightIdRef.current = highlightId;
       rangeRef.current = range;
-      setIsVisible(true);
     },
-    onHide: () => {
-      setIsVisible(false);
-    },
+    onHide: hideToolbar,
   });
 
   useEffect(() => {
@@ -81,7 +71,7 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
     <>
       <ArticleContent ref={contentRef} content={articleContent} />
       <FloatingToolbar
-        visible={isVisible}
+        visible={visible}
         position={position}
         mode={mode}
         onHighlightButtonClick={handleHighlightClick}

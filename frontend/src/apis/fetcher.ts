@@ -114,7 +114,7 @@ const request = async <TRequest, TResponse>({
       }
     }
 
-    return null;
+    return { headers: response.headers } as TResponse;
   } catch (error) {
     console.error(error);
     throw error;

@@ -7,6 +7,7 @@ import arrowPrev from '#/assets/carousel-arrow-prev.png';
 interface CarouselProps extends PropsWithChildren {
   timer?: boolean | number;
   showSlideButton?: boolean;
+  activeAnimation?: boolean;
 }
 
 /**
@@ -15,11 +16,13 @@ interface CarouselProps extends PropsWithChildren {
  *   - `true`: 기본 4초 주기
  *   - `number`: 커스텀 주기(ms)
  * @property {boolean} [showSlideButton=true] - 슬라이드 변경 버튼 렌더링 여부
+ * @property {boolean} [activeAnimation=true] - 슬라이드 애니메이션 활성화 여부
  * @property {React.ReactNode} children - 슬라이드로 렌더링할 자식 요소들
  */
 const Carousel = ({
   timer = true,
   showSlideButton = true,
+  activeAnimation = true,
   children,
 }: CarouselProps) => {
   const originSlides = Children.toArray(children);
@@ -57,6 +60,7 @@ const Carousel = ({
         slideIndex={slideIndex}
         isTransitioning={isTransitioning}
         onTransitionEnd={handleTransitionEnd}
+        activeAnimation={activeAnimation}
       >
         {infinitySlides.map((slideContent, index) => (
           <Slide key={`slide-${index}`}>{slideContent}</Slide>
@@ -93,14 +97,15 @@ const Container = styled.div`
 const SlidesWrapper = styled.ul<{
   slideIndex: number;
   isTransitioning: boolean;
+  activeAnimation: boolean;
 }>`
   height: 100%;
 
   display: flex;
 
   transform: ${({ slideIndex }) => `translateX(-${slideIndex * 100}%)`};
-  transition: ${({ isTransitioning }) =>
-    isTransitioning ? 'transform 0.3s ease-in-out' : 'none'};
+  transition: ${({ isTransitioning, activeAnimation }) =>
+    isTransitioning && activeAnimation ? 'transform 0.3s ease-in-out' : 'none'};
 `;
 
 const Slide = styled.li`

@@ -15,12 +15,9 @@ import { RNToWebMessage } from '../types/webview';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const WEB_CLIENT_ID =
-  '190361254930-2pjm8lf7hddaglvj5p7tqp9jo4av1n64.apps.googleusercontent.com';
-const IOS_CLIENT_ID =
-  '190361254930-1464b7md34crhu077urc0hsvtsmb5ks5.apps.googleusercontent.com';
-const ANDROID_CLIENT_ID =
-  '190361254930-2ngalbu1fkqse432v0detaf86d66valm.apps.googleusercontent.com';
+const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
+const IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+const ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [showWebViewLogin, setShowWebViewLogin] = useState(false);

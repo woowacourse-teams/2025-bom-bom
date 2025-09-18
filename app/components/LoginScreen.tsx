@@ -23,6 +23,22 @@ export const LoginScreen = () => {
     setShowWebViewLogin,
   } = useAuth();
 
+  const handleGoogleLogin = async () => {
+    try {
+      await loginWithGoogle();
+    } catch (error) {
+      console.error('Google 로그인 실패:', error);
+    }
+  };
+
+  const handleAppleLogin = async () => {
+    try {
+      await loginWithApple();
+    } catch (error) {
+      console.error('Apple 로그인 실패:', error);
+    }
+  };
+
   useEffect(() => {
     (async () => {
       const auth = await AsyncStorage.getItem('auth');
@@ -74,7 +90,7 @@ export const LoginScreen = () => {
             <View style={styles.socialLogin}>
               <Button
                 title="Google로 시작하기"
-                onPress={loginWithGoogle}
+                onPress={handleGoogleLogin}
                 variant="social"
                 icon={<Ionicons name="logo-google" size={24} color="#4285F4" />}
                 style={styles.socialButton}
@@ -83,7 +99,7 @@ export const LoginScreen = () => {
               {Platform.OS === 'ios' && (
                 <Button
                   title="Apple로 시작하기"
-                  onPress={loginWithApple}
+                  onPress={handleAppleLogin}
                   variant="social"
                   icon={
                     <Ionicons name="logo-apple" size={24} color="#000000" />

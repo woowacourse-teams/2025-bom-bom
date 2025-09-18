@@ -72,6 +72,10 @@ dependencies {
     // logging
     implementation(platform("org.springframework.cloud:spring-cloud-dependencies:2025.0.0"))
     implementation("net.logstash.logback:logstash-logback-encoder:8.1")
+
+    //ShedLock
+    implementation("net.javacrumbs.shedlock:shedlock-spring:6.9.2")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.9.2")
 }
 
 // Querydsl 생성된 파일 정리

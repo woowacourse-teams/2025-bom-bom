@@ -1,27 +1,9 @@
-export interface WebToRNMessage {
-  type: 'SHOW_LOGIN_SCREEN' | 'LOGIN_SUCCESS' | 'LOGIN_FAILED';
-  payload?: {
-    isAuthenticated?: boolean;
-    provider?: string;
-    error?: string;
-  };
-}
-
-export interface RNToWebMessage {
-  type: 'GOOGLE_LOGIN_TOKEN' | 'APPLE_LOGIN_TOKEN';
-  payload?: {
-    identityToken?: string;
-    authorizationCode?: string;
-  };
-}
-
-const isAndroid = () => window.ReactNativeWebView;
-const isIOS = () =>
-  (window as WindowWithWebkit).webkit?.messageHandlers?.ReactNativeWebView;
-
-export const isRunningInWebView = (): boolean => {
-  return !!(isAndroid() || isIOS());
-};
+import { isAndroid, isIOS, isRunningInWebView } from '../libs/webview/utils';
+import type {
+  WebToRNMessage,
+  RNToWebMessage,
+  WindowWithWebkit,
+} from '../libs/webview/types';
 
 export const sendMessageToRN = (message: WebToRNMessage): void => {
   if (!isRunningInWebView()) {
@@ -68,26 +50,7 @@ export const addWebViewMessageListener = (
   };
 
   window.addEventListener('message', messageHandler);
-
   return () => {
     window.removeEventListener('message', messageHandler);
   };
 };
-
-interface WindowWithWebkit extends Window {
-  webkit?: {
-    messageHandlers?: {
-      ReactNativeWebView?: {
-        postMessage: (message: string) => void;
-      };
-    };
-  };
-}
-
-declare global {
-  interface Window {
-    ReactNativeWebView?: {
-      postMessage: (message: string) => void;
-    };
-  }
-}

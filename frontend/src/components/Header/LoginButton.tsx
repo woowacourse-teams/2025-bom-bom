@@ -1,9 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import Button from '../Button/Button';
-import {
-  isRunningInWebView,
-  requestShowLoginScreen,
-} from '@/utils/webviewBridge';
+import { isRunningInWebView } from '@/libs/webview';
+import { requestShowLoginScreen } from '@/utils/webviewBridge';
 
 const LoginButton = () => {
   const navigate = useNavigate();

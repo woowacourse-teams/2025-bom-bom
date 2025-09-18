@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { postGoogleLogin, postAppleLogin } from '@/apis/auth';
+import { RNToWebMessage } from '@/libs/webview';
 import {
   addWebViewMessageListener,
-  RNToWebMessage,
   sendMessageToRN,
 } from '@/utils/webviewBridge';
 

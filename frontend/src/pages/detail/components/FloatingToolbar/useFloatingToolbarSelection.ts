@@ -20,7 +20,7 @@ export const useFloatingToolbarSelection = ({
 }: UseFloatingToolbarSelectionParams) => {
   const deviceType = useDeviceType();
 
-  const showToolbar = useCallback(
+  const openToolbarFromSelection = useCallback(
     (selection: Selection) => {
       const range = selection.getRangeAt(0);
       if (!isInSelectionTarget(range)) return;
@@ -40,7 +40,7 @@ export const useFloatingToolbarSelection = ({
     [deviceType, isInSelectionTarget, onShow],
   );
 
-  const handleHighlightClick = useCallback(
+  const openToolbarFromHighlight = useCallback(
     (target: HTMLElement) => {
       const id = target.dataset.highlightId;
       if (!id) return;
@@ -59,31 +59,45 @@ export const useFloatingToolbarSelection = ({
     [deviceType, onShow],
   );
 
-  const handleSelectionEnd = useCallback(
+  const handlePointerOrClick = useCallback(
     (e: PointerEvent | MouseEvent) => {
       const target = e.target as HTMLElement;
+
+      // 하이라이트 클릭
       if (target.tagName === 'MARK') {
-        handleHighlightClick(target);
+        openToolbarFromHighlight(target);
         return;
       }
 
+      // 새 selection
       const selection = window.getSelection();
       if (selection && !selection.isCollapsed && selection.rangeCount > 0) {
-        showToolbar(selection);
+        openToolbarFromSelection(selection);
         return;
       }
 
+      // 아무것도 없으면 툴바 닫기
       onHide();
     },
-    [handleHighlightClick, onHide, showToolbar],
+    [openToolbarFromHighlight, openToolbarFromSelection, onHide],
   );
 
+  const handleSelectionClear = useCallback(() => {
+    const selection = window.getSelection();
+    if (selection && selection.isCollapsed) {
+      onHide();
+    }
+  }, [onHide]);
+
   useEffect(() => {
-    document.addEventListener('mouseup', handleSelectionEnd);
-    document.addEventListener('pointerup', handleSelectionEnd);
+    document.addEventListener('mouseup', handlePointerOrClick);
+    document.addEventListener('pointerup', handlePointerOrClick);
+    document.addEventListener('selectionchange', handleSelectionClear);
+
     return () => {
-      document.removeEventListener('mouseup', handleSelectionEnd);
-      document.removeEventListener('pointerup', handleSelectionEnd);
+      document.removeEventListener('mouseup', handlePointerOrClick);
+      document.removeEventListener('pointerup', handlePointerOrClick);
+      document.removeEventListener('selectionchange', handleSelectionClear);
     };
-  }, [handleSelectionEnd]);
+  }, [handlePointerOrClick, handleSelectionClear]);
 };

@@ -1,5 +1,8 @@
-import { useCallback, useEffect } from 'react';
-import { FloatingToolbarMode, ToolbarPosition } from './FloatingToolbar.types';
+import { useCallback, useEffect, useRef } from 'react';
+import {
+  FloatingToolbarMode,
+  ToolbarPosition,
+} from '../FloatingToolbar/FloatingToolbar.types';
 import { useDeviceType } from '@/hooks/useDeviceType';
 
 interface UseFloatingToolbarSelectionParams {
@@ -7,8 +10,6 @@ interface UseFloatingToolbarSelectionParams {
   onShow: (params: {
     position: ToolbarPosition;
     mode: FloatingToolbarMode;
-    highlightId: number | null;
-    range: Range | null;
   }) => void;
   onHide: () => void;
 }
@@ -19,6 +20,8 @@ export const useFloatingToolbarSelection = ({
   onHide,
 }: UseFloatingToolbarSelectionParams) => {
   const deviceType = useDeviceType();
+  const rangeRef = useRef<Range>(null);
+  const highlightIdRef = useRef<number>(null);
 
   const openToolbarFromSelection = useCallback(
     (selection: Selection) => {
@@ -33,9 +36,9 @@ export const useFloatingToolbarSelection = ({
           y: deviceType !== 'pc' ? rect.bottom + 40 : rect.top,
         },
         mode: 'new',
-        highlightId: null,
-        range,
       });
+      highlightIdRef.current = null;
+      rangeRef.current = range;
     },
     [deviceType, isInSelectionTarget, onShow],
   );
@@ -52,9 +55,9 @@ export const useFloatingToolbarSelection = ({
           y: deviceType === 'mobile' ? rect.bottom + 40 : rect.top,
         },
         mode: 'existing',
-        highlightId: Number(id),
-        range: null,
       });
+      highlightIdRef.current = Number(id);
+      rangeRef.current = null;
     },
     [deviceType, onShow],
   );
@@ -100,4 +103,9 @@ export const useFloatingToolbarSelection = ({
       document.removeEventListener('selectionchange', handleSelectionClear);
     };
   }, [handlePointerOrClick, handleSelectionClear]);
+
+  return {
+    selectionRange: rangeRef.current,
+    selectedHighlightId: highlightIdRef.current,
+  };
 };

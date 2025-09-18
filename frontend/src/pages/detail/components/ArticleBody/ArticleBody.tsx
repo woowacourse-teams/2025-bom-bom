@@ -18,8 +18,13 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
   const { open, position, mode, showToolbar, hideToolbar } =
     useFloatingToolbarState();
   const [panelOpen, setPanelOpen] = useState(false);
-  const { highlights, addHighlight, updateMemo, removeHighlight } =
-    useHighlightData({ articleId });
+  const {
+    highlights,
+    isHighlightLoaded,
+    addHighlight,
+    updateMemo,
+    removeHighlight,
+  } = useHighlightData({ articleId });
   const { activeSelectionRange, activeHighlightId } =
     useFloatingToolbarSelection({
       isInSelectionTarget: (range) =>
@@ -53,10 +58,13 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
   };
 
   useEffect(() => {
-    if (!highlights || !articleContent) return;
+    if (!articleContent) return;
 
-    restoreHighlightAll(highlights);
-  }, [articleContent, highlights]);
+    if (isHighlightLoaded) restoreHighlightAll(highlights);
+
+    // 하이라이트가 처음 로드될 때만 restore 실행 (highlight 변경 시 재실행 방지)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [articleContent, isHighlightLoaded]);
 
   return (
     <>

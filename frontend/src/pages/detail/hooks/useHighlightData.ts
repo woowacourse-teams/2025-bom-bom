@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Highlight } from '../types/highlight';
-import { removeHighlightFromDOM } from '../utils/highlight';
+import { addHighlightToDOM, removeHighlightFromDOM } from '../utils/highlight';
 import {
   deleteHighlight,
   getHighlights,
@@ -11,7 +11,7 @@ import {
 
 export const useHighlightData = ({ articleId }: { articleId: number }) => {
   const queryClient = useQueryClient();
-  const { data: highlights } = useQuery({
+  const { data: highlights, isSuccess } = useQuery({
     queryKey: ['highlight'],
     queryFn: () => getHighlights({ articleId }),
   });
@@ -19,7 +19,8 @@ export const useHighlightData = ({ articleId }: { articleId: number }) => {
   const { mutate: addHighlight } = useMutation({
     mutationKey: ['addHighlights'],
     mutationFn: (params: PostHighlightParams) => postHighlight(params),
-    onSuccess: () => {
+    onSuccess: (addedHighlight) => {
+      addHighlightToDOM(addedHighlight as Highlight);
       queryClient.invalidateQueries({
         queryKey: ['highlight'],
       });
@@ -36,14 +37,9 @@ export const useHighlightData = ({ articleId }: { articleId: number }) => {
       color?: string;
       memo?: string;
     }) => patchHighlight({ id, color, memo }),
-    onSuccess: (updatedHighlight, variables) => {
-      queryClient.setQueryData<Highlight[]>(['highlight'], (prev) => {
-        if (!prev) return [];
-        return prev.map((highlight) =>
-          highlight.id === variables.id
-            ? { ...highlight, ...variables }
-            : highlight,
-        );
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['highlight'],
       });
     },
   });
@@ -64,6 +60,7 @@ export const useHighlightData = ({ articleId }: { articleId: number }) => {
 
   return {
     highlights: highlights?.content ?? [],
+    isHighlightLoaded: isSuccess,
     addHighlight,
     updateMemo,
     removeHighlight,

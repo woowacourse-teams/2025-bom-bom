@@ -7,7 +7,7 @@ import HighlightOffIcon from '#/assets/edit-off.svg';
 import HighlightIcon from '#/assets/edit.svg';
 
 interface FloatingToolBarProps {
-  visible: boolean;
+  open: boolean;
   position: ToolbarPosition;
   mode: FloatingToolbarMode;
   onHighlightButtonClick: () => void;
@@ -15,7 +15,7 @@ interface FloatingToolBarProps {
 }
 
 export default function FloatingToolbar({
-  visible,
+  open,
   position,
   mode,
   onHighlightButtonClick,
@@ -28,23 +28,13 @@ export default function FloatingToolbar({
   return (
     <Container
       position={position}
-      visible={visible}
+      open={open}
       onPointerDown={handlePointerDownOnToolbar}
     >
-      <ToolbarButton
-        onClick={() => {
-          console.log('toolbar highlight');
-          onHighlightButtonClick();
-        }}
-      >
+      <ToolbarButton onClick={onHighlightButtonClick}>
         {mode === 'new' ? <HighlightIcon /> : <HighlightOffIcon />}
       </ToolbarButton>
-      <ToolbarButton
-        onClick={() => {
-          console.log('toolbar memo');
-          onMemoButtonClick();
-        }}
-      >
+      <ToolbarButton onClick={onMemoButtonClick}>
         <MemoIcon />
       </ToolbarButton>
     </Container>
@@ -61,7 +51,7 @@ const fadeOut = keyframes`
     to { opacity: 0; transform: translate(-50%, -90%); }
   `;
 
-const Container = styled.div<{ position: ToolbarPosition; visible: boolean }>`
+const Container = styled.div<{ position: ToolbarPosition; open: boolean }>`
   position: fixed;
   top: ${({ position }) => position.y}px;
   left: ${({ position }) => position.x}px;
@@ -70,12 +60,12 @@ const Container = styled.div<{ position: ToolbarPosition; visible: boolean }>`
   border-radius: 8px;
   box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
 
-  display: flex;
+  display: ${({ open }) => (open ? 'flex' : 'none')};
   gap: 8px;
 
   background: ${({ theme }) => theme.colors.primary};
 
-  animation: ${({ visible }) => (visible ? fadeIn : fadeOut)} 0.2s ease-in-out
+  animation: ${({ open }) => (open ? fadeIn : fadeOut)} 0.2s ease-in-out
     forwards;
 `;
 

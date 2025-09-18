@@ -14,7 +14,7 @@ interface ArticleBodyProps {
 }
 
 const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
-  const { visible, position, mode, showToolbar, hideToolbar } =
+  const { open, position, mode, showToolbar, hideToolbar } =
     useFloatingToolbarState();
   const rangeRef = useRef<Range>(null);
   const selectedHighlightIdRef = useRef<number>(null);
@@ -25,29 +25,27 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
     useHighlightData({ articleId });
 
   const handleHighlightClick = () => {
-    const isNewHighlight = mode === 'new';
-    hideToolbar();
-
-    if (isNewHighlight && rangeRef.current) {
+    if (mode === 'new' && rangeRef.current) {
       const highlightData = saveSelection(rangeRef.current, articleId);
       addHighlight(highlightData);
       window.getSelection()?.removeAllRanges();
     }
-    if (!isNewHighlight && selectedHighlightIdRef.current) {
+    if (mode === 'existing' && selectedHighlightIdRef.current) {
       removeHighlight(selectedHighlightIdRef.current);
     }
+
+    hideToolbar();
   };
 
   const handleMemoClick = () => {
-    const isNewHighlight = mode === 'new';
-    hideToolbar();
-
-    if (isNewHighlight && rangeRef.current) {
+    if (mode === 'new' && rangeRef.current) {
       const highlightData = saveSelection(rangeRef.current, articleId);
       addHighlight(highlightData);
       window.getSelection()?.removeAllRanges();
     }
+
     setPanelOpen(true);
+    hideToolbar();
   };
 
   useFloatingToolbarSelection({
@@ -71,7 +69,7 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
     <>
       <ArticleContent ref={contentRef} content={articleContent} />
       <FloatingToolbar
-        visible={visible}
+        open={open}
         position={position}
         mode={mode}
         onHighlightButtonClick={handleHighlightClick}

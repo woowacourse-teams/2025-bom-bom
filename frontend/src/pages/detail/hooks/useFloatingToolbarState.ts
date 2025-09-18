@@ -5,7 +5,7 @@ import {
 } from './../components/FloatingToolbar/FloatingToolbar.types';
 
 export const useFloatingToolbarState = () => {
-  const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(false);
   const [position, setPosition] = useState<ToolbarPosition>({ x: 0, y: 0 });
   const [mode, setMode] = useState<FloatingToolbarMode>('new');
 
@@ -19,14 +19,14 @@ export const useFloatingToolbarState = () => {
     }) => {
       setPosition(position);
       setMode(mode);
-      setVisible(true);
+      setOpen(true);
     },
     [],
   );
 
   const hideToolbar = useCallback(() => {
-    setVisible(false);
+    setOpen(false);
   }, []);
 
-  return { visible, position, mode, showToolbar, hideToolbar };
+  return { open, position, mode, showToolbar, hideToolbar };
 };

@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const loginWithGoogle = async (): Promise<void> => {
     GoogleSignin.configure({
       webClientId:
-        '190361254930-2pjm8lf7hddaglvj5p7tqp9jo4av1n64.apps.googleusercontent.com',
+        '190361254930-1464b7md34crhu077urc0hsvtsmb5ks5.apps.googleusercontent.com',
       offlineAccess: true,
       hostedDomain: '',
       forceCodeForRefreshToken: true,

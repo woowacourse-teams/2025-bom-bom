@@ -6,6 +6,7 @@ import arrowPrev from '#/assets/carousel-arrow-prev.png';
 
 interface CarouselProps extends PropsWithChildren {
   timer?: boolean | number;
+  showSlideButton?: boolean;
 }
 
 /**
@@ -13,9 +14,14 @@ interface CarouselProps extends PropsWithChildren {
  *   - `false`: 비활성화
  *   - `true`: 기본 4초 주기
  *   - `number`: 커스텀 주기(ms)
+ * @property {boolean} [showSlideButton=true] - 슬라이드 변경 버튼 렌더링 여부
  * @property {React.ReactNode} children - 슬라이드로 렌더링할 자식 요소들
  */
-const Carousel = ({ timer = true, children }: CarouselProps) => {
+const Carousel = ({
+  timer = true,
+  showSlideButton = true,
+  children,
+}: CarouselProps) => {
   const originSlides = Children.toArray(children);
   const slideCount = originSlides.length;
 
@@ -57,13 +63,17 @@ const Carousel = ({ timer = true, children }: CarouselProps) => {
         ))}
       </SlidesWrapper>
 
-      <PrevSlideButton type="button" onClick={handlePrevButtonClick}>
-        <img src={arrowPrev} alt="이전 슬라이드 버튼" />
-      </PrevSlideButton>
+      {showSlideButton && (
+        <>
+          <PrevSlideButton type="button" onClick={handlePrevButtonClick}>
+            <img src={arrowPrev} alt="이전 슬라이드 버튼" />
+          </PrevSlideButton>
 
-      <NextSlideButton type="button" onClick={handleNextButtonClick}>
-        <img src={arrowNext} alt="다음 슬라이드 버튼" />
-      </NextSlideButton>
+          <NextSlideButton type="button" onClick={handleNextButtonClick}>
+            <img src={arrowNext} alt="다음 슬라이드 버튼" />
+          </NextSlideButton>
+        </>
+      )}
     </Container>
   );
 };

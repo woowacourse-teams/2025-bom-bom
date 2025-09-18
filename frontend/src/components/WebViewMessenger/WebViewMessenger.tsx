@@ -24,7 +24,8 @@ export const WebViewMessenger: React.FC = () => {
                 authorizationCode: message.payload.authorizationCode,
               });
 
-              alert(JSON.stringify(response));
+              // @ts-expect-error response가 unknown타입으로 추론 됨
+              alert(JSON.stringify(response!.headers!.get('Location')));
 
               window.location.reload();
 

@@ -54,6 +54,7 @@ export const MainScreen = () => {
           domStorageEnabled
           startInLoadingState
           pullToRefreshEnabled
+          originWhitelist={['*']}
           onMessage={handleWebViewMessage}
           onContentProcessDidTerminate={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent;

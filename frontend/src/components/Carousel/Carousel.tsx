@@ -88,7 +88,7 @@ const Container = styled.div`
   overflow: hidden;
   position: relative;
   width: 100%;
-  height: 280px;
+  min-height: fit-content;
   margin: 0 auto 20px;
 
   background: transparent;
@@ -99,8 +99,6 @@ const SlidesWrapper = styled.ul<{
   isTransitioning: boolean;
   activeAnimation: boolean;
 }>`
-  height: 100%;
-
   display: flex;
 
   transform: ${({ slideIndex }) => `translateX(-${slideIndex * 100}%)`};
@@ -109,7 +107,6 @@ const SlidesWrapper = styled.ul<{
 `;
 
 const Slide = styled.li`
-  height: 100%;
   flex: 0 0 100%;
 `;
 

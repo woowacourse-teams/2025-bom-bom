@@ -21,7 +21,7 @@ export default SlideCardList;
 
 const Banner = styled.div<{ imageUrl: string }>`
   width: 100%;
-  height: 100%;
+  height: 280px;
 
   background-image: url(${({ imageUrl }) => imageUrl});
   background-position: center;

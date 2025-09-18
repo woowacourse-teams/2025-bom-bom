@@ -3,6 +3,7 @@ package me.bombom.api.v1.reading.scheduler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.reading.service.ReadingService;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -20,13 +21,15 @@ public class ReadingScheduler {
     private final ReadingService readingService;
 
     @Scheduled(cron = DAILY_CRON, zone = TIME_ZONE)
-    public void dailyResetReadingCount() {
+    @SchedulerLock(name = "daily_reset_reading_count", lockAtLeastFor = "4s", lockAtMostFor = "9s")
+        public void dailyResetReadingCount() {
         log.info("오늘 읽기 초기화 실행");
         readingService.resetContinueReadingCount();
         readingService.resetTodayReadingCount();
     }
 
     @Scheduled(cron = WEEKLY_CRON, zone = TIME_ZONE)
+    @SchedulerLock(name = "weekly_reset_reading_count", lockAtLeastFor = "4s", lockAtMostFor = "9s")
     public void weeklyResetReadingCount() {
         log.info("주간 읽기 초기화 실행");
         readingService.resetWeeklyReadingCount();
@@ -38,13 +41,15 @@ public class ReadingScheduler {
      *     2월 1일 실행 시 → 1월 데이터를 2025년 YearlyReading에 추가
      */
     @Scheduled(cron = MONTHLY_CRON, zone = TIME_ZONE)
+    @SchedulerLock(name = "monthly_reset_reading_count", lockAtLeastFor = "4s", lockAtMostFor = "9s")
     public void monthlyResetReadingCount() {
         log.info("월간 읽기를 연간 읽기에 반영 후 초기화");
         readingService.passMonthlyCountToYearly();
     }
 
     @Scheduled(cron = EVERY_TEN_MINUTES_CRON, zone = TIME_ZONE)
-    public void hourlyCalculateMemberRank() {
+    @SchedulerLock(name = "ten_minutely_calculate_member_rank", lockAtLeastFor = "1.5s", lockAtMostFor = "3s")
+    public void tenMinutelyCalculateMemberRank() {
         log.info("이달의 독서왕 순위 업데이트");
         readingService.updateMonthlyRanking();
     }

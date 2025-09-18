@@ -20,8 +20,8 @@ export const useFloatingToolbarSelection = ({
   onHide,
 }: UseFloatingToolbarSelectionParams) => {
   const deviceType = useDeviceType();
-  const rangeRef = useRef<Range>(null);
-  const highlightIdRef = useRef<number>(null);
+  const activeSelectionRangeRef = useRef<Range>(null);
+  const activeHighlightIdRef = useRef<number>(null);
 
   const openToolbarFromSelection = useCallback(
     (selection: Selection) => {
@@ -37,8 +37,8 @@ export const useFloatingToolbarSelection = ({
         },
         mode: 'new',
       });
-      highlightIdRef.current = null;
-      rangeRef.current = range;
+      activeHighlightIdRef.current = null;
+      activeSelectionRangeRef.current = range;
     },
     [deviceType, isInSelectionTarget, onShow],
   );
@@ -56,8 +56,8 @@ export const useFloatingToolbarSelection = ({
         },
         mode: 'existing',
       });
-      highlightIdRef.current = Number(id);
-      rangeRef.current = null;
+      activeHighlightIdRef.current = Number(id);
+      activeSelectionRangeRef.current = null;
     },
     [deviceType, onShow],
   );
@@ -105,7 +105,7 @@ export const useFloatingToolbarSelection = ({
   }, [handlePointerOrClick, handleSelectionClear]);
 
   return {
-    selectionRange: rangeRef.current,
-    selectedHighlightId: highlightIdRef.current,
+    activeSelectionRange: activeSelectionRangeRef.current,
+    activeHighlightId: activeHighlightIdRef.current,
   };
 };

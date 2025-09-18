@@ -20,29 +20,30 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
   const [panelOpen, setPanelOpen] = useState(false);
   const { highlights, addHighlight, updateMemo, removeHighlight } =
     useHighlightData({ articleId });
-  const { selectionRange, selectedHighlightId } = useFloatingToolbarSelection({
-    isInSelectionTarget: (range) =>
-      contentRef.current?.contains(range.commonAncestorContainer) ?? false,
-    onShow: showToolbar,
-    onHide: hideToolbar,
-  });
+  const { activeSelectionRange, activeHighlightId } =
+    useFloatingToolbarSelection({
+      isInSelectionTarget: (range) =>
+        contentRef.current?.contains(range.commonAncestorContainer) ?? false,
+      onShow: showToolbar,
+      onHide: hideToolbar,
+    });
 
   const handleHighlightClick = () => {
-    if (mode === 'new' && selectionRange) {
-      const highlightData = saveSelection(selectionRange, articleId);
+    if (mode === 'new' && activeSelectionRange) {
+      const highlightData = saveSelection(activeSelectionRange, articleId);
       addHighlight(highlightData);
       window.getSelection()?.removeAllRanges();
     }
-    if (mode === 'existing' && selectedHighlightId) {
-      removeHighlight(selectedHighlightId);
+    if (mode === 'existing' && activeHighlightId) {
+      removeHighlight(activeHighlightId);
     }
 
     hideToolbar();
   };
 
   const handleMemoClick = () => {
-    if (mode === 'new' && selectionRange) {
-      const highlightData = saveSelection(selectionRange, articleId);
+    if (mode === 'new' && activeSelectionRange) {
+      const highlightData = saveSelection(activeSelectionRange, articleId);
       addHighlight(highlightData);
       window.getSelection()?.removeAllRanges();
     }

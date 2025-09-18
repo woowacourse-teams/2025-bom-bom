@@ -19,10 +19,12 @@ export const WebViewMessenger: React.FC = () => {
               return;
 
             try {
-              await postGoogleLogin({
+              const response = await postGoogleLogin({
                 identityToken: message.payload.identityToken,
                 authorizationCode: message.payload.authorizationCode,
               });
+
+              alert(JSON.stringify(response));
 
               window.location.reload();
 

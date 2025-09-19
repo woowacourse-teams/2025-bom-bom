@@ -1,6 +1,9 @@
-export const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
-export const IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+export const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '';
+export const IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ?? '';
 export const ANDROID_CLIENT_ID =
-  process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
+  process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? '';
 
-export const IOS_URL_SCHEME = process.env.EXPO_PUBLIC_IOS_URL_SCHEME;
+export const IOS_URL_SCHEME = process.env.EXPO_PUBLIC_IOS_URL_SCHEME ?? '';
+
+export const DEV_WEB_URL = process.env.EXPO_PUBLIC_DEV_WEB_URL ?? '';
+export const PROD_WEB_URL = process.env.EXPO_PUBLIC_PROD_WEB_URL ?? '';

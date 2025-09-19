@@ -8,11 +8,11 @@ import { WebViewProvider } from '../contexts/WebViewContext';
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <WebViewProvider>
+    <WebViewProvider>
+      <AuthProvider>
         <StatusBar style="auto" />
         <MainScreen />
-      </WebViewProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </WebViewProvider>
   );
 }

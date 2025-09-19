@@ -4,6 +4,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView from 'react-native-webview';
 
+import { DEV_WEB_URL } from '@/constants/env';
+import { WEBVIEW_USER_AGENT } from '@/constants/webview';
 import { useAuth } from '../contexts/AuthContext';
 import { useWebView } from '../contexts/WebViewContext';
 import { WebToRNMessage } from '../types/webview';
@@ -46,9 +48,9 @@ export const MainScreen = () => {
       <View style={styles.webViewContainer}>
         <WebView
           ref={webViewRef}
-          source={{ uri: 'https://dev.bombom.news/' }}
+          source={{ uri: DEV_WEB_URL }}
           style={styles.webView}
-          userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/96.0.4664.116 Mobile/15E148 Safari/604.1"
+          userAgent={WEBVIEW_USER_AGENT}
           allowsBackForwardNavigationGestures
           sharedCookiesEnabled
           thirdPartyCookiesEnabled

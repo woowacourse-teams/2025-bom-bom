@@ -1,14 +1,18 @@
+type WebViewMessageType =
+  | 'SHOW_LOGIN_SCREEN'
+  | 'LOGIN_SUCCESS'
+  | 'LOGIN_FAILED';
 export interface WebToRNMessage {
-  type: 'SHOW_LOGIN_SCREEN' | 'LOGIN_SUCCESS' | 'LOGIN_FAILED';
-  payload?: {
-    isAuthenticated?: boolean;
-    provider?: string;
-    error?: string;
-  };
+  type: WebViewMessageType;
+  isAuthenticated?: boolean;
+  provider?: string;
+  error?: string;
 }
 
+type RNToWebMessageType = 'GOOGLE_LOGIN_TOKEN' | 'APPLE_LOGIN_TOKEN';
+
 export interface RNToWebMessage {
-  type: 'GOOGLE_LOGIN_TOKEN' | 'APPLE_LOGIN_TOKEN';
+  type: RNToWebMessageType;
   payload?: {
     identityToken?: string;
     authorizationCode?: string;

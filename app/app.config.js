@@ -1,4 +1,4 @@
-import { IOS_URL_SCHEME } from './constants/env';
+const IOS_URL_SCHEME = process.env.EXPO_PUBLIC_IOS_URL_SCHEME ?? '';
 
 export default {
   expo: {

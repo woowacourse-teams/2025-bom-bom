@@ -1,10 +1,16 @@
+type WebViewMessageType =
+  | 'SHOW_LOGIN_SCREEN'
+  | 'LOGIN_SUCCESS'
+  | 'LOGIN_FAILED';
+
 export interface WebToRNMessage {
-  type: 'SHOW_LOGIN_SCREEN' | 'LOGIN_SUCCESS' | 'LOGIN_FAILED';
+  type: WebViewMessageType;
   payload?: any;
 }
 
+type RNToWebMessageType = 'GOOGLE_LOGIN_TOKEN' | 'APPLE_LOGIN_TOKEN';
 export interface RNToWebMessage {
-  type: 'GOOGLE_LOGIN_TOKEN' | 'APPLE_LOGIN_TOKEN';
+  type: RNToWebMessageType;
   payload?: {
     idToken?: string;
     serverAuthCode?: string;

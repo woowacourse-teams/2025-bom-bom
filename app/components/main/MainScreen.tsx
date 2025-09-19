@@ -6,10 +6,10 @@ import WebView from 'react-native-webview';
 
 import { DEV_WEB_URL } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
-import { useAuth } from '../contexts/AuthContext';
-import { useWebView } from '../contexts/WebViewContext';
-import { WebToRNMessage } from '../types/webview';
-import { LoginScreenOverlay } from './LoginScreenOverlay';
+import { useAuth } from '../../contexts/AuthContext';
+import { useWebView } from '../../contexts/WebViewContext';
+import { WebToRNMessage } from '../../types/webview';
+import { LoginScreenOverlay } from '../login/LoginScreenOverlay';
 
 export const MainScreen = () => {
   const { showWebViewLogin, setShowWebViewLogin } = useAuth();

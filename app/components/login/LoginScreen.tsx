@@ -13,9 +13,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { loginWithApple, loginWithGoogle } from '@/utils/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuth } from '../contexts/AuthContext';
-import { useWebView } from '../contexts/WebViewContext';
-import { Button } from './Button';
+import { useAuth } from '../../contexts/AuthContext';
+import { useWebView } from '../../contexts/WebViewContext';
+import { Button } from '../Button';
 
 export const LoginScreen = () => {
   const { setShowWebViewLogin } = useAuth();

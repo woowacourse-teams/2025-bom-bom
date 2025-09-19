@@ -11,21 +11,17 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { loginWithApple, loginWithGoogle } from '@/utils/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from './Button';
 
 export const LoginScreen = () => {
-  const {
-    loginWithGoogle,
-    loginWithApple,
-    sendMessageToWeb,
-    setShowWebViewLogin,
-  } = useAuth();
+  const { sendMessageToWeb, setShowWebViewLogin } = useAuth();
 
   const handleGoogleLogin = async () => {
     try {
-      await loginWithGoogle();
+      await loginWithGoogle(() => setShowWebViewLogin(true));
     } catch (error) {
       console.error('Google 로그인 실패:', error);
     }
@@ -33,7 +29,7 @@ export const LoginScreen = () => {
 
   const handleAppleLogin = async () => {
     try {
-      await loginWithApple();
+      await loginWithApple(() => setShowWebViewLogin(true));
     } catch (error) {
       console.error('Apple 로그인 실패:', error);
     }

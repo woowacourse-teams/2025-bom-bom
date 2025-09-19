@@ -18,7 +18,7 @@ public record MemberSignupRequest(
         @Email
         @NotNull
         @Length(min = 15, max = 42)
-        @Pattern(regexp = "^[a-zA-Z0-9](?:[a-zA-Z0-9+._-]*[a-zA-Z0-9])?@bombom\\.news$")
+        @Pattern(regexp = "^[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?@bombom\\.news$")
         String email,
 
         @JsonFormat(pattern = "yyyy-MM-dd")

@@ -14,10 +14,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { loginWithApple, loginWithGoogle } from '@/utils/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../contexts/AuthContext';
+import { useWebView } from '../contexts/WebViewContext';
 import { Button } from './Button';
 
 export const LoginScreen = () => {
-  const { sendMessageToWeb, setShowWebViewLogin } = useAuth();
+  const { setShowWebViewLogin } = useAuth();
+  const { sendMessageToWeb } = useWebView();
 
   const handleGoogleLogin = async () => {
     try {
@@ -36,7 +38,7 @@ export const LoginScreen = () => {
   };
 
   useEffect(() => {
-    (async () => {
+    const sendLoginTokenToWeb = async () => {
       const auth = await AsyncStorage.getItem('auth');
       if (!auth) return;
 
@@ -45,7 +47,10 @@ export const LoginScreen = () => {
       if (!authorizationCode || !identityToken || !provider) return;
 
       sendMessageToWeb({
-        type: `${provider.toUpperCase()}_LOGIN_TOKEN`,
+        type:
+          provider.toUpperCase() === 'GOOGLE'
+            ? 'GOOGLE_LOGIN_TOKEN'
+            : 'APPLE_LOGIN_TOKEN',
         payload: {
           identityToken,
           authorizationCode,
@@ -55,7 +60,9 @@ export const LoginScreen = () => {
       AsyncStorage.removeItem('auth');
 
       setShowWebViewLogin(false);
-    })();
+    };
+
+    sendLoginTokenToWeb();
   }, [sendMessageToWeb, setShowWebViewLogin]);
 
   return (

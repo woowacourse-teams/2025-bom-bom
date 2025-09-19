@@ -5,11 +5,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView from 'react-native-webview';
 
 import { useAuth } from '../contexts/AuthContext';
+import { useWebView } from '../contexts/WebViewContext';
 import { WebToRNMessage } from '../types/webview';
 import { LoginScreenOverlay } from './LoginScreenOverlay';
 
 export const MainScreen = () => {
-  const { showWebViewLogin, setShowWebViewLogin, webViewRef } = useAuth();
+  const { showWebViewLogin, setShowWebViewLogin } = useAuth();
+  const { webViewRef } = useWebView();
 
   const handleWebViewMessage = (event: any) => {
     try {

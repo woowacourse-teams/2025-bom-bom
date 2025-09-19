@@ -1,3 +1,5 @@
+import { IOS_URL_SCHEME } from './constants/env';
+
 export default {
   expo: {
     name: '봄봄',
@@ -51,7 +53,7 @@ export default {
       [
         '@react-native-google-signin/google-signin',
         {
-          iosUrlScheme: process.env.EXPO_PUBLIC_IOS_URL_SCHEME,
+          iosUrlScheme: IOS_URL_SCHEME,
         },
       ],
       [

@@ -14,25 +14,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [showWebViewLogin, setShowWebViewLogin] = useState(false);
-  const webViewRef = useRef<WebView>(null);
-
-  const sendMessageToWeb = (message: RNToWebMessage) => {
-    try {
-      const messageString = JSON.stringify(message);
-      webViewRef.current?.postMessage(messageString);
-      console.log('WebView로 메시지 전송:', message);
-    } catch (error) {
-      console.error('WebView 메시지 전송 실패:', error);
-    }
-  };
 
   return (
     <AuthContext.Provider
       value={{
         showWebViewLogin,
         setShowWebViewLogin,
-        webViewRef,
-        sendMessageToWeb,
       }}
     >
       {children}

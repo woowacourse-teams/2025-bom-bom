@@ -4,12 +4,15 @@ import 'react-native-reanimated';
 
 import { MainScreen } from '../components/MainScreen';
 import { AuthProvider } from '../contexts/AuthContext';
+import { WebViewProvider } from '../contexts/WebViewContext';
 
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <StatusBar style="auto" />
-      <MainScreen />
+      <WebViewProvider>
+        <StatusBar style="auto" />
+        <MainScreen />
+      </WebViewProvider>
     </AuthProvider>
   );
 }

@@ -10,6 +10,8 @@ export interface RNToWebMessage {
   payload?: {
     idToken?: string;
     serverAuthCode?: string;
+    identityToken?: string;
+    authorizationCode?: string;
   };
 }
 

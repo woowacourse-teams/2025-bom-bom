@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root';
 import { Route as SignupRouteImport } from './routes/signup';
+import { Route as MaintenanceRouteImport } from './routes/maintenance';
 import { Route as LoginRouteImport } from './routes/login';
 import { Route as BombomRouteImport } from './routes/_bombom';
 import { Route as BombomIndexRouteImport } from './routes/_bombom/index';
@@ -24,6 +25,11 @@ import { Route as BombomArticlesGuideGuideIdRouteImport } from './routes/_bombom
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any);
+const MaintenanceRoute = MaintenanceRouteImport.update({
+  id: '/maintenance',
+  path: '/maintenance',
   getParentRoute: () => rootRouteImport,
 } as any);
 const LoginRoute = LoginRouteImport.update({
@@ -79,6 +85,7 @@ const BombomArticlesGuideGuideIdRoute =
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute;
+  '/maintenance': typeof MaintenanceRoute;
   '/signup': typeof SignupRoute;
   '/bookmark': typeof BombomBookmarkRoute;
   '/guide': typeof BombomGuideRoute;
@@ -91,6 +98,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute;
+  '/maintenance': typeof MaintenanceRoute;
   '/signup': typeof SignupRoute;
   '/bookmark': typeof BombomBookmarkRoute;
   '/guide': typeof BombomGuideRoute;
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   '/_bombom': typeof BombomRouteWithChildren;
   '/login': typeof LoginRoute;
+  '/maintenance': typeof MaintenanceRoute;
   '/signup': typeof SignupRoute;
   '/_bombom/bookmark': typeof BombomBookmarkRoute;
   '/_bombom/guide': typeof BombomGuideRoute;
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | '/login'
+    | '/maintenance'
     | '/signup'
     | '/bookmark'
     | '/guide'
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo;
   to:
     | '/login'
+    | '/maintenance'
     | '/signup'
     | '/bookmark'
     | '/guide'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_bombom'
     | '/login'
+    | '/maintenance'
     | '/signup'
     | '/_bombom/bookmark'
     | '/_bombom/guide'
@@ -158,6 +170,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   BombomRoute: typeof BombomRouteWithChildren;
   LoginRoute: typeof LoginRoute;
+  MaintenanceRoute: typeof MaintenanceRoute;
   SignupRoute: typeof SignupRoute;
 }
 
@@ -168,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/signup';
       fullPath: '/signup';
       preLoaderRoute: typeof SignupRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    '/maintenance': {
+      id: '/maintenance';
+      path: '/maintenance';
+      fullPath: '/maintenance';
+      preLoaderRoute: typeof MaintenanceRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     '/login': {
@@ -271,6 +291,7 @@ const BombomRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   BombomRoute: BombomRouteWithChildren,
   LoginRoute: LoginRoute,
+  MaintenanceRoute: MaintenanceRoute,
   SignupRoute: SignupRoute,
 };
 export const routeTree = rootRouteImport

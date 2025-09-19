@@ -68,14 +68,12 @@ public class ReadingService {
 
     @Transactional
     public void resetTodayReadingCount() {
-        todayReadingRepository.findAll()
-                .forEach(TodayReading::resetCount);
+        todayReadingRepository.resetCurrentCount();
     }
 
     @Transactional
     public void resetWeeklyReadingCount() {
-        weeklyReadingRepository.findAll()
-                .forEach(WeeklyReading::resetCurrentCount);
+        weeklyReadingRepository.resetCurrentCount();
     }
 
     @Transactional

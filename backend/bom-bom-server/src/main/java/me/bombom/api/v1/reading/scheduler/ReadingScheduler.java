@@ -21,7 +21,7 @@ public class ReadingScheduler {
     private final ReadingService readingService;
 
     @Scheduled(cron = DAILY_CRON, zone = TIME_ZONE)
-    @SchedulerLock(name = "daily_reset_reading_count", lockAtLeastFor = "4s", lockAtMostFor = "9s")
+    @SchedulerLock(name = "daily_reset_reading_count", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
         public void dailyResetReadingCount() {
         log.info("오늘 읽기 초기화 실행");
         readingService.resetContinueReadingCount();
@@ -29,7 +29,7 @@ public class ReadingScheduler {
     }
 
     @Scheduled(cron = WEEKLY_CRON, zone = TIME_ZONE)
-    @SchedulerLock(name = "weekly_reset_reading_count", lockAtLeastFor = "4s", lockAtMostFor = "9s")
+    @SchedulerLock(name = "weekly_reset_reading_count", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void weeklyResetReadingCount() {
         log.info("주간 읽기 초기화 실행");
         readingService.resetWeeklyReadingCount();
@@ -41,14 +41,14 @@ public class ReadingScheduler {
      *     2월 1일 실행 시 → 1월 데이터를 2025년 YearlyReading에 추가
      */
     @Scheduled(cron = MONTHLY_CRON, zone = TIME_ZONE)
-    @SchedulerLock(name = "monthly_reset_reading_count", lockAtLeastFor = "4s", lockAtMostFor = "9s")
+    @SchedulerLock(name = "monthly_reset_reading_count", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void monthlyResetReadingCount() {
         log.info("월간 읽기를 연간 읽기에 반영 후 초기화");
         readingService.passMonthlyCountToYearly();
     }
 
     @Scheduled(cron = EVERY_TEN_MINUTES_CRON, zone = TIME_ZONE)
-    @SchedulerLock(name = "ten_minutely_calculate_member_rank", lockAtLeastFor = "1.5s", lockAtMostFor = "3s")
+    @SchedulerLock(name = "ten_minutely_calculate_member_rank", lockAtLeastFor = "PT1.5S", lockAtMostFor = "PT3S")
     public void tenMinutelyCalculateMemberRank() {
         log.info("이달의 독서왕 순위 업데이트");
         readingService.updateMonthlyRanking();

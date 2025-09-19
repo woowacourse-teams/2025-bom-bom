@@ -4,8 +4,11 @@ import { useNavigate } from '@tanstack/react-router';
 import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 import { toast } from '../Toast/utils/toastActions';
 import { postLogout, postWithdraw } from '@/apis/auth';
+import { useDeviceType } from '@/hooks/useDeviceType';
+import { useChannelTalk } from '@/libs/channelTalk/useChannelTalk';
 import { UserInfo } from '@/types/me';
 import { copyToClipboard } from '@/utils/copy';
+import ChatIcon from '#/assets/chat.svg';
 import CopyIcon from '#/assets/copy.svg';
 import LogoutIcon from '#/assets/logout.svg';
 import MailIcon from '#/assets/mail.svg';
@@ -16,6 +19,12 @@ interface ProfileDetailProps {
 
 const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
   const navigate = useNavigate();
+  const deviceType = useDeviceType();
+  const { showMessenger } = useChannelTalk({
+    bootOption: {
+      customLauncherSelector: '.channel-talk-button',
+    },
+  });
 
   const { mutate: mutateLogout } = useMutation({
     mutationKey: ['logout'],
@@ -88,6 +97,17 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
       </EmailWrapper>
 
       <Divider />
+
+      {deviceType !== 'pc' && (
+        <ChannelTalkButton
+          className="channel-talk-button"
+          type="button"
+          onClick={showMessenger}
+        >
+          <ChatIcon width={16} height={16} />
+          문의하기
+        </ChannelTalkButton>
+      )}
 
       <LogoutButton type="button" onClick={handleLogoutClick}>
         <LogoutIcon width={16} height={16} />
@@ -179,6 +199,20 @@ const ProfileEmail = styled.button`
 const EmailText = styled.div`
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body2};
+`;
+
+const ChannelTalkButton = styled.button`
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font: ${({ theme }) => theme.fonts.body2};
+
+  &:hover {
+    text-decoration: underline;
+    transition: all 0.2s ease-in-out;
+  }
 `;
 
 const LogoutButton = styled.button`

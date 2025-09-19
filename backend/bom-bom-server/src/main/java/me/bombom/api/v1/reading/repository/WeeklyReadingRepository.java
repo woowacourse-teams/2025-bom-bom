@@ -11,12 +11,10 @@ public interface WeeklyReadingRepository extends JpaRepository<WeeklyReading, Lo
     Optional<WeeklyReading> findByMemberId(Long memberId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query(
-        """
-            UPDATE WeeklyReading
-            SET currentCount = 0
-            WHERE currentCount != 0
-        """
-    )
+    @Query("""
+        UPDATE WeeklyReading
+        SET currentCount = 0
+        WHERE currentCount != 0
+    """)
     void resetCurrentCount();
 }

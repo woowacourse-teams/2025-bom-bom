@@ -78,9 +78,7 @@ public class ReadingService {
 
     @Transactional
     public void resetContinueReadingCount() {
-        todayReadingRepository.findAll()
-                .stream()
-                .filter(this::shouldResetContinueReadingCount)
+        todayReadingRepository.findTotalNonZeroAndCurrentZero()
                 .forEach(this::applyResetContinueReadingCount);
     }
 
@@ -184,10 +182,6 @@ public class ReadingService {
                 lowestRankMonthlyReading.getRankOrder() + 1,
                 lowestRankMonthlyReading.getCurrentCount()
         );
-    }
-
-    private boolean shouldResetContinueReadingCount(TodayReading todayReading) {
-        return (todayReading.getTotalCount() != 0) && (todayReading.getCurrentCount() == 0);
     }
 
     private void applyResetContinueReadingCount(TodayReading todayReading) {

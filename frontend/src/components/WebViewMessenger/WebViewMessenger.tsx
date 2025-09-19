@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { postGoogleLogin, postAppleLogin } from '@/apis/auth';
+import { RNToWebMessage } from '@/libs/webview/webview.types';
 import {
-  RNToWebMessage,
   addWebViewMessageListener,
   sendMessageToRN,
-} from '@/libs/webview';
+} from '@/libs/webview/webview.utils';
 
 export const WebViewMessenger: React.FC = () => {
   useEffect(() => {

@@ -9,12 +9,8 @@ export interface WebToRNMessage {
 }
 
 type RNToWebMessageType = 'GOOGLE_LOGIN_TOKEN' | 'APPLE_LOGIN_TOKEN';
+
 export interface RNToWebMessage {
   type: RNToWebMessageType;
-  payload?: {
-    idToken?: string;
-    serverAuthCode?: string;
-    identityToken?: string;
-    authorizationCode?: string;
-  };
+  payload?: any;
 }

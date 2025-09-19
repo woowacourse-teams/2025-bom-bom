@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import me.bombom.api.v1.auth.dto.NativeLoginResponse;
 import me.bombom.api.v1.auth.dto.request.DuplicateCheckRequest;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
 import me.bombom.api.v1.common.resolver.LoginMember;
@@ -72,7 +73,7 @@ public interface AuthControllerApi {
         @ApiResponse(responseCode = "400", description = "지원하지 않는 제공자"),
         @ApiResponse(responseCode = "401", description = "토큰 검증 실패 또는 교환 실패")
     })
-    void nativeLogin(
+    NativeLoginResponse nativeLogin(
         @PathVariable("provider") String provider,
         @RequestBody NativeLoginRequest nativeLoginRequest,
         HttpServletRequest request,

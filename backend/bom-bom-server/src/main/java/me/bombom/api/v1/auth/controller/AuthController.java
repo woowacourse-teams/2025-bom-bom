@@ -12,6 +12,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
+import me.bombom.api.v1.auth.dto.NativeLoginResponse;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.dto.request.DuplicateCheckRequest;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
@@ -96,7 +97,7 @@ public class AuthController implements AuthControllerApi{
     // 통합 네이티브 엔드포인트: /login/{provider}/native
     @Override
     @PostMapping("/login/{provider}/native")
-    public void nativeLogin(
+    public NativeLoginResponse nativeLogin(
             @PathVariable("provider") String provider,
             @RequestBody(required = false) NativeLoginRequest nativeLoginRequest,
             HttpServletRequest request,
@@ -104,15 +105,16 @@ public class AuthController implements AuthControllerApi{
     ) throws IOException {
         if (nativeLoginRequest == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request body is missing");
-            return;
+            return null;
         }
         
         if ("apple".equalsIgnoreCase(provider)) {
-            handleNativeResult(appleOAuth2Service.loginWithNative(nativeLoginRequest), request, response);
+            return handleNativeResult(appleOAuth2Service.loginWithNative(nativeLoginRequest), request, response);
         } else if ("google".equalsIgnoreCase(provider)) {
-            handleNativeResult(googleOAuth2LoginService.loginWithNative(nativeLoginRequest), request, response);
+            return handleNativeResult(googleOAuth2LoginService.loginWithNative(nativeLoginRequest), request, response);
         } else {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "지원하지 않는 제공자입니다.");
+            return null;
         }
     }
 
@@ -162,7 +164,7 @@ public class AuthController implements AuthControllerApi{
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 
-    private void handleNativeResult(Optional<Member> member, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private NativeLoginResponse handleNativeResult(Optional<Member> member, HttpServletRequest request, HttpServletResponse response) throws IOException {
         // 세션 생성 트리거 (컨테이너가 Set-Cookie: JSESSIONID를 설정)
         request.getSession(true);
         
@@ -173,13 +175,11 @@ public class AuthController implements AuthControllerApi{
             HttpSession session = request.getSession();
             session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
             
-            // 기존 회원 -> 홈으로 리다이렉트
-            response.setStatus(200);
-            response.setHeader("Location", "/");
+            // 기존 회원 -> 로그인 완료
+            return new NativeLoginResponse(true);
         } else {
-            // 신규 회원 -> 회원가입 페이지로 리다이렉트
-            response.setStatus(202);
-            response.setHeader("Location", "/signup");
+            // 신규 회원 -> 회원가입 필요
+            return new NativeLoginResponse(false);
         }
     }
 

@@ -21,7 +21,7 @@ export default {
           },
         },
       },
-      bundleIdentifier: 'com.antarctica.bombom.app',
+      bundleIdentifier: 'com.antarctica.bombom.app', // 서버와 논의 후 .app은 제거 예정
       usesAppleSignIn: true,
     },
     android: {
@@ -30,7 +30,7 @@ export default {
         backgroundColor: '#FE5E04',
       },
       edgeToEdgeEnabled: true,
-      package: 'com.antarctica.bombom.app',
+      package: 'com.antarctica.bombom',
     },
     web: {
       bundler: 'metro',

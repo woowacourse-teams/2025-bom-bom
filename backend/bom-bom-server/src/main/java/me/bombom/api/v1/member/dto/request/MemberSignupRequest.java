@@ -12,7 +12,7 @@ public record MemberSignupRequest(
 
         @NotNull
         @Length(min = 2, max = 12)
-        @Pattern(regexp = "^(?!.*\\.\\.)[A-Za-z0-9][A-Za-z0-9._]*[A-Za-z0-9]$")
+        @Pattern(regexp = "^(?!.*\\.\\.)[A-Za-z0-9가-힣][A-Za-z0-9가-힣._]*[A-Za-z0-9가-힣]$")
         String nickname,
 
         @Email

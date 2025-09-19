@@ -133,15 +133,23 @@ public class AppleOAuth2Service extends OidcUserService {
                 throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
                         .addContext("reason", "bundleId_not_configured");
             }
+            
             // id_token 서명/iss/aud 검증 후 sub 획득 (aud는 번들 ID)
             String subject = idTokenValidator.validateAppleAndGetSubject(request.identityToken(), bundleId);
+            
             Map<String, Object> token = requestAppleToken(request.authorizationCode(), bundleId, null);
+            
             session.setAttribute("appleAccessToken", token != null ? token.get("access_token") : null);
             session.setAttribute("appleClientId", bundleId);
             return findMemberAndSetPendingIfNew(subject);
+        } catch (UnauthorizedException e) {
+            log.error("Apple 네이티브 로그인 실패 - UnauthorizedException: {}", e.getMessage(), e);
+            throw e;
         } catch (Exception e) {
+            log.error("Apple 네이티브 로그인 실패 - Exception: {}", e.getMessage(), e);
             throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
-                    .addContext("reason", "apple_native_exchange_failed");
+                    .addContext("reason", "apple_native_exchange_failed")
+                    .addContext("error_detail", e.getMessage());
         }
     }
 

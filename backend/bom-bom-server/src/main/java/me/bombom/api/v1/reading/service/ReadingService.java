@@ -68,21 +68,17 @@ public class ReadingService {
 
     @Transactional
     public void resetTodayReadingCount() {
-        todayReadingRepository.findAll()
-                .forEach(TodayReading::resetCount);
+        todayReadingRepository.resetCurrentCount();
     }
 
     @Transactional
     public void resetWeeklyReadingCount() {
-        weeklyReadingRepository.findAll()
-                .forEach(WeeklyReading::resetCurrentCount);
+        weeklyReadingRepository.resetCurrentCount();
     }
 
     @Transactional
     public void resetContinueReadingCount() {
-        todayReadingRepository.findAll()
-                .stream()
-                .filter(this::shouldResetContinueReadingCount)
+        todayReadingRepository.findTotalNonZeroAndCurrentZero()
                 .forEach(this::applyResetContinueReadingCount);
     }
 
@@ -186,10 +182,6 @@ public class ReadingService {
                 lowestRankMonthlyReading.getRankOrder() + 1,
                 lowestRankMonthlyReading.getCurrentCount()
         );
-    }
-
-    private boolean shouldResetContinueReadingCount(TodayReading todayReading) {
-        return (todayReading.getTotalCount() != 0) && (todayReading.getCurrentCount() == 0);
     }
 
     private void applyResetContinueReadingCount(TodayReading todayReading) {

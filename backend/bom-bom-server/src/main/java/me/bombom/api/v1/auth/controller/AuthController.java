@@ -12,7 +12,6 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
-import me.bombom.api.v1.auth.dto.NativeLoginResponse;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.dto.request.DuplicateCheckRequest;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
@@ -25,7 +24,6 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.service.MemberService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,8 +67,12 @@ public class AuthController implements AuthControllerApi{
         Member newMember = memberService.signup(pendingMember, signupRequest);
         session.removeAttribute("pendingMember");
 
+        // 회원가입 후 로그인 처리 - 세션에 인증 정보 저장
         OAuth2AuthenticationToken authentication = createAuthenticationToken(newMember);
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        
+        // 세션에 인증 정보 저장 (다음 요청에서도 로그인 상태 유지)
+        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
     }
 
     @Override
@@ -94,19 +96,24 @@ public class AuthController implements AuthControllerApi{
     // 통합 네이티브 엔드포인트: /login/{provider}/native
     @Override
     @PostMapping("/login/{provider}/native")
-    public ResponseEntity nativeLogin(
+    public void nativeLogin(
             @PathVariable("provider") String provider,
-            @Valid @RequestBody NativeLoginRequest nativeLoginRequest,
+            @RequestBody(required = false) NativeLoginRequest nativeLoginRequest,
             HttpServletRequest request,
             HttpServletResponse response
-    ) {
+    ) throws IOException {
+        if (nativeLoginRequest == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request body is missing");
+            return;
+        }
+        
         if ("apple".equalsIgnoreCase(provider)) {
-            return handleNativeResult(appleOAuth2Service.loginWithNative(nativeLoginRequest), request);
+            handleNativeResult(appleOAuth2Service.loginWithNative(nativeLoginRequest), request, response);
+        } else if ("google".equalsIgnoreCase(provider)) {
+            handleNativeResult(googleOAuth2LoginService.loginWithNative(nativeLoginRequest), request, response);
+        } else {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "지원하지 않는 제공자입니다.");
         }
-        if ("google".equalsIgnoreCase(provider)) {
-            return handleNativeResult(googleOAuth2LoginService.loginWithNative(nativeLoginRequest), request);
-        }
-        return ResponseEntity.badRequest().body(new NativeLoginResponse("ERROR", "지원하지 않는 제공자입니다.", null));
     }
 
     @Override
@@ -115,6 +122,8 @@ public class AuthController implements AuthControllerApi{
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         if (request.getSession(false) != null) {
             request.getSession(false).invalidate();
+            SecurityContextHolder.clearContext();
+            expireSessionCookie(response);
         }
     }
 
@@ -149,22 +158,28 @@ public class AuthController implements AuthControllerApi{
         memberService.revoke(member.getId());
         session.invalidate();
         expireSessionCookie(response);
+        SecurityContextHolder.clearContext();
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 
-    private ResponseEntity handleNativeResult(Optional<Member> existing, HttpServletRequest request) {
+    private void handleNativeResult(Optional<Member> member, HttpServletRequest request, HttpServletResponse response) throws IOException {
         // 세션 생성 트리거 (컨테이너가 Set-Cookie: JSESSIONID를 설정)
-        String sessionId = request.getSession(true).getId();
-        SecurityContextHolder.getContext().getAuthentication();
-
-        if (existing.isPresent()) {
-            OAuth2AuthenticationToken authentication = createAuthenticationToken(existing.get());
+        request.getSession(true);
+        
+        if (member.isPresent()) {
+            OAuth2AuthenticationToken authentication = createAuthenticationToken(member.get());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            return ResponseEntity.ok()
-                    .body(new NativeLoginResponse("SUCCESS", "로그인에 성공했습니다", sessionId));
+
+            HttpSession session = request.getSession();
+            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+            
+            // 기존 회원 -> 홈으로 리다이렉트
+            response.setStatus(200);
+            response.setHeader("Location", "/");
         } else {
-            return ResponseEntity.ok()
-                    .body(new NativeLoginResponse("SIGNUP_REQUIRED", "신규 회원입니다. 회원가입이 필요합니다", sessionId));
+            // 신규 회원 -> 회원가입 페이지로 리다이렉트
+            response.setStatus(202);
+            response.setHeader("Location", "/signup");
         }
     }
 

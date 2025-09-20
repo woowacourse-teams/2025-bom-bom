@@ -634,8 +634,11 @@ export interface components {
       gender?: 'MALE' | 'FEMALE' | 'NONE';
     };
     NativeLoginRequest: {
-      identityToken: string;
-      authorizationCode: string;
+      identityToken?: string;
+      authorizationCode?: string;
+    };
+    NativeLoginResponse: {
+      isRegistered?: boolean;
     };
     WeeklyGoalCountResponse: {
       /**
@@ -815,11 +818,11 @@ export interface components {
       offset?: number;
       sort?: components['schemas']['SortObject'];
       unpaged?: boolean;
+      /** Format: int32 */
+      pageSize?: number;
       paged?: boolean;
       /** Format: int32 */
       pageNumber?: number;
-      /** Format: int32 */
-      pageSize?: number;
     };
     SortObject: {
       empty?: boolean;
@@ -1281,7 +1284,7 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody: {
+    requestBody?: {
       content: {
         'application/json': components['schemas']['NativeLoginRequest'];
       };
@@ -1293,7 +1296,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          '*/*': string;
+          '*/*': components['schemas']['NativeLoginResponse'];
         };
       };
       /** @description 지원하지 않는 제공자 */
@@ -1302,7 +1305,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          '*/*': string;
+          '*/*': components['schemas']['NativeLoginResponse'];
         };
       };
       /** @description 토큰 검증 실패 또는 교환 실패 */
@@ -1311,7 +1314,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          '*/*': string;
+          '*/*': components['schemas']['NativeLoginResponse'];
         };
       };
     };

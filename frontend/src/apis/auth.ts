@@ -32,11 +32,15 @@ export const postWithdraw = () => {
   });
 };
 
+export type PostNativeLoginParams = components['schemas']['NativeLoginRequest'];
+export type PostNativeLoginResponse =
+  components['schemas']['NativeLoginResponse'];
+
 export const postGoogleLogin = async ({
   identityToken,
   authorizationCode,
-}: components['schemas']['NativeLoginRequest']) => {
-  return await fetcher.post({
+}: PostNativeLoginParams) => {
+  return await fetcher.post<PostNativeLoginParams, PostNativeLoginResponse>({
     path: '/auth/login/google/native',
     body: {
       identityToken,
@@ -48,8 +52,8 @@ export const postGoogleLogin = async ({
 export const postAppleLogin = async ({
   identityToken,
   authorizationCode,
-}: components['schemas']['NativeLoginRequest']) => {
-  return await fetcher.post({
+}: PostNativeLoginParams) => {
+  return await fetcher.post<PostNativeLoginParams, PostNativeLoginResponse>({
     path: '/auth/login/apple/native',
     body: {
       identityToken,

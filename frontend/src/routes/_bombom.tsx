@@ -3,6 +3,7 @@ import { DEFAULT_ERROR_MESSAGES } from '@/apis/constants/defaultErrorMessage';
 import { queries } from '@/apis/queries';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import RequireLoginCard from '@/components/RequireLoginCard/RequireLoginCard';
+import { WebViewMessenger } from '@/components/WebViewMessenger/WebViewMessenger';
 
 let isFirstVisit = true;
 
@@ -39,6 +40,7 @@ function RouteComponent() {
   return (
     <PageLayout>
       <Outlet />
+      <WebViewMessenger />
     </PageLayout>
   );
 }

@@ -1,13 +1,19 @@
+import { useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import { postGoogleLogin, postAppleLogin } from '@/apis/auth';
+import { postAppleLogin, postGoogleLogin } from '@/apis/auth';
 import { RNToWebMessage } from '@/libs/webview/webview.types';
 import {
   addWebViewMessageListener,
+  isRunningInWebView,
   sendMessageToRN,
 } from '@/libs/webview/webview.utils';
 
 export const WebViewMessenger: React.FC = () => {
+  const navigate = useNavigate();
+
   useEffect(() => {
+    if (!isRunningInWebView()) return;
+
     const cleanup = addWebViewMessageListener(
       async (message: RNToWebMessage) => {
         switch (message.type) {
@@ -23,6 +29,9 @@ export const WebViewMessenger: React.FC = () => {
                 identityToken: message.payload.identityToken,
                 authorizationCode: message.payload.authorizationCode,
               });
+
+              if (!response) return;
+              if (!response.isRegistered) navigate({ to: '/signup' });
 
               alert(JSON.stringify(response));
 
@@ -55,10 +64,13 @@ export const WebViewMessenger: React.FC = () => {
               return;
 
             try {
-              await postAppleLogin({
+              const response = await postAppleLogin({
                 identityToken: message.payload.identityToken,
                 authorizationCode: message.payload.authorizationCode,
               });
+
+              if (!response) return;
+              if (!response.isRegistered) navigate({ to: '/signup' });
 
               window.location.reload();
 
@@ -88,7 +100,7 @@ export const WebViewMessenger: React.FC = () => {
     );
 
     return cleanup;
-  }, []);
+  }, [navigate]);
 
   return null;
 };

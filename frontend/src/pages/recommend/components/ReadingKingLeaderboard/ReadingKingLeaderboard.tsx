@@ -1,15 +1,38 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import LeaderboardItem from './ReadingKingLeaderboardItem';
 import ReadingKingMyRank from './ReadingKingMyRank';
 import { queries } from '@/apis/queries';
+import Carousel from '@/components/Carousel/Carousel';
 import ArrowIcon from '@/components/icons/ArrowIcon';
+import type { ReadingKingRank } from './ReadingKingLeaderboard.types';
 
 export default function ReadingKingLeaderboard() {
   const { data: monthlyReadingRank, isLoading } = useQuery(
-    queries.monthlyReadingRank({ limit: 5 }),
+    queries.monthlyReadingRank({ limit: 10 }),
   );
   const { data: userRank } = useQuery(queries.myMonthlyReadingRank());
+
+  const getLeaderboardData = useCallback((data: ReadingKingRank) => {
+    const leaderboardLength = Math.ceil(data.length / 5);
+
+    const leaderboardData: ReadingKingRank[] = Array.from(
+      { length: leaderboardLength },
+      () => [],
+    );
+
+    data.forEach((rankData, index) => {
+      const leaderboardIndex = Math.floor(index / 5);
+      leaderboardData[leaderboardIndex]?.push(rankData);
+    });
+
+    return leaderboardData;
+  }, []);
+
+  if (!monthlyReadingRank || monthlyReadingRank.length === 0) {
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -38,18 +61,22 @@ export default function ReadingKingLeaderboard() {
         </TitleContainer>
       </Header>
 
-      <LeaderboardList>
-        {monthlyReadingRank &&
-          monthlyReadingRank.length > 0 &&
-          monthlyReadingRank.map((item) => (
-            <LeaderboardItem
-              key={item.rank}
-              rank={item.rank}
-              name={item.nickname}
-              readCount={item.monthlyReadCount}
-            />
-          ))}
-      </LeaderboardList>
+      <Carousel showSlideButton={false} activeAnimation={false}>
+        {getLeaderboardData(monthlyReadingRank).map(
+          (leaderboard, leaderboardIndex) => (
+            <LeaderboardList key={`leaderboard-${leaderboardIndex}`}>
+              {leaderboard.map((item, index) => (
+                <LeaderboardItem
+                  key={`rank-${index}`}
+                  rank={item.rank}
+                  name={item.nickname}
+                  readCount={item.monthlyReadCount}
+                />
+              ))}
+            </LeaderboardList>
+          ),
+        )}
+      </Carousel>
 
       {userRank && (
         <>
@@ -108,6 +135,8 @@ const Title = styled.h3`
 `;
 
 const LeaderboardList = styled.div`
+  min-height: fit-content;
+
   display: flex;
   gap: 12px;
   flex-direction: column;

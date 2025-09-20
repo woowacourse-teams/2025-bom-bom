@@ -61,7 +61,7 @@ export default function ReadingKingLeaderboard() {
         </TitleContainer>
       </Header>
 
-      <Carousel showSlideButton={false} activeAnimation={false}>
+      <Carousel showSlideButton={false} animation="none">
         {getLeaderboardData(monthlyReadingRank).map(
           (leaderboard, leaderboardIndex) => (
             <LeaderboardList key={`leaderboard-${leaderboardIndex}`}>

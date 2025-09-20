@@ -1,3 +1,4 @@
+import styled from '@emotion/native';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect } from 'react';
 import {
@@ -5,9 +6,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StyleSheet,
-  Text,
-  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -66,37 +64,34 @@ export const LoginScreen = () => {
   }, [sendMessageToWeb, setShowWebViewLogin]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
+    <Container>
+      <StyledKeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoidingView}
       >
-        <ScrollView
-          contentContainerStyle={styles.scrollContainer}
+        <StyledScrollView
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.header}>
-            <View style={styles.iconContainer}>
+          <Header>
+            <IconContainer>
               <Ionicons name="sparkles" size={24} color="#FFFFFF" />
-            </View>
-            <Text style={styles.title}>봄봄에 오신 걸 환영해요</Text>
-            <Text style={styles.subtitle}>
+            </IconContainer>
+            <Title>봄봄에 오신 걸 환영해요</Title>
+            <Subtitle>
               당신의 하루에 찾아오는 작은 설렘{'\n'}뉴스레터를 한 곳에서 쉽게
               관리하세요
-            </Text>
-          </View>
+            </Subtitle>
+          </Header>
 
-          <View style={styles.divider} />
+          <Divider />
 
-          <View style={styles.loginSection}>
-            <View style={styles.socialLogin}>
+          <LoginSection>
+            <SocialLogin>
               <Button
                 title="Google로 시작하기"
                 onPress={handleGoogleLogin}
                 variant="social"
                 icon={<Ionicons name="logo-google" size={24} color="#4285F4" />}
-                style={styles.socialButton}
               />
 
               {Platform.OS === 'ios' && (
@@ -107,113 +102,106 @@ export const LoginScreen = () => {
                   icon={
                     <Ionicons name="logo-apple" size={24} color="#000000" />
                   }
-                  style={styles.socialButton}
                 />
               )}
-            </View>
-          </View>
+            </SocialLogin>
+          </LoginSection>
 
-          <View style={styles.termsContainer}>
-            <Text style={styles.termsText}>
-              로그인하시면 봄봄의{' '}
-              <Text style={styles.termsLink}>서비스 약관</Text>과{' '}
-              <Text style={styles.termsLink}>개인정보 처리방침</Text>에{'n'}
+          <TermsContainer>
+            <TermsText>
+              로그인하시면 봄봄의 <TermsLink>서비스 약관</TermsLink>과{' '}
+              <TermsLink>개인정보 처리방침</TermsLink>에{'\n'}
               동의하는 것으로 간주됩니다.
-            </Text>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            </TermsText>
+          </TermsContainer>
+        </StyledScrollView>
+      </StyledKeyboardAvoidingView>
+    </Container>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  keyboardAvoidingView: {
-    flex: 1,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    paddingHorizontal: 28,
-    justifyContent: 'center',
-    minHeight: Dimensions.get('window').height - 100,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  iconContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#FE5E04',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-    shadowColor: '#FE5E04',
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1C1C1E',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  divider: {
-    height: 2,
-    backgroundColor: '#E5E5EA',
-    marginBottom: 32,
-    opacity: 0.5,
-  },
-  loginSection: {
-    marginBottom: 24,
-  },
-  emailForm: {
-    gap: 16,
-  },
-  socialLogin: {
-    gap: 16,
-  },
-  loginButton: {
-    marginTop: 8,
-  },
-  switchButton: {
-    marginTop: 8,
-  },
-  socialButton: {
-    width: '100%',
-  },
-  emailButton: {
-    marginTop: 8,
-  },
-  termsContainer: {
-    marginTop: 'auto',
-    paddingTop: 24,
-  },
-  termsText: {
-    fontSize: 14,
-    color: '#8E8E93',
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  termsLink: {
-    color: '#FE5E04',
-    fontWeight: '600',
-  },
-});
+const Container = styled(SafeAreaView)`
+  flex: 1;
+  background-color: #ffffff;
+`;
+
+const StyledKeyboardAvoidingView = styled(KeyboardAvoidingView)`
+  flex: 1;
+`;
+
+const StyledScrollView = styled(ScrollView)`
+  flex-grow: 1;
+
+  min-height: ${Dimensions.get('window').height - 100}px;
+  gap: 16px;
+`;
+
+const Header = styled.View`
+  align-items: center;
+  gap: 20px;
+`;
+
+const IconContainer = styled.View`
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
+  background-color: #fe5e04;
+  justify-content: center;
+  align-items: center;
+  shadow-color: #ffd6c2;
+  shadow-offset: 0px 20px;
+  shadow-opacity: 0.4;
+  shadow-radius: 25px;
+  elevation: 12;
+`;
+
+const Title = styled.Text`
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  color: #181818;
+`;
+
+const Subtitle = styled.Text`
+  font-size: 18px;
+  font-weight: 400;
+  color: #5c5c5c;
+  text-align: center;
+  line-height: 28px;
+  margin-horizontal: 24px;
+`;
+
+const Divider = styled.View`
+  height: 2px;
+  margin-bottom: 34px;
+  background-color: transparent;
+  border-bottom-width: 1px;
+  border-bottom-color: #ededed;
+  opacity: 0.5;
+  margin-horizontal: -28px;
+`;
+
+const LoginSection = styled.View`
+  gap: 16px;
+`;
+
+const SocialLogin = styled.View`
+  gap: 16px;
+`;
+
+const TermsContainer = styled.View`
+  margin-top: auto;
+  padding-top: 24px;
+`;
+
+const TermsText = styled.Text`
+  font-size: 12px;
+  color: #747474;
+  text-align: center;
+  line-height: 18px;
+`;
+
+const TermsLink = styled.Text`
+  color: #fe5e04;
+  font-weight: 600;
+`;

@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AppleIcon } from '@/components/icons/AppleIcon';
+import { GoogleIcon } from '@/components/icons/GoogleIcon';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWebView } from '@/contexts/WebViewContext';
 import { loginWithApple, loginWithGoogle } from '@/utils/auth';
@@ -70,10 +72,25 @@ export const LoginScreen = () => {
         <StyledScrollView
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingHorizontal: 28,
+            paddingVertical: 28,
+            justifyContent: 'center',
+            minHeight: Dimensions.get('window').height - 100,
+          }}
         >
           <MainCard>
             <GreetingWrapper>
-              <IconContainer>
+              <IconContainer
+                style={{
+                  shadowColor: '#FFD6C2',
+                  shadowOffset: { width: 0, height: 20 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 25,
+                  elevation: 20,
+                }}
+              >
                 <Ionicons name="sparkles" size={24} color="#FFFFFF" />
               </IconContainer>
               <Title>봄봄에 오신 걸 환영해요</Title>
@@ -85,15 +102,33 @@ export const LoginScreen = () => {
 
             <Divider />
 
-            <LoginButton onPress={handleGoogleLogin}>
-              <Ionicons name="logo-google" size={24} color="#000000" />
-              <LoginButtonText>Google로 계속하기</LoginButtonText>
+            <LoginButton
+              onPress={handleGoogleLogin}
+              style={{
+                shadowColor: '#000000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.05,
+                shadowRadius: 6,
+                elevation: 2,
+              }}
+            >
+              <GoogleIcon width={24} height={24} />
+              <LoginButtonText>Google로 시작하기</LoginButtonText>
             </LoginButton>
 
             {Platform.OS === 'ios' && (
-              <LoginButton onPress={handleAppleLogin}>
-                <Ionicons name="logo-apple" size={24} color="#000000" />
-                <LoginButtonText>Apple로 계속하기</LoginButtonText>
+              <LoginButton
+                onPress={handleAppleLogin}
+                style={{
+                  shadowColor: '#000000',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 6,
+                  elevation: 2,
+                }}
+              >
+                <AppleIcon width={24} height={24} />
+                <LoginButtonText>Apple로 시작하기</LoginButtonText>
               </LoginButton>
             )}
 
@@ -119,10 +154,7 @@ const StyledKeyboardAvoidingView = styled(KeyboardAvoidingView)`
 `;
 
 const StyledScrollView = styled(ScrollView)`
-  flex-grow: 1;
-  padding-horizontal: 28px;
-  padding-vertical: 28px;
-  min-height: ${Dimensions.get('window').height - 100}px;
+  flex: 1;
 `;
 
 const MainCard = styled.View`
@@ -150,11 +182,6 @@ const IconContainer = styled.View`
   justify-content: center;
   align-items: center;
   background-color: #fe5e04;
-  shadow-color: #ffd6c2;
-  shadow-offset: 0px 20px;
-  shadow-opacity: 0.25;
-  shadow-radius: 25px;
-  elevation: 20;
 `;
 
 const Title = styled.Text`
@@ -193,11 +220,6 @@ const LoginButton = styled.TouchableOpacity`
   justify-content: center;
   flex-direction: row;
   background-color: #ffffff;
-  shadow-color: #000000;
-  shadow-offset: 0px 4px;
-  shadow-opacity: 0.05;
-  shadow-radius: 6px;
-  elevation: 2;
 `;
 
 const LoginButtonText = styled.Text`

@@ -46,27 +46,6 @@ export interface CallbackUser {
   unsubscribeTexting: boolean;
 }
 
-export interface UpdateUserInfo {
-  language?: string;
-  profile?: Profile | null;
-  profileOnce?: Profile;
-  tags?: string[] | null;
-  unsubscribeEmail?: boolean;
-  unsubscribeTexting?: boolean;
-}
-
 export interface Profile {
   [key: string]: string | number | boolean | null | undefined;
 }
-
-export interface FollowUpProfile {
-  name?: string | null;
-  mobileNumber?: string | null;
-  email?: string | null;
-}
-
-export interface EventProperty {
-  [key: string]: string | number | boolean | null | undefined;
-}
-
-export type Appearance = 'light' | 'dark' | 'system' | null;

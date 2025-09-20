@@ -5,5 +5,6 @@ export const ENV = {
   sentryDsn: `${process.env.SENTRY_DSN}`,
   nodeEnv: `${process.env.NODE_ENV}`,
   clarityProjectId: `${process.env.CLARITY_PROJECT_ID}`,
+  monitoringStatusUrl: `${process.env.MONITORING_STATUS_URL}`,
   pluginKey: `${process.env.CHANNEL_TALK_PLUGIN_KEY}`,
 } as const;

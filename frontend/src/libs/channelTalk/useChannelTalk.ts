@@ -56,6 +56,16 @@ export const useChannelTalk = ({
     [],
   );
 
+  const showChannelButton = useCallback(
+    () => window.ChannelIO?.('showChannelButton'),
+    [],
+  );
+
+  const hideChannelButton = useCallback(
+    () => window.ChannelIO?.('hideChannelButton'),
+    [],
+  );
+
   useEffect(() => {
     if (document.readyState === 'complete') {
       initChannelTalk();
@@ -73,5 +83,7 @@ export const useChannelTalk = ({
 
   return {
     showMessenger,
+    hideChannelButton,
+    showChannelButton,
   };
 };

@@ -9,9 +9,10 @@ import { NavType } from '@/types/nav';
 
 interface MobileHeaderProps {
   activeNav: NavType;
+  showMessenger: () => void;
 }
 
-const MobileHeader = ({ activeNav }: MobileHeaderProps) => {
+const MobileHeader = ({ activeNav, showMessenger }: MobileHeaderProps) => {
   const { data: userInfo } = useQuery(queries.me());
 
   return (
@@ -19,7 +20,11 @@ const MobileHeader = ({ activeNav }: MobileHeaderProps) => {
       <MobileHeaderContainer>
         <HeaderLogo deviceType="mobile" />
         {userInfo ? (
-          <HeaderProfile userInfo={userInfo} deviceType="mobile" />
+          <HeaderProfile
+            userInfo={userInfo}
+            deviceType="mobile"
+            showMessenger={showMessenger}
+          />
         ) : (
           <LoginButton />
         )}

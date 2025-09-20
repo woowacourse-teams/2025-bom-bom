@@ -1,3 +1,5 @@
-export type Gender = 'MALE' | 'FEMALE';
+import { components } from '@/types/openapi';
+
+export type Gender = components['schemas']['MemberSignupRequest']['gender'];
 
 export type FieldError = string | null;

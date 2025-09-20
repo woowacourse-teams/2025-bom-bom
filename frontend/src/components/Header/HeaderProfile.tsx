@@ -9,7 +9,7 @@ import { UserInfo } from '@/types/me';
 interface HeaderProfileProps {
   userInfo: UserInfo;
   deviceType: DeviceType;
-  showMessenger: () => void;
+  showMessenger?: () => void;
 }
 
 const HeaderProfile = ({

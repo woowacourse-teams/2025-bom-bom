@@ -14,7 +14,7 @@ import MailIcon from '#/assets/mail.svg';
 
 interface ProfileDetailProps {
   userInfo: UserInfo;
-  showMessenger: () => void;
+  showMessenger?: () => void;
 }
 
 const ProfileDetail = ({ userInfo, showMessenger }: ProfileDetailProps) => {
@@ -93,7 +93,7 @@ const ProfileDetail = ({ userInfo, showMessenger }: ProfileDetailProps) => {
 
       <Divider />
 
-      {deviceType !== 'pc' && (
+      {deviceType !== 'pc' && showMessenger && (
         <ChannelTalkButton type="button" onClick={showMessenger}>
           <ChatIcon width={16} height={16} />
           문의하기

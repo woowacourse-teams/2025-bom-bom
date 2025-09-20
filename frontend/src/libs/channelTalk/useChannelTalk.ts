@@ -10,8 +10,6 @@ import {
 } from './channelTalk.types';
 import { ENV } from '@/apis/env';
 
-const PLUGIN_KEY = ENV.pluginKey;
-
 interface UseChannelTalkParams {
   bootOption?: BootOption;
   bootCallback?: Callback;
@@ -50,7 +48,7 @@ export const useChannelTalk = ({
     script.onload = () => {
       window.ChannelIO?.(
         'boot',
-        { pluginKey: PLUGIN_KEY, ...bootOption },
+        { pluginKey: ENV.pluginKey, ...bootOption },
         bootCallback,
       );
     };

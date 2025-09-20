@@ -20,7 +20,6 @@ export interface BootOption {
   language?: string;
   memberHash?: string;
   memberId?: string;
-  pluginKey: string;
   profile?: Profile;
   trackDefaultEvent?: boolean;
   trackUtmSource?: boolean;

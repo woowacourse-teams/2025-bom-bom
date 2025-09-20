@@ -13,7 +13,6 @@ interface BomBomRouterContext {
 
 const RootComponent = () => {
   usePageTracking();
-
   return (
     <>
       <QueryClientProvider client={queryClient}>

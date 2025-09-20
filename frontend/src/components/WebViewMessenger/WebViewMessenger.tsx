@@ -31,9 +31,10 @@ export const WebViewMessenger: React.FC = () => {
               });
 
               if (!response) return;
-              if (!response.isRegistered) navigate({ to: '/signup' });
-
-              alert(JSON.stringify(response));
+              if (!response.isRegistered) {
+                navigate({ to: '/signup' });
+                return;
+              }
 
               window.location.reload();
 
@@ -70,7 +71,10 @@ export const WebViewMessenger: React.FC = () => {
               });
 
               if (!response) return;
-              if (!response.isRegistered) navigate({ to: '/signup' });
+              if (!response.isRegistered) {
+                navigate({ to: '/signup' });
+                return;
+              }
 
               window.location.reload();
 

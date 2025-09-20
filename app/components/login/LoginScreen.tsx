@@ -1,6 +1,6 @@
 import styled from '@emotion/native';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   Dimensions,
   KeyboardAvoidingView,
@@ -14,7 +14,6 @@ import { GoogleIcon } from '@/components/icons/GoogleIcon';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWebView } from '@/contexts/WebViewContext';
 import { loginWithApple, loginWithGoogle } from '@/utils/auth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const LoginScreen = () => {
   const { setShowWebViewLogin } = useAuth();
@@ -22,7 +21,16 @@ export const LoginScreen = () => {
 
   const handleGoogleLogin = async () => {
     try {
-      await loginWithGoogle(() => setShowWebViewLogin(true));
+      await loginWithGoogle(({ identityToken, authorizationCode }) => {
+        setShowWebViewLogin(true);
+        sendMessageToWeb({
+          type: 'GOOGLE_LOGIN_TOKEN',
+          payload: {
+            identityToken,
+            authorizationCode,
+          },
+        });
+      });
     } catch (error) {
       console.error('Google 로그인 실패:', error);
     }
@@ -30,39 +38,20 @@ export const LoginScreen = () => {
 
   const handleAppleLogin = async () => {
     try {
-      await loginWithApple(() => setShowWebViewLogin(true));
+      await loginWithApple(({ identityToken, authorizationCode }) => {
+        setShowWebViewLogin(true);
+        sendMessageToWeb({
+          type: 'APPLE_LOGIN_TOKEN',
+          payload: {
+            identityToken,
+            authorizationCode,
+          },
+        });
+      });
     } catch (error) {
       console.error('Apple 로그인 실패:', error);
     }
   };
-
-  useEffect(() => {
-    const sendLoginTokenToWeb = async () => {
-      const auth = await AsyncStorage.getItem('auth');
-      if (!auth) return;
-
-      const { provider, identityToken, authorizationCode } = JSON.parse(auth);
-
-      if (!authorizationCode || !identityToken || !provider) return;
-
-      sendMessageToWeb({
-        type:
-          provider.toUpperCase() === 'GOOGLE'
-            ? 'GOOGLE_LOGIN_TOKEN'
-            : 'APPLE_LOGIN_TOKEN',
-        payload: {
-          identityToken,
-          authorizationCode,
-        },
-      });
-
-      AsyncStorage.removeItem('auth');
-
-      setShowWebViewLogin(false);
-    };
-
-    sendLoginTokenToWeb();
-  }, [sendMessageToWeb, setShowWebViewLogin]);
 
   return (
     <Container>

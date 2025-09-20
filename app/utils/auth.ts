@@ -3,8 +3,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
 
+interface LoginWithGoogleCallback {
+  identityToken: string;
+  authorizationCode: string;
+  provider: 'google' | 'apple';
+}
+
 export const loginWithGoogle = async (
-  callbackWhenSuccess: () => void,
+  callbackWhenSuccess: ({
+    identityToken,
+    authorizationCode,
+    provider,
+  }: LoginWithGoogleCallback) => void,
 ): Promise<void> => {
   GoogleSignin.configure({
     webClientId: IOS_CLIENT_ID,
@@ -22,7 +32,11 @@ export const loginWithGoogle = async (
   const userInfo = await GoogleSignin.signIn();
 
   if (userInfo?.data?.idToken) {
-    callbackWhenSuccess();
+    callbackWhenSuccess({
+      identityToken: userInfo.data.idToken,
+      authorizationCode: userInfo.data.serverAuthCode ?? '',
+      provider: 'google',
+    });
 
     await AsyncStorage.setItem(
       'auth',
@@ -38,7 +52,11 @@ export const loginWithGoogle = async (
 };
 
 export const loginWithApple = async (
-  callbackWhenSuccess: () => void,
+  callbackWhenSuccess: ({
+    identityToken,
+    authorizationCode,
+    provider,
+  }: LoginWithGoogleCallback) => void,
 ): Promise<void> => {
   if (!AppleAuthentication.isAvailableAsync()) {
     throw new Error('Apple 로그인을 사용할 수 없습니다.');
@@ -52,7 +70,11 @@ export const loginWithApple = async (
   });
 
   if (credential.identityToken && credential.authorizationCode) {
-    callbackWhenSuccess();
+    callbackWhenSuccess({
+      identityToken: credential.identityToken,
+      authorizationCode: credential.authorizationCode,
+      provider: 'apple',
+    });
 
     await AsyncStorage.setItem(
       'auth',

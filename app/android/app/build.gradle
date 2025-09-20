@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.antarctica.bombom.app'
+    namespace 'com.antarctica.bombom'
     defaultConfig {
-        applicationId 'com.antarctica.bombom.app'
+        applicationId 'com.antarctica.bombom'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

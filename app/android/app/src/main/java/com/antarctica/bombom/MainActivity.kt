@@ -1,4 +1,4 @@
-package com.antarctica.bombom.app
+package com.antarctica.bombom
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

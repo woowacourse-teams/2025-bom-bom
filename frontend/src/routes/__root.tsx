@@ -4,7 +4,6 @@ import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { theme } from '../styles/theme';
 import Toast from '@/components/Toast/Toast';
-import { useChannelTalk } from '@/libs/channelTalk/useChannelTalk';
 import { usePageTracking } from '@/libs/googleAnalytics/usePageTracking';
 import { queryClient } from '@/main';
 
@@ -14,7 +13,6 @@ interface BomBomRouterContext {
 
 const RootComponent = () => {
   usePageTracking();
-  useChannelTalk();
 
   return (
     <>

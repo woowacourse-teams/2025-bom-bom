@@ -5,6 +5,7 @@ type WebViewMessageType =
 
 export interface WebToRNMessage {
   type: WebViewMessageType;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload?: any;
 }
 
@@ -12,6 +13,7 @@ type RNToWebMessageType = 'GOOGLE_LOGIN_TOKEN' | 'APPLE_LOGIN_TOKEN';
 
 export interface RNToWebMessage {
   type: RNToWebMessageType;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload?: any;
 }
 

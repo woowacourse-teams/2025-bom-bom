@@ -37,14 +37,12 @@ const ReadingKingLeaderboard = () => {
   if (isLoading) {
     return (
       <Container>
-        <Header>
-          <TitleContainer>
-            <HeaderIcon>
-              <ArrowIcon width={16} height={16} direction="upRight" />
-            </HeaderIcon>
-            <Title>이달의 독서왕</Title>
-          </TitleContainer>
-        </Header>
+        <TitleWrapper>
+          <TitleIcon>
+            <ArrowIcon width={16} height={16} direction="upRight" />
+          </TitleIcon>
+          <Title>이달의 독서왕</Title>
+        </TitleWrapper>
         <LoadingMessage>데이터를 불러오는 중...</LoadingMessage>
       </Container>
     );
@@ -52,14 +50,12 @@ const ReadingKingLeaderboard = () => {
 
   return (
     <Container>
-      <Header>
-        <TitleContainer>
-          <HeaderIcon>
-            <ArrowIcon width={16} height={16} direction="upRight" />
-          </HeaderIcon>
-          <Title>이달의 독서왕</Title>
-        </TitleContainer>
-      </Header>
+      <TitleWrapper>
+        <TitleIcon>
+          <ArrowIcon width={16} height={16} direction="upRight" />
+        </TitleIcon>
+        <Title>이달의 독서왕</Title>
+      </TitleWrapper>
 
       <Description>순위는 10분마다 변경됩니다.</Description>
 
@@ -103,7 +99,7 @@ const Container = styled.div`
     0 4px 6px -4px rgb(0 0 0 / 10%);
 
   display: flex;
-  gap: 12px;
+  gap: 16px;
   flex-direction: column;
 
   background: rgb(255 255 255 / 80%);
@@ -111,15 +107,13 @@ const Container = styled.div`
   backdrop-filter: blur(10px);
 `;
 
-const Header = styled.div``;
-
-const TitleContainer = styled.div`
+const TitleWrapper = styled.div`
   display: flex;
   gap: 10px;
   align-items: center;
 `;
 
-const HeaderIcon = styled.div`
+const TitleIcon = styled.div`
   width: 28px;
   height: 28px;
   border-radius: 12px;
@@ -145,7 +139,7 @@ const LeaderboardList = styled.div`
   min-height: fit-content;
 
   display: flex;
-  gap: 12px;
+  gap: 32px;
   flex-direction: column;
 `;
 

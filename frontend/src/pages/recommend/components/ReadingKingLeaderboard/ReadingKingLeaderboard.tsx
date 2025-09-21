@@ -8,7 +8,7 @@ import Carousel from '@/components/Carousel/Carousel';
 import ArrowIcon from '@/components/icons/ArrowIcon';
 import type { ReadingKingRank } from './ReadingKingLeaderboard.types';
 
-export default function ReadingKingLeaderboard() {
+const ReadingKingLeaderboard = () => {
   const { data: monthlyReadingRank, isLoading } = useQuery(
     queries.monthlyReadingRank({ limit: 10 }),
   );
@@ -86,7 +86,9 @@ export default function ReadingKingLeaderboard() {
       )}
     </Container>
   );
-}
+};
+
+export default ReadingKingLeaderboard;
 
 const Container = styled.div`
   width: 100%;

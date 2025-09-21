@@ -75,11 +75,8 @@ export const useFloatingToolbarSelection = ({
         openToolbarFromSelection(selection);
         return;
       }
-
-      // 아무것도 없으면 툴바 닫기
-      onHide();
     },
-    [openToolbarFromHighlight, openToolbarFromSelection, onHide],
+    [openToolbarFromHighlight, openToolbarFromSelection],
   );
 
   const handleSelectionClear = useCallback(() => {

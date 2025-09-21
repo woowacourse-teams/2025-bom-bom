@@ -8,14 +8,19 @@ import Carousel from '@/components/Carousel/Carousel';
 import ArrowIcon from '@/components/icons/ArrowIcon';
 import type { ReadingKingRank } from './ReadingKingLeaderboard.types';
 
+const RANKING = {
+  maxRank: 10,
+  boardUnit: 5,
+};
+
 const ReadingKingLeaderboard = () => {
   const { data: monthlyReadingRank, isLoading } = useQuery(
-    queries.monthlyReadingRank({ limit: 10 }),
+    queries.monthlyReadingRank({ limit: RANKING.maxRank }),
   );
   const { data: userRank } = useQuery(queries.myMonthlyReadingRank());
 
   const getLeaderboardData = useCallback((data: ReadingKingRank) => {
-    const leaderboardLength = Math.ceil(data.length / 5);
+    const leaderboardLength = Math.ceil(data.length / RANKING.boardUnit);
 
     const leaderboardData: ReadingKingRank[] = Array.from(
       { length: leaderboardLength },
@@ -23,7 +28,7 @@ const ReadingKingLeaderboard = () => {
     );
 
     data.forEach((rankData, index) => {
-      const leaderboardIndex = Math.floor(index / 5);
+      const leaderboardIndex = Math.floor(index / RANKING.boardUnit);
       leaderboardData[leaderboardIndex]?.push(rankData);
     });
 

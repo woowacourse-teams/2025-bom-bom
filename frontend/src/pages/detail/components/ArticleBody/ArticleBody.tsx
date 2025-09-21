@@ -24,7 +24,7 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
   const { highlights, isHighlightLoaded } = useHighlights({ articleId });
   const { mutate: addHighlight } = useAddHighlightMutation();
   const { mutate: updateHighlight } = useUpdateHighlightMutation();
-  const { mutate: removeHighlight } = useRemoveHighlightMutation();
+  const { mutate: removeHighlight } = useRemoveHighlightMutation({ articleId });
   const { activeSelectionRange, activeHighlightId } =
     useFloatingToolbarSelection({
       isInSelectionTarget: (range) =>

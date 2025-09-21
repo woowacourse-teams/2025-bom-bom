@@ -1,8 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { removeHighlightFromDOM } from '../utils/highlight';
 import { deleteHighlight, DeleteHighlightParams } from '@/apis/highlight';
+import { queries } from '@/apis/queries';
 
-export const useRemoveHighlightMutation = () => {
+interface UseRemoveHighlightMutationParams {
+  articleId: number;
+}
+
+export const useRemoveHighlightMutation = ({
+  articleId,
+}: UseRemoveHighlightMutationParams) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -11,7 +18,7 @@ export const useRemoveHighlightMutation = () => {
     onSuccess: (_, params) => {
       removeHighlightFromDOM(params.id);
       queryClient.invalidateQueries({
-        queryKey: ['highlight'],
+        queryKey: queries.highlights({ articleId }).queryKey,
       });
     },
   });

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { patchHighlight, PatchHighlightParams } from '@/apis/highlight';
+import { queries } from '@/apis/queries';
 
 export const useUpdateHighlightMutation = () => {
   const queryClient = useQueryClient();
@@ -7,9 +8,9 @@ export const useUpdateHighlightMutation = () => {
   return useMutation({
     mutationFn: (params: PatchHighlightParams) => patchHighlight(params),
 
-    onSuccess: () => {
+    onSuccess: (_, params) => {
       queryClient.invalidateQueries({
-        queryKey: ['highlight'],
+        queryKey: queries.highlights({ articleId: params.id }).queryKey,
       });
     },
   });

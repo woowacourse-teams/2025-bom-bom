@@ -12,7 +12,8 @@ export const Route = createFileRoute('/_bombom')({
     const { queryClient } = context;
 
     try {
-      await queryClient.fetchQuery(queries.me());
+      if (isFirstVisit) await queryClient.fetchQuery(queries.me());
+      else isFirstVisit = false;
     } catch {
       if (location.pathname !== '/recommend') {
         if (isFirstVisit) {
@@ -20,8 +21,6 @@ export const Route = createFileRoute('/_bombom')({
         }
         throw new Response(DEFAULT_ERROR_MESSAGES[401], { status: 401 });
       }
-    } finally {
-      isFirstVisit = false;
     }
   },
   errorComponent: ({ error }) => {

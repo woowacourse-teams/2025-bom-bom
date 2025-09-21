@@ -7,7 +7,6 @@ import arrowPrev from '#/assets/carousel-arrow-prev.png';
 interface CarouselProps extends PropsWithChildren {
   timer?: boolean | number;
   showSlideButton?: boolean;
-  activeAnimation?: boolean;
   animation?: 'slide' | 'none';
 }
 
@@ -17,7 +16,6 @@ interface CarouselProps extends PropsWithChildren {
  *   - `true`: 기본 4초 주기
  *   - `number`: 커스텀 주기(ms)
  * @property {boolean} [showSlideButton=true] - 슬라이드 변경 버튼 렌더링 여부
- * @property {boolean} [activeAnimation=true] - 슬라이드 애니메이션 활성화 여부
  * @property {'slide'|'none'} [animation='slide'] - 애니메이션 타입
  *   - `slide`: 왼쪽에서 오른쪽으로 미끄러지는 애니메이션
  *   - `none`: 애니메이션 없음

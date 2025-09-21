@@ -15,13 +15,15 @@ interface FloatingToolBarProps {
   onMemoButtonClick: () => void;
 }
 
-export default function FloatingToolbar({
+const FloatingToolbar = ({
   open,
   position,
   mode,
   onHighlightButtonClick,
   onMemoButtonClick,
-}: FloatingToolBarProps) {
+}: FloatingToolBarProps) => {
+  const isNewMode = mode === 'new';
+
   const handlePointerDownOnToolbar = (e: PointerEvent) => {
     e.preventDefault();
   };
@@ -33,14 +35,16 @@ export default function FloatingToolbar({
       onPointerDown={handlePointerDownOnToolbar}
     >
       <ToolbarButton onClick={onHighlightButtonClick}>
-        {mode === 'new' ? <HighlightIcon /> : <HighlightOffIcon />}
+        {isNewMode ? <HighlightIcon /> : <HighlightOffIcon />}
       </ToolbarButton>
       <ToolbarButton onClick={onMemoButtonClick}>
         <MemoIcon />
       </ToolbarButton>
     </Container>
   );
-}
+};
+
+export default FloatingToolbar;
 
 const fadeIn = keyframes`
     from { opacity: 0; transform: translate(-50%, -90%); }

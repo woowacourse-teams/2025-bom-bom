@@ -38,12 +38,14 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
   };
 
   const handleHighlightClick = () => {
-    if (mode === 'new' && activeSelectionRange) {
+    const isNewMode = mode === 'new';
+
+    if (isNewMode && activeSelectionRange) {
       const highlightData = saveSelection(activeSelectionRange, articleId);
       addHighlight(highlightData);
       window.getSelection()?.removeAllRanges();
     }
-    if (mode === 'existing' && activeHighlightId) {
+    if (!isNewMode && activeHighlightId) {
       removeHighlight({ id: activeHighlightId });
     }
 
@@ -51,7 +53,9 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
   };
 
   const handleMemoClick = () => {
-    if (mode === 'new' && activeSelectionRange) {
+    const isNewMode = mode === 'new';
+
+    if (isNewMode && activeSelectionRange) {
       const highlightData = saveSelection(activeSelectionRange, articleId);
       addHighlight(highlightData);
       window.getSelection()?.removeAllRanges();

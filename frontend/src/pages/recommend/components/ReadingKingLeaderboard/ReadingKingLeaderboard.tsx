@@ -61,6 +61,8 @@ const ReadingKingLeaderboard = () => {
         </TitleContainer>
       </Header>
 
+      <Description>순위는 10분마다 변경됩니다.</Description>
+
       <Carousel showSlideButton={false} animation="none">
         {getLeaderboardData(monthlyReadingRank).map(
           (leaderboard, leaderboardIndex) => (
@@ -101,7 +103,7 @@ const Container = styled.div`
     0 4px 6px -4px rgb(0 0 0 / 10%);
 
   display: flex;
-  gap: 20px;
+  gap: 12px;
   flex-direction: column;
 
   background: rgb(255 255 255 / 80%);
@@ -109,9 +111,7 @@ const Container = styled.div`
   backdrop-filter: blur(10px);
 `;
 
-const Header = styled.div`
-  padding-bottom: 20px;
-`;
+const Header = styled.div``;
 
 const TitleContainer = styled.div`
   display: flex;
@@ -134,6 +134,11 @@ const HeaderIcon = styled.div`
 const Title = styled.h3`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.heading5};
+`;
+
+const Description = styled.p`
+  color: ${({ theme }) => theme.colors.textTertiary};
+  font: ${({ theme }) => theme.fonts.body2};
 `;
 
 const LeaderboardList = styled.div`

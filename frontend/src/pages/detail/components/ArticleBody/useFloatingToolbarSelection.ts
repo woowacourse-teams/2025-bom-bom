@@ -18,6 +18,8 @@ export const useFloatingToolbarSelection = ({
   const activeSelectionRangeRef = useRef<Range>(null);
   const activeHighlightIdRef = useRef<number>(null);
 
+  const isPC = deviceType === 'pc';
+
   const openToolbarFromSelection = useCallback(
     (selection: Selection) => {
       const range = selection.getRangeAt(0);
@@ -28,14 +30,14 @@ export const useFloatingToolbarSelection = ({
       onShow({
         position: {
           x: rect.left + rect.width / 2,
-          y: deviceType !== 'pc' ? rect.bottom + 40 : rect.top,
+          y: isPC ? rect.top : rect.bottom + 40,
         },
         mode: 'new',
       });
       activeHighlightIdRef.current = null;
       activeSelectionRangeRef.current = range;
     },
-    [deviceType, isInSelectionTarget, onShow],
+    [isInSelectionTarget, isPC, onShow],
   );
 
   const openToolbarFromHighlight = useCallback(
@@ -47,14 +49,14 @@ export const useFloatingToolbarSelection = ({
       onShow({
         position: {
           x: rect.left + rect.width / 2,
-          y: deviceType === 'mobile' ? rect.bottom + 40 : rect.top,
+          y: isPC ? rect.top : rect.bottom + 40,
         },
         mode: 'existing',
       });
       activeHighlightIdRef.current = Number(id);
       activeSelectionRangeRef.current = null;
     },
-    [deviceType, onShow],
+    [isPC, onShow],
   );
 
   const handlePointerOrClick = useCallback(

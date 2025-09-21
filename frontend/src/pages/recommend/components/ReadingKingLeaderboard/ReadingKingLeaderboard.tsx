@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import LeaderboardItem from './ReadingKingLeaderboardItem';
+import LeaderboardItem from './LeaderboardItem';
 import ReadingKingMyRank from './ReadingKingMyRank';
 import { queries } from '@/apis/queries';
 import Carousel from '@/components/Carousel/Carousel';

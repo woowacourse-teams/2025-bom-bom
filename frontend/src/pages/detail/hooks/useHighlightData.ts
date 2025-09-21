@@ -3,18 +3,17 @@ import { Highlight } from '../types/highlight';
 import { addHighlightToDOM, removeHighlightFromDOM } from '../utils/highlight';
 import {
   deleteHighlight,
-  getHighlights,
   patchHighlight,
   postHighlight,
   PostHighlightParams,
 } from '@/apis/highlight';
+import { queries } from '@/apis/queries';
 
 export const useHighlightData = ({ articleId }: { articleId: number }) => {
   const queryClient = useQueryClient();
-  const { data: highlights, isSuccess } = useQuery({
-    queryKey: ['highlight'],
-    queryFn: () => getHighlights({ articleId }),
-  });
+  const { data: highlights, isSuccess } = useQuery(
+    queries.highlights({ articleId }),
+  );
 
   const { mutate: addHighlight } = useMutation({
     mutationKey: ['addHighlights'],

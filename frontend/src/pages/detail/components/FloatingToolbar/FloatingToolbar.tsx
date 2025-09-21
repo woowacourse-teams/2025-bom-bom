@@ -1,14 +1,15 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { PointerEvent } from 'react';
-import { FloatingToolbarMode, ToolbarPosition } from './FloatingToolbar.types';
+import { FloatingToolbarMode } from './FloatingToolbar.types';
+import { Position } from '@/types/position';
 import MemoIcon from '#/assets/comment.svg';
 import HighlightOffIcon from '#/assets/edit-off.svg';
 import HighlightIcon from '#/assets/edit.svg';
 
 interface FloatingToolBarProps {
   open: boolean;
-  position: ToolbarPosition;
+  position: Position;
   mode: FloatingToolbarMode;
   onHighlightButtonClick: () => void;
   onMemoButtonClick: () => void;
@@ -51,7 +52,7 @@ const fadeOut = keyframes`
     to { opacity: 0; transform: translate(-50%, -90%); }
   `;
 
-const Container = styled.div<{ position: ToolbarPosition; open: boolean }>`
+const Container = styled.div<{ position: Position; open: boolean }>`
   position: fixed;
   top: ${({ position }) => position.y}px;
   left: ${({ position }) => position.x}px;

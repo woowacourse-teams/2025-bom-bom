@@ -1,16 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react';
-import {
-  FloatingToolbarMode,
-  ToolbarPosition,
-} from '../FloatingToolbar/FloatingToolbar.types';
+import { FloatingToolbarMode } from '../FloatingToolbar/FloatingToolbar.types';
 import { useDeviceType } from '@/hooks/useDeviceType';
+import { Position } from '@/types/position';
 
 interface UseFloatingToolbarSelectionParams {
   isInSelectionTarget: (range: Range) => boolean;
-  onShow: (params: {
-    position: ToolbarPosition;
-    mode: FloatingToolbarMode;
-  }) => void;
+  onShow: (params: { position: Position; mode: FloatingToolbarMode }) => void;
   onHide: () => void;
 }
 

@@ -9,7 +9,7 @@ import MemoIcon from '#/assets/memo.svg';
 interface MemoPanelProps {
   open: boolean;
   memos: Highlight[];
-  removeHighlight: (id: number) => void;
+  removeHighlight: ({ id }: { id: number }) => void;
   updateMemo: (id: number, memo: string) => void;
   handleClose: () => void;
   handleToggle: () => void;

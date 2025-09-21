@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useFloatingToolbarSelection } from './useFloatingToolbarSelection';
+import { useAddHighlightMutation } from '../../hooks/useAddHighlightMutation';
 import { useFloatingToolbarState } from '../../hooks/useFloatingToolbarState';
-import { useHighlightData } from '../../hooks/useHighlightData';
+import { useHighlights } from '../../hooks/useHighlights';
+import { useRemoveHighlightMutation } from '../../hooks/useRemoveHighlighMutation';
+import { useUpdateHighlightMutation } from '../../hooks/useUpdateHighlightMutation';
 import { restoreHighlightAll, saveSelection } from '../../utils/highlight';
 import ArticleContent from '../ArticleContent/ArticleContent';
 import FloatingToolbar from '../FloatingToolbar/FloatingToolbar';
@@ -18,13 +21,10 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
   const { open, position, mode, showToolbar, hideToolbar } =
     useFloatingToolbarState();
   const [panelOpen, setPanelOpen] = useState(false);
-  const {
-    highlights,
-    isHighlightLoaded,
-    addHighlight,
-    updateMemo,
-    removeHighlight,
-  } = useHighlightData({ articleId });
+  const { highlights, isHighlightLoaded } = useHighlights({ articleId });
+  const { mutate: addHighlight } = useAddHighlightMutation();
+  const { mutate: updateHighlight } = useUpdateHighlightMutation();
+  const { mutate: removeHighlight } = useRemoveHighlightMutation();
   const { activeSelectionRange, activeHighlightId } =
     useFloatingToolbarSelection({
       isInSelectionTarget: (range) =>
@@ -33,6 +33,10 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
       onHide: hideToolbar,
     });
 
+  const updateMemo = (id: number, memo: string) => {
+    updateHighlight({ id, memo });
+  };
+
   const handleHighlightClick = () => {
     if (mode === 'new' && activeSelectionRange) {
       const highlightData = saveSelection(activeSelectionRange, articleId);
@@ -40,7 +44,7 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
       window.getSelection()?.removeAllRanges();
     }
     if (mode === 'existing' && activeHighlightId) {
-      removeHighlight(activeHighlightId);
+      removeHighlight({ id: activeHighlightId });
     }
 
     hideToolbar();

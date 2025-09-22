@@ -5,6 +5,7 @@ import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 import { toast } from '../Toast/utils/toastActions';
 import { postLogout, postWithdraw } from '@/apis/auth';
 import { useDeviceType } from '@/hooks/useDeviceType';
+import { useChannelTalk } from '@/libs/channelTalk/useChannelTalk';
 import { UserInfo } from '@/types/me';
 import { copyToClipboard } from '@/utils/copy';
 import ChatIcon from '#/assets/chat.svg';
@@ -14,12 +15,12 @@ import MailIcon from '#/assets/mail.svg';
 
 interface ProfileDetailProps {
   userInfo: UserInfo;
-  showMessenger?: () => void;
 }
 
-const ProfileDetail = ({ userInfo, showMessenger }: ProfileDetailProps) => {
+const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
   const navigate = useNavigate();
   const deviceType = useDeviceType();
+  const { showMessenger } = useChannelTalk();
 
   const { mutate: mutateLogout } = useMutation({
     mutationKey: ['logout'],

@@ -13,8 +13,7 @@ interface HeaderProps {
 
 const Header = ({ variant }: HeaderProps) => {
   const activeNav = useActiveNav();
-  const { showMessenger, showChannelButton, hideChannelButton } =
-    useChannelTalk();
+  const { showChannelButton, hideChannelButton } = useChannelTalk();
 
   useEffect(() => {
     if (variant === 'pc') {
@@ -30,7 +29,7 @@ const Header = ({ variant }: HeaderProps) => {
     return <PCHeader activeNav={activeNav} />;
   }
 
-  return <MobileHeader activeNav={activeNav} showMessenger={showMessenger} />;
+  return <MobileHeader activeNav={activeNav} />;
 };
 
 export default Header;

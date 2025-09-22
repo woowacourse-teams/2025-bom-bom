@@ -9,14 +9,9 @@ import { UserInfo } from '@/types/me';
 interface HeaderProfileProps {
   userInfo: UserInfo;
   deviceType: DeviceType;
-  showMessenger?: () => void;
 }
 
-const HeaderProfile = ({
-  userInfo,
-  deviceType,
-  showMessenger,
-}: HeaderProfileProps) => {
+const HeaderProfile = ({ userInfo, deviceType }: HeaderProfileProps) => {
   const {
     modalRef: profileModalRef,
     openModal: openProfileModal,
@@ -50,7 +45,7 @@ const HeaderProfile = ({
           showCloseButton={false}
           showBackdrop={false}
         >
-          <ProfileDetail userInfo={userInfo} showMessenger={showMessenger} />
+          <ProfileDetail userInfo={userInfo} />
         </Modal>
       )}
     </Container>

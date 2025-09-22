@@ -1,6 +1,6 @@
+import styled from '@emotion/native';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
 
 interface LoadingSpinnerProps {
   message?: string;
@@ -16,28 +16,28 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   iconColor = '#FE5E04',
 }) => {
   return (
-    <View style={styles.container}>
-      <View style={styles.iconContainer}>
+    <Container>
+      <IconContainer>
         <Ionicons name={iconName} size={iconSize} color={iconColor} />
-      </View>
-      <Text style={styles.text}>{message}</Text>
-    </View>
+      </IconContainer>
+      <LoadingText>{message}</LoadingText>
+    </Container>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  iconContainer: {
-    marginBottom: 16,
-  },
-  text: {
-    fontSize: 16,
-    color: '#8E8E93',
-    fontWeight: '500',
-  },
-});
+const Container = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+`;
+
+const IconContainer = styled.View`
+  margin-bottom: 16px;
+`;
+
+const LoadingText = styled.Text`
+  font-size: 16px;
+  color: #8e8e93;
+  font-weight: 500;
+`;

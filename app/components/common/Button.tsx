@@ -1,12 +1,6 @@
+import styled from '@emotion/native';
 import React, { ReactNode } from 'react';
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TextStyle,
-  TouchableOpacity,
-  ViewStyle,
-} from 'react-native';
+import { ActivityIndicator, TextStyle, ViewStyle } from 'react-native';
 
 interface ButtonProps {
   title: string;
@@ -29,42 +23,23 @@ export const Button = ({
   textStyle,
   icon,
 }: ButtonProps) => {
-  const getButtonStyle = (): ViewStyle => {
-    const baseStyle = styles.button;
+  const StyledButton =
+    variant === 'primary' ? PrimaryButton :
+    variant === 'secondary' ? SecondaryButton :
+    SocialButton;
 
-    switch (variant) {
-      case 'primary':
-        return { ...baseStyle, ...styles.primaryButton };
-      case 'secondary':
-        return { ...baseStyle, ...styles.secondaryButton };
-      case 'social':
-        return { ...baseStyle, ...styles.socialButton };
-      default:
-        return baseStyle;
-    }
-  };
-
-  const getTextStyle = (): TextStyle => {
-    const baseStyle = styles.text;
-
-    switch (variant) {
-      case 'primary':
-        return { ...baseStyle, ...styles.primaryText };
-      case 'secondary':
-        return { ...baseStyle, ...styles.secondaryText };
-      case 'social':
-        return { ...baseStyle, ...styles.socialText };
-      default:
-        return baseStyle;
-    }
-  };
+  const StyledText =
+    variant === 'primary' ? PrimaryText :
+    variant === 'secondary' ? SecondaryText :
+    SocialText;
 
   return (
-    <TouchableOpacity
-      style={[getButtonStyle(), disabled && styles.disabled, style]}
+    <StyledButton
+      style={style}
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.8}
+      $disabled={disabled}
     >
       {loading ? (
         <ActivityIndicator
@@ -74,60 +49,59 @@ export const Button = ({
       ) : (
         <>
           {icon}
-          <Text style={[getTextStyle(), textStyle]}>{title}</Text>
+          <StyledText style={textStyle}>{title}</StyledText>
         </>
       )}
-    </TouchableOpacity>
+    </StyledButton>
   );
 };
 
-const styles = StyleSheet.create({
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    minHeight: 48,
-    gap: 12,
-  },
-  primaryButton: {
-    backgroundColor: '#FE5E04',
-  },
-  secondaryButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: '#FE5E04',
-  },
-  socialButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#E5E5E5',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  text: {
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  primaryText: {
-    color: '#FFFFFF',
-  },
-  secondaryText: {
-    color: '#FE5E04',
-  },
-  socialText: {
-    color: '#000000',
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-});
+const BaseButton = styled.TouchableOpacity<{ $disabled?: boolean }>`
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 8px;
+  min-height: 48px;
+  gap: 12px;
+  opacity: ${props => props.$disabled ? 0.5 : 1};
+`;
+
+const PrimaryButton = styled(BaseButton)`
+  background-color: #fe5e04;
+`;
+
+const SecondaryButton = styled(BaseButton)`
+  background-color: transparent;
+  border-width: 2px;
+  border-color: #fe5e04;
+`;
+
+const SocialButton = styled(BaseButton)`
+  background-color: #ffffff;
+  border-width: 2px;
+  border-color: #e5e5e5;
+  shadow-color: #000;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.1;
+  shadow-radius: 3px;
+  elevation: 3;
+`;
+
+const BaseText = styled.Text`
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+`;
+
+const PrimaryText = styled(BaseText)`
+  color: #ffffff;
+`;
+
+const SecondaryText = styled(BaseText)`
+  color: #fe5e04;
+`;
+
+const SocialText = styled(BaseText)`
+  color: #000000;
+`;

@@ -61,13 +61,7 @@ export const LoginScreen = () => {
         <StyledScrollView
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingHorizontal: 28,
-            paddingVertical: 28,
-            justifyContent: 'center',
-            minHeight: Dimensions.get('window').height - 100,
-          }}
+          contentContainerStyle={scrollViewContentStyle}
         >
           <MainCard>
             <GreetingWrapper>
@@ -145,6 +139,14 @@ const StyledKeyboardAvoidingView = styled(KeyboardAvoidingView)`
 const StyledScrollView = styled(ScrollView)`
   flex: 1;
 `;
+
+const scrollViewContentStyle = {
+  flexGrow: 1,
+  paddingHorizontal: 28,
+  paddingVertical: 28,
+  justifyContent: 'center' as const,
+  minHeight: Dimensions.get('window').height - 100,
+};
 
 const MainCard = styled.View`
   width: 100%;

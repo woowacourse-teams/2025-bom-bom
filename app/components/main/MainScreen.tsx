@@ -1,6 +1,5 @@
-import { Ionicons } from '@expo/vector-icons';
+import styled from '@emotion/native';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
@@ -9,6 +8,7 @@ import { WEBVIEW_USER_AGENT } from '@/constants/webview';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWebView } from '../../contexts/WebViewContext';
 import { WebToRNMessage } from '../../types/webview';
+import { LoadingSpinner } from '../common/LoadingSpinner';
 import { LoginScreenOverlay } from '../login/LoginScreenOverlay';
 
 export const MainScreen = () => {
@@ -44,12 +44,11 @@ export const MainScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.webViewContainer}>
-        <WebView
+    <Container>
+      <WebViewContainer>
+        <StyledWebView
           ref={webViewRef}
           source={{ uri: Env.DEV_WEB_URL }}
-          style={styles.webView}
           userAgent={WEBVIEW_USER_AGENT}
           allowsBackForwardNavigationGestures
           sharedCookiesEnabled
@@ -73,104 +72,27 @@ export const MainScreen = () => {
             const { nativeEvent } = syntheticEvent;
             console.error('WebView HTTP Error:', nativeEvent);
           }}
-          renderLoading={() => (
-            <View style={styles.loadingContainer}>
-              <View style={styles.loadingIcon}>
-                <Ionicons name="sparkles" size={32} color="#FE5E04" />
-              </View>
-              <Text style={styles.loadingText}>봄봄을 불러오는 중...</Text>
-            </View>
-          )}
+          renderLoading={() => <LoadingSpinner />}
         />
-      </View>
+      </WebViewContainer>
 
       <LoginScreenOverlay
         visible={showWebViewLogin}
         onClose={() => setShowWebViewLogin(false)}
       />
-    </SafeAreaView>
+    </Container>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  iconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FE5E04',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1C1C1E',
-  },
-  profileButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: '#F2F2F7',
-    gap: 8,
-    maxWidth: 200,
-  },
-  userInfo: {
-    flex: 1,
-  },
-  userName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1C1C1E',
-    marginBottom: 2,
-  },
-  providerInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  providerText: {
-    fontSize: 12,
-    color: '#8E8E93',
-  },
-  webViewContainer: {
-    flex: 1,
-  },
-  webView: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  loadingIcon: {
-    marginBottom: 16,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#8E8E93',
-    fontWeight: '500',
-  },
-});
+const Container = styled(SafeAreaView)`
+  flex: 1;
+  background-color: #ffffff;
+`;
+
+const WebViewContainer = styled.View`
+  flex: 1;
+`;
+
+const StyledWebView = styled(WebView)`
+  flex: 1;
+`;

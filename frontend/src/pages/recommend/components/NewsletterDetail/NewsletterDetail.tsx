@@ -25,15 +25,17 @@ const NewsletterDetail = ({
     enabled: Boolean(newsletterId),
   });
   const deviceType = useDeviceType();
+
   const isMobile = deviceType === 'mobile';
+  const isLoggedIn = Boolean(userInfo);
 
   if (!newsletterId || !newsletterDetail) return null;
 
   const openSubscribe = () => {
-    if (userInfo?.email) {
-      copyToClipboard(userInfo.email);
-      alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
-    }
+    if (!isLoggedIn || !userInfo) return;
+
+    copyToClipboard(userInfo.email);
+    alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
 
     openExternalLink(newsletterDetail.subscribeUrl);
   };
@@ -46,6 +48,8 @@ const NewsletterDetail = ({
     if (!newsletterDetail.previousNewsletterUrl) return;
     openExternalLink(newsletterDetail.previousNewsletterUrl);
   };
+
+  console.log(userInfo, isLoggedIn);
 
   return (
     <Container>
@@ -74,8 +78,9 @@ const NewsletterDetail = ({
         </InfoWrapper>
 
         <SubscribeButton
-          text="구독하기"
+          text={isLoggedIn ? '구독하기' : '로그인 후 구독할 수 있어요'}
           onClick={openSubscribe}
+          disabled={!isLoggedIn}
           isMobile={isMobile}
         />
       </FixedWrapper>

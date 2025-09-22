@@ -2,6 +2,8 @@ import { useEffect, useCallback } from 'react';
 import { BootOption, Callback, IChannelIO } from './channelTalk.types';
 import { ENV } from '@/apis/env';
 
+const SCRIPT_SOURCE = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
+
 interface UseChannelTalkParams {
   bootOption?: BootOption;
   bootCallback?: Callback;
@@ -35,7 +37,7 @@ export const useChannelTalk = ({
     const script = document.createElement('script');
     script.type = 'text/javascript';
     script.async = true;
-    script.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
+    script.src = SCRIPT_SOURCE;
 
     script.onload = () => {
       window.ChannelIO?.(

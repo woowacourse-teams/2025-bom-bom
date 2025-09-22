@@ -36,28 +36,16 @@ export type PostNativeLoginParams = components['schemas']['NativeLoginRequest'];
 export type PostNativeLoginResponse =
   components['schemas']['NativeLoginResponse'];
 
-export const postGoogleLogin = async ({
-  identityToken,
-  authorizationCode,
-}: PostNativeLoginParams) => {
+export const postGoogleLogin = async (params: PostNativeLoginParams) => {
   return await fetcher.post<PostNativeLoginParams, PostNativeLoginResponse>({
     path: '/auth/login/google/native',
-    body: {
-      identityToken,
-      authorizationCode,
-    },
+    body: params,
   });
 };
 
-export const postAppleLogin = async ({
-  identityToken,
-  authorizationCode,
-}: PostNativeLoginParams) => {
+export const postAppleLogin = async (params: PostNativeLoginParams) => {
   return await fetcher.post<PostNativeLoginParams, PostNativeLoginResponse>({
     path: '/auth/login/apple/native',
-    body: {
-      identityToken,
-      authorizationCode,
-    },
+    body: params,
   });
 };

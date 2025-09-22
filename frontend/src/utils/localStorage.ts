@@ -1,12 +1,12 @@
-type SerializableType =
+type Serializable =
   | string
   | number
   | boolean
   | null
-  | SerializableType[]
-  | { [key: string]: SerializableType };
+  | Serializable[]
+  | { [key: string]: Serializable };
 
-interface StorageType<T extends SerializableType> {
+interface StorageType<T extends Serializable> {
   get: () => T;
   set: (data: T) => void;
   remove: () => void;
@@ -14,7 +14,7 @@ interface StorageType<T extends SerializableType> {
 
 const storage = window.localStorage;
 
-export const createStorage = <T extends SerializableType, K extends string>(
+export const createStorage = <T extends Serializable, K extends string>(
   key: K,
   defaultData?: T,
 ): StorageType<T> => ({

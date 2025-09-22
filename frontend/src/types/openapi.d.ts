@@ -634,8 +634,8 @@ export interface components {
       gender?: 'MALE' | 'FEMALE' | 'NONE';
     };
     NativeLoginRequest: {
-      identityToken?: string;
-      authorizationCode?: string;
+      identityToken: string;
+      authorizationCode: string;
     };
     NativeLoginResponse: {
       isRegistered?: boolean;
@@ -806,11 +806,11 @@ export interface components {
       /** Format: int32 */
       number?: number;
       sort?: components['schemas']['SortObject'];
+      pageable?: components['schemas']['PageableObject'];
       first?: boolean;
       last?: boolean;
       /** Format: int32 */
       numberOfElements?: number;
-      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     PageableObject: {
@@ -818,10 +818,10 @@ export interface components {
       offset?: number;
       sort?: components['schemas']['SortObject'];
       /** Format: int32 */
-      pageSize?: number;
+      pageNumber?: number;
       paged?: boolean;
       /** Format: int32 */
-      pageNumber?: number;
+      pageSize?: number;
       unpaged?: boolean;
     };
     SortObject: {
@@ -887,11 +887,11 @@ export interface components {
       /** Format: int32 */
       number?: number;
       sort?: components['schemas']['SortObject'];
+      pageable?: components['schemas']['PageableObject'];
       first?: boolean;
       last?: boolean;
       /** Format: int32 */
       numberOfElements?: number;
-      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     BookmarkStatusResponse: {
@@ -947,11 +947,11 @@ export interface components {
       /** Format: int32 */
       number?: number;
       sort?: components['schemas']['SortObject'];
+      pageable?: components['schemas']['PageableObject'];
       first?: boolean;
       last?: boolean;
       /** Format: int32 */
       numberOfElements?: number;
-      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     ArticleDetailResponse: {

@@ -11,8 +11,8 @@ interface MemoPanelProps {
   memos: Highlight[];
   removeHighlight: ({ id }: { id: number }) => void;
   updateMemo: (id: number, memo: string) => void;
-  handleClose: () => void;
-  handleToggle: () => void;
+  onCloseButtonClick: () => void;
+  onToggleButtonClick: () => void;
 }
 
 const MemoPanel = ({
@@ -20,12 +20,12 @@ const MemoPanel = ({
   memos,
   removeHighlight,
   updateMemo,
-  handleClose,
-  handleToggle,
+  onCloseButtonClick,
+  onToggleButtonClick,
 }: MemoPanelProps) => {
   return (
     <Container isOpen={open}>
-      <ToggleButton isOpen={open} onClick={handleToggle}>
+      <ToggleButton isOpen={open} onClick={onToggleButtonClick}>
         <ChevronIcon
           direction={open ? 'right' : 'left'}
           width={24}
@@ -45,7 +45,7 @@ const MemoPanel = ({
           </HeaderTitleBox>
         </HeaderLeft>
 
-        <CloseButton onClick={handleClose}>
+        <CloseButton onClick={onCloseButtonClick}>
           <CloseIcon fill={theme.colors.black} />
         </CloseButton>
       </Header>

@@ -89,8 +89,8 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
         memos={highlights ?? []}
         removeHighlight={removeHighlight}
         updateMemo={updateMemo}
-        handleClose={() => setPanelOpen(false)}
-        handleToggle={() => setPanelOpen((prev) => !prev)}
+        onCloseButtonClick={() => setPanelOpen(false)}
+        onToggleButtonClick={() => setPanelOpen((prev) => !prev)}
       />
     </>
   );

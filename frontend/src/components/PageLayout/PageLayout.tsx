@@ -9,13 +9,13 @@ const PageLayout = ({ children }: PropsWithChildren) => {
   const location = useLocation();
   const isMobile = deviceType === 'mobile';
 
-  const isHeaderInvisible =
-    deviceType !== 'pc' && location.pathname.startsWith('/articles/$articleId');
-  const headerVariant = isHeaderInvisible ? 'none' : deviceType;
+  const isHeaderVisible =
+    deviceType === 'pc' ||
+    !location.pathname.startsWith('/articles/$articleId');
 
   return (
     <Container isMobile={isMobile}>
-      <Header variant={headerVariant} />
+      {isHeaderVisible && <Header />}
       {children}
     </Container>
   );

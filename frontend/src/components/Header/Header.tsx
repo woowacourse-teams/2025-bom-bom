@@ -2,30 +2,23 @@ import { useEffect } from 'react';
 import MobileHeader from './MobileHeader';
 import PCHeader from './PCHeader';
 import { useActiveNav } from '@/hooks/useActiveNav';
-import { DeviceType } from '@/hooks/useDeviceType';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import { useChannelTalk } from '@/libs/channelTalk/useChannelTalk';
 
-export type HeaderVariant = DeviceType | 'none';
-
-interface HeaderProps {
-  variant: HeaderVariant;
-}
-
-const Header = ({ variant }: HeaderProps) => {
+const Header = () => {
   const activeNav = useActiveNav();
+  const deviceType = useDeviceType();
   const { showChannelButton, hideChannelButton } = useChannelTalk();
 
   useEffect(() => {
-    if (variant === 'pc') {
+    if (deviceType === 'pc') {
       showChannelButton();
     } else {
       hideChannelButton();
     }
-  }, [hideChannelButton, showChannelButton, variant]);
+  }, [hideChannelButton, showChannelButton, deviceType]);
 
-  if (variant === 'none') return;
-
-  if (variant === 'pc') {
+  if (deviceType === 'pc') {
     return <PCHeader activeNav={activeNav} />;
   }
 

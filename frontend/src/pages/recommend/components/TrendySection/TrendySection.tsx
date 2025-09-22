@@ -8,15 +8,14 @@ import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import Modal from '@/components/Modal/Modal';
 import useModal from '@/components/Modal/useModal';
-import { CATEGORIES, CategoryType } from '@/constants/category';
+import { CATEGORIES, Category } from '@/constants/category';
 import { Device, useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { Newsletter } from '@/types/newsletter';
 import TrendingUpIcon from '#/assets/trending-up.svg';
 
 const TrendySection = () => {
-  const [selectedCategory, setSelectedCategory] =
-    useState<CategoryType>('전체');
+  const [selectedCategory, setSelectedCategory] = useState<Category>('전체');
   const [selectedNewsletter, setSelectedNewsletter] =
     useState<Newsletter | null>(null);
 

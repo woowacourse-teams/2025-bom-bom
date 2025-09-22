@@ -36,7 +36,7 @@ export const saveSelection = (
   articleId: number,
 ): Omit<Highlight, 'id' | 'memo'> => {
   const container =
-    range.commonAncestorContainer.node === Node.TEXT_NODE
+    range.commonAncestorContainer.nodeType === Node.TEXT_NODE
       ? range.commonAncestorContainer.parentElement!
       : (range.commonAncestorContainer as Element);
 

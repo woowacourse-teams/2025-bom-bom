@@ -20,7 +20,7 @@ public interface TodayReadingRepository extends JpaRepository<TodayReading, Long
     void resetCurrentCount();
 
     @Query("""
-        SELECT tr.id, tr.memberId, tr.totalCount, tr.currentCount
+        SELECT tr
         FROM TodayReading tr
         WHERE tr.totalCount != 0 AND tr.currentCount = 0
     """)

@@ -3,15 +3,15 @@ import ProfileDetail from './ProfileDetail';
 import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 import Modal from '../Modal/Modal';
 import useModal from '../Modal/useModal';
-import { Device } from '@/hooks/useDeviceType';
+import { Device } from '@/hooks/useDevice';
 import { UserInfo } from '@/types/me';
 
 interface HeaderProfileProps {
   userInfo: UserInfo;
-  deviceType: Device;
+  device: Device;
 }
 
-const HeaderProfile = ({ userInfo, deviceType }: HeaderProfileProps) => {
+const HeaderProfile = ({ userInfo, device }: HeaderProfileProps) => {
   const {
     modalRef: profileModalRef,
     openModal: openProfileModal,
@@ -31,7 +31,7 @@ const HeaderProfile = ({ userInfo, deviceType }: HeaderProfileProps) => {
             width={32}
             height={32}
           />
-          {deviceType !== 'mobile' && (
+          {device !== 'mobile' && (
             <ProfileName>{userInfo.nickname}</ProfileName>
           )}
         </ProfileInfo>

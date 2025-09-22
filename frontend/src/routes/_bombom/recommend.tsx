@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import ReadingKingLeaderboard from '../../pages/recommend/components/ReadingKingLeaderboard/ReadingKingLeaderboard';
-import { useDeviceType, type Device } from '@/hooks/useDeviceType';
+import { useDevice, type Device } from '@/hooks/useDevice';
 import NewsletterHero from '@/pages/recommend/components/NewsletterHero/NewsletterHero';
 import TrendySection from '@/pages/recommend/components/TrendySection/TrendySection';
 
@@ -10,7 +10,7 @@ export const Route = createFileRoute('/_bombom/recommend')({
 });
 
 function Recommend() {
-  const device = useDeviceType();
+  const device = useDevice();
 
   return (
     <Container device={device}>

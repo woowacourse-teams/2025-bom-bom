@@ -13,7 +13,7 @@ import {
 import { getSignupCheck, GetSignupCheckParams, postSignup } from '@/apis/auth';
 import { SIGNUP_CHECK_ERROR_MESSAGE } from '@/apis/constants/checkErrorMessage';
 import InputField from '@/components/InputField/InputField';
-import { Device, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDevice } from '@/hooks/useDevice';
 import { GUIDE_MAILS } from '@/mocks/datas/guideMail';
 import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
@@ -23,7 +23,7 @@ import HelpIcon from '#/assets/help.svg';
 const EMAIL_DOMAIN = '@bombom.news';
 
 const SignupCard = () => {
-  const deviceType = useDeviceType();
+  const device = useDevice();
   const navigate = useNavigate();
   const [nickname, setNickname] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -125,7 +125,7 @@ const SignupCard = () => {
   const closeEmailHelp = () => setEmailHelpOpen(false);
 
   return (
-    <Container deviceType={deviceType}>
+    <Container device={device}>
       <SignupForm onSubmit={handleSubmit}>
         <HeaderWrapper>
           <Title>회원가입</Title>
@@ -243,14 +243,14 @@ const SignupCard = () => {
 
 export default SignupCard;
 
-const Container = styled.div<{ deviceType: Device }>`
+const Container = styled.div<{ device: Device }>`
   width: min(100%, 420px);
   padding: 28px 24px;
 
   background-color: ${({ theme }) => theme.colors.white};
 
-  ${({ deviceType }) =>
-    deviceType !== 'mobile' &&
+  ${({ device }) =>
+    device !== 'mobile' &&
     `
     border-radius: 20px;
     box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);

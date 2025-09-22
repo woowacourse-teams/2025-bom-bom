@@ -17,14 +17,14 @@ const PCHeader = ({ activeNav }: PCHeaderProps) => {
   return (
     <HeaderContainer>
       <HeaderInner>
-        <HeaderLogo deviceType="pc" />
+        <HeaderLogo device="pc" />
 
         <NavWrapper>
-          <HeaderNavButtons activeNav={activeNav} deviceType="pc" />
+          <HeaderNavButtons activeNav={activeNav} device="pc" />
         </NavWrapper>
 
         {userInfo ? (
-          <HeaderProfile userInfo={userInfo} deviceType="pc" />
+          <HeaderProfile userInfo={userInfo} device="pc" />
         ) : (
           <LoginButton />
         )}

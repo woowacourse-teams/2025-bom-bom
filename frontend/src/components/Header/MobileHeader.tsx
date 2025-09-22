@@ -17,15 +17,15 @@ const MobileHeader = ({ activeNav }: MobileHeaderProps) => {
   return (
     <>
       <MobileHeaderContainer>
-        <HeaderLogo deviceType="mobile" />
+        <HeaderLogo device="mobile" />
         {userInfo ? (
-          <HeaderProfile userInfo={userInfo} deviceType="mobile" />
+          <HeaderProfile userInfo={userInfo} device="mobile" />
         ) : (
           <LoginButton />
         )}
       </MobileHeaderContainer>
       <BottomNavWrapper>
-        <HeaderNavButtons activeNav={activeNav} deviceType="mobile" />
+        <HeaderNavButtons activeNav={activeNav} device="mobile" />
       </BottomNavWrapper>
     </>
   );

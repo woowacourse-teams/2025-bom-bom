@@ -40,7 +40,7 @@ export const useChannelTalk = ({
     script.onload = () => {
       window.ChannelIO?.(
         'boot',
-        { pluginKey: ENV.pluginKey, ...bootOption },
+        { pluginKey: ENV.channelTalkPluginKey, ...bootOption },
         bootCallback,
       );
     };

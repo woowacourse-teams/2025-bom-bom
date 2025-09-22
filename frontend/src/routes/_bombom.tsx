@@ -11,19 +11,26 @@ export const Route = createFileRoute('/_bombom')({
   beforeLoad: async ({ context, location }) => {
     const { queryClient } = context;
 
+    if (location.pathname === '/recommend') {
+      isFirstVisit = false;
+      return;
+    }
+
+    const data = queryClient.getQueryData(queries.me().queryKey);
+    if (data) return;
+
     try {
-      if (isFirstVisit) await queryClient.fetchQuery(queries.me());
-      else isFirstVisit = false;
+      await queryClient.fetchQuery(queries.me());
     } catch {
-      if (location.pathname !== '/recommend') {
-        if (isFirstVisit) {
-          return redirect({ to: '/recommend' });
-        }
-        throw new Response(DEFAULT_ERROR_MESSAGES[401], { status: 401 });
-      }
+      if (isFirstVisit) return redirect({ to: '/recommend' });
+
+      throw new Response(DEFAULT_ERROR_MESSAGES[401], { status: 401 });
+    } finally {
+      isFirstVisit = false;
     }
   },
   errorComponent: ({ error }) => {
+    console.log(error);
     if (error instanceof Response && error.status === 401) {
       return (
         <PageLayout>

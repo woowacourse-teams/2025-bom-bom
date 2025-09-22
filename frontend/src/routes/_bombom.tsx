@@ -14,10 +14,10 @@ export const Route = createFileRoute('/_bombom')({
     try {
       const user = await queryClient.fetchQuery(queries.me());
 
-      window.gtag?.('set', { user_id: user ? user.id : 'guest' });
+      if (user) {
+        window.gtag?.('set', { user_id: user.id });
+      }
     } catch {
-      window.gtag?.('set', { user_id: 'guest' });
-
       if (location.pathname !== '/recommend') {
         console.log('not first visit');
         if (isFirstVisit) {

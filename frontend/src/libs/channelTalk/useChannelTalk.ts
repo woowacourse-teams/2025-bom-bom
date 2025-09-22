@@ -1,18 +1,10 @@
 import { useEffect, useCallback } from 'react';
-import { BootOption, Callback, IChannelIO } from './channelTalk.types';
+import { IChannelIO } from './channelTalk.types';
 import { ENV } from '@/apis/env';
 
 const SCRIPT_SOURCE = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
 
-interface UseChannelTalkParams {
-  bootOption?: BootOption;
-  bootCallback?: Callback;
-}
-
-export const useChannelTalk = ({
-  bootOption,
-  bootCallback,
-}: UseChannelTalkParams = {}) => {
+export const useChannelTalk = () => {
   const loadScript = useCallback(() => {
     if (window.ChannelIO) {
       return console.error('ChannelIO script included twice.');
@@ -40,18 +32,14 @@ export const useChannelTalk = ({
     script.src = SCRIPT_SOURCE;
 
     script.onload = () => {
-      window.ChannelIO?.(
-        'boot',
-        { pluginKey: ENV.channelTalkPluginKey, ...bootOption },
-        bootCallback,
-      );
+      window.ChannelIO?.('boot', { pluginKey: ENV.channelTalkPluginKey });
     };
 
     const firstScript = document.getElementsByTagName('script')[0];
     if (firstScript?.parentNode) {
       firstScript.parentNode.insertBefore(script, firstScript);
     }
-  }, [bootOption, bootCallback, loadScript]);
+  }, [loadScript]);
 
   const showMessenger = useCallback(
     () => window.ChannelIO?.('showMessenger'),

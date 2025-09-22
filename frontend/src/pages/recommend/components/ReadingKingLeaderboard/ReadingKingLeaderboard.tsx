@@ -41,9 +41,9 @@ export default function ReadingKingLeaderboard() {
       <LeaderboardList>
         {monthlyReadingRank &&
           monthlyReadingRank.length > 0 &&
-          monthlyReadingRank.map((item) => (
+          monthlyReadingRank.map((item, index) => (
             <LeaderboardItem
-              key={item.rank}
+              key={index}
               rank={item.rank}
               name={item.nickname}
               readCount={item.monthlyReadCount}

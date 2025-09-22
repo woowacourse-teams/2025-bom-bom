@@ -1,6 +1,7 @@
 import React, {
   createContext,
   PropsWithChildren,
+  RefObject,
   useContext,
   useRef,
 } from 'react';
@@ -9,7 +10,7 @@ import { WebView } from 'react-native-webview';
 import { RNToWebMessage } from '../types/webview';
 
 export interface WebViewContextType {
-  webViewRef: React.RefObject<WebView | null>;
+  webViewRef: RefObject<WebView | null>;
   sendMessageToWeb: (message: RNToWebMessage) => void;
 }
 

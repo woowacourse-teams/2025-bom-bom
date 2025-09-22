@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
@@ -16,7 +16,7 @@ interface ButtonProps {
   loading?: boolean;
   style?: ViewStyle;
   textStyle?: TextStyle;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
 }
 
 export const Button = ({

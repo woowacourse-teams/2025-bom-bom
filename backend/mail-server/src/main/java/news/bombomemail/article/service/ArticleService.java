@@ -15,6 +15,8 @@ import news.bombomemail.article.domain.Article;
 import news.bombomemail.article.repository.ArticleRepository;
 import news.bombomemail.article.util.ReadingTimeCalculator;
 import news.bombomemail.article.util.SummaryGenerator;
+import news.bombomemail.newsletter.domain.NewsletterVerification;
+import news.bombomemail.newsletter.repository.NewsletterVerificationRepository;
 import news.bombomemail.subscribe.event.SubscribeEvent;
 import news.bombomemail.reading.event.TodayReadingEvent;
 import news.bombomemail.member.domain.Member;
@@ -36,6 +38,7 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
     private final NewsletterRepository newsletterRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final NewsletterVerificationRepository newsletterVerificationRepository;
 
     @Transactional
     public boolean save(MimeMessage message, String contents) throws MessagingException, DataAccessException {
@@ -86,12 +89,17 @@ public class ArticleService {
             return null;
         }
 
-        Optional<Newsletter> optionalNewsletter = newsletterRepository.findByEmail(fromEmailAddress);
-        if (optionalNewsletter.isEmpty()) {
-            log.info("미등록 발신자({})라 메일 폐기합니다: {}", fromEmailAddress, message.getSubject());
-            return null;
-        }
-        return optionalNewsletter.get();
+        return findNewsletterByEmail(fromEmailAddress)
+                .orElseGet(() -> {
+                    log.info("미등록 발신자({})라 메일 폐기합니다", fromEmailAddress);
+                    return null;
+                });
+    }
+
+    private Optional<Newsletter> findNewsletterByEmail(String fromEmailAddress) {
+        return newsletterRepository.findByEmail(fromEmailAddress)
+                .or(() -> newsletterVerificationRepository.findByEmail(fromEmailAddress)
+                        .flatMap(verification -> newsletterRepository.findById(verification.getNewsletterId())));
     }
 
     private Article buildArticle(

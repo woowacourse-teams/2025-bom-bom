@@ -1,9 +1,9 @@
 import MobileHeader from './MobileHeader';
 import PCHeader from './PCHeader';
 import { useActiveNav } from '@/hooks/useActiveNav';
-import { DeviceType } from '@/hooks/useDeviceType';
+import { Device } from '@/hooks/useDeviceType';
 
-export type HeaderVariant = DeviceType | 'none';
+export type HeaderVariant = Device | 'none';
 
 interface HeaderProps {
   variant: HeaderVariant;

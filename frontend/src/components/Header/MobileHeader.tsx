@@ -5,10 +5,10 @@ import HeaderNavButtons from './HeaderNavButtons';
 import HeaderProfile from './HeaderProfile';
 import LoginButton from './LoginButton';
 import { queries } from '@/apis/queries';
-import { NavType } from '@/types/nav';
+import { Nav } from '@/types/nav';
 
 interface MobileHeaderProps {
-  activeNav: NavType;
+  activeNav: Nav;
 }
 
 const MobileHeader = ({ activeNav }: MobileHeaderProps) => {

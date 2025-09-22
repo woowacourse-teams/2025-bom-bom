@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import LoginCard from '../pages/login/components/LoginCard';
-import { useDeviceType, DeviceType } from '@/hooks/useDeviceType';
+import { useDeviceType, Device } from '@/hooks/useDeviceType';
 import { getResponsiveValue } from '@/utils/responsive';
 
 export const Route = createFileRoute('/login')({
@@ -25,7 +25,7 @@ function Login() {
   );
 }
 
-const Container = styled.main<{ deviceType: DeviceType }>`
+const Container = styled.main<{ deviceType: Device }>`
   min-height: 100vh;
   padding: ${({ deviceType }) => getResponsiveValue(deviceType, 16, 24, 32)};
 
@@ -39,7 +39,7 @@ const Container = styled.main<{ deviceType: DeviceType }>`
       : `linear-gradient(135deg, ${theme.colors.primary} 0%, #f74 25%, ${theme.colors.primaryLight} 100%)`};
 `;
 
-const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
+const ContentWrapper = styled.div<{ deviceType: Device }>`
   position: relative;
   z-index: 1;
   width: 100%;
@@ -53,7 +53,7 @@ const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
   justify-content: center;
 `;
 
-const InfoText = styled.p<{ deviceType: DeviceType }>`
+const InfoText = styled.p<{ deviceType: Device }>`
   max-width: 320px;
   margin: 0;
 

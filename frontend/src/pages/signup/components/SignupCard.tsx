@@ -13,7 +13,7 @@ import {
 import { getSignupCheck, GetSignupCheckParams, postSignup } from '@/apis/auth';
 import { SIGNUP_CHECK_ERROR_MESSAGE } from '@/apis/constants/checkErrorMessage';
 import InputField from '@/components/InputField/InputField';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDeviceType } from '@/hooks/useDeviceType';
 import { GUIDE_MAILS } from '@/mocks/datas/guideMail';
 import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
@@ -243,7 +243,7 @@ const SignupCard = () => {
 
 export default SignupCard;
 
-const Container = styled.div<{ deviceType: DeviceType }>`
+const Container = styled.div<{ deviceType: Device }>`
   width: min(100%, 420px);
   padding: 28px 24px;
 

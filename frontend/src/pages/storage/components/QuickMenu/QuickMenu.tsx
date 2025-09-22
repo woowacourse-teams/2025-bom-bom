@@ -4,7 +4,7 @@ import { MENU_ITEMS } from './QuickMenu.constants';
 import FloatingActionButton from '@/components/FloatingActionButton/FloatingActionButton';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
 import LinkIcon from '#/assets/link.svg';
 
@@ -128,7 +128,7 @@ const Title = styled.h3`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const StyledIcon = styled.div<{ deviceType: DeviceType; selected?: boolean }>`
+const StyledIcon = styled.div<{ deviceType: Device; selected?: boolean }>`
   width: ${({ deviceType }) => (deviceType === 'pc' ? '24px' : '28px')};
   height: ${({ deviceType }) => (deviceType === 'pc' ? '24px' : '28px')};
 
@@ -136,7 +136,7 @@ const StyledIcon = styled.div<{ deviceType: DeviceType; selected?: boolean }>`
     selected ? theme.colors.white : theme.colors.primary};
 `;
 
-const StyledTab = styled(Tab)<{ deviceType: DeviceType }>`
+const StyledTab = styled(Tab)<{ deviceType: Device }>`
   font: ${({ theme, deviceType }) =>
     deviceType === 'pc' ? theme.fonts.body2 : theme.fonts.body1};
 `;

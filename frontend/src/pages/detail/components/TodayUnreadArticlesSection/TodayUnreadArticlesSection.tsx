@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import EmptyUnreadCard from '../EmptyUnreadCard/EmptyUnreadCard';
 import NewsletterItemCard from '../NewsletterItemCard/NewsletterItemCard';
 import { queries } from '@/apis/queries';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDeviceType } from '@/hooks/useDeviceType';
 
 interface TodayUnreadArticlesSectionProps {
   articleId: number;
@@ -54,7 +54,7 @@ const TodayArticleTitle = styled.h3`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const TodayArticleList = styled.div<{ deviceType: DeviceType }>`
+const TodayArticleList = styled.div<{ deviceType: Device }>`
   display: grid;
   gap: 20px;
   justify-items: center;

@@ -3,12 +3,12 @@ import ProfileDetail from './ProfileDetail';
 import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 import Modal from '../Modal/Modal';
 import useModal from '../Modal/useModal';
-import { DeviceType } from '@/hooks/useDeviceType';
+import { Device } from '@/hooks/useDeviceType';
 import { UserInfo } from '@/types/me';
 
 interface HeaderProfileProps {
   userInfo: UserInfo;
-  deviceType: DeviceType;
+  deviceType: Device;
 }
 
 const HeaderProfile = ({ userInfo, deviceType }: HeaderProfileProps) => {

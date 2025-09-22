@@ -7,7 +7,7 @@ import StreakCounter from '../StreakCounter/StreakCounter';
 import { queries } from '@/apis/queries';
 import ProgressBar from '@/components/ProgressBar/ProgressBar';
 import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDeviceType } from '@/hooks/useDeviceType';
 import useUpdateWeeklyGoalMutation from '@/pages/today/hooks/useUpdateWeeklyGoalMutation';
 import { theme } from '@/styles/theme';
 import type { CSSObject, Theme } from '@emotion/react';
@@ -133,7 +133,7 @@ function ReadingStatusCard() {
 
 export default ReadingStatusCard;
 
-const Container = styled.div<{ deviceType: DeviceType }>`
+const Container = styled.div<{ deviceType: Device }>`
   width: 310px;
   border-radius: 20px;
 
@@ -173,7 +173,7 @@ const Title = styled.h2`
   text-align: center;
 `;
 
-const StreakWrapper = styled.div<{ deviceType: DeviceType }>`
+const StreakWrapper = styled.div<{ deviceType: Device }>`
   display: flex;
   gap: ${({ deviceType }) => (deviceType === 'pc' ? '8px' : '0px')};
   flex-direction: column;
@@ -181,7 +181,7 @@ const StreakWrapper = styled.div<{ deviceType: DeviceType }>`
   justify-content: center;
 `;
 
-const StreakDescription = styled.p<{ deviceType: DeviceType }>`
+const StreakDescription = styled.p<{ deviceType: Device }>`
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ deviceType, theme }) =>
     deviceType === 'pc' ? theme.fonts.body1 : theme.fonts.body2};
@@ -252,7 +252,7 @@ const InputContainer = styled.div`
   }
 `;
 
-const containerStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {
+const containerStyles: Record<Device, (theme: Theme) => CSSObject> = {
   pc: (theme) => ({
     padding: '34px 30px',
     backgroundColor: theme.colors.white,

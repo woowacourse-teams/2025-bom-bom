@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDeviceType } from '@/hooks/useDeviceType';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import { Article } from '@/types/articles';
 
@@ -23,7 +23,7 @@ export default function ArticleList({ articles }: ArticleListProps) {
   );
 }
 
-const Container = styled.ul<{ deviceType: DeviceType }>`
+const Container = styled.ul<{ deviceType: Device }>`
   width: 100%;
 
   display: flex;

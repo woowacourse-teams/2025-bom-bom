@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { ChangeEvent, KeyboardEvent } from 'react';
-import { DeviceType } from '@/hooks/useDeviceType';
+import { Device } from '@/hooks/useDeviceType';
 import CheckIcon from '#/assets/check.svg';
 import EditIcon from '#/assets/edit.svg';
 
@@ -8,7 +8,7 @@ interface WeeklyGoalEditorProps {
   isEditing: boolean;
   goalValue: number | null;
   isPending: boolean;
-  deviceType: DeviceType;
+  deviceType: Device;
   onEditStart: () => void;
   onSave: () => void;
   onCancel: () => void;
@@ -18,7 +18,7 @@ interface WeeklyGoalEditorProps {
 interface WeeklyGoalInputProps {
   goalValue: number | null;
   isPending: boolean;
-  deviceType: DeviceType;
+  deviceType: Device;
   onSave: () => void;
   onCancel: () => void;
   onGoalChange: (value: number | null) => void;
@@ -108,7 +108,7 @@ function WeeklyGoalEditor({
 
 export default WeeklyGoalEditor;
 
-const Container = styled.div<{ deviceType: DeviceType }>`
+const Container = styled.div<{ deviceType: Device }>`
   margin-left: 4px;
 
   display: flex;
@@ -116,7 +116,7 @@ const Container = styled.div<{ deviceType: DeviceType }>`
 `;
 
 const EditButton = styled.button<{
-  deviceType: DeviceType;
+  deviceType: Device;
   isEditing?: boolean;
 }>`
   border: none;
@@ -166,14 +166,14 @@ const EditButton = styled.button<{
       `}
 `;
 
-const ButtonText = styled.span<{ deviceType: DeviceType }>`
+const ButtonText = styled.span<{ deviceType: Device }>`
   font: ${({ theme, deviceType }) =>
     deviceType === 'pc' ? theme.fonts.caption : theme.fonts.caption};
   font-size: ${({ deviceType }) => (deviceType === 'pc' ? '11px' : '10px')};
   white-space: nowrap;
 `;
 
-const EditInput = styled.input<{ deviceType: DeviceType }>`
+const EditInput = styled.input<{ deviceType: Device }>`
   width: 40px;
   height: auto;
   margin: 0;

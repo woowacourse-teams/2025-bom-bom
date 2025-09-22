@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
-import { useDeviceType, DeviceType } from '@/hooks/useDeviceType';
+import { useDeviceType, Device } from '@/hooks/useDeviceType';
 import SignupCard from '@/pages/signup/components/SignupCard';
 import { getResponsiveValue } from '@/utils/responsive';
 
@@ -20,7 +20,7 @@ function RouteComponent() {
   );
 }
 
-const Container = styled.main<{ deviceType: DeviceType }>`
+const Container = styled.main<{ deviceType: Device }>`
   min-height: 100vh;
   padding: ${({ deviceType }) => getResponsiveValue(deviceType, 16, 24, 32)};
 
@@ -34,7 +34,7 @@ const Container = styled.main<{ deviceType: DeviceType }>`
       : `linear-gradient(135deg, ${theme.colors.primary} 0%, #f74 25%, ${theme.colors.primaryLight} 100%)`};
 `;
 
-const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
+const ContentWrapper = styled.div<{ deviceType: Device }>`
   position: relative;
   z-index: 1;
   width: 100%;

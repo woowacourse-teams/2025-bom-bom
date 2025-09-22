@@ -6,7 +6,7 @@ import ArticleCardList from '../../pages/today/components/ArticleCardList/Articl
 import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/ReadingStatusCard';
 import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDeviceType } from '@/hooks/useDeviceType';
 import { theme } from '@/styles/theme';
 import { LocalGuideMail } from '@/types/guide';
 import { isToday } from '@/utils/date';
@@ -61,7 +61,7 @@ function Index() {
   );
 }
 
-const Container = styled.div<{ deviceType: DeviceType }>`
+const Container = styled.div<{ deviceType: Device }>`
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
@@ -98,7 +98,7 @@ const Title = styled.h1`
   font: ${({ theme }) => theme.fonts.heading3};
 `;
 
-const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
+const ContentWrapper = styled.div<{ deviceType: Device }>`
   width: 100%;
 
   display: flex;
@@ -111,7 +111,7 @@ const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
   justify-content: center;
 `;
 
-const ReaderCompanion = styled.div<{ deviceType: DeviceType }>`
+const ReaderCompanion = styled.div<{ deviceType: Device }>`
   min-width: 300px;
 
   display: flex;
@@ -122,7 +122,7 @@ const ReaderCompanion = styled.div<{ deviceType: DeviceType }>`
   ${({ deviceType, theme }) => sideCardWrapperStyles[deviceType](theme)}
 `;
 
-const sideCardWrapperStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {
+const sideCardWrapperStyles: Record<Device, (theme: Theme) => CSSObject> = {
   pc: (theme) => ({
     width: '310px',
     flexDirection: 'column',

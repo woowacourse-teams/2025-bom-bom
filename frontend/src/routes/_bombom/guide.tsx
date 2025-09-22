@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDeviceType } from '@/hooks/useDeviceType';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import { theme } from '@/styles/theme';
@@ -82,7 +82,7 @@ const GuideIcon = styled(HelpIcon)`
   text-align: center;
 `;
 
-const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
+const ContentWrapper = styled.div<{ deviceType: Device }>`
   width: 100%;
 
   display: flex;
@@ -91,7 +91,7 @@ const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
     deviceType === 'pc' ? 'row' : 'column'};
 `;
 
-const SidebarSection = styled.div<{ deviceType: DeviceType }>`
+const SidebarSection = styled.div<{ deviceType: Device }>`
   width: ${({ deviceType }) => (deviceType === 'pc' ? '320px' : '100%')};
 
   display: flex;

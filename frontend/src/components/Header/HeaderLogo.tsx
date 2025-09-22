@@ -1,11 +1,11 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
-import { DeviceType } from '@/hooks/useDeviceType';
+import { Device } from '@/hooks/useDeviceType';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import logo from '#/assets/logo.png';
 
 interface HeaderLogoProps {
-  deviceType: DeviceType;
+  deviceType: Device;
 }
 
 const HeaderLogo = ({ deviceType }: HeaderLogoProps) => {

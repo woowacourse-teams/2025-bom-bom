@@ -5,7 +5,7 @@ import { queries } from '@/apis/queries';
 import DetailPageHeader from '@/components/Header/DetailPageHeader';
 import ProgressBar from '@/components/ProgressBar/ProgressBar';
 import Spacing from '@/components/Spacing/Spacing';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDeviceType } from '@/hooks/useDeviceType';
 import useScrollProgress from '@/hooks/useScrollProgress';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
@@ -113,7 +113,7 @@ const ArticleActionButtons = styled(FloatingActionButtons)`
   transform: translate(-200%, -50%);
 `;
 
-const ArticleContent = styled.div<{ deviceType: DeviceType }>`
+const ArticleContent = styled.div<{ deviceType: Device }>`
   max-width: 700px;
   margin: 0 auto;
   padding: ${({ deviceType }) => (deviceType === 'mobile' ? '0' : '0 16px')};
@@ -130,7 +130,7 @@ const ArticleContent = styled.div<{ deviceType: DeviceType }>`
   align-items: center;
 `;
 
-const ArticleProgressBar = styled(ProgressBar)<{ deviceType: DeviceType }>`
+const ArticleProgressBar = styled(ProgressBar)<{ deviceType: Device }>`
   position: fixed;
   top: ${({ deviceType, theme }) =>
     deviceType === 'pc'

@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import Chip from '@/components/Chip/Chip';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDeviceType } from '@/hooks/useDeviceType';
 import { formatDate } from '@/utils/date';
 import ClockIcon from '#/assets/clock.svg';
 
@@ -61,7 +61,7 @@ const TitleRow = styled.div`
   align-items: flex-start;
 `;
 
-const Title = styled.h2<{ deviceType: DeviceType }>`
+const Title = styled.h2<{ deviceType: Device }>`
   flex: 1;
 
   color: ${({ theme }) => theme.colors.textPrimary};

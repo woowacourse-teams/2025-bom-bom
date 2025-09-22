@@ -9,7 +9,7 @@ import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import Modal from '@/components/Modal/Modal';
 import useModal from '@/components/Modal/useModal';
 import { CATEGORIES, CategoryType } from '@/constants/category';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDeviceType } from '@/hooks/useDeviceType';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { Newsletter } from '@/types/newsletter';
 import TrendingUpIcon from '#/assets/trending-up.svg';
@@ -152,7 +152,7 @@ const TagContainer = styled.div`
   flex-wrap: wrap;
 `;
 
-const TrendyGrid = styled.div<{ deviceType: DeviceType }>`
+const TrendyGrid = styled.div<{ deviceType: Device }>`
   display: grid;
   grid-template-columns: ${({ deviceType }) =>
     deviceType === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};

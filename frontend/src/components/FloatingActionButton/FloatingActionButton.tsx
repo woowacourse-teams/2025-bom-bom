@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { ReactNode, useState } from 'react';
 import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDeviceType } from '@/hooks/useDeviceType';
 
 interface FloatingActionButtonProps {
   icon: ReactNode;
@@ -37,7 +37,7 @@ const FloatingActionButton = ({
 
 export default FloatingActionButton;
 
-const FloatingButton = styled.button<{ deviceType: DeviceType }>`
+const FloatingButton = styled.button<{ deviceType: Device }>`
   position: fixed;
   right: 20px;
   bottom: calc(
@@ -62,7 +62,7 @@ const FloatingButton = styled.button<{ deviceType: DeviceType }>`
   }
 `;
 
-const FloatingMenu = styled.div<{ deviceType: DeviceType }>`
+const FloatingMenu = styled.div<{ deviceType: Device }>`
   position: fixed;
   right: 20px;
   bottom: calc(152px + env(safe-area-inset-bottom));

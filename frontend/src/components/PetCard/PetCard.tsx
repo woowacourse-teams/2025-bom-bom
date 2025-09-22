@@ -6,7 +6,7 @@ import { heartAnimation, jumpAnimation } from './PetCard.keyframes';
 import Button from '../Button/Button';
 import ProgressBar from '../ProgressBar/ProgressBar';
 import { getPet, postPetAttendance } from '@/apis/pet';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDeviceType } from '@/hooks/useDeviceType';
 import { queryClient } from '@/main';
 import { theme } from '@/styles/theme';
 import { calculateRate } from '@/utils/math';
@@ -107,7 +107,7 @@ const PetCard = () => {
 
 export default PetCard;
 
-const Container = styled.section<{ deviceType: DeviceType }>`
+const Container = styled.section<{ deviceType: Device }>`
   width: 310px;
   border-radius: 20px;
 
@@ -196,7 +196,7 @@ const Title = styled.h2`
   text-align: center;
 `;
 
-const AttendanceButton = styled(Button)<{ deviceType: DeviceType }>`
+const AttendanceButton = styled(Button)<{ deviceType: Device }>`
   height: 32px;
 
   ${({ deviceType }) =>
@@ -209,7 +209,7 @@ const AttendanceButton = styled(Button)<{ deviceType: DeviceType }>`
     }}
 `;
 
-const containerStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {
+const containerStyles: Record<Device, (theme: Theme) => CSSObject> = {
   pc: () => ({
     padding: '34px 30px',
     border: `1px solid ${theme.colors.white}`,

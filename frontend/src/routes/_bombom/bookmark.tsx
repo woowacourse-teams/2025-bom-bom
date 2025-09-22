@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 import { queries } from '@/apis/queries';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDeviceType } from '@/hooks/useDeviceType';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
@@ -119,7 +119,7 @@ const Title = styled.h1`
   font: ${({ theme }) => theme.fonts.heading3};
 `;
 
-const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
+const ContentWrapper = styled.div<{ deviceType: Device }>`
   width: 100%;
 
   display: flex;
@@ -129,7 +129,7 @@ const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
   align-items: flex-start;
 `;
 
-const SidebarSection = styled.div<{ deviceType: DeviceType }>`
+const SidebarSection = styled.div<{ deviceType: Device }>`
   width: ${({ deviceType }) => (deviceType === 'pc' ? '320px' : '100%')};
 
   display: flex;
@@ -137,7 +137,7 @@ const SidebarSection = styled.div<{ deviceType: DeviceType }>`
   flex-direction: column;
 `;
 
-const MainContentSection = styled.div<{ deviceType: DeviceType }>`
+const MainContentSection = styled.div<{ deviceType: Device }>`
   display: flex;
   gap: 20px;
   flex: 1;

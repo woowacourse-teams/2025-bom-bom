@@ -1,15 +1,15 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
 import HomeIcon from '../../../public/assets/home.svg';
-import { DeviceType } from '@/hooks/useDeviceType';
+import { Device } from '@/hooks/useDeviceType';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { NavType } from '@/types/nav';
+import { Nav } from '@/types/nav';
 import CompassIcon from '#/assets/compass.svg';
 import StorageIcon from '#/assets/storage.svg';
 
 interface HeaderNavButtonsProps {
-  activeNav: NavType;
-  deviceType: DeviceType;
+  activeNav: Nav;
+  deviceType: Device;
 }
 
 const HeaderNavButtons = ({ activeNav, deviceType }: HeaderNavButtonsProps) => {
@@ -78,7 +78,7 @@ const HeaderNavButtons = ({ activeNav, deviceType }: HeaderNavButtonsProps) => {
 
 export default HeaderNavButtons;
 
-const NavButton = styled(Link)<{ active?: boolean; deviceType: DeviceType }>`
+const NavButton = styled(Link)<{ active?: boolean; deviceType: Device }>`
   padding: ${({ deviceType }) =>
     deviceType === 'mobile' ? '4px 12px' : '10px 12px'};
   border-radius: 12px;

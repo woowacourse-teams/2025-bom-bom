@@ -1,7 +1,7 @@
-import { DeviceType } from '@/hooks/useDeviceType';
+import { Device } from '@/hooks/useDeviceType';
 
 export const getResponsiveValue = (
-  deviceType: DeviceType,
+  deviceType: Device,
   mobile: number,
   tablet: number,
   pc: number,

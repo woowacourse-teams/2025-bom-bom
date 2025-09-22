@@ -99,7 +99,7 @@ public class AuthController implements AuthControllerApi{
     @PostMapping("/login/{provider}/native")
     public NativeLoginResponse nativeLogin(
             @PathVariable("provider") String provider,
-            @RequestBody(required = false) NativeLoginRequest nativeLoginRequest,
+            @Valid @RequestBody(required = false) NativeLoginRequest nativeLoginRequest,
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException {

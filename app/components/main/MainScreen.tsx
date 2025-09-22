@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import WebView from 'react-native-webview';
+import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
 import { DEV_WEB_URL } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
@@ -15,7 +15,7 @@ export const MainScreen = () => {
   const { showWebViewLogin, setShowWebViewLogin } = useAuth();
   const { webViewRef } = useWebView();
 
-  const handleWebViewMessage = (event: any) => {
+  const handleWebViewMessage = (event: WebViewMessageEvent) => {
     try {
       const message: WebToRNMessage = JSON.parse(event.nativeEvent.data);
       console.log('WebView에서 메시지 수신:', message);

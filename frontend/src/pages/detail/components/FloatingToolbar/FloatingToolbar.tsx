@@ -8,7 +8,7 @@ import HighlightOffIcon from '#/assets/edit-off.svg';
 import HighlightIcon from '#/assets/edit.svg';
 
 interface FloatingToolBarProps {
-  open: boolean;
+  opened: boolean;
   position: Position;
   mode: FloatingToolbarMode;
   onHighlightButtonClick: () => void;
@@ -16,7 +16,7 @@ interface FloatingToolBarProps {
 }
 
 const FloatingToolbar = ({
-  open,
+  opened,
   position,
   mode,
   onHighlightButtonClick,
@@ -31,7 +31,7 @@ const FloatingToolbar = ({
   return (
     <Container
       position={position}
-      open={open}
+      opened={opened}
       onPointerDown={handlePointerDownOnToolbar}
     >
       <ToolbarButton onClick={onHighlightButtonClick}>
@@ -56,7 +56,7 @@ const fadeOut = keyframes`
     to { opacity: 0; transform: translate(-50%, -90%); }
   `;
 
-const Container = styled.div<{ position: Position; open: boolean }>`
+const Container = styled.div<{ position: Position; opened: boolean }>`
   position: fixed;
   top: ${({ position }) => position.y}px;
   left: ${({ position }) => position.x}px;
@@ -65,12 +65,12 @@ const Container = styled.div<{ position: Position; open: boolean }>`
   border-radius: 8px;
   box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
 
-  display: ${({ open }) => (open ? 'flex' : 'none')};
+  display: ${({ opened }) => (opened ? 'flex' : 'none')};
   gap: 8px;
 
   background: ${({ theme }) => theme.colors.primary};
 
-  animation: ${({ open }) => (open ? fadeIn : fadeOut)} 0.2s ease-in-out
+  animation: ${({ opened }) => (opened ? fadeIn : fadeOut)} 0.2s ease-in-out
     forwards;
 `;
 

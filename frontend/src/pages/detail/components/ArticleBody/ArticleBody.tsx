@@ -18,8 +18,13 @@ interface ArticleBodyProps {
 
 const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
-  const { open, position, mode, showToolbar, hideToolbar } =
-    useFloatingToolbarState();
+  const {
+    opened: toolbarOpened,
+    position,
+    mode,
+    showToolbar,
+    hideToolbar,
+  } = useFloatingToolbarState();
   const [panelOpen, setPanelOpen] = useState(false);
   const { highlights, isHighlightLoaded } = useHighlights({ articleId });
   const { mutate: addHighlight } = useAddHighlightMutation();
@@ -78,14 +83,14 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
     <>
       <ArticleContent ref={contentRef} content={articleContent} />
       <FloatingToolbar
-        open={open}
+        opened={toolbarOpened}
         position={position}
         mode={mode}
         onHighlightButtonClick={handleHighlightClick}
         onMemoButtonClick={handleMemoClick}
       />
       <MemoPanel
-        open={panelOpen}
+        opened={panelOpen}
         memos={highlights ?? []}
         removeHighlight={removeHighlight}
         updateMemo={updateMemo}

@@ -6,7 +6,7 @@ const DEFAULT_POSITION: Position = { x: 0, y: 0 };
 const DEFAULT_MODE: FloatingToolbarMode = 'new';
 
 export const useFloatingToolbarState = () => {
-  const [open, setOpen] = useState(false);
+  const [opened, setOpened] = useState(false);
   const [position, setPosition] = useState<Position>(DEFAULT_POSITION);
   const [mode, setMode] = useState<FloatingToolbarMode>(DEFAULT_MODE);
 
@@ -14,7 +14,7 @@ export const useFloatingToolbarState = () => {
     ({ position, mode }: { position: Position; mode: FloatingToolbarMode }) => {
       setPosition(position);
       setMode(mode);
-      setOpen(true);
+      setOpened(true);
     },
     [],
   );
@@ -22,8 +22,8 @@ export const useFloatingToolbarState = () => {
   const hideToolbar = useCallback(() => {
     setPosition(DEFAULT_POSITION);
     setMode(DEFAULT_MODE);
-    setOpen(false);
+    setOpened(false);
   }, []);
 
-  return { open, position, mode, showToolbar, hideToolbar };
+  return { opened, position, mode, showToolbar, hideToolbar };
 };

@@ -42,13 +42,19 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
     updateHighlight({ id, memo });
   };
 
+  const addNewHighlight = (range: Range | null) => {
+    if (!range) return;
+
+    const highlightData = saveSelection(range, articleId);
+    addHighlight(highlightData);
+    window.getSelection()?.removeAllRanges();
+  };
+
   const handleHighlightClick = () => {
     const isNewMode = mode === 'new';
 
-    if (isNewMode && activeSelectionRange) {
-      const highlightData = saveSelection(activeSelectionRange, articleId);
-      addHighlight(highlightData);
-      window.getSelection()?.removeAllRanges();
+    if (isNewMode) {
+      addNewHighlight(activeSelectionRange);
     }
     if (!isNewMode && activeHighlightId) {
       removeHighlight({ id: activeHighlightId });
@@ -60,10 +66,8 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
   const handleMemoClick = () => {
     const isNewMode = mode === 'new';
 
-    if (isNewMode && activeSelectionRange) {
-      const highlightData = saveSelection(activeSelectionRange, articleId);
-      addHighlight(highlightData);
-      window.getSelection()?.removeAllRanges();
+    if (isNewMode) {
+      addNewHighlight(activeSelectionRange);
     }
 
     setPanelOpen(true);

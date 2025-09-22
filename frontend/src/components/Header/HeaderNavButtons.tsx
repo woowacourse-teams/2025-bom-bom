@@ -78,7 +78,9 @@ const HeaderNavButtons = ({ activeNav, deviceType }: HeaderNavButtonsProps) => {
 
 export default HeaderNavButtons;
 
-const NavButton = styled(Link)<{ active?: boolean; deviceType: DeviceType }>`
+const NavButton = styled(Link, {
+  shouldForwardProp: (prop) => prop !== 'active' && prop !== 'deviceType',
+})<{ active?: boolean; deviceType: DeviceType }>`
   padding: ${({ deviceType }) =>
     deviceType === 'mobile' ? '4px 12px' : '10px 12px'};
   border-radius: 12px;

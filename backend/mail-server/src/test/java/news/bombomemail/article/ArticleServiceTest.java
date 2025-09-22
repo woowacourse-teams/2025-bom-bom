@@ -10,7 +10,7 @@ import java.util.Properties;
 import news.bombomemail.article.domain.Article;
 import news.bombomemail.article.repository.ArticleRepository;
 import news.bombomemail.article.service.ArticleService;
-import news.bombomemail.email.util.EmailContentExtractor;
+import news.bombomemail.email.extractor.EmailContentExtractor;
 import news.bombomemail.member.domain.Gender;
 import news.bombomemail.member.domain.Member;
 import news.bombomemail.member.repository.MemberRepository;

@@ -1,5 +1,4 @@
 import { Env } from '@/constants/env';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
 
@@ -37,15 +36,6 @@ export const loginWithGoogle = async (
       authorizationCode: userInfo.data.serverAuthCode ?? '',
       provider: 'google',
     });
-
-    await AsyncStorage.setItem(
-      'auth',
-      JSON.stringify({
-        identityToken: userInfo.data.idToken,
-        authorizationCode: userInfo.data.serverAuthCode,
-        provider: 'google',
-      }),
-    );
   } else {
     throw new Error('ID 토큰을 가져올 수 없습니다.');
   }
@@ -75,15 +65,6 @@ export const loginWithApple = async (
       authorizationCode: credential.authorizationCode,
       provider: 'apple',
     });
-
-    await AsyncStorage.setItem(
-      'auth',
-      JSON.stringify({
-        identityToken: credential.identityToken,
-        authorizationCode: credential.authorizationCode,
-        provider: 'apple',
-      }),
-    );
   } else {
     throw new Error('Apple 로그인 정보를 가져올 수 없습니다.');
   }

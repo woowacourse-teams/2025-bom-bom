@@ -53,7 +53,9 @@ const Container = styled.section<{ isMobile: boolean }>`
   justify-content: center;
 `;
 
-const MaintenanceImage = styled(ImageWithFallback)<{ isMobile: boolean }>`
+const MaintenanceImage = styled(ImageWithFallback, {
+  shouldForwardProp: (prop) => prop !== 'isMobile',
+})<{ isMobile: boolean }>`
   width: ${({ isMobile }) => (isMobile ? '240px' : '280px')};
   height: ${({ isMobile }) => (isMobile ? '240px' : '280px')};
 `;

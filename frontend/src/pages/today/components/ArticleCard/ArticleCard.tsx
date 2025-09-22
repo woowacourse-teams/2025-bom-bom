@@ -86,7 +86,10 @@ function ArticleCard({
 
 export default ArticleCard;
 
-const Container = styled(Link)<{
+const Container = styled(Link, {
+  shouldForwardProp: (prop) =>
+    prop !== 'isRead' && prop !== 'readVariant' && prop !== 'isMobile',
+})<{
   isRead: boolean;
   readVariant: ReadVariantType;
   isMobile: boolean;
@@ -174,7 +177,9 @@ const ThumbnailWrapper = styled.div<{ isMobile: boolean }>`
   flex-shrink: 0;
 `;
 
-const Thumbnail = styled(ImageWithFallback)<{ isMobile: boolean }>`
+const Thumbnail = styled(ImageWithFallback, {
+  shouldForwardProp: (prop) => prop !== 'isMobile',
+})<{ isMobile: boolean }>`
   width: ${({ isMobile }) => (isMobile ? '64px' : '126px')};
   border-radius: ${({ isMobile }) => (isMobile ? '8px' : '12px')};
 

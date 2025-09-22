@@ -12,7 +12,7 @@ export const Route = createFileRoute('/_bombom')({
     const { queryClient } = context;
 
     try {
-      // await queryClient.fetchQuery(queries.me());
+      await queryClient.fetchQuery(queries.me());
     } catch {
       if (location.pathname !== '/recommend') {
         if (isFirstVisit) {

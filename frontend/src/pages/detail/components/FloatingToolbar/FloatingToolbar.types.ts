@@ -1,1 +1,1 @@
-export type FloatingToolbarMode = 'new' | 'existing';
+export type FloatingToolbarMode = 'new' | 'existing' | 'none';

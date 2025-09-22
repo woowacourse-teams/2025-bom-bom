@@ -3,6 +3,8 @@ import { FloatingToolbarMode } from '../FloatingToolbar/FloatingToolbar.types';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { Position } from '@/types/position';
 
+const TOOLBAR_HEIGHT = 40;
+
 interface UseFloatingToolbarSelectionParams {
   isInSelectionTarget: (range: Range) => boolean;
   onShow: (params: { position: Position; mode: FloatingToolbarMode }) => void;
@@ -30,7 +32,7 @@ export const useFloatingToolbarSelection = ({
       onShow({
         position: {
           x: rect.left + rect.width / 2,
-          y: isPC ? rect.top : rect.bottom + 40,
+          y: isPC ? rect.top : rect.bottom + TOOLBAR_HEIGHT,
         },
         mode: 'new',
       });
@@ -49,7 +51,7 @@ export const useFloatingToolbarSelection = ({
       onShow({
         position: {
           x: rect.left + rect.width / 2,
-          y: isPC ? rect.top : rect.bottom + 40,
+          y: isPC ? rect.top : rect.bottom + TOOLBAR_HEIGHT,
         },
         mode: 'existing',
       });

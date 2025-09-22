@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
-import { DEV_WEB_URL } from '@/constants/env';
+import { Env } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWebView } from '../../contexts/WebViewContext';
@@ -48,7 +48,7 @@ export const MainScreen = () => {
       <View style={styles.webViewContainer}>
         <WebView
           ref={webViewRef}
-          source={{ uri: DEV_WEB_URL }}
+          source={{ uri: Env.DEV_WEB_URL }}
           style={styles.webView}
           userAgent={WEBVIEW_USER_AGENT}
           allowsBackForwardNavigationGestures

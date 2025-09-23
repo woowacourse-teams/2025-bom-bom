@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
+import me.bombom.api.v1.auth.enums.OAuth2Provider;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
@@ -130,10 +131,10 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
     }
 
     private Optional<Member> findMemberAndSetPendingIfNew(String sub) {
-        Optional<Member> member = memberRepository.findByProviderAndProviderId("google", sub);
+        Optional<Member> member = memberRepository.findByProviderAndProviderId(OAuth2Provider.GOOGLE.getValue(), sub);
         if (member.isEmpty()) {
             PendingOAuth2Member pending = PendingOAuth2Member.builder()
-                    .provider("google")
+                    .provider(OAuth2Provider.GOOGLE.getValue())
                     .providerId(sub)
                     .profileUrl(null)
                     .build();
@@ -144,12 +145,7 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
     }
 
     @Override
-    public String getProviderType() {
-        return "google";
-    }
-
-    @Override
     public boolean supports(String provider) {
-        return "google".equals(provider);
+        return OAuth2Provider.GOOGLE.isEqualProvider(provider);
     }
 }

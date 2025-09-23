@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { useEffect, useRef } from 'react';
 import ArticleList from '../ArticleList/ArticleList';
 import ArticleListControls from '../ArticleListControls/ArticleListControls';
+import EmptySearchCard from '../EmptySearchCard/EmptySearchCard';
 import { GetArticlesParams } from '@/apis/articles';
 import useInfiniteArticles from '@/pages/storage/hooks/useInfiniteArticles';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
@@ -64,10 +65,14 @@ export default function MobileStorageContent({
     (page) => page?.content || [],
   );
   const totalElements = infiniteArticlesPages[0]?.totalElements;
-  const isLoadingOrHaveContent = isInfiniteLoading || articleList.length > 0;
 
-  if (!isLoadingOrHaveContent && searchInput === '')
+  if (!isInfiniteLoading && articleList.length === 0 && searchInput !== '') {
+    return <EmptySearchCard searchQuery={searchInput} />;
+  }
+
+  if (!isInfiniteLoading && articleList.length === 0) {
     return <EmptyLetterCard title="보관된 뉴스레터가 없어요" />;
+  }
 
   return (
     <>
@@ -78,7 +83,7 @@ export default function MobileStorageContent({
         onSortChange={onSortChange}
         totalElements={totalElements}
       />
-      <ArticleList articles={articleList} />
+      <ArticleList articles={articleList} isLoading={isInfiniteLoading} />
       {/* 무한 스크롤 로딩 트리거 */}
       <LoadMoreTrigger ref={loadMoreRef} />
       {isFetchingNextPage && <LoadingSpinner>로딩 중...</LoadingSpinner>}

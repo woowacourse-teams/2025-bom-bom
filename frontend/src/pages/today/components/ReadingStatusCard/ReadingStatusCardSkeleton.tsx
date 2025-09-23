@@ -57,6 +57,12 @@ const SkeletonBar = styled(SkeletonBase)`
 `;
 
 const Container = styled.section`
+  width: 310px;
+  padding: 34px 30px;
+  border: 1px solid ${({ theme }) => theme.colors.white};
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 15%);
+
   display: flex;
   gap: 26px;
   flex-direction: column;
@@ -64,32 +70,26 @@ const Container = styled.section`
   align-items: center;
   justify-content: center;
 
-  width: 310px;
-  padding: 34px 30px;
-  border: 1px solid ${({ theme }) => theme.colors.white};
-  border-radius: 20px;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 15%);
-
   background-color: ${({ theme }) => theme.colors.white};
 `;
 
 const TitleWrapper = styled.div`
+  width: 100%;
+
   display: flex;
   gap: 10px;
   align-items: center;
-
-  width: 100%;
 `;
 
 const StatusIcon = styled(SkeletonBase)`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   width: 32px;
   height: 32px;
   padding: 6px;
   border-radius: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const StreakWrapper = styled.div`
@@ -101,20 +101,20 @@ const StreakWrapper = styled.div`
 `;
 
 const StreakIcon = styled(SkeletonBase)`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   width: 70px;
   height: 70px;
   padding: 18px;
   border-radius: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const ProgressSection = styled.div`
+  width: 100%;
+
   display: flex;
   gap: 14px;
   flex-direction: column;
-
-  width: 100%;
 `;

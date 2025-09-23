@@ -11,4 +11,4 @@ export const CATEGORIES = [
   '리빙/인테리어',
 ] as const;
 
-export type CategoryType = (typeof CATEGORIES)[number];
+export type Category = (typeof CATEGORIES)[number];

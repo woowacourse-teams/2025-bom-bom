@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { useLocation } from '@tanstack/react-router';
 import { PropsWithChildren, useEffect } from 'react';
 import Header from '../Header/Header';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDevice } from '@/hooks/useDevice';
 import {
   hideChannelButton,
   showChannelButton,
@@ -10,25 +10,24 @@ import {
 import { initChannelTalk } from '@/libs/channelTalk/initChannelTalk';
 
 const PageLayout = ({ children }: PropsWithChildren) => {
-  const deviceType = useDeviceType();
+  const device = useDevice();
   const location = useLocation();
-  const isMobile = deviceType === 'mobile';
+  const isMobile = device === 'mobile';
 
   const isHeaderVisible =
-    deviceType === 'pc' ||
-    !location.pathname.startsWith('/articles/$articleId');
+    device === 'pc' || !location.pathname.startsWith('/articles/$articleId');
 
   useEffect(() => {
     initChannelTalk();
   }, []);
 
   useEffect(() => {
-    if (deviceType === 'pc') {
+    if (device === 'pc') {
       showChannelButton();
     } else {
       hideChannelButton();
     }
-  }, [deviceType]);
+  }, [device]);
 
   return (
     <Container isMobile={isMobile}>

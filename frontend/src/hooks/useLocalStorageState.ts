@@ -1,18 +1,15 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { createStorage } from '@/utils/localStorage';
 
-type SerializableType =
+type Serializable =
   | string
   | number
   | boolean
   | null
-  | SerializableType[]
-  | { [key: string]: SerializableType };
+  | Serializable[]
+  | { [key: string]: Serializable };
 
-export const useLocalStorageState = <
-  T extends SerializableType,
-  K extends string,
->(
+export const useLocalStorageState = <T extends Serializable, K extends string>(
   key: K,
   defaultValue?: T,
 ) => {

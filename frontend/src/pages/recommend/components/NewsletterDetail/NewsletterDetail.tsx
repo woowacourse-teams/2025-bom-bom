@@ -4,7 +4,7 @@ import { queries } from '@/apis/queries';
 import Badge from '@/components/Badge/Badge';
 import Button from '@/components/Button/Button';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDevice } from '@/hooks/useDevice';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import { copyToClipboard } from '@/utils/copy';
 import { openExternalLink } from '@/utils/externalLink';
@@ -25,7 +25,7 @@ const NewsletterDetail = ({
     ...queries.newsletterDetail({ id: newsletterId }),
     enabled: Boolean(newsletterId),
   });
-  const deviceType = useDeviceType();
+  const deviceType = useDevice();
 
   const isMobile = deviceType === 'mobile';
 

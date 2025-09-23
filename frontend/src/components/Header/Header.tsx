@@ -1,11 +1,13 @@
 import MobileHeader from './MobileHeader';
 import PCHeader from './PCHeader';
 import { useActiveNav } from '@/hooks/useActiveNav';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDevice } from '@/hooks/useDevice';
+
+export type HeaderVariant = Device | 'none';
 
 const Header = () => {
   const activeNav = useActiveNav();
-  const deviceType = useDeviceType();
+  const deviceType = useDevice();
 
   if (deviceType === 'pc') {
     return <PCHeader activeNav={activeNav} />;

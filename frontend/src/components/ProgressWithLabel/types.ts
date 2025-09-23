@@ -1,1 +1,1 @@
-export type RateFormatType = 'percentage' | 'ratio';
+export type RateFormat = 'percentage' | 'ratio';

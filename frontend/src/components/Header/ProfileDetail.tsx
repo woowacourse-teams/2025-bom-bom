@@ -4,7 +4,7 @@ import { useNavigate } from '@tanstack/react-router';
 import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 import { toast } from '../Toast/utils/toastActions';
 import { postLogout, postWithdraw } from '@/apis/auth';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDevice } from '@/hooks/useDevice';
 import { showMessenger } from '@/libs/channelTalk/channelTalk.utils';
 import { UserInfo } from '@/types/me';
 import { copyToClipboard } from '@/utils/copy';
@@ -19,7 +19,7 @@ interface ProfileDetailProps {
 
 const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
   const navigate = useNavigate();
-  const deviceType = useDeviceType();
+  const deviceType = useDevice();
 
   const { mutate: mutateLogout } = useMutation({
     mutationKey: ['logout'],

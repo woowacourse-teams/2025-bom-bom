@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { FloatingToolbarMode } from '../FloatingToolbar/FloatingToolbar.types';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDevice } from '@/hooks/useDevice';
 import { Position } from '@/types/position';
 
 const TOOLBAR_HEIGHT = 40;
@@ -16,11 +16,11 @@ export const useFloatingToolbarSelection = ({
   onShow,
   onHide,
 }: UseFloatingToolbarSelectionParams) => {
-  const deviceType = useDeviceType();
+  const device = useDevice();
   const activeSelectionRangeRef = useRef<Range>(null);
   const activeHighlightIdRef = useRef<number>(null);
 
-  const isPC = deviceType === 'pc';
+  const isPC = device === 'pc';
 
   const openToolbarFromSelection = useCallback(
     (selection: Selection) => {

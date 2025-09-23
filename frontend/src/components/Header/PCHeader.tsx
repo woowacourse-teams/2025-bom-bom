@@ -4,10 +4,10 @@ import HeaderNavButtons from './HeaderNavButtons';
 import HeaderProfile from './HeaderProfile';
 import LoginButton from './LoginButton';
 import { useUserInfo } from '@/hooks/useUserInfo';
-import { NavType } from '@/types/nav';
+import { Nav } from '@/types/nav';
 
 interface PCHeaderProps {
-  activeNav: NavType;
+  activeNav: Nav;
 }
 
 const PCHeader = ({ activeNav }: PCHeaderProps) => {
@@ -16,14 +16,14 @@ const PCHeader = ({ activeNav }: PCHeaderProps) => {
   return (
     <HeaderContainer>
       <HeaderInner>
-        <HeaderLogo deviceType="pc" />
+        <HeaderLogo device="pc" />
 
         <NavWrapper>
-          <HeaderNavButtons activeNav={activeNav} deviceType="pc" />
+          <HeaderNavButtons activeNav={activeNav} device="pc" />
         </NavWrapper>
 
         {userInfo ? (
-          <HeaderProfile userInfo={userInfo} deviceType="pc" />
+          <HeaderProfile userInfo={userInfo} device="pc" />
         ) : (
           <LoginButton />
         )}

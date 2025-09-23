@@ -4,10 +4,10 @@ import HeaderNavButtons from './HeaderNavButtons';
 import HeaderProfile from './HeaderProfile';
 import LoginButton from './LoginButton';
 import { useUserInfo } from '@/hooks/useUserInfo';
-import { NavType } from '@/types/nav';
+import { Nav } from '@/types/nav';
 
 interface MobileHeaderProps {
-  activeNav: NavType;
+  activeNav: Nav;
 }
 
 const MobileHeader = ({ activeNav }: MobileHeaderProps) => {
@@ -16,15 +16,15 @@ const MobileHeader = ({ activeNav }: MobileHeaderProps) => {
   return (
     <>
       <MobileHeaderContainer>
-        <HeaderLogo deviceType="mobile" />
+        <HeaderLogo device="mobile" />
         {userInfo ? (
-          <HeaderProfile userInfo={userInfo} deviceType="mobile" />
+          <HeaderProfile userInfo={userInfo} device="mobile" />
         ) : (
           <LoginButton />
         )}
       </MobileHeaderContainer>
       <BottomNavWrapper>
-        <HeaderNavButtons activeNav={activeNav} deviceType="mobile" />
+        <HeaderNavButtons activeNav={activeNav} device="mobile" />
       </BottomNavWrapper>
     </>
   );

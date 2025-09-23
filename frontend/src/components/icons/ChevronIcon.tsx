@@ -1,13 +1,13 @@
 import styled from '@emotion/styled';
 import { SVGProps } from 'react';
-import { DirectionType } from './Icons.types';
+import { Direction } from './Icons.types';
 import ChevronDownSvg from '#/assets/chevron-down.svg';
 
 interface ChevronIconProps extends SVGProps<SVGSVGElement> {
-  direction?: DirectionType;
+  direction?: Direction;
 }
 
-const rotationMap: Record<DirectionType, number> = {
+const rotationMap: Record<Direction, number> = {
   up: 180,
   upRight: -45,
   right: -90,

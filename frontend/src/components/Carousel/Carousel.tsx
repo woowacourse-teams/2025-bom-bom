@@ -2,8 +2,8 @@ import styled from '@emotion/styled';
 import { PropsWithChildren, Children } from 'react';
 import { DEFAULT_SPEED } from './Carousel.constants';
 import useCarousel from './useCarousel';
-import arrowNext from '#/assets/image/carousel-arrow-next.png';
-import arrowPrev from '#/assets/image/carousel-arrow-prev.png';
+import arrowNext from '#/assets/png/carousel-arrow-next.png';
+import arrowPrev from '#/assets/png/carousel-arrow-prev.png';
 
 type CarouselProps = PropsWithChildren & {
   hasSlideButton?: boolean;

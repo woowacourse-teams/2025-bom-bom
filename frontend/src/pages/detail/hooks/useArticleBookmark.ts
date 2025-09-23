@@ -17,13 +17,17 @@ export const useArticleBookmark = ({ articleId }: UseArticleBookmarkParams) => {
   const { mutate: addBookmark } = useAddBookmarkMutation({ articleId });
   const { mutate: removeBookmark } = useRemoveBookmarkMutation({ articleId });
 
-  const debouncedSyncBookmark = useDebounce(() => {
-    if (isBookmarked) {
-      addBookmark();
-    } else {
-      removeBookmark();
-    }
-  }, 500);
+  const debouncedSyncBookmark = useDebounce(
+    () => {
+      if (isBookmarked) {
+        addBookmark();
+      } else {
+        removeBookmark();
+      }
+    },
+    500,
+    { cancelOnUnmount: false },
+  );
 
   const toggleBookmark = useCallback(() => {
     setIsBookmarked((prev) => !prev);

@@ -4,6 +4,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.dto.OAuth2LoginInfo;
+import me.bombom.api.v1.auth.enums.OAuth2Provider;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,11 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class AppleUserInfoExtractor implements OAuth2UserInfoExtractor {
+
+    private static final String FIRST_NAME = "firstName";
+    private static final String LAST_NAME = "lastName";
+    private static final String NAME = "name";
+    private static final String EMAIL = "email";
 
     @Override
     public OAuth2LoginInfo extractLoginInfo(CustomOAuth2User oauth2User, Member member) {
@@ -26,26 +32,26 @@ public class AppleUserInfoExtractor implements OAuth2UserInfoExtractor {
 
     @Override
     public boolean supports(String providerName) {
-        return "apple".equals(providerName);
+        return OAuth2Provider.APPLE.isEqualProvider(providerName);
     }
 
     private String extractEmail(CustomOAuth2User oauth2User) {
-        return (String) oauth2User.getAttributes().get("email");
+        return (String) oauth2User.getAttributes().get(EMAIL);
     }
 
     private String extractName(CustomOAuth2User oauth2User) {
-        Object nameObj = oauth2User.getAttributes().get("name");
+        Object nameObj = oauth2User.getAttributes().get(NAME);
         if (nameObj instanceof Map) {
             Map<String, String> nameMap = (Map<String, String>) nameObj;
-            return buildFullName(nameMap.get("firstName"), nameMap.get("lastName"));
+            return buildFullName(nameMap.get(FIRST_NAME), nameMap.get(LAST_NAME));
         }
         return null;
     }
 
     private String buildFullName(String firstName, String lastName) {
-        if (firstName == null || lastName == null) {
-            return null;
-        }
-        return firstName + " " + lastName;
+        String normalizedFirstName = firstName == null ? "" : firstName.strip();
+        String normalizedLastName  = lastName == null ? "" : lastName.strip();
+        String fullName = (normalizedFirstName + " " + normalizedLastName).strip();
+        return fullName.isEmpty() ? null : fullName;
     }
 }

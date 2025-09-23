@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
-
+    // 현재는 구글만 존재하지만, 추후에 다른 OAuth2 기반 로그인이 생길 경우 고려
     private final List<OAuth2LoginService> loginServices;
 
     @Override

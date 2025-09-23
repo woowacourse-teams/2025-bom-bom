@@ -1,11 +1,11 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
-import HomeIcon from '../../../public/assets/home.svg';
 import { Device } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { Nav } from '@/types/nav';
-import CompassIcon from '#/assets/compass.svg';
-import StorageIcon from '#/assets/storage.svg';
+import CompassIcon from '#/assets/svg/compass.svg';
+import HomeIcon from '#/assets/svg/home.svg';
+import StorageIcon from '#/assets/svg/storage.svg';
 
 interface HeaderNavButtonsProps {
   activeNav: Nav;

@@ -49,9 +49,11 @@ public class AppleUserInfoExtractor implements OAuth2UserInfoExtractor {
     }
 
     private String buildFullName(String firstName, String lastName) {
+        // 요구사항: 공백 제거, 성+이름(LastName + FirstName) 순서로 결합
         String normalizedFirstName = firstName == null ? "" : firstName.strip();
         String normalizedLastName  = lastName == null ? "" : lastName.strip();
-        String fullName = (normalizedFirstName + " " + normalizedLastName).strip();
+        String fullName = (normalizedLastName + normalizedFirstName);
+        fullName = fullName.replace(" ", "");
         return fullName.isEmpty() ? null : fullName;
     }
 }

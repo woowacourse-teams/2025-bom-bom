@@ -14,6 +14,7 @@ import { getSignupCheck, GetSignupCheckParams, postSignup } from '@/apis/auth';
 import { SIGNUP_CHECK_ERROR_MESSAGE } from '@/apis/constants/checkErrorMessage';
 import InputField from '@/components/InputField/InputField';
 import { Device, useDevice } from '@/hooks/useDevice';
+import { sendMessageToRN } from '@/libs/webview/webview.utils';
 import { GUIDE_MAILS } from '@/mocks/datas/guideMail';
 import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
@@ -57,6 +58,9 @@ const SignupCard = () => {
         birthDate,
       }),
     onSuccess: () => {
+      sendMessageToRN({
+        type: 'LOGIN_SUCCESS',
+      });
       navigate({ to: '/' });
     },
     onError: (e) => {

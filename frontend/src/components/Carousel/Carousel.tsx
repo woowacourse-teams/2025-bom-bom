@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { PropsWithChildren, Children } from 'react';
-import { DEFAULT_DELAY } from './Carousel.constants';
+import { DEFAULT_SPEED } from './Carousel.constants';
 import useCarousel from './useCarousel';
 import arrowNext from '#/assets/carousel-arrow-next.png';
 import arrowPrev from '#/assets/carousel-arrow-prev.png';
@@ -15,7 +15,7 @@ type CarouselProps = PropsWithChildren & {
 
 const Carousel = ({
   autoPlay = true,
-  autoPlaySpeedMs = DEFAULT_DELAY,
+  autoPlaySpeedMs = DEFAULT_SPEED,
   hasSlideButton = true,
   hasAnimation = true,
   children,

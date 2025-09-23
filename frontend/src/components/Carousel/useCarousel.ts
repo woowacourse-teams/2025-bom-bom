@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { DEFAULT_DELAY, START_SLIDE_INDEX } from './Carousel.constants';
+import { DEFAULT_SPEED, START_SLIDE_INDEX } from './Carousel.constants';
 
 interface UseCarouselProps {
   slideCount: number;
@@ -10,7 +10,7 @@ interface UseCarouselProps {
 const useCarousel = ({
   slideCount,
   autoPlay = true,
-  autoPlaySpeedMs = DEFAULT_DELAY,
+  autoPlaySpeedMs = DEFAULT_SPEED,
 }: UseCarouselProps) => {
   const [slideIndex, setSlideIndex] = useState(START_SLIDE_INDEX);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -31,7 +31,7 @@ const useCarousel = ({
   useEffect(() => {
     if (!autoPlay) return;
 
-    const autoSlideDelay = autoPlaySpeedMs ?? DEFAULT_DELAY;
+    const autoSlideDelay = autoPlaySpeedMs ?? DEFAULT_SPEED;
     if (!isTransitioning) {
       timerIdRef.current = setTimeout(() => {
         setIsTransitioning(true);

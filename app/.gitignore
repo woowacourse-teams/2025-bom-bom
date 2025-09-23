@@ -42,5 +42,3 @@ app-example
 # build files
 *.apk
 *.aab
-
-.env

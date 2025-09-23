@@ -5,6 +5,7 @@ import Badge from '@/components/Badge/Badge';
 import Button from '@/components/Button/Button';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { useDeviceType } from '@/hooks/useDeviceType';
+import { useUserInfo } from '@/hooks/useUserInfo';
 import { copyToClipboard } from '@/utils/copy';
 import { openExternalLink } from '@/utils/externalLink';
 import ArticleHistoryIcon from '#/assets/article-history.svg';
@@ -19,7 +20,7 @@ const NewsletterDetail = ({
   newsletterId,
   category,
 }: NewsletterDetailProps) => {
-  const { data: userInfo } = useQuery(queries.me());
+  const { userInfo, isLoggedIn } = useUserInfo();
   const { data: newsletterDetail } = useQuery({
     ...queries.newsletterDetail({ id: newsletterId }),
     enabled: Boolean(newsletterId),
@@ -27,7 +28,6 @@ const NewsletterDetail = ({
   const deviceType = useDeviceType();
 
   const isMobile = deviceType === 'mobile';
-  const isLoggedIn = Boolean(userInfo);
 
   if (!newsletterId || !newsletterDetail) return null;
 

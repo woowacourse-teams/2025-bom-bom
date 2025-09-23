@@ -65,12 +65,13 @@ export default function MobileStorageContent({
     (page) => page?.content || [],
   );
   const totalElements = infiniteArticlesPages[0]?.totalElements;
+  const IsContentsEmpty = !isInfiniteLoading && articleList.length === 0;
 
-  if (!isInfiniteLoading && articleList.length === 0 && searchInput !== '') {
+  if (IsContentsEmpty && searchInput !== '') {
     return <EmptySearchCard searchQuery={searchInput} />;
   }
 
-  if (!isInfiniteLoading && articleList.length === 0) {
+  if (IsContentsEmpty) {
     return <EmptyLetterCard title="보관된 뉴스레터가 없어요" />;
   }
 

@@ -12,6 +12,7 @@ import me.bombom.api.v1.auth.AppleClientSecretSupplier;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
+import me.bombom.api.v1.auth.filter.AppleUserCaptureFilter;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
@@ -80,7 +81,17 @@ public class AppleOAuth2Service extends OidcUserService {
             try {
                 Map<String, Object> additional = userRequest.getAdditionalParameters();
                 log.info("Apple 추가 파라미터 수신 - keys: {}", additional.keySet());
+                // 추가 파라미터에 없다면 세션에서 보조 조회
                 Object userParam = additional.get("user");
+                if (userParam == null) {
+                    Object fromSession = session.getAttribute(AppleUserCaptureFilter.SESSION_ATTR_USER_JSON);
+                    if (fromSession instanceof String s && !s.isBlank()) {
+                        userParam = s;
+                        log.info("세션에서 Apple user 파라미터 복원 성공");
+                        // 일회성 사용 후 세션에서 제거
+                        session.removeAttribute(AppleUserCaptureFilter.SESSION_ATTR_USER_JSON);
+                    }
+                }
                 if (userParam instanceof String userJson && !userJson.isBlank()) {
                     log.info("Apple user 원문(JSON) 수신: {}", userJson);
                     ObjectMapper objectMapper = new ObjectMapper();

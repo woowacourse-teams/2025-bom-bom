@@ -6,11 +6,12 @@ import ArticleCardList from '../../pages/today/components/ArticleCardList/Articl
 import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/ReadingStatusCard';
 import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
-import { Device, useDevice } from '@/hooks/useDevice';
+import { useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
-import { LocalGuideMail } from '@/types/guide';
 import { isToday } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
+import type { Device } from '@/hooks/useDevice';
+import type { LocalGuideMail } from '@/types/guide';
 import type { CSSObject, Theme } from '@emotion/react';
 import HomeIcon from '#/assets/home.svg';
 

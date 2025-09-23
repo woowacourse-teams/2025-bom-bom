@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { PropsWithChildren, Ref } from 'react';
 import { theme } from '@/styles/theme';
+import type { PropsWithChildren, Ref } from 'react';
 import CloseIcon from '#/assets/close.svg';
 
 type Position = 'center' | 'bottom' | 'dropdown';

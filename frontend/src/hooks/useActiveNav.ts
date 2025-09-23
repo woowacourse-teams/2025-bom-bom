@@ -1,6 +1,6 @@
 import { useRouterState } from '@tanstack/react-router';
 import { useEffect, useRef } from 'react';
-import { Nav } from '@/types/nav';
+import type { Nav } from '@/types/nav';
 
 const navMap: Record<string, Nav> = {
   '/': 'today',

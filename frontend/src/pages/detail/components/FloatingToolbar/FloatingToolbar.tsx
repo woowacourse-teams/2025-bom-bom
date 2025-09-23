@@ -1,8 +1,8 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { PointerEvent } from 'react';
-import { FloatingToolbarMode } from './FloatingToolbar.types';
-import { Position } from '@/types/position';
+import type { FloatingToolbarMode } from './FloatingToolbar.types';
+import type { Position } from '@/types/position';
+import type { PointerEvent } from 'react';
 import MemoIcon from '#/assets/comment.svg';
 import HighlightOffIcon from '#/assets/edit-off.svg';
 import HighlightIcon from '#/assets/edit.svg';

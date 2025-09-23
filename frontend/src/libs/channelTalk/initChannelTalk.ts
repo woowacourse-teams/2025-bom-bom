@@ -1,5 +1,5 @@
-import { IChannelIO } from './channelTalk.types';
 import { ENV } from '@/apis/env';
+import type { IChannelIO } from './channelTalk.types';
 
 const CHANNEL_TALK_SCRIPT_SOURCE =
   'https://cdn.channel.io/plugin/ch-plugin-web.js';

@@ -1,4 +1,4 @@
-import { Device } from '@/hooks/useDevice';
+import type { Device } from '@/hooks/useDevice';
 
 export const getResponsiveValue = (
   device: Device,

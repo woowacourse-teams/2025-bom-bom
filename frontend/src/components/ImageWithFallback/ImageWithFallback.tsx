@@ -1,4 +1,4 @@
-import { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
 import defaultImage from '#/assets/logo.png';
 
 interface ImageWithFallbackProps extends ComponentProps<'img'> {

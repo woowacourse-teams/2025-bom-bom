@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useLocation } from '@tanstack/react-router';
-import { PropsWithChildren, useEffect } from 'react';
+import { useEffect } from 'react';
 import Header from '../Header/Header';
 import { useDevice } from '@/hooks/useDevice';
 import {
@@ -8,6 +8,7 @@ import {
   showChannelButton,
 } from '@/libs/channelTalk/channelTalk.utils';
 import { initChannelTalk } from '@/libs/channelTalk/initChannelTalk';
+import type { PropsWithChildren } from 'react';
 
 const PageLayout = ({ children }: PropsWithChildren) => {
   const device = useDevice();

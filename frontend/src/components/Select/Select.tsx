@@ -1,8 +1,9 @@
 import styled from '@emotion/styled';
-import { ComponentProps, useState } from 'react';
-import { SelectOption } from './Select.types';
+import { useState } from 'react';
 import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
 import { theme } from '@/styles/theme';
+import type { SelectOption } from './Select.types';
+import type { ComponentProps } from 'react';
 import ChevronDownIcon from '#/assets/chevron-down.svg';
 import ChevronUpIcon from '#/assets/chevron-up.svg';
 

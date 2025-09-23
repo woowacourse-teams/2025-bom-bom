@@ -1,12 +1,12 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
-import { ComponentProps } from 'react';
 import Badge from '@/components/Badge/Badge';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { components } from '@/types/openapi';
 import { formatDate } from '@/utils/date';
+import type { components } from '@/types/openapi';
+import type { ComponentProps } from 'react';
 import ClockIcon from '#/assets/clock.svg';
 
 type ReadVariant = 'transparent' | 'badge';

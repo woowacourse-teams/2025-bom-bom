@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { ChangeEvent, useCallback, useState } from 'react';
-import { GetArticlesParams } from '@/apis/articles';
+import { useCallback, useState } from 'react';
 import { queries } from '@/apis/queries';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import type { GetArticlesParams } from '@/apis/articles';
+import type { ChangeEvent } from 'react';
 
 export const useStorageFilters = () => {
   const [selectedNewsletterId, setSelectedNewsletterId] = useState<

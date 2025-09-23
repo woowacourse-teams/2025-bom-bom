@@ -1,5 +1,5 @@
 import { fetcher } from './fetcher';
-import { components, operations } from '@/types/openapi';
+import type { components, operations } from '@/types/openapi';
 
 export type GetArticlesParams = Omit<
   components['schemas']['ArticlesOptionsRequest'],

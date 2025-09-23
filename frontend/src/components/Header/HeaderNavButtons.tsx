@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
 import HomeIcon from '../../../public/assets/home.svg';
-import { Device } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { Nav } from '@/types/nav';
+import type { Device } from '@/hooks/useDevice';
+import type { Nav } from '@/types/nav';
 import CompassIcon from '#/assets/compass.svg';
 import StorageIcon from '#/assets/storage.svg';
 

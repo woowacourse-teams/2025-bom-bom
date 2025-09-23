@@ -21,7 +21,7 @@
           }
         }
       },
-      "bundleIdentifier": "com.antarctica.bombom.app",
+      "bundleIdentifier": "com.antarctica.bombom",
       "usesAppleSignIn": true
     },
     "android": {

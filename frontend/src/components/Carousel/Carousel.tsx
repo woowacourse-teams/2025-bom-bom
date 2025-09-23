@@ -6,7 +6,7 @@ import arrowPrev from '#/assets/carousel-arrow-prev.png';
 
 interface CarouselProps extends PropsWithChildren {
   timer?: boolean | number;
-  showSlideButton?: boolean;
+  hasSlideButton?: boolean;
   animation?: 'slide' | 'none';
 }
 
@@ -15,7 +15,7 @@ interface CarouselProps extends PropsWithChildren {
  *   - `false`: 비활성화
  *   - `true`: 기본 4초 주기
  *   - `number`: 커스텀 주기(ms)
- * @property {boolean} [showSlideButton=true] - 슬라이드 변경 버튼 렌더링 여부
+ * @property {boolean} [hasSlideButton=true] - 슬라이드 변경 버튼 렌더링 여부
  * @property {'slide'|'none'} [animation='slide'] - 애니메이션 타입
  *   - `slide`: 왼쪽에서 오른쪽으로 미끄러지는 애니메이션
  *   - `none`: 애니메이션 없음
@@ -23,7 +23,7 @@ interface CarouselProps extends PropsWithChildren {
  */
 const Carousel = ({
   timer = true,
-  showSlideButton = true,
+  hasSlideButton = true,
   animation = 'slide',
   children,
 }: CarouselProps) => {
@@ -69,7 +69,7 @@ const Carousel = ({
         ))}
       </SlidesWrapper>
 
-      {showSlideButton && (
+      {hasSlideButton && (
         <>
           <PrevSlideButton type="button" onClick={handlePrevButtonClick}>
             <img src={arrowPrev} alt="이전 슬라이드 버튼" />

@@ -64,7 +64,7 @@ const ReadingKingLeaderboard = () => {
 
       <Description>순위는 10분마다 변경됩니다.</Description>
 
-      <Carousel showSlideButton={false} animation="none">
+      <Carousel hasSlideButton={false} animation="none">
         {getLeaderboardData(monthlyReadingRank).map(
           (leaderboard, leaderboardIndex) => (
             <LeaderboardList key={`leaderboard-${leaderboardIndex}`}>

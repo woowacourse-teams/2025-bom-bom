@@ -5,6 +5,7 @@ import Badge from '@/components/Badge/Badge';
 import Button from '@/components/Button/Button';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { useDevice } from '@/hooks/useDevice';
+import { useUserInfo } from '@/hooks/useUserInfo';
 import { copyToClipboard } from '@/utils/copy';
 import { openExternalLink } from '@/utils/externalLink';
 import ArticleHistoryIcon from '#/assets/article-history.svg';
@@ -19,21 +20,22 @@ const NewsletterDetail = ({
   newsletterId,
   category,
 }: NewsletterDetailProps) => {
-  const { data: userInfo } = useQuery(queries.me());
+  const { userInfo, isLoggedIn } = useUserInfo();
   const { data: newsletterDetail } = useQuery({
     ...queries.newsletterDetail({ id: newsletterId }),
     enabled: Boolean(newsletterId),
   });
-  const device = useDevice();
-  const isMobile = device === 'mobile';
+  const deviceType = useDevice();
+
+  const isMobile = deviceType === 'mobile';
 
   if (!newsletterId || !newsletterDetail) return null;
 
   const openSubscribe = () => {
-    if (userInfo?.email) {
-      copyToClipboard(userInfo.email);
-      alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
-    }
+    if (!isLoggedIn || !userInfo) return;
+
+    copyToClipboard(userInfo.email);
+    alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
 
     openExternalLink(newsletterDetail.subscribeUrl);
   };
@@ -74,8 +76,9 @@ const NewsletterDetail = ({
         </InfoWrapper>
 
         <SubscribeButton
-          text="구독하기"
+          text={isLoggedIn ? '구독하기' : '로그인 후 구독할 수 있어요'}
           onClick={openSubscribe}
+          disabled={!isLoggedIn}
           isMobile={isMobile}
         />
       </FixedWrapper>

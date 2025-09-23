@@ -1,14 +1,14 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import { postAppleLogin, postGoogleLogin } from '@/apis/auth';
-import { RNToWebMessage } from '@/libs/webview/webview.types';
+import { RNToWebMessage } from './webview.types';
 import {
   addWebViewMessageListener,
   isRunningInWebView,
   sendMessageToRN,
-} from '@/libs/webview/webview.utils';
+} from './webview.utils';
+import { postAppleLogin, postGoogleLogin } from '@/apis/auth';
 
-export const WebViewMessenger: React.FC = () => {
+export const useWebViewAuth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -105,6 +105,4 @@ export const WebViewMessenger: React.FC = () => {
 
     return cleanup;
   }, [navigate]);
-
-  return null;
 };

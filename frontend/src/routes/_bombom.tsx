@@ -3,7 +3,7 @@ import { DEFAULT_ERROR_MESSAGES } from '@/apis/constants/defaultErrorMessage';
 import { queries } from '@/apis/queries';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import RequireLoginCard from '@/components/RequireLoginCard/RequireLoginCard';
-import { WebViewMessenger } from '@/components/WebViewMessenger/WebViewMessenger';
+import { useWebViewAuth } from '@/libs/webview/useWebViewAuth';
 
 let isFirstVisit = true;
 
@@ -37,10 +37,11 @@ export const Route = createFileRoute('/_bombom')({
 });
 
 function RouteComponent() {
+  useWebViewAuth();
+
   return (
     <PageLayout>
       <Outlet />
-      <WebViewMessenger />
     </PageLayout>
   );
 }

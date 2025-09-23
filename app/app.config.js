@@ -1,57 +1,7 @@
-import { withAndroidManifest, withDangerousMod } from '@expo/config-plugins';
-import fs from 'fs';
-import path from 'path';
+const withNetworkSecurityConfigFile = require('./plugins/withNetworkSecurityConfigFile');
+const withCustomAndroidConfig = require('./plugins/withCustomAndroidConfig');
 
-const NETWORK_CONFIG_PATH = 'res/xml/network_security_config.xml';
-
-// 1. network_security_config.xml 파일 생성
-const withNetworkSecurityConfigFile = (config) => {
-  return withDangerousMod(config, [
-    'android',
-    (config) => {
-      const filePath = path.join(
-        config.modRequest.platformProjectRoot,
-        'app/src/main',
-        NETWORK_CONFIG_PATH,
-      );
-
-      const dir = path.dirname(filePath);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-
-      const xml = `<?xml version="1.0" encoding="utf-8"?>
-<network-security-config>
-  <domain-config cleartextTrafficPermitted="true">
-    <domain includeSubdomains="true">bombom.news</domain>
-  </domain-config>
-</network-security-config>`;
-
-      fs.writeFileSync(filePath, xml);
-      return config;
-    },
-  ]);
-};
-
-/**
- * AndroidManifest.xml 에
- * - usesCleartextTraffic
- * - networkSecurityConfig
- * 속성을 주입하는 Config Plugin
- */
-const withCustomAndroidConfig = (config) => {
-  return withAndroidManifest(config, (config) => {
-    const app = config.modResults.manifest.application[0];
-
-    // 여기서 application 태그에 속성을 주입
-    app.$['android:usesCleartextTraffic'] = 'true';
-    app.$['android:networkSecurityConfig'] = '@xml/network_security_config';
-
-    return config;
-  });
-};
-
-export default ({ config }) => {
+module.exports = ({ config }) => {
   return withCustomAndroidConfig(
     withNetworkSecurityConfigFile({
       ...config,

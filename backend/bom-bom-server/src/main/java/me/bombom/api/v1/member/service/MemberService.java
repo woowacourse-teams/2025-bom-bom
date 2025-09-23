@@ -39,7 +39,7 @@ public class MemberService {
         Member newMember = Member.builder()
                 .provider(pendingMember.getProvider())
                 .providerId(pendingMember.getProviderId())
-                .email(signupRequest.email())
+                .email(signupRequest.email().toLowerCase())
                 .profileImageUrl(pendingMember.getProfileUrl())
                 .nickname(signupRequest.nickname())
                 .gender(signupRequest.gender())
@@ -95,7 +95,7 @@ public class MemberService {
     }
 
     private void validateDuplicateEmail(String email) {
-        if (memberRepository.existsByEmail(email)) {
+        if (memberRepository.existsByEmail(email.toLowerCase())) {
             throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_EMAIL)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "email")
                     .addContext(ErrorContextKeys.OPERATION, "validateDuplicateEmail");

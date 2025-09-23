@@ -33,8 +33,7 @@ import org.springframework.web.client.RestClient;
 @Service
 @RequiredArgsConstructor
 public class AppleOAuth2Service extends OidcUserService {
-    
-    private static final String ID_TOKEN_KEY = "id_token";
+
     private static final String ACCESS_TOKEN_KEY = "access_token";
     private static final String APPLE_REVOKE_URL = "https://appleid.apple.com/auth/revoke";
     
@@ -101,12 +100,7 @@ public class AppleOAuth2Service extends OidcUserService {
             }
             log.info("Apple Token Revoke 시작 - clientId: {}", revokeClientId);
 
-            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-            requestBody.add("token", accessToken);
-            requestBody.add("client_id", revokeClientId);
-            String revokeClientSecret = revokeClientId.equals(this.clientId) ? appleClientSecretSupplier.get() : appleClientSecretSupplier.generateFor(revokeClientId);
-            requestBody.add("client_secret", revokeClientSecret);
-            requestBody.add("token_type_hint", "access_token");
+            MultiValueMap<String, String> requestBody = buildRevokeRequestBody(accessToken, revokeClientId);
 
             restClientBuilder.build().post()
                 .uri(APPLE_REVOKE_URL)
@@ -133,13 +127,11 @@ public class AppleOAuth2Service extends OidcUserService {
                 throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
                         .addContext("reason", "bundleId_not_configured");
             }
-            
-            // id_token 서명/iss/aud 검증 후 sub 획득 (aud는 번들 ID)
+
             String subject = idTokenValidator.validateAppleAndGetSubject(request.identityToken(), bundleId);
-            
-            Map<String, Object> token = requestAppleToken(request.authorizationCode(), bundleId, null);
-            
-            session.setAttribute("appleAccessToken", token != null ? token.get("access_token") : null);
+            Map<String, Object> token = requestAppleToken(request.authorizationCode(), bundleId);
+
+            session.setAttribute("appleAccessToken", token.get("access_token"));
             session.setAttribute("appleClientId", bundleId);
             return findMemberAndSetPendingIfNew(subject);
         } catch (UnauthorizedException e) {
@@ -151,6 +143,17 @@ public class AppleOAuth2Service extends OidcUserService {
                     .addContext("reason", "apple_native_exchange_failed")
                     .addContext("error_detail", e.getMessage());
         }
+    }
+
+    private MultiValueMap<String, String> buildRevokeRequestBody(String accessToken, String revokeClientId) {
+        MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+        requestBody.add("token", accessToken);
+        requestBody.add("client_id", revokeClientId);
+        String revokeClientSecret = revokeClientId.equals(this.clientId) ? appleClientSecretSupplier.get() : appleClientSecretSupplier.generateFor(
+                revokeClientId);
+        requestBody.add("client_secret", revokeClientSecret);
+        requestBody.add("token_type_hint", "access_token");
+        return requestBody;
     }
 
     /**
@@ -172,18 +175,8 @@ public class AppleOAuth2Service extends OidcUserService {
         }
     }
 
-    private Map<String, Object> requestAppleToken(String code, String clientIdForExchange, String redirectUri) {
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("grant_type", "authorization_code");
-        body.add("code", code);
-        body.add("client_id", clientIdForExchange);
-        String clientSecret = clientIdForExchange != null && !clientIdForExchange.equals(this.clientId)
-                ? appleClientSecretSupplier.generateFor(clientIdForExchange)
-                : appleClientSecretSupplier.get();
-        body.add("client_secret", clientSecret);
-        if (redirectUri != null) {
-            body.add("redirect_uri", redirectUri);
-        }
+    private Map<String, Object> requestAppleToken(String code, String clientIdForExchange) {
+        MultiValueMap<String, String> body = buildAccessTokenRequestBody(code, clientIdForExchange);
         Map<String, Object> responseMap = restClientBuilder.build().post()
                 .uri("https://appleid.apple.com/auth/token")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -192,16 +185,27 @@ public class AppleOAuth2Service extends OidcUserService {
                 .body(new ParameterizedTypeReference<>() {});
 
         if (responseMap == null) {
-            throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN).addContext("reason", "apple_token_response_is_null");
+            throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
+                    .addContext("reason", "apple_token_response_is_null");
         }
-
         if (responseMap.containsKey("error")) {
             log.error("Apple 토큰 교환 실패 - error: {}, description: {}", responseMap.get("error"), responseMap.get("error_description"));
             throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
                     .addContext("reason", responseMap.get("error_description"));
         }
-
         return responseMap;
+    }
+
+    private MultiValueMap<String, String> buildAccessTokenRequestBody(String code, String clientIdForExchange) {
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "authorization_code");
+        body.add("code", code);
+        body.add("client_id", clientIdForExchange);
+        String clientSecret = clientIdForExchange != null && !clientIdForExchange.equals(this.clientId)
+                ? appleClientSecretSupplier.generateFor(clientIdForExchange)
+                : appleClientSecretSupplier.get();
+        body.add("client_secret", clientSecret);
+        return body;
     }
 
     // 공통: 기존 회원 조회 + 신규면 pendingMember 세션 저장

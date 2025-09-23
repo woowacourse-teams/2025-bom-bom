@@ -30,11 +30,11 @@ public class IdTokenValidator {
     private final JwtDecoder googleDecoder = buildDecoder(GOOGLE_JWKS, GOOGLE_ISS);
 
     public String validateAppleAndGetSubject(String idToken, String expectedAudience) {
-        return validateAndGetSub(appleDecoder, APPLE_ISS, idToken, expectedAudience, "apple");
+        return validateAndGetSub(appleDecoder, idToken, expectedAudience, "apple");
     }
 
     public String validateGoogleAndGetSubject(String idToken, String expectedAudience) {
-        return validateAndGetSub(googleDecoder, GOOGLE_ISS, idToken, expectedAudience, "google");
+        return validateAndGetSub(googleDecoder, idToken, expectedAudience, "google");
     }
 
     private static JwtDecoder buildDecoder(String jwks, String issuer) {
@@ -46,7 +46,7 @@ public class IdTokenValidator {
         return decoder;
     }
 
-    private String validateAndGetSub(JwtDecoder decoder, String issuer, String idToken, String expectedAudience, String provider) {
+    private String validateAndGetSub(JwtDecoder decoder, String idToken, String expectedAudience, String provider) {
         try {
             Jwt jwt = decoder.decode(idToken);
             log.info("ID Token 검증 - provider: {}, actualAud: {}, expectedAud: {}", provider, jwt.getAudience(), expectedAudience);

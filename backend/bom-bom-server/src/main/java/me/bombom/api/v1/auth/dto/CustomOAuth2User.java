@@ -62,4 +62,8 @@ public class CustomOAuth2User implements OidcUser, Serializable {
     public Map<String, Object> getClaims() {
         return attributes;
     }
+
+    public Member getMember() {
+        return member;
+    }
 }

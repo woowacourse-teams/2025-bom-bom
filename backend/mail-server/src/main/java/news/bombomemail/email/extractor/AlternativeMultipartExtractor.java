@@ -14,6 +14,11 @@ public class AlternativeMultipartExtractor implements ContentExtractor {
     }
 
     @Override
+    public int getOrder() {
+        return 3;
+    }
+
+    @Override
     public String extract(Part part) throws MessagingException, IOException {
         Multipart mp = (Multipart) part.getContent();
         String plain = null;

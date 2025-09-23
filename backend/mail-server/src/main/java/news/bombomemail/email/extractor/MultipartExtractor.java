@@ -13,6 +13,11 @@ public class MultipartExtractor implements ContentExtractor{
     }
 
     @Override
+    public int getOrder() {
+        return 4;
+    }
+
+    @Override
     public String extract(Part part) throws MessagingException, IOException {
         Multipart multipart = (Multipart) part.getContent();
         StringBuilder sb = new StringBuilder();

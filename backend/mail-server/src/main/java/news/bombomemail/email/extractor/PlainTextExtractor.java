@@ -11,6 +11,11 @@ public class PlainTextExtractor implements ContentExtractor{
     }
 
     @Override
+    public int getOrder() {
+        return 2;
+    }
+
+    @Override
     public String extract(Part part) throws MessagingException, IOException {
         return (String) part.getContent();
     }

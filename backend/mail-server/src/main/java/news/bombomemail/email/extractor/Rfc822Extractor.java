@@ -13,6 +13,11 @@ public class Rfc822Extractor implements ContentExtractor{
     }
 
     @Override
+    public int getOrder() {
+        return 5;
+    }
+
+    @Override
     public String extract(Part part) throws MessagingException, IOException {
         Object inner = part.getContent();
         if (inner instanceof MimeMessage) {

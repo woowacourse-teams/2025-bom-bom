@@ -4,7 +4,9 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.Part;
 import jakarta.mail.internet.MimeMessage;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,13 +15,14 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class EmailContentExtractor {
 
-    private static final List<ContentExtractor> EXTRACTORS = List.of(
-            new HtmlTextExtractor(),
-            new PlainTextExtractor(),
-            new AlternativeMultipartExtractor(),
-            new MultipartExtractor(),
-            new Rfc822Extractor()
-    );
+    private static final List<ContentExtractor> EXTRACTORS = Stream.of(
+                    new HtmlTextExtractor(),
+                    new PlainTextExtractor(),
+                    new AlternativeMultipartExtractor(),
+                    new MultipartExtractor(),
+                    new Rfc822Extractor())
+            .sorted(Comparator.comparing(ContentExtractor::getOrder))
+            .toList();
 
     public static String extractContents(MimeMessage msg) throws MessagingException, IOException {
         try {

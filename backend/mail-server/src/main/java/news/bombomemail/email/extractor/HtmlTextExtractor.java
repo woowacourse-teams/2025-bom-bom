@@ -14,6 +14,11 @@ public class HtmlTextExtractor implements ContentExtractor{
     }
 
     @Override
+    public int getOrder() {
+        return 1;
+    }
+
+    @Override
     public String extract(Part part) throws MessagingException, IOException {
         return Jsoup.clean((String) part.getContent(), Safelist.basic());
     }

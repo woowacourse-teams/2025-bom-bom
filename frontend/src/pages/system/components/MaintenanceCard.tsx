@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { useDevice } from '@/hooks/useDevice';
-import maintenanceBom from '#/assets/maintenance-bom.png';
+import maintenanceBom from '#/assets/image/maintenance-bom.png';
 
 const MaintenanceCard = () => {
   const device = useDevice();

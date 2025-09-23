@@ -11,11 +11,11 @@ import { queryClient } from '@/main';
 import { theme } from '@/styles/theme';
 import { calculateRate } from '@/utils/math';
 import type { CSSObject, Theme } from '@emotion/react';
-import petLv1 from '#/assets/pet-1-lv1.png';
-import petLv2 from '#/assets/pet-1-lv2.png';
-import petLv3 from '#/assets/pet-1-lv3.png';
-import petLv4 from '#/assets/pet-1-lv4.png';
-import petLv5 from '#/assets/pet-1-lv5.png';
+import petLv1 from '#/assets/image/pet-1-lv1.png';
+import petLv2 from '#/assets/image/pet-1-lv2.png';
+import petLv3 from '#/assets/image/pet-1-lv3.png';
+import petLv4 from '#/assets/image/pet-1-lv4.png';
+import petLv5 from '#/assets/image/pet-1-lv5.png';
 import PetIcon from '#/assets/svg/pet.svg';
 
 const petImages: Record<number, string> = {

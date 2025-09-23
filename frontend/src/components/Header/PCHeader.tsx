@@ -1,30 +1,29 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
 import HeaderLogo from './HeaderLogo';
 import HeaderNavButtons from './HeaderNavButtons';
 import HeaderProfile from './HeaderProfile';
 import LoginButton from './LoginButton';
-import { queries } from '@/apis/queries';
-import { NavType } from '@/types/nav';
+import { useUserInfo } from '@/hooks/useUserInfo';
+import { Nav } from '@/types/nav';
 
 interface PCHeaderProps {
-  activeNav: NavType;
+  activeNav: Nav;
 }
 
 const PCHeader = ({ activeNav }: PCHeaderProps) => {
-  const { data: userInfo } = useQuery(queries.me());
+  const { userInfo } = useUserInfo();
 
   return (
     <HeaderContainer>
       <HeaderInner>
-        <HeaderLogo deviceType="pc" />
+        <HeaderLogo device="pc" />
 
         <NavWrapper>
-          <HeaderNavButtons activeNav={activeNav} deviceType="pc" />
+          <HeaderNavButtons activeNav={activeNav} device="pc" />
         </NavWrapper>
 
         {userInfo ? (
-          <HeaderProfile userInfo={userInfo} deviceType="pc" />
+          <HeaderProfile userInfo={userInfo} device="pc" />
         ) : (
           <LoginButton />
         )}

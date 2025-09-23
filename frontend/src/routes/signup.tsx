@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
-import { useDeviceType, DeviceType } from '@/hooks/useDeviceType';
+import { useDevice, Device } from '@/hooks/useDevice';
 import SignupCard from '@/pages/signup/components/SignupCard';
 import { getResponsiveValue } from '@/utils/responsive';
 
@@ -9,40 +9,39 @@ export const Route = createFileRoute('/signup')({
 });
 
 function RouteComponent() {
-  const deviceType = useDeviceType();
+  const device = useDevice();
 
   return (
-    <Container deviceType={deviceType}>
-      <ContentWrapper deviceType={deviceType}>
+    <Container device={device}>
+      <ContentWrapper device={device}>
         <SignupCard />
       </ContentWrapper>
     </Container>
   );
 }
 
-const Container = styled.main<{ deviceType: DeviceType }>`
+const Container = styled.main<{ device: Device }>`
   min-height: 100vh;
-  padding: ${({ deviceType }) => getResponsiveValue(deviceType, 16, 24, 32)};
+  padding: ${({ device }) => getResponsiveValue(device, 16, 24, 32)};
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  background: ${({ deviceType, theme }) =>
-    deviceType === 'mobile'
+  background: ${({ device, theme }) =>
+    device === 'mobile'
       ? theme.colors.white
       : `linear-gradient(135deg, ${theme.colors.primary} 0%, #f74 25%, ${theme.colors.primaryLight} 100%)`};
 `;
 
-const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
+const ContentWrapper = styled.div<{ device: Device }>`
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: ${({ deviceType }) =>
-    getResponsiveValue(deviceType, 400, 520, 600)};
+  max-width: ${({ device }) => getResponsiveValue(device, 400, 520, 600)};
 
   display: flex;
-  gap: ${({ deviceType }) => getResponsiveValue(deviceType, 20, 28, 32)};
+  gap: ${({ device }) => getResponsiveValue(device, 20, 28, 32)};
   flex-direction: column;
   align-items: center;
   justify-content: center;

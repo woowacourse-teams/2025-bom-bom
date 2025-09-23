@@ -8,7 +8,7 @@ interface EditableMemoCardProps {
   id: number;
   content: string;
   memo?: string;
-  onRemoveButtonClick: (id: number) => void;
+  onRemoveButtonClick: ({ id }: { id: number }) => void;
   onMemoChange: (id: number, memo: string) => void;
 }
 
@@ -24,7 +24,7 @@ const EditableMemoCard = ({
   const debouncedMemo = useDebouncedValue(localMemo, 500);
 
   const handleRemoveButtonClick = () => {
-    onRemoveButtonClick(id);
+    onRemoveButtonClick({ id });
   };
 
   useEffect(() => {

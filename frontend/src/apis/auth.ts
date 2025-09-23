@@ -31,3 +31,21 @@ export const postWithdraw = () => {
     path: '/auth/withdraw',
   });
 };
+
+export type PostNativeLoginParams = components['schemas']['NativeLoginRequest'];
+export type PostNativeLoginResponse =
+  components['schemas']['NativeLoginResponse'];
+
+export const postGoogleLogin = async (params: PostNativeLoginParams) => {
+  return await fetcher.post<PostNativeLoginParams, PostNativeLoginResponse>({
+    path: '/auth/login/google/native',
+    body: params,
+  });
+};
+
+export const postAppleLogin = async (params: PostNativeLoginParams) => {
+  return await fetcher.post<PostNativeLoginParams, PostNativeLoginResponse>({
+    path: '/auth/login/apple/native',
+    body: params,
+  });
+};

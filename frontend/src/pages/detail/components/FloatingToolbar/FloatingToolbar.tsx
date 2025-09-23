@@ -1,55 +1,28 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { PointerEvent, RefObject } from 'react';
+import { PointerEvent } from 'react';
 import { FloatingToolbarMode } from './FloatingToolbar.types';
-import {
-  ToolbarPosition,
-  useFloatingToolbarSelection,
-} from './useFloatingToolbarSelection';
+import { Position } from '@/types/position';
 import MemoIcon from '#/assets/comment.svg';
 import HighlightOffIcon from '#/assets/edit-off.svg';
 import HighlightIcon from '#/assets/edit.svg';
 
 interface FloatingToolBarProps {
-  selectionTargetRef: RefObject<HTMLDivElement | null>;
-  onHighlightButtonClick: ({
-    mode,
-    selectionRange,
-    highlightId,
-  }: {
-    mode: FloatingToolbarMode;
-    selectionRange: Range | null;
-    highlightId: number | null;
-  }) => void;
-  onMemoButtonClick: ({
-    mode,
-    selectionRange,
-  }: {
-    mode: FloatingToolbarMode;
-    selectionRange: Range | null;
-  }) => void;
+  opened: boolean;
+  position: Position;
+  mode: FloatingToolbarMode;
+  onHighlightButtonClick: () => void;
+  onMemoButtonClick: () => void;
 }
 
-export default function FloatingToolbar({
-  selectionTargetRef,
+const FloatingToolbar = ({
+  opened,
+  position,
+  mode,
   onHighlightButtonClick,
   onMemoButtonClick,
-}: FloatingToolBarProps) {
-  const isInSelectionTarget = (range: Range) =>
-    selectionTargetRef.current?.contains(range.commonAncestorContainer) ??
-    false;
-
-  const {
-    isVisible,
-    position,
-    currentMode,
-    handleHighlightButtonClick,
-    handleMemoButtonClick,
-  } = useFloatingToolbarSelection({
-    isInSelectionTarget,
-    onHighlightButtonClick,
-    onMemoButtonClick,
-  });
+}: FloatingToolBarProps) => {
+  const isNewMode = mode === 'new';
 
   const handlePointerDownOnToolbar = (e: PointerEvent) => {
     e.preventDefault();
@@ -58,18 +31,20 @@ export default function FloatingToolbar({
   return (
     <Container
       position={position}
-      visible={isVisible}
+      opened={opened}
       onPointerDown={handlePointerDownOnToolbar}
     >
-      <ToolbarButton onClick={handleHighlightButtonClick}>
-        {currentMode === 'new' ? <HighlightIcon /> : <HighlightOffIcon />}
+      <ToolbarButton onClick={onHighlightButtonClick}>
+        {isNewMode ? <HighlightIcon /> : <HighlightOffIcon />}
       </ToolbarButton>
-      <ToolbarButton onClick={handleMemoButtonClick}>
+      <ToolbarButton onClick={onMemoButtonClick}>
         <MemoIcon />
       </ToolbarButton>
     </Container>
   );
-}
+};
+
+export default FloatingToolbar;
 
 const fadeIn = keyframes`
     from { opacity: 0; transform: translate(-50%, -90%); }
@@ -81,7 +56,7 @@ const fadeOut = keyframes`
     to { opacity: 0; transform: translate(-50%, -90%); }
   `;
 
-const Container = styled.div<{ position: ToolbarPosition; visible: boolean }>`
+const Container = styled.div<{ position: Position; opened: boolean }>`
   position: fixed;
   top: ${({ position }) => position.y}px;
   left: ${({ position }) => position.x}px;
@@ -90,12 +65,12 @@ const Container = styled.div<{ position: ToolbarPosition; visible: boolean }>`
   border-radius: 8px;
   box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
 
-  display: flex;
+  display: ${({ opened }) => (opened ? 'flex' : 'none')};
   gap: 8px;
 
   background: ${({ theme }) => theme.colors.primary};
 
-  animation: ${({ visible }) => (visible ? fadeIn : fadeOut)} 0.2s ease-in-out
+  animation: ${({ opened }) => (opened ? fadeIn : fadeOut)} 0.2s ease-in-out
     forwards;
 `;
 

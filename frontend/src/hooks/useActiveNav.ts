@@ -1,19 +1,19 @@
 import { useRouterState } from '@tanstack/react-router';
 import { useEffect, useRef } from 'react';
-import { NavType } from '@/types/nav';
+import { Nav } from '@/types/nav';
 
-const navMap: Record<string, NavType> = {
+const navMap: Record<string, Nav> = {
   '/': 'today',
   '/storage': 'storage',
   '/recommend': 'recommend',
 };
 
-export const useActiveNav = (): NavType => {
+export const useActiveNav = (): Nav => {
   const location = useRouterState({
     select: (state) => state.location.pathname,
   });
 
-  const previousNavRef = useRef<NavType>(null);
+  const previousNavRef = useRef<Nav>(null);
 
   useEffect(() => {
     if (navMap[location]) {

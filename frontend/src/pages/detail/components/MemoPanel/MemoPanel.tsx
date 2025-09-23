@@ -7,27 +7,27 @@ import CloseIcon from '#/assets/close.svg';
 import MemoIcon from '#/assets/memo.svg';
 
 interface MemoPanelProps {
-  open: boolean;
+  opened: boolean;
   memos: Highlight[];
-  removeHighlight: (id: number) => void;
+  removeHighlight: ({ id }: { id: number }) => void;
   updateMemo: (id: number, memo: string) => void;
-  handleClose: () => void;
-  handleToggle: () => void;
+  onCloseButtonClick: () => void;
+  onToggleButtonClick: () => void;
 }
 
 const MemoPanel = ({
-  open,
+  opened,
   memos,
   removeHighlight,
   updateMemo,
-  handleClose,
-  handleToggle,
+  onCloseButtonClick,
+  onToggleButtonClick,
 }: MemoPanelProps) => {
   return (
-    <Container isOpen={open}>
-      <ToggleButton isOpen={open} onClick={handleToggle}>
+    <Container opened={opened}>
+      <ToggleButton opened={opened} onClick={onToggleButtonClick}>
         <ChevronIcon
-          direction={open ? 'right' : 'left'}
+          direction={opened ? 'right' : 'left'}
           width={24}
           height={24}
           color={theme.colors.primary}
@@ -45,7 +45,7 @@ const MemoPanel = ({
           </HeaderTitleBox>
         </HeaderLeft>
 
-        <CloseButton onClick={handleClose}>
+        <CloseButton onClick={onCloseButtonClick}>
           <CloseIcon fill={theme.colors.black} />
         </CloseButton>
       </Header>
@@ -80,7 +80,7 @@ const MemoPanel = ({
 
 export default MemoPanel;
 
-const Container = styled.aside<{ isOpen: boolean }>`
+const Container = styled.aside<{ opened: boolean }>`
   position: fixed;
   top: 0;
   right: 0;
@@ -95,12 +95,12 @@ const Container = styled.aside<{ isOpen: boolean }>`
 
   background-color: ${({ theme }) => theme.colors.white};
 
-  transform: ${({ isOpen }) => (isOpen ? 'translateX(0)' : 'translateX(100%)')};
+  transform: ${({ opened }) => (opened ? 'translateX(0)' : 'translateX(100%)')};
 
   transition: transform 0.3s;
 `;
 
-const ToggleButton = styled.button<{ isOpen: boolean }>`
+const ToggleButton = styled.button<{ opened: boolean }>`
   position: absolute;
   top: 80vh;
   left: -40px;

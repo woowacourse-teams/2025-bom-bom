@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { ENV } from '@/apis/env';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
 import { isLocal } from '@/utils/environment';
 import AppleIcon from '#/assets/apple.svg';
@@ -8,8 +8,8 @@ import GoogleIcon from '#/assets/google.svg';
 import SparklesIcon from '#/assets/sparkles.svg';
 
 const LoginCard = () => {
-  const deviceType = useDeviceType();
-  const isMobile = deviceType === 'mobile';
+  const device = useDevice();
+  const isMobile = device === 'mobile';
 
   return (
     <Container isMobile={isMobile}>
@@ -37,7 +37,7 @@ const LoginCard = () => {
         type="button"
       >
         <GoogleIcon width={24} height={24} fill="black" />
-        Google로 시작하기
+        Google로 계속하기
       </LoginButton>
       <LoginButton
         onClick={() => {
@@ -46,7 +46,7 @@ const LoginCard = () => {
         type="button"
       >
         <AppleIcon width={24} height={24} fill="black" />
-        Apple로 시작하기
+        Apple로 계속하기
       </LoginButton>
       <Terms>
         로그인하시면 봄봄의 <Highlight>서비스 약관</Highlight>과

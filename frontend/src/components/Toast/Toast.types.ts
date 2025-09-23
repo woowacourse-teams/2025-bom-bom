@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-export type ToastType = 'info' | 'success' | 'error';
+export type ToastVariant = 'info' | 'success' | 'error';
 
 export type ToastPosition =
   | 'top-left'
@@ -12,6 +12,6 @@ export type ToastPosition =
 
 export type ToastData = {
   id?: string;
-  type: ToastType;
+  variant: ToastVariant;
   message: ReactNode;
 };

@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { memo, RefObject } from 'react';
 import { processContent } from './ArticleContent.utils';
+import { useHighlightHoverEffect } from '../../hooks/useHighlightHoverEffect';
 
 interface ArticleContentProps {
   ref: RefObject<HTMLDivElement | null>;
@@ -8,6 +9,8 @@ interface ArticleContentProps {
 }
 
 const ArticleContent = ({ ref, content }: ArticleContentProps) => {
+  useHighlightHoverEffect();
+
   return (
     <Container
       ref={ref}

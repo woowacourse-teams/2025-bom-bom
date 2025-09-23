@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import ArticleCard from '../ArticleCard/ArticleCard';
 import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
 import { Article } from '@/types/articles';
 import CheckIcon from '#/assets/check.svg';
@@ -16,8 +16,8 @@ interface ArticleCardListProps {
 }
 
 const ArticleCardList = ({ articles }: ArticleCardListProps) => {
-  const deviceType = useDeviceType();
-  const isMobile = deviceType === 'mobile';
+  const device = useDevice();
+  const isMobile = device === 'mobile';
 
   const grouped = articles.reduce<{
     read: ExtendedArticle[];

@@ -53,7 +53,7 @@ const ReadingKingLeaderboard = () => {
             <LeaderboardList key={`leaderboard-${leaderboardIndex}`}>
               {leaderboard.map((item, index) => (
                 <LeaderboardItem
-                  key={`rank-${index}`}
+                  key={`rank-${index}` + item.nickname}
                   rank={item.rank}
                   name={item.nickname}
                   readCount={item.monthlyReadCount}

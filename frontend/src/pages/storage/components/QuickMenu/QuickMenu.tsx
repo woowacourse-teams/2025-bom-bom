@@ -4,20 +4,20 @@ import { MENU_ITEMS } from './QuickMenu.constants';
 import FloatingActionButton from '@/components/FloatingActionButton/FloatingActionButton';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
 import LinkIcon from '#/assets/link.svg';
 
 const QuickMenu = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const deviceType = useDeviceType();
+  const device = useDevice();
 
   const handleTabSelect = (path: string) => {
     navigate({ to: path });
   };
 
-  if (deviceType !== 'pc') {
+  if (device !== 'pc') {
     return (
       <FloatingActionButton
         icon={<LinkIcon width={24} height={24} fill={theme.colors.white} />}
@@ -34,14 +34,10 @@ const QuickMenu = () => {
                 selected={isSelected}
                 onTabSelect={() => handleTabSelect(path)}
                 StartComponent={
-                  <StyledIcon
-                    as={Icon}
-                    selected={isSelected}
-                    deviceType={deviceType}
-                  />
+                  <StyledIcon as={Icon} selected={isSelected} device={device} />
                 }
                 textAlign="start"
-                deviceType={deviceType}
+                device={device}
               />
             );
           })}
@@ -70,14 +66,10 @@ const QuickMenu = () => {
               selected={isSelected}
               onTabSelect={() => handleTabSelect(path)}
               StartComponent={
-                <StyledIcon
-                  as={Icon}
-                  selected={isSelected}
-                  deviceType={deviceType}
-                />
+                <StyledIcon as={Icon} selected={isSelected} device={device} />
               }
               textAlign="start"
-              deviceType={deviceType}
+              device={device}
             />
           );
         })}
@@ -128,15 +120,15 @@ const Title = styled.h3`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const StyledIcon = styled.div<{ deviceType: DeviceType; selected?: boolean }>`
-  width: ${({ deviceType }) => (deviceType === 'pc' ? '24px' : '28px')};
-  height: ${({ deviceType }) => (deviceType === 'pc' ? '24px' : '28px')};
+const StyledIcon = styled.div<{ device: Device; selected?: boolean }>`
+  width: ${({ device }) => (device === 'pc' ? '24px' : '28px')};
+  height: ${({ device }) => (device === 'pc' ? '24px' : '28px')};
 
   color: ${({ theme, selected = false }) =>
     selected ? theme.colors.white : theme.colors.primary};
 `;
 
-const StyledTab = styled(Tab)<{ deviceType: DeviceType }>`
-  font: ${({ theme, deviceType }) =>
-    deviceType === 'pc' ? theme.fonts.body2 : theme.fonts.body1};
+const StyledTab = styled(Tab)<{ device: Device }>`
+  font: ${({ theme, device }) =>
+    device === 'pc' ? theme.fonts.body2 : theme.fonts.body1};
 `;

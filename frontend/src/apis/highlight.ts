@@ -27,15 +27,14 @@ export const postHighlight = async (params: PostHighlightParams) => {
 };
 
 export type PatchHighlightParams =
-  operations['updateHighlight']['parameters']['path'];
-export type PatchHighlightRequest =
-  components['schemas']['UpdateHighlightRequest'];
+  operations['updateHighlight']['parameters']['path'] &
+    components['schemas']['UpdateHighlightRequest'];
 
 export const patchHighlight = async ({
   id,
   color,
   memo,
-}: PatchHighlightParams & PatchHighlightRequest) => {
+}: PatchHighlightParams) => {
   return await fetcher.patch({
     path: `/highlights/${id}`,
     body: {

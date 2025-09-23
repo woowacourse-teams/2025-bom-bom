@@ -1,12 +1,12 @@
 import styled from '@emotion/styled';
 
-type VariantType = 'rounded' | 'rectangular';
+type Variant = 'rounded' | 'rectangular';
 
 interface ProgressBarProps {
   rate: number;
   caption?: string;
   transition?: boolean | number;
-  variant?: VariantType;
+  variant?: Variant;
 }
 
 /**

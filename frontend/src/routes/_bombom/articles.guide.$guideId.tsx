@@ -4,8 +4,8 @@ import Spacing from '@/components/Spacing/Spacing';
 import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import { GuideMail } from '@/mocks/datas/guideMail';
+import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
-import GuideArticleBody from '@/pages/detail/components/GuideArticleBody';
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
 import useGuideAsReadMutation from '@/pages/detail/hooks/useGuideAsReadMutation';
 
@@ -56,7 +56,7 @@ function GuideMailPage() {
       />
       <Divider />
 
-      <GuideArticleBody
+      <ArticleBody
         articleId={guideIdNumber}
         articleContent={guideArticle.contents}
       />

@@ -1,31 +1,30 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
 import HeaderLogo from './HeaderLogo';
 import HeaderNavButtons from './HeaderNavButtons';
 import HeaderProfile from './HeaderProfile';
 import LoginButton from './LoginButton';
-import { queries } from '@/apis/queries';
-import { NavType } from '@/types/nav';
+import { useUserInfo } from '@/hooks/useUserInfo';
+import { Nav } from '@/types/nav';
 
 interface MobileHeaderProps {
-  activeNav: NavType;
+  activeNav: Nav;
 }
 
 const MobileHeader = ({ activeNav }: MobileHeaderProps) => {
-  const { data: userInfo } = useQuery(queries.me());
+  const { userInfo } = useUserInfo();
 
   return (
     <>
       <MobileHeaderContainer>
-        <HeaderLogo deviceType="mobile" />
+        <HeaderLogo device="mobile" />
         {userInfo ? (
-          <HeaderProfile userInfo={userInfo} deviceType="mobile" />
+          <HeaderProfile userInfo={userInfo} device="mobile" />
         ) : (
           <LoginButton />
         )}
       </MobileHeaderContainer>
       <BottomNavWrapper>
-        <HeaderNavButtons activeNav={activeNav} deviceType="mobile" />
+        <HeaderNavButtons activeNav={activeNav} device="mobile" />
       </BottomNavWrapper>
     </>
   );

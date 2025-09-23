@@ -3,12 +3,15 @@ import { tanstackRouter } from '@tanstack/router-plugin/webpack';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import dotenv from 'dotenv';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
 import webpack from 'webpack';
 import 'webpack-dev-server';
 
 dotenv.config();
 
 export default (env, argv) => {
+  const isProduction = argv.mode === 'production';
+
   const config: webpack.Configuration = {
     mode: argv.mode,
     entry: './src/main.tsx',
@@ -109,6 +112,28 @@ export default (env, argv) => {
     optimization: {
       usedExports: true, // 사용되지 않는 export 제거
       sideEffects: false, // side effect가 없는 모듈들 최적화
+      minimize: isProduction,
+      minimizer: isProduction
+        ? [
+            new TerserPlugin({
+              terserOptions: {
+                compress: {
+                  drop_console: true, // console.log 제거
+                  drop_debugger: true, // debugger 제거
+                  pure_funcs: ['console.log', 'console.info', 'console.warn'], // console.log 제거
+                },
+                mangle: {
+                  toplevel: true,
+                  reserved: [], // 변수 이름 변경 방지
+                },
+                format: {
+                  comments: false, // 주석 제거
+                },
+              },
+              extractComments: false, // 주석 제거
+            }),
+          ]
+        : [],
       splitChunks: {
         chunks: 'all', // 모든 청크에 대해 코드 분할 적용
         minSize: 30000, // 최소 분할 크기 (30KB)

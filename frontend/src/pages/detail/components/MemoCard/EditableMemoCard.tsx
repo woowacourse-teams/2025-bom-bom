@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { useEffect, useRef, useState } from 'react';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { theme } from '@/styles/theme';
-import DeleteIcon from '#/assets/delete.svg';
+import DeleteIcon from '#/assets/svg/delete.svg';
 
 interface EditableMemoCardProps {
   id: number;

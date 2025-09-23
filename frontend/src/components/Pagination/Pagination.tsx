@@ -6,8 +6,8 @@ import {
   canGoToNextPage,
   shouldShowPagination,
 } from './Pagination.utils';
-import ChevronLeftIcon from '#/assets/chevron-left.svg';
-import ChevronRightIcon from '#/assets/chevron-right.svg';
+import ChevronLeftIcon from '#/assets/svg/chevron-left.svg';
+import ChevronRightIcon from '#/assets/svg/chevron-right.svg';
 
 interface PaginationProps {
   currentPage: number;

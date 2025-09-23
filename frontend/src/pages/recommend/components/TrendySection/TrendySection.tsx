@@ -12,7 +12,7 @@ import { CATEGORIES, Category } from '@/constants/category';
 import { Device, useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { Newsletter } from '@/types/newsletter';
-import TrendingUpIcon from '#/assets/trending-up.svg';
+import TrendingUpIcon from '#/assets/svg/trending-up.svg';
 
 const TrendySection = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category>('전체');

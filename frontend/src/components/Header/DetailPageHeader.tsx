@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { useRouter } from '@tanstack/react-router';
 import ChevronIcon from '@/components/icons/ChevronIcon';
-import BookmarkActiveIcon from '#/assets/bookmark-active.svg';
-import BookmarkInactiveIcon from '#/assets/bookmark-inactive.svg';
+import BookmarkActiveIcon from '#/assets/svg/bookmark-active.svg';
+import BookmarkInactiveIcon from '#/assets/svg/bookmark-inactive.svg';
 
 interface DetailPageHeaderProps {
   bookmarked?: boolean;

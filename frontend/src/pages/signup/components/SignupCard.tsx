@@ -18,7 +18,7 @@ import { GUIDE_MAILS } from '@/mocks/datas/guideMail';
 import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
-import HelpIcon from '#/assets/help.svg';
+import HelpIcon from '#/assets/svg/help.svg';
 
 const EMAIL_DOMAIN = '@bombom.news';
 

@@ -8,10 +8,10 @@ import { useDevice } from '@/hooks/useDevice';
 import { showMessenger } from '@/libs/channelTalk/channelTalk.utils';
 import { UserInfo } from '@/types/me';
 import { copyToClipboard } from '@/utils/copy';
-import ChatIcon from '#/assets/chat.svg';
-import CopyIcon from '#/assets/copy.svg';
-import LogoutIcon from '#/assets/logout.svg';
-import MailIcon from '#/assets/mail.svg';
+import ChatIcon from '#/assets/svg/chat.svg';
+import CopyIcon from '#/assets/svg/copy.svg';
+import LogoutIcon from '#/assets/svg/logout.svg';
+import MailIcon from '#/assets/svg/mail.svg';
 
 interface ProfileDetailProps {
   userInfo: UserInfo;

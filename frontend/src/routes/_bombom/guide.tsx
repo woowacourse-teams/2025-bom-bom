@@ -6,7 +6,7 @@ import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import { theme } from '@/styles/theme';
 import { Article } from '@/types/articles';
 import { createStorage } from '@/utils/localStorage';
-import HelpIcon from '#/assets/help.svg';
+import HelpIcon from '#/assets/svg/help.svg';
 
 export const Route = createFileRoute('/_bombom/guide')({
   component: GuidePage,

@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import Chip from '@/components/Chip/Chip';
 import { Device, useDevice } from '@/hooks/useDevice';
 import { formatDate } from '@/utils/date';
-import ClockIcon from '#/assets/clock.svg';
+import ClockIcon from '#/assets/svg/clock.svg';
 
 interface ArticleHeaderProps {
   title: string;

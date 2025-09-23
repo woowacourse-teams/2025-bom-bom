@@ -16,7 +16,7 @@ import petLv2 from '#/assets/pet-1-lv2.png';
 import petLv3 from '#/assets/pet-1-lv3.png';
 import petLv4 from '#/assets/pet-1-lv4.png';
 import petLv5 from '#/assets/pet-1-lv5.png';
-import PetIcon from '#/assets/pet.svg';
+import PetIcon from '#/assets/svg/pet.svg';
 
 const petImages: Record<number, string> = {
   1: petLv1,

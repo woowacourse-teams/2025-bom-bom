@@ -8,8 +8,8 @@ import { useDevice } from '@/hooks/useDevice';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import { copyToClipboard } from '@/utils/copy';
 import { openExternalLink } from '@/utils/externalLink';
-import ArticleHistoryIcon from '#/assets/article-history.svg';
-import HomeIcon from '#/assets/home.svg';
+import ArticleHistoryIcon from '#/assets/svg/article-history.svg';
+import HomeIcon from '#/assets/svg/home.svg';
 
 interface NewsletterDetailProps {
   newsletterId: number;

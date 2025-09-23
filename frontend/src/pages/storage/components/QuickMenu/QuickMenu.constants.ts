@@ -1,6 +1,6 @@
-import BookmarkIcon from '#/assets/bookmark-inactive.svg';
-import HelpIcon from '#/assets/help.svg';
-import MemoIcon from '#/assets/memo.svg';
+import BookmarkIcon from '#/assets/svg/bookmark-inactive.svg';
+import HelpIcon from '#/assets/svg/help.svg';
+import MemoIcon from '#/assets/svg/memo.svg';
 
 export const MENU_ITEMS = [
   {

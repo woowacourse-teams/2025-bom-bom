@@ -6,7 +6,7 @@ import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
 import { Device, useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
-import LinkIcon from '#/assets/link.svg';
+import LinkIcon from '#/assets/svg/link.svg';
 
 const QuickMenu = () => {
   const navigate = useNavigate();

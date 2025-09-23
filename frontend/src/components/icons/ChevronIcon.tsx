@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { SVGProps } from 'react';
 import { Direction } from './Icons.types';
-import ChevronDownSvg from '#/assets/chevron-down.svg';
+import ChevronDownSvg from '#/assets/svg/chevron-down.svg';
 
 interface ChevronIconProps extends SVGProps<SVGSVGElement> {
   direction?: Direction;

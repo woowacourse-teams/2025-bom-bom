@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import BookmarkActiveIcon from '#/assets/bookmark-active.svg';
-import BookmarkInactiveIcon from '#/assets/bookmark-inactive.svg';
-import ArrowIcon from '#/assets/chevron-up.svg';
+import BookmarkActiveIcon from '#/assets/svg/bookmark-active.svg';
+import BookmarkInactiveIcon from '#/assets/svg/bookmark-inactive.svg';
+import ArrowIcon from '#/assets/svg/chevron-up.svg';
 
 interface FloatingActionButtonsProps {
   bookmarked: boolean | null;

@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { ChangeEvent, KeyboardEvent } from 'react';
 import { Device } from '@/hooks/useDevice';
-import CheckIcon from '#/assets/check.svg';
-import EditIcon from '#/assets/edit.svg';
+import CheckIcon from '#/assets/svg/check.svg';
+import EditIcon from '#/assets/svg/edit.svg';
 
 interface WeeklyGoalEditorProps {
   isEditing: boolean;

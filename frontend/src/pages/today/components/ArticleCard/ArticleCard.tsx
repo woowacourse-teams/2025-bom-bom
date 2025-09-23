@@ -7,7 +7,7 @@ import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { components } from '@/types/openapi';
 import { formatDate } from '@/utils/date';
-import ClockIcon from '#/assets/clock.svg';
+import ClockIcon from '#/assets/svg/clock.svg';
 
 type ReadVariant = 'transparent' | 'badge';
 

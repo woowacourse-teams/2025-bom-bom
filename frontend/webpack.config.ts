@@ -72,7 +72,7 @@ export default (env, argv) => {
         template: './index.html', // 템플릿 HTML
         filename: 'index.html', // 출력될 HTML 파일 이름
         inject: true, // <script> 태그 자동 삽입
-        favicon: './public/assets/bombom.png',
+        favicon: './public/assets/logo.png',
       }),
       tanstackRouter({
         target: 'react',

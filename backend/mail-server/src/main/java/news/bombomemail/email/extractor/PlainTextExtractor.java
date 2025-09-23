@@ -5,6 +5,7 @@ import jakarta.mail.Part;
 import java.io.IOException;
 
 public class PlainTextExtractor implements ContentExtractor{
+
     @Override
     public boolean supports(Part part) throws MessagingException {
         return part.isMimeType("text/plain");

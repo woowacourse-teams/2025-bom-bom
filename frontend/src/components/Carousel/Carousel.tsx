@@ -7,7 +7,7 @@ import arrowPrev from '#/assets/carousel-arrow-prev.png';
 interface CarouselProps extends PropsWithChildren {
   timer?: boolean | number;
   hasSlideButton?: boolean;
-  animation?: 'slide' | 'none';
+  hasAnimation?: boolean;
 }
 
 /**
@@ -16,7 +16,7 @@ interface CarouselProps extends PropsWithChildren {
  *   - `true`: 기본 4초 주기
  *   - `number`: 커스텀 주기(ms)
  * @property {boolean} [hasSlideButton=true] - 슬라이드 변경 버튼 렌더링 여부
- * @property {'slide'|'none'} [animation='slide'] - 애니메이션 타입
+ * @property {boolean} [hasAnimation=true] - 애니메이션 타입
  *   - `slide`: 왼쪽에서 오른쪽으로 미끄러지는 애니메이션
  *   - `none`: 애니메이션 없음
  * @property {React.ReactNode} children - 슬라이드로 렌더링할 자식 요소들
@@ -24,7 +24,7 @@ interface CarouselProps extends PropsWithChildren {
 const Carousel = ({
   timer = true,
   hasSlideButton = true,
-  animation = 'slide',
+  hasAnimation = true,
   children,
 }: CarouselProps) => {
   const originSlides = Children.toArray(children);
@@ -62,7 +62,7 @@ const Carousel = ({
         slideIndex={slideIndex}
         isTransitioning={isTransitioning}
         onTransitionEnd={handleTransitionEnd}
-        animation={animation}
+        hasAnimation={hasAnimation}
       >
         {infinitySlides.map((slideContent, index) => (
           <Slide key={`slide-${index}`}>{slideContent}</Slide>
@@ -104,15 +104,15 @@ const Container = styled.div`
 const SlidesWrapper = styled.ul<{
   slideIndex: number;
   isTransitioning: boolean;
-  animation: 'slide' | 'none';
+  hasAnimation: boolean;
 }>`
   position: relative;
 
   display: flex;
 
   transform: ${({ slideIndex }) => `translateX(-${slideIndex * 100}%)`};
-  transition: ${({ animation, isTransitioning }) =>
-    animation === 'slide'
+  transition: ${({ hasAnimation, isTransitioning }) =>
+    hasAnimation
       ? isTransitioning
         ? TRANSITIONS.slide
         : TRANSITIONS.none

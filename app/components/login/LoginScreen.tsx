@@ -16,13 +16,13 @@ import { useWebView } from '@/contexts/WebViewContext';
 import { loginWithApple, loginWithGoogle } from '@/utils/auth';
 
 export const LoginScreen = () => {
-  const { setShowWebViewLogin } = useAuth();
+  const { showLogin } = useAuth();
   const { sendMessageToWeb } = useWebView();
 
   const handleGoogleLogin = async () => {
     try {
       await loginWithGoogle(({ identityToken, authorizationCode }) => {
-        setShowWebViewLogin(true);
+        showLogin();
         sendMessageToWeb({
           type: 'GOOGLE_LOGIN_TOKEN',
           payload: {
@@ -39,7 +39,7 @@ export const LoginScreen = () => {
   const handleAppleLogin = async () => {
     try {
       await loginWithApple(({ identityToken, authorizationCode }) => {
-        setShowWebViewLogin(true);
+        showLogin();
         sendMessageToWeb({
           type: 'APPLE_LOGIN_TOKEN',
           payload: {

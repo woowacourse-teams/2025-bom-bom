@@ -7,7 +7,6 @@ import React, {
 
 export interface AuthContextType {
   showWebViewLogin: boolean;
-  setShowWebViewLogin: (show: boolean) => void;
   showLogin: () => void;
   hideLogin: () => void;
 }
@@ -17,11 +16,20 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [showWebViewLogin, setShowWebViewLogin] = useState(false);
 
+  const showLogin = () => {
+    setShowWebViewLogin(true);
+  };
+
+  const hideLogin = () => {
+    setShowWebViewLogin(false);
+  };
+
   return (
     <AuthContext.Provider
       value={{
         showWebViewLogin,
-        setShowWebViewLogin,
+        showLogin,
+        hideLogin,
       }}
     >
       {children}

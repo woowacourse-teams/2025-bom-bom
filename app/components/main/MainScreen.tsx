@@ -12,7 +12,7 @@ import { LoadingSpinner } from '../common/LoadingSpinner';
 import { LoginScreenOverlay } from '../login/LoginScreenOverlay';
 
 export const MainScreen = () => {
-  const { showWebViewLogin, setShowWebViewLogin } = useAuth();
+  const { showWebViewLogin, showLogin, hideLogin } = useAuth();
   const { webViewRef } = useWebView();
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {
@@ -22,17 +22,17 @@ export const MainScreen = () => {
 
       switch (message.type) {
         case 'SHOW_LOGIN_SCREEN':
-          setShowWebViewLogin(true);
+          showLogin();
           break;
 
         case 'LOGIN_SUCCESS':
           console.log('웹뷰에서 로그인 성공 알림 수신:', message.payload);
-          setShowWebViewLogin(false);
+          hideLogin();
           break;
 
         case 'LOGIN_FAILED':
           console.log('웹뷰에서 로그인 실패 알림 수신:', message.payload);
-          setShowWebViewLogin(false);
+          hideLogin();
           break;
 
         default:
@@ -76,10 +76,7 @@ export const MainScreen = () => {
         />
       </WebViewContainer>
 
-      <LoginScreenOverlay
-        visible={showWebViewLogin}
-        onClose={() => setShowWebViewLogin(false)}
-      />
+      <LoginScreenOverlay visible={showWebViewLogin} onClose={hideLogin} />
     </Container>
   );
 };

@@ -1,12 +1,11 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback } from 'react';
 import LeaderboardItem from './LeaderboardItem';
+import { getLeaderboardData } from './ReadingKingLeaderboard.utils';
 import ReadingKingMyRank from './ReadingKingMyRank';
 import { queries } from '@/apis/queries';
 import Carousel from '@/components/Carousel/Carousel';
 import ArrowIcon from '@/components/icons/ArrowIcon';
-import type { ReadingKingRank } from './ReadingKingLeaderboard.types';
 
 const RANKING = {
   maxRank: 10,
@@ -18,22 +17,6 @@ const ReadingKingLeaderboard = () => {
     queries.monthlyReadingRank({ limit: RANKING.maxRank }),
   );
   const { data: userRank } = useQuery(queries.myMonthlyReadingRank());
-
-  const getLeaderboardData = useCallback((data: ReadingKingRank) => {
-    const leaderboardLength = Math.ceil(data.length / RANKING.boardUnit);
-
-    const leaderboardData: ReadingKingRank[] = Array.from(
-      { length: leaderboardLength },
-      () => [],
-    );
-
-    data.forEach((rankData, index) => {
-      const leaderboardIndex = Math.floor(index / RANKING.boardUnit);
-      leaderboardData[leaderboardIndex]?.push(rankData);
-    });
-
-    return leaderboardData;
-  }, []);
 
   if (!monthlyReadingRank || monthlyReadingRank.length === 0) {
     return null;
@@ -65,7 +48,7 @@ const ReadingKingLeaderboard = () => {
       <Description>순위는 10분마다 변경됩니다.</Description>
 
       <Carousel hasSlideButton={false} hasAnimation={false}>
-        {getLeaderboardData(monthlyReadingRank).map(
+        {getLeaderboardData(monthlyReadingRank, RANKING.boardUnit).map(
           (leaderboard, leaderboardIndex) => (
             <LeaderboardList key={`leaderboard-${leaderboardIndex}`}>
               {leaderboard.map((item, index) => (

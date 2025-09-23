@@ -1,8 +1,8 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useMutation } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { useLocation, useNavigate } from '@tanstack/react-router';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { FieldError, Gender } from './SignupCard.types';
 import {
   formatBirthDate,
@@ -24,6 +24,8 @@ import HelpIcon from '#/assets/help.svg';
 const EMAIL_DOMAIN = '@bombom.news';
 
 const SignupCard = () => {
+  const location = useLocation();
+
   const deviceType = useDeviceType();
   const navigate = useNavigate();
   const [nickname, setNickname] = useState('');
@@ -134,6 +136,26 @@ const SignupCard = () => {
 
   const openEmailHelp = () => setEmailHelpOpen(true);
   const closeEmailHelp = () => setEmailHelpOpen(false);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+
+    const emailParam = searchParams.get('email');
+    const nameParam = searchParams.get('name');
+
+    if (emailParam) {
+      setEmailPart(emailParam);
+    }
+
+    if (nameParam) {
+      setNickname(nameParam);
+    }
+
+    if (emailParam || nameParam) {
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+    }
+  }, [location.search]);
 
   return (
     <Container deviceType={deviceType}>

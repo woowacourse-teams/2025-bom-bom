@@ -22,6 +22,7 @@ import me.bombom.api.v1.member.service.MemberService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -71,13 +72,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 response.sendRedirect(getBaseUrlByEnv(request));
                 return;
             }
+        } else {
+            // === 로그인 처리 ===
+            OAuth2LoginInfo oauth2Info = extractOAuth2LoginInfo(authentication);
+            Member member = oauth2Info.getMember();
+            String redirectUrl = buildRedirectUrl(request, member, oauth2Info);
+            response.sendRedirect(redirectUrl);
         }
 
-        // === 로그인 처리 ===
-        OAuth2LoginInfo oauth2Info = extractOAuth2LoginInfo(authentication);
-        Member member = oauth2Info.getMember();
-        String redirectUrl = buildRedirectUrl(request, member, oauth2Info);
-        response.sendRedirect(redirectUrl);
     }
 
     private OAuth2LoginInfo extractOAuth2LoginInfo(Authentication authentication) {
@@ -95,7 +97,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     }
 
     private OAuth2UserInfoExtractor getExtractor(Authentication authentication) {
-        String provider = authentication.getName();
+        String provider = resolveProvider(authentication);
 
         return extractors.stream()
                 .filter(extractor -> extractor.supports(provider))
@@ -104,8 +106,17 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                     log.error("지원하지 않는 OAuth2 제공자입니다: {}", provider);
                     return new UnauthorizedException(ErrorDetail.UNSUPPORTED_OAUTH2_PROVIDER)
                             .addContext(ErrorContextKeys.OPERATION, "getExtractor")
-                            .addContext("provider", authentication.getName());
+                            .addContext("provider", provider);
                 });
+    }
+
+    private String resolveProvider(Authentication authentication) {
+        if (authentication instanceof OAuth2AuthenticationToken token) {
+            return token.getAuthorizedClientRegistrationId();
+        }
+        throw new UnauthorizedException(ErrorDetail.UNSUPPORTED_OAUTH2_PROVIDER)
+                .addContext(ErrorContextKeys.OPERATION, "resolveProvider")
+                .addContext("provider", "unknown");
     }
 
     private String buildRedirectUrl(HttpServletRequest request, Member member, OAuth2LoginInfo oauth2Info) {

@@ -4,31 +4,31 @@ import {
   getArticles,
   type GetArticlesParams,
   getArticlesStatisticsNewsletters,
-,
-  GetArticleByIdParams,
-  GetArticleStatisticsNewslettersParams} from './articles';
-import type { GetSignupCheckParams } from './auth';
+  type GetArticleByIdParams,
+  type GetArticleStatisticsNewslettersParams,
+} from './articles';
 import { getSignupCheck } from './auth';
-import type {
-  GetArticleBookmarkStatusParams,
-  GetBookmarksParams,
-} from './bookmark';
 import {
   getArticleBookmarkStatus,
   getBookmarks,
   getBookmarksStatisticsNewsletters,
 } from './bookmark';
-import type { GetHighlightsParams } from './highlight';
 import { getHighlights, getHighlightStatisticsNewsletter } from './highlight';
-import type { GetMonthlyReadingRankParams } from './members';
 import {
   getMonthlyReadingRank,
   getMyMonthlyReadingRank,
   getReadingStatus,
   getUserInfo,
 } from './members';
-import type { GetNewsletterDetailParams } from './newsLetters';
 import { getNewsletterDetail, getNewsletters } from './newsLetters';
+import type { GetSignupCheckParams } from './auth';
+import type {
+  GetArticleBookmarkStatusParams,
+  GetBookmarksParams,
+} from './bookmark';
+import type { GetHighlightsParams } from './highlight';
+import type { GetMonthlyReadingRankParams } from './members';
+import type { GetNewsletterDetailParams } from './newsLetters';
 
 export const queries = {
   // articles

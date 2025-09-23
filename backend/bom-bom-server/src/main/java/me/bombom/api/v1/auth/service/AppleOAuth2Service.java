@@ -1,6 +1,9 @@
 package me.bombom.api.v1.auth.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -72,9 +75,57 @@ public class AppleOAuth2Service extends OidcUserService {
                 log.warn("Apple Access Token 추출 실패");
             }
             
+            // user 추가 정보(name/email) 파싱 및 attributes 병합 (form_post로 전달되는 user JSON)
+            Map<String, Object> mergedAttributes = new HashMap<>(oidcUser.getAttributes());
+            try {
+                Map<String, Object> additional = userRequest.getAdditionalParameters();
+                log.info("Apple 추가 파라미터 수신 - keys: {}", additional.keySet());
+                // 추가 파라미터에 없다면 세션에서 보조 조회
+                Object userParam = additional.get("user");
+                if (userParam == null) {
+                    Object fromSession = session.getAttribute("appleUserParam");
+                    if (fromSession instanceof String s && !s.isBlank()) {
+                        userParam = s;
+                        log.info("세션에서 Apple user 파라미터 복원 성공");
+                        // 일회성 사용 후 세션에서 제거
+                        session.removeAttribute("appleUserParam");
+                    }
+                }
+                if (userParam instanceof String userJson && !userJson.isBlank()) {
+                    log.info("Apple user 원문(JSON) 수신: {}", userJson);
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    Map<String, Object> userMap = objectMapper.readValue(userJson, new TypeReference<Map<String, Object>>() {});
+                    // email
+                    Object emailFromUser = userMap.get("email");
+                    if (emailFromUser instanceof String emailStr && !emailStr.isBlank()) {
+                        mergedAttributes.put("email", emailStr);
+                        log.info("Apple user 파싱 - email: {}", emailStr);
+                    }
+                    // name { firstName, lastName }
+                    Object nameObj = userMap.get("name");
+                    if (nameObj instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> nameMap = (Map<String, Object>) nameObj;
+                        String firstName = Optional.ofNullable(nameMap.get("firstName")).map(Object::toString).orElse(null);
+                        String lastName  = Optional.ofNullable(nameMap.get("lastName")).map(Object::toString).orElse(null);
+                        Map<String, String> mergedName = new HashMap<>();
+                        if (firstName != null) mergedName.put("firstName", firstName);
+                        if (lastName != null) mergedName.put("lastName", lastName);
+                        if (!mergedName.isEmpty()) {
+                            mergedAttributes.put("name", mergedName);
+                            log.info("Apple user 파싱 - firstName: {}, lastName: {}", firstName, lastName);
+                        }
+                    }
+                } else {
+                    log.info("Apple user 파라미터가 없습니다(최초 동의가 아니거나 Apple 미제공 케이스)");
+                }
+            } catch (Exception e) {
+                log.warn("Apple user 파라미터 파싱 실패 - error: {}", e.getMessage(), e);
+            }
+
             // 기존 회원 확인
             Optional<Member> member = findMemberAndSetPendingIfNew(providerId);
-            return new CustomOAuth2User(oidcUser.getAttributes(), member.orElse(null), oidcUser.getIdToken(), oidcUser.getUserInfo());
+            return new CustomOAuth2User(mergedAttributes, member.orElse(null), oidcUser.getIdToken(), oidcUser.getUserInfo());
         } catch (Exception e) {
             log.error("Apple OIDC 로그인 처리 실패 - error: {}", e.getMessage(), e);
             throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)

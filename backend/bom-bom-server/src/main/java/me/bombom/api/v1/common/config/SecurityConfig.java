@@ -7,6 +7,7 @@ import me.bombom.api.v1.auth.AppleClientSecretSupplier;
 import me.bombom.api.v1.auth.AppleOAuth2AccessTokenResponseClient;
 import me.bombom.api.v1.auth.ApplePrivateKeyLoader;
 import me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler;
+import me.bombom.api.v1.auth.resolver.AppleAuthorizationRequestResolver;
 import me.bombom.api.v1.auth.service.AppleOAuth2Service;
 import me.bombom.api.v1.auth.service.CustomOAuth2UserService;
 import me.bombom.api.v1.auth.service.GoogleOAuth2LoginService;
@@ -27,6 +28,7 @@ import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResp
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -60,7 +62,8 @@ public class SecurityConfig {
             CustomOAuth2UserService customOAuth2UserService,
             AppleOAuth2Service appleOAuth2Service,
             OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
-            OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegatingAccessTokenClient
+            OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegatingAccessTokenClient,
+            ClientRegistrationRepository clientRegistrationRepository
     ) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -70,6 +73,9 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(authorization ->
+                                authorization.authorizationRequestResolver(new AppleAuthorizationRequestResolver(clientRegistrationRepository))
+                        )
                         .tokenEndpoint(token -> token.accessTokenResponseClient(delegatingAccessTokenClient))
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)

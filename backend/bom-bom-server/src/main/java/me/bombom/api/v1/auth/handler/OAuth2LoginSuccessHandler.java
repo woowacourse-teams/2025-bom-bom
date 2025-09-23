@@ -124,7 +124,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         if (member != null) {
             return baseUrl + HOME_PATH;
         }
-        if (oauth2Info.getEmail() != null && oauth2Info.getName() != null) {
+        if (oauth2Info.getEmail() != null || oauth2Info.getName() != null) {
             String queryParams = buildQueryParams(oauth2Info);
             return baseUrl + SIGNUP_PATH + queryParams;
         }
@@ -133,15 +133,23 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private String buildQueryParams(OAuth2LoginInfo oauth2Info) {
         StringBuilder params = new StringBuilder("?");
+        boolean first = true;
         try {
-            params.append(EMAIL_PARAM)
-                    .append("=")
-                    .append(URLEncoder.encode(getEmailLocalPart(oauth2Info), StandardCharsets.UTF_8))
-                    .append("&");
+            if (oauth2Info.getEmail() != null) {
+                if (!first) params.append("&");
+                params.append(EMAIL_PARAM)
+                        .append("=")
+                        .append(URLEncoder.encode(getEmailLocalPart(oauth2Info), StandardCharsets.UTF_8));
+                first = false;
+            }
 
-            params.append(NAME_PARAM)
-                  .append("=")
-                  .append(URLEncoder.encode(oauth2Info.getName(), StandardCharsets.UTF_8));
+            if (oauth2Info.getName() != null) {
+                if (!first) params.append("&");
+                params.append(NAME_PARAM)
+                        .append("=")
+                        .append(URLEncoder.encode(oauth2Info.getName(), StandardCharsets.UTF_8));
+                first = false;
+            }
         } catch (Exception e) {
             log.warn("쿼리 파라미터 인코딩 실패", e);
         }

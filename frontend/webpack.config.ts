@@ -47,7 +47,7 @@ export default (env, argv) => {
           ],
         },
         {
-          test: /\.(png|jpg|jpeg|gif)$/i,
+          test: /\.(png|jpg|jpeg|gif|avif)$/i,
           type: 'asset',
         },
         {

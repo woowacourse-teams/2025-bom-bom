@@ -49,8 +49,6 @@ const NewsletterDetail = ({
     openExternalLink(newsletterDetail.previousNewsletterUrl);
   };
 
-  console.log(userInfo, isLoggedIn);
-
   return (
     <Container>
       <FixedWrapper isMobile={isMobile}>

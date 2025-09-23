@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
 import SlideCardList from '../SlideCardList/SlideCardList';
 import { useUserInfo } from '@/hooks/useUserInfo';
-import logo from '#/assets/png/logo.png';
+import logo from '#/assets/avif/logo.avif';
 
 export default function NewsletterHero() {
   const { userInfo } = useUserInfo();

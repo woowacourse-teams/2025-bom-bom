@@ -47,7 +47,7 @@ export default (env, argv) => {
           ],
         },
         {
-          test: /\.(png|jpg|jpeg|gif|avif)$/i,
+          test: /\.(avif|jpg|jpeg|gif|avif)$/i,
           type: 'asset',
         },
         {
@@ -76,7 +76,7 @@ export default (env, argv) => {
         template: './index.html', // 템플릿 HTML
         filename: 'index.html', // 출력될 HTML 파일 이름
         inject: true, // <script> 태그 자동 삽입
-        favicon: './public/assets/png/logo.png',
+        favicon: './public/assets/avif/logo.avif',
       }),
       tanstackRouter({
         target: 'react',

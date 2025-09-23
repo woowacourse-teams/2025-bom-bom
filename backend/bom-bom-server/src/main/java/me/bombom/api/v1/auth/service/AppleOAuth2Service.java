@@ -1,6 +1,7 @@
 package me.bombom.api.v1.auth.service;
 
 import jakarta.servlet.http.HttpSession;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +73,20 @@ public class AppleOAuth2Service extends OidcUserService {
                 log.warn("Apple Access Token 추출 실패");
             }
             
+            // user 추가 정보(name 등) 파싱 (form_post로 전달되는 user JSON)
+            try {
+                Object userParam = userRequest.getAdditionalParameters().get("user");
+                if (userParam instanceof String userJson && !userJson.isBlank()) {
+                    // attributes에 병합하여 이후 Extractor에서 접근 가능하도록 함
+                    Map<String, Object> merged = new HashMap<>(oidcUser.getAttributes());
+                    merged.put("user", userJson);
+                    oidcUser = new org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser(
+                            oidcUser.getAuthorities(), oidcUser.getIdToken(), oidcUser.getUserInfo(), "sub");
+                }
+            } catch (Exception ignore) {
+                // user 파라미터가 없거나 파싱 실패해도 치명적이지 않음
+            }
+
             // 기존 회원 확인
             Optional<Member> member = findMemberAndSetPendingIfNew(providerId);
             return new CustomOAuth2User(oidcUser.getAttributes(), member.orElse(null), oidcUser.getIdToken(), oidcUser.getUserInfo());

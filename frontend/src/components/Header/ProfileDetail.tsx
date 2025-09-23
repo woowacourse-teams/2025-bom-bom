@@ -5,7 +5,7 @@ import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 import { toast } from '../Toast/utils/toastActions';
 import { postLogout, postWithdraw } from '@/apis/auth';
 import { useDeviceType } from '@/hooks/useDeviceType';
-import { useChannelTalk } from '@/libs/channelTalk/useChannelTalk';
+import { showMessenger } from '@/libs/channelTalk/channelTalk.utils';
 import { UserInfo } from '@/types/me';
 import { copyToClipboard } from '@/utils/copy';
 import ChatIcon from '#/assets/chat.svg';
@@ -20,7 +20,6 @@ interface ProfileDetailProps {
 const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
   const navigate = useNavigate();
   const deviceType = useDeviceType();
-  const { showMessenger } = useChannelTalk();
 
   const { mutate: mutateLogout } = useMutation({
     mutationKey: ['logout'],
@@ -94,7 +93,7 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
 
       <Divider />
 
-      {deviceType !== 'pc' && showMessenger && (
+      {deviceType !== 'pc' && (
         <ChannelTalkButton type="button" onClick={showMessenger}>
           <ChatIcon width={16} height={16} />
           문의하기

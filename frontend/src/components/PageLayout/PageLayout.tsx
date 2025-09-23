@@ -3,12 +3,15 @@ import { useLocation } from '@tanstack/react-router';
 import { PropsWithChildren, useEffect } from 'react';
 import Header from '../Header/Header';
 import { useDeviceType } from '@/hooks/useDeviceType';
-import { useChannelTalk } from '@/libs/channelTalk/useChannelTalk';
+import {
+  hideChannelButton,
+  showChannelButton,
+} from '@/libs/channelTalk/channelTalk.utils';
+import { initChannelTalk } from '@/libs/channelTalk/initChannelTalk';
 
 const PageLayout = ({ children }: PropsWithChildren) => {
   const deviceType = useDeviceType();
   const location = useLocation();
-  const { showChannelButton, hideChannelButton } = useChannelTalk();
   const isMobile = deviceType === 'mobile';
 
   const isHeaderVisible =
@@ -16,12 +19,16 @@ const PageLayout = ({ children }: PropsWithChildren) => {
     !location.pathname.startsWith('/articles/$articleId');
 
   useEffect(() => {
+    initChannelTalk();
+  }, []);
+
+  useEffect(() => {
     if (deviceType === 'pc') {
       showChannelButton();
     } else {
       hideChannelButton();
     }
-  }, [hideChannelButton, showChannelButton, deviceType]);
+  }, [deviceType]);
 
   return (
     <Container isMobile={isMobile}>

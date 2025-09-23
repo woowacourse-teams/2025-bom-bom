@@ -136,7 +136,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         try {
             params.append(EMAIL_PARAM)
                     .append("=")
-                    .append(URLEncoder.encode(oauth2Info.getEmail(), StandardCharsets.UTF_8))
+                    .append(URLEncoder.encode(getEmailLocalPart(oauth2Info), StandardCharsets.UTF_8))
                     .append("&");
 
             params.append(NAME_PARAM)
@@ -146,6 +146,16 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             log.warn("쿼리 파라미터 인코딩 실패", e);
         }
         return params.toString();
+    }
+
+    private String getEmailLocalPart(OAuth2LoginInfo oauth2Info) {
+        String email = oauth2Info.getEmail();
+        String localPart = email;
+        int atPos = email.indexOf('@');
+        if (atPos > 0) {
+            localPart = email.substring(0, atPos);
+        }
+        return localPart;
     }
 
     private String getBaseUrlByEnv(HttpServletRequest request) {

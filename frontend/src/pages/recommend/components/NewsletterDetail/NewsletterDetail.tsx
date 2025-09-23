@@ -199,7 +199,9 @@ const InfoWrapper = styled.div<{ isMobile: boolean }>`
   justify-content: center;
 `;
 
-const NewsletterImage = styled(ImageWithFallback)<{ isMobile: boolean }>`
+const NewsletterImage = styled(ImageWithFallback, {
+  shouldForwardProp: (prop) => prop !== 'isMobile',
+})<{ isMobile: boolean }>`
   width: ${({ isMobile }) => (isMobile ? '88px' : '104px')};
   height: ${({ isMobile }) => (isMobile ? '88px' : '104px')};
   border-radius: ${({ isMobile }) => (isMobile ? '12px' : '16px')};

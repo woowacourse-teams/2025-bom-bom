@@ -106,6 +106,44 @@ export default (env, argv) => {
         overlay: true, // 에러 발생 시 브라우저에 띄워줘요
       },
     },
+    optimization: {
+      usedExports: true, // 사용되지 않는 export 제거
+      sideEffects: false, // side effect가 없는 모듈들 최적화
+      splitChunks: {
+        chunks: 'all', // 모든 청크에 대해 코드 분할 적용
+        minSize: 30000, // 최소 분할 크기 (30KB)
+        maxSize: 100000, // 최대 분할 크기 (50KB)
+        minChunks: 1, // 최소 참조 횟수 (1회 이상 사용된 모듈 분리)
+        maxAsyncRequests: 10, // 비동기 요청 최대 수
+        maxInitialRequests: 5, // 초기 요청 최대 수
+        automaticNameDelimiter: '~', // 자동 생성 청크 이름 구분자
+        cacheGroups: {
+          // React 관련 라이브러리 별도 분리
+          react: {
+            test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+            name: 'react',
+            chunks: 'all',
+            priority: 30,
+          },
+          // vendor 라이브러리 별도 분리
+          vendor: {
+            test: /[\\/]node_modules[\\/](?!(react|react-dom)[\\/])/,
+            name: 'vendor',
+            chunks: 'all',
+            priority: 20,
+            minSize: 50000,
+          },
+          // 공통 모듈 분리
+          common: {
+            name: 'common',
+            minChunks: 3, // 3번 이상 사용된 모듈
+            chunks: 'all',
+            priority: 10,
+            reuseExistingChunk: true,
+          },
+        },
+      },
+    },
   };
 
   return config;

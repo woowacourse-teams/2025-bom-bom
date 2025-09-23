@@ -1,7 +1,7 @@
-import { keyframes, css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { InfoWrapper, MetaInfoRow, ThumbnailWrapper } from './ArticleCard';
 import { useDevice } from '@/hooks/useDevice';
+import { skeletonStyle } from '@/styles/skeleton';
 
 const ArticleCardSkeleton = () => {
   const device = useDevice();
@@ -27,18 +27,6 @@ const ArticleCardSkeleton = () => {
 
 export default ArticleCardSkeleton;
 
-const shimmer = keyframes`
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
-`;
-
-const skeletonShimmerStyle = css`
-  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 37%, #e0e0e0 63%);
-  background-size: 400px 100%;
-
-  animation: ${shimmer} 1.4s ease infinite;
-`;
-
 const SkeletonContainer = styled.div<{ isMobile: boolean }>`
   padding: ${({ isMobile }) => (isMobile ? '8px 0' : '20px')};
 
@@ -62,7 +50,8 @@ const SkeletonTitle = styled.div<{ isMobile: boolean }>`
   width: 85%;
   height: ${({ isMobile }) => (isMobile ? '20px' : '28px')};
   border-radius: 4px;
-  ${skeletonShimmerStyle}
+
+  ${skeletonStyle}
 `;
 
 const SkeletonDescription = styled.div<{ isMobile: boolean }>`
@@ -70,7 +59,8 @@ const SkeletonDescription = styled.div<{ isMobile: boolean }>`
   height: 16px;
   margin-bottom: 4px;
   border-radius: 4px;
-  ${skeletonShimmerStyle}
+
+  ${skeletonStyle}
 `;
 
 const SkeletonMetaInfo = styled.div`
@@ -78,7 +68,7 @@ const SkeletonMetaInfo = styled.div`
   height: 12px;
   border-radius: 4px;
 
-  ${skeletonShimmerStyle}
+  ${skeletonStyle}
 `;
 
 const SkeletonThumbnail = styled.div<{ isMobile: boolean }>`
@@ -87,5 +77,6 @@ const SkeletonThumbnail = styled.div<{ isMobile: boolean }>`
   border-radius: ${({ isMobile }) => (isMobile ? '8px' : '12px')};
 
   flex-shrink: 0;
-  ${skeletonShimmerStyle}
+
+  ${skeletonStyle}
 `;

@@ -25,4 +25,7 @@ public interface TodayReadingRepository extends JpaRepository<TodayReading, Long
         WHERE tr.totalCount != 0 AND tr.currentCount = 0
     """)
     List<TodayReading> findTotalNonZeroAndCurrentZero();
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    void deleteByMemberId(Long memberId);
 }

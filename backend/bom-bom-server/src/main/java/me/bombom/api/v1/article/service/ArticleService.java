@@ -30,6 +30,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -143,6 +144,11 @@ public class ArticleService {
                 .sorted(Comparator.comparing(Highlight::getCreatedAt).reversed())
                 .map(highlight -> ArticleHighlightResponse.from(highlight))
                 .toList();
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteAllByMemberId(Long memberId) {
+        articleRepository.deleteAllByMemberId(memberId);
     }
 
     private Article findArticleById(Long articleId, Long memberId) {

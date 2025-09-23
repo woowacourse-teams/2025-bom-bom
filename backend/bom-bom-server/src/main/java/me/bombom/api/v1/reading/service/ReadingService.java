@@ -4,6 +4,7 @@ package me.bombom.api.v1.reading.service;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -168,6 +170,20 @@ public class ReadingService {
     @Transactional
     public void updateMonthlyRanking() {
         monthlyReadingRepository.updateMonthlyRanking();
+    }
+
+    // TODO: 실패한 작업부터 재실행 로직 필요
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteAllByMemberId(Long memberId) {
+        try {
+            continueReadingRepository.deleteByMemberId(memberId);
+            todayReadingRepository.deleteByMemberId(memberId);
+            weeklyReadingRepository.deleteByMemberId(memberId);
+            monthlyReadingRepository.deleteByMemberId(memberId);
+            yearlyReadingRepository.deleteByMemberId(memberId);
+        } catch (Exception e){
+            log.error("회원 읽기 정보 삭제 실패. memberId = {}", memberId, e.getStackTrace());
+        }
     }
 
     private LowestRankWithDifference computeLowestRankWithDifference() {

@@ -62,4 +62,7 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
 	MemberMonthlyReadingRankResponse findMemberRankAndGap(@Param("memberId") Long memberId);
 
 	MonthlyReading findTopByOrderByRankOrderDesc();
+
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+    void deleteByMemberId(Long memberId);
 }

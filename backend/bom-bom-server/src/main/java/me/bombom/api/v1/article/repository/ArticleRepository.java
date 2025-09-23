@@ -4,6 +4,7 @@ import java.util.List;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -26,4 +27,8 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
             @Param("memberId") Long memberId,
             @Param("keyword") String keyword
     );
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM Article a WHERE a.memberId = :memberId")
+    void deleteAllByMemberId(Long memberId);
 }

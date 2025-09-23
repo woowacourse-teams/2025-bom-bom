@@ -16,6 +16,11 @@ public class UnauthorizedException extends RuntimeException {
         this.errorDetail = errorDetail;
     }
 
+    public UnauthorizedException addContext(ErrorContextKeys key, Object value) {
+        this.context.put(key.getKey(), value);
+        return this;
+    }
+
     public UnauthorizedException addContext(String key, Object value) {
         this.context.put(key, value);
         return this;

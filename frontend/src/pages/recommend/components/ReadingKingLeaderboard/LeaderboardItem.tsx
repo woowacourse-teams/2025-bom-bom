@@ -26,7 +26,6 @@ const LeaderboardItem = ({ rank, name, readCount }: LeaderboardItemProps) => (
 export default LeaderboardItem;
 
 const Container = styled.div`
-  padding: 10px;
   border-radius: 12px;
 
   display: flex;

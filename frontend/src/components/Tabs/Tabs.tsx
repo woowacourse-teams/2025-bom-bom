@@ -2,10 +2,10 @@ import styled from '@emotion/styled';
 import { ComponentProps, ReactElement } from 'react';
 import { TabProps } from '../Tab/Tab';
 
-type DirectionType = 'horizontal' | 'vertical';
+type Direction = 'horizontal' | 'vertical';
 
 interface TabsProps<T extends string> extends ComponentProps<'ul'> {
-  direction?: DirectionType;
+  direction?: Direction;
   children: ReactElement<TabProps<T>>[];
 }
 
@@ -23,7 +23,7 @@ const Tabs = <T extends string>({
 
 export default Tabs;
 
-const Container = styled.ul<{ direction: DirectionType }>`
+const Container = styled.ul<{ direction: Direction }>`
   display: flex;
   gap: ${({ direction }) => (direction === 'horizontal' ? '12px' : '8px')};
   flex-direction: ${({ direction }) =>

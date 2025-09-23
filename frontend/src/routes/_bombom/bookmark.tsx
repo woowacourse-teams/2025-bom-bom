@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 import { queries } from '@/apis/queries';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDevice } from '@/hooks/useDevice';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
@@ -24,7 +24,7 @@ function BookmarkPage() {
       size: 100, // 페이지네이션 없이 구현
     }),
   );
-  const deviceType = useDeviceType();
+  const device = useDevice();
 
   const totalElements = articles?.totalElements ?? 0;
 
@@ -45,8 +45,8 @@ function BookmarkPage() {
           <Title>북마크 보관함</Title>
         </TitleWrapper>
 
-        <ContentWrapper deviceType={deviceType}>
-          <SidebarSection deviceType={deviceType}>
+        <ContentWrapper device={device}>
+          <SidebarSection device={device}>
             <NewsLetterFilter
               newsLetterList={[
                 {
@@ -67,7 +67,7 @@ function BookmarkPage() {
             <QuickMenu />
           </SidebarSection>
 
-          <MainContentSection deviceType={deviceType}>
+          <MainContentSection device={device}>
             <SummaryBar>
               <ResultsInfo>총 {totalElements}개의 북마크</ResultsInfo>
             </SummaryBar>
@@ -119,31 +119,30 @@ const Title = styled.h1`
   font: ${({ theme }) => theme.fonts.heading3};
 `;
 
-const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
+const ContentWrapper = styled.div<{ device: Device }>`
   width: 100%;
 
   display: flex;
-  gap: ${({ deviceType }) => (deviceType === 'pc' ? '32px' : '20px')};
-  flex-direction: ${({ deviceType }) =>
-    deviceType === 'pc' ? 'row' : 'column'};
+  gap: ${({ device }) => (device === 'pc' ? '32px' : '20px')};
+  flex-direction: ${({ device }) => (device === 'pc' ? 'row' : 'column')};
   align-items: flex-start;
 `;
 
-const SidebarSection = styled.div<{ deviceType: DeviceType }>`
-  width: ${({ deviceType }) => (deviceType === 'pc' ? '320px' : '100%')};
+const SidebarSection = styled.div<{ device: Device }>`
+  width: ${({ device }) => (device === 'pc' ? '320px' : '100%')};
 
   display: flex;
   gap: 20px;
   flex-direction: column;
 `;
 
-const MainContentSection = styled.div<{ deviceType: DeviceType }>`
+const MainContentSection = styled.div<{ device: Device }>`
   display: flex;
   gap: 20px;
   flex: 1;
   flex-direction: column;
 
-  order: ${({ deviceType }) => (deviceType === 'pc' ? 2 : 1)};
+  order: ${({ device }) => (device === 'pc' ? 2 : 1)};
 `;
 
 const ArticleList = styled.ul`

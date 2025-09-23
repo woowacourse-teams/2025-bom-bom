@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { ENV } from '@/apis/env';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
 import { isLocal } from '@/utils/environment';
 import AppleIcon from '#/assets/apple.svg';
@@ -8,8 +8,8 @@ import GoogleIcon from '#/assets/google.svg';
 import SparklesIcon from '#/assets/sparkles.svg';
 
 const LoginCard = () => {
-  const deviceType = useDeviceType();
-  const isMobile = deviceType === 'mobile';
+  const device = useDevice();
+  const isMobile = device === 'mobile';
 
   return (
     <Container isMobile={isMobile}>

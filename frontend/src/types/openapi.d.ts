@@ -637,6 +637,9 @@ export interface components {
       identityToken: string;
       authorizationCode: string;
     };
+    NativeLoginResponse: {
+      isRegistered?: boolean;
+    };
     WeeklyGoalCountResponse: {
       /**
        * Format: int64
@@ -803,28 +806,28 @@ export interface components {
       /** Format: int32 */
       number?: number;
       sort?: components['schemas']['SortObject'];
+      pageable?: components['schemas']['PageableObject'];
       first?: boolean;
       last?: boolean;
       /** Format: int32 */
       numberOfElements?: number;
-      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     PageableObject: {
       /** Format: int64 */
       offset?: number;
       sort?: components['schemas']['SortObject'];
-      unpaged?: boolean;
-      paged?: boolean;
       /** Format: int32 */
       pageNumber?: number;
+      paged?: boolean;
       /** Format: int32 */
       pageSize?: number;
+      unpaged?: boolean;
     };
     SortObject: {
       empty?: boolean;
-      unsorted?: boolean;
       sorted?: boolean;
+      unsorted?: boolean;
     };
     /** @description 뉴스레터 별 하이라이트 개수 통계 */
     HighlightCountPerNewsletterResponse: {
@@ -884,11 +887,11 @@ export interface components {
       /** Format: int32 */
       number?: number;
       sort?: components['schemas']['SortObject'];
+      pageable?: components['schemas']['PageableObject'];
       first?: boolean;
       last?: boolean;
       /** Format: int32 */
       numberOfElements?: number;
-      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     BookmarkStatusResponse: {
@@ -944,11 +947,11 @@ export interface components {
       /** Format: int32 */
       number?: number;
       sort?: components['schemas']['SortObject'];
+      pageable?: components['schemas']['PageableObject'];
       first?: boolean;
       last?: boolean;
       /** Format: int32 */
       numberOfElements?: number;
-      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     ArticleDetailResponse: {
@@ -1281,7 +1284,7 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody: {
+    requestBody?: {
       content: {
         'application/json': components['schemas']['NativeLoginRequest'];
       };
@@ -1293,7 +1296,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          '*/*': string;
+          '*/*': components['schemas']['NativeLoginResponse'];
         };
       };
       /** @description 지원하지 않는 제공자 */
@@ -1302,7 +1305,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          '*/*': string;
+          '*/*': components['schemas']['NativeLoginResponse'];
         };
       };
       /** @description 토큰 검증 실패 또는 교환 실패 */
@@ -1311,7 +1314,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          '*/*': string;
+          '*/*': components['schemas']['NativeLoginResponse'];
         };
       };
     };

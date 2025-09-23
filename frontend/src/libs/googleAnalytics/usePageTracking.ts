@@ -6,7 +6,6 @@ export const usePageTracking = () => {
 
   useEffect(() => {
     if (typeof window.gtag !== 'function') {
-      console.warn('[GA] gtag is not initialized');
       return;
     }
 

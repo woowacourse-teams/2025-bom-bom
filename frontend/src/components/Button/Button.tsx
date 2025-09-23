@@ -2,12 +2,12 @@ import styled from '@emotion/styled';
 import { ComponentProps } from 'react';
 import type { Theme } from '@emotion/react';
 
-type VariantType = 'default';
+type Variant = 'default';
 
 interface ButtonProps extends ComponentProps<'button'> {
   text: string;
   onClick: () => void;
-  variant?: VariantType;
+  variant?: Variant;
 }
 
 function Button({ text, onClick, variant = 'default', ...props }: ButtonProps) {
@@ -21,15 +21,15 @@ function Button({ text, onClick, variant = 'default', ...props }: ButtonProps) {
 export default Button;
 
 const Container = styled.button<{
-  variant: VariantType;
+  variant: Variant;
 }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   width: fit-content;
   padding: 8px 16px;
   border-radius: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   font: ${({ theme }) => theme.fonts.caption};
 

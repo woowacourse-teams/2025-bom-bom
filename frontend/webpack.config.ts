@@ -1,5 +1,6 @@
 import path from 'path';
 import { tanstackRouter } from '@tanstack/router-plugin/webpack';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 import dotenv from 'dotenv';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack from 'webpack';
@@ -72,7 +73,7 @@ export default (env, argv) => {
         template: './index.html', // 템플릿 HTML
         filename: 'index.html', // 출력될 HTML 파일 이름
         inject: true, // <script> 태그 자동 삽입
-        favicon: './public/assets/bombom.png',
+        favicon: './public/assets/logo.png',
       }),
       tanstackRouter({
         target: 'react',
@@ -82,6 +83,14 @@ export default (env, argv) => {
       new webpack.DefinePlugin({
         'process.env': JSON.stringify(process.env),
         'process.env.ENABLE_MSW': JSON.stringify(env.ENABLE_MSW),
+      }),
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: 'public/assets',
+            to: 'assets',
+          },
+        ],
       }),
     ],
     devServer: {

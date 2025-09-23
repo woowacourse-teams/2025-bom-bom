@@ -3,10 +3,10 @@ import { Highlight } from '../types/highlight';
 import { removeHighlightFromDOM } from '../utils/highlight';
 import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 
-type StorageKeyType = `guide-highlight-${string}`;
+type StorageKey = `guide-highlight-${string}`;
 
 export const useLocalHighlightData = ({ articleId }: { articleId: number }) => {
-  const storageKey: StorageKeyType = `guide-highlight-${articleId}`;
+  const storageKey: StorageKey = `guide-highlight-${articleId}`;
   const [highlights, setHighlights] = useLocalStorageState<
     Highlight[],
     typeof storageKey

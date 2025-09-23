@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { ComponentType, SVGProps } from 'react';
 import { getProgressInfo } from './ProgressWithLabel.utils';
-import { RateFormatType } from './types';
+import { RateFormat } from './types';
 import ProgressBar from '../ProgressBar/ProgressBar';
 
 interface ProgressWithLabelProps {
@@ -12,7 +12,7 @@ interface ProgressWithLabelProps {
     totalCount: number;
   };
   description?: string;
-  rateFormat?: RateFormatType;
+  rateFormat?: RateFormat;
   showGraph?: boolean;
 }
 

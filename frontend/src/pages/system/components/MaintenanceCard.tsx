@@ -1,11 +1,11 @@
 import styled from '@emotion/styled';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDevice } from '@/hooks/useDevice';
 import maintenanceBom from '#/assets/maintenance-bom.png';
 
 const MaintenanceCard = () => {
-  const deviceType = useDeviceType();
-  const isMobile = deviceType === 'mobile';
+  const device = useDevice();
+  const isMobile = device === 'mobile';
 
   return (
     <Container isMobile={isMobile}>
@@ -53,7 +53,9 @@ const Container = styled.section<{ isMobile: boolean }>`
   justify-content: center;
 `;
 
-const MaintenanceImage = styled(ImageWithFallback)<{ isMobile: boolean }>`
+const MaintenanceImage = styled(ImageWithFallback, {
+  shouldForwardProp: (prop) => prop !== 'isMobile',
+})<{ isMobile: boolean }>`
   width: ${({ isMobile }) => (isMobile ? '240px' : '280px')};
   height: ${({ isMobile }) => (isMobile ? '240px' : '280px')};
 `;

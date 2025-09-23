@@ -8,15 +8,14 @@ import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import Modal from '@/components/Modal/Modal';
 import useModal from '@/components/Modal/useModal';
-import { CATEGORIES, CategoryType } from '@/constants/category';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { CATEGORIES, Category } from '@/constants/category';
+import { Device, useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { Newsletter } from '@/types/newsletter';
 import TrendingUpIcon from '#/assets/trending-up.svg';
 
 const TrendySection = () => {
-  const [selectedCategory, setSelectedCategory] =
-    useState<CategoryType>('전체');
+  const [selectedCategory, setSelectedCategory] = useState<Category>('전체');
   const [selectedNewsletter, setSelectedNewsletter] =
     useState<Newsletter | null>(null);
 
@@ -27,7 +26,7 @@ const TrendySection = () => {
     closeModal: closeDetailModal,
     isOpen,
   } = useModal();
-  const deviceType = useDeviceType();
+  const device = useDevice();
 
   if (!newsletters) return null;
 
@@ -66,7 +65,7 @@ const TrendySection = () => {
             />
           ))}
         </TagContainer>
-        <TrendyGrid deviceType={deviceType}>
+        <TrendyGrid device={device}>
           {filteredNewsletters.map((newsletter) => (
             <NewsletterCard
               key={newsletter.newsletterId}
@@ -84,8 +83,8 @@ const TrendySection = () => {
           modalRef={detailModalRef}
           closeModal={closeDetailModal}
           isOpen={isOpen}
-          position={deviceType === 'mobile' ? 'bottom' : 'center'}
-          showCloseButton={deviceType !== 'mobile'}
+          position={device === 'mobile' ? 'bottom' : 'center'}
+          showCloseButton={device !== 'mobile'}
         >
           {selectedNewsletter && (
             <NewsletterDetail
@@ -152,10 +151,10 @@ const TagContainer = styled.div`
   flex-wrap: wrap;
 `;
 
-const TrendyGrid = styled.div<{ deviceType: DeviceType }>`
+const TrendyGrid = styled.div<{ device: Device }>`
   display: grid;
-  grid-template-columns: ${({ deviceType }) =>
-    deviceType === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
+  grid-template-columns: ${({ device }) =>
+    device === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
 `;
 
 const NewsletterCard = styled(ImageInfoCard)`

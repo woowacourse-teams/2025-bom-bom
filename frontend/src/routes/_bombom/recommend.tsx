@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import ReadingKingLeaderboard from '../../pages/recommend/components/ReadingKingLeaderboard/ReadingKingLeaderboard';
-import { useDeviceType, type DeviceType } from '@/hooks/useDeviceType';
+import { useDevice, type Device } from '@/hooks/useDevice';
 import NewsletterHero from '@/pages/recommend/components/NewsletterHero/NewsletterHero';
 import TrendySection from '@/pages/recommend/components/TrendySection/TrendySection';
 
@@ -10,7 +10,7 @@ export const Route = createFileRoute('/_bombom/recommend')({
 });
 
 function Recommend() {
-  const device = useDeviceType();
+  const device = useDevice();
 
   return (
     <Container device={device}>
@@ -25,7 +25,7 @@ function Recommend() {
   );
 }
 
-const Container = styled.div<{ device: DeviceType }>`
+const Container = styled.div<{ device: Device }>`
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
@@ -37,7 +37,7 @@ const Container = styled.div<{ device: DeviceType }>`
   align-items: flex-start;
 `;
 
-const MainSection = styled.section<{ device: DeviceType }>`
+const MainSection = styled.section<{ device: Device }>`
   width: ${({ device }) => (device === 'mobile' ? '100%' : 'auto')};
   min-width: 0;
   max-width: ${({ device }) => (device === 'mobile' ? 'none' : '840px')};
@@ -48,7 +48,7 @@ const MainSection = styled.section<{ device: DeviceType }>`
   flex-direction: column;
 `;
 
-const SideSection = styled.div<{ device: DeviceType }>`
+const SideSection = styled.div<{ device: Device }>`
   width: ${({ device }) =>
     device === 'mobile' ? '100%' : device === 'tablet' ? '360px' : '400px'};
   max-width: ${({ device }) => (device === 'mobile' ? '400px' : 'none')};

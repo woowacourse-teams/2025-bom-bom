@@ -1,4 +1,4 @@
-export type DirectionType =
+export type Direction =
   | 'up'
   | 'down'
   | 'left'

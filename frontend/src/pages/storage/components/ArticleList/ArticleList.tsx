@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDevice } from '@/hooks/useDevice';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import { Article } from '@/types/articles';
 
@@ -8,10 +8,10 @@ interface ArticleListProps {
 }
 
 export default function ArticleList({ articles }: ArticleListProps) {
-  const deviceType = useDeviceType();
+  const device = useDevice();
 
   return (
-    <Container deviceType={deviceType}>
+    <Container device={device}>
       {articles.map((article) =>
         article ? (
           <li key={article.articleId}>
@@ -23,15 +23,15 @@ export default function ArticleList({ articles }: ArticleListProps) {
   );
 }
 
-const Container = styled.ul<{ deviceType: DeviceType }>`
+const Container = styled.ul<{ device: Device }>`
   width: 100%;
 
   display: flex;
-  gap: ${({ deviceType }) => (deviceType === 'mobile' ? '0' : '16px')};
+  gap: ${({ device }) => (device === 'mobile' ? '0' : '16px')};
   flex-direction: column;
 
-  ${({ deviceType, theme }) =>
-    deviceType === 'mobile' &&
+  ${({ device, theme }) =>
+    device === 'mobile' &&
     `
     li {
       padding: 8px 0;

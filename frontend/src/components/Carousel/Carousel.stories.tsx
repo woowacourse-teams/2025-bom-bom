@@ -11,7 +11,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-interface SlideType {
+interface Slide {
   label: string;
   backgroundColor: 'primary' | 'primaryLight';
 }
@@ -20,7 +20,7 @@ interface SlideBoxProps {
   children: React.ReactNode;
 }
 
-const slides: SlideType[] = [
+const slides: Slide[] = [
   { label: '슬라이드1', backgroundColor: 'primary' },
   { label: '슬라이드2', backgroundColor: 'primaryLight' },
 ];
@@ -46,13 +46,9 @@ const SlideBox = ({ backgroundColor, children }: SlideBoxProps) => {
   );
 };
 
-export const DefaultTimer: Story = {
-  args: {
-    timer: true,
-    children: [],
-  },
-  render: (args) => (
-    <Carousel timer={args.timer}>
+export const DefaultAutoPlay: Story = {
+  render: () => (
+    <Carousel>
       {slides.map(({ label, backgroundColor }) => (
         <SlideBox key={label} backgroundColor={backgroundColor}>
           {label}
@@ -62,14 +58,15 @@ export const DefaultTimer: Story = {
   ),
 };
 
-export const CustomTimer: Story = {
+export const CustomAutoPlay: Story = {
   args: {
-    timer: 1000,
+    autoPlay: true,
+    autoPlaySpeedMs: 1000,
     children: [],
   },
 
-  render: ({ timer }) => (
-    <Carousel timer={timer}>
+  render: ({ autoPlaySpeedMs }) => (
+    <Carousel autoPlay={true} autoPlaySpeedMs={autoPlaySpeedMs}>
       {slides.map(({ label, backgroundColor }) => (
         <SlideBox key={label} backgroundColor={backgroundColor}>
           {label}
@@ -81,12 +78,12 @@ export const CustomTimer: Story = {
 
 export const UserControlled: Story = {
   args: {
-    timer: false,
+    autoPlay: false,
     children: [],
   },
 
-  render: ({ timer }) => (
-    <Carousel timer={timer}>
+  render: () => (
+    <Carousel autoPlay={false}>
       {slides.map(({ label, backgroundColor }) => (
         <SlideBox key={label} backgroundColor={backgroundColor}>
           {label}

@@ -35,6 +35,12 @@ public class WithdrawService {
         log.info("탈퇴한 회원 정보 이전 성공. memberId:{}", member.getId());
     }
 
+    @Transactional
+    public void deleteExpiredWithdrawnMembers() {
+        withdrawnMemberRepository.deleteAllByExpireDate(LocalDate.now());
+        log.info("만료된 회원 정보 삭제 성공");
+    }
+
     private WithdrawnMember createWithdrawnMember(Member member) {
         return WithdrawnMember.builder()
                 .memberId(member.getId())

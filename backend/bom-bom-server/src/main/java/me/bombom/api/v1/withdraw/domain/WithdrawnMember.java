@@ -64,6 +64,7 @@ public class WithdrawnMember {
             int highlightCount
     ) {
         this.id = id;
+        this.memberId = memberId;
         this.email = email;
         this.birthDate = birthDate;
         this.gender = gender;

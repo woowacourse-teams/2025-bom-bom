@@ -58,14 +58,7 @@ function ArticleDetailPage() {
       )}
 
       <Container>
-        {device === 'pc' && (
-          <ArticleActionButtons
-            bookmarked={isBookmarked}
-            onBookmarkClick={toggleBookmark}
-          />
-        )}
-
-        <ArticleContent device={device}>
+        <ArticleContent deviceType={deviceType}>
           <ArticleProgressBar
             rate={progressPercentage}
             transition={false}
@@ -78,8 +71,6 @@ function ArticleDetailPage() {
             newsletterName={currentArticle.newsletter?.name ?? ''}
             arrivedDateTime={new Date(currentArticle.arrivedDateTime ?? '')}
             expectedReadTime={currentArticle.expectedReadTime ?? 1}
-            bookmarked={isBookmarked}
-            onBookmarkClick={toggleBookmark}
           />
           <Divider />
 
@@ -97,6 +88,13 @@ function ArticleDetailPage() {
 
           <TodayUnreadArticlesSection articleId={articleIdNumber} />
         </ArticleContent>
+
+        {deviceType === 'pc' && (
+          <ArticleActionButtons
+            bookmarked={isBookmarked}
+            onBookmarkClick={toggleBookmark}
+          />
+        )}
       </Container>
     </>
   );

@@ -10,8 +10,6 @@ interface ArticleHeaderProps {
   newsletterName: string;
   arrivedDateTime: Date;
   expectedReadTime: number;
-  bookmarked?: boolean;
-  onBookmarkClick?: (bookmarked: boolean) => void;
 }
 
 const ArticleHeader = ({

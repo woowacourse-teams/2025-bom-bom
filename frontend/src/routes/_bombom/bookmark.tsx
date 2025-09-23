@@ -8,7 +8,7 @@ import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/Newsle
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
-import BookmarkIcon from '#/assets/bookmark-inactive.svg';
+import BookmarkIcon from '#/assets/svg/bookmark-inactive.svg';
 
 export const Route = createFileRoute('/_bombom/bookmark')({
   component: BookmarkPage,

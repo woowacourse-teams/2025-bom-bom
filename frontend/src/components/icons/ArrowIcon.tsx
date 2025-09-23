@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { SVGProps } from 'react';
 import { Direction } from './Icons.types';
-import ArrowRightSvg from '#/assets/arrow-right.svg';
+import ArrowRightSvg from '#/assets/svg/arrow-right.svg';
 
 interface ArrowIconProps extends SVGProps<SVGSVGElement> {
   direction?: Direction;

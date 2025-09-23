@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { ComponentProps } from 'react';
 import { theme } from '@/styles/theme';
-import ReadingGlassesIcon from '#/assets/reading-glasses.svg';
+import ReadingGlassesIcon from '#/assets/svg/reading-glasses.svg';
 
 export default function SearchInput({ ...props }: ComponentProps<'input'>) {
   return (

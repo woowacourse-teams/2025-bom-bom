@@ -3,9 +3,9 @@ import styled from '@emotion/styled';
 import { FunctionComponent, SVGProps, useEffect } from 'react';
 import { ToastData, ToastVariant } from './Toast.types';
 import { hideToast } from './utils/toastActions';
-import ErrorIcon from '#/assets/cancel-circle.svg';
-import SuccessIcon from '#/assets/check-circle.svg';
-import InfoIcon from '#/assets/info-circle.svg';
+import ErrorIcon from '#/assets/svg/cancel-circle.svg';
+import SuccessIcon from '#/assets/svg/check-circle.svg';
+import InfoIcon from '#/assets/svg/info-circle.svg';
 
 const iconMap: Record<
   ToastVariant,

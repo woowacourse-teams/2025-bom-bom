@@ -3,9 +3,9 @@ import { ENV } from '@/apis/env';
 import { useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
 import { isLocal } from '@/utils/environment';
-import AppleIcon from '#/assets/apple.svg';
-import GoogleIcon from '#/assets/google.svg';
-import SparklesIcon from '#/assets/sparkles.svg';
+import AppleIcon from '#/assets/svg/apple.svg';
+import GoogleIcon from '#/assets/svg/google.svg';
+import SparklesIcon from '#/assets/svg/sparkles.svg';
 
 const LoginCard = () => {
   const device = useDevice();

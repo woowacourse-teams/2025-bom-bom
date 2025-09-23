@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { useNavigate } from '@tanstack/react-router';
 import Button from '../Button/Button';
 import { useDevice } from '@/hooks/useDevice';
-import LockIcon from '#/assets/lock.svg';
+import LockIcon from '#/assets/svg/lock.svg';
 
 const RequireLoginCard = () => {
   const navigate = useNavigate();

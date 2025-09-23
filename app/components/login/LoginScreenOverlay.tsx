@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Modal } from 'react-native';
 
+import { theme } from '@/styles/theme';
 import { LoginScreen } from './LoginScreen';
 
 interface LoginScreenOverlayProps {
@@ -25,15 +26,8 @@ export const LoginScreenOverlay = ({
         <CloseButton
           onPress={onClose}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          style={{
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 3,
-          }}
         >
-          <Ionicons name="close" size={24} color="#8E8E93" />
+          <Ionicons name="close" size={24} color={theme.colors.icons} />
         </CloseButton>
 
         <LoginScreen />
@@ -55,7 +49,7 @@ const CloseButton = styled.TouchableOpacity`
   width: 32px;
   height: 32px;
   border-radius: 16px;
-  background-color: #f2f2f7;
+  background-color: ${(props) => props.theme.colors.disabledBackground};
   justify-content: center;
   align-items: center;
 `;

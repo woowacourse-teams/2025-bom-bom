@@ -68,20 +68,20 @@ const BaseButton = styled.TouchableOpacity<{ $disabled?: boolean }>`
 `;
 
 const PrimaryButton = styled(BaseButton)`
-  background-color: #fe5e04;
+  background-color: ${props => props.theme.colors.primary};
 `;
 
 const SecondaryButton = styled(BaseButton)`
   background-color: transparent;
   border-width: 2px;
-  border-color: #fe5e04;
+  border-color: ${props => props.theme.colors.primary};
 `;
 
 const SocialButton = styled(BaseButton)`
-  background-color: #ffffff;
+  background-color: ${props => props.theme.colors.white};
   border-width: 2px;
-  border-color: #e5e5e5;
-  shadow-color: #000;
+  border-color: ${props => props.theme.colors.stroke};
+  shadow-color: ${props => props.theme.colors.black};
   shadow-offset: 0px 2px;
   shadow-opacity: 0.1;
   shadow-radius: 3px;
@@ -95,13 +95,13 @@ const BaseText = styled.Text`
 `;
 
 const PrimaryText = styled(BaseText)`
-  color: #ffffff;
+  color: ${props => props.theme.colors.white};
 `;
 
 const SecondaryText = styled(BaseText)`
-  color: #fe5e04;
+  color: ${props => props.theme.colors.primary};
 `;
 
 const SocialText = styled(BaseText)`
-  color: #000000;
+  color: ${props => props.theme.colors.black};
 `;

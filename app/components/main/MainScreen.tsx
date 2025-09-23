@@ -83,7 +83,7 @@ export const MainScreen = () => {
 
 const Container = styled(SafeAreaView)`
   flex: 1;
-  background-color: #ffffff;
+  background-color: ${props => props.theme.colors.white};
 `;
 
 const WebViewContainer = styled.View`

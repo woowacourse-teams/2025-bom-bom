@@ -103,7 +103,7 @@ export const LoginScreen = () => {
 
 const Container = styled(SafeAreaView)`
   flex: 1;
-  background-color: #ffffff;
+  background-color: ${(props) => props.theme.colors.white};
 `;
 
 const StyledKeyboardAvoidingView = styled(KeyboardAvoidingView)`
@@ -146,25 +146,20 @@ const IconContainer = styled.View`
   border-radius: 50px;
   justify-content: center;
   align-items: center;
-  background-color: #fe5e04;
-  shadowColor: #ffd6c2;
-  shadowOffset: 0px 20px;
-  shadowOpacity: 0.25;
-  shadowRadius: 25px;
-  elevation: 20;
+  background-color: ${(props) => props.theme.colors.primary};
 `;
 
 const Title = styled.Text`
   font-size: 28px;
   font-weight: 700;
   text-align: center;
-  color: #181818;
+  color: ${(props) => props.theme.colors.textPrimary};
   background-color: transparent;
 `;
 
 const Subtitle = styled.Text`
   margin: 34px 0;
-  color: #5c5c5c;
+  color: ${(props) => props.theme.colors.textSecondary};
   font-size: 18px;
   font-weight: 400;
   text-align: center;
@@ -175,42 +170,37 @@ const Divider = styled.View`
   width: 100%;
   height: 2px;
   margin-bottom: 34px;
-  background-color: #ededed;
+  background-color: ${(props) => props.theme.colors.dividers};
   opacity: 0.3;
 `;
 
 const LoginButton = styled.TouchableOpacity`
   width: 100%;
   padding: 12px;
-  border: 2px solid #ededed;
+  border: 2px solid ${(props) => props.theme.colors.dividers};
   border-radius: 8px;
   display: flex;
   gap: 12px;
   align-items: center;
   justify-content: center;
   flex-direction: row;
-  background-color: #ffffff;
-  shadow-color: #000000;
-  shadow-offset: 0px 4px;
-  shadow-opacity: 0.05;
-  shadow-radius: 6px;
-  elevation: 2;
+  background-color: ${(props) => props.theme.colors.white};
 `;
 
 const LoginButtonText = styled.Text`
   font-size: 16px;
   font-weight: 400;
-  color: #000000;
+  color: ${(props) => props.theme.colors.black};
   text-align: center;
 `;
 
 const TermsText = styled.Text`
-  color: #747474;
+  color: ${(props) => props.theme.colors.textTertiary};
   font-size: 12px;
   text-align: center;
   line-height: 18px;
 `;
 
 const TermsLink = styled.Text`
-  color: #fe5e04;
+  color: ${(props) => props.theme.colors.primary};
 `;

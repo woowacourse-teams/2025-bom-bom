@@ -29,7 +29,7 @@ const Container = styled.View`
   flex: 1;
   justify-content: center;
   align-items: center;
-  background-color: #ffffff;
+  background-color: ${(props) => props.theme.colors.white};
 `;
 
 const IconContainer = styled.View`
@@ -38,6 +38,6 @@ const IconContainer = styled.View`
 
 const LoadingText = styled.Text`
   font-size: 16px;
-  color: #8e8e93;
+  color: ${(props) => props.theme.colors.primary};
   font-weight: 500;
 `;

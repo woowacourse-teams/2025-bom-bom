@@ -1,4 +1,4 @@
-import { Env } from '@/constants/env';
+import { ENV } from '@/constants/env';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
 
@@ -16,12 +16,12 @@ export const loginWithGoogle = async (
   }: LoginWithGoogleCallback) => void,
 ): Promise<void> => {
   GoogleSignin.configure({
-    webClientId: Env.IOS_CLIENT_ID,
+    webClientId: ENV.IOS_CLIENT_ID,
     offlineAccess: true,
     hostedDomain: '',
     forceCodeForRefreshToken: true,
     accountName: '',
-    iosClientId: Env.IOS_CLIENT_ID,
+    iosClientId: ENV.IOS_CLIENT_ID,
     googleServicePlistPath: '',
     profileImageSize: 120,
   });

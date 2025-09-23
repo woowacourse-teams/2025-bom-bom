@@ -3,7 +3,7 @@ import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
-import { Env } from '@/constants/env';
+import { ENV } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWebView } from '../../contexts/WebViewContext';
@@ -48,7 +48,7 @@ export const MainScreen = () => {
       <WebViewContainer>
         <StyledWebView
           ref={webViewRef}
-          source={{ uri: Env.DEV_WEB_URL }}
+          source={{ uri: ENV.DEV_WEB_URL }}
           userAgent={WEBVIEW_USER_AGENT}
           allowsBackForwardNavigationGestures
           sharedCookiesEnabled
@@ -83,7 +83,7 @@ export const MainScreen = () => {
 
 const Container = styled(SafeAreaView)`
   flex: 1;
-  background-color: ${props => props.theme.colors.white};
+  background-color: ${(props) => props.theme.colors.white};
 `;
 
 const WebViewContainer = styled.View`

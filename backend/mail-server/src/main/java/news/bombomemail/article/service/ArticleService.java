@@ -89,9 +89,10 @@ public class ArticleService {
             return null;
         }
 
-        return findNewsletterByEmail(fromEmailAddress)
+        String normalizedFromEmail = fromEmailAddress.strip().toLowerCase();
+        return findNewsletterByEmail(normalizedFromEmail)
                 .orElseGet(() -> {
-                    log.info("미등록 발신자({})라 메일 폐기합니다", fromEmailAddress);
+                    log.info("미등록 발신자({})라 메일 폐기합니다", normalizedFromEmail);
                     return null;
                 });
     }

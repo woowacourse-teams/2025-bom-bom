@@ -1,28 +1,21 @@
 import styled from '@emotion/styled';
 import { PropsWithChildren, Children } from 'react';
+import { DEFAULT_DELAY } from './Carousel.constants';
 import useCarousel from './useCarousel';
 import arrowNext from '#/assets/carousel-arrow-next.png';
 import arrowPrev from '#/assets/carousel-arrow-prev.png';
 
-interface CarouselProps extends PropsWithChildren {
-  timer?: boolean | number;
+type CarouselProps = PropsWithChildren & {
   hasSlideButton?: boolean;
   hasAnimation?: boolean;
-}
+} & (
+    | { autoPlay?: true; autoPlaySpeedMs?: number }
+    | { autoPlay: false; autoPlaySpeedMs?: never }
+  );
 
-/**
- * @property {boolean|number} [timer=true] - 자동 슬라이드 재생 여부 또는 주기 설정(ms).
- *   - `false`: 비활성화
- *   - `true`: 기본 4초 주기
- *   - `number`: 커스텀 주기(ms)
- * @property {boolean} [hasSlideButton=true] - 슬라이드 변경 버튼 렌더링 여부
- * @property {boolean} [hasAnimation=true] - 애니메이션 타입
- *   - `slide`: 왼쪽에서 오른쪽으로 미끄러지는 애니메이션
- *   - `none`: 애니메이션 없음
- * @property {React.ReactNode} children - 슬라이드로 렌더링할 자식 요소들
- */
 const Carousel = ({
-  timer = true,
+  autoPlay = true,
+  autoPlaySpeedMs = DEFAULT_DELAY,
   hasSlideButton = true,
   hasAnimation = true,
   children,
@@ -37,7 +30,7 @@ const Carousel = ({
       );
     }
 
-    if (typeof timer === 'number' && timer < 100) {
+    if (autoPlay && autoPlaySpeedMs < 100) {
       throw new Error('timer 주기는 100ms 이상이어야 합니다.');
     }
   }
@@ -54,7 +47,7 @@ const Carousel = ({
     handleTransitionEnd,
     handlePrevButtonClick,
     handleNextButtonClick,
-  } = useCarousel({ slideCount, timer });
+  } = useCarousel({ slideCount, autoPlay, autoPlaySpeedMs });
 
   return (
     <Container>

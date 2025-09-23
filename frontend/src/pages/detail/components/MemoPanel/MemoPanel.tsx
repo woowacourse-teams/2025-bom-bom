@@ -37,7 +37,7 @@ const MemoPanel = ({
       <Header>
         <HeaderLeft>
           <IconWrapper>
-            <MemoIcon fill={theme.colors.primary} />
+            <MemoIcon fill={theme.colors.primary} width={24} height={24} />
           </IconWrapper>
           <HeaderTitleBox>
             <HeaderTitleText>읽기 노트</HeaderTitleText>

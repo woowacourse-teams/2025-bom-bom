@@ -3,13 +3,13 @@ import { PropsWithChildren, Ref } from 'react';
 import { theme } from '@/styles/theme';
 import CloseIcon from '#/assets/close.svg';
 
-type PositionType = 'center' | 'bottom' | 'dropdown';
+type Position = 'center' | 'bottom' | 'dropdown';
 
 interface UseModalParams extends PropsWithChildren {
   modalRef: Ref<HTMLDivElement | null>;
   closeModal: () => void;
   isOpen: boolean;
-  position?: PositionType;
+  position?: Position;
   showCloseButton?: boolean;
   showBackdrop?: boolean;
 }
@@ -65,7 +65,7 @@ const Backdrop = styled.div`
 `;
 
 const Container = styled.div<{
-  position: PositionType;
+  position: Position;
 }>`
   position: fixed;
   z-index: ${({ theme }) => theme.zIndex.overlay};
@@ -91,7 +91,7 @@ const CloseButton = styled.button`
   background: none;
 `;
 
-const ContentWrapper = styled.div<{ position: PositionType }>`
+const ContentWrapper = styled.div<{ position: Position }>`
   min-height: 0;
 
   display: flex;

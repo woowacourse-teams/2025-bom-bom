@@ -1,11 +1,11 @@
 import styled from '@emotion/styled';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDevice } from '@/hooks/useDevice';
 import maintenanceBom from '#/assets/maintenance-bom.png';
 
 const MaintenanceCard = () => {
-  const deviceType = useDeviceType();
-  const isMobile = deviceType === 'mobile';
+  const device = useDevice();
+  const isMobile = device === 'mobile';
 
   return (
     <Container isMobile={isMobile}>

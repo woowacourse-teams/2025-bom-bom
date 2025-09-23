@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDevice } from '@/hooks/useDevice';
 import MobileStorageContent from '@/pages/storage/components/MobileStorageContent/MobileStorageContent';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import PCStorageContent from '@/pages/storage/components/PCStorageContent/PCStorageContent';
@@ -14,9 +14,9 @@ export const Route = createFileRoute('/_bombom/storage')({
 });
 
 function Storage() {
-  const deviceType = useDeviceType();
-  const isPC = deviceType === 'pc';
-  const isMobile = deviceType === 'mobile';
+  const device = useDevice();
+  const isPC = device === 'pc';
+  const isMobile = device === 'mobile';
 
   const {
     selectedNewsletterId,

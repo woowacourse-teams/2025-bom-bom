@@ -1,30 +1,21 @@
-import { useRef } from "react";
-import "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from 'expo-status-bar';
+import React from 'react';
+import 'react-native-reanimated';
 
-import WebView from "react-native-webview";
-
-const CHROME_USER_AGENT =
-  "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/96.0.4664.116 Mobile/15E148 Safari/604.1";
+import { MainScreen } from '../components/main/MainScreen';
+import { AuthProvider } from '../contexts/AuthContext';
+import { EmotionThemeProvider } from '../contexts/ThemeContext';
+import { WebViewProvider } from '../contexts/WebViewContext';
 
 export default function RootLayout() {
-  const webviewRef = useRef<WebView>(null);
-
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <WebView
-        ref={webviewRef}
-        source={{ uri: "https://www.bombom.news" }}
-        userAgent={CHROME_USER_AGENT}
-        allowsBackForwardNavigationGestures
-        sharedCookiesEnabled
-        thirdPartyCookiesEnabled
-        webviewDebuggingEnabled
-        pullToRefreshEnabled
-        onContentProcessDidTerminate={() => {
-          webviewRef.current?.reload();
-        }}
-      />
-    </SafeAreaView>
+    <EmotionThemeProvider>
+      <WebViewProvider>
+        <AuthProvider>
+          <StatusBar style="auto" />
+          <MainScreen />
+        </AuthProvider>
+      </WebViewProvider>
+    </EmotionThemeProvider>
   );
 }

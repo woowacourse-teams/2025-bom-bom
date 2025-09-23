@@ -6,4 +6,5 @@ export const ENV = {
   nodeEnv: `${process.env.NODE_ENV}`,
   clarityProjectId: `${process.env.CLARITY_PROJECT_ID}`,
   monitoringStatusUrl: `${process.env.MONITORING_STATUS_URL}`,
+  channelTalkPluginKey: `${process.env.CHANNEL_TALK_PLUGIN_KEY}`,
 } as const;

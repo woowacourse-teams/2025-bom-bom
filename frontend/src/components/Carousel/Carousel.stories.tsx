@@ -11,7 +11,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-interface SlideType {
+interface Slide {
   label: string;
   backgroundColor: 'primary' | 'primaryLight';
 }
@@ -20,7 +20,7 @@ interface SlideBoxProps {
   children: React.ReactNode;
 }
 
-const slides: SlideType[] = [
+const slides: Slide[] = [
   { label: '슬라이드1', backgroundColor: 'primary' },
   { label: '슬라이드2', backgroundColor: 'primaryLight' },
 ];

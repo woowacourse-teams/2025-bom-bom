@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDevice } from '@/hooks/useDevice';
 import PCMemoContent from '@/pages/memo/components/PCMemoContent/PCMemoContent';
 import { useMemoFilters } from '@/pages/memo/hooks/useMemoFilters';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
@@ -13,8 +13,8 @@ export const Route = createFileRoute('/_bombom/memo')({
 });
 
 function MemoPage() {
-  const deviceType = useDeviceType();
-  const isPC = deviceType === 'pc';
+  const device = useDevice();
+  const isPC = device === 'pc';
 
   const {
     selectedNewsletterId,

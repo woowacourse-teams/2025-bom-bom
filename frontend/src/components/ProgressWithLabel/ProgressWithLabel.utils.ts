@@ -1,10 +1,10 @@
-import { RateFormatType } from './types';
+import { RateFormat } from './types';
 import { calculateRate } from '@/utils/math';
 
 interface FormatRateParams {
   currentCount: number;
   totalCount: number;
-  rateFormat: RateFormatType;
+  rateFormat: RateFormat;
 }
 
 const format = {

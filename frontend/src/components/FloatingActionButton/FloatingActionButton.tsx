@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { ReactNode, useState } from 'react';
 import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDevice } from '@/hooks/useDevice';
 
 interface FloatingActionButtonProps {
   icon: ReactNode;
@@ -13,7 +13,7 @@ const FloatingActionButton = ({
   children,
 }: FloatingActionButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const deviceType = useDeviceType();
+  const device = useDevice();
 
   const toggleMenu = () => {
     setIsOpen((prev) => !prev);
@@ -25,19 +25,17 @@ const FloatingActionButton = ({
 
   return (
     <div ref={floatingRef}>
-      <FloatingButton onClick={toggleMenu} deviceType={deviceType}>
+      <FloatingButton onClick={toggleMenu} device={device}>
         {icon}
       </FloatingButton>
-      {isOpen && (
-        <FloatingMenu deviceType={deviceType}>{children}</FloatingMenu>
-      )}
+      {isOpen && <FloatingMenu device={device}>{children}</FloatingMenu>}
     </div>
   );
 };
 
 export default FloatingActionButton;
 
-const FloatingButton = styled.button<{ deviceType: DeviceType }>`
+const FloatingButton = styled.button<{ device: Device }>`
   position: fixed;
   right: 20px;
   bottom: calc(
@@ -62,7 +60,7 @@ const FloatingButton = styled.button<{ deviceType: DeviceType }>`
   }
 `;
 
-const FloatingMenu = styled.div<{ deviceType: DeviceType }>`
+const FloatingMenu = styled.div<{ device: Device }>`
   position: fixed;
   right: 20px;
   bottom: calc(152px + env(safe-area-inset-bottom));

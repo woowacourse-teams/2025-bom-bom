@@ -1,14 +1,14 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
-import { DeviceType } from '@/hooks/useDeviceType';
+import { Device } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import logo from '#/assets/logo.png';
 
 interface HeaderLogoProps {
-  deviceType: DeviceType;
+  device: Device;
 }
 
-const HeaderLogo = ({ deviceType }: HeaderLogoProps) => {
+const HeaderLogo = ({ device }: HeaderLogoProps) => {
   return (
     <Container
       to="/"
@@ -23,7 +23,7 @@ const HeaderLogo = ({ deviceType }: HeaderLogoProps) => {
       <Logo src={logo} alt="logo" />
       <TitleBox>
         <Title>봄봄</Title>
-        {deviceType === 'pc' && (
+        {device === 'pc' && (
           <SubTitle>당신의 하루에 찾아오는 작은 설렘</SubTitle>
         )}
       </TitleBox>

@@ -6,7 +6,7 @@ import { heartAnimation, jumpAnimation } from './PetCard.keyframes';
 import Button from '../Button/Button';
 import ProgressBar from '../ProgressBar/ProgressBar';
 import { getPet, postPetAttendance } from '@/apis/pet';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDevice } from '@/hooks/useDevice';
 import { queryClient } from '@/main';
 import { theme } from '@/styles/theme';
 import { calculateRate } from '@/utils/math';
@@ -27,7 +27,7 @@ const petImages: Record<number, string> = {
 };
 
 const PetCard = () => {
-  const deviceType = useDeviceType();
+  const device = useDevice();
   const [isAnimating, setIsAnimating] = useState(false);
 
   const { data: pet } = useQuery({
@@ -54,8 +54,8 @@ const PetCard = () => {
   };
 
   return (
-    <Container deviceType={deviceType}>
-      {deviceType === 'pc' && (
+    <Container device={device}>
+      {device === 'pc' && (
         <TitleWrapper>
           <StatusIconWrapper>
             <PetIcon width={16} height={16} color={theme.colors.white} />
@@ -96,7 +96,7 @@ const PetCard = () => {
       />
 
       <AttendanceButton
-        deviceType={deviceType}
+        device={device}
         text={isAttended ? '출석 완료!' : '출석체크하기'}
         onClick={handleAttendanceClick}
         disabled={isAttended}
@@ -107,7 +107,7 @@ const PetCard = () => {
 
 export default PetCard;
 
-const Container = styled.section<{ deviceType: DeviceType }>`
+const Container = styled.section<{ device: Device }>`
   width: 310px;
   border-radius: 20px;
 
@@ -118,7 +118,7 @@ const Container = styled.section<{ deviceType: DeviceType }>`
   align-items: center;
   justify-content: center;
 
-  ${({ deviceType, theme }) => containerStyles[deviceType](theme)}
+  ${({ device, theme }) => containerStyles[device](theme)}
 `;
 
 const PetImageContainer = styled.div`
@@ -196,11 +196,11 @@ const Title = styled.h2`
   text-align: center;
 `;
 
-const AttendanceButton = styled(Button)<{ deviceType: DeviceType }>`
+const AttendanceButton = styled(Button)<{ device: Device }>`
   height: 32px;
 
-  ${({ deviceType }) =>
-    deviceType === 'mobile' && {
+  ${({ device }) =>
+    device === 'mobile' && {
       position: 'absolute',
       left: '50%',
       bottom: 0,
@@ -209,7 +209,7 @@ const AttendanceButton = styled(Button)<{ deviceType: DeviceType }>`
     }}
 `;
 
-const containerStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {
+const containerStyles: Record<Device, (theme: Theme) => CSSObject> = {
   pc: () => ({
     padding: '34px 30px',
     border: `1px solid ${theme.colors.white}`,

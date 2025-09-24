@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
+import { buildSubscribeUrl } from './NewsletterDetail.utils';
 import { queries } from '@/apis/queries';
 import Badge from '@/components/Badge/Badge';
 import Button from '@/components/Button/Button';
@@ -37,18 +38,11 @@ const NewsletterDetail = ({
     copyToClipboard(userInfo.email);
     alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
 
-    // 스티비 페이지인지 확인
-    const isStibeePage =
-      newsletterDetail.subscribeUrl.includes('page.stibee.com');
-
-    if (isStibeePage) {
-      const url = new URL(newsletterDetail.subscribeUrl);
-      url.searchParams.set('email', userInfo.email);
-      url.searchParams.set('name', userInfo.nickname);
-      openExternalLink(url.toString());
-    } else {
-      openExternalLink(newsletterDetail.subscribeUrl);
-    }
+    const subscribeUrl = buildSubscribeUrl(
+      newsletterDetail.subscribeUrl,
+      userInfo,
+    );
+    openExternalLink(subscribeUrl);
   };
 
   const openMainSite = () => {

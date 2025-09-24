@@ -10,6 +10,14 @@ import type { Article } from '@/types/articles';
 import HelpIcon from '#/assets/svg/help.svg';
 
 export const Route = createFileRoute('/_bombom/guide')({
+  head: () => ({
+    meta: [
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
+    ],
+  }),
   component: GuidePage,
 });
 

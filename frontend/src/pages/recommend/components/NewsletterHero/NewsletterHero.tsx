@@ -7,6 +7,7 @@ import {
   isRunningInWebView,
   sendMessageToRN,
 } from '@/libs/webview/webview.utils';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import logo from '#/assets/png/logo.png';
 
 export default function NewsletterHero() {
@@ -35,7 +36,17 @@ export default function NewsletterHero() {
             <HeroSubtitle>
               당신의 관심사에 맞는 최고의 뉴스레터를 추천해드립니다.
             </HeroSubtitle>
-            <CTAButton onClick={handleLoginClick}>
+            <CTAButton
+              to="/login"
+              onClick={() => {
+                handleLoginClick();
+                trackEvent({
+                  category: 'Navigation',
+                  action: '로그인 버튼 클릭',
+                  label: '추천 페이지 Hero',
+                });
+              }}
+            >
               로그인하고 맞춤 추천 받기
             </CTAButton>
           </HeroContent>

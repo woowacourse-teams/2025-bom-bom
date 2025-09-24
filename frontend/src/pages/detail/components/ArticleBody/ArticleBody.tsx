@@ -10,6 +10,7 @@ import ArticleContent from '../ArticleContent/ArticleContent';
 import FloatingToolbar from '../FloatingToolbar/FloatingToolbar';
 import MemoPanel from '../MemoPanel/MemoPanel';
 import type { GetArticleByIdResponse } from '@/apis/articles';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 
 interface ArticleBodyProps {
   articleId: number;
@@ -55,9 +56,21 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
 
     if (isNewMode) {
       addNewHighlight(activeSelectionRange);
+
+      trackEvent({
+        category: 'Memo',
+        action: 'FloatingToolbar - 하이라이트 추가',
+        label: '아티클 본문',
+      });
     }
     if (!isNewMode && activeHighlightId) {
       removeHighlight({ id: activeHighlightId });
+
+      trackEvent({
+        category: 'Memo',
+        action: 'FloatingToolbar - 하이라이트 삭제',
+        label: '아티클 본문',
+      });
     }
 
     hideToolbar();
@@ -68,6 +81,12 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
 
     if (isNewMode) {
       addNewHighlight(activeSelectionRange);
+
+      trackEvent({
+        category: 'Memo',
+        action: 'FloatingToolbar - 메모 추가',
+        label: '아티클 본문',
+      });
     }
 
     setPanelOpen(true);

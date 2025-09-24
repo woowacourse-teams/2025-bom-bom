@@ -1,8 +1,6 @@
 import styled from '@emotion/styled';
-import { StreakWrapper } from './ReadingStatusCard';
 import ReadingStatusCardContainer from './ReadingStatusCardContainer';
 import ProgressWithLabelSkeleton from '@/components/ProgressWithLabel/ProgressWithLabelSkeleton';
-import TextSkeleton from '@/components/Skeleton/TextSkeleton';
 import { useDevice } from '@/hooks/useDevice';
 import { skeletonStyle } from '@/styles/skeleton';
 
@@ -12,35 +10,42 @@ const ReadingStatusCardSkeleton = () => {
 
   return (
     <ReadingStatusCardContainer>
-      <StreakWrapper device={device}>
-        <StreakIcon />
-        <TextSkeleton width="60px" height="28px" />
-      </StreakWrapper>
+      <Streak />
 
-      <ProgressWithLabelSkeleton
-        hasShowGraph={isPC}
-        hasShowDescription={isPC}
-      />
+      <SkeletonProgressWrapper isPC={isPC}>
+        <ProgressWithLabelSkeleton
+          hasShowGraph={isPC}
+          hasShowDescription={isPC}
+        />
 
-      <ProgressWithLabelSkeleton
-        hasShowGraph={isPC}
-        hasShowDescription={isPC}
-      />
+        <ProgressWithLabelSkeleton
+          hasShowGraph={isPC}
+          hasShowDescription={isPC}
+        />
+      </SkeletonProgressWrapper>
     </ReadingStatusCardContainer>
   );
 };
 
 export default ReadingStatusCardSkeleton;
 
-const StreakIcon = styled.div`
-  width: 70px;
-  height: 70px;
-  padding: 18px;
-  border-radius: 36px;
+const Streak = styled.div`
+  width: 104px;
+  height: 104px;
+  padding: 20px;
+  border-radius: 12px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
   ${skeletonStyle}
+`;
+
+const SkeletonProgressWrapper = styled.div<{ isPC: boolean }>`
+  width: 100%;
+
+  display: flex;
+  gap: ${({ isPC }) => (isPC ? '50px' : '16px')};
+  flex-direction: column;
 `;

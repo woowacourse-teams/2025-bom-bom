@@ -12,7 +12,8 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.pet.ScorePolicyConstants;
 import me.bombom.api.v1.reading.domain.ContinueReading;
 import me.bombom.api.v1.reading.domain.LowestRankWithDifference;
-import me.bombom.api.v1.reading.domain.MonthlyReading;
+import me.bombom.api.v1.reading.domain.MonthlyReadingRealtime;
+import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
@@ -21,7 +22,8 @@ import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
-import me.bombom.api.v1.reading.repository.MonthlyReadingRepository;
+import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
+import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.reading.repository.YearlyReadingRepository;
@@ -40,7 +42,8 @@ public class ReadingService {
     private final ContinueReadingRepository continueReadingRepository;
     private final TodayReadingRepository todayReadingRepository;
     private final WeeklyReadingRepository weeklyReadingRepository;
-    private final MonthlyReadingRepository monthlyReadingRepository;
+    private final MonthlyReadingSnapshotRepository monthlyReadingSnapshotRepository;
+    private final MonthlyReadingRealtimeRepository monthlyReadingRealtimeRepository;
     private final YearlyReadingRepository yearlyReadingRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -55,12 +58,16 @@ public class ReadingService {
         weeklyReadingRepository.save(newWeeklyReading);
 
         LowestRankWithDifference lowestRankWithDifference = computeLowestRankWithDifference();
-        MonthlyReading newMonthlyReading = MonthlyReading.create(
+        MonthlyReadingSnapshot newMonthlyReadingSnapshot = MonthlyReadingSnapshot.create(
                 memberId,
                 lowestRankWithDifference.rank(),
                 lowestRankWithDifference.difference()
         );
-        monthlyReadingRepository.save(newMonthlyReading);
+        monthlyReadingSnapshotRepository.save(newMonthlyReadingSnapshot);
+
+        MonthlyReadingRealtime monthlyReadingRealtime = MonthlyReadingRealtime.create(memberId);
+        monthlyReadingRealtimeRepository.save(monthlyReadingRealtime);
+
 
         YearlyReading newYearlyReading = YearlyReading.create(memberId, LocalDate.now().getYear());
         yearlyReadingRepository.save(newYearlyReading);
@@ -84,7 +91,7 @@ public class ReadingService {
 
     @Transactional
     public void passMonthlyCountToYearly() {
-        monthlyReadingRepository.findAll().forEach(monthlyReading -> {
+        monthlyReadingSnapshotRepository.findAll().forEach(monthlyReading -> {
             Long memberId = monthlyReading.getMemberId();
             int targetYear = LocalDate.now().minusMonths(LAST_MONTH_OFFSET).getYear();
             YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndReadingYear(memberId, targetYear)
@@ -158,29 +165,29 @@ public class ReadingService {
     }
 
     public List<MonthlyReadingRankResponse> getMonthlyReadingRank(int limit) {
-        return monthlyReadingRepository.findMonthlyRanking(limit);
+        return monthlyReadingSnapshotRepository.findMonthlyRanking(limit);
     }
 
     public MemberMonthlyReadingRankResponse getMemberMonthlyReadingRank(Member member) {
-        return monthlyReadingRepository.findMemberRankAndGap(member.getId());
+        return monthlyReadingSnapshotRepository.findMemberRankAndGap(member.getId());
     }
 
     @Transactional
     public void updateMonthlyRanking() {
-        monthlyReadingRepository.updateMonthlyRanking();
+        monthlyReadingSnapshotRepository.updateMonthlyRanking();
     }
 
     private LowestRankWithDifference computeLowestRankWithDifference() {
-        MonthlyReading lowestRankMonthlyReading = monthlyReadingRepository.findTopByOrderByRankOrderDesc();
-        if (lowestRankMonthlyReading.getCurrentCount() == 0) {
+        MonthlyReadingSnapshot lowestRankMonthlyReadingSnapshot = monthlyReadingSnapshotRepository.findTopByOrderByRankOrderDesc();
+        if (lowestRankMonthlyReadingSnapshot.getCurrentCount() == 0) {
             return LowestRankWithDifference.of(
-                    lowestRankMonthlyReading.getRankOrder(),
-                    lowestRankMonthlyReading.getNextRankDifference()
+                    lowestRankMonthlyReadingSnapshot.getRankOrder(),
+                    lowestRankMonthlyReadingSnapshot.getNextRankDifference()
             );
         }
         return LowestRankWithDifference.of(
-                lowestRankMonthlyReading.getRankOrder() + 1,
-                lowestRankMonthlyReading.getCurrentCount()
+                lowestRankMonthlyReadingSnapshot.getRankOrder() + 1,
+                lowestRankMonthlyReadingSnapshot.getCurrentCount()
         );
     }
 
@@ -229,12 +236,12 @@ public class ReadingService {
     }
 
     private void updateMonthlyReadingCount(Long memberId) {
-        MonthlyReading monthlyReading = monthlyReadingRepository.findByMemberId(memberId)
+        MonthlyReadingRealtime monthlyReadingRealtime = monthlyReadingRealtimeRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReading")
                         .addContext(ErrorContextKeys.OPERATION, "updateMonthlyReadingCount"));
-        monthlyReading.increaseCurrentCount();
+        monthlyReadingRealtime.increaseCurrentCount();
     }
 
     private boolean isBonusApplicable(ContinueReading continueReading) {

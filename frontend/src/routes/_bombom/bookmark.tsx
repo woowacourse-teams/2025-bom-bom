@@ -5,9 +5,9 @@ import { useCallback, useState } from 'react';
 import { queries } from '@/apis/queries';
 import TextSkeleton from '@/components/Skeleton/TextSkeleton';
 import { Device, useDevice } from '@/hooks/useDevice';
+import ArticleList from '@/pages/storage/components/ArticleList/ArticleList';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
-import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import BookmarkIcon from '#/assets/bookmark-inactive.svg';
 
@@ -37,7 +37,12 @@ function BookmarkPage() {
     queries.bookmarksStatisticsNewsletters(),
   );
 
-  if (!articles) return null;
+  const bookmarkContent = articles?.content ?? [];
+  const haveNoContent = !isLoading && bookmarkContent.length === 0;
+
+  if (haveNoContent)
+    return <EmptyLetterCard title="북마크한 뉴스레터가 없어요" />;
+
   return (
     <Container>
       <MainSection>
@@ -76,17 +81,7 @@ function BookmarkPage() {
                 <ResultsInfo>총 {totalElements}개의 북마크</ResultsInfo>
               )}
             </SummaryBar>
-            {articles.content && articles.content?.length > 0 ? (
-              <ArticleList>
-                {articles.content.map((article) => (
-                  <li key={article.articleId}>
-                    <ArticleCard data={article} readVariant="badge" />
-                  </li>
-                ))}
-              </ArticleList>
-            ) : (
-              <EmptyLetterCard title="북마크한 뉴스레터가 없어요" />
-            )}
+            <ArticleList articles={bookmarkContent} isLoading={isLoading} />
           </MainContentSection>
         </ContentWrapper>
       </MainSection>
@@ -148,14 +143,6 @@ const MainContentSection = styled.div<{ device: Device }>`
   flex-direction: column;
 
   order: ${({ device }) => (device === 'pc' ? 2 : 1)};
-`;
-
-const ArticleList = styled.ul`
-  width: 100%;
-
-  display: flex;
-  gap: 16px;
-  flex-direction: column;
 `;
 
 const BookmarkStorageIcon = styled(BookmarkIcon)`

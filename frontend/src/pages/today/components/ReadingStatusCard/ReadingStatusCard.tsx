@@ -120,14 +120,6 @@ function ReadingStatusCard() {
 
 export default ReadingStatusCard;
 
-const StreakWrapper = styled.div<{ device: Device }>`
-  display: flex;
-  gap: ${({ device }) => (device === 'pc' ? '8px' : '0px')};
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-`;
-
 const StreakDescription = styled.p<{ device: Device }>`
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ device, theme }) =>
@@ -138,14 +130,6 @@ const StreakDescription = styled.p<{ device: Device }>`
 const WeeklyGoalSection = styled.section`
   position: relative;
   width: 100%;
-`;
-
-const WeeklyProgressContainer = styled.div`
-  width: 100%;
-
-  display: flex;
-  gap: 14px;
-  flex-direction: column;
 `;
 
 const ProgressInfo = styled.div`
@@ -197,4 +181,20 @@ const InputContainer = styled.div`
     color: ${({ theme }) => theme.colors.primary};
     font: ${({ theme }) => theme.fonts.body2};
   }
+`;
+
+export const StreakWrapper = styled.div<{ device: Device }>`
+  display: flex;
+  gap: ${({ device }) => (device === 'pc' ? '8px' : '0px')};
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const WeeklyProgressContainer = styled.div`
+  width: 100%;
+
+  display: flex;
+  gap: 14px;
+  flex-direction: column;
 `;

@@ -1,47 +1,43 @@
 import styled from '@emotion/styled';
+import { StreakWrapper, WeeklyProgressContainer } from './ReadingStatusCard';
 import ReadingStatusCardContainer from './ReadingStatusCardContainer';
 import TextSkeleton from '@/components/Skeleton/TextSkeleton';
+import { useDevice } from '@/hooks/useDevice';
 import { skeletonStyle } from '@/styles/skeleton';
 
-function ReadingStatusCardSkeleton() {
+const ReadingStatusCardSkeleton = () => {
+  const device = useDevice();
+
   return (
     <ReadingStatusCardContainer>
-      <StreakWrapper>
+      <StreakWrapper device={device}>
         <StreakIcon />
         <TextSkeleton width="60px" height="28px" />
       </StreakWrapper>
 
-      <ProgressSection>
+      <WeeklyProgressContainer>
         <TextSkeleton width="100px" height="22px" />
         <SkeletonBar height="10px" />
         <TextSkeleton width="60px" height="18px" />
-      </ProgressSection>
+      </WeeklyProgressContainer>
 
-      <ProgressSection>
+      <WeeklyProgressContainer>
         <TextSkeleton width="100px" height="22px" />
         <SkeletonBar height="10px" />
         <TextSkeleton width="60px" height="18px" />
-      </ProgressSection>
+      </WeeklyProgressContainer>
     </ReadingStatusCardContainer>
   );
-}
+};
 
 export default ReadingStatusCardSkeleton;
 
-const SkeletonBar = styled.div<{ height?: string }>`
+const SkeletonBar = styled.div<{ height: string }>`
   width: 100%;
   height: ${({ height }) => height};
   border-radius: 8px;
 
   ${skeletonStyle}
-`;
-
-const StreakWrapper = styled.div`
-  display: flex;
-  gap: 10px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
 `;
 
 const StreakIcon = styled.div`
@@ -55,12 +51,4 @@ const StreakIcon = styled.div`
   justify-content: center;
 
   ${skeletonStyle}
-`;
-
-const ProgressSection = styled.div`
-  width: 100%;
-
-  display: flex;
-  gap: 14px;
-  flex-direction: column;
 `;

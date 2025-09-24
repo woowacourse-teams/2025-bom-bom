@@ -4,6 +4,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { GetHighlightsParams } from '@/apis/highlight';
 import { queries } from '@/apis/queries';
 import Pagination from '@/components/Pagination/Pagination';
+import TextSkeleton from '@/components/Skeleton/TextSkeleton';
 import ReadOnlyMemoCard from '@/pages/detail/components/MemoCard/ReadOnlyMemoCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 
@@ -42,7 +43,11 @@ export default function PCMemoContent({
   return (
     <>
       <SummaryBar>
-        <ResultsInfo>총 {totalElements}개의 메모</ResultsInfo>
+        {isLoading ? (
+          <TextSkeleton width="80px" height="20px" />
+        ) : (
+          <ResultsInfo>총 {totalElements}개의 메모</ResultsInfo>
+        )}
       </SummaryBar>
 
       <MemoList>

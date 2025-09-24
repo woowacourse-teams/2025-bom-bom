@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 import { queries } from '@/apis/queries';
+import TextSkeleton from '@/components/Skeleton/TextSkeleton';
 import { Device, useDevice } from '@/hooks/useDevice';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
@@ -18,7 +19,7 @@ function BookmarkPage() {
   const [selectedNewsletterId, setSelectedNewsletterId] = useState<
     number | null
   >(null);
-  const { data: articles } = useQuery(
+  const { data: articles, isLoading } = useQuery(
     queries.bookmarks({
       newsletterId: selectedNewsletterId || undefined,
       size: 100, // 페이지네이션 없이 구현
@@ -69,7 +70,11 @@ function BookmarkPage() {
 
           <MainContentSection device={device}>
             <SummaryBar>
-              <ResultsInfo>총 {totalElements}개의 북마크</ResultsInfo>
+              {isLoading ? (
+                <TextSkeleton width="80px" height="20px" />
+              ) : (
+                <ResultsInfo>총 {totalElements}개의 북마크</ResultsInfo>
+              )}
             </SummaryBar>
             {articles.content && articles.content?.length > 0 ? (
               <ArticleList>

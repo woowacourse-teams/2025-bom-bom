@@ -83,6 +83,7 @@ export default function MobileStorageContent({
         sortFilter={sortFilter}
         onSortChange={onSortChange}
         totalElements={totalElements}
+        isLoading={isInfiniteLoading}
       />
       <ArticleList articles={articleList} isLoading={isInfiniteLoading} />
       {/* 무한 스크롤 로딩 트리거 */}

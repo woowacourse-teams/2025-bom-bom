@@ -61,6 +61,7 @@ export default function PCStorageContent({
         sortFilter={sortFilter}
         onSortChange={onSortChange}
         totalElements={totalElements}
+        isLoading={isLoading}
       />
       <ArticleList articles={articleList} isLoading={isLoading} />
       <Pagination

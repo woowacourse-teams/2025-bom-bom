@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import SearchInput from '@/components/SearchInput/SearchInput';
 import Select from '@/components/Select/Select';
+import TextSkeleton from '@/components/Skeleton/TextSkeleton';
 
 interface ArticleListControlsProps {
   searchInput: string;
@@ -8,6 +9,7 @@ interface ArticleListControlsProps {
   sortFilter: 'DESC' | 'ASC';
   onSortChange: (value: 'DESC' | 'ASC') => void;
   totalElements: number | undefined;
+  isLoading: boolean;
 }
 
 export default function ArticleListControls({
@@ -16,6 +18,7 @@ export default function ArticleListControls({
   sortFilter,
   onSortChange,
   totalElements,
+  isLoading,
 }: ArticleListControlsProps) {
   return (
     <Container>
@@ -25,7 +28,12 @@ export default function ArticleListControls({
         onChange={onSearchChange}
       />
       <SummaryBar>
-        <SummaryText>총 {totalElements ?? 0}개</SummaryText>
+        {isLoading ? (
+          <TextSkeleton width="80px" height="20px" />
+        ) : (
+          <SummaryText>총 {totalElements ?? 0}개</SummaryText>
+        )}
+
         <Select
           options={[
             { value: 'DESC', label: '최신순' },

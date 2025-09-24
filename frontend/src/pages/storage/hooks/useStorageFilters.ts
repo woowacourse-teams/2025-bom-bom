@@ -22,7 +22,7 @@ export const useStorageFilters = () => {
     page,
   };
 
-  const { data: newsletterCounts } = useQuery(
+  const { data: newsletterCounts, isLoading } = useQuery(
     queries.articlesStatisticsNewsletters({
       keyword: debouncedSearchInput,
     }),
@@ -54,6 +54,7 @@ export const useStorageFilters = () => {
     searchInput,
     baseQueryParams,
     newsletterCounts,
+    isLoading,
     handleNewsletterChange,
     handleSortChange,
     handleSearchChange,

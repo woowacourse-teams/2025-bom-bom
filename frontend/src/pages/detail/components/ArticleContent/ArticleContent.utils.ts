@@ -5,7 +5,7 @@ export const processContent = (content: string): string => {
     content
       .replace(/\\r\\n/g, '') // Windows 개행
       .replace(/\r/g, '') // Mac 개행 (구버전)
-      .replace(/\n/g, '<br>') // Unix/Linux 개행
+      .replace(/\n/g, '') // Unix/Linux 개행
       // 긱뉴스 절취선을 제거하기 위해서 추가
       // * 링크 패턴을 <ul><li><a>로 변환
       .replace(

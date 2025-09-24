@@ -37,10 +37,13 @@ public class WithdrawnMember {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
+    @Column(nullable = false)
     private LocalDate joinedDate;
 
+    @Column(nullable = false)
     private LocalDate deletedDate;
 
+    @Column(nullable = false)
     private LocalDate expireDate;
 
     private int continueReading;

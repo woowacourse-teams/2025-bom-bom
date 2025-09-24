@@ -39,7 +39,7 @@ const Container = styled.div`
   word-wrap: break-word;
 
   a {
-    color: #1a73e8;
+    color: ${({ theme }) => theme.colors.info};
 
     cursor: pointer;
     text-decoration: underline;

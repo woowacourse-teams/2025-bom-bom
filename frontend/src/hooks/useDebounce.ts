@@ -6,7 +6,7 @@ interface UseDebounceOptions {
 
 export function useDebounce<T extends unknown[]>(
   callback: (...args: T) => void,
-  wait: number,
+  debouncedMs: number,
   options: UseDebounceOptions = {},
 ) {
   const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -21,9 +21,9 @@ export function useDebounce<T extends unknown[]>(
 
       timerIdRef.current = setTimeout(() => {
         callbackRef.current(...args);
-      }, wait);
+      }, debouncedMs);
     },
-    [wait],
+    [debouncedMs],
   );
 
   useEffect(() => {

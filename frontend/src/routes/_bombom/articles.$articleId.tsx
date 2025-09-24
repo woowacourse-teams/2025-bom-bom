@@ -58,7 +58,7 @@ function ArticleDetailPage() {
       )}
 
       <Container>
-        <ArticleContent deviceType={deviceType}>
+        <ArticleContent device={device}>
           <ArticleProgressBar
             rate={progressPercentage}
             transition={false}
@@ -89,7 +89,7 @@ function ArticleDetailPage() {
           <TodayUnreadArticlesSection articleId={articleIdNumber} />
         </ArticleContent>
 
-        {deviceType === 'pc' && (
+        {device === 'pc' && (
           <ArticleActionButtons
             bookmarked={isBookmarked}
             onBookmarkClick={toggleBookmark}

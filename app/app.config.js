@@ -50,6 +50,19 @@ module.exports = ({ config }) => {
             backgroundColor: '#FE5E04',
           },
         ],
+        [
+          '@react-native-google-signin/google-signin',
+          {
+            iosUrlScheme:
+              'com.googleusercontent.apps.190361254930-1464b7md34crhu077urc0hsvtsmb5ks5',
+          },
+        ],
+        [
+          'expo-apple-authentication',
+          {
+            appleTeamId: 'F6XK836QA8',
+          },
+        ],
       ],
 
       experiments: {

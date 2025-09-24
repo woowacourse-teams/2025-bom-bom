@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
-import { Device } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
+import type { Device } from '@/hooks/useDevice';
 import logo from '#/assets/png/logo.png';
 
 interface HeaderLogoProps {

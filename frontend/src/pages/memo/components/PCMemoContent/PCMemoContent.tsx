@@ -1,11 +1,11 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { GetHighlightsParams } from '@/apis/highlight';
 import { queries } from '@/apis/queries';
 import Pagination from '@/components/Pagination/Pagination';
 import ReadOnlyMemoCard from '@/pages/detail/components/MemoCard/ReadOnlyMemoCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
+import type { GetHighlightsParams } from '@/apis/highlight';
 
 interface PCMemoContentProps {
   baseQueryParams: GetHighlightsParams;

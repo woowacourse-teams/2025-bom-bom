@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
-import { Device, useDevice } from '@/hooks/useDevice';
+import { useDevice } from '@/hooks/useDevice';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
-import { Article } from '@/types/articles';
+import type { Device } from '@/hooks/useDevice';
+import type { Article } from '@/types/articles';
 
 interface ArticleListProps {
   articles: Article[];

@@ -1,5 +1,5 @@
 import { fetcher } from './fetcher';
-import { components, operations } from '@/types/openapi';
+import type { components, operations } from '@/types/openapi';
 
 export type GetBookmarksParams = Omit<
   operations['getBookmarks']['parameters']['query'],

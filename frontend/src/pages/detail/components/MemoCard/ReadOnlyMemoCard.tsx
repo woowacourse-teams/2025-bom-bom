@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { ElementType } from 'react';
+import type { ElementType } from 'react';
 
 interface ReadOnlyMemoCardProps {
   id: number;

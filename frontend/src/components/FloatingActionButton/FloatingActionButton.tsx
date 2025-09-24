@@ -1,7 +1,9 @@
 import styled from '@emotion/styled';
-import { ReactNode, useState } from 'react';
+import { useState } from 'react';
 import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
-import { Device, useDevice } from '@/hooks/useDevice';
+import { useDevice } from '@/hooks/useDevice';
+import type { Device } from '@/hooks/useDevice';
+import type { ReactNode } from 'react';
 
 interface FloatingActionButtonProps {
   icon: ReactNode;

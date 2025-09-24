@@ -3,8 +3,8 @@ import ProfileDetail from './ProfileDetail';
 import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 import Modal from '../Modal/Modal';
 import useModal from '../Modal/useModal';
-import { Device } from '@/hooks/useDevice';
-import { UserInfo } from '@/types/me';
+import type { Device } from '@/hooks/useDevice';
+import type { UserInfo } from '@/types/me';
 
 interface HeaderProfileProps {
   userInfo: UserInfo;

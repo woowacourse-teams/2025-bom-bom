@@ -1,37 +1,34 @@
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query';
 import {
   getArticleById,
-  GetArticleByIdParams,
   getArticles,
   type GetArticlesParams,
   getArticlesStatisticsNewsletters,
-  GetArticleStatisticsNewslettersParams,
+  type GetArticleByIdParams,
+  type GetArticleStatisticsNewslettersParams,
 } from './articles';
-import { getSignupCheck, GetSignupCheckParams } from './auth';
+import { getSignupCheck } from './auth';
 import {
   getArticleBookmarkStatus,
-  GetArticleBookmarkStatusParams,
   getBookmarks,
-  GetBookmarksParams,
   getBookmarksStatisticsNewsletters,
 } from './bookmark';
-import {
-  getHighlights,
-  GetHighlightsParams,
-  getHighlightStatisticsNewsletter,
-} from './highlight';
+import { getHighlights, getHighlightStatisticsNewsletter } from './highlight';
 import {
   getMonthlyReadingRank,
-  GetMonthlyReadingRankParams,
   getMyMonthlyReadingRank,
   getReadingStatus,
   getUserInfo,
 } from './members';
-import {
-  getNewsletterDetail,
-  GetNewsletterDetailParams,
-  getNewsletters,
-} from './newsLetters';
+import { getNewsletterDetail, getNewsletters } from './newsLetters';
+import type { GetSignupCheckParams } from './auth';
+import type {
+  GetArticleBookmarkStatusParams,
+  GetBookmarksParams,
+} from './bookmark';
+import type { GetHighlightsParams } from './highlight';
+import type { GetMonthlyReadingRankParams } from './members';
+import type { GetNewsletterDetailParams } from './newsLetters';
 
 export const queries = {
   // articles

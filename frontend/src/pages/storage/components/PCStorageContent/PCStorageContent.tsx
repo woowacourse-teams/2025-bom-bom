@@ -2,10 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import ArticleList from '../ArticleList/ArticleList';
 import ArticleListControls from '../ArticleListControls/ArticleListControls';
-import { GetArticlesParams } from '@/apis/articles';
 import { queries } from '@/apis/queries';
 import Pagination from '@/components/Pagination/Pagination';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
+import type { GetArticlesParams } from '@/apis/articles';
 
 interface PCStorageContentProps {
   baseQueryParams: GetArticlesParams;

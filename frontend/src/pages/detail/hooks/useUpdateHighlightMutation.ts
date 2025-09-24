@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { patchHighlight, PatchHighlightParams } from '@/apis/highlight';
+import { patchHighlight } from '@/apis/highlight';
 import { queries } from '@/apis/queries';
+import type { PatchHighlightParams } from '@/apis/highlight';
 
 export const useUpdateHighlightMutation = () => {
   const queryClient = useQueryClient();

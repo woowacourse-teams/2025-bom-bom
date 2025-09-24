@@ -4,7 +4,7 @@ import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
 import { useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
-import { Newsletter } from '@/types/articles';
+import type { Newsletter } from '@/types/articles';
 import NewsIcon from '#/assets/svg/news.svg';
 
 interface NewsLetterFilterProps {

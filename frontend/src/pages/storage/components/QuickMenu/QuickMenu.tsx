@@ -4,8 +4,9 @@ import { MENU_ITEMS } from './QuickMenu.constants';
 import FloatingActionButton from '@/components/FloatingActionButton/FloatingActionButton';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
-import { Device, useDevice } from '@/hooks/useDevice';
+import { useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
+import type { Device } from '@/hooks/useDevice';
 import LinkIcon from '#/assets/svg/link.svg';
 
 const QuickMenu = () => {

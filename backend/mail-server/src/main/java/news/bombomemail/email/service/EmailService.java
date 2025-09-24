@@ -11,7 +11,7 @@ import java.nio.file.Files;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import news.bombomemail.article.service.ArticleService;
-import news.bombomemail.email.util.EmailContentExtractor;
+import news.bombomemail.email.extractor.EmailContentExtractor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 

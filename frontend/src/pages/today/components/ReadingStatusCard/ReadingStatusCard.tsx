@@ -132,6 +132,14 @@ const WeeklyGoalSection = styled.section`
   width: 100%;
 `;
 
+const WeeklyProgressContainer = styled.div`
+  width: 100%;
+
+  display: flex;
+  gap: 14px;
+  flex-direction: column;
+`;
+
 const ProgressInfo = styled.div`
   width: 100%;
 
@@ -189,12 +197,4 @@ export const StreakWrapper = styled.div<{ device: Device }>`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-`;
-
-export const WeeklyProgressContainer = styled.div`
-  width: 100%;
-
-  display: flex;
-  gap: 14px;
-  flex-direction: column;
 `;

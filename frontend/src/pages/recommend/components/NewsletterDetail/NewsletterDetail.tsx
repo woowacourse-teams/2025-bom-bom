@@ -37,7 +37,18 @@ const NewsletterDetail = ({
     copyToClipboard(userInfo.email);
     alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
 
-    openExternalLink(newsletterDetail.subscribeUrl);
+    // 스티비 페이지인지 확인
+    const isStibeePage =
+      newsletterDetail.subscribeUrl.includes('page.stibee.com');
+
+    if (isStibeePage) {
+      const url = new URL(newsletterDetail.subscribeUrl);
+      url.searchParams.set('email', userInfo.email);
+      url.searchParams.set('name', userInfo.nickname);
+      openExternalLink(url.toString());
+    } else {
+      openExternalLink(newsletterDetail.subscribeUrl);
+    }
   };
 
   const openMainSite = () => {

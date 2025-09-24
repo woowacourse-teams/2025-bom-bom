@@ -9,6 +9,5 @@ public interface ContinueReadingRepository extends JpaRepository<ContinueReading
 
     Optional<ContinueReading> findByMemberId(Long memberId);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
     void deleteByMemberId(Long memberId);
 }

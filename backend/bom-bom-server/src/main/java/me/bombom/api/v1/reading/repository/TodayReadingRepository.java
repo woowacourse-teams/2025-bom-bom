@@ -26,6 +26,5 @@ public interface TodayReadingRepository extends JpaRepository<TodayReading, Long
     """)
     List<TodayReading> findTotalNonZeroAndCurrentZero();
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
     void deleteByMemberId(Long memberId);
 }

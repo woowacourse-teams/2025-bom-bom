@@ -63,6 +63,5 @@ public interface MonthlyReadingRepository extends JpaRepository<MonthlyReading, 
 
 	MonthlyReading findTopByOrderByRankOrderDesc();
 
-	@Modifying(clearAutomatically = true, flushAutomatically = true)
     void deleteByMemberId(Long memberId);
 }

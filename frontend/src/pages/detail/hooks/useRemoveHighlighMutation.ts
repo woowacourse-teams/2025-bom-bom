@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { removeHighlightFromDOM } from '../utils/highlight';
-import { deleteHighlight, DeleteHighlightParams } from '@/apis/highlight';
+import { deleteHighlight } from '@/apis/highlight';
 import { queries } from '@/apis/queries';
+import type { DeleteHighlightParams } from '@/apis/highlight';
 
 interface UseRemoveHighlightMutationParams {
   articleId: number;

@@ -1,12 +1,26 @@
 import styled from '@emotion/styled';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import SlideCardList from '../SlideCardList/SlideCardList';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
+import {
+  isIOS,
+  isRunningInWebView,
+  sendMessageToRN,
+} from '@/libs/webview/webview.utils';
 import logo from '#/assets/png/logo.png';
 
 export default function NewsletterHero() {
   const { userInfo } = useUserInfo();
+  const navigate = useNavigate();
+
+  const handleLoginClick = () => {
+    if (isRunningInWebView() && isIOS())
+      sendMessageToRN({
+        type: 'SHOW_LOGIN_SCREEN',
+      });
+    else navigate({ to: '/login' });
+  };
 
   return (
     <>
@@ -25,6 +39,7 @@ export default function NewsletterHero() {
             <CTAButton
               to="/login"
               onClick={() => {
+                handleLoginClick();
                 trackEvent({
                   category: 'Navigation',
                   action: '로그인 버튼 클릭',

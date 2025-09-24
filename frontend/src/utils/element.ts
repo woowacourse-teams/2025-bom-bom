@@ -1,4 +1,4 @@
-import { Ref } from 'react';
+import type { Ref } from 'react';
 
 export const isElementVisible = (element: HTMLElement): boolean => {
   const style = window.getComputedStyle(element);

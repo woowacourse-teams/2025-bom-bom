@@ -9,8 +9,8 @@ import { restoreHighlightAll, saveSelection } from '../../utils/highlight';
 import ArticleContent from '../ArticleContent/ArticleContent';
 import FloatingToolbar from '../FloatingToolbar/FloatingToolbar';
 import MemoPanel from '../MemoPanel/MemoPanel';
-import { GetArticleByIdResponse } from '@/apis/articles';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
+import type { GetArticleByIdResponse } from '@/apis/articles';
 
 interface ArticleBodyProps {
   articleId: number;

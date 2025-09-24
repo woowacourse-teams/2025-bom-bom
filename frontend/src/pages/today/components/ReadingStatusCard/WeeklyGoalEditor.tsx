@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { ChangeEvent, KeyboardEvent } from 'react';
-import { Device } from '@/hooks/useDevice';
+import type { Device } from '@/hooks/useDevice';
+import type { ChangeEvent, KeyboardEvent } from 'react';
 import CheckIcon from '#/assets/svg/check.svg';
 import EditIcon from '#/assets/svg/edit.svg';
 

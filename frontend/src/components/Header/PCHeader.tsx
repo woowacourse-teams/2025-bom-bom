@@ -4,7 +4,7 @@ import HeaderNavButtons from './HeaderNavButtons';
 import HeaderProfile from './HeaderProfile';
 import LoginButton from './LoginButton';
 import { useUserInfo } from '@/hooks/useUserInfo';
-import { Nav } from '@/types/nav';
+import type { Nav } from '@/types/nav';
 
 interface PCHeaderProps {
   activeNav: Nav;

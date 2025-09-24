@@ -4,9 +4,9 @@ import {
   DEFAULT_LIMIT,
   DEFAULT_POSITION,
 } from './Toast.constants';
-import { ToastPosition } from './Toast.types';
 import ToastItem from './ToastItem';
 import { useToasts } from './useToasts';
+import type { ToastPosition } from './Toast.types';
 
 interface ToastProps {
   limit?: number;

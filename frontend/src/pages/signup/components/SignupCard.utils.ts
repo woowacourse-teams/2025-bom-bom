@@ -1,4 +1,4 @@
-import { FieldError } from './SignupCard.types';
+import type { FieldError } from './SignupCard.types';
 
 const nicknameRegex = /^[가-힣a-zA-Z0-9_]{2,12}$/;
 const emailLocalRegex = /^[A-Za-z0-9._-]{3,30}$/;

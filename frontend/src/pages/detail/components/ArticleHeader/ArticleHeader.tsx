@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
 import Chip from '@/components/Chip/Chip';
-import { Device, useDevice } from '@/hooks/useDevice';
+import { useDevice } from '@/hooks/useDevice';
 import { formatDate } from '@/utils/date';
+import type { Device } from '@/hooks/useDevice';
 import ClockIcon from '#/assets/svg/clock.svg';
 
 interface ArticleHeaderProps {
@@ -10,8 +11,6 @@ interface ArticleHeaderProps {
   newsletterName: string;
   arrivedDateTime: Date;
   expectedReadTime: number;
-  bookmarked?: boolean;
-  onBookmarkClick?: (bookmarked: boolean) => void;
 }
 
 const ArticleHeader = ({

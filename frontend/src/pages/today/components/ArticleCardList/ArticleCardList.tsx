@@ -4,7 +4,7 @@ import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
 import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { theme } from '@/styles/theme';
-import { Article } from '@/types/articles';
+import type { Article } from '@/types/articles';
 import CheckIcon from '#/assets/svg/check.svg';
 import LetterIcon from '#/assets/svg/letter.svg';
 

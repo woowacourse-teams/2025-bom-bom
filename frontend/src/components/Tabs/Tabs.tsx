@@ -1,19 +1,16 @@
 import styled from '@emotion/styled';
 import { ComponentProps, ReactElement } from 'react';
-import { TabProps } from '../Tab/Tab';
 
 type Direction = 'horizontal' | 'vertical';
 
-interface TabsProps<T extends string> extends ComponentProps<'ul'> {
+interface TabsProps extends ComponentProps<'ul'> {
   direction?: Direction;
-  children: ReactElement<TabProps<T>>[];
+  children:
+    | ReactElement<ComponentProps<'li'>>[]
+    | ReactElement<ComponentProps<'li'>>;
 }
 
-const Tabs = <T extends string>({
-  direction = 'horizontal',
-  children,
-  ...props
-}: TabsProps<T>) => {
+const Tabs = ({ direction = 'horizontal', children, ...props }: TabsProps) => {
   return (
     <Container role="tablist" direction={direction} {...props}>
       {children}

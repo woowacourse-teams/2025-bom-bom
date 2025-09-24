@@ -2,12 +2,24 @@ import styled from '@emotion/styled';
 import { useNavigate } from '@tanstack/react-router';
 import Button from '../Button/Button';
 import { useDevice } from '@/hooks/useDevice';
+import {
+  isIOS,
+  isRunningInWebView,
+  sendMessageToRN,
+} from '@/libs/webview/webview.utils';
 import LockIcon from '#/assets/svg/lock.svg';
 
 const RequireLoginCard = () => {
   const navigate = useNavigate();
   const device = useDevice();
   const isMobile = device === 'mobile';
+  const handleLoginClick = () => {
+    if (isRunningInWebView() && isIOS())
+      sendMessageToRN({
+        type: 'SHOW_LOGIN_SCREEN',
+      });
+    else navigate({ to: '/login' });
+  };
 
   return (
     <Container isMobile={isMobile}>
@@ -21,12 +33,7 @@ const RequireLoginCard = () => {
           봄봄에서 더 많은 특별한 기능들을 만나보실 수 있어요!
         </Support>
       </DescriptionWrapper>
-      <GoToLoginButton
-        text="봄봄 시작하기"
-        onClick={() => {
-          navigate({ to: '/login' });
-        }}
-      />
+      <GoToLoginButton text="봄봄 시작하기" onClick={handleLoginClick} />
     </Container>
   );
 };

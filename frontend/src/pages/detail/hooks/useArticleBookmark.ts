@@ -26,7 +26,7 @@ export const useArticleBookmark = ({ articleId }: UseArticleBookmarkParams) => {
       }
     },
     500,
-    { cancelOnUnmount: false },
+    { autoCancelOnUnmount: false },
   );
 
   const toggleBookmark = useCallback(() => {

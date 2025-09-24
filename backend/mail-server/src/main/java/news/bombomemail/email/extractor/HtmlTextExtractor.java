@@ -43,7 +43,6 @@ public class HtmlTextExtractor implements ContentExtractor{
      * @throws IOException
      */
     private String readBody(Part part) throws MessagingException, IOException {
-
         Charset charset = resolveCharset(part.getContentType());
         try (InputStream input = part.getInputStream()) {
             byte[] bytes = input.readAllBytes();

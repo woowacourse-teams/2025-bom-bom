@@ -6,10 +6,15 @@ import type { RefObject } from 'react';
 
 interface ArticleContentProps {
   ref: RefObject<HTMLDivElement | null>;
+  newsletterName: string;
   content?: string;
 }
 
-const ArticleContent = ({ ref, content }: ArticleContentProps) => {
+const ArticleContent = ({
+  ref,
+  newsletterName,
+  content,
+}: ArticleContentProps) => {
   const bodyContent = extractBodyContent(content ?? '');
 
   useHighlightHoverEffect();
@@ -18,7 +23,7 @@ const ArticleContent = ({ ref, content }: ArticleContentProps) => {
     <Container
       ref={ref}
       dangerouslySetInnerHTML={{
-        __html: processContent(bodyContent),
+        __html: processContent(newsletterName, bodyContent),
       }}
     />
   );

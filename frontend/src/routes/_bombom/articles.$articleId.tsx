@@ -77,6 +77,7 @@ function ArticleDetailPage() {
 
           <ArticleBody
             articleId={articleIdNumber}
+            newsletterName={currentArticle.newsletter.name}
             articleContent={currentArticle.contents}
           />
           <Spacing size={24} />

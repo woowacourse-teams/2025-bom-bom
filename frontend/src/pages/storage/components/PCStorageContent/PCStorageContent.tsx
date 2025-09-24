@@ -43,13 +43,13 @@ export default function PCStorageContent({
 
   const totalElements = articles?.totalElements;
   const articleList = articles?.content || [];
-  const IsContentsEmpty = !isLoading && articleList.length === 0;
+  const haveNoContent = !isLoading && articleList.length === 0;
 
-  if (IsContentsEmpty && searchInput !== '') {
+  if (haveNoContent && searchInput !== '') {
     return <EmptySearchCard searchQuery={searchInput} />;
   }
 
-  if (IsContentsEmpty) {
+  if (haveNoContent) {
     return <EmptyLetterCard title="보관된 뉴스레터가 없어요" />;
   }
 

@@ -1,8 +1,10 @@
 import { fetcher } from './fetcher';
 import { components } from '@/types/openapi';
 
+export type GetPetResponse = components['schemas']['PetResponse'];
+
 export const getPet = async () => {
-  return await fetcher.get<components['schemas']['PetResponse']>({
+  return await fetcher.get<GetPetResponse>({
     path: '/members/me/pet',
   });
 };

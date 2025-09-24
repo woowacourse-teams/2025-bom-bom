@@ -4,8 +4,10 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useMemo } from 'react';
 import ArticleCardList from '../../pages/today/components/ArticleCardList/ArticleCardList';
 import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/ReadingStatusCard';
+import { getPet } from '@/apis/pet';
 import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
+import PetCardSkeleton from '@/components/PetCard/PetCardSkeleton';
 import { Device, useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
 import { LocalGuideMail } from '@/types/guide';
@@ -20,9 +22,15 @@ export const Route = createFileRoute('/_bombom/')({
 
 function Index() {
   const today = useMemo(() => new Date(), []);
-  const { data: todayArticles, isLoading } = useQuery(
+  const { data: todayArticles, isLoading: isArticlesLoading } = useQuery(
     queries.articles({ date: today }),
   );
+
+  const { data: pet, isLoading: isPetLoading } = useQuery({
+    queryKey: ['pet'],
+    queryFn: getPet,
+  });
+
   const guideArticles = createStorage<LocalGuideMail[], string>(
     'guide-mail',
   ).get();
@@ -53,9 +61,16 @@ function Index() {
       )}
 
       <ContentWrapper device={device}>
-        <ArticleCardList articles={mergedArticles} isLoading={isLoading} />
+        <ArticleCardList
+          articles={mergedArticles}
+          isLoading={isArticlesLoading}
+        />
         <ReaderCompanion device={device}>
-          <PetCard />
+          {isPetLoading ? (
+            <PetCardSkeleton />
+          ) : (
+            pet && <PetCard pet={pet} isLoading={isPetLoading} />
+          )}
           <ReadingStatusCard />
         </ReaderCompanion>
       </ContentWrapper>

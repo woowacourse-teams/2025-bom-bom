@@ -1,27 +1,36 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import LeaderboardItem from './ReadingKingLeaderboardItem';
+import LeaderboardItem from './LeaderboardItem';
+import { getLeaderboardData } from './ReadingKingLeaderboard.utils';
 import ReadingKingMyRank from './ReadingKingMyRank';
 import { queries } from '@/apis/queries';
+import Carousel from '@/components/Carousel/Carousel';
 import ArrowIcon from '@/components/icons/ArrowIcon';
 
-export default function ReadingKingLeaderboard() {
+const RANKING = {
+  maxRank: 10,
+  boardUnit: 5,
+};
+
+const ReadingKingLeaderboard = () => {
   const { data: monthlyReadingRank, isLoading } = useQuery(
-    queries.monthlyReadingRank({ limit: 5 }),
+    queries.monthlyReadingRank({ limit: RANKING.maxRank }),
   );
   const { data: userRank } = useQuery(queries.myMonthlyReadingRank());
+
+  if (!monthlyReadingRank || monthlyReadingRank.length === 0) {
+    return null;
+  }
 
   if (isLoading) {
     return (
       <Container>
-        <Header>
-          <TitleContainer>
-            <HeaderIcon>
-              <ArrowIcon width={16} height={16} direction="upRight" />
-            </HeaderIcon>
-            <Title>이달의 독서왕</Title>
-          </TitleContainer>
-        </Header>
+        <TitleWrapper>
+          <TitleIcon>
+            <ArrowIcon width={16} height={16} direction="upRight" />
+          </TitleIcon>
+          <Title>이달의 독서왕</Title>
+        </TitleWrapper>
         <LoadingMessage>데이터를 불러오는 중...</LoadingMessage>
       </Container>
     );
@@ -29,27 +38,31 @@ export default function ReadingKingLeaderboard() {
 
   return (
     <Container>
-      <Header>
-        <TitleContainer>
-          <HeaderIcon>
-            <ArrowIcon width={16} height={16} direction="upRight" />
-          </HeaderIcon>
-          <Title>이달의 독서왕</Title>
-        </TitleContainer>
-      </Header>
+      <TitleWrapper>
+        <TitleIcon>
+          <ArrowIcon width={16} height={16} direction="upRight" />
+        </TitleIcon>
+        <Title>이달의 독서왕</Title>
+      </TitleWrapper>
 
-      <LeaderboardList>
-        {monthlyReadingRank &&
-          monthlyReadingRank.length > 0 &&
-          monthlyReadingRank.map((item) => (
-            <LeaderboardItem
-              key={item.rank}
-              rank={item.rank}
-              name={item.nickname}
-              readCount={item.monthlyReadCount}
-            />
-          ))}
-      </LeaderboardList>
+      <Description>순위는 10분마다 변경됩니다.</Description>
+
+      <Carousel hasSlideButton={false}>
+        {getLeaderboardData(monthlyReadingRank, RANKING.boardUnit).map(
+          (leaderboard, leaderboardIndex) => (
+            <LeaderboardList key={`leaderboard-${leaderboardIndex}`}>
+              {leaderboard.map((item, index) => (
+                <LeaderboardItem
+                  key={`rank-${index}` + item.nickname}
+                  rank={item.rank}
+                  name={item.nickname}
+                  readCount={item.monthlyReadCount}
+                />
+              ))}
+            </LeaderboardList>
+          ),
+        )}
+      </Carousel>
 
       {userRank && (
         <>
@@ -59,7 +72,9 @@ export default function ReadingKingLeaderboard() {
       )}
     </Container>
   );
-}
+};
+
+export default ReadingKingLeaderboard;
 
 const Container = styled.div`
   width: 100%;
@@ -72,7 +87,7 @@ const Container = styled.div`
     0 4px 6px -4px rgb(0 0 0 / 10%);
 
   display: flex;
-  gap: 20px;
+  gap: 16px;
   flex-direction: column;
 
   background: rgb(255 255 255 / 80%);
@@ -80,17 +95,13 @@ const Container = styled.div`
   backdrop-filter: blur(10px);
 `;
 
-const Header = styled.div`
-  padding-bottom: 20px;
-`;
-
-const TitleContainer = styled.div`
+const TitleWrapper = styled.div`
   display: flex;
   gap: 10px;
   align-items: center;
 `;
 
-const HeaderIcon = styled.div`
+const TitleIcon = styled.div`
   width: 28px;
   height: 28px;
   border-radius: 12px;
@@ -107,9 +118,16 @@ const Title = styled.h3`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
+const Description = styled.p`
+  color: ${({ theme }) => theme.colors.textTertiary};
+  font: ${({ theme }) => theme.fonts.body2};
+`;
+
 const LeaderboardList = styled.div`
+  min-height: fit-content;
+
   display: flex;
-  gap: 12px;
+  gap: 32px;
   flex-direction: column;
 `;
 

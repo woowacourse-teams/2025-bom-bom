@@ -1,13 +1,12 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import SlideCardList from '../SlideCardList/SlideCardList';
-import { queries } from '@/apis/queries';
+import { useUserInfo } from '@/hooks/useUserInfo';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import logo from '#/assets/logo.png';
+import logo from '#/assets/png/logo.png';
 
 export default function NewsletterHero() {
-  const { data: userInfo } = useQuery(queries.me());
+  const { userInfo } = useUserInfo();
 
   return (
     <>

@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import EmptySearchIcon from '#/assets/empty-search.svg';
+import EmptySearchIcon from '#/assets/svg/empty-search.svg';
 
 interface EmptySearchCardProps {
   searchQuery: string;

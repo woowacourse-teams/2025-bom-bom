@@ -1,13 +1,16 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { FunctionComponent, SVGProps, useEffect } from 'react';
-import { ToastData, ToastType } from './Toast.types';
+import { ToastData, ToastVariant } from './Toast.types';
 import { hideToast } from './utils/toastActions';
-import ErrorIcon from '#/assets/cancel-circle.svg';
-import SuccessIcon from '#/assets/check-circle.svg';
-import InfoIcon from '#/assets/info-circle.svg';
+import ErrorIcon from '#/assets/svg/cancel-circle.svg';
+import SuccessIcon from '#/assets/svg/check-circle.svg';
+import InfoIcon from '#/assets/svg/info-circle.svg';
 
-const iconMap: Record<ToastType, FunctionComponent<SVGProps<SVGSVGElement>>> = {
+const iconMap: Record<
+  ToastVariant,
+  FunctionComponent<SVGProps<SVGSVGElement>>
+> = {
   error: ErrorIcon,
   info: InfoIcon,
   success: SuccessIcon,
@@ -20,7 +23,7 @@ interface ToastItemProps {
 }
 
 const ToastItem = ({ toast, isTop, duration }: ToastItemProps) => {
-  const ToastIcon = iconMap[toast.type];
+  const ToastIcon = iconMap[toast.variant];
 
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -32,10 +35,10 @@ const ToastItem = ({ toast, isTop, duration }: ToastItemProps) => {
   }, [duration, toast.id]);
 
   return (
-    <Container enterFromTop={isTop} type={toast.type}>
+    <Container enterFromTop={isTop} variant={toast.variant}>
       <ToastIcon />
       <Content>{toast.message}</Content>
-      <ProgressBar type={toast.type} duration={duration / 1000} />
+      <ProgressBar variant={toast.variant} duration={duration / 1000} />
     </Container>
   );
 };
@@ -58,7 +61,7 @@ const progressShrink = keyframes`
 
 const Container = styled.div<{
   enterFromTop: boolean;
-  type: ToastType;
+  variant: ToastVariant;
 }>`
   overflow: hidden;
   position: relative;
@@ -73,7 +76,7 @@ const Container = styled.div<{
 
   background-color: ${({ theme }) => theme.colors.white};
 
-  border-color: ${({ theme, type }) => theme.colors[type]};
+  border-color: ${({ theme, variant }) => theme.colors[variant]};
 
   pointer-events: auto;
   will-change: transform, opacity;
@@ -88,14 +91,14 @@ const Content = styled.div`
   font: ${({ theme }) => theme.fonts.body2};
 `;
 
-const ProgressBar = styled.div<{ type: ToastType; duration: number }>`
+const ProgressBar = styled.div<{ variant: ToastVariant; duration: number }>`
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
   height: 4px;
 
-  background-color: ${({ theme, type }) => theme.colors[type]};
+  background-color: ${({ theme, variant }) => theme.colors[variant]};
 
   animation: ${progressShrink} ${({ duration }) => duration}s linear forwards;
 `;

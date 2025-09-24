@@ -7,15 +7,15 @@ import StreakCounter from '../StreakCounter/StreakCounter';
 import { queries } from '@/apis/queries';
 import ProgressBar from '@/components/ProgressBar/ProgressBar';
 import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDevice } from '@/hooks/useDevice';
 import useUpdateWeeklyGoalMutation from '@/pages/today/hooks/useUpdateWeeklyGoalMutation';
 import { theme } from '@/styles/theme';
 import type { CSSObject, Theme } from '@emotion/react';
-import GoalIcon from '#/assets/goal.svg';
-import StatusIcon from '#/assets/reading-status.svg';
+import GoalIcon from '#/assets/svg/goal.svg';
+import StatusIcon from '#/assets/svg/reading-status.svg';
 
 function ReadingStatusCard() {
-  const deviceType = useDeviceType();
+  const device = useDevice();
   const { data, isLoading } = useQuery(queries.readingStatus());
   const [isEditing, setIsEditing] = useState(false);
   const [goalCount, setGoalCount] = useState<number | null>(null);
@@ -64,8 +64,8 @@ function ReadingStatusCard() {
       : '목표 달성!';
 
   return (
-    <Container deviceType={deviceType}>
-      {deviceType === 'pc' && (
+    <Container device={device}>
+      {device === 'pc' && (
         <TitleWrapper>
           <StatusIconWrapper>
             <StatusIcon width={20} height={20} color={theme.colors.white} />
@@ -74,11 +74,9 @@ function ReadingStatusCard() {
         </TitleWrapper>
       )}
 
-      <StreakWrapper deviceType={deviceType}>
+      <StreakWrapper device={device}>
         <StreakCounter streakReadDay={streakReadDay} />
-        <StreakDescription deviceType={deviceType}>
-          연속 읽기 중!
-        </StreakDescription>
+        <StreakDescription device={device}>연속 읽기 중!</StreakDescription>
       </StreakWrapper>
 
       <ProgressWithLabel
@@ -87,19 +85,19 @@ function ReadingStatusCard() {
           currentCount: today.readCount,
           totalCount: today.totalCount,
         }}
-        {...(deviceType === 'pc'
+        {...(device === 'pc'
           ? { Icon: GoalIcon, description: todayProgressDescription }
           : { showGraph: false })}
       />
       <WeeklyGoalSection>
         <WeeklyProgressContainer>
           <ProgressInfo>
-            {deviceType === 'pc' && <StyledIcon as={GoalIcon} />}
+            {device === 'pc' && <StyledIcon as={GoalIcon} />}
             <ProgressLabel>주간 목표</ProgressLabel>
             <WeeklyGoalEditor
               isEditing={isEditing}
               isPending={isPending}
-              deviceType={deviceType}
+              device={device}
               onEditStart={handleEditStart}
               onSave={handleSave}
             />
@@ -109,7 +107,7 @@ function ReadingStatusCard() {
                 <WeeklyGoalInput
                   goalValue={goalCount}
                   isPending={isPending}
-                  deviceType={deviceType}
+                  device={device}
                   onSave={handleSave}
                   onCancel={handleCancel}
                   onGoalChange={handleGoalChange}
@@ -119,10 +117,10 @@ function ReadingStatusCard() {
               <ProgressRate>{`${weekly.readCount}/${weekly.goalCount}`}</ProgressRate>
             )}
           </ProgressInfo>
-          {deviceType === 'pc' && (
+          {device === 'pc' && (
             <ProgressBar rate={(weekly.readCount / weekly.goalCount) * 100} />
           )}
-          {deviceType === 'pc' && weeklyGoalDescription && (
+          {device === 'pc' && weeklyGoalDescription && (
             <ProgressDescription>{weeklyGoalDescription}</ProgressDescription>
           )}
         </WeeklyProgressContainer>
@@ -133,7 +131,7 @@ function ReadingStatusCard() {
 
 export default ReadingStatusCard;
 
-const Container = styled.div<{ deviceType: DeviceType }>`
+const Container = styled.div<{ device: Device }>`
   width: 310px;
   border-radius: 20px;
 
@@ -143,7 +141,7 @@ const Container = styled.div<{ deviceType: DeviceType }>`
   align-items: center;
   justify-content: center;
 
-  ${({ deviceType, theme }) => containerStyles[deviceType](theme)}
+  ${({ device, theme }) => containerStyles[device](theme)}
 `;
 
 const TitleWrapper = styled.div`
@@ -173,18 +171,18 @@ const Title = styled.h2`
   text-align: center;
 `;
 
-const StreakWrapper = styled.div<{ deviceType: DeviceType }>`
+const StreakWrapper = styled.div<{ device: Device }>`
   display: flex;
-  gap: ${({ deviceType }) => (deviceType === 'pc' ? '8px' : '0px')};
+  gap: ${({ device }) => (device === 'pc' ? '8px' : '0px')};
   flex-direction: column;
   align-items: center;
   justify-content: center;
 `;
 
-const StreakDescription = styled.p<{ deviceType: DeviceType }>`
+const StreakDescription = styled.p<{ device: Device }>`
   color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ deviceType, theme }) =>
-    deviceType === 'pc' ? theme.fonts.body1 : theme.fonts.body2};
+  font: ${({ device, theme }) =>
+    device === 'pc' ? theme.fonts.body1 : theme.fonts.body2};
   text-align: center;
 `;
 
@@ -252,7 +250,7 @@ const InputContainer = styled.div`
   }
 `;
 
-const containerStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {
+const containerStyles: Record<Device, (theme: Theme) => CSSObject> = {
   pc: (theme) => ({
     padding: '34px 30px',
     backgroundColor: theme.colors.white,

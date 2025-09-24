@@ -5,7 +5,7 @@ import { queries } from '@/apis/queries';
 import DetailPageHeader from '@/components/Header/DetailPageHeader';
 import ProgressBar from '@/components/ProgressBar/ProgressBar';
 import Spacing from '@/components/Spacing/Spacing';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDevice } from '@/hooks/useDevice';
 import useScrollProgress from '@/hooks/useScrollProgress';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
@@ -31,7 +31,7 @@ export const Route = createFileRoute('/_bombom/articles/$articleId')({
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
   const articleIdNumber = Number(articleId);
-  const deviceType = useDeviceType();
+  const device = useDevice();
 
   const { data: currentArticle } = useQuery(
     queries.articleById({ id: articleIdNumber }),
@@ -58,7 +58,7 @@ function ArticleDetailPage() {
 
   return (
     <>
-      {deviceType !== 'pc' && (
+      {device !== 'pc' && (
         <DetailPageHeader
           bookmarked={isBookmarked}
           onBookmarkClick={toggleBookmark}
@@ -66,19 +66,19 @@ function ArticleDetailPage() {
       )}
 
       <Container>
-        {deviceType === 'pc' && (
+        {device === 'pc' && (
           <ArticleActionButtons
             bookmarked={isBookmarked}
             onBookmarkClick={toggleBookmark}
           />
         )}
 
-        <ArticleContent deviceType={deviceType}>
+        <ArticleContent device={device}>
           <ArticleProgressBar
             rate={progressPercentage}
             transition={false}
             variant="rectangular"
-            deviceType={deviceType}
+            device={device}
           />
           <ArticleHeader
             title={currentArticle.title ?? ''}
@@ -121,16 +121,16 @@ const ArticleActionButtons = styled(FloatingActionButtons)`
   transform: translate(-200%, -50%);
 `;
 
-const ArticleContent = styled.div<{ deviceType: DeviceType }>`
+const ArticleContent = styled.div<{ device: Device }>`
   max-width: 700px;
   margin: 0 auto;
-  padding: ${({ deviceType }) => (deviceType === 'mobile' ? '0' : '0 16px')};
+  padding: ${({ device }) => (device === 'mobile' ? '0' : '0 16px')};
   border-right: 1px solid
-    ${({ theme, deviceType }) =>
-      deviceType === 'mobile' ? 'transparent' : theme.colors.stroke};
+    ${({ theme, device }) =>
+      device === 'mobile' ? 'transparent' : theme.colors.stroke};
   border-left: 1px solid
-    ${({ theme, deviceType }) =>
-      deviceType === 'mobile' ? 'transparent' : theme.colors.stroke};
+    ${({ theme, device }) =>
+      device === 'mobile' ? 'transparent' : theme.colors.stroke};
 
   display: flex;
   gap: 20px;
@@ -138,10 +138,10 @@ const ArticleContent = styled.div<{ deviceType: DeviceType }>`
   align-items: center;
 `;
 
-const ArticleProgressBar = styled(ProgressBar)<{ deviceType: DeviceType }>`
+const ArticleProgressBar = styled(ProgressBar)<{ device: Device }>`
   position: fixed;
-  top: ${({ deviceType, theme }) =>
-    deviceType === 'pc'
+  top: ${({ device, theme }) =>
+    device === 'pc'
       ? `calc(${theme.heights.headerPC} + env(safe-area-inset-top))`
       : `calc(${theme.heights.headerMobile} + env(safe-area-inset-top))`};
   z-index: ${({ theme }) => theme.zIndex.floating};

@@ -1,12 +1,12 @@
 import styled from '@emotion/styled';
 import ArticleCard from '../ArticleCard/ArticleCard';
 import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { theme } from '@/styles/theme';
 import { Article } from '@/types/articles';
-import CheckIcon from '#/assets/check.svg';
-import LetterIcon from '#/assets/letter.svg';
+import CheckIcon from '#/assets/svg/check.svg';
+import LetterIcon from '#/assets/svg/letter.svg';
 
 type ExtendedArticle = Article & {
   type: 'guide' | 'article';
@@ -17,8 +17,8 @@ interface ArticleCardListProps {
 }
 
 const ArticleCardList = ({ articles }: ArticleCardListProps) => {
-  const deviceType = useDeviceType();
-  const isMobile = deviceType === 'mobile';
+  const device = useDevice();
+  const isMobile = device === 'mobile';
 
   const grouped = articles.reduce<{
     read: ExtendedArticle[];

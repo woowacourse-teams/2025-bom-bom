@@ -1,21 +1,25 @@
 import styled from '@emotion/styled';
 import { PropsWithChildren, Children } from 'react';
+import { DEFAULT_SPEED } from './Carousel.constants';
 import useCarousel from './useCarousel';
-import arrowNext from '#/assets/carousel-arrow-next.png';
-import arrowPrev from '#/assets/carousel-arrow-prev.png';
+import arrowNext from '#/assets/png/carousel-arrow-next.png';
+import arrowPrev from '#/assets/png/carousel-arrow-prev.png';
 
-interface CarouselProps extends PropsWithChildren {
-  timer?: boolean | number;
-}
+type CarouselProps = PropsWithChildren & {
+  hasSlideButton?: boolean;
+  hasAnimation?: boolean;
+} & (
+    | { autoPlay?: true; autoPlaySpeedMs?: number }
+    | { autoPlay: false; autoPlaySpeedMs?: never }
+  );
 
-/**
- * @property {boolean|number} [timer=true] - 자동 슬라이드 재생 여부 또는 주기 설정(ms).
- *   - `false`: 비활성화
- *   - `true`: 기본 4초 주기
- *   - `number`: 커스텀 주기(ms)
- * @property {React.ReactNode} children - 슬라이드로 렌더링할 자식 요소들
- */
-const Carousel = ({ timer = true, children }: CarouselProps) => {
+const Carousel = ({
+  autoPlay = true,
+  autoPlaySpeedMs = DEFAULT_SPEED,
+  hasSlideButton = true,
+  hasAnimation = true,
+  children,
+}: CarouselProps) => {
   const originSlides = Children.toArray(children);
   const slideCount = originSlides.length;
 
@@ -26,7 +30,7 @@ const Carousel = ({ timer = true, children }: CarouselProps) => {
       );
     }
 
-    if (typeof timer === 'number' && timer < 100) {
+    if (autoPlay && autoPlaySpeedMs < 100) {
       throw new Error('timer 주기는 100ms 이상이어야 합니다.');
     }
   }
@@ -43,7 +47,7 @@ const Carousel = ({ timer = true, children }: CarouselProps) => {
     handleTransitionEnd,
     handlePrevButtonClick,
     handleNextButtonClick,
-  } = useCarousel({ slideCount, timer });
+  } = useCarousel({ slideCount, autoPlay, autoPlaySpeedMs });
 
   return (
     <Container>
@@ -51,30 +55,40 @@ const Carousel = ({ timer = true, children }: CarouselProps) => {
         slideIndex={slideIndex}
         isTransitioning={isTransitioning}
         onTransitionEnd={handleTransitionEnd}
+        hasAnimation={hasAnimation}
       >
         {infinitySlides.map((slideContent, index) => (
           <Slide key={`slide-${index}`}>{slideContent}</Slide>
         ))}
       </SlidesWrapper>
 
-      <PrevSlideButton type="button" onClick={handlePrevButtonClick}>
-        <img src={arrowPrev} alt="이전 슬라이드 버튼" />
-      </PrevSlideButton>
+      {hasSlideButton && (
+        <>
+          <PrevSlideButton type="button" onClick={handlePrevButtonClick}>
+            <img src={arrowPrev} alt="이전 슬라이드 버튼" />
+          </PrevSlideButton>
 
-      <NextSlideButton type="button" onClick={handleNextButtonClick}>
-        <img src={arrowNext} alt="다음 슬라이드 버튼" />
-      </NextSlideButton>
+          <NextSlideButton type="button" onClick={handleNextButtonClick}>
+            <img src={arrowNext} alt="다음 슬라이드 버튼" />
+          </NextSlideButton>
+        </>
+      )}
     </Container>
   );
 };
 
 export default Carousel;
 
+const TRANSITIONS = {
+  slide: 'transform 0.3s ease-in-out',
+  none: 'transform 0.3s step-end',
+} as const;
+
 const Container = styled.div`
   overflow: hidden;
   position: relative;
   width: 100%;
-  height: 280px;
+  min-height: fit-content;
   margin: 0 auto 20px;
 
   background: transparent;
@@ -83,18 +97,22 @@ const Container = styled.div`
 const SlidesWrapper = styled.ul<{
   slideIndex: number;
   isTransitioning: boolean;
+  hasAnimation: boolean;
 }>`
-  height: 100%;
+  position: relative;
 
   display: flex;
 
   transform: ${({ slideIndex }) => `translateX(-${slideIndex * 100}%)`};
-  transition: ${({ isTransitioning }) =>
-    isTransitioning ? 'transform 0.3s ease-in-out' : 'none'};
+  transition: ${({ hasAnimation, isTransitioning }) =>
+    hasAnimation
+      ? isTransitioning
+        ? TRANSITIONS.slide
+        : TRANSITIONS.none
+      : TRANSITIONS.none};
 `;
 
 const Slide = styled.li`
-  height: 100%;
   flex: 0 0 100%;
 `;
 

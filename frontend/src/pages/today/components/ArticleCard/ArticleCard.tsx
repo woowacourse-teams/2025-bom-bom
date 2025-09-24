@@ -3,16 +3,16 @@ import { Link } from '@tanstack/react-router';
 import { ComponentProps } from 'react';
 import Badge from '@/components/Badge/Badge';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDevice } from '@/hooks/useDevice';
 import { components } from '@/types/openapi';
 import { formatDate } from '@/utils/date';
-import ClockIcon from '#/assets/clock.svg';
+import ClockIcon from '#/assets/svg/clock.svg';
 
-type ReadVariantType = 'transparent' | 'badge';
+type ReadVariant = 'transparent' | 'badge';
 
 interface ArticleCardProps extends ComponentProps<typeof Link> {
   data: components['schemas']['ArticleResponse'];
-  readVariant?: ReadVariantType;
+  readVariant?: ReadVariant;
 }
 
 function ArticleCard({
@@ -31,8 +31,8 @@ function ArticleCard({
     isRead,
     newsletter,
   } = data;
-  const deviceType = useDeviceType();
-  const isMobile = deviceType === 'mobile';
+  const device = useDevice();
+  const isMobile = device === 'mobile';
 
   return (
     <Container
@@ -78,9 +78,12 @@ function ArticleCard({
 
 export default ArticleCard;
 
-const Container = styled(Link)<{
+const Container = styled(Link, {
+  shouldForwardProp: (prop) =>
+    prop !== 'isRead' && prop !== 'readVariant' && prop !== 'isMobile',
+})<{
   isRead: boolean;
-  readVariant: ReadVariantType;
+  readVariant: ReadVariant;
   isMobile: boolean;
 }>`
   padding: ${({ isMobile }) => (isMobile ? '8px 0' : '20px')};
@@ -166,7 +169,9 @@ const ThumbnailWrapper = styled.div<{ isMobile: boolean }>`
   flex-shrink: 0;
 `;
 
-const Thumbnail = styled(ImageWithFallback)<{ isMobile: boolean }>`
+const Thumbnail = styled(ImageWithFallback, {
+  shouldForwardProp: (prop) => prop !== 'isMobile',
+})<{ isMobile: boolean }>`
   width: ${({ isMobile }) => (isMobile ? '64px' : '126px')};
   border-radius: ${({ isMobile }) => (isMobile ? '8px' : '12px')};
 

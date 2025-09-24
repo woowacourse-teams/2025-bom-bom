@@ -1,13 +1,13 @@
 import styled from '@emotion/styled';
 import { useNavigate } from '@tanstack/react-router';
 import Button from '../Button/Button';
-import { useDeviceType } from '@/hooks/useDeviceType';
-import LockIcon from '#/assets/lock.svg';
+import { useDevice } from '@/hooks/useDevice';
+import LockIcon from '#/assets/svg/lock.svg';
 
 const RequireLoginCard = () => {
   const navigate = useNavigate();
-  const deviceType = useDeviceType();
-  const isMobile = deviceType === 'mobile';
+  const device = useDevice();
+  const isMobile = device === 'mobile';
 
   return (
     <Container isMobile={isMobile}>

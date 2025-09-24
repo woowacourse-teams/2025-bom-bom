@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
+import { DEFAULT_SPEED, START_SLIDE_INDEX } from './Carousel.constants';
 
 interface UseCarouselProps {
   slideCount: number;
-  timer?: boolean | number;
+  autoPlay?: boolean;
+  autoPlaySpeedMs?: number;
 }
 
-const DEFAULT_DELAY = 4000;
-const START_SLIDE_INDEX = 1;
-
-const useCarousel = ({ slideCount, timer = true }: UseCarouselProps) => {
+const useCarousel = ({
+  slideCount,
+  autoPlay = true,
+  autoPlaySpeedMs = DEFAULT_SPEED,
+}: UseCarouselProps) => {
   const [slideIndex, setSlideIndex] = useState(START_SLIDE_INDEX);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -26,9 +29,9 @@ const useCarousel = ({ slideCount, timer = true }: UseCarouselProps) => {
   };
 
   useEffect(() => {
-    if (!timer) return;
+    if (!autoPlay) return;
 
-    const autoSlideDelay = typeof timer === 'number' ? timer : DEFAULT_DELAY;
+    const autoSlideDelay = autoPlaySpeedMs ?? DEFAULT_SPEED;
     if (!isTransitioning) {
       timerIdRef.current = setTimeout(() => {
         setIsTransitioning(true);
@@ -41,7 +44,7 @@ const useCarousel = ({ slideCount, timer = true }: UseCarouselProps) => {
         clearTimeout(timerIdRef.current);
       }
     };
-  }, [timer, slideIndex, isTransitioning]);
+  }, [autoPlay, slideIndex, isTransitioning, autoPlaySpeedMs]);
 
   const handlePrevButtonClick = () => {
     if (isTransitioning) return;

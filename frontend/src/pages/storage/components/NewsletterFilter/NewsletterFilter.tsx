@@ -2,10 +2,10 @@ import styled from '@emotion/styled';
 import Badge from '@/components/Badge/Badge';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
 import { Newsletter } from '@/types/articles';
-import NewsIcon from '#/assets/news.svg';
+import NewsIcon from '#/assets/svg/news.svg';
 
 interface NewsLetterFilterProps {
   newsLetterList: Newsletter['newsletters'];
@@ -18,11 +18,11 @@ function NewsLetterFilter({
   selectedNewsletterId,
   onSelectNewsletter,
 }: NewsLetterFilterProps) {
-  const deviceType = useDeviceType();
+  const device = useDevice();
 
   return (
-    <Container aria-label="뉴스레터" isPc={deviceType === 'pc'}>
-      {deviceType === 'pc' && (
+    <Container aria-label="뉴스레터" isPc={device === 'pc'}>
+      {device === 'pc' && (
         <TitleWrapper>
           <IconWrapper>
             <NewsIcon width={16} height={16} fill={theme.colors.white} />
@@ -30,7 +30,7 @@ function NewsLetterFilter({
           <Title>뉴스레터</Title>
         </TitleWrapper>
       )}
-      <StyledTabs direction={deviceType === 'pc' ? 'vertical' : 'horizontal'}>
+      <StyledTabs direction={device === 'pc' ? 'vertical' : 'horizontal'}>
         {newsLetterList.map(({ name, articleCount, imageUrl, id }) => (
           <Tab
             key={name}
@@ -46,7 +46,7 @@ function NewsLetterFilter({
               imageUrl ? <NewsLetterImage src={imageUrl} /> : null
             }
             EndComponent={<Badge text={String(articleCount)} />}
-            textAlign={deviceType === 'pc' ? 'start' : 'center'}
+            textAlign={device === 'pc' ? 'start' : 'center'}
           />
         ))}
       </StyledTabs>

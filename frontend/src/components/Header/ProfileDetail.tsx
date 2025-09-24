@@ -4,11 +4,14 @@ import { useNavigate } from '@tanstack/react-router';
 import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 import { toast } from '../Toast/utils/toastActions';
 import { postLogout, postWithdraw } from '@/apis/auth';
+import { useDevice } from '@/hooks/useDevice';
+import { showMessenger } from '@/libs/channelTalk/channelTalk.utils';
 import { UserInfo } from '@/types/me';
 import { copyToClipboard } from '@/utils/copy';
-import CopyIcon from '#/assets/copy.svg';
-import LogoutIcon from '#/assets/logout.svg';
-import MailIcon from '#/assets/mail.svg';
+import ChatIcon from '#/assets/svg/chat.svg';
+import CopyIcon from '#/assets/svg/copy.svg';
+import LogoutIcon from '#/assets/svg/logout.svg';
+import MailIcon from '#/assets/svg/mail.svg';
 
 interface ProfileDetailProps {
   userInfo: UserInfo;
@@ -16,6 +19,7 @@ interface ProfileDetailProps {
 
 const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
   const navigate = useNavigate();
+  const deviceType = useDevice();
 
   const { mutate: mutateLogout } = useMutation({
     mutationKey: ['logout'],
@@ -88,6 +92,13 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
       </EmailWrapper>
 
       <Divider />
+
+      {deviceType !== 'pc' && (
+        <ChannelTalkButton type="button" onClick={showMessenger}>
+          <ChatIcon width={16} height={16} />
+          문의하기
+        </ChannelTalkButton>
+      )}
 
       <LogoutButton type="button" onClick={handleLogoutClick}>
         <LogoutIcon width={16} height={16} />
@@ -179,6 +190,20 @@ const ProfileEmail = styled.button`
 const EmailText = styled.div`
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body2};
+`;
+
+const ChannelTalkButton = styled.button`
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font: ${({ theme }) => theme.fonts.body2};
+
+  &:hover {
+    text-decoration: underline;
+    transition: all 0.2s ease-in-out;
+  }
 `;
 
 const LogoutButton = styled.button`

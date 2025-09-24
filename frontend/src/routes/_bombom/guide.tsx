@@ -1,12 +1,12 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDevice } from '@/hooks/useDevice';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import { theme } from '@/styles/theme';
 import { Article } from '@/types/articles';
 import { createStorage } from '@/utils/localStorage';
-import HelpIcon from '#/assets/help.svg';
+import HelpIcon from '#/assets/svg/help.svg';
 
 export const Route = createFileRoute('/_bombom/guide')({
   head: () => ({
@@ -23,7 +23,7 @@ export const Route = createFileRoute('/_bombom/guide')({
 function GuidePage() {
   const guideArticles = createStorage<Article[], string>('guide-mail').get();
 
-  const deviceType = useDeviceType();
+  const device = useDevice();
   if (!guideArticles) return null;
 
   return (
@@ -33,8 +33,8 @@ function GuidePage() {
         <Title>가이드 메일 보관함</Title>
       </TitleWrapper>
 
-      <ContentWrapper deviceType={deviceType}>
-        <SidebarSection deviceType={deviceType}>
+      <ContentWrapper device={device}>
+        <SidebarSection device={device}>
           <QuickMenu />
         </SidebarSection>
 
@@ -90,17 +90,16 @@ const GuideIcon = styled(HelpIcon)`
   text-align: center;
 `;
 
-const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
+const ContentWrapper = styled.div<{ device: Device }>`
   width: 100%;
 
   display: flex;
-  gap: ${({ deviceType }) => (deviceType === 'pc' ? '32px' : '20px')};
-  flex-direction: ${({ deviceType }) =>
-    deviceType === 'pc' ? 'row' : 'column'};
+  gap: ${({ device }) => (device === 'pc' ? '32px' : '20px')};
+  flex-direction: ${({ device }) => (device === 'pc' ? 'row' : 'column')};
 `;
 
-const SidebarSection = styled.div<{ deviceType: DeviceType }>`
-  width: ${({ deviceType }) => (deviceType === 'pc' ? '320px' : '100%')};
+const SidebarSection = styled.div<{ device: Device }>`
+  width: ${({ device }) => (device === 'pc' ? '320px' : '100%')};
 
   display: flex;
   gap: 20px;

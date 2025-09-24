@@ -17,18 +17,6 @@ export default meta;
 
 type Story = StoryObj<typeof Header>;
 
-export const PC: Story = {
-  render: () => <Header variant="pc" />,
-};
-
-export const Mobile: Story = {
-  render: () => <Header variant="mobile" />,
-};
-
-export const Tablet: Story = {
-  render: () => <Header variant="tablet" />,
-};
-
-export const None: Story = {
-  render: () => <Header variant="none" />,
+export const Default: Story = {
+  render: () => <Header />,
 };

@@ -6,13 +6,13 @@ import ArticleCardList from '../../pages/today/components/ArticleCardList/Articl
 import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/ReadingStatusCard';
 import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
-import { DeviceType, useDeviceType } from '@/hooks/useDeviceType';
+import { Device, useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
 import { LocalGuideMail } from '@/types/guide';
 import { isToday } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
 import type { CSSObject, Theme } from '@emotion/react';
-import HomeIcon from '#/assets/home.svg';
+import HomeIcon from '#/assets/svg/home.svg';
 
 export const Route = createFileRoute('/_bombom/')({
   head: () => ({
@@ -43,11 +43,11 @@ function Index() {
       .map((guide) => ({ ...guide, type: 'guide' as const })) ?? []),
   ];
 
-  const deviceType = useDeviceType();
+  const device = useDevice();
 
   return (
-    <Container deviceType={deviceType}>
-      {deviceType !== 'mobile' && (
+    <Container device={device}>
+      {device !== 'mobile' && (
         <>
           <TitleWrapper>
             <TitleIconBox>
@@ -58,9 +58,9 @@ function Index() {
         </>
       )}
 
-      <ContentWrapper deviceType={deviceType}>
+      <ContentWrapper device={device}>
         <ArticleCardList articles={mergedArticles} />
-        <ReaderCompanion deviceType={deviceType}>
+        <ReaderCompanion device={device}>
           <PetCard />
           <ReadingStatusCard />
         </ReaderCompanion>
@@ -69,7 +69,7 @@ function Index() {
   );
 }
 
-const Container = styled.div<{ deviceType: DeviceType }>`
+const Container = styled.div<{ device: Device }>`
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
@@ -106,20 +106,19 @@ const Title = styled.h1`
   font: ${({ theme }) => theme.fonts.heading3};
 `;
 
-const ContentWrapper = styled.div<{ deviceType: DeviceType }>`
+const ContentWrapper = styled.div<{ device: Device }>`
   width: 100%;
 
   display: flex;
   gap: 24px;
-  flex-direction: ${({ deviceType }) =>
-    deviceType === 'pc' ? 'row' : 'column-reverse'};
-  align-items: ${({ deviceType }) =>
-    deviceType === 'pc' ? 'flex-start' : 'center'};
+  flex-direction: ${({ device }) =>
+    device === 'pc' ? 'row' : 'column-reverse'};
+  align-items: ${({ device }) => (device === 'pc' ? 'flex-start' : 'center')};
   align-self: stretch;
   justify-content: center;
 `;
 
-const ReaderCompanion = styled.div<{ deviceType: DeviceType }>`
+const ReaderCompanion = styled.div<{ device: Device }>`
   min-width: 300px;
 
   display: flex;
@@ -127,10 +126,10 @@ const ReaderCompanion = styled.div<{ deviceType: DeviceType }>`
 
   box-sizing: border-box;
 
-  ${({ deviceType, theme }) => sideCardWrapperStyles[deviceType](theme)}
+  ${({ device, theme }) => sideCardWrapperStyles[device](theme)}
 `;
 
-const sideCardWrapperStyles: Record<DeviceType, (theme: Theme) => CSSObject> = {
+const sideCardWrapperStyles: Record<Device, (theme: Theme) => CSSObject> = {
   pc: (theme) => ({
     width: '310px',
     flexDirection: 'column',

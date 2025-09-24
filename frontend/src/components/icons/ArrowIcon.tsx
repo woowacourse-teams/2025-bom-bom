@@ -1,10 +1,10 @@
 import styled from '@emotion/styled';
 import { SVGProps } from 'react';
-import { DirectionType } from './Icons.types';
-import ArrowRightSvg from '#/assets/arrow-right.svg';
+import { Direction } from './Icons.types';
+import ArrowRightSvg from '#/assets/svg/arrow-right.svg';
 
 interface ArrowIconProps extends SVGProps<SVGSVGElement> {
-  direction?: DirectionType;
+  direction?: Direction;
 }
 
 export const rotationMap = {

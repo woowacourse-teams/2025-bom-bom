@@ -2,43 +2,32 @@ import styled from '@emotion/styled';
 import { Highlight } from '../../types/highlight';
 import EditableMemoCard from '../MemoCard/EditableMemoCard';
 import ChevronIcon from '@/components/icons/ChevronIcon';
-import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { theme } from '@/styles/theme';
-import CloseIcon from '#/assets/close.svg';
-import MemoIcon from '#/assets/memo.svg';
+import CloseIcon from '#/assets/svg/close.svg';
+import MemoIcon from '#/assets/svg/memo.svg';
 
 interface MemoPanelProps {
-  open: boolean;
+  opened: boolean;
   memos: Highlight[];
-  removeHighlight: (id: number) => void;
+  removeHighlight: ({ id }: { id: number }) => void;
   updateMemo: (id: number, memo: string) => void;
-  handleClose: () => void;
-  handleToggle: () => void;
+  onCloseButtonClick: () => void;
+  onToggleButtonClick: () => void;
 }
 
 const MemoPanel = ({
-  open,
+  opened,
   memos,
   removeHighlight,
   updateMemo,
-  handleClose,
-  handleToggle,
+  onCloseButtonClick,
+  onToggleButtonClick,
 }: MemoPanelProps) => {
   return (
-    <Container isOpen={open}>
-      <ToggleButton
-        isOpen={open}
-        onClick={() => {
-          handleToggle();
-          trackEvent({
-            category: 'Memo',
-            action: open ? '메모 패널 닫기' : '메모 패널 열기',
-            label: '아티클 본문',
-          });
-        }}
-      >
+    <Container opened={opened}>
+      <ToggleButton opened={opened} onClick={onToggleButtonClick}>
         <ChevronIcon
-          direction={open ? 'right' : 'left'}
+          direction={opened ? 'right' : 'left'}
           width={24}
           height={24}
           color={theme.colors.primary}
@@ -48,7 +37,7 @@ const MemoPanel = ({
       <Header>
         <HeaderLeft>
           <IconWrapper>
-            <MemoIcon fill={theme.colors.primary} />
+            <MemoIcon fill={theme.colors.primary} width={24} height={24} />
           </IconWrapper>
           <HeaderTitleBox>
             <HeaderTitleText>읽기 노트</HeaderTitleText>
@@ -56,7 +45,7 @@ const MemoPanel = ({
           </HeaderTitleBox>
         </HeaderLeft>
 
-        <CloseButton onClick={handleClose}>
+        <CloseButton onClick={onCloseButtonClick}>
           <CloseIcon fill={theme.colors.black} />
         </CloseButton>
       </Header>
@@ -91,7 +80,7 @@ const MemoPanel = ({
 
 export default MemoPanel;
 
-const Container = styled.aside<{ isOpen: boolean }>`
+const Container = styled.aside<{ opened: boolean }>`
   position: fixed;
   top: 0;
   right: 0;
@@ -106,12 +95,12 @@ const Container = styled.aside<{ isOpen: boolean }>`
 
   background-color: ${({ theme }) => theme.colors.white};
 
-  transform: ${({ isOpen }) => (isOpen ? 'translateX(0)' : 'translateX(100%)')};
+  transform: ${({ opened }) => (opened ? 'translateX(0)' : 'translateX(100%)')};
 
   transition: transform 0.3s;
 `;
 
-const ToggleButton = styled.button<{ isOpen: boolean }>`
+const ToggleButton = styled.button<{ opened: boolean }>`
   position: absolute;
   top: 80vh;
   left: -40px;

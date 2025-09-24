@@ -3,13 +3,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { theme } from '@/styles/theme';
-import DeleteIcon from '#/assets/delete.svg';
+import DeleteIcon from '#/assets/svg/delete.svg';
 
 interface EditableMemoCardProps {
   id: number;
   content: string;
   memo?: string;
-  onRemoveButtonClick: (id: number) => void;
+  onRemoveButtonClick: ({ id }: { id: number }) => void;
   onMemoChange: (id: number, memo: string) => void;
 }
 
@@ -25,7 +25,7 @@ const EditableMemoCard = ({
   const debouncedMemo = useDebouncedValue(localMemo, 500);
 
   const handleRemoveButtonClick = () => {
-    onRemoveButtonClick(id);
+    onRemoveButtonClick({ id });
     trackEvent({
       category: 'Memo',
       action: '메모 패널 - 하이라이트 삭제',

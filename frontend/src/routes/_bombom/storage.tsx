@@ -1,13 +1,13 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDevice } from '@/hooks/useDevice';
 import MobileStorageContent from '@/pages/storage/components/MobileStorageContent/MobileStorageContent';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import PCStorageContent from '@/pages/storage/components/PCStorageContent/PCStorageContent';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import { useStorageFilters } from '@/pages/storage/hooks/useStorageFilters';
 import { theme } from '@/styles/theme';
-import StorageIcon from '#/assets/storage.svg';
+import StorageIcon from '#/assets/svg/storage.svg';
 
 export const Route = createFileRoute('/_bombom/storage')({
   head: () => ({
@@ -22,9 +22,9 @@ export const Route = createFileRoute('/_bombom/storage')({
 });
 
 function Storage() {
-  const deviceType = useDeviceType();
-  const isPC = deviceType === 'pc';
-  const isMobile = deviceType === 'mobile';
+  const device = useDevice();
+  const isPC = device === 'pc';
+  const isMobile = device === 'mobile';
 
   const {
     selectedNewsletterId,

@@ -20,7 +20,7 @@ export const showToast = (toast: ToastData, store: Store = toastStore) => {
       toasts.some(
         (storedToast) =>
           storedToast.message === toast.message &&
-          storedToast.type === toast.type,
+          storedToast.variant === toast.variant,
       )
     ) {
       return toasts;
@@ -51,7 +51,7 @@ export const cleanToasts = (store: Store = toastStore) => {
 };
 
 export const toast = {
-  success: (message: string) => showToast({ type: 'success', message }),
-  error: (message: string) => showToast({ type: 'error', message }),
-  info: (message: string) => showToast({ type: 'info', message }),
+  success: (message: string) => showToast({ variant: 'success', message }),
+  error: (message: string) => showToast({ variant: 'error', message }),
+  info: (message: string) => showToast({ variant: 'info', message }),
 } as const;

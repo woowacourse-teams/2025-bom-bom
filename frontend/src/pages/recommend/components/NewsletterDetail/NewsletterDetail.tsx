@@ -4,12 +4,13 @@ import { queries } from '@/apis/queries';
 import Badge from '@/components/Badge/Badge';
 import Button from '@/components/Button/Button';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { useDevice } from '@/hooks/useDevice';
+import { useUserInfo } from '@/hooks/useUserInfo';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { copyToClipboard } from '@/utils/copy';
 import { openExternalLink } from '@/utils/externalLink';
-import ArticleHistoryIcon from '#/assets/article-history.svg';
-import HomeIcon from '#/assets/home.svg';
+import ArticleHistoryIcon from '#/assets/svg/article-history.svg';
+import HomeIcon from '#/assets/svg/home.svg';
 
 interface NewsletterDetailProps {
   newsletterId: number;
@@ -20,21 +21,22 @@ const NewsletterDetail = ({
   newsletterId,
   category,
 }: NewsletterDetailProps) => {
-  const { data: userInfo } = useQuery(queries.me());
+  const { userInfo, isLoggedIn } = useUserInfo();
   const { data: newsletterDetail } = useQuery({
     ...queries.newsletterDetail({ id: newsletterId }),
     enabled: Boolean(newsletterId),
   });
-  const deviceType = useDeviceType();
+  const deviceType = useDevice();
+
   const isMobile = deviceType === 'mobile';
 
   if (!newsletterId || !newsletterDetail) return null;
 
   const openSubscribe = () => {
-    if (userInfo?.email) {
-      copyToClipboard(userInfo.email);
-      alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
-    }
+    if (!isLoggedIn || !userInfo) return;
+
+    copyToClipboard(userInfo.email);
+    alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
 
     trackEvent({
       category: 'Newsletter',
@@ -81,8 +83,9 @@ const NewsletterDetail = ({
         </InfoWrapper>
 
         <SubscribeButton
-          text="구독하기"
+          text={isLoggedIn ? '구독하기' : '로그인 후 구독할 수 있어요'}
           onClick={openSubscribe}
+          disabled={!isLoggedIn}
           isMobile={isMobile}
         />
       </FixedWrapper>
@@ -203,7 +206,9 @@ const InfoWrapper = styled.div<{ isMobile: boolean }>`
   justify-content: center;
 `;
 
-const NewsletterImage = styled(ImageWithFallback)<{ isMobile: boolean }>`
+const NewsletterImage = styled(ImageWithFallback, {
+  shouldForwardProp: (prop) => prop !== 'isMobile',
+})<{ isMobile: boolean }>`
   width: ${({ isMobile }) => (isMobile ? '88px' : '104px')};
   height: ${({ isMobile }) => (isMobile ? '88px' : '104px')};
   border-radius: ${({ isMobile }) => (isMobile ? '12px' : '16px')};

@@ -11,5 +11,4 @@ CREATE TABLE withdrawn_member (
                                   continue_reading INT NOT NULL,
                                   bookmarked_count INT NOT NULL,
                                   highlight_count INT NOT NULL
-                                  PRIMARY KEY (`id`)
 );

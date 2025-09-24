@@ -20,7 +20,9 @@ export const Route = createFileRoute('/_bombom/')({
 
 function Index() {
   const today = useMemo(() => new Date(), []);
-  const { data: todayArticles } = useQuery(queries.articles({ date: today }));
+  const { data: todayArticles, isLoading } = useQuery(
+    queries.articles({ date: today }),
+  );
   const guideArticles = createStorage<LocalGuideMail[], string>(
     'guide-mail',
   ).get();
@@ -51,7 +53,7 @@ function Index() {
       )}
 
       <ContentWrapper device={device}>
-        <ArticleCardList articles={mergedArticles} />
+        <ArticleCardList articles={mergedArticles} isLoading={isLoading} />
         <ReaderCompanion device={device}>
           <PetCard />
           <ReadingStatusCard />

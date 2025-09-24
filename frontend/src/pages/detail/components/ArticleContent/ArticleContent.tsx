@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { memo, RefObject } from 'react';
+import { memo } from 'react';
 import { extractBodyContent, processContent } from './ArticleContent.utils';
 import { useHighlightHoverEffect } from '../../hooks/useHighlightHoverEffect';
 import type { RefObject } from 'react';

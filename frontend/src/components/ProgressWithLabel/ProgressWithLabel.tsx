@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
-import { ComponentType, SVGProps } from 'react';
 import { getProgressInfo } from './ProgressWithLabel.utils';
-import { RateFormat } from './types';
 import ProgressBar from '../ProgressBar/ProgressBar';
+import type { RateFormat } from './types';
+import type { ComponentType, SVGProps } from 'react';
 
 interface ProgressWithLabelProps {
   label: string;

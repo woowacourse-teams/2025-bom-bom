@@ -1,4 +1,4 @@
-import { GetArticleByIdResponse } from '@/apis/articles';
+import type { GetArticleByIdResponse } from '@/apis/articles';
 
 export type GuideMail = GetArticleByIdResponse & {
   articleId: number;

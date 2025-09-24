@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
-import { memo, RefObject } from 'react';
+import { memo } from 'react';
 import { processContent } from './ArticleContent.utils';
 import { useHighlightHoverEffect } from '../../hooks/useHighlightHoverEffect';
+import type { RefObject } from 'react';
 
 interface ArticleContentProps {
   ref: RefObject<HTMLDivElement | null>;

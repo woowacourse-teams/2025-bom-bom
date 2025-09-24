@@ -3,8 +3,8 @@ import {
   getTextNodesInRange,
   getXPathForNode,
 } from './selection';
-import { Highlight } from '../types/highlight';
 import { theme } from '@/styles/theme';
+import type { Highlight } from '../types/highlight';
 
 export const highlightNodeSegment = (
   node: Text,

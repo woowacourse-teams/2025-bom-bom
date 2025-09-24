@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import ProgressBar from '@/components/ProgressBar/ProgressBar';
-import { components } from '@/types/openapi';
+import type { components } from '@/types/openapi';
 
 interface ReadingKingMyRankProps {
   userRank: components['schemas']['MemberMonthlyReadingRankResponse'];

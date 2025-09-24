@@ -1,3 +1,3 @@
-import { components } from './openapi';
+import type { components } from './openapi';
 
 export type UserInfo = components['schemas']['MemberProfileResponse'];

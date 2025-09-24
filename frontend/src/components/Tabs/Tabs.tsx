@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { ComponentProps, ReactElement } from 'react';
-import { TabProps } from '../Tab/Tab';
+import type { TabProps } from '../Tab/Tab';
+import type { ComponentProps, ReactElement } from 'react';
 
 type Direction = 'horizontal' | 'vertical';
 

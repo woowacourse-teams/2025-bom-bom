@@ -1,4 +1,4 @@
-import { components } from '@/types/openapi';
+import type { components } from '@/types/openapi';
 
 interface ArticleReadStats {
   total: number;

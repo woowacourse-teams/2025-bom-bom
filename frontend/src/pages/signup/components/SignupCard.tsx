@@ -2,23 +2,26 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { ChangeEvent, FormEvent, useState } from 'react';
-import { FieldError, Gender } from './SignupCard.types';
+import { useState } from 'react';
 import {
   formatBirthDate,
   validateBirthDate,
   validateEmailLocal,
   validateNickname,
 } from './SignupCard.utils';
-import { getSignupCheck, GetSignupCheckParams, postSignup } from '@/apis/auth';
+import { getSignupCheck, postSignup } from '@/apis/auth';
 import { SIGNUP_CHECK_ERROR_MESSAGE } from '@/apis/constants/checkErrorMessage';
 import InputField from '@/components/InputField/InputField';
-import { Device, useDevice } from '@/hooks/useDevice';
+import { useDevice } from '@/hooks/useDevice';
 import { sendMessageToRN } from '@/libs/webview/webview.utils';
 import { GUIDE_MAILS } from '@/mocks/datas/guideMail';
 import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
+import type { FieldError, Gender } from './SignupCard.types';
+import type { GetSignupCheckParams } from '@/apis/auth';
+import type { Device } from '@/hooks/useDevice';
+import type { ChangeEvent, FormEvent } from 'react';
 import HelpIcon from '#/assets/svg/help.svg';
 
 const EMAIL_DOMAIN = '@bombom.news';

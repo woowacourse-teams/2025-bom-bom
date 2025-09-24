@@ -1,6 +1,6 @@
-import { ToastData } from '../Toast.types';
-import { Store } from './createStore';
 import { toastStore } from './toastStore';
+import type { ToastData } from '../Toast.types';
+import type { Store } from './createStore';
 
 export const updateToastsState = (
   store: Store,

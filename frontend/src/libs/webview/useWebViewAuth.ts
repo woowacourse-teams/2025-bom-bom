@@ -1,12 +1,12 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import { RNToWebMessage } from './webview.types';
 import {
   addWebViewMessageListener,
   isRunningInWebView,
   sendMessageToRN,
 } from './webview.utils';
 import { postAppleLogin, postGoogleLogin } from '@/apis/auth';
+import type { RNToWebMessage } from './webview.types';
 
 export const useWebViewAuth = () => {
   const navigate = useNavigate();

@@ -1,8 +1,9 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { FunctionComponent, SVGProps, useEffect } from 'react';
-import { ToastData, ToastVariant } from './Toast.types';
+import { useEffect } from 'react';
 import { hideToast } from './utils/toastActions';
+import type { ToastData, ToastVariant } from './Toast.types';
+import type { FunctionComponent, SVGProps } from 'react';
 import ErrorIcon from '#/assets/svg/cancel-circle.svg';
 import SuccessIcon from '#/assets/svg/check-circle.svg';
 import InfoIcon from '#/assets/svg/info-circle.svg';

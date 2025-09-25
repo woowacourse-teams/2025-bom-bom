@@ -5,6 +5,7 @@ import {
 } from './selection';
 import { Highlight } from '../types/highlight';
 import { theme } from '@/styles/theme';
+import { logger } from '@/utils/logger';
 
 export const highlightNodeSegment = (
   node: Text,
@@ -131,7 +132,7 @@ export const restoreHighlightAll = (highlights: Highlight[]) => {
     try {
       addHighlightToDOM(highlight);
     } catch (error) {
-      console.error(error);
+      logger.error(error);
     }
   });
 };

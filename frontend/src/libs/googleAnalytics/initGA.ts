@@ -1,3 +1,5 @@
+import { logger } from '@/utils/logger';
+
 declare global {
   interface Window {
     dataLayer: unknown[];
@@ -10,7 +12,7 @@ export const initGA = (
   gtagUrl: string = 'https://www.googletagmanager.com/gtag/js',
 ) => {
   if (!measurementId) {
-    console.warn('[GA] Measurement ID missing');
+    logger.warn('[GA] Measurement ID missing');
     return;
   }
 

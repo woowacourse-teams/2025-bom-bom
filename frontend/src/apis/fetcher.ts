@@ -2,6 +2,7 @@ import ApiError from './ApiError';
 import { DEFAULT_ERROR_MESSAGES } from './constants/defaultErrorMessage';
 import { ENV } from './env';
 import { formatDate } from '@/utils/date';
+import { logger } from '@/utils/logger';
 
 type JsonBody = Record<string, unknown>;
 
@@ -116,7 +117,7 @@ const request = async <TRequest, TResponse>({
 
     return null;
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     throw error;
   }
 };

@@ -1,3 +1,5 @@
+import { logger } from '@/utils/logger';
+
 interface TrackEventParams {
   category: string;
   action: string;
@@ -12,7 +14,7 @@ export const trackEvent = ({
   value,
 }: TrackEventParams) => {
   if (typeof window.gtag !== 'function') {
-    console.warn('[GA] gtag is not initialized');
+    logger.warn('[GA] gtag is not initialized');
     return;
   }
 

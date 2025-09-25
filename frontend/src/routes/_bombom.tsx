@@ -31,7 +31,6 @@ export const Route = createFileRoute('/_bombom')({
     }
   },
   errorComponent: ({ error }) => {
-    console.log(error);
     if (error instanceof Response && error.status === 401) {
       return (
         <PageLayout>

@@ -273,7 +273,7 @@ class ReadingServiceTest {
         int monthlyCountBefore = monthlyReadingSnapshotRepository.findByMemberId(member.getId()).get().getCurrentCount();
 
         // when
-        readingService.passMonthlyCountToYearly();
+        readingService.migrateMonthlyCountToYearlyAndReset();
 
         // then
         MonthlyReadingSnapshot monthlyReadingSnapshot = monthlyReadingSnapshotRepository.findByMemberId(member.getId()).get();

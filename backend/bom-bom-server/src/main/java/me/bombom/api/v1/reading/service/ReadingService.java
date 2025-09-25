@@ -93,7 +93,7 @@ public class ReadingService {
     }
 
     @Transactional
-    public void passMonthlyCountToYearly() {
+    public void migrateMonthlyCountToYearlyAndReset() {
         monthlyReadingSnapshotRepository.findAll().forEach(monthlyReadingSnapshot -> {
             Long memberId = monthlyReadingSnapshot.getMemberId();
             int targetYear = LocalDate.now().minusMonths(LAST_MONTH_OFFSET).getYear();

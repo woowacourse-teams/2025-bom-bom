@@ -103,6 +103,7 @@ public class ReadingService {
             yearlyReading.increaseCurrentCount(monthlyReadingSnapshot.getCurrentCount());
             monthlyReadingSnapshot.resetCurrentCount();
         });
+        monthlyReadingRealtimeRepository.resetCurrentCount();
     }
 
     @Transactional

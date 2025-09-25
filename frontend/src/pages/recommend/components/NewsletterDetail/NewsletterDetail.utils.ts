@@ -17,7 +17,8 @@ export const buildSubscribeUrl = (
   if (isStibee(baseUrl)) {
     url.searchParams.set('email', userInfo.email);
     url.searchParams.set('name', userInfo.nickname);
-  } else if (isMaily(baseUrl)) {
+  }
+  if (isMaily(baseUrl)) {
     url.searchParams.set('email', userInfo.email);
     url.searchParams.set('nickname', userInfo.nickname);
     url.searchParams.set('pop', 'up');

@@ -37,7 +37,7 @@ function Tab<T>({
 
 export default Tab;
 
-export const Container = styled.li<{ selected: boolean }>`
+const Container = styled.li<{ selected: boolean }>`
   min-width: fit-content;
   padding: 10px 12px;
   border: 2px solid
@@ -65,7 +65,7 @@ export const Container = styled.li<{ selected: boolean }>`
   }
 `;
 
-export const Label = styled.span<{ textAlign: 'start' | 'center' | 'end' }>`
+const Label = styled.span<{ textAlign: 'start' | 'center' | 'end' }>`
   width: 100%;
   text-align: ${({ textAlign }) => textAlign};
 `;

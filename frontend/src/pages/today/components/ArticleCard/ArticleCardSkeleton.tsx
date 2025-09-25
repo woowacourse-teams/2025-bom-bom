@@ -1,5 +1,4 @@
 import styled from '@emotion/styled';
-import { InfoWrapper, MetaInfoRow, ThumbnailWrapper } from './ArticleCard';
 import { useDevice } from '@/hooks/useDevice';
 import { skeletonStyle } from '@/styles/skeleton';
 
@@ -9,18 +8,18 @@ const ArticleCardSkeleton = () => {
 
   return (
     <SkeletonContainer isMobile={isMobile}>
-      <InfoWrapper isMobile={isMobile}>
+      <SkeletonInfoWrapper isMobile={isMobile}>
         <SkeletonTitle isMobile={isMobile} />
         <SkeletonDescription isMobile={isMobile} />
-        <MetaInfoRow isMobile={isMobile}>
+        <SkeletonMetaInfoRow isMobile={isMobile}>
           <SkeletonMetaInfo />
           <SkeletonMetaInfo />
           <SkeletonMetaInfo />
-        </MetaInfoRow>
-      </InfoWrapper>
-      <ThumbnailWrapper isMobile={isMobile}>
+        </SkeletonMetaInfoRow>
+      </SkeletonInfoWrapper>
+      <SkeletonThumbnailWrapper isMobile={isMobile}>
         <SkeletonThumbnail isMobile={isMobile} />
-      </ThumbnailWrapper>
+      </SkeletonThumbnailWrapper>
     </SkeletonContainer>
   );
 };
@@ -79,4 +78,25 @@ const SkeletonThumbnail = styled.div<{ isMobile: boolean }>`
   flex-shrink: 0;
 
   ${skeletonStyle}
+`;
+
+const SkeletonInfoWrapper = styled.div<{ isMobile: boolean }>`
+  width: 100%;
+
+  display: flex;
+  gap: ${({ isMobile }) => (isMobile ? '8px' : '12px')};
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
+const SkeletonMetaInfoRow = styled.div<{ isMobile: boolean }>`
+  display: flex;
+  gap: ${({ isMobile }) => (isMobile ? '6px' : '8px')};
+  flex-wrap: ${({ isMobile }) => (isMobile ? 'wrap' : 'nowrap')};
+  align-items: center;
+`;
+
+const SkeletonThumbnailWrapper = styled.div<{ isMobile: boolean }>`
+  position: relative;
+  flex-shrink: 0;
 `;

@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
-import { PetImageContainer } from './PetCard';
 import PetCardContainer from './PetCardContainer';
 import TextSkeleton from '../Skeleton/TextSkeleton';
-import { Device, useDevice } from '@/hooks/useDevice';
+import { useDevice } from '@/hooks/useDevice';
 import { skeletonStyle } from '@/styles/skeleton';
+import type { Device } from '@/hooks/useDevice';
 
 const PetCardSkeleton = () => {
   const device = useDevice();
@@ -27,6 +27,14 @@ const PetCardSkeleton = () => {
 };
 
 export default PetCardSkeleton;
+
+const PetImageContainer = styled.div`
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 
 const SkeletonPetImage = styled.div`
   width: 120px;

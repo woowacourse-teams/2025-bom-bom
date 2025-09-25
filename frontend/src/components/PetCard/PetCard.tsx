@@ -6,10 +6,11 @@ import { heartAnimation, jumpAnimation } from './PetCard.keyframes';
 import PetCardContainer from './PetCardContainer';
 import Button from '../Button/Button';
 import ProgressBar from '../ProgressBar/ProgressBar';
-import { GetPetResponse, postPetAttendance } from '@/apis/pet';
+import { postPetAttendance } from '@/apis/pet';
 import { useDevice } from '@/hooks/useDevice';
 import { queryClient } from '@/main';
 import { calculateRate } from '@/utils/math';
+import type { GetPetResponse } from '@/apis/pet';
 import type { Device } from '@/hooks/useDevice';
 import petLv1 from '#/assets/avif/pet-1-lv1.avif';
 import petLv2 from '#/assets/avif/pet-1-lv2.avif';
@@ -150,7 +151,7 @@ const AttendanceButton = styled(Button)<{ device: Device }>`
     }}
 `;
 
-export const PetImageContainer = styled.div`
+const PetImageContainer = styled.div`
   position: relative;
 
   display: flex;

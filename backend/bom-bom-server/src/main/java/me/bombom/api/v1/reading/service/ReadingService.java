@@ -206,7 +206,15 @@ public class ReadingService {
 
     @Transactional
     public void updateMonthlyRanking() {
-        monthlyReadingSnapshotRepository.updateMonthlyRanking();
+        try {
+            log.info("Starting monthly ranking update");
+            monthlyReadingSnapshotRepository.updateMonthlyRanking();
+            log.info("Monthly ranking update completed successfully");
+        } catch (Exception e) {
+            log.error("Failed to update monthly ranking: {}", e.getMessage(), e);
+            throw new CIllegalArgumentException(ErrorDetail.INTERNAL_SERVER_ERROR)
+                    .addContext(ErrorContextKeys.OPERATION, "updateMonthlyRanking");
+        }
     }
 
     public MemberMonthlyReadingCountResponse getMemberMonthlyReadingCount(Member member) {

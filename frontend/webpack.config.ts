@@ -118,7 +118,6 @@ export default (env, argv) => {
             new TerserPlugin({
               terserOptions: {
                 compress: {
-                  drop_console: true, // console.log 제거
                   drop_debugger: true, // debugger 제거
                   pure_funcs: ['console.log', 'console.info', 'console.warn'], // console.log 제거
                 },

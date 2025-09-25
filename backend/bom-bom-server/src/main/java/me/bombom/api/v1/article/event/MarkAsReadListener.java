@@ -1,5 +1,6 @@
 package me.bombom.api.v1.article.event;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.service.ArticleService;
@@ -19,6 +20,7 @@ public class MarkAsReadListener {
     private final ReadingService readingService;
     private final PetService petService;
 
+    @WithSpan
     @TransactionalEventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void on(MarkAsReadEvent event) {

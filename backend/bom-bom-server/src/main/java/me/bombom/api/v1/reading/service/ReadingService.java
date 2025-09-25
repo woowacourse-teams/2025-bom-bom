@@ -92,16 +92,16 @@ public class ReadingService {
 
     @Transactional
     public void passMonthlyCountToYearly() {
-        monthlyReadingSnapshotRepository.findAll().forEach(monthlyReading -> {
-            Long memberId = monthlyReading.getMemberId();
+        monthlyReadingSnapshotRepository.findAll().forEach(monthlyReadingSnapshot -> {
+            Long memberId = monthlyReadingSnapshot.getMemberId();
             int targetYear = LocalDate.now().minusMonths(LAST_MONTH_OFFSET).getYear();
             YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndReadingYear(memberId, targetYear)
                     .orElseGet(() -> {
                         YearlyReading newYearlyReading = YearlyReading.create(memberId, targetYear);
                         return yearlyReadingRepository.save(newYearlyReading);
                     });
-            yearlyReading.increaseCurrentCount(monthlyReading.getCurrentCount());
-            monthlyReading.resetCurrentCount();
+            yearlyReading.increaseCurrentCount(monthlyReadingSnapshot.getCurrentCount());
+            monthlyReadingSnapshot.resetCurrentCount();
         });
     }
 
@@ -240,7 +240,7 @@ public class ReadingService {
         MonthlyReadingRealtime monthlyReadingRealtime = monthlyReadingRealtimeRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReading")
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReadingRealtime")
                         .addContext(ErrorContextKeys.OPERATION, "updateMonthlyReadingCount"));
         monthlyReadingRealtime.increaseCurrentCount();
     }
@@ -257,8 +257,8 @@ public class ReadingService {
         MonthlyReadingRealtime monthlyReadingRealtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReading")
-                        .addContext(ErrorContextKeys.OPERATION, "updateMonthlyReadingCount"));
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReadingRealtime")
+                        .addContext(ErrorContextKeys.OPERATION, "getMemberMonthlyReadingCount"));
         return MemberMonthlyReadingCountResponse.from(monthlyReadingRealtime.getCurrentCount());
     }
 }

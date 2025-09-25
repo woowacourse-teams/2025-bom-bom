@@ -203,7 +203,7 @@ public final class TestFixture {
     }
 
     /**
-     * MonthlyReading
+     * MonthlyReadingSnapshot
      */
     public static MonthlyReadingSnapshot monthlyReadingFixture(Member member) {
         return MonthlyReadingSnapshot.builder()

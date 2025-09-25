@@ -1,9 +1,10 @@
 import styled from '@emotion/styled';
-import { PropsWithChildren } from 'react';
-import { Device, useDevice } from '@/hooks/useDevice';
+import { useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
+import type { Device } from '@/hooks/useDevice';
 import type { CSSObject, Theme } from '@emotion/react';
-import PetIcon from '#/assets/pet.svg';
+import type { PropsWithChildren } from 'react';
+import PetIcon from '#/assets/svg/pet.svg';
 
 const PetCardContainer = ({ children }: PropsWithChildren) => {
   const device = useDevice();

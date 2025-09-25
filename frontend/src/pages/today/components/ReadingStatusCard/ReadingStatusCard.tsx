@@ -10,15 +10,12 @@ import ProgressBar from '@/components/ProgressBar/ProgressBar';
 import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
 import { useDevice } from '@/hooks/useDevice';
 import useUpdateWeeklyGoalMutation from '@/pages/today/hooks/useUpdateWeeklyGoalMutation';
-import { theme } from '@/styles/theme';
 import type { Device } from '@/hooks/useDevice';
-import type { CSSObject, Theme } from '@emotion/react';
 import GoalIcon from '#/assets/svg/goal.svg';
-import StatusIcon from '#/assets/svg/reading-status.svg';
 
-function ReadingStatusCard() {
+const ReadingStatusCard = () => {
   const device = useDevice();
-  const { data } = useQuery(queries.readingStatus());
+  const { data, isLoading } = useQuery(queries.readingStatus());
   const [isEditing, setIsEditing] = useState(false);
   const [goalCount, setGoalCount] = useState<number | null>(null);
 
@@ -28,6 +25,7 @@ function ReadingStatusCard() {
     },
   });
 
+  if (isLoading) return <ReadingStatusCardSkeleton />;
   if (!data) return null;
 
   const { streakReadDay, today, weekly } = data;
@@ -119,7 +117,7 @@ function ReadingStatusCard() {
       </WeeklyGoalSection>
     </ReadingStatusCardContainer>
   );
-}
+};
 
 export default ReadingStatusCard;
 

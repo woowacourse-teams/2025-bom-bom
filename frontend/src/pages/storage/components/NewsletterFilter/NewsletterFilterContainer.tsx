@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
-import { ComponentProps, ReactElement } from 'react';
 import Tabs from '@/components/Tabs/Tabs';
 import { useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
-import NewsIcon from '#/assets/news.svg';
+import type { ComponentProps, ReactElement } from 'react';
+import NewsIcon from '#/assets/svg/news.svg';
 
 interface NewsletterFilterContainerProps {
   children:

@@ -47,11 +47,13 @@ public class ReadingController implements ReadingControllerApi{
         return readingService.getMonthlyReadingRank(limit);
     }
 
+    @Override
     @GetMapping("/month/rank/me")
     public MemberMonthlyReadingRankResponse getMemberMonthlyRank(@LoginMember Member member) {
         return readingService.getMemberMonthlyReadingRank(member);
     }
 
+    @Override
     @GetMapping("/month")
     public MemberMonthlyReadingCountResponse getMemberMonthlyReadingCount(@LoginMember Member member) {
         return readingService.getMemberMonthlyReadingCount(member);

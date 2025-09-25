@@ -2,7 +2,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import {
   addWebViewMessageListener,
-  isRunningInWebView,
+  isWebView,
   sendMessageToRN,
 } from './webview.utils';
 import { postAppleLogin, postGoogleLogin } from '@/apis/auth';
@@ -12,7 +12,7 @@ export const useWebViewAuth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isRunningInWebView()) return;
+    if (!isWebView()) return;
 
     const cleanup = addWebViewMessageListener(
       async (message: RNToWebMessage) => {

@@ -3,12 +3,15 @@ import { tanstackRouter } from '@tanstack/router-plugin/webpack';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import dotenv from 'dotenv';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
 import webpack from 'webpack';
 import 'webpack-dev-server';
 
 dotenv.config();
 
 export default (env, argv) => {
+  const isProduction = argv.mode === 'production';
+
   const config: webpack.Configuration = {
     mode: argv.mode,
     entry: './src/main.tsx',
@@ -44,7 +47,7 @@ export default (env, argv) => {
           ],
         },
         {
-          test: /\.(png|jpg|jpeg|gif)$/i,
+          test: /\.(avif|jpg|jpeg|gif|avif)$/i,
           type: 'asset',
         },
         {
@@ -73,7 +76,7 @@ export default (env, argv) => {
         template: './index.html', // 템플릿 HTML
         filename: 'index.html', // 출력될 HTML 파일 이름
         inject: true, // <script> 태그 자동 삽입
-        favicon: './public/assets/logo.png',
+        favicon: './public/assets/avif/logo.avif',
       }),
       tanstackRouter({
         target: 'react',
@@ -90,6 +93,22 @@ export default (env, argv) => {
             from: 'public/assets',
             to: 'assets',
           },
+          {
+            from: path.resolve(
+              __dirname,
+              'public',
+              `robots.${process.env.SERVER_TYPE}.txt`,
+            ),
+            to: path.resolve(__dirname, 'dist', 'robots.txt'),
+          },
+          ...(process.env.SERVER_TYPE === 'prod'
+            ? [
+                {
+                  from: path.resolve(__dirname, 'public', 'sitemap.xml'),
+                  to: path.resolve(__dirname, 'dist', 'sitemap.xml'),
+                },
+              ]
+            : []),
         ],
       }),
     ],
@@ -104,6 +123,65 @@ export default (env, argv) => {
       historyApiFallback: true, // SPA 라우팅 지원
       client: {
         overlay: true, // 에러 발생 시 브라우저에 띄워줘요
+      },
+    },
+    optimization: {
+      usedExports: true, // 사용되지 않는 export 제거
+      sideEffects: false, // side effect가 없는 모듈들 최적화
+      minimize: isProduction,
+      minimizer: isProduction
+        ? [
+            new TerserPlugin({
+              terserOptions: {
+                compress: {
+                  drop_debugger: true, // debugger 제거
+                  pure_funcs: ['console.log', 'console.info', 'console.warn'], // console.log 제거
+                },
+                mangle: {
+                  toplevel: true,
+                  reserved: [], // 변수 이름 변경 방지
+                },
+                format: {
+                  comments: false, // 주석 제거
+                },
+              },
+              extractComments: false, // 주석 제거
+            }),
+          ]
+        : [],
+      splitChunks: {
+        chunks: 'all', // 모든 청크에 대해 코드 분할 적용
+        minSize: 30000, // 최소 분할 크기 (30KB)
+        maxSize: 100000, // 최대 분할 크기 (50KB)
+        minChunks: 1, // 최소 참조 횟수 (1회 이상 사용된 모듈 분리)
+        maxAsyncRequests: 10, // 비동기 요청 최대 수
+        maxInitialRequests: 5, // 초기 요청 최대 수
+        automaticNameDelimiter: '~', // 자동 생성 청크 이름 구분자
+        cacheGroups: {
+          // React 관련 라이브러리 별도 분리
+          react: {
+            test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+            name: 'react',
+            chunks: 'all',
+            priority: 30,
+          },
+          // vendor 라이브러리 별도 분리
+          vendor: {
+            test: /[\\/]node_modules[\\/](?!(react|react-dom)[\\/])/,
+            name: 'vendor',
+            chunks: 'all',
+            priority: 20,
+            minSize: 50000,
+          },
+          // 공통 모듈 분리
+          common: {
+            name: 'common',
+            minChunks: 3, // 3번 이상 사용된 모듈
+            chunks: 'all',
+            priority: 10,
+            reuseExistingChunk: true,
+          },
+        },
       },
     },
   };

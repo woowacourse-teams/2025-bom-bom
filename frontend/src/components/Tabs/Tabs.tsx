@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { ComponentProps, ReactElement } from 'react';
+import type { ComponentProps, ReactElement } from 'react';
 
 type Direction = 'horizontal' | 'vertical';
 

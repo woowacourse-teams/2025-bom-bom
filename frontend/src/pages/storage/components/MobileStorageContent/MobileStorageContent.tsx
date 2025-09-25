@@ -3,9 +3,9 @@ import { useEffect, useRef } from 'react';
 import ArticleList from '../ArticleList/ArticleList';
 import ArticleListControls from '../ArticleListControls/ArticleListControls';
 import EmptySearchCard from '../EmptySearchCard/EmptySearchCard';
-import { GetArticlesParams } from '@/apis/articles';
 import useInfiniteArticles from '@/pages/storage/hooks/useInfiniteArticles';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
+import type { GetArticlesParams } from '@/apis/articles';
 
 interface MobileStorageContentProps {
   baseQueryParams: GetArticlesParams;

@@ -7,14 +7,15 @@ import PetCardContainer from './PetCardContainer';
 import Button from '../Button/Button';
 import ProgressBar from '../ProgressBar/ProgressBar';
 import { GetPetResponse, postPetAttendance } from '@/apis/pet';
-import { Device, useDevice } from '@/hooks/useDevice';
+import { useDevice } from '@/hooks/useDevice';
 import { queryClient } from '@/main';
 import { calculateRate } from '@/utils/math';
-import petLv1 from '#/assets/pet-1-lv1.png';
-import petLv2 from '#/assets/pet-1-lv2.png';
-import petLv3 from '#/assets/pet-1-lv3.png';
-import petLv4 from '#/assets/pet-1-lv4.png';
-import petLv5 from '#/assets/pet-1-lv5.png';
+import type { Device } from '@/hooks/useDevice';
+import petLv1 from '#/assets/avif/pet-1-lv1.avif';
+import petLv2 from '#/assets/avif/pet-1-lv2.avif';
+import petLv3 from '#/assets/avif/pet-1-lv3.avif';
+import petLv4 from '#/assets/avif/pet-1-lv4.avif';
+import petLv5 from '#/assets/avif/pet-1-lv5.avif';
 
 const petImages: Record<number, string> = {
   1: petLv1,

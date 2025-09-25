@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { FloatingToolbarMode } from '../FloatingToolbar/FloatingToolbar.types';
 import { useDevice } from '@/hooks/useDevice';
-import { Position } from '@/types/position';
+import type { FloatingToolbarMode } from '../FloatingToolbar/FloatingToolbar.types';
+import type { Position } from '@/types/position';
 
 const TOOLBAR_HEIGHT = 40;
 

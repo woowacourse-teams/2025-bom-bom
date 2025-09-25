@@ -5,7 +5,7 @@ import { ARTICLES } from './datas/articles';
 import { TRENDY_NEWSLETTERS } from './datas/trendyNewsLetter';
 import { bookmarkHandlers } from './handlers/bookmark';
 import { newsletterDetailHandlers } from './handlers/newsletterDetail';
-import { Highlight } from '@/pages/detail/types/highlight';
+import type { Highlight } from '@/pages/detail/types/highlight';
 
 const baseURL = ENV.baseUrl;
 

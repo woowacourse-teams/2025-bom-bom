@@ -5,7 +5,7 @@ import HeaderProfile from './HeaderProfile';
 import LoginButton from './LoginButton';
 import TextSkeleton from '../Skeleton/TextSkeleton';
 import { useUserInfo } from '@/hooks/useUserInfo';
-import { Nav } from '@/types/nav';
+import type { Nav } from '@/types/nav';
 
 interface PCHeaderProps {
   activeNav: Nav;

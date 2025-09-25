@@ -1,4 +1,4 @@
-import { components } from './openapi';
+import type { components } from './openapi';
 
 export type Article = components['schemas']['ArticleResponse'];
 export type Newsletter =

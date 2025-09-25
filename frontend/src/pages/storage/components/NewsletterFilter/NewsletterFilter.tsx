@@ -3,7 +3,7 @@ import NewsletterFilterContainer from './NewsletterFilterContainer';
 import Badge from '@/components/Badge/Badge';
 import Tab from '@/components/Tab/Tab';
 import { useDevice } from '@/hooks/useDevice';
-import { Newsletter } from '@/types/articles';
+import type { Newsletter } from '@/types/articles';
 
 interface NewsLetterFilterProps {
   newsLetterList: Newsletter['newsletters'];

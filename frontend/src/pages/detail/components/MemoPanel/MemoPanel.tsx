@@ -1,10 +1,10 @@
 import styled from '@emotion/styled';
-import { Highlight } from '../../types/highlight';
 import EditableMemoCard from '../MemoCard/EditableMemoCard';
 import ChevronIcon from '@/components/icons/ChevronIcon';
 import { theme } from '@/styles/theme';
-import CloseIcon from '#/assets/close.svg';
-import MemoIcon from '#/assets/memo.svg';
+import type { Highlight } from '../../types/highlight';
+import CloseIcon from '#/assets/svg/close.svg';
+import MemoIcon from '#/assets/svg/memo.svg';
 
 interface MemoPanelProps {
   opened: boolean;

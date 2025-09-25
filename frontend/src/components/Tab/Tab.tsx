@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { ReactNode, LiHTMLAttributes } from 'react';
+import type { ReactNode, LiHTMLAttributes } from 'react';
 
 export interface TabProps<T>
   extends Omit<LiHTMLAttributes<HTMLLIElement>, 'value'> {

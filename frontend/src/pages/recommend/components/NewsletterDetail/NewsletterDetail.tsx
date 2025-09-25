@@ -1,15 +1,17 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
+import { buildSubscribeUrl, isMaily, isStibee } from './NewsletterDetail.utils';
 import { queries } from '@/apis/queries';
 import Badge from '@/components/Badge/Badge';
 import Button from '@/components/Button/Button';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { useDevice } from '@/hooks/useDevice';
 import { useUserInfo } from '@/hooks/useUserInfo';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { copyToClipboard } from '@/utils/copy';
 import { openExternalLink } from '@/utils/externalLink';
-import ArticleHistoryIcon from '#/assets/article-history.svg';
-import HomeIcon from '#/assets/home.svg';
+import ArticleHistoryIcon from '#/assets/svg/article-history.svg';
+import HomeIcon from '#/assets/svg/home.svg';
 
 interface NewsletterDetailProps {
   newsletterId: number;
@@ -34,10 +36,26 @@ const NewsletterDetail = ({
   const openSubscribe = () => {
     if (!isLoggedIn || !userInfo) return;
 
-    copyToClipboard(userInfo.email);
-    alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
+    if (
+      !isStibee(newsletterDetail.subscribeUrl) &&
+      !isMaily(newsletterDetail.subscribeUrl)
+    ) {
+      copyToClipboard(userInfo.email);
+      alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
+    }
 
-    openExternalLink(newsletterDetail.subscribeUrl);
+    trackEvent({
+      category: 'Newsletter',
+      action: '구독하기 버튼 클릭',
+      label: newsletterDetail.name ?? 'Unknown Newsletter',
+    });
+
+    const subscribeUrl = buildSubscribeUrl(
+      newsletterDetail.subscribeUrl,
+      userInfo,
+    );
+
+    openExternalLink(subscribeUrl);
   };
 
   const openMainSite = () => {

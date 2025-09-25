@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useRef } from 'react';
 
+interface UseDebounceOptions {
+  autoCancelOnUnmount?: boolean;
+}
+
 export function useDebounce<T extends unknown[]>(
   callback: (...args: T) => void,
-  wait: number,
+  debounceMs: number,
+  options: UseDebounceOptions = {},
 ) {
   const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const callbackRef = useRef(callback);
+  const { autoCancelOnUnmount = true } = options;
 
   const debounced = useCallback(
     (...args: T) => {
@@ -15,9 +21,9 @@ export function useDebounce<T extends unknown[]>(
 
       timerIdRef.current = setTimeout(() => {
         callbackRef.current(...args);
-      }, wait);
+      }, debounceMs);
     },
-    [wait],
+    [debounceMs],
   );
 
   useEffect(() => {
@@ -26,11 +32,15 @@ export function useDebounce<T extends unknown[]>(
 
   useEffect(() => {
     return () => {
+      if (!autoCancelOnUnmount) {
+        return;
+      }
+
       if (timerIdRef.current) {
         clearTimeout(timerIdRef.current);
       }
     };
-  }, []);
+  }, [autoCancelOnUnmount]);
 
   return debounced;
 }

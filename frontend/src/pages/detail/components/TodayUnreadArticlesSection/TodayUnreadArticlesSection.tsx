@@ -4,7 +4,8 @@ import { useMemo } from 'react';
 import EmptyUnreadCard from '../EmptyUnreadCard/EmptyUnreadCard';
 import NewsletterItemCard from '../NewsletterItemCard/NewsletterItemCard';
 import { queries } from '@/apis/queries';
-import { Device, useDevice } from '@/hooks/useDevice';
+import { useDevice } from '@/hooks/useDevice';
+import type { Device } from '@/hooks/useDevice';
 
 interface TodayUnreadArticlesSectionProps {
   articleId: number;

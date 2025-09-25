@@ -2,8 +2,8 @@ import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
 import Badge from '@/components/Badge/Badge';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
-import { components } from '@/types/openapi';
-import ClockIcon from '#/assets/clock.svg';
+import type { components } from '@/types/openapi';
+import ClockIcon from '#/assets/svg/clock.svg';
 
 interface NewsletterItemCardProps {
   data: components['schemas']['ArticleResponse'];

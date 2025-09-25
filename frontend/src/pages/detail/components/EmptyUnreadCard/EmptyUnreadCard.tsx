@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import firecrackerIcon from '#/assets/fire-cracker.png';
+import firecrackerIcon from '#/assets/avif/fire-cracker.avif';
 
 function EmptyUnreadCard() {
   return (

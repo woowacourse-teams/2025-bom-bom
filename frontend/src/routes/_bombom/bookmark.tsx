@@ -4,14 +4,23 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 import { queries } from '@/apis/queries';
 import TextSkeleton from '@/components/Skeleton/TextSkeleton';
-import { Device, useDevice } from '@/hooks/useDevice';
+import { useDevice } from '@/hooks/useDevice';
 import ArticleList from '@/pages/storage/components/ArticleList/ArticleList';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
-import BookmarkIcon from '#/assets/bookmark-inactive.svg';
+import type { Device } from '@/hooks/useDevice';
+import BookmarkIcon from '#/assets/svg/bookmark-inactive.svg';
 
 export const Route = createFileRoute('/_bombom/bookmark')({
+  head: () => ({
+    meta: [
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
+    ],
+  }),
   component: BookmarkPage,
 });
 

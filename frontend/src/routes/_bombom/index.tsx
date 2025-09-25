@@ -8,15 +8,24 @@ import { getPet } from '@/apis/pet';
 import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
 import PetCardSkeleton from '@/components/PetCard/PetCardSkeleton';
-import { Device, useDevice } from '@/hooks/useDevice';
+import { useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
-import { LocalGuideMail } from '@/types/guide';
 import { isToday } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
+import type { Device } from '@/hooks/useDevice';
+import type { LocalGuideMail } from '@/types/guide';
 import type { CSSObject, Theme } from '@emotion/react';
-import HomeIcon from '#/assets/home.svg';
+import HomeIcon from '#/assets/svg/home.svg';
 
 export const Route = createFileRoute('/_bombom/')({
+  head: () => ({
+    meta: [
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
+    ],
+  }),
   component: Index,
 });
 

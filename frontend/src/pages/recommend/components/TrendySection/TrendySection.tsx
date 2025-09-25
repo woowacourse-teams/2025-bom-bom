@@ -9,11 +9,13 @@ import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import ImageInfoCardSkeleton from '@/components/ImageInfoCard/ImageInfoCardSkeleton';
 import Modal from '@/components/Modal/Modal';
 import useModal from '@/components/Modal/useModal';
-import { CATEGORIES, Category, NEWSLETTER_COUNT } from '@/constants/newsletter';
-import { Device, useDevice } from '@/hooks/useDevice';
+import { CATEGORIES, NEWSLETTER_COUNT } from '@/constants/newsletter';
+import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { Newsletter } from '@/types/newsletter';
-import TrendingUpIcon from '#/assets/trending-up.svg';
+import type { Category } from '@/constants/newsletter';
+import type { Device } from '@/hooks/useDevice';
+import type { Newsletter } from '@/types/newsletter';
+import TrendingUpIcon from '#/assets/svg/trending-up.svg';
 
 const TrendySection = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category>('전체');
@@ -40,7 +42,7 @@ const TrendySection = () => {
 
     trackEvent({
       category: 'Newsletter',
-      action: 'Click Trendy Newsletter Card',
+      action: '뉴스레터 카드 클릭',
       label: newsletter.name ?? 'Unknown Newsletter',
     });
   };

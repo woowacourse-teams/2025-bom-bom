@@ -1,13 +1,12 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
-import { ComponentProps } from 'react';
 import Badge from '@/components/Badge/Badge';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { useDevice } from '@/hooks/useDevice';
-import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { components } from '@/types/openapi';
 import { formatDate } from '@/utils/date';
-import ClockIcon from '#/assets/clock.svg';
+import type { components } from '@/types/openapi';
+import type { ComponentProps } from 'react';
+import ClockIcon from '#/assets/svg/clock.svg';
 
 type ReadVariant = 'transparent' | 'badge';
 
@@ -41,13 +40,6 @@ const ArticleCard = ({
       readVariant={readVariant}
       isMobile={isMobile}
       to={to ?? `/articles/${articleId}`}
-      onClick={() => {
-        trackEvent({
-          category: 'Article',
-          action: 'Click Article Card',
-          label: `${newsletter?.name} - [${articleId}]${title}`,
-        });
-      }}
       {...props}
     >
       <InfoWrapper isMobile={isMobile}>

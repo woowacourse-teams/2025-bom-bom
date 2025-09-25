@@ -5,7 +5,7 @@ import { queries } from '@/apis/queries';
 import DetailPageHeader from '@/components/Header/DetailPageHeader';
 import ProgressBar from '@/components/ProgressBar/ProgressBar';
 import Spacing from '@/components/Spacing/Spacing';
-import { Device, useDevice } from '@/hooks/useDevice';
+import { useDevice } from '@/hooks/useDevice';
 import useScrollProgress from '@/hooks/useScrollProgress';
 import useScrollRestoration from '@/hooks/useScrollRestoration';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
@@ -15,8 +15,17 @@ import FloatingActionButtons from '@/pages/detail/components/FloatingActionButto
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
 import useArticleAsReadMutation from '@/pages/detail/hooks/useArticleAsReadMutation';
 import { useArticleBookmark } from '@/pages/detail/hooks/useArticleBookmark';
+import type { Device } from '@/hooks/useDevice';
 
 export const Route = createFileRoute('/_bombom/articles/$articleId')({
+  head: () => ({
+    meta: [
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
+    ],
+  }),
   component: ArticleDetailPage,
 });
 
@@ -58,13 +67,6 @@ function ArticleDetailPage() {
       )}
 
       <Container>
-        {device === 'pc' && (
-          <ArticleActionButtons
-            bookmarked={isBookmarked}
-            onBookmarkClick={toggleBookmark}
-          />
-        )}
-
         <ArticleContent device={device}>
           <ArticleProgressBar
             rate={progressPercentage}
@@ -78,13 +80,12 @@ function ArticleDetailPage() {
             newsletterName={currentArticle.newsletter?.name ?? ''}
             arrivedDateTime={new Date(currentArticle.arrivedDateTime ?? '')}
             expectedReadTime={currentArticle.expectedReadTime ?? 1}
-            bookmarked={isBookmarked}
-            onBookmarkClick={toggleBookmark}
           />
           <Divider />
 
           <ArticleBody
             articleId={articleIdNumber}
+            newsletterName={currentArticle.newsletter.name}
             articleContent={currentArticle.contents}
           />
           <Spacing size={24} />
@@ -97,6 +98,13 @@ function ArticleDetailPage() {
 
           <TodayUnreadArticlesSection articleId={articleIdNumber} />
         </ArticleContent>
+
+        {device === 'pc' && (
+          <ArticleActionButtons
+            bookmarked={isBookmarked}
+            onBookmarkClick={toggleBookmark}
+          />
+        )}
       </Container>
     </>
   );

@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
-import { Device } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import logo from '#/assets/logo.png';
+import type { Device } from '@/hooks/useDevice';
+import logo from '#/assets/avif/logo.avif';
 
 interface HeaderLogoProps {
   device: Device;

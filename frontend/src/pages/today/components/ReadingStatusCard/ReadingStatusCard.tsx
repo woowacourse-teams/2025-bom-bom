@@ -8,13 +8,17 @@ import StreakCounter from '../StreakCounter/StreakCounter';
 import { queries } from '@/apis/queries';
 import ProgressBar from '@/components/ProgressBar/ProgressBar';
 import ProgressWithLabel from '@/components/ProgressWithLabel/ProgressWithLabel';
-import { Device, useDevice } from '@/hooks/useDevice';
+import { useDevice } from '@/hooks/useDevice';
 import useUpdateWeeklyGoalMutation from '@/pages/today/hooks/useUpdateWeeklyGoalMutation';
-import GoalIcon from '#/assets/goal.svg';
+import { theme } from '@/styles/theme';
+import type { Device } from '@/hooks/useDevice';
+import type { CSSObject, Theme } from '@emotion/react';
+import GoalIcon from '#/assets/svg/goal.svg';
+import StatusIcon from '#/assets/svg/reading-status.svg';
 
 function ReadingStatusCard() {
   const device = useDevice();
-  const { data, isLoading } = useQuery(queries.readingStatus());
+  const { data } = useQuery(queries.readingStatus());
   const [isEditing, setIsEditing] = useState(false);
   const [goalCount, setGoalCount] = useState<number | null>(null);
 
@@ -24,7 +28,6 @@ function ReadingStatusCard() {
     },
   });
 
-  if (isLoading) return <ReadingStatusCardSkeleton />;
   if (!data) return null;
 
   const { streakReadDay, today, weekly } = data;

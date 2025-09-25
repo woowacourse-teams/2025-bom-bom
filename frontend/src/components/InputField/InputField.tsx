@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { ChangeEvent, ComponentProps, ReactNode } from 'react';
+import type { ChangeEvent, ComponentProps, ReactNode } from 'react';
 
 interface InputFieldProps extends ComponentProps<'input'> {
   name?: string;

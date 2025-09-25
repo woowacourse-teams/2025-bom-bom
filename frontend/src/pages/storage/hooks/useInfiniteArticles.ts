@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { GetArticlesParams } from '@/apis/articles';
 import { queries } from '@/apis/queries';
+import type { GetArticlesParams } from '@/apis/articles';
 
 interface UseInfiniteArticlesParams {
   baseQueryParams: GetArticlesParams;

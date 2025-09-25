@@ -3,11 +3,12 @@ import ArticleCard from '../ArticleCard/ArticleCard';
 import ArticleCardSkeleton from '../ArticleCard/ArticleCardSkeleton';
 import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
 import { useDevice } from '@/hooks/useDevice';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { ARTICLE_SIZE } from '@/pages/storage/constants/article';
 import { theme } from '@/styles/theme';
-import { Article } from '@/types/articles';
-import CheckIcon from '#/assets/check.svg';
-import LetterIcon from '#/assets/letter.svg';
+import type { Article } from '@/types/articles';
+import CheckIcon from '#/assets/svg/check.svg';
+import LetterIcon from '#/assets/svg/letter.svg';
 
 type ExtendedArticle = Article & {
   type: 'guide' | 'article';
@@ -66,6 +67,16 @@ const ArticleCardList = ({ articles, isLoading }: ArticleCardListProps) => {
                         ? `/articles/guide/${article.articleId}`
                         : `/articles/${article.articleId}`
                     }
+                    onClick={() => {
+                      trackEvent({
+                        category: 'Article',
+                        action:
+                          article.type === 'guide'
+                            ? '가이드 메일 클릭'
+                            : '아티클 클릭',
+                        label: article.title ?? 'Unknown Article',
+                      });
+                    }}
                   />
                 </li>
               ))}
@@ -81,7 +92,24 @@ const ArticleCardList = ({ articles, isLoading }: ArticleCardListProps) => {
             <CardList isMobile={isMobile}>
               {grouped.read.map((article) => (
                 <li key={article.articleId}>
-                  <ArticleCard data={article} />
+                  <ArticleCard
+                    data={article}
+                    to={
+                      article.type === 'guide'
+                        ? `/articles/guide/${article.articleId}`
+                        : `/articles/${article.articleId}`
+                    }
+                    onClick={() => {
+                      trackEvent({
+                        category: 'Article',
+                        action:
+                          article.type === 'guide'
+                            ? '가이드 메일 클릭'
+                            : '아티클 클릭',
+                        label: article.title ?? 'Unknown Article',
+                      });
+                    }}
+                  />
                 </li>
               ))}
             </CardList>

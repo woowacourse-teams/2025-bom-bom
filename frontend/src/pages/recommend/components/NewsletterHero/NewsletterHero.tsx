@@ -1,13 +1,20 @@
 import styled from '@emotion/styled';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import SlideCardList from '../SlideCardList/SlideCardList';
 import { useDevice } from '@/hooks/useDevice';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import { skeletonStyle } from '@/styles/skeleton';
-import logo from '#/assets/logo.png';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
+import {
+  isIOS,
+  isWebView,
+  sendMessageToRN,
+} from '@/libs/webview/webview.utils';
+import logo from '#/assets/avif/logo.avif';
 
 const NewsletterHero = () => {
   const { userInfo, isLoading } = useUserInfo();
+  const navigate = useNavigate();
   const device = useDevice();
   const isPC = device === 'pc';
 
@@ -18,6 +25,14 @@ const NewsletterHero = () => {
       </Container>
     );
   }
+
+  const handleLoginClick = () => {
+    if (isWebView() && isIOS())
+      sendMessageToRN({
+        type: 'SHOW_LOGIN_SCREEN',
+      });
+    else navigate({ to: '/login' });
+  };
 
   return (
     <>
@@ -33,7 +48,18 @@ const NewsletterHero = () => {
             <HeroSubtitle isPC={isPC}>
               당신의 관심사에 맞는 최고의 뉴스레터를 추천해드립니다.
             </HeroSubtitle>
-            <CTAButton to="/login" isPC={isPC}>
+            <CTAButton
+              to="/login"
+              isPC={isPC}
+              onClick={() => {
+                handleLoginClick();
+                trackEvent({
+                  category: 'Navigation',
+                  action: '로그인 버튼 클릭',
+                  label: '추천 페이지 Hero',
+                });
+              }}
+            >
               로그인하고 맞춤 추천 받기
             </CTAButton>
           </HeroContent>

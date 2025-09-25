@@ -1,5 +1,5 @@
 import { fetcher } from './fetcher';
-import { components } from '@/types/openapi';
+import type { components } from '@/types/openapi';
 
 export type GetPetResponse = components['schemas']['PetResponse'];
 

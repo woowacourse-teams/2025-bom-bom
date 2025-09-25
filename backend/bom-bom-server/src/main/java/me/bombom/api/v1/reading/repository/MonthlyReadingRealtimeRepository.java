@@ -12,5 +12,5 @@ public interface MonthlyReadingRealtimeRepository extends JpaRepository<MonthlyR
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE MonthlyReadingRealtime mrr SET mrr.currentCount = 0")
-    void resetCurrentCount();
+    void resetAllCurrentCount();
 }

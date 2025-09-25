@@ -19,7 +19,7 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 			m.nickname AS nickname,
 			mr.rank_order AS `rank`,
 			mr.current_count AS monthlyReadCount
-		FROM monthly_reading mr
+		FROM monthly_reading_snapshot mr
 		JOIN member m ON mr.member_id = m.id
 		WHERE mr.rank_order IS NOT NULL
 		ORDER BY mr.rank_order ASC, m.nickname ASC
@@ -62,6 +62,10 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 	MemberMonthlyReadingRankResponse findMemberRankAndGap(@Param("memberId") Long memberId);
 
 	MonthlyReadingSnapshot findTopByOrderByRankOrderDesc();
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE MonthlyReadingSnapshot mrs SET mrs.currentCount = 0")
+    void resetAllCurrentCount();
 
 	void deleteByMemberId(Long memberId);
 }

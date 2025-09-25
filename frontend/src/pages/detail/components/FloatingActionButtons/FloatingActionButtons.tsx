@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
+import ChevronIcon from '@/components/icons/ChevronIcon';
 import { theme } from '@/styles/theme';
 import BookmarkActiveIcon from '#/assets/svg/bookmark-active.svg';
 import BookmarkInactiveIcon from '#/assets/svg/bookmark-inactive.svg';
-import ArrowIcon from '#/assets/svg/chevron-up.svg';
 
 interface FloatingActionButtonsProps {
   bookmarked: boolean | null;
@@ -38,8 +38,13 @@ const FloatingActionButtons = ({
         )}
       </ActionButton>
 
-      <ActionButton type="button">
-        <ScrollUpIcon onClick={handleScrollUp} />
+      <ActionButton type="button" onClick={handleScrollUp}>
+        <ChevronIcon
+          direction="up"
+          width={28}
+          height={28}
+          color={theme.colors.icons}
+        />
       </ActionButton>
     </Container>
   );
@@ -82,11 +87,4 @@ const ActionButton = styled.button`
   &:hover > svg {
     transform: scale(1.1);
   }
-`;
-
-const ScrollUpIcon = styled(ArrowIcon)`
-  width: 28px;
-  height: 28px;
-
-  color: ${({ theme }) => theme.colors.icons};
 `;

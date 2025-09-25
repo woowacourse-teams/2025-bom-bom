@@ -45,7 +45,6 @@ const reset = css`
     border: 0;
 
     font: inherit;
-    vertical-align: baseline;
   }
 
   body {

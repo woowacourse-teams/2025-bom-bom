@@ -1,3 +1,5 @@
+import { GOOGLE_ANALYTICS_ID } from './constants';
+
 declare global {
   interface Window {
     dataLayer: unknown[];
@@ -6,18 +8,18 @@ declare global {
 }
 
 export const initGA = (
-  measurementId: string,
+  googleAnalyticsId: string,
   gtagUrl: string = 'https://www.googletagmanager.com/gtag/js',
 ) => {
-  if (!measurementId) {
-    console.warn('[GA] Measurement ID missing');
+  if (!googleAnalyticsId) {
+    console.warn('[GA] Google Analytics ID missing');
     return;
   }
 
   // gtag.js 삽입
   const script = document.createElement('script');
   script.async = true;
-  script.src = `${gtagUrl}?id=${measurementId}`;
+  script.src = `${gtagUrl}?id=${googleAnalyticsId}`;
   document.head.appendChild(script);
 
   // gtag 초기화
@@ -28,7 +30,7 @@ export const initGA = (
   };
 
   window.gtag('js', new Date());
-  window.gtag('config', measurementId, {
-    send_page_view: false, // 수동으로 pageview 보내기 위해 false로 설정
+  window.gtag('config', GOOGLE_ANALYTICS_ID, {
+    send_page_view: false,
   });
 };

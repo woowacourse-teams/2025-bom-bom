@@ -12,6 +12,14 @@ import type { Device } from '@/hooks/useDevice';
 import BookmarkIcon from '#/assets/svg/bookmark-inactive.svg';
 
 export const Route = createFileRoute('/_bombom/bookmark')({
+  head: () => ({
+    meta: [
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
+    ],
+  }),
   component: BookmarkPage,
 });
 

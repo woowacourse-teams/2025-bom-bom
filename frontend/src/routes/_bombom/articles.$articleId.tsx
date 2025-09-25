@@ -18,6 +18,14 @@ import { useArticleBookmark } from '@/pages/detail/hooks/useArticleBookmark';
 import type { Device } from '@/hooks/useDevice';
 
 export const Route = createFileRoute('/_bombom/articles/$articleId')({
+  head: () => ({
+    meta: [
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
+    ],
+  }),
   component: ArticleDetailPage,
 });
 
@@ -77,6 +85,7 @@ function ArticleDetailPage() {
 
           <ArticleBody
             articleId={articleIdNumber}
+            newsletterName={currentArticle.newsletter.name}
             articleContent={currentArticle.contents}
           />
           <Spacing size={24} />

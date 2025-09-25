@@ -43,7 +43,7 @@ const TrendySection = () => {
 
     trackEvent({
       category: 'Newsletter',
-      action: 'Click Trendy Newsletter Card',
+      action: '뉴스레터 카드 클릭',
       label: newsletter.name ?? 'Unknown Newsletter',
     });
   };

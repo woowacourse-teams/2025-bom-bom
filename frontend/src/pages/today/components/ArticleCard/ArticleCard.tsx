@@ -3,7 +3,6 @@ import { Link } from '@tanstack/react-router';
 import Badge from '@/components/Badge/Badge';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { useDevice } from '@/hooks/useDevice';
-import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { formatDate } from '@/utils/date';
 import type { components } from '@/types/openapi';
 import type { ComponentProps } from 'react';
@@ -41,13 +40,6 @@ function ArticleCard({
       readVariant={readVariant}
       isMobile={isMobile}
       to={to ?? `/articles/${articleId}`}
-      onClick={() => {
-        trackEvent({
-          category: 'Article',
-          action: 'Click Article Card',
-          label: `${newsletter?.name} - [${articleId}]${title}`,
-        });
-      }}
       {...props}
     >
       <InfoWrapper isMobile={isMobile}>

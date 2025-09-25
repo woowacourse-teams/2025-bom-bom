@@ -21,7 +21,11 @@ export const Route = createFileRoute('/_bombom')({
     if (data) return;
 
     try {
-      await queryClient.fetchQuery(queries.me());
+      const user = await queryClient.fetchQuery(queries.me());
+
+      if (user) {
+        window.gtag?.('set', { user_id: user.id });
+      }
     } catch {
       if (isFirstVisit) return redirect({ to: '/recommend' });
 

@@ -6,6 +6,14 @@ import { getResponsiveValue } from '@/utils/responsive';
 import type { Device } from '@/hooks/useDevice';
 
 export const Route = createFileRoute('/signup')({
+  head: () => ({
+    meta: [
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
+    ],
+  }),
   component: RouteComponent,
 });
 

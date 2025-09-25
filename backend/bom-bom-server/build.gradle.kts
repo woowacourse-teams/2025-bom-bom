@@ -76,6 +76,9 @@ dependencies {
     //ShedLock
     implementation("net.javacrumbs.shedlock:shedlock-spring:6.9.2")
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.9.2")
+
+    //otel
+    implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.7.0")
 }
 
 // Querydsl 생성된 파일 정리

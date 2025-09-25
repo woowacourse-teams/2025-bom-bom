@@ -217,7 +217,7 @@ const SignupCard = () => {
             </LabelRow>
           }
           inputValue={emailPart}
-          onInputChange={(e) => setEmailPart(e.target.value)}
+          onInputChange={(e) => setEmailPart(e.target.value.toLowerCase())}
           onBlur={handleEmailBlur}
           errorString={emailError}
           placeholder="이메일을 입력해주세요"

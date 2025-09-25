@@ -6,9 +6,10 @@ import NewsletterDetail from '../NewsletterDetail/NewsletterDetail';
 import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
+import ImageInfoCardSkeleton from '@/components/ImageInfoCard/ImageInfoCardSkeleton';
 import Modal from '@/components/Modal/Modal';
 import useModal from '@/components/Modal/useModal';
-import { CATEGORIES, Category } from '@/constants/category';
+import { CATEGORIES, Category, NEWSLETTER_COUNT } from '@/constants/newsletter';
 import { Device, useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { Newsletter } from '@/types/newsletter';
@@ -19,7 +20,7 @@ const TrendySection = () => {
   const [selectedNewsletter, setSelectedNewsletter] =
     useState<Newsletter | null>(null);
 
-  const { data: newsletters } = useQuery(queries.newsletters());
+  const { data: newsletters, isLoading } = useQuery(queries.newsletters());
   const {
     modalRef: detailModalRef,
     openModal: openDetailModal,
@@ -28,9 +29,7 @@ const TrendySection = () => {
   } = useModal();
   const device = useDevice();
 
-  if (!newsletters) return null;
-
-  const filteredNewsletters = newsletters.filter(
+  const filteredNewsletters = newsletters?.filter(
     (newsletter) =>
       selectedCategory === '전체' || newsletter.category === selectedCategory,
   );
@@ -66,16 +65,24 @@ const TrendySection = () => {
           ))}
         </TagContainer>
         <TrendyGrid device={device}>
-          {filteredNewsletters.map((newsletter) => (
-            <NewsletterCard
-              key={newsletter.newsletterId}
-              imageUrl={newsletter.imageUrl ?? ''}
-              title={newsletter.name}
-              description={newsletter.description}
-              onClick={() => handleCardClick(newsletter)}
-              as="button"
-            />
-          ))}
+          {isLoading ? (
+            Array.from({ length: NEWSLETTER_COUNT }).map((_, index) => (
+              <SkeletonCard key={index} />
+            ))
+          ) : filteredNewsletters?.length === 0 ? (
+            <p>해당 카테고리에 뉴스레터가 없습니다.</p>
+          ) : (
+            filteredNewsletters?.map((newsletter) => (
+              <NewsletterCard
+                key={newsletter.newsletterId}
+                imageUrl={newsletter.imageUrl ?? ''}
+                title={newsletter.name}
+                description={newsletter.description}
+                onClick={() => handleCardClick(newsletter)}
+                as="button"
+              />
+            ))
+          )}
         </TrendyGrid>
       </Container>
       {createPortal(
@@ -183,4 +190,8 @@ const NewsletterCard = styled(ImageInfoCard)`
   &:focus:not(:focus-visible) {
     outline: none;
   }
+`;
+
+const SkeletonCard = styled(ImageInfoCardSkeleton)`
+  padding: 8px;
 `;

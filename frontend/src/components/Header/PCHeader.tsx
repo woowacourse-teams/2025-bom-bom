@@ -23,13 +23,15 @@ const PCHeader = ({ activeNav }: PCHeaderProps) => {
           <HeaderNavButtons activeNav={activeNav} device="pc" />
         </NavWrapper>
 
-        {isLoading ? (
-          <TextSkeleton width="120px" height="40px" />
-        ) : userInfo ? (
-          <HeaderProfile userInfo={userInfo} device="pc" />
-        ) : (
-          <LoginButton />
-        )}
+        <UserInfoWrapper>
+          {isLoading ? (
+            <TextSkeleton width="120px" height="40px" />
+          ) : userInfo ? (
+            <HeaderProfile userInfo={userInfo} device="pc" />
+          ) : (
+            <LoginButton />
+          )}
+        </UserInfoWrapper>
       </HeaderInner>
     </HeaderContainer>
   );
@@ -73,4 +75,11 @@ const NavWrapper = styled.nav`
   align-items: center;
 
   background: ${({ theme }) => theme.colors.white};
+`;
+
+const UserInfoWrapper = styled.div`
+  width: 220px;
+
+  display: flex;
+  justify-content: flex-end;
 `;

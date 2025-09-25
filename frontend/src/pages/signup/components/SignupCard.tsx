@@ -67,7 +67,7 @@ const SignupCard = () => {
       sendMessageToRN({
         type: 'LOGIN_SUCCESS',
       });
-      navigate({ to: '/' });
+      navigate({ to: '/today' });
       trackEvent({
         category: 'Authentication',
         action: '회원가입 성공',

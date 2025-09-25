@@ -10,11 +10,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import me.bombom.api.v1.common.BaseEntity;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MonthlyReadingRealtime {
+public class MonthlyReadingRealtime extends BaseEntity {
 
     private static final int INITIAL_CURRENT_COUNT = 0;
 

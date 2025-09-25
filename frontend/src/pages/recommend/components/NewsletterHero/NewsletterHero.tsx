@@ -3,13 +3,13 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import SlideCardList from '../SlideCardList/SlideCardList';
 import { useDevice } from '@/hooks/useDevice';
 import { useUserInfo } from '@/hooks/useUserInfo';
-import { skeletonStyle } from '@/styles/skeleton';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import {
   isIOS,
   isWebView,
   sendMessageToRN,
 } from '@/libs/webview/webview.utils';
+import { skeletonStyle } from '@/styles/skeleton';
 import logo from '#/assets/avif/logo.avif';
 
 const NewsletterHero = () => {

@@ -209,6 +209,15 @@ public class ReadingService {
         monthlyReadingSnapshotRepository.updateMonthlyRanking();
     }
 
+    public MemberMonthlyReadingCountResponse getMemberMonthlyReadingCount(Member member) {
+        MonthlyReadingRealtime monthlyReadingRealtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReadingRealtime")
+                        .addContext(ErrorContextKeys.OPERATION, "getMemberMonthlyReadingCount"));
+        return MemberMonthlyReadingCountResponse.from(monthlyReadingRealtime.getCurrentCount());
+    }
+
     private LowestRankWithDifference computeLowestRankWithDifference() {
         MonthlyReadingSnapshot lowestRankMonthlyReadingSnapshot = monthlyReadingSnapshotRepository.findTopByOrderByRankOrderDesc();
         if (lowestRankMonthlyReadingSnapshot.getCurrentCount() == 0) {
@@ -282,14 +291,5 @@ public class ReadingService {
 
     private boolean canIncreaseContinueReadingCount(TodayReading todayReading) {
         return todayReading.getCurrentCount() == 0;
-    }
-
-    public MemberMonthlyReadingCountResponse getMemberMonthlyReadingCount(Member member) {
-        MonthlyReadingRealtime monthlyReadingRealtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReadingRealtime")
-                        .addContext(ErrorContextKeys.OPERATION, "getMemberMonthlyReadingCount"));
-        return MemberMonthlyReadingCountResponse.from(monthlyReadingRealtime.getCurrentCount());
     }
 }

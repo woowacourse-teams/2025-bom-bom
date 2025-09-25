@@ -8,10 +8,12 @@ import Chip from '@/components/Chip/Chip';
 import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import Modal from '@/components/Modal/Modal';
 import useModal from '@/components/Modal/useModal';
-import { CATEGORIES, Category } from '@/constants/category';
-import { Device, useDevice } from '@/hooks/useDevice';
+import { CATEGORIES } from '@/constants/category';
+import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { Newsletter } from '@/types/newsletter';
+import type { Category } from '@/constants/category';
+import type { Device } from '@/hooks/useDevice';
+import type { Newsletter } from '@/types/newsletter';
 import TrendingUpIcon from '#/assets/svg/trending-up.svg';
 
 const TrendySection = () => {
@@ -41,7 +43,7 @@ const TrendySection = () => {
 
     trackEvent({
       category: 'Newsletter',
-      action: 'Click Trendy Newsletter Card',
+      action: '뉴스레터 카드 클릭',
       label: newsletter.name ?? 'Unknown Newsletter',
     });
   };

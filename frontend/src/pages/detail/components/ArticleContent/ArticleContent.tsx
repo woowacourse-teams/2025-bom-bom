@@ -1,21 +1,29 @@
 import styled from '@emotion/styled';
-import { memo, RefObject } from 'react';
-import { processContent } from './ArticleContent.utils';
+import { memo } from 'react';
+import { extractBodyContent, processContent } from './ArticleContent.utils';
 import { useHighlightHoverEffect } from '../../hooks/useHighlightHoverEffect';
+import type { RefObject } from 'react';
 
 interface ArticleContentProps {
   ref: RefObject<HTMLDivElement | null>;
+  newsletterName: string;
   content?: string;
 }
 
-const ArticleContent = ({ ref, content }: ArticleContentProps) => {
+const ArticleContent = ({
+  ref,
+  newsletterName,
+  content,
+}: ArticleContentProps) => {
+  const bodyContent = extractBodyContent(content ?? '');
+
   useHighlightHoverEffect();
 
   return (
     <Container
       ref={ref}
       dangerouslySetInnerHTML={{
-        __html: processContent(content ?? ''),
+        __html: processContent(newsletterName, bodyContent),
       }}
     />
   );
@@ -30,10 +38,21 @@ const Container = styled.div`
   flex-direction: column;
   align-items: flex-start;
 
-  white-space: normal;
+  white-space: pre-line;
 
   word-break: break-all;
   word-wrap: break-word;
+
+  a {
+    color: ${({ theme }) => theme.colors.info};
+
+    cursor: pointer;
+    text-decoration: underline;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
 
   mark[data-highlight-id] {
     background-color: #ffeb3b;

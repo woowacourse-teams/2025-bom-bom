@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
-import { PropsWithChildren, Children } from 'react';
+import { Children } from 'react';
 import { DEFAULT_SPEED } from './Carousel.constants';
 import useCarousel from './useCarousel';
+import type { PropsWithChildren } from 'react';
 import arrowNext from '#/assets/avif/carousel-arrow-next.avif';
 import arrowPrev from '#/assets/avif/carousel-arrow-prev.avif';
 

@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { ComponentProps } from 'react';
 import type { Theme } from '@emotion/react';
+import type { ComponentProps } from 'react';
 
 type Variant = 'default' | 'outlinePrimary';
 

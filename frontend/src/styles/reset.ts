@@ -45,14 +45,22 @@ const reset = css`
     border: 0;
 
     font: inherit;
-    vertical-align: baseline;
   }
 
   body {
     font-family:
-      -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
-      'Pretendard Variable', Pretendard, Roboto, 'Noto Sans KR', 'Segoe UI',
-      'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+      'Pretendard Variable',
+      Pretendard,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Apple SD Gothic Neo',
+      Roboto,
+      'Noto Sans KR',
+      'Segoe UI',
+      'Malgun Gothic',
+      'Apple Color Emoji',
+      'Segoe UI Emoji',
+      'Segoe UI Symbol',
       sans-serif;
     line-height: 1;
   }

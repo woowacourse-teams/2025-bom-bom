@@ -3,13 +3,21 @@ import { createFileRoute } from '@tanstack/react-router';
 import Spacing from '@/components/Spacing/Spacing';
 import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
-import { GuideMail } from '@/mocks/datas/guideMail';
 import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
 import useGuideAsReadMutation from '@/pages/detail/hooks/useGuideAsReadMutation';
+import type { GuideMail } from '@/mocks/datas/guideMail';
 
 export const Route = createFileRoute('/_bombom/articles/guide/$guideId')({
+  head: () => ({
+    meta: [
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
+    ],
+  }),
   component: GuideMailPage,
 });
 
@@ -58,6 +66,7 @@ function GuideMailPage() {
 
       <ArticleBody
         articleId={guideIdNumber}
+        newsletterName={guideArticle.newsletter.name}
         articleContent={guideArticle.contents}
       />
       <Spacing size={24} />

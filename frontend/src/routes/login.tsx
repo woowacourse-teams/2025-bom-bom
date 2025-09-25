@@ -1,8 +1,9 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import LoginCard from '../pages/login/components/LoginCard';
-import { useDevice, Device } from '@/hooks/useDevice';
+import { useDevice } from '@/hooks/useDevice';
 import { getResponsiveValue } from '@/utils/responsive';
+import type { Device } from '@/hooks/useDevice';
 
 export const Route = createFileRoute('/login')({
   component: Login,

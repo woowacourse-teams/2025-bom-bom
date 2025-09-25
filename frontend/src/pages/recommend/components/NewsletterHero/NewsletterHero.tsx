@@ -1,11 +1,26 @@
 import styled from '@emotion/styled';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import SlideCardList from '../SlideCardList/SlideCardList';
 import { useUserInfo } from '@/hooks/useUserInfo';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
+import {
+  isIOS,
+  isRunningInWebView,
+  sendMessageToRN,
+} from '@/libs/webview/webview.utils';
 import logo from '#/assets/avif/logo.avif';
 
 export default function NewsletterHero() {
   const { userInfo } = useUserInfo();
+  const navigate = useNavigate();
+
+  const handleLoginClick = () => {
+    if (isRunningInWebView() && isIOS())
+      sendMessageToRN({
+        type: 'SHOW_LOGIN_SCREEN',
+      });
+    else navigate({ to: '/login' });
+  };
 
   return (
     <>
@@ -21,7 +36,19 @@ export default function NewsletterHero() {
             <HeroSubtitle>
               당신의 관심사에 맞는 최고의 뉴스레터를 추천해드립니다.
             </HeroSubtitle>
-            <CTAButton to="/login">로그인하고 맞춤 추천 받기</CTAButton>
+            <CTAButton
+              to="/login"
+              onClick={() => {
+                handleLoginClick();
+                trackEvent({
+                  category: 'Navigation',
+                  action: '로그인 버튼 클릭',
+                  label: '추천 페이지 Hero',
+                });
+              }}
+            >
+              로그인하고 맞춤 추천 받기
+            </CTAButton>
           </HeroContent>
         </Container>
       )}

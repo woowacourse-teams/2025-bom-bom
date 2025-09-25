@@ -1,3 +1,4 @@
+import { GOOGLE_ANALYTICS_ID } from './constants';
 import { logger } from '@/utils/logger';
 
 declare global {
@@ -8,10 +9,10 @@ declare global {
 }
 
 export const initGA = (
-  measurementId: string,
+  googleAnalyticsId: string,
   gtagUrl: string = 'https://www.googletagmanager.com/gtag/js',
 ) => {
-  if (!measurementId) {
+  if (!googleAnalyticsId) {
     logger.warn('[GA] Measurement ID missing');
     return;
   }
@@ -19,7 +20,7 @@ export const initGA = (
   // gtag.js 삽입
   const script = document.createElement('script');
   script.async = true;
-  script.src = `${gtagUrl}?id=${measurementId}`;
+  script.src = `${gtagUrl}?id=${googleAnalyticsId}`;
   document.head.appendChild(script);
 
   // gtag 초기화
@@ -30,7 +31,7 @@ export const initGA = (
   };
 
   window.gtag('js', new Date());
-  window.gtag('config', measurementId, {
-    send_page_view: false, // 수동으로 pageview 보내기 위해 false로 설정
+  window.gtag('config', GOOGLE_ANALYTICS_ID, {
+    send_page_view: false,
   });
 };

@@ -35,6 +35,14 @@ module.exports = {
         },
       },
     ],
+    '@typescript-eslint/consistent-type-imports': [
+      'error',
+      {
+        prefer: 'type-imports',
+        disallowTypeAnnotations: false,
+        fixStyle: 'separate-type-imports',
+      },
+    ],
   },
   plugins: ['jsx-a11y', 'import', 'react-hooks', 'react', 'jest', 'prettier'],
   parser: '@typescript-eslint/parser',

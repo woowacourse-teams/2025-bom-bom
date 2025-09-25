@@ -6,8 +6,8 @@ import { toast } from '../Toast/utils/toastActions';
 import { postLogout, postWithdraw } from '@/apis/auth';
 import { useDevice } from '@/hooks/useDevice';
 import { showMessenger } from '@/libs/channelTalk/channelTalk.utils';
-import { UserInfo } from '@/types/me';
 import { copyToClipboard } from '@/utils/copy';
+import type { UserInfo } from '@/types/me';
 import ChatIcon from '#/assets/svg/chat.svg';
 import CopyIcon from '#/assets/svg/copy.svg';
 import LogoutIcon from '#/assets/svg/logout.svg';
@@ -93,7 +93,7 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
 
       <Divider />
 
-      {deviceType !== 'pc' && (
+      {!deviceType && (
         <ChannelTalkButton type="button" onClick={showMessenger}>
           <ChatIcon width={16} height={16} />
           문의하기

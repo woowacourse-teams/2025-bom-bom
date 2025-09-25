@@ -6,5 +6,13 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "plugins/withCustomAndroidConfig.js",
+    "app.config.js",
+    "plugins/withNetworkSecurityConfigFile.js"
+  ]
 }

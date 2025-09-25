@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { ComponentProps } from 'react';
 import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
+import type { ComponentProps } from 'react';
 
 interface ImageInfoCardProps extends ComponentProps<'div'> {
   imageUrl: string;

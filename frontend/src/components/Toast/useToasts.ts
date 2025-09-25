@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
-import { Store } from './utils/createStore';
 import { toastStore } from './utils/toastStore';
+import type { Store } from './utils/createStore';
 
 export const useToasts = (limit: number, store: Store = toastStore) => {
   const state = useSyncExternalStore(

@@ -18,6 +18,7 @@ import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
+import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingCountResponse;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
@@ -266,5 +267,14 @@ public class ReadingService {
 
     private boolean canIncreaseContinueReadingCount(TodayReading todayReading) {
         return todayReading.getCurrentCount() == 0;
+    }
+
+    public MemberMonthlyReadingCountResponse getMemberMonthlyReadingCount(Member member) {
+        MonthlyReadingRealtime monthlyReadingRealtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReading")
+                        .addContext(ErrorContextKeys.OPERATION, "updateMonthlyReadingCount"));
+        return MemberMonthlyReadingCountResponse.from(monthlyReadingRealtime.getCurrentCount());
     }
 }

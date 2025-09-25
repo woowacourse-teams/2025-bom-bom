@@ -9,13 +9,13 @@ export const isAndroid = (): boolean => !!window.ReactNativeWebView;
 export const isIOS = (): boolean =>
   !!(window as WindowWithWebkit).webkit?.messageHandlers?.ReactNativeWebView;
 
-export const isRunningInWebView = (): boolean => {
+export const isWebView = (): boolean => {
   return !!(isAndroid() || isIOS());
 };
 
 export const sendMessageToRN = (message: WebToRNMessage): void => {
-  if (!isRunningInWebView()) {
-    logger.warn('WebView 환경이 아닙니다. 메시지가 전송되지 않습니다.');
+  if (!isWebView()) {
+    console.warn('WebView 환경이 아닙니다. 메시지가 전송되지 않습니다.');
     return;
   }
 

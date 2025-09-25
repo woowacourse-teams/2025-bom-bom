@@ -1,6 +1,10 @@
 import { ThemeProvider } from '@emotion/react';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
+import {
+  createRootRouteWithContext,
+  HeadContent,
+  Outlet,
+} from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { theme } from '../styles/theme';
 import PageTitle from '@/components/PageTitle/PageTitle';
@@ -29,7 +33,12 @@ const RootComponent = () => {
 };
 
 export const Route = createRootRouteWithContext<BomBomRouterContext>()({
-  component: RootComponent,
+  component: () => (
+    <>
+      <HeadContent />
+      <RootComponent />
+    </>
+  ),
   beforeLoad: async (): Promise<void | ReturnType<typeof redirect>> => {
     return;
   },

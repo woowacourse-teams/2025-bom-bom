@@ -6,6 +6,13 @@ import NewsletterHero from '@/pages/recommend/components/NewsletterHero/Newslett
 import TrendySection from '@/pages/recommend/components/TrendySection/TrendySection';
 
 export const Route = createFileRoute('/_bombom/recommend')({
+  head: () => ({
+    meta: [
+      {
+        title: '뉴스레터 추천',
+      },
+    ],
+  }),
   component: Recommend,
 });
 

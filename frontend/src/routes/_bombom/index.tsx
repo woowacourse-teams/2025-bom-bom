@@ -22,6 +22,9 @@ export const Route = createFileRoute('/_bombom/')({
         name: 'robots',
         content: 'noindex, nofollow',
       },
+      {
+        title: '오늘의 뉴스레터',
+      },
     ],
   }),
   component: Index,

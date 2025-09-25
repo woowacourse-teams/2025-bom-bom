@@ -6,6 +6,7 @@ import ArticleCardList from '../../pages/today/components/ArticleCardList/Articl
 import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/ReadingStatusCard';
 import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
+import RequireLogin from '@/hocs/RequireLogin';
 import { useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
 import { isToday } from '@/utils/date';
@@ -24,7 +25,11 @@ export const Route = createFileRoute('/_bombom/')({
       },
     ],
   }),
-  component: Index,
+  component: () => (
+    <RequireLogin>
+      <Index />
+    </RequireLogin>
+  ),
 });
 
 function Index() {

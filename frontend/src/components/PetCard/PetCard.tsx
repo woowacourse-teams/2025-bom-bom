@@ -103,6 +103,14 @@ const Level = styled.p`
   font: ${({ theme }) => theme.fonts.body2};
 `;
 
+const PetImageContainer = styled.div`
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 const PetImage = styled.img<{ isAnimating: boolean }>`
   animation: ${({ isAnimating }) => (isAnimating ? jumpAnimation : 'none')} 0.6s
     ease-in-out;
@@ -149,12 +157,4 @@ const AttendanceButton = styled(Button)<{ device: Device }>`
       width: '50%',
       transform: 'translateX(-50%)',
     }}
-`;
-
-const PetImageContainer = styled.div`
-  position: relative;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
 `;

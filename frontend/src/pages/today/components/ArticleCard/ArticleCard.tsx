@@ -111,6 +111,15 @@ const Container = styled(Link, {
   `};
 `;
 
+const InfoWrapper = styled.div<{ isMobile: boolean }>`
+  width: 100%;
+
+  display: flex;
+  gap: ${({ isMobile }) => (isMobile ? '8px' : '12px')};
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
 const Title = styled.h2<{ isMobile: boolean }>`
   overflow: hidden;
   min-height: fit-content;
@@ -137,6 +146,13 @@ const Description = styled.p<{ isMobile: boolean }>`
   -webkit-line-clamp: 2;
 `;
 
+const MetaInfoRow = styled.div<{ isMobile: boolean }>`
+  display: flex;
+  gap: ${({ isMobile }) => (isMobile ? '6px' : '8px')};
+  flex-wrap: ${({ isMobile }) => (isMobile ? 'wrap' : 'nowrap')};
+  align-items: center;
+`;
+
 const MetaInfoText = styled.span`
   color: ${({ theme }) => theme.colors.textTertiary};
   font: ${({ theme }) => theme.fonts.caption};
@@ -146,6 +162,11 @@ const ReadTimeBox = styled.div`
   display: flex;
   gap: 4px;
   align-items: center;
+`;
+
+const ThumbnailWrapper = styled.div<{ isMobile: boolean }>`
+  position: relative;
+  flex-shrink: 0;
 `;
 
 const Thumbnail = styled(ImageWithFallback, {
@@ -166,25 +187,4 @@ const ReadingBadge = styled(Badge)<{ isMobile: boolean }>`
   top: 4px;
   right: 4px;
   padding: ${({ isMobile }) => (isMobile ? '2px 4px' : '4px 8px')};
-`;
-
-export const InfoWrapper = styled.div<{ isMobile: boolean }>`
-  width: 100%;
-
-  display: flex;
-  gap: ${({ isMobile }) => (isMobile ? '8px' : '12px')};
-  flex-direction: column;
-  align-items: flex-start;
-`;
-
-export const MetaInfoRow = styled.div<{ isMobile: boolean }>`
-  display: flex;
-  gap: ${({ isMobile }) => (isMobile ? '6px' : '8px')};
-  flex-wrap: ${({ isMobile }) => (isMobile ? 'wrap' : 'nowrap')};
-  align-items: center;
-`;
-
-export const ThumbnailWrapper = styled.div<{ isMobile: boolean }>`
-  position: relative;
-  flex-shrink: 0;
 `;

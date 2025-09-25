@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { buildSubscribeUrl } from './NewsletterDetail.utils';
+import { buildSubscribeUrl, isMaily, isStibee } from './NewsletterDetail.utils';
 import { queries } from '@/apis/queries';
 import Badge from '@/components/Badge/Badge';
 import Button from '@/components/Button/Button';
@@ -36,7 +36,13 @@ const NewsletterDetail = ({
     if (!isLoggedIn || !userInfo) return;
 
     copyToClipboard(userInfo.email);
-    alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
+
+    if (
+      !isStibee(newsletterDetail.subscribeUrl) ||
+      !isMaily(newsletterDetail.subscribeUrl)
+    ) {
+      alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
+    }
 
     const subscribeUrl = buildSubscribeUrl(
       newsletterDetail.subscribeUrl,

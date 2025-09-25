@@ -1,4 +1,12 @@
-import { MAILY_URL, STIBEE_URL } from './NewsletterDetail.constant';
+import { MAILY_DOMAIN, STIBEE_DOMAIN } from './NewsletterDetail.constant';
+
+export const isStibee = (baseUrl: string) => {
+  return baseUrl.includes(STIBEE_DOMAIN);
+};
+
+export const isMaily = (baseUrl: string) => {
+  return baseUrl.includes(MAILY_DOMAIN);
+};
 
 export const buildSubscribeUrl = (
   baseUrl: string,
@@ -6,10 +14,10 @@ export const buildSubscribeUrl = (
 ) => {
   const url = new URL(baseUrl);
 
-  if (baseUrl.includes(STIBEE_URL)) {
+  if (isStibee(baseUrl)) {
     url.searchParams.set('email', userInfo.email);
     url.searchParams.set('name', userInfo.nickname);
-  } else if (baseUrl.includes(MAILY_URL)) {
+  } else if (isMaily(baseUrl)) {
     url.searchParams.set('email', userInfo.email);
     url.searchParams.set('nickname', userInfo.nickname);
     url.searchParams.set('pop', 'up');

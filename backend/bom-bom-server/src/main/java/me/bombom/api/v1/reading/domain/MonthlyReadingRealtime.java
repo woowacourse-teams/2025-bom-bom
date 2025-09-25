@@ -15,11 +15,9 @@ import me.bombom.api.v1.common.BaseEntity;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MonthlyReading extends BaseEntity {
+public class MonthlyReadingRealtime extends BaseEntity {
 
     private static final int INITIAL_CURRENT_COUNT = 0;
-    private static final int RESET_CURRENT_COUNT = 0;
-    private static final int INCREASE_CURRENT_COUNT = 1;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,41 +29,25 @@ public class MonthlyReading extends BaseEntity {
     @Column(nullable = false, columnDefinition = "SMALLINT")
     private int currentCount;
 
-    @Column(nullable = false)
-    private long rankOrder;
-
-    @Column(nullable = false, columnDefinition = "SMALLINT")
-    private long nextRankDifference;
-
     @Builder
-    public MonthlyReading(
+    public MonthlyReadingRealtime(
             Long id,
             @NonNull Long memberId,
-            int currentCount,
-            long rankOrder,
-            long nextRankDifference
+            int currentCount
     ) {
         this.id = id;
         this.memberId = memberId;
         this.currentCount = currentCount;
-        this.rankOrder = rankOrder;
-        this.nextRankDifference = nextRankDifference;
     }
 
-    public static MonthlyReading create(Long memberId, long lowestRank, long lowestDifference) {
-        return MonthlyReading.builder()
+    public static MonthlyReadingRealtime create(Long memberId) {
+        return MonthlyReadingRealtime.builder()
                 .memberId(memberId)
                 .currentCount(INITIAL_CURRENT_COUNT)
-                .rankOrder(lowestRank)
-                .nextRankDifference(lowestDifference)
                 .build();
     }
 
-    public void resetCurrentCount() {
-        this.currentCount = RESET_CURRENT_COUNT;
-    }
-
     public void increaseCurrentCount() {
-        this.currentCount += INCREASE_CURRENT_COUNT;
+        this.currentCount++;
     }
 }

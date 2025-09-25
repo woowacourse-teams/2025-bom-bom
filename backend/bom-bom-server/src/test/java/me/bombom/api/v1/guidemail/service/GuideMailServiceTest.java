@@ -12,11 +12,13 @@ import me.bombom.api.v1.pet.repository.PetRepository;
 import me.bombom.api.v1.pet.repository.StageRepository;
 import me.bombom.api.v1.pet.service.PetService;
 import me.bombom.api.v1.reading.domain.ContinueReading;
-import me.bombom.api.v1.reading.domain.MonthlyReading;
+import me.bombom.api.v1.reading.domain.MonthlyReadingRealtime;
+import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
-import me.bombom.api.v1.reading.repository.MonthlyReadingRepository;
+import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
+import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.reading.service.ReadingService;
@@ -54,14 +56,17 @@ class GuideMailServiceTest {
     private ContinueReadingRepository continueReadingRepository;
 
     @Autowired
-    private MonthlyReadingRepository monthlyReadingRepository;
+    private MonthlyReadingSnapshotRepository monthlyReadingSnapshotRepository;
+
+    @Autowired
+    private MonthlyReadingRealtimeRepository monthlyReadingRealtimeRepository;
 
     private Member member;
     private Pet pet;
     private TodayReading todayReading;
     private WeeklyReading weeklyReading;
     private ContinueReading continueReading;
-    private MonthlyReading monthlyReading;
+    private MonthlyReadingSnapshot monthlyReadingSnapshot;
 
     @BeforeEach
     void setUp() {
@@ -71,7 +76,11 @@ class GuideMailServiceTest {
         todayReading = todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));
         weeklyReading = weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member));
         continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
-        monthlyReading = monthlyReadingRepository.save(TestFixture.monthlyReadingFixture(member));
+        monthlyReadingSnapshot = monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingFixture(member));
+        monthlyReadingRealtimeRepository.save(MonthlyReadingRealtime.builder()
+                .memberId(member.getId())
+                .currentCount(0)
+                .build());
     }
 
     @Test

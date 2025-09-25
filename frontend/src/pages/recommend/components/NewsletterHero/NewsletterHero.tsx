@@ -8,7 +8,7 @@ import {
   isWebView,
   sendMessageToRN,
 } from '@/libs/webview/webview.utils';
-import logo from '#/assets/png/logo.png';
+import logo from '#/assets/avif/logo.avif';
 
 export default function NewsletterHero() {
   const { userInfo } = useUserInfo();

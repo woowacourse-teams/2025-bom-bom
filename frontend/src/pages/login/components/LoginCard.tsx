@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { ENV } from '@/apis/env';
 import { useDevice } from '@/hooks/useDevice';
-import { isAndroid, isRunningInWebView } from '@/libs/webview/webview.utils';
+import { isIOS } from '@/libs/webview/webview.utils';
 import { theme } from '@/styles/theme';
 import { isLocal } from '@/utils/environment';
 import AppleIcon from '#/assets/svg/apple.svg';
@@ -40,7 +40,7 @@ const LoginCard = () => {
         <GoogleIcon width={24} height={24} fill="black" />
         Google로 계속하기
       </LoginButton>
-      {!(isRunningInWebView() && isAndroid()) && (
+      {isIOS() && (
         <LoginButton
           onClick={() => {
             window.location.href = `${ENV.baseUrl}/auth/login/apple`;

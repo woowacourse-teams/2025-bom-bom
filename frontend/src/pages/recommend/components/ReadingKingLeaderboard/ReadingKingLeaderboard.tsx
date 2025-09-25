@@ -1,16 +1,12 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import LeaderboardItem from './LeaderboardItem';
+import { RANKING } from './ReadingKingLeaderboard.constants';
 import { getLeaderboardData } from './ReadingKingLeaderboard.utils';
 import ReadingKingMyRank from './ReadingKingMyRank';
 import { queries } from '@/apis/queries';
 import Carousel from '@/components/Carousel/Carousel';
 import ArrowIcon from '@/components/icons/ArrowIcon';
-
-const RANKING = {
-  maxRank: 10,
-  boardUnit: 5,
-};
 
 const ReadingKingLeaderboard = () => {
   const { data: monthlyReadingRank, isLoading } = useQuery(

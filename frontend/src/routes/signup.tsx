@@ -13,7 +13,7 @@ export const Route = createFileRoute('/signup')({
         content: 'noindex, nofollow',
       },
       {
-        title: '회원가입',
+        title: '봄봄 | 회원가입',
       },
     ],
   }),

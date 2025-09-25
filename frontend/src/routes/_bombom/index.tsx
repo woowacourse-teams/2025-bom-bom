@@ -9,7 +9,7 @@ export const Route = createFileRoute('/_bombom/')({
   head: () => ({
     meta: [
       {
-        title: '뉴스레터 추천',
+        title: '봄봄 | 뉴스레터 추천',
       },
     ],
   }),

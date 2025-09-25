@@ -25,7 +25,7 @@ export const Route = createFileRoute('/_bombom/articles/$articleId')({
         content: 'noindex, nofollow',
       },
       {
-        title: '아티클 상세',
+        title: '봄봄 | 아티클 상세',
       },
     ],
   }),

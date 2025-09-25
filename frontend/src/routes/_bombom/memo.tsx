@@ -16,7 +16,7 @@ export const Route = createFileRoute('/_bombom/memo')({
         content: 'noindex, nofollow',
       },
       {
-        title: '메모 보관함',
+        title: '봄봄 | 메모 보관함',
       },
     ],
   }),

@@ -23,7 +23,7 @@ export const Route = createFileRoute('/_bombom/today')({
         content: 'noindex, nofollow',
       },
       {
-        title: '오늘의 뉴스레터',
+        title: '봄봄 | 오늘의 뉴스레터',
       },
     ],
   }),

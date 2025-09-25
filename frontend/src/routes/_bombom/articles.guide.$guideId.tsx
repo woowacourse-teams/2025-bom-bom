@@ -17,7 +17,7 @@ export const Route = createFileRoute('/_bombom/articles/guide/$guideId')({
         content: 'noindex, nofollow',
       },
       {
-        title: '가이드 메일 상세',
+        title: '봄봄 | 가이드 메일 상세',
       },
     ],
   }),

@@ -10,7 +10,7 @@ export const Route = createFileRoute('/login')({
   head: () => ({
     meta: [
       {
-        title: '로그인',
+        title: '봄봄 | 로그인',
       },
     ],
   }),

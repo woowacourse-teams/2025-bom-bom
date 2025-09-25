@@ -17,7 +17,7 @@ export const Route = createFileRoute('/_bombom/storage')({
         content: 'noindex, nofollow',
       },
       {
-        title: '뉴스레터 보관함',
+        title: '봄봄 | 뉴스레터 보관함',
       },
     ],
   }),

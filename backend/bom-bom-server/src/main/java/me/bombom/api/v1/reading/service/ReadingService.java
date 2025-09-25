@@ -4,6 +4,7 @@ package me.bombom.api.v1.reading.service;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -92,18 +94,46 @@ public class ReadingService {
 
     @Transactional
     public void migrateMonthlyCountToYearlyAndReset() {
-        monthlyReadingSnapshotRepository.findAll().forEach(monthlyReadingSnapshot -> {
-            Long memberId = monthlyReadingSnapshot.getMemberId();
-            int targetYear = LocalDate.now().minusMonths(LAST_MONTH_OFFSET).getYear();
-            YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndReadingYear(memberId, targetYear)
-                    .orElseGet(() -> {
-                        YearlyReading newYearlyReading = YearlyReading.create(memberId, targetYear);
-                        return yearlyReadingRepository.save(newYearlyReading);
-                    });
-            yearlyReading.increaseCurrentCount(monthlyReadingSnapshot.getCurrentCount());
-            monthlyReadingSnapshot.resetCurrentCount();
-        });
-        monthlyReadingRealtimeRepository.resetCurrentCount();
+        int targetYear = LocalDate.now().minusMonths(LAST_MONTH_OFFSET).getYear();
+        try {
+            // 1. 데이터가 없으면 바로 realtime 초기화
+            long snapshotCount = monthlyReadingSnapshotRepository.count();
+            if (snapshotCount == 0) {
+                monthlyReadingRealtimeRepository.resetAllCurrentCount();
+                return;
+            }
+
+            // 2. Stream으로 메모리 효율적 처리
+            // forEach는 side effect가 있지만, 트랜잭션 내에서 DB 업데이트가 목적이므로 적절함
+            monthlyReadingSnapshotRepository.findAll()
+                .stream()
+                .peek(snapshot -> log.debug("Processing member {}", snapshot.getMemberId()))
+                .forEach(snapshot -> {
+                    Long memberId = snapshot.getMemberId();
+                    int monthlyCount = snapshot.getCurrentCount();
+
+                    try {
+                        int updatedRows = yearlyReadingRepository.increaseMonthlyCountToYearly(memberId, monthlyCount, targetYear);
+                        if (updatedRows == 0) {
+                            YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndReadingYear(memberId, targetYear)
+                                    .orElseGet(() -> {
+                                        YearlyReading newYearlyReading = YearlyReading.create(memberId, targetYear);
+                                        return yearlyReadingRepository.save(newYearlyReading);
+                                    });
+                            yearlyReading.increaseCurrentCount(monthlyCount);
+                        }
+                    } catch (Exception e) {
+                        log.error("Failed to migrate monthly count for member {}: {}", memberId, e.getMessage(), e);
+                        throw new RuntimeException("Migration failed for member " + memberId, e);
+                    }
+                });
+            monthlyReadingSnapshotRepository.resetAllCurrentCount();
+            monthlyReadingRealtimeRepository.resetAllCurrentCount();
+        } catch (Exception e) {
+            log.error("Critical error in monthly migration: {}", e.getMessage(), e);
+            throw new CIllegalArgumentException(ErrorDetail.INTERNAL_SERVER_ERROR)
+                    .addContext(ErrorContextKeys.OPERATION, "migrateMonthlyCountToYearlyAndReset");
+        }
     }
 
     @Transactional

@@ -62,4 +62,8 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 	MemberMonthlyReadingRankResponse findMemberRankAndGap(@Param("memberId") Long memberId);
 
 	MonthlyReadingSnapshot findTopByOrderByRankOrderDesc();
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE MonthlyReadingSnapshot mrs SET mrs.currentCount = 0")
+    void resetAllCurrentCount();
 }

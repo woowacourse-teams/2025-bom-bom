@@ -93,7 +93,7 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
 
       <Divider />
 
-      {deviceType !== 'pc' && (
+      {!deviceType && (
         <ChannelTalkButton type="button" onClick={showMessenger}>
           <ChatIcon width={16} height={16} />
           문의하기

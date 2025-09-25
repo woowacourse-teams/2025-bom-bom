@@ -1,8 +1,8 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useMutation } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useLocation, useNavigate } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
 import {
   formatBirthDate,
   validateBirthDate,
@@ -13,6 +13,7 @@ import { getSignupCheck, postSignup } from '@/apis/auth';
 import { SIGNUP_CHECK_ERROR_MESSAGE } from '@/apis/constants/checkErrorMessage';
 import InputField from '@/components/InputField/InputField';
 import { useDevice } from '@/hooks/useDevice';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { sendMessageToRN } from '@/libs/webview/webview.utils';
 import { GUIDE_MAILS } from '@/mocks/datas/guideMail';
 import { theme } from '@/styles/theme';
@@ -27,6 +28,8 @@ import HelpIcon from '#/assets/svg/help.svg';
 const EMAIL_DOMAIN = '@bombom.news';
 
 const SignupCard = () => {
+  const location = useLocation();
+
   const device = useDevice();
   const navigate = useNavigate();
   const [nickname, setNickname] = useState('');
@@ -65,6 +68,11 @@ const SignupCard = () => {
         type: 'LOGIN_SUCCESS',
       });
       navigate({ to: '/' });
+      trackEvent({
+        category: 'Authentication',
+        action: '회원가입 성공',
+        label: '회원가입 완료 후 메인 페이지 이동',
+      });
     },
     onError: (e) => {
       const errorMessage = e.message;
@@ -72,6 +80,11 @@ const SignupCard = () => {
         setNicknameError(SIGNUP_CHECK_ERROR_MESSAGE.nickname);
       if (errorMessage === '이미 사용 중인 이메일입니다.')
         setEmailError(SIGNUP_CHECK_ERROR_MESSAGE.email);
+      trackEvent({
+        category: 'Authentication',
+        action: '회원가입 실패',
+        label: `회원가입 실패 에러메시지: ${errorMessage}`,
+      });
     },
   });
 
@@ -130,6 +143,26 @@ const SignupCard = () => {
 
   const openEmailHelp = () => setEmailHelpOpen(true);
   const closeEmailHelp = () => setEmailHelpOpen(false);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+
+    const emailParam = searchParams.get('email');
+    const nameParam = searchParams.get('name');
+
+    if (emailParam) {
+      setEmailPart(emailParam);
+    }
+
+    if (nameParam) {
+      setNickname(nameParam);
+    }
+
+    if (emailParam || nameParam) {
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+    }
+  }, [location.search]);
 
   return (
     <Container device={device}>

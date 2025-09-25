@@ -9,14 +9,20 @@ import { restoreHighlightAll, saveSelection } from '../../utils/highlight';
 import ArticleContent from '../ArticleContent/ArticleContent';
 import FloatingToolbar from '../FloatingToolbar/FloatingToolbar';
 import MemoPanel from '../MemoPanel/MemoPanel';
+import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import type { GetArticleByIdResponse } from '@/apis/articles';
 
 interface ArticleBodyProps {
   articleId: number;
+  newsletterName: string;
   articleContent: GetArticleByIdResponse['contents'];
 }
 
-const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
+const ArticleBody = ({
+  articleId,
+  newsletterName,
+  articleContent,
+}: ArticleBodyProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const {
     opened: toolbarOpened,
@@ -55,9 +61,21 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
 
     if (isNewMode) {
       addNewHighlight(activeSelectionRange);
+
+      trackEvent({
+        category: 'Memo',
+        action: 'FloatingToolbar - 하이라이트 추가',
+        label: '아티클 본문',
+      });
     }
     if (!isNewMode && activeHighlightId) {
       removeHighlight({ id: activeHighlightId });
+
+      trackEvent({
+        category: 'Memo',
+        action: 'FloatingToolbar - 하이라이트 삭제',
+        label: '아티클 본문',
+      });
     }
 
     hideToolbar();
@@ -68,6 +86,12 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
 
     if (isNewMode) {
       addNewHighlight(activeSelectionRange);
+
+      trackEvent({
+        category: 'Memo',
+        action: 'FloatingToolbar - 메모 추가',
+        label: '아티클 본문',
+      });
     }
 
     setPanelOpen(true);
@@ -85,7 +109,11 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
 
   return (
     <>
-      <ArticleContent ref={contentRef} content={articleContent} />
+      <ArticleContent
+        ref={contentRef}
+        newsletterName={newsletterName}
+        content={articleContent}
+      />
       <FloatingToolbar
         opened={toolbarOpened}
         position={position}

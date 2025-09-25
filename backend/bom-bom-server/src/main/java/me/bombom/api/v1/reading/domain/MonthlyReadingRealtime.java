@@ -30,7 +30,11 @@ public class MonthlyReadingRealtime extends BaseEntity {
     private int currentCount;
 
     @Builder
-    public MonthlyReadingRealtime(Long id, @NonNull Long memberId, int currentCount) {
+    public MonthlyReadingRealtime(
+            Long id,
+            @NonNull Long memberId,
+            int currentCount
+    ) {
         this.id = id;
         this.memberId = memberId;
         this.currentCount = currentCount;

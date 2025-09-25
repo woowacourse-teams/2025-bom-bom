@@ -44,7 +44,7 @@ public class ReadingScheduler {
     @SchedulerLock(name = "monthly_reset_reading_count", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void monthlyResetReadingCount() {
         log.info("월간 읽기를 연간 읽기에 반영 후 초기화");
-        readingService.passMonthlyCountToYearly();
+        readingService.migrateMonthlyCountToYearlyAndReset();
     }
 
     @Scheduled(cron = EVERY_TEN_MINUTES_CRON, zone = TIME_ZONE)

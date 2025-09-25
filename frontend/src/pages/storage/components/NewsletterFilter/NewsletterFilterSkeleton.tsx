@@ -7,24 +7,29 @@ import { skeletonStyle } from '@/styles/skeleton';
 
 const SKELETON_LENGTH = {
   pc: 6,
-  mobile: 4,
+  mobile: 5,
 };
+
+const TOTAL_COUNT_INDEX = 0;
 
 const NewsletterFilterSkeleton = () => {
   const device = useDevice();
-  const isPc = device === 'pc';
+  const isPC = device === 'pc';
 
   return (
     <NewsletterFilterContainer>
       {Array.from({
-        length: isPc ? SKELETON_LENGTH.pc : SKELETON_LENGTH.mobile,
+        length: isPC ? SKELETON_LENGTH.pc : SKELETON_LENGTH.mobile,
       }).map((_, index) => (
         <TabSkeleton
           key={index}
-          StartComponent={index === 0 ? null : <SkeletonImage />}
-          EndComponent={<BadgeSkeleton skeletonHeight="24px" />}
-          textAlign={isPc ? 'start' : 'center'}
-          skeletonHeight="24px"
+          StartComponent={
+            index !== TOTAL_COUNT_INDEX && isPC && <SkeletonImage />
+          }
+          EndComponent={isPC && <BadgeSkeleton skeletonHeight="24px" />}
+          textAlign={isPC ? 'start' : 'center'}
+          skeletonWidth="80px"
+          skeletonHeight="36px"
         />
       ))}
     </NewsletterFilterContainer>

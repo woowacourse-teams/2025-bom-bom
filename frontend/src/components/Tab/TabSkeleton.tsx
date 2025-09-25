@@ -1,11 +1,12 @@
 import styled from '@emotion/styled';
-import { skeletonStyle } from '@/styles/skeleton';
+import TextSkeleton from '../Skeleton/TextSkeleton';
 import type { ReactNode } from 'react';
 
 interface TabSkeletonProps {
   StartComponent?: ReactNode;
   EndComponent?: ReactNode;
   textAlign?: 'start' | 'center' | 'end';
+  skeletonWidth?: string;
   skeletonHeight?: string;
 }
 
@@ -13,13 +14,14 @@ const TabSkeleton = ({
   StartComponent,
   EndComponent,
   textAlign = 'center',
+  skeletonWidth = '100%',
   skeletonHeight = '100%',
 }: TabSkeletonProps) => {
   return (
-    <SkeletonContainer selected={false}>
+    <SkeletonContainer>
       {StartComponent}
       <SkeletonLabel textAlign={textAlign}>
-        <SkeletonText height={skeletonHeight} />
+        <TextSkeleton width={skeletonWidth} height={skeletonHeight} />
       </SkeletonLabel>
       {EndComponent}
     </SkeletonContainer>
@@ -28,22 +30,14 @@ const TabSkeleton = ({
 
 export default TabSkeleton;
 
-const SkeletonContainer = styled.li<{ selected: boolean }>`
-  padding: 10px 12px;
+const SkeletonContainer = styled.li`
+  padding: 8px 12px;
   border-radius: 12px;
 
   display: flex;
   gap: 8px;
   align-items: center;
   justify-content: space-between;
-`;
-
-const SkeletonText = styled.div<{ height: string }>`
-  width: 100%;
-  height: ${({ height }) => height};
-  border-radius: 4px;
-
-  ${skeletonStyle}
 `;
 
 const SkeletonLabel = styled.span<{ textAlign: 'start' | 'center' | 'end' }>`

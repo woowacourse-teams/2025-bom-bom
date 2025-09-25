@@ -36,12 +36,11 @@ const NewsletterDetail = ({
   const openSubscribe = () => {
     if (!isLoggedIn || !userInfo) return;
 
-    copyToClipboard(userInfo.email);
-
     if (
-      !isStibee(newsletterDetail.subscribeUrl) ||
+      !isStibee(newsletterDetail.subscribeUrl) &&
       !isMaily(newsletterDetail.subscribeUrl)
     ) {
+      copyToClipboard(userInfo.email);
       alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
     }
 
@@ -55,6 +54,7 @@ const NewsletterDetail = ({
       newsletterDetail.subscribeUrl,
       userInfo,
     );
+
     openExternalLink(subscribeUrl);
   };
 

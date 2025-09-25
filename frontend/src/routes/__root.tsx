@@ -7,8 +7,8 @@ import {
 } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { theme } from '../styles/theme';
-import PageTitle from '@/components/PageTitle/PageTitle';
 import Toast from '@/components/Toast/Toast';
+import usePageTracking from '@/libs/googleAnalytics/usePageTracking';
 import { queryClient } from '@/main';
 import type { QueryClient } from '@tanstack/react-query';
 import type { redirect } from '@tanstack/react-router';
@@ -18,9 +18,10 @@ interface BomBomRouterContext {
 }
 
 const RootComponent = () => {
+  usePageTracking();
+
   return (
     <>
-      <PageTitle />
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={theme}>
           <Outlet />

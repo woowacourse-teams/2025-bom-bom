@@ -1,7 +1,7 @@
 import { useLocation } from '@tanstack/react-router';
 import { useEffect, useRef } from 'react';
 
-const PageTitle = () => {
+export const usePageTracking = () => {
   const location = useLocation();
   const prevPathRef = useRef<string>(null);
 
@@ -18,8 +18,6 @@ const PageTitle = () => {
 
     prevPathRef.current = currentPath;
   }, [location.pathname]);
-
-  return null;
 };
 
-export default PageTitle;
+export default usePageTracking;

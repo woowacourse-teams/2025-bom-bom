@@ -30,19 +30,23 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """
 		UPDATE monthly_reading_snapshot mrs
-  		JOIN (
-  		  SELECT
-  			  member_id,
-  			  RANK() OVER (ORDER BY current_count DESC) AS calculated_rank,
-              COALESCE(
-	            LEAD(current_count) OVER (ORDER BY current_count DESC) - current_count,
-                0
-	  		  ) AS next_diff
-  		  FROM monthly_reading_realtime
-  		) ranks ON mrs.member_id = ranks.member_id
-  		SET
-  		  mrs.rank_order = ranks.calculated_rank,
-  		  mrs.next_rank_difference = diffs.next_diff;
+        JOIN (
+            SELECT
+              r.member_id,
+              RANK() OVER (ORDER BY r.current_count DESC) AS calculated_rank,
+              /* 다음(위 등수) distinct 점수 - 내 점수 */
+              COALESCE(ds.prev_distinct - r.current_count, 0) AS next_diff
+            FROM monthly_reading_realtime r
+            JOIN (
+              SELECT
+                t.current_count AS cnt,
+                LAG(t.current_count) OVER (ORDER BY t.current_count DESC) AS prev_distinct
+              FROM (SELECT DISTINCT current_count FROM monthly_reading_realtime) t
+            ) ds ON ds.cnt = r.current_count
+        ) ranks ON mrs.member_id = ranks.member_id
+        SET
+            mrs.rank_order = ranks.calculated_rank,
+            mrs.next_rank_difference = ranks.next_diff
 	""", nativeQuery = true)
     void updateMonthlyRanking();
 

@@ -18,7 +18,7 @@ import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.pet.dto.PetResponse;
 import me.bombom.api.v1.pet.repository.PetRepository;
 import me.bombom.api.v1.pet.repository.StageRepository;
-import me.bombom.support.AcceptanceTest;
+import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-@AcceptanceTest
+@IntegrationTest
 class PetServiceTest {
 
     @Autowired

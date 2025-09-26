@@ -14,5 +14,5 @@ import java.lang.annotation.Target;
 @SpringBootTest
 @ActiveProfiles("test")
 @Import(TestcontainerConfig.class)
-public @interface AcceptanceTest {
+public @interface IntegrationTest {
 }

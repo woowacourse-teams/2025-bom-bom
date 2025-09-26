@@ -11,14 +11,16 @@ import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.reading.domain.ContinueReading;
-import me.bombom.api.v1.reading.domain.MonthlyReading;
+import me.bombom.api.v1.reading.domain.MonthlyReadingRealtime;
+import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
-import me.bombom.api.v1.reading.repository.MonthlyReadingRepository;
+import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
+import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.reading.repository.YearlyReadingRepository;
@@ -52,7 +54,10 @@ class ReadingServiceTest {
     private WeeklyReadingRepository weeklyReadingRepository;
 
     @Autowired
-    private MonthlyReadingRepository monthlyReadingRepository;
+    private MonthlyReadingSnapshotRepository monthlyReadingSnapshotRepository;
+
+    @Autowired
+    private MonthlyReadingRealtimeRepository monthlyReadingRealtimeRepository;
 
     @Autowired
     private YearlyReadingRepository yearlyReadingRepository;
@@ -61,13 +66,13 @@ class ReadingServiceTest {
     private TodayReading todayReading;
     private ContinueReading continueReading;
     private WeeklyReading weeklyReading;
-    private MonthlyReading monthlyReading;
+    private MonthlyReadingSnapshot monthlyReadingSnapshot;
 
     @BeforeEach
     void setUp() {
         // 기존 데이터 삭제
         yearlyReadingRepository.deleteAll();
-        monthlyReadingRepository.deleteAll();
+        monthlyReadingSnapshotRepository.deleteAll();
         weeklyReadingRepository.deleteAll();
         todayReadingRepository.deleteAll();
         continueReadingRepository.deleteAll();
@@ -80,7 +85,11 @@ class ReadingServiceTest {
         todayReading = todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));
         continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
         weeklyReading = weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member));
-        monthlyReading = monthlyReadingRepository.save(TestFixture.monthlyReadingFixture(member));
+        monthlyReadingSnapshot = monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingFixture(member));
+        monthlyReadingRealtimeRepository.save(MonthlyReadingRealtime.builder()
+                .memberId(member.getId())
+                .currentCount(0)
+                .build());
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -152,11 +161,11 @@ class ReadingServiceTest {
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_r2", "pid_r2"));
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_r3", "pid_r3"));
 
-        monthlyReadingRepository.save(MonthlyReading.builder()
+        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
                 .memberId(member2.getId())
                 .currentCount(30)
                 .build());
-        monthlyReadingRepository.save(MonthlyReading.builder()
+        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
                 .memberId(member3.getId())
                 .currentCount(20)
                 .build());
@@ -183,15 +192,15 @@ class ReadingServiceTest {
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr3", "pid_mr3"));
         Member member4 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr4", "pid_mr4"));
 
-        monthlyReadingRepository.save(MonthlyReading.builder()
+        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
                 .memberId(member2.getId())
                 .currentCount(30)
                 .build());
-        MonthlyReading member3Reading = monthlyReadingRepository.save(MonthlyReading.builder()
+        MonthlyReadingSnapshot member3Reading = monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
                 .memberId(member3.getId())
                 .currentCount(20)
                 .build());
-        monthlyReadingRepository.save(MonthlyReading.builder()
+        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
                 .memberId(member4.getId())
                 .currentCount(20)
                 .build());
@@ -203,9 +212,9 @@ class ReadingServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(memberRank.rank()).isGreaterThan(0L);
-            softly.assertThat(memberRank.readCount()).isEqualTo(monthlyReading.getCurrentCount());
+            softly.assertThat(memberRank.readCount()).isEqualTo(monthlyReadingSnapshot.getCurrentCount());
             softly.assertThat(memberRank.nextRankDifference())
-                    .isEqualTo(member3Reading.getCurrentCount() - monthlyReading.getCurrentCount());
+                    .isEqualTo(member3Reading.getCurrentCount() - monthlyReadingSnapshot.getCurrentCount());
         });
     }
 
@@ -216,11 +225,11 @@ class ReadingServiceTest {
         Member first = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr3", "pid_mr3"));
 
-        monthlyReadingRepository.save(MonthlyReading.builder()
+        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
                 .memberId(first.getId())
                 .currentCount(30)
                 .build());
-        monthlyReadingRepository.save(MonthlyReading.builder()
+        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
                 .memberId(member3.getId())
                 .currentCount(20)
                 .build());
@@ -240,11 +249,11 @@ class ReadingServiceTest {
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr3", "pid_mr3"));
 
-        monthlyReadingRepository.save(MonthlyReading.builder()
+        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
                 .memberId(member2.getId())
                 .currentCount(20)
                 .build());
-        monthlyReadingRepository.save(MonthlyReading.builder()
+        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
                 .memberId(member3.getId())
                 .currentCount(20)
                 .build());
@@ -261,19 +270,19 @@ class ReadingServiceTest {
     @Test
     void 매월_읽기_수를_연간_읽기_수에_반영하고_월간은_초기화한다() {
         // given
-        int monthlyCountBefore = monthlyReadingRepository.findByMemberId(member.getId()).get().getCurrentCount();
+        int monthlyCountBefore = monthlyReadingSnapshotRepository.findByMemberId(member.getId()).get().getCurrentCount();
 
         // when
-        readingService.passMonthlyCountToYearly();
+        readingService.migrateMonthlyCountToYearlyAndReset();
 
         // then
-        MonthlyReading monthlyReading = monthlyReadingRepository.findByMemberId(member.getId()).get();
+        MonthlyReadingSnapshot monthlyReadingSnapshot = monthlyReadingSnapshotRepository.findByMemberId(member.getId()).get();
         YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndReadingYear(member.getId(),
                 LocalDate.now().minusMonths(1).getYear()).get();
 
         assertSoftly(softly -> {
             softly.assertThat(yearlyReading.getCurrentCount()).isEqualTo(monthlyCountBefore);
-            softly.assertThat(monthlyReading.getCurrentCount()).isEqualTo(0);
+            softly.assertThat(monthlyReadingSnapshot.getCurrentCount()).isEqualTo(0);
         });
     }
 }

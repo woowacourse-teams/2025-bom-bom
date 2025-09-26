@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import me.bombom.api.v1.auth.AppleClientSecretSupplier;
 import me.bombom.api.v1.auth.AppleOAuth2AccessTokenResponseClient;
 import me.bombom.api.v1.auth.ApplePrivateKeyLoader;
+import me.bombom.api.v1.auth.handler.OAuth2LoginFailureHandler;
 import me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler;
 import me.bombom.api.v1.auth.resolver.AppleAuthorizationRequestResolver;
 import me.bombom.api.v1.auth.service.AppleOAuth2Service;
@@ -62,6 +63,7 @@ public class SecurityConfig {
             CustomOAuth2UserService customOAuth2UserService,
             AppleOAuth2Service appleOAuth2Service,
             OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
+            OAuth2LoginFailureHandler oAuth2LoginFailureHandler,
             OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegatingAccessTokenClient,
             ClientRegistrationRepository clientRegistrationRepository
     ) throws Exception {
@@ -80,7 +82,8 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                                 .oidcUserService(appleOAuth2Service))
-                        .successHandler(oAuth2LoginSuccessHandler));
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler));
 
         return http.build();
     }

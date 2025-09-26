@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingCountResponse;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
@@ -56,4 +57,11 @@ public interface ReadingControllerApi {
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),
     })
     MemberMonthlyReadingRankResponse getMemberMonthlyRank(@Parameter(hidden = true) Member member);
+
+    @Operation(summary = "나의 월간 읽기 개수 조회", description = "현재 로그인한 사용자의 이번 달 아티클 읽기 개수를 조회합니다.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "월간 읽기 개수 조회 성공"),
+        @ApiResponse(responseCode = "404", description = "월간 읽기 정보를 찾을 수 없음", content = @Content)
+    })
+    MemberMonthlyReadingCountResponse getMemberMonthlyReadingCount(@Parameter(hidden = true) Member member);
 }

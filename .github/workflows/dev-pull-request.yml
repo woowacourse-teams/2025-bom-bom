@@ -41,21 +41,3 @@ jobs:
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
           ./gradlew clean build --no-daemon
           
-      - name: 테스트 결과 요약
-        if: always() 
-        shell: bash
-        run: |
-          echo "테스트 결과 요약"
-          TOTAL_TESTS=$(find . -path '*/build/test-results/test/*.xml' -exec grep -o '<testcase' {} + | wc -l)
-          FAILED_TESTS=$(find . -path '*/build/test-results/test/*.xml' -exec grep -o '<failure' {} + | wc -l)
-          PASSED_TESTS=$((TOTAL_TESTS - FAILED_TESTS))
-          
-          echo "-------------------------------------"
-          echo " Total Tests: $TOTAL_TESTS"
-          echo " Passed ✅: $PASSED_TESTS"
-          echo " Failed ❌: $FAILED_TESTS"
-          echo "-------------------------------------"
-          
-          if [ "$FAILED_TESTS" -gt 0 ]; then
-            exit 1
-          fi

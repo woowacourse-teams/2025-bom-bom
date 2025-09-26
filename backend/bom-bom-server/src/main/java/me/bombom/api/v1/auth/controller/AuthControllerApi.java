@@ -10,9 +10,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import me.bombom.api.v1.auth.dto.NativeLoginResponse;
-import me.bombom.api.v1.auth.dto.SignupValidateResponse;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
 import me.bombom.api.v1.auth.dto.request.SignupValidateRequest;
+import me.bombom.api.v1.auth.enums.SignupValidateStatus;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
@@ -46,7 +46,7 @@ public interface AuthControllerApi {
             @ApiResponse(responseCode = "200", description = "중복 체크 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
     })
-    SignupValidateResponse validateSignupField(
+    SignupValidateStatus validateSignupField(
             @Parameter(description = "중복 체크 요청 데이터") @ModelAttribute SignupValidateRequest request
     );
 

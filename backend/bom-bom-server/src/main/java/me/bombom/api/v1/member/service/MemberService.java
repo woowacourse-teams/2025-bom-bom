@@ -4,7 +4,6 @@ import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
-import me.bombom.api.v1.auth.dto.SignupValidateResponse;
 import me.bombom.api.v1.auth.enums.SignupValidateField;
 import me.bombom.api.v1.auth.enums.SignupValidateStatus;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -52,14 +51,12 @@ public class MemberService {
         return savedMember;
     }
 
-    public SignupValidateResponse validateSignupField(SignupValidateField field, String value) {
+    public SignupValidateStatus validateSignupField(SignupValidateField field, String value) {
         String normalized = value.strip().toLowerCase();
-        SignupValidateStatus status = switch (field) {
+        return switch (field) {
             case NICKNAME -> validateSignupNickname(normalized);
             case EMAIL -> validateSignupEmail(normalized);
         };
-
-        return SignupValidateResponse.of(field, status);
     }
 
     public MemberProfileResponse getProfile(Long id) {

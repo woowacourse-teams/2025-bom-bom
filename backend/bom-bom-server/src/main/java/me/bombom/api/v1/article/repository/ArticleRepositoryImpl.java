@@ -142,11 +142,12 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         }
         
         String cleanKeyword = keyword.strip();
-        // ngram 인덱스를 활용한 FULLTEXT 검색
-        // MySQL의 MATCH AGAINST를 사용하여 ngram 검색 성능 향상
+        // BOOLEAN MODE에서 와일드카드 사용으로 부분 검색 지원
+        String wildcardKeyword = cleanKeyword + "*";
+        
         return Expressions.booleanTemplate(
-            "MATCH({0}) AGAINST({1} IN NATURAL LANGUAGE MODE)",
-            article.title, cleanKeyword
+            "MATCH({0}) AGAINST({1} IN BOOLEAN MODE)",
+            article.title, wildcardKeyword
         );
     }
   

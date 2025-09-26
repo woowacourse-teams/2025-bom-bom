@@ -8,6 +8,7 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
@@ -18,8 +19,8 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.dto.response.QArticleResponse;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -136,7 +137,17 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     }
 
     private BooleanExpression createKeywordWhereClause(String keyword) {
-        return StringUtils.hasText(keyword) ? article.title.like("%" + keyword.strip() + "%") : null;
+        if (!StringUtils.hasText(keyword)) {
+            return null;
+        }
+        
+        String cleanKeyword = keyword.strip();
+        // ngram 인덱스를 활용한 FULLTEXT 검색
+        // MySQL의 MATCH AGAINST를 사용하여 ngram 검색 성능 향상
+        return Expressions.booleanTemplate(
+            "MATCH({0}) AGAINST({1} IN NATURAL LANGUAGE MODE)",
+            article.title, cleanKeyword
+        );
     }
   
     private List<OrderSpecifier<?>> getOrderSpecifiers(Pageable pageable) {

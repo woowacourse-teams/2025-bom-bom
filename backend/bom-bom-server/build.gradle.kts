@@ -23,6 +23,12 @@ repositories {
     mavenCentral()
 }
 
+dependencyManagement {
+    imports {
+        mavenBom("org.testcontainers:testcontainers-bom:1.19.7")
+    }
+}
+
 dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -54,6 +60,9 @@ dependencies {
     // test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.testcontainers:testcontainers")
+    testImplementation("org.testcontainers:mysql")
+    testImplementation("org.testcontainers:junit-jupiter")
 
     // db
     runtimeOnly("com.mysql:mysql-connector-j")
@@ -84,4 +93,8 @@ dependencies {
 // Querydsl 생성된 파일 정리
 tasks.named<Delete>("clean") {
     delete("src/main/generated")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

@@ -5,17 +5,17 @@ import { useUserInfo } from '@/hooks/useUserInfo';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import {
   isIOS,
-  isRunningInWebView,
+  isWebView,
   sendMessageToRN,
 } from '@/libs/webview/webview.utils';
-import logo from '#/assets/png/logo.png';
+import logo from '#/assets/avif/logo.avif';
 
 export default function NewsletterHero() {
   const { userInfo } = useUserInfo();
   const navigate = useNavigate();
 
   const handleLoginClick = () => {
-    if (isRunningInWebView() && isIOS())
+    if (isWebView() && isIOS())
       sendMessageToRN({
         type: 'SHOW_LOGIN_SCREEN',
       });

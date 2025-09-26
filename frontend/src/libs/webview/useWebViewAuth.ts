@@ -2,17 +2,18 @@ import { useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import {
   addWebViewMessageListener,
-  isRunningInWebView,
+  isWebView,
   sendMessageToRN,
 } from './webview.utils';
 import { postAppleLogin, postGoogleLogin } from '@/apis/auth';
+import { logger } from '@/utils/logger';
 import type { RNToWebMessage } from './webview.types';
 
 export const useWebViewAuth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isRunningInWebView()) return;
+    if (!isWebView()) return;
 
     const cleanup = addWebViewMessageListener(
       async (message: RNToWebMessage) => {
@@ -46,7 +47,7 @@ export const useWebViewAuth = () => {
                 },
               });
             } catch (error) {
-              console.error('Google 로그인 실패:', error);
+              logger.error('Google 로그인 실패:', error);
               sendMessageToRN({
                 type: 'LOGIN_FAILED',
                 payload: {
@@ -86,7 +87,7 @@ export const useWebViewAuth = () => {
                 },
               });
             } catch (error) {
-              console.error('Apple 로그인 실패:', error);
+              logger.error('Apple 로그인 실패:', error);
               sendMessageToRN({
                 type: 'LOGIN_FAILED',
                 payload: {
@@ -98,7 +99,7 @@ export const useWebViewAuth = () => {
             break;
 
           default:
-            console.warn('알 수 없는 WebView 메시지 타입:', message.type);
+            logger.warn('알 수 없는 WebView 메시지 타입:', message.type);
         }
       },
     );

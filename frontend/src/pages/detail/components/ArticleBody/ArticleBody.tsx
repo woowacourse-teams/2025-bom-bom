@@ -14,10 +14,15 @@ import type { GetArticleByIdResponse } from '@/apis/articles';
 
 interface ArticleBodyProps {
   articleId: number;
+  newsletterName: string;
   articleContent: GetArticleByIdResponse['contents'];
 }
 
-const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
+const ArticleBody = ({
+  articleId,
+  newsletterName,
+  articleContent,
+}: ArticleBodyProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const {
     opened: toolbarOpened,
@@ -104,7 +109,11 @@ const ArticleBody = ({ articleId, articleContent }: ArticleBodyProps) => {
 
   return (
     <>
-      <ArticleContent ref={contentRef} content={articleContent} />
+      <ArticleContent
+        ref={contentRef}
+        newsletterName={newsletterName}
+        content={articleContent}
+      />
       <FloatingToolbar
         opened={toolbarOpened}
         position={position}

@@ -66,6 +66,7 @@ function GuideMailPage() {
 
       <ArticleBody
         articleId={guideIdNumber}
+        newsletterName={guideArticle.newsletter.name}
         articleContent={guideArticle.contents}
       />
       <Spacing size={24} />

@@ -1,10 +1,10 @@
 import styled from '@emotion/styled';
 import Carousel from '@/components/Carousel/Carousel';
 
-const banner1 = '/assets/png/banner_1.png';
-const banner2 = '/assets/png/banner_2.png';
-const banner3 = '/assets/png/banner_3.png';
-const banner4 = '/assets/png/banner_4.png';
+const banner1 = '/assets/avif/banner_1.avif';
+const banner2 = '/assets/avif/banner_2.avif';
+const banner3 = '/assets/avif/banner_3.avif';
+const banner4 = '/assets/avif/banner_4.avif';
 
 const SlideCardList = () => {
   return (

@@ -208,8 +208,7 @@ public class ReadingService {
     public void updateMonthlyRanking() {
         try {
             log.info("Starting monthly ranking update");
-            int updatedRows = monthlyReadingSnapshotRepository.updateMonthlyRanking();
-            log.info("✅ 업데이트된 행 수 = {}", updatedRows);
+            monthlyReadingSnapshotRepository.updateMonthlyRanking();
             log.info("Monthly ranking update completed successfully");
         } catch (Exception e) {
             log.error("Failed to update monthly ranking: {}", e.getMessage(), e);

@@ -44,10 +44,11 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
         ) ds ON ds.cnt = r.current_count
     ) ranks ON mrs.member_id = ranks.member_id
     SET
+        mrs.current_count = ranks.current_count,
         mrs.rank_order = ranks.calculated_rank,
         mrs.next_rank_difference = ranks.next_diff
 """, nativeQuery = true)
-    int updateMonthlyRanking();
+    void updateMonthlyRanking();
 
 	@Query("""
 		SELECT new me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse(

@@ -34,7 +34,8 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
         SELECT
           r.member_id,
           RANK() OVER (ORDER BY r.current_count DESC) AS calculated_rank,
-          COALESCE(ds.prev_distinct - r.current_count, 0) AS next_diff
+          COALESCE(ds.prev_distinct - r.current_count, 0) AS next_diff,
+          r.current_count AS current_count
         FROM monthly_reading_realtime r
         JOIN (
           SELECT

@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private static final long MEMBER_ROLE_ID = 1L;
-    private static final String NICKNAME_REGEX_PATTERN = "^(?!.*\\.\\.)[A-Za-z0-9가-힣][A-Za-z0-9가-힣._\\s]*[A-Za-z0-9가-힣]$";
+    private static final String NICKNAME_REGEX_PATTERN = "^(?!.*\\.\\.)[A-Za-z0-9가-힣][A-Za-z0-9가-힣._ ]*[A-Za-z0-9가-힣]$";
     private static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?@bombom\\.news$";
 
     private final MemberRepository memberRepository;

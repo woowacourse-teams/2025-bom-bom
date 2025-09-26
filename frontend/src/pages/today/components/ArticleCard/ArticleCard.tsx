@@ -15,12 +15,12 @@ interface ArticleCardProps extends ComponentProps<typeof Link> {
   readVariant?: ReadVariant;
 }
 
-function ArticleCard({
+const ArticleCard = ({
   data,
   readVariant = 'transparent',
   to,
   ...props
-}: ArticleCardProps) {
+}: ArticleCardProps) => {
   const {
     articleId,
     title,
@@ -74,7 +74,7 @@ function ArticleCard({
       </ThumbnailWrapper>
     </Container>
   );
-}
+};
 
 export default ArticleCard;
 

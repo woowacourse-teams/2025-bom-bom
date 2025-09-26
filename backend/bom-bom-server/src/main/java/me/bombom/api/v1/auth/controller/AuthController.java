@@ -14,8 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.dto.NativeLoginResponse;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
-import me.bombom.api.v1.auth.dto.request.DuplicateCheckRequest;
+import me.bombom.api.v1.auth.dto.SignupValidateResponse;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
+import me.bombom.api.v1.auth.dto.request.SignupValidateRequest;
 import me.bombom.api.v1.auth.service.AppleOAuth2Service;
 import me.bombom.api.v1.auth.service.GoogleOAuth2LoginService;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -78,8 +79,8 @@ public class AuthController implements AuthControllerApi{
 
     @Override
     @GetMapping("/signup/check")
-    public boolean checkSignupDuplicate(@Valid @ModelAttribute DuplicateCheckRequest request) {
-        return memberService.checkSignupDuplicate(request.field(), request.userInput());
+    public SignupValidateResponse validateSignupField(@Valid @ModelAttribute SignupValidateRequest request) {
+        return memberService.validateSignupField(request.field(), request.userInput());
     }
 
     @Override

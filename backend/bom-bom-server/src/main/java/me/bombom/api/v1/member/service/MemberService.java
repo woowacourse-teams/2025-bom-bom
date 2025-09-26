@@ -1,9 +1,12 @@
 package me.bombom.api.v1.member.service;
 
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
-import me.bombom.api.v1.auth.enums.DuplicateCheckField;
+import me.bombom.api.v1.auth.dto.SignupValidateResponse;
+import me.bombom.api.v1.auth.enums.SignupValidateField;
+import me.bombom.api.v1.auth.enums.SignupValidateStatus;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -23,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private static final long MEMBER_ROLE_ID = 1L;
+    private static final String NICKNAME_REGEX_PATTERN = "^(?!.*\\.\\.)[A-Za-z0-9가-힣][A-Za-z0-9가-힣._\\s]*[A-Za-z0-9가-힣]$";
+    private static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?@bombom\\.news$";
 
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -37,7 +42,7 @@ public class MemberService {
                 .providerId(pendingMember.getProviderId())
                 .email(signupRequest.email().toLowerCase())
                 .profileImageUrl(pendingMember.getProfileUrl())
-                .nickname(signupRequest.nickname())
+                .nickname(signupRequest.nickname().strip())
                 .gender(signupRequest.gender())
                 .roleId(MEMBER_ROLE_ID)
                 .birthDate(signupRequest.birthDate())
@@ -47,11 +52,14 @@ public class MemberService {
         return savedMember;
     }
 
-    public boolean checkSignupDuplicate(DuplicateCheckField field, String value) {
-        return switch (field) {
-            case NICKNAME -> memberRepository.existsByNickname(value);
-            case EMAIL -> memberRepository.existsByEmail(value);
+    public SignupValidateResponse validateSignupField(SignupValidateField field, String value) {
+        String normalized = value.strip().toLowerCase();
+        SignupValidateStatus status = switch (field) {
+            case NICKNAME -> validateSignupNickname(normalized);
+            case EMAIL -> validateSignupEmail(normalized);
         };
+
+        return SignupValidateResponse.of(field, status);
     }
 
     public MemberProfileResponse getProfile(Long id) {
@@ -78,7 +86,7 @@ public class MemberService {
                 .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
             );
-        
+
         memberRepository.delete(member);
         log.info("회원 탈퇴 처리 완료. MemberId: {}", memberId);
     }
@@ -98,5 +106,35 @@ public class MemberService {
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "nickname")
                     .addContext(ErrorContextKeys.OPERATION, "validateDuplicateNickname");
         }
+    }
+
+    private SignupValidateStatus validateSignupNickname(String value) {
+        if (isInvalidNicknamePattern(value)) {
+            return SignupValidateStatus.INVALID_PATTERN;
+        }
+        if (memberRepository.existsByNickname(value)) {
+            return SignupValidateStatus.DUPLICATE;
+        }
+        return SignupValidateStatus.OK;
+    }
+
+    private SignupValidateStatus validateSignupEmail(String value) {
+        if (isInvalidEmailPattern(value)) {
+            return SignupValidateStatus.INVALID_PATTERN;
+        }
+        if (memberRepository.existsByEmail(value)) {
+            return SignupValidateStatus.DUPLICATE;
+        }
+        return SignupValidateStatus.OK;
+    }
+
+    private boolean isInvalidNicknamePattern(String value) {
+        Pattern nicknamePattern = Pattern.compile(NICKNAME_REGEX_PATTERN);
+        return !nicknamePattern.matcher(value).matches();
+    }
+
+    private boolean isInvalidEmailPattern(String value) {
+        Pattern emailPattern = Pattern.compile(MemberService.EMAIL_REGEX_PATTERN);
+        return !emailPattern.matcher(value).matches();
     }
 }

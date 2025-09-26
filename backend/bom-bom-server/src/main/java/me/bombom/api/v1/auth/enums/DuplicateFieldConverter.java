@@ -4,13 +4,13 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DuplicateFieldConverter implements Converter<String, DuplicateCheckField> {
+public class DuplicateFieldConverter implements Converter<String, SignupValidateField> {
 
     @Override
-    public DuplicateCheckField convert(String source) {
+    public SignupValidateField convert(String source) {
         if (source == null) {
             return null;
         }
-        return DuplicateCheckField.valueOf(source.strip().toUpperCase());
+        return SignupValidateField.valueOf(source.strip().toUpperCase());
     }
 }

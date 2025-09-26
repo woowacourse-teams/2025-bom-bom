@@ -152,7 +152,7 @@ class ReadingServiceTest {
     }
 
     @Test
-    @Disabled
+    //@Disabled
     void 저장된_rank를_사용해_상위_N명의_랭킹을_조회할_수_있다() {
         // given: 기본 멤버는 currentCount 10
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_r2", "pid_r2"));
@@ -216,7 +216,7 @@ class ReadingServiceTest {
     }
 
     @Test
-    @Disabled
+    //@Disabled
     void 일등일_경우_앞_사람과의_차이는_0이다() {
         // given: 기본 멤버는 currentCount 10
         Member first = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));
@@ -240,7 +240,7 @@ class ReadingServiceTest {
     }
 
     @Test
-    @Disabled
+    //@Disabled
     void currentCount가_같으면_순위가_같다() {
         // given: 기본 멤버는 currentCount 10
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));

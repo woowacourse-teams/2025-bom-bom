@@ -62,6 +62,12 @@ class BookmarkServiceTest {
 
     @BeforeEach
     void setUp() {
+        bookmarkRepository.deleteAllInBatch();
+        articleRepository.deleteAllInBatch();
+        newsletterRepository.deleteAllInBatch();
+        categoryRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
         categories = TestFixture.createCategories();

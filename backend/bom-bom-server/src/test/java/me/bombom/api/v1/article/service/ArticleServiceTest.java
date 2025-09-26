@@ -69,6 +69,11 @@ class ArticleServiceTest {
 
     @BeforeEach
     public void setup() {
+        articleRepository.deleteAllInBatch();
+        newsletterRepository.deleteAllInBatch();
+        categoryRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
         categories = TestFixture.createCategories();

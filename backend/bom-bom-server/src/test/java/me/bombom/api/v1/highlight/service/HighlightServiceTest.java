@@ -66,6 +66,12 @@ class HighlightServiceTest {
 
     @BeforeEach
     public void setup() {
+        highlightRepository.deleteAllInBatch();
+        articleRepository.deleteAllInBatch();
+        newsletterRepository.deleteAllInBatch();
+        categoryRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
         categories = TestFixture.createCategories();

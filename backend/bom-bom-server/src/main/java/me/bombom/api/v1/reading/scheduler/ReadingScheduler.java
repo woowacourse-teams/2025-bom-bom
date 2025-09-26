@@ -65,6 +65,7 @@ public class ReadingScheduler {
         }
 
         readingService.updateMonthlyRanking();
+        log.info("이달의 독서왕 순위 업데이트 완료");
     }
 
     /**

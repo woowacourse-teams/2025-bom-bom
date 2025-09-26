@@ -1,40 +1,46 @@
 import styled from '@emotion/styled';
-import PetCardContainer from './PetCardContainer';
+import {
+  AttendanceButton,
+  Container,
+  PetImageContainer,
+  StatusIconWrapper,
+  Title,
+  TitleWrapper,
+} from './PetCard';
+import ProgressBarSkeleton from '../ProgressBar/ProgressBarSkeleton';
 import TextSkeleton from '../Skeleton/TextSkeleton';
 import { useDevice } from '@/hooks/useDevice';
 import { skeletonStyle } from '@/styles/skeleton';
-import type { Device } from '@/hooks/useDevice';
+import { theme } from '@/styles/theme';
+import PetIcon from '#/assets/svg/pet.svg';
 
 const PetCardSkeleton = () => {
   const device = useDevice();
 
   return (
-    <PetCardContainer>
+    <Container device={device}>
+      {device === 'pc' && (
+        <TitleWrapper>
+          <StatusIconWrapper>
+            <PetIcon width={16} height={16} color={theme.colors.white} />
+          </StatusIconWrapper>
+          <Title>봄이</Title>
+        </TitleWrapper>
+      )}
       <PetImageContainer>
         <SkeletonPetImage />
       </PetImageContainer>
 
       <TextSkeleton width="100px" height="16px" />
 
-      <ProgressBarContainer>
-        <SkeletonProgressBar />
-        <TextSkeleton width="40px" height="12px" />
-      </ProgressBarContainer>
+      <ProgressBarSkeleton />
 
-      <SkeletonAttendanceButton device={device} />
-    </PetCardContainer>
+      <SkeletonAttendanceButton as={AttendanceButton} />
+    </Container>
   );
 };
 
 export default PetCardSkeleton;
-
-const PetImageContainer = styled.div`
-  position: relative;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
 
 const SkeletonPetImage = styled.div`
   width: 120px;
@@ -44,38 +50,8 @@ const SkeletonPetImage = styled.div`
   ${skeletonStyle}
 `;
 
-const ProgressBarContainer = styled.div`
-  width: 100%;
-
-  display: flex;
-  gap: 4px;
-  flex-direction: column;
-  align-items: flex-end;
-`;
-
-const SkeletonProgressBar = styled.div`
-  width: 100%;
-  height: 12px;
-  border-radius: 4px;
-
-  ${skeletonStyle}
-`;
-
-const SkeletonAttendanceButton = styled.div<{ device: Device }>`
+const SkeletonAttendanceButton = styled.div`
   width: 50%;
-  height: 28px;
-  margin-top: -8px;
-  padding: 8px 16px;
-  border-radius: 8px;
-
-  ${({ device }) =>
-    device === 'mobile' && {
-      position: 'absolute',
-      left: '50%',
-      bottom: 0,
-      width: '50%',
-      transform: 'translateX(-50%)',
-    }}
 
   ${skeletonStyle};
 `;

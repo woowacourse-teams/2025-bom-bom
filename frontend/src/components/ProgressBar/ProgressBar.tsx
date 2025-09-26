@@ -40,7 +40,7 @@ const ProgressBar = ({
 
 export default ProgressBar;
 
-const Container = styled.div`
+export const Container = styled.div`
   width: 100%;
   height: 10px;
 `;
@@ -53,7 +53,7 @@ const ProgressOverlay = styled.div<{ variant: 'rounded' | 'rectangular' }>`
   background-color: ${({ theme }) => theme.colors.primaryLight};
 `;
 
-const ProgressGauge = styled.div<{
+export const ProgressGauge = styled.div<{
   rate: number;
   transitionDuration: false | number;
   variant: 'rounded' | 'rectangular';
@@ -74,7 +74,7 @@ const ProgressGauge = styled.div<{
     `transition: width ${transitionDuration}s ease-in-out`};
 `;
 
-const ProgressCaption = styled.p`
+export const ProgressCaption = styled.p`
   width: 100%;
 
   color: ${({ theme }) => theme.colors.textSecondary};

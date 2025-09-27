@@ -49,6 +49,6 @@ public class UniqueUserInfoGenerator {
     }
 
     private static String getTimestampSuffix() {
-        return String.valueOf(System.currentTimeMillis() % 10000);
+        return String.valueOf(System.currentTimeMillis() % 1000);
     }
 }

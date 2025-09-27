@@ -1,9 +1,16 @@
 import styled from '@emotion/styled';
-import NewsletterFilterContainer from './NewsletterFilterContainer';
+import {
+  Container,
+  IconWrapper,
+  Title,
+  TitleWrapper,
+} from './NewsletterFilter';
 import BadgeSkeleton from '@/components/Badge/BadgeSkeleton';
 import TabSkeleton from '@/components/Tab/TabSkeleton';
 import { useDevice } from '@/hooks/useDevice';
 import { skeletonStyle } from '@/styles/skeleton';
+import { theme } from '@/styles/theme';
+import NewsIcon from '#/assets/svg/news.svg';
 
 const SKELETON_LENGTH = {
   pc: 6,
@@ -17,7 +24,15 @@ const NewsletterFilterSkeleton = () => {
   const isPC = device === 'pc';
 
   return (
-    <NewsletterFilterContainer>
+    <Container aria-label="뉴스레터" isPc={device === 'pc'}>
+      {device === 'pc' && (
+        <TitleWrapper>
+          <IconWrapper>
+            <NewsIcon width={16} height={16} fill={theme.colors.white} />
+          </IconWrapper>
+          <Title>뉴스레터</Title>
+        </TitleWrapper>
+      )}
       {Array.from({
         length: isPC ? SKELETON_LENGTH.pc : SKELETON_LENGTH.mobile,
       }).map((_, index) => (
@@ -32,7 +47,7 @@ const NewsletterFilterSkeleton = () => {
           skeletonHeight="36px"
         />
       ))}
-    </NewsletterFilterContainer>
+    </Container>
   );
 };
 
@@ -42,8 +57,6 @@ const SkeletonImage = styled.div`
   width: 24px;
   height: 24px;
   border-radius: 50%;
-
-  flex-shrink: 0;
 
   ${skeletonStyle}
 `;

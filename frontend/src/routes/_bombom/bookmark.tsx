@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 import { queries } from '@/apis/queries';
-import TextSkeleton from '@/components/Skeleton/TextSkeleton';
+import SkeletonBox from '@/components/Skeleton/SkeletonBox';
 import { useDevice } from '@/hooks/useDevice';
 import ArticleList from '@/pages/storage/components/ArticleList/ArticleList';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
@@ -85,7 +85,7 @@ function BookmarkPage() {
           <MainContentSection device={device}>
             <SummaryBar>
               {isLoading ? (
-                <TextSkeleton width="80px" height="20px" />
+                <SkeletonBox width="80px" height="20px" />
               ) : (
                 <ResultsInfo>총 {totalElements}개의 북마크</ResultsInfo>
               )}

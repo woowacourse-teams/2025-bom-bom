@@ -3,7 +3,7 @@ import HeaderLogo from './HeaderLogo';
 import HeaderNavButtons from './HeaderNavButtons';
 import HeaderProfile from './HeaderProfile';
 import LoginButton from './LoginButton';
-import TextSkeleton from '../Skeleton/TextSkeleton';
+import SkeletonBox from '../Skeleton/SkeletonBox';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import type { Nav } from '@/types/nav';
 
@@ -25,7 +25,7 @@ const PCHeader = ({ activeNav }: PCHeaderProps) => {
 
         <UserInfoWrapper>
           {isLoading ? (
-            <TextSkeleton width="120px" height="40px" />
+            <SkeletonBox width="120px" height="40px" />
           ) : userInfo ? (
             <HeaderProfile userInfo={userInfo} device="pc" />
           ) : (

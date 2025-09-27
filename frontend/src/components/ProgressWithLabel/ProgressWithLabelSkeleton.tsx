@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import ProgressBarSkeleton from '../ProgressBar/ProgressBarSkeleton';
-import TextSkeleton from '../Skeleton/TextSkeleton';
+import SkeletonBox from '../Skeleton/SkeletonBox';
 import { useDevice } from '@/hooks/useDevice';
 
 interface ProgressWithLabelSkeletonProps {
@@ -17,12 +17,12 @@ const ProgressWithLabelSkeleton = ({
   return (
     <SkeletonContainer>
       <SkeletonProgressInfo>
-        <TextSkeleton width="80px" height="16px" />
-        <TextSkeleton width="50px" height="16px" />
+        <SkeletonBox width="80px" height="16px" />
+        <SkeletonBox width="50px" height="16px" />
       </SkeletonProgressInfo>
       {hasShowGraph && <ProgressBarSkeleton />}
       {hasShowDescription && device === 'pc' && (
-        <TextSkeleton width="100px" height="14px" />
+        <SkeletonBox width="100px" height="14px" />
       )}
     </SkeletonContainer>
   );

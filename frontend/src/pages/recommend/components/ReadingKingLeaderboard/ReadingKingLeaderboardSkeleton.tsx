@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { RANKING } from './ReadingKingLeaderboard.constants';
-import TextSkeleton from '@/components/Skeleton/TextSkeleton';
+import SkeletonBox from '@/components/Skeleton/SkeletonBox';
 import { skeletonStyle } from '@/styles/skeleton';
 
 const ReadingKingLeaderboardSkeleton = () => {
@@ -11,8 +11,8 @@ const ReadingKingLeaderboardSkeleton = () => {
           <SkeletonLeaderboardItem key={`skeletonLeaderboard-${index}`}>
             <SkeletonRank />
             <UserInfoBox>
-              <TextSkeleton width="80px" height="22px" />
-              <TextSkeleton width="60px" height="20px" />
+              <SkeletonBox width="80px" height="22px" />
+              <SkeletonBox width="60px" height="20px" />
             </UserInfoBox>
           </SkeletonLeaderboardItem>
         ))}

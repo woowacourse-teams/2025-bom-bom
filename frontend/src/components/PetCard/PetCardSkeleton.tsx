@@ -8,7 +8,7 @@ import {
   TitleWrapper,
 } from './PetCard';
 import ProgressBarSkeleton from '../ProgressBar/ProgressBarSkeleton';
-import TextSkeleton from '../Skeleton/TextSkeleton';
+import SkeletonBox from '../Skeleton/SkeletonBox';
 import { useDevice } from '@/hooks/useDevice';
 import { skeletonStyle } from '@/styles/skeleton';
 import { theme } from '@/styles/theme';
@@ -31,7 +31,7 @@ const PetCardSkeleton = () => {
         <SkeletonPetImage />
       </PetImageContainer>
 
-      <TextSkeleton width="100px" height="16px" />
+      <SkeletonBox width="100px" height="16px" />
 
       <ProgressBarSkeleton />
 

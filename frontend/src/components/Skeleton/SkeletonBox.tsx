@@ -6,11 +6,11 @@ interface TextSkeletonProps {
   height: string;
 }
 
-const TextSkeleton = ({ width, height }: TextSkeletonProps) => {
+const SkeletonBox = ({ width, height }: TextSkeletonProps) => {
   return <Skeleton width={width} height={height} />;
 };
 
-export default TextSkeleton;
+export default SkeletonBox;
 
 const Skeleton = styled.div<{ width: string; height: string }>`
   width: ${({ width }) => width};

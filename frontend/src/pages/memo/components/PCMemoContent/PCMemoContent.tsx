@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
 import Pagination from '@/components/Pagination/Pagination';
-import TextSkeleton from '@/components/Skeleton/TextSkeleton';
+import SkeletonBox from '@/components/Skeleton/SkeletonBox';
 import ReadOnlyMemoCard from '@/pages/detail/components/MemoCard/ReadOnlyMemoCard';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import type { GetHighlightsParams } from '@/apis/highlight';
@@ -44,7 +44,7 @@ export default function PCMemoContent({
     <>
       <SummaryBar>
         {isLoading ? (
-          <TextSkeleton width="80px" height="20px" />
+          <SkeletonBox width="80px" height="20px" />
         ) : (
           <ResultsInfo>총 {totalElements}개의 메모</ResultsInfo>
         )}

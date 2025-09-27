@@ -8,7 +8,7 @@ import {
   ThumbnailWrapper,
   Title,
 } from './ArticleCard';
-import TextSkeleton from '@/components/Skeleton/TextSkeleton';
+import SkeletonBox from '@/components/Skeleton/SkeletonBox';
 import { useDevice } from '@/hooks/useDevice';
 import { skeletonStyle } from '@/styles/skeleton';
 
@@ -28,7 +28,7 @@ const ArticleCardSkeleton = () => {
         </SkeletonMetaInfoRow>
       </SkeletonInfoWrapper>
       <SkeletonThumbnailWrapper as={ThumbnailWrapper} isMobile={isMobile}>
-        <TextSkeleton
+        <SkeletonBox
           width={isMobile ? '64px' : '126px'}
           height={isMobile ? '64px' : '126px'}
         />

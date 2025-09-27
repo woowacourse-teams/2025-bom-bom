@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import TextSkeleton from '../Skeleton/TextSkeleton';
+import SkeletonBox from '../Skeleton/SkeletonBox';
 import type { ReactNode } from 'react';
 
 interface TabSkeletonProps {
@@ -21,7 +21,7 @@ const TabSkeleton = ({
     <SkeletonContainer>
       {StartComponent}
       <SkeletonLabel textAlign={textAlign}>
-        <TextSkeleton width={skeletonWidth} height={skeletonHeight} />
+        <SkeletonBox width={skeletonWidth} height={skeletonHeight} />
       </SkeletonLabel>
       {EndComponent}
     </SkeletonContainer>

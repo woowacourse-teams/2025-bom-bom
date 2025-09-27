@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import TextSkeleton from '../Skeleton/TextSkeleton';
+import SkeletonBox from '../Skeleton/SkeletonBox';
 import { skeletonStyle } from '@/styles/skeleton';
 
 const ImageInfoCardSkeleton = ({ ...props }) => {
@@ -7,8 +7,8 @@ const ImageInfoCardSkeleton = ({ ...props }) => {
     <Container {...props}>
       <ImageSkeleton />
       <InfoBox>
-        <TextSkeleton width="60%" height="20px" />
-        <TextSkeleton width="80%" height="16px" />
+        <SkeletonBox width="60%" height="20px" />
+        <SkeletonBox width="80%" height="16px" />
       </InfoBox>
     </Container>
   );

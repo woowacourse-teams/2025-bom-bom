@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import SearchInput from '@/components/SearchInput/SearchInput';
 import Select from '@/components/Select/Select';
-import TextSkeleton from '@/components/Skeleton/TextSkeleton';
+import SkeletonBox from '@/components/Skeleton/SkeletonBox';
 
 interface ArticleListControlsProps {
   searchInput: string;
@@ -29,7 +29,7 @@ export default function ArticleListControls({
       />
       <SummaryBar>
         {isLoading ? (
-          <TextSkeleton width="80px" height="20px" />
+          <SkeletonBox width="80px" height="20px" />
         ) : (
           <SummaryText>총 {totalElements ?? 0}개</SummaryText>
         )}

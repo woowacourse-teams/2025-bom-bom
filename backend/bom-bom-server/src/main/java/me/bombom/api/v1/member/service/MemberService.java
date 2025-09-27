@@ -1,11 +1,11 @@
 package me.bombom.api.v1.member.service;
 
-import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.enums.SignupValidateField;
 import me.bombom.api.v1.auth.enums.SignupValidateStatus;
+import me.bombom.api.v1.auth.service.UserInfoValidator;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -25,11 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private static final long MEMBER_ROLE_ID = 1L;
-    private static final String NICKNAME_REGEX_PATTERN = "^(?!.*\\.\\.)[A-Za-z0-9가-힣][A-Za-z0-9가-힣._ ]*[A-Za-z0-9가-힣]$";
-    private static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?@bombom\\.news$";
 
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final UserInfoValidator userInfoValidator;
 
     @Transactional
     public Member signup(PendingOAuth2Member pendingMember, MemberSignupRequest signupRequest) {
@@ -68,14 +67,6 @@ public class MemberService {
         return MemberProfileResponse.from(member);
     }
 
-    public Member findById(Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, id)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
-                );
-    }
-
     @Transactional
     public void revoke(Long memberId) {
         Member member = memberRepository.findById(memberId)
@@ -90,7 +81,7 @@ public class MemberService {
 
 
     private void validateDuplicateEmail(String email) {
-        if (memberRepository.existsByEmail(email.toLowerCase())) {
+        if (userInfoValidator.isDuplicateEmail(email)) {
             throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_EMAIL)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "email")
                     .addContext(ErrorContextKeys.OPERATION, "validateDuplicateEmail");
@@ -98,7 +89,7 @@ public class MemberService {
     }
 
     private void validateDuplicateNickname(String nickname) {
-        if (memberRepository.existsByNickname(nickname)) {
+        if (userInfoValidator.isDuplicateNickname(nickname)) {
             throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_NICKNAME)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "nickname")
                     .addContext(ErrorContextKeys.OPERATION, "validateDuplicateNickname");
@@ -106,32 +97,22 @@ public class MemberService {
     }
 
     private SignupValidateStatus validateSignupNickname(String value) {
-        if (isInvalidNicknamePattern(value)) {
+        if (!userInfoValidator.isValidNickname(value)) {
             return SignupValidateStatus.INVALID_PATTERN;
         }
-        if (memberRepository.existsByNickname(value)) {
+        if (userInfoValidator.isDuplicateNickname(value)) {
             return SignupValidateStatus.DUPLICATE;
         }
         return SignupValidateStatus.OK;
     }
 
     private SignupValidateStatus validateSignupEmail(String value) {
-        if (isInvalidEmailPattern(value)) {
+        if (!userInfoValidator.isValidEmail(value)) {
             return SignupValidateStatus.INVALID_PATTERN;
         }
-        if (memberRepository.existsByEmail(value)) {
+        if (userInfoValidator.isDuplicateEmail(value)) {
             return SignupValidateStatus.DUPLICATE;
         }
         return SignupValidateStatus.OK;
-    }
-
-    private boolean isInvalidNicknamePattern(String value) {
-        Pattern nicknamePattern = Pattern.compile(NICKNAME_REGEX_PATTERN);
-        return !nicknamePattern.matcher(value).matches();
-    }
-
-    private boolean isInvalidEmailPattern(String value) {
-        Pattern emailPattern = Pattern.compile(MemberService.EMAIL_REGEX_PATTERN);
-        return !emailPattern.matcher(value).matches();
     }
 }

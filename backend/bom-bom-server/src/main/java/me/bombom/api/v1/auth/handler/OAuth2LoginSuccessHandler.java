@@ -14,6 +14,8 @@ import me.bombom.api.v1.auth.dto.OAuth2LoginInfo;
 import me.bombom.api.v1.auth.extractor.AppleUserInfoExtractor;
 import me.bombom.api.v1.auth.extractor.GoogleUserInfoExtractor;
 import me.bombom.api.v1.auth.extractor.OAuth2UserInfoExtractor;
+import me.bombom.api.v1.auth.service.UniqueUserInfoGenerator;
+import me.bombom.api.v1.auth.service.UserInfoValidator;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
@@ -49,6 +51,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private String frontendLocalUrl;
 
     private final MemberService memberService;
+    private final UserInfoValidator userInfoValidator;
+    private final UniqueUserInfoGenerator uniqueUserInfoGenerator;
 
     @Override
     public void onAuthenticationSuccess(
@@ -138,31 +142,23 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         boolean hasParam = false;
         try {
             if (oauth2Info.getEmail() != null) {
+                String uniqueEmailLocalPart = uniqueUserInfoGenerator.getUniqueEmail(oauth2Info.getEmail());
                 params.append(EMAIL_PARAM)
                         .append("=")
-                        .append(URLEncoder.encode(getEmailLocalPart(oauth2Info), StandardCharsets.UTF_8));
+                        .append(URLEncoder.encode(uniqueEmailLocalPart, StandardCharsets.UTF_8));
                 hasParam = true;
             }
             if (oauth2Info.getName() != null) {
                 if (hasParam) params.append("&");
+                String uniqueNickname = uniqueUserInfoGenerator.getUniqueNickname(oauth2Info.getName());
                 params.append(NAME_PARAM)
                         .append("=")
-                        .append(URLEncoder.encode(oauth2Info.getName(), StandardCharsets.UTF_8));
+                        .append(URLEncoder.encode(uniqueNickname, StandardCharsets.UTF_8));
             }
         } catch (Exception e) {
             log.warn("쿼리 파라미터 인코딩 실패", e);
         }
         return params.toString();
-    }
-
-    private String getEmailLocalPart(OAuth2LoginInfo oauth2Info) {
-        String email = oauth2Info.getEmail();
-        String localPart = email;
-        int atPos = email.indexOf('@');
-        if (atPos > 0) {
-            localPart = email.substring(0, atPos);
-        }
-        return localPart;
     }
 
     private String getBaseUrlByEnv(HttpServletRequest request) {

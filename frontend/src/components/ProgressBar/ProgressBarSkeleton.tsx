@@ -2,11 +2,15 @@ import styled from '@emotion/styled';
 import { Container, ProgressCaption, ProgressGauge } from './ProgressBar';
 import { skeletonStyle } from '@/styles/skeleton';
 
-const ProgressBarSkeleton = () => {
+interface ProgressBarSkeletonProps {
+  hasCaption?: boolean;
+}
+
+const ProgressBarSkeleton = ({ hasCaption }: ProgressBarSkeletonProps) => {
   return (
     <Container>
       <SkeletonProgressGauge as={ProgressGauge} />
-      <SkeletonProgressCaption as={ProgressCaption} />
+      {hasCaption && <SkeletonProgressCaption as={ProgressCaption} />}
     </Container>
   );
 };

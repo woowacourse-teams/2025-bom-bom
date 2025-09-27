@@ -1,15 +1,31 @@
 import styled from '@emotion/styled';
-import ReadingStatusCardContainer from './ReadingStatusCardContainer';
+import {
+  Container,
+  StatusIconWrapper,
+  Title,
+  TitleWrapper,
+} from './ReadingStatusCard';
 import ProgressWithLabelSkeleton from '@/components/ProgressWithLabel/ProgressWithLabelSkeleton';
 import { useDevice } from '@/hooks/useDevice';
 import { skeletonStyle } from '@/styles/skeleton';
+import { theme } from '@/styles/theme';
+import StatusIcon from '#/assets/svg/reading-status.svg';
 
 const ReadingStatusCardSkeleton = () => {
   const device = useDevice();
   const isPC = device === 'pc';
 
   return (
-    <ReadingStatusCardContainer>
+    <Container device={device}>
+      {device === 'pc' && (
+        <TitleWrapper>
+          <StatusIconWrapper>
+            <StatusIcon width={20} height={20} color={theme.colors.white} />
+          </StatusIconWrapper>
+          <Title>읽기 현황</Title>
+        </TitleWrapper>
+      )}
+
       <Streak />
 
       <SkeletonProgressWrapper isPC={isPC}>
@@ -23,21 +39,16 @@ const ReadingStatusCardSkeleton = () => {
           hasShowDescription={isPC}
         />
       </SkeletonProgressWrapper>
-    </ReadingStatusCardContainer>
+    </Container>
   );
 };
 
 export default ReadingStatusCardSkeleton;
 
 const Streak = styled.div`
-  width: 104px;
-  height: 104px;
-  padding: 20px;
+  width: 120px;
+  height: 120px;
   border-radius: 12px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
   ${skeletonStyle}
 `;

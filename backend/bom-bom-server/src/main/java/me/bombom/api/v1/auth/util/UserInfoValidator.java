@@ -1,4 +1,4 @@
-package me.bombom.api.v1.auth.service;
+package me.bombom.api.v1.auth.util;
 
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;

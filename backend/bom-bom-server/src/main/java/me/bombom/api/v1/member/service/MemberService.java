@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.enums.SignupValidateField;
 import me.bombom.api.v1.auth.enums.SignupValidateStatus;
-import me.bombom.api.v1.auth.service.UserInfoValidator;
+import me.bombom.api.v1.auth.util.UserInfoValidator;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;

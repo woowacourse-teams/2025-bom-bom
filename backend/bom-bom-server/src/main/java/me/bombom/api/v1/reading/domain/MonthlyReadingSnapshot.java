@@ -15,11 +15,10 @@ import me.bombom.api.v1.common.BaseEntity;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MonthlyReading extends BaseEntity {
+public class MonthlyReadingSnapshot extends BaseEntity {
 
     private static final int INITIAL_CURRENT_COUNT = 0;
     private static final int RESET_CURRENT_COUNT = 0;
-    private static final int INCREASE_CURRENT_COUNT = 1;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +37,7 @@ public class MonthlyReading extends BaseEntity {
     private long nextRankDifference;
 
     @Builder
-    public MonthlyReading(
+    public MonthlyReadingSnapshot(
             Long id,
             @NonNull Long memberId,
             int currentCount,
@@ -52,8 +51,8 @@ public class MonthlyReading extends BaseEntity {
         this.nextRankDifference = nextRankDifference;
     }
 
-    public static MonthlyReading create(Long memberId, long lowestRank, long lowestDifference) {
-        return MonthlyReading.builder()
+    public static MonthlyReadingSnapshot create(Long memberId, long lowestRank, long lowestDifference) {
+        return MonthlyReadingSnapshot.builder()
                 .memberId(memberId)
                 .currentCount(INITIAL_CURRENT_COUNT)
                 .rankOrder(lowestRank)
@@ -63,9 +62,5 @@ public class MonthlyReading extends BaseEntity {
 
     public void resetCurrentCount() {
         this.currentCount = RESET_CURRENT_COUNT;
-    }
-
-    public void increaseCurrentCount() {
-        this.currentCount += INCREASE_CURRENT_COUNT;
     }
 }

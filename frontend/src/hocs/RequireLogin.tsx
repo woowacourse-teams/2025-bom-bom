@@ -2,12 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import { queries } from '@/apis/queries';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import RequireLoginCard from '@/components/RequireLoginCard/RequireLoginCard';
-import { useWebViewAuth } from '@/libs/webview/useWebViewAuth';
 import type { PropsWithChildren } from 'react';
 
 const RequireLogin = ({ children }: PropsWithChildren) => {
-  useWebViewAuth();
-
   const { data: user, isLoading, error } = useQuery(queries.me());
 
   if (isLoading) {

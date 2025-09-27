@@ -62,16 +62,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // === 탈퇴 처리 ===
         if (pendingWithdraw != null && pendingWithdraw && withdrawMemberId != null) {
-            try {
-                memberService.revoke(withdrawMemberId);
-            } catch (Exception e) {
-                log.error("재인증 후 탈퇴 처리 중 예외 발생 - memberId: {}", withdrawMemberId, e);
-            } finally {
-                session.invalidate();
-                SecurityContextHolder.clearContext();
-                response.sendRedirect(getBaseUrlByEnv(request));
-                return;
-            }
+            handleWithdrawAfterReAuth(withdrawMemberId, request, response);
         } else {
             // === 로그인 처리 ===
             OAuth2LoginInfo oauth2Info = extractOAuth2LoginInfo(authentication);
@@ -79,18 +70,29 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             String redirectUrl = buildRedirectUrl(request, member, oauth2Info);
             response.sendRedirect(redirectUrl);
         }
+    }
 
+    private void handleWithdrawAfterReAuth(Long withdrawMemberId, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            memberService.revoke(withdrawMemberId);
+        } catch (Exception e) {
+            log.error("재인증 후 탈퇴 처리 중 예외 발생 - memberId: {}", withdrawMemberId, e);
+        } finally {
+            HttpSession session = request.getSession();
+            session.invalidate();
+            SecurityContextHolder.clearContext();
+            response.sendRedirect(getBaseUrlByEnv(request));
+        }
     }
 
     private OAuth2LoginInfo extractOAuth2LoginInfo(Authentication authentication) {
         Object principal = authentication.getPrincipal();
 
-        if (!(principal instanceof CustomOAuth2User)) {
+        if (!(principal instanceof CustomOAuth2User oauth2User)) {
             log.warn("알 수 없는 OAuth2User 타입: {}", principal.getClass().getSimpleName());
             return new OAuth2LoginInfo(null, null, null);  // 회원가입 페이지로 리다이렉트 유도
         }
 
-        CustomOAuth2User oauth2User = (CustomOAuth2User) principal;
         Member member = oauth2User.getMember();
         OAuth2UserInfoExtractor extractor = getExtractor(authentication);
         return extractor.extractLoginInfo(oauth2User, member);
@@ -133,22 +135,19 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private String buildQueryParams(OAuth2LoginInfo oauth2Info) {
         StringBuilder params = new StringBuilder("?");
-        boolean first = true;
+        boolean hasParam = false;
         try {
             if (oauth2Info.getEmail() != null) {
-                if (!first) params.append("&");
                 params.append(EMAIL_PARAM)
                         .append("=")
                         .append(URLEncoder.encode(getEmailLocalPart(oauth2Info), StandardCharsets.UTF_8));
-                first = false;
+                hasParam = true;
             }
-
             if (oauth2Info.getName() != null) {
-                if (!first) params.append("&");
+                if (hasParam) params.append("&");
                 params.append(NAME_PARAM)
                         .append("=")
                         .append(URLEncoder.encode(oauth2Info.getName(), StandardCharsets.UTF_8));
-                first = false;
             }
         } catch (Exception e) {
             log.warn("쿼리 파라미터 인코딩 실패", e);

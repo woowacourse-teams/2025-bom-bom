@@ -233,7 +233,8 @@ public class ReadingService {
             continueReadingRepository.deleteByMemberId(memberId);
             todayReadingRepository.deleteByMemberId(memberId);
             weeklyReadingRepository.deleteByMemberId(memberId);
-            monthlyReadingRepository.deleteByMemberId(memberId);
+            monthlyReadingSnapshotRepository.deleteByMemberId(memberId);
+            monthlyReadingRealtimeRepository.deleteByMemberId(memberId);
             yearlyReadingRepository.deleteByMemberId(memberId);
         } catch (Exception e){
             log.error("회원 읽기 정보 삭제 실패. memberId = {}", memberId, e.getStackTrace());

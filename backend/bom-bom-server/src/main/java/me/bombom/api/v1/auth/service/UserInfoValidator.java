@@ -19,9 +19,6 @@ public class UserInfoValidator {
     
     private final MemberRepository memberRepository;
 
-    /**
-     * 닉네임 유효성 검사
-     */
     public boolean isValidNickname(String nickname) {
         if (nickname == null || nickname.isBlank()) {
             return false;
@@ -30,9 +27,6 @@ public class UserInfoValidator {
         return pattern.matcher(nickname.strip()).matches();
     }
 
-    /**
-     * 이메일 유효성 검사
-     */
     public boolean isValidEmail(String email) {
         if (email == null || email.isBlank()) {
             return false;
@@ -41,9 +35,6 @@ public class UserInfoValidator {
         return pattern.matcher(email.strip().toLowerCase()).matches();
     }
 
-    /**
-     * 닉네임 중복 검사
-     */
     public boolean isDuplicateNickname(String nickname) {
         if (nickname == null || nickname.isBlank()) {
             return false;
@@ -51,9 +42,6 @@ public class UserInfoValidator {
         return memberRepository.existsByNickname(nickname.strip().toLowerCase());
     }
 
-    /**
-     * 이메일 중복 검사
-     */
     public boolean isDuplicateEmail(String email) {
         if (email == null || email.isBlank()) {
             return false;
@@ -61,16 +49,10 @@ public class UserInfoValidator {
         return memberRepository.existsByEmail(email.strip().toLowerCase());
     }
 
-    /**
-     * 닉네임 사용 가능 여부 검사 (유효성 + 중복 검사)
-     */
     public boolean isNicknameAvailable(String nickname) {
         return isValidNickname(nickname) && !isDuplicateNickname(nickname);
     }
 
-    /**
-     * 이메일 사용 가능 여부 검사 (유효성 + 중복 검사)
-     */
     public boolean isEmailAvailable(String email) {
         return isValidEmail(email) && !isDuplicateEmail(email);
     }

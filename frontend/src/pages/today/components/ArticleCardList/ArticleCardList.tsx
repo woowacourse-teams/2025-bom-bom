@@ -1,8 +1,10 @@
 import styled from '@emotion/styled';
 import ArticleCard from '../ArticleCard/ArticleCard';
+import ArticleCardSkeleton from '../ArticleCard/ArticleCardSkeleton';
 import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
 import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
+import { ARTICLE_SIZE } from '@/pages/storage/constants/article';
 import { theme } from '@/styles/theme';
 import type { Article } from '@/types/articles';
 import CheckIcon from '#/assets/svg/check.svg';
@@ -14,9 +16,10 @@ type ExtendedArticle = Article & {
 
 interface ArticleCardListProps {
   articles: ExtendedArticle[];
+  isLoading: boolean;
 }
 
-const ArticleCardList = ({ articles }: ArticleCardListProps) => {
+const ArticleCardList = ({ articles, isLoading }: ArticleCardListProps) => {
   const device = useDevice();
   const isMobile = device === 'mobile';
 
@@ -32,73 +35,87 @@ const ArticleCardList = ({ articles }: ArticleCardListProps) => {
     { read: [], unread: [] },
   );
 
-  if (articles.length === 0)
+  if (!isLoading && articles.length === 0)
     return <EmptyLetterCard title="새로운 뉴스레터가 없어요" />;
 
   return (
     <Container isMobile={isMobile}>
-      <LettersWrapper isMobile={isMobile}>
-        <ListTitleBox>
-          <LetterIcon width={32} height={32} color={theme.colors.white} />
-          <ListTitle>새로운 뉴스레터 ({grouped.unread.length}개)</ListTitle>
-        </ListTitleBox>
-        <CardList isMobile={isMobile}>
-          {grouped.unread.map((article) => (
-            <li key={article.articleId}>
-              <ArticleCard
-                data={article}
-                to={
-                  article.type === 'guide'
-                    ? `/articles/guide/${article.articleId}`
-                    : `/articles/${article.articleId}`
-                }
-                onClick={() => {
-                  trackEvent({
-                    category: 'Article',
-                    action:
+      {isLoading ? (
+        <LettersWrapper isMobile={isMobile}>
+          <CardList isMobile={isMobile}>
+            {Array.from({ length: ARTICLE_SIZE }).map((_, index) => (
+              <li key={`skeleton-${index}`}>
+                <ArticleCardSkeleton />
+              </li>
+            ))}
+          </CardList>
+        </LettersWrapper>
+      ) : (
+        <>
+          <LettersWrapper isMobile={isMobile}>
+            <ListTitleBox>
+              <LetterIcon width={32} height={32} color={theme.colors.white} />
+              <ListTitle>새로운 뉴스레터 ({grouped.unread.length}개)</ListTitle>
+            </ListTitleBox>
+            <CardList isMobile={isMobile}>
+              {grouped.unread.map((article) => (
+                <li key={article.articleId}>
+                  <ArticleCard
+                    data={article}
+                    to={
                       article.type === 'guide'
-                        ? '가이드 메일 클릭'
-                        : '아티클 클릭',
-                    label: article.title ?? 'Unknown Article',
-                  });
-                }}
-              />
-            </li>
-          ))}
-        </CardList>
-      </LettersWrapper>
-      <LettersWrapper isMobile={isMobile}>
-        {grouped.read.length > 0 && (
-          <ListTitleBox>
-            <CheckIcon width={32} height={32} color={theme.colors.black} />
-            <ListTitle>읽은 뉴스레터 ({grouped.read.length}개)</ListTitle>
-          </ListTitleBox>
-        )}
-        <CardList isMobile={isMobile}>
-          {grouped.read.map((article) => (
-            <li key={article.articleId}>
-              <ArticleCard
-                data={article}
-                to={
-                  article.type === 'guide'
-                    ? `/articles/guide/${article.articleId}`
-                    : `/articles/${article.articleId}`
-                }
-                onClick={() => {
-                  trackEvent({
-                    category: 'Article',
-                    action:
+                        ? `/articles/guide/${article.articleId}`
+                        : `/articles/${article.articleId}`
+                    }
+                    onClick={() => {
+                      trackEvent({
+                        category: 'Article',
+                        action:
+                          article.type === 'guide'
+                            ? '가이드 메일 클릭'
+                            : '아티클 클릭',
+                        label: article.title ?? 'Unknown Article',
+                      });
+                    }}
+                  />
+                </li>
+              ))}
+            </CardList>
+          </LettersWrapper>
+          <LettersWrapper isMobile={isMobile}>
+            {grouped.read.length > 0 && (
+              <ListTitleBox>
+                <CheckIcon width={32} height={32} color={theme.colors.black} />
+                <ListTitle>읽은 뉴스레터 ({grouped.read.length}개)</ListTitle>
+              </ListTitleBox>
+            )}
+            <CardList isMobile={isMobile}>
+              {grouped.read.map((article) => (
+                <li key={article.articleId}>
+                  <ArticleCard
+                    data={article}
+                    to={
                       article.type === 'guide'
-                        ? '가이드 메일 클릭'
-                        : '아티클 클릭',
-                    label: article.title ?? 'Unknown Article',
-                  });
-                }}
-              />
-            </li>
-          ))}
-        </CardList>
-      </LettersWrapper>
+                        ? `/articles/guide/${article.articleId}`
+                        : `/articles/${article.articleId}`
+                    }
+                    onClick={() => {
+                      trackEvent({
+                        category: 'Article',
+                        action:
+                          article.type === 'guide'
+                            ? '가이드 메일 클릭'
+                            : '아티클 클릭',
+                        label: article.title ?? 'Unknown Article',
+                      });
+                    }}
+                  />
+                </li>
+              ))}
+            </CardList>
+          </LettersWrapper>
+        </>
+      )}
     </Container>
   );
 };

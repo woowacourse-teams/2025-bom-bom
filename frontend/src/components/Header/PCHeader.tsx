@@ -3,6 +3,7 @@ import HeaderLogo from './HeaderLogo';
 import HeaderNavButtons from './HeaderNavButtons';
 import HeaderProfile from './HeaderProfile';
 import LoginButton from './LoginButton';
+import TextSkeleton from '../Skeleton/TextSkeleton';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import type { Nav } from '@/types/nav';
 
@@ -11,7 +12,7 @@ interface PCHeaderProps {
 }
 
 const PCHeader = ({ activeNav }: PCHeaderProps) => {
-  const { userInfo } = useUserInfo();
+  const { userInfo, isLoading } = useUserInfo();
 
   return (
     <HeaderContainer>
@@ -22,11 +23,15 @@ const PCHeader = ({ activeNav }: PCHeaderProps) => {
           <HeaderNavButtons activeNav={activeNav} device="pc" />
         </NavWrapper>
 
-        {userInfo ? (
-          <HeaderProfile userInfo={userInfo} device="pc" />
-        ) : (
-          <LoginButton />
-        )}
+        <UserInfoWrapper>
+          {isLoading ? (
+            <TextSkeleton width="120px" height="40px" />
+          ) : userInfo ? (
+            <HeaderProfile userInfo={userInfo} device="pc" />
+          ) : (
+            <LoginButton />
+          )}
+        </UserInfoWrapper>
       </HeaderInner>
     </HeaderContainer>
   );
@@ -70,4 +75,11 @@ const NavWrapper = styled.nav`
   align-items: center;
 
   background: ${({ theme }) => theme.colors.white};
+`;
+
+const UserInfoWrapper = styled.div`
+  width: 220px;
+
+  display: flex;
+  justify-content: flex-end;
 `;

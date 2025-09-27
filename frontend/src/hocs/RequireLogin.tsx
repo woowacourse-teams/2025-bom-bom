@@ -5,11 +5,7 @@ import RequireLoginCard from '@/components/RequireLoginCard/RequireLoginCard';
 import type { PropsWithChildren } from 'react';
 
 const RequireLogin = ({ children }: PropsWithChildren) => {
-  const { data: user, isLoading, error } = useQuery(queries.me());
-
-  if (isLoading) {
-    return <PageLayout>{/* 로딩 상태는 필요에 따라 추가 */}</PageLayout>;
-  }
+  const { data: user, error } = useQuery(queries.me());
 
   if (error || !user) {
     return (

@@ -79,7 +79,6 @@ public class MemberService {
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
             );
 
-
         /*
         회원 탈퇴 신청 시 즉시 withdrawnMember로 정보 이전
         이벤트에서 회원 관련된 모든 정보 제거: articles, pet, highlight, bookmark, reading, subscribe

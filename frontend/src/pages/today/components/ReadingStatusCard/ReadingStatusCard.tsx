@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import ReadingStatusCardContainer from './ReadingStatusCardContainer';
-import ReadingStatusCardSkeleton from './ReadingStatusCardSkeleton';
 import WeeklyGoalEditor, { WeeklyGoalInput } from './WeeklyGoalEditor';
 import StreakCounter from '../StreakCounter/StreakCounter';
 import { queries } from '@/apis/queries';
@@ -15,7 +14,7 @@ import GoalIcon from '#/assets/svg/goal.svg';
 
 const ReadingStatusCard = () => {
   const device = useDevice();
-  const { data, isLoading } = useQuery(queries.readingStatus());
+  const { data } = useQuery(queries.readingStatus());
   const [isEditing, setIsEditing] = useState(false);
   const [goalCount, setGoalCount] = useState<number | null>(null);
 
@@ -25,7 +24,6 @@ const ReadingStatusCard = () => {
     },
   });
 
-  if (isLoading) return <ReadingStatusCardSkeleton />;
   if (!data) return null;
 
   const { streakReadDay, today, weekly } = data;

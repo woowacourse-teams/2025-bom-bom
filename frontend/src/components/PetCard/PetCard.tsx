@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
-import { PET_LABEL, PET_WIDTH, LEVEL } from './PetCard.constants';
+import { LEVEL, PET_LABEL, PET_WIDTH } from './PetCard.constants';
 import { heartAnimation, jumpAnimation } from './PetCard.keyframes';
 import Button from '../Button/Button';
 import ProgressBar from '../ProgressBar/ProgressBar';

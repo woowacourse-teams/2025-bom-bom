@@ -33,3 +33,4 @@ public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
         response.sendRedirect(redirectUrl);
     }
 }
+

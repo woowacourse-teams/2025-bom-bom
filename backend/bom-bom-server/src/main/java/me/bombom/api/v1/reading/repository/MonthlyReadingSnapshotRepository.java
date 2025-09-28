@@ -27,8 +27,8 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 	""", nativeQuery = true)
 	List<MonthlyReadingRankResponse> findMonthlyRanking(@Param("limit") int limit);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query(value = """
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Query(value = """
     UPDATE monthly_reading_snapshot mrs
     JOIN (
         SELECT
@@ -48,8 +48,8 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
         mrs.current_count = ranks.current_count,
         mrs.rank_order = ranks.calculated_rank,
         mrs.next_rank_difference = ranks.next_diff
-""", nativeQuery = true)
-    void updateMonthlyRanking();
+  """, nativeQuery = true)
+  void updateMonthlyRanking();
 
 	@Query("""
 		SELECT new me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse(
@@ -64,7 +64,9 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 
 	MonthlyReadingSnapshot findTopByOrderByRankOrderDesc();
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("UPDATE MonthlyReadingSnapshot mrs SET mrs.currentCount = 0")
-    void resetAllCurrentCount();
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Query("UPDATE MonthlyReadingSnapshot mrs SET mrs.currentCount = 0")
+  void resetAllCurrentCount();
+         
+	void deleteByMemberId(Long memberId);
 }

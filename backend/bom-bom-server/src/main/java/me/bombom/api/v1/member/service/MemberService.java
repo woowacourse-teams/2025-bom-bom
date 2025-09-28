@@ -2,6 +2,7 @@ package me.bombom.api.v1.member.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.enums.SignupValidateField;
 import me.bombom.api.v1.auth.enums.SignupValidateStatus;
@@ -14,6 +15,8 @@ import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.dto.response.MemberProfileResponse;
 import me.bombom.api.v1.member.event.MemberSignupEvent;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.withdraw.event.WithdrawEvent;
+import me.bombom.api.v1.withdraw.service.WithdrawService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +31,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final WithdrawService withdrawService;
     private final UserInfoValidator userInfoValidator;
 
     @Transactional
@@ -75,10 +79,17 @@ public class MemberService {
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
             );
 
+
+        /*
+        회원 탈퇴 신청 시 즉시 withdrawnMember로 정보 이전
+        이벤트에서 회원 관련된 모든 정보 제거: articles, pet, highlight, bookmark, reading, subscribe
+         */
+        withdrawService.migrateDeletedMember(member);
+        applicationEventPublisher.publishEvent(new WithdrawEvent(memberId));
+
         memberRepository.delete(member);
         log.info("회원 탈퇴 처리 완료. MemberId: {}", memberId);
     }
-
 
     private void validateDuplicateEmail(String email) {
         if (userInfoValidator.isDuplicateEmail(email)) {

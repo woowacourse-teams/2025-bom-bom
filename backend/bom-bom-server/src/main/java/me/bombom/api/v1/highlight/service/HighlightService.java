@@ -22,6 +22,7 @@ import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -71,6 +72,11 @@ public class HighlightService {
         int total = highlightRepository.countByMemberId(member.getId());
         List<HighlightCountPerNewsletterResponse> newsletters = highlightRepository.countPerNewsletters(member.getId());
         return HighlightStatisticsResponse.of(total, newsletters);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteAllByMemberId(Long memberId) {
+        highlightRepository.deleteAllByMemberId(memberId);
     }
 
     private void validateArticleOwner(Member member, Article article) {

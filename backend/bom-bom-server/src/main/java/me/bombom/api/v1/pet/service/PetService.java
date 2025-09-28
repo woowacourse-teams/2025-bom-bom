@@ -1,6 +1,7 @@
 package me.bombom.api.v1.pet.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -95,6 +97,11 @@ public class PetService {
     @Transactional
     public void resetAttendance() {
         petRepository.resetAllAttendance();
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteByMemberId(Long memberId) {
+        petRepository.deleteByMemberId(memberId);
     }
 
     private void updatePetStage(Pet pet) {

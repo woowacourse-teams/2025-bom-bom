@@ -18,6 +18,9 @@ export const Route = createFileRoute('/_bombom/bookmark')({
         name: 'robots',
         content: 'noindex, nofollow',
       },
+      {
+        title: '봄봄 | 북마크 보관함',
+      },
     ],
   }),
   component: BookmarkPage,

@@ -11,7 +11,7 @@ interface HeaderLogoProps {
 const HeaderLogo = ({ device }: HeaderLogoProps) => {
   return (
     <Container
-      to="/"
+      to="/today"
       onClick={() =>
         trackEvent({
           category: 'Navigation',

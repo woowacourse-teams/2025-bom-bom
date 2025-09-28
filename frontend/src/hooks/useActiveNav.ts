@@ -3,9 +3,9 @@ import { useEffect, useRef } from 'react';
 import type { Nav } from '@/types/nav';
 
 const navMap: Record<string, Nav> = {
-  '/': 'today',
+  '/today': 'today',
   '/storage': 'storage',
-  '/recommend': 'recommend',
+  '/': 'recommend',
 };
 
 export const useActiveNav = (): Nav => {

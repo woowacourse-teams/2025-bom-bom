@@ -35,8 +35,9 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
   const { mutate: mutateWithdraw } = useMutation({
     mutationKey: ['withdraw'],
     mutationFn: postWithdraw,
+
     onSuccess: () => {
-      navigate({ to: '/recommend' });
+      navigate({ to: '/' });
     },
     onError: () => {
       toast.error('회원탈퇴에 실패했습니다. 다시 시도해주세요.');

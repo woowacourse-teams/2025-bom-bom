@@ -1,28 +1,15 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useMemo } from 'react';
-import ArticleCardList from '../../pages/today/components/ArticleCardList/ArticleCardList';
-import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/ReadingStatusCard';
-import { getPet } from '@/apis/pet';
-import { queries } from '@/apis/queries';
-import PetCard from '@/components/PetCard/PetCard';
-import PetCardSkeleton from '@/components/PetCard/PetCardSkeleton';
-import { useDevice } from '@/hooks/useDevice';
-import { theme } from '@/styles/theme';
-import { isToday } from '@/utils/date';
-import { createStorage } from '@/utils/localStorage';
-import type { Device } from '@/hooks/useDevice';
-import type { LocalGuideMail } from '@/types/guide';
-import type { CSSObject, Theme } from '@emotion/react';
-import HomeIcon from '#/assets/svg/home.svg';
+import ReadingKingLeaderboard from '../../pages/recommend/components/ReadingKingLeaderboard/ReadingKingLeaderboard';
+import { useDevice, type Device } from '@/hooks/useDevice';
+import NewsletterHero from '@/pages/recommend/components/NewsletterHero/NewsletterHero';
+import TrendySection from '@/pages/recommend/components/TrendySection/TrendySection';
 
 export const Route = createFileRoute('/_bombom/')({
   head: () => ({
     meta: [
       {
-        name: 'robots',
-        content: 'noindex, nofollow',
+        title: '봄봄 | 뉴스레터 추천',
       },
     ],
   }),
@@ -30,59 +17,17 @@ export const Route = createFileRoute('/_bombom/')({
 });
 
 function Index() {
-  const today = useMemo(() => new Date(), []);
-  const { data: todayArticles, isLoading: isArticlesLoading } = useQuery(
-    queries.articles({ date: today }),
-  );
-
-  const { data: pet, isLoading: isPetLoading } = useQuery({
-    queryKey: ['pet'],
-    queryFn: getPet,
-  });
-
-  const guideArticles = createStorage<LocalGuideMail[], string>(
-    'guide-mail',
-  ).get();
-
-  const mergedArticles = [
-    ...(todayArticles?.content?.map((article) => ({
-      ...article,
-      type: 'article' as const,
-    })) ?? []),
-    ...(guideArticles
-      ?.filter((guide) => isToday(new Date(guide.createdAt)))
-      .map((guide) => ({ ...guide, type: 'guide' as const })) ?? []),
-  ];
-
   const device = useDevice();
 
   return (
     <Container device={device}>
-      {device !== 'mobile' && (
-        <>
-          <TitleWrapper>
-            <TitleIconBox>
-              <HomeIcon width={20} height={20} color={theme.colors.white} />
-            </TitleIconBox>
-            <Title>오늘의 뉴스레터</Title>
-          </TitleWrapper>
-        </>
-      )}
-
-      <ContentWrapper device={device}>
-        <ArticleCardList
-          articles={mergedArticles}
-          isLoading={isArticlesLoading}
-        />
-        <ReaderCompanion device={device}>
-          {isPetLoading ? (
-            <PetCardSkeleton />
-          ) : (
-            pet && <PetCard pet={pet} isLoading={isPetLoading} />
-          )}
-          <ReadingStatusCard />
-        </ReaderCompanion>
-      </ContentWrapper>
+      <MainSection device={device}>
+        <NewsletterHero />
+        <TrendySection />
+      </MainSection>
+      <SideSection device={device}>
+        <ReadingKingLeaderboard />
+      </SideSection>
     </Container>
   );
 }
@@ -93,80 +38,28 @@ const Container = styled.div<{ device: Device }>`
   margin: 0 auto;
 
   display: flex;
-  gap: 24px;
-  flex-direction: column;
+  gap: ${({ device }) =>
+    device === 'mobile' ? '20px' : device === 'tablet' ? '24px' : '32px'};
+  flex-direction: ${({ device }) => (device === 'mobile' ? 'column' : 'row')};
   align-items: flex-start;
-
-  box-sizing: border-box;
 `;
 
-const TitleWrapper = styled.div`
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: center;
-`;
-
-const TitleIconBox = styled.div`
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: center;
-
-  background-color: ${({ theme }) => theme.colors.primary};
-`;
-
-const Title = styled.h1`
-  font: ${({ theme }) => theme.fonts.heading3};
-`;
-
-const ContentWrapper = styled.div<{ device: Device }>`
-  width: 100%;
+const MainSection = styled.section<{ device: Device }>`
+  width: ${({ device }) => (device === 'mobile' ? '100%' : 'auto')};
+  min-width: 0;
+  max-width: ${({ device }) => (device === 'mobile' ? 'none' : '840px')};
 
   display: flex;
   gap: 24px;
-  flex-direction: ${({ device }) =>
-    device === 'pc' ? 'row' : 'column-reverse'};
-  align-items: ${({ device }) => (device === 'pc' ? 'flex-start' : 'center')};
-  align-self: stretch;
-  justify-content: center;
+  flex: 1;
+  flex-direction: column;
 `;
 
-const ReaderCompanion = styled.div<{ device: Device }>`
-  min-width: 300px;
+const SideSection = styled.div<{ device: Device }>`
+  width: ${({ device }) =>
+    device === 'mobile' ? '100%' : device === 'tablet' ? '360px' : '400px'};
+  max-width: ${({ device }) => (device === 'mobile' ? '400px' : 'none')};
+  margin: ${({ device }) => (device === 'mobile' ? '0 auto' : '0')};
 
-  display: flex;
-  gap: 36px;
-
-  box-sizing: border-box;
-
-  ${({ device, theme }) => sideCardWrapperStyles[device](theme)}
+  flex-shrink: 0;
 `;
-
-const sideCardWrapperStyles: Record<Device, (theme: Theme) => CSSObject> = {
-  pc: (theme) => ({
-    width: '310px',
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    gap: '24px',
-    border: `1px solid ${theme.colors.white}`,
-  }),
-  tablet: () => ({
-    width: '100%',
-    maxWidth: 'calc(100% - 200px)',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  }),
-  mobile: () => ({
-    position: 'relative',
-    paddingBottom: '44px',
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  }),
-};

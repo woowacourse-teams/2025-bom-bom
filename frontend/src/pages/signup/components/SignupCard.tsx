@@ -67,7 +67,7 @@ const SignupCard = () => {
       sendMessageToRN({
         type: 'LOGIN_SUCCESS',
       });
-      navigate({ to: '/' });
+      navigate({ to: '/today' });
       trackEvent({
         category: 'Authentication',
         action: '회원가입 성공',
@@ -217,7 +217,7 @@ const SignupCard = () => {
             </LabelRow>
           }
           inputValue={emailPart}
-          onInputChange={(e) => setEmailPart(e.target.value)}
+          onInputChange={(e) => setEmailPart(e.target.value.toLowerCase())}
           onBlur={handleEmailBlur}
           errorString={emailError}
           placeholder="이메일을 입력해주세요"

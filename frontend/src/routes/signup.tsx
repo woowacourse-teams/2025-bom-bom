@@ -12,6 +12,9 @@ export const Route = createFileRoute('/signup')({
         name: 'robots',
         content: 'noindex, nofollow',
       },
+      {
+        title: '봄봄 | 회원가입',
+      },
     ],
   }),
   component: RouteComponent,

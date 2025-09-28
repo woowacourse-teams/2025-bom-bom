@@ -16,6 +16,9 @@ export const Route = createFileRoute('/_bombom/guide')({
         name: 'robots',
         content: 'noindex, nofollow',
       },
+      {
+        title: '봄봄 | 가이드 보관함',
+      },
     ],
   }),
   component: GuidePage,

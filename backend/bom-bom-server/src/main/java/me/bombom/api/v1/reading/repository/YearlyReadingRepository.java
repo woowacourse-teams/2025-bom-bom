@@ -19,4 +19,8 @@ public interface YearlyReadingRepository extends JpaRepository<YearlyReading, Lo
         WHERE yr.memberId = :memberId AND yr.readingYear = :targetYear
     """)
     int increaseMonthlyCountToYearly(@Param("memberId") Long memberId, @Param("monthlyCount") int monthlyCount, @Param("targetYear") int targetYear);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM YearlyReading y WHERE y.memberId = :memberId")
+    void deleteByMemberId(Long memberId);
 }

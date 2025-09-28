@@ -122,38 +122,6 @@ export const Container = styled.section<{ device: Device }>`
   ${({ device, theme }) => containerStyles[device](theme)}
 `;
 
-export const TitleWrapper = styled.div`
-  width: 100%;
-
-  display: flex;
-  gap: 10px;
-  align-items: center;
-`;
-
-export const StatusIconWrapper = styled.div`
-  width: 32px;
-  height: 32px;
-  padding: 6px;
-  border-radius: 14px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background-color: ${({ theme }) => theme.colors.primary};
-`;
-
-export const Title = styled.h2`
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.heading5};
-  text-align: center;
-`;
-
-const Level = styled.p`
-  color: ${({ theme }) => theme.colors.textTertiary};
-  font: ${({ theme }) => theme.fonts.body2};
-`;
-
 export const PetImageContainer = styled.div`
   position: relative;
 
@@ -195,6 +163,38 @@ const Heart = styled.div`
   &:nth-of-type(5) {
     left: 50%;
   }
+`;
+
+const Level = styled.p`
+  color: ${({ theme }) => theme.colors.textTertiary};
+  font: ${({ theme }) => theme.fonts.body2};
+`;
+
+export const TitleWrapper = styled.div`
+  width: 100%;
+
+  display: flex;
+  gap: 10px;
+  align-items: center;
+`;
+
+export const StatusIconWrapper = styled.div`
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  border-radius: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: ${({ theme }) => theme.colors.primary};
+`;
+
+export const Title = styled.h2`
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.heading5};
+  text-align: center;
 `;
 
 export const AttendanceButton = styled(Button)<{ device: Device }>`

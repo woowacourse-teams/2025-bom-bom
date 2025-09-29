@@ -14,9 +14,10 @@ type ExtendedArticle = Article & {
 
 interface ArticleCardListProps {
   articles: ExtendedArticle[];
+  isLoading: boolean;
 }
 
-const ArticleCardList = ({ articles }: ArticleCardListProps) => {
+const ArticleCardList = ({ articles, isLoading }: ArticleCardListProps) => {
   const device = useDevice();
   const isMobile = device === 'mobile';
 
@@ -32,7 +33,7 @@ const ArticleCardList = ({ articles }: ArticleCardListProps) => {
     { read: [], unread: [] },
   );
 
-  if (articles.length === 0)
+  if (articles.length === 0 && !isLoading)
     return <EmptyLetterCard title="새로운 뉴스레터가 없어요" />;
 
   return (

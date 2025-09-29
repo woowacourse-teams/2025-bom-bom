@@ -37,7 +37,6 @@ function withNetworkSecurityConfigFile(config) {
       // - cleartextTrafficPermitted="true": HTTP 허용
       // - <domain includeSubdomains="true">bombom.news</domain>: 대상 도메인 및 서브도메인 허용
       const xml = `
-        <?xml version="1.0" encoding="utf-8"?>
         <network-security-config>
           <domain-config cleartextTrafficPermitted="true">
             <domain includeSubdomains="true">bombom.news</domain>

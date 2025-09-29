@@ -1,10 +1,10 @@
-import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useLocation } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { formatBirthDate, validateBirthDate } from './SignupCard.utils';
 import { useSignupMutation } from '../hooks/useSignupMutation';
 import InputField from '@/components/InputField/InputField';
+import Tooltip from '@/components/Tooltip/Tooltip';
 import { useDevice } from '@/hooks/useDevice';
 import { GUIDE_MAILS } from '@/mocks/datas/guideMail';
 import { theme } from '@/styles/theme';
@@ -108,7 +108,7 @@ const SignupCard = () => {
         <FieldGroup>
           <LabelRow>
             <Label htmlFor="email">이메일</Label>
-            <InfoButton
+            <TooltipButton
               type="button"
               aria-label="이메일을 수집하는 이유 안내"
               aria-expanded={emailHelpOpen}
@@ -119,14 +119,10 @@ const SignupCard = () => {
               onBlur={closeEmailHelp}
             >
               <EmailHelpIcon fill={theme.colors.primary} />
-            </InfoButton>
+            </TooltipButton>
             <InfoText>이 주소로 뉴스레터가 도착해요!</InfoText>
 
-            <Tooltip
-              role="tooltip"
-              id="email-help-tooltip"
-              open={emailHelpOpen}
-            >
+            <Tooltip id="email-help-tooltip" open={emailHelpOpen}>
               봄봄은 <b>개인 메일</b>이 아닌 <b>봄봄 전용 메일</b>(
               <b>{EMAIL_DOMAIN}</b>)로 뉴스레터를 <b>수신</b>해요.
               <br />- 뉴스레터 전용이라 깔끔하게 관리돼요.
@@ -260,7 +256,7 @@ const LabelRow = styled.div`
   align-items: center;
 `;
 
-const InfoButton = styled.button`
+const TooltipButton = styled.button`
   width: 18px;
   height: 18px;
   padding: 0;
@@ -289,38 +285,6 @@ const InfoText = styled.p`
 
 const EmailHelpIcon = styled(HelpIcon)`
   background-color: ${({ theme }) => theme.colors.white};
-`;
-
-const Tooltip = styled.div<{ open: boolean }>`
-  visibility: hidden;
-  position: absolute;
-  bottom: 28px;
-  left: 0;
-  z-index: ${({ theme }) => theme.zIndex.elevated};
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  box-shadow: 0 10px 20px -12px rgb(0 0 0 / 35%);
-
-  background: ${({ theme }) => theme.colors.black};
-  color: ${({ theme }) => theme.colors.white};
-  font: ${({ theme }) => theme.fonts.caption};
-
-  opacity: 0;
-  transform: translateY(4px);
-  transition:
-    opacity 0.15s ease,
-    transform 0.15s ease,
-    visibility 0.15s;
-
-  ${({ open }) =>
-    open &&
-    css`
-      visibility: visible;
-
-      opacity: 1;
-      transform: translateY(0);
-    `}
 `;
 
 const SubmitButton = styled.button`

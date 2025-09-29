@@ -2,7 +2,6 @@ package me.bombom.api.v1.member.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.enums.SignupValidateField;
 import me.bombom.api.v1.auth.enums.SignupValidateStatus;
@@ -36,8 +35,8 @@ public class MemberService {
 
     @Transactional
     public Member signup(PendingOAuth2Member pendingMember, MemberSignupRequest signupRequest) {
-        validateDuplicateNickname(signupRequest.nickname());
-        validateDuplicateEmail(signupRequest.email());
+        userInfoValidator.validateNickname(signupRequest.nickname());
+        userInfoValidator.validateEmail(signupRequest.email());
 
         Member newMember = Member.builder()
                 .provider(pendingMember.getProvider())
@@ -58,6 +57,7 @@ public class MemberService {
         String normalized = value.strip().toLowerCase();
         return switch (field) {
             case NICKNAME -> validateSignupNickname(normalized);
+            //이메일 전체가 옴
             case EMAIL -> validateSignupEmail(normalized);
         };
     }
@@ -88,22 +88,6 @@ public class MemberService {
 
         memberRepository.delete(member);
         log.info("회원 탈퇴 처리 완료. MemberId: {}", memberId);
-    }
-
-    private void validateDuplicateEmail(String email) {
-        if (userInfoValidator.isDuplicateEmail(email)) {
-            throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_EMAIL)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "email")
-                    .addContext(ErrorContextKeys.OPERATION, "validateDuplicateEmail");
-        }
-    }
-
-    private void validateDuplicateNickname(String nickname) {
-        if (userInfoValidator.isDuplicateNickname(nickname)) {
-            throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_NICKNAME)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "nickname")
-                    .addContext(ErrorContextKeys.OPERATION, "validateDuplicateNickname");
-        }
     }
 
     private SignupValidateStatus validateSignupNickname(String value) {

@@ -20,6 +20,7 @@ public enum ErrorDetail {
     HANDLE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "M007", "권한이 없습니다."),
     INVALID_REQUEST_PARAMETER_VALIDATION(HttpStatus.BAD_REQUEST, "M008", "요청 파라미터 유효성이 맞지 않습니다."),
     DUPLICATED_DATA(HttpStatus.BAD_REQUEST, "M009", "이미 존재하는 데이터입니다."),
+    BLANK_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "M010", "공백은 허용하지 않습니다"),
 
     /*
     * J : 인증
@@ -32,6 +33,8 @@ public enum ErrorDetail {
     UNSUPPORTED_OAUTH2_PROVIDER(HttpStatus.BAD_REQUEST, "J006", "지원하지 않는 소셜 로그인 입니다."),
     DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "J007", "이미 사용 중인 이메일입니다."),
     WITHDRAWN_MEMBER(HttpStatus.BAD_REQUEST, "J008", "이미 탈퇴한 회원입니다."),
+    INVALID_NICKNAME_FORMAT(HttpStatus.BAD_REQUEST, "J009", "잘못된 닉네임 형식입니다."),
+    INVALID_EMAIL_FORMAT(HttpStatus.BAD_REQUEST, "J009", "잘못된 이메일 형식입니다."),
 
     /*
     * G : 인가

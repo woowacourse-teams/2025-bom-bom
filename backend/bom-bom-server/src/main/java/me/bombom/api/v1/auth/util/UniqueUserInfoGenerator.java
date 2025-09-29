@@ -26,10 +26,10 @@ public class UniqueUserInfoGenerator {
         return generateUniqueNickname(normalizedNickname);
     }
 
-    public String getUniqueEmail(String email) {
-        String normalizedEmail = email.strip().toLowerCase();
-        String localPart = extractEmailLocalPart(normalizedEmail);
-        if (userInfoValidator.isEmailAvailable(normalizedEmail)) {
+    public String getUniqueEmailLocalPart(String email) {
+        String normalizedEmailLocalPart = email.strip().toLowerCase();
+        String localPart = extractEmailLocalPart(normalizedEmailLocalPart);
+        if (userInfoValidator.isEmailAvailable(normalizedEmailLocalPart)) {
             return localPart;
         }
         return generateUniqueEmailLocalPart(localPart);

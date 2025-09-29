@@ -142,7 +142,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         boolean hasParam = false;
         try {
             if (oauth2Info.getEmail() != null) {
-                String uniqueEmailLocalPart = uniqueUserInfoGenerator.getUniqueEmail(oauth2Info.getEmail());
+                String uniqueEmailLocalPart = uniqueUserInfoGenerator.getUniqueEmailLocalPart(oauth2Info.getEmail());
                 params.append(EMAIL_PARAM)
                         .append("=")
                         .append(URLEncoder.encode(uniqueEmailLocalPart, StandardCharsets.UTF_8));

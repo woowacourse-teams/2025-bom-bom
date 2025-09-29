@@ -4,19 +4,19 @@ import type { PropsWithChildren } from 'react';
 
 interface TooltipProps {
   id?: string;
-  open: boolean;
+  opened: boolean;
   position?: 'top' | 'bottom' | 'left' | 'right';
   className?: string;
 }
 
 const Tooltip = ({
   id,
-  open,
+  opened,
   position = 'top',
   children,
 }: PropsWithChildren<TooltipProps>) => {
   return (
-    <Container role="tooltip" id={id} open={open} position={position}>
+    <Container role="tooltip" id={id} opened={opened} position={position}>
       {children}
     </Container>
   );
@@ -24,7 +24,7 @@ const Tooltip = ({
 
 export default Tooltip;
 
-const Container = styled.div<{ open: boolean; position: string }>`
+const Container = styled.div<{ opened: boolean; position: string }>`
   visibility: hidden;
   position: absolute;
   z-index: ${({ theme }) => theme.zIndex.elevated};
@@ -37,7 +37,6 @@ const Container = styled.div<{ open: boolean; position: string }>`
   background: ${({ theme }) => theme.colors.black};
   color: ${({ theme }) => theme.colors.white};
   font: ${({ theme }) => theme.fonts.caption};
-  line-height: 1.4;
 
   opacity: 0;
   transform: translateY(4px);
@@ -46,8 +45,8 @@ const Container = styled.div<{ open: boolean; position: string }>`
     transform 0.15s ease,
     visibility 0.15s;
 
-  ${({ open }) =>
-    open &&
+  ${({ opened }) =>
+    opened &&
     css`
       visibility: visible;
 

@@ -33,7 +33,7 @@ function NewsLetterFilter({
       <StyledTabs direction={device === 'pc' ? 'vertical' : 'horizontal'}>
         {newsLetterList.map(({ name, articleCount, imageUrl, id }) => (
           <Tab
-            key={name}
+            key={id}
             value={id ?? null}
             label={name}
             selected={

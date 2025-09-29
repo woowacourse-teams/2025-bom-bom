@@ -1,8 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import 'react-native-reanimated';
 
-import { MainScreen } from '../components/main/MainScreen';
+import { Slot } from 'expo-router';
 import { AuthProvider } from '../contexts/AuthContext';
 import { EmotionThemeProvider } from '../contexts/ThemeContext';
 import { WebViewProvider } from '../contexts/WebViewContext';
@@ -13,7 +12,7 @@ export default function RootLayout() {
       <WebViewProvider>
         <AuthProvider>
           <StatusBar style="auto" />
-          <MainScreen />
+          <Slot />
         </AuthProvider>
       </WebViewProvider>
     </EmotionThemeProvider>

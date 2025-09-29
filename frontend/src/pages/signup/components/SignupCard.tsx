@@ -1,26 +1,16 @@
-import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { useMutation } from '@tanstack/react-query';
-import { useLocation, useNavigate } from '@tanstack/react-router';
+import { useLocation } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import {
-  formatBirthDate,
-  validateBirthDate,
-  validateEmailLocal,
-  validateNickname,
-} from './SignupCard.utils';
-import { getSignupCheck, postSignup } from '@/apis/auth';
-import { SIGNUP_CHECK_ERROR_MESSAGE } from '@/apis/constants/checkErrorMessage';
+import { formatBirthDate, validateBirthDate } from './SignupCard.utils';
+import { useSignupMutation } from '../hooks/useSignupMutation';
 import InputField from '@/components/InputField/InputField';
+import Tooltip from '@/components/Tooltip/Tooltip';
 import { useDevice } from '@/hooks/useDevice';
-import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { sendMessageToRN } from '@/libs/webview/webview.utils';
 import { GUIDE_MAILS } from '@/mocks/datas/guideMail';
 import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
 import type { FieldError, Gender } from './SignupCard.types';
-import type { GetSignupCheckParams } from '@/apis/auth';
 import type { Device } from '@/hooks/useDevice';
 import type { ChangeEvent, FormEvent } from 'react';
 import HelpIcon from '#/assets/svg/help.svg';
@@ -29,88 +19,25 @@ const EMAIL_DOMAIN = '@bombom.news';
 
 const SignupCard = () => {
   const location = useLocation();
-
   const device = useDevice();
-  const navigate = useNavigate();
+
   const [nickname, setNickname] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [emailPart, setEmailPart] = useState('');
   const [gender, setGender] = useState<Gender>('NONE');
-  const [emailHelpOpen, setEmailHelpOpen] = useState(false);
+  const [emailHelpOpened, setEmailHelpOpened] = useState(false);
 
-  const [nicknameError, setNicknameError] = useState<FieldError>(null);
   const [birthDateError, setBirthDateError] = useState<FieldError>(null);
-  const [emailError, setEmailError] = useState<FieldError>(null);
-  const { mutateAsync: checkDuplicate } = useMutation({
-    mutationFn: (params: GetSignupCheckParams) => getSignupCheck(params),
-  });
 
   const email = `${emailPart.trim()}${EMAIL_DOMAIN}`;
+  const isFormValid = nickname && emailPart && (!birthDate || !birthDateError);
 
-  const isFormValid =
-    !nicknameError &&
-    !emailError &&
-    nickname &&
-    emailPart &&
-    (!birthDate || !birthDateError);
-
-  const { mutate: mutateSignup } = useMutation({
-    mutationKey: ['signup', nickname, email, gender],
-    mutationFn: () =>
-      postSignup({
-        nickname: nickname.trim(),
-        email,
-        gender,
-        birthDate,
-      }),
-    onSuccess: () => {
-      sendMessageToRN({
-        type: 'LOGIN_SUCCESS',
-      });
-      navigate({ to: '/today' });
-      trackEvent({
-        category: 'Authentication',
-        action: '회원가입 성공',
-        label: '회원가입 완료 후 메인 페이지 이동',
-      });
-    },
-    onError: (e) => {
-      const errorMessage = e.message;
-      if (errorMessage === '이미 사용 중인 닉네임입니다.')
-        setNicknameError(SIGNUP_CHECK_ERROR_MESSAGE.nickname);
-      if (errorMessage === '이미 사용 중인 이메일입니다.')
-        setEmailError(SIGNUP_CHECK_ERROR_MESSAGE.email);
-      trackEvent({
-        category: 'Authentication',
-        action: '회원가입 실패',
-        label: `회원가입 실패 에러메시지: ${errorMessage}`,
-      });
-    },
+  const { mutate: signup } = useSignupMutation({
+    nickname,
+    email,
+    gender,
+    birthDate,
   });
-
-  const handleNicknameBlur = async () => {
-    const error = validateNickname(nickname);
-    setNicknameError(error);
-    if (error) return;
-
-    const isDuplicate = await checkDuplicate({
-      field: 'NICKNAME',
-      userInput: nickname,
-    });
-    if (isDuplicate) setNicknameError(SIGNUP_CHECK_ERROR_MESSAGE.nickname);
-  };
-
-  const handleEmailBlur = async () => {
-    const error = validateEmailLocal(emailPart);
-    setEmailError(validateEmailLocal(emailPart));
-    if (error) return;
-
-    const isDuplicate = await checkDuplicate({
-      field: 'EMAIL',
-      userInput: email,
-    });
-    if (isDuplicate) setEmailError(SIGNUP_CHECK_ERROR_MESSAGE.email);
-  };
 
   const handleBirthDateBlur = () => {
     setBirthDateError(validateBirthDate(birthDate));
@@ -137,12 +64,13 @@ const SignupCard = () => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    mutateSignup();
+
+    signup();
     addGuideMail();
   };
 
-  const openEmailHelp = () => setEmailHelpOpen(true);
-  const closeEmailHelp = () => setEmailHelpOpen(false);
+  const openEmailHelp = () => setEmailHelpOpened(true);
+  const closeEmailHelp = () => setEmailHelpOpened(false);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -172,61 +100,42 @@ const SignupCard = () => {
           <Description>봄봄과 함께 오늘의 뉴스레터를 시작해요.</Description>
         </HeaderWrapper>
 
-        <InputField
-          name="닉네임"
-          label={<Label required={true}>닉네임</Label>}
-          inputValue={nickname}
-          onInputChange={(e) => setNickname(e.target.value)}
-          onBlur={handleNicknameBlur}
-          errorString={nicknameError}
-          placeholder="닉네임을 입력해주세요"
-        />
+        <FieldGroup>
+          <Label>닉네임</Label>
+          <TextValue>{nickname}</TextValue>
+        </FieldGroup>
+
+        <FieldGroup>
+          <LabelRow>
+            <Label htmlFor="email">이메일</Label>
+            <TooltipButton
+              type="button"
+              aria-label="이메일을 수집하는 이유 안내"
+              aria-expanded={emailHelpOpened}
+              aria-describedby="email-why-tooltip"
+              onMouseEnter={openEmailHelp}
+              onMouseLeave={closeEmailHelp}
+              onFocus={openEmailHelp}
+              onBlur={closeEmailHelp}
+            >
+              <EmailHelpIcon fill={theme.colors.primary} />
+            </TooltipButton>
+            <InfoText>이 주소로 뉴스레터가 도착해요!</InfoText>
+
+            <Tooltip id="email-help-tooltip" opened={emailHelpOpened}>
+              봄봄은 <b>개인 메일</b>이 아닌 <b>봄봄 전용 메일</b>(
+              <b>{EMAIL_DOMAIN}</b>)로 뉴스레터를 <b>수신</b>해요.
+              <br />- 뉴스레터 전용이라 깔끔하게 관리돼요.
+              <br />- 구독/알림/차단 같은 관리 기능에 이 주소를 사용해요.
+              <br />- 일반 메일 송수신은 지원하지 않아요. (수신 전용)
+            </Tooltip>
+          </LabelRow>
+          <TextValue>{emailPart + EMAIL_DOMAIN}</TextValue>
+        </FieldGroup>
 
         <InputField
-          name="email"
-          label={
-            <LabelRow>
-              <Label htmlFor="email" required={true}>
-                이메일
-              </Label>
-              <InfoButton
-                type="button"
-                aria-label="이메일을 수집하는 이유 안내"
-                aria-expanded={emailHelpOpen}
-                aria-describedby="email-why-tooltip"
-                onMouseEnter={openEmailHelp}
-                onMouseLeave={closeEmailHelp}
-                onFocus={openEmailHelp}
-                onBlur={closeEmailHelp}
-              >
-                <EmailHelpIcon fill={theme.colors.primary} />
-              </InfoButton>
-              <InfoText>이 주소로 뉴스레터가 도착해요!</InfoText>
-
-              <Tooltip
-                role="tooltip"
-                id="email-help-tooltip"
-                open={emailHelpOpen}
-              >
-                봄봄은 <b>개인 메일</b>이 아닌 <b>봄봄 전용 메일</b>(
-                <b>{EMAIL_DOMAIN}</b>)로 뉴스레터를 <b>수신</b>해요.
-                <br />- 뉴스레터 전용이라 깔끔하게 관리돼요.
-                <br />- 구독/알림/차단 같은 관리 기능에 이 주소를 사용해요.
-                <br />- 일반 메일 송수신은 지원하지 않아요. (수신 전용)
-              </Tooltip>
-            </LabelRow>
-          }
-          inputValue={emailPart}
-          onInputChange={(e) => setEmailPart(e.target.value.toLowerCase())}
-          onBlur={handleEmailBlur}
-          errorString={emailError}
-          placeholder="이메일을 입력해주세요"
-          suffix={<Suffix>{EMAIL_DOMAIN}</Suffix>}
-        />
-
-        <InputField
-          name="생년월일"
-          label="생년월일"
+          name="생년월일(선택)"
+          label="생년월일(선택)"
           inputValue={birthDate}
           onInputChange={handleBirthDateChange}
           onBlur={handleBirthDateBlur}
@@ -235,7 +144,7 @@ const SignupCard = () => {
         />
 
         <FieldGroup>
-          <Label as="p">성별</Label>
+          <Label as="p">성별(선택)</Label>
           <RadioGroup role="radiogroup" aria-describedby="gender-hint">
             <RadioItem>
               <HiddenRadio
@@ -274,7 +183,7 @@ const SignupCard = () => {
         </FieldGroup>
 
         <SubmitButton type="submit" disabled={!isFormValid}>
-          회원가입
+          시작하기
         </SubmitButton>
       </SignupForm>
     </Container>
@@ -327,21 +236,16 @@ const FieldGroup = styled.div`
   flex-direction: column;
 `;
 
-const Label = styled.label<{ required?: boolean }>`
+const Label = styled.label`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body2};
+`;
 
-  ${({ required, theme }) =>
-    required &&
-    `
-    &::after {
-      margin-left: 2px;
+const TextValue = styled.p`
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.body1};
 
-      color: ${theme.colors.red};
-
-      content: '*';
-    }
-  `}
+  user-select: text;
 `;
 
 const LabelRow = styled.div`
@@ -352,7 +256,7 @@ const LabelRow = styled.div`
   align-items: center;
 `;
 
-const InfoButton = styled.button`
+const TooltipButton = styled.button`
   width: 18px;
   height: 18px;
   padding: 0;
@@ -381,53 +285,6 @@ const InfoText = styled.p`
 
 const EmailHelpIcon = styled(HelpIcon)`
   background-color: ${({ theme }) => theme.colors.white};
-`;
-
-const Tooltip = styled.div<{ open: boolean }>`
-  visibility: hidden;
-  position: absolute;
-  bottom: 28px;
-  left: 0;
-  z-index: ${({ theme }) => theme.zIndex.elevated};
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  box-shadow: 0 10px 20px -12px rgb(0 0 0 / 35%);
-
-  background: ${({ theme }) => theme.colors.black};
-  color: ${({ theme }) => theme.colors.white};
-  font: ${({ theme }) => theme.fonts.caption};
-
-  opacity: 0;
-  transform: translateY(4px);
-  transition:
-    opacity 0.15s ease,
-    transform 0.15s ease,
-    visibility 0.15s;
-
-  ${({ open }) =>
-    open &&
-    css`
-      visibility: visible;
-
-      opacity: 1;
-      transform: translateY(0);
-    `}
-`;
-
-const Suffix = styled.span`
-  height: 100%;
-  padding: 0 10px;
-  border-radius: 10px;
-
-  display: inline-flex;
-  align-items: center;
-
-  background: ${({ theme }) => theme.colors.disabledBackground};
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.body2};
-
-  user-select: none;
 `;
 
 const SubmitButton = styled.button`

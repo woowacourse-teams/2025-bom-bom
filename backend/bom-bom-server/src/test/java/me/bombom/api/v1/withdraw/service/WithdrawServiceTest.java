@@ -106,7 +106,7 @@ class WithdrawServiceTest {
         List<WithdrawnMember> withdrawn = withdrawnMemberRepository.findAll();
         assertSoftly(softly -> {
             softly.assertThat(withdrawn).hasSize(1);
-            softly.assertThat(withdrawn.getFirst().getEmail()).isEqualTo("email");
+            softly.assertThat(withdrawn.getFirst().getEmail()).isEqualTo("email@bombom.news");
             softly.assertThat(withdrawn.getFirst().getContinueReading()).isEqualTo(10);
             softly.assertThat(withdrawn.getFirst().getBookmarkedCount()).isEqualTo(1);
             softly.assertThat(withdrawn.getFirst().getHighlightCount()).isEqualTo(6);

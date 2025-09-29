@@ -75,8 +75,8 @@ class ReadingServiceTest {
         continueReadingRepository.deleteAll();
         memberRepository.deleteAll();
 
-        String nickname = "test_nickname_" + UUID.randomUUID();
-        String providerId = "test_providerId_" + UUID.randomUUID();
+        String nickname = ("test_nickname_" + UUID.randomUUID()).substring(0, 20);
+        String providerId = ("test_providerId_" + UUID.randomUUID()).substring(0, 20);
 
         member = memberRepository.save(TestFixture.createUniqueMember(nickname, providerId));
         todayReading = todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));

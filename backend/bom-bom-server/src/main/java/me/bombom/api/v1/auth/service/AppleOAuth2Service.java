@@ -45,6 +45,7 @@ public class AppleOAuth2Service extends OidcUserService {
     private final RestClient.Builder restClientBuilder;
     private final AppleClientSecretSupplier appleClientSecretSupplier;
     private final IdTokenValidator idTokenValidator;
+    private final ObjectMapper objectMapper;
 
     //웹 로그인에서 사용
     @Value("${oauth2.apple.client-id}")
@@ -75,57 +76,12 @@ public class AppleOAuth2Service extends OidcUserService {
                 log.warn("Apple Access Token 추출 실패");
             }
             
-            // user 추가 정보(name/email) 파싱 및 attributes 병합 (form_post로 전달되는 user JSON)
-            Map<String, Object> mergedAttributes = new HashMap<>(oidcUser.getAttributes());
-            try {
-                Map<String, Object> additional = userRequest.getAdditionalParameters();
-                log.info("Apple 추가 파라미터 수신 - keys: {}", additional.keySet());
-                // 추가 파라미터에 없다면 세션에서 보조 조회
-                Object userParam = additional.get("user");
-                if (userParam == null) {
-                    Object fromSession = session.getAttribute("appleUserParam");
-                    if (fromSession instanceof String s && !s.isBlank()) {
-                        userParam = s;
-                        log.info("세션에서 Apple user 파라미터 복원 성공");
-                        // 일회성 사용 후 세션에서 제거
-                        session.removeAttribute("appleUserParam");
-                    }
-                }
-                if (userParam instanceof String userJson && !userJson.isBlank()) {
-                    log.info("Apple user 원문(JSON) 수신: {}", userJson);
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    Map<String, Object> userMap = objectMapper.readValue(userJson, new TypeReference<Map<String, Object>>() {});
-                    // email
-                    Object emailFromUser = userMap.get("email");
-                    if (emailFromUser instanceof String emailStr && !emailStr.isBlank()) {
-                        mergedAttributes.put("email", emailStr);
-                        log.info("Apple user 파싱 - email: {}", emailStr);
-                    }
-                    // name { firstName, lastName }
-                    Object nameObj = userMap.get("name");
-                    if (nameObj instanceof Map) {
-                        @SuppressWarnings("unchecked")
-                        Map<String, Object> nameMap = (Map<String, Object>) nameObj;
-                        String firstName = Optional.ofNullable(nameMap.get("firstName")).map(Object::toString).orElse(null);
-                        String lastName  = Optional.ofNullable(nameMap.get("lastName")).map(Object::toString).orElse(null);
-                        Map<String, String> mergedName = new HashMap<>();
-                        if (firstName != null) mergedName.put("firstName", firstName);
-                        if (lastName != null) mergedName.put("lastName", lastName);
-                        if (!mergedName.isEmpty()) {
-                            mergedAttributes.put("name", mergedName);
-                            log.info("Apple user 파싱 - firstName: {}, lastName: {}", firstName, lastName);
-                        }
-                    }
-                } else {
-                    log.info("Apple user 파라미터가 없습니다(최초 동의가 아니거나 Apple 미제공 케이스)");
-                }
-            } catch (Exception e) {
-                log.warn("Apple user 파라미터 파싱 실패 - error: {}", e.getMessage(), e);
-            }
+            // Apple user 정보 파싱 및 attributes 병합
+            Map<String, Object> appleUserInfo = parseAppleUserInfo(oidcUser.getAttributes());
 
             // 기존 회원 확인
             Optional<Member> member = findMemberAndSetPendingIfNew(providerId);
-            return new CustomOAuth2User(mergedAttributes, member.orElse(null), oidcUser.getIdToken(), oidcUser.getUserInfo());
+            return new CustomOAuth2User(appleUserInfo, member.orElse(null), oidcUser.getIdToken(), oidcUser.getUserInfo());
         } catch (Exception e) {
             log.error("Apple OIDC 로그인 처리 실패 - error: {}", e.getMessage(), e);
             throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
@@ -162,7 +118,6 @@ public class AppleOAuth2Service extends OidcUserService {
 
             log.info("Apple Token Revoke 성공");
             return true;
-
         } catch (Exception e) {
             log.warn("Apple Token Revoke 실패 - error: {}", e.getMessage());
             return false;
@@ -257,6 +212,70 @@ public class AppleOAuth2Service extends OidcUserService {
                 : appleClientSecretSupplier.get();
         body.add("client_secret", clientSecret);
         return body;
+    }
+
+    /**
+     * 세션에서 Apple user 정보를 파싱하여 attributes에 병합
+     */
+    private Map<String, Object> parseAppleUserInfo(Map<String, Object> baseAttributes) {
+        Map<String, Object> mergedAttributes = new HashMap<>(baseAttributes);
+        
+        try {
+            Object userParam = session.getAttribute("appleUserParam");
+            if (!(userParam instanceof String userJson) || userJson.isBlank()) {
+                log.info("Apple user 파라미터가 없습니다(최초 동의가 아니거나 Apple 미제공 케이스)");
+                return mergedAttributes;
+            }
+            
+            log.info("Apple user 원문(JSON) 수신: {}", userJson);
+            //objectMapper가 Map<String, Object>로 만들어주기 위해서는 TypeReference를 사용해야 함. 없어도 Map으로 만들 수는 있음
+            Map<String, Object> userMap = objectMapper.readValue(userJson, new TypeReference<>() {});
+            parseEmail(userMap, mergedAttributes);
+            parseName(userMap, mergedAttributes);
+
+            // 사용 후 세션에서 제거
+            session.removeAttribute("appleUserParam");
+        } catch (Exception e) {
+            log.warn("Apple user 파라미터 파싱 실패 - error: {}", e.getMessage(), e);
+        }
+        return mergedAttributes;
+    }
+
+    private void parseEmail(Map<String, Object> userMap, Map<String, Object> attributes) {
+        Object emailFromUser = userMap.get("email");
+        if (emailFromUser instanceof String emailStr && !emailStr.isBlank()) {
+            attributes.put("email", emailStr);
+            log.info("Apple user 파싱 - email: {}", emailStr);
+        }
+    }
+
+    private void parseName(Map<String, Object> userMap, Map<String, Object> attributes) {
+        Object nameObj = userMap.get("name");
+        //name은 firstName과 lastName으로 Map으로 옴
+        if (!(nameObj instanceof Map)) return;
+
+        //nameObj는 Object 타입인데 Map으로 바꾸려하면 unchecked 예외를 발생시킴. 그걸 무시함
+        @SuppressWarnings("unchecked")
+        Map<String, Object> nameMap = (Map<String, Object>) nameObj;
+
+        String fullName = getFullName(nameMap);
+
+        if (!fullName.isEmpty()) {
+            attributes.put("name", fullName);
+            log.info("Apple user 파싱 - fullName: {}", fullName);
+        }
+    }
+
+    private String getFullName(Map<String, Object> nameMap) {
+        String firstName = Optional.ofNullable(nameMap.get("firstName"))
+                .map(Object::toString)
+                .orElse("");
+        String lastName = Optional.ofNullable(nameMap.get("lastName"))
+                .map(Object::toString)
+                .orElse("");
+
+        // lastName + firstName 순서로 합치고 공백 제거
+        return (lastName + firstName).strip();
     }
 
     // 공통: 기존 회원 조회 + 신규면 pendingMember 세션 저장

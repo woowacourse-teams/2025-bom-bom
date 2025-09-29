@@ -17,6 +17,17 @@ public class AppleCallbackController {
     private static final String APPLE_SECURITY_CALLBACK = "/login/oauth2/code/apple";
     private static final String SESSION_ATTR_USER_JSON = "appleUserParam";
 
+    /**
+     * 애플에서 보내주는 user 객체
+     * userJson
+     *{
+     *   "name": {
+     *     "firstName": "string",
+     *     "lastName": "string"
+     *   },
+     *   "email": "string"
+     * }
+     */
     @PostMapping("/login/sso/verify/success/apple")
     public void handleAppleFormPost(
             HttpServletRequest request,
@@ -34,5 +45,4 @@ public class AppleCallbackController {
         request.getRequestDispatcher(APPLE_SECURITY_CALLBACK).forward(request, response);
     }
 }
-
 

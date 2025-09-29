@@ -45,10 +45,10 @@ public class Member extends BaseEntity implements Serializable {
     @Column(nullable = false)
     private String providerId;
 
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false, length = 50)
     private String email;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 20)
     private String nickname;
 
     @Column(length = 512)

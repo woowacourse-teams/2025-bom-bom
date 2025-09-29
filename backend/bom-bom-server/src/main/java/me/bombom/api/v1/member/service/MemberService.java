@@ -2,9 +2,10 @@ package me.bombom.api.v1.member.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
-import me.bombom.api.v1.auth.enums.DuplicateCheckField;
+import me.bombom.api.v1.auth.enums.SignupValidateField;
+import me.bombom.api.v1.auth.enums.SignupValidateStatus;
+import me.bombom.api.v1.auth.util.UserInfoValidator;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -30,18 +31,19 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final WithdrawService withdrawService;
+    private final UserInfoValidator userInfoValidator;
 
     @Transactional
     public Member signup(PendingOAuth2Member pendingMember, MemberSignupRequest signupRequest) {
-        validateDuplicateNickname(signupRequest.nickname());
-        validateDuplicateEmail(signupRequest.email());
+        userInfoValidator.validateNickname(signupRequest.nickname());
+        userInfoValidator.validateEmail(signupRequest.email());
 
         Member newMember = Member.builder()
                 .provider(pendingMember.getProvider())
                 .providerId(pendingMember.getProviderId())
                 .email(signupRequest.email().toLowerCase())
                 .profileImageUrl(pendingMember.getProfileUrl())
-                .nickname(signupRequest.nickname())
+                .nickname(signupRequest.nickname().strip())
                 .gender(signupRequest.gender())
                 .roleId(MEMBER_ROLE_ID)
                 .birthDate(signupRequest.birthDate())
@@ -51,10 +53,12 @@ public class MemberService {
         return savedMember;
     }
 
-    public boolean checkSignupDuplicate(DuplicateCheckField field, String value) {
+    public SignupValidateStatus validateSignupField(SignupValidateField field, String value) {
+        String normalized = value.strip().toLowerCase();
         return switch (field) {
-            case NICKNAME -> memberRepository.existsByNickname(value);
-            case EMAIL -> memberRepository.existsByEmail(value);
+            case NICKNAME -> validateSignupNickname(normalized);
+            //이메일 전체가 옴
+            case EMAIL -> validateSignupEmail(normalized);
         };
     }
 
@@ -65,14 +69,6 @@ public class MemberService {
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
                 );
         return MemberProfileResponse.from(member);
-    }
-
-    public Member findById(Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, id)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
-                );
     }
 
     @Transactional
@@ -94,19 +90,23 @@ public class MemberService {
         log.info("회원 탈퇴 처리 완료. MemberId: {}", memberId);
     }
 
-    private void validateDuplicateEmail(String email) {
-        if (memberRepository.existsByEmail(email.toLowerCase())) {
-            throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_EMAIL)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "email")
-                    .addContext(ErrorContextKeys.OPERATION, "validateDuplicateEmail");
+    private SignupValidateStatus validateSignupNickname(String value) {
+        if (!userInfoValidator.isValidNicknameFormat(value)) {
+            return SignupValidateStatus.INVALID_FORMAT;
         }
+        if (userInfoValidator.isDuplicateNickname(value)) {
+            return SignupValidateStatus.DUPLICATE;
+        }
+        return SignupValidateStatus.OK;
     }
 
-    private void validateDuplicateNickname(String nickname) {
-        if (memberRepository.existsByNickname(nickname)) {
-            throw new CIllegalArgumentException(ErrorDetail.DUPLICATE_NICKNAME)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "nickname")
-                    .addContext(ErrorContextKeys.OPERATION, "validateDuplicateNickname");
+    private SignupValidateStatus validateSignupEmail(String value) {
+        if (!userInfoValidator.isValidEmailFormat(value)) {
+            return SignupValidateStatus.INVALID_FORMAT;
         }
+        if (userInfoValidator.isDuplicateEmail(value)) {
+            return SignupValidateStatus.DUPLICATE;
+        }
+        return SignupValidateStatus.OK;
     }
 }

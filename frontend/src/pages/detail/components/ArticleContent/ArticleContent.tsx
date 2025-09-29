@@ -40,6 +40,10 @@ const Container = styled.div`
 
   white-space: pre-line;
 
+  -webkit-tap-highlight-color: rgb(0 0 0 / 10%);
+  -webkit-touch-callout: default;
+  user-select: text;
+
   word-break: break-all;
   word-wrap: break-word;
 

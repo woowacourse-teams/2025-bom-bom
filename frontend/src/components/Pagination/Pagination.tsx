@@ -6,8 +6,8 @@ import {
   canGoToNextPage,
   shouldShowPagination,
 } from './Pagination.utils';
-import ChevronLeftIcon from '#/assets/svg/chevron-left.svg';
-import ChevronRightIcon from '#/assets/svg/chevron-right.svg';
+import ChevronIcon from '../icons/ChevronIcon';
+import { theme } from '@/styles/theme';
 
 interface PaginationProps {
   currentPage: number;
@@ -43,7 +43,7 @@ const Pagination = ({
         disabled={!canGoToPreviousPage(currentPage)}
         aria-label="이전 페이지"
       >
-        <ChevronLeftIcon />
+        <ChevronIcon direction="left" width={16} color={theme.colors.black} />
       </NavigationButton>
 
       <PageNumberButtonWrapper>
@@ -67,7 +67,7 @@ const Pagination = ({
         disabled={!canGoToNextPage(currentPage, totalPages)}
         aria-label="다음 페이지"
       >
-        <ChevronRightIcon />
+        <ChevronIcon direction="right" width={16} color={theme.colors.black} />
       </NavigationButton>
     </Container>
   );

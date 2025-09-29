@@ -95,6 +95,13 @@ const reset = css`
     color: inherit;
     text-decoration: none;
   }
+
+  html {
+    -webkit-tap-highlight-color: rgb(0 0 0 / 0%);
+    -webkit-touch-callout: none;
+
+    user-select: none;
+  }
 `;
 
 export default reset;

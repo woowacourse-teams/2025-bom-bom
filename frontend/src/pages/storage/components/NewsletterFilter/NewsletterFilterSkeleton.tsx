@@ -58,5 +58,7 @@ const SkeletonImage = styled.div`
   height: 24px;
   border-radius: 50%;
 
+  flex-shrink: 0;
+
   ${skeletonStyle}
 `;

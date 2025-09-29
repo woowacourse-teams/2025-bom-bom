@@ -1,6 +1,5 @@
 package me.bombom.api.v1.auth.extractor;
 
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.dto.OAuth2LoginInfo;
@@ -15,8 +14,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class AppleUserInfoExtractor implements OAuth2UserInfoExtractor {
 
-    private static final String FIRST_NAME = "firstName";
-    private static final String LAST_NAME = "lastName";
     private static final String NAME = "name";
     private static final String EMAIL = "email";
 
@@ -41,19 +38,9 @@ public class AppleUserInfoExtractor implements OAuth2UserInfoExtractor {
 
     private String extractName(CustomOAuth2User oauth2User) {
         Object nameObj = oauth2User.getAttributes().get(NAME);
-        if (nameObj instanceof Map) {
-            Map<String, String> nameMap = (Map<String, String>) nameObj;
-            return buildFullName(nameMap.get(FIRST_NAME), nameMap.get(LAST_NAME));
+        if (nameObj instanceof String) {
+            return (String) nameObj;
         }
         return null;
-    }
-
-    private String buildFullName(String firstName, String lastName) {
-        // 요구사항: 공백 제거, 성+이름(LastName + FirstName) 순서로 결합
-        String normalizedFirstName = firstName == null ? "" : firstName.strip();
-        String normalizedLastName  = lastName == null ? "" : lastName.strip();
-        String fullName = (normalizedLastName + normalizedFirstName);
-        fullName = fullName.replace(" ", "");
-        return fullName.isEmpty() ? null : fullName;
     }
 }

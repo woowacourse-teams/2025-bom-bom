@@ -17,4 +17,6 @@ public interface WeeklyReadingRepository extends JpaRepository<WeeklyReading, Lo
         WHERE currentCount != 0
     """)
     void resetCurrentCount();
+
+    void deleteByMemberId(Long memberId);
 }

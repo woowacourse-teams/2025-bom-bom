@@ -29,7 +29,7 @@ public class WithdrawnMember extends BaseEntity {
     @Column(nullable = false)
     private Long memberId;
 
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false, length = 50)
     private String email;
 
     private LocalDate birthDate;

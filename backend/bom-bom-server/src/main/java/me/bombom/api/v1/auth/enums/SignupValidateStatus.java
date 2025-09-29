@@ -4,5 +4,5 @@ public enum SignupValidateStatus {
 
     OK,
     DUPLICATE,
-    INVALID_PATTERN
+    INVALID_FORMAT
 }

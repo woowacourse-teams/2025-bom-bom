@@ -107,8 +107,8 @@ public class MemberService {
     }
 
     private SignupValidateStatus validateSignupNickname(String value) {
-        if (!userInfoValidator.isValidNickname(value)) {
-            return SignupValidateStatus.INVALID_PATTERN;
+        if (!userInfoValidator.isValidNicknameFormat(value)) {
+            return SignupValidateStatus.INVALID_FORMAT;
         }
         if (userInfoValidator.isDuplicateNickname(value)) {
             return SignupValidateStatus.DUPLICATE;
@@ -117,8 +117,8 @@ public class MemberService {
     }
 
     private SignupValidateStatus validateSignupEmail(String value) {
-        if (!userInfoValidator.isValidEmail(value)) {
-            return SignupValidateStatus.INVALID_PATTERN;
+        if (!userInfoValidator.isValidEmailFormat(value)) {
+            return SignupValidateStatus.INVALID_FORMAT;
         }
         if (userInfoValidator.isDuplicateEmail(value)) {
             return SignupValidateStatus.DUPLICATE;

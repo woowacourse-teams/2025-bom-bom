@@ -16,10 +16,18 @@ public class UserInfoValidator {
 
     private static final String NICKNAME_REGEX_PATTERN = "^(?!.*\\.\\.)[A-Za-z0-9가-힣][A-Za-z0-9가-힣._ ]*[A-Za-z0-9가-힣]$";
     private static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?@bombom\\.news$";
-    
+
     private final MemberRepository memberRepository;
 
-    public boolean isValidNickname(String nickname) {
+    public boolean isNicknameAvailable(String nickname) {
+        return isValidNicknameFormat(nickname) && !isDuplicateNickname(nickname);
+    }
+
+    public boolean isEmailAvailable(String email) {
+        return isValidEmailFormat(email) && !isDuplicateEmail(email);
+    }
+
+    public boolean isValidNicknameFormat(String nickname) {
         if (nickname == null || nickname.isBlank()) {
             return false;
         }
@@ -27,7 +35,7 @@ public class UserInfoValidator {
         return pattern.matcher(nickname.strip()).matches();
     }
 
-    public boolean isValidEmail(String email) {
+    public boolean isValidEmailFormat(String email) {
         if (email == null || email.isBlank()) {
             return false;
         }
@@ -47,13 +55,5 @@ public class UserInfoValidator {
             return false;
         }
         return memberRepository.existsByEmail(email.strip().toLowerCase());
-    }
-
-    public boolean isNicknameAvailable(String nickname) {
-        return isValidNickname(nickname) && !isDuplicateNickname(nickname);
-    }
-
-    public boolean isEmailAvailable(String email) {
-        return isValidEmail(email) && !isDuplicateEmail(email);
     }
 }

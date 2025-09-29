@@ -183,7 +183,7 @@ const SignupCard = () => {
         </FieldGroup>
 
         <SubmitButton type="submit" disabled={!isFormValid}>
-          회원가입
+          시작하기
         </SubmitButton>
       </SignupForm>
     </Container>

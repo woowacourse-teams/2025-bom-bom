@@ -60,8 +60,8 @@ public class UniqueUserInfoGenerator {
     }
 
     private static String getRandomValue() {
-        int randomValue = ThreadLocalRandom.current().nextInt(10, 10000);
-        return String.valueOf(randomValue);
+        int randomValue = ThreadLocalRandom.current().nextInt(1, 10000);
+        return String.format("%04d", randomValue);
     }
 
     private String trimNicknameForSuffix(String baseNickname, String random) {

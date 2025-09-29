@@ -78,11 +78,7 @@ function Index() {
           isLoading={isArticlesLoading}
         />
         <ReaderCompanion device={device}>
-          {isPetLoading ? (
-            <PetCardSkeleton />
-          ) : (
-            pet && <PetCard pet={pet} isLoading={isPetLoading} />
-          )}
+          {isPetLoading ? <PetCardSkeleton /> : pet && <PetCard pet={pet} />}
           <ReadingStatusCard />
         </ReaderCompanion>
       </ContentWrapper>

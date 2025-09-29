@@ -30,10 +30,9 @@ const petImages: Record<number, string> = {
 
 interface PetCardProps {
   pet: GetPetResponse;
-  isLoading: boolean;
 }
 
-const PetCard = ({ pet, isLoading }: PetCardProps) => {
+const PetCard = ({ pet }: PetCardProps) => {
   const device = useDevice();
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -45,8 +44,6 @@ const PetCard = ({ pet, isLoading }: PetCardProps) => {
       queryClient.invalidateQueries({ queryKey: ['pet'] });
     },
   });
-
-  if (!isLoading && !pet) return null;
 
   const { level, isAttended, currentStageScore, requiredStageScore } = pet;
   const levelPercentage = calculateRate(currentStageScore, requiredStageScore);

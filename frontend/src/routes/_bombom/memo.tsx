@@ -15,6 +15,9 @@ export const Route = createFileRoute('/_bombom/memo')({
         name: 'robots',
         content: 'noindex, nofollow',
       },
+      {
+        title: '봄봄 | 메모 보관함',
+      },
     ],
   }),
   component: MemoPage,

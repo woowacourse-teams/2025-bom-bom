@@ -6,7 +6,7 @@
 
   <!-- 추천 페이지(현 랜딩 페이지) -->
   <url>
-    <loc>https://www.bombom.news/recommend</loc>
+    <loc>https://www.bombom.news/</loc>
     <lastmod>2025-09-12T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>

@@ -37,13 +37,13 @@ public class UniqueUserInfoGenerator {
 
     private String generateUniqueNickname(String baseNickname) {
         String uniqueNickname = baseNickname + NICKNAME_RANDOM_DELIMITER + getRandomValue();
-        log.info("고유 닉네임 생성 - 원본: {}, 생성: {}", baseNickname, uniqueNickname);
+        log.debug("고유 닉네임 생성 - 원본: {}, 생성: {}", baseNickname, uniqueNickname);
         return uniqueNickname;
     }
 
     private String generateUniqueEmailLocalPart(String baseLocalPart) {
         String uniqueEmailLocalPart = baseLocalPart + EMAIL_RANDOM_DELIMITER + getRandomValue();
-        log.info("고유 이메일 로컬파트 생성 - 원본: {}, 생성: {}", baseLocalPart, uniqueEmailLocalPart);
+        log.debug("고유 이메일 로컬파트 생성 - 원본: {}, 생성: {}", baseLocalPart, uniqueEmailLocalPart);
         return uniqueEmailLocalPart;
     }
 

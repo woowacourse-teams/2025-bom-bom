@@ -7,6 +7,13 @@ import { getResponsiveValue } from '@/utils/responsive';
 import type { Device } from '@/hooks/useDevice';
 
 export const Route = createFileRoute('/login')({
+  head: () => ({
+    meta: [
+      {
+        title: '봄봄 | 로그인',
+      },
+    ],
+  }),
   component: Login,
 });
 

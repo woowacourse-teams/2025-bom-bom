@@ -12,7 +12,7 @@ export const Route = createFileRoute('/_bombom')({
   beforeLoad: async ({ context, location }) => {
     const { queryClient } = context;
 
-    if (location.pathname === '/recommend') {
+    if (location.pathname === '/') {
       isFirstVisit = false;
       return;
     }
@@ -27,7 +27,7 @@ export const Route = createFileRoute('/_bombom')({
         window.gtag?.('set', { user_id: user.id });
       }
     } catch {
-      if (isFirstVisit) return redirect({ to: '/recommend' });
+      if (isFirstVisit) return redirect({ to: '/' });
 
       throw new Response(DEFAULT_ERROR_MESSAGES[401], { status: 401 });
     } finally {

@@ -25,7 +25,7 @@ function EmptyLetterCard({ title }: EmptyLetterCardProps) {
         </Support>
       </DescriptionWrapper>
 
-      <LinkButton to="/recommend">
+      <LinkButton to="/">
         <CompassIcon width={16} height={16} />
         추천 뉴스레터 보기
         <StyledArrowIcon direction="right" />

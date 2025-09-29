@@ -165,5 +165,5 @@ const MainContentSection = styled.div<{ isPC: boolean }>`
   flex: 1;
   flex-direction: column;
 
-  order: ${({ isPC }) => (isPC ? 1 : 1)};
+  order: 1;
 `;

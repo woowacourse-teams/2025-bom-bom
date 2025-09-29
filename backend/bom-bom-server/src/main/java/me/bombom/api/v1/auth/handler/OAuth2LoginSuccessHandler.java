@@ -78,7 +78,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private void handleWithdrawAfterReAuth(Long withdrawMemberId, HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
-            memberService.revoke(withdrawMemberId);
+            memberService.withdraw(withdrawMemberId);
         } catch (Exception e) {
             log.error("재인증 후 탈퇴 처리 중 예외 발생 - memberId: {}", withdrawMemberId, e);
         } finally {

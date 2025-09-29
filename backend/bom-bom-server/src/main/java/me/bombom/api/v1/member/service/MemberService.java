@@ -72,7 +72,7 @@ public class MemberService {
     }
 
     @Transactional
-    public void revoke(Long memberId) {
+    public void withdraw(Long memberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                 .addContext(ErrorContextKeys.MEMBER_ID, memberId)

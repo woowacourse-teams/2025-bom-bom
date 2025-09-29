@@ -56,12 +56,6 @@ class ArticleServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @Autowired
-    private TodayReadingRepository todayReadingRepository;
-
-    @Autowired
-    private WeeklyReadingRepository weeklyReadingRepository;
-
     List<Category> categories;
     List<Newsletter> newsletters;
     List<Article> articles;
@@ -69,6 +63,11 @@ class ArticleServiceTest {
 
     @BeforeEach
     public void setup() {
+        newsletterRepository.deleteAllInBatch();
+        articleRepository.deleteAllInBatch();
+        categoryRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
         categories = TestFixture.createCategories();

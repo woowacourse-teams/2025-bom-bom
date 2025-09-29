@@ -23,7 +23,7 @@ import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.reading.repository.YearlyReadingRepository;
-import me.bombom.support.AcceptanceTest;
+import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-@AcceptanceTest
+@IntegrationTest
 class ReadingServiceTest {
 
     @Autowired
@@ -152,7 +152,6 @@ class ReadingServiceTest {
     }
 
     @Test
-    @Disabled
     void 저장된_rank를_사용해_상위_N명의_랭킹을_조회할_수_있다() {
         // given: 기본 멤버는 currentCount 10
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_r2", "pid_r2"));
@@ -216,7 +215,6 @@ class ReadingServiceTest {
     }
 
     @Test
-    @Disabled
     void 일등일_경우_앞_사람과의_차이는_0이다() {
         // given: 기본 멤버는 currentCount 10
         Member first = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));
@@ -240,7 +238,6 @@ class ReadingServiceTest {
     }
 
     @Test
-    @Disabled
     void currentCount가_같으면_순위가_같다() {
         // given: 기본 멤버는 currentCount 10
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));

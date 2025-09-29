@@ -2,6 +2,7 @@ package me.bombom.api.v1.member.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.enums.SignupValidateField;
 import me.bombom.api.v1.auth.enums.SignupValidateStatus;

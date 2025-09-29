@@ -1,5 +1,6 @@
 package me.bombom.api.v1.auth.util;
 
+import java.util.concurrent.ThreadLocalRandom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,7 @@ public class UniqueUserInfoGenerator {
     }
 
     private static String getTimestampSuffix() {
-        return String.valueOf(System.currentTimeMillis() % 1000);
+        int randomValue = ThreadLocalRandom.current().nextInt(10, 10000);
+        return String.valueOf(randomValue);
     }
 }

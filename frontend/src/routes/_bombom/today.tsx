@@ -9,6 +9,7 @@ import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
 import PetCardSkeleton from '@/components/PetCard/PetCardSkeleton';
 import { useDevice } from '@/hooks/useDevice';
+import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import { theme } from '@/styles/theme';
 import { isToday } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
@@ -73,10 +74,11 @@ function Index() {
       )}
 
       <ContentWrapper device={device}>
-        <ArticleCardList
-          articles={mergedArticles}
-          isLoading={isArticlesLoading}
-        />
+        {isArticlesLoading ? (
+          <ArticleCardListSkeleton />
+        ) : (
+          <ArticleCardList articles={mergedArticles} />
+        )}
         <ReaderCompanion device={device}>
           {isPetLoading ? <PetCardSkeleton /> : pet && <PetCard pet={pet} />}
           <ReadingStatusCard />

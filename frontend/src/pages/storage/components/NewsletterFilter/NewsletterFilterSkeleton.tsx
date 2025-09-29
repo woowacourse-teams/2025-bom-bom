@@ -1,4 +1,3 @@
-import styled from '@emotion/styled';
 import {
   Container,
   IconWrapper,
@@ -8,7 +7,6 @@ import {
 import SkeletonBox from '@/components/Skeleton/SkeletonBox';
 import TabSkeleton from '@/components/Tab/TabSkeleton';
 import { useDevice } from '@/hooks/useDevice';
-import { skeletonStyle } from '@/styles/skeleton';
 import { theme } from '@/styles/theme';
 import NewsIcon from '#/assets/svg/news.svg';
 
@@ -39,7 +37,10 @@ const NewsletterFilterSkeleton = () => {
         <TabSkeleton
           key={index}
           StartComponent={
-            index !== TOTAL_COUNT_INDEX && isPC && <SkeletonImage />
+            index !== TOTAL_COUNT_INDEX &&
+            isPC && (
+              <SkeletonBox width="24px" height="24px" borderRadius="50%" />
+            )
           }
           EndComponent={isPC && <SkeletonBox width="36px" height="24px" />}
           textAlign={isPC ? 'start' : 'center'}
@@ -52,13 +53,3 @@ const NewsletterFilterSkeleton = () => {
 };
 
 export default NewsletterFilterSkeleton;
-
-const SkeletonImage = styled.div`
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-
-  flex-shrink: 0;
-
-  ${skeletonStyle}
-`;

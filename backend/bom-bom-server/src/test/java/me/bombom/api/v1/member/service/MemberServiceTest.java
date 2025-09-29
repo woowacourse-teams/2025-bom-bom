@@ -13,7 +13,6 @@ import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -65,7 +64,7 @@ class MemberServiceTest {
     @Test
     void 회원가입_중_이미_존재하는_이메일이면_예외_발생() {
         //given
-        String duplicateEmail = "email";
+        String duplicateEmail = "email@bombom.news";
         Member member = TestFixture.createMemberFixture(duplicateEmail, "nickname");
         memberRepository.save(member);
 

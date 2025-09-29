@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { patchArticleRead } from '@/apis/articles';
 import { queries } from '@/apis/queries';
+import { formatDate } from '@/utils/date';
 
 interface UseArticleAsReadMutationParams {
   articleId: number;
@@ -20,7 +21,7 @@ const useArticleAsReadMutation = ({
         queryKey: queries.articleById({ id: articleId }).queryKey,
       });
       queryClient.invalidateQueries({
-        queryKey: queries.articles({ date: today }).queryKey,
+        queryKey: queries.articles({ date: formatDate(today, '-') }).queryKey,
       });
     },
   });

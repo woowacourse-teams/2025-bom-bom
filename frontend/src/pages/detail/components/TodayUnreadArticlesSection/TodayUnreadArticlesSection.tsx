@@ -5,6 +5,7 @@ import EmptyUnreadCard from '../EmptyUnreadCard/EmptyUnreadCard';
 import NewsletterItemCard from '../NewsletterItemCard/NewsletterItemCard';
 import { queries } from '@/apis/queries';
 import { useDevice } from '@/hooks/useDevice';
+import { formatDate } from '@/utils/date';
 import type { Device } from '@/hooks/useDevice';
 
 interface TodayUnreadArticlesSectionProps {
@@ -15,7 +16,9 @@ const TodayUnreadArticlesSection = ({
   articleId,
 }: TodayUnreadArticlesSectionProps) => {
   const today = useMemo(() => new Date(), []);
-  const { data: todayArticles } = useQuery(queries.articles({ date: today }));
+  const { data: todayArticles } = useQuery(
+    queries.articles({ date: formatDate(today, '-') }),
+  );
   const device = useDevice();
 
   const unreadArticles = todayArticles?.content?.filter(

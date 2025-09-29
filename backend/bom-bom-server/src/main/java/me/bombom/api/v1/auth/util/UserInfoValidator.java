@@ -30,39 +30,43 @@ public class UserInfoValidator {
     private final MemberRepository memberRepository;
 
     public boolean isNicknameAvailable(String nickname) {
-        return isValidNicknameFormat(nickname) && !isDuplicateNickname(nickname);
+        return isValidNicknameFormat(nickname)
+                && !isDuplicateNickname(nickname)
+                && isValidNicknameLength(nickname);
     }
 
     public boolean isEmailAvailable(String email) {
-        return isValidEmailFormat(email) && !isDuplicateEmail(email);
+        return isValidEmailFormat(email)
+                && !isDuplicateEmail(email)
+                && isValidEmailLength(email);
     }
 
     public boolean isValidNicknameFormat(String nickname) {
-        if (StringUtils.hasText(nickname)) {
-            return false;
-        }
-        return NICKNAME_PATTERN.matcher(normalize(nickname)).matches();
+        return StringUtils.hasText(nickname) &&
+                isValidNicknameLength(nickname) &&
+                NICKNAME_PATTERN.matcher(normalize(nickname)).matches();
     }
 
     public boolean isValidEmailFormat(String email) {
-        if (StringUtils.hasText(email)) {
-            return false;
-        }
-        return EMAIL_PATTERN.matcher(normalize(email)).matches();
+        return StringUtils.hasText(email) &&
+                isValidEmailLength(email) &&
+                EMAIL_PATTERN.matcher(normalize(email)).matches();
     }
 
     public boolean isDuplicateNickname(String nickname) {
-        if (StringUtils.hasText(nickname)) {
-            return false;
-        }
         return memberRepository.existsByNickname(normalize(nickname));
     }
 
     public boolean isDuplicateEmail(String email) {
-        if (StringUtils.hasText(email)) {
-            return false;
-        }
         return memberRepository.existsByEmail(normalize(email));
+    }
+
+    private boolean isValidEmailLength(String email) {
+        return email.length() >= 15 && email.length() <= 50;
+    }
+
+    private boolean isValidNicknameLength(String nickname) {
+        return nickname.length() >= 2 && nickname.length() <= 20;
     }
 
     private String normalize(String value) {

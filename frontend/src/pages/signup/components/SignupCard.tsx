@@ -122,7 +122,7 @@ const SignupCard = () => {
             </TooltipButton>
             <InfoText>이 주소로 뉴스레터가 도착해요!</InfoText>
 
-            <Tooltip id="email-help-tooltip" open={emailHelpOpen}>
+            <Tooltip id="email-help-tooltip" opened={emailHelpOpen}>
               봄봄은 <b>개인 메일</b>이 아닌 <b>봄봄 전용 메일</b>(
               <b>{EMAIL_DOMAIN}</b>)로 뉴스레터를 <b>수신</b>해요.
               <br />- 뉴스레터 전용이라 깔끔하게 관리돼요.

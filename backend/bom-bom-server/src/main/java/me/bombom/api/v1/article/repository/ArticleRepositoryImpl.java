@@ -54,21 +54,6 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     }
 
     @Override
-    public int countAllByNewsletterIdAndMemberId(Long memberId, Long newsletterId, String keyword) {
-        Long count = jpaQueryFactory.select(article.count())
-                .from(article)
-                .join(newsletter).on(article.newsletterId.eq(newsletter.id))
-                .where(createMemberWhereClause(memberId))
-                .where(createNewsletterIdWhereClause(newsletterId))
-                .where(createKeywordWhereClause(keyword))
-                .fetchOne();
-
-        return Optional.ofNullable(count)
-                .orElse(0L)
-                .intValue();
-    }
-
-    @Override
     public int countByMemberIdAndArrivedDateTimeAndIsRead(Long memberId, LocalDate date, boolean isRead) {
         Long count = jpaQueryFactory.select(article.count())
                 .from(article)

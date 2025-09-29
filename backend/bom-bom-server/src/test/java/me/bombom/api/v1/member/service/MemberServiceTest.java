@@ -13,6 +13,7 @@ import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.support.IntegrationTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -70,8 +71,8 @@ class MemberServiceTest {
 
         //when
         PendingOAuth2Member oAuth2Member = PendingOAuth2Member.builder()
-                .provider("provider")
-                .providerId("providerId")
+                .provider("provider2")
+                .providerId("providerId2")
                 .profileUrl("profileUrl")
                 .build();
         MemberSignupRequest memberSignupRequest = new MemberSignupRequest(

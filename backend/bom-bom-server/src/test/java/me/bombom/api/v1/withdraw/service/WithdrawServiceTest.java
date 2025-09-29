@@ -9,7 +9,6 @@ import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
-import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
@@ -27,9 +26,6 @@ import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
@@ -71,6 +67,15 @@ class WithdrawServiceTest {
 
     @BeforeEach
     public void setup() {
+        bookmarkRepository.deleteAllInBatch();
+        highlightRepository.deleteAllInBatch();
+        articleRepository.deleteAllInBatch();
+        newsletterRepository.deleteAllInBatch();
+        categoryRepository.deleteAllInBatch();
+        withdrawnMemberRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+        continueReadingRepository.deleteAllInBatch();
+
         member = memberRepository.save(TestFixture.normalMemberFixture());
         categories = TestFixture.createCategories();
         categoryRepository.saveAll(categories);

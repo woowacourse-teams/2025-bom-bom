@@ -5,7 +5,7 @@ import {
   Title,
   TitleWrapper,
 } from './NewsletterFilter';
-import BadgeSkeleton from '@/components/Badge/BadgeSkeleton';
+import SkeletonBox from '@/components/Skeleton/SkeletonBox';
 import TabSkeleton from '@/components/Tab/TabSkeleton';
 import { useDevice } from '@/hooks/useDevice';
 import { skeletonStyle } from '@/styles/skeleton';
@@ -41,7 +41,7 @@ const NewsletterFilterSkeleton = () => {
           StartComponent={
             index !== TOTAL_COUNT_INDEX && isPC && <SkeletonImage />
           }
-          EndComponent={isPC && <BadgeSkeleton skeletonHeight="24px" />}
+          EndComponent={isPC && <SkeletonBox width="36px" height="24px" />}
           textAlign={isPC ? 'start' : 'center'}
           skeletonWidth="80px"
           skeletonHeight="36px"

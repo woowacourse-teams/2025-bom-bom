@@ -66,7 +66,6 @@ dependencies {
 
     // db
     runtimeOnly("com.mysql:mysql-connector-j")
-    runtimeOnly("com.h2database:h2")
 
     // spring session jdbc
     implementation ("org.springframework.session:spring-session-jdbc")

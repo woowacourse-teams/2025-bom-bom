@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { ENV } from '@/apis/env';
 import { useDevice } from '@/hooks/useDevice';
+import { isWeb, isIOS } from '@/libs/webview/webview.utils';
 import { theme } from '@/styles/theme';
 import { isLocal } from '@/utils/environment';
 import AppleIcon from '#/assets/svg/apple.svg';
@@ -39,15 +40,18 @@ const LoginCard = () => {
         <GoogleIcon width={24} height={24} fill="black" />
         Google로 계속하기
       </LoginButton>
-      <LoginButton
-        onClick={() => {
-          window.location.href = `${ENV.baseUrl}/auth/login/apple`;
-        }}
-        type="button"
-      >
-        <AppleIcon width={24} height={24} fill="black" />
-        Apple로 계속하기
-      </LoginButton>
+      {(isWeb() || isIOS()) && (
+        <LoginButton
+          onClick={() => {
+            const envQuery = isLocal ? '?env=local' : '';
+            window.location.href = `${ENV.baseUrl}/auth/login/apple${envQuery}`;
+          }}
+          type="button"
+        >
+          <AppleIcon width={24} height={24} fill="black" />
+          Apple로 계속하기
+        </LoginButton>
+      )}
       <Terms>
         로그인하시면 봄봄의 <Highlight>서비스 약관</Highlight>과
         <Highlight>개인정보 처리방침</Highlight>에{'\n'}

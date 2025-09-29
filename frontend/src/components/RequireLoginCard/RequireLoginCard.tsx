@@ -4,7 +4,7 @@ import Button from '../Button/Button';
 import { useDevice } from '@/hooks/useDevice';
 import {
   isIOS,
-  isRunningInWebView,
+  isWebView,
   sendMessageToRN,
 } from '@/libs/webview/webview.utils';
 import LockIcon from '#/assets/svg/lock.svg';
@@ -14,7 +14,7 @@ const RequireLoginCard = () => {
   const device = useDevice();
   const isMobile = device === 'mobile';
   const handleLoginClick = () => {
-    if (isRunningInWebView() && isIOS())
+    if (isWebView() && isIOS())
       sendMessageToRN({
         type: 'SHOW_LOGIN_SCREEN',
       });

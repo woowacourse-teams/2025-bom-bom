@@ -1,4 +1,5 @@
 import { ENV } from '@/apis/env';
+import { logger } from '@/utils/logger';
 import type { IChannelIO } from './channelTalk.types';
 
 const CHANNEL_TALK_SCRIPT_SOURCE =
@@ -6,7 +7,7 @@ const CHANNEL_TALK_SCRIPT_SOURCE =
 
 const loadScript = () => {
   if (window.ChannelIO) {
-    return console.error('ChannelIO script included twice.');
+    return logger.error('ChannelIO script included twice.');
   }
 
   const ch: IChannelIO = function (...args) {

@@ -4,6 +4,7 @@ import {
   getXPathForNode,
 } from './selection';
 import { theme } from '@/styles/theme';
+import { logger } from '@/utils/logger';
 import type { Highlight } from '../types/highlight';
 
 export const highlightNodeSegment = (
@@ -131,7 +132,7 @@ export const restoreHighlightAll = (highlights: Highlight[]) => {
     try {
       addHighlightToDOM(highlight);
     } catch (error) {
-      console.error(error);
+      logger.error(error);
     }
   });
 };

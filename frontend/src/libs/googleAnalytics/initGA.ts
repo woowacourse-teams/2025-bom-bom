@@ -1,4 +1,5 @@
 import { GOOGLE_ANALYTICS_ID } from './constants';
+import { logger } from '@/utils/logger';
 
 declare global {
   interface Window {
@@ -12,7 +13,7 @@ export const initGA = (
   gtagUrl: string = 'https://www.googletagmanager.com/gtag/js',
 ) => {
   if (!googleAnalyticsId) {
-    console.warn('[GA] Google Analytics ID missing');
+    logger.warn('[GA] Measurement ID missing');
     return;
   }
 

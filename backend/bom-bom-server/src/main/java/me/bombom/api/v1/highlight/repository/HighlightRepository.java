@@ -29,7 +29,7 @@ public interface HighlightRepository extends JpaRepository<Highlight, Long>, Cus
     @Query(
             value = "DELETE h FROM highlight h "
                     + "JOIN article a ON h.article_id = a.id "
-                    + "WHERE a.member_id = :memberid",
+                    + "WHERE a.member_id = :memberId",
             nativeQuery = true
     )
     void deleteAllByMemberId(Long memberId);

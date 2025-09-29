@@ -8,6 +8,7 @@ import { getPet } from '@/apis/pet';
 import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
 import PetCardSkeleton from '@/components/PetCard/PetCardSkeleton';
+import RequireLogin from '@/hocs/RequireLogin';
 import { useDevice } from '@/hooks/useDevice';
 import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import { theme } from '@/styles/theme';
@@ -30,7 +31,11 @@ export const Route = createFileRoute('/_bombom/today')({
       },
     ],
   }),
-  component: Index,
+  component: () => (
+    <RequireLogin>
+      <Index />
+    </RequireLogin>
+  ),
 });
 
 function Index() {

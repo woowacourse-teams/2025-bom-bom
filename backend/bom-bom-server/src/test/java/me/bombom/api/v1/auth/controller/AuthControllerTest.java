@@ -3,11 +3,13 @@ package me.bombom.api.v1.auth.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.bombom.api.v1.TestFixture;
+import me.bombom.api.v1.auth.enums.SignupValidateField;
+import me.bombom.api.v1.auth.enums.SignupValidateStatus;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.enums.Gender;
@@ -43,33 +45,42 @@ class AuthControllerTest {
     }
 
     @Test
-    void 닉네임_중복_체크_TRUE() throws Exception {
+    void 닉네임_중복_체크_DUPLICATE() throws Exception {
         mockMvc.perform(get("/api/v1/auth/signup/check")
-                        .param("field", "NICKNAME")
+                        .param("field", SignupValidateField.NICKNAME.name())
                         .param("userInput", member.getNickname())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string("true"));
+                .andExpect(jsonPath("$").value(SignupValidateStatus.DUPLICATE.name()));
     }
 
     @Test
-    void 닉네임_중복_체크_FALSE() throws Exception {
+    void 닉네임_형식_체크_INVALID_FORMAT() throws Exception {
         mockMvc.perform(get("/api/v1/auth/signup/check")
-                        .param("field", "nickname")
-                        .param("userInput", "anotherNickname")
+                        .param("field", SignupValidateField.NICKNAME.name())
+                        .param("userInput", "bombom..bombom")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string("false"));
+                .andExpect(jsonPath("$").value(SignupValidateStatus.INVALID_FORMAT.name()));
     }
 
     @Test
-    void 이메일_중복_체크_TRUE() throws Exception {
+    void 회원가입_닉네임_체크_OK() throws Exception {
         mockMvc.perform(get("/api/v1/auth/signup/check")
-                        .param("field", "EMAIL")
+                        .param("field", SignupValidateField.NICKNAME.name())
+                        .param("userInput", "anotherNickname"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value(SignupValidateStatus.OK.name()));
+    }
+
+    @Test
+    void 이메일_중복_체크_DUPLICATE() throws Exception {
+        mockMvc.perform(get("/api/v1/auth/signup/check")
+                        .param("field", SignupValidateField.EMAIL.name())
                         .param("userInput", member.getEmail())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string("true"));
+                .andExpect(jsonPath("$").value(SignupValidateStatus.DUPLICATE.name()));
     }
 
     @Test

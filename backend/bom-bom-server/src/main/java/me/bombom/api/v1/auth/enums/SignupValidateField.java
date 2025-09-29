@@ -1,6 +1,6 @@
 package me.bombom.api.v1.auth.enums;
 
-public enum DuplicateCheckField {
+public enum SignupValidateField {
 
     NICKNAME,
     EMAIL

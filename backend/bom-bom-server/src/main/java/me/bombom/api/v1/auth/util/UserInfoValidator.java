@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * 사용자 정보 검증 서비스
@@ -37,30 +38,34 @@ public class UserInfoValidator {
     }
 
     public boolean isValidNicknameFormat(String nickname) {
-        if (nickname == null || nickname.isBlank()) {
+        if (StringUtils.hasText(nickname)) {
             return false;
         }
-        return NICKNAME_PATTERN.matcher(nickname.strip()).matches();
+        return NICKNAME_PATTERN.matcher(normalize(nickname)).matches();
     }
 
     public boolean isValidEmailFormat(String email) {
-        if (email == null || email.isBlank()) {
+        if (StringUtils.hasText(email)) {
             return false;
         }
-        return EMAIL_PATTERN.matcher(email.strip().toLowerCase()).matches();
+        return EMAIL_PATTERN.matcher(normalize(email)).matches();
     }
 
     public boolean isDuplicateNickname(String nickname) {
-        if (nickname == null || nickname.isBlank()) {
+        if (StringUtils.hasText(nickname)) {
             return false;
         }
-        return memberRepository.existsByNickname(nickname.strip().toLowerCase());
+        return memberRepository.existsByNickname(normalize(nickname));
     }
 
     public boolean isDuplicateEmail(String email) {
-        if (email == null || email.isBlank()) {
+        if (StringUtils.hasText(email)) {
             return false;
         }
-        return memberRepository.existsByEmail(email.strip().toLowerCase());
+        return memberRepository.existsByEmail(normalize(email));
+    }
+
+    private String normalize(String value) {
+        return value.strip().toLowerCase();
     }
 }

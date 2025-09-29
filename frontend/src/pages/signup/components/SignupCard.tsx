@@ -25,7 +25,7 @@ const SignupCard = () => {
   const [birthDate, setBirthDate] = useState('');
   const [emailPart, setEmailPart] = useState('');
   const [gender, setGender] = useState<Gender>('NONE');
-  const [emailHelpOpen, setEmailHelpOpen] = useState(false);
+  const [emailHelpOpened, setEmailHelpOpened] = useState(false);
 
   const [birthDateError, setBirthDateError] = useState<FieldError>(null);
 
@@ -69,8 +69,8 @@ const SignupCard = () => {
     addGuideMail();
   };
 
-  const openEmailHelp = () => setEmailHelpOpen(true);
-  const closeEmailHelp = () => setEmailHelpOpen(false);
+  const openEmailHelp = () => setEmailHelpOpened(true);
+  const closeEmailHelp = () => setEmailHelpOpened(false);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -111,7 +111,7 @@ const SignupCard = () => {
             <TooltipButton
               type="button"
               aria-label="이메일을 수집하는 이유 안내"
-              aria-expanded={emailHelpOpen}
+              aria-expanded={emailHelpOpened}
               aria-describedby="email-why-tooltip"
               onMouseEnter={openEmailHelp}
               onMouseLeave={closeEmailHelp}
@@ -122,7 +122,7 @@ const SignupCard = () => {
             </TooltipButton>
             <InfoText>이 주소로 뉴스레터가 도착해요!</InfoText>
 
-            <Tooltip id="email-help-tooltip" opened={emailHelpOpen}>
+            <Tooltip id="email-help-tooltip" opened={emailHelpOpened}>
               봄봄은 <b>개인 메일</b>이 아닌 <b>봄봄 전용 메일</b>(
               <b>{EMAIL_DOMAIN}</b>)로 뉴스레터를 <b>수신</b>해요.
               <br />- 뉴스레터 전용이라 깔끔하게 관리돼요.

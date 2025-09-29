@@ -11,13 +11,13 @@ import org.hibernate.validator.constraints.Length;
 public record MemberSignupRequest(
 
         @NotNull
-        @Length(min = 2, max = 12)
+        @Length(min = 2, max = 20)
         @Pattern(regexp = "^(?!.*\\.\\.)[A-Za-z0-9가-힣][A-Za-z0-9가-힣._ ]*[A-Za-z0-9가-힣]$")
         String nickname,
 
         @Email
         @NotNull
-        @Length(min = 15, max = 42)
+        @Length(min = 15, max = 50)
         @Pattern(regexp = "^[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?@bombom\\.news$")
         String email,
 

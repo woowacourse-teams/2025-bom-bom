@@ -9,10 +9,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
 @SpringBootTest
 @ActiveProfiles("test")
+@Target(ElementType.TYPE)
 @Import(TestcontainerConfig.class)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface IntegrationTest {
 }

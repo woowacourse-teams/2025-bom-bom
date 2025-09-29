@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import ReadingKingLeaderboard from '../../pages/recommend/components/ReadingKingLeaderboard/ReadingKingLeaderboard';
-import RequireLogin from '@/hocs/RequireLogin';
 import { useDevice } from '@/hooks/useDevice';
 import NewsletterHero from '@/pages/recommend/components/NewsletterHero/NewsletterHero';
 import TrendySection from '@/pages/recommend/components/TrendySection/TrendySection';
@@ -15,11 +14,7 @@ export const Route = createFileRoute('/_bombom/')({
       },
     ],
   }),
-  component: () => (
-    <RequireLogin>
-      <Recommend />
-    </RequireLogin>
-  ),
+  component: Recommend,
 });
 
 function Recommend() {

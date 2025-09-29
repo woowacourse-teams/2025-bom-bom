@@ -19,7 +19,6 @@ export const useSignupMutation = ({
   const navigate = useNavigate();
 
   return useMutation({
-    mutationKey: ['signup', nickname, email, gender],
     mutationFn: () =>
       postSignup({
         nickname: nickname.trim(),

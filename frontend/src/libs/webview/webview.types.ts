@@ -9,7 +9,10 @@ export interface WebToRNMessage {
   payload?: any;
 }
 
-type RNToWebMessageType = 'GOOGLE_LOGIN_TOKEN' | 'APPLE_LOGIN_TOKEN';
+type RNToWebMessageType =
+  | 'GOOGLE_LOGIN_TOKEN'
+  | 'APPLE_LOGIN_TOKEN'
+  | 'ANDROID_BACK_BUTTON_CLICKED';
 
 export interface RNToWebMessage {
   type: RNToWebMessageType;

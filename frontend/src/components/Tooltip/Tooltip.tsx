@@ -6,7 +6,6 @@ interface TooltipProps {
   id?: string;
   opened: boolean;
   position?: 'top' | 'bottom' | 'left' | 'right';
-  className?: string;
 }
 
 const Tooltip = ({

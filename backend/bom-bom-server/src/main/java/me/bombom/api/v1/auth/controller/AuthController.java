@@ -158,7 +158,7 @@ public class AuthController implements AuthControllerApi{
             }
         }
 
-        memberService.revoke(member.getId());
+        memberService.withdraw(member.getId());
         session.invalidate();
         expireSessionCookie(response);
         SecurityContextHolder.clearContext();

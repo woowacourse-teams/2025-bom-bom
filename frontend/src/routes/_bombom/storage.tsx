@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
+import RequireLogin from '@/hocs/RequireLogin';
 import { useDevice } from '@/hooks/useDevice';
 import MobileStorageContent from '@/pages/storage/components/MobileStorageContent/MobileStorageContent';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
@@ -21,7 +22,11 @@ export const Route = createFileRoute('/_bombom/storage')({
       },
     ],
   }),
-  component: Storage,
+  component: () => (
+    <RequireLogin>
+      <Storage />
+    </RequireLogin>
+  ),
 });
 
 function Storage() {

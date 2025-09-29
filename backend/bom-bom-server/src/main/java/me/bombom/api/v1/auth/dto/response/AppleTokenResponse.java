@@ -27,4 +27,3 @@ public class AppleTokenResponse {
     @JsonProperty("error_description")
     private String errorDescription;
 }
-

@@ -98,4 +98,3 @@ class AuthControllerTest {
         assertThat(Gender.NONE).isEqualTo(request.gender());
     }
 }
-

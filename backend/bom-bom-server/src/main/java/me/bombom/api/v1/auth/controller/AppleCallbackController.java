@@ -18,6 +18,7 @@ public class AppleCallbackController {
     private static final String SESSION_ATTR_USER_JSON = "appleUserParam";
 
     /**
+     * 애플에서 보내주는 user 객체
      * userJson
      *{
      *   "name": {
@@ -44,3 +45,4 @@ public class AppleCallbackController {
         request.getRequestDispatcher(APPLE_SECURITY_CALLBACK).forward(request, response);
     }
 }
+

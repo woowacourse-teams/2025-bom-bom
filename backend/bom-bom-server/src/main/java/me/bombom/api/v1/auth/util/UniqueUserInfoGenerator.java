@@ -12,7 +12,10 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UniqueUserInfoGenerator {
-    
+
+    public static final String NICKNAME_RANDOM_DELIMITER = "#";
+    public static final String EMAIL_RANDOM_DELIMITER = ".";
+
     private final UserInfoValidator userInfoValidator;
 
     public String getUniqueNickname(String nickname) {
@@ -33,13 +36,13 @@ public class UniqueUserInfoGenerator {
     }
 
     private String generateUniqueNickname(String baseNickname) {
-        String uniqueNickname = baseNickname + getTimestampSuffix();
+        String uniqueNickname = baseNickname + NICKNAME_RANDOM_DELIMITER + getTimestampSuffix();
         log.info("고유 닉네임 생성 - 원본: {}, 생성: {}", baseNickname, uniqueNickname);
         return uniqueNickname;
     }
 
     private String generateUniqueEmailLocalPart(String baseLocalPart) {
-        String uniqueEmailLocalPart = baseLocalPart + getTimestampSuffix();
+        String uniqueEmailLocalPart = baseLocalPart + EMAIL_RANDOM_DELIMITER + getTimestampSuffix();
         log.info("고유 이메일 로컬파트 생성 - 원본: {}, 생성: {}", baseLocalPart, uniqueEmailLocalPart);
         return uniqueEmailLocalPart;
     }

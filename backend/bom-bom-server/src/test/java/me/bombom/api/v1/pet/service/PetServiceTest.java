@@ -50,7 +50,7 @@ class PetServiceTest {
 
     @BeforeEach
     void setUp() {
-        member = TestFixture.createUniqueMember(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        member = TestFixture.createUniqueMember(getUniqueValue(), getUniqueValue());
         memberRepository.save(member);
         firstStage = TestFixture.createStage(1, 0);
         stageRepository.save(firstStage);
@@ -188,5 +188,9 @@ class PetServiceTest {
 
         // then
         assertThat(stage.getLevel()).isEqualTo(firstStage.getLevel());
+    }
+
+    private String getUniqueValue() {
+        return UUID.randomUUID().toString().substring(0, 20);
     }
 }

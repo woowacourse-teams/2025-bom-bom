@@ -8,6 +8,7 @@ import { useDevice } from '@/hooks/useDevice';
 import ArticleList from '@/pages/storage/components/ArticleList/ArticleList';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
+import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import type { Device } from '@/hooks/useDevice';
 import BookmarkIcon from '#/assets/svg/bookmark-inactive.svg';
@@ -93,7 +94,11 @@ function BookmarkPage() {
                 <ResultsInfo>총 {totalElements}개의 북마크</ResultsInfo>
               )}
             </SummaryBar>
-            <ArticleList articles={bookmarkContent} isLoading={isLoading} />
+            {isLoading ? (
+              <ArticleCardListSkeleton />
+            ) : (
+              <ArticleList articles={bookmarkContent} isLoading={isLoading} />
+            )}
           </MainContentSection>
         </ContentWrapper>
       </MainSection>

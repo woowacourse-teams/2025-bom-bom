@@ -13,6 +13,7 @@ import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.support.IntegrationTest;
+import me.bombom.api.v1.withdraw.service.WithdrawService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -35,6 +36,12 @@ class MemberServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private TestEntityManager entityManager;
+
+    @MockitoBean
+    private WithdrawService withdrawService;
+  
     @Test
     void 회원가입_중_이미_존재하는_닉네임이면_예외_발생() {
         //given

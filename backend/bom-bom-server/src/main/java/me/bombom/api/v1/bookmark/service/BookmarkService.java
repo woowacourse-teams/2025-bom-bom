@@ -2,6 +2,7 @@ package me.bombom.api.v1.bookmark.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
@@ -18,8 +19,10 @@ import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -65,15 +68,6 @@ public class BookmarkService {
         bookmarkRepository.deleteByMemberIdAndArticleId(memberId, articleId);
     }
 
-    private void validateArticleOwner(Long memberId, Article article) {
-        if (article.isNotOwner(memberId)) {
-            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
-                .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                .addContext(ErrorContextKeys.ARTICLE_ID, article.getId())
-                .addContext(ErrorContextKeys.ACTUAL_OWNER_ID, article.getMemberId());
-        }
-    }
-
     public BookmarkNewsletterStatisticsResponse getBookmarkNewsletterStatistics(Member member) {
         List<BookmarkCountPerNewsletterResponse> countResponse = newsletterRepository.findAll()
                 .stream()
@@ -90,5 +84,19 @@ public class BookmarkService {
                 .sum();
 
         return BookmarkNewsletterStatisticsResponse.of(totalCount, countResponse);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteAllByMemberId(Long memberId) {
+        bookmarkRepository.deleteAllByMemberId(memberId);
+    }
+
+    private void validateArticleOwner(Long memberId, Article article) {
+        if (article.isNotOwner(memberId)) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                .addContext(ErrorContextKeys.ARTICLE_ID, article.getId())
+                .addContext(ErrorContextKeys.ACTUAL_OWNER_ID, article.getMemberId());
+        }
     }
 }

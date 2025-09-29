@@ -25,15 +25,16 @@ public class UserInfoValidator {
      * - 연속된 마침표(..) 금지
      * - 선택적으로 '#숫자'가 붙을 수 있음
      */
-    private static final String NICKNAME_REGEX_PATTERN = "^(?!.*\\.\\.)[A-Za-z0-9가-힣](?:[A-Za-z0-9가-힣._ ]*[A-Za-z0-9가-힣])?(?:#\\d+)?$";
-    private static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?@bombom\\.news$";
+    public static final String NICKNAME_REGEX_PATTERN = "^(?!.*\\.\\.)[A-Za-z0-9가-힣](?:[A-Za-z0-9가-힣._ ]*[A-Za-z0-9가-힣])?(?:#\\d+)?$";
+    public static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?@bombom\\.news$";
+    private static final String EMAIL_DOMAIN = "@bombom.news";
+    public static final int EMAIL_MIN_LENGTH = 15;
+    public static final int EMAIL_MAX_LENGTH = 50;
+    public static final int NICKNAME_MIN_LENGTH = 2;
+    public static final int NICKNAME_MAX_LENGTH = 20;
+
     private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX_PATTERN);
     private static final Pattern NICKNAME_PATTERN = Pattern.compile(NICKNAME_REGEX_PATTERN);
-    private static final String EMAIL_DOMAIN = "@bombom.news";
-    private static final int EMAIL_MIN_LENGTH = 15;
-    private static final int EMAIL_MAX_LENGTH = 50;
-    private static final int NICKNAME_MIN_LENGTH = 2;
-    private static final int NICKNAME_MAX_LENGTH = 20;
 
     private final MemberRepository memberRepository;
 

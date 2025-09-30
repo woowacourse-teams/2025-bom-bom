@@ -31,6 +31,15 @@ jobs:
           printf '%s' "${{ secrets.APPLICATION_PROD_PROPERTIES }}" > src/main/resources/application.yml
           printf '%s' "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
 
+#      - name: 빌드 및 테스트
+#        shell: bash
+#        env:
+#          SPRING_PROFILES_ACTIVE: test
+#          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+#        run: |
+#          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "${APPLE_P8_ESCAPED:?APPLE_P8_ESCAPED 시크릿이 없습니다}")"
+#          ./gradlew clean build --no-daemon
+
       - name: 빌드 및 테스트
         shell: bash
         env:
@@ -38,7 +47,15 @@ jobs:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "${APPLE_P8_ESCAPED:?APPLE_P8_ESCAPED 시크릿이 없습니다}")"
-          ./gradlew clean build --no-daemon
+          # gradle 실행 시 stacktrace와 info 출력
+          ./gradlew clean build --no-daemon --stacktrace --info \
+            | tee gradle.log
+      
+          # ScannerException 줄만 뽑기
+          grep -A3 -B3 "ScannerException" gradle.log || true
+      
+          # line / column 정보만 추출
+          grep -E "line:|column:" gradle.log || true
 
       - name: Docker Buildx 설정
         uses: docker/setup-buildx-action@v3

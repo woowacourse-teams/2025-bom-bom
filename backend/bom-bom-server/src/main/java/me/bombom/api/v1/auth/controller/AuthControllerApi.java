@@ -95,7 +95,7 @@ public interface AuthControllerApi {
         description = "현재 로그인한 회원의 계정을 삭제합니다. Apple 로그인 사용자의 경우 Apple 토큰도 함께 철회됩니다."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "탈퇴 성공"),
+        @ApiResponse(responseCode = "204", description = "탈퇴 성공"),
         @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
     })
     void withdraw(@Parameter(hidden = true) @LoginMember Member member, HttpSession session, HttpServletResponse response) throws IOException;

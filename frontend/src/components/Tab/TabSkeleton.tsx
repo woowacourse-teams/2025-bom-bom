@@ -1,29 +1,49 @@
 import styled from '@emotion/styled';
+import { Container, Label } from './Tab';
 import SkeletonBox from '../Skeleton/SkeletonBox';
-import type { ReactNode } from 'react';
 
 interface TabSkeletonProps {
-  StartComponent?: ReactNode;
-  EndComponent?: ReactNode;
+  StartComponentSkeleton?: {
+    width: string;
+    height: string;
+    borderRadius?: string;
+  };
+  EndComponentSkeleton?: {
+    width: string;
+    height: string;
+    borderRadius?: string;
+  };
   textAlign?: 'start' | 'center' | 'end';
-  skeletonWidth?: string;
-  skeletonHeight?: string;
+  width?: string;
+  height?: string;
 }
 
 const TabSkeleton = ({
-  StartComponent,
-  EndComponent,
+  StartComponentSkeleton,
+  EndComponentSkeleton,
   textAlign = 'center',
-  skeletonWidth = '100%',
-  skeletonHeight = '100%',
+  width = '100%',
+  height = '100%',
 }: TabSkeletonProps) => {
   return (
-    <SkeletonContainer>
-      {StartComponent}
-      <SkeletonLabel textAlign={textAlign}>
-        <SkeletonBox width={skeletonWidth} height={skeletonHeight} />
-      </SkeletonLabel>
-      {EndComponent}
+    <SkeletonContainer as={Container}>
+      {StartComponentSkeleton && (
+        <SkeletonBox
+          width={StartComponentSkeleton.width}
+          height={StartComponentSkeleton.height}
+          borderRadius={StartComponentSkeleton.borderRadius}
+        />
+      )}
+      <Label textAlign={textAlign}>
+        <SkeletonBox width={width} height={height} />
+      </Label>
+      {EndComponentSkeleton && (
+        <SkeletonBox
+          width={EndComponentSkeleton.width}
+          height={EndComponentSkeleton.height}
+          borderRadius={EndComponentSkeleton.borderRadius}
+        />
+      )}
     </SkeletonContainer>
   );
 };
@@ -32,15 +52,4 @@ export default TabSkeleton;
 
 const SkeletonContainer = styled.li`
   padding: 8px 12px;
-  border-radius: 12px;
-
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-const SkeletonLabel = styled.span<{ textAlign: 'start' | 'center' | 'end' }>`
-  width: 100%;
-  text-align: ${({ textAlign }) => textAlign};
 `;

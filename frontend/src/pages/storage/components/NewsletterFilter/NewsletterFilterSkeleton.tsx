@@ -4,7 +4,6 @@ import {
   Title,
   TitleWrapper,
 } from './NewsletterFilter';
-import SkeletonBox from '@/components/Skeleton/SkeletonBox';
 import TabSkeleton from '@/components/Tab/TabSkeleton';
 import { useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
@@ -22,8 +21,8 @@ const NewsletterFilterSkeleton = () => {
   const isPC = device === 'pc';
 
   return (
-    <Container aria-label="뉴스레터" isPc={device === 'pc'}>
-      {device === 'pc' && (
+    <Container aria-label="뉴스레터" isPc={isPC}>
+      {isPC && (
         <TitleWrapper>
           <IconWrapper>
             <NewsIcon width={16} height={16} fill={theme.colors.white} />
@@ -36,16 +35,17 @@ const NewsletterFilterSkeleton = () => {
       }).map((_, index) => (
         <TabSkeleton
           key={index}
-          StartComponent={
-            index !== TOTAL_COUNT_INDEX &&
-            isPC && (
-              <SkeletonBox width="24px" height="24px" borderRadius="50%" />
-            )
+          StartComponentSkeleton={
+            index !== TOTAL_COUNT_INDEX && isPC
+              ? { width: '24px', height: '24px', borderRadius: '50%' }
+              : undefined
           }
-          EndComponent={isPC && <SkeletonBox width="36px" height="24px" />}
+          EndComponentSkeleton={
+            isPC ? { width: '36px', height: '24px' } : undefined
+          }
           textAlign={isPC ? 'start' : 'center'}
-          skeletonWidth="80px"
-          skeletonHeight="36px"
+          width="80px"
+          height="36px"
         />
       ))}
     </Container>

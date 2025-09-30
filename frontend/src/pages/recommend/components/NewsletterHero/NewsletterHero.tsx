@@ -1,13 +1,9 @@
 import styled from '@emotion/styled';
-import { Link, useNavigate } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import SlideCardList from '../SlideCardList/SlideCardList';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import {
-  isIOS,
-  isWebView,
-  sendMessageToRN,
-} from '@/libs/webview/webview.utils';
+import { isIOS, sendMessageToRN } from '@/libs/webview/webview.utils';
 import logo from '#/assets/avif/logo.avif';
 
 export default function NewsletterHero() {
@@ -15,7 +11,7 @@ export default function NewsletterHero() {
   const navigate = useNavigate();
 
   const handleLoginClick = () => {
-    if (isWebView() && isIOS())
+    if (isIOS())
       sendMessageToRN({
         type: 'SHOW_LOGIN_SCREEN',
       });
@@ -37,7 +33,6 @@ export default function NewsletterHero() {
               당신의 관심사에 맞는 최고의 뉴스레터를 추천해드립니다.
             </HeroSubtitle>
             <CTAButton
-              to="/login"
               onClick={() => {
                 handleLoginClick();
                 trackEvent({
@@ -100,7 +95,7 @@ const HeroSubtitle = styled.p`
   opacity: 0.9;
 `;
 
-const CTAButton = styled(Link)`
+const CTAButton = styled.button`
   width: fit-content;
   padding: 12px 24px;
   border: none;

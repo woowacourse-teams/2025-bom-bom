@@ -111,23 +111,13 @@ public class AuthController implements AuthControllerApi{
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "응답 바디가 없습니다.");
             return null;
         }
-        
-        if (OAuth2Provider.APPLE.isEqualProvider(provider)) {
-            return handleNativeResult(
-                    nativeLoginRequest,
-                    appleOAuth2Service.loginWithNative(nativeLoginRequest),
-                    request
-            );
-        } else if (OAuth2Provider.GOOGLE.isEqualProvider(provider)) {
-            return handleNativeResult(
-                    nativeLoginRequest,
-                    googleOAuth2LoginService.loginWithNative(nativeLoginRequest),
-                    request
-            );
-        } else {
+
+        Optional<Member> loginResult = loginWithProvider(provider, nativeLoginRequest);
+        if (loginResult.isEmpty()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "지원하지 않는 제공자입니다.");
             return null;
         }
+        return handleNativeResult(nativeLoginRequest, loginResult, request);
     }
 
     @Override
@@ -176,6 +166,15 @@ public class AuthController implements AuthControllerApi{
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 
+    private Optional<Member> loginWithProvider(String provider, NativeLoginRequest nativeLoginRequest) {
+        if (OAuth2Provider.APPLE.isEqualProvider(provider)) {
+            return appleOAuth2Service.loginWithNative(nativeLoginRequest);
+        } else if (OAuth2Provider.GOOGLE.isEqualProvider(provider)) {
+            return googleOAuth2LoginService.loginWithNative(nativeLoginRequest);
+        }
+        return Optional.empty(); // 미지원 provider
+    }
+
     private NativeLoginResponse handleNativeResult(
             NativeLoginRequest nativeLoginRequest,
             Optional<Member> member,
@@ -183,14 +182,14 @@ public class AuthController implements AuthControllerApi{
     ) {
         // 세션 생성 트리거 (컨테이너가 Set-Cookie: JSESSIONID를 설정)
         request.getSession(true);
-        
+
         if (member.isPresent()) {
             OAuth2AuthenticationToken authentication = createAuthenticationToken(member.get());
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             HttpSession session = request.getSession();
             session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
-            
+
             // 기존 회원 -> 로그인 완료
             return new NativeLoginResponse(true, null, null);
         } else {

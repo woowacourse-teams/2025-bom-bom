@@ -1,4 +1,3 @@
-import styled from '@emotion/styled';
 import {
   AttendanceButton,
   Container,
@@ -10,7 +9,6 @@ import {
 import ProgressBarSkeleton from '../ProgressBar/ProgressBarSkeleton';
 import SkeletonBox from '../Skeleton/SkeletonBox';
 import { useDevice } from '@/hooks/useDevice';
-import { skeletonStyle } from '@/styles/skeleton';
 import { theme } from '@/styles/theme';
 import PetIcon from '#/assets/svg/pet.svg';
 
@@ -28,30 +26,21 @@ const PetCardSkeleton = () => {
         </TitleWrapper>
       )}
       <PetImageContainer>
-        <SkeletonPetImage />
+        <SkeletonBox
+          width="120px"
+          height="120px"
+          borderRadius="12px"
+          as={AttendanceButton}
+        />
       </PetImageContainer>
 
       <SkeletonBox width="100px" height="16px" />
 
       <ProgressBarSkeleton hasCaption={true} />
 
-      <SkeletonAttendanceButton as={AttendanceButton} />
+      <SkeletonBox width="50%" height="100%" as={AttendanceButton} />
     </Container>
   );
 };
 
 export default PetCardSkeleton;
-
-const SkeletonPetImage = styled.div`
-  width: 120px;
-  height: 120px;
-  border-radius: 12px;
-
-  ${skeletonStyle}
-`;
-
-const SkeletonAttendanceButton = styled.div`
-  width: 50%;
-
-  ${skeletonStyle};
-`;

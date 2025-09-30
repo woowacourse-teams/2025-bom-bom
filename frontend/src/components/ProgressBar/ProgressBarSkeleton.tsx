@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { Container, ProgressCaption, ProgressGauge } from './ProgressBar';
-import { skeletonStyle } from '@/styles/skeleton';
+import SkeletonBox from '../Skeleton/SkeletonBox';
 
 interface ProgressBarSkeletonProps {
   hasCaption?: boolean;
@@ -8,28 +8,24 @@ interface ProgressBarSkeletonProps {
 
 const ProgressBarSkeleton = ({ hasCaption }: ProgressBarSkeletonProps) => {
   return (
-    <Container>
-      <SkeletonProgressGauge as={ProgressGauge} />
-      {hasCaption && <SkeletonProgressCaption as={ProgressCaption} />}
-    </Container>
+    <SkeletonContainer as={Container}>
+      <SkeletonBox
+        width="100%"
+        height="100%"
+        borderRadius="10px"
+        as={ProgressGauge}
+      />
+      {hasCaption && (
+        <SkeletonBox width="24px" height="12px" as={ProgressCaption} />
+      )}
+    </SkeletonContainer>
   );
 };
 
 export default ProgressBarSkeleton;
 
-const SkeletonProgressGauge = styled.div`
-  width: 100%;
-  border-radius: 10px;
-
-  ${skeletonStyle}
-`;
-
-const SkeletonProgressCaption = styled.div`
-  width: 24px;
-  height: 12px;
-  margin-top: 4px;
-  margin-left: auto;
-  border-radius: 4px;
-
-  ${skeletonStyle}
+const SkeletonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 `;

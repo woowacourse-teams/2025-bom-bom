@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { Link, useNavigate } from '@tanstack/react-router';
 import SlideCardList from '../SlideCardList/SlideCardList';
+import SkeletonBox from '@/components/Skeleton/SkeletonBox';
 import { useDevice } from '@/hooks/useDevice';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
@@ -9,7 +10,6 @@ import {
   isWebView,
   sendMessageToRN,
 } from '@/libs/webview/webview.utils';
-import { skeletonStyle } from '@/styles/skeleton';
 import logo from '#/assets/avif/logo.avif';
 
 const NewsletterHero = () => {
@@ -21,7 +21,7 @@ const NewsletterHero = () => {
   if (isLoading) {
     return (
       <Container>
-        <SkeletonBanner />
+        <SkeletonBox width="100%" height="280px" />
       </Container>
     );
   }
@@ -129,10 +129,4 @@ const CTAButton = styled(Link)<{ isPC: boolean }>`
     box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
     transform: translateY(-2px);
   }
-`;
-
-const SkeletonBanner = styled.div`
-  height: 280px;
-
-  ${skeletonStyle}
 `;

@@ -5,14 +5,23 @@ interface TextSkeletonProps {
   width: string;
   height: string;
   borderRadius?: string;
+  as?: React.ElementType;
 }
 
 const SkeletonBox = ({
   width,
   height,
   borderRadius = '4px',
+  as,
 }: TextSkeletonProps) => {
-  return <Skeleton width={width} height={height} borderRadius={borderRadius} />;
+  return (
+    <Skeleton
+      width={width}
+      height={height}
+      borderRadius={borderRadius}
+      as={as}
+    />
+  );
 };
 
 export default SkeletonBox;

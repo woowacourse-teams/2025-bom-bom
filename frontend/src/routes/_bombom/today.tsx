@@ -13,7 +13,7 @@ import {
   GUIDE_MAILS,
 } from '@/pages/guide-detail/constants/guideMail';
 import { theme } from '@/styles/theme';
-import { formatDate, isToday } from '@/utils/date';
+import { isToday } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
 import type { Device } from '@/hooks/useDevice';
 import type { LocalGuideMail } from '@/types/guide';
@@ -46,12 +46,12 @@ function Index() {
     GUIDE_MAIL_STORAGE_KEY,
   ).get();
 
-  const guideMailCreatedAt = guideMails?.createdAt ?? formatDate(new Date());
   const guideMailReadMailIds = guideMails?.readMailIds ?? [];
 
-  const guideArticles = isToday(new Date(guideMailCreatedAt))
-    ? GUIDE_MAILS
-    : [];
+  const guideArticles =
+    guideMails?.createdAt && isToday(new Date(guideMails?.createdAt))
+      ? GUIDE_MAILS
+      : [];
 
   const mergedArticles = [
     ...(todayArticles?.content?.map((article) => ({

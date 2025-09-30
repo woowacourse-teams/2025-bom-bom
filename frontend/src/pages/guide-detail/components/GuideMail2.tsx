@@ -199,9 +199,6 @@ const ActionButton = styled.a`
   background: ${({ theme }) => theme.colors.primary};
   color: ${({ theme }) => theme.colors.white};
   font: ${({ theme }) => theme.fonts.body1};
-  font-weight: 700;
-
-  text-decoration: none;
 
   &:hover {
     opacity: 0.9;

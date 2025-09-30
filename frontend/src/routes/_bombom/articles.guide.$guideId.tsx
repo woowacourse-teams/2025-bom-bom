@@ -46,7 +46,7 @@ function GuideMailPage() {
     setGuideArticles((prev) => {
       if (!prev) {
         return {
-          createdAt: formatDate(new Date()),
+          createdAt: formatDate(new Date('2025-01-01')),
           readMailIds: [guideIdNumber],
         };
       }

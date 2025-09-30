@@ -3,7 +3,6 @@ import styled from '@emotion/styled';
 export default function GuideMail1() {
   return (
     <Container>
-      {/* 상단 박스 */}
       <HeaderBox>
         <HeaderTag>봄봄 사용 가이드</HeaderTag>
         <HeaderTitle>뉴스레터 구독하기</HeaderTitle>
@@ -13,7 +12,6 @@ export default function GuideMail1() {
         </HeaderDescription>
       </HeaderBox>
 
-      {/* 섹션 1 */}
       <SectionTitle>🔍 뉴스레터 둘러보기</SectionTitle>
       <TipBox>
         <TipText>
@@ -33,7 +31,6 @@ export default function GuideMail1() {
         </WarningDescription>
       </WarningBox>
 
-      {/* 섹션 2 */}
       <SectionTitle>📧 구독 페이지 접속하기</SectionTitle>
       <BodyText>
         원하는 뉴스레터에서 <strong>「구독하기」</strong> 버튼을 눌러 구독
@@ -48,7 +45,6 @@ export default function GuideMail1() {
         </WarningDescription>
       </WarningBox>
 
-      {/* 섹션 3 */}
       <SectionTitle>📝 봄봄 메일 붙여넣기</SectionTitle>
       <BodyText>
         구독 페이지의 이메일 입력 칸에 복사된 봄봄 메일을 붙여넣기 해주세요.
@@ -57,7 +53,6 @@ export default function GuideMail1() {
       </BodyText>
       <Image src="/assets/gif/guide_subscribe_2.gif" alt="뉴스레터 구독 - 2" />
 
-      {/* 섹션 4 */}
       <SectionTitle>✅ 구독 완료</SectionTitle>
       <BodyText>
         🎉 축하해요! 이제 정기적으로 뉴스레터를 받아보실 수 있어요.
@@ -191,8 +186,6 @@ const ActionButton = styled.a`
   background: ${({ theme }) => theme.colors.primary};
   color: ${({ theme }) => theme.colors.white};
   font: ${({ theme }) => theme.fonts.body1};
-
-  text-decoration: none;
 
   &:hover {
     opacity: 0.9;

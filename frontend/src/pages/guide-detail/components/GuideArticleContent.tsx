@@ -45,17 +45,6 @@ const Container = styled.div`
   word-break: break-all;
   word-wrap: break-word;
 
-  a {
-    color: ${({ theme }) => theme.colors.info};
-
-    cursor: pointer;
-    text-decoration: underline;
-
-    &:hover {
-      text-decoration: none;
-    }
-  }
-
   mark[data-highlight-id] {
     background-color: #ffeb3b;
     transition: box-shadow 0.2s ease-in-out;

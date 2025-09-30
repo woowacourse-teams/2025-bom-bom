@@ -53,7 +53,7 @@ public class UniqueUserInfoGenerator {
             return generateRandomNickname();
         }
         if (userInfoValidator.isNicknameAvailable(normalizedNickname)) {
-            return nickname;
+            return nickname.strip();
         }
         return generateUniqueNickname(normalizedNickname);
     }

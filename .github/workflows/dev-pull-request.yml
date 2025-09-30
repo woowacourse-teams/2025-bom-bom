@@ -41,3 +41,10 @@ jobs:
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
           ./gradlew clean build --no-daemon
           
+      - name: 테스트 리포트 생성
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: JUnit Test Report
+          path: backend/bom-bom-server/build/test-results/test/*.xml
+          reporter: java-junit

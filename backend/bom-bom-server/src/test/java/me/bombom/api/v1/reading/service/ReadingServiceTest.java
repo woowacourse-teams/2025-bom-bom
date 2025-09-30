@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.reading.domain.ContinueReading;
@@ -24,18 +23,13 @@ import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.reading.repository.YearlyReadingRepository;
+import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.transaction.TestTransaction;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@Import({ReadingService.class, QuerydslConfig.class})
+@IntegrationTest
 class ReadingServiceTest {
 
     @Autowired
@@ -71,15 +65,15 @@ class ReadingServiceTest {
     @BeforeEach
     void setUp() {
         // 기존 데이터 삭제
-        yearlyReadingRepository.deleteAll();
-        monthlyReadingSnapshotRepository.deleteAll();
-        weeklyReadingRepository.deleteAll();
-        todayReadingRepository.deleteAll();
-        continueReadingRepository.deleteAll();
-        memberRepository.deleteAll();
+        yearlyReadingRepository.deleteAllInBatch();
+        monthlyReadingSnapshotRepository.deleteAllInBatch();
+        weeklyReadingRepository.deleteAllInBatch();
+        todayReadingRepository.deleteAllInBatch();
+        continueReadingRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
 
-        String nickname = "test_nickname_" + UUID.randomUUID();
-        String providerId = "test_providerId_" + UUID.randomUUID();
+        String nickname = ("test_nickname_" + UUID.randomUUID()).substring(0, 20);
+        String providerId = ("test_providerId_" + UUID.randomUUID()).substring(0, 20);
 
         member = memberRepository.save(TestFixture.createUniqueMember(nickname, providerId));
         todayReading = todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));
@@ -91,9 +85,12 @@ class ReadingServiceTest {
                 .currentCount(0)
                 .build());
 
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
+        memberRepository.flush();
+        todayReadingRepository.flush();
+        continueReadingRepository.flush();
+        weeklyReadingRepository.flush();
+        monthlyReadingSnapshotRepository.flush();
+        monthlyReadingRealtimeRepository.flush();
     }
 
     @Test
@@ -155,7 +152,6 @@ class ReadingServiceTest {
     }
 
     @Test
-    @Disabled
     void 저장된_rank를_사용해_상위_N명의_랭킹을_조회할_수_있다() {
         // given: 기본 멤버는 currentCount 10
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_r2", "pid_r2"));
@@ -219,7 +215,6 @@ class ReadingServiceTest {
     }
 
     @Test
-    @Disabled
     void 일등일_경우_앞_사람과의_차이는_0이다() {
         // given: 기본 멤버는 currentCount 10
         Member first = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));
@@ -243,7 +238,6 @@ class ReadingServiceTest {
     }
 
     @Test
-    @Disabled
     void currentCount가_같으면_순위가_같다() {
         // given: 기본 멤버는 currentCount 10
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));

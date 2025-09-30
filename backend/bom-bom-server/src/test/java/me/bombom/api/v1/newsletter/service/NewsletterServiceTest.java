@@ -1,11 +1,10 @@
 package me.bombom.api.v1.newsletter.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.newsletter.domain.Category;
@@ -16,16 +15,12 @@ import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
+import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@Import({NewsletterService.class, QuerydslConfig.class})
+@IntegrationTest
 class NewsletterServiceTest {
 
     @Autowired
@@ -45,6 +40,10 @@ class NewsletterServiceTest {
 
     @BeforeEach
     void setup() {
+        newsletterRepository.deleteAllInBatch();
+        newsletterDetailRepository.deleteAllInBatch();
+        categoryRepository.deleteAllInBatch();
+
         newsletterDetails = TestFixture.createNewsletterDetails();
         newsletterDetails = newsletterDetailRepository.saveAll(newsletterDetails);
         List<Category> categories = TestFixture.createCategories();

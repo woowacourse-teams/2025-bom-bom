@@ -148,13 +148,11 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                         .append(URLEncoder.encode(uniqueEmailLocalPart, StandardCharsets.UTF_8));
                 hasParam = true;
             }
-            if (oauth2Info.getName() != null) {
-                if (hasParam) params.append("&");
-                String uniqueNickname = uniqueUserInfoGenerator.getUniqueNickname(oauth2Info.getName());
-                params.append(NAME_PARAM)
-                        .append("=")
-                        .append(URLEncoder.encode(uniqueNickname, StandardCharsets.UTF_8));
-            }
+            if (hasParam) params.append("&");
+            String uniqueNickname = uniqueUserInfoGenerator.getUniqueNickname(oauth2Info.getName());
+            params.append(NAME_PARAM)
+                    .append("=")
+                    .append(URLEncoder.encode(uniqueNickname, StandardCharsets.UTF_8));
         } catch (Exception e) {
             log.warn("쿼리 파라미터 인코딩 실패", e);
         }

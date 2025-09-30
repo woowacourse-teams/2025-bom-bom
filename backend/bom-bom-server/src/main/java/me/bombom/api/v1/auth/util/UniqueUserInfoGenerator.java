@@ -53,16 +53,19 @@ public class UniqueUserInfoGenerator {
         }
 
         String baseNickname = getBaseNickname(nickname);
+        log.info("baseNickName: " + baseNickname);
         String uniqueNickname = generateUniqueNickname(baseNickname);
         while (userInfoValidator.isDuplicateNickname(uniqueNickname)) {
             uniqueNickname = generateUniqueNickname(baseNickname);
         }
+        log.info("uniqueNickname: " + uniqueNickname);
         return uniqueNickname;
     }
 
     public String getUniqueEmailLocalPart(String email) {
         String normalizedEmailLocalPart = email.strip().toLowerCase();
         String localPart = extractEmailLocalPart(normalizedEmailLocalPart);
+        log.info("localPart: " + localPart);
         if (userInfoValidator.isEmailAvailable(normalizedEmailLocalPart)) {
             return localPart;
         }

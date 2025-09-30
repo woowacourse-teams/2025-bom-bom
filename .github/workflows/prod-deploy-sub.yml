@@ -29,33 +29,49 @@ jobs:
         run: |
           mkdir -p src/main/resources src/test/resources
           printf '%s' "${{ secrets.APPLICATION_PROD_PROPERTIES }}" > src/main/resources/application.yml
+          
+      - name: only 빌드
+        run: ./gradlew clean assemble --no-daemon --stacktrace --info
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: JDK 21 설정
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: gradle
+
+      - name: application.yml 생성 (Test)
+        run: |
+          mkdir -p src/test/resources
           printf '%s' "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
 
-#      - name: 빌드 및 테스트
-#        shell: bash
-#        env:
-#          SPRING_PROFILES_ACTIVE: test
-#          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
-#        run: |
-#          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "${APPLE_P8_ESCAPED:?APPLE_P8_ESCAPED 시크릿이 없습니다}")"
-#          ./gradlew clean build --no-daemon
-
-      - name: 빌드 및 테스트
-        shell: bash
+      - name: 테스트 실행
         env:
           SPRING_PROFILES_ACTIVE: test
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "${APPLE_P8_ESCAPED:?APPLE_P8_ESCAPED 시크릿이 없습니다}")"
-          # gradle 실행 시 stacktrace와 info 출력
-          ./gradlew clean build --no-daemon --stacktrace --info \
-            | tee gradle.log
-      
-          # ScannerException 줄만 뽑기
-          grep -A3 -B3 "ScannerException" gradle.log || true
-      
-          # line / column 정보만 추출
-          grep -E "line:|column:" gradle.log || true
+          ./gradlew test --no-daemon --stacktrace --info
+
+  docker-image:
+    runs-on: ubuntu-latest
+    needs: [build, test]   # ✅ 테스트 통과 후에만 이미지 빌드/푸시
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
 
       - name: Docker Buildx 설정
         uses: docker/setup-buildx-action@v3
@@ -82,7 +98,7 @@ jobs:
 
   deploy-server-sub:
     name: Production Server sub 배포
-    needs: build
+    needs: docker-image
     runs-on: [ self-hosted, prod-sub ] 
     defaults:
       run:
@@ -139,7 +155,7 @@ jobs:
 
   deploy-server-main:
     name: Production Server main 배포
-    needs: build
+    needs: docker-image
     runs-on: [ self-hosted, prod-main ]  
     defaults:
       run:
@@ -193,4 +209,3 @@ jobs:
         run: |
           sudo docker container prune -f --filter "until=24h"
           sudo docker image prune     -f --filter "until=24h"
-

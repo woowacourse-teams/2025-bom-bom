@@ -5,6 +5,8 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 interface LoginWithGoogleCallback {
   identityToken: string;
   authorizationCode: string;
+  name: string | null;
+  email: string;
   provider: 'google' | 'apple';
 }
 
@@ -12,6 +14,8 @@ export const loginWithGoogle = async (
   callbackWhenSuccess: ({
     identityToken,
     authorizationCode,
+    name,
+    email,
     provider,
   }: LoginWithGoogleCallback) => void,
 ): Promise<void> => {
@@ -34,6 +38,8 @@ export const loginWithGoogle = async (
     callbackWhenSuccess({
       identityToken: userInfo.data.idToken,
       authorizationCode: userInfo.data.serverAuthCode ?? '',
+      name: userInfo.data?.user?.name ?? '',
+      email: userInfo.data?.user?.email ?? '',
       provider: 'google',
     });
   } else {
@@ -59,10 +65,14 @@ export const loginWithApple = async (
     ],
   });
 
+  console.log(credential);
+
   if (credential.identityToken && credential.authorizationCode) {
     callbackWhenSuccess({
       identityToken: credential.identityToken,
       authorizationCode: credential.authorizationCode,
+      name: credential.fullName?.nickname ?? '',
+      email: credential.email ?? '',
       provider: 'apple',
     });
   } else {

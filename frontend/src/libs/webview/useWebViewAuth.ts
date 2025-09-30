@@ -42,7 +42,15 @@ export const useWebViewAuth = () => {
               });
 
               if (!response.isRegistered) {
-                navigate({ to: '/signup' });
+                const parsedEmail = (message.payload.email ?? '').split('@')[0];
+                const name = message.payload.name ?? '';
+                navigate({
+                  to: '/signup',
+                  search: {
+                    email: parsedEmail,
+                    name: name,
+                  },
+                });
                 return;
               }
 

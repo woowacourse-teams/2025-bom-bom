@@ -21,16 +21,20 @@ export const LoginScreen = () => {
 
   const handleGoogleLogin = async () => {
     try {
-      await loginWithGoogle(({ identityToken, authorizationCode }) => {
-        showLogin();
-        sendMessageToWeb({
-          type: 'GOOGLE_LOGIN_TOKEN',
-          payload: {
-            identityToken,
-            authorizationCode,
-          },
-        });
-      });
+      await loginWithGoogle(
+        ({ identityToken, authorizationCode, email, name }) => {
+          showLogin();
+          sendMessageToWeb({
+            type: 'GOOGLE_LOGIN_TOKEN',
+            payload: {
+              identityToken,
+              authorizationCode,
+              email,
+              name,
+            },
+          });
+        },
+      );
     } catch (error) {
       console.error('Google 로그인 실패:', error);
     }
@@ -38,16 +42,20 @@ export const LoginScreen = () => {
 
   const handleAppleLogin = async () => {
     try {
-      await loginWithApple(({ identityToken, authorizationCode }) => {
-        showLogin();
-        sendMessageToWeb({
-          type: 'APPLE_LOGIN_TOKEN',
-          payload: {
-            identityToken,
-            authorizationCode,
-          },
-        });
-      });
+      await loginWithApple(
+        ({ identityToken, authorizationCode, email, name }) => {
+          showLogin();
+          sendMessageToWeb({
+            type: 'APPLE_LOGIN_TOKEN',
+            payload: {
+              identityToken,
+              authorizationCode,
+              email,
+              name,
+            },
+          });
+        },
+      );
     } catch (error) {
       console.error('Apple 로그인 실패:', error);
     }

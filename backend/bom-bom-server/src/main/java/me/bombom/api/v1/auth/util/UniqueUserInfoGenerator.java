@@ -48,25 +48,15 @@ public class UniqueUserInfoGenerator {
     private final UserInfoValidator userInfoValidator;
 
     public String getUniqueNickname(String nickname) {
-        String normalizedNickname = nickname.strip().toLowerCase();
-        if (!StringUtils.hasText(nickname)) {
-            return generateRandomNickname();
-        }
-        if (userInfoValidator.isNicknameAvailable(normalizedNickname)) {
+        if (StringUtils.hasText(nickname) && userInfoValidator.isNicknameAvailable(nickname.strip().toLowerCase())) {
             return nickname.strip();
         }
-        return generateUniqueNickname(normalizedNickname);
-    }
 
-    private String generateRandomNickname() {
-        String adjective = RANDOM_NICKNAME_ADJECTIVES[ThreadLocalRandom.current().nextInt(RANDOM_NICKNAME_ADJECTIVES.length)];
-        String noun = RANDOM_NICKNAME_NOUNS[ThreadLocalRandom.current().nextInt(RANDOM_NICKNAME_NOUNS.length)];
-        String randomValue = getRandomValue();
-        
-        String baseNickname = adjective + noun;
-        String uniqueNickname = baseNickname + NICKNAME_RANDOM_DELIMITER + randomValue;
-
-        log.debug("랜덤 닉네임 생성 - 생성: {}", uniqueNickname);
+        String baseNickname = getBaseNickname(nickname);
+        String uniqueNickname = generateUniqueNickname(baseNickname);
+        while (userInfoValidator.isDuplicateNickname(uniqueNickname)) {
+            uniqueNickname = generateUniqueNickname(baseNickname);
+        }
         return uniqueNickname;
     }
 
@@ -77,6 +67,22 @@ public class UniqueUserInfoGenerator {
             return localPart;
         }
         return generateUniqueEmailLocalPart(localPart);
+    }
+
+    private String getBaseNickname(String nickname) {
+        if (!StringUtils.hasText(nickname)) {
+            return generateRandomNickname();
+        }
+        return nickname;
+    }
+
+    private String generateRandomNickname() {
+        String adjective = RANDOM_NICKNAME_ADJECTIVES[ThreadLocalRandom.current().nextInt(RANDOM_NICKNAME_ADJECTIVES.length)];
+        String noun = RANDOM_NICKNAME_NOUNS[ThreadLocalRandom.current().nextInt(RANDOM_NICKNAME_NOUNS.length)];
+
+        String randomNickname = adjective + noun;
+        log.debug("랜덤 닉네임 생성 - 생성: {}", randomNickname);
+        return randomNickname;
     }
 
     private String generateUniqueNickname(String baseNickname) {

@@ -32,12 +32,6 @@ export const useWebViewAuth = () => {
               });
 
               if (!response) return;
-              if (!response.isRegistered) {
-                navigate({ to: '/signup' });
-                return;
-              }
-
-              window.location.reload();
 
               sendMessageToRN({
                 type: 'LOGIN_SUCCESS',
@@ -46,6 +40,13 @@ export const useWebViewAuth = () => {
                   provider: 'google',
                 },
               });
+
+              if (!response.isRegistered) {
+                navigate({ to: '/signup' });
+                return;
+              }
+
+              window.location.reload();
             } catch (error) {
               logger.error('Google 로그인 실패:', error);
               sendMessageToRN({

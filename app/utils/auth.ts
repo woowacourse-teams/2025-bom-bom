@@ -65,8 +65,6 @@ export const loginWithApple = async (
     ],
   });
 
-  console.log(credential);
-
   if (credential.identityToken && credential.authorizationCode) {
     callbackWhenSuccess({
       identityToken: credential.identityToken,

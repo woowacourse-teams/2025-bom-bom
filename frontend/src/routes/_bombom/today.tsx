@@ -39,7 +39,7 @@ export const Route = createFileRoute('/_bombom/today')({
 function Index() {
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
-  const guideMails = createStorage<LocalGuideMail, string>('guide-mail').get();
+  const guideMails = createStorage<LocalGuideMail, string>('guideMail').get();
 
   const guideMailCreatedAt = guideMails?.createdAt ?? formatDate(new Date());
   const guideMailReadMailIds = guideMails?.readMailIds ?? [];

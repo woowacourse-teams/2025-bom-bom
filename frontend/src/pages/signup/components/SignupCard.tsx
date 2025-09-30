@@ -54,7 +54,7 @@ const SignupCard = () => {
   };
 
   const initializeGuideMailStorage = () => {
-    createStorage('guide-mail').set({
+    createStorage('guideMail').set({
       createdAt: formatDate(new Date()),
       readMailIds: [],
     });

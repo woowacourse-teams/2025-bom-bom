@@ -36,7 +36,7 @@ function GuideMailPage() {
       readMailIds: number[];
     },
     string
-  >('guide-mail');
+  >('guideMail');
 
   const guideArticle = GUIDE_MAILS.find(
     (article) => article.articleId === guideIdNumber,

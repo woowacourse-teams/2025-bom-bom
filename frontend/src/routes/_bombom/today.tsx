@@ -8,8 +8,9 @@ import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
 import RequireLogin from '@/hocs/RequireLogin';
 import { useDevice } from '@/hooks/useDevice';
+import { GUIDE_MAILS } from '@/pages/guide-detail/constants/guideMail';
 import { theme } from '@/styles/theme';
-import { isToday } from '@/utils/date';
+import { formatDate, isToday } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
 import type { Device } from '@/hooks/useDevice';
 import type { LocalGuideMail } from '@/types/guide';
@@ -38,18 +39,25 @@ export const Route = createFileRoute('/_bombom/today')({
 function Index() {
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
-  const guideArticles = createStorage<LocalGuideMail[], string>(
-    'guide-mail',
-  ).get();
+  const guideMails = createStorage<LocalGuideMail, string>('guide-mail').get();
+
+  const guideMailCreatedAt = guideMails?.createdAt ?? formatDate(new Date());
+  const guideMailReadMailIds = guideMails?.readMailIds ?? [];
+
+  const guideArticles = isToday(new Date(guideMailCreatedAt))
+    ? GUIDE_MAILS
+    : [];
 
   const mergedArticles = [
     ...(todayArticles?.content?.map((article) => ({
       ...article,
       type: 'article' as const,
     })) ?? []),
-    ...(guideArticles
-      ?.filter((guide) => isToday(new Date(guide.createdAt)))
-      .map((guide) => ({ ...guide, type: 'guide' as const })) ?? []),
+    ...(guideArticles.map((guide) => ({
+      ...guide,
+      isRead: guideMailReadMailIds.includes(guide.articleId),
+      type: 'guide' as const,
+    })) ?? []),
   ];
 
   const device = useDevice();

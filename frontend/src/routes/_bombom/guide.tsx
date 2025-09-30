@@ -5,7 +5,9 @@ import { GUIDE_MAILS } from '@/pages/guide-detail/constants/guideMail';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import { theme } from '@/styles/theme';
+import { createStorage } from '@/utils/localStorage';
 import type { Device } from '@/hooks/useDevice';
+import type { LocalGuideMail } from '@/types/guide';
 import HelpIcon from '#/assets/svg/help.svg';
 
 export const Route = createFileRoute('/_bombom/guide')({
@@ -24,7 +26,16 @@ export const Route = createFileRoute('/_bombom/guide')({
 });
 
 function GuidePage() {
-  const guideArticles = GUIDE_MAILS;
+  const guideMailReadMailIds =
+    createStorage<LocalGuideMail, string>('guide-mail').get()?.readMailIds ??
+    [];
+
+  const guideArticles = GUIDE_MAILS.map((article) => {
+    return {
+      ...article,
+      isRead: guideMailReadMailIds.includes(article.articleId),
+    };
+  });
 
   const device = useDevice();
   if (!guideArticles) return null;

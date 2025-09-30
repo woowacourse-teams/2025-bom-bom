@@ -1,5 +1,4 @@
-import type { Article } from './articles';
-
-export type LocalGuideMail = Article & {
+export type LocalGuideMail = {
   createdAt: string;
+  readMailIds: number[];
 };

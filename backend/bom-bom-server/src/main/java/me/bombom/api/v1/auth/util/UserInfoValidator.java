@@ -91,8 +91,7 @@ public class UserInfoValidator {
     }
 
     public boolean isValidNicknameFormat(String nickname) {
-        return StringUtils.hasText(nickname) &&
-                isValidNicknameLength(nickname) &&
+        return isValidNicknameLength(nickname) &&
                 NICKNAME_PATTERN.matcher(normalize(nickname)).matches();
     }
 

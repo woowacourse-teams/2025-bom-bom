@@ -32,6 +32,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
@@ -86,9 +87,8 @@ public class ArticleService {
     }
 
     public ArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(Member member, String keyword) {
-        String trimmedKeyword = (keyword == null || keyword.isBlank()) ? null : keyword.strip();
-        List<ArticleCountPerNewsletterResponse> countResponse =
-                articleRepository.countPerNewsletter(member.getId(), trimmedKeyword);
+        String trimmedKeyword = StringUtils.hasText(keyword) ? keyword.strip() : null;
+        List<ArticleCountPerNewsletterResponse> countResponse = articleRepository.countPerNewsletter(member.getId(), trimmedKeyword);
         int totalCount = countResponse.stream()
                 .mapToInt(ArticleCountPerNewsletterResponse::articleCount)
                 .sum();

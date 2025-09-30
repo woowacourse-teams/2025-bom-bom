@@ -10,7 +10,5 @@ public interface CustomArticleRepository {
 
     Page<ArticleResponse> findArticles(Long memberId, ArticlesOptionsRequest options, Pageable pageable);
 
-    int countAllByNewsletterIdAndMemberId(Long memberId, Long newsletterId, String keyword);
-
     int countByMemberIdAndArrivedDateTimeAndIsRead(Long memberId, LocalDate date, boolean isRead);
 }

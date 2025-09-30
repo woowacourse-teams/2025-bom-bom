@@ -4,5 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record NativeLoginRequest(
         @NotNull String identityToken,
-        @NotNull String authorizationCode
+        @NotNull String authorizationCode,
+        String email,
+        String nickname
 ) {}

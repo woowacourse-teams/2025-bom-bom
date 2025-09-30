@@ -131,6 +131,7 @@ public class UserInfoValidator {
         if (!fullEmail.contains("@")) {
             fullEmail += EMAIL_DOMAIN;
         }
+        log.info("fullEmail: {}", fullEmail);
         return fullEmail;
     }
 }

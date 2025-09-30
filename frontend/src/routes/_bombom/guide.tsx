@@ -1,12 +1,11 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import { useDevice } from '@/hooks/useDevice';
+import { GUIDE_MAILS } from '@/pages/guide-detail/constants/guideMail';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import { theme } from '@/styles/theme';
-import { createStorage } from '@/utils/localStorage';
 import type { Device } from '@/hooks/useDevice';
-import type { Article } from '@/types/articles';
 import HelpIcon from '#/assets/svg/help.svg';
 
 export const Route = createFileRoute('/_bombom/guide')({
@@ -25,7 +24,7 @@ export const Route = createFileRoute('/_bombom/guide')({
 });
 
 function GuidePage() {
-  const guideArticles = createStorage<Article[], string>('guide-mail').get();
+  const guideArticles = GUIDE_MAILS;
 
   const device = useDevice();
   if (!guideArticles) return null;

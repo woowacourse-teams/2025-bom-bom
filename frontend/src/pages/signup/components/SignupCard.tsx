@@ -6,7 +6,6 @@ import { useSignupMutation } from '../hooks/useSignupMutation';
 import InputField from '@/components/InputField/InputField';
 import Tooltip from '@/components/Tooltip/Tooltip';
 import { useDevice } from '@/hooks/useDevice';
-import { GUIDE_MAILS } from '@/mocks/datas/guideMail';
 import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
@@ -54,19 +53,18 @@ const SignupCard = () => {
     setGender(e.target.value as Gender);
   };
 
-  const addGuideMail = () => {
-    const guideMail = GUIDE_MAILS.map((mail) => ({
-      ...mail,
+  const initializeGuideMailStorage = () => {
+    createStorage('guide-mail').set({
       createdAt: formatDate(new Date()),
-    }));
-    createStorage('guide-mail').set(guideMail);
+      readMailIds: [],
+    });
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     signup();
-    addGuideMail();
+    initializeGuideMailStorage();
   };
 
   const openEmailHelp = () => setEmailHelpOpened(true);

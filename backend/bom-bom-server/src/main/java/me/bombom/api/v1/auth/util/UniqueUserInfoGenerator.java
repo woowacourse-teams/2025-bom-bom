@@ -44,12 +44,11 @@ public class UniqueUserInfoGenerator {
             "별","달","태양","은하","행성","우주","돌","산","바다","강"
     };
 
-
     private final UserInfoValidator userInfoValidator;
 
     public String getUniqueNickname(String nickname) {
         log.info("nickname: " + nickname);
-                if (StringUtils.hasText(nickname) && userInfoValidator.isNicknameAvailable(nickname.strip().toLowerCase())) {
+        if (StringUtils.hasText(nickname) && userInfoValidator.isNicknameAvailable(nickname.strip().toLowerCase())) {
             return nickname.strip();
         }
 

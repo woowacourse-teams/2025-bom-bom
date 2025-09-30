@@ -127,11 +127,15 @@ public class UserInfoValidator {
 
     private String getCompleteEmail(String email) {
         if (!StringUtils.hasText(email)) return "";
-        String fullEmail = email.strip().toLowerCase();
-        if (!fullEmail.contains("@")) {
-            fullEmail += EMAIL_DOMAIN;
-        }
+        String emailLocalPart = extractEmailLocalPart(email);
+        String normalizedLocalPart = emailLocalPart.strip().toLowerCase();
+        String fullEmail = normalizedLocalPart + EMAIL_DOMAIN;
         log.info("fullEmail: {}", fullEmail);
         return fullEmail;
+    }
+
+    private String extractEmailLocalPart(String email) {
+        int atPos = email.indexOf('@');
+        return atPos > 0 ? email.substring(0, atPos) : email;
     }
 }

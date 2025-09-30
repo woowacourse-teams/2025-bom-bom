@@ -13,13 +13,12 @@ import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.support.IntegrationTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
 @IntegrationTest
 class MemberServiceTest {
 
@@ -34,6 +33,11 @@ class MemberServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @BeforeEach
+    void setUp() {
+        memberRepository.deleteAllInBatch();
+    }
 
     @Test
     void 회원가입_중_이미_존재하는_닉네임이면_예외_발생() {

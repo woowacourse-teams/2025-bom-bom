@@ -22,10 +22,7 @@ import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.transaction.TestTransaction;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
 @IntegrationTest
 class PetServiceTest {
 
@@ -50,6 +47,10 @@ class PetServiceTest {
 
     @BeforeEach
     void setUp() {
+        petRepository.deleteAllInBatch();
+        stageRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+
         member = TestFixture.createUniqueMember(getUniqueValue(), getUniqueValue());
         memberRepository.save(member);
         firstStage = TestFixture.createStage(1, 0);
@@ -107,9 +108,10 @@ class PetServiceTest {
         petService.attend(member);
 
         // then
+        Pet updatedPet = petRepository.findById(pet.getId()).orElseThrow();
         assertSoftly(softly -> {
-                    softly.assertThat(pet.getCurrentScore()).isEqualTo(5);
-                    softly.assertThat(pet.isAttended()).isTrue();
+                    softly.assertThat(updatedPet.getCurrentScore()).isEqualTo(5);
+                    softly.assertThat(updatedPet.isAttended()).isTrue();
                 }
         );
     }
@@ -158,10 +160,8 @@ class PetServiceTest {
     void 펫_스테이지_업데이트_성공() {
         // given
         Pet pet = TestFixture.createPetWithScore(member, firstStage.getId(), 49);
-        petRepository.save(pet);
-
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
+        petRepository.saveAndFlush(pet);
+        entityManager.clear();
 
         // when
         petService.increaseCurrentScore(member.getId(), 1);
@@ -176,10 +176,8 @@ class PetServiceTest {
     void 점수_부족_시_펫_스테이지_업데이트_실패() {
         // given
         Pet pet = TestFixture.createPetWithScore(member, firstStage.getId(), 48);
-        petRepository.save(pet);
-
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
+        petRepository.saveAndFlush(pet);
+        entityManager.clear();
 
         // when
         petService.increaseCurrentScore(member.getId(), 1);

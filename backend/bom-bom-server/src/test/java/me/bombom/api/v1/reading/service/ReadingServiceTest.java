@@ -28,10 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.transaction.TestTransaction;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
 @IntegrationTest
 class ReadingServiceTest {
 
@@ -68,12 +65,12 @@ class ReadingServiceTest {
     @BeforeEach
     void setUp() {
         // 기존 데이터 삭제
-        yearlyReadingRepository.deleteAll();
-        monthlyReadingSnapshotRepository.deleteAll();
-        weeklyReadingRepository.deleteAll();
-        todayReadingRepository.deleteAll();
-        continueReadingRepository.deleteAll();
-        memberRepository.deleteAll();
+        yearlyReadingRepository.deleteAllInBatch();
+        monthlyReadingSnapshotRepository.deleteAllInBatch();
+        weeklyReadingRepository.deleteAllInBatch();
+        todayReadingRepository.deleteAllInBatch();
+        continueReadingRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
 
         String nickname = ("test_nickname_" + UUID.randomUUID()).substring(0, 20);
         String providerId = ("test_providerId_" + UUID.randomUUID()).substring(0, 20);
@@ -88,9 +85,12 @@ class ReadingServiceTest {
                 .currentCount(0)
                 .build());
 
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
+        memberRepository.flush();
+        todayReadingRepository.flush();
+        continueReadingRepository.flush();
+        weeklyReadingRepository.flush();
+        monthlyReadingSnapshotRepository.flush();
+        monthlyReadingRealtimeRepository.flush();
     }
 
     @Test

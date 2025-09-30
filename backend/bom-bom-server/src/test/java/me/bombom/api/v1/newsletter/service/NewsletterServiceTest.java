@@ -19,9 +19,7 @@ import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
 @IntegrationTest
 class NewsletterServiceTest {
 
@@ -42,6 +40,10 @@ class NewsletterServiceTest {
 
     @BeforeEach
     void setup() {
+        newsletterRepository.deleteAllInBatch();
+        newsletterDetailRepository.deleteAllInBatch();
+        categoryRepository.deleteAllInBatch();
+
         newsletterDetails = TestFixture.createNewsletterDetails();
         newsletterDetails = newsletterDetailRepository.saveAll(newsletterDetails);
         List<Category> categories = TestFixture.createCategories();

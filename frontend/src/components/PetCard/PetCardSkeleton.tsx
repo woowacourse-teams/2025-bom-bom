@@ -33,7 +33,7 @@ const PetCardSkeleton = () => {
 
       <SkeletonBox width="100px" height="16px" />
 
-      <ProgressBarSkeleton />
+      <ProgressBarSkeleton hasCaption={true} />
 
       <SkeletonAttendanceButton as={AttendanceButton} />
     </Container>

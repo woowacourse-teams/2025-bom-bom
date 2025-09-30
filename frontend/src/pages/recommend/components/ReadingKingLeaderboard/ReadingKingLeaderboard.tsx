@@ -19,23 +19,7 @@ const ReadingKingLeaderboard = () => {
   const haveNoContent = !isLoading && monthlyReadingRankContent.length === 0;
 
   if (!isLoading && haveNoContent) return null;
-
-  if (isLoading) {
-    return (
-      <Container>
-        <TitleWrapper>
-          <TitleIcon>
-            <ArrowIcon width={16} height={16} direction="upRight" />
-          </TitleIcon>
-          <Title>이달의 독서왕</Title>
-        </TitleWrapper>
-
-        <Description>순위는 10분마다 변경됩니다.</Description>
-
-        <ReadingKingLeaderboardSkeleton />
-      </Container>
-    );
-  }
+  if (isLoading) return <ReadingKingLeaderboardSkeleton />;
 
   return (
     <Container>
@@ -77,7 +61,7 @@ const ReadingKingLeaderboard = () => {
 
 export default ReadingKingLeaderboard;
 
-const Container = styled.div`
+export const Container = styled.div`
   width: 100%;
   max-width: 400px;
   padding: 22px;
@@ -96,13 +80,13 @@ const Container = styled.div`
   backdrop-filter: blur(10px);
 `;
 
-const TitleWrapper = styled.div`
+export const TitleWrapper = styled.div`
   display: flex;
   gap: 10px;
   align-items: center;
 `;
 
-const TitleIcon = styled.div`
+export const TitleIcon = styled.div`
   width: 28px;
   height: 28px;
   border-radius: 12px;
@@ -114,17 +98,17 @@ const TitleIcon = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
 `;
 
-const Title = styled.h3`
+export const Title = styled.h3`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const Description = styled.p`
+export const Description = styled.p`
   color: ${({ theme }) => theme.colors.textTertiary};
   font: ${({ theme }) => theme.fonts.body2};
 `;
 
-const LeaderboardList = styled.div`
+export const LeaderboardList = styled.div`
   min-height: fit-content;
 
   display: flex;

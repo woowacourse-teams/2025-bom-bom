@@ -1,54 +1,36 @@
-import styled from '@emotion/styled';
+import LeaderboardItemSkeleton from './LeaderboardItemSkeleton';
+import {
+  Container,
+  Description,
+  LeaderboardList,
+  Title,
+  TitleIcon,
+  TitleWrapper,
+} from './ReadingKingLeaderboard';
 import { RANKING } from './ReadingKingLeaderboard.constants';
-import SkeletonBox from '@/components/Skeleton/SkeletonBox';
-import { skeletonStyle } from '@/styles/skeleton';
+import ArrowIcon from '@/components/icons/ArrowIcon';
 
 const ReadingKingLeaderboardSkeleton = () => {
   return (
     <>
-      <SkeletonLeaderboardList>
-        {Array.from({ length: RANKING.boardUnit }).map((_, index) => (
-          <SkeletonLeaderboardItem key={`skeletonLeaderboard-${index}`}>
-            <SkeletonRank />
-            <UserInfoBox>
-              <SkeletonBox width="80px" height="22px" />
-              <SkeletonBox width="60px" height="20px" />
-            </UserInfoBox>
-          </SkeletonLeaderboardItem>
-        ))}
-      </SkeletonLeaderboardList>
+      <Container>
+        <TitleWrapper>
+          <TitleIcon>
+            <ArrowIcon width={16} height={16} direction="upRight" />
+          </TitleIcon>
+          <Title>이달의 독서왕</Title>
+        </TitleWrapper>
+
+        <Description>순위는 10분마다 변경됩니다.</Description>
+
+        <LeaderboardList>
+          {Array.from({ length: RANKING.boardUnit }).map((_, index) => (
+            <LeaderboardItemSkeleton key={`skeletonLeaderboard-${index}`} />
+          ))}
+        </LeaderboardList>
+      </Container>
     </>
   );
 };
 
 export default ReadingKingLeaderboardSkeleton;
-
-const SkeletonLeaderboardList = styled.div`
-  min-height: fit-content;
-
-  display: flex;
-  gap: 32px;
-  flex-direction: column;
-`;
-
-const SkeletonLeaderboardItem = styled.div`
-  border-radius: 12px;
-
-  display: flex;
-  gap: 10px;
-  align-items: center;
-`;
-
-const SkeletonRank = styled.div`
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
-
-  ${skeletonStyle}
-`;
-
-const UserInfoBox = styled.div`
-  display: flex;
-  gap: 4px;
-  flex-direction: column;
-`;

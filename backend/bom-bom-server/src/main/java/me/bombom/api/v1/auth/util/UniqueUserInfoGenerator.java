@@ -24,7 +24,7 @@ public class UniqueUserInfoGenerator {
     public String getUniqueNickname(String nickname) {
         String normalizedNickname = nickname.strip().toLowerCase();
         if (userInfoValidator.isNicknameAvailable(normalizedNickname)) {
-            return normalizedNickname;
+            return nickname;
         }
         return generateUniqueNickname(normalizedNickname);
     }

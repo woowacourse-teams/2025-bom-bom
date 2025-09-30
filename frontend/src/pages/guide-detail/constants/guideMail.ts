@@ -1,5 +1,7 @@
 import type { Article } from '@/types/articles';
 
+export const GUIDE_MAIL_STORAGE_KEY = 'guideMail';
+
 export const GUIDE_MAILS: Article[] = [
   {
     articleId: 1,

@@ -7,8 +7,12 @@ import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
 import useGuideAsReadMutation from '@/pages/detail/hooks/useGuideAsReadMutation';
 import GuideArticleBody from '@/pages/guide-detail/components/GuideArticleBody';
-import { GUIDE_MAILS } from '@/pages/guide-detail/constants/guideMail';
+import {
+  GUIDE_MAIL_STORAGE_KEY,
+  GUIDE_MAILS,
+} from '@/pages/guide-detail/constants/guideMail';
 import { formatDate } from '@/utils/date';
+import type { LocalGuideMail } from '@/types/guide';
 
 export const Route = createFileRoute('/_bombom/articles/guide/$guideId')({
   head: () => ({
@@ -29,12 +33,9 @@ function GuideMailPage() {
   const { guideId } = Route.useParams();
   const guideIdNumber = Number(guideId);
   const [guideArticles, setGuideArticles] = useLocalStorageState<
-    {
-      createdAt: string;
-      readMailIds: number[];
-    },
+    LocalGuideMail,
     string
-  >('guideMail');
+  >(GUIDE_MAIL_STORAGE_KEY);
 
   const guideArticle = GUIDE_MAILS.find(
     (article) => article.articleId === guideIdNumber,

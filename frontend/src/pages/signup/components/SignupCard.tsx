@@ -6,6 +6,7 @@ import { useSignupMutation } from '../hooks/useSignupMutation';
 import InputField from '@/components/InputField/InputField';
 import Tooltip from '@/components/Tooltip/Tooltip';
 import { useDevice } from '@/hooks/useDevice';
+import { GUIDE_MAIL_STORAGE_KEY } from '@/pages/guide-detail/constants/guideMail';
 import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
@@ -54,7 +55,7 @@ const SignupCard = () => {
   };
 
   const initializeGuideMailStorage = () => {
-    createStorage('guideMail').set({
+    createStorage(GUIDE_MAIL_STORAGE_KEY).set({
       createdAt: formatDate(new Date()),
       readMailIds: [],
     });

@@ -8,7 +8,10 @@ import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
 import RequireLogin from '@/hocs/RequireLogin';
 import { useDevice } from '@/hooks/useDevice';
-import { GUIDE_MAILS } from '@/pages/guide-detail/constants/guideMail';
+import {
+  GUIDE_MAIL_STORAGE_KEY,
+  GUIDE_MAILS,
+} from '@/pages/guide-detail/constants/guideMail';
 import { theme } from '@/styles/theme';
 import { formatDate, isToday } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
@@ -39,7 +42,9 @@ export const Route = createFileRoute('/_bombom/today')({
 function Index() {
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles } = useQuery(queries.articles({ date: today }));
-  const guideMails = createStorage<LocalGuideMail, string>('guideMail').get();
+  const guideMails = createStorage<LocalGuideMail, string>(
+    GUIDE_MAIL_STORAGE_KEY,
+  ).get();
 
   const guideMailCreatedAt = guideMails?.createdAt ?? formatDate(new Date());
   const guideMailReadMailIds = guideMails?.readMailIds ?? [];

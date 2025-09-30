@@ -1,7 +1,10 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import { useDevice } from '@/hooks/useDevice';
-import { GUIDE_MAILS } from '@/pages/guide-detail/constants/guideMail';
+import {
+  GUIDE_MAIL_STORAGE_KEY,
+  GUIDE_MAILS,
+} from '@/pages/guide-detail/constants/guideMail';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import { theme } from '@/styles/theme';
@@ -27,7 +30,8 @@ export const Route = createFileRoute('/_bombom/guide')({
 
 function GuidePage() {
   const guideMailReadMailIds =
-    createStorage<LocalGuideMail, string>('guideMail').get()?.readMailIds ?? [];
+    createStorage<LocalGuideMail, string>(GUIDE_MAIL_STORAGE_KEY).get()
+      ?.readMailIds ?? [];
 
   const guideArticles = GUIDE_MAILS.map((article) => {
     return {

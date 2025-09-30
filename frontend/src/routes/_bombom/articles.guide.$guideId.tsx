@@ -6,9 +6,7 @@ import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
 import useGuideAsReadMutation from '@/pages/detail/hooks/useGuideAsReadMutation';
-import GuideMail1 from '@/pages/guide-detail/components/GuideMail1';
-import GuideMail2 from '@/pages/guide-detail/components/GuideMail2';
-import GuideMail3 from '@/pages/guide-detail/components/GuideMail3';
+import GuideArticleBody from '@/pages/guide-detail/components/GuideArticleBody';
 import { GUIDE_MAILS } from '@/pages/guide-detail/constants/guideMail';
 import { formatDate } from '@/utils/date';
 
@@ -87,13 +85,7 @@ function GuideMailPage() {
       />
       <Divider />
 
-      {guideIdNumber === 1 ? (
-        <GuideMail1 />
-      ) : guideIdNumber === 2 ? (
-        <GuideMail2 />
-      ) : (
-        <GuideMail3 />
-      )}
+      <GuideArticleBody articleId={guideIdNumber} />
 
       <Spacing size={24} />
       <Divider />

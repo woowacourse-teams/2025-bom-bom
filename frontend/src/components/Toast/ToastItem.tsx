@@ -67,6 +67,7 @@ const Container = styled.div<{
   overflow: hidden;
   position: relative;
   width: 420px;
+  max-width: calc(100vw - 32px);
   padding: 12px;
   border: 1px solid;
   border-radius: 12px;
@@ -82,6 +83,13 @@ const Container = styled.div<{
   pointer-events: auto;
   will-change: transform, opacity;
 
+  @media (width <= 480px) {
+    width: calc(100vw - 32px);
+    padding: 8px;
+
+    gap: 6px;
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     animation: ${({ enterFromTop }) => (enterFromTop ? enterDown : enterUp)}
       160ms ease-out both;
@@ -89,7 +97,15 @@ const Container = styled.div<{
 `;
 
 const Content = styled.div`
+  flex: 1;
+
   font: ${({ theme }) => theme.fonts.body2};
+
+  overflow-wrap: break-word;
+
+  @media (width <= 480px) {
+    font-size: 14px;
+  }
 `;
 
 const ProgressBar = styled.div<{ variant: ToastVariant; duration: number }>`

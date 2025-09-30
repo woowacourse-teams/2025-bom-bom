@@ -3,11 +3,16 @@ import { createFileRoute } from '@tanstack/react-router';
 import Spacing from '@/components/Spacing/Spacing';
 import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
-import ArticleBody from '@/pages/detail/components/ArticleBody/ArticleBody';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
 import useGuideAsReadMutation from '@/pages/detail/hooks/useGuideAsReadMutation';
-import type { GuideMail } from '@/mocks/datas/guideMail';
+import GuideArticleBody from '@/pages/guide-detail/components/GuideArticleBody';
+import {
+  GUIDE_MAIL_STORAGE_KEY,
+  GUIDE_MAILS,
+} from '@/pages/guide-detail/constants/guideMail';
+import { formatDate } from '@/utils/date';
+import type { LocalGuideMail } from '@/types/guide';
 
 export const Route = createFileRoute('/_bombom/articles/guide/$guideId')({
   head: () => ({
@@ -28,27 +33,41 @@ function GuideMailPage() {
   const { guideId } = Route.useParams();
   const guideIdNumber = Number(guideId);
   const [guideArticles, setGuideArticles] = useLocalStorageState<
-    GuideMail[],
+    LocalGuideMail,
     string
-  >('guide-mail');
-  const guideArticle = guideArticles.find(
+  >(GUIDE_MAIL_STORAGE_KEY);
+
+  const guideArticle = GUIDE_MAILS.find(
     (article) => article.articleId === guideIdNumber,
   );
+  const isRead = guideArticles?.readMailIds?.includes(guideIdNumber) ?? false;
+
   const updateGuideStateAsRead = () => {
-    setGuideArticles((prev) =>
-      prev.map((article) =>
-        article.articleId === guideIdNumber
-          ? { ...article, isRead: true }
-          : article,
-      ),
-    );
+    setGuideArticles((prev) => {
+      if (!prev) {
+        return {
+          createdAt: formatDate(new Date('2025-01-01')),
+          readMailIds: [guideIdNumber],
+        };
+      }
+
+      if (prev.readMailIds.includes(guideIdNumber)) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        readMailIds: [...prev.readMailIds, guideIdNumber],
+      };
+    });
   };
+
   const { mutate: updateGuideAsRead } = useGuideAsReadMutation({
     onSuccess: updateGuideStateAsRead,
   });
 
   useScrollThreshold({
-    enabled: !guideArticle?.isRead && !!guideArticle,
+    enabled: !isRead && !!guideArticle,
     threshold: 70,
     throttleMs: 500,
     onTrigger: updateGuideAsRead,
@@ -67,11 +86,8 @@ function GuideMailPage() {
       />
       <Divider />
 
-      <ArticleBody
-        articleId={guideIdNumber}
-        newsletterName={guideArticle.newsletter.name}
-        articleContent={guideArticle.contents}
-      />
+      <GuideArticleBody articleId={guideIdNumber} />
+
       <Spacing size={24} />
       <Divider />
 

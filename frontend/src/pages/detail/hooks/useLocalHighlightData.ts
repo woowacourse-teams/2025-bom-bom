@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { removeHighlightFromDOM } from '../utils/highlight';
+import { addHighlightToDOM, removeHighlightFromDOM } from '../utils/highlight';
 import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 import type { Highlight } from '../types/highlight';
 
@@ -14,18 +14,20 @@ export const useLocalHighlightData = ({ articleId }: { articleId: number }) => {
 
   const addHighlight = useCallback(
     (highlight: Omit<Highlight, 'id' | 'memo'>) => {
+      const highlightWithMemo = { ...highlight, id: Date.now(), memo: '' };
       setHighlights((prev) => {
         if (!prev) {
-          return [{ ...highlight, id: Date.now(), memo: '' }];
+          return [highlightWithMemo];
         }
-        return [...prev, { ...highlight, id: Date.now(), memo: '' }];
+        return [...prev, highlightWithMemo];
       });
+      addHighlightToDOM(highlightWithMemo);
     },
     [setHighlights],
   );
 
   const removeHighlight = useCallback(
-    (id: number) => {
+    ({ id }: { id: number }) => {
       setHighlights((prev) => prev.filter((h) => h.id !== id));
       removeHighlightFromDOM(id);
     },
@@ -45,6 +47,7 @@ export const useLocalHighlightData = ({ articleId }: { articleId: number }) => {
 
   return {
     highlights,
+    isHighlightLoaded: !!highlights,
     addHighlight,
     removeHighlight,
     updateMemo,

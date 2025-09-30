@@ -16,9 +16,11 @@ import me.bombom.api.v1.auth.dto.NativeLoginResponse;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
 import me.bombom.api.v1.auth.dto.request.SignupValidateRequest;
+import me.bombom.api.v1.auth.enums.OAuth2Provider;
 import me.bombom.api.v1.auth.enums.SignupValidateStatus;
 import me.bombom.api.v1.auth.service.AppleOAuth2Service;
 import me.bombom.api.v1.auth.service.GoogleOAuth2LoginService;
+import me.bombom.api.v1.auth.util.UniqueUserInfoGenerator;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.common.resolver.LoginMember;
@@ -47,6 +49,7 @@ public class AuthController implements AuthControllerApi{
     private final MemberService memberService;
     private final AppleOAuth2Service appleOAuth2Service;
     private final GoogleOAuth2LoginService googleOAuth2LoginService;
+    private final UniqueUserInfoGenerator uniqueUserInfoGenerator;
 
     @Override
     @PostMapping("/signup")
@@ -105,14 +108,22 @@ public class AuthController implements AuthControllerApi{
             HttpServletResponse response
     ) throws IOException {
         if (nativeLoginRequest == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request body is missing");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "응답 바디가 없습니다.");
             return null;
         }
         
-        if ("apple".equalsIgnoreCase(provider)) {
-            return handleNativeResult(appleOAuth2Service.loginWithNative(nativeLoginRequest), request, response);
-        } else if ("google".equalsIgnoreCase(provider)) {
-            return handleNativeResult(googleOAuth2LoginService.loginWithNative(nativeLoginRequest), request, response);
+        if (OAuth2Provider.APPLE.isEqualProvider(provider)) {
+            return handleNativeResult(
+                    nativeLoginRequest,
+                    appleOAuth2Service.loginWithNative(nativeLoginRequest),
+                    request
+            );
+        } else if (OAuth2Provider.GOOGLE.isEqualProvider(provider)) {
+            return handleNativeResult(
+                    nativeLoginRequest,
+                    googleOAuth2LoginService.loginWithNative(nativeLoginRequest),
+                    request
+            );
         } else {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "지원하지 않는 제공자입니다.");
             return null;
@@ -165,7 +176,11 @@ public class AuthController implements AuthControllerApi{
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 
-    private NativeLoginResponse handleNativeResult(Optional<Member> member, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private NativeLoginResponse handleNativeResult(
+            NativeLoginRequest nativeLoginRequest,
+            Optional<Member> member,
+            HttpServletRequest request
+    ) {
         // 세션 생성 트리거 (컨테이너가 Set-Cookie: JSESSIONID를 설정)
         request.getSession(true);
         
@@ -177,10 +192,12 @@ public class AuthController implements AuthControllerApi{
             session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
             
             // 기존 회원 -> 로그인 완료
-            return new NativeLoginResponse(true);
+            return new NativeLoginResponse(true, null, null);
         } else {
             // 신규 회원 -> 회원가입 필요
-            return new NativeLoginResponse(false);
+            String uniqueEmailLocalPart = uniqueUserInfoGenerator.getUniqueEmailLocalPart(nativeLoginRequest.email());
+            String uniqueNickname = uniqueUserInfoGenerator.getUniqueNickname(nativeLoginRequest.nickname());
+            return new NativeLoginResponse(false, uniqueEmailLocalPart, uniqueNickname);
         }
     }
 

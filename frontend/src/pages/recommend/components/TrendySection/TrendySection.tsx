@@ -69,7 +69,7 @@ const TrendySection = () => {
         <TrendyGrid device={device}>
           {isLoading ? (
             Array.from({ length: NEWSLETTER_COUNT }).map((_, index) => (
-              <SkeletonCard key={index} />
+              <ImageInfoCardSkeleton key={`skeleton-card-${index}`} />
             ))
           ) : filteredNewsletters?.length === 0 ? (
             <p>해당 카테고리에 뉴스레터가 없습니다.</p>
@@ -162,12 +162,13 @@ const TagContainer = styled.div`
 
 const TrendyGrid = styled.div<{ device: Device }>`
   display: grid;
+  gap: 12px;
+
   grid-template-columns: ${({ device }) =>
     device === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
 `;
 
 const NewsletterCard = styled(ImageInfoCard)`
-  padding: 8px;
   border-radius: 16px;
 
   cursor: pointer;
@@ -192,8 +193,4 @@ const NewsletterCard = styled(ImageInfoCard)`
   &:focus:not(:focus-visible) {
     outline: none;
   }
-`;
-
-const SkeletonCard = styled(ImageInfoCardSkeleton)`
-  padding: 8px;
 `;

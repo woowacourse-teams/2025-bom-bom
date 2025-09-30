@@ -14,17 +14,15 @@ import me.bombom.api.v1.pet.service.PetService;
 import me.bombom.api.v1.reading.service.ReadingService;
 import me.bombom.api.v1.subscribe.service.SubscribeService;
 import me.bombom.api.v1.withdraw.event.WithdrawEvent;
+import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.transaction.TestTransaction;
 
 @Transactional
-@SpringBootTest
-@ActiveProfiles("test")
+@IntegrationTest
 public class MemberWithdrawIntegrationTest {
 
     @Autowired

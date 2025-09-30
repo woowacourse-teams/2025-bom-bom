@@ -6,26 +6,20 @@ import java.time.LocalDate;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.service.AppleOAuth2Service;
-import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.withdraw.service.WithdrawService;
+import me.bombom.support.IntegrationTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@Import({MemberService.class, QuerydslConfig.class})
+@IntegrationTest
 class MemberServiceTest {
 
     @Autowired
@@ -40,11 +34,10 @@ class MemberServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @Autowired
-    private TestEntityManager entityManager;
-
-    @MockitoBean
-    private WithdrawService withdrawService;
+    @BeforeEach
+    void setUp() {
+        memberRepository.deleteAllInBatch();
+    }
 
     @Test
     void 회원가입_중_이미_존재하는_닉네임이면_예외_발생() {
@@ -75,14 +68,14 @@ class MemberServiceTest {
     @Test
     void 회원가입_중_이미_존재하는_이메일이면_예외_발생() {
         //given
-        String duplicateEmail = "email";
+        String duplicateEmail = "email@bombom.news";
         Member member = TestFixture.createMemberFixture(duplicateEmail, "nickname");
         memberRepository.save(member);
 
         //when
         PendingOAuth2Member oAuth2Member = PendingOAuth2Member.builder()
-                .provider("provider")
-                .providerId("providerId")
+                .provider("provider2")
+                .providerId("providerId2")
                 .profileUrl("profileUrl")
                 .build();
         MemberSignupRequest memberSignupRequest = new MemberSignupRequest(
@@ -97,5 +90,4 @@ class MemberServiceTest {
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.DUPLICATE_EMAIL);
     }
-
 }

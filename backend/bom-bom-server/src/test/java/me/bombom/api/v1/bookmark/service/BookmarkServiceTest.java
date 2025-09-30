@@ -9,11 +9,10 @@ import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
+import me.bombom.api.v1.bookmark.dto.response.BookmarkNewsletterStatisticsResponse;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkResponse;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkStatusResponse;
-import me.bombom.api.v1.bookmark.dto.response.BookmarkNewsletterStatisticsResponse;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
-import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
@@ -23,20 +22,16 @@ import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
+import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.test.context.ActiveProfiles;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@Import({BookmarkService.class, QuerydslConfig.class})
+@IntegrationTest
 class BookmarkServiceTest {
 
     @Autowired
@@ -65,6 +60,12 @@ class BookmarkServiceTest {
 
     @BeforeEach
     void setUp() {
+        bookmarkRepository.deleteAllInBatch();
+        articleRepository.deleteAllInBatch();
+        newsletterRepository.deleteAllInBatch();
+        categoryRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
         categories = TestFixture.createCategories();

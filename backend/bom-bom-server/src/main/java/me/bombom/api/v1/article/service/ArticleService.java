@@ -32,6 +32,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
@@ -85,39 +86,12 @@ public class ArticleService {
                 member.getId(), articleId);
     }
 
-    // FIXME: 테스트를 위해 임시 주석
-//    public ArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(Member member, String keyword) {
-//        String trimmedKeyword = (keyword == null || keyword.isBlank()) ? null : keyword.strip();
-//
-//        List<ArticleCountPerNewsletterResponse> rows = articleRepository.countPerNewsletter(member.getId(), trimmedKeyword);
-//        int total = rows.stream()
-//                .mapToInt(ArticleCountPerNewsletterResponse::articleCount)
-//                .sum();
-//        return ArticleNewsletterStatisticsResponse.of(total, rows);
-//    }
-
     public ArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(Member member, String keyword) {
-        List<ArticleCountPerNewsletterResponse> countResponse = newsletterRepository.findAll()
-                .stream()
-                .map(newsletter -> {
-                    int count = articleRepository.countAllByNewsletterIdAndMemberId(
-                            member.getId(),
-                            newsletter.getId(),
-                            keyword
-                    );
-                    return ArticleCountPerNewsletterResponse.of(newsletter, count);
-                })
-                .filter(response -> response.articleCount() > 0)
-                .sorted(
-                        Comparator.comparingLong(ArticleCountPerNewsletterResponse::articleCount)
-                                .reversed()
-                )
-                .toList();
-
+        String trimmedKeyword = StringUtils.hasText(keyword) ? keyword.strip() : null;
+        List<ArticleCountPerNewsletterResponse> countResponse = articleRepository.countPerNewsletter(member.getId(), trimmedKeyword);
         int totalCount = countResponse.stream()
-                .mapToInt(response -> (int) response.articleCount())
+                .mapToInt(ArticleCountPerNewsletterResponse::articleCount)
                 .sum();
-
         return ArticleNewsletterStatisticsResponse.of(totalCount, countResponse);
     }
 

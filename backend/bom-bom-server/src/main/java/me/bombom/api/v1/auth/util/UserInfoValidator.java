@@ -81,20 +81,17 @@ public class UserInfoValidator {
 
     public boolean isNicknameAvailable(String nickname) {
         return isValidNicknameFormat(nickname)
-                && !isDuplicateNickname(nickname)
-                && isValidNicknameLength(nickname);
+                && !isDuplicateNickname(nickname);
     }
 
     public boolean isEmailAvailable(String email) {
         String completeEmail = getCompleteEmail(email);
         return isValidEmailFormat(completeEmail)
-                && !isDuplicateEmail(completeEmail)
-                && isValidEmailLength(completeEmail);
+                && !isDuplicateEmail(completeEmail);
     }
 
     public boolean isValidNicknameFormat(String nickname) {
-        return StringUtils.hasText(nickname) &&
-                isValidNicknameLength(nickname) &&
+        return isValidNicknameLength(nickname) &&
                 NICKNAME_PATTERN.matcher(normalize(nickname)).matches();
     }
 

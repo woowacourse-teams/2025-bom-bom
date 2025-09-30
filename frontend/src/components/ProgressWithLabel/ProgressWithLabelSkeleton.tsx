@@ -1,7 +1,6 @@
-import styled from '@emotion/styled';
+import { Container, ProgressInfo } from './ProgressWithLabel';
 import ProgressBarSkeleton from '../ProgressBar/ProgressBarSkeleton';
 import SkeletonBox from '../Skeleton/SkeletonBox';
-import { useDevice } from '@/hooks/useDevice';
 
 interface ProgressWithLabelSkeletonProps {
   hasShowGraph?: boolean;
@@ -12,40 +11,15 @@ const ProgressWithLabelSkeleton = ({
   hasShowGraph = true,
   hasShowDescription = true,
 }: ProgressWithLabelSkeletonProps) => {
-  const device = useDevice();
-
   return (
-    <SkeletonContainer>
-      <SkeletonProgressInfo>
+    <Container>
+      <ProgressInfo>
         <SkeletonBox width="80px" height="16px" />
-        <SkeletonBox width="50px" height="16px" />
-      </SkeletonProgressInfo>
+      </ProgressInfo>
       {hasShowGraph && <ProgressBarSkeleton />}
-      {hasShowDescription && device === 'pc' && (
-        <SkeletonBox width="100px" height="14px" />
-      )}
-    </SkeletonContainer>
+      {hasShowDescription && <SkeletonBox width="100px" height="14px" />}
+    </Container>
   );
 };
 
 export default ProgressWithLabelSkeleton;
-
-const SkeletonContainer = styled.div`
-  width: 100%;
-
-  display: flex;
-  gap: 14px;
-  flex-direction: column;
-`;
-
-const SkeletonProgressInfo = styled.div`
-  width: 100%;
-
-  display: flex;
-  gap: 8px;
-  align-items: center;
-
-  > :last-child {
-    margin-left: auto;
-  }
-`;

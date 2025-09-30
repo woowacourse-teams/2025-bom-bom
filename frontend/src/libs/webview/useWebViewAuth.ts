@@ -81,12 +81,6 @@ export const useWebViewAuth = () => {
               });
 
               if (!response) return;
-              if (!response.isRegistered) {
-                navigate({ to: '/signup' });
-                return;
-              }
-
-              window.location.reload();
 
               sendMessageToRN({
                 type: 'LOGIN_SUCCESS',
@@ -95,6 +89,21 @@ export const useWebViewAuth = () => {
                   provider: 'apple',
                 },
               });
+
+              if (!response.isRegistered) {
+                const parsedEmail = (message.payload.email ?? '').split('@')[0];
+                const name = message.payload.name ?? '';
+                navigate({
+                  to: '/signup',
+                  search: {
+                    email: parsedEmail,
+                    name: name,
+                  },
+                });
+                return;
+              }
+
+              window.location.reload();
             } catch (error) {
               logger.error('Apple 로그인 실패:', error);
               sendMessageToRN({

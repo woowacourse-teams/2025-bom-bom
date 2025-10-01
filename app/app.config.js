@@ -61,6 +61,8 @@ module.exports = ({ config }) => {
           appleTeamId: 'F6XK836QA8',
         },
       ],
+      'expo-secure-store',
+      'expo-web-browser',
     ],
 
     experiments: {

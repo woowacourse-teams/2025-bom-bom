@@ -14,13 +14,13 @@ export const ExternalLink = ({
   className,
 }: ExternalLinkProps) => {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (isWebView()) {
-      e.preventDefault();
-      sendMessageToRN({
-        type: 'OPEN_BROWSER',
-        payload: { url: href },
-      });
-    }
+    if (!isWebView()) return;
+
+    e.preventDefault();
+    sendMessageToRN({
+      type: 'OPEN_BROWSER',
+      payload: { url: href },
+    });
   };
 
   return (

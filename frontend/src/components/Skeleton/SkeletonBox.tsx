@@ -1,27 +1,15 @@
 import styled from '@emotion/styled';
 import { skeletonStyle } from '@/styles/skeleton';
+import type { CSSProperties } from 'react';
 
-interface TextSkeletonProps {
+interface TextSkeletonProps extends CSSProperties {
   width: string;
   height: string;
-  borderRadius?: string;
   as?: React.ElementType;
 }
 
-const SkeletonBox = ({
-  width,
-  height,
-  borderRadius = '4px',
-  as,
-}: TextSkeletonProps) => {
-  return (
-    <Skeleton
-      width={width}
-      height={height}
-      borderRadius={borderRadius}
-      as={as}
-    />
-  );
+const SkeletonBox = ({ width, height, as, ...cssProps }: TextSkeletonProps) => {
+  return <Skeleton width={width} height={height} as={as} style={cssProps} />;
 };
 
 export default SkeletonBox;
@@ -29,11 +17,10 @@ export default SkeletonBox;
 const Skeleton = styled.div<{
   width: string;
   height: string;
-  borderRadius: string;
 }>`
   width: ${({ width }) => width};
   height: ${({ height }) => height};
-  border-radius: ${({ borderRadius }) => borderRadius};
+  border-radius: 4px;
 
   flex-shrink: 0;
 

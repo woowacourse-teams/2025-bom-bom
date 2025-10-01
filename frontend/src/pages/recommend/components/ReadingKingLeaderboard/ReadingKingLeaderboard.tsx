@@ -78,7 +78,11 @@ const ReadingKingLeaderboard = () => {
         </Tooltip>
       </TitleWrapper>
 
-      <Carousel autoPlay={false} hasSlideButton={false}>
+      <Carousel
+        autoPlay={false}
+        hasSlideButton={true}
+        slideButtonPosition="bottom"
+      >
         {getLeaderboardData(monthlyReadingRank, RANKING.boardUnit).map(
           (leaderboard, leaderboardIndex) => (
             <LeaderboardList key={`leaderboard-${leaderboardIndex}`}>

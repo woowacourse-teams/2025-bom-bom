@@ -15,6 +15,7 @@ const ProgressWithLabelSkeleton = ({
     <Container>
       <ProgressInfo>
         <Skeleton width="80px" height="16px" />
+        <Skeleton width="24px" height="16px" marginLeft="auto" />
       </ProgressInfo>
       {hasShowGraph && <ProgressBarSkeleton />}
       {hasShowDescription && <Skeleton width="100px" height="14px" />}

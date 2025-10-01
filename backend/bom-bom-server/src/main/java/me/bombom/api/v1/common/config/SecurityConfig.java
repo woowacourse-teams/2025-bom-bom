@@ -52,7 +52,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
-
     @Value("${swagger.admin.username}")
     private String adminUsername;
 

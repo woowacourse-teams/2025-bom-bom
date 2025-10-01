@@ -16,6 +16,8 @@ import type { ChangeEvent, FormEvent } from 'react';
 import HelpIcon from '#/assets/svg/help.svg';
 
 const EMAIL_DOMAIN = '@bombom.news';
+const TERMS_URL =
+  'https://guesung.notion.site/26a89de02fde80cda21dec7e51d5de89?pvs=74';
 
 const SignupCard = () => {
   const location = useLocation();
@@ -201,7 +203,7 @@ const SignupCard = () => {
             </CheckboxSquare>
             <TermsText>
               이용약관 동의 (필수)
-              <ViewTermsLink href="#" onClick={(e) => e.preventDefault()}>
+              <ViewTermsLink href={TERMS_URL} target="_blank">
                 내용보기
               </ViewTermsLink>
             </TermsText>

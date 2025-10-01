@@ -2,19 +2,19 @@ import styled from '@emotion/styled';
 import { skeletonStyle } from '@/styles/skeleton';
 import type { CSSProperties } from 'react';
 
-interface TextSkeletonProps extends CSSProperties {
+interface SkeletonProps extends CSSProperties {
   width: string;
   height: string;
   as?: React.ElementType;
 }
 
-const SkeletonBox = ({ width, height, as, ...cssProps }: TextSkeletonProps) => {
-  return <Skeleton width={width} height={height} as={as} style={cssProps} />;
+const Skeleton = ({ width, height, as, ...cssProps }: SkeletonProps) => {
+  return <Container width={width} height={height} as={as} style={cssProps} />;
 };
 
-export default SkeletonBox;
+export default Skeleton;
 
-const Skeleton = styled.div<{
+const Container = styled.div<{
   width: string;
   height: string;
 }>`

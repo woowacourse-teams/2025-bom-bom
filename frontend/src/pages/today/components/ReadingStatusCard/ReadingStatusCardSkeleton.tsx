@@ -6,7 +6,7 @@ import {
   TitleWrapper,
 } from './ReadingStatusCard';
 import ProgressWithLabelSkeleton from '@/components/ProgressWithLabel/ProgressWithLabelSkeleton';
-import SkeletonBox from '@/components/Skeleton/SkeletonBox';
+import Skeleton from '@/components/Skeleton/Skeleton';
 import { useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
 import StatusIcon from '#/assets/svg/reading-status.svg';
@@ -26,7 +26,7 @@ const ReadingStatusCardSkeleton = () => {
         </TitleWrapper>
       )}
 
-      <SkeletonBox width="120px" height="120px" borderRadius="12px" />
+      <Skeleton width="120px" height="120px" borderRadius="12px" />
 
       <SkeletonProgressWrapper isPC={isPC}>
         <ProgressWithLabelSkeleton

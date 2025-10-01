@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { Container, Label } from './Tab';
-import SkeletonBox from '../Skeleton/SkeletonBox';
+import Skeleton from '../Skeleton/Skeleton';
 
 interface TabSkeletonProps {
   StartComponentSkeleton?: {
@@ -28,17 +28,17 @@ const TabSkeleton = ({
   return (
     <SkeletonContainer as={Container}>
       {StartComponentSkeleton && (
-        <SkeletonBox
+        <Skeleton
           width={StartComponentSkeleton.width}
           height={StartComponentSkeleton.height}
           borderRadius={StartComponentSkeleton.borderRadius}
         />
       )}
       <Label textAlign={textAlign}>
-        <SkeletonBox width={width} height={height} />
+        <Skeleton width={width} height={height} />
       </Label>
       {EndComponentSkeleton && (
-        <SkeletonBox
+        <Skeleton
           width={EndComponentSkeleton.width}
           height={EndComponentSkeleton.height}
           borderRadius={EndComponentSkeleton.borderRadius}

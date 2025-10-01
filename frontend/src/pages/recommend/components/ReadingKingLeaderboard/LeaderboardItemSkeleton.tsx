@@ -1,15 +1,15 @@
 import { Container, RankIconWrapper, UserInfoBox } from './LeaderboardItem';
-import SkeletonBox from '@/components/Skeleton/SkeletonBox';
+import Skeleton from '@/components/Skeleton/Skeleton';
 
 const LeaderboardItemSkeleton = () => (
   <Container>
     <RankIconWrapper>
-      <SkeletonBox width="24px" height="24px" />
+      <Skeleton width="24px" height="24px" />
     </RankIconWrapper>
 
     <UserInfoBox>
-      <SkeletonBox width="80px" height="22px" />
-      <SkeletonBox width="60px" height="20px" />
+      <Skeleton width="80px" height="22px" />
+      <Skeleton width="60px" height="20px" />
     </UserInfoBox>
   </Container>
 );

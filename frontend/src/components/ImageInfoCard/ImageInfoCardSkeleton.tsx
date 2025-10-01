@@ -1,13 +1,13 @@
 import { Container, InfoBox } from './ImageInfoCard';
-import SkeletonBox from '../Skeleton/SkeletonBox';
+import Skeleton from '../Skeleton/Skeleton';
 
 const ImageInfoCardSkeleton = () => {
   return (
     <Container>
-      <SkeletonBox width="64px" height="64px" borderRadius="16px" />
+      <Skeleton width="64px" height="64px" borderRadius="16px" />
       <InfoBox>
-        <SkeletonBox width="60%" height="20px" />
-        <SkeletonBox width="80%" height="16px" />
+        <Skeleton width="60%" height="20px" />
+        <Skeleton width="80%" height="16px" />
       </InfoBox>
     </Container>
   );

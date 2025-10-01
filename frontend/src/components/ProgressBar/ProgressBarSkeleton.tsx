@@ -1,5 +1,5 @@
 import { Container, ProgressCaption, ProgressGauge } from './ProgressBar';
-import Skeleton from '../Skeleton/Skeleton';
+import SkeletonBox from '../Skeleton/Skeleton';
 
 interface ProgressBarSkeletonProps {
   hasCaption?: boolean;
@@ -8,14 +8,14 @@ interface ProgressBarSkeletonProps {
 const ProgressBarSkeleton = ({ hasCaption }: ProgressBarSkeletonProps) => {
   return (
     <Container>
-      <Skeleton
+      <SkeletonBox
         width="100%"
         height="100%"
         borderRadius="10px"
         as={ProgressGauge}
       />
       {hasCaption && (
-        <Skeleton
+        <SkeletonBox
           width="24px"
           height="12px"
           alignSelf="flex-end"

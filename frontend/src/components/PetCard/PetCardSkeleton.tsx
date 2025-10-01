@@ -7,7 +7,7 @@ import {
   TitleWrapper,
 } from './PetCard';
 import ProgressBarSkeleton from '../ProgressBar/ProgressBarSkeleton';
-import SkeletonBox from '../Skeleton/SkeletonBox';
+import Skeleton from '../Skeleton/Skeleton';
 import { useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
 import PetIcon from '#/assets/svg/pet.svg';
@@ -26,7 +26,7 @@ const PetCardSkeleton = () => {
         </TitleWrapper>
       )}
       <PetImageContainer>
-        <SkeletonBox
+        <Skeleton
           width="120px"
           height="120px"
           borderRadius="12px"
@@ -34,11 +34,11 @@ const PetCardSkeleton = () => {
         />
       </PetImageContainer>
 
-      <SkeletonBox width="100px" height="16px" />
+      <Skeleton width="100px" height="16px" />
 
       <ProgressBarSkeleton hasCaption={true} />
 
-      <SkeletonBox width="50%" height="100%" as={AttendanceButton} />
+      <Skeleton width="50%" height="100%" as={AttendanceButton} />
     </Container>
   );
 };

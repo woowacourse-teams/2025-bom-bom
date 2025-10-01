@@ -5,7 +5,7 @@ import {
   MetaInfoRow,
   ThumbnailWrapper,
 } from './ArticleCard';
-import SkeletonBox from '@/components/Skeleton/SkeletonBox';
+import Skeleton from '@/components/Skeleton/Skeleton';
 import { useDevice } from '@/hooks/useDevice';
 
 const ArticleCardSkeleton = () => {
@@ -15,16 +15,16 @@ const ArticleCardSkeleton = () => {
   return (
     <SkeletonContainer as={Container}>
       <SkeletonInfoWrapper as={InfoWrapper}>
-        <SkeletonBox width="85%" height={isMobile ? '20px' : '28px'} />
-        <SkeletonBox width="100%" height="16px" />
+        <Skeleton width="85%" height={isMobile ? '20px' : '28px'} />
+        <Skeleton width="100%" height="16px" />
         <SkeletonMetaInfoRow as={MetaInfoRow}>
-          <SkeletonBox width="60px" height="12px" />
-          <SkeletonBox width="60px" height="12px" />
-          <SkeletonBox width="60px" height="12px" />
+          <Skeleton width="60px" height="12px" />
+          <Skeleton width="60px" height="12px" />
+          <Skeleton width="60px" height="12px" />
         </SkeletonMetaInfoRow>
       </SkeletonInfoWrapper>
       <SkeletonThumbnailWrapper as={ThumbnailWrapper}>
-        <SkeletonBox
+        <Skeleton
           width={isMobile ? '64px' : '126px'}
           height={isMobile ? '64px' : '126px'}
         />

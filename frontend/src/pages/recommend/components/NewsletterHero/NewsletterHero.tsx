@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useNavigate } from '@tanstack/react-router';
 import SlideCardList from '../SlideCardList/SlideCardList';
-import SkeletonBox from '@/components/Skeleton/SkeletonBox';
+import Skeleton from '@/components/Skeleton/Skeleton';
 import { useDevice } from '@/hooks/useDevice';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
@@ -17,7 +17,7 @@ const NewsletterHero = () => {
   if (isLoading) {
     return (
       <Container>
-        <SkeletonBox width="100%" height="280px" />
+        <Skeleton width="100%" height="280px" />
       </Container>
     );
   }

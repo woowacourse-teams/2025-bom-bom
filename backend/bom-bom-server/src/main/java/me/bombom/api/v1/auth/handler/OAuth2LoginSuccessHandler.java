@@ -153,7 +153,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             params.append(NAME_PARAM)
                     .append("=")
                     .append(URLEncoder.encode(uniqueNickname, StandardCharsets.UTF_8));
-
         } catch (Exception e) {
             log.warn("쿼리 파라미터 인코딩 실패", e);
         }

@@ -172,10 +172,12 @@ public class ReadingService {
     }
 
     @Transactional
-    public void updateReadingCountForGuideMail(Long memberId) {
-        updateContinueReadingCount(memberId);
-        updateTodayReadingCount(memberId);
-        updateWeeklyReadingCount(memberId);
+    public void updateReadingCountForGuideMail(Long memberId, boolean isRegisterDay) {
+        if (isRegisterDay) {
+            updateContinueReadingCount(memberId);
+            updateTodayReadingCount(memberId);
+            updateWeeklyReadingCount(memberId);
+        }
         updateMonthlyReadingCount(memberId);
     }
 

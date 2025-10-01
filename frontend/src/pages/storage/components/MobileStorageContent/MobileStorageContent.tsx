@@ -4,6 +4,7 @@ import ArticleList from '../ArticleList/ArticleList';
 import ArticleListControls from '../ArticleListControls/ArticleListControls';
 import EmptySearchCard from '../EmptySearchCard/EmptySearchCard';
 import useInfiniteArticles from '@/pages/storage/hooks/useInfiniteArticles';
+import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import type { GetArticlesParams } from '@/apis/articles';
 
@@ -85,7 +86,11 @@ export default function MobileStorageContent({
         totalElements={totalElements}
         isLoading={isInfiniteLoading}
       />
-      <ArticleList articles={articleList} isLoading={isInfiniteLoading} />
+      {isInfiniteLoading ? (
+        <ArticleCardListSkeleton />
+      ) : (
+        <ArticleList articles={articleList} />
+      )}
       {/* 무한 스크롤 로딩 트리거 */}
       <LoadMoreTrigger ref={loadMoreRef} />
       {isFetchingNextPage && <LoadingSpinner>로딩 중...</LoadingSpinner>}

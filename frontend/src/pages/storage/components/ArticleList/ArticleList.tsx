@@ -6,7 +6,6 @@ import type { Article } from '@/types/articles';
 
 interface ArticleListProps {
   articles: Article[];
-  isLoading: boolean;
 }
 
 const ArticleList = ({ articles }: ArticleListProps) => {

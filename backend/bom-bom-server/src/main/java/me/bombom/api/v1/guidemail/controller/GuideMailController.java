@@ -17,9 +17,10 @@ public class GuideMailController implements GuideMailControllerApi{
 
     private final GuideMailService guideMailService;
 
+    @Override
     @PatchMapping("/read")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateRead(@LoginMember Member member) {
-        guideMailService.updateReadScore(member.getId());
+        guideMailService.updateReadScore(member);
     }
 }

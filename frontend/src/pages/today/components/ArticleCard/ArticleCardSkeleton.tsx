@@ -35,7 +35,9 @@ const ArticleCardSkeleton = () => {
 
 export default ArticleCardSkeleton;
 
-const SkeletonContainer = styled.div``;
+const SkeletonContainer = styled.div`
+  border-bottom: none;
+`;
 
 const SkeletonInfoWrapper = styled.div``;
 

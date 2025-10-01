@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { skeletonStyle } from '@/styles/skeleton';
+import { shimmer } from './Skeleton.keyframes';
 import type { CSSProperties } from 'react';
 
 interface SkeletonProps extends CSSProperties {
@@ -24,5 +24,8 @@ const Container = styled.div<{
 
   flex-shrink: 0;
 
-  ${skeletonStyle}
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 37%, #e0e0e0 63%);
+  background-size: 400px 100%;
+
+  animation: ${shimmer} 1.4s ease infinite;
 `;

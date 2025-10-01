@@ -5,11 +5,11 @@ import FloatingToolbar from '@/pages/detail/components/FloatingToolbar/FloatingT
 import MemoPanel from '@/pages/detail/components/MemoPanel/MemoPanel';
 import { useFloatingToolbarState } from '@/pages/detail/hooks/useFloatingToolbarState';
 import { useHighlightHoverEffect } from '@/pages/detail/hooks/useHighlightHoverEffect';
-import { useLocalHighlightData } from '@/pages/detail/hooks/useLocalHighlightData';
 import {
   restoreHighlightAll,
   saveSelection,
 } from '@/pages/detail/utils/highlight';
+import { useLocalHighlightData } from '@/pages/guide-detail/hooks/useLocalHighlightData';
 
 interface ArticleBodyProps {
   articleId: number;

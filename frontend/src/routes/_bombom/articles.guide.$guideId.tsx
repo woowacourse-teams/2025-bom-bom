@@ -5,12 +5,12 @@ import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 import { useScrollThreshold } from '@/hooks/useScrollThreshold';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
-import useGuideAsReadMutation from '@/pages/detail/hooks/useGuideAsReadMutation';
 import GuideArticleBody from '@/pages/guide-detail/components/GuideArticleBody';
 import {
   GUIDE_MAIL_STORAGE_KEY,
   GUIDE_MAILS,
 } from '@/pages/guide-detail/constants/guideMail';
+import { useGuideAsReadMutation } from '@/pages/guide-detail/hooks/useGuideAsReadMutation';
 import { formatDate } from '@/utils/date';
 import type { LocalGuideMail } from '@/types/guide';
 

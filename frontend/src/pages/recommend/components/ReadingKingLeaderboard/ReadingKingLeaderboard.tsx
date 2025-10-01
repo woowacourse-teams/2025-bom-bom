@@ -69,7 +69,11 @@ const ReadingKingLeaderboard = () => {
           />
         </TooltipButton>
 
-        <Tooltip id="rank-explain-tooltip" opened={rankExplainOpened}>
+        <Tooltip
+          id="rank-explain-tooltip"
+          opened={rankExplainOpened}
+          position="right"
+        >
           순위는 10분마다 갱신됩니다.
         </Tooltip>
       </TitleWrapper>
@@ -123,6 +127,9 @@ const Container = styled.div`
 `;
 
 const TitleWrapper = styled.div`
+  position: relative;
+  width: fit-content;
+
   display: flex;
   gap: 10px;
   align-items: center;

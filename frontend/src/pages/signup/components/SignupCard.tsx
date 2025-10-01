@@ -21,16 +21,18 @@ const SignupCard = () => {
   const location = useLocation();
   const device = useDevice();
 
-  const [nickname, setNickname] = useState('');
+  const [nickname, setNickname] = useState('a');
   const [birthDate, setBirthDate] = useState('');
-  const [emailPart, setEmailPart] = useState('');
+  const [emailPart, setEmailPart] = useState('a');
   const [gender, setGender] = useState<Gender>('NONE');
   const [emailHelpOpened, setEmailHelpOpened] = useState(false);
+  const [termsAgreed, setTermsAgreed] = useState(false);
 
   const [birthDateError, setBirthDateError] = useState<FieldError>(null);
 
   const email = `${emailPart.trim()}${EMAIL_DOMAIN}`;
-  const isFormValid = nickname && emailPart && (!birthDate || !birthDateError);
+  const isFormValid =
+    nickname && emailPart && (!birthDate || !birthDateError) && termsAgreed;
 
   const { mutate: signup } = useSignupMutation({
     nickname,
@@ -71,6 +73,10 @@ const SignupCard = () => {
 
   const openEmailHelp = () => setEmailHelpOpened(true);
   const closeEmailHelp = () => setEmailHelpOpened(false);
+
+  const handleTermsChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setTermsAgreed(e.target.checked);
+  };
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -181,6 +187,26 @@ const SignupCard = () => {
             </RadioItem>
           </RadioGroup>
         </FieldGroup>
+
+        <TermsCheckboxWrapper>
+          <HiddenCheckbox
+            id="terms-checkbox"
+            type="checkbox"
+            checked={termsAgreed}
+            onChange={handleTermsChange}
+          />
+          <CheckboxLabel htmlFor="terms-checkbox" checked={termsAgreed}>
+            <CheckboxSquare checked={termsAgreed}>
+              {termsAgreed && <CheckMark>✓</CheckMark>}
+            </CheckboxSquare>
+            <TermsText>
+              이용약관 동의 (필수)
+              <ViewTermsLink href="#" onClick={(e) => e.preventDefault()}>
+                내용보기
+              </ViewTermsLink>
+            </TermsText>
+          </CheckboxLabel>
+        </TermsCheckboxWrapper>
 
         <SubmitButton type="submit" disabled={!isFormValid}>
           시작하기
@@ -363,8 +389,83 @@ const RadioButtonLabel = styled.label<{ selected: boolean }>`
   color: ${({ selected, theme }) =>
     selected ? theme.colors.white : theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body2};
-  font-weight: ${({ selected }) => (selected ? '600' : '400')};
   text-align: center;
 
   user-select: none;
+`;
+
+const TermsCheckboxWrapper = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const HiddenCheckbox = styled.input`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  appearance: none;
+  opacity: 0;
+  pointer-events: none;
+
+  &:focus-visible + label {
+    outline: 2px solid ${({ theme }) => theme.colors.primary};
+    outline-offset: 2px;
+  }
+`;
+
+const CheckboxLabel = styled.label<{ checked: boolean }>`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  cursor: pointer;
+  user-select: none;
+`;
+
+const CheckboxSquare = styled.div<{ checked: boolean }>`
+  width: 20px;
+  height: 20px;
+  border: 2px solid
+    ${({ theme, checked }) =>
+      checked ? theme.colors.primary : theme.colors.stroke};
+  border-radius: 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: ${({ theme, checked }) =>
+    checked ? theme.colors.primary : theme.colors.white};
+
+  transition: all 0.2s ease;
+`;
+
+const CheckMark = styled.span`
+  color: ${({ theme }) => theme.colors.white};
+  font: ${({ theme }) => theme.fonts.body2};
+`;
+
+const TermsText = styled.span`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.body2};
+`;
+
+const ViewTermsLink = styled.a`
+  color: ${({ theme }) => theme.colors.textTertiary};
+  font: ${({ theme }) => theme.fonts.body2};
+
+  cursor: pointer;
+  text-decoration: underline;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.textSecondary};
+  }
 `;

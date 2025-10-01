@@ -13,7 +13,7 @@ const ArticleCardSkeleton = () => {
   const isMobile = device === 'mobile';
 
   return (
-    <SkeletonContainer as={Container}>
+    <SkeletonContainer isMobile={isMobile} as={Container}>
       <SkeletonInfoWrapper as={InfoWrapper}>
         <Skeleton width="85%" height={isMobile ? '20px' : '28px'} />
         <Skeleton width="100%" height="16px" />
@@ -35,8 +35,10 @@ const ArticleCardSkeleton = () => {
 
 export default ArticleCardSkeleton;
 
-const SkeletonContainer = styled.div`
+const SkeletonContainer = styled.div<{ isMobile: boolean }>`
   border-bottom: none;
+
+  ${({ isMobile }) => isMobile && `box-shadow: none`}
 `;
 
 const SkeletonInfoWrapper = styled.div``;

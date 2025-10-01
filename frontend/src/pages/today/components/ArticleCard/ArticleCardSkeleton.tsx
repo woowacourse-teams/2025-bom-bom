@@ -27,6 +27,7 @@ const ArticleCardSkeleton = () => {
         <Skeleton
           width={isMobile ? '64px' : '126px'}
           height={isMobile ? '64px' : '126px'}
+          borderRadius="12px"
         />
       </SkeletonThumbnailWrapper>
     </SkeletonContainer>

@@ -73,6 +73,7 @@ const reset = css`
   table {
     border-collapse: collapse;
     border-spacing: 0;
+    table-layout: fixed;
   }
 
   * {

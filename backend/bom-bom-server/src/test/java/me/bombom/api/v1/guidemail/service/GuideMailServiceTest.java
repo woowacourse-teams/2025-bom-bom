@@ -94,7 +94,7 @@ class GuideMailServiceTest {
         int currentContinueDayCount = continueReading.getDayCount();
 
         // when
-        guideMailService.updateReadScore(member.getId());
+        guideMailService.updateReadScore(member);
 
         // then
         Pet updatedPet = petRepository.findByMemberId(member.getId()).get();

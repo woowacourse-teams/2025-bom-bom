@@ -19,6 +19,7 @@ const ProgressBarSkeleton = ({ hasCaption }: ProgressBarSkeletonProps) => {
           width="24px"
           height="12px"
           justifySelf="flex-end"
+          marginTop="2px"
           as={ProgressCaption}
         />
       )}

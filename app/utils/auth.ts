@@ -69,7 +69,7 @@ export const loginWithApple = async (
     callbackWhenSuccess({
       identityToken: credential.identityToken,
       authorizationCode: credential.authorizationCode,
-      name: `${credential.fullName?.familyName}${credential.fullName?.givenName}`,
+      name: `${credential.fullName?.familyName ?? ''}${credential.fullName?.givenName ?? ''}`,
       email: credential.email ?? '',
       provider: 'apple',
     });

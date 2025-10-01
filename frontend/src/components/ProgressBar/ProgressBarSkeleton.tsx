@@ -18,7 +18,7 @@ const ProgressBarSkeleton = ({ hasCaption }: ProgressBarSkeletonProps) => {
         <SkeletonBox
           width="24px"
           height="12px"
-          alignSelf="flex-end"
+          justifySelf="flex-end"
           as={ProgressCaption}
         />
       )}

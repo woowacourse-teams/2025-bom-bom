@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
@@ -35,6 +36,7 @@ import org.springframework.web.client.RestClient;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AppleOAuth2Service extends OidcUserService {
 
     private static final String ACCESS_TOKEN_KEY = "access_token";
@@ -56,6 +58,7 @@ public class AppleOAuth2Service extends OidcUserService {
     private String bundleId;
 
     @Override
+    @Transactional
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
         log.info("Apple OIDC 로그인 처리 시작");
         
@@ -127,6 +130,7 @@ public class AppleOAuth2Service extends OidcUserService {
     /**
      *  iOS 네이티브 로그인 처리: 번들 ID로 client_secret 생성하여 코드 교환
      */
+    @Transactional
     public Optional<Member> loginWithNative(NativeLoginRequest request) {
         try {
             if (bundleId == null || bundleId.isBlank()) {

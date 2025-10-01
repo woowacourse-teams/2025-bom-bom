@@ -100,7 +100,7 @@ export const NewsLetterImage = styled.img`
   object-fit: cover;
 `;
 
-const StyledTabs = styled(Tabs)`
+export const StyledTabs = styled(Tabs)`
   padding-bottom: 8px;
   overflow-x: auto;
 

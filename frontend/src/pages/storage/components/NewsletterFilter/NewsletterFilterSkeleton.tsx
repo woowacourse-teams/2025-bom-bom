@@ -1,6 +1,7 @@
 import {
   Container,
   IconWrapper,
+  StyledTabs,
   Title,
   TitleWrapper,
 } from './NewsletterFilter';
@@ -30,24 +31,26 @@ const NewsletterFilterSkeleton = () => {
           <Title>뉴스레터</Title>
         </TitleWrapper>
       )}
-      {Array.from({
-        length: isPC ? SKELETON_LENGTH.pc : SKELETON_LENGTH.mobile,
-      }).map((_, index) => (
-        <TabSkeleton
-          key={index}
-          StartComponentSkeleton={
-            index !== TOTAL_COUNT_INDEX && isPC
-              ? { width: '24px', height: '24px', borderRadius: '50%' }
-              : undefined
-          }
-          EndComponentSkeleton={
-            isPC ? { width: '36px', height: '24px' } : undefined
-          }
-          textAlign={isPC ? 'start' : 'center'}
-          width="80px"
-          height="36px"
-        />
-      ))}
+      <StyledTabs direction={device === 'pc' ? 'vertical' : 'horizontal'}>
+        {Array.from({
+          length: isPC ? SKELETON_LENGTH.pc : SKELETON_LENGTH.mobile,
+        }).map((_, index) => (
+          <TabSkeleton
+            key={index}
+            StartComponentSkeleton={
+              index !== TOTAL_COUNT_INDEX
+                ? { width: '24px', height: '24px', borderRadius: '50%' }
+                : undefined
+            }
+            EndComponentSkeleton={
+              isPC ? { width: '36px', height: '24px' } : undefined
+            }
+            textAlign={isPC ? 'start' : 'center'}
+            width="80px"
+            height="36px"
+          />
+        ))}
+      </StyledTabs>
     </Container>
   );
 };

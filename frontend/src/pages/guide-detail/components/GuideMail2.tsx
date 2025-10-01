@@ -77,8 +77,6 @@ export default function GuideMail2() {
   );
 }
 
-/* ------------------------------ Styled Components ------------------------------ */
-
 const Container = styled.div`
   max-width: 680px;
   margin: 0 auto;
@@ -86,7 +84,6 @@ const Container = styled.div`
 
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body1};
-  line-height: 1.65;
 `;
 
 const HeaderBox = styled.div`
@@ -103,7 +100,6 @@ const HeaderTag = styled.div`
 
   color: ${({ theme }) => theme.colors.primary};
   font: ${({ theme }) => theme.fonts.body2};
-  font-weight: 700;
 `;
 
 const HeaderTitle = styled.h1`
@@ -182,7 +178,6 @@ const InfoText = styled.p`
 
   color: #0284c7;
   font: ${({ theme }) => theme.fonts.body2};
-  line-height: 1.6;
 `;
 
 const ButtonWrapper = styled.div`

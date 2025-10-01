@@ -1,7 +1,6 @@
 package me.bombom.api.v1.common.config;
 
 import java.security.interfaces.ECPrivateKey;
-import java.time.Duration;
 import java.util.List;
 import java.util.function.Supplier;
 import me.bombom.api.v1.auth.AppleClientSecretSupplier;
@@ -57,9 +56,6 @@ public class SecurityConfig {
 
     @Value("${swagger.admin.password}")
     private String adminPassword;
-
-    @Value("${server.servlet.session.cookie.max-age}")
-    private Duration cookieMaxAge;
 
     @Bean
     public SecurityFilterChain apiSecurityFilterChain(
@@ -210,7 +206,6 @@ public class SecurityConfig {
         serializer.setUseSecureCookie(true);
         serializer.setSameSite("None");
         serializer.setCookiePath("/");
-        serializer.setCookieMaxAge((int) cookieMaxAge.getSeconds());
         return serializer;
     }
 }

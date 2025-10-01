@@ -24,7 +24,9 @@ import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
+@SQLRestriction("deleted_at IS NULL")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE member SET deleted_at = now() WHERE id = ?")
 @Table(
         name = "member",
         uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "providerId"})
@@ -61,6 +63,9 @@ public class Member extends BaseEntity implements Serializable {
     @Column(nullable = false, columnDefinition = "BIGINT")
     private Long roleId = 0L;
 
+
+    private LocalDateTime deletedAt;
+
     @Builder
     public Member(
             Long id,
@@ -82,5 +87,9 @@ public class Member extends BaseEntity implements Serializable {
         this.birthDate = birthDate;
         this.gender = gender;
         this.roleId = roleId;
+    }
+
+    public boolean isWithdrawnMember() {
+        return this.deletedAt != null;
     }
 }

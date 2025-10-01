@@ -19,4 +19,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByEmail(String email);
 
     boolean existsByNickname(String nickname);
+
+    void deleteByDeletedAtBefore(LocalDateTime threshold);
 }

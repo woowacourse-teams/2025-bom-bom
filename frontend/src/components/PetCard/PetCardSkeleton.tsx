@@ -26,12 +26,7 @@ const PetCardSkeleton = () => {
         </TitleWrapper>
       )}
       <PetImageContainer>
-        <Skeleton
-          width="120px"
-          height="120px"
-          borderRadius="12px"
-          as={AttendanceButton}
-        />
+        <Skeleton width="120px" height="120px" borderRadius="12px" />
       </PetImageContainer>
 
       <Skeleton width="100px" height="16px" />

@@ -284,13 +284,8 @@ public class AppleOAuth2Service extends OidcUserService {
 
     // 공통: 기존 회원 조회 + 신규면 pendingMember 세션 저장
     private Optional<Member> findMemberAndSetPendingIfNew(String providerId) {
-        log.info("=== findMemberAndSetPendingIfNew 시작 ===");
-        log.info("providerId: {}", providerId);
-        
         try {
-            log.info("Repository 호출 전 - findByProviderAndProviderId('apple', '{}')", providerId);
             Optional<Member> member = memberRepository.findByProviderAndProviderId("apple", providerId);
-            log.info("Repository 호출 완료 - member present: {}", member.isPresent());
             
             if (member.isEmpty()) {
                 log.info("회원 없음 - 신규 사용자 처리 시작");
@@ -304,11 +299,8 @@ public class AppleOAuth2Service extends OidcUserService {
             } else {
                 log.info("Apple 기존 사용자 - memberId: {}", member.get().getId());
             }
-            
-            log.info("=== findMemberAndSetPendingIfNew 완료 ===");
             return member;
         } catch (Exception e) {
-            log.error("=== findMemberAndSetPendingIfNew 예외 발생 ===", e);
             log.error("예외 타입: {}", e.getClass().getSimpleName());
             log.error("예외 메시지: {}", e.getMessage());
             throw e;

@@ -97,7 +97,7 @@ function BookmarkPage() {
             {isLoading ? (
               <ArticleCardListSkeleton />
             ) : (
-              <ArticleList articles={bookmarkContent} isLoading={isLoading} />
+              <ArticleList articles={bookmarkContent} />
             )}
           </MainContentSection>
         </ContentWrapper>

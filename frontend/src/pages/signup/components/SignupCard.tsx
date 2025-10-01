@@ -23,9 +23,9 @@ const SignupCard = () => {
   const location = useLocation();
   const device = useDevice();
 
-  const [nickname, setNickname] = useState('a');
+  const [nickname, setNickname] = useState('');
   const [birthDate, setBirthDate] = useState('');
-  const [emailPart, setEmailPart] = useState('a');
+  const [emailPart, setEmailPart] = useState('');
   const [gender, setGender] = useState<Gender>('NONE');
   const [emailHelpOpened, setEmailHelpOpened] = useState(false);
   const [termsAgreed, setTermsAgreed] = useState(false);

@@ -1,11 +1,15 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import LeaderboardItem from './LeaderboardItem';
 import { getLeaderboardData } from './ReadingKingLeaderboard.utils';
 import ReadingKingMyRank from './ReadingKingMyRank';
 import { queries } from '@/apis/queries';
 import Carousel from '@/components/Carousel/Carousel';
 import ArrowIcon from '@/components/icons/ArrowIcon';
+import Tooltip from '@/components/Tooltip/Tooltip';
+import { theme } from '@/styles/theme';
+import ReadingKingHelpIcon from '#/assets/svg/help.svg';
 
 const RANKING = {
   maxRank: 10,
@@ -13,10 +17,15 @@ const RANKING = {
 };
 
 const ReadingKingLeaderboard = () => {
+  const [rankExplainOpened, setRankExplainOpened] = useState(false);
+
   const { data: monthlyReadingRank, isLoading } = useQuery(
     queries.monthlyReadingRank({ limit: RANKING.maxRank }),
   );
   const { data: userRank } = useQuery(queries.myMonthlyReadingRank());
+
+  const openRankExplain = () => setRankExplainOpened(true);
+  const closeRankExplain = () => setRankExplainOpened(false);
 
   if (!monthlyReadingRank || monthlyReadingRank.length === 0) {
     return null;
@@ -43,9 +52,27 @@ const ReadingKingLeaderboard = () => {
           <ArrowIcon width={16} height={16} direction="upRight" />
         </TitleIcon>
         <Title>이달의 독서왕</Title>
-      </TitleWrapper>
+        <TooltipButton
+          type="button"
+          aria-label="이달의 독서왕 랭킹 안내"
+          aria-expanded={rankExplainOpened}
+          aria-describedby="rank-explain-tooltip"
+          onMouseEnter={openRankExplain}
+          onMouseLeave={closeRankExplain}
+          onFocus={openRankExplain}
+          onBlur={closeRankExplain}
+        >
+          <ReadingKingHelpIcon
+            width={20}
+            height={20}
+            fill={theme.colors.primary}
+          />
+        </TooltipButton>
 
-      <Description>순위는 10분마다 변경됩니다.</Description>
+        <Tooltip id="rank-explain-tooltip" opened={rankExplainOpened}>
+          순위는 10분마다 갱신됩니다.
+        </Tooltip>
+      </TitleWrapper>
 
       <Carousel autoPlay={false} hasSlideButton={false}>
         {getLeaderboardData(monthlyReadingRank, RANKING.boardUnit).map(
@@ -116,11 +143,13 @@ const TitleIcon = styled.div`
 const Title = styled.h3`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.heading5};
+  line-height: 0;
 `;
 
-const Description = styled.p`
-  color: ${({ theme }) => theme.colors.textTertiary};
-  font: ${({ theme }) => theme.fonts.body2};
+const TooltipButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const LeaderboardList = styled.div`

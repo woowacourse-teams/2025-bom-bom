@@ -113,10 +113,10 @@ public class AuthController implements AuthControllerApi{
         }
 
         Optional<Member> loginResult = loginWithProvider(provider, nativeLoginRequest);
-        if (loginResult.isEmpty()) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "지원하지 않는 제공자입니다.");
-            return null;
-        }
+//        if (loginResult.isEmpty()) {
+//            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "지원하지 않는 제공자입니다.");
+//            return null;
+//        }
         return handleNativeResult(nativeLoginRequest, loginResult, request);
     }
 

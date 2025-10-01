@@ -130,7 +130,6 @@ public class UserInfoValidator {
         String emailLocalPart = extractEmailLocalPart(email);
         String normalizedLocalPart = emailLocalPart.strip().toLowerCase();
         String fullEmail = normalizedLocalPart + EMAIL_DOMAIN;
-        log.info("fullEmail: {}", fullEmail);
         return fullEmail;
     }
 

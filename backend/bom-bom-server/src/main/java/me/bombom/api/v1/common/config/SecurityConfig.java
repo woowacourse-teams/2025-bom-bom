@@ -51,6 +51,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private static final int COOKIE_MAX_AGE = 7 * 24 * 60 * 60 + 10;
+
     @Value("${swagger.admin.username}")
     private String adminUsername;
 
@@ -206,6 +208,7 @@ public class SecurityConfig {
         serializer.setUseSecureCookie(true);
         serializer.setSameSite("None");
         serializer.setCookiePath("/");
+        serializer.setCookieMaxAge(COOKIE_MAX_AGE);
         return serializer;
     }
 }

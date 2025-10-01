@@ -197,14 +197,7 @@ export const Title = styled.h2`
 export const AttendanceButton = styled(Button)<{ device: Device }>`
   height: 32px;
 
-  ${({ device }) =>
-    device === 'mobile' && {
-      position: 'absolute',
-      left: '50%',
-      bottom: 0,
-      width: '50%',
-      transform: 'translateX(-50%)',
-    }}
+  ${({ device }) => attendanceButtonStyles[device]}
 `;
 
 const containerStyles: Record<Device, (theme: Theme) => CSSObject> = {
@@ -220,4 +213,16 @@ const containerStyles: Record<Device, (theme: Theme) => CSSObject> = {
   mobile: () => ({
     flex: '1',
   }),
+};
+
+export const attendanceButtonStyles: Record<Device, CSSObject> = {
+  pc: {},
+  tablet: {},
+  mobile: {
+    position: 'absolute',
+    left: '50%',
+    bottom: 0,
+    width: '50%',
+    transform: 'translateX(-50%)',
+  },
 };

@@ -1,5 +1,6 @@
+import styled from '@emotion/styled';
 import {
-  AttendanceButton,
+  attendanceButtonStyles,
   Container,
   PetImageContainer,
   StatusIconWrapper,
@@ -10,6 +11,7 @@ import ProgressBarSkeleton from '../ProgressBar/ProgressBarSkeleton';
 import Skeleton from '../Skeleton/Skeleton';
 import { useDevice } from '@/hooks/useDevice';
 import { theme } from '@/styles/theme';
+import type { Device } from '@/hooks/useDevice';
 import PetIcon from '#/assets/svg/pet.svg';
 
 const PetCardSkeleton = () => {
@@ -33,9 +35,17 @@ const PetCardSkeleton = () => {
 
       <ProgressBarSkeleton hasCaption={true} />
 
-      <Skeleton width="50%" height="100%" as={AttendanceButton} />
+      <AttendanceButtonWrapper device={device}>
+        <Skeleton width="100%" height="32px" />
+      </AttendanceButtonWrapper>
     </Container>
   );
 };
 
 export default PetCardSkeleton;
+
+const AttendanceButtonWrapper = styled.div<{ device: Device }>`
+  width: 50%;
+
+  ${({ device }) => attendanceButtonStyles[device]}
+`;

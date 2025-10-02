@@ -29,6 +29,8 @@ export const useWebViewAuth = () => {
               const response = await postGoogleLogin({
                 identityToken: message.payload.identityToken,
                 authorizationCode: message.payload.authorizationCode,
+                email: message.payload.email ?? '',
+                nickname: message.payload.name ?? '',
               });
 
               if (!response) return;
@@ -42,13 +44,11 @@ export const useWebViewAuth = () => {
               });
 
               if (!response.isRegistered) {
-                const parsedEmail = (message.payload.email ?? '').split('@')[0];
-                const name = message.payload.name ?? '';
                 navigate({
                   to: '/signup',
                   search: {
-                    email: parsedEmail,
-                    name: name,
+                    email: response.email,
+                    name: response.nickname,
                   },
                 });
                 return;
@@ -78,6 +78,8 @@ export const useWebViewAuth = () => {
               const response = await postAppleLogin({
                 identityToken: message.payload.identityToken,
                 authorizationCode: message.payload.authorizationCode,
+                email: message.payload.email ?? '',
+                nickname: message.payload.name ?? '',
               });
 
               if (!response) return;
@@ -91,13 +93,11 @@ export const useWebViewAuth = () => {
               });
 
               if (!response.isRegistered) {
-                const parsedEmail = (message.payload.email ?? '').split('@')[0];
-                const name = message.payload.name ?? '';
                 navigate({
                   to: '/signup',
                   search: {
-                    email: parsedEmail,
-                    name: name,
+                    email: response.email,
+                    name: response.nickname,
                   },
                 });
                 return;

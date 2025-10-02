@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { Link } from '@tanstack/react-router';
 
 export default function GuideMail2() {
   return (
@@ -20,11 +21,7 @@ export default function GuideMail2() {
         <br />
         <strong>레벨 5까지 성장</strong>시켜 보세요! 🌱
       </BodyText>
-      <Image
-        src="/assets/gif/guide_grow.gif"
-        alt="가이드 영상"
-        style={{ width: '300px' }}
-      />
+      <Image src="/assets/gif/guide_grow.gif" alt="가이드 영상" />
 
       <SectionTitle>🍀 경험치 모으는 방법</SectionTitle>
       <List>
@@ -71,7 +68,7 @@ export default function GuideMail2() {
       </InfoBox>
 
       <ButtonWrapper>
-        <ActionButton href="/today">출석하고 읽기 시작하기</ActionButton>
+        <TodayLink to="/today">출석하고 읽기 시작하기</TodayLink>
       </ButtonWrapper>
     </Container>
   );
@@ -131,7 +128,7 @@ const BodyText = styled.p`
 `;
 
 const Image = styled.img`
-  width: 640px;
+  width: 300px;
   max-width: 100%;
   margin: 8px 0 16px;
   border-radius: 4px;
@@ -185,7 +182,7 @@ const ButtonWrapper = styled.div`
   text-align: center;
 `;
 
-const ActionButton = styled.a`
+const TodayLink = styled(Link)`
   padding: 11px 16px;
   border-radius: 999px;
 

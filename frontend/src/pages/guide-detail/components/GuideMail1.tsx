@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { Link } from '@tanstack/react-router';
 
 export default function GuideMail1() {
   return (
@@ -70,7 +71,7 @@ export default function GuideMail1() {
       </WarningBox>
 
       <ButtonWrapper>
-        <ActionButton href="/">지금 구독하러 가기</ActionButton>
+        <SubscribeLink to="/">지금 구독하러 가기</SubscribeLink>
       </ButtonWrapper>
     </Container>
   );
@@ -177,7 +178,7 @@ const ButtonWrapper = styled.div`
   text-align: center;
 `;
 
-const ActionButton = styled.a`
+const SubscribeLink = styled(Link)`
   padding: 11px 16px;
   border-radius: 999px;
 

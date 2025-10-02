@@ -63,6 +63,12 @@ module.exports = ({ config }) => {
       ],
       'expo-secure-store',
       'expo-web-browser',
+      [
+        'expo-web-browser',
+        {
+          experimentalLauncherActivity: true,
+        },
+      ],
     ],
 
     experiments: {

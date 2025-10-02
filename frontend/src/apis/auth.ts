@@ -11,7 +11,7 @@ export const postSignup = async (params: PostSignupParams) => {
 };
 
 export type GetSignupCheckParams =
-  operations['checkSignupDuplicate']['parameters']['query']['request'];
+  operations['validateSignupField']['parameters']['query']['request'];
 
 export const getSignupCheck = (params: GetSignupCheckParams) => {
   return fetcher.get({

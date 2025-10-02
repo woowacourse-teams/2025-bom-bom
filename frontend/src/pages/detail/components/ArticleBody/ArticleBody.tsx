@@ -10,6 +10,7 @@ import ArticleContent from '../ArticleContent/ArticleContent';
 import FloatingToolbar from '../FloatingToolbar/FloatingToolbar';
 import MemoPanel from '../MemoPanel/MemoPanel';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
+import { openExternalLink } from '@/utils/externalLink';
 import type { GetArticleByIdResponse } from '@/apis/articles';
 
 interface ArticleBodyProps {
@@ -43,6 +44,22 @@ const ArticleBody = ({
       onShow: showToolbar,
       onHide: hideToolbar,
     });
+
+  useEffect(() => {
+    const contentEl = contentRef.current;
+    if (!contentEl) return;
+
+    const handleClick = (e: MouseEvent) => {
+      const link = (e.target as HTMLElement).closest('a');
+      if (link && link.href) {
+        e.preventDefault();
+        openExternalLink(link.href);
+      }
+    };
+
+    contentEl.addEventListener('click', handleClick);
+    return () => contentEl.removeEventListener('click', handleClick);
+  }, []);
 
   const updateMemo = (id: number, memo: string) => {
     updateHighlight({ id, memo });

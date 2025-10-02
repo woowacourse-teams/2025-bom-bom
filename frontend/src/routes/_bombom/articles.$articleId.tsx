@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useRef } from 'react';
 import { queries } from '@/apis/queries';
 import DetailPageHeader from '@/components/Header/DetailPageHeader';
 import ProgressBar from '@/components/ProgressBar/ProgressBar';
@@ -16,7 +15,6 @@ import FloatingActionButtons from '@/pages/detail/components/FloatingActionButto
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
 import useArticleAsReadMutation from '@/pages/detail/hooks/useArticleAsReadMutation';
 import { useArticleBookmark } from '@/pages/detail/hooks/useArticleBookmark';
-import { openExternalLink } from '@/utils/externalLink';
 import type { Device } from '@/hooks/useDevice';
 
 export const Route = createFileRoute('/_bombom/articles/$articleId')({
@@ -38,7 +36,6 @@ function ArticleDetailPage() {
   const { articleId } = Route.useParams();
   const articleIdNumber = Number(articleId);
   const device = useDevice();
-  const articleContentRef = useRef<HTMLDivElement>(null);
 
   const { data: currentArticle } = useQuery(
     queries.articleById({ id: articleIdNumber }),
@@ -61,22 +58,6 @@ function ArticleDetailPage() {
 
   useScrollRestoration({ pathname: articleId, enabled: !!currentArticle });
 
-  useEffect(() => {
-    const contentEl = articleContentRef.current;
-    if (!contentEl) return;
-
-    const handleClick = (e: MouseEvent) => {
-      const link = (e.target as HTMLElement).closest('a');
-      if (link && link.href) {
-        e.preventDefault();
-        openExternalLink(link.href);
-      }
-    };
-
-    contentEl.addEventListener('click', handleClick);
-    return () => contentEl.removeEventListener('click', handleClick);
-  }, [currentArticle]);
-
   if (!currentArticle) return null;
 
   return (
@@ -89,7 +70,7 @@ function ArticleDetailPage() {
       )}
 
       <Container>
-        <ArticleContent ref={articleContentRef} device={device}>
+        <ArticleContent device={device}>
           <ArticleProgressBar
             rate={progressPercentage}
             transition={false}

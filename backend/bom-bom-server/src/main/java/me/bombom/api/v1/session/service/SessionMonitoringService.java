@@ -7,6 +7,7 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.session.dto.SessionCleanupResponse;
 import me.bombom.api.v1.session.dto.SessionStatisticsResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 세션 모니터링 서비스
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SessionMonitoringService {
 
     private final SessionCleanupService sessionCleanupService;

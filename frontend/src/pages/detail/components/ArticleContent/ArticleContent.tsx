@@ -21,7 +21,7 @@ const ArticleContent = ({
   useEffect(() => {
     if (!ref.current) return;
 
-    const screenWidth = window.innerWidth - (24 + 24); // 좌우 패딩 값에 임의 값 추가
+    const screenWidth = window.outerWidth - (24 + 24); // 좌우 패딩 값에 임의 값 추가
     const contentWidth = ref.current?.clientWidth || 1;
 
     const newScale =

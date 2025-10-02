@@ -47,46 +47,6 @@ module.exports = ({ config }) => {
           resizeMode: 'contain',
           backgroundColor: '#FE5E04',
         },
-        edgeToEdgeEnabled: true,
-        package: 'com.antarctica.bombom',
-      },
-      web: {
-        bundler: 'metro',
-        output: 'static',
-        favicon: './app/assets/images/logo.png',
-      },
-      plugins: [
-        'expo-router',
-        [
-          'expo-splash-screen',
-          {
-            image: './app/assets/images/logo.png',
-            imageWidth: 200,
-            resizeMode: 'contain',
-            backgroundColor: '#FE5E04',
-          },
-        ],
-        [
-          '@react-native-google-signin/google-signin',
-          {
-            iosUrlScheme:
-              'com.googleusercontent.apps.190361254930-1464b7md34crhu077urc0hsvtsmb5ks5',
-          },
-        ],
-        [
-          'expo-apple-authentication',
-          {
-            appleTeamId: 'F6XK836QA8',
-          },
-        ],
-        'expo-secure-store',
-        'expo-web-browser',
-        [
-          'expo-web-browser',
-          {
-            experimentalLauncherActivity: true,
-          },
-        ],
       ],
       [
         '@react-native-google-signin/google-signin',

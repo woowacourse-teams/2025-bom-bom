@@ -35,7 +35,7 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
     mutationFn: postWithdraw,
 
     onSuccess: () => {
-      window.location.href = '/';
+      window.location.reload();
     },
     onError: () => {
       toast.error('회원탈퇴에 실패했습니다. 다시 시도해주세요.');

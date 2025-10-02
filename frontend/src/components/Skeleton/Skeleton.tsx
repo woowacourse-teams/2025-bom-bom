@@ -3,23 +3,16 @@ import { shimmer } from './Skeleton.keyframes';
 import type { CSSProperties } from 'react';
 
 interface SkeletonProps extends CSSProperties {
-  width: string;
-  height: string;
   as?: React.ElementType;
 }
 
-const Skeleton = ({ width, height, as, ...cssProps }: SkeletonProps) => {
-  return <Container width={width} height={height} as={as} style={cssProps} />;
+const Skeleton = ({ as, ...cssProps }: SkeletonProps) => {
+  return <Container as={as} style={cssProps} />;
 };
 
 export default Skeleton;
 
-const Container = styled.div<{
-  width: string;
-  height: string;
-}>`
-  width: ${({ width }) => width};
-  height: ${({ height }) => height};
+const Container = styled.div`
   border-radius: 4px;
 
   flex-shrink: 0;

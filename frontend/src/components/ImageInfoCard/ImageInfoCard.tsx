@@ -29,7 +29,7 @@ function ImageInfoCard({
 
 export default ImageInfoCard;
 
-const Container = styled.div`
+export const Container = styled.div`
   width: 100%;
   padding: 0;
 
@@ -51,7 +51,7 @@ const Image = styled(ImageWithFallback)`
   object-fit: cover;
 `;
 
-const InfoBox = styled.div`
+export const InfoBox = styled.div`
   min-height: 64px;
 
   display: flex;

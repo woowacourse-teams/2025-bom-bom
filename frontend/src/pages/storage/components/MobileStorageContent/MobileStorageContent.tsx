@@ -2,7 +2,9 @@ import styled from '@emotion/styled';
 import { useEffect, useRef } from 'react';
 import ArticleList from '../ArticleList/ArticleList';
 import ArticleListControls from '../ArticleListControls/ArticleListControls';
+import EmptySearchCard from '../EmptySearchCard/EmptySearchCard';
 import useInfiniteArticles from '@/pages/storage/hooks/useInfiniteArticles';
+import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import type { GetArticlesParams } from '@/apis/articles';
 
@@ -64,10 +66,15 @@ export default function MobileStorageContent({
     (page) => page?.content || [],
   );
   const totalElements = infiniteArticlesPages[0]?.totalElements;
-  const isLoadingOrHaveContent = isInfiniteLoading || articleList.length > 0;
+  const IsContentsEmpty = !isInfiniteLoading && articleList.length === 0;
 
-  if (!isLoadingOrHaveContent && searchInput === '')
+  if (IsContentsEmpty && searchInput !== '') {
+    return <EmptySearchCard searchQuery={searchInput} />;
+  }
+
+  if (IsContentsEmpty) {
     return <EmptyLetterCard title="보관된 뉴스레터가 없어요" />;
+  }
 
   return (
     <>
@@ -77,8 +84,13 @@ export default function MobileStorageContent({
         sortFilter={sortFilter}
         onSortChange={onSortChange}
         totalElements={totalElements}
+        isLoading={isInfiniteLoading}
       />
-      <ArticleList articles={articleList} />
+      {isInfiniteLoading ? (
+        <ArticleCardListSkeleton />
+      ) : (
+        <ArticleList articles={articleList} />
+      )}
       {/* 무한 스크롤 로딩 트리거 */}
       <LoadMoreTrigger ref={loadMoreRef} />
       {isFetchingNextPage && <LoadingSpinner>로딩 중...</LoadingSpinner>}

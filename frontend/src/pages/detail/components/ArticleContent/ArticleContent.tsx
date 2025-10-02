@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { extractBodyContent, processContent } from './ArticleContent.utils';
 import { useHighlightHoverEffect } from '../../hooks/useHighlightHoverEffect';
 import type { RefObject } from 'react';
@@ -16,12 +16,24 @@ const ArticleContent = ({
   content,
 }: ArticleContentProps) => {
   const bodyContent = extractBodyContent(content ?? '');
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const screenWidth = window.innerWidth - (24 + 24); // 좌우 패딩 값에 임의 값 추가
+    const contentWidth = ref.current?.clientWidth || 1;
+
+    const newScale =
+      contentWidth > screenWidth ? screenWidth / contentWidth : 1;
+
+    setScale(newScale);
+  }, [ref]);
 
   useHighlightHoverEffect();
 
   return (
     <Container
       ref={ref}
+      scale={scale}
       dangerouslySetInnerHTML={{
         __html: processContent(newsletterName, bodyContent),
       }}
@@ -31,7 +43,7 @@ const ArticleContent = ({
 
 export default memo(ArticleContent);
 
-const Container = styled.div`
+const Container = styled.div<{ scale: number }>`
   overflow: visible;
 
   display: flex;
@@ -42,6 +54,8 @@ const Container = styled.div`
 
   -webkit-tap-highlight-color: rgb(0 0 0 / 10%);
   -webkit-touch-callout: default;
+
+  transform: ${({ scale }) => `scale(${scale})`};
   user-select: text;
 
   word-break: break-all;

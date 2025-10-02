@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class NewsletterSubscriptionCountEventListenerTest {
+class NewsletterSubscribedEventListenerTest {
 
     @Mock
     private NewsletterSubscriptionCountService newsletterSubscriptionCountService;
@@ -26,7 +26,7 @@ class NewsletterSubscriptionCountEventListenerTest {
         // given
         Long newsletterId = 1L;
         Long memberId = 1L;
-        NewsletterSubscriptionCountEvent event = NewsletterSubscriptionCountEvent.of(newsletterId, memberId);
+        NewsletterSubscribedEvent event = NewsletterSubscribedEvent.of(newsletterId, memberId);
 
         // when
         eventListener.on(event);
@@ -40,7 +40,7 @@ class NewsletterSubscriptionCountEventListenerTest {
         // given
         Long newsletterId = 1L;
         Long memberId = 1L;
-        NewsletterSubscriptionCountEvent event = NewsletterSubscriptionCountEvent.of(newsletterId, memberId);
+        NewsletterSubscribedEvent event = NewsletterSubscribedEvent.of(newsletterId, memberId);
         
         doThrow(new RuntimeException("DB 오류")).when(newsletterSubscriptionCountService)
                 .updateNewsletterSubscriptionCount(anyLong(), anyLong());

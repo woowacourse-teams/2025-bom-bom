@@ -14,7 +14,7 @@ public class NewsletterSubscriptionCountEventListener {
     private final NewsletterSubscriptionCountService newsletterSubscriptionCountService;
 
     @TransactionalEventListener
-    public void on(NewsletterSubscriptionCountEvent event) {
+    public void on(NewsletterSubscribedEvent event) {
         try {
             newsletterSubscriptionCountService.updateNewsletterSubscriptionCount(event.newsletterId(), event.memberId());
         } catch (Exception e) {

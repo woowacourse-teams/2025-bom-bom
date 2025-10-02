@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useFloatingToolbarSelection } from './useFloatingToolbarSelection';
 import { useAddHighlightMutation } from '../../hooks/useAddHighlightMutation';
+import { useExternalLinkHandler } from '../../hooks/useExternalLinkHandler';
 import { useFloatingToolbarState } from '../../hooks/useFloatingToolbarState';
 import { useHighlights } from '../../hooks/useHighlights';
 import { useRemoveHighlightMutation } from '../../hooks/useRemoveHighlighMutation';
@@ -10,7 +11,6 @@ import ArticleContent from '../ArticleContent/ArticleContent';
 import FloatingToolbar from '../FloatingToolbar/FloatingToolbar';
 import MemoPanel from '../MemoPanel/MemoPanel';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { openExternalLink } from '@/utils/externalLink';
 import type { GetArticleByIdResponse } from '@/apis/articles';
 
 interface ArticleBodyProps {
@@ -45,21 +45,7 @@ const ArticleBody = ({
       onHide: hideToolbar,
     });
 
-  useEffect(() => {
-    const contentEl = contentRef.current;
-    if (!contentEl) return;
-
-    const handleClick = (e: MouseEvent) => {
-      const link = (e.target as HTMLElement).closest('a');
-      if (link && link.href) {
-        e.preventDefault();
-        openExternalLink(link.href);
-      }
-    };
-
-    contentEl.addEventListener('click', handleClick);
-    return () => contentEl.removeEventListener('click', handleClick);
-  }, []);
+  useExternalLinkHandler(contentRef);
 
   const updateMemo = (id: number, memo: string) => {
     updateHighlight({ id, memo });

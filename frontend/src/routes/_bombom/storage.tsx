@@ -4,6 +4,7 @@ import RequireLogin from '@/hocs/RequireLogin';
 import { useDevice } from '@/hooks/useDevice';
 import MobileStorageContent from '@/pages/storage/components/MobileStorageContent/MobileStorageContent';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
+import NewsletterFilterSkeleton from '@/pages/storage/components/NewsletterFilter/NewsletterFilterSkeleton';
 import PCStorageContent from '@/pages/storage/components/PCStorageContent/PCStorageContent';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import { useStorageFilters } from '@/pages/storage/hooks/useStorageFilters';
@@ -40,6 +41,7 @@ function Storage() {
     searchInput,
     baseQueryParams,
     newsletterCounts,
+    isLoading,
     handleNewsletterChange,
     handleSortChange,
     handleSearchChange,
@@ -61,24 +63,28 @@ function Storage() {
 
       <ContentWrapper isPC={isPC}>
         <SidebarSection isPC={isPC}>
-          <NewsLetterFilter
-            newsLetterList={[
-              {
-                id: 0,
-                name: '전체',
-                articleCount: newsletterCounts?.totalCount ?? 0,
-                imageUrl: '',
-              },
-              ...(newsletterCounts?.newsletters
-                .map((newsletter) => ({
-                  ...newsletter,
-                  articleCount: newsletter.articleCount ?? 0,
-                }))
-                .filter((newsletter) => newsletter.articleCount !== 0) ?? []),
-            ]}
-            selectedNewsletterId={selectedNewsletterId}
-            onSelectNewsletter={handleNewsletterChange}
-          />
+          {isLoading ? (
+            <NewsletterFilterSkeleton />
+          ) : (
+            <NewsLetterFilter
+              newsLetterList={[
+                {
+                  id: 0,
+                  name: '전체',
+                  articleCount: newsletterCounts?.totalCount ?? 0,
+                  imageUrl: '',
+                },
+                ...(newsletterCounts?.newsletters
+                  .map((newsletter) => ({
+                    ...newsletter,
+                    articleCount: newsletter.articleCount ?? 0,
+                  }))
+                  .filter((newsletter) => newsletter.articleCount !== 0) ?? []),
+              ]}
+              selectedNewsletterId={selectedNewsletterId}
+              onSelectNewsletter={handleNewsletterChange}
+            />
+          )}
           <QuickMenu />
         </SidebarSection>
         <MainContentSection isPC={isPC}>
@@ -159,7 +165,7 @@ const SidebarSection = styled.div<{ isPC: boolean }>`
   gap: ${({ isPC }) => (isPC ? '20px' : '8px')};
   flex-direction: column;
 
-  order: ${({ isPC }) => (isPC ? 1 : 0)};
+  order: ${({ isPC }) => (isPC ? 2 : 0)};
 `;
 
 const MainContentSection = styled.div<{ isPC: boolean }>`
@@ -170,5 +176,5 @@ const MainContentSection = styled.div<{ isPC: boolean }>`
   flex: 1;
   flex-direction: column;
 
-  order: ${({ isPC }) => (isPC ? 2 : 1)};
+  order: 1;
 `;

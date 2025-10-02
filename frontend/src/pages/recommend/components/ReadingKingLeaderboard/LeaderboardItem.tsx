@@ -25,7 +25,7 @@ const LeaderboardItem = ({ rank, name, readCount }: LeaderboardItemProps) => (
 
 export default LeaderboardItem;
 
-const Container = styled.div`
+export const Container = styled.div`
   border-radius: 12px;
 
   display: flex;
@@ -33,7 +33,7 @@ const Container = styled.div`
   align-items: center;
 `;
 
-const RankIconWrapper = styled.div`
+export const RankIconWrapper = styled.div`
   width: 24px;
   height: 24px;
 
@@ -45,7 +45,7 @@ const RankIconWrapper = styled.div`
   font: ${({ theme }) => theme.fonts.body3};
 `;
 
-const UserInfoBox = styled.div`
+export const UserInfoBox = styled.div`
   display: flex;
   gap: 2px;
   flex-direction: column;

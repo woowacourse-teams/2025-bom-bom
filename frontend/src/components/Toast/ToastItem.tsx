@@ -67,6 +67,7 @@ const Container = styled.div<{
   overflow: hidden;
   position: relative;
   width: 420px;
+  max-width: calc(100vw - 32px);
   padding: 12px;
   border: 1px solid;
   border-radius: 12px;

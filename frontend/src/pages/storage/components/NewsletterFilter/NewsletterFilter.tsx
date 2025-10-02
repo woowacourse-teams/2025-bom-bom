@@ -56,7 +56,7 @@ function NewsLetterFilter({
 
 export default NewsLetterFilter;
 
-const Container = styled.nav<{ isPc: boolean }>`
+export const Container = styled.nav<{ isPc: boolean }>`
   width: 100%;
   padding: ${({ isPc }) => (isPc ? '16px' : '0')};
   border: ${({ isPc, theme }) =>
@@ -68,14 +68,14 @@ const Container = styled.nav<{ isPc: boolean }>`
   flex-direction: column;
 `;
 
-const TitleWrapper = styled.div`
+export const TitleWrapper = styled.div`
   display: flex;
   gap: 10px;
   align-items: center;
   justify-content: flex-start;
 `;
 
-const IconWrapper = styled.div`
+export const IconWrapper = styled.div`
   padding: 8px;
   border-radius: 50%;
 
@@ -86,11 +86,11 @@ const IconWrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
 `;
 
-const Title = styled.h3`
+export const Title = styled.h3`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const NewsLetterImage = styled.img`
+export const NewsLetterImage = styled.img`
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -100,7 +100,7 @@ const NewsLetterImage = styled.img`
   object-fit: cover;
 `;
 
-const StyledTabs = styled(Tabs)`
+export const StyledTabs = styled(Tabs)`
   padding-bottom: 8px;
   overflow-x: auto;
 

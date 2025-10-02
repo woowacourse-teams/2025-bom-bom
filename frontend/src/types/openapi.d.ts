@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+  '/login/sso/verify/success/apple': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['handleAppleFormPost'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/members/me/pet/attendance': {
     parameters: {
       query?: never;
@@ -316,6 +332,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/members/me/reading/month': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 나의 월간 읽기 개수 조회
+     * @description 현재 로그인한 사용자의 이번 달 아티클 읽기 개수를 조회합니다.
+     */
+    get: operations['getMemberMonthlyReadingCount'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/members/me/reading/month/rank': {
     parameters: {
       query?: never;
@@ -467,7 +503,7 @@ export interface paths {
      * 회원가입 필드 중복 체크
      * @description 회원가입에 사용되는 필드의 중복을 체크하여 true/false를 반환합니다.
      */
-    get: operations['checkSignupDuplicate'];
+    get: operations['validateSignupField'];
     put?: never;
     post?: never;
     delete?: never;
@@ -636,9 +672,13 @@ export interface components {
     NativeLoginRequest: {
       identityToken: string;
       authorizationCode: string;
+      email?: string;
+      nickname?: string;
     };
     NativeLoginResponse: {
-      isRegistered?: boolean;
+      isRegistered: boolean;
+      email?: string;
+      nickname?: string;
     };
     WeeklyGoalCountResponse: {
       /**
@@ -739,6 +779,10 @@ export interface components {
        */
       goalCount: number;
     };
+    MemberMonthlyReadingCountResponse: {
+      /** Format: int32 */
+      readCount: number;
+    };
     MonthlyReadingRankResponse: {
       nickname: string;
       /** Format: int64 */
@@ -806,23 +850,23 @@ export interface components {
       /** Format: int32 */
       number?: number;
       sort?: components['schemas']['SortObject'];
-      pageable?: components['schemas']['PageableObject'];
       first?: boolean;
       last?: boolean;
       /** Format: int32 */
       numberOfElements?: number;
+      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     PageableObject: {
       /** Format: int64 */
       offset?: number;
       sort?: components['schemas']['SortObject'];
-      /** Format: int32 */
-      pageNumber?: number;
-      paged?: boolean;
+      unpaged?: boolean;
       /** Format: int32 */
       pageSize?: number;
-      unpaged?: boolean;
+      paged?: boolean;
+      /** Format: int32 */
+      pageNumber?: number;
     };
     SortObject: {
       empty?: boolean;
@@ -887,11 +931,11 @@ export interface components {
       /** Format: int32 */
       number?: number;
       sort?: components['schemas']['SortObject'];
-      pageable?: components['schemas']['PageableObject'];
       first?: boolean;
       last?: boolean;
       /** Format: int32 */
       numberOfElements?: number;
+      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     BookmarkStatusResponse: {
@@ -910,7 +954,7 @@ export interface components {
       totalCount: number;
       newsletters: components['schemas']['BookmarkCountPerNewsletterResponse'][];
     };
-    DuplicateCheckRequest: {
+    SignupValidateRequest: {
       /** @enum {string} */
       field: 'NICKNAME' | 'EMAIL';
       userInput: string;
@@ -947,11 +991,11 @@ export interface components {
       /** Format: int32 */
       number?: number;
       sort?: components['schemas']['SortObject'];
-      pageable?: components['schemas']['PageableObject'];
       first?: boolean;
       last?: boolean;
       /** Format: int32 */
       numberOfElements?: number;
+      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     ArticleDetailResponse: {
@@ -999,6 +1043,26 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  handleAppleFormPost: {
+    parameters: {
+      query?: {
+        user?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   attend: {
     parameters: {
       query?: never;
@@ -1206,7 +1270,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description 탈퇴 성공 */
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -1633,6 +1697,40 @@ export interface operations {
       };
     };
   };
+  getMemberMonthlyReadingCount: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 월간 읽기 개수 조회 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['MemberMonthlyReadingCountResponse'];
+        };
+      };
+      /** @description 인증 실패 (로그인 필요) */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 월간 읽기 정보를 찾을 수 없음 */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   getMonthlyReadingRank: {
     parameters: {
       query: {
@@ -1828,11 +1926,11 @@ export interface operations {
       };
     };
   };
-  checkSignupDuplicate: {
+  validateSignupField: {
     parameters: {
       query: {
         /** @description 중복 체크 요청 데이터 */
-        request: components['schemas']['DuplicateCheckRequest'];
+        request: components['schemas']['SignupValidateRequest'];
       };
       header?: never;
       path?: never;
@@ -1846,7 +1944,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          '*/*': boolean;
+          '*/*': 'OK' | 'DUPLICATE' | 'INVALID_FORMAT';
         };
       };
       /** @description 잘못된 요청 데이터 */
@@ -1855,7 +1953,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          '*/*': boolean;
+          '*/*': 'OK' | 'DUPLICATE' | 'INVALID_FORMAT';
         };
       };
     };

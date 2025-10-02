@@ -4,14 +4,17 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useMemo } from 'react';
 import ArticleCardList from '../../pages/today/components/ArticleCardList/ArticleCardList';
 import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/ReadingStatusCard';
+import { getPet } from '@/apis/pet';
 import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
+import PetCardSkeleton from '@/components/PetCard/PetCardSkeleton';
 import RequireLogin from '@/hocs/RequireLogin';
 import { useDevice } from '@/hooks/useDevice';
 import {
   GUIDE_MAIL_STORAGE_KEY,
   GUIDE_MAILS,
 } from '@/pages/guide-detail/constants/guideMail';
+import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import { theme } from '@/styles/theme';
 import { isToday } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
@@ -41,7 +44,15 @@ export const Route = createFileRoute('/_bombom/today')({
 
 function Index() {
   const today = useMemo(() => new Date(), []);
-  const { data: todayArticles } = useQuery(queries.articles({ date: today }));
+  const { data: todayArticles, isLoading: isArticlesLoading } = useQuery(
+    queries.articles({ date: today }),
+  );
+
+  const { data: pet, isLoading: isPetLoading } = useQuery({
+    queryKey: ['pet'],
+    queryFn: getPet,
+  });
+
   const guideMails = createStorage<LocalGuideMail, string>(
     GUIDE_MAIL_STORAGE_KEY,
   ).get();
@@ -81,9 +92,13 @@ function Index() {
       )}
 
       <ContentWrapper device={device}>
-        <ArticleCardList articles={mergedArticles} />
+        {isArticlesLoading ? (
+          <ArticleCardListSkeleton />
+        ) : (
+          <ArticleCardList articles={mergedArticles} />
+        )}
         <ReaderCompanion device={device}>
-          <PetCard />
+          {isPetLoading ? <PetCardSkeleton /> : pet && <PetCard pet={pet} />}
           <ReadingStatusCard />
         </ReaderCompanion>
       </ContentWrapper>

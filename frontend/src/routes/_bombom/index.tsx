@@ -14,10 +14,10 @@ export const Route = createFileRoute('/_bombom/')({
       },
     ],
   }),
-  component: Recommend,
+  component: Index,
 });
 
-function Recommend() {
+function Index() {
   const device = useDevice();
 
   return (

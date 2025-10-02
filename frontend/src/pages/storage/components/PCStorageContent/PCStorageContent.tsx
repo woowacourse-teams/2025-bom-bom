@@ -2,8 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import ArticleList from '../ArticleList/ArticleList';
 import ArticleListControls from '../ArticleListControls/ArticleListControls';
+import EmptySearchCard from '../EmptySearchCard/EmptySearchCard';
 import { queries } from '@/apis/queries';
 import Pagination from '@/components/Pagination/Pagination';
+import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import type { GetArticlesParams } from '@/apis/articles';
 
@@ -42,10 +44,16 @@ export default function PCStorageContent({
 
   const totalElements = articles?.totalElements;
   const articleList = articles?.content || [];
-  const isLoadingOrHaveContent = isLoading || articleList.length > 0;
+  const haveNoContent = !isLoading && articleList.length === 0;
 
-  if (!isLoadingOrHaveContent && searchInput === '')
+  if (haveNoContent && searchInput !== '') {
+    return <EmptySearchCard searchQuery={searchInput} />;
+  }
+
+  if (haveNoContent) {
     return <EmptyLetterCard title="보관된 뉴스레터가 없어요" />;
+  }
+
   return (
     <>
       <ArticleListControls
@@ -54,8 +62,13 @@ export default function PCStorageContent({
         sortFilter={sortFilter}
         onSortChange={onSortChange}
         totalElements={totalElements}
+        isLoading={isLoading}
       />
-      <ArticleList articles={articleList} />
+      {isLoading ? (
+        <ArticleCardListSkeleton />
+      ) : (
+        <ArticleList articles={articleList} />
+      )}
       <Pagination
         currentPage={page}
         totalPages={articles?.totalPages ?? 1}

@@ -1,15 +1,16 @@
 import styled from '@emotion/styled';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
-import { PET_LABEL, PET_WIDTH, LEVEL } from './PetCard.constants';
+import { LEVEL, PET_LABEL, PET_WIDTH } from './PetCard.constants';
 import { heartAnimation, jumpAnimation } from './PetCard.keyframes';
 import Button from '../Button/Button';
 import ProgressBar from '../ProgressBar/ProgressBar';
-import { getPet, postPetAttendance } from '@/apis/pet';
+import { postPetAttendance } from '@/apis/pet';
 import { useDevice } from '@/hooks/useDevice';
 import { queryClient } from '@/main';
 import { theme } from '@/styles/theme';
 import { calculateRate } from '@/utils/math';
+import type { GetPetResponse } from '@/apis/pet';
 import type { Device } from '@/hooks/useDevice';
 import type { CSSObject, Theme } from '@emotion/react';
 import petLv1 from '#/assets/avif/pet-1-lv1.avif';
@@ -27,14 +28,13 @@ const petImages: Record<number, string> = {
   5: petLv5,
 };
 
-const PetCard = () => {
+interface PetCardProps {
+  pet: GetPetResponse;
+}
+
+const PetCard = ({ pet }: PetCardProps) => {
   const device = useDevice();
   const [isAnimating, setIsAnimating] = useState(false);
-
-  const { data: pet } = useQuery({
-    queryKey: ['pet'],
-    queryFn: getPet,
-  });
 
   const { mutate: mutatePetAttendance } = useMutation({
     mutationFn: postPetAttendance,
@@ -44,8 +44,6 @@ const PetCard = () => {
       queryClient.invalidateQueries({ queryKey: ['pet'] });
     },
   });
-
-  if (!pet) return null;
 
   const { level, isAttended, currentStageScore, requiredStageScore } = pet;
   const levelPercentage = calculateRate(currentStageScore, requiredStageScore);
@@ -64,7 +62,6 @@ const PetCard = () => {
           <Title>봄이</Title>
         </TitleWrapper>
       )}
-
       <PetImageContainer>
         <PetImage
           src={petImages[level]}
@@ -108,7 +105,7 @@ const PetCard = () => {
 
 export default PetCard;
 
-const Container = styled.section<{ device: Device }>`
+export const Container = styled.section<{ device: Device }>`
   width: 310px;
   border-radius: 20px;
 
@@ -122,7 +119,7 @@ const Container = styled.section<{ device: Device }>`
   ${({ device, theme }) => containerStyles[device](theme)}
 `;
 
-const PetImageContainer = styled.div`
+export const PetImageContainer = styled.div`
   position: relative;
 
   display: flex;
@@ -170,7 +167,7 @@ const Level = styled.p`
   font: ${({ theme }) => theme.fonts.body2};
 `;
 
-const TitleWrapper = styled.div`
+export const TitleWrapper = styled.div`
   width: 100%;
 
   display: flex;
@@ -178,7 +175,7 @@ const TitleWrapper = styled.div`
   align-items: center;
 `;
 
-const StatusIconWrapper = styled.div`
+export const StatusIconWrapper = styled.div`
   width: 32px;
   height: 32px;
   padding: 6px;
@@ -191,23 +188,16 @@ const StatusIconWrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
 `;
 
-const Title = styled.h2`
+export const Title = styled.h2`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.heading5};
   text-align: center;
 `;
 
-const AttendanceButton = styled(Button)<{ device: Device }>`
+export const AttendanceButton = styled(Button)<{ device: Device }>`
   height: 32px;
 
-  ${({ device }) =>
-    device === 'mobile' && {
-      position: 'absolute',
-      left: '50%',
-      bottom: 0,
-      width: '50%',
-      transform: 'translateX(-50%)',
-    }}
+  ${({ device }) => attendanceButtonStyles[device]}
 `;
 
 const containerStyles: Record<Device, (theme: Theme) => CSSObject> = {
@@ -223,4 +213,16 @@ const containerStyles: Record<Device, (theme: Theme) => CSSObject> = {
   mobile: () => ({
     flex: '1',
   }),
+};
+
+export const attendanceButtonStyles: Record<Device, CSSObject> = {
+  pc: {},
+  tablet: {},
+  mobile: {
+    position: 'absolute',
+    left: '50%',
+    bottom: 0,
+    width: '50%',
+    transform: 'translateX(-50%)',
+  },
 };

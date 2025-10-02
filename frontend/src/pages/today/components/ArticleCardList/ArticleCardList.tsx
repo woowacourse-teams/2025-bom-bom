@@ -105,7 +105,7 @@ const ArticleCardList = ({ articles }: ArticleCardListProps) => {
 
 export default ArticleCardList;
 
-const Container = styled.div<{ isMobile: boolean }>`
+export const Container = styled.div<{ isMobile: boolean }>`
   width: 100%;
 
   display: flex;
@@ -114,7 +114,7 @@ const Container = styled.div<{ isMobile: boolean }>`
   align-items: flex-start;
 `;
 
-const LettersWrapper = styled.div<{ isMobile: boolean }>`
+export const LettersWrapper = styled.div<{ isMobile: boolean }>`
   width: 100%;
 
   display: flex;
@@ -133,7 +133,7 @@ const ListTitle = styled.h5`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const CardList = styled.ul<{ isMobile: boolean }>`
+export const CardList = styled.ul<{ isMobile: boolean }>`
   width: 100%;
 
   display: flex;

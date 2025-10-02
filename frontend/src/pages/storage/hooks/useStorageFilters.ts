@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
+import { ARTICLE_SIZE } from '../constants/article';
 import { queries } from '@/apis/queries';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import type { GetArticlesParams } from '@/apis/articles';
@@ -17,12 +18,12 @@ export const useStorageFilters = () => {
   const baseQueryParams: GetArticlesParams = {
     sort: ['arrivedDateTime', sortFilter],
     keyword: debouncedSearchInput,
-    size: 6,
+    size: ARTICLE_SIZE,
     newsletterId: selectedNewsletterId ?? undefined,
     page,
   };
 
-  const { data: newsletterCounts } = useQuery(
+  const { data: newsletterCounts, isLoading } = useQuery(
     queries.articlesStatisticsNewsletters({
       keyword: debouncedSearchInput,
     }),
@@ -54,6 +55,7 @@ export const useStorageFilters = () => {
     searchInput,
     baseQueryParams,
     newsletterCounts,
+    isLoading,
     handleNewsletterChange,
     handleSortChange,
     handleSearchChange,

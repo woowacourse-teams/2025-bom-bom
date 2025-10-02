@@ -3,10 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 import { queries } from '@/apis/queries';
+import Skeleton from '@/components/Skeleton/Skeleton';
 import { useDevice } from '@/hooks/useDevice';
+import ArticleList from '@/pages/storage/components/ArticleList/ArticleList';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
-import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
+import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import type { Device } from '@/hooks/useDevice';
 import BookmarkIcon from '#/assets/svg/bookmark-inactive.svg';
@@ -30,7 +32,7 @@ function BookmarkPage() {
   const [selectedNewsletterId, setSelectedNewsletterId] = useState<
     number | null
   >(null);
-  const { data: articles } = useQuery(
+  const { data: articles, isLoading } = useQuery(
     queries.bookmarks({
       newsletterId: selectedNewsletterId || undefined,
       size: 100, // 페이지네이션 없이 구현
@@ -48,7 +50,12 @@ function BookmarkPage() {
     queries.bookmarksStatisticsNewsletters(),
   );
 
-  if (!articles) return null;
+  const bookmarkContent = articles?.content ?? [];
+  const haveNoContent = !isLoading && bookmarkContent.length === 0;
+
+  if (haveNoContent)
+    return <EmptyLetterCard title="북마크한 뉴스레터가 없어요" />;
+
   return (
     <Container>
       <MainSection>
@@ -81,18 +88,16 @@ function BookmarkPage() {
 
           <MainContentSection device={device}>
             <SummaryBar>
-              <ResultsInfo>총 {totalElements}개의 북마크</ResultsInfo>
+              {isLoading ? (
+                <Skeleton width="80px" height="20px" />
+              ) : (
+                <ResultsInfo>총 {totalElements}개의 북마크</ResultsInfo>
+              )}
             </SummaryBar>
-            {articles.content && articles.content?.length > 0 ? (
-              <ArticleList>
-                {articles.content.map((article) => (
-                  <li key={article.articleId}>
-                    <ArticleCard data={article} readVariant="badge" />
-                  </li>
-                ))}
-              </ArticleList>
+            {isLoading ? (
+              <ArticleCardListSkeleton />
             ) : (
-              <EmptyLetterCard title="북마크한 뉴스레터가 없어요" />
+              <ArticleList articles={bookmarkContent} />
             )}
           </MainContentSection>
         </ContentWrapper>
@@ -155,14 +160,6 @@ const MainContentSection = styled.div<{ device: Device }>`
   flex-direction: column;
 
   order: ${({ device }) => (device === 'pc' ? 2 : 1)};
-`;
-
-const ArticleList = styled.ul`
-  width: 100%;
-
-  display: flex;
-  gap: 16px;
-  flex-direction: column;
 `;
 
 const BookmarkStorageIcon = styled(BookmarkIcon)`

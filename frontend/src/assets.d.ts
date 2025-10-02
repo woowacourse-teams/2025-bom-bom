@@ -3,6 +3,11 @@ declare module '*.svg' {
   export default content;
 }
 
+declare module '*.gif' {
+  const src: string;
+  export default src;
+}
+
 declare module '*.avif';
 
 declare module '*.avif';

@@ -2,7 +2,9 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import LeaderboardItem from './LeaderboardItem';
+import { RANKING } from './ReadingKingLeaderboard.constants';
 import { getLeaderboardData } from './ReadingKingLeaderboard.utils';
+import ReadingKingLeaderboardSkeleton from './ReadingKingLeaderboardSkeleton';
 import ReadingKingMyRank from './ReadingKingMyRank';
 import { queries } from '@/apis/queries';
 import Carousel from '@/components/Carousel/Carousel';
@@ -10,11 +12,6 @@ import ArrowIcon from '@/components/icons/ArrowIcon';
 import Tooltip from '@/components/Tooltip/Tooltip';
 import { theme } from '@/styles/theme';
 import ReadingKingHelpIcon from '#/assets/svg/help.svg';
-
-const RANKING = {
-  maxRank: 10,
-  boardUnit: 5,
-};
 
 const ReadingKingLeaderboard = () => {
   const [rankExplainOpened, setRankExplainOpened] = useState(false);
@@ -27,23 +24,11 @@ const ReadingKingLeaderboard = () => {
   const openRankExplain = () => setRankExplainOpened(true);
   const closeRankExplain = () => setRankExplainOpened(false);
 
-  if (!monthlyReadingRank || monthlyReadingRank.length === 0) {
-    return null;
-  }
+  const monthlyReadingRankContent = monthlyReadingRank ?? [];
+  const haveNoContent = !isLoading && monthlyReadingRankContent.length === 0;
 
-  if (isLoading) {
-    return (
-      <Container>
-        <TitleWrapper>
-          <TitleIcon>
-            <ArrowIcon width={16} height={16} direction="upRight" />
-          </TitleIcon>
-          <Title>이달의 독서왕</Title>
-        </TitleWrapper>
-        <LoadingMessage>데이터를 불러오는 중...</LoadingMessage>
-      </Container>
-    );
-  }
+  if (!isLoading && haveNoContent) return null;
+  if (isLoading) return <ReadingKingLeaderboardSkeleton />;
 
   return (
     <Container>
@@ -83,7 +68,7 @@ const ReadingKingLeaderboard = () => {
         hasSlideButton={true}
         slideButtonPosition="bottom"
       >
-        {getLeaderboardData(monthlyReadingRank, RANKING.boardUnit).map(
+        {getLeaderboardData(monthlyReadingRankContent, RANKING.boardUnit).map(
           (leaderboard, leaderboardIndex) => (
             <LeaderboardList key={`leaderboard-${leaderboardIndex}`}>
               {leaderboard.map((item, index) => (
@@ -111,7 +96,7 @@ const ReadingKingLeaderboard = () => {
 
 export default ReadingKingLeaderboard;
 
-const Container = styled.div`
+export const Container = styled.div`
   width: 100%;
   max-width: 400px;
   padding: 22px;
@@ -130,7 +115,7 @@ const Container = styled.div`
   backdrop-filter: blur(10px);
 `;
 
-const TitleWrapper = styled.div`
+export const TitleWrapper = styled.div`
   position: relative;
   width: fit-content;
 
@@ -139,7 +124,7 @@ const TitleWrapper = styled.div`
   align-items: center;
 `;
 
-const TitleIcon = styled.div`
+export const TitleIcon = styled.div`
   width: 28px;
   height: 28px;
   border-radius: 12px;
@@ -151,32 +136,24 @@ const TitleIcon = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
 `;
 
-const Title = styled.h3`
+export const Title = styled.h3`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.heading5};
   line-height: 0;
 `;
 
-const TooltipButton = styled.button`
+export const TooltipButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
 `;
 
-const LeaderboardList = styled.div`
+export const LeaderboardList = styled.div`
   min-height: fit-content;
 
   display: flex;
   gap: 32px;
   flex-direction: column;
-`;
-
-const LoadingMessage = styled.div`
-  padding: 40px 20px;
-
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.body2};
-  text-align: center;
 `;
 
 const Divider = styled.div`

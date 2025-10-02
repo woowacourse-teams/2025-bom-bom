@@ -14,7 +14,12 @@ interface HeaderNavButtonsProps {
 const HeaderNavButtons = ({ activeNav, device }: HeaderNavButtonsProps) => {
   return (
     <>
-      <NavButton active={activeNav === 'today'} device={device} to="/today">
+      <NavButton
+        active={activeNav === 'today'}
+        device={device}
+        to="/today"
+        className="nav-link"
+      >
         <HomeIcon
           width={24}
           height={24}
@@ -22,7 +27,12 @@ const HeaderNavButtons = ({ activeNav, device }: HeaderNavButtonsProps) => {
         />
         <p>오늘의 뉴스레터</p>
       </NavButton>
-      <NavButton active={activeNav === 'storage'} device={device} to="/storage">
+      <NavButton
+        active={activeNav === 'storage'}
+        device={device}
+        to="/storage"
+        className="nav-link"
+      >
         <StorageIcon
           width={24}
           height={24}
@@ -30,7 +40,12 @@ const HeaderNavButtons = ({ activeNav, device }: HeaderNavButtonsProps) => {
         />
         <p>뉴스레터 보관함</p>
       </NavButton>
-      <NavButton active={activeNav === 'recommend'} device={device} to="/">
+      <NavButton
+        active={activeNav === 'recommend'}
+        device={device}
+        to="/"
+        className="nav-link"
+      >
         <CompassIcon
           width={24}
           height={24}

@@ -19,12 +19,16 @@ const ArticleContent = ({
   const [scale, setScale] = useState(1);
 
   useEffect(() => {
+    if (!ref.current) return;
+
     const screenWidth = window.innerWidth - (24 + 24); // 좌우 패딩 값에 임의 값 추가
     const contentWidth = ref.current?.clientWidth || 1;
 
     const newScale =
       contentWidth > screenWidth ? screenWidth / contentWidth : 1;
 
+    const newHeight = ref.current.scrollHeight * newScale;
+    ref.current.style.height = `${newHeight}px`;
     setScale(newScale);
   }, [ref]);
 
@@ -56,6 +60,7 @@ const Container = styled.div<{ scale: number }>`
   -webkit-touch-callout: default;
 
   transform: ${({ scale }) => `scale(${scale})`};
+  transform-origin: top;
   user-select: text;
 
   word-break: break-all;

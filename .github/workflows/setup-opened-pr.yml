@@ -15,7 +15,7 @@ jobs:
         uses: tj-actions/changed-files@v39
 
       - name: Frontend Review Assignment
-        if: contains(steps.changed-files.outputs.all_changed_files, 'frontend/')
+        if: contains(steps.changed-files.outputs.all_changed_files, 'frontend/') || contains(steps.changed-files.outputs.all_changed_files, 'app/')
         uses: kentaro-m/auto-assign-action@v2.0.0
         with:
           configuration-path: ".github/auto_assign_frontend.yml"

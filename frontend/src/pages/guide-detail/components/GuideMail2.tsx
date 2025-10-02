@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
+import guideGrow from '#//assets/gif/guide_grow.gif';
 
 export default function GuideMail2() {
   return (
@@ -21,7 +22,7 @@ export default function GuideMail2() {
         <br />
         <strong>레벨 5까지 성장</strong>시켜 보세요! 🌱
       </BodyText>
-      <Image src="/assets/gif/guide_grow.gif" alt="가이드 영상" />
+      <Image src={guideGrow} alt="가이드 영상" />
 
       <SectionTitle>🍀 경험치 모으는 방법</SectionTitle>
       <List>

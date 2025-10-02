@@ -29,11 +29,7 @@ public class SessionMonitoringService {
             int totalSessions = sessionCleanupService.getTotalSessionCount();
             int expiredSessions = sessionCleanupService.getExpiredSessionCount();
             int activeSessions = totalSessions - expiredSessions;
-            SessionStatisticsResponse response = SessionStatisticsResponse.builder()
-                    .totalSessions(totalSessions)
-                    .activeSessions(activeSessions)
-                    .expiredSessions(expiredSessions)
-                    .build();
+            SessionStatisticsResponse response = SessionStatisticsResponse.of(totalSessions, expiredSessions, activeSessions);
 
             log.info("세션 통계 조회 - 전체: {}, 활성: {}, 만료: {}", 
                     totalSessions, activeSessions, expiredSessions);

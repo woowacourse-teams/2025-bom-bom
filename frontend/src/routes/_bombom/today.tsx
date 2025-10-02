@@ -45,7 +45,7 @@ export const Route = createFileRoute('/_bombom/today')({
 function Index() {
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles, isLoading: isArticlesLoading } = useQuery(
-    queries.articles({ date: formatDate(today) }),
+    queries.articles({ date: formatDate(today, '-') }),
   );
 
   const { data: pet, isLoading: isPetLoading } = useQuery({

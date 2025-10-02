@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { queries } from '@/apis/queries';
 import DetailPageHeader from '@/components/Header/DetailPageHeader';
 import ProgressBar from '@/components/ProgressBar/ProgressBar';
@@ -38,6 +38,7 @@ function ArticleDetailPage() {
   const { articleId } = Route.useParams();
   const articleIdNumber = Number(articleId);
   const device = useDevice();
+  const articleContentRef = useRef<HTMLDivElement>(null);
 
   const { data: currentArticle } = useQuery(
     queries.articleById({ id: articleIdNumber }),
@@ -61,21 +62,20 @@ function ArticleDetailPage() {
   useScrollRestoration({ pathname: articleId, enabled: !!currentArticle });
 
   useEffect(() => {
+    const contentEl = articleContentRef.current;
+    if (!contentEl) return;
+
     const handleClick = (e: MouseEvent) => {
       const link = (e.target as HTMLElement).closest('a');
-
-      if (link && link.href && !link.classList.contains('nav-link')) {
+      if (link && link.href) {
         e.preventDefault();
         openExternalLink(link.href);
       }
     };
 
-    document.addEventListener('click', handleClick);
-
-    return () => {
-      document.removeEventListener('click', handleClick);
-    };
-  }, []);
+    contentEl.addEventListener('click', handleClick);
+    return () => contentEl.removeEventListener('click', handleClick);
+  }, [currentArticle]);
 
   if (!currentArticle) return null;
 
@@ -89,7 +89,7 @@ function ArticleDetailPage() {
       )}
 
       <Container>
-        <ArticleContent device={device}>
+        <ArticleContent ref={articleContentRef} device={device}>
           <ArticleProgressBar
             rate={progressPercentage}
             transition={false}

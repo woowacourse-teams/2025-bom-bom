@@ -1,15 +1,16 @@
+import { Link } from '@tanstack/react-router';
 import React from 'react';
 import { sendMessageToRN, isWebView } from '@/libs/webview/webview.utils';
 import type { ReactNode } from 'react';
 
 interface ExternalLinkProps {
-  href: string;
+  to: string;
   children: ReactNode;
   className?: string;
 }
 
 export const ExternalLink = ({
-  href,
+  to,
   children,
   className,
 }: ExternalLinkProps) => {
@@ -19,13 +20,13 @@ export const ExternalLink = ({
     e.preventDefault();
     sendMessageToRN({
       type: 'OPEN_BROWSER',
-      payload: { url: href },
+      payload: { url: to },
     });
   };
 
   return (
-    <a href={href} onClick={handleClick} className={className}>
+    <Link to={to} onClick={handleClick} className={className}>
       {children}
-    </a>
+    </Link>
   );
 };

@@ -6,14 +6,9 @@ import type { ReactNode } from 'react';
 interface ExternalLinkProps {
   to: string;
   children: ReactNode;
-  className?: string;
 }
 
-export const ExternalLink = ({
-  to,
-  children,
-  className,
-}: ExternalLinkProps) => {
+export const ExternalLink = ({ to, children }: ExternalLinkProps) => {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (!isWebView()) return;
 
@@ -25,7 +20,7 @@ export const ExternalLink = ({
   };
 
   return (
-    <Link to={to} onClick={handleClick} className={className}>
+    <Link to={to} onClick={handleClick}>
       {children}
     </Link>
   );

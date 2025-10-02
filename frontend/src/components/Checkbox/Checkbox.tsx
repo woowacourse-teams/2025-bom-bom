@@ -1,14 +1,18 @@
 import styled from '@emotion/styled';
-import { ChangeEvent, ReactNode } from 'react';
+import type { ChangeEvent, PropsWithChildren } from 'react';
 
 interface CheckboxProps {
   id: string;
   checked: boolean;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  children: ReactNode;
 }
 
-const Checkbox = ({ id, checked, onChange, children }: CheckboxProps) => {
+const Checkbox = ({
+  id,
+  checked,
+  onChange,
+  children,
+}: PropsWithChildren<CheckboxProps>) => {
   return (
     <CheckboxWrapper>
       <HiddenCheckbox

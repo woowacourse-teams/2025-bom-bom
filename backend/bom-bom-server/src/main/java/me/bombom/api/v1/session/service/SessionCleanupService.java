@@ -2,7 +2,7 @@ package me.bombom.api.v1.session.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.session.repository.SessionRepository;
+import me.bombom.api.v1.session.repository.SessionManagerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class SessionCleanupService {
 
-    private final SessionRepository sessionRepository;
+    private final SessionManagerRepository sessionManagerRepository;
 
     /**
      * 만료된 세션 정리
@@ -28,7 +28,7 @@ public class SessionCleanupService {
     public int cleanupExpiredSessions() {
         long currentTimeMillis = System.currentTimeMillis();
         
-        int deletedCount = sessionRepository.deleteExpiredSessions(currentTimeMillis);
+        int deletedCount = sessionManagerRepository.deleteExpiredSessions(currentTimeMillis);
         
         if (deletedCount > 0) {
             log.info("만료된 세션 정리 완료 - 삭제된 세션 수: {}", deletedCount);
@@ -51,7 +51,7 @@ public class SessionCleanupService {
         // 추가로 30일 이상 된 세션도 정리
         long thirtyDaysAgoMillis = currentTimeMillis - 30L * 24 * 60 * 60 * 1000;
         
-        int deletedCount = sessionRepository.deleteExpiredAndOldSessions(currentTimeMillis, thirtyDaysAgoMillis);
+        int deletedCount = sessionManagerRepository.deleteExpiredAndOldSessions(currentTimeMillis, thirtyDaysAgoMillis);
         
         if (deletedCount > 0) {
             log.info("철저한 세션 정리 완료 - 삭제된 세션 수: {}", deletedCount);
@@ -68,7 +68,7 @@ public class SessionCleanupService {
      * @return 현재 세션 수
      */
     public int getTotalSessionCount() {
-        return sessionRepository.countTotalSessions();
+        return sessionManagerRepository.countTotalSessions();
     }
 
     /**
@@ -78,6 +78,6 @@ public class SessionCleanupService {
      */
     public int getExpiredSessionCount() {
         long currentTimeMillis = System.currentTimeMillis();
-        return sessionRepository.countExpiredSessions(currentTimeMillis);
+        return sessionManagerRepository.countExpiredSessions(currentTimeMillis);
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class SessionRepository {
+public class SessionManagerRepository {
 
     private final JdbcTemplate jdbcTemplate;
 

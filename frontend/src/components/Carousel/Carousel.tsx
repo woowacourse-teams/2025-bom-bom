@@ -77,7 +77,7 @@ const Carousel = ({
             onClick={handlePrevButtonClick}
             slideButtonPosition={slideButtonPosition}
           >
-            <img src={arrowPrev} alt="이전 슬라이드 버튼" />
+            <SlideButtonIcon src={arrowPrev} alt="이전 슬라이드 버튼" />
           </PrevSlideButton>
 
           <NextSlideButton
@@ -85,7 +85,7 @@ const Carousel = ({
             onClick={handleNextButtonClick}
             slideButtonPosition={slideButtonPosition}
           >
-            <img src={arrowNext} alt="다음 슬라이드 버튼" />
+            <SlideButtonIcon src={arrowNext} alt="다음 슬라이드 버튼" />
           </NextSlideButton>
         </>
       )}
@@ -141,7 +141,8 @@ const PrevSlideButton = styled.button<{
     slideButtonPosition === 'middle' ? '50%' : 'auto'};
   bottom: ${({ slideButtonPosition }) =>
     slideButtonPosition === 'bottom' ? '0' : 'auto'};
-  left: 24px;
+  left: 0;
+  width: clamp(32px, 10%, 48px);
 
   transform: ${({ slideButtonPosition }) =>
     slideButtonPosition === 'middle' ? 'translateY(-50%)' : 'none'};
@@ -157,9 +158,10 @@ const NextSlideButton = styled.button<{
   position: absolute;
   top: ${({ slideButtonPosition }) =>
     slideButtonPosition === 'middle' ? '50%' : 'auto'};
-  right: 24px;
+  right: 0;
   bottom: ${({ slideButtonPosition }) =>
     slideButtonPosition === 'bottom' ? '0' : 'auto'};
+  width: clamp(32px, 10%, 48px);
 
   transform: ${({ slideButtonPosition }) =>
     slideButtonPosition === 'middle' ? 'translateY(-50%)' : 'none'};
@@ -167,4 +169,11 @@ const NextSlideButton = styled.button<{
   &:hover {
     opacity: 0.8;
   }
+`;
+
+const SlideButtonIcon = styled.img`
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
 `;

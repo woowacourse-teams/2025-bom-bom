@@ -2,6 +2,7 @@ package me.bombom.api.v1.session.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.session.dto.SessionStatisticsResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +41,7 @@ public class SessionCleanupService {
         } else {
             log.debug("정리할 만료된 세션이 없습니다");
         }
-        
+
         return deletedCount;
     }
 

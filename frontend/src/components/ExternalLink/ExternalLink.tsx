@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import React from 'react';
-import { sendMessageToRN, isWebView } from '@/libs/webview/webview.utils';
+import { isWebView } from '@/libs/webview/webview.utils';
+import { openExternalLink } from '@/utils/externalLink';
 import type { ReactNode } from 'react';
 
 interface ExternalLinkProps {
@@ -13,10 +14,7 @@ export const ExternalLink = ({ to, children }: ExternalLinkProps) => {
     if (!isWebView()) return;
 
     e.preventDefault();
-    sendMessageToRN({
-      type: 'OPEN_BROWSER',
-      payload: { url: to },
-    });
+    openExternalLink(to);
   };
 
   return (

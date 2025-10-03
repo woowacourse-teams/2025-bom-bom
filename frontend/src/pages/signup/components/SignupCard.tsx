@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { formatBirthDate, validateBirthDate } from './SignupCard.utils';
 import { useSignupMutation } from '../hooks/useSignupMutation';
 import Checkbox from '@/components/Checkbox/Checkbox';
+import { ExternalLink } from '@/components/ExternalLink/ExternalLink';
 import InputField from '@/components/InputField/InputField';
 import Tooltip from '@/components/Tooltip/Tooltip';
 import { useDevice } from '@/hooks/useDevice';
@@ -197,9 +198,7 @@ const SignupCard = () => {
         >
           <TermsText>
             이용약관 동의 (필수)
-            <ViewTermsLink href={TERMS_URL} target="_blank">
-              내용보기
-            </ViewTermsLink>
+            <ViewTermsLink to={TERMS_URL}>내용보기</ViewTermsLink>
           </TermsText>
         </Checkbox>
 
@@ -398,7 +397,7 @@ const TermsText = styled.span`
   font: ${({ theme }) => theme.fonts.body2};
 `;
 
-const ViewTermsLink = styled.a`
+const ViewTermsLink = styled(ExternalLink)`
   color: ${({ theme }) => theme.colors.textTertiary};
   font: ${({ theme }) => theme.fonts.body2};
 

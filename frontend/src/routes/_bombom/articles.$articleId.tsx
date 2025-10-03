@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect } from 'react';
 import { queries } from '@/apis/queries';
 import DetailPageHeader from '@/components/Header/DetailPageHeader';
 import ProgressBar from '@/components/ProgressBar/ProgressBar';
@@ -16,7 +15,6 @@ import FloatingActionButtons from '@/pages/detail/components/FloatingActionButto
 import TodayUnreadArticlesSection from '@/pages/detail/components/TodayUnreadArticlesSection/TodayUnreadArticlesSection';
 import useArticleAsReadMutation from '@/pages/detail/hooks/useArticleAsReadMutation';
 import { useArticleBookmark } from '@/pages/detail/hooks/useArticleBookmark';
-import { openExternalLink } from '@/utils/externalLink';
 import type { Device } from '@/hooks/useDevice';
 
 export const Route = createFileRoute('/_bombom/articles/$articleId')({
@@ -59,23 +57,6 @@ function ArticleDetailPage() {
   });
 
   useScrollRestoration({ pathname: articleId, enabled: !!currentArticle });
-
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      const link = (e.target as HTMLElement).closest('a');
-
-      if (link && link.href && !link.classList.contains('nav-link')) {
-        e.preventDefault();
-        openExternalLink(link.href);
-      }
-    };
-
-    document.addEventListener('click', handleClick);
-
-    return () => {
-      document.removeEventListener('click', handleClick);
-    };
-  }, []);
 
   if (!currentArticle) return null;
 

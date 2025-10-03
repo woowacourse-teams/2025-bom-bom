@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useFloatingToolbarSelection } from './useFloatingToolbarSelection';
 import { useAddHighlightMutation } from '../../hooks/useAddHighlightMutation';
+import { useExternalLinkHandler } from '../../hooks/useExternalLinkHandler';
 import { useFloatingToolbarState } from '../../hooks/useFloatingToolbarState';
 import { useHighlights } from '../../hooks/useHighlights';
 import { useRemoveHighlightMutation } from '../../hooks/useRemoveHighlighMutation';
@@ -43,6 +44,8 @@ const ArticleBody = ({
       onShow: showToolbar,
       onHide: hideToolbar,
     });
+
+  useExternalLinkHandler(contentRef);
 
   const updateMemo = (id: number, memo: string) => {
     updateHighlight({ id, memo });

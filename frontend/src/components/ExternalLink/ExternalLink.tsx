@@ -1,31 +1,35 @@
+import styled from '@emotion/styled';
+import { Link } from '@tanstack/react-router';
 import React from 'react';
-import { sendMessageToRN, isWebView } from '@/libs/webview/webview.utils';
+import { isWebView } from '@/libs/webview/webview.utils';
+import { openExternalLink } from '@/utils/externalLink';
 import type { ReactNode } from 'react';
 
 interface ExternalLinkProps {
-  href: string;
+  to: string;
   children: ReactNode;
-  className?: string;
+  underline?: boolean;
 }
 
 export const ExternalLink = ({
-  href,
+  to,
   children,
-  className,
+  underline = true,
 }: ExternalLinkProps) => {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (!isWebView()) return;
 
     e.preventDefault();
-    sendMessageToRN({
-      type: 'OPEN_BROWSER',
-      payload: { url: href },
-    });
+    openExternalLink(to);
   };
 
   return (
-    <a href={href} onClick={handleClick} className={className}>
+    <StyledLink to={to} onClick={handleClick} underline={underline}>
       {children}
-    </a>
+    </StyledLink>
   );
 };
+
+export const StyledLink = styled(Link)<{ underline: boolean }>`
+  text-decoration: ${({ underline }) => (underline ? 'underline' : 'none')};
+`;

@@ -16,7 +16,7 @@ import {
 } from '@/pages/guide-detail/constants/guideMail';
 import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import { theme } from '@/styles/theme';
-import { isToday } from '@/utils/date';
+import { formatDate, isToday } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
 import type { Device } from '@/hooks/useDevice';
 import type { LocalGuideMail } from '@/types/guide';
@@ -45,7 +45,7 @@ export const Route = createFileRoute('/_bombom/today')({
 function Index() {
   const today = useMemo(() => new Date(), []);
   const { data: todayArticles, isLoading: isArticlesLoading } = useQuery(
-    queries.articles({ date: today }),
+    queries.articles({ date: formatDate(today, '-') }),
   );
 
   const { data: pet, isLoading: isPetLoading } = useQuery({

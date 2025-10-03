@@ -1,14 +1,13 @@
 import ApiError from './ApiError';
 import { DEFAULT_ERROR_MESSAGES } from './constants/defaultErrorMessage';
 import { ENV } from './env';
-import { formatDate } from '@/utils/date';
 import { logger } from '@/utils/logger';
 
 type JsonBody = Record<string, unknown>;
 
 type FetcherOptions<TRequest extends JsonBody> = {
   path: string;
-  query?: Record<string, string | number | Date | undefined | string[]>;
+  query?: Record<string, string | number | undefined | string[]>;
   body?: TRequest;
   headers?: HeadersInit;
 };
@@ -42,7 +41,7 @@ type FetchMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT';
 type RequestOptions<TRequest> = {
   path: string;
   method: FetchMethod;
-  query?: Record<string, string | number | Date | undefined | string[]>;
+  query?: Record<string, string | number | undefined | string[]>;
   body?: TRequest;
   headers?: HeadersInit;
 };
@@ -58,12 +57,7 @@ const request = async <TRequest, TResponse>({
     const url = new URL(ENV.baseUrl + path);
     const stringifiedQuery: Record<string, string> = Object.fromEntries(
       Object.entries(query)
-        .map(([key, value]) => {
-          if (value instanceof Date) {
-            return [key, formatDate(value, '-')];
-          }
-          return [key, value?.toString()];
-        })
+        .map(([key, value]) => [key, value?.toString()])
         .filter(([, value]) => value),
     );
     url.search = new URLSearchParams(stringifiedQuery).toString();

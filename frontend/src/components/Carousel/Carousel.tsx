@@ -126,9 +126,8 @@ const Container = styled.div<{ slideButtonPosition?: SlideButtonPosition }>`
   position: relative;
   width: 100%;
   min-height: fit-content;
-  padding: 12px;
   padding-bottom: ${({ slideButtonPosition }) =>
-    slideButtonPosition === 'bottom' ? '60px' : '12px'};
+    slideButtonPosition === 'bottom' ? '60px' : '0'};
 
   background: transparent;
 `;

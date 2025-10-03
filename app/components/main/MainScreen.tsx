@@ -1,4 +1,5 @@
 import styled from '@emotion/native';
+import * as SplashScreen from 'expo-splash-screen';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
@@ -12,11 +13,25 @@ import * as WebBrowser from 'expo-web-browser';
 
 import { ENV } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
-import { LoadingSpinner } from '../common/LoadingSpinner';
 
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
   const { webViewRef } = useWebView();
+  const [webViewLoaded, setWebViewLoaded] = React.useState(false);
+
+  React.useEffect(() => {
+    if (webViewLoaded) {
+      const timer = setTimeout(async () => {
+        try {
+          await SplashScreen.hideAsync();
+        } catch (error) {
+          console.warn('스플래시 스크린 숨기기 실패:', error);
+        }
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [webViewLoaded]);
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {
     try {
@@ -68,7 +83,6 @@ export const MainScreen = () => {
           thirdPartyCookiesEnabled
           webviewDebuggingEnabled
           domStorageEnabled
-          startInLoadingState
           pullToRefreshEnabled
           originWhitelist={['*']}
           onMessage={handleWebViewMessage}
@@ -85,7 +99,9 @@ export const MainScreen = () => {
             const { nativeEvent } = syntheticEvent;
             console.error('WebView HTTP Error:', nativeEvent);
           }}
-          renderLoading={() => <LoadingSpinner />}
+          onLoadEnd={() => {
+            setWebViewLoaded(true);
+          }}
         />
       </WebViewContainer>
 

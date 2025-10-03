@@ -167,7 +167,7 @@ const PrevSlideButton = styled.button<{
   left: 12px;
   width: clamp(32px, 10%, 48px);
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
 
   display: flex;
   align-items: center;
@@ -193,7 +193,7 @@ const NextSlideButton = styled.button<{
     slideButtonPosition === 'bottom' ? '12px' : 'auto'};
   width: clamp(32px, 10%, 48px);
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
 
   display: flex;
   align-items: center;

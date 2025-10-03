@@ -139,7 +139,6 @@ export const TitleIcon = styled.div`
 export const Title = styled.h3`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.heading5};
-  line-height: 0;
 `;
 
 export const TooltipButton = styled.button`

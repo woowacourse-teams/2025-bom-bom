@@ -42,8 +42,7 @@ export const MainScreen = () => {
           if (message.payload?.url) {
             console.log('외부 브라우저 열기:', message.payload.url);
             WebBrowser.openBrowserAsync(message.payload.url, {
-              presentationStyle:
-                WebBrowser.WebBrowserPresentationStyle.FORM_SHEET,
+              presentationStyle: WebBrowser.WebBrowserPresentationStyle.POPOVER,
               dismissButtonStyle: 'close',
             });
           }

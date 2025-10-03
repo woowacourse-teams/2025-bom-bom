@@ -2,9 +2,9 @@ import styled from '@emotion/styled';
 import { Children } from 'react';
 import { DEFAULT_SPEED } from './Carousel.constants';
 import useCarousel from './useCarousel';
+import ChevronIcon from '../icons/ChevronIcon';
+import { theme } from '@/styles/theme';
 import type { PropsWithChildren } from 'react';
-import arrowNext from '#/assets/avif/carousel-arrow-next.avif';
-import arrowPrev from '#/assets/avif/carousel-arrow-prev.avif';
 
 type SlideButtonPosition = 'middle' | 'bottom';
 
@@ -84,16 +84,28 @@ const Carousel = ({
             type="button"
             onClick={handlePrevButtonClick}
             slideButtonPosition={slideButtonPosition}
+            aria-label="이전 슬라이드 이동"
           >
-            <SlideButtonIcon src={arrowPrev} alt="이전 슬라이드 버튼" />
+            <ChevronIcon
+              direction="left"
+              width="100%"
+              height="100%"
+              fill={theme.colors.primary}
+            />
           </PrevSlideButton>
 
           <NextSlideButton
             type="button"
             onClick={handleNextButtonClick}
             slideButtonPosition={slideButtonPosition}
+            aria-label="다음 슬라이드 이동"
           >
-            <SlideButtonIcon src={arrowNext} alt="다음 슬라이드 버튼" />
+            <ChevronIcon
+              direction="right"
+              width="100%"
+              height="100%"
+              fill={theme.colors.primary}
+            />
           </NextSlideButton>
         </>
       )}
@@ -152,6 +164,13 @@ const PrevSlideButton = styled.button<{
     slideButtonPosition === 'bottom' ? '0' : 'auto'};
   left: 0;
   width: clamp(32px, 10%, 48px);
+  border: 2px solid ${({ theme }) => theme.colors.stroke};
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+
+  background-color: ${({ theme }) => theme.colors.white};
 
   transform: ${({ slideButtonPosition }) =>
     slideButtonPosition === 'middle' ? 'translateY(-50%)' : 'none'};
@@ -171,6 +190,13 @@ const NextSlideButton = styled.button<{
   bottom: ${({ slideButtonPosition }) =>
     slideButtonPosition === 'bottom' ? '0' : 'auto'};
   width: clamp(32px, 10%, 48px);
+  border: 2px solid ${({ theme }) => theme.colors.stroke};
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+
+  background-color: ${({ theme }) => theme.colors.white};
 
   transform: ${({ slideButtonPosition }) =>
     slideButtonPosition === 'middle' ? 'translateY(-50%)' : 'none'};
@@ -178,11 +204,4 @@ const NextSlideButton = styled.button<{
   &:hover {
     opacity: 0.8;
   }
-`;
-
-const SlideButtonIcon = styled.img`
-  width: 100%;
-  height: 100%;
-
-  object-fit: contain;
 `;

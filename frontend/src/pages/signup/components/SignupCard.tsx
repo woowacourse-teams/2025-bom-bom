@@ -401,9 +401,6 @@ const ViewTermsLink = styled(ExternalLink)`
   color: ${({ theme }) => theme.colors.textTertiary};
   font: ${({ theme }) => theme.fonts.body2};
 
-  cursor: pointer;
-  text-decoration: underline;
-
   &:hover {
     color: ${({ theme }) => theme.colors.textSecondary};
   }

@@ -1,3 +1,4 @@
+import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
 import React from 'react';
 import { isWebView } from '@/libs/webview/webview.utils';
@@ -7,9 +8,14 @@ import type { ReactNode } from 'react';
 interface ExternalLinkProps {
   to: string;
   children: ReactNode;
+  underline?: boolean;
 }
 
-export const ExternalLink = ({ to, children }: ExternalLinkProps) => {
+export const ExternalLink = ({
+  to,
+  children,
+  underline = true,
+}: ExternalLinkProps) => {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (!isWebView()) return;
 
@@ -18,8 +24,12 @@ export const ExternalLink = ({ to, children }: ExternalLinkProps) => {
   };
 
   return (
-    <Link to={to} onClick={handleClick}>
+    <StyledLink to={to} onClick={handleClick} underline={underline}>
       {children}
-    </Link>
+    </StyledLink>
   );
 };
+
+export const StyledLink = styled(Link)<{ underline: boolean }>`
+  text-decoration: ${({ underline }) => (underline ? 'underline' : 'none')};
+`;

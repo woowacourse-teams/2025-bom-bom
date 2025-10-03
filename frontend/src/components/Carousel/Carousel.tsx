@@ -52,9 +52,13 @@ const Carousel = ({
   const {
     slideIndex,
     isTransitioning,
+    isSwiping,
     handleTransitionEnd,
     handlePrevButtonClick,
     handleNextButtonClick,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
   } = useCarousel({ slideCount, autoPlay, autoPlaySpeedMs });
 
   return (
@@ -62,7 +66,11 @@ const Carousel = ({
       <SlidesWrapper
         slideIndex={slideIndex}
         isTransitioning={isTransitioning}
+        isSwiping={isSwiping}
         onTransitionEnd={handleTransitionEnd}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         hasAnimation={hasAnimation}
       >
         {infinitySlides.map((slideContent, index) => (
@@ -114,6 +122,7 @@ const Container = styled.div<{ slideButtonPosition?: SlideButtonPosition }>`
 const SlidesWrapper = styled.ul<{
   slideIndex: number;
   isTransitioning: boolean;
+  isSwiping: boolean;
   hasAnimation: boolean;
 }>`
   position: relative;
@@ -121,8 +130,8 @@ const SlidesWrapper = styled.ul<{
   display: flex;
 
   transform: ${({ slideIndex }) => `translateX(-${slideIndex * 100}%)`};
-  transition: ${({ hasAnimation, isTransitioning }) =>
-    hasAnimation
+  transition: ${({ hasAnimation, isTransitioning, isSwiping }) =>
+    hasAnimation && !isSwiping
       ? isTransitioning
         ? TRANSITIONS.slide
         : TRANSITIONS.none

@@ -117,7 +117,7 @@ export default Carousel;
 
 const TRANSITIONS = {
   slide: 'transform 0.3s ease-in-out',
-  none: 'transform 0.3s step-end',
+  none: 'none',
 } as const;
 
 const Container = styled.div<{ slideButtonPosition?: SlideButtonPosition }>`

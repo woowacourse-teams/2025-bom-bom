@@ -114,7 +114,6 @@ const Container = styled.div`
 
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body1};
-  line-height: 1.65;
 `;
 
 const HeaderBox = styled.div`
@@ -131,7 +130,6 @@ const HeaderTag = styled.div`
 
   color: ${({ theme }) => theme.colors.primary};
   font: ${({ theme }) => theme.fonts.body2};
-  font-weight: 700;
 `;
 
 const HeaderTitle = styled.h1`
@@ -212,7 +210,6 @@ const TipText = styled.p`
 
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body1};
-  font-weight: 600;
 `;
 
 const List = styled.ul`
@@ -236,7 +233,6 @@ const DashedBox = styled.div`
   background: #f1f5f9;
   color: #64748b;
   font: ${({ theme }) => theme.fonts.body2};
-  font-style: italic;
   text-align: center;
 `;
 
@@ -254,7 +250,6 @@ const InfoTitle = styled.div`
 
   color: #0369a1;
   font: ${({ theme }) => theme.fonts.heading6};
-  font-weight: 600;
 `;
 
 const InfoText = styled.p`
@@ -262,7 +257,6 @@ const InfoText = styled.p`
 
   color: #0284c7;
   font: ${({ theme }) => theme.fonts.body2};
-  line-height: 1.6;
 `;
 
 const Video = styled.video`

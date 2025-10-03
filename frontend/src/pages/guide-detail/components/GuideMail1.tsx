@@ -1,4 +1,8 @@
 import styled from '@emotion/styled';
+import { Link } from '@tanstack/react-router';
+import guideSubscribe1 from '#/assets/gif/guide_subscribe_1.gif';
+import guideSubscribe2 from '#/assets/gif/guide_subscribe_2.gif';
+import guideSubscribe3 from '#/assets/gif/guide_subscribe_3.gif';
 
 export default function GuideMail1() {
   return (
@@ -36,7 +40,7 @@ export default function GuideMail1() {
         원하는 뉴스레터에서 <strong>「구독하기」</strong> 버튼을 눌러 구독
         페이지로 이동해보세요.
       </BodyText>
-      <Image src="/assets/gif/guide_subscribe_1.gif" alt="뉴스레터 구독 - 1" />
+      <Image src={guideSubscribe1} alt="뉴스레터 구독 - 1" />
 
       <WarningBox>
         <WarningTitle>⚠️ 주의사항</WarningTitle>
@@ -51,13 +55,13 @@ export default function GuideMail1() {
         <br />
         봄봄 계정으로 접속 중이라면 자동으로 붙여넣기가 가능해요.
       </BodyText>
-      <Image src="/assets/gif/guide_subscribe_2.gif" alt="뉴스레터 구독 - 2" />
+      <Image src={guideSubscribe2} alt="뉴스레터 구독 - 2" />
 
       <SectionTitle>✅ 구독 완료</SectionTitle>
       <BodyText>
         🎉 축하해요! 이제 정기적으로 뉴스레터를 받아보실 수 있어요.
       </BodyText>
-      <Image src="/assets/gif/guide_subscribe_3.gif" alt="뉴스레터 구독 - 3" />
+      <Image src={guideSubscribe3} alt="뉴스레터 구독 - 3" />
 
       <WarningBox>
         <WarningTitle>⚠️ 주의사항</WarningTitle>
@@ -70,7 +74,7 @@ export default function GuideMail1() {
       </WarningBox>
 
       <ButtonWrapper>
-        <ActionButton href="/">지금 구독하러 가기</ActionButton>
+        <SubscribeLink to="/">지금 구독하러 가기</SubscribeLink>
       </ButtonWrapper>
     </Container>
   );
@@ -177,7 +181,7 @@ const ButtonWrapper = styled.div`
   text-align: center;
 `;
 
-const ActionButton = styled.a`
+const SubscribeLink = styled(Link)`
   padding: 11px 16px;
   border-radius: 999px;
 

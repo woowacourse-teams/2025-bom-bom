@@ -8,7 +8,7 @@ interface ArticleListProps {
   articles: Article[];
 }
 
-export default function ArticleList({ articles }: ArticleListProps) {
+const ArticleList = ({ articles }: ArticleListProps) => {
   const device = useDevice();
 
   return (
@@ -22,7 +22,9 @@ export default function ArticleList({ articles }: ArticleListProps) {
       )}
     </Container>
   );
-}
+};
+
+export default ArticleList;
 
 const Container = styled.ul<{ device: Device }>`
   width: 100%;

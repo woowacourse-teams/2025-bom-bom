@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import ReadingStatusCardSkeleton from './ReadingStatusCardSkeleton';
 import WeeklyGoalEditor, { WeeklyGoalInput } from './WeeklyGoalEditor';
 import StreakCounter from '../StreakCounter/StreakCounter';
 import { queries } from '@/apis/queries';
@@ -14,9 +15,9 @@ import type { CSSObject, Theme } from '@emotion/react';
 import GoalIcon from '#/assets/svg/goal.svg';
 import StatusIcon from '#/assets/svg/reading-status.svg';
 
-function ReadingStatusCard() {
+const ReadingStatusCard = () => {
   const device = useDevice();
-  const { data } = useQuery(queries.readingStatus());
+  const { data, isLoading } = useQuery(queries.readingStatus());
   const [isEditing, setIsEditing] = useState(false);
   const [goalCount, setGoalCount] = useState<number | null>(null);
 
@@ -25,7 +26,7 @@ function ReadingStatusCard() {
       setIsEditing(false);
     },
   });
-
+  if (isLoading) return <ReadingStatusCardSkeleton />;
   if (!data) return null;
 
   const { streakReadDay, today, weekly } = data;
@@ -126,11 +127,11 @@ function ReadingStatusCard() {
       </WeeklyGoalSection>
     </Container>
   );
-}
+};
 
 export default ReadingStatusCard;
 
-const Container = styled.div<{ device: Device }>`
+export const Container = styled.div<{ device: Device }>`
   width: 310px;
   border-radius: 20px;
 
@@ -143,7 +144,7 @@ const Container = styled.div<{ device: Device }>`
   ${({ device, theme }) => containerStyles[device](theme)}
 `;
 
-const TitleWrapper = styled.div`
+export const TitleWrapper = styled.div`
   width: 100%;
 
   display: flex;
@@ -151,7 +152,7 @@ const TitleWrapper = styled.div`
   align-items: center;
 `;
 
-const StatusIconWrapper = styled.div`
+export const StatusIconWrapper = styled.div`
   width: 32px;
   height: 32px;
   padding: 6px;
@@ -164,7 +165,7 @@ const StatusIconWrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
 `;
 
-const Title = styled.h2`
+export const Title = styled.h2`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.heading5};
   text-align: center;

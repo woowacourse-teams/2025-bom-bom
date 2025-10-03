@@ -1,4 +1,6 @@
 import styled from '@emotion/styled';
+import { Link } from '@tanstack/react-router';
+import guideGrow from '#//assets/gif/guide_grow.gif';
 
 export default function GuideMail2() {
   return (
@@ -20,11 +22,7 @@ export default function GuideMail2() {
         <br />
         <strong>레벨 5까지 성장</strong>시켜 보세요! 🌱
       </BodyText>
-      <Image
-        src="/assets/gif/guide_grow.gif"
-        alt="가이드 영상"
-        style={{ width: '300px' }}
-      />
+      <Image src={guideGrow} alt="가이드 영상" />
 
       <SectionTitle>🍀 경험치 모으는 방법</SectionTitle>
       <List>
@@ -71,13 +69,11 @@ export default function GuideMail2() {
       </InfoBox>
 
       <ButtonWrapper>
-        <ActionButton href="/today">출석하고 읽기 시작하기</ActionButton>
+        <TodayLink to="/today">출석하고 읽기 시작하기</TodayLink>
       </ButtonWrapper>
     </Container>
   );
 }
-
-/* ------------------------------ Styled Components ------------------------------ */
 
 const Container = styled.div`
   max-width: 680px;
@@ -86,7 +82,6 @@ const Container = styled.div`
 
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body1};
-  line-height: 1.65;
 `;
 
 const HeaderBox = styled.div`
@@ -103,7 +98,6 @@ const HeaderTag = styled.div`
 
   color: ${({ theme }) => theme.colors.primary};
   font: ${({ theme }) => theme.fonts.body2};
-  font-weight: 700;
 `;
 
 const HeaderTitle = styled.h1`
@@ -135,7 +129,7 @@ const BodyText = styled.p`
 `;
 
 const Image = styled.img`
-  width: 640px;
+  width: 300px;
   max-width: 100%;
   margin: 8px 0 16px;
   border-radius: 4px;
@@ -182,7 +176,6 @@ const InfoText = styled.p`
 
   color: #0284c7;
   font: ${({ theme }) => theme.fonts.body2};
-  line-height: 1.6;
 `;
 
 const ButtonWrapper = styled.div`
@@ -190,7 +183,7 @@ const ButtonWrapper = styled.div`
   text-align: center;
 `;
 
-const ActionButton = styled.a`
+const TodayLink = styled(Link)`
   padding: 11px 16px;
   border-radius: 999px;
 

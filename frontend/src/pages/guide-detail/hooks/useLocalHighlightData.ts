@@ -1,7 +1,10 @@
 import { useCallback } from 'react';
-import { addHighlightToDOM, removeHighlightFromDOM } from '../utils/highlight';
+import {
+  addHighlightToDOM,
+  removeHighlightFromDOM,
+} from '../../detail/utils/highlight';
 import { useLocalStorageState } from '@/hooks/useLocalStorageState';
-import type { Highlight } from '../types/highlight';
+import type { Highlight } from '../../detail/types/highlight';
 
 type StorageKey = `guide-highlight-${string}`;
 

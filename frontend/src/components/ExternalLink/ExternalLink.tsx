@@ -1,31 +1,25 @@
+import { Link } from '@tanstack/react-router';
 import React from 'react';
-import { sendMessageToRN, isWebView } from '@/libs/webview/webview.utils';
+import { isWebView } from '@/libs/webview/webview.utils';
+import { openExternalLink } from '@/utils/externalLink';
 import type { ReactNode } from 'react';
 
 interface ExternalLinkProps {
-  href: string;
+  to: string;
   children: ReactNode;
-  className?: string;
 }
 
-export const ExternalLink = ({
-  href,
-  children,
-  className,
-}: ExternalLinkProps) => {
+export const ExternalLink = ({ to, children }: ExternalLinkProps) => {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (!isWebView()) return;
 
     e.preventDefault();
-    sendMessageToRN({
-      type: 'OPEN_BROWSER',
-      payload: { url: href },
-    });
+    openExternalLink(to);
   };
 
   return (
-    <a href={href} onClick={handleClick} className={className}>
+    <Link to={to} onClick={handleClick}>
       {children}
-    </a>
+    </Link>
   );
 };

@@ -125,8 +125,9 @@ const Container = styled.div<{ slideButtonPosition?: SlideButtonPosition }>`
   position: relative;
   width: 100%;
   min-height: fit-content;
+  padding: 12px;
   padding-bottom: ${({ slideButtonPosition }) =>
-    slideButtonPosition === 'bottom' ? '60px' : '0'};
+    slideButtonPosition === 'bottom' ? '60px' : '12px'};
 
   background: transparent;
 `;
@@ -138,6 +139,7 @@ const SlidesWrapper = styled.ul<{
   hasAnimation: boolean;
 }>`
   position: relative;
+  margin: 0 -12px;
 
   display: flex;
 
@@ -161,11 +163,11 @@ const PrevSlideButton = styled.button<{
   top: ${({ slideButtonPosition }) =>
     slideButtonPosition === 'middle' ? '50%' : 'auto'};
   bottom: ${({ slideButtonPosition }) =>
-    slideButtonPosition === 'bottom' ? '0' : 'auto'};
-  left: 0;
+    slideButtonPosition === 'bottom' ? '12px' : 'auto'};
+  left: 12px;
   width: clamp(32px, 10%, 48px);
-  border: 2px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 50%;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
 
   display: flex;
   align-items: center;
@@ -176,7 +178,7 @@ const PrevSlideButton = styled.button<{
     slideButtonPosition === 'middle' ? 'translateY(-50%)' : 'none'};
 
   &:hover {
-    opacity: 0.8;
+    background-color: ${({ theme }) => theme.colors.dividers};
   }
 `;
 
@@ -186,12 +188,12 @@ const NextSlideButton = styled.button<{
   position: absolute;
   top: ${({ slideButtonPosition }) =>
     slideButtonPosition === 'middle' ? '50%' : 'auto'};
-  right: 0;
+  right: 12px;
   bottom: ${({ slideButtonPosition }) =>
-    slideButtonPosition === 'bottom' ? '0' : 'auto'};
+    slideButtonPosition === 'bottom' ? '12px' : 'auto'};
   width: clamp(32px, 10%, 48px);
-  border: 2px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 50%;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
 
   display: flex;
   align-items: center;
@@ -202,6 +204,6 @@ const NextSlideButton = styled.button<{
     slideButtonPosition === 'middle' ? 'translateY(-50%)' : 'none'};
 
   &:hover {
-    opacity: 0.8;
+    background-color: ${({ theme }) => theme.colors.dividers};
   }
 `;

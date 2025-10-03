@@ -5,7 +5,7 @@ module.exports = ({ config }) => {
     ...config,
     name: '봄봄',
     slug: 'bombom',
-    version: '1.0.2',
+    version: '1.0.3',
     orientation: 'portrait',
     icon: './app/assets/images/logo.png',
     scheme: 'bombom',

@@ -23,6 +23,9 @@ module.exports = ({ config }) => {
         },
       },
       bundleIdentifier: 'com.antarctica.bombom',
+      config: {
+        usesNonExemptEncryption: false, // 수출 규정 관련 문서 누락됨 메시지 해결
+      },
     },
     android: {
       adaptiveIcon: {

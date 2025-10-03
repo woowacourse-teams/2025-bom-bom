@@ -45,7 +45,7 @@ function ProgressWithLabel({
 
 export default ProgressWithLabel;
 
-const Container = styled.div`
+export const Container = styled.div`
   width: 100%;
 
   display: flex;
@@ -53,7 +53,7 @@ const Container = styled.div`
   flex-direction: column;
 `;
 
-const ProgressInfo = styled.div`
+export const ProgressInfo = styled.div`
   width: 100%;
 
   display: flex;
@@ -75,7 +75,7 @@ const ProgressLabel = styled.h3`
   text-align: center;
 `;
 
-const ProgressRate = styled.span`
+export const ProgressRate = styled.span`
   margin-left: auto;
 
   color: ${({ theme }) => theme.colors.primary};

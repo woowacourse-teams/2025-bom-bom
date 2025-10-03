@@ -15,12 +15,12 @@ interface ArticleCardProps extends ComponentProps<typeof Link> {
   readVariant?: ReadVariant;
 }
 
-function ArticleCard({
+const ArticleCard = ({
   data,
   readVariant = 'transparent',
   to,
   ...props
-}: ArticleCardProps) {
+}: ArticleCardProps) => {
   const {
     articleId,
     title,
@@ -74,11 +74,11 @@ function ArticleCard({
       </ThumbnailWrapper>
     </Container>
   );
-}
+};
 
 export default ArticleCard;
 
-const Container = styled(Link, {
+export const Container = styled(Link, {
   shouldForwardProp: (prop) =>
     prop !== 'isRead' && prop !== 'readVariant' && prop !== 'isMobile',
 })<{
@@ -111,7 +111,7 @@ const Container = styled(Link, {
   `};
 `;
 
-const InfoWrapper = styled.div<{ isMobile: boolean }>`
+export const InfoWrapper = styled.div<{ isMobile: boolean }>`
   width: 100%;
 
   display: flex;
@@ -120,7 +120,7 @@ const InfoWrapper = styled.div<{ isMobile: boolean }>`
   align-items: flex-start;
 `;
 
-const Title = styled.h2<{ isMobile: boolean }>`
+export const Title = styled.h2<{ isMobile: boolean }>`
   overflow: hidden;
   min-height: fit-content;
 
@@ -134,7 +134,7 @@ const Title = styled.h2<{ isMobile: boolean }>`
   -webkit-line-clamp: 2;
 `;
 
-const Description = styled.p<{ isMobile: boolean }>`
+export const Description = styled.p<{ isMobile: boolean }>`
   overflow: hidden;
 
   display: -webkit-box;
@@ -146,14 +146,14 @@ const Description = styled.p<{ isMobile: boolean }>`
   -webkit-line-clamp: 2;
 `;
 
-const MetaInfoRow = styled.div<{ isMobile: boolean }>`
+export const MetaInfoRow = styled.div<{ isMobile: boolean }>`
   display: flex;
   gap: ${({ isMobile }) => (isMobile ? '6px' : '8px')};
   flex-wrap: ${({ isMobile }) => (isMobile ? 'wrap' : 'nowrap')};
   align-items: center;
 `;
 
-const MetaInfoText = styled.span`
+export const MetaInfoText = styled.span`
   color: ${({ theme }) => theme.colors.textTertiary};
   font: ${({ theme }) => theme.fonts.caption};
 `;
@@ -164,12 +164,12 @@ const ReadTimeBox = styled.div`
   align-items: center;
 `;
 
-const ThumbnailWrapper = styled.div<{ isMobile: boolean }>`
+export const ThumbnailWrapper = styled.div<{ isMobile: boolean }>`
   position: relative;
   flex-shrink: 0;
 `;
 
-const Thumbnail = styled(ImageWithFallback, {
+export const Thumbnail = styled(ImageWithFallback, {
   shouldForwardProp: (prop) => prop !== 'isMobile',
 })<{ isMobile: boolean }>`
   width: ${({ isMobile }) => (isMobile ? '64px' : '126px')};

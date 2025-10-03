@@ -20,17 +20,17 @@ export const MainScreen = () => {
   const [webViewLoaded, setWebViewLoaded] = React.useState(false);
 
   React.useEffect(() => {
-    if (webViewLoaded) {
-      const timer = setTimeout(async () => {
-        try {
-          await SplashScreen.hideAsync();
-        } catch (error) {
-          console.warn('스플래시 스크린 숨기기 실패:', error);
-        }
-      }, 1000);
+    if (!webViewLoaded) return;
 
-      return () => clearTimeout(timer);
-    }
+    const timer = setTimeout(async () => {
+      try {
+        await SplashScreen.hideAsync();
+      } catch (error) {
+        console.warn('스플래시 스크린 숨기기 실패:', error);
+      }
+    }, 3000);
+
+    return () => clearTimeout(timer);
   }, [webViewLoaded]);
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {

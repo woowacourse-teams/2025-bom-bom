@@ -1,19 +1,30 @@
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import 'react-native-reanimated';
+import React, { useEffect } from 'react';
 
-import { MainScreen } from '../components/main/MainScreen';
+import { Slot } from 'expo-router';
+import { Platform } from 'react-native';
 import { AuthProvider } from '../contexts/AuthContext';
 import { EmotionThemeProvider } from '../contexts/ThemeContext';
 import { WebViewProvider } from '../contexts/WebViewContext';
 
 export default function RootLayout() {
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+
+    activateKeepAwakeAsync();
+
+    return () => {
+      deactivateKeepAwake();
+    };
+  }, []);
+
   return (
     <EmotionThemeProvider>
       <WebViewProvider>
         <AuthProvider>
           <StatusBar style="auto" />
-          <MainScreen />
+          <Slot />
         </AuthProvider>
       </WebViewProvider>
     </EmotionThemeProvider>

@@ -1,7 +1,8 @@
 type WebViewMessageType =
   | 'SHOW_LOGIN_SCREEN'
   | 'LOGIN_SUCCESS'
-  | 'LOGIN_FAILED';
+  | 'LOGIN_FAILED'
+  | 'OPEN_BROWSER';
 
 export interface WebToRNMessage {
   type: WebViewMessageType;

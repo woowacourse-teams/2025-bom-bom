@@ -3,10 +3,12 @@ import { useLocation } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { formatBirthDate, validateBirthDate } from './SignupCard.utils';
 import { useSignupMutation } from '../hooks/useSignupMutation';
+import Checkbox from '@/components/Checkbox/Checkbox';
+import { ExternalLink } from '@/components/ExternalLink/ExternalLink';
 import InputField from '@/components/InputField/InputField';
 import Tooltip from '@/components/Tooltip/Tooltip';
 import { useDevice } from '@/hooks/useDevice';
-import { GUIDE_MAILS } from '@/mocks/datas/guideMail';
+import { GUIDE_MAIL_STORAGE_KEY } from '@/pages/guide-detail/constants/guideMail';
 import { theme } from '@/styles/theme';
 import { formatDate } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
@@ -16,6 +18,8 @@ import type { ChangeEvent, FormEvent } from 'react';
 import HelpIcon from '#/assets/svg/help.svg';
 
 const EMAIL_DOMAIN = '@bombom.news';
+const TERMS_URL =
+  'https://guesung.notion.site/26a89de02fde80cda21dec7e51d5de89?pvs=74';
 
 const SignupCard = () => {
   const location = useLocation();
@@ -26,11 +30,13 @@ const SignupCard = () => {
   const [emailPart, setEmailPart] = useState('');
   const [gender, setGender] = useState<Gender>('NONE');
   const [emailHelpOpened, setEmailHelpOpened] = useState(false);
+  const [termsAgreed, setTermsAgreed] = useState(false);
 
   const [birthDateError, setBirthDateError] = useState<FieldError>(null);
 
   const email = `${emailPart.trim()}${EMAIL_DOMAIN}`;
-  const isFormValid = nickname && emailPart && (!birthDate || !birthDateError);
+  const isFormValid =
+    nickname && emailPart && (!birthDate || !birthDateError) && termsAgreed;
 
   const { mutate: signup } = useSignupMutation({
     nickname,
@@ -54,23 +60,26 @@ const SignupCard = () => {
     setGender(e.target.value as Gender);
   };
 
-  const addGuideMail = () => {
-    const guideMail = GUIDE_MAILS.map((mail) => ({
-      ...mail,
+  const initializeGuideMailStorage = () => {
+    createStorage(GUIDE_MAIL_STORAGE_KEY).set({
       createdAt: formatDate(new Date()),
-    }));
-    createStorage('guide-mail').set(guideMail);
+      readMailIds: [],
+    });
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     signup();
-    addGuideMail();
+    initializeGuideMailStorage();
   };
 
   const openEmailHelp = () => setEmailHelpOpened(true);
   const closeEmailHelp = () => setEmailHelpOpened(false);
+
+  const handleTermsChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setTermsAgreed(e.target.checked);
+  };
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -181,6 +190,17 @@ const SignupCard = () => {
             </RadioItem>
           </RadioGroup>
         </FieldGroup>
+
+        <Checkbox
+          id="terms-checkbox"
+          checked={termsAgreed}
+          onChange={handleTermsChange}
+        >
+          <TermsText>
+            이용약관 동의 (필수)
+            <ViewTermsLink to={TERMS_URL}>내용보기</ViewTermsLink>
+          </TermsText>
+        </Checkbox>
 
         <SubmitButton type="submit" disabled={!isFormValid}>
           시작하기
@@ -363,8 +383,25 @@ const RadioButtonLabel = styled.label<{ selected: boolean }>`
   color: ${({ selected, theme }) =>
     selected ? theme.colors.white : theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body2};
-  font-weight: ${({ selected }) => (selected ? '600' : '400')};
   text-align: center;
 
   user-select: none;
+`;
+
+const TermsText = styled.span`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.body2};
+`;
+
+const ViewTermsLink = styled(ExternalLink)`
+  color: ${({ theme }) => theme.colors.textTertiary};
+  font: ${({ theme }) => theme.fonts.body2};
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.textSecondary};
+  }
 `;

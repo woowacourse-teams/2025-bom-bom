@@ -1,3 +1,11 @@
+import { isWebView, sendMessageToRN } from '@/libs/webview/webview.utils';
+
 export const openExternalLink = (link: string) => {
-  window.open(link, '_blank', 'noopener,noreferrer');
+  const inAppBrowserUpdated = navigator.userAgent.includes('bombom/1.0.2');
+  if (isWebView() && inAppBrowserUpdated) {
+    sendMessageToRN({
+      type: 'OPEN_BROWSER',
+      payload: { url: link },
+    });
+  } else window.open(link, '_blank', 'noopener,noreferrer');
 };

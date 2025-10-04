@@ -4,13 +4,16 @@ import { BackHandler, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
-import { ENV } from '@/constants/env';
-import { WEBVIEW_USER_AGENT } from '@/constants/webview';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWebView } from '../../contexts/WebViewContext';
 import { WebToRNMessage } from '../../types/webview';
-import { LoadingSpinner } from '../common/LoadingSpinner';
 import { LoginScreenOverlay } from '../login/LoginScreenOverlay';
+
+import * as WebBrowser from 'expo-web-browser';
+
+import { ENV } from '@/constants/env';
+import { WEBVIEW_USER_AGENT } from '@/constants/webview';
+import { LoadingSpinner } from '../common/LoadingSpinner';
 
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
@@ -54,6 +57,13 @@ export const MainScreen = () => {
           hideLogin();
           break;
 
+        case 'OPEN_BROWSER':
+          if (message.payload?.url) {
+            console.log('외부 브라우저 열기:', message.payload.url);
+            WebBrowser.openBrowserAsync(message.payload.url);
+          }
+          break;
+
         default:
           console.warn('알 수 없는 메시지 타입:', message.type);
       }
@@ -67,7 +77,7 @@ export const MainScreen = () => {
       <WebViewContainer>
         <StyledWebView
           ref={webViewRef}
-          source={{ uri: ENV.devWebUrl }}
+          source={{ uri: ENV.prodWebUrl }}
           userAgent={WEBVIEW_USER_AGENT}
           allowsBackForwardNavigationGestures
           sharedCookiesEnabled

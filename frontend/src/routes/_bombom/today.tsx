@@ -4,11 +4,19 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useMemo } from 'react';
 import ArticleCardList from '../../pages/today/components/ArticleCardList/ArticleCardList';
 import ReadingStatusCard from '../../pages/today/components/ReadingStatusCard/ReadingStatusCard';
+import { getPet } from '@/apis/pet';
 import { queries } from '@/apis/queries';
 import PetCard from '@/components/PetCard/PetCard';
+import PetCardSkeleton from '@/components/PetCard/PetCardSkeleton';
+import RequireLogin from '@/hocs/RequireLogin';
 import { useDevice } from '@/hooks/useDevice';
+import {
+  GUIDE_MAIL_STORAGE_KEY,
+  GUIDE_MAILS,
+} from '@/pages/guide-detail/constants/guideMail';
+import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import { theme } from '@/styles/theme';
-import { isToday } from '@/utils/date';
+import { formatDate, isToday } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
 import type { Device } from '@/hooks/useDevice';
 import type { LocalGuideMail } from '@/types/guide';
@@ -27,24 +35,45 @@ export const Route = createFileRoute('/_bombom/today')({
       },
     ],
   }),
-  component: Index,
+  component: () => (
+    <RequireLogin>
+      <Index />
+    </RequireLogin>
+  ),
 });
 
 function Index() {
   const today = useMemo(() => new Date(), []);
-  const { data: todayArticles } = useQuery(queries.articles({ date: today }));
-  const guideArticles = createStorage<LocalGuideMail[], string>(
-    'guide-mail',
+  const { data: todayArticles, isLoading: isArticlesLoading } = useQuery(
+    queries.articles({ date: formatDate(today, '-') }),
+  );
+
+  const { data: pet, isLoading: isPetLoading } = useQuery({
+    queryKey: ['pet'],
+    queryFn: getPet,
+  });
+
+  const guideMails = createStorage<LocalGuideMail, string>(
+    GUIDE_MAIL_STORAGE_KEY,
   ).get();
+
+  const guideMailReadMailIds = guideMails?.readMailIds ?? [];
+
+  const guideArticles =
+    guideMails?.createdAt && isToday(new Date(guideMails?.createdAt))
+      ? GUIDE_MAILS
+      : [];
 
   const mergedArticles = [
     ...(todayArticles?.content?.map((article) => ({
       ...article,
       type: 'article' as const,
     })) ?? []),
-    ...(guideArticles
-      ?.filter((guide) => isToday(new Date(guide.createdAt)))
-      .map((guide) => ({ ...guide, type: 'guide' as const })) ?? []),
+    ...(guideArticles.map((guide) => ({
+      ...guide,
+      isRead: guideMailReadMailIds.includes(guide.articleId),
+      type: 'guide' as const,
+    })) ?? []),
   ];
 
   const device = useDevice();
@@ -63,9 +92,13 @@ function Index() {
       )}
 
       <ContentWrapper device={device}>
-        <ArticleCardList articles={mergedArticles} />
+        {isArticlesLoading ? (
+          <ArticleCardListSkeleton />
+        ) : (
+          <ArticleCardList articles={mergedArticles} />
+        )}
         <ReaderCompanion device={device}>
-          <PetCard />
+          {isPetLoading ? <PetCardSkeleton /> : pet && <PetCard pet={pet} />}
           <ReadingStatusCard />
         </ReaderCompanion>
       </ContentWrapper>

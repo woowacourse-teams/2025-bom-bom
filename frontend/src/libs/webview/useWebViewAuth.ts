@@ -29,15 +29,11 @@ export const useWebViewAuth = () => {
               const response = await postGoogleLogin({
                 identityToken: message.payload.identityToken,
                 authorizationCode: message.payload.authorizationCode,
+                email: message.payload.email ?? '',
+                nickname: message.payload.name ?? '',
               });
 
               if (!response) return;
-              if (!response.isRegistered) {
-                navigate({ to: '/signup' });
-                return;
-              }
-
-              window.location.reload();
 
               sendMessageToRN({
                 type: 'LOGIN_SUCCESS',
@@ -46,6 +42,19 @@ export const useWebViewAuth = () => {
                   provider: 'google',
                 },
               });
+
+              if (!response.isRegistered) {
+                navigate({
+                  to: '/signup',
+                  search: {
+                    email: response.email,
+                    name: response.nickname,
+                  },
+                });
+                return;
+              }
+
+              window.location.reload();
             } catch (error) {
               logger.error('Google 로그인 실패:', error);
               sendMessageToRN({
@@ -69,15 +78,11 @@ export const useWebViewAuth = () => {
               const response = await postAppleLogin({
                 identityToken: message.payload.identityToken,
                 authorizationCode: message.payload.authorizationCode,
+                email: message.payload.email ?? '',
+                nickname: message.payload.name ?? '',
               });
 
               if (!response) return;
-              if (!response.isRegistered) {
-                navigate({ to: '/signup' });
-                return;
-              }
-
-              window.location.reload();
 
               sendMessageToRN({
                 type: 'LOGIN_SUCCESS',
@@ -86,6 +91,19 @@ export const useWebViewAuth = () => {
                   provider: 'apple',
                 },
               });
+
+              if (!response.isRegistered) {
+                navigate({
+                  to: '/signup',
+                  search: {
+                    email: response.email,
+                    name: response.nickname,
+                  },
+                });
+                return;
+              }
+
+              window.location.reload();
             } catch (error) {
               logger.error('Apple 로그인 실패:', error);
               sendMessageToRN({

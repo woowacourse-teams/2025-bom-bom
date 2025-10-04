@@ -53,6 +53,7 @@ const Carousel = ({
     slideIndex,
     isTransitioning,
     isSwiping,
+    swipeOffset,
     handleTransitionEnd,
     handlePrevButtonClick,
     handleNextButtonClick,
@@ -68,6 +69,7 @@ const Carousel = ({
           slideIndex={slideIndex}
           isTransitioning={isTransitioning}
           isSwiping={isSwiping}
+          swipeOffset={swipeOffset}
           onTransitionEnd={handleTransitionEnd}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -142,13 +144,15 @@ const SlidesWrapper = styled.ul<{
   slideIndex: number;
   isTransitioning: boolean;
   isSwiping: boolean;
+  swipeOffset: number;
   hasAnimation: boolean;
 }>`
   position: relative;
 
   display: flex;
 
-  transform: ${({ slideIndex }) => `translateX(-${slideIndex * 100}%)`};
+  transform: ${({ slideIndex, swipeOffset }) =>
+    `translateX(calc(-${slideIndex * 100}% + ${swipeOffset}px))`};
   transition: ${({ hasAnimation, isTransitioning, isSwiping }) =>
     hasAnimation && !isSwiping
       ? isTransitioning

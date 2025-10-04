@@ -1,7 +1,10 @@
 import styled from '@emotion/native';
-import React from 'react';
+import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import WebView, { WebViewMessageEvent } from 'react-native-webview';
+import WebView, {
+  WebViewMessageEvent,
+  WebViewNavigation,
+} from 'react-native-webview';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { useWebView } from '../../contexts/WebViewContext';
@@ -17,15 +20,16 @@ import { LoadingSpinner } from '../common/LoadingSpinner';
 
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
-  const { webViewRef, sendMessageToWeb } = useWebView();
+  const { webViewRef } = useWebView();
+  const [canGoBack, setCanGoBack] = useState(false);
+
+  const handleNavigationStateChange = (navState: WebViewNavigation) => {
+    setCanGoBack(navState.canGoBack);
+    console.log('navState', navState);
+  };
 
   useAndroidBackHandler({
-    onBackPress: () => {
-      sendMessageToWeb({
-        type: 'ANDROID_BACK_BUTTON_CLICKED',
-      });
-      return true;
-    },
+    canGoBack,
   });
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {
@@ -93,6 +97,7 @@ export const MainScreen = () => {
             console.error('WebView HTTP Error:', nativeEvent);
           }}
           renderLoading={() => <LoadingSpinner />}
+          onNavigationStateChange={handleNavigationStateChange}
         />
       </WebViewContainer>
 

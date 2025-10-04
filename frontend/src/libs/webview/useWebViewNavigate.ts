@@ -1,10 +1,10 @@
-import { useNavigate } from '@tanstack/react-router';
+import { useRouter } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { addWebViewMessageListener, isWebView } from './webview.utils';
 import type { RNToWebMessage } from './webview.types';
 
 export const useWebViewNavigate = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     if (!isWebView()) return;
@@ -13,12 +13,12 @@ export const useWebViewNavigate = () => {
       async (message: RNToWebMessage) => {
         switch (message.type) {
           case 'ANDROID_BACK_BUTTON_CLICKED':
-            navigate({ to: '..' });
+            router.history.back();
             break;
         }
       },
     );
 
     return cleanup;
-  }, [navigate]);
+  }, [router]);
 };

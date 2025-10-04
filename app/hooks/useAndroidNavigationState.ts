@@ -42,7 +42,7 @@ const useAndroidNavigationState = () => {
     );
 
     return () => backHandler.remove();
-  }, [canGoBack, sendMessageToWeb, handleNavigationStateChange]);
+  }, [canGoBack, sendMessageToWeb]);
 
   return {
     handleNavigationStateChange,

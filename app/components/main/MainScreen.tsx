@@ -1,11 +1,11 @@
 import styled from '@emotion/native';
-import React, { useEffect } from 'react';
-import { BackHandler, Platform } from 'react-native';
+import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { useWebView } from '../../contexts/WebViewContext';
+import { useAndroidBackHandler } from '../../hooks/useAndroidBackHandler';
 import { WebToRNMessage } from '../../types/webview';
 import { LoginScreenOverlay } from '../login/LoginScreenOverlay';
 
@@ -19,23 +19,14 @@ export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
   const { webViewRef, sendMessageToWeb } = useWebView();
 
-  useEffect(() => {
-    if (Platform.OS !== 'android') return;
-
-    const handleBackAction = () => {
+  useAndroidBackHandler({
+    onBackPress: () => {
       sendMessageToWeb({
         type: 'ANDROID_BACK_BUTTON_CLICKED',
       });
       return true;
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      handleBackAction,
-    );
-
-    return () => backHandler.remove();
-  }, [sendMessageToWeb]);
+    },
+  });
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {
     try {

@@ -98,6 +98,8 @@ const reset = css`
 
   html {
     -webkit-tap-highlight-color: rgb(0 0 0 / 0%);
+
+    touch-action: pan-x pan-y;
     -webkit-touch-callout: none;
 
     user-select: none;

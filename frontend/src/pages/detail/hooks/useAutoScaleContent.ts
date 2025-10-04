@@ -2,16 +2,13 @@ import { useEffect, useState } from 'react';
 import { PC_HORIZONTAL_PADDING } from '@/components/PageLayout/PageLayout.constants';
 import type { RefObject } from 'react';
 
-const EXTRA_PADDING = 24;
-
 export const useAutoScaleContent = (ref: RefObject<HTMLDivElement | null>) => {
   const [scale, setScale] = useState(1);
 
   useEffect(() => {
     if (!ref.current) return;
 
-    const screenWidth =
-      window.outerWidth - (PC_HORIZONTAL_PADDING + EXTRA_PADDING);
+    const screenWidth = window.outerWidth - PC_HORIZONTAL_PADDING;
     const contentWidth = ref.current?.clientWidth || 1;
 
     const newScale =

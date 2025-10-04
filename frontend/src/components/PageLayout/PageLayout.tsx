@@ -49,7 +49,7 @@ const Container = styled.div<{ isMobile: boolean }>`
   padding: ${({ isMobile, theme }) => {
     const sidePadding = isMobile
       ? `${MOBILE_HORIZONTAL_PADDING}px`
-      : `${PC_HORIZONTAL_PADDING}x`;
+      : `${PC_HORIZONTAL_PADDING}px`;
     const headerHeight = isMobile
       ? theme.heights.headerMobile
       : theme.heights.headerPC;

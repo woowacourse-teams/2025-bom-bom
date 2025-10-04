@@ -64,23 +64,21 @@ const Carousel = ({
 
   return (
     <Container slideButtonPosition={slideButtonPosition}>
-      <SlideContainer>
-        <SlidesWrapper
-          slideIndex={slideIndex}
-          isTransitioning={isTransitioning}
-          isSwiping={isSwiping}
-          swipeOffset={swipeOffset}
-          onTransitionEnd={handleTransitionEnd}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          hasAnimation={hasAnimation}
-        >
-          {infinitySlides.map((slideContent, index) => (
-            <Slide key={`slide-${index}`}>{slideContent}</Slide>
-          ))}
-        </SlidesWrapper>
-      </SlideContainer>
+      <SlidesWrapper
+        slideIndex={slideIndex}
+        isTransitioning={isTransitioning}
+        isSwiping={isSwiping}
+        swipeOffset={swipeOffset}
+        onTransitionEnd={handleTransitionEnd}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        hasAnimation={hasAnimation}
+      >
+        {infinitySlides.map((slideContent, index) => (
+          <Slide key={`slide-${index}`}>{slideContent}</Slide>
+        ))}
+      </SlidesWrapper>
 
       {hasSlideButton && (
         <>
@@ -125,19 +123,14 @@ const TRANSITIONS = {
 } as const;
 
 const Container = styled.div<{ slideButtonPosition?: SlideButtonPosition }>`
-  position: relative;
-  width: 100%;
-  min-height: fit-content;
-  padding-bottom: ${({ slideButtonPosition }) =>
-    slideButtonPosition === 'bottom' ? '60px' : '0'};
-
-  background: transparent;
-`;
-
-const SlideContainer = styled.div`
   overflow: hidden;
   position: relative;
   width: 100%;
+  min-height: fit-content;
+  padding: ${({ slideButtonPosition }) =>
+    `0 12px ${slideButtonPosition === 'bottom' ? '60px' : '0'}`};
+
+  background: transparent;
 `;
 
 const SlidesWrapper = styled.ul<{
@@ -148,6 +141,7 @@ const SlidesWrapper = styled.ul<{
   hasAnimation: boolean;
 }>`
   position: relative;
+  margin: 0 -12px;
 
   display: flex;
 
@@ -172,8 +166,8 @@ const PrevSlideButton = styled.button<{
   top: ${({ slideButtonPosition }) =>
     slideButtonPosition === 'middle' ? '50%' : 'auto'};
   bottom: ${({ slideButtonPosition }) =>
-    slideButtonPosition === 'bottom' ? '0' : 'auto'};
-  left: 0;
+    slideButtonPosition === 'bottom' ? '8px' : 'auto'};
+  left: 8px;
   width: clamp(32px, 10%, 48px);
   border-radius: 50%;
   box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
@@ -197,9 +191,9 @@ const NextSlideButton = styled.button<{
   position: absolute;
   top: ${({ slideButtonPosition }) =>
     slideButtonPosition === 'middle' ? '50%' : 'auto'};
-  right: 0;
+  right: 8px;
   bottom: ${({ slideButtonPosition }) =>
-    slideButtonPosition === 'bottom' ? '0' : 'auto'};
+    slideButtonPosition === 'bottom' ? '8px' : 'auto'};
   width: clamp(32px, 10%, 48px);
   border-radius: 50%;
   box-shadow: 0 2px 8px rgb(0 0 0 / 12%);

@@ -20,8 +20,8 @@ const useCarousel = ({
   const [slideIndex, setSlideIndex] = useState(START_SLIDE_INDEX);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isSwiping, setIsSwiping] = useState(false);
-  const [swipeOffset, setSwipeOffset] = useState(0);
   const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const swipeOffsetRef = useRef(0);
   const swipeStartRef = useRef(0);
 
   const handleTransitionEnd = () => {
@@ -73,14 +73,14 @@ const useCarousel = ({
 
     setIsSwiping(true);
     swipeStartRef.current = clientX;
-    setSwipeOffset(0);
+    swipeOffsetRef.current = 0;
   };
 
   const swipeMove = (clientX: number) => {
     if (!isSwiping) return;
 
     const offset = clientX - swipeStartRef.current;
-    setSwipeOffset(offset);
+    swipeOffsetRef.current = offset;
   };
 
   const swipeEnd = () => {
@@ -88,13 +88,13 @@ const useCarousel = ({
 
     setIsSwiping(false);
 
-    if (Math.abs(swipeOffset) >= SWIPE_OFFSET_THRESHOLD) {
+    if (Math.abs(swipeOffsetRef.current) >= SWIPE_OFFSET_THRESHOLD) {
       setIsTransitioning(true);
-      const swipeIndex = swipeOffset > 0 ? -1 : 1;
+      const swipeIndex = swipeOffsetRef.current > 0 ? -1 : 1;
       setSlideIndex((prev) => prev + swipeIndex);
     }
 
-    setSwipeOffset(0);
+    swipeOffsetRef.current = 0;
   };
 
   const handleTouchStart = (e: TouchEvent) => {
@@ -117,7 +117,7 @@ const useCarousel = ({
     slideIndex,
     isTransitioning,
     isSwiping,
-    swipeOffset,
+    swipeOffset: swipeOffsetRef.current,
     handleTransitionEnd,
     handlePrevButtonClick,
     handleNextButtonClick,

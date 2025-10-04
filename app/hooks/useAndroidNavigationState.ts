@@ -22,7 +22,6 @@ const useAndroidNavigationState = () => {
         sendMessageToWeb({
           type: 'ANDROID_BACK_BUTTON_CLICKED',
         });
-        return true;
       } else {
         Alert.alert('앱 종료', '앱을 종료하시겠습니까?', [
           { text: '취소', style: 'cancel' },

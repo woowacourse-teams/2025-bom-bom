@@ -5,7 +5,7 @@ interface UseGuideAsReadMutationParams {
   onSuccess: () => void;
 }
 
-const useGuideAsReadMutation = ({
+export const useGuideAsReadMutation = ({
   onSuccess,
 }: UseGuideAsReadMutationParams) => {
   return useMutation({
@@ -13,5 +13,3 @@ const useGuideAsReadMutation = ({
     onSuccess,
   });
 };
-
-export default useGuideAsReadMutation;

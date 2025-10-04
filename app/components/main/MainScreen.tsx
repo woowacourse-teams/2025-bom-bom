@@ -12,7 +12,6 @@ import * as WebBrowser from 'expo-web-browser';
 
 import { ENV } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
-import { LoadingSpinner } from '../common/LoadingSpinner';
 
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
@@ -41,7 +40,10 @@ export const MainScreen = () => {
         case 'OPEN_BROWSER':
           if (message.payload?.url) {
             console.log('외부 브라우저 열기:', message.payload.url);
-            WebBrowser.openBrowserAsync(message.payload.url);
+            WebBrowser.openBrowserAsync(message.payload.url, {
+              presentationStyle: WebBrowser.WebBrowserPresentationStyle.POPOVER,
+              dismissButtonStyle: 'close',
+            });
           }
           break;
 
@@ -58,14 +60,13 @@ export const MainScreen = () => {
       <WebViewContainer>
         <StyledWebView
           ref={webViewRef}
-          source={{ uri: ENV.devWebUrl }}
+          source={{ uri: ENV.prodWebUrl }}
           userAgent={WEBVIEW_USER_AGENT}
           allowsBackForwardNavigationGestures
           sharedCookiesEnabled
           thirdPartyCookiesEnabled
           webviewDebuggingEnabled
           domStorageEnabled
-          startInLoadingState
           pullToRefreshEnabled
           originWhitelist={['*']}
           onMessage={handleWebViewMessage}
@@ -82,7 +83,6 @@ export const MainScreen = () => {
             const { nativeEvent } = syntheticEvent;
             console.error('WebView HTTP Error:', nativeEvent);
           }}
-          renderLoading={() => <LoadingSpinner />}
         />
       </WebViewContainer>
 

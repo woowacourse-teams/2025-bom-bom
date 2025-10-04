@@ -1,40 +1,34 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import LeaderboardItem from './LeaderboardItem';
+import { RANKING } from './ReadingKingLeaderboard.constants';
 import { getLeaderboardData } from './ReadingKingLeaderboard.utils';
+import ReadingKingLeaderboardSkeleton from './ReadingKingLeaderboardSkeleton';
 import ReadingKingMyRank from './ReadingKingMyRank';
 import { queries } from '@/apis/queries';
 import Carousel from '@/components/Carousel/Carousel';
 import ArrowIcon from '@/components/icons/ArrowIcon';
-
-const RANKING = {
-  maxRank: 10,
-  boardUnit: 5,
-};
+import Tooltip from '@/components/Tooltip/Tooltip';
+import { theme } from '@/styles/theme';
+import ReadingKingHelpIcon from '#/assets/svg/help.svg';
 
 const ReadingKingLeaderboard = () => {
+  const [rankExplainOpened, setRankExplainOpened] = useState(false);
+
   const { data: monthlyReadingRank, isLoading } = useQuery(
     queries.monthlyReadingRank({ limit: RANKING.maxRank }),
   );
   const { data: userRank } = useQuery(queries.myMonthlyReadingRank());
 
-  if (!monthlyReadingRank || monthlyReadingRank.length === 0) {
-    return null;
-  }
+  const openRankExplain = () => setRankExplainOpened(true);
+  const closeRankExplain = () => setRankExplainOpened(false);
 
-  if (isLoading) {
-    return (
-      <Container>
-        <TitleWrapper>
-          <TitleIcon>
-            <ArrowIcon width={16} height={16} direction="upRight" />
-          </TitleIcon>
-          <Title>이달의 독서왕</Title>
-        </TitleWrapper>
-        <LoadingMessage>데이터를 불러오는 중...</LoadingMessage>
-      </Container>
-    );
-  }
+  const monthlyReadingRankContent = monthlyReadingRank ?? [];
+  const haveNoContent = !isLoading && monthlyReadingRankContent.length === 0;
+
+  if (!isLoading && haveNoContent) return null;
+  if (isLoading) return <ReadingKingLeaderboardSkeleton />;
 
   return (
     <Container>
@@ -43,12 +37,38 @@ const ReadingKingLeaderboard = () => {
           <ArrowIcon width={16} height={16} direction="upRight" />
         </TitleIcon>
         <Title>이달의 독서왕</Title>
+        <TooltipButton
+          type="button"
+          aria-label="이달의 독서왕 랭킹 안내"
+          aria-expanded={rankExplainOpened}
+          aria-describedby="rank-explain-tooltip"
+          onMouseEnter={openRankExplain}
+          onMouseLeave={closeRankExplain}
+          onFocus={openRankExplain}
+          onBlur={closeRankExplain}
+        >
+          <ReadingKingHelpIcon
+            width={20}
+            height={20}
+            fill={theme.colors.primary}
+          />
+        </TooltipButton>
+
+        <Tooltip
+          id="rank-explain-tooltip"
+          opened={rankExplainOpened}
+          position="right"
+        >
+          순위는 10분마다 갱신됩니다.
+        </Tooltip>
       </TitleWrapper>
 
-      <Description>순위는 10분마다 변경됩니다.</Description>
-
-      <Carousel hasSlideButton={false}>
-        {getLeaderboardData(monthlyReadingRank, RANKING.boardUnit).map(
+      <Carousel
+        autoPlay={false}
+        hasSlideButton={true}
+        slideButtonPosition="bottom"
+      >
+        {getLeaderboardData(monthlyReadingRankContent, RANKING.boardUnit).map(
           (leaderboard, leaderboardIndex) => (
             <LeaderboardList key={`leaderboard-${leaderboardIndex}`}>
               {leaderboard.map((item, index) => (
@@ -76,7 +96,7 @@ const ReadingKingLeaderboard = () => {
 
 export default ReadingKingLeaderboard;
 
-const Container = styled.div`
+export const Container = styled.div`
   width: 100%;
   max-width: 400px;
   padding: 22px;
@@ -95,13 +115,16 @@ const Container = styled.div`
   backdrop-filter: blur(10px);
 `;
 
-const TitleWrapper = styled.div`
+export const TitleWrapper = styled.div`
+  position: relative;
+  width: fit-content;
+
   display: flex;
   gap: 10px;
   align-items: center;
 `;
 
-const TitleIcon = styled.div`
+export const TitleIcon = styled.div`
   width: 28px;
   height: 28px;
   border-radius: 12px;
@@ -113,30 +136,23 @@ const TitleIcon = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
 `;
 
-const Title = styled.h3`
+export const Title = styled.h3`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const Description = styled.p`
-  color: ${({ theme }) => theme.colors.textTertiary};
-  font: ${({ theme }) => theme.fonts.body2};
+export const TooltipButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
-const LeaderboardList = styled.div`
+export const LeaderboardList = styled.div`
   min-height: fit-content;
 
   display: flex;
   gap: 32px;
   flex-direction: column;
-`;
-
-const LoadingMessage = styled.div`
-  padding: 40px 20px;
-
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.body2};
-  text-align: center;
 `;
 
 const Divider = styled.div`

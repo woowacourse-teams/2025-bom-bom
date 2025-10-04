@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import { useMutation } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
 import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 import { toast } from '../Toast/utils/toastActions';
 import { postLogout, postWithdraw } from '@/apis/auth';
@@ -18,7 +17,6 @@ interface ProfileDetailProps {
 }
 
 const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
-  const navigate = useNavigate();
   const deviceType = useDevice();
 
   const { mutate: mutateLogout } = useMutation({
@@ -37,7 +35,7 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
     mutationFn: postWithdraw,
 
     onSuccess: () => {
-      navigate({ to: '/' });
+      window.location.reload();
     },
     onError: () => {
       toast.error('회원탈퇴에 실패했습니다. 다시 시도해주세요.');

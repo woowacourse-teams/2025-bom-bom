@@ -16,10 +16,6 @@ function withCustomAndroidConfig(config) {
     // 'android:usesCleartextTraffic' = 'true' : HTTP(클리어텍스트) 트래픽을 허용
     app.$['android:usesCleartextTraffic'] = 'true';
 
-    // 'android:networkSecurityConfig' = '@xml/network_security_config'
-    // → res/xml/network_security_config.xml 파일을 네트워크 보안 설정으로 사용
-    app.$['android:networkSecurityConfig'] = '@xml/network_security_config';
-
     // 수정이 끝난 config를 반환 (필수)
     return config;
   });

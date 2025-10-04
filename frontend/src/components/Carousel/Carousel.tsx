@@ -6,18 +6,25 @@ import type { PropsWithChildren } from 'react';
 import arrowNext from '#/assets/avif/carousel-arrow-next.avif';
 import arrowPrev from '#/assets/avif/carousel-arrow-prev.avif';
 
+type SlideButtonPosition = 'middle' | 'bottom';
+
 type CarouselProps = PropsWithChildren & {
   hasSlideButton?: boolean;
   hasAnimation?: boolean;
 } & (
     | { autoPlay?: true; autoPlaySpeedMs?: number }
     | { autoPlay: false; autoPlaySpeedMs?: never }
+  ) &
+  (
+    | { hasSlideButton?: true; slideButtonPosition?: SlideButtonPosition }
+    | { hasSlideButton: false; slideButtonPosition?: never }
   );
 
 const Carousel = ({
   autoPlay = true,
   autoPlaySpeedMs = DEFAULT_SPEED,
   hasSlideButton = true,
+  slideButtonPosition = 'middle',
   hasAnimation = true,
   children,
 }: CarouselProps) => {
@@ -51,7 +58,7 @@ const Carousel = ({
   } = useCarousel({ slideCount, autoPlay, autoPlaySpeedMs });
 
   return (
-    <Container>
+    <Container slideButtonPosition={slideButtonPosition}>
       <SlidesWrapper
         slideIndex={slideIndex}
         isTransitioning={isTransitioning}
@@ -65,12 +72,20 @@ const Carousel = ({
 
       {hasSlideButton && (
         <>
-          <PrevSlideButton type="button" onClick={handlePrevButtonClick}>
-            <img src={arrowPrev} alt="이전 슬라이드 버튼" />
+          <PrevSlideButton
+            type="button"
+            onClick={handlePrevButtonClick}
+            slideButtonPosition={slideButtonPosition}
+          >
+            <SlideButtonIcon src={arrowPrev} alt="이전 슬라이드 버튼" />
           </PrevSlideButton>
 
-          <NextSlideButton type="button" onClick={handleNextButtonClick}>
-            <img src={arrowNext} alt="다음 슬라이드 버튼" />
+          <NextSlideButton
+            type="button"
+            onClick={handleNextButtonClick}
+            slideButtonPosition={slideButtonPosition}
+          >
+            <SlideButtonIcon src={arrowNext} alt="다음 슬라이드 버튼" />
           </NextSlideButton>
         </>
       )}
@@ -85,12 +100,13 @@ const TRANSITIONS = {
   none: 'transform 0.3s step-end',
 } as const;
 
-const Container = styled.div`
+const Container = styled.div<{ slideButtonPosition?: SlideButtonPosition }>`
   overflow: hidden;
   position: relative;
   width: 100%;
   min-height: fit-content;
-  margin: 0 auto 20px;
+  padding-bottom: ${({ slideButtonPosition }) =>
+    slideButtonPosition === 'bottom' ? '60px' : '0'};
 
   background: transparent;
 `;
@@ -117,26 +133,47 @@ const Slide = styled.li`
   flex: 0 0 100%;
 `;
 
-const PrevSlideButton = styled.button`
+const PrevSlideButton = styled.button<{
+  slideButtonPosition: SlideButtonPosition;
+}>`
   position: absolute;
-  top: 50%;
-  left: 24px;
+  top: ${({ slideButtonPosition }) =>
+    slideButtonPosition === 'middle' ? '50%' : 'auto'};
+  bottom: ${({ slideButtonPosition }) =>
+    slideButtonPosition === 'bottom' ? '0' : 'auto'};
+  left: 0;
+  width: clamp(32px, 10%, 48px);
 
-  transform: translateY(-50%);
+  transform: ${({ slideButtonPosition }) =>
+    slideButtonPosition === 'middle' ? 'translateY(-50%)' : 'none'};
 
   &:hover {
     opacity: 0.8;
   }
 `;
 
-const NextSlideButton = styled.button`
+const NextSlideButton = styled.button<{
+  slideButtonPosition: SlideButtonPosition;
+}>`
   position: absolute;
-  top: 50%;
-  right: 24px;
+  top: ${({ slideButtonPosition }) =>
+    slideButtonPosition === 'middle' ? '50%' : 'auto'};
+  right: 0;
+  bottom: ${({ slideButtonPosition }) =>
+    slideButtonPosition === 'bottom' ? '0' : 'auto'};
+  width: clamp(32px, 10%, 48px);
 
-  transform: translateY(-50%);
+  transform: ${({ slideButtonPosition }) =>
+    slideButtonPosition === 'middle' ? 'translateY(-50%)' : 'none'};
 
   &:hover {
     opacity: 0.8;
   }
+`;
+
+const SlideButtonIcon = styled.img`
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
 `;

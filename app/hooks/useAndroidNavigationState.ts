@@ -33,7 +33,7 @@ const useAndroidNavigationState = () => {
         ]);
       }
 
-      return true;
+      return true; // 뒤로가기 버튼 비활성화
     };
 
     const backHandler = BackHandler.addEventListener(

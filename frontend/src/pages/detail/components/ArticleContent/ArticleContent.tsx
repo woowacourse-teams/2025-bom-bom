@@ -1,11 +1,9 @@
 import styled from '@emotion/styled';
-import { memo, useEffect, useState } from 'react';
+import { memo } from 'react';
 import { extractBodyContent, processContent } from './ArticleContent.utils';
+import { useAutoScaleContent } from '../../hooks/useAutoScaleContent';
 import { useHighlightHoverEffect } from '../../hooks/useHighlightHoverEffect';
-import { PC_HORIZONTAL_PADDING } from '@/components/PageLayout/PageLayout.constants';
 import type { RefObject } from 'react';
-
-const EXTRA_PADDING = 24;
 
 interface ArticleContentProps {
   ref: RefObject<HTMLDivElement | null>;
@@ -19,22 +17,7 @@ const ArticleContent = ({
   content,
 }: ArticleContentProps) => {
   const bodyContent = extractBodyContent(content ?? '');
-  const [scale, setScale] = useState(1);
-
-  useEffect(() => {
-    if (!ref.current) return;
-
-    const screenWidth =
-      window.outerWidth - (PC_HORIZONTAL_PADDING + EXTRA_PADDING);
-    const contentWidth = ref.current?.clientWidth || 1;
-
-    const newScale =
-      contentWidth > screenWidth ? screenWidth / contentWidth : 1;
-
-    const newHeight = ref.current.scrollHeight * newScale;
-    ref.current.style.height = `${newHeight}px`;
-    setScale(newScale);
-  }, [ref]);
+  const scale = useAutoScaleContent(ref);
 
   useHighlightHoverEffect();
 

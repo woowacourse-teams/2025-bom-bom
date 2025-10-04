@@ -13,8 +13,6 @@ import * as WebBrowser from 'expo-web-browser';
 import { ENV } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
 
-const SPLASH_DELAY = 3_000;
-
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
   const { webViewRef } = useWebView();

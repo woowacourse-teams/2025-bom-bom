@@ -17,6 +17,8 @@ export const useAutoScaleContent = (ref: RefObject<HTMLDivElement | null>) => {
     const newScale =
       contentWidth > screenWidth ? screenWidth / contentWidth : 1;
 
+    if (newScale === 1) return;
+
     const newHeight = ref.current.scrollHeight * newScale;
     ref.current.style.height = `${newHeight}px`;
     setScale(newScale);

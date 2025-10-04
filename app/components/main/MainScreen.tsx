@@ -1,14 +1,11 @@
 import styled from '@emotion/native';
-import React, { useState } from 'react';
+import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import WebView, {
-  WebViewMessageEvent,
-  WebViewNavigation,
-} from 'react-native-webview';
+import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { useWebView } from '../../contexts/WebViewContext';
-import { useAndroidBackHandler } from '../../hooks/useAndroidBackHandler';
+import useAndroidNavigationState from '../../hooks/useAndroidNavigationState';
 import { WebToRNMessage } from '../../types/webview';
 import { LoginScreenOverlay } from '../login/LoginScreenOverlay';
 
@@ -21,16 +18,8 @@ import { LoadingSpinner } from '../common/LoadingSpinner';
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
   const { webViewRef } = useWebView();
-  const [canGoBack, setCanGoBack] = useState(false);
 
-  const handleNavigationStateChange = (navState: WebViewNavigation) => {
-    setCanGoBack(navState.canGoBack);
-    console.log('navState', navState);
-  };
-
-  useAndroidBackHandler({
-    canGoBack,
-  });
+  const { handleNavigationStateChange } = useAndroidNavigationState();
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {
     try {

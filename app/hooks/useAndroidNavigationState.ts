@@ -1,15 +1,18 @@
 import { useWebView } from '@/contexts/WebViewContext';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, BackHandler, Platform } from 'react-native';
+import { WebViewNavigation } from 'react-native-webview';
 
-interface UseAndroidBackHandlerProps {
-  canGoBack: boolean;
-}
-
-export const useAndroidBackHandler = ({
-  canGoBack,
-}: UseAndroidBackHandlerProps) => {
+const useAndroidNavigationState = () => {
+  const [canGoBack, setCanGoBack] = useState(false);
   const { sendMessageToWeb } = useWebView();
+
+  const handleNavigationStateChange = useCallback(
+    (navState: WebViewNavigation) => {
+      setCanGoBack(navState.canGoBack);
+    },
+    [],
+  );
 
   useEffect(() => {
     if (Platform.OS !== 'android') return;
@@ -40,5 +43,11 @@ export const useAndroidBackHandler = ({
     );
 
     return () => backHandler.remove();
-  }, [canGoBack, sendMessageToWeb]);
+  }, [canGoBack, sendMessageToWeb, handleNavigationStateChange]);
+
+  return {
+    handleNavigationStateChange,
+  };
 };
+
+export default useAndroidNavigationState;

@@ -10,7 +10,7 @@ import { EmotionThemeProvider } from '../contexts/ThemeContext';
 import { WebViewProvider } from '../contexts/WebViewContext';
 
 SplashScreen.setOptions({
-  duration: 2_000,
+  duration: 1_500,
   fade: true,
 });
 

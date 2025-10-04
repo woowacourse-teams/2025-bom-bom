@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DEFAULT_SPEED,
   START_SLIDE_INDEX,
@@ -23,6 +23,14 @@ const useCarousel = ({
   const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const swipeOffsetRef = useRef(0);
   const swipeStartRef = useRef(0);
+  const slideWrapperRef = useRef<HTMLUListElement>(null);
+
+  const updateTransform = useCallback(() => {
+    if (!slideWrapperRef.current) return;
+
+    const offset = swipeOffsetRef.current;
+    slideWrapperRef.current.style.transform = `translateX(calc(-${slideIndex * 100}% + ${offset}px))`;
+  }, [slideIndex]);
 
   const handleTransitionEnd = () => {
     setIsTransitioning(false);
@@ -81,6 +89,7 @@ const useCarousel = ({
 
     const offset = clientX - swipeStartRef.current;
     swipeOffsetRef.current = offset;
+    updateTransform();
   };
 
   const swipeEnd = () => {
@@ -95,6 +104,9 @@ const useCarousel = ({
     }
 
     swipeOffsetRef.current = 0;
+    if (slideWrapperRef.current) {
+      slideWrapperRef.current.style.transform = '';
+    }
   };
 
   const handleTouchStart = (e: TouchEvent) => {
@@ -117,7 +129,7 @@ const useCarousel = ({
     slideIndex,
     isTransitioning,
     isSwiping,
-    swipeOffset: swipeOffsetRef.current,
+    slideWrapperRef,
     handleTransitionEnd,
     handlePrevButtonClick,
     handleNextButtonClick,

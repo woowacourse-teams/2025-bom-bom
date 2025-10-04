@@ -1,6 +1,10 @@
 import styled from '@emotion/styled';
 import { useLocation } from '@tanstack/react-router';
 import { useEffect } from 'react';
+import {
+  MOBILE_HORIZONTAL_PADDING,
+  PC_HORIZONTAL_PADDING,
+} from './PageLayout.constants';
 import Header from '../Header/Header';
 import { useDevice } from '@/hooks/useDevice';
 import {
@@ -43,7 +47,9 @@ export default PageLayout;
 const Container = styled.div<{ isMobile: boolean }>`
   min-height: 100dvh;
   padding: ${({ isMobile, theme }) => {
-    const sidePadding = isMobile ? '12px' : '24px';
+    const sidePadding = isMobile
+      ? `${MOBILE_HORIZONTAL_PADDING}px`
+      : `${PC_HORIZONTAL_PADDING}x`;
     const headerHeight = isMobile
       ? theme.heights.headerMobile
       : theme.heights.headerPC;

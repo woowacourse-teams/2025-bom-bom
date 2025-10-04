@@ -2,7 +2,10 @@ import styled from '@emotion/styled';
 import { memo, useEffect, useState } from 'react';
 import { extractBodyContent, processContent } from './ArticleContent.utils';
 import { useHighlightHoverEffect } from '../../hooks/useHighlightHoverEffect';
+import { PC_HORIZONTAL_PADDING } from '@/components/PageLayout/PageLayout.constants';
 import type { RefObject } from 'react';
+
+const EXTRA_PADDING = 24;
 
 interface ArticleContentProps {
   ref: RefObject<HTMLDivElement | null>;
@@ -21,7 +24,8 @@ const ArticleContent = ({
   useEffect(() => {
     if (!ref.current) return;
 
-    const screenWidth = window.outerWidth - (24 + 24); // 좌우 패딩 값에 임의 값 추가
+    const screenWidth =
+      window.outerWidth - (PC_HORIZONTAL_PADDING + EXTRA_PADDING);
     const contentWidth = ref.current?.clientWidth || 1;
 
     const newScale =

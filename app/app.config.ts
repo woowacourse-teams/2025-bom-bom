@@ -1,17 +1,18 @@
-const withCustomAndroidConfig = require('./plugins/withCustomAndroidConfig');
+import { ConfigContext, ExpoConfig } from 'expo/config';
 
-module.exports = ({ config }) => {
-  return withCustomAndroidConfig({
+module.exports = ({ config }: ConfigContext): ExpoConfig => {
+  return {
     ...config,
     name: '봄봄',
     slug: 'bombom',
-    version: '1.0.2',
+    version: '1.0.3',
     orientation: 'portrait',
     icon: './app/assets/images/logo.png',
     scheme: 'bombom',
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     ios: {
+      buildNumber: '5',
       supportsTablet: true,
       infoPlist: {
         NSExceptionDomains: {
@@ -23,6 +24,9 @@ module.exports = ({ config }) => {
         },
       },
       bundleIdentifier: 'com.antarctica.bombom',
+      config: {
+        usesNonExemptEncryption: false, // 수출 규정 관련 문서 누락됨 메시지 해결
+      },
     },
     android: {
       adaptiveIcon: {
@@ -69,6 +73,14 @@ module.exports = ({ config }) => {
           experimentalLauncherActivity: true,
         },
       ],
+      [
+        'expo-build-properties',
+        {
+          android: {
+            usesCleartextTraffic: true,
+          },
+        },
+      ],
     ],
 
     experiments: {
@@ -83,5 +95,5 @@ module.exports = ({ config }) => {
     },
 
     owner: 'antarctica-bombom',
-  });
+  };
 };

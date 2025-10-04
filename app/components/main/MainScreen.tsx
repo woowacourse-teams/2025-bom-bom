@@ -73,6 +73,7 @@ export const MainScreen = () => {
           pullToRefreshEnabled
           originWhitelist={['*']}
           onMessage={handleWebViewMessage}
+          onNavigationStateChange={handleNavigationStateChange}
           onContentProcessDidTerminate={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent;
             console.warn('WebView Content Process Did Terminate:', nativeEvent);

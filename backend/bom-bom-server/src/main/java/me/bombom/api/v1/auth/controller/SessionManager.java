@@ -26,6 +26,7 @@ public class SessionManager {
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);
+        // 세션에 인증 정보 저장 (다음 요청에서도 로그인 상태 유지)
         session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
     }
 
@@ -38,7 +39,12 @@ public class SessionManager {
         ensure(request).setAttribute(key, value);
     }
 
-    public void removeAttr(HttpServletRequest request, String key) {
+    public Object getAttribute(HttpServletRequest request, String key) {
+        return get(request).map(s -> s.getAttribute(key))
+                .orElse(null);
+    }
+
+    public void removeAttribute(HttpServletRequest request, String key) {
         get(request).ifPresent(s -> s.removeAttribute(key));
     }
 }

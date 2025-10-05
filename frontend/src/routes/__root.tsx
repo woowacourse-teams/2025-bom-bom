@@ -9,7 +9,6 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { theme } from '../styles/theme';
 import Toast from '@/components/Toast/Toast';
 import usePageTracking from '@/libs/googleAnalytics/usePageTracking';
-import { useWebViewNavigate } from '@/libs/webview/useWebViewNavigate';
 import { queryClient } from '@/main';
 import type { QueryClient } from '@tanstack/react-query';
 import type { redirect } from '@tanstack/react-router';
@@ -20,7 +19,6 @@ interface BomBomRouterContext {
 
 const RootComponent = () => {
   usePageTracking();
-  useWebViewNavigate();
 
   return (
     <>

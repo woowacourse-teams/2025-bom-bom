@@ -5,7 +5,7 @@ import { WebViewNavigation } from 'react-native-webview';
 
 const useAndroidNavigationState = () => {
   const [canGoBack, setCanGoBack] = useState(false);
-  const { sendMessageToWeb } = useWebView();
+  const { webViewRef } = useWebView();
 
   const handleNavigationStateChange = useCallback(
     (navState: WebViewNavigation) => {
@@ -19,9 +19,7 @@ const useAndroidNavigationState = () => {
 
     const onBackPress = () => {
       if (canGoBack) {
-        sendMessageToWeb({
-          type: 'ANDROID_BACK_BUTTON_CLICKED',
-        });
+        webViewRef.current?.goBack();
       } else {
         Alert.alert('앱 종료', '앱을 종료하시겠습니까?', [
           { text: '취소', style: 'cancel' },
@@ -42,7 +40,7 @@ const useAndroidNavigationState = () => {
     );
 
     return () => backHandler.remove();
-  }, [canGoBack, sendMessageToWeb]);
+  }, [canGoBack, webViewRef]);
 
   return {
     handleNavigationStateChange,

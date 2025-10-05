@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { memo } from 'react';
 import { extractBodyContent, processContent } from './ArticleContent.utils';
+import { useAutoScaleContent } from '../../hooks/useAutoScaleContent';
 import { useHighlightHoverEffect } from '../../hooks/useHighlightHoverEffect';
 import type { RefObject } from 'react';
 
@@ -16,12 +17,14 @@ const ArticleContent = ({
   content,
 }: ArticleContentProps) => {
   const bodyContent = extractBodyContent(content ?? '');
+  const scale = useAutoScaleContent(ref);
 
   useHighlightHoverEffect();
 
   return (
     <Container
       ref={ref}
+      scale={scale}
       dangerouslySetInnerHTML={{
         __html: processContent(newsletterName, bodyContent),
       }}
@@ -31,7 +34,7 @@ const ArticleContent = ({
 
 export default memo(ArticleContent);
 
-const Container = styled.div`
+const Container = styled.div<{ scale: number }>`
   overflow: visible;
 
   display: flex;
@@ -42,6 +45,9 @@ const Container = styled.div`
 
   -webkit-tap-highlight-color: rgb(0 0 0 / 10%);
   -webkit-touch-callout: default;
+
+  transform: ${({ scale }) => `scale(${scale})`};
+  transform-origin: top;
   user-select: text;
 
   word-break: break-all;

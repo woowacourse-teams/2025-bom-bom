@@ -115,6 +115,7 @@ function ArticleDetailPage() {
 
 const Container = styled.div`
   position: relative;
+  width: 100%;
 `;
 
 const ArticleActionButtons = styled(FloatingActionButtons)`

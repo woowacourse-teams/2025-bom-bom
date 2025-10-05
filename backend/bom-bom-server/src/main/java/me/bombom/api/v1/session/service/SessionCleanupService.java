@@ -1,5 +1,6 @@
 package me.bombom.api.v1.session.service;
 
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.session.repository.SessionManagerRepository;
@@ -49,7 +50,7 @@ public class SessionCleanupService {
     public int cleanupExpiredSessionsCompletely() {
         long currentTimeMillis = System.currentTimeMillis();
         // 추가로 30일 이상 된 세션도 정리
-        long thirtyDaysAgoMillis = currentTimeMillis - 30L * 24 * 60 * 60 * 1000;
+        long thirtyDaysAgoMillis = currentTimeMillis - Duration.ofDays(30).toMillis();
         
         int deletedCount = sessionManagerRepository.deleteExpiredAndOldSessions(currentTimeMillis, thirtyDaysAgoMillis);
         

@@ -103,20 +103,11 @@ public class AuthController implements AuthControllerApi{
     @PostMapping("/login/{provider}/native")
     public NativeLoginResponse nativeLogin(
             @PathVariable("provider") String provider,
-            @Valid @RequestBody(required = false) NativeLoginRequest nativeLoginRequest,
+            @Valid @RequestBody NativeLoginRequest nativeLoginRequest,
             HttpServletRequest request,
             HttpServletResponse response
-    ) throws IOException {
-        if (nativeLoginRequest == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "응답 바디가 없습니다.");
-            return null;
-        }
-
+    ) {
         Optional<Member> loginResult = loginWithProvider(provider, nativeLoginRequest);
-        if (loginResult.isEmpty()) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "지원하지 않는 제공자입니다.");
-            return null;
-        }
         return handleNativeResult(nativeLoginRequest, loginResult, request);
     }
 

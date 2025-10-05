@@ -51,9 +51,11 @@ export const addWebViewMessageListener = (
     }
   };
 
-  window.addEventListener('message', messageHandler);
+  document.addEventListener('message', messageHandler as EventListener); // Android
+  window.addEventListener('message', messageHandler as EventListener); // iOS
   return () => {
-    window.removeEventListener('message', messageHandler);
+    document.removeEventListener('message', messageHandler as EventListener);
+    window.removeEventListener('message', messageHandler as EventListener);
   };
 };
 

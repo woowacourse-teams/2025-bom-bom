@@ -5,6 +5,7 @@ import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { useWebView } from '../../contexts/WebViewContext';
+import useAndroidNavigationState from '../../hooks/useAndroidNavigationState';
 import { WebToRNMessage } from '../../types/webview';
 import { LoginScreenOverlay } from '../login/LoginScreenOverlay';
 
@@ -16,6 +17,8 @@ import { WEBVIEW_USER_AGENT } from '@/constants/webview';
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
   const { webViewRef } = useWebView();
+
+  const { handleNavigationStateChange } = useAndroidNavigationState();
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {
     try {
@@ -70,6 +73,7 @@ export const MainScreen = () => {
           pullToRefreshEnabled
           originWhitelist={['*']}
           onMessage={handleWebViewMessage}
+          onNavigationStateChange={handleNavigationStateChange}
           onContentProcessDidTerminate={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent;
             console.warn('WebView Content Process Did Terminate:', nativeEvent);

@@ -1,7 +1,6 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
 import PageLayout from '@/components/PageLayout/PageLayout';
-import { useWebViewAuth } from '@/libs/webview/useWebViewAuth';
 
 let isFirstVisit = true;
 
@@ -33,8 +32,6 @@ export const Route = createFileRoute('/_bombom')({
 });
 
 function RouteComponent() {
-  useWebViewAuth();
-
   return (
     <PageLayout>
       <Outlet />

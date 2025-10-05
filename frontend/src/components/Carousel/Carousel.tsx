@@ -2,9 +2,9 @@ import styled from '@emotion/styled';
 import { Children } from 'react';
 import { DEFAULT_SPEED } from './Carousel.constants';
 import useCarousel from './useCarousel';
+import ChevronIcon from '../icons/ChevronIcon';
+import { theme } from '@/styles/theme';
 import type { PropsWithChildren } from 'react';
-import arrowNext from '#/assets/avif/carousel-arrow-next.avif';
-import arrowPrev from '#/assets/avif/carousel-arrow-prev.avif';
 
 type SlideButtonPosition = 'middle' | 'bottom';
 
@@ -52,17 +52,27 @@ const Carousel = ({
   const {
     slideIndex,
     isTransitioning,
+    isSwiping,
+    slideWrapperRef,
     handleTransitionEnd,
     handlePrevButtonClick,
     handleNextButtonClick,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
   } = useCarousel({ slideCount, autoPlay, autoPlaySpeedMs });
 
   return (
     <Container slideButtonPosition={slideButtonPosition}>
       <SlidesWrapper
+        ref={slideWrapperRef}
         slideIndex={slideIndex}
         isTransitioning={isTransitioning}
+        isSwiping={isSwiping}
         onTransitionEnd={handleTransitionEnd}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         hasAnimation={hasAnimation}
       >
         {infinitySlides.map((slideContent, index) => (
@@ -76,16 +86,28 @@ const Carousel = ({
             type="button"
             onClick={handlePrevButtonClick}
             slideButtonPosition={slideButtonPosition}
+            aria-label="이전 슬라이드 이동"
           >
-            <SlideButtonIcon src={arrowPrev} alt="이전 슬라이드 버튼" />
+            <ChevronIcon
+              direction="left"
+              width="100%"
+              height="100%"
+              fill={theme.colors.primary}
+            />
           </PrevSlideButton>
 
           <NextSlideButton
             type="button"
             onClick={handleNextButtonClick}
             slideButtonPosition={slideButtonPosition}
+            aria-label="다음 슬라이드 이동"
           >
-            <SlideButtonIcon src={arrowNext} alt="다음 슬라이드 버튼" />
+            <ChevronIcon
+              direction="right"
+              width="100%"
+              height="100%"
+              fill={theme.colors.primary}
+            />
           </NextSlideButton>
         </>
       )}
@@ -97,7 +119,7 @@ export default Carousel;
 
 const TRANSITIONS = {
   slide: 'transform 0.3s ease-in-out',
-  none: 'transform 0.3s step-end',
+  none: 'none',
 } as const;
 
 const Container = styled.div<{ slideButtonPosition?: SlideButtonPosition }>`
@@ -105,8 +127,8 @@ const Container = styled.div<{ slideButtonPosition?: SlideButtonPosition }>`
   position: relative;
   width: 100%;
   min-height: fit-content;
-  padding-bottom: ${({ slideButtonPosition }) =>
-    slideButtonPosition === 'bottom' ? '60px' : '0'};
+  padding: ${({ slideButtonPosition }) =>
+    `0 12px ${slideButtonPosition === 'bottom' ? '60px' : '0'}`};
 
   background: transparent;
 `;
@@ -114,19 +136,20 @@ const Container = styled.div<{ slideButtonPosition?: SlideButtonPosition }>`
 const SlidesWrapper = styled.ul<{
   slideIndex: number;
   isTransitioning: boolean;
+  isSwiping: boolean;
   hasAnimation: boolean;
 }>`
   position: relative;
+  margin: 0 -12px;
 
   display: flex;
 
   transform: ${({ slideIndex }) => `translateX(-${slideIndex * 100}%)`};
-  transition: ${({ hasAnimation, isTransitioning }) =>
-    hasAnimation
-      ? isTransitioning
-        ? TRANSITIONS.slide
-        : TRANSITIONS.none
-      : TRANSITIONS.none};
+  transition: ${({ hasAnimation, isTransitioning, isSwiping }) => {
+    if (!hasAnimation || isSwiping) return TRANSITIONS.none;
+    if (isTransitioning) return TRANSITIONS.slide;
+    return TRANSITIONS.none;
+  }};
 `;
 
 const Slide = styled.li`
@@ -140,15 +163,22 @@ const PrevSlideButton = styled.button<{
   top: ${({ slideButtonPosition }) =>
     slideButtonPosition === 'middle' ? '50%' : 'auto'};
   bottom: ${({ slideButtonPosition }) =>
-    slideButtonPosition === 'bottom' ? '0' : 'auto'};
-  left: 0;
+    slideButtonPosition === 'bottom' ? '8px' : 'auto'};
+  left: 8px;
   width: clamp(32px, 10%, 48px);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
+
+  display: flex;
+  align-items: center;
+
+  background-color: ${({ theme }) => theme.colors.white};
 
   transform: ${({ slideButtonPosition }) =>
     slideButtonPosition === 'middle' ? 'translateY(-50%)' : 'none'};
 
   &:hover {
-    opacity: 0.8;
+    background-color: ${({ theme }) => theme.colors.dividers};
   }
 `;
 
@@ -158,22 +188,22 @@ const NextSlideButton = styled.button<{
   position: absolute;
   top: ${({ slideButtonPosition }) =>
     slideButtonPosition === 'middle' ? '50%' : 'auto'};
-  right: 0;
+  right: 8px;
   bottom: ${({ slideButtonPosition }) =>
-    slideButtonPosition === 'bottom' ? '0' : 'auto'};
+    slideButtonPosition === 'bottom' ? '8px' : 'auto'};
   width: clamp(32px, 10%, 48px);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
+
+  display: flex;
+  align-items: center;
+
+  background-color: ${({ theme }) => theme.colors.white};
 
   transform: ${({ slideButtonPosition }) =>
     slideButtonPosition === 'middle' ? 'translateY(-50%)' : 'none'};
 
   &:hover {
-    opacity: 0.8;
+    background-color: ${({ theme }) => theme.colors.dividers};
   }
-`;
-
-const SlideButtonIcon = styled.img`
-  width: 100%;
-  height: 100%;
-
-  object-fit: contain;
 `;

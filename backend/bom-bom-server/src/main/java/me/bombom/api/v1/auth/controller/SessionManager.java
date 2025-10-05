@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class SessionManager {
 
+    private static final String SPRING_SECURITY_CONTEXT_KEY = "SPRING_SECURITY_CONTEXT";
+
     // 세션을 보장. 없으면 생성. 있으면 리턴.
     public HttpSession ensure(HttpServletRequest request) {
         return request.getSession(true);
@@ -27,7 +29,7 @@ public class SessionManager {
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);
         // 세션에 인증 정보 저장 (다음 요청에서도 로그인 상태 유지)
-        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+        session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
     }
 
     public void clearAuth(HttpServletRequest request) {

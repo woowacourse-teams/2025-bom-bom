@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
 import me.bombom.api.v1.auth.dto.request.SignupValidateRequest;
@@ -61,8 +60,8 @@ public interface AuthControllerApi {
         @Parameter(description = "OAuth2 제공자 (google, kakao 등)", example = "google")
         @PathVariable("provider") String provider,
         @RequestParam(defaultValue = "deploy") String env,
-        HttpServletResponse response,
-        HttpSession httpSession
+        HttpServletRequest request,
+        HttpServletResponse response
     ) throws IOException;
 
     @Operation(
@@ -77,8 +76,7 @@ public interface AuthControllerApi {
     NativeLoginResponse nativeLogin(
         @PathVariable("provider") String provider,
         @RequestBody NativeLoginRequest nativeLoginRequest,
-        HttpServletRequest request,
-        HttpServletResponse response
+        HttpServletRequest request
     ) throws IOException;
 
     @Operation(
@@ -98,5 +96,8 @@ public interface AuthControllerApi {
         @ApiResponse(responseCode = "204", description = "탈퇴 성공"),
         @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
     })
-    void withdraw(@Parameter(hidden = true) @LoginMember Member member, HttpSession session, HttpServletResponse response) throws IOException;
+    void withdraw(
+            @Parameter(hidden = true) @LoginMember Member member,
+            HttpServletRequest request,
+            HttpServletResponse response) throws IOException;
 } 

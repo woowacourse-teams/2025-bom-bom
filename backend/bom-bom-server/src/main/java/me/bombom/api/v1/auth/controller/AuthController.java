@@ -28,7 +28,6 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.service.MemberService;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -50,19 +49,20 @@ public class AuthController implements AuthControllerApi{
     private final AppleOAuth2Service appleOAuth2Service;
     private final GoogleOAuth2LoginService googleOAuth2LoginService;
     private final UniqueUserInfoGenerator uniqueUserInfoGenerator;
+    private final SessionManager sessionManager;
 
     @Override
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
     public void signup(@Valid @RequestBody MemberSignupRequest signupRequest, HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
+        Optional<HttpSession> optionalSession = sessionManager.get(request);
+        if (optionalSession.isEmpty()) {
             throw new UnauthorizedException(ErrorDetail.MISSING_OAUTH_DATA)
                 .addContext("sessionExists", false)
                 .addContext("requestedEmail", signupRequest.email());
         }
-        PendingOAuth2Member pendingMember = (PendingOAuth2Member) session.getAttribute("pendingMember");
-        log.info("회원가입 요청 - sessionId: {}, pendingMember: {}", session.getId(), pendingMember);
+        PendingOAuth2Member pendingMember = (PendingOAuth2Member) sessionManager.getAttribute(request, "pendingMember");
+        log.info("회원가입 요청 - sessionId: {}, pendingMember: {}", optionalSession.get().getId(), pendingMember);
         if (pendingMember == null) {
             throw new UnauthorizedException(ErrorDetail.MISSING_OAUTH_DATA)
                 .addContext("sessionExists", true)
@@ -70,14 +70,11 @@ public class AuthController implements AuthControllerApi{
                 .addContext("requestedEmail", signupRequest.email());
         }
         Member newMember = memberService.signup(pendingMember, signupRequest);
-        session.removeAttribute("pendingMember");
+        sessionManager.removeAttribute(request, "pendingMember");
 
         // 회원가입 후 로그인 처리 - 세션에 인증 정보 저장
         OAuth2AuthenticationToken authentication = createAuthenticationToken(newMember);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        
-        // 세션에 인증 정보 저장 (다음 요청에서도 로그인 상태 유지)
-        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+        sessionManager.setAuth(request, authentication);
     }
 
     @Override
@@ -91,10 +88,10 @@ public class AuthController implements AuthControllerApi{
     public void login(
             @PathVariable("provider") String provider,
             @RequestParam(defaultValue = "deploy") String env,
-            HttpServletResponse response,
-            HttpSession httpSession
+            HttpServletRequest request,
+            HttpServletResponse response
     ) throws IOException {
-        httpSession.setAttribute("env", env);
+        sessionManager.setAttribute(request, "env", env);
         response.sendRedirect("/oauth2/authorization/" + provider);
     }
 
@@ -104,8 +101,7 @@ public class AuthController implements AuthControllerApi{
     public NativeLoginResponse nativeLogin(
             @PathVariable("provider") String provider,
             @Valid @RequestBody NativeLoginRequest nativeLoginRequest,
-            HttpServletRequest request,
-            HttpServletResponse response
+            HttpServletRequest request
     ) {
         Optional<Member> loginResult = loginWithProvider(provider, nativeLoginRequest);
         return handleNativeResult(nativeLoginRequest, loginResult, request);
@@ -115,25 +111,22 @@ public class AuthController implements AuthControllerApi{
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(HttpServletRequest request, HttpServletResponse response) {
-        if (request.getSession(false) != null) {
-            request.getSession(false).invalidate();
-            SecurityContextHolder.clearContext();
-            expireSessionCookie(response);
-        }
+        sessionManager.clearAuth(request);
+        expireSessionCookie(response);
     }
 
     @Override
     @PostMapping("/withdraw")
-    public void withdraw(@LoginMember Member member, HttpSession session, HttpServletResponse response) throws IOException {
-        String appleAccessToken = (String) session.getAttribute("appleAccessToken");
-
+    public void withdraw(
+            @LoginMember Member member,
+            HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+        String appleAccessToken = (String) sessionManager.getAttribute(request, "appleAccessToken");
         // Apple 로그인 사용자이고 Access Token이 없는 경우
         if (member.getProvider().equals("apple") && appleAccessToken == null) {
-            log.info("Apple Access Token 없음 - memberId: {}, 세션ID: {}", member.getId(), session.getId());
-
             // 탈퇴 플래그 저장 후 재로그인 요구
-            session.setAttribute("pendingWithdraw", true);
-            session.setAttribute("withdrawMemberId", member.getId());
+            sessionManager.setAttribute(request, "pendingWithdraw", true);
+            sessionManager.setAttribute(request, "withdrawMemberId", member.getId());
             response.sendRedirect("/oauth2/authorization/apple");
             return;
         }
@@ -151,8 +144,7 @@ public class AuthController implements AuthControllerApi{
         }
 
         memberService.withdraw(member.getId());
-        session.invalidate();
-        SecurityContextHolder.clearContext();
+        sessionManager.clearAuth(request);
         expireSessionCookie(response);
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
@@ -172,14 +164,11 @@ public class AuthController implements AuthControllerApi{
             HttpServletRequest request
     ) {
         // 세션 생성 트리거 (컨테이너가 Set-Cookie: JSESSIONID를 설정)
-        request.getSession(true);
+        sessionManager.ensure(request);
 
         if (member.isPresent()) {
             OAuth2AuthenticationToken authentication = createAuthenticationToken(member.get());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            HttpSession session = request.getSession();
-            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+            sessionManager.setAuth(request, authentication);
 
             // 기존 회원 -> 로그인 완료
             return new NativeLoginResponse(true, null, null);

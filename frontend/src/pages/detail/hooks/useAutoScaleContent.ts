@@ -9,7 +9,7 @@ export const useAutoScaleContent = (ref: RefObject<HTMLDivElement | null>) => {
     if (!ref.current) return;
 
     const screenWidth = window.outerWidth - PC_HORIZONTAL_PADDING;
-    const contentWidth = ref.current?.clientWidth || 1;
+    const contentWidth = ref.current.clientWidth;
 
     const newScale =
       contentWidth > screenWidth ? screenWidth / contentWidth : 1;

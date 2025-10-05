@@ -145,12 +145,11 @@ const SlidesWrapper = styled.ul<{
   display: flex;
 
   transform: ${({ slideIndex }) => `translateX(-${slideIndex * 100}%)`};
-  transition: ${({ hasAnimation, isTransitioning, isSwiping }) =>
-    hasAnimation && !isSwiping
-      ? isTransitioning
-        ? TRANSITIONS.slide
-        : TRANSITIONS.none
-      : TRANSITIONS.none};
+  transition: ${({ hasAnimation, isTransitioning, isSwiping }) => {
+    if (!hasAnimation || isSwiping) return TRANSITIONS.none;
+    if (isTransitioning) return TRANSITIONS.slide;
+    return TRANSITIONS.none;
+  }};
 `;
 
 const Slide = styled.li`

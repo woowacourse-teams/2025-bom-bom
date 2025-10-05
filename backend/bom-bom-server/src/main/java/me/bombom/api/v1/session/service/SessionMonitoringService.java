@@ -59,10 +59,7 @@ public class SessionMonitoringService {
             
             log.info("수동 세션 정리 완료 - 삭제된 세션 수: {}", deletedCount);
             
-            return SessionCleanupResponse.builder()
-                    .deletedCount(deletedCount)
-                    .message(message)
-                    .build();
+            return SessionCleanupResponse.of(deletedCount, message);
         } catch (Exception e) {
             log.error("수동 세션 정리 중 오류 발생", e);
             throw new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)

@@ -19,8 +19,7 @@ public class GoogleUserInfoExtractor implements OAuth2UserInfoExtractor {
         String name = extractName(oauth2User);
 
         log.info("Google 로그인 정보 추출 - 이메일: {}, 이름: {}", email, name);
-
-        return new OAuth2LoginInfo(member, email, name);
+        return OAuth2LoginInfo.of(member, email, name);
     }
 
     private String extractEmail(CustomOAuth2User oauth2User) {
@@ -28,7 +27,6 @@ public class GoogleUserInfoExtractor implements OAuth2UserInfoExtractor {
     }
 
     private String extractName(CustomOAuth2User oauth2User) {
-        // Google에서는 name이 이미 풀네임으로 제공됨
         return (String) oauth2User.getAttributes().get("name");
     }
 

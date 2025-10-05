@@ -23,8 +23,7 @@ public class AppleUserInfoExtractor implements OAuth2UserInfoExtractor {
         String name = extractName(oauth2User);
 
         log.info("Apple 로그인 정보 추출 - 이메일: {}, 이름: {}", email, name);
-
-        return new OAuth2LoginInfo(member, email, name);
+        return OAuth2LoginInfo.of(member, email, name);
     }
 
     @Override

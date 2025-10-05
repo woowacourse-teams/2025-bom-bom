@@ -70,7 +70,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         } else {
             // === 로그인 처리 ===
             OAuth2LoginInfo oauth2Info = extractOAuth2LoginInfo(authentication);
-            Member member = oauth2Info.getMember();
+            Member member = oauth2Info.member();
             String redirectUrl = buildRedirectUrl(request, member, oauth2Info);
             response.sendRedirect(redirectUrl);
         }
@@ -94,7 +94,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         if (!(principal instanceof CustomOAuth2User oauth2User)) {
             log.warn("알 수 없는 OAuth2User 타입: {}", principal.getClass().getSimpleName());
-            return new OAuth2LoginInfo(null, null, null);  // 회원가입 페이지로 리다이렉트 유도
+            return OAuth2LoginInfo.of(null, null, null);  // 회원가입 페이지로 리다이렉트 유도
         }
 
         Member member = oauth2User.getMember();
@@ -130,7 +130,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         if (member != null) {
             return baseUrl + HOME_PATH;
         }
-        if (oauth2Info.getEmail() != null || oauth2Info.getName() != null) {
+        if (oauth2Info.email() != null || oauth2Info.nickname() != null) {
             String queryParams = buildQueryParams(oauth2Info);
             return baseUrl + SIGNUP_PATH + queryParams;
         }
@@ -141,15 +141,15 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         StringBuilder params = new StringBuilder("?");
         boolean hasParam = false;
         try {
-            if (oauth2Info.getEmail() != null) {
-                String uniqueEmailLocalPart = uniqueUserInfoGenerator.getUniqueEmailLocalPart(oauth2Info.getEmail());
+            if (oauth2Info.email() != null) {
+                String uniqueEmailLocalPart = uniqueUserInfoGenerator.getUniqueEmailLocalPart(oauth2Info.email());
                 params.append(EMAIL_PARAM)
                         .append("=")
                         .append(URLEncoder.encode(uniqueEmailLocalPart, StandardCharsets.UTF_8));
                 hasParam = true;
             }
             if (hasParam) params.append("&");
-            String uniqueNickname = uniqueUserInfoGenerator.getUniqueNickname(oauth2Info.getName());
+            String uniqueNickname = uniqueUserInfoGenerator.getUniqueNickname(oauth2Info.nickname());
             params.append(NAME_PARAM)
                     .append("=")
                     .append(URLEncoder.encode(uniqueNickname, StandardCharsets.UTF_8));

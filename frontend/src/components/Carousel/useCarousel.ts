@@ -32,7 +32,7 @@ const useCarousel = ({
     slideWrapperRef.current.style.transform = `translateX(calc(-${slideIndex * 100}% + ${offset}px))`;
   }, [slideIndex]);
 
-  const handleTransitionEnd = () => {
+  const handleTransitionEnd = useCallback(() => {
     setIsTransitioning(false);
 
     if (slideIndex < START_SLIDE_INDEX) {
@@ -42,7 +42,7 @@ const useCarousel = ({
     if (slideIndex > slideCount) {
       setSlideIndex(START_SLIDE_INDEX);
     }
-  };
+  }, [slideIndex, slideCount]);
 
   useEffect(() => {
     if (!autoPlay || isSwiping) return;
@@ -62,37 +62,43 @@ const useCarousel = ({
     };
   }, [autoPlay, slideIndex, isTransitioning, autoPlaySpeedMs, isSwiping]);
 
-  const handlePrevButtonClick = () => {
+  const handlePrevButtonClick = useCallback(() => {
     if (isTransitioning || isSwiping) return;
 
     setIsTransitioning(true);
     setSlideIndex((prev) => prev - 1);
-  };
+  }, [isTransitioning, isSwiping]);
 
-  const handleNextButtonClick = () => {
+  const handleNextButtonClick = useCallback(() => {
     if (isTransitioning || isSwiping) return;
 
     setIsTransitioning(true);
     setSlideIndex((prev) => prev + 1);
-  };
+  }, [isTransitioning, isSwiping]);
 
-  const swipeStart = (clientX: number) => {
-    if (isTransitioning) return;
+  const swipeStart = useCallback(
+    (clientX: number) => {
+      if (isTransitioning) return;
 
-    setIsSwiping(true);
-    swipeStartRef.current = clientX;
-    swipeOffsetRef.current = 0;
-  };
+      setIsSwiping(true);
+      swipeStartRef.current = clientX;
+      swipeOffsetRef.current = 0;
+    },
+    [isTransitioning],
+  );
 
-  const swipeMove = (clientX: number) => {
-    if (!isSwiping) return;
+  const swipeMove = useCallback(
+    (clientX: number) => {
+      if (!isSwiping) return;
 
-    const offset = clientX - swipeStartRef.current;
-    swipeOffsetRef.current = offset;
-    updateTransform();
-  };
+      const offset = clientX - swipeStartRef.current;
+      swipeOffsetRef.current = offset;
+      updateTransform();
+    },
+    [isSwiping, updateTransform],
+  );
 
-  const swipeEnd = () => {
+  const swipeEnd = useCallback(() => {
     if (!isSwiping) return;
 
     setIsSwiping(false);
@@ -107,23 +113,29 @@ const useCarousel = ({
     if (slideWrapperRef.current) {
       slideWrapperRef.current.style.transform = '';
     }
-  };
+  }, [isSwiping]);
 
-  const handleTouchStart = (e: TouchEvent) => {
-    const touchPoint = e.touches[0];
-    if (!touchPoint) return;
-    swipeStart(touchPoint.clientX);
-  };
+  const handleTouchStart = useCallback(
+    (e: TouchEvent) => {
+      const touchPoint = e.touches[0];
+      if (!touchPoint) return;
+      swipeStart(touchPoint.clientX);
+    },
+    [swipeStart],
+  );
 
-  const handleTouchMove = (e: TouchEvent) => {
-    const touchPoint = e.touches[0];
-    if (!touchPoint) return;
-    swipeMove(touchPoint.clientX);
-  };
+  const handleTouchMove = useCallback(
+    (e: TouchEvent) => {
+      const touchPoint = e.touches[0];
+      if (!touchPoint) return;
+      swipeMove(touchPoint.clientX);
+    },
+    [swipeMove],
+  );
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = useCallback(() => {
     swipeEnd();
-  };
+  }, [swipeEnd]);
 
   return {
     slideIndex,

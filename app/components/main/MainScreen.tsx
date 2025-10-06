@@ -5,6 +5,7 @@ import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { useWebView } from '../../contexts/WebViewContext';
+import useAndroidNavigationState from '../../hooks/useAndroidNavigationState';
 import { WebToRNMessage } from '../../types/webview';
 import { LoginScreenOverlay } from '../login/LoginScreenOverlay';
 
@@ -12,11 +13,12 @@ import * as WebBrowser from 'expo-web-browser';
 
 import { ENV } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
-import { LoadingSpinner } from '../common/LoadingSpinner';
 
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
   const { webViewRef } = useWebView();
+
+  const { handleNavigationStateChange } = useAndroidNavigationState();
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {
     try {
@@ -41,7 +43,10 @@ export const MainScreen = () => {
         case 'OPEN_BROWSER':
           if (message.payload?.url) {
             console.log('외부 브라우저 열기:', message.payload.url);
-            WebBrowser.openBrowserAsync(message.payload.url);
+            WebBrowser.openBrowserAsync(message.payload.url, {
+              presentationStyle: WebBrowser.WebBrowserPresentationStyle.POPOVER,
+              dismissButtonStyle: 'close',
+            });
           }
           break;
 
@@ -65,10 +70,10 @@ export const MainScreen = () => {
           thirdPartyCookiesEnabled
           webviewDebuggingEnabled
           domStorageEnabled
-          startInLoadingState
           pullToRefreshEnabled
           originWhitelist={['*']}
           onMessage={handleWebViewMessage}
+          onNavigationStateChange={handleNavigationStateChange}
           onContentProcessDidTerminate={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent;
             console.warn('WebView Content Process Did Terminate:', nativeEvent);
@@ -82,7 +87,6 @@ export const MainScreen = () => {
             const { nativeEvent } = syntheticEvent;
             console.error('WebView HTTP Error:', nativeEvent);
           }}
-          renderLoading={() => <LoadingSpinner />}
         />
       </WebViewContainer>
 

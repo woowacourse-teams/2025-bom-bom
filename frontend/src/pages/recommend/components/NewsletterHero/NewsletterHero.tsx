@@ -5,7 +5,7 @@ import Skeleton from '@/components/Skeleton/Skeleton';
 import { useDevice } from '@/hooks/useDevice';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { isIOS, sendMessageToRN } from '@/libs/webview/webview.utils';
+import { isWebView, sendMessageToRN } from '@/libs/webview/webview.utils';
 import logo from '#/assets/avif/logo.avif';
 
 const NewsletterHero = () => {
@@ -23,7 +23,7 @@ const NewsletterHero = () => {
   }
 
   const handleLoginClick = () => {
-    if (isIOS())
+    if (isWebView())
       sendMessageToRN({
         type: 'SHOW_LOGIN_SCREEN',
       });

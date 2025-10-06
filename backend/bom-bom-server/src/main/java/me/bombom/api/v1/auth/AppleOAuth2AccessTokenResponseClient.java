@@ -2,7 +2,6 @@ package me.bombom.api.v1.auth;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
@@ -21,7 +20,7 @@ import org.springframework.web.client.RestClient;
 @RequiredArgsConstructor
 public class AppleOAuth2AccessTokenResponseClient implements OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> {
 
-    private final Supplier<String> clientSecretSupplier;
+    private final AppleClientSecretGenerator clientSecretGenerator;
     private final RestClient restClient;
 
     @Override
@@ -31,7 +30,7 @@ public class AppleOAuth2AccessTokenResponseClient implements OAuth2AccessTokenRe
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("client_id", clientRegistration.getClientId());
-        params.add("client_secret", clientSecretSupplier.get());
+        params.add("client_secret", clientSecretGenerator.generateFor(clientRegistration.getClientId()));
         params.add("code", authorizationCode);
         params.add("grant_type", "authorization_code");
         params.add("redirect_uri", authorizationGrantRequest.getAuthorizationExchange().getAuthorizationRequest().getRedirectUri());

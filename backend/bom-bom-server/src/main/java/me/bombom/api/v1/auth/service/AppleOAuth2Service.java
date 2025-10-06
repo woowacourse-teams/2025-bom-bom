@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.auth.AppleClientSecretSupplier;
+import me.bombom.api.v1.auth.AppleClientSecretGenerator;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
@@ -43,7 +43,7 @@ public class AppleOAuth2Service extends OidcUserService {
     private final MemberRepository memberRepository;
     private final HttpSession session;
     private final RestClient.Builder restClientBuilder;
-    private final AppleClientSecretSupplier appleClientSecretSupplier;
+    private final AppleClientSecretGenerator appleClientSecretGenerator;
     private final IdTokenValidator idTokenValidator;
     private final ObjectMapper objectMapper;
 
@@ -135,6 +135,7 @@ public class AppleOAuth2Service extends OidcUserService {
             }
 
             String subject = idTokenValidator.validateAppleAndGetSubject(request.identityToken(), bundleId);
+            //TODO: AppleToken 요청을 AppleOAuth2AccessTokenResponseClient에서 하도록
             Map<String, Object> token = requestAppleToken(request.authorizationCode(), bundleId);
 
             session.setAttribute("appleAccessToken", token.get("access_token"));
@@ -155,8 +156,7 @@ public class AppleOAuth2Service extends OidcUserService {
         MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
         requestBody.add("token", accessToken);
         requestBody.add("client_id", revokeClientId);
-        String revokeClientSecret = revokeClientId.equals(this.clientId) ? appleClientSecretSupplier.get() : appleClientSecretSupplier.generateFor(
-                revokeClientId);
+        String revokeClientSecret = appleClientSecretGenerator.generateFor(revokeClientId);
         requestBody.add("client_secret", revokeClientSecret);
         requestBody.add("token_type_hint", "access_token");
         return requestBody;
@@ -207,10 +207,7 @@ public class AppleOAuth2Service extends OidcUserService {
         body.add("grant_type", "authorization_code");
         body.add("code", code);
         body.add("client_id", clientIdForExchange);
-        String clientSecret = clientIdForExchange != null && !clientIdForExchange.equals(this.clientId)
-                ? appleClientSecretSupplier.generateFor(clientIdForExchange)
-                : appleClientSecretSupplier.get();
-        body.add("client_secret", clientSecret);
+        body.add("client_secret", appleClientSecretGenerator.generateFor(clientIdForExchange));
         return body;
     }
 

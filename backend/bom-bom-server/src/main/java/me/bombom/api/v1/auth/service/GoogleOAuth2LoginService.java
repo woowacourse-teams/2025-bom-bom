@@ -127,7 +127,17 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
     }
 
     private String validateAndExtractGoogleSubject(String idToken) {
-        return idTokenValidator.validateGoogleAndGetSubject(idToken, googleAppClientId);
+        try {
+            return idTokenValidator.validateGoogleAndGetSubject(idToken, googleClientId);
+        } catch (UnauthorizedException e) {
+            log.info("첫 번째 client ID로 검증 실패, 두 번째 client ID로 재시도 - clientId: {}, error: {}", googleClientId, e.getMessage());
+            try {
+                return idTokenValidator.validateGoogleAndGetSubject(idToken, googleAppClientId);
+            } catch (UnauthorizedException e2) {
+                log.info("두 번째 client ID로도 검증 실패 - appClientId: {}, error: {}", googleAppClientId, e2.getMessage());
+                throw e2; // 두 번 모두 실패했을 때 예외 던지기
+            }
+        }
     }
 
     private Optional<Member> findMemberAndSetPendingIfNew(String sub) {

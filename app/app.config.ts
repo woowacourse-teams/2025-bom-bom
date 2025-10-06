@@ -12,7 +12,6 @@ module.exports = ({ config }: ConfigContext): ExpoConfig => {
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     ios: {
-      buildNumber: '5',
       supportsTablet: true,
       infoPlist: {
         NSExceptionDomains: {

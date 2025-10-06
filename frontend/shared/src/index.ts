@@ -3,10 +3,7 @@ export { theme } from './theme/theme';
 export type { AppTheme } from './theme/theme';
 
 // WebView exports
-export {
-  isWebToRNMessage,
-  isRNToWebMessage,
-} from './webview/types';
+export { isWebToRNMessage, isRNToWebMessage } from './webview/types';
 export type {
   WebToRNMessage,
   RNToWebMessage,

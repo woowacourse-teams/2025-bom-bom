@@ -22,7 +22,6 @@ export const loginWithGoogle = async (
   GoogleSignin.configure({
     offlineAccess: false,
     forceCodeForRefreshToken: false,
-    accountName: '봄봄',
     profileImageSize: 120,
     webClientId: ENV.webClientId,
     iosClientId: ENV.iosClientId,

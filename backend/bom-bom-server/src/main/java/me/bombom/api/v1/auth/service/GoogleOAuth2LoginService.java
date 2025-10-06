@@ -127,7 +127,7 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
     }
 
     private String validateAndExtractGoogleSubject(String idToken) {
-        return idTokenValidator.validateGoogleAndGetSubject(idToken, googleAppClientId);
+        return idTokenValidator.validateGoogleAndGetSubject(idToken, googleClientId);
     }
 
     private Optional<Member> findMemberAndSetPendingIfNew(String sub) {

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { FloatingToolbarMode } from './../components/FloatingToolbar/FloatingToolbar.types';
+import type { FloatingToolbarMode } from '../components/FloatingToolbar/FloatingToolbar.types';
 import type { Position } from '@/types/position';
 
 const DEFAULT_POSITION: Position = { x: 0, y: 0 };

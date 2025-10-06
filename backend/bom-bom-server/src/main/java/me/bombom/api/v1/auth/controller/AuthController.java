@@ -1,6 +1,5 @@
 package me.bombom.api.v1.auth.controller;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -45,11 +44,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 public class AuthController implements AuthControllerApi{
 
+    private static final String JSESSIONID = "JSESSIONID";
+
     private final MemberService memberService;
     private final AppleOAuth2Service appleOAuth2Service;
     private final GoogleOAuth2LoginService googleOAuth2LoginService;
     private final UniqueUserInfoGenerator uniqueUserInfoGenerator;
     private final SessionManager sessionManager;
+    private final CookieManager cookieManager;
 
     @Override
     @PostMapping("/signup")
@@ -112,7 +114,7 @@ public class AuthController implements AuthControllerApi{
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         sessionManager.clearAuth(request);
-        expireSessionCookie(response);
+        cookieManager.delete(response, JSESSIONID);
     }
 
     @Override
@@ -145,7 +147,7 @@ public class AuthController implements AuthControllerApi{
 
         memberService.withdraw(member.getId());
         sessionManager.clearAuth(request);
-        expireSessionCookie(response);
+        cookieManager.delete(response, JSESSIONID);
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 
@@ -180,17 +182,7 @@ public class AuthController implements AuthControllerApi{
         }
     }
 
-    private void expireSessionCookie(HttpServletResponse response) {
-        Cookie jsid = new Cookie("JSESSIONID", "");
-        jsid.setMaxAge(0);
-        jsid.setPath("/");
-        jsid.setHttpOnly(true);
-        jsid.setSecure(true);
-        response.addCookie(jsid);
-        // Ensure SameSite=None for cross-site
-        response.addHeader("Set-Cookie", "JSESSIONID=; Max-Age=0; Path=/; Secure; HttpOnly; SameSite=None");
-    }
-
+    //TODO: 이거도 분리하자
     private OAuth2AuthenticationToken createAuthenticationToken(Member member) {
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("name", member.getNickname());

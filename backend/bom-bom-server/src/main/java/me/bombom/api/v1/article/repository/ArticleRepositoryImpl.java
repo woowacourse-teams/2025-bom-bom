@@ -8,6 +8,7 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
@@ -18,8 +19,8 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.dto.response.QArticleResponse;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -121,7 +122,18 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     }
 
     private BooleanExpression createKeywordWhereClause(String keyword) {
-        return StringUtils.hasText(keyword) ? article.title.like("%" + keyword.strip() + "%") : null;
+        if (!StringUtils.hasText(keyword)) {
+            return null;
+        }
+        
+        String cleanKeyword = keyword.strip();
+        // BOOLEAN MODE에서 와일드카드 사용으로 부분 검색 지원
+        String wildcardKeyword = cleanKeyword + "*";
+        
+        return Expressions.booleanTemplate(
+            "MATCH({0}) AGAINST({1} IN BOOLEAN MODE)",
+            article.title, wildcardKeyword
+        );
     }
   
     private List<OrderSpecifier<?>> getOrderSpecifiers(Pageable pageable) {

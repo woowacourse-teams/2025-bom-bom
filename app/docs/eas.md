@@ -1,5 +1,7 @@
 # eas
 
+- eas는 `npm i -g eas-cli` 로 설치후, eas 명령어로 실행합니다.
+
 ### eas 환경 세팅
 
 1. eas 로그인

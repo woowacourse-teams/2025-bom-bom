@@ -1,5 +1,8 @@
 import { ENV } from '@/constants/env';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import {
+  ConfigureParams,
+  GoogleSignin,
+} from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Platform } from 'react-native';
 
@@ -20,12 +23,12 @@ export const loginWithGoogle = async (
     provider,
   }: LoginWithGoogleCallback) => void,
 ): Promise<void> => {
-  const defaultConfig = {
+  const defaultConfig: ConfigureParams = {
     offlineAccess: false,
-    hostedDomain: '',
+    hostedDomain: 'bombom.news',
     forceCodeForRefreshToken: false,
-    accountName: '',
-    googleServicePlistPath: '',
+    accountName: 'bombom',
+    googleServicePlistPath: 'GoogleService-Info.plist',
     profileImageSize: 120,
   };
   if (Platform.OS === 'ios') {

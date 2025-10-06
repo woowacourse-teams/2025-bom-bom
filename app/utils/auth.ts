@@ -1,10 +1,6 @@
 import { ENV } from '@/constants/env';
-import {
-  ConfigureParams,
-  GoogleSignin,
-} from '@react-native-google-signin/google-signin';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { Platform } from 'react-native';
 
 interface LoginWithGoogleCallback {
   identityToken: string;
@@ -23,26 +19,14 @@ export const loginWithGoogle = async (
     provider,
   }: LoginWithGoogleCallback) => void,
 ): Promise<void> => {
-  const defaultConfig: ConfigureParams = {
+  GoogleSignin.configure({
     offlineAccess: false,
-    hostedDomain: '',
     forceCodeForRefreshToken: false,
     accountName: '봄봄',
-    googleServicePlistPath: 'GoogleService-Info.plist',
     profileImageSize: 120,
-  };
-  if (Platform.OS === 'ios') {
-    GoogleSignin.configure({
-      ...defaultConfig,
-      webClientId: ENV.webClientId,
-      iosClientId: ENV.iosClientId,
-    });
-  } else {
-    GoogleSignin.configure({
-      ...defaultConfig,
-      webClientId: ENV.webClientId,
-    });
-  }
+    webClientId: ENV.webClientId,
+    iosClientId: ENV.iosClientId,
+  });
 
   await GoogleSignin.hasPlayServices();
 

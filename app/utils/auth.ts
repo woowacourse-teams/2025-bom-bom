@@ -25,16 +25,16 @@ export const loginWithGoogle = async (
 ): Promise<void> => {
   const defaultConfig: ConfigureParams = {
     offlineAccess: false,
-    hostedDomain: 'bombom.news',
+    hostedDomain: '',
     forceCodeForRefreshToken: false,
-    accountName: 'bombom',
+    accountName: '봄봄',
     googleServicePlistPath: 'GoogleService-Info.plist',
     profileImageSize: 120,
   };
   if (Platform.OS === 'ios') {
     GoogleSignin.configure({
       ...defaultConfig,
-      webClientId: ENV.iosClientId,
+      webClientId: ENV.webClientId,
       iosClientId: ENV.iosClientId,
     });
   } else {

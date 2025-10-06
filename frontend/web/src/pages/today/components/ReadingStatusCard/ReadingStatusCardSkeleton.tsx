@@ -1,3 +1,4 @@
+import { theme } from '@bom-bom/shared';
 import styled from '@emotion/styled';
 import {
   Container,
@@ -8,7 +9,6 @@ import {
 import ProgressWithLabelSkeleton from '@/components/ProgressWithLabel/ProgressWithLabelSkeleton';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import { useDevice } from '@/hooks/useDevice';
-import { theme } from '@/styles/theme';
 import StatusIcon from '#/assets/svg/reading-status.svg';
 
 const ReadingStatusCardSkeleton = () => {

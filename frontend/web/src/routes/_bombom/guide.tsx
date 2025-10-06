@@ -1,3 +1,4 @@
+import { theme } from '@bom-bom/shared';
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import { useDevice } from '@/hooks/useDevice';
@@ -7,7 +8,6 @@ import {
 } from '@/pages/guide-detail/constants/guideMail';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
-import { theme } from '@/styles/theme';
 import { createStorage } from '@/utils/localStorage';
 import type { Device } from '@/hooks/useDevice';
 import type { LocalGuideMail } from '@/types/guide';

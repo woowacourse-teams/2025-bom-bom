@@ -1,3 +1,4 @@
+import { theme } from '@bom-bom/shared';
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
 import RequireLogin from '@/hocs/RequireLogin';
@@ -8,7 +9,6 @@ import NewsletterFilterSkeleton from '@/pages/storage/components/NewsletterFilte
 import PCStorageContent from '@/pages/storage/components/PCStorageContent/PCStorageContent';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import { useStorageFilters } from '@/pages/storage/hooks/useStorageFilters';
-import { theme } from '@/styles/theme';
 import StorageIcon from '#/assets/svg/storage.svg';
 
 export const Route = createFileRoute('/_bombom/storage')({

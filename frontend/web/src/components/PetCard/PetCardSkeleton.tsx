@@ -1,3 +1,4 @@
+import { theme } from '@bom-bom/shared';
 import styled from '@emotion/styled';
 import {
   attendanceButtonStyles,
@@ -10,7 +11,6 @@ import {
 import ProgressBarSkeleton from '../ProgressBar/ProgressBarSkeleton';
 import Skeleton from '../Skeleton/Skeleton';
 import { useDevice } from '@/hooks/useDevice';
-import { theme } from '@/styles/theme';
 import type { Device } from '@/hooks/useDevice';
 import PetIcon from '#/assets/svg/pet.svg';
 

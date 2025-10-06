@@ -1,3 +1,4 @@
+import { theme } from '@bom-bom/shared';
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -10,7 +11,6 @@ import { queries } from '@/apis/queries';
 import Carousel from '@/components/Carousel/Carousel';
 import ArrowIcon from '@/components/icons/ArrowIcon';
 import Tooltip from '@/components/Tooltip/Tooltip';
-import { theme } from '@/styles/theme';
 import ReadingKingHelpIcon from '#/assets/svg/help.svg';
 
 const ReadingKingLeaderboard = () => {

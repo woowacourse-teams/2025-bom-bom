@@ -1,3 +1,4 @@
+import { theme } from '@bom-bom/shared';
 import styled from '@emotion/styled';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -8,7 +9,6 @@ import ProgressBar from '../ProgressBar/ProgressBar';
 import { postPetAttendance } from '@/apis/pet';
 import { useDevice } from '@/hooks/useDevice';
 import { queryClient } from '@/main';
-import { theme } from '@/styles/theme';
 import { calculateRate } from '@/utils/math';
 import type { GetPetResponse } from '@/apis/pet';
 import type { Device } from '@/hooks/useDevice';

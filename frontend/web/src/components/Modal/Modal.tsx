@@ -1,5 +1,5 @@
+import { theme } from '@bom-bom/shared';
 import styled from '@emotion/styled';
-import { theme } from '@/styles/theme';
 import type { PropsWithChildren, Ref } from 'react';
 import CloseIcon from '#/assets/svg/close.svg';
 

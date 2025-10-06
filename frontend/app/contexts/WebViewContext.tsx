@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { WebView } from 'react-native-webview';
 
-import { RNToWebMessage } from '../types/webview';
+import { RNToWebMessage } from '@bom-bom/shared';
 
 export interface WebViewContextType {
   webViewRef: RefObject<WebView | null>;

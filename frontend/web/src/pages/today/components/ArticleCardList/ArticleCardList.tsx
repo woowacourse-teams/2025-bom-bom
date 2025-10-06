@@ -1,9 +1,9 @@
+import { theme } from '@bom-bom/shared';
 import styled from '@emotion/styled';
 import ArticleCard from '../ArticleCard/ArticleCard';
 import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
 import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { theme } from '@/styles/theme';
 import type { Article } from '@/types/articles';
 import CheckIcon from '#/assets/svg/check.svg';
 import LetterIcon from '#/assets/svg/letter.svg';

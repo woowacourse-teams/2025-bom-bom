@@ -1,5 +1,5 @@
+import { theme } from '@bom-bom/shared';
 import styled from '@emotion/styled';
-import { theme } from '@/styles/theme';
 import type { ComponentProps } from 'react';
 import ReadingGlassesIcon from '#/assets/svg/reading-glasses.svg';
 

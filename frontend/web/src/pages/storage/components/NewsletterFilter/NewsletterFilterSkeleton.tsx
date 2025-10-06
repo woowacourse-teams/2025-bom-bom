@@ -1,3 +1,4 @@
+import { theme } from '@bom-bom/shared';
 import {
   Container,
   IconWrapper,
@@ -7,7 +8,6 @@ import {
 } from './NewsletterFilter';
 import TabSkeleton from '@/components/Tab/TabSkeleton';
 import { useDevice } from '@/hooks/useDevice';
-import { theme } from '@/styles/theme';
 import NewsIcon from '#/assets/svg/news.svg';
 
 const SKELETON_LENGTH = {

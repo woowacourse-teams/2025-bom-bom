@@ -1,8 +1,8 @@
+import { theme } from '@bom-bom/shared';
 import styled from '@emotion/styled';
 import { useEffect, useRef, useState } from 'react';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { theme } from '@/styles/theme';
 import DeleteIcon from '#/assets/svg/delete.svg';
 
 interface EditableMemoCardProps {

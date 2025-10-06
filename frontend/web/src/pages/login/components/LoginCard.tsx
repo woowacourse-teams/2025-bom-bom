@@ -1,8 +1,8 @@
+import { theme } from '@bom-bom/shared';
 import styled from '@emotion/styled';
 import { ENV } from '@/apis/env';
 import { useDevice } from '@/hooks/useDevice';
 import { isWeb, isIOS } from '@/libs/webview/webview.utils';
-import { theme } from '@/styles/theme';
 import { isLocal } from '@/utils/environment';
 import AppleIcon from '#/assets/svg/apple.svg';
 import GoogleIcon from '#/assets/svg/google.svg';

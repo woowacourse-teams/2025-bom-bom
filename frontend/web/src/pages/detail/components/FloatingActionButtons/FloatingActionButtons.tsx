@@ -1,6 +1,6 @@
+import { theme } from '@bom-bom/shared';
 import styled from '@emotion/styled';
 import ChevronIcon from '@/components/icons/ChevronIcon';
-import { theme } from '@/styles/theme';
 import BookmarkActiveIcon from '#/assets/svg/bookmark-active.svg';
 import BookmarkInactiveIcon from '#/assets/svg/bookmark-inactive.svg';
 

@@ -1,3 +1,4 @@
+import { theme } from '@bom-bom/shared';
 import styled from '@emotion/styled';
 import { ELLIPSIS } from './Pagination.constants';
 import {
@@ -7,7 +8,6 @@ import {
   shouldShowPagination,
 } from './Pagination.utils';
 import ChevronIcon from '../icons/ChevronIcon';
-import { theme } from '@/styles/theme';
 
 interface PaginationProps {
   currentPage: number;

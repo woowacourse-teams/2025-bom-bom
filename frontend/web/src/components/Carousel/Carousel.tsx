@@ -1,9 +1,9 @@
+import { theme } from '@bom-bom/shared';
 import styled from '@emotion/styled';
 import { Children } from 'react';
 import { DEFAULT_SPEED } from './Carousel.constants';
 import useCarousel from './useCarousel';
 import ChevronIcon from '../icons/ChevronIcon';
-import { theme } from '@/styles/theme';
 import type { PropsWithChildren } from 'react';
 
 type SlideButtonPosition = 'middle' | 'bottom';

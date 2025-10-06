@@ -1,9 +1,9 @@
+import { theme } from '@bom-bom/shared';
 import {
   getNodeByXPath,
   getTextNodesInRange,
   getXPathForNode,
 } from './selection';
-import { theme } from '@/styles/theme';
 import { logger } from '@/utils/logger';
 import type { Highlight } from '../types/highlight';
 

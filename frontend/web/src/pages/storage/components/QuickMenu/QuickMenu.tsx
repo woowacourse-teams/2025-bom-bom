@@ -1,3 +1,4 @@
+import { theme } from '@bom-bom/shared';
 import styled from '@emotion/styled';
 import { useLocation, useNavigate } from '@tanstack/react-router';
 import { MENU_ITEMS } from './QuickMenu.constants';
@@ -5,7 +6,6 @@ import FloatingActionButton from '@/components/FloatingActionButton/FloatingActi
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
 import { useDevice } from '@/hooks/useDevice';
-import { theme } from '@/styles/theme';
 import type { Device } from '@/hooks/useDevice';
 import LinkIcon from '#/assets/svg/link.svg';
 

@@ -1,9 +1,9 @@
+import { theme } from '@bom-bom/shared';
 import styled from '@emotion/styled';
 import Badge from '@/components/Badge/Badge';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
 import { useDevice } from '@/hooks/useDevice';
-import { theme } from '@/styles/theme';
 import type { Newsletter } from '@/types/articles';
 import NewsIcon from '#/assets/svg/news.svg';
 

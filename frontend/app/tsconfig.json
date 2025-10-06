@@ -3,21 +3,24 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "NodeNext",
-    "lib": ["ES2020", "DOM"],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "declaration": true,
     "declarationMap": true,
     "outDir": "./dist",
     "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,
+    "jsxImportSource": "@emotion/react",
+    "allowUmdGlobalAccess": true,
+    "allowImportingTsExtensions": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "nodenext",
     "resolveJsonModule": true,
-    "types": [],
+    "types": ["./emotion.d.ts", "jest", "node"],
     "paths": {
       "@/*": ["./*"]
     }
   },
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts", "**/*.tsx"]
 }

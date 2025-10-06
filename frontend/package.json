@@ -18,7 +18,7 @@
     "shared:build": "npm run build --workspace=shared",
     "type-check": "npm run type-check --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
-    "format": "npm run format --workspaces --if-present"
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "prettier": "^3.6.2",

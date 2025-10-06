@@ -5,7 +5,6 @@ export const ENV = {
   androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? '',
 
   // Web URLs
-  localWebUrl: process.env.EXPO_PUBLIC_LOCAL_WEB_URL ?? '',
   devWebUrl: process.env.EXPO_PUBLIC_DEV_WEB_URL ?? '',
   prodWebUrl: process.env.EXPO_PUBLIC_PROD_WEB_URL ?? '',
 } as const;

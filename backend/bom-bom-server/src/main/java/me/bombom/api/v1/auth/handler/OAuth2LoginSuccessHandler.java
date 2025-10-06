@@ -2,20 +2,19 @@ package me.bombom.api.v1.auth.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.auth.controller.SessionManager;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.dto.OAuth2LoginInfo;
 import me.bombom.api.v1.auth.extractor.AppleUserInfoExtractor;
 import me.bombom.api.v1.auth.extractor.GoogleUserInfoExtractor;
 import me.bombom.api.v1.auth.extractor.OAuth2UserInfoExtractor;
 import me.bombom.api.v1.auth.util.UniqueUserInfoGenerator;
-import me.bombom.api.v1.auth.util.UserInfoValidator;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
@@ -23,7 +22,6 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.service.MemberService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -44,6 +42,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private static final String EMAIL_PARAM = "email";
     private static final String NAME_PARAM = "name";
 
+    private final SessionManager sessionManager;
+
     @Value("${frontend.base-url}")
     private String frontendBaseUrl;
 
@@ -51,7 +51,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private String frontendLocalUrl;
 
     private final MemberService memberService;
-    private final UserInfoValidator userInfoValidator;
     private final UniqueUserInfoGenerator uniqueUserInfoGenerator;
 
     @Override
@@ -60,9 +59,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             HttpServletResponse response,
             Authentication authentication
     ) throws IOException {
-        HttpSession session = request.getSession();
-        Boolean pendingWithdraw = (Boolean) session.getAttribute("pendingWithdraw");
-        Long withdrawMemberId = (Long) session.getAttribute("withdrawMemberId");
+        Boolean pendingWithdraw = (Boolean) sessionManager.getAttribute(request, "pendingWithdraw");
+        Long withdrawMemberId = (Long) sessionManager.getAttribute(request, "withdrawMemberId");
 
         // === 탈퇴 처리 ===
         if (pendingWithdraw != null && pendingWithdraw && withdrawMemberId != null) {
@@ -82,9 +80,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         } catch (Exception e) {
             log.error("재인증 후 탈퇴 처리 중 예외 발생 - memberId: {}", withdrawMemberId, e);
         } finally {
-            HttpSession session = request.getSession();
-            session.invalidate();
-            SecurityContextHolder.clearContext();
+            sessionManager.clearAuth(request);
             response.sendRedirect(getBaseUrlByEnv(request));
         }
     }
@@ -160,11 +156,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     }
 
     private String getBaseUrlByEnv(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        String env = session != null ? (String) session.getAttribute("env") : null;
-        if (LOCAL_ENV.equals(env)) {
-            return frontendLocalUrl;
-        }
-        return frontendBaseUrl;
+        String env = (String) sessionManager.getAttribute(request, "env");
+        return LOCAL_ENV.equals(env) ? frontendLocalUrl : frontendBaseUrl;
     }
 }

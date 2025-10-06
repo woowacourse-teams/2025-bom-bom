@@ -18,21 +18,18 @@ export const useWebViewAuth = () => {
     const cleanup = addWebViewMessageListener(
       async (message: RNToWebMessage) => {
         if (message.type === 'GOOGLE_LOGIN_TOKEN') {
-          if (
-            !message.payload?.identityToken ||
-            !message.payload?.authorizationCode
-          )
-            return;
+          if (!message.payload.identityToken)
+            throw new Error('Google 로그인 정보가 없습니다.');
 
           try {
             const response = await postGoogleLogin({
               identityToken: message.payload.identityToken,
-              authorizationCode: message.payload.authorizationCode,
-              email: message.payload.email ?? '',
-              nickname: message.payload.name ?? '',
+              authorizationCode: message.payload.authorizationCode ?? '',
+              email: message.payload.email,
+              nickname: message.payload.name,
             });
 
-            if (!response) return;
+            if (!response) throw new Error('Google 로그인 실패');
 
             sendMessageToRN({
               type: 'LOGIN_SUCCESS',
@@ -65,21 +62,18 @@ export const useWebViewAuth = () => {
             });
           }
         } else if (message.type === 'APPLE_LOGIN_TOKEN') {
-          if (
-            !message.payload?.identityToken ||
-            !message.payload?.authorizationCode
-          )
-            return;
+          if (!message.payload.identityToken)
+            throw new Error('Apple 로그인 정보가 없습니다.');
 
           try {
             const response = await postAppleLogin({
               identityToken: message.payload.identityToken,
               authorizationCode: message.payload.authorizationCode,
-              email: message.payload.email ?? '',
-              nickname: message.payload.name ?? '',
+              email: message.payload.email,
+              nickname: message.payload.name,
             });
 
-            if (!response) return;
+            if (!response) throw new Error('Apple 로그인 실패');
 
             sendMessageToRN({
               type: 'LOGIN_SUCCESS',

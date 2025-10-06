@@ -31,7 +31,7 @@ export const LoginScreen = () => {
               identityToken,
               authorizationCode,
               email,
-              name,
+              name: name ?? '',
             },
           });
         },
@@ -52,7 +52,7 @@ export const LoginScreen = () => {
               identityToken,
               authorizationCode,
               email,
-              name,
+              name: name ?? '',
             },
           });
         },

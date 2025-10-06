@@ -15,21 +15,19 @@ export type RNToWebMessage =
   | {
       type: 'GOOGLE_LOGIN_TOKEN';
       payload: {
-        token: string;
-        identityToken?: string;
+        identityToken: string;
         authorizationCode?: string;
-        email?: string;
-        name?: string;
+        email: string;
+        name: string;
       };
     }
   | {
       type: 'APPLE_LOGIN_TOKEN';
       payload: {
-        token: string;
-        identityToken?: string;
-        authorizationCode?: string;
-        email?: string;
-        name?: string;
+        identityToken: string;
+        authorizationCode: string;
+        email: string;
+        name: string;
       };
     };
 

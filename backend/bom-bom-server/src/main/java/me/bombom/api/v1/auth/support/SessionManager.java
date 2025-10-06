@@ -1,4 +1,4 @@
-package me.bombom.api.v1.auth.controller;
+package me.bombom.api.v1.auth.support;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;

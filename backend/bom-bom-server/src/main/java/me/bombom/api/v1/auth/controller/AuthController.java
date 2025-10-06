@@ -19,6 +19,8 @@ import me.bombom.api.v1.auth.enums.OAuth2Provider;
 import me.bombom.api.v1.auth.enums.SignupValidateStatus;
 import me.bombom.api.v1.auth.service.AppleOAuth2Service;
 import me.bombom.api.v1.auth.service.GoogleOAuth2LoginService;
+import me.bombom.api.v1.auth.support.CookieManager;
+import me.bombom.api.v1.auth.support.SessionManager;
 import me.bombom.api.v1.auth.util.UniqueUserInfoGenerator;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;

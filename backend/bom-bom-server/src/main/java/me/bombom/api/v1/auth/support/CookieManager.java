@@ -1,4 +1,4 @@
-package me.bombom.api.v1.auth.controller;
+package me.bombom.api.v1.auth.support;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;

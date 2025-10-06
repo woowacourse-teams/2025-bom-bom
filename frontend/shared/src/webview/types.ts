@@ -1,5 +1,3 @@
-// Discriminated union types for type-safe WebView messaging
-
 export type WebToRNMessage =
   | { type: 'SHOW_LOGIN_SCREEN' }
   | {

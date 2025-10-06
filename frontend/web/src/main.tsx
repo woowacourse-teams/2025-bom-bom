@@ -10,7 +10,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ENV } from './apis/env.ts';
 import GAInitializer from './libs/googleAnalytics/GAInitializer.tsx';
-import { routeTree } from './routeTree.gen';
+import { routeTree } from './routeTree.gen.ts';
 import reset from './styles/reset.ts';
 import { isDevelopment, isProduction } from './utils/environment.ts';
 
@@ -40,7 +40,7 @@ declare module '@tanstack/react-router' {
 
 async function enableMocking() {
   if (ENV.enableMsw === 'true') {
-    const { worker } = await import('./mocks/browser');
+    const { worker } = await import('./mocks/browser.ts');
 
     return worker.start({
       onUnhandledRequest: 'bypass',

@@ -6,7 +6,10 @@ let isFirstVisit = true;
 
 export const Route = createFileRoute('/_bombom')({
   component: RouteComponent,
-  beforeLoad: async ({ context, location }) => {
+  beforeLoad: async ({
+    context,
+    location,
+  }): Promise<void | ReturnType<typeof redirect>> => {
     const { queryClient } = context;
 
     if (location.pathname === '/') {

@@ -1,0 +1,24 @@
+{
+  "name": "bom-bom-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "frontend:start": "npm run start --workspace=packages/frontend",
+    "frontend:build": "npm run build --workspace=packages/frontend",
+    "frontend:lint": "npm run lint --workspace=packages/frontend",
+    "frontend:test": "npm run test --workspace=packages/frontend",
+    "app:start": "npm run start --workspace=packages/app",
+    "app:android": "npm run android --workspace=packages/app",
+    "app:ios": "npm run ios --workspace=packages/app",
+    "shared:build": "npm run build --workspace=packages/shared",
+    "type-check": "npm run type-check --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  }
+}

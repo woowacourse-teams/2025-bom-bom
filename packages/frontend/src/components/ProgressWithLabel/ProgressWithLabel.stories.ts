@@ -1,0 +1,48 @@
+import ProgressWithLabel from './ProgressWithLabel';
+import type { Meta, StoryObj } from '@storybook/react-webpack5';
+import CompassIcon from '#/assets/svg/compass.svg';
+
+const meta = {
+  title: 'components/common/ProgressWithLabel',
+  component: ProgressWithLabel,
+  args: {
+    Icon: CompassIcon,
+  },
+} satisfies Meta<typeof ProgressWithLabel>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  args: {
+    label: '[제목]',
+    value: {
+      currentCount: 3,
+      totalCount: 4,
+    },
+    description: '[설명]',
+  },
+};
+
+export const DailyProgress: Story = {
+  args: {
+    label: '오늘의 진행률',
+    value: {
+      currentCount: 3,
+      totalCount: 4,
+    },
+    description: '목표까지 조금 더!',
+  },
+};
+
+export const WeeklyProgress: Story = {
+  args: {
+    label: '주간 목표',
+    value: {
+      currentCount: 3,
+      totalCount: 4,
+    },
+    description: '목표까지 1개 남음',
+    rateFormat: 'ratio',
+  },
+};

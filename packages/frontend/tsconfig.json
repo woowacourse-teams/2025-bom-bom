@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "es6",
+    "module": "esnext",
+    "strict": true,
+    "skipLibCheck": true,
+    "moduleResolution": "Bundler",
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "jsxImportSource": "@emotion/react",
+    "jsx": "react-jsx",
+    "allowUmdGlobalAccess": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "types": ["./emotion.d.ts", "jest", "node"],
+    "paths": {
+      "@/*": ["src/*"],
+      "#/*": ["public/*"]
+    }
+  },
+  "include": ["src", ".storybook/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

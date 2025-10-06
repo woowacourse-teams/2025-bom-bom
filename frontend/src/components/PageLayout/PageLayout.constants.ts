@@ -1,2 +1,0 @@
-export const MOBILE_HORIZONTAL_PADDING = 12;
-export const PC_HORIZONTAL_PADDING = 24;

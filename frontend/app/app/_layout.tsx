@@ -1,6 +1,6 @@
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';

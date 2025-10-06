@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
-import React from 'react';
+
 import { isWebView } from '@/libs/webview/webview.utils';
 import { openExternalLink } from '@/utils/externalLink';
 import type { ReactNode } from 'react';

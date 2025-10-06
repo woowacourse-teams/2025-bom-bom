@@ -1,5 +1,5 @@
 import styled from '@emotion/native';
-import React from 'react';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 

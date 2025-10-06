@@ -1,6 +1,6 @@
 import styled from '@emotion/native';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+
 import {
   Dimensions,
   KeyboardAvoidingView,
@@ -14,6 +14,7 @@ import { GoogleIcon } from '@/components/icons/GoogleIcon';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWebView } from '@/contexts/WebViewContext';
 import { loginWithApple, loginWithGoogle } from '@/utils/auth';
+import { theme } from '@bom-bom/shared';
 
 export const LoginScreen = () => {
   const { showLogin } = useAuth();
@@ -74,7 +75,11 @@ export const LoginScreen = () => {
           <MainCard>
             <GreetingWrapper>
               <IconContainer>
-                <Ionicons name="sparkles" size={24} color="#FFFFFF" />
+                <Ionicons
+                  name="sparkles"
+                  size={24}
+                  color={theme.colors.white}
+                />
               </IconContainer>
               <Title>봄봄에 오신 걸 환영해요</Title>
               <Subtitle>

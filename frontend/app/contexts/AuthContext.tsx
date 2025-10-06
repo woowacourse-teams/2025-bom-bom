@@ -1,9 +1,4 @@
-import React, {
-  createContext,
-  PropsWithChildren,
-  useContext,
-  useState,
-} from 'react';
+import { createContext, PropsWithChildren, useContext, useState } from 'react';
 
 export interface AuthContextType {
   showWebViewLogin: boolean;

@@ -1,5 +1,5 @@
 import styled from '@emotion/native';
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { ActivityIndicator, TextStyle, ViewStyle } from 'react-native';
 
 interface ButtonProps {

@@ -1,12 +1,11 @@
 {
-  "name": "@bom-bom/shared",
+  "name": "shared",
+  "private": true,
   "version": "1.0.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
     "type-check": "tsc --noEmit",
-    "lint": "eslint src --ext .ts,.tsx,.js,.jsx",
-    "lint:fix": "eslint src --ext .ts,.tsx,.js,.jsx --fix",
     "format": "prettier --write ."
   }
 }

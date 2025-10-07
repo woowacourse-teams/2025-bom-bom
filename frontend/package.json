@@ -18,8 +18,7 @@
     "format": "pnpm -r format"
   },
   "devDependencies": {
-    "prettier": "^3.6.2",
-    "typescript": "^5.8.3"
+    "prettier": "^3.6.2"
   },
   "packageManager": "pnpm@10.12.1"
 }

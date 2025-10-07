@@ -81,7 +81,7 @@
     "webpack-dev-server": "^5.2.2"
   },
   "dependencies": {
-    "@bom-bom/shared": "*",
+    "shared": "*",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@microsoft/clarity": "^1.0.0",

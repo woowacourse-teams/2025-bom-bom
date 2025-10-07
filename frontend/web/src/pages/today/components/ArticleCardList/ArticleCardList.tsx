@@ -1,4 +1,4 @@
-import { theme } from '@bom-bom/shared';
+import { theme } from 'shared';
 import styled from '@emotion/styled';
 import ArticleCard from '../ArticleCard/ArticleCard';
 import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';

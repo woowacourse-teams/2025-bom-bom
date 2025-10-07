@@ -1,6 +1,6 @@
 import { Global, ThemeProvider } from '@emotion/react';
 import type { Preview, Decorator } from '@storybook/react-webpack5';
-import { theme } from '@bom-bom/shared';
+import { theme } from 'shared';
 import reset from '@/styles/reset.ts';
 import {
   createRouter,

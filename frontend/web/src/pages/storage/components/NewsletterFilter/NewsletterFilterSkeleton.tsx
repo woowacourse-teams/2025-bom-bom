@@ -1,4 +1,4 @@
-import { theme } from '@bom-bom/shared';
+import { theme } from 'shared';
 import {
   Container,
   IconWrapper,

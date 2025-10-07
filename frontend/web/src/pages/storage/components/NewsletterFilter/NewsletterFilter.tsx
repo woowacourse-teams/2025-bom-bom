@@ -1,4 +1,4 @@
-import { theme } from '@bom-bom/shared';
+import { theme } from 'shared';
 import styled from '@emotion/styled';
 import Badge from '@/components/Badge/Badge';
 import Tab from '@/components/Tab/Tab';

@@ -6,7 +6,7 @@ import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWebView } from '../../contexts/WebViewContext';
 import useAndroidNavigationState from '../../hooks/useAndroidNavigationState';
-import { WebToRNMessage } from '@bom-bom/shared';
+import { WebToRNMessage } from 'shared';
 import { LoginScreenOverlay } from '../login/LoginScreenOverlay';
 
 import * as WebBrowser from 'expo-web-browser';

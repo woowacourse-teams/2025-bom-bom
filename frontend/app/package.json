@@ -15,7 +15,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@bom-bom/shared": "*",
+    "shared": "*",
     "@emotion/native": "^11.11.0",
     "@emotion/react": "^11.14.0",
     "@expo/vector-icons": "^15.0.2",

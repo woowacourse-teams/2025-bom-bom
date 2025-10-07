@@ -3,7 +3,7 @@ import type {
   RNToWebMessage,
   WebToRNMessage,
   WindowWithWebkit,
-} from '@bom-bom/shared';
+} from 'shared';
 
 export const isAndroid = (): boolean => !!window.ReactNativeWebView;
 export const isIOS = (): boolean =>

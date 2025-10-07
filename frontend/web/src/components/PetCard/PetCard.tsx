@@ -1,4 +1,4 @@
-import { theme } from '@bom-bom/shared';
+import { theme } from 'shared';
 import styled from '@emotion/styled';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';

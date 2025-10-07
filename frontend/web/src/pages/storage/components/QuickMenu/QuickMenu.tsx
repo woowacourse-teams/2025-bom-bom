@@ -1,4 +1,4 @@
-import { theme } from '@bom-bom/shared';
+import { theme } from 'shared';
 import styled from '@emotion/styled';
 import { useLocation, useNavigate } from '@tanstack/react-router';
 import { MENU_ITEMS } from './QuickMenu.constants';

@@ -1,4 +1,4 @@
-import { theme } from '@bom-bom/shared';
+import { theme } from 'shared';
 import styled from '@emotion/styled';
 import FloatingActionButton from './FloatingActionButton';
 import type { Meta, StoryObj } from '@storybook/react-webpack5';

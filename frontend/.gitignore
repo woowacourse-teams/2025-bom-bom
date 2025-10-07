@@ -1,7 +1,14 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# common
+.env*
 
-# dependencies
-node_modules/
+# npm
+node_modules
+
+# Web
+dist
+playwright
+playwright-report
+test-results
 
 # Expo
 android/
@@ -10,6 +17,7 @@ ios/
 dist/
 web-build/
 expo-env.d.ts
+
 
 # Native
 .kotlin/
@@ -34,7 +42,7 @@ yarn-error.*
 
 # local env files
 .env
-.env*.local
+
 
 # typescript
 *.tsbuildinfo

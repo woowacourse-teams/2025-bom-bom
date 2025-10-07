@@ -2,22 +2,17 @@
   "name": "frontend",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "web",
-    "app",
-    "shared"
-  ],
   "scripts": {
-    "web:start": "npm run start --workspace=web",
-    "web:build": "npm run build --workspace=web",
-    "web:lint": "npm run lint --workspace=web",
-    "web:test": "npm run test --workspace=web",
-    "app:start": "npm run start --workspace=app",
-    "app:android": "npm run android --workspace=app",
-    "app:ios": "npm run ios --workspace=app",
-    "shared:build": "npm run build --workspace=shared",
-    "type-check": "npm run type-check --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present",
+    "web:start": "pnpm run start --workspace=web",
+    "web:build": "pnpm run build --workspace=web",
+    "web:lint": "pnpm run lint --workspace=web",
+    "web:test": "pnpm run test --workspace=web",
+    "app:start": "pnpm run start --workspace=app",
+    "app:android": "pnpm run android --workspace=app",
+    "app:ios": "pnpm run ios --workspace=app",
+    "shared:build": "pnpm run build --workspace=shared",
+    "type-check": "pnpm run type-check",
+    "lint": "pnpm run lint",
     "format": "prettier --write ."
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
-import { theme } from 'shared';
 import { ThemeProvider } from '@emotion/react';
+import { theme } from 'shared';
 import Toast from './Toast';
 import Button from '../Button/Button';
 import { toast } from './utils/toastActions';

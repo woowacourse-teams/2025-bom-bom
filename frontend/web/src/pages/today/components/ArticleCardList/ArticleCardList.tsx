@@ -1,5 +1,5 @@
-import { theme } from 'shared';
 import styled from '@emotion/styled';
+import { theme } from 'shared';
 import ArticleCard from '../ArticleCard/ArticleCard';
 import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
 import { useDevice } from '@/hooks/useDevice';

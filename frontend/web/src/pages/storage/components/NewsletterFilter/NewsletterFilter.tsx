@@ -1,5 +1,5 @@
-import { theme } from 'shared';
 import styled from '@emotion/styled';
+import { theme } from 'shared';
 import Badge from '@/components/Badge/Badge';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';

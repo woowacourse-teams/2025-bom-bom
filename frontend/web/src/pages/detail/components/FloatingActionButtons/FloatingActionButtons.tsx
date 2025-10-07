@@ -1,5 +1,5 @@
-import { theme } from 'shared';
 import styled from '@emotion/styled';
+import { theme } from 'shared';
 import ChevronIcon from '@/components/icons/ChevronIcon';
 import BookmarkActiveIcon from '#/assets/svg/bookmark-active.svg';
 import BookmarkInactiveIcon from '#/assets/svg/bookmark-inactive.svg';

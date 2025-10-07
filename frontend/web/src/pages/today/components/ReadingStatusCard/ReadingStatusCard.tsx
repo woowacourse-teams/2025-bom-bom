@@ -1,7 +1,7 @@
-import { theme } from 'shared';
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { theme } from 'shared';
 import ReadingStatusCardSkeleton from './ReadingStatusCardSkeleton';
 import WeeklyGoalEditor, { WeeklyGoalInput } from './WeeklyGoalEditor';
 import StreakCounter from '../StreakCounter/StreakCounter';

@@ -1,6 +1,6 @@
-import { theme } from 'shared';
 import styled from '@emotion/styled';
 import { useState } from 'react';
+import { theme } from 'shared';
 import ChevronIcon from '../icons/ChevronIcon';
 import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
 import type { SelectOption } from './Select.types';

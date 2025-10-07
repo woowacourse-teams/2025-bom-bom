@@ -9,8 +9,11 @@ import 'webpack-dev-server';
 
 dotenv.config();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default (env: any, argv: any) => {
+type Env = Record<string, string>;
+type Mode = 'development' | 'production';
+type Argv = { mode: Mode };
+
+export default (env: Env, argv: Argv) => {
   const isProduction = argv.mode === 'production';
 
   const config: webpack.Configuration = {

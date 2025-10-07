@@ -6,6 +6,7 @@ import java.util.List;
 import me.bombom.api.v1.auth.AppleClientSecretGenerator;
 import me.bombom.api.v1.auth.ApplePrivateKeyLoader;
 import me.bombom.api.v1.auth.AppleTokenClient;
+import me.bombom.api.v1.auth.client.AppleAuthClient;
 import me.bombom.api.v1.auth.handler.OAuth2LoginFailureHandler;
 import me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler;
 import me.bombom.api.v1.auth.resolver.AppleAuthorizationRequestResolver;
@@ -137,7 +138,7 @@ public class SecurityConfig {
 
     @Bean
     public OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegatingAccessTokenClient(
-            AppleTokenClient appleClient
+            AppleAuthClient appleClient
     ) {
         var defaultClient = new RestClientAuthorizationCodeTokenResponseClient();
         return request -> {

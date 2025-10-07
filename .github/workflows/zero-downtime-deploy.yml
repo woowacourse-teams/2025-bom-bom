@@ -1,0 +1,252 @@
+name: Backend Prod Server Blue-Green CI/CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: '배포할 버전 태그 (예: v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  # ---------------------------------------------------
+  # 1️⃣ Build & Push
+  # ---------------------------------------------------
+  build:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    outputs:
+      version_tag: ${{ steps.version.outputs.tag }}
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: version
+        run: |
+          INPUT_TAG="${{ github.event.inputs.version_tag }}"
+          if [ -z "$INPUT_TAG" ]; then
+            echo "버전 태그를 입력해주세요 (예: v1.0.0)"
+            exit 1
+          fi
+          VERSION_TAG="server-${INPUT_TAG}"
+          git tag $VERSION_TAG
+          git push origin $VERSION_TAG
+          echo "tag=$VERSION_TAG" >> $GITHUB_OUTPUT
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: gradle
+
+      - run: ./gradlew clean build --no-daemon
+
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker 이미지 빌드 및 푸시
+        run: |
+          VERSION_TAG="${{ steps.version.outputs.tag }}"
+          docker buildx build \
+            --platform linux/arm64,linux/amd64 \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:${VERSION_TAG} \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod \
+            --push .
+
+  # ---------------------------------------------------
+  # 2️⃣ Shift traffic to MAIN (micro 배포 전)
+  # ---------------------------------------------------
+  shift-traffic-to-main:
+    name: Shift Traffic to prod-main (Runtime API)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: micro → main 서버 비활성화
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.LB_HOST }}
+          username: ubuntu
+          key: ${{ secrets.LB_SSH_KEY }}
+          script: |
+            echo "disable server backend_prod/prod-sub" | sudo socat stdio /var/run/haproxy.sock
+            echo "✅ prod-main으로 트래픽 이동 완료"
+
+  # ---------------------------------------------------
+  # 3️⃣ Deploy to prod-sub (micro)
+  # ---------------------------------------------------
+  deploy-sub:
+    name: Deploy Green to prod-sub
+    needs: shift-traffic-to-main
+    runs-on: [ self-hosted, prod-sub ]
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: .env 생성
+        run: |
+          cat <<EOF > .env
+          SPRING_PROFILES_ACTIVE=prod
+          RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
+          DATABASE=${{ secrets.PROD_DATABASE }}
+          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          DOCKER_IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:${{ needs.build.outputs.version_tag }}
+          EOF
+
+      - name: Blue 컨테이너 graceful shutdown
+        run: |
+          sudo docker stop --time=30 $(sudo docker ps -q --filter "name=bom-bom") || true
+
+      - name: Green 컨테이너 실행
+        run: |
+          sudo docker compose -f docker-compose-prod-sub.yml --env-file .env up -d --remove-orphans --force-recreate --pull=always
+
+      - name: Health check + Flyway (/actuator/health)
+        id: sub_health
+        run: |
+          echo "🔍 Green 컨테이너 + Flyway 상태 체크 시작..."
+          SUCCESS_COUNT=0
+          for i in {1..30}; do
+            RESPONSE=$(curl -s http://localhost:8081/actuator/health || true)
+            STATUS=$(echo $RESPONSE | jq -r '.status')
+            DB_STATUS=$(echo $RESPONSE | jq -r '.components.db.status')
+            FLYWAY_STATUS=$(echo $RESPONSE | jq -r '.components.flyway.status // "UNKNOWN"')
+
+            if [ "$STATUS" = "UP" ] && [ "$DB_STATUS" = "UP" ] && [ "$FLYWAY_STATUS" = "UP" ]; then
+              SUCCESS_COUNT=$((SUCCESS_COUNT+1))
+              echo "✅ Healthy + Flyway OK ($SUCCESS_COUNT/10)"
+            else
+              SUCCESS_COUNT=0
+              echo "❌ Unhealthy / Flyway 문제 가능, 카운트 리셋"
+            fi
+
+            if [ "$SUCCESS_COUNT" -ge 10 ]; then
+              echo "🎉 10회 연속 Healthy + Flyway OK!"
+              echo "enable server backend_prod/prod-sub" | sudo socat stdio /var/run/haproxy.sock
+              exit 0
+            fi
+
+            sleep 10
+          done
+
+          echo "❌ 5분 내 10회 연속 Healthy + Flyway 조건 실패"
+          exit 1
+
+  # ---------------------------------------------------
+  # 3️⃣-1️⃣ Rollback Sub (micro) on Failure
+  # ---------------------------------------------------
+  rollback-sub:
+    name: Rollback prod-sub
+    if: failure() && needs.deploy-sub.result != 'success'
+    needs: deploy-sub
+    runs-on: [ self-hosted, prod-sub ]
+    steps:
+      - name: rollback 진행 (Runtime API)
+        run: |
+          echo "⚠️ deploy-sub 실패, rollback 시작..."
+          sudo docker compose -f docker-compose-prod-sub.yml down || true
+          sudo docker compose -f docker-compose-prod-sub.yml --env-file .env up -d bom-bom
+          echo "enable server backend_prod/prod-sub" | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ rollback 완료"
+
+  # ---------------------------------------------------
+  # 4️⃣ Deploy to prod-main
+  # ---------------------------------------------------
+  deploy-main:
+    name: Deploy Green to prod-main
+    needs: [ deploy-sub, rollback-sub ]
+    runs-on: [ self-hosted, prod-main ]
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: .env 생성
+        run: |
+          cat <<EOF > .env
+          SPRING_PROFILES_ACTIVE=prod
+          RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
+          DATABASE=${{ secrets.PROD_DATABASE }}
+          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          DOCKER_IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:${{ needs.build.outputs.version_tag }}
+          EOF
+
+      - name: Blue 컨테이너 graceful shutdown
+        run: |
+          sudo docker stop --time=30 $(sudo docker ps -q --filter "name=bom-bom") || true
+
+      - name: Green 컨테이너 실행
+        run: |
+          sudo docker compose -f docker-compose-prod-main.yml --env-file .env up -d --remove-orphans --force-recreate --pull=always
+
+      - name: Health check + Flyway (/actuator/health)
+        run: |
+          echo "🔍 Green 컨테이너 + Flyway 상태 체크 시작..."
+          SUCCESS_COUNT=0
+          for i in {1..30}; do
+            RESPONSE=$(curl -s http://localhost:8081/actuator/health || true)
+            STATUS=$(echo $RESPONSE | jq -r '.status')
+            DB_STATUS=$(echo $RESPONSE | jq -r '.components.db.status')
+            FLYWAY_STATUS=$(echo $RESPONSE | jq -r '.components.flyway.status // "UNKNOWN"')
+
+            if [ "$STATUS" = "UP" ] && [ "$DB_STATUS" = "UP" ] && [ "$FLYWAY_STATUS" = "UP" ]; then
+              SUCCESS_COUNT=$((SUCCESS_COUNT+1))
+              echo "✅ Healthy + Flyway OK ($SUCCESS_COUNT/10)"
+            else
+              SUCCESS_COUNT=0
+              echo "❌ Unhealthy / Flyway 문제 가능, 카운트 리셋"
+            fi
+
+            if [ "$SUCCESS_COUNT" -ge 10 ]; then
+              echo "🎉 10회 연속 Healthy + Flyway OK!"
+              echo "enable server backend_prod/prod-main" | sudo socat stdio /var/run/haproxy.sock
+              exit 0
+            fi
+
+            sleep 10
+          done
+
+          echo "❌ 5분 내 10회 연속 Healthy + Flyway 조건 실패"
+          exit 1
+
+  # ---------------------------------------------------
+  # 5️⃣ 최종 트래픽 weight 복원 (Runtime API)
+  # ---------------------------------------------------
+  restore-final-traffic:
+    name: Restore Final Traffic Weights
+    needs: deploy-main
+    runs-on: ubuntu-latest
+    steps:
+      - name: HAProxy 트래픽 2:1 복귀
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.LB_HOST }}
+          username: ubuntu
+          key: ${{ secrets.LB_SSH_KEY }}
+          script: |
+            echo "set weight backend_prod/prod-main 2" | sudo socat stdio /var/run/haproxy.sock
+            echo "set weight backend_prod/prod-sub 1"  | sudo socat stdio /var/run/haproxy.sock
+            echo "✅ 최종 트래픽 정상화 완료"

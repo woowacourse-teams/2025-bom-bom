@@ -1,0 +1,28 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 22
+    commands:
+      - echo "Installing dependencies..."
+      - cd ./frontend
+      - npm install -g pnpm
+      - pnpm install --frozen-lockfile
+
+  pre_build:
+    commands:
+      - echo "Running lint..."
+      - pnpm run web:lint
+      - echo "Running type-check..."
+      - pnpm run web:type-check
+
+  build:
+    commands:
+      - echo "Building project..."
+      - pnpm run web:build
+
+artifacts:
+  base-directory: frontend/web/dist
+  files:
+    - '**/*'

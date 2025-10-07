@@ -1,4 +1,7 @@
 name: CI
+defaults:
+  run:
+    working-directory: ./frontend
 on:
   push:
     paths:
@@ -22,13 +25,10 @@ jobs:
           version: 10
 
       - name: Install dependencies
-        working-directory: ./frontend
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        working-directory: ./frontend/web
-        run: pnpm run lint
+        run: pnpm run web:lint
 
       - name: Type check
-        working-directory: ./frontend/web
-        run: pnpm run type-check
+        run: pnpm run web:type-check

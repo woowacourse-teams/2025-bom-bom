@@ -20,9 +20,6 @@ export const loginWithGoogle = async (
   }: LoginWithGoogleCallback) => void,
 ): Promise<void> => {
   GoogleSignin.configure({
-    offlineAccess: false,
-    forceCodeForRefreshToken: false,
-    profileImageSize: 120,
     webClientId: ENV.webClientId,
     iosClientId: ENV.iosClientId,
   });

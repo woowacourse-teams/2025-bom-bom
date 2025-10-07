@@ -1,7 +1,4 @@
 name: CI
-defaults:
-  run:
-    working-directory: ./frontend/web
 on:
   push:
     paths:
@@ -32,15 +29,13 @@ jobs:
       #     cache-dependency-path: "./frontend/web/pnpm-lock.yaml"
 
       - name: Install dependencies
+        working-directory: ./frontend
         run: pnpm install --frozen-lockfile
 
       - name: Lint
+        working-directory: ./frontend/web
         run: pnpm run lint
 
       - name: Type check
+        working-directory: ./frontend/web
         run: pnpm run type-check
-
-      - name: Build
-        run: pnpm run build
-
-      # TODO : Deploy

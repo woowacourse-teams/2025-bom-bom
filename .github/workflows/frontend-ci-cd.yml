@@ -12,30 +12,36 @@ on:
     branches:
       - main
       - client
+      - client-dev
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Get npm cache directory path
-        id: npm-cache-dir
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-      - uses: actions/cache@v3
-        id: npm-cache
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
         with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "pnpm"
+          cache-dependency-path: "./frontend/pnpm-lock.yaml"
+
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
+
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
+
       - name: Type check
-        run: npm run type-check
+        run: pnpm run type-check
+
       - name: Build
-        run: npm run build
+        run: pnpm run build
 
       # TODO : Deploy

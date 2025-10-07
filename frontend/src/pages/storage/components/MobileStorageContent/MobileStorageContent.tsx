@@ -68,14 +68,6 @@ export default function MobileStorageContent({
   const totalElements = infiniteArticlesPages[0]?.totalElements;
   const IsContentsEmpty = !isInfiniteLoading && articleList.length === 0;
 
-  if (IsContentsEmpty && searchInput !== '') {
-    return <EmptySearchCard searchQuery={searchInput} />;
-  }
-
-  if (IsContentsEmpty) {
-    return <EmptyLetterCard title="보관된 뉴스레터가 없어요" />;
-  }
-
   return (
     <>
       <ArticleListControls
@@ -86,14 +78,20 @@ export default function MobileStorageContent({
         totalElements={totalElements}
         isLoading={isInfiniteLoading}
       />
-      {isInfiniteLoading ? (
+      {IsContentsEmpty && searchInput !== '' ? (
+        <EmptySearchCard searchQuery={searchInput} />
+      ) : IsContentsEmpty ? (
+        <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
+      ) : isInfiniteLoading ? (
         <ArticleCardListSkeleton />
       ) : (
-        <ArticleList articles={articleList} />
+        <>
+          <ArticleList articles={articleList} />
+          {/* 무한 스크롤 로딩 트리거 */}
+          <LoadMoreTrigger ref={loadMoreRef} />
+          {isFetchingNextPage && <LoadingSpinner>로딩 중...</LoadingSpinner>}
+        </>
       )}
-      {/* 무한 스크롤 로딩 트리거 */}
-      <LoadMoreTrigger ref={loadMoreRef} />
-      {isFetchingNextPage && <LoadingSpinner>로딩 중...</LoadingSpinner>}
     </>
   );
 }

@@ -124,7 +124,8 @@ public class AuthController implements AuthControllerApi{
     public void withdraw(
             @LoginMember Member member,
             HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
+            HttpServletResponse response
+    ) throws IOException {
         String appleAccessToken = (String) sessionManager.getAttribute(request, "appleAccessToken");
         // Apple 로그인 사용자이고 Access Token이 없는 경우
         if (member.getProvider().equals("apple") && appleAccessToken == null) {
@@ -139,12 +140,7 @@ public class AuthController implements AuthControllerApi{
         // Apple 연동 회원인 경우 토큰 철회 로직 호출
         if ("apple".equals(member.getProvider())) {
             log.info("Apple 연동 회원 탈퇴 - 토큰 철회를 시도합니다. memberId: {}", member.getId());
-            boolean revokeSuccess = appleOAuth2Service.revokeToken(appleAccessToken);
-            if (revokeSuccess) {
-                log.info("Apple Token Revoke 성공 - memberId: {}", member.getId());
-            } else {
-                log.warn("Apple Token Revoke 실패 - memberId: {}, 탈퇴는 계속 진행됩니다", member.getId());
-            }
+            appleOAuth2Service.revokeToken(appleAccessToken);
         }
 
         memberService.withdraw(member.getId());

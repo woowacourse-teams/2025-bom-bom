@@ -9,6 +9,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.AppleClientSecretGenerator;
+import me.bombom.api.v1.auth.client.AppleAuthClient;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
@@ -46,6 +47,7 @@ public class AppleOAuth2Service extends OidcUserService {
     private final AppleClientSecretGenerator appleClientSecretGenerator;
     private final IdTokenValidator idTokenValidator;
     private final ObjectMapper objectMapper;
+    private final AppleAuthClient appleAuthClient;
 
     //웹 로그인에서 사용
     @Value("${oauth2.apple.client-id}")
@@ -93,34 +95,18 @@ public class AppleOAuth2Service extends OidcUserService {
     /**
      * Apple Access Token을 철회합니다
      * @param accessToken 철회할 Access Token
-     * @return 철회 성공 여부
      */
-    public boolean revokeToken(String accessToken) {
-        if (accessToken == null || accessToken.isBlank()) {
-            log.warn("철회할 Apple Access Token이 없습니다.");
-            return false;
+    public void revokeToken(String accessToken) {
+        String clientId = (String) session.getAttribute("appleClientId");
+        if (clientId == null || clientId.isBlank()) {
+            clientId = this.clientId; // 웹 기본 clientId
         }
         try {
-            String revokeClientId = (String) session.getAttribute("appleClientId");
-            if (revokeClientId == null || revokeClientId.isBlank()) {
-                revokeClientId = clientId;
-            }
-            log.info("Apple Token Revoke 시작 - clientId: {}", revokeClientId);
-
-            MultiValueMap<String, String> requestBody = buildRevokeRequestBody(accessToken, revokeClientId);
-
-            restClientBuilder.build().post()
-                .uri(APPLE_REVOKE_URL)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(requestBody)
-                .retrieve()
-                .toBodilessEntity();
-
+            log.info("Apple Token Revoke 시작 - clientId: {}", clientId);
+            appleAuthClient.revokeToken(accessToken, clientId);
             log.info("Apple Token Revoke 성공");
-            return true;
         } catch (Exception e) {
             log.warn("Apple Token Revoke 실패 - error: {}", e.getMessage());
-            return false;
         }
     }
 
@@ -152,16 +138,6 @@ public class AppleOAuth2Service extends OidcUserService {
         }
     }
 
-    private MultiValueMap<String, String> buildRevokeRequestBody(String accessToken, String revokeClientId) {
-        MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("token", accessToken);
-        requestBody.add("client_id", revokeClientId);
-        String revokeClientSecret = appleClientSecretGenerator.generateFor(revokeClientId);
-        requestBody.add("client_secret", revokeClientSecret);
-        requestBody.add("token_type_hint", "access_token");
-        return requestBody;
-    }
-
     /**
      * Apple Access Token을 추출합니다 (OidcUserRequest용)
      * @param userRequest OIDC 사용자 요청
@@ -181,6 +157,7 @@ public class AppleOAuth2Service extends OidcUserService {
         }
     }
 
+    //TODO: 빼야함
     private Map<String, Object> requestAppleToken(String code, String clientIdForExchange) {
         MultiValueMap<String, String> body = buildAccessTokenRequestBody(code, clientIdForExchange);
         Map<String, Object> responseMap = restClientBuilder.build().post()

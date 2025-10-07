@@ -46,14 +46,6 @@ export default function PCStorageContent({
   const articleList = articles?.content || [];
   const haveNoContent = !isLoading && articleList.length === 0;
 
-  if (haveNoContent && searchInput !== '') {
-    return <EmptySearchCard searchQuery={searchInput} />;
-  }
-
-  if (haveNoContent) {
-    return <EmptyLetterCard title="보관된 뉴스레터가 없어요" />;
-  }
-
   return (
     <>
       <ArticleListControls
@@ -64,16 +56,22 @@ export default function PCStorageContent({
         totalElements={totalElements}
         isLoading={isLoading}
       />
-      {isLoading ? (
+      {haveNoContent && searchInput !== '' ? (
+        <EmptySearchCard searchQuery={searchInput} />
+      ) : haveNoContent ? (
+        <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
+      ) : isLoading ? (
         <ArticleCardListSkeleton />
       ) : (
-        <ArticleList articles={articleList} />
+        <>
+          <ArticleList articles={articleList} />
+          <Pagination
+            currentPage={page}
+            totalPages={articles?.totalPages ?? 1}
+            onPageChange={onPageChange}
+          />
+        </>
       )}
-      <Pagination
-        currentPage={page}
-        totalPages={articles?.totalPages ?? 1}
-        onPageChange={onPageChange}
-      />
     </>
   );
 }

@@ -1,3 +1,13 @@
+export interface WindowWithWebkit extends Window {
+  webkit?: {
+    messageHandlers?: {
+      ReactNativeWebView?: {
+        postMessage: (message: string) => void;
+      };
+    };
+  };
+}
+
 export type WebToRNMessage =
   | { type: 'SHOW_LOGIN_SCREEN' }
   | {
@@ -30,13 +40,3 @@ export type RNToWebMessage =
         name: string;
       };
     };
-
-export interface WindowWithWebkit extends Window {
-  webkit?: {
-    messageHandlers?: {
-      ReactNativeWebView?: {
-        postMessage: (message: string) => void;
-      };
-    };
-  };
-}

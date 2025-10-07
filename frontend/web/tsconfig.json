@@ -2,10 +2,9 @@
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
     "target": "es6",
-    "module": "esnext",
+    "module": "Node16",
     "strict": true,
     "skipLibCheck": true,
-    "moduleResolution": "Bundler",
     "noUncheckedIndexedAccess": true,
     "esModuleInterop": true,
     "jsxImportSource": "@emotion/react",

@@ -17,7 +17,7 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "nodenext",
     "resolveJsonModule": true,
-    "types": ["./emotion.d.ts", "jest", "node"],
+    "types": ["./emotion.d.ts"],
     "paths": {
       "@/*": ["./*"]
     }

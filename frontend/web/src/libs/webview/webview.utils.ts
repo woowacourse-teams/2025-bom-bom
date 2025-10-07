@@ -1,5 +1,9 @@
 import { logger } from '@/utils/logger';
-import type { RNToWebMessage, WebToRNMessage, WindowWithWebkit } from 'shared';
+import type {
+  RNToWebMessage,
+  WebToRNMessage,
+  WindowWithWebkit,
+} from 'shared/webview';
 
 export const isAndroid = (): boolean => !!window.ReactNativeWebView;
 export const isIOS = (): boolean =>

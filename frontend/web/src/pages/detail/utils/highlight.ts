@@ -1,4 +1,4 @@
-import { theme } from 'shared';
+import { theme } from 'shared/theme';
 import {
   getNodeByXPath,
   getTextNodesInRange,

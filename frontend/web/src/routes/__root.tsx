@@ -6,7 +6,7 @@ import {
   Outlet,
 } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
-import { theme } from 'shared';
+import { theme } from 'shared/theme';
 import Toast from '@/components/Toast/Toast';
 import usePageTracking from '@/libs/googleAnalytics/usePageTracking';
 import { useWebViewAuth } from '@/libs/webview/useWebViewAuth';

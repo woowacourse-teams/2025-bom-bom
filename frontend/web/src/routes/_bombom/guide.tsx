@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
-import { theme } from 'shared';
+import { theme } from 'shared/theme';
 import { useDevice } from '@/hooks/useDevice';
 import {
   GUIDE_MAIL_STORAGE_KEY,

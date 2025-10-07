@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { theme } from 'shared';
+import { theme } from 'shared/theme';
 import FloatingActionButton from './FloatingActionButton';
 import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import BookmarkIcon from '#/assets/svg/bookmark-inactive.svg';

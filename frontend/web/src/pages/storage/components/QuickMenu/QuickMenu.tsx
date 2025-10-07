@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useLocation, useNavigate } from '@tanstack/react-router';
-import { theme } from 'shared';
+import { theme } from 'shared/theme';
 import { MENU_ITEMS } from './QuickMenu.constants';
 import FloatingActionButton from '@/components/FloatingActionButton/FloatingActionButton';
 import Tab from '@/components/Tab/Tab';

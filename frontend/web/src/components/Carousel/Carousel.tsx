@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { Children } from 'react';
-import { theme } from 'shared';
+import { theme } from 'shared/theme';
 import { DEFAULT_SPEED } from './Carousel.constants';
 import useCarousel from './useCarousel';
 import ChevronIcon from '../icons/ChevronIcon';

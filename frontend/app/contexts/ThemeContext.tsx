@@ -1,4 +1,4 @@
-import { theme } from 'shared';
+import { theme } from 'shared/theme';
 import { ThemeProvider } from '@emotion/react';
 import { PropsWithChildren } from 'react';
 

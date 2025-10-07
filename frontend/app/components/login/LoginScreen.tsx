@@ -14,7 +14,7 @@ import { GoogleIcon } from '@/components/icons/GoogleIcon';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWebView } from '@/contexts/WebViewContext';
 import { loginWithApple, loginWithGoogle } from '@/utils/auth';
-import { theme } from 'shared';
+import { theme } from 'shared/theme';
 
 export const LoginScreen = () => {
   const { showLogin } = useAuth();

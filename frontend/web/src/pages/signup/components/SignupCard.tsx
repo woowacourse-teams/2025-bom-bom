@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useLocation } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { theme } from 'shared';
+import { theme } from 'shared/theme';
 import { formatBirthDate, validateBirthDate } from './SignupCard.utils';
 import { useSignupMutation } from '../hooks/useSignupMutation';
 import Checkbox from '@/components/Checkbox/Checkbox';

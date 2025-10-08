@@ -3,6 +3,9 @@ import { useNavigate } from '@tanstack/react-router';
 import { postSignup } from '@/apis/auth';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { sendMessageToRN } from '@/libs/webview/webview.utils';
+import { GUIDE_MAIL_STORAGE_KEY } from '@/pages/guide-detail/constants/guideMail';
+import { formatDate } from '@/utils/date';
+import { createStorage } from '@/utils/localStorage';
 import type { Gender } from '../components/SignupCard.types';
 
 export const useSignupMutation = ({
@@ -18,6 +21,13 @@ export const useSignupMutation = ({
 }) => {
   const navigate = useNavigate();
 
+  const initializeGuideMailStorage = () => {
+    createStorage(GUIDE_MAIL_STORAGE_KEY).set({
+      createdAt: formatDate(new Date()),
+      readMailIds: [],
+    });
+  };
+
   return useMutation({
     mutationFn: () =>
       postSignup({
@@ -27,6 +37,8 @@ export const useSignupMutation = ({
         birthDate,
       }),
     onSuccess: () => {
+      initializeGuideMailStorage();
+
       sendMessageToRN({
         type: 'LOGIN_SUCCESS',
       });

@@ -83,6 +83,11 @@ const SignupCard = () => {
     if (nameParam) {
       setNickname(nameParam);
     }
+
+    if (emailParam || nameParam) {
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+    }
   }, [location.search]);
 
   return (

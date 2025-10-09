@@ -1,4 +1,4 @@
-import { gte } from 'semver';
+import { coerce, gte, valid } from 'semver';
 
 const extractAppVersionFromUserAgent = (userAgent: string) => {
   const match = userAgent.match(/bombom\/(\d+\.\d+\.\d+)/);
@@ -6,10 +6,18 @@ const extractAppVersionFromUserAgent = (userAgent: string) => {
   return match?.[1] ?? null;
 };
 
+const normalizeVersion = (version: string): string | null => {
+  return valid(version) ?? coerce(version)?.version ?? null;
+};
+
 export const isAppVersionSupported = (minVersion: string): boolean => {
-  const version = extractAppVersionFromUserAgent(navigator.userAgent);
+  const extractedVersion = extractAppVersionFromUserAgent(navigator.userAgent);
+  if (!extractedVersion) return false;
 
-  if (!version) return false;
+  const normalizedVersion = normalizeVersion(extractedVersion);
+  const normalizedMinVersion = normalizeVersion(minVersion);
 
-  return gte(version, minVersion);
+  if (!normalizedVersion || !normalizedMinVersion) return false;
+
+  return gte(normalizedVersion, normalizedMinVersion);
 };

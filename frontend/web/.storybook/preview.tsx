@@ -1,13 +1,13 @@
 import { Global, ThemeProvider } from '@emotion/react';
 import type { Preview, Decorator } from '@storybook/react-webpack5';
 import { theme } from '@bombom/shared/theme';
-import reset from '@/styles/reset.ts';
 import {
   createRouter,
   createRootRoute,
   RouterProvider,
 } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import reset from '@/styles/reset';
 
 const queryClient = new QueryClient();
 

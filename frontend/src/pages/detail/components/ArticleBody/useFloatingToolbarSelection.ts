@@ -3,17 +3,18 @@ import { useDevice } from '@/hooks/useDevice';
 import { isAndroid, isIOS, isWeb } from '@/libs/webview/webview.utils';
 import type { FloatingToolbarMode } from '../FloatingToolbar/FloatingToolbar.types';
 import type { Position } from '@/types/position';
+import type { RefObject } from 'react';
 
 const TOOLBAR_HEIGHT = 40;
 
 interface UseFloatingToolbarSelectionParams {
-  isInSelectionTarget: (range: Range) => boolean;
+  contentRef: RefObject<HTMLDivElement | null>;
   onShow: (params: { position: Position; mode: FloatingToolbarMode }) => void;
   onHide: () => void;
 }
 
 export const useFloatingToolbarSelection = ({
-  isInSelectionTarget,
+  contentRef,
   onShow,
   onHide,
 }: UseFloatingToolbarSelectionParams) => {
@@ -22,6 +23,11 @@ export const useFloatingToolbarSelection = ({
   const activeHighlightIdRef = useRef<number>(null);
 
   const isPC = device === 'pc';
+  const isInSelectionTarget = useCallback(
+    (range: Range) =>
+      contentRef.current?.contains(range.commonAncestorContainer) ?? false,
+    [contentRef],
+  );
 
   const openToolbarFromSelection = useCallback(
     (selection: Selection) => {
@@ -111,43 +117,49 @@ export const useFloatingToolbarSelection = ({
   );
 
   useEffect(() => {
+    const contentEl = contentRef.current;
+    if (!contentEl) return;
+
     if (isIOS()) {
-      document.addEventListener('pointerup', handleHighlightClickOrSelection);
+      contentEl.addEventListener('pointerup', handleHighlightClickOrSelection);
       return;
     }
     if (isAndroid()) {
-      document.addEventListener('contextmenu', handleSelectionComplete);
-      document.addEventListener('click', handleHighlightClick);
-      document.addEventListener('click', handleSelectionClear);
+      contentEl.addEventListener('contextmenu', handleSelectionComplete);
+      contentEl.addEventListener('click', handleHighlightClick);
+      contentEl.addEventListener('click', handleSelectionClear);
       return;
     }
     if (isWeb()) {
-      document.addEventListener('mouseup', handleSelectionComplete);
-      document.addEventListener('click', handleHighlightClick);
+      contentEl.addEventListener('mouseup', handleSelectionComplete);
+      contentEl.addEventListener('click', handleHighlightClick);
       document.addEventListener('selectionchange', handleSelectionClear);
     }
 
     return () => {
+      if (!contentEl) return;
+
       if (isIOS()) {
-        document.removeEventListener(
+        contentEl.removeEventListener(
           'pointerup',
           handleHighlightClickOrSelection,
         );
         return;
       }
       if (isAndroid()) {
-        document.removeEventListener('contextmenu', handleSelectionComplete);
-        document.removeEventListener('click', handleHighlightClick);
-        document.removeEventListener('click', handleSelectionClear);
+        contentEl.removeEventListener('contextmenu', handleSelectionComplete);
+        contentEl.removeEventListener('click', handleHighlightClick);
+        contentEl.removeEventListener('click', handleSelectionClear);
         return;
       }
       if (isWeb()) {
-        document.removeEventListener('mouseup', handleSelectionComplete);
-        document.removeEventListener('click', handleHighlightClick);
+        contentEl.removeEventListener('mouseup', handleSelectionComplete);
+        contentEl.removeEventListener('click', handleHighlightClick);
         document.removeEventListener('selectionchange', handleSelectionClear);
       }
     };
   }, [
+    contentRef,
     handleHighlightClick,
     handleHighlightClickOrSelection,
     handleSelectionClear,

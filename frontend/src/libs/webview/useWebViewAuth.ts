@@ -19,11 +19,7 @@ export const useWebViewAuth = () => {
       async (message: RNToWebMessage) => {
         switch (message.type) {
           case 'GOOGLE_LOGIN_TOKEN':
-            if (
-              !message.payload?.identityToken ||
-              !message.payload?.authorizationCode
-            )
-              return;
+            if (!message.payload?.identityToken) return;
 
             try {
               const response = await postGoogleLogin({

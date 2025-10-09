@@ -36,12 +36,12 @@ public class AppleAuthClient {
         String code = getAuthorizationCode(request);
         String redirectUri = getRedirectUri(request);
 
-        Map<String, Object> response = requestTokenInternal(clientId, code, redirectUri);
+        Map<String, Object> response = requestToken(clientId, code, redirectUri);
         return toAccessTokenResponse(response, reg);
     }
 
     public AppleNativeTokenResponse getTokenResponse(String code, String clientId) {
-        Map<String, Object> response = requestTokenInternal(clientId, code, null);
+        Map<String, Object> response = requestToken(clientId, code, null);
         return AppleNativeTokenResponse.from(response);
     }
 
@@ -65,9 +65,9 @@ public class AppleAuthClient {
         log.info("Apple token revoke 성공");
     }
 
-    private Map<String, Object> requestTokenInternal(String clientId, String code, String redirectUri) {
+    private Map<String, Object> requestToken(String clientId, String code, String redirectUri) {
         MultiValueMap<String, String> form = buildTokenRequestBody(clientId, code, redirectUri);
-        Map<String, Object> response = requestAccessToken(TOKEN_URI, form);
+        Map<String, Object> response = requestAccessToken(form);
         validateTokenResponse(response);
         return response;
     }
@@ -82,18 +82,17 @@ public class AppleAuthClient {
         form.add("client_secret", clientSecretGenerator.generateFor(clientId));
         form.add("code", code);
         form.add("grant_type", "authorization_code");
-
         if (redirectUri != null) {
             form.add("redirect_uri", redirectUri);
         }
         return form;
     }
 
-    private Map<String, Object> requestAccessToken(String uri, MultiValueMap<String, String> form) {
-        log.info("Apple 토큰 교환 요청 - URI: {}", uri);
+    private Map<String, Object> requestAccessToken(MultiValueMap<String, String> form) {
+        log.info("Apple 토큰 교환 요청 - URI: {}", TOKEN_URI);
         return restClientBuilder.build()
                 .post()
-                .uri(uri)
+                .uri(TOKEN_URI)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(form)
                 .retrieve()

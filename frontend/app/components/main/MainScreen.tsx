@@ -49,6 +49,10 @@ export const MainScreen = () => {
             });
           }
           break;
+
+        default:
+          console.log('알수 없는 메시지 수신:', message);
+          break;
       }
     } catch (error) {
       console.error('WebView 메시지 파싱 실패:', error);

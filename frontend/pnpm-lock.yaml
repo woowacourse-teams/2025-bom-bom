@@ -234,6 +234,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.1.6
         version: 19.2.0(@types/react@19.1.17)
+      '@types/semver':
+        specifier: ^7.7.1
+        version: 7.7.1
       '@types/webpack':
         specifier: ^5.28.5
         version: 5.28.5(@swc/core@1.13.5)(esbuild@0.25.10)(webpack-cli@6.0.1)

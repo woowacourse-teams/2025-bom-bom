@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.auth.AppleClientSecretGenerator;
 import me.bombom.api.v1.auth.client.AppleAuthClient;
 import me.bombom.api.v1.auth.client.dto.AppleNativeTokenResponse;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
@@ -24,7 +23,6 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
 /**
  * Apple OAuth2 통합 서비스
@@ -39,8 +37,6 @@ public class AppleOAuth2Service extends OidcUserService {
     
     private final MemberRepository memberRepository;
     private final HttpSession session;
-    private final RestClient.Builder restClientBuilder;
-    private final AppleClientSecretGenerator appleClientSecretGenerator;
     private final IdTokenValidator idTokenValidator;
     private final ObjectMapper objectMapper;
     private final AppleAuthClient appleAuthClient;

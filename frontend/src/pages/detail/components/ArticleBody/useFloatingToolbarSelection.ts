@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
+import { getFloatingToolbarEventMap } from './useFloatingToolbarSelection.utils';
 import { useDevice } from '@/hooks/useDevice';
-import { isAndroid, isIOS, isWeb } from '@/libs/webview/webview.utils';
 import type { FloatingToolbarMode } from '../FloatingToolbar/FloatingToolbar.types';
 import type { Position } from '@/types/position';
 
@@ -91,33 +91,15 @@ export const useFloatingToolbarSelection = ({
   }, [onHide]);
 
   useEffect(() => {
-    if (isAndroid()) {
-      document.addEventListener('contextmenu', handleSelectionComplete);
-      document.addEventListener('click', handleSelectionClear);
-    } else {
-      if (isWeb()) {
-        document.addEventListener('mouseup', handleSelectionComplete);
-      } else if (isIOS()) {
-        document.addEventListener('pointerup', handleSelectionComplete);
-      }
-      document.addEventListener('selectionchange', handleSelectionClear);
-    }
+    const { selectionComplete, selectionClear } = getFloatingToolbarEventMap();
+
+    document.addEventListener(selectionComplete, handleSelectionComplete);
+    document.addEventListener(selectionClear, handleSelectionClear);
     document.addEventListener('click', handleHighlightClick);
 
-    // logAllEvents();
-
     return () => {
-      if (isAndroid()) {
-        document.removeEventListener('contextmenu', handleSelectionComplete);
-        document.removeEventListener('click', handleSelectionClear);
-      } else {
-        if (isWeb()) {
-          document.removeEventListener('mouseup', handleSelectionComplete);
-        } else if (isIOS()) {
-          document.removeEventListener('pointerup', handleSelectionComplete);
-        }
-        document.removeEventListener('selectionchange', handleSelectionClear);
-      }
+      document.removeEventListener(selectionComplete, handleSelectionComplete);
+      document.removeEventListener(selectionClear, handleSelectionClear);
       document.removeEventListener('click', handleHighlightClick);
     };
   }, [handleHighlightClick, handleSelectionClear, handleSelectionComplete]);

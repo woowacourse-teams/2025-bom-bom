@@ -2,11 +2,7 @@ import styled from '@emotion/styled';
 import { useNavigate } from '@tanstack/react-router';
 import Button from '../Button/Button';
 import { useDevice } from '@/hooks/useDevice';
-import {
-  isIOS,
-  isWebView,
-  sendMessageToRN,
-} from '@/libs/webview/webview.utils';
+import { isWebView, sendMessageToRN } from '@/libs/webview/webview.utils';
 import LockIcon from '#/assets/svg/lock.svg';
 
 const RequireLoginCard = () => {
@@ -14,7 +10,7 @@ const RequireLoginCard = () => {
   const device = useDevice();
   const isMobile = device === 'mobile';
   const handleLoginClick = () => {
-    if (isWebView() && isIOS())
+    if (isWebView())
       sendMessageToRN({
         type: 'SHOW_LOGIN_SCREEN',
       });

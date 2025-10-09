@@ -1,13 +1,13 @@
 import { useNavigate } from '@tanstack/react-router';
 import Button from '../Button/Button';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { isIOS, sendMessageToRN } from '@/libs/webview/webview.utils';
+import { isWebView, sendMessageToRN } from '@/libs/webview/webview.utils';
 
 const LoginButton = () => {
   const navigate = useNavigate();
 
   const handleLoginClick = () => {
-    if (isIOS())
+    if (isWebView())
       sendMessageToRN({
         type: 'SHOW_LOGIN_SCREEN',
       });

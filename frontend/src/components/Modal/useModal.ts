@@ -28,19 +28,19 @@ const useModal = (options: UseModalOptions = {}) => {
 
   const modalRef = compoundRefs<HTMLDivElement>(clickOutsideRef, focusTrapRef);
 
-  const toggleScrollLock = useCallback(() => {
+  useEffect(() => {
+    if (!scrollLock) return;
+
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = bodyScrollStatus;
     }
-  }, [isOpen, bodyScrollStatus]);
 
-  useEffect(() => {
-    if (!scrollLock) return;
-
-    toggleScrollLock();
-  }, [isOpen, scrollLock, toggleScrollLock]);
+    return () => {
+      document.body.style.overflow = bodyScrollStatus;
+    };
+  }, [isOpen, scrollLock, bodyScrollStatus]);
 
   useKeydownEscape(isOpen ? closeModal : null);
 

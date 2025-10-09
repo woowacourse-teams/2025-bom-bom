@@ -77,8 +77,10 @@ export const useFloatingToolbarSelection = ({
         openToolbarFromHighlight(target);
         return;
       }
+
+      onHide();
     },
-    [openToolbarFromHighlight],
+    [openToolbarFromHighlight, onHide],
   );
 
   const handleSelectionComplete = useCallback(() => {
@@ -127,12 +129,10 @@ export const useFloatingToolbarSelection = ({
     if (isAndroid()) {
       contentEl.addEventListener('contextmenu', handleSelectionComplete);
       contentEl.addEventListener('click', handleHighlightClick);
-      contentEl.addEventListener('click', handleSelectionClear);
       return;
     }
     if (isWeb()) {
-      contentEl.addEventListener('mouseup', handleSelectionComplete);
-      contentEl.addEventListener('click', handleHighlightClick);
+      contentEl.addEventListener('mouseup', handleHighlightClickOrSelection);
       document.addEventListener('selectionchange', handleSelectionClear);
     }
 
@@ -149,12 +149,13 @@ export const useFloatingToolbarSelection = ({
       if (isAndroid()) {
         contentEl.removeEventListener('contextmenu', handleSelectionComplete);
         contentEl.removeEventListener('click', handleHighlightClick);
-        contentEl.removeEventListener('click', handleSelectionClear);
         return;
       }
       if (isWeb()) {
-        contentEl.removeEventListener('mouseup', handleSelectionComplete);
-        contentEl.removeEventListener('click', handleHighlightClick);
+        contentEl.removeEventListener(
+          'mouseup',
+          handleHighlightClickOrSelection,
+        );
         document.removeEventListener('selectionchange', handleSelectionClear);
       }
     };

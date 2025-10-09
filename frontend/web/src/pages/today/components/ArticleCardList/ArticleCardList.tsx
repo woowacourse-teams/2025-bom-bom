@@ -1,5 +1,5 @@
-import styled from '@emotion/styled';
 import { theme } from '@bombom/shared/theme';
+import styled from '@emotion/styled';
 import ArticleCard from '../ArticleCard/ArticleCard';
 import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
 import { useDevice } from '@/hooks/useDevice';

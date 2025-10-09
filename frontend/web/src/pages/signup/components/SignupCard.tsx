@@ -1,7 +1,7 @@
+import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
 import { useLocation } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { theme } from '@bombom/shared/theme';
 import { formatBirthDate, validateBirthDate } from './SignupCard.utils';
 import { useSignupMutation } from '../hooks/useSignupMutation';
 import Checkbox from '@/components/Checkbox/Checkbox';

@@ -1,5 +1,5 @@
-import styled from '@emotion/styled';
 import { theme } from '@bombom/shared/theme';
+import styled from '@emotion/styled';
 import FloatingActionButton from './FloatingActionButton';
 import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import BookmarkIcon from '#/assets/svg/bookmark-inactive.svg';

@@ -1,5 +1,5 @@
-import styled from '@emotion/styled';
 import { theme } from '@bombom/shared/theme';
+import styled from '@emotion/styled';
 import { ENV } from '@/apis/env';
 import { useDevice } from '@/hooks/useDevice';
 import { isWeb, isIOS } from '@/libs/webview/webview.utils';

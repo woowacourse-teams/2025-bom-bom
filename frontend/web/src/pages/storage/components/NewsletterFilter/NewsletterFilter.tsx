@@ -1,5 +1,5 @@
-import styled from '@emotion/styled';
 import { theme } from '@bombom/shared/theme';
+import styled from '@emotion/styled';
 import Badge from '@/components/Badge/Badge';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';

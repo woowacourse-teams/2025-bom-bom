@@ -1,5 +1,5 @@
-import styled from '@emotion/styled';
 import { theme } from '@bombom/shared/theme';
+import styled from '@emotion/styled';
 import { ELLIPSIS } from './Pagination.constants';
 import {
   getPageNumbers,

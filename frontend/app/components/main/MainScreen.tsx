@@ -60,7 +60,7 @@ export const MainScreen = () => {
       <WebViewContainer>
         <StyledWebView
           ref={webViewRef}
-          source={{ uri: ENV.prodWebUrl }}
+          source={{ uri: ENV.webUrl }}
           userAgent={WEBVIEW_USER_AGENT}
           allowsBackForwardNavigationGestures
           sharedCookiesEnabled

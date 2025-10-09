@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface useScrollLockParams {
   scrollLock: boolean;
@@ -6,19 +6,18 @@ interface useScrollLockParams {
 }
 
 export const useScrollLock = ({ scrollLock, isOpen }: useScrollLockParams) => {
-  const bodyScrollStatus = useMemo(() => document.body.style.overflow, []);
+  const initialScrollStatus = useRef('');
 
   useEffect(() => {
     if (!scrollLock) return;
 
     if (isOpen) {
+      initialScrollStatus.current = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = bodyScrollStatus;
     }
 
     return () => {
-      document.body.style.overflow = bodyScrollStatus;
+      document.body.style.overflow = initialScrollStatus.current;
     };
-  }, [isOpen, scrollLock, bodyScrollStatus]);
+  }, [isOpen, scrollLock]);
 };

@@ -5,6 +5,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.AppleClientSecretGenerator;
+import me.bombom.api.v1.auth.client.dto.AppleNativeTokenResponse;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
@@ -23,6 +24,7 @@ import org.springframework.web.client.RestClient;
 public class AppleAuthClient {
 
     private static final String APPLE_BASE = "https://appleid.apple.com";
+    private static final String TOKEN_URI = APPLE_BASE + "/auth/token";
     private static final String REVOKE_URI = APPLE_BASE + "/auth/revoke";
 
     private final RestClient.Builder restClientBuilder;
@@ -31,20 +33,16 @@ public class AppleAuthClient {
     public OAuth2AccessTokenResponse getTokenResponse(OAuth2AuthorizationCodeGrantRequest request) {
         ClientRegistration reg = request.getClientRegistration();
         String clientId = reg.getClientId();
-        String tokenUri = reg.getProviderDetails().getTokenUri();
         String code = getAuthorizationCode(request);
         String redirectUri = getRedirectUri(request);
 
-        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-        form.add("client_id", clientId);
-        form.add("client_secret", clientSecretGenerator.generateFor(clientId));
-        form.add("code", code);
-        form.add("grant_type", "authorization_code");
-        form.add("redirect_uri", redirectUri);
-
-        Map<String, Object> response = requestAccessToken(tokenUri, form);
-        validateTokenResponse(response);
+        Map<String, Object> response = requestTokenInternal(clientId, code, redirectUri);
         return toAccessTokenResponse(response, reg);
+    }
+
+    public AppleNativeTokenResponse getTokenResponse(String code, String clientId) {
+        Map<String, Object> response = requestTokenInternal(clientId, code, null);
+        return AppleNativeTokenResponse.from(response);
     }
 
     public void revokeToken(String accessToken, String clientId) {
@@ -65,6 +63,30 @@ public class AppleAuthClient {
                 .retrieve()
                 .toBodilessEntity();
         log.info("Apple token revoke 성공");
+    }
+
+    private Map<String, Object> requestTokenInternal(String clientId, String code, String redirectUri) {
+        MultiValueMap<String, String> form = buildTokenRequestBody(clientId, code, redirectUri);
+        Map<String, Object> response = requestAccessToken(TOKEN_URI, form);
+        validateTokenResponse(response);
+        return response;
+    }
+
+    private MultiValueMap<String, String> buildTokenRequestBody(
+            String clientId,
+            String code,
+            String redirectUri
+    ) {
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("client_id", clientId);
+        form.add("client_secret", clientSecretGenerator.generateFor(clientId));
+        form.add("code", code);
+        form.add("grant_type", "authorization_code");
+
+        if (redirectUri != null) {
+            form.add("redirect_uri", redirectUri);
+        }
+        return form;
     }
 
     private Map<String, Object> requestAccessToken(String uri, MultiValueMap<String, String> form) {

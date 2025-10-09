@@ -9,9 +9,6 @@ import { ExternalLink } from '@/components/ExternalLink/ExternalLink';
 import InputField from '@/components/InputField/InputField';
 import Tooltip from '@/components/Tooltip/Tooltip';
 import { useDevice } from '@/hooks/useDevice';
-import { GUIDE_MAIL_STORAGE_KEY } from '@/pages/guide-detail/constants/guideMail';
-import { formatDate } from '@/utils/date';
-import { createStorage } from '@/utils/localStorage';
 import type { FieldError, Gender } from './SignupCard.types';
 import type { Device } from '@/hooks/useDevice';
 import type { ChangeEvent, FormEvent } from 'react';
@@ -60,18 +57,10 @@ const SignupCard = () => {
     setGender(e.target.value as Gender);
   };
 
-  const initializeGuideMailStorage = () => {
-    createStorage(GUIDE_MAIL_STORAGE_KEY).set({
-      createdAt: formatDate(new Date()),
-      readMailIds: [],
-    });
-  };
-
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     signup();
-    initializeGuideMailStorage();
   };
 
   const openEmailHelp = () => setEmailHelpOpened(true);

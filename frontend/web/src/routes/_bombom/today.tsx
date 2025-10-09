@@ -16,7 +16,7 @@ import {
   GUIDE_MAILS,
 } from '@/pages/guide-detail/constants/guideMail';
 import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
-import { formatDate, isToday } from '@/utils/date';
+import { formatDate } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
 import type { Device } from '@/hooks/useDevice';
 import type { LocalGuideMail } from '@/types/guide';
@@ -60,7 +60,7 @@ function Index() {
   const guideMailReadMailIds = guideMails?.readMailIds ?? [];
 
   const guideArticles =
-    guideMails?.createdAt && isToday(new Date(guideMails?.createdAt))
+    guideMails?.createdAt && guideMails.createdAt === formatDate(new Date())
       ? GUIDE_MAILS
       : [];
 

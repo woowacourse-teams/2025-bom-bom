@@ -7,7 +7,7 @@ phases:
     commands:
       - echo "Installing dependencies..."
       - cd ./frontend
-      - npm install -g pnpm
+      - npm install -g pnpm@10.12.1
       - pnpm install --frozen-lockfile
 
   pre_build:

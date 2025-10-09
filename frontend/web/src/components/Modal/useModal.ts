@@ -1,7 +1,8 @@
-import { useCallback, useState, useEffect, useMemo } from 'react';
+import { useCallback, useState } from 'react';
 import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
 import useFocusTrap from '@/hooks/useFocusTrap';
 import useKeydownEscape from '@/hooks/useKeydownEscape';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import { compoundRefs } from '@/utils/element';
 
 interface UseModalOptions {
@@ -11,7 +12,6 @@ interface UseModalOptions {
 const useModal = (options: UseModalOptions = {}) => {
   const { scrollLock = true } = options;
   const [isOpen, setIsOpen] = useState(false);
-  const bodyScrollStatus = useMemo(() => document.body.style.overflow, []);
 
   const openModal = useCallback(() => {
     setIsOpen(true);
@@ -28,20 +28,7 @@ const useModal = (options: UseModalOptions = {}) => {
 
   const modalRef = compoundRefs<HTMLDivElement>(clickOutsideRef, focusTrapRef);
 
-  const toggleScrollLock = useCallback(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = bodyScrollStatus;
-    }
-  }, [isOpen, bodyScrollStatus]);
-
-  useEffect(() => {
-    if (!scrollLock) return;
-
-    toggleScrollLock();
-  }, [isOpen, scrollLock, toggleScrollLock]);
-
+  useScrollLock({ scrollLock, isOpen });
   useKeydownEscape(isOpen ? closeModal : null);
 
   return {

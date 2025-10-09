@@ -50,19 +50,8 @@ public class AppleAuthClient {
             log.info("AccessToken이 존재하지 않아 토큰 철회를 스킵합니다.");
             return;
         }
-        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-        form.add("token", accessToken);
-        form.add("client_id", clientId);
-        form.add("client_secret", clientSecretGenerator.generateFor(clientId));
-        form.add("token_type_hint", "access_token");
-
-        restClientBuilder.build().post()
-                .uri(REVOKE_URI)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(form)
-                .retrieve()
-                .toBodilessEntity();
-        log.info("Apple token revoke 성공");
+        MultiValueMap<String, String> form = buildRevokeRequestBody(accessToken, clientId);
+        requestTokenRevoke(form);
     }
 
     private Map<String, Object> requestToken(String clientId, String code, String redirectUri) {
@@ -122,6 +111,24 @@ public class AppleAuthClient {
                 .refreshToken(response.get("refresh_token") != null ? String.valueOf(response.get("refresh_token")) : null)
                 .additionalParameters(response)
                 .build();
+    }
+
+    private MultiValueMap<String, String> buildRevokeRequestBody(String accessToken, String clientId) {
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("token", accessToken);
+        form.add("client_id", clientId);
+        form.add("client_secret", clientSecretGenerator.generateFor(clientId));
+        form.add("token_type_hint", "access_token");
+        return form;
+    }
+
+    private void requestTokenRevoke(MultiValueMap<String, String> form) {
+        restClientBuilder.build().post()
+                .uri(REVOKE_URI)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(form)
+                .retrieve()
+                .toBodilessEntity();
     }
 
     private String getAuthorizationCode(OAuth2AuthorizationCodeGrantRequest request) {

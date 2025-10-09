@@ -82,6 +82,7 @@
     "webpack-dev-server": "^5.2.2"
   },
   "dependencies": {
+    "@bombom/shared": "workspace:*",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@microsoft/clarity": "^1.0.0",
@@ -92,7 +93,7 @@
     "dotenv": "^17.2.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "@bombom/shared": "workspace:*"
+    "semver": "^7.7.3"
   },
   "msw": {
     "workerDirectory": [

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useDevice } from '@/hooks/useDevice';
+import { isAndroid, isIOS, isWeb } from '@/libs/webview/webview.utils';
 import type { FloatingToolbarMode } from '../FloatingToolbar/FloatingToolbar.types';
 import type { Position } from '@/types/position';
 
@@ -48,6 +49,7 @@ export const useFloatingToolbarSelection = ({
       if (!id) return;
 
       const rect = target.getBoundingClientRect();
+
       onShow({
         position: {
           x: rect.left + rect.width / 2,
@@ -61,25 +63,25 @@ export const useFloatingToolbarSelection = ({
     [isPC, onShow],
   );
 
-  const handlePointerOrClick = useCallback(
+  const handleHighlightClick = useCallback(
     (e: PointerEvent | MouseEvent) => {
       const target = e.target as HTMLElement;
 
-      // 하이라이트 클릭
       if (target.tagName === 'MARK') {
         openToolbarFromHighlight(target);
         return;
       }
-
-      // 새 selection
-      const selection = window.getSelection();
-      if (selection && !selection.isCollapsed && selection.rangeCount > 0) {
-        openToolbarFromSelection(selection);
-        return;
-      }
     },
-    [openToolbarFromHighlight, openToolbarFromSelection],
+    [openToolbarFromHighlight],
   );
+
+  const handleSelectionComplete = useCallback(() => {
+    const selection = window.getSelection();
+    if (selection && !selection.isCollapsed && selection.rangeCount > 0) {
+      openToolbarFromSelection(selection);
+      return;
+    }
+  }, [openToolbarFromSelection]);
 
   const handleSelectionClear = useCallback(() => {
     const selection = window.getSelection();
@@ -89,16 +91,36 @@ export const useFloatingToolbarSelection = ({
   }, [onHide]);
 
   useEffect(() => {
-    document.addEventListener('mouseup', handlePointerOrClick);
-    document.addEventListener('pointerup', handlePointerOrClick);
-    document.addEventListener('selectionchange', handleSelectionClear);
+    if (isAndroid()) {
+      document.addEventListener('contextmenu', handleSelectionComplete);
+      document.addEventListener('click', handleSelectionClear);
+    } else {
+      if (isWeb()) {
+        document.addEventListener('mouseup', handleSelectionComplete);
+      } else if (isIOS()) {
+        document.addEventListener('pointerup', handleSelectionComplete);
+      }
+      document.addEventListener('selectionchange', handleSelectionClear);
+    }
+    document.addEventListener('click', handleHighlightClick);
+
+    // logAllEvents();
 
     return () => {
-      document.removeEventListener('mouseup', handlePointerOrClick);
-      document.removeEventListener('pointerup', handlePointerOrClick);
-      document.removeEventListener('selectionchange', handleSelectionClear);
+      if (isAndroid()) {
+        document.removeEventListener('contextmenu', handleSelectionComplete);
+        document.removeEventListener('click', handleSelectionClear);
+      } else {
+        if (isWeb()) {
+          document.removeEventListener('mouseup', handleSelectionComplete);
+        } else if (isIOS()) {
+          document.removeEventListener('pointerup', handleSelectionComplete);
+        }
+        document.removeEventListener('selectionchange', handleSelectionClear);
+      }
+      document.removeEventListener('click', handleHighlightClick);
     };
-  }, [handlePointerOrClick, handleSelectionClear]);
+  }, [handleHighlightClick, handleSelectionClear, handleSelectionComplete]);
 
   return {
     activeSelectionRange: activeSelectionRangeRef.current,

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.AppleClientSecretGenerator;
 import me.bombom.api.v1.auth.client.AppleAuthClient;
+import me.bombom.api.v1.auth.client.dto.AppleNativeTokenResponse;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
@@ -18,15 +19,11 @@ import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
 /**
@@ -39,7 +36,6 @@ import org.springframework.web.client.RestClient;
 public class AppleOAuth2Service extends OidcUserService {
 
     private static final String ACCESS_TOKEN_KEY = "access_token";
-    private static final String APPLE_REVOKE_URL = "https://appleid.apple.com/auth/revoke";
     
     private final MemberRepository memberRepository;
     private final HttpSession session;
@@ -121,10 +117,8 @@ public class AppleOAuth2Service extends OidcUserService {
             }
 
             String subject = idTokenValidator.validateAppleAndGetSubject(request.identityToken(), bundleId);
-            //TODO: AppleToken 요청을 AppleOAuth2AccessTokenResponseClient에서 하도록
-            Map<String, Object> token = requestAppleToken(request.authorizationCode(), bundleId);
-
-            session.setAttribute("appleAccessToken", token.get("access_token"));
+            AppleNativeTokenResponse tokenResponse = appleAuthClient.getTokenResponse(request.authorizationCode(), bundleId);
+            session.setAttribute("appleAccessToken", tokenResponse.accessToken());
             session.setAttribute("appleClientId", bundleId);
             return findMemberAndSetPendingIfNew(subject);
         } catch (UnauthorizedException e) {
@@ -155,37 +149,6 @@ public class AppleOAuth2Service extends OidcUserService {
             log.warn("Apple Access Token 추출 실패 - error: {}", e.getMessage());
             return null;
         }
-    }
-
-    //TODO: 빼야함
-    private Map<String, Object> requestAppleToken(String code, String clientIdForExchange) {
-        MultiValueMap<String, String> body = buildAccessTokenRequestBody(code, clientIdForExchange);
-        Map<String, Object> responseMap = restClientBuilder.build().post()
-                .uri("https://appleid.apple.com/auth/token")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(body)
-                .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
-
-        if (responseMap == null) {
-            throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
-                    .addContext("reason", "apple_token_response_is_null");
-        }
-        if (responseMap.containsKey("error")) {
-            log.error("Apple 토큰 교환 실패 - error: {}, description: {}", responseMap.get("error"), responseMap.get("error_description"));
-            throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
-                    .addContext("reason", responseMap.get("error_description"));
-        }
-        return responseMap;
-    }
-
-    private MultiValueMap<String, String> buildAccessTokenRequestBody(String code, String clientIdForExchange) {
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("grant_type", "authorization_code");
-        body.add("code", code);
-        body.add("client_id", clientIdForExchange);
-        body.add("client_secret", appleClientSecretGenerator.generateFor(clientIdForExchange));
-        return body;
     }
 
     /**

@@ -23,16 +23,10 @@ export const useFloatingToolbarSelection = ({
   const activeHighlightIdRef = useRef<number>(null);
 
   const isPC = device === 'pc';
-  const isInSelectionTarget = useCallback(
-    (range: Range) =>
-      contentRef.current?.contains(range.commonAncestorContainer) ?? false,
-    [contentRef],
-  );
 
   const openToolbarFromSelection = useCallback(
     (selection: Selection) => {
       const range = selection.getRangeAt(0);
-      if (!isInSelectionTarget(range)) return;
 
       const rect = range.getBoundingClientRect();
 
@@ -46,7 +40,7 @@ export const useFloatingToolbarSelection = ({
       activeHighlightIdRef.current = null;
       activeSelectionRangeRef.current = range;
     },
-    [isInSelectionTarget, isPC, onShow],
+    [isPC, onShow],
   );
 
   const openToolbarFromHighlight = useCallback(

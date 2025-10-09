@@ -92,7 +92,7 @@
     "dotenv": "^17.2.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "shared": "workspace:*"
+    "@bombom/shared": "workspace:*"
   },
   "msw": {
     "workerDirectory": [

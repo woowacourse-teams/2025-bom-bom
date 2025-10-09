@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useEffect, useRef, useState } from 'react';
-import { theme } from 'shared/theme';
+import { theme } from '@bombom/shared/theme';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import DeleteIcon from '#/assets/svg/delete.svg';

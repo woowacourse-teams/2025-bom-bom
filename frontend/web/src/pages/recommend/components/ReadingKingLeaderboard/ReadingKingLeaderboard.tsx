@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { theme } from 'shared/theme';
+import { theme } from '@bombom/shared/theme';
 import LeaderboardItem from './LeaderboardItem';
 import { RANKING } from './ReadingKingLeaderboard.constants';
 import { getLeaderboardData } from './ReadingKingLeaderboard.utils';

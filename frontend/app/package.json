@@ -15,7 +15,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "shared": "workspace:*",
+    "@bombom/shared": "workspace:*",
     "@emotion/native": "^11.11.0",
     "@emotion/react": "^11.14.0",
     "@expo/vector-icons": "^15.0.2",

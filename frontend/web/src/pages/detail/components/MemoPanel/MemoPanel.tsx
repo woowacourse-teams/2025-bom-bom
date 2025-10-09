@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { theme } from 'shared/theme';
+import { theme } from '@bombom/shared/theme';
 import EditableMemoCard from '../MemoCard/EditableMemoCard';
 import ChevronIcon from '@/components/icons/ChevronIcon';
 import type { Highlight } from '../../types/highlight';

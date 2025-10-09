@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { Modal } from 'react-native';
 
-import { theme } from 'shared/theme';
+import { theme } from '@bombom/shared/theme';
 import { LoginScreen } from './LoginScreen';
 
 interface LoginScreenOverlayProps {

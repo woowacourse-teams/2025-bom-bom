@@ -7,7 +7,7 @@ import {
 } from './webview.utils';
 import { postAppleLogin, postGoogleLogin } from '@/apis/auth';
 import { logger } from '@/utils/logger';
-import type { RNToWebMessage } from 'shared/webview';
+import type { RNToWebMessage } from '@bombom/shared/webview';
 
 export const useWebViewAuth = () => {
   const navigate = useNavigate();

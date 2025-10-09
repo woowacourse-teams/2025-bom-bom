@@ -10,32 +10,25 @@ on:
     paths:
       - "frontend/**"
     branches:
-      - main
       - client
+      - client-dev
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-      - name: Get npm cache directory path
-        id: npm-cache-dir
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-      - uses: actions/cache@v3
-        id: npm-cache
-        with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - name: Install dependencies
-        run: npm install
-      - name: Lint
-        run: npm run lint
-      - name: Type check
-        run: npm run type-check
-      - name: Build
-        run: npm run build
+        uses: actions/checkout@v5
 
-      # TODO : Deploy
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm run web:lint
+
+      - name: Type check
+        run: pnpm run web:type-check

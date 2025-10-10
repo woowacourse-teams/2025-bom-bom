@@ -63,7 +63,7 @@ public class AuthController implements AuthControllerApi{
                 .addContext("sessionExists", false)
                 .addContext("requestedEmail", signupRequest.email());
         }
-        PendingOAuth2Member pendingMember = (PendingOAuth2Member) sessionManager.getAttribute("pendingMember");
+        PendingOAuth2Member pendingMember = sessionManager.getAttribute("pendingMember", PendingOAuth2Member.class);
         log.info("회원가입 요청 - pendingMember: {}", pendingMember);
         if (pendingMember == null) {
             throw new UnauthorizedException(ErrorDetail.MISSING_OAUTH_DATA)
@@ -124,7 +124,7 @@ public class AuthController implements AuthControllerApi{
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException {
-        String appleAccessToken = (String) sessionManager.getAttribute("appleAccessToken");
+        String appleAccessToken = sessionManager.getAttribute("appleAccessToken", String.class);
         // Apple 로그인 사용자이고 Access Token이 없는 경우
         if (member.getProvider().equals("apple") && appleAccessToken == null) {
             // 탈퇴 플래그 저장 후 재로그인 요구

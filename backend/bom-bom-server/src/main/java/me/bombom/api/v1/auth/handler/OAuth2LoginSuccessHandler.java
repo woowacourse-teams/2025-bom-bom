@@ -59,8 +59,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             HttpServletResponse response,
             Authentication authentication
     ) throws IOException {
-        Boolean pendingWithdraw = (Boolean) sessionManager.getAttribute("pendingWithdraw");
-        Long withdrawMemberId = (Long) sessionManager.getAttribute("withdrawMemberId");
+        Boolean pendingWithdraw = sessionManager.getAttribute("pendingWithdraw", Boolean.class);
+        Long withdrawMemberId = sessionManager.getAttribute("withdrawMemberId", Long.class);
 
         // === 탈퇴 처리 ===
         if (pendingWithdraw != null && pendingWithdraw && withdrawMemberId != null) {
@@ -156,7 +156,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     }
 
     private String getBaseUrlByEnv(HttpServletRequest request) {
-        String env = (String) sessionManager.getAttribute("env");
+        String env = sessionManager.getAttribute("env", String.class);
         return LOCAL_ENV.equals(env) ? frontendLocalUrl : frontendBaseUrl;
     }
 }

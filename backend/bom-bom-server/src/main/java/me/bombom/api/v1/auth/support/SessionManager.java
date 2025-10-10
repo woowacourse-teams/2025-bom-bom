@@ -34,8 +34,11 @@ public class SessionManager {
         ensure().setAttribute(key, value);
     }
 
-    public Object getAttribute(String key) {
-        return get().map(s -> s.getAttribute(key))
+    public <T> T getAttribute(String key, Class<T> type) {
+        return get()
+                .map(s -> s.getAttribute(key))
+                .filter(type::isInstance)
+                .map(type::cast)
                 .orElse(null);
     }
 

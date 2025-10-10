@@ -23,6 +23,7 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * Apple OAuth2 통합 서비스
@@ -88,7 +89,7 @@ public class AppleOAuth2Service extends OidcUserService {
      * @param accessToken 철회할 Access Token
      */
     public void revokeToken(String accessToken) {
-        String clientId = (String) sessionManager.getAttribute("appleClientId");
+        String clientId = sessionManager.getAttribute("appleClientId", String.class);
         if (clientId == null || clientId.isBlank()) {
             clientId = this.clientId; // 웹 기본 clientId
         }
@@ -153,8 +154,8 @@ public class AppleOAuth2Service extends OidcUserService {
         Map<String, Object> mergedAttributes = new HashMap<>(baseAttributes);
         
         try {
-            Object userParam = sessionManager.getAttribute("appleUserParam");
-            if (!(userParam instanceof String userJson) || userJson.isBlank()) {
+            String userJson = sessionManager.getAttribute("appleUserParam", String.class);
+            if (!StringUtils.hasText(userJson)) {
                 log.info("Apple user 파라미터가 없습니다(최초 동의가 아니거나 Apple 미제공 케이스)");
                 return mergedAttributes;
             }

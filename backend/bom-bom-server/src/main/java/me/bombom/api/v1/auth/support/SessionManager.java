@@ -15,23 +15,6 @@ public class SessionManager {
 
     private static final String SPRING_SECURITY_CONTEXT_KEY = "SPRING_SECURITY_CONTEXT";
 
-    // 세션을 보장. 없으면 생성. 있으면 리턴.
-    public HttpSession ensure() {
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        if (requestAttributes instanceof ServletRequestAttributes) {
-            return ((ServletRequestAttributes) requestAttributes).getRequest().getSession(true);
-        }
-        throw new IllegalStateException("Http 요청 컨텍스트가 없습니다.");
-    }
-
-    public Optional<HttpSession> get() {
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        if (requestAttributes instanceof ServletRequestAttributes) {
-            return Optional.ofNullable(((ServletRequestAttributes) requestAttributes).getRequest().getSession(false));
-        }
-        throw new IllegalStateException("Http 요청 컨텍스트가 없습니다.");
-    }
-
     public void setAuth(Authentication authentication) {
         HttpSession session = ensure();
         // 쓰레드 로컬이라 데이터가 남아있을 수 있어, 새로 만들고 채우는게 안전
@@ -58,5 +41,28 @@ public class SessionManager {
 
     public void removeAttribute(String key) {
         get().ifPresent(s -> s.removeAttribute(key));
+    }
+
+    public boolean isEmpty() {
+        Optional<HttpSession> session = get();
+        return session.isEmpty();
+    }
+
+    // 세션을 보장. 없으면 생성. 있으면 리턴.
+    private HttpSession ensure() {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes instanceof ServletRequestAttributes) {
+            return ((ServletRequestAttributes) requestAttributes).getRequest().getSession(true);
+        }
+        throw new IllegalStateException("Http 요청 컨텍스트가 없습니다.");
+    }
+
+    // 없으면 예외. 있으면 리턴.
+    private Optional<HttpSession> get() {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes instanceof ServletRequestAttributes) {
+            return Optional.ofNullable(((ServletRequestAttributes) requestAttributes).getRequest().getSession(false));
+        }
+        throw new IllegalStateException("Http 요청 컨텍스트가 없습니다.");
     }
 }

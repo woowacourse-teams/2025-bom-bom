@@ -2,7 +2,6 @@ package me.bombom.api.v1.auth.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.HashMap;
@@ -59,14 +58,13 @@ public class AuthController implements AuthControllerApi{
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
     public void signup(@Valid @RequestBody MemberSignupRequest signupRequest, HttpServletRequest request) {
-        Optional<HttpSession> optionalSession = sessionManager.get();
-        if (optionalSession.isEmpty()) {
+        if (sessionManager.isEmpty()) {
             throw new UnauthorizedException(ErrorDetail.MISSING_OAUTH_DATA)
                 .addContext("sessionExists", false)
                 .addContext("requestedEmail", signupRequest.email());
         }
         PendingOAuth2Member pendingMember = (PendingOAuth2Member) sessionManager.getAttribute("pendingMember");
-        log.info("회원가입 요청 - sessionId: {}, pendingMember: {}", optionalSession.get().getId(), pendingMember);
+        log.info("회원가입 요청 - pendingMember: {}", pendingMember);
         if (pendingMember == null) {
             throw new UnauthorizedException(ErrorDetail.MISSING_OAUTH_DATA)
                 .addContext("sessionExists", true)
@@ -163,14 +161,10 @@ public class AuthController implements AuthControllerApi{
             Optional<Member> member,
             HttpServletRequest request
     ) {
-        // 세션 생성 트리거 (컨테이너가 Set-Cookie: JSESSIONID를 설정)
-        sessionManager.ensure();
-
         if (member.isPresent()) {
+            // 기존 회원 -> 로그인 완료
             OAuth2AuthenticationToken authentication = createAuthenticationToken(member.get());
             sessionManager.setAuth(authentication);
-
-            // 기존 회원 -> 로그인 완료
             return new NativeLoginResponse(true, null, null);
         } else {
             // 신규 회원 -> 회원가입 필요

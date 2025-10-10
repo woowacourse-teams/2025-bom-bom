@@ -87,19 +87,6 @@ public class NewsletterSubscriptionCount {
             throw new IllegalArgumentException("출생연도가 미래입니다: " + birthYear);
         }
         int decade = age / DECADE_UNIT;
-        return Math.min(decade, MAX_DECADE); // 6 == 60+
-    }
-
-    public void increaseByDecade(int decade) {
-        switch (decade) {
-            case 0 -> this.age0s++;
-            case 1 -> this.age10s++;
-            case 2 -> this.age20s++;
-            case 3 -> this.age30s++;
-            case 4 -> this.age40s++;
-            case 5 -> this.age50s++;
-            default -> this.age60Plus++; // 6 이상은 전부 60+
-        }
-        this.total++;
+        return Math.min(decade, MAX_DECADE);
     }
 }

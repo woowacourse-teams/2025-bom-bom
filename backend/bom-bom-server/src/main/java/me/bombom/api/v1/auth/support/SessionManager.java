@@ -1,12 +1,14 @@
 package me.bombom.api.v1.auth.support;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Component
 public class SessionManager {
@@ -14,16 +16,24 @@ public class SessionManager {
     private static final String SPRING_SECURITY_CONTEXT_KEY = "SPRING_SECURITY_CONTEXT";
 
     // 세션을 보장. 없으면 생성. 있으면 리턴.
-    public HttpSession ensure(HttpServletRequest request) {
-        return request.getSession(true);
+    public HttpSession ensure() {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes instanceof ServletRequestAttributes) {
+            return ((ServletRequestAttributes) requestAttributes).getRequest().getSession(true);
+        }
+        throw new IllegalStateException("Http 요청 컨텍스트가 없습니다.");
     }
 
-    public Optional<HttpSession> get(HttpServletRequest request) {
-        return Optional.ofNullable(request.getSession(false));
+    public Optional<HttpSession> get() {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes instanceof ServletRequestAttributes) {
+            return Optional.ofNullable(((ServletRequestAttributes) requestAttributes).getRequest().getSession(false));
+        }
+        throw new IllegalStateException("Http 요청 컨텍스트가 없습니다.");
     }
 
-    public void setAuth(HttpServletRequest request, Authentication authentication) {
-        HttpSession session = ensure(request);
+    public void setAuth(Authentication authentication) {
+        HttpSession session = ensure();
         // 쓰레드 로컬이라 데이터가 남아있을 수 있어, 새로 만들고 채우는게 안전
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(authentication);
@@ -32,21 +42,21 @@ public class SessionManager {
         session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
     }
 
-    public void clearAuth(HttpServletRequest request) {
-        get(request).ifPresent(HttpSession::invalidate);
+    public void clearAuth() {
+        get().ifPresent(HttpSession::invalidate);
         SecurityContextHolder.clearContext();
     }
 
-    public void setAttribute(HttpServletRequest request, String key, Object value) {
-        ensure(request).setAttribute(key, value);
+    public void setAttribute(String key, Object value) {
+        ensure().setAttribute(key, value);
     }
 
-    public Object getAttribute(HttpServletRequest request, String key) {
-        return get(request).map(s -> s.getAttribute(key))
+    public Object getAttribute(String key) {
+        return get().map(s -> s.getAttribute(key))
                 .orElse(null);
     }
 
-    public void removeAttribute(HttpServletRequest request, String key) {
-        get(request).ifPresent(s -> s.removeAttribute(key));
+    public void removeAttribute(String key) {
+        get().ifPresent(s -> s.removeAttribute(key));
     }
 }

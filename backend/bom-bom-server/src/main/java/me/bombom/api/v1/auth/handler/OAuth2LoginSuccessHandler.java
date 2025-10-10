@@ -59,8 +59,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             HttpServletResponse response,
             Authentication authentication
     ) throws IOException {
-        Boolean pendingWithdraw = (Boolean) sessionManager.getAttribute(request, "pendingWithdraw");
-        Long withdrawMemberId = (Long) sessionManager.getAttribute(request, "withdrawMemberId");
+        Boolean pendingWithdraw = (Boolean) sessionManager.getAttribute("pendingWithdraw");
+        Long withdrawMemberId = (Long) sessionManager.getAttribute("withdrawMemberId");
 
         // === 탈퇴 처리 ===
         if (pendingWithdraw != null && pendingWithdraw && withdrawMemberId != null) {
@@ -80,7 +80,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         } catch (Exception e) {
             log.error("재인증 후 탈퇴 처리 중 예외 발생 - memberId: {}", withdrawMemberId, e);
         } finally {
-            sessionManager.clearAuth(request);
+            sessionManager.clearAuth();
             response.sendRedirect(getBaseUrlByEnv(request));
         }
     }
@@ -156,7 +156,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     }
 
     private String getBaseUrlByEnv(HttpServletRequest request) {
-        String env = (String) sessionManager.getAttribute(request, "env");
+        String env = (String) sessionManager.getAttribute("env");
         return LOCAL_ENV.equals(env) ? frontendLocalUrl : frontendBaseUrl;
     }
 }

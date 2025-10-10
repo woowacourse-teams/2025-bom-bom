@@ -36,7 +36,7 @@ public class AppleCallbackController {
             @RequestParam(value = "user", required = false) String userJson
     ) throws Exception {
         if (userJson != null && !userJson.isBlank()) {
-            sessionManager.setAttribute(request, "appleUserParam", userJson);
+            sessionManager.setAttribute("appleUserParam", userJson);
             log.info("Apple 콜백 user 캡처 완료(컨트롤러) — 세션 저장");
         } else {
             log.info("Apple 콜백에 user 파라미터가 없음");

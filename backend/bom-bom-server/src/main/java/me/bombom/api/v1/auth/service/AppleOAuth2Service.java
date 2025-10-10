@@ -2,7 +2,6 @@ package me.bombom.api.v1.auth.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -13,6 +12,7 @@ import me.bombom.api.v1.auth.client.dto.AppleNativeTokenResponse;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
+import me.bombom.api.v1.auth.support.SessionManager;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 
 /**
  * Apple OAuth2 통합 서비스
- * Apple 로그인, Token Revoke, 탈퇴 처리를 모두 담당합니다
  */
 @Slf4j
 @Service
@@ -36,10 +35,10 @@ public class AppleOAuth2Service extends OidcUserService {
     private static final String ACCESS_TOKEN_KEY = "access_token";
     
     private final MemberRepository memberRepository;
-    private final HttpSession session;
     private final IdTokenValidator idTokenValidator;
-    private final ObjectMapper objectMapper;
     private final AppleAuthClient appleAuthClient;
+    private final SessionManager sessionManager;
+    private final ObjectMapper objectMapper;
 
     //웹 로그인에서 사용
     @Value("${oauth2.apple.client-id}")
@@ -63,8 +62,8 @@ public class AppleOAuth2Service extends OidcUserService {
             // Apple Access Token 추출 및 세션에 저장
             String accessToken = extractAccessTokenFromOidcRequest(userRequest);
             if (accessToken != null) {
-                session.setAttribute("appleAccessToken", accessToken);
-                session.setAttribute("appleClientId", clientId);
+                sessionManager.setAttribute("appleAccessToken", accessToken);
+                sessionManager.setAttribute("appleClientId", clientId);
                 log.info("Apple Access Token 세션에 저장 완료");
             } else {
                 log.warn("Apple Access Token 추출 실패");
@@ -89,7 +88,7 @@ public class AppleOAuth2Service extends OidcUserService {
      * @param accessToken 철회할 Access Token
      */
     public void revokeToken(String accessToken) {
-        String clientId = (String) session.getAttribute("appleClientId");
+        String clientId = (String) sessionManager.getAttribute("appleClientId");
         if (clientId == null || clientId.isBlank()) {
             clientId = this.clientId; // 웹 기본 clientId
         }
@@ -114,8 +113,8 @@ public class AppleOAuth2Service extends OidcUserService {
 
             String subject = idTokenValidator.validateAppleAndGetSubject(request.identityToken(), bundleId);
             AppleNativeTokenResponse tokenResponse = appleAuthClient.getTokenResponse(request.authorizationCode(), bundleId);
-            session.setAttribute("appleAccessToken", tokenResponse.accessToken());
-            session.setAttribute("appleClientId", bundleId);
+            sessionManager.setAttribute("appleAccessToken", tokenResponse.accessToken());
+            sessionManager.setAttribute("appleClientId", bundleId);
             return findMemberAndSetPendingIfNew(subject);
         } catch (UnauthorizedException e) {
             log.error("Apple 네이티브 로그인 실패 - UnauthorizedException: {}", e.getMessage(), e);
@@ -154,7 +153,7 @@ public class AppleOAuth2Service extends OidcUserService {
         Map<String, Object> mergedAttributes = new HashMap<>(baseAttributes);
         
         try {
-            Object userParam = session.getAttribute("appleUserParam");
+            Object userParam = sessionManager.getAttribute("appleUserParam");
             if (!(userParam instanceof String userJson) || userJson.isBlank()) {
                 log.info("Apple user 파라미터가 없습니다(최초 동의가 아니거나 Apple 미제공 케이스)");
                 return mergedAttributes;
@@ -167,7 +166,7 @@ public class AppleOAuth2Service extends OidcUserService {
             parseName(userMap, mergedAttributes);
 
             // 사용 후 세션에서 제거
-            session.removeAttribute("appleUserParam");
+            sessionManager.removeAttribute("appleUserParam");
         } catch (Exception e) {
             log.warn("Apple user 파라미터 파싱 실패 - error: {}", e.getMessage(), e);
         }
@@ -220,7 +219,7 @@ public class AppleOAuth2Service extends OidcUserService {
                     .providerId(providerId)
                     .profileUrl(null)
                     .build();
-            session.setAttribute("pendingMember", pendingMember);
+            sessionManager.setAttribute("pendingMember", pendingMember);
             log.info("Apple 신규 사용자 - 회원가입 대기 상태로 설정, providerId: {}", providerId);
         } else {
             log.info("Apple 기존 사용자 - memberId: {}", member.get().getId());

@@ -59,13 +59,13 @@ public class AuthController implements AuthControllerApi{
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
     public void signup(@Valid @RequestBody MemberSignupRequest signupRequest, HttpServletRequest request) {
-        Optional<HttpSession> optionalSession = sessionManager.get(request);
+        Optional<HttpSession> optionalSession = sessionManager.get();
         if (optionalSession.isEmpty()) {
             throw new UnauthorizedException(ErrorDetail.MISSING_OAUTH_DATA)
                 .addContext("sessionExists", false)
                 .addContext("requestedEmail", signupRequest.email());
         }
-        PendingOAuth2Member pendingMember = (PendingOAuth2Member) sessionManager.getAttribute(request, "pendingMember");
+        PendingOAuth2Member pendingMember = (PendingOAuth2Member) sessionManager.getAttribute("pendingMember");
         log.info("회원가입 요청 - sessionId: {}, pendingMember: {}", optionalSession.get().getId(), pendingMember);
         if (pendingMember == null) {
             throw new UnauthorizedException(ErrorDetail.MISSING_OAUTH_DATA)
@@ -74,11 +74,11 @@ public class AuthController implements AuthControllerApi{
                 .addContext("requestedEmail", signupRequest.email());
         }
         Member newMember = memberService.signup(pendingMember, signupRequest);
-        sessionManager.removeAttribute(request, "pendingMember");
+        sessionManager.removeAttribute("pendingMember");
 
         // 회원가입 후 로그인 처리 - 세션에 인증 정보 저장
         OAuth2AuthenticationToken authentication = createAuthenticationToken(newMember);
-        sessionManager.setAuth(request, authentication);
+        sessionManager.setAuth(authentication);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class AuthController implements AuthControllerApi{
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException {
-        sessionManager.setAttribute(request, "env", env);
+        sessionManager.setAttribute("env", env);
         response.sendRedirect("/oauth2/authorization/" + provider);
     }
 
@@ -115,7 +115,7 @@ public class AuthController implements AuthControllerApi{
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(HttpServletRequest request, HttpServletResponse response) {
-        sessionManager.clearAuth(request);
+        sessionManager.clearAuth();
         cookieManager.delete(response, JSESSIONID);
     }
 
@@ -126,12 +126,12 @@ public class AuthController implements AuthControllerApi{
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException {
-        String appleAccessToken = (String) sessionManager.getAttribute(request, "appleAccessToken");
+        String appleAccessToken = (String) sessionManager.getAttribute("appleAccessToken");
         // Apple 로그인 사용자이고 Access Token이 없는 경우
         if (member.getProvider().equals("apple") && appleAccessToken == null) {
             // 탈퇴 플래그 저장 후 재로그인 요구
-            sessionManager.setAttribute(request, "pendingWithdraw", true);
-            sessionManager.setAttribute(request, "withdrawMemberId", member.getId());
+            sessionManager.setAttribute("pendingWithdraw", true);
+            sessionManager.setAttribute("withdrawMemberId", member.getId());
             response.sendRedirect("/oauth2/authorization/apple");
             return;
         }
@@ -144,7 +144,7 @@ public class AuthController implements AuthControllerApi{
         }
 
         memberService.withdraw(member.getId());
-        sessionManager.clearAuth(request);
+        sessionManager.clearAuth();
         cookieManager.delete(response, JSESSIONID);
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
@@ -164,11 +164,11 @@ public class AuthController implements AuthControllerApi{
             HttpServletRequest request
     ) {
         // 세션 생성 트리거 (컨테이너가 Set-Cookie: JSESSIONID를 설정)
-        sessionManager.ensure(request);
+        sessionManager.ensure();
 
         if (member.isPresent()) {
             OAuth2AuthenticationToken authentication = createAuthenticationToken(member.get());
-            sessionManager.setAuth(request, authentication);
+            sessionManager.setAuth(authentication);
 
             // 기존 회원 -> 로그인 완료
             return new NativeLoginResponse(true, null, null);

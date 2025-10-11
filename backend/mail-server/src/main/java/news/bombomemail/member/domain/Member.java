@@ -76,4 +76,8 @@ public class Member extends BaseEntity {
         this.gender = gender;
         this.roleId = roleId;
     }
+
+    public boolean hasBirthDate() {
+        return this.birthDate != null;
+    }
 }

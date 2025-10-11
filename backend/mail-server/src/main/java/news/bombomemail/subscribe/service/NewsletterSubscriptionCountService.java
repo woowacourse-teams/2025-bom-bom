@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import news.bombomemail.member.domain.Member;
 import news.bombomemail.member.repository.MemberRepository;
+import news.bombomemail.subscribe.domain.AgeGroup;
 import news.bombomemail.subscribe.domain.NewsletterSubscriptionCount;
 import news.bombomemail.subscribe.repository.NewsletterSubscriptionCountRepository;
 import org.springframework.stereotype.Service;
@@ -27,22 +28,9 @@ public class NewsletterSubscriptionCountService {
         }
         
         int birthYear = member.getBirthDate().getYear();
-        int decade = NewsletterSubscriptionCount.toDecadeBucket(LocalDate.now().getYear(), birthYear);
-        
+        AgeGroup group = AgeGroup.fromBirthYear(LocalDate.now().getYear(), birthYear);
+
         // MySQL INSERT ON DUPLICATE KEY UPDATE를 사용한 원자적 UPSERT 연산
-        incrementCountByDecade(newsletterId, decade);
-    }
-    
-    private void incrementCountByDecade(Long newsletterId, int decade) {
-        String ageGroup = switch (decade) {
-            case 0 -> "age0s";
-            case 1 -> "age10s";
-            case 2 -> "age20s";
-            case 3 -> "age30s";
-            case 4 -> "age40s";
-            case 5 -> "age50s";
-            default -> "age60plus";
-        };
-        newsletterSubscriptionCountRepository.incrementSubscriptionCountByNewsletterIdAndAgeGroup(newsletterId, ageGroup);
+        newsletterSubscriptionCountRepository.incrementSubscriptionCountByNewsletterIdAndAgeGroup(newsletterId, group.getDbKey());
     }
 }

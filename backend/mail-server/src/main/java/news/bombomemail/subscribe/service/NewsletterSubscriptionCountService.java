@@ -43,6 +43,6 @@ public class NewsletterSubscriptionCountService {
             case 5 -> "age50s";
             default -> "age60plus";
         };
-        newsletterSubscriptionCountRepository.incrementAge(newsletterId, ageGroup);
+        newsletterSubscriptionCountRepository.incrementSubscriptionCountByNewsletterIdAndAgeGroup(newsletterId, ageGroup);
     }
 }

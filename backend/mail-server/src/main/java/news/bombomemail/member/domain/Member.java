@@ -9,14 +9,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import news.bombomemail.common.BaseEntity;
-import news.bombomemail.member.domain.Gender;
 
 @Entity
 @Getter
@@ -46,7 +45,7 @@ public class Member extends BaseEntity {
     @Column(length = 512)
     private String profileImageUrl;
 
-    private LocalDateTime birthDate;
+    private LocalDate birthDate;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -63,7 +62,7 @@ public class Member extends BaseEntity {
             @NonNull String email,
             @NonNull String nickname,
             String profileImageUrl,
-            LocalDateTime birthDate,
+            LocalDate birthDate,
             @NonNull Gender gender,
             @NonNull Long roleId
     ) {
@@ -76,5 +75,9 @@ public class Member extends BaseEntity {
         this.birthDate = birthDate;
         this.gender = gender;
         this.roleId = roleId;
+    }
+
+    public boolean hasBirthDate() {
+        return this.birthDate != null;
     }
 }

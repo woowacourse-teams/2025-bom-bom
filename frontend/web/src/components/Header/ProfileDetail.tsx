@@ -189,6 +189,7 @@ const MyPageButton = styled(Link)`
 
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body2};
+
   text-decoration: none;
 
   &:hover {

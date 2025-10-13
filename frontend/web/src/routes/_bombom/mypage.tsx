@@ -2,13 +2,13 @@ import styled from '@emotion/styled';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
+import { postWithdraw } from '@/apis/auth';
+import { patchNickname } from '@/apis/members';
+import { queries } from '@/apis/queries';
 import Button from '@/components/Button/Button';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import InputField from '@/components/InputField/InputField';
 import { toast } from '@/components/Toast/utils/toastActions';
-import { queries } from '@/apis/queries';
-import { patchNickname } from '@/apis/members';
-import { postWithdraw } from '@/apis/auth';
 import { useDevice } from '@/hooks/useDevice';
 import type { Device } from '@/hooks/useDevice';
 
@@ -203,6 +203,7 @@ const NicknameWrapper = styled.div`
 const NewsletterGrid = styled.div<{ device: Device }>`
   display: grid;
   gap: 16px;
+
   grid-template-columns: ${({ device }) =>
     device === 'mobile' ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))'};
 `;
@@ -236,32 +237,32 @@ const NewsletterImage = styled(ImageWithFallback)`
 `;
 
 const NewsletterInfo = styled.div`
+  overflow: hidden;
+
   display: flex;
   gap: 4px;
   flex: 1;
   flex-direction: column;
-
-  overflow: hidden;
 `;
 
 const NewsletterName = styled.h3`
+  overflow: hidden;
+
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body1};
   font-weight: 600;
-
-  overflow: hidden;
+  white-space: nowrap;
 
   text-overflow: ellipsis;
-  white-space: nowrap;
 `;
 
 const NewsletterDescription = styled.p`
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.body2};
-
   overflow: hidden;
 
   display: -webkit-box;
+
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font: ${({ theme }) => theme.fonts.body2};
 
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;

@@ -87,6 +87,9 @@ dependencies {
 
     //otel
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.7.0")
+
+    // for : webhook
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
 }
 
 // Querydsl 생성된 파일 정리

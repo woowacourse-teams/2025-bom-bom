@@ -2,12 +2,10 @@ package news.bombomemail.subscribe.service;
 
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.log4j.Log4j2;
 import news.bombomemail.member.domain.Member;
 import news.bombomemail.member.repository.MemberRepository;
 import news.bombomemail.subscribe.domain.AgeGroup;
-import news.bombomemail.subscribe.domain.NewsletterSubscriptionCount;
 import news.bombomemail.subscribe.repository.NewsletterSubscriptionCountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -35,6 +33,6 @@ public class NewsletterSubscriptionCountService {
         AgeGroup group = AgeGroup.fromBirthYear(LocalDate.now().getYear(), birthYear);
 
         // MySQL INSERT ON DUPLICATE KEY UPDATE를 사용한 원자적 UPSERT 연산
-        newsletterSubscriptionCountRepository.incrementSubscriptionCountByNewsletterIdAndAgeGroup(newsletterId, group.getDbKey());
+        newsletterSubscriptionCountRepository.increaseSubscriptionCountByNewsletterIdAndAgeGroup(newsletterId, group.getDbKey());
     }
 }

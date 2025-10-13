@@ -1,4 +1,3 @@
-import styled from '@emotion/styled';
 import NewsletterCardList from './NewsletterCardList';
 import Carousel from '@/components/Carousel/Carousel';
 import type { Newsletter } from '@/types/newsletter';
@@ -35,12 +34,10 @@ const NewsletterCarousel = ({
   return (
     <>
       {newsletterSlides.length === 1 ? (
-        <SlideNewsletters>
-          <NewsletterCardList
-            newsletters={newsletters}
-            handleCardClick={handleCardClick}
-          />
-        </SlideNewsletters>
+        <NewsletterCardList
+          newsletters={newsletters}
+          handleCardClick={handleCardClick}
+        />
       ) : (
         <Carousel
           autoPlay={false}
@@ -48,12 +45,11 @@ const NewsletterCarousel = ({
           showNextSlidePart={true}
         >
           {newsletterSlides.map((newslettersOfSlide, slideIndex) => (
-            <SlideNewsletters key={`newsletters-${slideIndex}`}>
-              <NewsletterCardList
-                newsletters={newslettersOfSlide}
-                handleCardClick={handleCardClick}
-              />
-            </SlideNewsletters>
+            <NewsletterCardList
+              key={`newsletters-${slideIndex}`}
+              newsletters={newslettersOfSlide}
+              handleCardClick={handleCardClick}
+            />
           ))}
         </Carousel>
       )}
@@ -62,9 +58,3 @@ const NewsletterCarousel = ({
 };
 
 export default NewsletterCarousel;
-
-const SlideNewsletters = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-`;

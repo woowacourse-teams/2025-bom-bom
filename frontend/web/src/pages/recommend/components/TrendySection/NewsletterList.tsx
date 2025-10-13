@@ -39,14 +39,18 @@ const NewsletterList = ({
   };
 
   if (isLoading) {
-    return Array.from({
-      length:
-        device === 'mobile'
-          ? NEWSLETTER_COUNT.mobile
-          : NEWSLETTER_COUNT.nonMobile,
-    }).map((_, index) => (
-      <ImageInfoCardSkeleton key={`skeleton-card-${index}`} />
-    ));
+    return (
+      <TrendyGrid device={device}>
+        {Array.from({
+          length:
+            device === 'mobile'
+              ? NEWSLETTER_COUNT.mobile
+              : NEWSLETTER_COUNT.nonMobile,
+        }).map((_, index) => (
+          <ImageInfoCardSkeleton key={`skeleton-card-${index}`} />
+        ))}
+      </TrendyGrid>
+    );
   }
 
   return (
@@ -94,7 +98,6 @@ const SlideNewsletters = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 0 12px;
 `;
 
 const TrendyGrid = styled.div<{ device: Device }>`
@@ -107,7 +110,6 @@ const TrendyGrid = styled.div<{ device: Device }>`
 
 const NewsletterCard = styled(ImageInfoCard)`
   border-radius: 16px;
-  padding: 8px;
 
   cursor: pointer;
 

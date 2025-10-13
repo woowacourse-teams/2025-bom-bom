@@ -12,7 +12,6 @@ import { CATEGORIES } from '@/constants/newsletter';
 import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import type { Category } from '@/constants/newsletter';
-import type { Device } from '@/hooks/useDevice';
 import type { Newsletter } from '@/types/newsletter';
 import TrendingUpIcon from '#/assets/svg/trending-up.svg';
 
@@ -48,7 +47,7 @@ const TrendySection = () => {
 
   return (
     <>
-      <Container device={device}>
+      <Container>
         <SectionHeader>
           <SectionIconBox>
             <TrendingUpIcon width={16} height={16} />
@@ -94,22 +93,18 @@ const TrendySection = () => {
 
 export default TrendySection;
 
-const Container = styled.div<{ device: Device }>`
+const Container = styled.div`
   width: 100%;
-  padding: ${({ device }) => (device === 'mobile' ? '12px' : '24px')};
+  padding: 24px;
+  border: 1px solid ${({ theme }) => theme.colors.stroke};
+  border-radius: 20px;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 10%),
+    0 4px 6px -4px rgb(0 0 0 / 10%);
+
   background: ${({ theme }) => theme.colors.white};
 
   backdrop-filter: blur(10px);
-
-  ${({ device, theme }) =>
-    device !== 'mobile' &&
-    `
-    border: 1px solid ${theme.colors.stroke};
-    border-radius: 20px;
-    box-shadow:
-      0 10px 15px -3px rgb(0 0 0 / 10%),
-      0 4px 6px -4px rgb(0 0 0 / 10%);
-  `};
 `;
 
 const SectionHeader = styled.div`

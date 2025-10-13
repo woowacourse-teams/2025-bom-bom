@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum AgeGroup {
+
     AGE0S("age0s"),
     AGE10S("age10s"),
     AGE20S("age20s"),

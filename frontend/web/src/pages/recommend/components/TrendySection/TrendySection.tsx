@@ -66,6 +66,7 @@ const TrendySection = () => {
           ))}
         </TagContainer>
         <NewsletterList
+          key={selectedCategory}
           newsletters={filteredNewsletters ?? []}
           isLoading={isLoading}
           handleCardClick={handleCardClick}

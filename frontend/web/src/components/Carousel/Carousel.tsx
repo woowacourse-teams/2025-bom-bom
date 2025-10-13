@@ -1,6 +1,6 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
-import { Children } from 'react';
+import { Children, useMemo } from 'react';
 import { DEFAULT_SPEED } from './Carousel.constants';
 import useCarousel from './useCarousel';
 import ChevronIcon from '../icons/ChevronIcon';
@@ -45,11 +45,14 @@ const Carousel = ({
     }
   }
 
-  const infinitySlides = [
-    originSlides[originSlides.length - 1],
-    ...originSlides,
-    originSlides[0],
-  ];
+  const infinitySlides = useMemo(
+    () => [
+      originSlides[originSlides.length - 1],
+      ...originSlides,
+      originSlides[0],
+    ],
+    [originSlides],
+  );
 
   const {
     slideIndex,

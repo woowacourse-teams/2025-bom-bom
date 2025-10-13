@@ -39,8 +39,7 @@ const ArticleBody = ({
   const { mutate: removeHighlight } = useRemoveHighlightMutation({ articleId });
   const { activeSelectionRange, activeHighlightId } =
     useFloatingToolbarSelection({
-      isInSelectionTarget: (range) =>
-        contentRef.current?.contains(range.commonAncestorContainer) ?? false,
+      contentRef,
       onShow: showToolbar,
       onHide: hideToolbar,
     });

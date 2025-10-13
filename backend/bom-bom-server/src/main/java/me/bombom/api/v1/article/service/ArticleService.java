@@ -6,10 +6,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.article.dto.request.PreviousArticleRequest;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
+import me.bombom.api.v1.article.dto.response.PreviousArticleResponse;
 import me.bombom.api.v1.article.event.MarkAsReadEvent;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -19,6 +21,7 @@ import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
@@ -40,12 +43,15 @@ import org.springframework.util.StringUtils;
 @Transactional(readOnly = true)
 public class ArticleService {
 
+    private static final String ADMIN_NICKNAME = "봄봄";
+
     private final ArticleRepository articleRepository;
     private final TodayReadingRepository todayReadingRepository;
     private final CategoryRepository categoryRepository;
     private final NewsletterRepository newsletterRepository;
     private final HighlightRepository highlightRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final MemberRepository memberRepository;
 
     public Page<ArticleResponse> getArticles(
             Member member,
@@ -70,6 +76,20 @@ public class ArticleService {
                         .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
                         .addContext("categoryId", newsletter.getCategoryId()));
         return ArticleDetailResponse.of(article, newsletter, category);
+    }
+
+    public List<PreviousArticleResponse> getPreviousArticles(PreviousArticleRequest previousArticleRequest) {
+        Member admin = memberRepository.findByNickname(ADMIN_NICKNAME)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
+                .addContext(ErrorContextKeys.OPERATION, "getPreviousArticles"));
+
+        validateNewsletterId(previousArticleRequest.newsletterId());
+        return articleRepository.findArticlesByMemberIdAndNewsletterId(
+                previousArticleRequest.newsletterId(),
+                admin.getId(),
+                previousArticleRequest.limit()
+        );
     }
 
     @Transactional

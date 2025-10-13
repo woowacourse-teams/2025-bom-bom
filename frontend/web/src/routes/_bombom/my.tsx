@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
+import Divider from '@/components/Divider/Divider';
 import { useDevice } from '@/hooks/useDevice';
 import NicknameSection from '@/pages/MyPage/NicknameSection';
 import SubscribedNewslettersSection from '@/pages/MyPage/SubscribedNewslettersSection';
@@ -63,12 +64,4 @@ const Title = styled.h1<{ device: Device }>`
   color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme, device }) =>
     device === 'mobile' ? theme.fonts.heading3 : theme.fonts.heading2};
-`;
-
-const Divider = styled.div`
-  width: 100%;
-  height: 1px;
-  margin: 8px 0;
-
-  background-color: ${({ theme }) => theme.colors.dividers};
 `;

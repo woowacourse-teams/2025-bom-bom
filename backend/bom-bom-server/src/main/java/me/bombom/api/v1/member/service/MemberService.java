@@ -63,43 +63,31 @@ public class MemberService {
         };
     }
 
-    public MemberProfileResponse getProfile(Long id) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, id)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
-                );
+    public MemberProfileResponse getProfile(Long memberId) {
+        Member member = findMemberById(memberId);
         return MemberProfileResponse.from(member);
     }
 
     @Transactional
     public MemberProfileResponse updateProfile(Long memberId, MemberProfileUpdateRequest request) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
-            );
+        Member member = findMemberById(memberId);
 
         if (request.nickname() != null && !member.getNickname().equals(request.nickname())) {
             userInfoValidator.validateNickname(request.nickname());
         }
 
         member.updateProfile(
-            request.nickname(),
-            request.profileImageUrl(),
-            request.birthDate(),
-            request.gender()
+                request.nickname(),
+                request.profileImageUrl(),
+                request.birthDate(),
+                request.gender()
         );
         return MemberProfileResponse.from(member);
     }
 
     @Transactional
     public void withdraw(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
-            );
+        Member member = findMemberById(memberId);
 
         /*
         회원 탈퇴 신청 시 즉시 withdrawnMember로 정보 이전
@@ -130,5 +118,13 @@ public class MemberService {
             return SignupValidateStatus.DUPLICATE;
         }
         return SignupValidateStatus.OK;
+    }
+
+    private Member findMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
+                );
     }
 }

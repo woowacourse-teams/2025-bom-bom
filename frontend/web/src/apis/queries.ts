@@ -20,7 +20,11 @@ import {
   getReadingStatus,
   getUserInfo,
 } from './members';
-import { getNewsletterDetail, getNewsletters } from './newsLetters';
+import {
+  getMyNewsletters,
+  getNewsletterDetail,
+  getNewsletters,
+} from './newsLetters';
 import type { GetSignupCheckParams } from './auth';
 import type {
   GetArticleBookmarkStatusParams,
@@ -99,6 +103,12 @@ export const queries = {
     queryOptions({
       queryKey: ['newsletters'],
       queryFn: getNewsletters,
+    }),
+
+  myNewsletters: () =>
+    queryOptions({
+      queryKey: ['newsletters', 'me'],
+      queryFn: getMyNewsletters,
     }),
 
   newsletterDetail: (params: GetNewsletterDetailParams) =>

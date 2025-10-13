@@ -21,3 +21,11 @@ export const getNewsletterDetail = async ({
     path: `/newsletters/${id}`,
   });
 };
+
+type GetMyNewslettersResponse = components['schemas']['NewsletterResponse'][];
+
+export const getMyNewsletters = async () => {
+  return await fetcher.get<GetMyNewslettersResponse>({
+    path: '/members/me/newsletters',
+  });
+};

@@ -12,7 +12,7 @@ import { toast } from '@/components/Toast/utils/toastActions';
 import { useDevice } from '@/hooks/useDevice';
 import type { Device } from '@/hooks/useDevice';
 
-export const Route = createFileRoute('/_bombom/mypage')({
+export const Route = createFileRoute('/_bombom/my')({
   head: () => ({
     meta: [
       {

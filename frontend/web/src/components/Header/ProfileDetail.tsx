@@ -79,7 +79,7 @@ const ProfileDetail = ({ userInfo, onClose }: ProfileDetailProps) => {
         </ChannelTalkButton>
       )}
 
-      <MyPageButton to="/mypage" onClick={onClose}>
+      <MyPageButton to="/my" onClick={onClose}>
         마이페이지
       </MyPageButton>
 

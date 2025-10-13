@@ -53,18 +53,33 @@ const NewsletterList = ({
     );
   }
 
+  const splittedNewsletters = splitNewsletters(newsletters, ITEMS_PER_SLIDE);
+
   return (
     <TrendyGrid device={device}>
       {newsletters.length === 0 ? (
         <p>해당 카테고리에 뉴스레터가 없습니다.</p>
       ) : device === 'mobile' ? (
-        <Carousel
-          autoPlay={false}
-          hasSlideButton={false}
-          showNextSlidePart={true}
-        >
-          {splitNewsletters(newsletters, ITEMS_PER_SLIDE).map(
-            (newsletterItems, slideIndex) => (
+        splittedNewsletters.length === 1 ? (
+          <SlideNewsletters>
+            {newsletters.map((newsletter) => (
+              <NewsletterCard
+                key={newsletter.newsletterId}
+                imageUrl={newsletter.imageUrl ?? ''}
+                title={newsletter.name}
+                description={newsletter.description}
+                onClick={() => handleCardClick(newsletter)}
+                as="button"
+              />
+            ))}
+          </SlideNewsletters>
+        ) : (
+          <Carousel
+            autoPlay={false}
+            hasSlideButton={false}
+            showNextSlidePart={true}
+          >
+            {splittedNewsletters.map((newsletterItems, slideIndex) => (
               <SlideNewsletters key={`newsletters-${slideIndex}`}>
                 {newsletterItems.map((newsletter) => (
                   <NewsletterCard
@@ -77,9 +92,9 @@ const NewsletterList = ({
                   />
                 ))}
               </SlideNewsletters>
-            ),
-          )}
-        </Carousel>
+            ))}
+          </Carousel>
+        )
       ) : (
         newsletters.map((newsletter) => (
           <NewsletterCard

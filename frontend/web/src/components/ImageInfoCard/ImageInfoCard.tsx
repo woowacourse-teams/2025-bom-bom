@@ -54,6 +54,7 @@ const Image = styled(ImageWithFallback)`
 
 export const InfoBox = styled.div`
   min-height: 64px;
+
   display: flex;
   gap: 8px;
   flex: 1;

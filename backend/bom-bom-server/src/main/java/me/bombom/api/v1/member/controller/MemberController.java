@@ -5,7 +5,10 @@ import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.response.MemberProfileResponse;
 import me.bombom.api.v1.member.service.MemberService;
+import me.bombom.api.v1.member.dto.request.MemberProfileUpdateRequest;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,5 +23,11 @@ public class MemberController implements MemberControllerApi{
     @GetMapping("/me")
     public MemberProfileResponse getMember(@LoginMember Member member) {
         return memberService.getProfile(member.getId());
+    }
+
+    @Override
+    @PatchMapping("/me")
+    public MemberProfileResponse updateMember(@LoginMember Member member, @RequestBody MemberProfileUpdateRequest request) {
+        return memberService.updateProfile(member.getId(), request);
     }
 }

@@ -1,6 +1,7 @@
 package me.bombom.api.v1.article.controller;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -34,8 +35,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -80,6 +79,7 @@ class ArticleControllerTest {
     private List<Newsletter> newsletters;
     private List<Category> categories;
     private CustomOAuth2User customOAuth2User;
+    private OAuth2AuthenticationToken authToken;
 
     @BeforeEach
     void setUp() {
@@ -113,30 +113,21 @@ class ArticleControllerTest {
                 "name", member.getNickname()
         );
         customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
-    }
-
-    private void setAuthentication() {
+        
         // OAuth2AuthenticationToken 생성
-        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+        authToken = new OAuth2AuthenticationToken(
                 customOAuth2User,
                 customOAuth2User.getAuthorities(),
                 "registrationId"
         );
-
-        // SecurityContext에 인증 정보 설정
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authToken);
-        SecurityContextHolder.setContext(context);
     }
 
     @Test
     @DisplayName("기본 아티클 목록 조회 성공")
     void 아티클_목록_조회_성공() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then
         mockMvc.perform(get("/api/v1/articles")
+                        .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -151,13 +142,13 @@ class ArticleControllerTest {
     @Test
     void 뉴스레터_아티클_목록_조회() throws Exception {
         // given
-        setAuthentication();
         Newsletter newsletter = newsletters.get(2);
         Long newsletterId = newsletter.getId();
         String newsletterName = newsletter.getName();
 
         // when & then
         mockMvc.perform(get("/api/v1/articles")
+                        .with(authentication(authToken))
                         .param("newsletterId", newsletterId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
@@ -168,11 +159,9 @@ class ArticleControllerTest {
 
     @Test
     void 뉴스_키워드_검색_아티클_목록_조회() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then
         mockMvc.perform(get("/api/v1/articles")
+                        .with(authentication(authToken))
                         .param("keyword", "뉴스"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
@@ -183,11 +172,9 @@ class ArticleControllerTest {
 
     @Test
     void 레터_키워드_검색_아티클_목록_조회() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then
         mockMvc.perform(get("/api/v1/articles")
+                        .with(authentication(authToken))
                         .param("keyword", "레터"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
@@ -198,11 +185,9 @@ class ArticleControllerTest {
 
     @Test
     void 존재하지않는_키워드_검색_아티클_목록_조회() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then
         mockMvc.perform(get("/api/v1/articles")
+                        .with(authentication(authToken))
                         .param("keyword", "존재하지않는키워드"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
@@ -212,11 +197,9 @@ class ArticleControllerTest {
 
     @Test
     void 기본값이_DESC_정렬인지_확인() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then - 정렬 파라미터 없는 기본값
-        MvcResult defaultResult = mockMvc.perform(get("/api/v1/articles"))
+        MvcResult defaultResult = mockMvc.perform(get("/api/v1/articles")
+                        .with(authentication(authToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.totalElements").value(4))
@@ -224,6 +207,7 @@ class ArticleControllerTest {
 
         // when & then - 명시적 DESC 정렬
         MvcResult descResult = mockMvc.perform(get("/api/v1/articles")
+                        .with(authentication(authToken))
                         .param("sorted", "desc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
@@ -245,11 +229,9 @@ class ArticleControllerTest {
 
     @Test
     void DESC_정렬_아티클_목록_조회() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then
         MvcResult result = mockMvc.perform(get("/api/v1/articles")
+                        .with(authentication(authToken))
                         .param("sorted", "desc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
@@ -269,11 +251,9 @@ class ArticleControllerTest {
 
     @Test
     void ASC_정렬_아티클_목록_조회() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then
         MvcResult result = mockMvc.perform(get("/api/v1/articles")
+                        .with(authentication(authToken))
                         .param("sort", "arrivedDateTime")
                         .param("direction", "asc"))
                 .andExpect(status().isOk())
@@ -294,11 +274,9 @@ class ArticleControllerTest {
 
     @Test
     void 첫번째_페이지_아티클_목록_조회() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then
         mockMvc.perform(get("/api/v1/articles")
+                        .with(authentication(authToken))
                         .param("page", "0")
                         .param("size", "2"))
                 .andExpect(status().isOk())
@@ -314,11 +292,9 @@ class ArticleControllerTest {
 
     @Test
     void 두번째_페이지_아티클_목록_조회() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then
         mockMvc.perform(get("/api/v1/articles")
+                        .with(authentication(authToken))
                         .param("page", "1")
                         .param("size", "2"))
                 .andExpect(status().isOk())
@@ -334,11 +310,11 @@ class ArticleControllerTest {
     @Test
     void 날짜_필터링_아티클_목록_조회() throws Exception {
         // given
-        setAuthentication();
         LocalDate baseDate = LocalDate.of(2025, 7, 15);
 
         // when & then - 특정 날짜로 필터링
         mockMvc.perform(get("/api/v1/articles")
+                        .with(authentication(authToken))
                         .param("date", baseDate.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
@@ -348,13 +324,13 @@ class ArticleControllerTest {
     @Test
     void 뉴스레터_키워드_날짜_복합_필터링_아티클_목록_조회() throws Exception {
         // given
-        setAuthentication();
         Newsletter newsletter = newsletters.get(2);
         Long newsletterId = newsletter.getId();
         LocalDate baseDate = LocalDate.of(2025, 7, 15);
 
         // when & then - 뉴스레터 + 키워드 + 날짜 복합 필터링
         mockMvc.perform(get("/api/v1/articles")
+                        .with(authentication(authToken))
                         .param("newsletterId", newsletterId.toString())
                         .param("keyword", "레터")
                         .param("date", baseDate.toString())

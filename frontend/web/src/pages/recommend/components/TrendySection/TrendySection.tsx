@@ -2,14 +2,13 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
+import NewsletterList from './NewsletterList';
 import NewsletterDetail from '../NewsletterDetail/NewsletterDetail';
 import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
-import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
-import ImageInfoCardSkeleton from '@/components/ImageInfoCard/ImageInfoCardSkeleton';
 import Modal from '@/components/Modal/Modal';
 import useModal from '@/components/Modal/useModal';
-import { CATEGORIES, NEWSLETTER_COUNT } from '@/constants/newsletter';
+import { CATEGORIES } from '@/constants/newsletter';
 import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import type { Category } from '@/constants/newsletter';
@@ -66,26 +65,11 @@ const TrendySection = () => {
             />
           ))}
         </TagContainer>
-        <TrendyGrid device={device}>
-          {isLoading ? (
-            Array.from({ length: NEWSLETTER_COUNT }).map((_, index) => (
-              <ImageInfoCardSkeleton key={`skeleton-card-${index}`} />
-            ))
-          ) : filteredNewsletters?.length === 0 ? (
-            <p>해당 카테고리에 뉴스레터가 없습니다.</p>
-          ) : (
-            filteredNewsletters?.map((newsletter) => (
-              <NewsletterCard
-                key={newsletter.newsletterId}
-                imageUrl={newsletter.imageUrl ?? ''}
-                title={newsletter.name}
-                description={newsletter.description}
-                onClick={() => handleCardClick(newsletter)}
-                as="button"
-              />
-            ))
-          )}
-        </TrendyGrid>
+        <NewsletterList
+          newsletters={filteredNewsletters ?? []}
+          isLoading={isLoading}
+          handleCardClick={handleCardClick}
+        />
       </Container>
       {createPortal(
         <Modal
@@ -162,39 +146,4 @@ const TagContainer = styled.div`
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-`;
-
-const TrendyGrid = styled.div<{ device: Device }>`
-  display: grid;
-  gap: 12px;
-
-  grid-template-columns: ${({ device }) =>
-    device === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
-`;
-
-const NewsletterCard = styled(ImageInfoCard)`
-  border-radius: 16px;
-
-  cursor: pointer;
-
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-
-  &:hover {
-    box-shadow: 0 8px 25px -8px rgb(0 0 0 / 12%);
-    transform: translateY(-2px);
-  }
-
-  &:active {
-    transform: translateY(-1px);
-  }
-
-  &:focus-visible {
-    outline: none;
-  }
-
-  &:focus:not(:focus-visible) {
-    outline: none;
-  }
 `;

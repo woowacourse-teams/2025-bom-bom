@@ -13,4 +13,7 @@ export const CATEGORIES = [
 
 export type Category = (typeof CATEGORIES)[number];
 
-export const NEWSLETTER_COUNT = 52;
+export const NEWSLETTER_COUNT = {
+  nonMobile: 52,
+  mobile: 5,
+};

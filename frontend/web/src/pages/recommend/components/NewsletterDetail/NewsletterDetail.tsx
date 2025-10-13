@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { buildSubscribeUrl, isMaily, isStibee } from './NewsletterDetail.utils';
 import NewsletterSubscribeGuide from './NewsletterSubscribeGuide';
@@ -25,6 +26,7 @@ const NewsletterDetail = ({
   newsletterId,
   category,
 }: NewsletterDetailProps) => {
+  const navigate = useNavigate();
   const { userInfo, isLoggedIn } = useUserInfo();
   const { data: newsletterDetail } = useQuery({
     ...queries.newsletterDetail({ id: newsletterId }),
@@ -147,7 +149,7 @@ const NewsletterDetail = ({
               <PreviousArticleListItem
                 key={article.articleId}
                 {...article}
-                onClick={(id) => console.log('이전 아티클 클릭', id)}
+                onClick={(id) => navigate({ to: `articles/previous/${id}` })}
               />
             ))}
           </PreviousArticleList>

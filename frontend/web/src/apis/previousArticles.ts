@@ -19,3 +19,28 @@ export const getPreviousArticles = async (
     query: params,
   });
 };
+
+export type GetPreviousArticleDetailParams = {
+  articleId: number;
+};
+export type GetPreviousArticleDetailResponse = {
+  id: number;
+  title: string;
+  contents: string;
+  arrivedDateTime: string;
+  expectedReadTime: number;
+  newsletter: {
+    name: string;
+    email: string;
+    imageUrl: string;
+    category: string;
+  };
+};
+
+export const getPreviousArticleDetail = async (
+  params: GetPreviousArticleDetailParams,
+) => {
+  return await fetcher.get<GetPreviousArticleDetailResponse>({
+    path: `/articles/previous/${params.articleId}`,
+  });
+};

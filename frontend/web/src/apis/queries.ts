@@ -21,7 +21,10 @@ import {
   getUserInfo,
 } from './members';
 import { getNewsletterDetail, getNewsletters } from './newsLetters';
-import { getPreviousArticles } from './previousArticles';
+import {
+  getPreviousArticleDetail,
+  getPreviousArticles,
+} from './previousArticles';
 import type { GetSignupCheckParams } from './auth';
 import type {
   GetArticleBookmarkStatusParams,
@@ -30,7 +33,10 @@ import type {
 import type { GetHighlightsParams } from './highlight';
 import type { GetMonthlyReadingRankParams } from './members';
 import type { GetNewsletterDetailParams } from './newsLetters';
-import type { GetPreviousArticlesParams } from './previousArticles';
+import type {
+  GetPreviousArticleDetailParams,
+  GetPreviousArticlesParams,
+} from './previousArticles';
 
 export const queries = {
   // articles
@@ -154,5 +160,11 @@ export const queries = {
     queryOptions({
       queryKey: ['articles', 'previous', params],
       queryFn: () => getPreviousArticles(params),
+    }),
+
+  previousArticleDetail: (params: GetPreviousArticleDetailParams) =>
+    queryOptions({
+      queryKey: ['articles', 'previous', params],
+      queryFn: () => getPreviousArticleDetail(params),
     }),
 };

@@ -10,6 +10,7 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.dto.request.MemberProfileUpdateRequest;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.dto.response.MemberProfileResponse;
 import me.bombom.api.v1.member.event.MemberSignupEvent;
@@ -68,6 +69,27 @@ public class MemberService {
                     .addContext(ErrorContextKeys.MEMBER_ID, id)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
                 );
+        return MemberProfileResponse.from(member);
+    }
+
+    @Transactional
+    public MemberProfileResponse updateProfile(Long memberId, MemberProfileUpdateRequest request) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
+            );
+
+        if (request.nickname() != null && !member.getNickname().equals(request.nickname())) {
+            userInfoValidator.validateNickname(request.nickname());
+        }
+
+        member.updateProfile(
+            request.nickname(),
+            request.profileImageUrl(),
+            request.birthDate(),
+            request.gender()
+        );
         return MemberProfileResponse.from(member);
     }
 

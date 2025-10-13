@@ -45,6 +45,7 @@ import org.springframework.util.StringUtils;
 public class ArticleService {
 
     private static final String ADMIN_NICKNAME = "봄봄";
+    private static final int PREVIOUS_ARTICLE_KEEP_COUNT = 10;
 
     private final ArticleRepository articleRepository;
     private final TodayReadingRepository todayReadingRepository;
@@ -150,9 +151,10 @@ public class ArticleService {
         articleRepository.deleteAllByMemberId(memberId);
     }
 
-    public void cleanupOldPreviousArticles() {
+    @Transactional
+    public int cleanupOldPreviousArticles() {
         Long adminMemberId = getAdminMemberId();
-
+        return articleRepository.cleanupOldPreviousArticles(adminMemberId, PREVIOUS_ARTICLE_KEEP_COUNT);
     }
 
     private Long getAdminMemberId() {

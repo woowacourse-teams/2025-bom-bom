@@ -40,22 +40,21 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
         a.id, a.title, a.contentsSummary, a.expectedReadTime
     )
     FROM Article a
-    JOIN Newsletter n ON n.id = a.newsletterId
-    WHERE a.memberId = :memberId
-    ORDER BY a.arrivedDateTime DESC, a.id ASC
+    WHERE a.newsletterId = :newsletterId AND a.memberId = :memberId
+    ORDER BY a.arrivedDateTime DESC
     LIMIT :limit
     """)
     List<PreviousArticleResponse> findArticlesByMemberIdAndNewsletterId(
-            Long newsletterId,
-            Long memberId,
-            int limit
+            @Param("newsletterId") Long newsletterId,
+            @Param("memberId") Long memberId,
+            @Param("limit") int limit
     );
 
     @Query("""
     SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse(
         a.title, a.contents, a.arrivedDateTime, a.expectedReadTime,
             new me.bombom.api.v1.newsletter.dto.NewsletterBasicResponse(
-                n.name, n.email, n.imageUrl, c.name                
+                n.name, n.email, n.imageUrl, c.name
             )
     )
     FROM Article a
@@ -63,5 +62,24 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
     JOIN Category c ON c.id = n.categoryId
     WHERE a.id = :id AND a.memberId = :memberId
     """)
-    Optional<PreviousArticleDetailResponse> getPreviousArticleDetailsByMemberId(Long id, Long memberId);
+    Optional<PreviousArticleDetailResponse> getPreviousArticleDetailsByMemberId(@Param("id") Long id, @Param("memberId") Long memberId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = """
+    WITH cleanup_candidates AS (
+        SELECT id,
+               ROW_NUMBER() OVER (
+                   PARTITION BY newsletter_id
+                   ORDER BY arrived_date_time DESC, id DESC
+               ) as keep_order
+        FROM article\s
+        WHERE member_id = :memberId
+    )
+    DELETE FROM article\s
+    WHERE id IN (
+        SELECT id FROM cleanup_candidates
+        WHERE keep_order > :keepCount
+    )
+    """, nativeQuery = true)
+    int cleanupOldPreviousArticles(@Param("memberId") Long memberId, @Param("keepCount") int keepCount);
 }

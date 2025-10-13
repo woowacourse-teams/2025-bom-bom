@@ -13,7 +13,7 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.dto.response.MemberProfileResponse;
 import me.bombom.api.v1.member.event.MemberSignupEvent;
-import me.bombom.api.v1.member.event.NewMemberRegisteredEvent;
+import me.bombom.api.v1.member.event.MemberRegisteredEvent;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.withdraw.event.WithdrawEvent;
 import me.bombom.api.v1.withdraw.service.WithdrawService;
@@ -51,7 +51,7 @@ public class MemberService {
                 .build();
         Member savedMember = memberRepository.save(newMember);
         applicationEventPublisher.publishEvent(new MemberSignupEvent(savedMember.getId()));
-        applicationEventPublisher.publishEvent(new NewMemberRegisteredEvent(savedMember.getNickname()));
+        applicationEventPublisher.publishEvent(new MemberRegisteredEvent(savedMember.getNickname()));
         return savedMember;
     }
 

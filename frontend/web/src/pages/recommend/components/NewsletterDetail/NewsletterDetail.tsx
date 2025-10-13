@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { buildSubscribeUrl, isMaily, isStibee } from './NewsletterDetail.utils';
 import { queries } from '@/apis/queries';
 import Badge from '@/components/Badge/Badge';
@@ -28,6 +29,7 @@ const NewsletterDetail = ({
     enabled: Boolean(newsletterId),
   });
   const deviceType = useDevice();
+  const [activeTab, setActiveTab] = useState<'detail' | 'previous'>('detail');
 
   const isMobile = deviceType === 'mobile';
 
@@ -101,77 +103,102 @@ const NewsletterDetail = ({
         />
       </FixedWrapper>
 
-      <ScrollableWrapper isMobile={isMobile}>
-        <Description isMobile={isMobile}>
-          {newsletterDetail.description}
-        </Description>
+      <TabHeader>
+        <TabButton
+          isActive={activeTab === 'detail'}
+          onClick={() => setActiveTab('detail')}
+        >
+          뉴스레터 소개
+        </TabButton>
+        <TabButton
+          isActive={activeTab === 'previous'}
+          onClick={() => setActiveTab('previous')}
+        >
+          지난 뉴스레터
+        </TabButton>
+      </TabHeader>
 
-        {newsletterDetail.previousNewsletterUrl && (
-          <DetailLink onClick={openPreviousLetters} isMobile={isMobile}>
-            <ArticleHistoryIcon width={16} height={16} />
-            지난 소식 보기
-          </DetailLink>
-        )}
+      {activeTab === 'detail' && (
+        <ScrollableWrapper isMobile={isMobile}>
+          <Description isMobile={isMobile}>
+            {newsletterDetail.description}
+          </Description>
 
-        {!isMobile && (
-          <SubscribeWrapper>
-            <SubscribeHeader>
-              <SubscribeTitle>구독 방법</SubscribeTitle>
-            </SubscribeHeader>
-            <SubscribeContent>
-              <StepsWrapper>
-                <StepItem>
-                  <StepNumber>1</StepNumber>
-                  <StepContent>
-                    <StepTitle>구독하기 버튼 클릭</StepTitle>
-                    <StepDescription>
-                      {'위의 "구독하기" 버튼을 눌러주세요.'}
-                    </StepDescription>
-                  </StepContent>
-                </StepItem>
-                <StepItem>
-                  <StepNumber>2</StepNumber>
-                  <StepContent>
-                    <StepTitle>구독 페이지 접속</StepTitle>
-                    <StepDescription>
-                      {'뉴스레터 공식 구독 페이지로 이동합니다.'}
-                    </StepDescription>
-                  </StepContent>
-                </StepItem>
-                <StepItem>
-                  <StepNumber>3</StepNumber>
-                  <StepContent>
-                    <StepTitle>봄봄 메일 붙여넣기</StepTitle>
-                    <StepDescription>
-                      {'이메일 칸에 봄봄 메일을 입력해주세요.'}
-                    </StepDescription>
-                    <StepDescription>
-                      {
-                        '봄봄을 통해 접속한 유저라면 즉시 붙여넣기가 가능합니다!'
-                      }
-                    </StepDescription>
-                  </StepContent>
-                </StepItem>
-                <StepItem>
-                  <StepNumber>4</StepNumber>
-                  <StepContent>
-                    <StepTitle>구독 완료!</StepTitle>
-                    <StepDescription>
-                      {'축하합니다! 이제 정기적으로 뉴스레터를 받아보세요.'}
-                    </StepDescription>
-                  </StepContent>
-                </StepItem>
-              </StepsWrapper>
-              {newsletterDetail.subscribePageImageUrl && (
-                <Screenshot
-                  src={newsletterDetail.subscribePageImageUrl}
-                  alt="구독 페이지 스크린샷"
-                />
-              )}
-            </SubscribeContent>
-          </SubscribeWrapper>
-        )}
-      </ScrollableWrapper>
+          {newsletterDetail.previousNewsletterUrl && (
+            <DetailLink onClick={openPreviousLetters} isMobile={isMobile}>
+              <ArticleHistoryIcon width={16} height={16} />
+              지난 소식 보기
+            </DetailLink>
+          )}
+
+          {!isMobile && (
+            <SubscribeWrapper>
+              <SubscribeHeader>
+                <SubscribeTitle>구독 방법</SubscribeTitle>
+              </SubscribeHeader>
+              <SubscribeContent>
+                <StepsWrapper>
+                  <StepItem>
+                    <StepNumber>1</StepNumber>
+                    <StepContent>
+                      <StepTitle>구독하기 버튼 클릭</StepTitle>
+                      <StepDescription>
+                        {'위의 "구독하기" 버튼을 눌러주세요.'}
+                      </StepDescription>
+                    </StepContent>
+                  </StepItem>
+                  <StepItem>
+                    <StepNumber>2</StepNumber>
+                    <StepContent>
+                      <StepTitle>구독 페이지 접속</StepTitle>
+                      <StepDescription>
+                        {'뉴스레터 공식 구독 페이지로 이동합니다.'}
+                      </StepDescription>
+                    </StepContent>
+                  </StepItem>
+                  <StepItem>
+                    <StepNumber>3</StepNumber>
+                    <StepContent>
+                      <StepTitle>봄봄 메일 붙여넣기</StepTitle>
+                      <StepDescription>
+                        {'이메일 칸에 봄봄 메일을 입력해주세요.'}
+                      </StepDescription>
+                      <StepDescription>
+                        {
+                          '봄봄을 통해 접속한 유저라면 즉시 붙여넣기가 가능합니다!'
+                        }
+                      </StepDescription>
+                    </StepContent>
+                  </StepItem>
+                  <StepItem>
+                    <StepNumber>4</StepNumber>
+                    <StepContent>
+                      <StepTitle>구독 완료!</StepTitle>
+                      <StepDescription>
+                        {'축하합니다! 이제 정기적으로 뉴스레터를 받아보세요.'}
+                      </StepDescription>
+                    </StepContent>
+                  </StepItem>
+                </StepsWrapper>
+                {newsletterDetail.subscribePageImageUrl && (
+                  <Screenshot
+                    src={newsletterDetail.subscribePageImageUrl}
+                    alt="구독 페이지 스크린샷"
+                  />
+                )}
+              </SubscribeContent>
+            </SubscribeWrapper>
+          )}
+        </ScrollableWrapper>
+      )}
+
+      {activeTab === 'previous' && (
+        <ScrollableWrapper isMobile={isMobile}>
+          <div>
+            <p>지난 뉴스레터를 확인해보세요.</p>
+          </div>
+        </ScrollableWrapper>
+      )}
     </Container>
   );
 };
@@ -189,7 +216,6 @@ const Container = styled.div`
 
 const FixedWrapper = styled.div<{ isMobile: boolean }>`
   padding-bottom: ${({ isMobile }) => (isMobile ? '16px' : '24px')};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.dividers};
 
   display: flex;
   gap: ${({ isMobile }) => (isMobile ? '16px' : '24px')};
@@ -197,10 +223,8 @@ const FixedWrapper = styled.div<{ isMobile: boolean }>`
 `;
 
 const ScrollableWrapper = styled.div<{ isMobile: boolean }>`
-  min-height: 0;
   margin-right: -16px;
-  padding-top: ${({ isMobile }) => (isMobile ? '16px' : '24px')};
-  padding-right: 16px;
+  padding: 8px;
 
   display: flex;
   gap: ${({ isMobile }) => (isMobile ? '16px' : '24px')};
@@ -414,4 +438,31 @@ const StepTitle = styled.p`
 const StepDescription = styled.p`
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body2};
+`;
+
+const TabHeader = styled.div`
+  display: flex;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.dividers};
+`;
+
+const TabButton = styled.button<{ isActive: boolean }>`
+  flex: 1;
+  padding: 12px 0;
+  font: ${({ theme }) => theme.fonts.body2};
+  color: ${({ theme, isActive }) =>
+    isActive ? theme.colors.primary : theme.colors.textSecondary};
+  border-bottom: 2px solid
+    ${({ theme, isActive }) =>
+      isActive ? theme.colors.primary : 'transparent'};
+  background: none;
+  transition: color 0.2s;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary};
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 `;

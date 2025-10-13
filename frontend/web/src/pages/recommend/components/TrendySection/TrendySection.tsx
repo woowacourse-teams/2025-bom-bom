@@ -49,7 +49,7 @@ const TrendySection = () => {
 
   return (
     <>
-      <Container>
+      <Container device={device}>
         <SectionHeader>
           <SectionIconBox>
             <TrendingUpIcon width={16} height={16} />
@@ -110,18 +110,22 @@ const TrendySection = () => {
 
 export default TrendySection;
 
-const Container = styled.div`
+const Container = styled.div<{ device: Device }>`
   width: 100%;
-  padding: 24px;
-  border: 1px solid ${({ theme }) => theme.colors.stroke};
-  border-radius: 20px;
-  box-shadow:
-    0 10px 15px -3px rgb(0 0 0 / 10%),
-    0 4px 6px -4px rgb(0 0 0 / 10%);
-
+  padding: ${({ device }) => (device === 'mobile' ? '12px' : '24px')};
   background: ${({ theme }) => theme.colors.white};
 
   backdrop-filter: blur(10px);
+
+  ${({ device, theme }) =>
+    device !== 'mobile' &&
+    `
+    border: 1px solid ${theme.colors.stroke};
+    border-radius: 20px;
+    box-shadow:
+      0 10px 15px -3px rgb(0 0 0 / 10%),
+      0 4px 6px -4px rgb(0 0 0 / 10%);
+  `};
 `;
 
 const SectionHeader = styled.div`

@@ -1,8 +1,9 @@
 import styled from '@emotion/styled';
 import { useMutation } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 import { toast } from '../Toast/utils/toastActions';
-import { postLogout, postWithdraw } from '@/apis/auth';
+import { postLogout } from '@/apis/auth';
 import { useDevice } from '@/hooks/useDevice';
 import { showMessenger } from '@/libs/channelTalk/channelTalk.utils';
 import { copyToClipboard } from '@/utils/copy';
@@ -30,33 +31,11 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
     },
   });
 
-  const { mutate: mutateWithdraw } = useMutation({
-    mutationKey: ['withdraw'],
-    mutationFn: postWithdraw,
-
-    onSuccess: () => {
-      window.location.reload();
-    },
-    onError: () => {
-      toast.error('회원탈퇴에 실패했습니다. 다시 시도해주세요.');
-    },
-  });
-
   const handleCopyEmail = () => {
     if (!userInfo.email) return;
 
     copyToClipboard(userInfo.email);
     toast.success('이메일이 복사되었습니다.');
-  };
-
-  const handleResignClick = () => {
-    const confirmWithdraw = confirm(
-      '회원 탈퇴 시, 회원님의 모든 정보가 삭제됩니다. 정말 탈퇴하시겠습니까?',
-    );
-
-    if (confirmWithdraw) {
-      mutateWithdraw();
-    }
   };
 
   const handleLogoutClick = () => {
@@ -99,14 +78,12 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
         </ChannelTalkButton>
       )}
 
+      <MyPageButton to="/mypage">마이페이지</MyPageButton>
+
       <LogoutButton type="button" onClick={handleLogoutClick}>
         <LogoutIcon width={16} height={16} />
         로그아웃
       </LogoutButton>
-
-      <ResignButton type="button" onClick={handleResignClick}>
-        회원 탈퇴
-      </ResignButton>
     </Container>
   );
 };
@@ -205,6 +182,21 @@ const ChannelTalkButton = styled.button`
   }
 `;
 
+const MyPageButton = styled(Link)`
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font: ${({ theme }) => theme.fonts.body2};
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+    transition: all 0.2s ease-in-out;
+  }
+`;
+
 const LogoutButton = styled.button`
   display: flex;
   gap: 4px;
@@ -217,12 +209,4 @@ const LogoutButton = styled.button`
     text-decoration: underline;
     transition: all 0.2s ease-in-out;
   }
-`;
-
-const ResignButton = styled.button`
-  display: flex;
-  align-items: center;
-
-  color: ${({ theme }) => theme.colors.textTertiary};
-  font: ${({ theme }) => theme.fonts.body3};
 `;

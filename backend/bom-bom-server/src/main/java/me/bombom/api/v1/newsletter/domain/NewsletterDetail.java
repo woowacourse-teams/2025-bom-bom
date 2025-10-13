@@ -41,9 +41,6 @@ public class NewsletterDetail {
     @Column(length=512)
     private String previousNewsletterUrl;
 
-    @Column(length=512)
-    private String subscribeMethod;
-
     @Builder
     public NewsletterDetail(
             Long id,
@@ -53,8 +50,7 @@ public class NewsletterDetail {
             int subscribeCount,
             @NonNull String sender,
             String subscribePageImageUrl,
-            String previousNewsletterUrl,
-            String subscribeMethod
+            String previousNewsletterUrl
     ) {
         this.id = id;
         this.mainPageUrl = mainPageUrl;
@@ -64,6 +60,5 @@ public class NewsletterDetail {
         this.sender = sender;
         this.subscribePageImageUrl = subscribePageImageUrl;
         this.previousNewsletterUrl = previousNewsletterUrl;
-        this.subscribeMethod = subscribeMethod;
     }
 }

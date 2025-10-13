@@ -118,14 +118,10 @@ export const useFloatingToolbarSelection = ({
 
     if (isIOS()) {
       contentEl.addEventListener('pointerup', handleHighlightClickOrSelection);
-      return;
-    }
-    if (isAndroid()) {
+    } else if (isAndroid()) {
       contentEl.addEventListener('contextmenu', handleSelectionComplete);
       contentEl.addEventListener('click', handleHighlightClick);
-      return;
-    }
-    if (isWeb()) {
+    } else if (isWeb()) {
       contentEl.addEventListener('mouseup', handleHighlightClickOrSelection);
       document.addEventListener('selectionchange', handleSelectionClear);
     }
@@ -138,14 +134,10 @@ export const useFloatingToolbarSelection = ({
           'pointerup',
           handleHighlightClickOrSelection,
         );
-        return;
-      }
-      if (isAndroid()) {
+      } else if (isAndroid()) {
         contentEl.removeEventListener('contextmenu', handleSelectionComplete);
         contentEl.removeEventListener('click', handleHighlightClick);
-        return;
-      }
-      if (isWeb()) {
+      } else if (isWeb()) {
         contentEl.removeEventListener(
           'mouseup',
           handleHighlightClickOrSelection,

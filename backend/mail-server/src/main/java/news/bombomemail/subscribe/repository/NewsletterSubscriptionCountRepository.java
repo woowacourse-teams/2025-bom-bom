@@ -19,7 +19,7 @@ public interface NewsletterSubscriptionCountRepository extends JpaRepository<New
      */
     @Modifying(clearAutomatically = true)
     @Query(value = """
-    INSERT INTO newsletter_subscription_count AS cur
+    INSERT INTO newsletter_subscription_count
         (newsletter_id, total, age0s, age10s, age20s, age30s, age40s, age50s, age60plus)
     VALUES (
         :newsletterId,
@@ -33,14 +33,14 @@ public interface NewsletterSubscriptionCountRepository extends JpaRepository<New
         IF(:ageGroup = 'age60plus', 1, 0)
     )
     ON DUPLICATE KEY UPDATE
-        total    = cur.total    + 1,        
-        age0s    = cur.age0s    + IF(:ageGroup = 'age0s', 1, 0),
-        age10s   = cur.age10s   + IF(:ageGroup = 'age10s', 1, 0),
-        age20s   = cur.age20s   + IF(:ageGroup = 'age20s', 1, 0),
-        age30s   = cur.age30s   + IF(:ageGroup = 'age30s', 1, 0),
-        age40s   = cur.age40s   + IF(:ageGroup = 'age40s', 1, 0),
-        age50s   = cur.age50s   + IF(:ageGroup = 'age50s', 1, 0),
-        age60plus= cur.age60plus+ IF(:ageGroup = 'age60plus', 1, 0)
+        total    = total    + 1,        
+        age0s    = age0s    + IF(:ageGroup = 'age0s', 1, 0),
+        age10s   = age10s   + IF(:ageGroup = 'age10s', 1, 0),
+        age20s   = age20s   + IF(:ageGroup = 'age20s', 1, 0),
+        age30s   = age30s   + IF(:ageGroup = 'age30s', 1, 0),
+        age40s   = age40s   + IF(:ageGroup = 'age40s', 1, 0),
+        age50s   = age50s   + IF(:ageGroup = 'age50s', 1, 0),
+        age60plus= age60plus+ IF(:ageGroup = 'age60plus', 1, 0)
     """, nativeQuery = true)
     void increaseSubscriptionCountByNewsletterIdAndAgeGroup(
             @Param("newsletterId") Long newsletterId,

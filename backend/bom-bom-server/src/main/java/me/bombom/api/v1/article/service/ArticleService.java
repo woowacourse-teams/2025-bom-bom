@@ -150,6 +150,11 @@ public class ArticleService {
         articleRepository.deleteAllByMemberId(memberId);
     }
 
+    public void cleanupOldPreviousArticles() {
+        Long adminMemberId = getAdminMemberId();
+
+    }
+
     private Long getAdminMemberId() {
         Member admin = memberRepository.findByNickname(ADMIN_NICKNAME)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)

@@ -33,12 +33,14 @@ export const Container = styled.div`
   width: 100%;
   height: 80px;
   padding: 8px;
-  box-sizing: border-box;
+
   display: flex;
   gap: 12px;
   align-items: center;
 
   text-align: left;
+
+  box-sizing: border-box;
 `;
 
 const Image = styled(ImageWithFallback)`

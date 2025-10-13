@@ -12,7 +12,6 @@ import usePageTracking from '@/libs/googleAnalytics/usePageTracking';
 import { useWebViewAuth } from '@/libs/webview/useWebViewAuth';
 import { queryClient } from '@/main';
 import type { QueryClient } from '@tanstack/react-query';
-import type { redirect } from '@tanstack/react-router';
 
 interface BomBomRouterContext {
   queryClient: QueryClient;
@@ -42,7 +41,4 @@ export const Route = createRootRouteWithContext<BomBomRouterContext>()({
       <RootComponent />
     </>
   ),
-  beforeLoad: async (): Promise<void | ReturnType<typeof redirect>> => {
-    return;
-  },
 });

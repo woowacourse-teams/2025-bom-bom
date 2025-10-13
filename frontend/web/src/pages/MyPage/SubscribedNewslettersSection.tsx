@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import type { GetMyNewslettersResponse } from '@/apis/newsLetters';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
+import type { GetMyNewslettersResponse } from '@/apis/newsLetters';
 import type { Device } from '@/hooks/useDevice';
 
 interface SubscribedNewslettersSectionProps {

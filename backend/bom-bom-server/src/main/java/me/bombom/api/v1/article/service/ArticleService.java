@@ -11,6 +11,7 @@ import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
+import me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.PreviousArticleResponse;
 import me.bombom.api.v1.article.event.MarkAsReadEvent;
 import me.bombom.api.v1.article.repository.ArticleRepository;
@@ -79,17 +80,21 @@ public class ArticleService {
     }
 
     public List<PreviousArticleResponse> getPreviousArticles(PreviousArticleRequest previousArticleRequest) {
-        Member admin = memberRepository.findByNickname(ADMIN_NICKNAME)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
-                .addContext(ErrorContextKeys.OPERATION, "getPreviousArticles"));
-
         validateNewsletterId(previousArticleRequest.newsletterId());
         return articleRepository.findArticlesByMemberIdAndNewsletterId(
                 previousArticleRequest.newsletterId(),
-                admin.getId(),
+                getAdminMemberId(),
                 previousArticleRequest.limit()
         );
+    }
+
+    public PreviousArticleDetailResponse getPreviousArticleDetail(Long id) {
+        Long adminMemberId = getAdminMemberId();
+        return articleRepository.getPreviousArticleDetailsByMemberId(id, adminMemberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ARTICLE_ID, id)
+                        .addContext(ErrorContextKeys.MEMBER_ID, adminMemberId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "article"));
     }
 
     @Transactional
@@ -143,6 +148,14 @@ public class ArticleService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteAllByMemberId(Long memberId) {
         articleRepository.deleteAllByMemberId(memberId);
+    }
+
+    private Long getAdminMemberId() {
+        Member admin = memberRepository.findByNickname(ADMIN_NICKNAME)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
+                        .addContext(ErrorContextKeys.OPERATION, "getPreviousArticles"));
+        return admin.getId();
     }
 
     private Article findArticleById(Long articleId, Long memberId) {

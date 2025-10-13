@@ -1,8 +1,10 @@
 package me.bombom.api.v1.article.repository;
 
 import java.util.List;
+import java.util.Optional;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
+import me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.PreviousArticleResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -42,11 +44,24 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
     WHERE a.memberId = :memberId
     ORDER BY a.arrivedDateTime DESC, a.id ASC
     LIMIT :limit
-    
     """)
     List<PreviousArticleResponse> findArticlesByMemberIdAndNewsletterId(
             Long newsletterId,
             Long memberId,
             int limit
     );
+
+    @Query("""
+    SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse(
+        a.title, a.contents, a.arrivedDateTime, a.expectedReadTime,
+            new me.bombom.api.v1.newsletter.dto.NewsletterBasicResponse(
+                n.name, n.email, n.imageUrl, c.name                
+            )
+    )
+    FROM Article a
+    JOIN Newsletter n ON n.id = a.newsletterId
+    JOIN Category c ON c.id = n.categoryId
+    WHERE a.id = :id AND a.memberId = :memberId
+    """)
+    Optional<PreviousArticleDetailResponse> getPreviousArticleDetailsByMemberId(Long id, Long memberId);
 }

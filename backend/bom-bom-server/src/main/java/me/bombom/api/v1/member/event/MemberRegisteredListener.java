@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class MemberRegisteredListener {
+public class NewMemberRegisteredListener {
 
     private final DiscordWebhookNotifier discordNotifier;
 
     @Async
     @EventListener
-    public void onNewMemberRegistered(MemberRegisteredEvent event) {
+    public void onNewMemberRegistered(NewMemberRegisteredEvent event) {
         try {
             discordNotifier.sendNewMemberNotification(event.nickname());
         } catch (Exception e) {

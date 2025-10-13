@@ -58,7 +58,11 @@ const NewsletterList = ({
       {newsletters.length === 0 ? (
         <p>해당 카테고리에 뉴스레터가 없습니다.</p>
       ) : device === 'mobile' ? (
-        <Carousel autoPlay={false} hasSlideButton={false}>
+        <Carousel
+          autoPlay={false}
+          hasSlideButton={false}
+          showNextSlidePart={true}
+        >
           {splitNewsletters(newsletters, ITEMS_PER_SLIDE).map(
             (newsletterItems, slideIndex) => (
               <SlideNewsletters key={`newsletters-${slideIndex}`}>

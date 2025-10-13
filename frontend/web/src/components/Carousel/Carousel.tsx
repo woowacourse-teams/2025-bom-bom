@@ -11,6 +11,7 @@ type SlideButtonPosition = 'middle' | 'bottom';
 type CarouselProps = PropsWithChildren & {
   hasSlideButton?: boolean;
   hasAnimation?: boolean;
+  showNextSlidePart?: boolean;
 } & (
     | { autoPlay?: true; autoPlaySpeedMs?: number }
     | { autoPlay: false; autoPlaySpeedMs?: never }
@@ -26,6 +27,7 @@ const Carousel = ({
   hasSlideButton = true,
   slideButtonPosition = 'middle',
   hasAnimation = true,
+  showNextSlidePart = false,
   children,
 }: CarouselProps) => {
   const originSlides = Children.toArray(children);
@@ -74,6 +76,7 @@ const Carousel = ({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         hasAnimation={hasAnimation}
+        showNextSlidePart={showNextSlidePart}
       >
         {infinitySlides.map((slideContent, index) => (
           <Slide key={`slide-${index}`}>{slideContent}</Slide>
@@ -138,9 +141,11 @@ const SlidesWrapper = styled.ul<{
   isTransitioning: boolean;
   isSwiping: boolean;
   hasAnimation: boolean;
+  showNextSlidePart: boolean;
 }>`
   position: relative;
-  margin: 0 -12px;
+  margin: ${({ showNextSlidePart }) =>
+    showNextSlidePart ? '0 20px 0 -12px' : '0 -12px'};
 
   display: flex;
 

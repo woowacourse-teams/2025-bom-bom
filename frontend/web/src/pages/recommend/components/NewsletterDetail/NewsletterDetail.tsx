@@ -132,17 +132,7 @@ const NewsletterDetail = ({
             </DetailLink>
           )}
 
-          {!isMobile && (
-            <>
-              <NewsletterSubscribeGuide />
-              {newsletterDetail.subscribePageImageUrl && (
-                <Screenshot
-                  src={newsletterDetail.subscribePageImageUrl}
-                  alt="구독 페이지 스크린샷"
-                />
-              )}
-            </>
-          )}
+          {!isMobile && <NewsletterSubscribeGuide />}
         </ScrollableWrapper>
       )}
 
@@ -289,14 +279,6 @@ const SubscribeButton = styled(Button)<{ isMobile: boolean }>`
   &:hover {
     filter: brightness(90%);
   }
-`;
-
-const Screenshot = styled(ImageWithFallback)`
-  width: 100%;
-  border-radius: 12px;
-
-  object-fit: cover;
-  object-position: center;
 `;
 
 const TabHeader = styled.div`

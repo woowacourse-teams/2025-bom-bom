@@ -1,5 +1,6 @@
 package me.bombom.api.v1.common;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class DiscordWebhookNotifier {
                         "color", 0x00C853,
                         "fields", List.of(
                                 Map.of("name", "🧑‍💻 닉네임", "value", "**" + nickname + "**"),
-                                Map.of("name", "🕒 가입 시각", "value", java.time.LocalDateTime.now().toString())
+                                Map.of("name", "🕒 가입 시각", "value", LocalDateTime.now().toString())
                         )
                 )
         ));

@@ -10,15 +10,15 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class MemberRegisteredListener {
+public class MemberSignupDiscordListener {
 
     private final DiscordWebhookNotifier discordNotifier;
 
     @Async
     @EventListener
-    public void onMemberRegistered(MemberRegisteredEvent event) {
+    public void on(MemberSignupDiscordEvent event) {
         try {
-            discordNotifier.sendMemberNotification(event.nickname());
+            discordNotifier.sendNewMemberNotification(event.nickname());
         } catch (Exception e) {
             log.debug("⚠️ Discord 알림 전송 실패 (무시): {}", e.getMessage());
         }

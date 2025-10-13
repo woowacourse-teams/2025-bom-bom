@@ -18,7 +18,7 @@ public class DiscordWebhookNotifier {
 
     private final WebhookHttpClient webhookClient;
 
-    public void sendMemberNotification(String nickname) {
+    public void sendNewMemberNotification(String nickname) {
         Map<String, Object> body = Map.of("embeds", List.of(
                 Map.of(
                         "title", "🎉 새로운 봄봄 회원이 가입했어요!",

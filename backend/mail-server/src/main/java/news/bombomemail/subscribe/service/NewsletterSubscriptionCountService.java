@@ -2,7 +2,7 @@ package news.bombomemail.subscribe.service;
 
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import news.bombomemail.member.domain.Member;
 import news.bombomemail.member.repository.MemberRepository;
 import news.bombomemail.subscribe.domain.AgeGroup;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@Log4j2
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)

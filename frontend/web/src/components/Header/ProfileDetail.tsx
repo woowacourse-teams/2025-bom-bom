@@ -15,9 +15,10 @@ import MailIcon from '#/assets/svg/mail.svg';
 
 interface ProfileDetailProps {
   userInfo: UserInfo;
+  onClose?: () => void;
 }
 
-const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
+const ProfileDetail = ({ userInfo, onClose }: ProfileDetailProps) => {
   const deviceType = useDevice();
 
   const { mutate: mutateLogout } = useMutation({
@@ -78,7 +79,9 @@ const ProfileDetail = ({ userInfo }: ProfileDetailProps) => {
         </ChannelTalkButton>
       )}
 
-      <MyPageButton to="/mypage">마이페이지</MyPageButton>
+      <MyPageButton to="/mypage" onClick={onClose}>
+        마이페이지
+      </MyPageButton>
 
       <LogoutButton type="button" onClick={handleLogoutClick}>
         <LogoutIcon width={16} height={16} />

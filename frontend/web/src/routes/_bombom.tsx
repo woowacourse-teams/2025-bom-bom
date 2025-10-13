@@ -18,7 +18,10 @@ export const Route = createFileRoute('/_bombom')({
     }
 
     const data = queryClient.getQueryData(queries.me().queryKey);
-    if (data) return;
+    if (data) {
+      window.gtag?.('set', { user_id: data.id });
+      return;
+    }
 
     try {
       const user = await queryClient.fetchQuery(queries.me());

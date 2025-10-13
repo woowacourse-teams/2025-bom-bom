@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DiscordWebhookNotifier {
 
-    @Value("${discord.webhook.url}")
+    @Value("${discord.webhook.new_member.url}")
     private String webhookUrl;
 
     private final WebhookHttpClient webhookClient;

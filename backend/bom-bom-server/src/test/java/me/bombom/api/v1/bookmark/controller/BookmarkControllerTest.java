@@ -1,5 +1,6 @@
 package me.bombom.api.v1.bookmark.controller;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -30,8 +31,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -69,6 +68,7 @@ class BookmarkControllerTest {
 
     private Member member;
     private CustomOAuth2User customOAuth2User;
+    private OAuth2AuthenticationToken authToken;
 
     @BeforeEach
     void setUp() {
@@ -105,27 +105,20 @@ class BookmarkControllerTest {
                 "name", member.getNickname()
         );
         customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
-    }
-
-    private void setAuthentication() {
-        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+        
+        authToken = new OAuth2AuthenticationToken(
                 customOAuth2User,
                 customOAuth2User.getAuthorities(),
                 "registrationId"
         );
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authToken);
-        SecurityContextHolder.setContext(context);
     }
 
     @Test
     @DisplayName("북마크 목록 조회 성공")
     void getBookmarks_success() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then
         mockMvc.perform(get("/api/v1/bookmarks")
+                        .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
@@ -137,11 +130,11 @@ class BookmarkControllerTest {
     @DisplayName("북마크 상태 조회 성공")
     void getBookmarkStatus_success() throws Exception {
         // given
-        setAuthentication();
         Article article = articleRepository.findAll().get(0);
 
         // when & then
         mockMvc.perform(get("/api/v1/bookmarks/status/articles/" + article.getId())
+                        .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.bookmarkStatus").value(true));
@@ -151,11 +144,11 @@ class BookmarkControllerTest {
     @DisplayName("북마크 추가 성공")
     void addBookmark_success() throws Exception {
         // given
-        setAuthentication();
         Article article = articleRepository.findAll().get(1);
 
         // when & then
         mockMvc.perform(post("/api/v1/bookmarks/articles/" + article.getId())
+                        .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
@@ -164,11 +157,11 @@ class BookmarkControllerTest {
     @DisplayName("북마크 삭제 성공")
     void deleteBookmark_success() throws Exception {
         // given
-        setAuthentication();
         Article article = articleRepository.findAll().get(0);
 
         // when & then
         mockMvc.perform(delete("/api/v1/bookmarks/articles/" + article.getId())
+                        .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
@@ -176,11 +169,9 @@ class BookmarkControllerTest {
     @Test
     @DisplayName("뉴스레터별 북마크 통계 조회 성공")
     void getBookmarkNewsletterStatistics_success() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then
         mockMvc.perform(get("/api/v1/bookmarks/statistics/newsletters")
+                        .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalCount").value(1));

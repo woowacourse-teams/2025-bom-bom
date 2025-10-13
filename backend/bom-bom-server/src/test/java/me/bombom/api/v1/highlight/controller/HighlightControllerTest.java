@@ -1,5 +1,6 @@
 package me.bombom.api.v1.highlight.controller;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -27,8 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -63,6 +62,7 @@ class HighlightControllerTest {
 
     private List<Highlight> highlights;
     private CustomOAuth2User customOAuth2User;
+    private OAuth2AuthenticationToken authToken;
 
     @BeforeEach
     void setUp() {
@@ -91,27 +91,17 @@ class HighlightControllerTest {
                 "name", member.getNickname()
         );
         customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
-    }
-
-    private void setAuthentication() {
+        
         // OAuth2AuthenticationToken 생성
-        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+        authToken = new OAuth2AuthenticationToken(
                 customOAuth2User,
                 customOAuth2User.getAuthorities(),
                 "registrationId"
         );
-
-        // SecurityContext에 인증 정보 설정
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authToken);
-        SecurityContextHolder.setContext(context);
     }
 
     @Test
     void 하이라이트_생성_성공() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then
         String content = String.format("""
         {
@@ -128,6 +118,7 @@ class HighlightControllerTest {
         }
         """, highlights.getFirst().getArticleId());
         mockMvc.perform(post("/api/v1/highlights")
+                        .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
                 .andExpect(status().isCreated());
@@ -135,11 +126,9 @@ class HighlightControllerTest {
 
     @Test
     void 하이라이트_수정_성공() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then
         mockMvc.perform(patch("/api/v1/highlights/{id}", highlights.getFirst().getId())
+                        .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                             {
@@ -152,11 +141,9 @@ class HighlightControllerTest {
 
     @Test
     void 하이라이트_수정_포맷에_맞지_않는_color_입력() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then
         mockMvc.perform(patch("/api/v1/highlights/{id}", highlights.getFirst().getId())
+                        .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                             {

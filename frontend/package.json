@@ -18,7 +18,11 @@
     "format": "pnpm -r format"
   },
   "devDependencies": {
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "stylelint": "^16.21.1",
+    "stylelint-config-standard": "^38.0.0",
+    "stylelint-order": "^6.0.4",
+    "stylelint-prettier": "^5.0.3"
   },
   "packageManager": "pnpm@10.12.1"
 }

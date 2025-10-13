@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { buildSubscribeUrl, isMaily, isStibee } from './NewsletterDetail.utils';
 import NewsletterSubscribeGuide from './NewsletterSubscribeGuide';
+import PreviousArticleListItem from './PreviousArticleListItem';
 import { queries } from '@/apis/queries';
 import Badge from '@/components/Badge/Badge';
 import Button from '@/components/Button/Button';
@@ -28,6 +29,9 @@ const NewsletterDetail = ({
   const { data: newsletterDetail } = useQuery({
     ...queries.newsletterDetail({ id: newsletterId }),
     enabled: Boolean(newsletterId),
+  });
+  const { data: previousArticles } = useQuery({
+    ...queries.previousArticles({ newsletterId, limit: 10 }),
   });
   const deviceType = useDevice();
   const [activeTab, setActiveTab] = useState<'detail' | 'previous'>('detail');
@@ -138,9 +142,15 @@ const NewsletterDetail = ({
 
       {activeTab === 'previous' && (
         <ScrollableWrapper isMobile={isMobile}>
-          <div>
-            <p>지난 뉴스레터를 확인해보세요.</p>
-          </div>
+          <PreviousArticleList>
+            {previousArticles?.map((article) => (
+              <PreviousArticleListItem
+                key={article.articleId}
+                {...article}
+                onClick={(id) => console.log('이전 아티클 클릭', id)}
+              />
+            ))}
+          </PreviousArticleList>
         </ScrollableWrapper>
       )}
     </Container>
@@ -307,3 +317,5 @@ const TabButton = styled.button<{ isActive: boolean }>`
     cursor: not-allowed;
   }
 `;
+
+const PreviousArticleList = styled.div``;

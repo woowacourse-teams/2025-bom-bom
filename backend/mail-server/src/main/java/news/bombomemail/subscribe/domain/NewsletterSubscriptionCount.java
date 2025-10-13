@@ -48,7 +48,7 @@ public class NewsletterSubscriptionCount {
     private int age50s;
 
     @Column(nullable = false)
-    private int age60Plus;
+    private int age60plus;
 
     @Builder
     public NewsletterSubscriptionCount(
@@ -61,7 +61,7 @@ public class NewsletterSubscriptionCount {
             int age30s,
             int age40s,
             int age50s,
-            int age60Plus
+            int age60plus
     ) {
         this.id = id;
         this.newsletterId = newsletterId;
@@ -72,7 +72,7 @@ public class NewsletterSubscriptionCount {
         this.age30s = age30s;
         this.age40s = age40s;
         this.age50s = age50s;
-        this.age60Plus = age60Plus;
+        this.age60plus = age60plus;
     }
 
     public static NewsletterSubscriptionCount from(Long newsletterId) {

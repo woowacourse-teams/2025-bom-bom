@@ -31,8 +31,9 @@ export default ImageInfoCard;
 
 export const Container = styled.div`
   width: 100%;
+  height: 80px;
   padding: 8px;
-
+  box-sizing: border-box;
   display: flex;
   gap: 12px;
   align-items: center;
@@ -53,7 +54,6 @@ const Image = styled(ImageWithFallback)`
 
 export const InfoBox = styled.div`
   min-height: 64px;
-
   display: flex;
   gap: 8px;
   flex: 1;

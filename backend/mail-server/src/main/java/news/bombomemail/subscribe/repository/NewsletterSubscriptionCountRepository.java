@@ -42,7 +42,7 @@ public interface NewsletterSubscriptionCountRepository extends JpaRepository<New
         age50s   = cur.age50s   + IF(:ageGroup = 'age50s', 1, 0),
         age60plus= cur.age60plus+ IF(:ageGroup = 'age60plus', 1, 0)
     """, nativeQuery = true)
-    int increaseSubscriptionCountByNewsletterIdAndAgeGroup(
+    void increaseSubscriptionCountByNewsletterIdAndAgeGroup(
             @Param("newsletterId") Long newsletterId,
             @Param("ageGroup") String ageGroup
     );

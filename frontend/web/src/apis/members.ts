@@ -59,3 +59,16 @@ export const getMyMonthlyReadingRank = async () => {
     path: '/members/me/reading/month/rank/me',
   });
 };
+
+export type PatchNicknameParams = {
+  nickname: string;
+};
+
+export const patchNickname = async ({ nickname }: PatchNicknameParams) => {
+  return await fetcher.patch<PatchNicknameParams, never>({
+    path: '/members/me/nickname',
+    query: {
+      nickname,
+    },
+  });
+};

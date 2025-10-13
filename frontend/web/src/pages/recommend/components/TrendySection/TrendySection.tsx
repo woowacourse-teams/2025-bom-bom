@@ -6,12 +6,14 @@ import NewsletterList from './NewsletterList';
 import NewsletterDetail from '../NewsletterDetail/NewsletterDetail';
 import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
+import ImageInfoCardSkeleton from '@/components/ImageInfoCard/ImageInfoCardSkeleton';
 import Modal from '@/components/Modal/Modal';
 import useModal from '@/components/Modal/useModal';
-import { CATEGORIES } from '@/constants/newsletter';
+import { CATEGORIES, NEWSLETTER_COUNT } from '@/constants/newsletter';
 import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import type { Category } from '@/constants/newsletter';
+import type { Device } from '@/hooks/useDevice';
 import type { Newsletter } from '@/types/newsletter';
 import TrendingUpIcon from '#/assets/svg/trending-up.svg';
 
@@ -64,11 +66,23 @@ const TrendySection = () => {
             />
           ))}
         </TagContainer>
-        <NewsletterList
-          newsletters={filteredNewsletters ?? []}
-          isLoading={isLoading}
-          handleCardClick={handleCardClick}
-        />
+        <TrendyGrid device={device}>
+          {isLoading ? (
+            Array.from({
+              length:
+                device === 'mobile'
+                  ? NEWSLETTER_COUNT.mobile
+                  : NEWSLETTER_COUNT.nonMobile,
+            }).map((_, index) => (
+              <ImageInfoCardSkeleton key={`skeleton-card-${index}`} />
+            ))
+          ) : (
+            <NewsletterList
+              newsletters={filteredNewsletters ?? []}
+              handleCardClick={handleCardClick}
+            />
+          )}
+        </TrendyGrid>
       </Container>
       {createPortal(
         <Modal
@@ -141,4 +155,12 @@ const TagContainer = styled.div`
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+`;
+
+const TrendyGrid = styled.div<{ device: Device }>`
+  display: grid;
+  gap: 12px;
+
+  grid-template-columns: ${({ device }) =>
+    device === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
 `;

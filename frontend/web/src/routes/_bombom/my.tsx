@@ -1,10 +1,12 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import {
+  createFileRoute,
+  useNavigate,
+  useSearch,
+} from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
 import Tab from '@/components/Tab/Tab';
-import TabItem from '@/components/Tabs/TabItem';
 import Tabs from '@/components/Tabs/Tabs';
 import { useDevice } from '@/hooks/useDevice';
 import NicknameSection from '@/pages/MyPage/NicknameSection';
@@ -20,6 +22,10 @@ const TABS = [
   { id: 'settings' as TabId, label: '설정' },
 ];
 
+type MyPageSearch = {
+  tab?: TabId;
+};
+
 export const Route = createFileRoute('/_bombom/my')({
   head: () => ({
     meta: [
@@ -28,17 +34,36 @@ export const Route = createFileRoute('/_bombom/my')({
       },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>): MyPageSearch => {
+    const tab = search.tab as string | undefined;
+    const isValidTab = (value: string): value is TabId =>
+      ['profile', 'newsletters', 'settings'].includes(value);
+
+    return {
+      tab: tab && isValidTab(tab) ? tab : 'profile',
+    };
+  },
   component: MyPage,
 });
 
 function MyPage() {
   const device = useDevice();
-  const [activeTab, setActiveTab] = useState<TabId>('profile');
+  const navigate = useNavigate();
+  const { tab } = useSearch({ from: '/_bombom/my' });
+  const activeTab = tab || 'profile';
 
   const { data: userInfo } = useQuery(queries.me());
   const { data: myNewsletters } = useQuery(queries.myNewsletters());
 
   if (!userInfo) return null;
+
+  const handleTabSelect = (tabId: TabId) => {
+    navigate({
+      to: '/my',
+      search: { tab: tabId },
+      replace: true,
+    });
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -62,27 +87,31 @@ function MyPage() {
     <Container device={device}>
       <Title device={device}>마이페이지</Title>
 
-      <Tabs direction="vertical">
-        {TABS.map((tab) => (
-          <Tab
-            key={tab.id}
-            value={tab.id}
-            label={tab.label}
-            onTabSelect={() => setActiveTab(tab.id)}
-            selected={activeTab === tab.id}
-            aria-controls={`panel-${tab.id}`}
-          />
-        ))}
-      </Tabs>
+      <ContentWrapper device={device}>
+        <TabsWrapper device={device}>
+          <Tabs direction="vertical">
+            {TABS.map((tab) => (
+              <Tab
+                key={tab.id}
+                value={tab.id}
+                label={tab.label}
+                onTabSelect={() => handleTabSelect(tab.id)}
+                selected={activeTab === tab.id}
+                aria-controls={`panel-${tab.id}`}
+              />
+            ))}
+          </Tabs>
+        </TabsWrapper>
 
-      <TabPanel
-        id={`panel-${activeTab}`}
-        role="tabpanel"
-        aria-labelledby={`tab-${activeTab}`}
-        device={device}
-      >
-        {renderTabContent()}
-      </TabPanel>
+        <TabPanel
+          id={`panel-${activeTab}`}
+          role="tabpanel"
+          aria-labelledby={`tab-${activeTab}`}
+          device={device}
+        >
+          {renderTabContent()}
+        </TabPanel>
+      </ContentWrapper>
     </Container>
   );
 }
@@ -105,19 +134,33 @@ const Title = styled.h1<{ device: Device }>`
     device === 'mobile' ? theme.fonts.heading3 : theme.fonts.heading2};
 `;
 
+const ContentWrapper = styled.div<{ device: Device }>`
+  display: flex;
+  gap: 24px;
+  flex-direction: ${({ device }) => (device === 'mobile' ? 'column' : 'row')};
+  align-items: ${({ device }) =>
+    device === 'mobile' ? 'stretch' : 'flex-start'};
+`;
+
+const TabsWrapper = styled.div<{ device: Device }>`
+  flex-shrink: 0;
+  width: ${({ device }) => (device === 'mobile' ? '100%' : '200px')};
+`;
+
 const TabPanel = styled.div<{ device: Device }>`
-  padding: ${({ device }) => (device === 'mobile' ? '16px 0' : '24px 0')};
+  flex: 1;
+  min-width: 0;
 
   animation: fadeIn 0.2s ease-in-out;
 
   @keyframes fadeIn {
     from {
       opacity: 0;
-      transform: translateY(-8px);
+      transform: translateX(-8px);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateX(0);
     }
   }
 `;

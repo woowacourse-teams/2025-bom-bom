@@ -18,12 +18,10 @@ public class ArticleScheduler {
     private final ArticleService articleService;
 
     @Scheduled(cron = DAILY_2AM_CRON, zone = TIME_ZONE)
-    @SchedulerLock(name = "daily_reset_reading_count", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
+    @SchedulerLock(name = "cleanup_old_previous_articles", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void cleanupOldPreviousArticles() {
         log.info("이전 아티클 정리 시작");
         int deletedCount = articleService.cleanupOldPreviousArticles();
         log.info("{}개 정리 완료", deletedCount);
     }
 }
-
-

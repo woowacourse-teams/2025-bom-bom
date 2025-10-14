@@ -78,6 +78,7 @@ const TrendySection = () => {
             ))
           ) : (
             <NewsletterList
+              key={selectedCategory}
               newsletters={filteredNewsletters ?? []}
               handleCardClick={handleCardClick}
             />

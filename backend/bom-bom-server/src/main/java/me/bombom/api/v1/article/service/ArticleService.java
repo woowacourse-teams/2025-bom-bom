@@ -30,6 +30,7 @@ import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.pet.ScorePolicyConstants;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,8 +45,10 @@ import org.springframework.util.StringUtils;
 @Transactional(readOnly = true)
 public class ArticleService {
 
-    private static final String ADMIN_NICKNAME = "봄봄";
     private static final int PREVIOUS_ARTICLE_KEEP_COUNT = 10;
+
+    @Value("${admin.previous-article.member-id}")
+    private Long PREVIOUS_ARTICLE_ADMIN_ID;
 
     private final ArticleRepository articleRepository;
     private final TodayReadingRepository todayReadingRepository;
@@ -84,17 +87,16 @@ public class ArticleService {
         validateNewsletterId(previousArticleRequest.newsletterId());
         return articleRepository.findArticlesByMemberIdAndNewsletterId(
                 previousArticleRequest.newsletterId(),
-                getAdminMemberId(),
+                PREVIOUS_ARTICLE_ADMIN_ID,
                 previousArticleRequest.limit()
         );
     }
 
     public PreviousArticleDetailResponse getPreviousArticleDetail(Long id) {
-        Long adminMemberId = getAdminMemberId();
-        return articleRepository.getPreviousArticleDetailsByMemberId(id, adminMemberId)
+        return articleRepository.getPreviousArticleDetailsByMemberId(id, PREVIOUS_ARTICLE_ADMIN_ID)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ARTICLE_ID, id)
-                        .addContext(ErrorContextKeys.MEMBER_ID, adminMemberId)
+                        .addContext(ErrorContextKeys.MEMBER_ID, PREVIOUS_ARTICLE_ADMIN_ID)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "article"));
     }
 
@@ -153,16 +155,7 @@ public class ArticleService {
 
     @Transactional
     public int cleanupOldPreviousArticles() {
-        Long adminMemberId = getAdminMemberId();
-        return articleRepository.cleanupOldPreviousArticles(adminMemberId, PREVIOUS_ARTICLE_KEEP_COUNT);
-    }
-
-    private Long getAdminMemberId() {
-        Member admin = memberRepository.findByNickname(ADMIN_NICKNAME)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
-                        .addContext(ErrorContextKeys.OPERATION, "getPreviousArticles"));
-        return admin.getId();
+        return articleRepository.cleanupOldPreviousArticles(PREVIOUS_ARTICLE_ADMIN_ID, PREVIOUS_ARTICLE_KEEP_COUNT);
     }
 
     private Article findArticleById(Long articleId, Long memberId) {

@@ -18,7 +18,7 @@ export const Route = createFileRoute('/_bombom/')({
   component: Index,
   validateSearch: (search) => {
     return {
-      newsletterDetail: search.newsletterDetail as number,
+      newsletterDetail: search.newsletterDetail as number | undefined,
       tab: search.tab as NewsletterTab | undefined,
     };
   },

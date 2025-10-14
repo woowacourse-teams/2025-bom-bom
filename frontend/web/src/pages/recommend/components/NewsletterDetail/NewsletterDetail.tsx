@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useState } from 'react';
 import { buildSubscribeUrl, isMaily, isStibee } from './NewsletterDetail.utils';
 import NewsletterSubscribeGuide from './NewsletterSubscribeGuide';
@@ -36,7 +36,10 @@ const NewsletterDetail = ({
     ...queries.previousArticles({ newsletterId, limit: 10 }),
   });
   const deviceType = useDevice();
-  const [activeTab, setActiveTab] = useState<'detail' | 'previous'>('detail');
+  const { tab } = useSearch({ from: '/_bombom/' });
+  const [activeTab, setActiveTab] = useState<'detail' | 'previous'>(
+    tab ?? 'detail',
+  );
 
   const isMobile = deviceType === 'mobile';
 
@@ -113,13 +116,25 @@ const NewsletterDetail = ({
       <TabHeader>
         <TabButton
           isActive={activeTab === 'detail'}
-          onClick={() => setActiveTab('detail')}
+          onClick={() => {
+            setActiveTab('detail');
+            navigate({
+              to: '.',
+              search: (prev) => ({ ...prev, tab: 'detail' as const }),
+            });
+          }}
         >
           뉴스레터 소개
         </TabButton>
         <TabButton
           isActive={activeTab === 'previous'}
-          onClick={() => setActiveTab('previous')}
+          onClick={() => {
+            setActiveTab('previous');
+            navigate({
+              to: '.',
+              search: (prev) => ({ ...prev, tab: 'previous' as const }),
+            });
+          }}
         >
           지난 뉴스레터
         </TabButton>

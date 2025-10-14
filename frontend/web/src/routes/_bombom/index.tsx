@@ -15,6 +15,12 @@ export const Route = createFileRoute('/_bombom/')({
     ],
   }),
   component: Index,
+  validateSearch: (search) => {
+    return {
+      newsletterDetail: search.newsletterDetail as number,
+      tab: search.tab as 'detail' | 'previous',
+    };
+  },
 });
 
 function Index() {

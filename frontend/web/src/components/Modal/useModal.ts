@@ -1,3 +1,4 @@
+import { useNavigate } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
 import useFocusTrap from '@/hooks/useFocusTrap';
@@ -10,6 +11,7 @@ interface UseModalOptions {
 }
 
 const useModal = (options: UseModalOptions = {}) => {
+  const navigate = useNavigate();
   const { scrollLock = true } = options;
   const [isOpen, setIsOpen] = useState(false);
 
@@ -19,7 +21,11 @@ const useModal = (options: UseModalOptions = {}) => {
 
   const closeModal = useCallback(() => {
     setIsOpen(false);
-  }, []);
+    navigate({
+      to: '.',
+      search: () => ({}),
+    });
+  }, [navigate]);
 
   const clickOutsideRef = useClickOutsideRef<HTMLDivElement>(closeModal);
   const focusTrapRef = useFocusTrap<HTMLDivElement>({

@@ -107,6 +107,8 @@ export const queries = {
     queryOptions({
       queryKey: ['newsletters'],
       queryFn: getNewsletters,
+      staleTime: 1000 * 60 * 60 * 24 * 3, // 3 days
+      gcTime: 1000 * 60 * 60 * 24 * 7, // 7 days
     }),
 
   newsletterDetail: (params: GetNewsletterDetailParams) =>

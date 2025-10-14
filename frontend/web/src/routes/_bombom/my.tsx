@@ -1,3 +1,4 @@
+import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -13,6 +14,8 @@ import NicknameSection from '@/pages/MyPage/NicknameSection';
 import SubscribedNewslettersSection from '@/pages/MyPage/SubscribedNewslettersSection';
 import WithdrawSection from '@/pages/MyPage/WithdrawSection';
 import type { Device } from '@/hooks/useDevice';
+import type { CSSObject, Theme } from '@emotion/react';
+import AvatarIcon from '#/assets/svg/avatar.svg';
 
 type TabId = 'profile' | 'newsletters' | 'settings';
 
@@ -85,7 +88,14 @@ function MyPage() {
 
   return (
     <Container device={device}>
-      <Title device={device}>마이페이지</Title>
+      {device !== 'mobile' && (
+        <TitleWrapper>
+          <TitleIconBox>
+            <AvatarIcon width={20} height={20} color={theme.colors.white} />
+          </TitleIconBox>
+          <Title>마이페이지</Title>
+        </TitleWrapper>
+      )}
 
       <ContentWrapper device={device}>
         <TabsWrapper device={device}>
@@ -98,6 +108,7 @@ function MyPage() {
                 onTabSelect={() => handleTabSelect(tab.id)}
                 selected={activeTab === tab.id}
                 aria-controls={`panel-${tab.id}`}
+                textAlign="start"
               />
             ))}
           </Tabs>
@@ -118,34 +129,80 @@ function MyPage() {
 
 const Container = styled.div<{ device: Device }>`
   width: 100%;
-  max-width: ${({ device }) => (device === 'mobile' ? '100%' : '800px')};
+  max-width: 1280px;
   margin: 0 auto;
-  padding: ${({ device }) =>
-    device === 'mobile' ? '16px' : device === 'tablet' ? '24px' : '32px'};
 
   display: flex;
   gap: 24px;
   flex-direction: column;
+  align-items: flex-start;
+
+  box-sizing: border-box;
 `;
 
-const Title = styled.h1<{ device: Device }>`
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme, device }) =>
-    device === 'mobile' ? theme.fonts.heading3 : theme.fonts.heading2};
+const TitleWrapper = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+`;
+
+const TitleIconBox = styled.div`
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+
+  background-color: ${({ theme }) => theme.colors.primary};
+`;
+
+const Title = styled.h1`
+  font: ${({ theme }) => theme.fonts.heading3};
 `;
 
 const ContentWrapper = styled.div<{ device: Device }>`
+  width: 100%;
+
   display: flex;
   gap: 24px;
-  flex-direction: ${({ device }) => (device === 'mobile' ? 'column' : 'row')};
-  align-items: ${({ device }) =>
-    device === 'mobile' ? 'stretch' : 'flex-start'};
+  flex-direction: ${({ device }) =>
+    device === 'pc' ? 'row' : 'column-reverse'};
+  align-items: ${({ device }) => (device === 'pc' ? 'flex-start' : 'center')};
+  align-self: stretch;
+  justify-content: center;
 `;
 
 const TabsWrapper = styled.div<{ device: Device }>`
-  flex-shrink: 0;
-  width: ${({ device }) => (device === 'mobile' ? '100%' : '200px')};
+  min-width: ${({ device }) => (device === 'mobile' ? '100%' : '310px')};
+
+  display: flex;
+  gap: 24px;
+  flex-direction: column;
+
+  box-sizing: border-box;
+
+  ${({ device, theme }) => tabsWrapperStyles[device](theme)}
 `;
+
+const tabsWrapperStyles: Record<Device, (theme: Theme) => CSSObject> = {
+  pc: (theme) => ({
+    width: '310px',
+    border: `1px solid ${theme.colors.stroke}`,
+    borderRadius: '12px',
+    padding: '16px',
+  }),
+  tablet: () => ({
+    width: '100%',
+    maxWidth: 'calc(100% - 200px)',
+  }),
+  mobile: () => ({
+    width: '100%',
+  }),
+};
 
 const TabPanel = styled.div<{ device: Device }>`
   flex: 1;
@@ -156,11 +213,11 @@ const TabPanel = styled.div<{ device: Device }>`
   @keyframes fadeIn {
     from {
       opacity: 0;
-      transform: translateX(-8px);
+      transform: translateY(-8px);
     }
     to {
       opacity: 1;
-      transform: translateX(0);
+      transform: translateY(0);
     }
   }
 `;

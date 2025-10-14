@@ -2,13 +2,11 @@ package me.bombom.api.v1.member.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
 import lombok.Builder;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.enums.Gender;
 
 @Builder
-public record MemberProfileResponse(
+public record MemberProfileSimpleResponse(
 
         @NotNull
         @Schema(type = "integer", format = "int64", description = "회원 ID", required = true)
@@ -23,21 +21,15 @@ public record MemberProfileResponse(
         String nickname,
 
         @Schema(type = "string", description = "프로필 이미지 URL")
-        String profileImageUrl,
-        @Schema(type = "string", description = "성별")
-        Gender gender,
-        @Schema(type = "string", format = "date", description = "생년월일")
-        LocalDate birthDate
+        String profileImageUrl
 ) {
 
-    public static MemberProfileResponse from(Member member) {
-        return MemberProfileResponse.builder()
+    public static MemberProfileSimpleResponse from(Member member) {
+        return MemberProfileSimpleResponse.builder()
                 .id(member.getId())
                 .email(member.getEmail())
                 .nickname(member.getNickname())
                 .profileImageUrl(member.getProfileImageUrl())
-                .gender(member.getGender())
-                .birthDate(member.getBirthDate())
                 .build();
     }
 }

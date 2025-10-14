@@ -13,8 +13,11 @@ type CarouselProps = PropsWithChildren & {
   hasAnimation?: boolean;
   showNextSlidePart?: boolean;
 } & (
-    | { autoPlay?: true; autoPlaySpeedMs?: number }
-    | { autoPlay: false; autoPlaySpeedMs?: never }
+    | { isInfinity?: false; autoPlay?: false; autoPlaySpeedMs?: never }
+    | ({ isInfinity: true } & (
+        | { autoPlay?: true; autoPlaySpeedMs?: number }
+        | { autoPlay: false; autoPlaySpeedMs?: never }
+      ))
   ) &
   (
     | { hasSlideButton?: true; slideButtonPosition?: SlideButtonPosition }
@@ -22,6 +25,7 @@ type CarouselProps = PropsWithChildren & {
   );
 
 const Carousel = ({
+  isInfinity = true,
   autoPlay = true,
   autoPlaySpeedMs = DEFAULT_SPEED,
   hasSlideButton = true,
@@ -50,11 +54,9 @@ const Carousel = ({
     }
   }
 
-  const infinitySlides = [
-    originSlides[originSlides.length - 1],
-    ...originSlides,
-    originSlides[0],
-  ];
+  const slides = isInfinity
+    ? [originSlides[originSlides.length - 1], ...originSlides, originSlides[0]]
+    : [...originSlides];
 
   const {
     slideIndex,
@@ -69,6 +71,7 @@ const Carousel = ({
     handleTouchEnd,
   } = useCarousel({
     slideCount,
+    isInfinity,
     autoPlay: hasMultipleSlides ? autoPlay : false,
     autoPlaySpeedMs,
   });
@@ -89,7 +92,7 @@ const Carousel = ({
           onTouchEnd: handleTouchEnd,
         })}
       >
-        {infinitySlides.map((slideContent, index) => (
+        {slides.map((slideContent, index) => (
           <Slide key={`slide-${index}`}>{slideContent}</Slide>
         ))}
       </SlidesWrapper>

@@ -64,7 +64,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
     """)
     Optional<PreviousArticleDetailResponse> getPreviousArticleDetailsByMemberId(@Param("id") Long id, @Param("memberId") Long memberId);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(clearAutomatically = true)
     @Query(value = """
     WITH cleanup_candidates AS (
         SELECT id,

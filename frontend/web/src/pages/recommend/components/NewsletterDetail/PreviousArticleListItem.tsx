@@ -39,8 +39,8 @@ const Container = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.colors.dividers};
 
   display: flex;
-  flex-direction: column;
   gap: 8px;
+  flex-direction: column;
 
   cursor: pointer;
   transition: background 0.2s ease;
@@ -52,39 +52,43 @@ const Container = styled.div`
 
 const InfoWrapper = styled.div`
   display: flex;
-  flex-direction: column;
   gap: 6px;
+  flex-direction: column;
 `;
 
 const Title = styled.h3`
-  font: ${({ theme }) => theme.fonts.heading6};
-  color: ${({ theme }) => theme.colors.textPrimary};
-
   overflow: hidden;
+
   display: -webkit-box;
+
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.heading6};
+
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 `;
 
 const Description = styled.p`
-  font: ${({ theme }) => theme.fonts.body2};
-  color: ${({ theme }) => theme.colors.textSecondary};
-
   overflow: hidden;
+
   display: -webkit-box;
+
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font: ${({ theme }) => theme.fonts.body2};
+
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 `;
 
 const MetaInfoRow = styled.div`
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 `;
 
 const MetaInfoText = styled.span`
-  font: ${({ theme }) => theme.fonts.caption};
   color: ${({ theme }) => theme.colors.textTertiary};
+  font: ${({ theme }) => theme.fonts.caption};
 `;
 
 const ReadTimeBox = styled.div`

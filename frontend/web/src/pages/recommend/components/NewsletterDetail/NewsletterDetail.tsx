@@ -294,20 +294,23 @@ const SubscribeButton = styled(Button)<{ isMobile: boolean }>`
 `;
 
 const TabHeader = styled.div`
-  display: flex;
   border-bottom: 1px solid ${({ theme }) => theme.colors.dividers};
+  display: flex;
 `;
 
 const TabButton = styled.button<{ isActive: boolean }>`
-  flex: 1;
   padding: 12px 0;
-  font: ${({ theme }) => theme.fonts.body2};
-  color: ${({ theme, isActive }) =>
-    isActive ? theme.colors.primary : theme.colors.textSecondary};
   border-bottom: 2px solid
     ${({ theme, isActive }) =>
       isActive ? theme.colors.primary : 'transparent'};
+
+  flex: 1;
+
   background: none;
+  color: ${({ theme, isActive }) =>
+    isActive ? theme.colors.primary : theme.colors.textSecondary};
+  font: ${({ theme }) => theme.fonts.body2};
+
   transition: color 0.2s;
 
   &:hover {
@@ -315,8 +318,8 @@ const TabButton = styled.button<{ isActive: boolean }>`
   }
 
   &:disabled {
-    opacity: 0.4;
     cursor: not-allowed;
+    opacity: 0.4;
   }
 `;
 

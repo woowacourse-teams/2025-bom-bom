@@ -55,8 +55,8 @@ function RouteComponent() {
 }
 
 const Container = styled.div`
-  max-width: 700px;
   width: 100%;
+  max-width: 700px;
   margin: 0 auto;
   margin-top: 20px;
   padding: 28px;

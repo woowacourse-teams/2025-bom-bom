@@ -24,6 +24,7 @@ const useModal = (options: UseModalOptions = {}) => {
     navigate({
       to: '.',
       search: () => ({}),
+      replace: true,
     });
   }, [navigate]);
 

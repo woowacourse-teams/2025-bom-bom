@@ -22,6 +22,7 @@ export const useNewsletterTab = () => {
     navigate({
       to: '.',
       search: (prev) => ({ ...prev, tab: nextTab }),
+      replace: true,
     });
   };
 

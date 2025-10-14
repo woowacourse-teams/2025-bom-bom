@@ -32,6 +32,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @IntegrationTest
 class ArticleServiceTest {
@@ -623,6 +624,9 @@ class ArticleServiceTest {
                 .roleId(1L)
                 .build();
         memberRepository.save(admin);
+        
+        // 테스트용 설정값 오버라이드
+        ReflectionTestUtils.setField(articleService, "PREVIOUS_ARTICLE_ADMIN_ID", admin.getId());
 
         Newsletter newsletter1 = newsletters.get(0);
         
@@ -640,7 +644,7 @@ class ArticleServiceTest {
         
         articleRepository.saveAll(adminArticles);
 
-        // when
+        // when - 서비스를 통해 호출 (트랜잭션 처리)
         int deletedCount = articleService.cleanupOldPreviousArticles();
 
         // then

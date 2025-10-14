@@ -136,8 +136,12 @@ const NewsletterDetail = ({
             {previousArticles?.map((article) => (
               <PreviousArticleListItem
                 key={article.articleId}
-                {...article}
-                onClick={(id) => navigate({ to: `articles/previous/${id}` })}
+                title={article.title}
+                contentsSummary={article.contentsSummary}
+                expectedReadTime={article.expectedReadTime}
+                onClick={() =>
+                  navigate({ to: `articles/previous/${article.articleId}` })
+                }
               />
             ))}
           </PreviousArticleList>

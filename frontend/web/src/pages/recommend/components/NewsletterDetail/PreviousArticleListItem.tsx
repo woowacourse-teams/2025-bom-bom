@@ -2,22 +2,20 @@ import styled from '@emotion/styled';
 import ClockIcon from '#/assets/svg/clock.svg';
 
 interface PreviousArticleListItemProps {
-  articleId: number;
   title: string;
   contentsSummary: string;
   expectedReadTime: number;
-  onClick?: (articleId: number) => void;
+  onClick: () => void;
 }
 
 const PreviousArticleListItem = ({
-  articleId,
   title,
   contentsSummary,
   expectedReadTime,
   onClick,
 }: PreviousArticleListItemProps) => {
   return (
-    <Container onClick={() => onClick?.(articleId)}>
+    <Container onClick={onClick}>
       <InfoWrapper>
         <Title>{title}</Title>
         <Description>{contentsSummary}</Description>
@@ -34,7 +32,7 @@ const PreviousArticleListItem = ({
 
 export default PreviousArticleListItem;
 
-const Container = styled.div`
+const Container = styled.a`
   padding: 16px;
   border-bottom: 1px solid ${({ theme }) => theme.colors.dividers};
 

@@ -18,6 +18,12 @@ export const Route = createFileRoute('/signup')({
     ],
   }),
   component: RouteComponent,
+  validateSearch: (search) => {
+    return {
+      email: search.email as string | undefined,
+      name: search.name as string | undefined,
+    };
+  },
 });
 
 function RouteComponent() {

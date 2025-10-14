@@ -67,7 +67,7 @@ const TrendySection = () => {
   useEffect(() => {
     if (newsletterDetail) {
       const newsletter = newsletters?.find(
-        (n) => n.newsletterId === newsletterDetail,
+        (newsletter) => newsletter.newsletterId === newsletterDetail,
       );
       if (newsletter) {
         setSelectedNewsletter(newsletter);

@@ -80,7 +80,15 @@ const ProfileDetail = ({ userInfo, onClose }: ProfileDetailProps) => {
       )}
 
       <MyPageButton to="/my" onClick={onClose}>
-        마이페이지
+        마이 페이지
+      </MyPageButton>
+
+      <MyPageButton to="/my?tab=profile" onClick={onClose}>
+        내 정보
+      </MyPageButton>
+
+      <MyPageButton to="/my?tab=newsletters" onClick={onClose}>
+        구독 뉴스레터
       </MyPageButton>
 
       <LogoutButton type="button" onClick={handleLogoutClick}>

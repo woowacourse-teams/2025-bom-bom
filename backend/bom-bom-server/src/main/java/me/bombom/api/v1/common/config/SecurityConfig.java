@@ -3,10 +3,10 @@ package me.bombom.api.v1.common.config;
 import java.security.interfaces.ECPrivateKey;
 import java.time.Duration;
 import java.util.List;
-import java.util.function.Supplier;
-import me.bombom.api.v1.auth.AppleClientSecretSupplier;
-import me.bombom.api.v1.auth.AppleOAuth2AccessTokenResponseClient;
+import me.bombom.api.v1.auth.AppleClientSecretGenerator;
 import me.bombom.api.v1.auth.ApplePrivateKeyLoader;
+import me.bombom.api.v1.auth.AppleTokenClient;
+import me.bombom.api.v1.auth.client.AppleAuthClient;
 import me.bombom.api.v1.auth.handler.OAuth2LoginFailureHandler;
 import me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler;
 import me.bombom.api.v1.auth.resolver.AppleAuthorizationRequestResolver;
@@ -129,26 +129,16 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AppleClientSecretSupplier appleClientSecretSupplier(
-            @Value("${oauth2.apple.team-id}") String teamId,
-            @Value("${oauth2.apple.key-id}") String keyId,
-            @Value("${oauth2.apple.client-id}") String clientId,
-            ECPrivateKey applePrivateKey
-    ) {
-        return new AppleClientSecretSupplier(teamId, keyId, clientId, applePrivateKey);
-    }
-
-    @Bean
-    public AppleOAuth2AccessTokenResponseClient appleOAuth2AccessTokenResponseClient(
-            Supplier<String> appleClientSecretSupplier,
+    public AppleTokenClient appleTokenClient(
+            AppleClientSecretGenerator appleClientSecretGenerator,
             RestClient.Builder restClientBuilder
     ) {
-        return new AppleOAuth2AccessTokenResponseClient(appleClientSecretSupplier, restClientBuilder.build());
+        return new AppleTokenClient(appleClientSecretGenerator, restClientBuilder.build());
     }
 
     @Bean
     public OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegatingAccessTokenClient(
-            AppleOAuth2AccessTokenResponseClient appleClient
+            AppleAuthClient appleClient
     ) {
         var defaultClient = new RestClientAuthorizationCodeTokenResponseClient();
         return request -> {

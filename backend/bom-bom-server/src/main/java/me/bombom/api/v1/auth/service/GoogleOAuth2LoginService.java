@@ -1,6 +1,5 @@
 package me.bombom.api.v1.auth.service;
 
-import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +7,7 @@ import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
 import me.bombom.api.v1.auth.enums.OAuth2Provider;
+import me.bombom.api.v1.auth.support.SessionManager;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
@@ -36,9 +36,9 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
 
     private final DefaultOAuth2UserService defaultOAuth2UserService = new DefaultOAuth2UserService();
     private final MemberRepository memberRepository;
-    private final HttpSession session;
     private final RestClient.Builder restClientBuilder;
     private final IdTokenValidator idTokenValidator;
+    private final SessionManager sessionManager;
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String googleClientId;
@@ -67,7 +67,7 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
                     .providerId(providerId)
                     .profileUrl(profileUrl)
                     .build();
-            session.setAttribute("pendingMember", pendingMember);
+            sessionManager.setAttribute("pendingMember", pendingMember);
             log.info("Google 신규 회원 - 회원가입 대기 상태로 설정");
         } else {
             log.info("Google 기존 회원 - 로그인 성공, memberId: {}", member.get().getId());
@@ -89,6 +89,11 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
             throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
                     .addContext("reason", "google_native_exchange_failed");
         }
+    }
+
+    @Override
+    public boolean supports(String provider) {
+        return OAuth2Provider.GOOGLE.isEqualProvider(provider);
     }
 
     private java.util.Map<String, Object> exchangeGoogleToken(String authorizationCode) {
@@ -122,7 +127,7 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
 
     private void saveGoogleAccessToken(java.util.Map<String, Object> tokenResponse) {
         Object accessToken = tokenResponse.get("access_token");
-        session.setAttribute("googleAccessToken", accessToken);
+        sessionManager.setAttribute("googleAccessToken", accessToken);
         log.info("Google 네이티브 Access Token 세션에 저장 완료");
     }
 
@@ -148,14 +153,9 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
                     .providerId(sub)
                     .profileUrl(null)
                     .build();
-            session.setAttribute("pendingMember", pending);
+            sessionManager.setAttribute("pendingMember", pending);
             return Optional.empty();
         }
         return member;
-    }
-
-    @Override
-    public boolean supports(String provider) {
-        return OAuth2Provider.GOOGLE.isEqualProvider(provider);
     }
 }

@@ -45,7 +45,7 @@ const TrendySection = () => {
       to: '.',
       search: (prev) => ({
         ...prev,
-        newsletterDetail: newsletter.newsletterId as number,
+        newsletterDetail: newsletter.newsletterId,
       }),
     });
 

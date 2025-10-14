@@ -16,10 +16,13 @@ export const Route = createFileRoute('/_bombom/')({
     ],
   }),
   component: Index,
-  validateSearch: (search) => {
+  validateSearch: (search: {
+    newsletterDetail?: number;
+    tab?: NewsletterTab;
+  }) => {
     return {
-      newsletterDetail: search.newsletterDetail as number | undefined,
-      tab: search.tab as NewsletterTab | undefined,
+      newsletterDetail: search.newsletterDetail,
+      tab: search.tab,
     };
   },
 });

@@ -1,5 +1,6 @@
 package me.bombom.api.v1.member.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
@@ -27,7 +28,7 @@ public class MemberController implements MemberControllerApi{
 
     @Override
     @PatchMapping("/me")
-    public MemberProfileResponse updateMember(@LoginMember Member member, @RequestBody MemberProfileUpdateRequest request) {
+    public MemberProfileResponse updateMember(@LoginMember Member member, @Valid @RequestBody MemberProfileUpdateRequest request) {
         return memberService.updateProfile(member.getId(), request);
     }
 }

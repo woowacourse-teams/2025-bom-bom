@@ -10,7 +10,6 @@ export const useNewsletterTab = () => {
     tabParam ?? 'detail',
   );
 
-  // URL이 바뀌었을 때 상태도 동기화
   useEffect(() => {
     if (tabParam && tabParam !== activeTab) {
       setActiveTab(tabParam as NewsletterTab);

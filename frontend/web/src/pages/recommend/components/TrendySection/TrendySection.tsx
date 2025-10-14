@@ -31,7 +31,15 @@ const TrendySection = () => {
     openModal: openDetailModal,
     closeModal: closeDetailModal,
     isOpen,
-  } = useModal();
+  } = useModal({
+    onClose: () => {
+      navigate({
+        to: '.',
+        search: () => ({}),
+        replace: true,
+      });
+    },
+  });
   const device = useDevice();
 
   const filteredNewsletters = newsletters?.filter(

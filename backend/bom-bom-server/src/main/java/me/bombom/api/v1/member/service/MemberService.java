@@ -10,10 +10,10 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.dto.request.MemberProfileUpdateRequest;
+import me.bombom.api.v1.member.dto.request.MemberInfoUpdateRequest;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
+import me.bombom.api.v1.member.dto.response.MemberInfoResponse;
 import me.bombom.api.v1.member.dto.response.MemberProfileResponse;
-import me.bombom.api.v1.member.dto.response.MemberProfileSimpleResponse;
 import me.bombom.api.v1.member.event.MemberSignupEvent;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.withdraw.event.WithdrawEvent;
@@ -64,18 +64,18 @@ public class MemberService {
         };
     }
 
-    public MemberProfileResponse getProfile(Long memberId) {
+    public MemberInfoResponse getProfile(Long memberId) {
+        Member member = findMemberById(memberId);
+        return MemberInfoResponse.from(member);
+    }
+
+    public MemberProfileResponse getProfileSimple(Long memberId) {
         Member member = findMemberById(memberId);
         return MemberProfileResponse.from(member);
     }
 
-    public MemberProfileSimpleResponse getProfileSimple(Long memberId) {
-        Member member = findMemberById(memberId);
-        return MemberProfileSimpleResponse.from(member);
-    }
-
     @Transactional
-    public MemberProfileResponse updateProfile(Long memberId, MemberProfileUpdateRequest request) {
+    public MemberInfoResponse updateProfile(Long memberId, MemberInfoUpdateRequest request) {
         Member member = findMemberById(memberId);
 
         if (request.nickname() != null && !member.isSameNickname(request.nickname())) {
@@ -88,7 +88,7 @@ public class MemberService {
                 request.birthDate(),
                 request.gender()
         );
-        return MemberProfileResponse.from(member);
+        return MemberInfoResponse.from(member);
     }
 
     @Transactional

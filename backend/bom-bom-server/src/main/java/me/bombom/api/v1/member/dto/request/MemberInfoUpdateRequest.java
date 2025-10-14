@@ -7,7 +7,7 @@ import me.bombom.api.v1.auth.util.UserInfoValidator;
 import me.bombom.api.v1.member.enums.Gender;
 import org.hibernate.validator.constraints.Length;
 
-public record MemberProfileUpdateRequest(
+public record MemberInfoUpdateRequest(
 
     @Pattern(regexp = UserInfoValidator.NICKNAME_REGEX_PATTERN)
     @Length(min = UserInfoValidator.NICKNAME_MIN_LENGTH, max = UserInfoValidator.NICKNAME_MAX_LENGTH)

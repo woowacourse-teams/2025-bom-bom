@@ -10,7 +10,7 @@ import java.util.Map;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.dto.request.MemberProfileUpdateRequest;
+import me.bombom.api.v1.member.dto.request.MemberInfoUpdateRequest;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,7 +61,7 @@ class MemberControllerTest {
     @Test
     void 형식에_맞지_않는_닉네임으로_변경_시도_시_400_예외가_발생한다() throws Exception {
         // given
-        MemberProfileUpdateRequest request = new MemberProfileUpdateRequest("invalid..nickname", null, null, null);
+        MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("invalid..nickname", null, null, null);
         String requestBody = objectMapper.writeValueAsString(request);
 
         // when & then
@@ -76,7 +76,7 @@ class MemberControllerTest {
     @Test
     void 너무_짧은_닉네임으로_변경_시도_시_400_예외가_발생한다() throws Exception {
         // given
-        MemberProfileUpdateRequest request = new MemberProfileUpdateRequest("a", null, null, null);
+        MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("a", null, null, null);
         String requestBody = objectMapper.writeValueAsString(request);
 
         // when & then
@@ -91,7 +91,7 @@ class MemberControllerTest {
     @Test
     void 형식에_맞는_닉네임이면_정상_동작한다() throws Exception {
         // given
-        MemberProfileUpdateRequest request = new MemberProfileUpdateRequest("new.nickname", null, null, null);
+        MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("new.nickname", null, null, null);
         String requestBody = objectMapper.writeValueAsString(request);
 
         // when & then

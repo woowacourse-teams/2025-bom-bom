@@ -10,7 +10,7 @@ import me.bombom.api.v1.auth.service.AppleOAuth2Service;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.dto.request.MemberProfileUpdateRequest;
+import me.bombom.api.v1.member.dto.request.MemberInfoUpdateRequest;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -98,7 +98,7 @@ class MemberServiceTest {
         //given
         Member member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
-        MemberProfileUpdateRequest request = new MemberProfileUpdateRequest(
+        MemberInfoUpdateRequest request = new MemberInfoUpdateRequest(
                 "newNickname",
                 "newProfileImageUrl",
                 LocalDate.of(2000, 1, 1),
@@ -127,7 +127,7 @@ class MemberServiceTest {
         memberRepository.save(member1);
         Member member2 = TestFixture.createUniqueMember(duplicateNickname, "providerId2");
         memberRepository.save(member2);
-        MemberProfileUpdateRequest request = new MemberProfileUpdateRequest(
+        MemberInfoUpdateRequest request = new MemberInfoUpdateRequest(
                 duplicateNickname,
                 "newProfileImageUrl",
                 LocalDate.of(2000, 1, 1),

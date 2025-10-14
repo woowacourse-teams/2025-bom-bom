@@ -47,7 +47,6 @@ const TrendySection = () => {
         ...prev,
         newsletterDetail: newsletter.newsletterId as number,
       }),
-      replace: true,
     });
 
     trackEvent({

@@ -71,7 +71,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
                ROW_NUMBER() OVER (
                    PARTITION BY newsletter_id
                    ORDER BY arrived_date_time DESC, id DESC
-               ) as keep_order
+               ) AS keep_order
         FROM article
         WHERE member_id = :memberId
     )

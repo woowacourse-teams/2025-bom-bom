@@ -5,15 +5,13 @@ import { patchNickname } from '@/apis/members';
 import Button from '@/components/Button/Button';
 import InputField from '@/components/InputField/InputField';
 import { toast } from '@/components/Toast/utils/toastActions';
-import type { Device } from '@/hooks/useDevice';
 import type { UserInfo } from '@/types/me';
 
 interface NicknameSectionProps {
   userInfo: UserInfo;
-  device: Device;
 }
 
-const NicknameSection = ({ userInfo, device }: NicknameSectionProps) => {
+const NicknameSection = ({ userInfo }: NicknameSectionProps) => {
   const queryClient = useQueryClient();
 
   const [nickname, setNickname] = useState(userInfo?.nickname || '');
@@ -58,8 +56,7 @@ const NicknameSection = ({ userInfo, device }: NicknameSectionProps) => {
   };
 
   return (
-    <Section device={device}>
-      <SectionTitle device={device}>닉네임 변경</SectionTitle>
+    <Wrapper>
       <NicknameWrapper>
         <InputField
           name="nickname"
@@ -75,22 +72,16 @@ const NicknameSection = ({ userInfo, device }: NicknameSectionProps) => {
           disabled={isNicknameUpdating || !!nicknameError}
         />
       </NicknameWrapper>
-    </Section>
+    </Wrapper>
   );
 };
 
 export default NicknameSection;
 
-const Section = styled.section<{ device: Device }>`
+const Wrapper = styled.div`
   display: flex;
   gap: 16px;
   flex-direction: column;
-`;
-
-const SectionTitle = styled.h2<{ device: Device }>`
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme, device }) =>
-    device === 'mobile' ? theme.fonts.heading5 : theme.fonts.heading4};
 `;
 
 const NicknameWrapper = styled.div`

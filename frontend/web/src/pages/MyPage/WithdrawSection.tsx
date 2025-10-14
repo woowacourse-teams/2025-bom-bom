@@ -2,13 +2,8 @@ import styled from '@emotion/styled';
 import { useMutation } from '@tanstack/react-query';
 import { postWithdraw } from '@/apis/auth';
 import { toast } from '@/components/Toast/utils/toastActions';
-import type { Device } from '@/hooks/useDevice';
 
-interface WithdrawSectionProps {
-  device: Device;
-}
-
-const WithdrawSection = ({ device }: WithdrawSectionProps) => {
+const WithdrawSection = () => {
   const { mutate: mutateWithdraw } = useMutation({
     mutationKey: ['withdraw'],
     mutationFn: postWithdraw,
@@ -31,21 +26,13 @@ const WithdrawSection = ({ device }: WithdrawSectionProps) => {
   };
 
   return (
-    <Section device={device}>
-      <WithdrawButton type="button" onClick={handleWithdrawClick}>
-        회원 탈퇴
-      </WithdrawButton>
-    </Section>
+    <WithdrawButton type="button" onClick={handleWithdrawClick}>
+      회원 탈퇴
+    </WithdrawButton>
   );
 };
 
 export default WithdrawSection;
-
-const Section = styled.section<{ device: Device }>`
-  display: flex;
-  gap: 16px;
-  flex-direction: column;
-`;
 
 const WithdrawButton = styled.button`
   width: fit-content;

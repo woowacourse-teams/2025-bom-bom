@@ -13,8 +13,7 @@ const SubscribedNewslettersSection = ({
   device,
 }: SubscribedNewslettersSectionProps) => {
   return (
-    <Section device={device}>
-      <SectionTitle device={device}>구독 뉴스레터</SectionTitle>
+    <Wrapper>
       {newsletters && newsletters.length > 0 ? (
         <NewsletterGrid device={device}>
           {newsletters.map((newsletter) => (
@@ -37,22 +36,16 @@ const SubscribedNewslettersSection = ({
       ) : (
         <EmptyMessage>구독 중인 뉴스레터가 없습니다.</EmptyMessage>
       )}
-    </Section>
+    </Wrapper>
   );
 };
 
 export default SubscribedNewslettersSection;
 
-const Section = styled.section<{ device: Device }>`
+const Wrapper = styled.div`
   display: flex;
   gap: 16px;
   flex-direction: column;
-`;
-
-const SectionTitle = styled.h2<{ device: Device }>`
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme, device }) =>
-    device === 'mobile' ? theme.fonts.heading5 : theme.fonts.heading4};
 `;
 
 const NewsletterGrid = styled.div<{ device: Device }>`

@@ -23,7 +23,7 @@ const NewsletterSubscribeGuide = () => {
             <StepContent>
               <StepTitle>구독 페이지 접속</StepTitle>
               <StepDescription>
-                {'뉴스레터 공식 구독 페이지로 이동합니다.'}
+                뉴스레터 공식 구독 페이지로 이동합니다.
               </StepDescription>
             </StepContent>
           </StepItem>
@@ -32,10 +32,10 @@ const NewsletterSubscribeGuide = () => {
             <StepContent>
               <StepTitle>봄봄 메일 붙여넣기</StepTitle>
               <StepDescription>
-                {'이메일 칸에 봄봄 메일을 입력해주세요.'}
+                이메일 칸에 봄봄 메일을 입력해주세요.
               </StepDescription>
               <StepDescription>
-                {'봄봄을 통해 접속한 유저라면 즉시 붙여넣기가 가능합니다!'}
+                봄봄을 통해 접속한 유저라면 즉시 붙여넣기가 가능합니다!
               </StepDescription>
             </StepContent>
           </StepItem>
@@ -44,7 +44,7 @@ const NewsletterSubscribeGuide = () => {
             <StepContent>
               <StepTitle>구독 완료!</StepTitle>
               <StepDescription>
-                {'축하합니다! 이제 정기적으로 뉴스레터를 받아보세요.'}
+                축하합니다! 이제 정기적으로 뉴스레터를 받아보세요.
               </StepDescription>
             </StepContent>
           </StepItem>

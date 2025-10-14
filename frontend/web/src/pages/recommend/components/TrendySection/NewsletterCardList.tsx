@@ -31,7 +31,8 @@ export default NewsletterCardList;
 
 const NewsletterCard = styled(ImageInfoCard)`
   border-radius: 16px;
-
+  height: 80px;
+  padding: 12px;
   cursor: pointer;
 
   transition:

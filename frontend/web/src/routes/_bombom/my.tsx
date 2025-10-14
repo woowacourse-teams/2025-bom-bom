@@ -17,16 +17,16 @@ import type { Device } from '@/hooks/useDevice';
 import type { CSSObject, Theme } from '@emotion/react';
 import AvatarIcon from '#/assets/svg/avatar.svg';
 
-type TabId = 'profile' | 'newsletters' | 'settings';
+type MyPageTab = 'profile' | 'newsletters' | 'settings';
 
 const TABS = [
-  { id: 'profile' as TabId, label: '내 정보' },
-  { id: 'newsletters' as TabId, label: '구독 뉴스레터' },
-  { id: 'settings' as TabId, label: '설정' },
-];
+  { id: 'profile', label: '내 정보' },
+  { id: 'newsletters', label: '구독 뉴스레터' },
+  { id: 'settings', label: '설정' },
+] as const;
 
 type MyPageSearch = {
-  tab?: TabId;
+  tab: MyPageTab;
 };
 
 export const Route = createFileRoute('/_bombom/my')({
@@ -39,7 +39,7 @@ export const Route = createFileRoute('/_bombom/my')({
   }),
   validateSearch: (search: Record<string, unknown>): MyPageSearch => {
     const tab = search.tab as string | undefined;
-    const isValidTab = (value: string): value is TabId =>
+    const isValidTab = (value: string): value is MyPageTab =>
       ['profile', 'newsletters', 'settings'].includes(value);
 
     return {
@@ -53,14 +53,14 @@ function MyPage() {
   const device = useDevice();
   const navigate = useNavigate();
   const { tab } = useSearch({ from: '/_bombom/my' });
-  const activeTab = tab || 'profile';
+  const activeTab = tab;
 
   const { data: userInfo } = useQuery(queries.me());
   const { data: myNewsletters } = useQuery(queries.myNewsletters());
 
   if (!userInfo) return null;
 
-  const handleTabSelect = (tabId: TabId) => {
+  const handleTabSelect = (tabId: MyPageTab) => {
     navigate({
       to: '/my',
       search: { tab: tabId },

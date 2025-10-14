@@ -72,10 +72,10 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
                    PARTITION BY newsletter_id
                    ORDER BY arrived_date_time DESC, id DESC
                ) as keep_order
-        FROM article\s
+        FROM article
         WHERE member_id = :memberId
     )
-    DELETE FROM article\s
+    DELETE FROM article
     WHERE id IN (
         SELECT id FROM cleanup_candidates
         WHERE keep_order > :keepCount

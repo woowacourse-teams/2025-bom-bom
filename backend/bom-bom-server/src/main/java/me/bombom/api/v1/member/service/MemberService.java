@@ -78,7 +78,7 @@ public class MemberService {
     public MemberProfileResponse updateProfile(Long memberId, MemberProfileUpdateRequest request) {
         Member member = findMemberById(memberId);
 
-        if (request.nickname() != null && !member.getNickname().equals(request.nickname())) {
+        if (request.nickname() != null && !member.isSameNickname(request.nickname())) {
             userInfoValidator.validateNickname(request.nickname());
         }
 

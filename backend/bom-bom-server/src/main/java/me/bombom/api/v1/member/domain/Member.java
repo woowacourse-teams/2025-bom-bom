@@ -100,4 +100,8 @@ public class Member extends BaseEntity implements Serializable {
             this.gender = gender;
         }
     }
+
+    public boolean isSameNickname(String nickname) {
+        return this.nickname.equals(nickname);
+    }
 }

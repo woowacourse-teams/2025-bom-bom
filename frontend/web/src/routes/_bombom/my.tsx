@@ -99,7 +99,7 @@ function MyPage() {
 
       <ContentWrapper device={device}>
         <TabsWrapper device={device}>
-          <Tabs direction="vertical">
+          <Tabs direction={device === 'mobile' ? 'horizontal' : 'vertical'}>
             {TABS.map((tab) => (
               <Tab
                 key={tab.id}
@@ -168,45 +168,51 @@ const ContentWrapper = styled.div<{ device: Device }>`
   width: 100%;
 
   display: flex;
-  gap: 24px;
-  flex-direction: ${({ device }) =>
-    device === 'pc' ? 'row' : 'column-reverse'};
-  align-items: ${({ device }) => (device === 'pc' ? 'flex-start' : 'center')};
+  gap: ${({ device }) => (device === 'pc' ? '24px' : '16px')};
+  flex-direction: ${({ device }) => (device === 'pc' ? 'row' : 'column')};
+  align-items: flex-start;
   align-self: stretch;
-  justify-content: center;
 `;
 
 const TabsWrapper = styled.div<{ device: Device }>`
-  min-width: ${({ device }) => (device === 'mobile' ? '100%' : '310px')};
+  width: ${({ device }) => (device === 'pc' ? '310px' : '100%')};
 
   display: flex;
-  gap: 24px;
   flex-direction: column;
 
   box-sizing: border-box;
+
+  order: ${({ device }) => (device === 'pc' ? 0 : 0)};
 
   ${({ device, theme }) => tabsWrapperStyles[device](theme)}
 `;
 
 const tabsWrapperStyles: Record<Device, (theme: Theme) => CSSObject> = {
   pc: (theme) => ({
-    width: '310px',
+    flexShrink: 0,
     border: `1px solid ${theme.colors.stroke}`,
     borderRadius: '12px',
     padding: '16px',
   }),
   tablet: () => ({
-    width: '100%',
-    maxWidth: 'calc(100% - 200px)',
+    flexShrink: 0,
   }),
   mobile: () => ({
-    width: '100%',
+    gap: '8px',
+    overflowX: 'auto',
+    '&::-webkit-scrollbar': {
+      display: 'none',
+    },
+    scrollbarWidth: 'none',
   }),
 };
 
 const TabPanel = styled.div<{ device: Device }>`
+  width: 100%;
   flex: 1;
   min-width: 0;
+
+  order: 1;
 
   animation: fadeIn 0.2s ease-in-out;
 

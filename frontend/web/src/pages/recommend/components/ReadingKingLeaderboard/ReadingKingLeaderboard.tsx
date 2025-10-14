@@ -4,13 +4,13 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import LeaderboardItem from './LeaderboardItem';
 import { RANKING } from './ReadingKingLeaderboard.constants';
-import { getLeaderboardData } from './ReadingKingLeaderboard.utils';
 import ReadingKingLeaderboardSkeleton from './ReadingKingLeaderboardSkeleton';
 import ReadingKingMyRank from './ReadingKingMyRank';
 import { queries } from '@/apis/queries';
 import Carousel from '@/components/Carousel/Carousel';
 import ArrowIcon from '@/components/icons/ArrowIcon';
 import Tooltip from '@/components/Tooltip/Tooltip';
+import { chunk } from '@/utils/array';
 import ReadingKingHelpIcon from '#/assets/svg/help.svg';
 
 const ReadingKingLeaderboard = () => {
@@ -68,7 +68,7 @@ const ReadingKingLeaderboard = () => {
         hasSlideButton={true}
         slideButtonPosition="bottom"
       >
-        {getLeaderboardData(monthlyReadingRankContent, RANKING.boardUnit).map(
+        {chunk(monthlyReadingRankContent, RANKING.boardUnit).map(
           (leaderboard, leaderboardIndex) => (
             <LeaderboardList key={`leaderboard-${leaderboardIndex}`}>
               {leaderboard.map((item, index) => (

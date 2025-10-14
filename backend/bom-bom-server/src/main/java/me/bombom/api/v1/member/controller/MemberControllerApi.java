@@ -1,13 +1,17 @@
 package me.bombom.api.v1.member.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberProfileUpdateRequest;
 import me.bombom.api.v1.member.dto.response.MemberProfileResponse;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Member", description = "회원 관련 API")
 @ApiResponses({
@@ -22,7 +26,7 @@ public interface MemberControllerApi {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "프로필 조회 성공")
     })
-    MemberProfileResponse getMember(Member member);
+    MemberProfileResponse getMember(@Parameter(hidden = true) @LoginMember Member member);
 
     @Operation(
         summary = "내 프로필 수정",
@@ -32,5 +36,5 @@ public interface MemberControllerApi {
         @ApiResponse(responseCode = "200", description = "프로필 수정 성공"),
         @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
     })
-    MemberProfileResponse updateMember(Member member, MemberProfileUpdateRequest request);
-} 
+    MemberProfileResponse updateMember(@Parameter(hidden = true) @LoginMember Member member, @Valid @RequestBody MemberProfileUpdateRequest request);
+}

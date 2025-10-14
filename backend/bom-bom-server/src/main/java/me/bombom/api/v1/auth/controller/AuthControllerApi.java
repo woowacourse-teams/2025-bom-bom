@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import java.io.IOException;
 import me.bombom.api.v1.auth.dto.NativeLoginResponse;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
@@ -34,7 +35,7 @@ public interface AuthControllerApi {
         @ApiResponse(responseCode = "401", description = "OAuth2 인증 정보 없음")
     })
     void signup(
-        @Parameter(description = "회원가입 요청 데이터") @RequestBody MemberSignupRequest signupRequest,
+        @Parameter(description = "회원가입 요청 데이터") @Valid @RequestBody MemberSignupRequest signupRequest,
         HttpServletRequest request
     );
 
@@ -47,7 +48,7 @@ public interface AuthControllerApi {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
     })
     SignupValidateStatus validateSignupField(
-            @Parameter(description = "중복 체크 요청 데이터") @ModelAttribute SignupValidateRequest request
+            @Parameter(description = "중복 체크 요청 데이터") @Valid @ModelAttribute SignupValidateRequest request
     );
 
     @Operation(
@@ -76,7 +77,7 @@ public interface AuthControllerApi {
     })
     NativeLoginResponse nativeLogin(
         @PathVariable("provider") String provider,
-        @RequestBody NativeLoginRequest nativeLoginRequest,
+        @Valid @RequestBody NativeLoginRequest nativeLoginRequest,
         HttpServletRequest request,
         HttpServletResponse response
     ) throws IOException;

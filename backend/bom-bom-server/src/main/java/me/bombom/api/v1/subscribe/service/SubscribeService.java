@@ -1,7 +1,10 @@
 package me.bombom.api.v1.subscribe.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -18,5 +21,9 @@ public class SubscribeService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteAllByMemberId(Long memberId) {
         subscribeRepository.deleteAllByMemberId(memberId);
+    }
+
+    public List<SubscribedNewsletterResponse> getSubscribedNewsletters(Member member) {
+        return subscribeRepository.findSubscribedByMemberId(member.getId());
     }
 }

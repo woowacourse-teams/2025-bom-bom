@@ -64,18 +64,18 @@ public class MemberService {
         };
     }
 
-    public MemberInfoResponse getProfile(Long memberId) {
+    public MemberInfoResponse getInfo(Long memberId) {
         Member member = findMemberById(memberId);
         return MemberInfoResponse.from(member);
     }
 
-    public MemberProfileResponse getProfileSimple(Long memberId) {
+    public MemberProfileResponse getProfile(Long memberId) {
         Member member = findMemberById(memberId);
         return MemberProfileResponse.from(member);
     }
 
     @Transactional
-    public MemberInfoResponse updateProfile(Long memberId, MemberInfoUpdateRequest request) {
+    public MemberInfoResponse updateInfo(Long memberId, MemberInfoUpdateRequest request) {
         Member member = findMemberById(memberId);
 
         if (request.nickname() != null && !member.isSameNickname(request.nickname())) {

@@ -23,19 +23,19 @@ public class MemberController implements MemberControllerApi {
 
   @Override
   @GetMapping("/me")
-  public MemberInfoResponse getMember(@LoginMember Member member) {
-    return memberService.getProfile(member.getId());
+  public MemberInfoResponse getMemberInfo(@LoginMember Member member) {
+    return memberService.getInfo(member.getId());
   }
 
   @Override
   @PatchMapping("/me")
-  public MemberInfoResponse updateMember(@LoginMember Member member, @Valid @RequestBody MemberInfoUpdateRequest request) {
-    return memberService.updateProfile(member.getId(), request);
+  public MemberInfoResponse updateMemberInfo(@LoginMember Member member, @Valid @RequestBody MemberInfoUpdateRequest request) {
+    return memberService.updateInfo(member.getId(), request);
   }
 
   @Override
   @GetMapping("/me/profile")
   public MemberProfileResponse getMemberProfile(@LoginMember Member member) {
-    return memberService.getProfileSimple(member.getId());
+    return memberService.getProfile(member.getId());
   }
 }

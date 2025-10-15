@@ -27,7 +27,7 @@ public interface MemberControllerApi {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "내 정보 조회 성공")
     })
-    MemberInfoResponse getMember(@Parameter(hidden = true) @LoginMember Member member);
+    MemberInfoResponse getMemberInfo(@Parameter(hidden = true) @LoginMember Member member);
 
     @Operation(
             summary = "내 정보 수정",
@@ -37,8 +37,8 @@ public interface MemberControllerApi {
             @ApiResponse(responseCode = "200", description = "내 정보 수정 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
     })
-    MemberInfoResponse updateMember(@Parameter(hidden = true) @LoginMember Member member,
-                                    @Valid @RequestBody MemberInfoUpdateRequest request);
+    MemberInfoResponse updateMemberInfo(@Parameter(hidden = true) @LoginMember Member member,
+                                        @Valid @RequestBody MemberInfoUpdateRequest request);
 
     @Operation(
             summary = "내 프로필 간단 조회",

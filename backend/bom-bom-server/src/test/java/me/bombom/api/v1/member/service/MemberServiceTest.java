@@ -106,7 +106,7 @@ class MemberServiceTest {
         );
 
         //when
-        memberService.updateProfile(member.getId(), request);
+        memberService.updateInfo(member.getId(), request);
 
         //then
         Member updatedMember = memberRepository.findById(member.getId()).get();
@@ -135,7 +135,7 @@ class MemberServiceTest {
         );
 
         //then
-        assertThatThrownBy(() -> memberService.updateProfile(member1.getId(), request))
+        assertThatThrownBy(() -> memberService.updateInfo(member1.getId(), request))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.DUPLICATE_NICKNAME);
     }

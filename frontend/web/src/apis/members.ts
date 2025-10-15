@@ -60,15 +60,12 @@ export const getMyMonthlyReadingRank = async () => {
   });
 };
 
-export type PatchNicknameParams = {
-  nickname: string;
-};
+export type PatchMembersInfoParams =
+  components['schemas']['MemberInfoUpdateRequest'];
 
-export const patchNickname = async ({ nickname }: PatchNicknameParams) => {
-  return await fetcher.patch<PatchNicknameParams, never>({
-    path: '/members/me/nickname',
-    query: {
-      nickname,
-    },
+export const patchMemberInfo = async (params: PatchMembersInfoParams) => {
+  return await fetcher.patch<PatchMembersInfoParams, never>({
+    path: '/members/me',
+    body: params,
   });
 };

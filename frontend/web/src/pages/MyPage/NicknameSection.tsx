@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { patchNickname } from '@/apis/members';
+import { patchMemberInfo } from '@/apis/members';
 import Button from '@/components/Button/Button';
 import InputField from '@/components/InputField/InputField';
 import { toast } from '@/components/Toast/utils/toastActions';
@@ -17,19 +17,17 @@ const NicknameSection = ({ userInfo }: NicknameSectionProps) => {
   const [nickname, setNickname] = useState(userInfo?.nickname || '');
   const [nicknameError, setNicknameError] = useState<string | null>(null);
 
-  const { mutate: mutateNickname, isPending: isNicknameUpdating } = useMutation(
-    {
-      mutationKey: ['updateNickname'],
-      mutationFn: patchNickname,
+  const { mutate: mutateMemberInfo, isPending: isMemberInfoUpdating } =
+    useMutation({
+      mutationFn: patchMemberInfo,
       onSuccess: () => {
         toast.success('닉네임이 변경되었습니다.');
         queryClient.invalidateQueries({ queryKey: ['members', 'me'] });
       },
-      onError: () => {
-        toast.error('닉네임 변경에 실패했습니다.');
+      onError: (error) => {
+        toast.error(error?.rawBody?.message ?? '닉네임 변경에 실패했습니다.');
       },
-    },
-  );
+    });
 
   const validateNickname = (value: string) => {
     if (value.length < 2 || value.length > 10) {
@@ -49,10 +47,10 @@ const NicknameSection = ({ userInfo }: NicknameSectionProps) => {
   const handleNicknameUpdate = () => {
     if (!validateNickname(nickname)) return;
     if (nickname === userInfo?.nickname) {
-      toast.info('변경할 닉네임을 입력해주세요.');
+      toast.error('이전과 다른 닉네임을 설정해주세요.');
       return;
     }
-    mutateNickname({ nickname });
+    mutateMemberInfo({ nickname });
   };
 
   return (
@@ -69,7 +67,7 @@ const NicknameSection = ({ userInfo }: NicknameSectionProps) => {
         <Button
           text="변경"
           onClick={handleNicknameUpdate}
-          disabled={isNicknameUpdating || !!nicknameError}
+          disabled={isMemberInfoUpdating || !!nicknameError}
         />
       </NicknameWrapper>
     </Wrapper>

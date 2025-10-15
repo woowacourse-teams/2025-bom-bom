@@ -168,6 +168,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/admin/sessions/cleanup': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['cleanupExpiredSessions'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/members/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 내 정보 조회
+     * @description 로그인한 회원의 정보를 조회합니다.
+     */
+    get: operations['getMemberInfo'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * 내 정보 수정
+     * @description 로그인한 회원의 정보(닉네임, 프로필이미지, 생년월일, 성별)를 수정합니다.
+     */
+    patch: operations['updateMemberInfo'];
+    trace?: never;
+  };
   '/api/v1/members/me/reading/progress/week/goal': {
     parameters: {
       query?: never;
@@ -292,26 +332,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/api/v1/members/me': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * 내 프로필 조회
-     * @description 로그인한 회원의 프로필 정보를 조회합니다.
-     */
-    get: operations['getMember'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   '/api/v1/members/me/reading': {
     parameters: {
       query?: never;
@@ -384,6 +404,26 @@ export interface paths {
      * @description 저장된 rank 기반으로 나의 순위와 총 랭킹 참여자 수를 반환합니다.
      */
     get: operations['getMemberMonthlyRank'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/members/me/profile': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 내 프로필 간단 조회
+     * @description 로그인한 회원의 간단한 프로필 정보(id, email, nickname, profileImage)를 조회합니다.
+     */
+    get: operations['getMemberProfile'];
     put?: never;
     post?: never;
     delete?: never;
@@ -612,6 +652,62 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/articles/previous': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 지난 아티클 목록 조회
+     * @description 조건에 맞는 지난 아티클 목록을 조회합니다.
+     */
+    get: operations['getPreviousArticles'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/articles/previous/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 지난 아티클 상세 조회
+     * @description 특정 지난 아티클의 상세 정보를 조회합니다.
+     */
+    get: operations['getPreviousArticleDetail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/admin/sessions/statistics': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getSessionStatistics'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -678,7 +774,31 @@ export interface components {
     NativeLoginResponse: {
       isRegistered: boolean;
       email?: string;
+      password?: string;
+    };
+    SessionCleanupResponse: {
+      /** Format: int32 */
+      deletedCount?: number;
+      message?: string;
+    };
+    MemberInfoUpdateRequest: {
       nickname?: string;
+      profileImageUrl?: string;
+      /** Format: date */
+      birthDate?: string;
+      /** @enum {string} */
+      gender?: 'MALE' | 'FEMALE' | 'NONE';
+    };
+    MemberInfoResponse: {
+      /** Format: int64 */
+      id: number;
+      email: string;
+      nickname: string;
+      profileImageUrl?: string;
+      /** @enum {string} */
+      gender?: 'MALE' | 'FEMALE' | 'NONE';
+      /** Format: date */
+      birthDate?: string;
     };
     WeeklyGoalCountResponse: {
       /**
@@ -728,19 +848,6 @@ export interface components {
       issueCycle: string;
       subscribePageImageUrl?: string;
       previousNewsletterUrl?: string;
-    };
-    MemberProfileResponse: {
-      /**
-       * Format: int64
-       * @description 회원 ID
-       */
-      id: number;
-      /** @description 이메일 */
-      email: string;
-      /** @description 닉네임 */
-      nickname: string;
-      /** @description 프로필 이미지 URL */
-      profileImageUrl?: string;
     };
     ReadingInformationResponse: {
       /**
@@ -798,6 +905,13 @@ export interface components {
       /** Format: int64 */
       nextRankDifference: number;
     };
+    MemberProfileResponse: {
+      /** Format: int64 */
+      id: number;
+      email: string;
+      nickname: string;
+      profileImageUrl?: string;
+    };
     PetResponse: {
       /**
        * Format: int32
@@ -852,21 +966,21 @@ export interface components {
       sort?: components['schemas']['SortObject'];
       first?: boolean;
       last?: boolean;
+      pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
-      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     PageableObject: {
       /** Format: int64 */
       offset?: number;
       sort?: components['schemas']['SortObject'];
-      unpaged?: boolean;
-      /** Format: int32 */
-      pageSize?: number;
-      paged?: boolean;
       /** Format: int32 */
       pageNumber?: number;
+      paged?: boolean;
+      /** Format: int32 */
+      pageSize?: number;
+      unpaged?: boolean;
     };
     SortObject: {
       empty?: boolean;
@@ -933,9 +1047,9 @@ export interface components {
       sort?: components['schemas']['SortObject'];
       first?: boolean;
       last?: boolean;
+      pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
-      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     BookmarkStatusResponse: {
@@ -993,9 +1107,9 @@ export interface components {
       sort?: components['schemas']['SortObject'];
       first?: boolean;
       last?: boolean;
+      pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
-      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     ArticleDetailResponse: {
@@ -1033,6 +1147,37 @@ export interface components {
       /** Format: int32 */
       totalCount: number;
       newsletters: components['schemas']['ArticleCountPerNewsletterResponse'][];
+    };
+    PreviousArticleRequest: {
+      /** Format: int64 */
+      newsletterId: number;
+      /** Format: int32 */
+      limit?: number;
+    };
+    PreviousArticleResponse: {
+      /** Format: int64 */
+      articleId: number;
+      title: string;
+      contentsSummary: string;
+      /** Format: int32 */
+      expectedReadTime: number;
+    };
+    PreviousArticleDetailResponse: {
+      title: string;
+      contents: string;
+      /** Format: date-time */
+      arrivedDateTime: string;
+      /** Format: int32 */
+      expectedReadTime: number;
+      newsletter: components['schemas']['NewsletterBasicResponse'];
+    };
+    SessionStatisticsResponse: {
+      /** Format: int32 */
+      totalSessions?: number;
+      /** Format: int32 */
+      activeSessions?: number;
+      /** Format: int32 */
+      expiredSessions?: number;
     };
   };
   responses: never;
@@ -1383,6 +1528,93 @@ export interface operations {
       };
     };
   };
+  cleanupExpiredSessions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['SessionCleanupResponse'];
+        };
+      };
+    };
+  };
+  getMemberInfo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 내 정보 조회 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['MemberInfoResponse'];
+        };
+      };
+      /** @description 인증 실패 (로그인 필요) */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  updateMemberInfo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MemberInfoUpdateRequest'];
+      };
+    };
+    responses: {
+      /** @description 내 정보 수정 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['MemberInfoResponse'];
+        };
+      };
+      /** @description 잘못된 요청 데이터 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['MemberInfoResponse'];
+        };
+      };
+      /** @description 인증 실패 (로그인 필요) */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   updateWeeklyGoalCount: {
     parameters: {
       query: {
@@ -1643,33 +1875,6 @@ export interface operations {
       };
     };
   };
-  getMember: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description 프로필 조회 성공 */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          '*/*': components['schemas']['MemberProfileResponse'];
-        };
-      };
-      /** @description 인증 실패 (로그인 필요) */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
   getReadingInformation: {
     parameters: {
       query?: never;
@@ -1784,6 +1989,33 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['MemberMonthlyReadingRankResponse'];
+        };
+      };
+      /** @description 인증 실패 (로그인 필요) */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getMemberProfile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 프로필 조회 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['MemberProfileResponse'];
         };
       };
       /** @description 인증 실패 (로그인 필요) */
@@ -2094,6 +2326,93 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['ArticleNewsletterStatisticsResponse'];
+        };
+      };
+    };
+  };
+  getPreviousArticles: {
+    parameters: {
+      query: {
+        /** @description 필터링 관련 요청 */
+        previousArticleRequest: components['schemas']['PreviousArticleRequest'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 지난 아티클 목록 조회 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['PreviousArticleResponse'][];
+        };
+      };
+      /** @description 잘못된 쿼리 파라미터로 요청 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getPreviousArticleDetail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description 아티클 ID */
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 지난 아티클 상세 조회 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['PreviousArticleDetailResponse'];
+        };
+      };
+      /** @description 잘못된 Path Variable로 요청 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 아티클을 찾을 수 없음 */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getSessionStatistics: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['SessionStatisticsResponse'];
         };
       };
     };

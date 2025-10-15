@@ -36,13 +36,15 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
     void deleteAllByMemberId(Long memberId);
 
     @Query("""
-    SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleResponse(
-        a.id, a.title, a.contentsSummary, a.expectedReadTime
-    )
-    FROM Article a
-    WHERE a.newsletterId = :newsletterId AND a.memberId = :memberId
-    ORDER BY a.arrivedDateTime DESC
-    LIMIT :limit
+        SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleResponse(
+            a.id, a.title, a.contentsSummary, a.expectedReadTime
+        )
+        FROM Article a
+        JOIN Newsletter n ON n.id = a.newsletterId
+        JOIN NewsletterDetail nd ON nd.id = n.detailId
+        WHERE a.newsletterId = :newsletterId AND a.memberId = :memberId AND nd.previousAllowed = true
+        ORDER BY a.arrivedDateTime DESC
+        LIMIT :limit
     """)
     List<PreviousArticleResponse> findArticlesByMemberIdAndNewsletterId(
             @Param("newsletterId") Long newsletterId,
@@ -51,16 +53,17 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
     );
 
     @Query("""
-    SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse(
-        a.title, a.contents, a.arrivedDateTime, a.expectedReadTime,
-            new me.bombom.api.v1.newsletter.dto.NewsletterBasicResponse(
-                n.name, n.email, n.imageUrl, c.name
-            )
-    )
-    FROM Article a
-    JOIN Newsletter n ON n.id = a.newsletterId
-    JOIN Category c ON c.id = n.categoryId
-    WHERE a.id = :id AND a.memberId = :memberId
+        SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse(
+            a.title, a.contents, a.arrivedDateTime, a.expectedReadTime,
+                new me.bombom.api.v1.newsletter.dto.NewsletterBasicResponse(
+                    n.name, n.email, n.imageUrl, c.name
+                )
+        )
+        FROM Article a
+        JOIN Newsletter n ON n.id = a.newsletterId
+        JOIN Category c ON c.id = n.categoryId
+        JOIN NewsletterDetail nd ON nd.id = n.detailId
+        WHERE a.id = :id AND a.memberId = :memberId AND nd.previousAllowed = true
     """)
     Optional<PreviousArticleDetailResponse> getPreviousArticleDetailsByMemberId(@Param("id") Long id, @Param("memberId") Long memberId);
 

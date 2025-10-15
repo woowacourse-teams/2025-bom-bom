@@ -29,7 +29,9 @@ const RequireLoginCard = () => {
           봄봄에서 더 많은 특별한 기능들을 만나보실 수 있어요!
         </Support>
       </DescriptionWrapper>
-      <GoToLoginButton text="봄봄 시작하기" onClick={handleLoginClick} />
+      <GoToLoginButton onClick={handleLoginClick}>
+        봄봄 시작하기
+      </GoToLoginButton>
     </Container>
   );
 };

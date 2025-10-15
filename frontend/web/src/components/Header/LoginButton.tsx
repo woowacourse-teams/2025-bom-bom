@@ -20,7 +20,7 @@ const LoginButton = () => {
     });
   };
 
-  return <Button text="로그인" onClick={handleLoginClick} />;
+  return <Button onClick={handleLoginClick}>로그인</Button>;
 };
 
 export default LoginButton;

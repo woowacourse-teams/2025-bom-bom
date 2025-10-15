@@ -95,10 +95,11 @@ const PetCard = ({ pet }: PetCardProps) => {
 
       <AttendanceButton
         device={device}
-        text={isAttended ? '출석 완료!' : '출석체크하기'}
         onClick={handleAttendanceClick}
         disabled={isAttended}
-      />
+      >
+        {isAttended ? '출석 완료!' : '출석체크하기'}
+      </AttendanceButton>
     </Container>
   );
 };

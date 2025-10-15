@@ -93,11 +93,12 @@ const NewsletterDetail = ({
         </InfoWrapper>
 
         <SubscribeButton
-          text={isLoggedIn ? '구독하기' : '로그인 후 구독할 수 있어요'}
           onClick={openSubscribe}
           disabled={!isLoggedIn}
           isMobile={isMobile}
-        />
+        >
+          {isLoggedIn ? '구독하기' : '로그인 후 구독할 수 있어요'}
+        </SubscribeButton>
       </FixedWrapper>
 
       <NewsletterTabs activeTab={activeTab} onTabChange={changeTab} />
@@ -106,7 +107,6 @@ const NewsletterDetail = ({
         {activeTab === 'detail' && (
           <DetailTab
             newsletterDescription={newsletterDetail.description}
-            previousNewsletterUrl={newsletterDetail.previousNewsletterUrl}
             isMobile={isMobile}
           />
         )}
@@ -143,6 +143,7 @@ const FixedWrapper = styled.div<{ isMobile: boolean }>`
 `;
 
 const ScrollableWrapper = styled.div<{ isMobile: boolean }>`
+  height: 100%;
   margin-right: -16px;
   padding: 8px;
 

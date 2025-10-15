@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import PreviousArticleListItem from './PreviousArticleListItem';
 import { queries } from '@/apis/queries';
+import Button from '@/components/Button/Button';
 import { openExternalLink } from '@/utils/externalLink';
 import OpenIcon from '#/assets/svg/open.svg';
 
@@ -45,10 +46,10 @@ const PreviousTab = ({
   if (previousNewsletterUrl) {
     return (
       <Container>
-        <LinkButton onClick={openPreviousLetters} isMobile={isMobile}>
+        <Button onClick={openPreviousLetters}>
           지난 소식 보러가기
           <OpenIcon fill={theme.colors.white} width={16} height={16} />
-        </LinkButton>
+        </Button>
       </Container>
     );
   }
@@ -75,27 +76,4 @@ const EmptyState = styled.p<{ isMobile: boolean }>`
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme, isMobile }) =>
     isMobile ? theme.fonts.body3 : theme.fonts.body2};
-`;
-
-const LinkButton = styled.button<{ isMobile: boolean }>`
-  padding: 10px 16px;
-  border-radius: 8px;
-
-  display: inline-flex;
-  gap: 6px;
-  align-items: center;
-  justify-content: center;
-
-  background-color: ${({ theme }) => theme.colors.primary};
-  color: ${({ theme }) => theme.colors.white};
-  font: ${({ theme, isMobile }) =>
-    isMobile ? theme.fonts.body3 : theme.fonts.body2};
-
-  cursor: pointer;
-
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.primaryDark};
-  }
 `;

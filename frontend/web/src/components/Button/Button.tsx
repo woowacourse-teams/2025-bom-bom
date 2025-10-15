@@ -5,15 +5,19 @@ import type { ComponentProps } from 'react';
 type Variant = 'default';
 
 interface ButtonProps extends ComponentProps<'button'> {
-  text: string;
   onClick: () => void;
   variant?: Variant;
 }
 
-function Button({ text, onClick, variant = 'default', ...props }: ButtonProps) {
+function Button({
+  onClick,
+  variant = 'default',
+  children,
+  ...props
+}: ButtonProps) {
   return (
     <Container type="button" onClick={onClick} variant={variant} {...props}>
-      {text}
+      {children}
     </Container>
   );
 }
@@ -34,6 +38,10 @@ const Container = styled.button<{
   font: ${({ theme }) => theme.fonts.caption};
 
   ${({ variant, theme }) => variantStyles[variant](theme)}
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primaryDark};
+  }
 
   &:disabled {
     background-color: ${({ theme }) => theme.colors.disabledBackground};

@@ -10,7 +10,8 @@ export const getReadingStatus = async () => {
   });
 };
 
-type GetUserInfoResponse = components['schemas']['MemberProfileResponse'];
+export type GetUserInfoResponse =
+  components['schemas']['MemberProfileResponse'];
 
 export const getUserInfo = async () => {
   return await fetcher.get<GetUserInfoResponse>({

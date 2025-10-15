@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import DetailTab from './DetailTab';
-import { buildSubscribeUrl, isMaily, isStibee } from './NewsletterDetail.utils';
+import { openSubscribeLink } from './NewsletterDetail.utils';
 import NewsletterTabs from './NewsletterTabs';
 import PreviousTab from './PreviousTab';
 import { useNewsletterTab } from './useNewsletterTab';
@@ -11,8 +11,6 @@ import Button from '@/components/Button/Button';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { useDevice } from '@/hooks/useDevice';
 import { useUserInfo } from '@/hooks/useUserInfo';
-import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { copyToClipboard } from '@/utils/copy';
 import { openExternalLink } from '@/utils/externalLink';
 import HomeIcon from '#/assets/svg/home.svg';
 
@@ -39,31 +37,6 @@ const NewsletterDetail = ({
   const isMobile = deviceType === 'mobile';
 
   if (!newsletterId || !newsletterDetail) return null;
-
-  const openSubscribe = () => {
-    if (!isLoggedIn || !userInfo) return;
-
-    if (
-      !isStibee(newsletterDetail.subscribeUrl) &&
-      !isMaily(newsletterDetail.subscribeUrl)
-    ) {
-      copyToClipboard(userInfo.email);
-      alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
-    }
-
-    trackEvent({
-      category: 'Newsletter',
-      action: '구독하기 버튼 클릭',
-      label: newsletterDetail.name ?? 'Unknown Newsletter',
-    });
-
-    const subscribeUrl = buildSubscribeUrl(
-      newsletterDetail.subscribeUrl,
-      userInfo,
-    );
-
-    openExternalLink(subscribeUrl);
-  };
 
   const openMainSite = () => {
     openExternalLink(newsletterDetail.mainPageUrl);
@@ -96,7 +69,13 @@ const NewsletterDetail = ({
         </InfoWrapper>
 
         <SubscribeButton
-          onClick={openSubscribe}
+          onClick={() =>
+            openSubscribeLink(
+              newsletterDetail.subscribeUrl,
+              newsletterDetail.name,
+              userInfo,
+            )
+          }
           disabled={!isLoggedIn}
           isMobile={isMobile}
         >
@@ -243,10 +222,4 @@ const SubscribeButton = styled(Button)<{ isMobile: boolean }>`
 
   font: ${({ theme, isMobile }) =>
     isMobile ? theme.fonts.body2 : theme.fonts.heading6};
-
-  transition: all 0.2s ease;
-
-  &:hover {
-    filter: brightness(90%);
-  }
 `;

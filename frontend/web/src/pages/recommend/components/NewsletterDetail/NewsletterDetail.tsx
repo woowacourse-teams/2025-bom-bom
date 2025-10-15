@@ -30,6 +30,9 @@ const NewsletterDetail = ({
     ...queries.newsletterDetail({ id: newsletterId }),
     enabled: Boolean(newsletterId),
   });
+  const { data: previousArticles } = useQuery({
+    ...queries.previousArticles({ newsletterId, limit: 10 }),
+  });
   const deviceType = useDevice();
   const { activeTab, changeTab } = useNewsletterTab();
 
@@ -113,7 +116,7 @@ const NewsletterDetail = ({
 
         {activeTab === 'previous' && (
           <PreviousTab
-            newsletterId={newsletterId}
+            previousArticles={previousArticles}
             previousNewsletterUrl={newsletterDetail.previousNewsletterUrl}
             isMobile={isMobile}
           />

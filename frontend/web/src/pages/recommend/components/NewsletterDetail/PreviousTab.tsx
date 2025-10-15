@@ -1,28 +1,24 @@
 import { theme } from '@bombom/shared';
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import PreviousArticleListItem from './PreviousArticleListItem';
-import { queries } from '@/apis/queries';
 import Button from '@/components/Button/Button';
 import { openExternalLink } from '@/utils/externalLink';
+import type { GetPreviousArticlesResponse } from '@/apis/previousArticles';
 import OpenIcon from '#/assets/svg/open.svg';
 
 interface PreviousTabProps {
-  newsletterId: number;
+  previousArticles?: GetPreviousArticlesResponse | null;
   previousNewsletterUrl?: string;
   isMobile: boolean;
 }
 
 const PreviousTab = ({
-  newsletterId,
+  previousArticles,
   previousNewsletterUrl,
   isMobile,
 }: PreviousTabProps) => {
   const navigate = useNavigate();
-  const { data: previousArticles } = useQuery({
-    ...queries.previousArticles({ newsletterId, limit: 10 }),
-  });
 
   const openPreviousLetters = () => {
     if (!previousNewsletterUrl) return;

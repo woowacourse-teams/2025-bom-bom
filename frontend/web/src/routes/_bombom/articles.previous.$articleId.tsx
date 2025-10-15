@@ -28,7 +28,7 @@ function RouteComponent() {
   const articleIdNumber = Number(articleId);
 
   const { data: article } = useQuery(
-    queries.previousArticleDetail({ articleId: articleIdNumber }),
+    queries.previousArticleDetail({ id: articleIdNumber }),
   );
   const bodyContent = extractBodyContent(article?.contents ?? '');
 

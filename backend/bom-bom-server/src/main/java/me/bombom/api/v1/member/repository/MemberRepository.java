@@ -1,6 +1,5 @@
 package me.bombom.api.v1.member.repository;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;

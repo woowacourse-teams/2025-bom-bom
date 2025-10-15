@@ -148,14 +148,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: .env 파일 생성 및 백업
+      - name: .env file 생성
         run: |
-          echo "📦 .env 파일 생성 시작"
-          if [ -f .env ]; then
-            cp .env .env.backup
-            echo "📦 기존 .env 백업 완료"
-          fi
-
           cat <<EOF > .env
           RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
           DATABASE=${{ secrets.PROD_DATABASE }}
@@ -165,14 +159,6 @@ jobs:
           PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
           EOF
 
-          for var in RDS_ENDPOINT DATABASE MYSQL_USER MYSQL_PASSWORD; do
-            if ! grep -q "^${var}=" .env || grep -q "^${var}=$" .env; then
-              echo "❌ ${var} 누락 또는 비어있음"
-              exit 1
-            fi
-          done
-          echo "✅ .env 파일 생성 및 검증 완료"
-
       - name: 기존 컨테이너 중지 및 삭제
         run: |
           if sudo docker ps --format "{{.Names}}" | grep -q "bombom-server"; then
@@ -181,14 +167,26 @@ jobs:
             sudo docker rm bombom-server || true
           fi
 
-      - name: 새 컨테이너 실행
+      - name: 컨테이너 재실행
+        shell: bash
         env:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
+          set -euo pipefail
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
-          echo "🚀 새로운 컨테이너 실행 중..."
-          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose -f docker-compose-prod.yml --env-file .env up -d --pull=always --force-recreate
-          echo "✅ 컨테이너 재시작 완료"
+          echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env down || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env \
+            up -d --remove-orphans --pull=always --force-recreate
+          
+          echo "✅ prod-sub 컨테이너 실행 완료"
 
       - name: 컨테이너 헬스체크
         run: |
@@ -240,14 +238,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: .env 파일 생성 및 백업
+      - name: .env file 생성
         run: |
-          echo "📦 .env 파일 생성 시작"
-          if [ -f .env ]; then
-            cp .env .env.backup
-            echo "📦 기존 .env 백업 완료"
-          fi
-
           cat <<EOF > .env
           RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
           DATABASE=${{ secrets.PROD_DATABASE }}
@@ -257,14 +249,6 @@ jobs:
           PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
           EOF
 
-          for var in RDS_ENDPOINT DATABASE MYSQL_USER MYSQL_PASSWORD; do
-            if ! grep -q "^${var}=" .env || grep -q "^${var}=$" .env; then
-              echo "❌ ${var} 누락 또는 비어있음"
-              exit 1
-            fi
-          done
-          echo "✅ .env 파일 생성 및 검증 완료"
-
       - name: 기존 컨테이너 중지 및 삭제
         run: |
           if sudo docker ps --format "{{.Names}}" | grep -q "bombom-server"; then
@@ -273,13 +257,26 @@ jobs:
             sudo docker rm bombom-server || true
           fi
 
-      - name: 새 컨테이너 실행
+      - name: 컨테이너 재실행
+        shell: bash
         env:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
+          set -euo pipefail
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
-          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose -f docker-compose-prod.yml --env-file .env up -d --pull=always --force-recreate
-          echo "✅ 컨테이너 실행 완료"
+          echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env down || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env \
+            up -d --remove-orphans --pull=always --force-recreate
+          
+          echo "✅ prod-main 컨테이너 실행 완료"
 
       - name: 컨테이너 헬스체크
         run: |

@@ -31,6 +31,7 @@ const colors = {
   error: '#FF4D4F',
   info: '#0D6EFD',
   success: '#198754',
+  backgroundHover: '#F9F9F9',
 };
 
 const heights = {

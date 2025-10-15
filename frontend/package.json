@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "web:start": "pnpm --filter web start",
+    "web:start:msw": "pnpm --filter web start:msw",
     "web:build": "pnpm --filter web build",
     "web:lint": "pnpm --filter web lint",
     "web:type-check": "pnpm --filter web type-check",

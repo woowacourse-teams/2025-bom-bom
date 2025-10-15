@@ -1,9 +1,9 @@
 version: "3.8"
 
 services:
-  bom-bom-blue:
+  bombom-server-blue:
     image: bombomnewsletter/bom-bom:${BLUE_IMAGE_TAG:-prod}
-    container_name: bom-bom-blue
+    container_name: bombom-server-blue
     ports:
       - 80:8080
       - 8081:8081
@@ -35,9 +35,9 @@ services:
       - /home/ec2-user/bombom-prod/opentelemetry/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
     restart: unless-stopped
 
-  bom-bom-green:
+  bombom-server-green:
     image: bombomnewsletter/bom-bom:${GREEN_IMAGE_TAG:-prod}
-    container_name: bom-bom-green
+    container_name: bombom-server-green
     ports:
       - 80:8080
       - 8081:8081

@@ -112,7 +112,11 @@ const NewsletterDetail = ({
         )}
 
         {activeTab === 'previous' && (
-          <PreviousTab newsletterId={newsletterId} />
+          <PreviousTab
+            newsletterId={newsletterId}
+            previousNewsletterUrl={newsletterDetail.previousNewsletterUrl}
+            isMobile={isMobile}
+          />
         )}
       </ScrollableWrapper>
     </Container>

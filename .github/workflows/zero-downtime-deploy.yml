@@ -1,0 +1,312 @@
+name: Backend Blue-Green CI/CD
+
+on:
+  push:
+    branches:
+      - server-blue-green
+  workflow_dispatch:
+
+env:
+  WORKING_BRANCH: server-blue-green
+  HEALTH_CHECK_URL: http://localhost:8081/actuator/health
+
+jobs:
+  # ---------------------------------------------------
+  # 1️⃣ Build & Test & Push
+  # ---------------------------------------------------
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
+      - name: JDK 21 설정
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: gradle
+
+      - name: application.yml 생성 (Prod 환경)
+        run: |
+          mkdir -p src/main/resources
+          printf '%s' "${{ secrets.APPLICATION_PROD_PROPERTIES }}" > src/main/resources/application.yml
+
+      - name: Gradle 빌드
+        run: ./gradlew clean assemble --no-daemon --stacktrace --info
+
+      - name: JAR 업로드
+        uses: actions/upload-artifact@v4
+        with:
+          name: bom-bom-jar
+          path: ./backend/bom-bom-server/build/libs/*.jar
+          if-no-files-found: error
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
+      - name: JDK 21 설정
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: gradle
+
+      - name: application.yml 생성 (Test)
+        run: |
+          mkdir -p src/test/resources
+          printf '%s' "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
+
+      - name: 테스트 실행
+        env:
+          SPRING_PROFILES_ACTIVE: test
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          ./gradlew test --no-daemon --stacktrace --info
+
+  docker-image:
+    runs-on: ubuntu-latest
+    needs: [build, test]
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
+      - name: JAR 다운로드
+        uses: actions/download-artifact@v4
+        with:
+          name: bom-bom-jar
+          path: ./backend/bom-bom-server/build/libs
+
+      - name: Docker Buildx 설정
+        uses: docker/setup-buildx-action@v3
+
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker 이미지 빌드 및 푸시
+        run: |
+          docker buildx build \
+            --platform linux/arm64,linux/amd64 \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod \
+            --push .
+          echo "✅ Docker 이미지 푸시 완료"
+
+  # ---------------------------------------------------
+  # 2️⃣ prod-sub 배포 준비 (트래픽 전환)
+  # ---------------------------------------------------
+  shift-traffic-to-main:
+    name: "🔀 Step 1: 트래픽을 prod-main으로 이동"
+    needs: docker-image
+    runs-on: [self-hosted, lb]
+    steps:
+      - name: prod-sub → prod-main 트래픽 이동
+        run: |
+          echo "🔄 prod-sub 서버 비활성화"
+          echo "disable server app_servers/prod-sub" | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ 모든 트래픽이 prod-main으로 이동되었습니다."
+
+  # ---------------------------------------------------
+  # 3️⃣ prod-sub 배포
+  # ---------------------------------------------------
+  deploy-sub:
+    name: "🚀 Step 2: prod-sub 배포"
+    needs: shift-traffic-to-main
+    runs-on: [self-hosted, prod-sub]
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+
+    steps:
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: .env 파일 생성 및 백업
+        run: |
+          echo "📦 .env 파일 생성 시작"
+          if [ -f .env ]; then
+            cp .env .env.backup
+            echo "📦 기존 .env 백업 완료"
+          fi
+
+          cat <<EOF > .env
+          RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
+          DATABASE=${{ secrets.PROD_DATABASE }}
+          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          SPRING_PROFILES_ACTIVE=prod
+          PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
+          EOF
+
+          for var in RDS_ENDPOINT DATABASE MYSQL_USER MYSQL_PASSWORD; do
+            if ! grep -q "^${var}=" .env || grep -q "^${var}=$" .env; then
+              echo "❌ ${var} 누락 또는 비어있음"
+              exit 1
+            fi
+          done
+          echo "✅ .env 파일 생성 및 검증 완료"
+
+      - name: 기존 컨테이너 중지 및 삭제
+        run: |
+          if sudo docker ps --format "{{.Names}}" | grep -q "bombom-server"; then
+            echo "🛑 기존 컨테이너 중지 및 삭제"
+            sudo docker stop bombom-server || true
+            sudo docker rm bombom-server || true
+          fi
+
+      - name: 새 컨테이너 실행
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          echo "🚀 새로운 컨테이너 실행 중..."
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose -f docker-compose-prod.yml --env-file .env up -d --pull=always --force-recreate
+          echo "✅ 컨테이너 재시작 완료"
+
+      - name: 컨테이너 헬스체크
+        run: |
+          echo "🏥 컨테이너 헬스체크 시작..."
+          for i in {1..20}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Healthy"
+              exit 0
+            fi
+            echo "⏳ 상태: $STATUS ($i/20)"
+            sleep 10
+          done
+          echo "❌ 헬스체크 실패"
+          sudo docker logs bombom-server --tail 50 || true
+          exit 1
+
+  # ---------------------------------------------------
+  # 4️⃣ 트래픽 전환: prod-main → prod-sub
+  # ---------------------------------------------------
+  shift-traffic-to-sub:
+    name: "🔀 Step 3: 트래픽을 prod-sub로 전환"
+    needs: deploy-sub
+    runs-on: [self-hosted, lb]
+    steps:
+      - name: prod-main → prod-sub 트래픽 이동
+        run: |
+          echo "🔄 prod-main 비활성화"
+          echo "disable server app_servers/prod-main" | sudo socat stdio /var/run/haproxy.sock
+          echo "🔄 prod-sub 활성화"
+          echo "enable server app_servers/prod-sub" | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ 트래픽이 prod-sub로 이동되었습니다."
+
+  # ---------------------------------------------------
+  # 5️⃣ prod-main 배포
+  # ---------------------------------------------------
+  deploy-main:
+    name: "🚀 Step 4: prod-main 배포"
+    needs: shift-traffic-to-sub
+    runs-on: [self-hosted, prod-main]
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+
+    steps:
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: .env 파일 생성 및 백업
+        run: |
+          echo "📦 .env 파일 생성 시작"
+          if [ -f .env ]; then
+            cp .env .env.backup
+            echo "📦 기존 .env 백업 완료"
+          fi
+
+          cat <<EOF > .env
+          RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
+          DATABASE=${{ secrets.PROD_DATABASE }}
+          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          SPRING_PROFILES_ACTIVE=prod
+          PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
+          EOF
+
+          for var in RDS_ENDPOINT DATABASE MYSQL_USER MYSQL_PASSWORD; do
+            if ! grep -q "^${var}=" .env || grep -q "^${var}=$" .env; then
+              echo "❌ ${var} 누락 또는 비어있음"
+              exit 1
+            fi
+          done
+          echo "✅ .env 파일 생성 및 검증 완료"
+
+      - name: 기존 컨테이너 중지 및 삭제
+        run: |
+          if sudo docker ps --format "{{.Names}}" | grep -q "bombom-server"; then
+            echo "🛑 기존 컨테이너 중지 및 삭제"
+            sudo docker stop bombom-server || true
+            sudo docker rm bombom-server || true
+          fi
+
+      - name: 새 컨테이너 실행
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose -f docker-compose-prod.yml --env-file .env up -d --pull=always --force-recreate
+          echo "✅ 컨테이너 실행 완료"
+
+      - name: 컨테이너 헬스체크
+        run: |
+          echo "🏥 컨테이너 헬스체크 시작..."
+          for i in {1..20}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Healthy"
+              exit 0
+            fi
+            echo "⏳ 상태: $STATUS ($i/20)"
+            sleep 10
+          done
+          echo "❌ 헬스체크 실패"
+          sudo docker logs bombom-server --tail 50 || true
+          exit 1
+
+  # ---------------------------------------------------
+  # 6️⃣ 트래픽 복귀
+  # ---------------------------------------------------
+  restore-final-traffic:
+    name: "🔁 Step 5: 트래픽 원상복귀"
+    needs: deploy-main
+    runs-on: [self-hosted, lb]
+    steps:
+      - name: HAProxy 트래픽 비율 복귀
+        run: |
+          echo "🔄 prod-main 재활성화"
+          echo "enable server app_servers/prod-main" | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ 배포 완료 및 트래픽 정상화"

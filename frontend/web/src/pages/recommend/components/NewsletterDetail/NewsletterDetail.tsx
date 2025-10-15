@@ -1,10 +1,9 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
+import DetailTab from './DetailTab';
 import { buildSubscribeUrl, isMaily, isStibee } from './NewsletterDetail.utils';
-import NewsletterSubscribeGuide from './NewsletterSubscribeGuide';
 import NewsletterTabs from './NewsletterTabs';
-import PreviousArticleListItem from './PreviousArticleListItem';
+import PreviousTab from './PreviousTab';
 import { useNewsletterTab } from './useNewsletterTab';
 import { queries } from '@/apis/queries';
 import Badge from '@/components/Badge/Badge';
@@ -15,7 +14,6 @@ import { useUserInfo } from '@/hooks/useUserInfo';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { copyToClipboard } from '@/utils/copy';
 import { openExternalLink } from '@/utils/externalLink';
-import ArticleHistoryIcon from '#/assets/svg/article-history.svg';
 import HomeIcon from '#/assets/svg/home.svg';
 
 interface NewsletterDetailProps {
@@ -27,14 +25,10 @@ const NewsletterDetail = ({
   newsletterId,
   category,
 }: NewsletterDetailProps) => {
-  const navigate = useNavigate();
   const { userInfo, isLoggedIn } = useUserInfo();
   const { data: newsletterDetail } = useQuery({
     ...queries.newsletterDetail({ id: newsletterId }),
     enabled: Boolean(newsletterId),
-  });
-  const { data: previousArticles } = useQuery({
-    ...queries.previousArticles({ newsletterId, limit: 10 }),
   });
   const deviceType = useDevice();
   const { activeTab, changeTab } = useNewsletterTab();
@@ -70,11 +64,6 @@ const NewsletterDetail = ({
 
   const openMainSite = () => {
     openExternalLink(newsletterDetail.mainPageUrl);
-  };
-
-  const openPreviousLetters = () => {
-    if (!newsletterDetail.previousNewsletterUrl) return;
-    openExternalLink(newsletterDetail.previousNewsletterUrl);
   };
 
   return (
@@ -113,40 +102,19 @@ const NewsletterDetail = ({
 
       <NewsletterTabs activeTab={activeTab} onTabChange={changeTab} />
 
-      {activeTab === 'detail' && (
-        <ScrollableWrapper isMobile={isMobile}>
-          <Description isMobile={isMobile}>
-            {newsletterDetail.description}
-          </Description>
+      <ScrollableWrapper isMobile={isMobile}>
+        {activeTab === 'detail' && (
+          <DetailTab
+            newsletterDescription={newsletterDetail.description}
+            previousNewsletterUrl={newsletterDetail.previousNewsletterUrl}
+            isMobile={isMobile}
+          />
+        )}
 
-          {newsletterDetail.previousNewsletterUrl && (
-            <DetailLink onClick={openPreviousLetters} isMobile={isMobile}>
-              <ArticleHistoryIcon width={16} height={16} />
-              지난 소식 보기
-            </DetailLink>
-          )}
-
-          {!isMobile && <NewsletterSubscribeGuide />}
-        </ScrollableWrapper>
-      )}
-
-      {activeTab === 'previous' && (
-        <ScrollableWrapper isMobile={isMobile}>
-          <PreviousArticleList>
-            {previousArticles?.map((article) => (
-              <PreviousArticleListItem
-                key={article.articleId}
-                title={article.title}
-                contentsSummary={article.contentsSummary}
-                expectedReadTime={article.expectedReadTime}
-                onClick={() =>
-                  navigate({ to: `articles/previous/${article.articleId}` })
-                }
-              />
-            ))}
-          </PreviousArticleList>
-        </ScrollableWrapper>
-      )}
+        {activeTab === 'previous' && (
+          <PreviousTab newsletterId={newsletterId} />
+        )}
+      </ScrollableWrapper>
     </Container>
   );
 };
@@ -173,10 +141,6 @@ const FixedWrapper = styled.div<{ isMobile: boolean }>`
 const ScrollableWrapper = styled.div<{ isMobile: boolean }>`
   margin-right: -16px;
   padding: 8px;
-
-  display: flex;
-  gap: ${({ isMobile }) => (isMobile ? '16px' : '24px')};
-  flex-direction: column;
 
   overflow-y: auto;
   scrollbar-gutter: stable;
@@ -246,12 +210,6 @@ const IssueCycle = styled.p`
   text-align: center;
 `;
 
-const Description = styled.p<{ isMobile: boolean }>`
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ isMobile, theme }) =>
-    isMobile ? theme.fonts.body2 : theme.fonts.body1};
-`;
-
 const DetailLink = styled.button<{ isMobile: boolean }>`
   display: flex;
   gap: 4px;
@@ -284,5 +242,3 @@ const SubscribeButton = styled(Button)<{ isMobile: boolean }>`
     filter: brightness(90%);
   }
 `;
-
-const PreviousArticleList = styled.div``;

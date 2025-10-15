@@ -67,6 +67,12 @@ public final class TestFixture {
     /**
      * Category
      */
+    public static Category createCategory() {
+        return Category.builder()
+                .name("경제")
+                .build();
+    }
+
     public static List<Category> createCategories() {
         return List.of(
                 Category.builder()

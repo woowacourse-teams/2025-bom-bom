@@ -31,13 +31,15 @@ export default ImageInfoCard;
 
 export const Container = styled.div`
   width: 100%;
-  padding: 0;
+  padding: 0px;
 
   display: flex;
   gap: 12px;
   align-items: center;
 
   text-align: left;
+
+  box-sizing: border-box;
 `;
 
 const Image = styled(ImageWithFallback)`

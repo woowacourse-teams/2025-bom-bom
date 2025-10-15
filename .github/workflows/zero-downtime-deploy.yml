@@ -142,6 +142,11 @@ jobs:
         working-directory: ./backend/bom-bom-server
 
     steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
       - name: DockerHub 로그인
         uses: docker/login-action@v3
         with:
@@ -232,6 +237,11 @@ jobs:
         working-directory: ./backend/bom-bom-server
 
     steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
       - name: DockerHub 로그인
         uses: docker/login-action@v3
         with:

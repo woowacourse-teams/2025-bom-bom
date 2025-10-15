@@ -196,16 +196,39 @@ jobs:
       - name: 컨테이너 헬스체크
         run: |
           echo "🏥 컨테이너 헬스체크 시작..."
-          for i in {1..20}; do
+          
+          # 컨테이너가 완전히 기동될 시간을 약간 기다림
+          echo "⏳ 컨테이너 기동 대기 (20초)"
+          sleep 20
+          
+          SUCCESS_COUNT=0
+          MAX_RETRIES=40        # 총 40번(약 400초) 시도
+          REQUIRED_SUCCESS=5    # 연속 5회 성공해야 진짜 Healthy
+          
+          for ((i=1; i<=MAX_RETRIES; i++)); do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
+          
             if [ "$STATUS" = "200" ]; then
-              echo "✅ Healthy"
-              exit 0
+              SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+              echo "✅ ($SUCCESS_COUNT/${REQUIRED_SUCCESS}) 성공 ($i/${MAX_RETRIES})"
+          
+              if [ "$SUCCESS_COUNT" -ge "$REQUIRED_SUCCESS" ]; then
+                echo "🎉 컨테이너가 연속 ${REQUIRED_SUCCESS}회 이상 Healthy 상태입니다."
+                exit 0
+              fi
+            else
+              # 실패 시 카운터 리셋
+              if [ "$SUCCESS_COUNT" -gt 0 ]; then
+                echo "⚠️ 상태 불안정, 카운터 리셋 (${SUCCESS_COUNT} → 0)"
+              fi
+              SUCCESS_COUNT=0
+              echo "⏳ 상태: $STATUS ($i/${MAX_RETRIES})"
             fi
-            echo "⏳ 상태: $STATUS ($i/20)"
+          
             sleep 10
           done
-          echo "❌ 헬스체크 실패"
+          
+          echo "❌ 헬스체크 실패 (연속 ${REQUIRED_SUCCESS}회 성공 조건 미충족)"
           sudo docker logs bombom-server --tail 50 || true
           exit 1
 
@@ -291,16 +314,39 @@ jobs:
       - name: 컨테이너 헬스체크
         run: |
           echo "🏥 컨테이너 헬스체크 시작..."
-          for i in {1..20}; do
+          
+          # 컨테이너가 완전히 기동될 시간을 약간 기다림
+          echo "⏳ 컨테이너 기동 대기 (20초)"
+          sleep 20
+          
+          SUCCESS_COUNT=0
+          MAX_RETRIES=40        # 총 40번(약 400초) 시도
+          REQUIRED_SUCCESS=5    # 연속 5회 성공해야 진짜 Healthy
+          
+          for ((i=1; i<=MAX_RETRIES; i++)); do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
+          
             if [ "$STATUS" = "200" ]; then
-              echo "✅ Healthy"
-              exit 0
+              SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+              echo "✅ ($SUCCESS_COUNT/${REQUIRED_SUCCESS}) 성공 ($i/${MAX_RETRIES})"
+          
+              if [ "$SUCCESS_COUNT" -ge "$REQUIRED_SUCCESS" ]; then
+                echo "🎉 컨테이너가 연속 ${REQUIRED_SUCCESS}회 이상 Healthy 상태입니다."
+                exit 0
+              fi
+            else
+              # 실패 시 카운터 리셋
+              if [ "$SUCCESS_COUNT" -gt 0 ]; then
+                echo "⚠️ 상태 불안정, 카운터 리셋 (${SUCCESS_COUNT} → 0)"
+              fi
+              SUCCESS_COUNT=0
+              echo "⏳ 상태: $STATUS ($i/${MAX_RETRIES})"
             fi
-            echo "⏳ 상태: $STATUS ($i/20)"
+          
             sleep 10
           done
-          echo "❌ 헬스체크 실패"
+          
+          echo "❌ 헬스체크 실패 (연속 ${REQUIRED_SUCCESS}회 성공 조건 미충족)"
           sudo docker logs bombom-server --tail 50 || true
           exit 1
 

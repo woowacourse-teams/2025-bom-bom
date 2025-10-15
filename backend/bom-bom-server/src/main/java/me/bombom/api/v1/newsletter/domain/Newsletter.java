@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,12 +17,15 @@ import me.bombom.api.v1.common.BaseEntity;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(uniqueConstraints = {
+        @UniqueConstraint(name = "uk_newsletter_detail_id", columnNames = {"detail_id"})
+})
 public class Newsletter extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(nullable = false)
     private String name;
 
@@ -36,7 +41,7 @@ public class Newsletter extends BaseEntity {
     @Column(nullable = false)
     private Long categoryId;
 
-    @Column(nullable = false)
+    @Column(name = "detail_id", nullable = false)
     private Long detailId;
 
     @Builder

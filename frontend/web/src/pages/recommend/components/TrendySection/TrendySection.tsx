@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import NewsletterList from './NewsletterList';
 import NewsletterDetail from '../NewsletterDetail/NewsletterDetail';
@@ -18,7 +19,9 @@ import type { Newsletter } from '@/types/newsletter';
 import TrendingUpIcon from '#/assets/svg/trending-up.svg';
 
 const TrendySection = () => {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<Category>('전체');
+  const { newsletterDetail } = useSearch({ from: '/_bombom/' });
   const [selectedNewsletter, setSelectedNewsletter] =
     useState<Newsletter | null>(null);
 
@@ -28,7 +31,15 @@ const TrendySection = () => {
     openModal: openDetailModal,
     closeModal: closeDetailModal,
     isOpen,
-  } = useModal();
+  } = useModal({
+    onClose: () => {
+      navigate({
+        to: '.',
+        search: () => ({}),
+        replace: true,
+      });
+    },
+  });
   const device = useDevice();
 
   const filteredNewsletters = newsletters?.filter(
@@ -38,7 +49,13 @@ const TrendySection = () => {
 
   const handleCardClick = (newsletter: Newsletter) => {
     setSelectedNewsletter(newsletter);
-    openDetailModal();
+    navigate({
+      to: '.',
+      search: (prev) => ({
+        ...prev,
+        newsletterDetail: newsletter.newsletterId,
+      }),
+    });
 
     trackEvent({
       category: 'Newsletter',
@@ -46,6 +63,20 @@ const TrendySection = () => {
       label: newsletter.name ?? 'Unknown Newsletter',
     });
   };
+
+  useEffect(() => {
+    if (newsletterDetail) {
+      const newsletter = newsletters?.find(
+        (newsletter) => newsletter.newsletterId === newsletterDetail,
+      );
+      if (newsletter) {
+        setSelectedNewsletter(newsletter);
+        openDetailModal();
+      }
+    } else {
+      closeDetailModal();
+    }
+  }, [closeDetailModal, newsletterDetail, newsletters, openDetailModal]);
 
   return (
     <>

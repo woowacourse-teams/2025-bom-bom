@@ -39,12 +39,6 @@ const Carousel = ({
   const hasMultipleSlides = slideCount > 1;
 
   if (process.env.NODE_ENV === 'development') {
-    if (originSlides.length === 0) {
-      throw new Error(
-        'Carousel 컴포넌트에 최소 한 개 이상의 child가 필요합니다.',
-      );
-    }
-
     if (autoPlay && autoPlaySpeedMs < 100) {
       throw new Error('timer 주기는 100ms 이상이어야 합니다.');
     }

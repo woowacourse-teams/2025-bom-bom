@@ -49,7 +49,7 @@ app_*.log.gz
 *.properties
 
 # frontend/buildspec.yml 파일만 예외 처리
-!frontend/web/buildspec.yml
+!frontend/buildspec.yml
 
 # .github 디렉토리 내의 .yml 파일 예외 처리
 !.github/**/*.yml

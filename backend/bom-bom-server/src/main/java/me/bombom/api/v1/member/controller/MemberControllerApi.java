@@ -7,11 +7,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberInfoUpdateRequest;
 import me.bombom.api.v1.member.dto.response.MemberInfoResponse;
 import me.bombom.api.v1.member.dto.response.MemberProfileResponse;
+import me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Member", description = "회원 관련 API")
@@ -47,4 +49,14 @@ public interface MemberControllerApi {
             @ApiResponse(responseCode = "200", description = "프로필 조회 성공")
     })
     MemberProfileResponse getMemberProfile(@Parameter(hidden = true) @LoginMember Member member);
+
+    @Operation(
+            summary = "구독한 뉴스레터 목록 조회",
+            description = "로그인한 회원이 구독중인 뉴스레터 목록을 조회합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "구독한 뉴스레터 목록 조회 성공")
+    })
+    List<SubscribedNewsletterResponse> getSubscribedNewsletters(@Parameter(hidden = true) @LoginMember Member member);
+
 }

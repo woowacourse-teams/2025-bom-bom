@@ -21,6 +21,7 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
+import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
@@ -87,7 +88,10 @@ class BookmarkControllerTest {
         List<Category> categories = TestFixture.createCategories();
         categoryRepository.saveAll(categories);
 
-        List<Newsletter> newsletters = TestFixture.createNewsletters(categories);
+        List<NewsletterDetail> newsletterDetails = TestFixture.createNewsletterDetails();
+        newsletterDetailRepository.saveAll(newsletterDetails);
+
+        List<Newsletter> newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
         newsletterRepository.saveAll(newsletters);
 
         List<Article> articles = TestFixture.createArticles(member, newsletters);

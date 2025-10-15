@@ -20,7 +20,9 @@ import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
+import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
+import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,6 +60,8 @@ class ArticleServiceTest {
     List<Newsletter> newsletters;
     List<Article> articles;
     Member member;
+    @Autowired
+    private NewsletterDetailRepository newsletterDetailRepository;
 
     @BeforeEach
     public void setup() {
@@ -70,7 +74,9 @@ class ArticleServiceTest {
         memberRepository.save(member);
         categories = TestFixture.createCategories();
         categoryRepository.saveAll(categories);
-        newsletters = TestFixture.createNewsletters(categories);
+        List<NewsletterDetail> newsletterDetails = TestFixture.createNewsletterDetails();
+        newsletterDetailRepository.saveAll(newsletterDetails);
+        newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
         newsletterRepository.saveAll(newsletters);
         articles = TestFixture.createArticles(member, newsletters);
         articleRepository.saveAll(articles);
@@ -361,7 +367,9 @@ class ArticleServiceTest {
     @Test
     void 아티클_상세_조회_카테고리가_존재하지_않으면_예외() {
         // given
-        Newsletter newsletter = TestFixture.createNewsletter("테스트 뉴스레터", "test@example.com", 0L);
+        NewsletterDetail newsletterDetail = TestFixture.createNewsletterDetail(false);
+        newsletterDetailRepository.save(newsletterDetail);
+        Newsletter newsletter = TestFixture.createNewsletter("테스트 뉴스레터", "test@example.com", 0L, newsletterDetail.getId());
         newsletterRepository.save(newsletter);
         Article article = TestFixture.createArticle("제목", member.getId(), newsletter.getId(), BASE_TIME);
         articleRepository.save(article);

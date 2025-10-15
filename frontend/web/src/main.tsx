@@ -23,6 +23,7 @@ const router = createRouter({
   context: {
     queryClient,
   },
+  scrollRestoration: true,
 });
 
 initSentry({

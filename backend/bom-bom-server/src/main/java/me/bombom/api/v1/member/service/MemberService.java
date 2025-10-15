@@ -10,7 +10,9 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.dto.request.MemberInfoUpdateRequest;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
+import me.bombom.api.v1.member.dto.response.MemberInfoResponse;
 import me.bombom.api.v1.member.dto.response.MemberProfileResponse;
 import me.bombom.api.v1.member.event.MemberSignupEvent;
 import me.bombom.api.v1.member.event.MemberSignupDiscordEvent;
@@ -64,22 +66,36 @@ public class MemberService {
         };
     }
 
-    public MemberProfileResponse getProfile(Long id) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, id)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
-                );
+    public MemberInfoResponse getInfo(Long memberId) {
+        Member member = findMemberById(memberId);
+        return MemberInfoResponse.from(member);
+    }
+
+    public MemberProfileResponse getProfile(Long memberId) {
+        Member member = findMemberById(memberId);
         return MemberProfileResponse.from(member);
     }
 
     @Transactional
+    public MemberInfoResponse updateInfo(Long memberId, MemberInfoUpdateRequest request) {
+        Member member = findMemberById(memberId);
+
+        if (request.nickname() != null && !member.isSameNickname(request.nickname())) {
+            userInfoValidator.validateNickname(request.nickname());
+        }
+
+        member.updateProfile(
+                request.nickname(),
+                request.profileImageUrl(),
+                request.birthDate(),
+                request.gender()
+        );
+        return MemberInfoResponse.from(member);
+    }
+
+    @Transactional
     public void withdraw(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
-            );
+        Member member = findMemberById(memberId);
 
         /*
         회원 탈퇴 신청 시 즉시 withdrawnMember로 정보 이전
@@ -110,5 +126,13 @@ public class MemberService {
             return SignupValidateStatus.DUPLICATE;
         }
         return SignupValidateStatus.OK;
+    }
+
+    private Member findMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
+                );
     }
 }

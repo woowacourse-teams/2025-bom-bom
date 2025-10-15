@@ -50,10 +50,6 @@ const Carousel = ({
     if (autoPlay && autoPlaySpeedMs < 100) {
       throw new Error('timer 주기는 100ms 이상이어야 합니다.');
     }
-
-    if (autoPlay && originSlides.length === 1) {
-      throw new Error('슬라이드가 1개일 경우, 자동 재생을 할 수 없습니다.');
-    }
   }
 
   const slides = isInfinity

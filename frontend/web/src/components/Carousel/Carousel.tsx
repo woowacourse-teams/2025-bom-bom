@@ -16,7 +16,7 @@ type CarouselProps = PropsWithChildren & {
   /**
    * isInfinity가 true일 경우에만 autoPlay 사용 가능
    * - autoPlay: 자동 슬라이드 재생 여부 (기본값: true)
-   * - autoPlaySpeedMs: 자동 재생 간격 (밀리초, 기본값: 3000)
+   * - autoPlaySpeedMs: 자동 재생 간격 (밀리초, 기본값: 4000)
    */
   (| { isInfinity?: false; autoPlay?: false; autoPlaySpeedMs?: never }
     | ({ isInfinity: true } & (

@@ -97,6 +97,7 @@ const NewsletterDetail = ({
           <PreviousTab
             previousArticles={previousArticles}
             previousNewsletterUrl={newsletterDetail.previousNewsletterUrl}
+            newsletterSubscribeUrl={newsletterDetail.subscribeUrl}
             isMobile={isMobile}
           />
         )}

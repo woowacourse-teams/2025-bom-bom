@@ -8,12 +8,14 @@ import type { GetPreviousArticlesResponse } from '@/apis/previousArticles';
 import OpenIcon from '#/assets/svg/open.svg';
 
 interface PreviousTabProps {
+  newsletterSubscribeUrl: string;
   previousArticles?: GetPreviousArticlesResponse | null;
   previousNewsletterUrl?: string;
   isMobile: boolean;
 }
 
 const PreviousTab = ({
+  newsletterSubscribeUrl,
   previousArticles,
   previousNewsletterUrl,
   isMobile,
@@ -33,7 +35,12 @@ const PreviousTab = ({
         contentsSummary={article.contentsSummary}
         expectedReadTime={article.expectedReadTime}
         onClick={() =>
-          navigate({ to: `articles/previous/${article.articleId}` })
+          navigate({
+            to: `articles/previous/${article.articleId}`,
+            state: {
+              subscribeUrl: newsletterSubscribeUrl,
+            },
+          })
         }
       />
     ));

@@ -1,12 +1,15 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useRouterState } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
+import Button from '@/components/Button/Button';
+import { useUserInfo } from '@/hooks/useUserInfo';
 import {
   extractBodyContent,
   processContent,
 } from '@/pages/detail/components/ArticleContent/ArticleContent.utils';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
+import { openSubscribeLink } from '@/pages/recommend/components/NewsletterDetail/NewsletterDetail.utils';
 
 export const Route = createFileRoute('/_bombom/articles/previous/$articleId')({
   head: () => ({
@@ -24,7 +27,11 @@ export const Route = createFileRoute('/_bombom/articles/previous/$articleId')({
 });
 
 function RouteComponent() {
+  const { userInfo, isLoggedIn } = useUserInfo();
   const { articleId } = Route.useParams();
+  const subscribeUrl = useRouterState({
+    select: (routerState) => routerState.location.state.subscribeUrl,
+  });
   const articleIdNumber = Number(articleId);
 
   const { data: article } = useQuery(
@@ -50,15 +57,23 @@ function RouteComponent() {
           __html: processContent(article.newsletter.name, bodyContent),
         }}
       />
+      <Divider />
+
+      <SubscribeButton
+        disabled={!userInfo}
+        onClick={() =>
+          openSubscribeLink(subscribeUrl, article.newsletter.name, userInfo)
+        }
+      >
+        {isLoggedIn ? '구독하기' : '로그인 후 구독할 수 있어요'}
+      </SubscribeButton>
     </Container>
   );
 }
 
 const Container = styled.div`
-  width: 100%;
   max-width: 700px;
   margin: 0 auto;
-  margin-top: 20px;
   padding: 28px;
   border-right: 1px solid ${({ theme }) => theme.colors.stroke};
   border-left: 1px solid ${({ theme }) => theme.colors.stroke};
@@ -103,4 +118,12 @@ const Content = styled.div`
       text-decoration: none;
     }
   }
+`;
+
+const SubscribeButton = styled(Button)`
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+
+  font: ${({ theme }) => theme.fonts.heading6};
 `;

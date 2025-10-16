@@ -10,19 +10,17 @@ import { queries } from '@/apis/queries';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
 import { useDevice } from '@/hooks/useDevice';
-import NicknameSection from '@/pages/MyPage/NicknameSection';
+import ProfileSection from '@/pages/MyPage/ProfileSection';
 import SubscribedNewslettersSection from '@/pages/MyPage/SubscribedNewslettersSection';
-import WithdrawSection from '@/pages/MyPage/WithdrawSection';
 import type { Device } from '@/hooks/useDevice';
 import type { CSSObject, Theme } from '@emotion/react';
 import AvatarIcon from '#/assets/svg/avatar.svg';
 
-type MyPageTab = 'profile' | 'newsletters' | 'settings';
+type MyPageTab = 'profile' | 'newsletters';
 
 const TABS = [
   { id: 'profile', label: '내 정보' },
   { id: 'newsletters', label: '구독 뉴스레터' },
-  { id: 'settings', label: '설정' },
 ] as const;
 
 type MyPageSearch = {
@@ -40,7 +38,7 @@ export const Route = createFileRoute('/_bombom/my')({
   validateSearch: (search: Record<string, unknown>): MyPageSearch => {
     const tab = search.tab as string | undefined;
     const isValidTab = (value: string): value is MyPageTab =>
-      ['profile', 'newsletters', 'settings'].includes(value);
+      ['profile', 'newsletters'].includes(value);
 
     return {
       tab: tab && isValidTab(tab) ? tab : 'profile',
@@ -71,7 +69,7 @@ function MyPage() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'profile':
-        return <NicknameSection userInfo={userInfo} />;
+        return <ProfileSection userInfo={userInfo} />;
       case 'newsletters':
         return (
           <SubscribedNewslettersSection
@@ -79,8 +77,6 @@ function MyPage() {
             device={device}
           />
         );
-      case 'settings':
-        return <WithdrawSection />;
       default:
         return null;
     }

@@ -1,6 +1,8 @@
 import styled from '@emotion/styled';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ChangeEvent } from 'react';
+import Divider from '../../components/Divider/Divider';
+import { postWithdraw } from '@/apis/auth';
 import { patchMemberInfo } from '@/apis/members';
 import Button from '@/components/Button/Button';
 import InputField from '@/components/InputField/InputField';
@@ -13,11 +15,11 @@ import type ApiError from '@/apis/ApiError';
 import type { Gender } from '@/pages/signup/components/SignupCard.types';
 import type { UserInfo } from '@/types/me';
 
-interface NicknameSectionProps {
+interface ProfileSectionProps {
   userInfo: UserInfo;
 }
 
-const NicknameSection = ({ userInfo }: NicknameSectionProps) => {
+const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
   const queryClient = useQueryClient();
 
   const [nickname, setNickname] = useState(userInfo?.nickname || '');
@@ -26,6 +28,17 @@ const NicknameSection = ({ userInfo }: NicknameSectionProps) => {
 
   const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [birthDateError, setBirthDateError] = useState<string | null>(null);
+
+  const { mutate: mutateWithdraw } = useMutation({
+    mutationKey: ['withdraw'],
+    mutationFn: postWithdraw,
+    onSuccess: () => {
+      window.location.reload();
+    },
+    onError: () => {
+      toast.error('회원탈퇴에 실패했습니다. 다시 시도해주세요.');
+    },
+  });
 
   const { mutate: mutateMemberInfo, isPending: isMemberInfoUpdating } =
     useMutation({
@@ -75,11 +88,19 @@ const NicknameSection = ({ userInfo }: NicknameSectionProps) => {
     setGender(e.target.value as Gender);
   };
 
+  const handleWithdrawClick = () => {
+    const confirmWithdraw = confirm(
+      '회원 탈퇴 시, 회원님의 모든 정보가 삭제됩니다. 정말 탈퇴하시겠습니까?',
+    );
+
+    if (confirmWithdraw) {
+      mutateWithdraw();
+    }
+  };
+
   const handleProfileUpdate = () => {
-    // Validate nickname
     if (!validateNickname(nickname)) return;
 
-    // Validate birthDate if provided
     if (birthDate) {
       const birthDateValidationError = validateBirthDate(birthDate);
       if (birthDateValidationError) {
@@ -88,13 +109,12 @@ const NicknameSection = ({ userInfo }: NicknameSectionProps) => {
       }
     }
 
-    // Check if any field has changed
     const hasNicknameChanged = nickname !== userInfo?.nickname;
     const hasBirthDateChanged = birthDate !== (userInfo?.birthDate || '');
     const hasGenderChanged = gender !== (userInfo?.gender || 'NONE');
 
     if (!hasNicknameChanged && !hasBirthDateChanged && !hasGenderChanged) {
-      setNicknameError('변경된 정보가 없습니다.');
+      toast.error('변경된 정보가 없습니다.');
       return;
     }
 
@@ -195,11 +215,17 @@ const NicknameSection = ({ userInfo }: NicknameSectionProps) => {
         disabled={isMemberInfoUpdating || hasError}
         style={{ marginLeft: 'auto' }}
       />
+
+      <Divider />
+
+      <WithdrawButton type="button" onClick={handleWithdrawClick}>
+        회원 탈퇴
+      </WithdrawButton>
     </Container>
   );
 };
 
-export default NicknameSection;
+export default ProfileSection;
 
 const Container = styled.div`
   display: flex;
@@ -280,5 +306,19 @@ const RadioButtonLabel = styled.label<{ selected: boolean }>`
   &:hover {
     border-color: ${({ theme, selected }) =>
       selected ? 'transparent' : theme.colors.primary};
+  }
+`;
+
+const WithdrawButton = styled.button`
+  width: fit-content;
+
+  display: flex;
+  align-items: center;
+
+  color: ${({ theme }) => theme.colors.textTertiary};
+  font: ${({ theme }) => theme.fonts.body3};
+
+  &:hover {
+    text-decoration: underline;
   }
 `;

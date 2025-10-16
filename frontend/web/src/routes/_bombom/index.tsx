@@ -5,7 +5,7 @@ import { useDevice } from '@/hooks/useDevice';
 import NewsletterHero from '@/pages/recommend/components/NewsletterHero/NewsletterHero';
 import TrendySection from '@/pages/recommend/components/TrendySection/TrendySection';
 import type { Device } from '@/hooks/useDevice';
-import type { NewsletterTab } from '@/pages/recommend/components/NewsletterDetail/useNewsletterTab';
+import type { NewsletterTab } from '@/pages/recommend/components/NewsletterDetail/NewsletterDetail.types';
 
 export const Route = createFileRoute('/_bombom/')({
   head: () => ({

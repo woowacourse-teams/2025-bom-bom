@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import type { NewsletterTab } from './useNewsletterTab';
+import type { NewsletterTab } from './NewsletterDetail.types';
 
 interface NewsletterTabsProps {
   activeTab: NewsletterTab;

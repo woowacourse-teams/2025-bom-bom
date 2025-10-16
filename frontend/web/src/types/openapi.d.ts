@@ -774,7 +774,7 @@ export interface components {
     NativeLoginResponse: {
       isRegistered: boolean;
       email?: string;
-      password?: string;
+      nickname?: string;
     };
     SessionCleanupResponse: {
       /** Format: int32 */
@@ -966,9 +966,9 @@ export interface components {
       sort?: components['schemas']['SortObject'];
       first?: boolean;
       last?: boolean;
-      pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
+      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     PageableObject: {
@@ -976,10 +976,10 @@ export interface components {
       offset?: number;
       sort?: components['schemas']['SortObject'];
       /** Format: int32 */
-      pageNumber?: number;
+      pageSize?: number;
       paged?: boolean;
       /** Format: int32 */
-      pageSize?: number;
+      pageNumber?: number;
       unpaged?: boolean;
     };
     SortObject: {
@@ -1047,9 +1047,9 @@ export interface components {
       sort?: components['schemas']['SortObject'];
       first?: boolean;
       last?: boolean;
-      pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
+      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     BookmarkStatusResponse: {
@@ -1107,9 +1107,9 @@ export interface components {
       sort?: components['schemas']['SortObject'];
       first?: boolean;
       last?: boolean;
-      pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
+      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     ArticleDetailResponse: {

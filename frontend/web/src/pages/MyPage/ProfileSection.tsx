@@ -51,9 +51,7 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
       },
       onError: (error: ApiError) => {
         const errorMessage =
-          (error?.rawBody as { message?: string })?.message ??
-          error?.message ??
-          '프로필 정보 변경에 실패했습니다.';
+          error?.rawBody?.message || '프로필 정보 변경에 실패했습니다.';
         setNicknameError(errorMessage);
       },
     });
@@ -63,6 +61,7 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
       setNicknameError('닉네임은 2자 이상 10자 이하로 입력해주세요.');
       return false;
     }
+
     setNicknameError(null);
     return true;
   };

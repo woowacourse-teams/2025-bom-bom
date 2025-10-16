@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 
 interface DividerProps {
-  margin: number;
+  margin?: number;
 }
 
 const Divider = ({ margin = 8 }: DividerProps) => {

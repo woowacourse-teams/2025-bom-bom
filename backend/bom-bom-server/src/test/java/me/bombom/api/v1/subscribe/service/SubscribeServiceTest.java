@@ -8,7 +8,9 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
+import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
+import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse;
@@ -36,6 +38,8 @@ class SubscribeServiceTest {
 
     @Autowired
     private SubscribeRepository subscribeRepository;
+    @Autowired
+    private NewsletterDetailRepository newsletterDetailRepository;
 
     @Test
     void 구독중인_뉴스레터를_조회한다() {
@@ -43,17 +47,17 @@ class SubscribeServiceTest {
         Member member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
 
-        Category category = TestFixture.createCategory();
-        categoryRepository.save(category);
+        List<Category> categories = TestFixture.createCategories();
+        categoryRepository.saveAll(categories);
 
-        Newsletter newsletter1 = TestFixture.createNewsletter("newsletter1", "email1@test.com", category.getId());
-        Newsletter newsletter2 = TestFixture.createNewsletter("newsletter2", "email2@test.com", category.getId());
-        Newsletter newsletter3 = TestFixture.createNewsletter("newsletter3", "email3@test.com", category.getId());
-        newsletterRepository.saveAll(List.of(newsletter1, newsletter2, newsletter3));
+        List<NewsletterDetail> newsletterDetails = TestFixture.createNewsletterDetails();
+        newsletterDetailRepository.saveAll(newsletterDetails);
+        List<Newsletter> newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
+        newsletterRepository.saveAll(newsletters);
 
         subscribeRepository.saveAll(List.of(
-                Subscribe.builder().memberId(member.getId()).newsletterId(newsletter1.getId()).build(),
-                Subscribe.builder().memberId(member.getId()).newsletterId(newsletter3.getId()).build()
+                Subscribe.builder().memberId(member.getId()).newsletterId(newsletters.getFirst().getId()).build(),
+                Subscribe.builder().memberId(member.getId()).newsletterId(newsletters.getLast().getId()).build()
         ));
 
         // when
@@ -62,6 +66,6 @@ class SubscribeServiceTest {
         // then
         assertThat(result).hasSize(2)
             .extracting("name")
-            .containsExactlyInAnyOrder("newsletter1", "newsletter3");
+            .containsExactlyInAnyOrder(newsletters.getFirst().getName(), newsletters.getLast().getName());
     }
 }

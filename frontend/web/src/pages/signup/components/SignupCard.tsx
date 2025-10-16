@@ -1,6 +1,6 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
-import { useLocation } from '@tanstack/react-router';
+import { useSearch } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { formatBirthDate, validateBirthDate } from './SignupCard.utils';
 import { useSignupMutation } from '../hooks/useSignupMutation';
@@ -19,7 +19,6 @@ const TERMS_URL =
   'https://guesung.notion.site/26a89de02fde80cda21dec7e51d5de89?pvs=74';
 
 const SignupCard = () => {
-  const location = useLocation();
   const device = useDevice();
 
   const [nickname, setNickname] = useState('');
@@ -28,6 +27,7 @@ const SignupCard = () => {
   const [gender, setGender] = useState<Gender>('NONE');
   const [emailHelpOpened, setEmailHelpOpened] = useState(false);
   const [termsAgreed, setTermsAgreed] = useState(false);
+  const { email: emailParam, name: nameParam } = useSearch({ from: '/signup' });
 
   const [birthDateError, setBirthDateError] = useState<FieldError>(null);
 
@@ -71,11 +71,6 @@ const SignupCard = () => {
   };
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-
-    const emailParam = searchParams.get('email');
-    const nameParam = searchParams.get('name');
-
     if (emailParam) {
       setEmailPart(emailParam);
     }
@@ -88,7 +83,7 @@ const SignupCard = () => {
       const cleanUrl = window.location.pathname;
       window.history.replaceState({}, '', cleanUrl);
     }
-  }, [location.search]);
+  }, [emailParam, nameParam]);
 
   return (
     <Container device={device}>

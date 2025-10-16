@@ -1,23 +1,29 @@
-import { useCallback, useState, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
 import useFocusTrap from '@/hooks/useFocusTrap';
 import useKeydownEscape from '@/hooks/useKeydownEscape';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import { compoundRefs } from '@/utils/element';
 
 interface UseModalOptions {
   scrollLock?: boolean;
+  onOpen?: () => void;
+  onClose?: () => void;
 }
 
 const useModal = (options: UseModalOptions = {}) => {
-  const { scrollLock = true } = options;
+  const { scrollLock = true, onOpen, onClose } = options;
+  const onOpenRef = useRef(onOpen);
+  const onCloseRef = useRef(onClose);
   const [isOpen, setIsOpen] = useState(false);
-  const bodyScrollStatus = useMemo(() => document.body.style.overflow, []);
 
   const openModal = useCallback(() => {
+    onOpenRef.current?.();
     setIsOpen(true);
   }, []);
 
   const closeModal = useCallback(() => {
+    onCloseRef.current?.();
     setIsOpen(false);
   }, []);
 
@@ -28,21 +34,13 @@ const useModal = (options: UseModalOptions = {}) => {
 
   const modalRef = compoundRefs<HTMLDivElement>(clickOutsideRef, focusTrapRef);
 
-  const toggleScrollLock = useCallback(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = bodyScrollStatus;
-    }
-  }, [isOpen, bodyScrollStatus]);
+  useScrollLock({ scrollLock, isOpen });
+  useKeydownEscape(isOpen ? closeModal : null);
 
   useEffect(() => {
-    if (!scrollLock) return;
-
-    toggleScrollLock();
-  }, [isOpen, scrollLock, toggleScrollLock]);
-
-  useKeydownEscape(isOpen ? closeModal : null);
+    onOpenRef.current = onOpen;
+    onCloseRef.current = onClose;
+  });
 
   return {
     modalRef,

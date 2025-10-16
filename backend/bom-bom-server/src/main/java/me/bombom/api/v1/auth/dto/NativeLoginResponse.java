@@ -7,6 +7,6 @@ public record NativeLoginResponse(
         @NotNull
         boolean isRegistered,
         String email,
-        String password
+        String nickname
 ) {
 }

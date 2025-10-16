@@ -1,15 +1,10 @@
 import { fetcher } from './fetcher';
+import type { components, operations } from '@/types/openapi';
 
-export type GetPreviousArticlesParams = {
-  newsletterId: number;
-  limit?: number;
-};
-export type GetPreviousArticlesResponse = {
-  articleId: number;
-  title: string;
-  contentsSummary: string;
-  expectedReadTime: number;
-}[];
+export type GetPreviousArticlesParams =
+  operations['getPreviousArticles']['parameters']['query']['previousArticleRequest'];
+export type GetPreviousArticlesResponse =
+  components['schemas']['PreviousArticleResponse'][];
 
 export const getPreviousArticles = async (
   params: GetPreviousArticlesParams,
@@ -20,27 +15,15 @@ export const getPreviousArticles = async (
   });
 };
 
-export type GetPreviousArticleDetailParams = {
-  articleId: number;
-};
-export type GetPreviousArticleDetailResponse = {
-  id: number;
-  title: string;
-  contents: string;
-  arrivedDateTime: string;
-  expectedReadTime: number;
-  newsletter: {
-    name: string;
-    email: string;
-    imageUrl: string;
-    category: string;
-  };
-};
+export type GetPreviousArticleDetailParams =
+  operations['getPreviousArticleDetail']['parameters']['path'];
+export type GetPreviousArticleDetailResponse =
+  components['schemas']['PreviousArticleDetailResponse'];
 
 export const getPreviousArticleDetail = async (
   params: GetPreviousArticleDetailParams,
 ) => {
   return await fetcher.get<GetPreviousArticleDetailResponse>({
-    path: `/articles/previous/${params.articleId}`,
+    path: `/articles/previous/${params.id}`,
   });
 };

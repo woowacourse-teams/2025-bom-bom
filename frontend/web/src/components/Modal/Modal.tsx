@@ -116,7 +116,7 @@ const containerStyles = {
     right: 0,
     width: '100%',
     height: '100%',
-    maxHeight: '45vh',
+    maxHeight: '80vh',
     borderRadius: '12px 12px 0 0',
     boxShadow: 'none',
   },

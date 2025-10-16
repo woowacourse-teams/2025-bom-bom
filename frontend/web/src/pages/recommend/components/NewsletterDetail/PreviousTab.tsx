@@ -90,4 +90,8 @@ const OpenSubscribeButton = styled(Button)`
   background-color: ${({ theme }) => theme.colors.white};
   color: ${({ theme }) => theme.colors.primary};
   font: ${({ theme }) => theme.fonts.body2};
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.white};
+  }
 `;

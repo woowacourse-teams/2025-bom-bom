@@ -29,7 +29,22 @@ export const Route = createFileRoute('/_bombom/articles/previous/$articleId')({
   component: RouteComponent,
 });
 
-function RouteComponent() {
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Previous article detail page
+ *
+ * @param {Device} device - Device type to decide rendering
+ * @param {UserInfo} userInfo - User information
+ * @param {string} articleId - Previous article id
+ * @param {string} subscribeUrl - Subscribe url
+ * @param {number} articleIdNumber - Previous article id as a number
+ * @param {object} article - Previous article data
+ * @param {string} bodyContent - Previous article body content
+ * @param {function} handleSubscribeClick - Event handler when subscribe button is clicked
+ * @param {function} handleScrollUp - Event handler when scroll up button is clicked
+ * @returns {JSX.Element} Previous article detail page component
+ */
+/*******  7a3337ed-db1d-4cb1-9e5e-464cbbe31a65  *******/ function RouteComponent() {
   const device = useDevice();
   const { userInfo } = useUserInfo();
   const { articleId } = Route.useParams();
@@ -78,9 +93,9 @@ function RouteComponent() {
 
         {device === 'pc' && (
           <ActionButtonWrapper>
-            <ActionButton type="button" onClick={handleSubscribeClick}>
+            <SubscribeButton type="button" onClick={handleSubscribeClick}>
               구독
-            </ActionButton>
+            </SubscribeButton>
 
             <ActionButton type="button" onClick={handleScrollUp}>
               <ChevronIcon
@@ -184,4 +199,9 @@ const ActionButton = styled.button`
   &:hover > svg {
     transform: scale(1.1);
   }
+`;
+
+const SubscribeButton = styled(ActionButton)`
+  background-color: ${({ theme }) => theme.colors.primary};
+  color: ${({ theme }) => theme.colors.white};
 `;

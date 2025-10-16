@@ -4,7 +4,7 @@ import type { GetMyNewslettersResponse } from '@/apis/newsLetters';
 import type { Device } from '@/hooks/useDevice';
 
 interface SubscribedNewslettersSectionProps {
-  newsletters: GetMyNewslettersResponse | null | undefined;
+  newsletters?: GetMyNewslettersResponse;
   device: Device;
 }
 

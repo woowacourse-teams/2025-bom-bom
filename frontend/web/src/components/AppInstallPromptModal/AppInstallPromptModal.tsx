@@ -116,10 +116,6 @@ const InstallButton = styled.button`
   cursor: pointer;
   transition: background 0.2s ease;
 
-  &:hover {
-    background: ${({ theme }) => theme.colors.primaryDark};
-  }
-
   &:active {
     transform: scale(0.98);
   }

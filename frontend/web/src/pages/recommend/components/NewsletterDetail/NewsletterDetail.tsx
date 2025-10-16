@@ -88,7 +88,6 @@ const NewsletterDetail = ({
         {activeTab === 'detail' && (
           <DetailTab
             newsletterDescription={newsletterDetail.description}
-            previousNewsletterUrl={newsletterDetail.previousNewsletterUrl}
             isMobile={isMobile}
           />
         )}

@@ -19,6 +19,8 @@ import type { Device } from '@/hooks/useDevice';
 import type { Newsletter } from '@/types/newsletter';
 import TrendingUpIcon from '#/assets/svg/trending-up.svg';
 
+const HIDE_NEWSLETTERS = ['계발메이트'];
+
 const TrendySection = () => {
   const device = useDevice();
   const [selectedCategory, setSelectedCategory] = useState<Category>('전체');
@@ -41,14 +43,17 @@ const TrendySection = () => {
     },
   });
 
-  const filteredNewsletters = newsletters?.filter((newsletter) => {
-    const matchesCategory =
-      selectedCategory === '전체' || newsletter.category === selectedCategory;
-    const matchesSearch =
-      searchQuery === '' ||
-      newsletter.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const filteredNewsletters = newsletters
+    ?.filter(
+      (newsletter) =>
+        selectedCategory === '전체' || newsletter.category === selectedCategory,
+    )
+    .filter(
+      (newsletter) =>
+        searchQuery === '' ||
+        newsletter.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    )
+    .filter((newsletter) => !HIDE_NEWSLETTERS.includes(newsletter.name));
 
   const handleCardClick = (newsletter: Newsletter) => {
     setSelectedNewsletterId(newsletter.newsletterId);

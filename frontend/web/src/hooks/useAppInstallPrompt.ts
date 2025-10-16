@@ -8,14 +8,15 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const APP_INSTALL_DISMISSED_KEY = 'app-install-prompt-dismissed';
+const DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 export function useAppInstallPrompt() {
   const device = useDevice();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [dismissedUntil, setDismissedUntil] = useLocalStorageState<
-    number | null
-  >(APP_INSTALL_DISMISSED_KEY, null);
+  const [dismissedUntil, setDismissedUntil] = useLocalStorageState<number>(
+    APP_INSTALL_DISMISSED_KEY,
+  );
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
@@ -29,6 +30,7 @@ export function useAppInstallPrompt() {
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
+
       const event = e as BeforeInstallPromptEvent;
       setDeferredPrompt(event);
       setShowModal(true);
@@ -39,8 +41,7 @@ export function useAppInstallPrompt() {
     const isStandalone = window.matchMedia(
       '(display-mode: standalone)',
     ).matches;
-    const isInApp =
-      (window.navigator as any).standalone === true || isStandalone;
+    const isInApp = window.navigator.standalone === true || isStandalone;
 
     if (!isInApp && device === 'mobile') {
       setShowModal(true);

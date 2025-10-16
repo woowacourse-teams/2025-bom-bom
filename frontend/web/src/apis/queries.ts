@@ -19,6 +19,7 @@ import {
   getMyMonthlyReadingRank,
   getReadingStatus,
   getUserInfo,
+  getUserProfile,
 } from './members';
 import {
   getMyNewsletters,
@@ -78,6 +79,12 @@ export const queries = {
       queryKey: ['members', 'me'],
       queryFn: getUserInfo,
       retry: false,
+    }),
+
+  userProfile: () =>
+    queryOptions({
+      queryKey: ['members', 'me', 'profile'],
+      queryFn: getUserProfile,
     }),
 
   readingStatus: () =>

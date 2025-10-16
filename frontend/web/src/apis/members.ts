@@ -10,13 +10,20 @@ export const getReadingStatus = async () => {
   });
 };
 
-type GetUserInfoResponse = components['schemas']['MemberProfileResponse'];
+type GetUserInfoResponse = components['schemas']['MemberInfoResponse'];
 
 export const getUserInfo = async () => {
   return await fetcher.get<GetUserInfoResponse>({
     path: '/members/me',
   });
 };
+
+type GetUserProfileResponse = components['schemas']['MemberProfileResponse'];
+
+export const getUserProfile = () =>
+  fetcher.get<GetUserProfileResponse>({
+    path: '/members/me/profile',
+  });
 
 type PatchWeeklyReadingGoalParams =
   operations['updateWeeklyGoalCount']['parameters']['query'];

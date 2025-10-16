@@ -61,7 +61,10 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
             </TitleWrapper>
 
             <NewsletterInfo isMobile={isMobile}>
-              <StyledBadge text={'dfd'} isMobile={isMobile} />
+              <StyledBadge
+                text={newsletterDetail.category}
+                isMobile={isMobile}
+              />
               <IssueCycle>{`${newsletterDetail.issueCycle} 발행`}</IssueCycle>
             </NewsletterInfo>
           </InfoBox>

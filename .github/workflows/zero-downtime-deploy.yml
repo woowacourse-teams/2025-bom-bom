@@ -156,19 +156,21 @@ jobs:
       # 🧩 배포 전 현재 실행 중 컨테이너 이미지 백업
       - name: 현재 실행 중 컨테이너 이미지 latest-stable로 백업
         run: |
-          echo "🧩 현재 실행 중 bombom-server 이미지 백업 시작"
-          CURRENT_IMAGE=$(sudo docker inspect bombom-server-prod-sub --format='{{.Config.Image}}' || echo "none")
+          echo "🧩 현재 실행 중 bombom-server-prod-sub 이미지 백업 시작"
+          CURRENT_IMAGE=$(sudo docker inspect bombom-server-prod-sub --format='{{.Config.Image}}' 2>/dev/null || echo "none")
+          CURRENT_IMAGE=$(echo "$CURRENT_IMAGE" | tr -d '\r\n')   # ✅ 공백/개행 제거
           echo "현재 이미지: $CURRENT_IMAGE"
-
+          
           if [ "$CURRENT_IMAGE" != "none" ]; then
             echo "🔄 현재 이미지를 latest-stable로 태깅 및 푸시"
             sudo docker pull "$CURRENT_IMAGE" || true
-            sudo docker tag "$CURRENT_IMAGE" ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
-            sudo docker push ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+            sudo docker tag "$CURRENT_IMAGE" bombomnewsletter/bom-bom:latest-stable
+            sudo docker push bombomnewsletter/bom-bom:latest-stable
             echo "✅ 백업 완료: latest-stable"
           else
             echo "⚠️ 실행 중인 bombom-server-prod-sub 컨테이너가 없어 백업을 건너뜀"
           fi
+
 
       - name: .env file 생성
         run: |
@@ -340,18 +342,19 @@ jobs:
       # 🧩 배포 전 현재 실행 중 컨테이너 이미지 백업
       - name: 현재 실행 중 컨테이너 이미지 latest-stable로 백업
         run: |
-          echo "🧩 현재 실행 중 bombom-server 이미지 백업 시작"
-          CURRENT_IMAGE=$(sudo docker inspect bombom-server-prod-sub --format='{{.Config.Image}}' || echo "none")
+          echo "🧩 현재 실행 중 bombom-server-prod-sub 이미지 백업 시작"
+          CURRENT_IMAGE=$(sudo docker inspect bombom-server-prod-sub --format='{{.Config.Image}}' 2>/dev/null || echo "none")
+          CURRENT_IMAGE=$(echo "$CURRENT_IMAGE" | tr -d '\r\n')   # ✅ 공백/개행 제거
           echo "현재 이미지: $CURRENT_IMAGE"
-
+          
           if [ "$CURRENT_IMAGE" != "none" ]; then
             echo "🔄 현재 이미지를 latest-stable로 태깅 및 푸시"
             sudo docker pull "$CURRENT_IMAGE" || true
-            sudo docker tag "$CURRENT_IMAGE" ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
-            sudo docker push ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+            sudo docker tag "$CURRENT_IMAGE" bombomnewsletter/bom-bom:latest-stable
+            sudo docker push bombomnewsletter/bom-bom:latest-stable
             echo "✅ 백업 완료: latest-stable"
           else
-            echo "⚠️ 실행 중인 bombom-server 컨테이너가 없어 백업을 건너뜀"
+            echo "⚠️ 실행 중인 bombom-server-prod-sub 컨테이너가 없어 백업을 건너뜀"
           fi
 
       - name: .env file 생성

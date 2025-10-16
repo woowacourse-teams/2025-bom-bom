@@ -5,10 +5,12 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
+import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ public class NewsletterService {
 
     private final NewsletterRepository newsletterRepository;
     private final NewsletterDetailRepository newsletterDetailRepository;
+    private final CategoryRepository categoryRepository;
 
     public List<NewsletterResponse> getNewsletters() {
         //임시로 repository 메서드 내부에 Detail 정보 가져오는 것이 불필요
@@ -38,6 +41,10 @@ public class NewsletterService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletterDetail")
                         .addContext("newsletterDetailId", newsletter.getDetailId()));
-        return NewsletterWithDetailResponse.of(newsletter, newsletterDetail);
+        Category category = categoryRepository.findById(newsletter.getCategoryId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "category")
+                        .addContext("categoryId", newsletter.getCategoryId()));
+        return NewsletterWithDetailResponse.of(newsletter, newsletterDetail, category);
     }
 }

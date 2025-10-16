@@ -168,6 +168,7 @@ jobs:
             echo "✅ 백업 완료: latest-stable"
           else
             echo "⚠️ 실행 중인 bombom-server-prod-sub 컨테이너가 없어 백업을 건너뜀"
+          fi
 
       - name: .env file 생성
         run: |
@@ -351,6 +352,7 @@ jobs:
             echo "✅ 백업 완료: latest-stable"
           else
             echo "⚠️ 실행 중인 bombom-server 컨테이너가 없어 백업을 건너뜀"
+          fi
 
       - name: .env file 생성
         run: |

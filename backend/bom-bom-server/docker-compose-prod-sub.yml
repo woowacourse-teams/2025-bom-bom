@@ -1,8 +1,8 @@
 version: "3.8"
 services:
-  bombom-server:
+  bombom-server-prod:
     image: bombomnewsletter/bom-bom:prod
-    container_name: bombom-server
+    container_name: bombom-server-prod-sub
     ports:
       - 80:8080
       - 8081:8081
@@ -26,10 +26,11 @@ services:
       OTEL_METRICS_EXPORTER: none
       OTEL_LOGS_EXPORTER: none
       OTEL_PROPAGATORS: tracecontext,baggage
+
+      # exclude
       OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDE_URLS: /actuator/.*
       OTEL_JAVAAGENT_DEBUG: "true"
 
     volumes:
       - /home/ec2-user/bombom-prod/logs:/logs
       - /home/ec2-user/bombom-prod/opentelemetry/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
-    restart: unless-stopped

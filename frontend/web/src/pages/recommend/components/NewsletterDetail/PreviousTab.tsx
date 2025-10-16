@@ -49,8 +49,8 @@ const PreviousTab = ({
 
   if (previousNewsletterUrl) {
     return (
-      <Container isMobile={isMobile}>
-        <img width={160} src={subscribeBom} alt="empty" />
+      <Container>
+        <img width={isMobile ? 120 : 160} src={subscribeBom} alt="empty" />
         <OpenSubscribeButton onClick={openPreviousLetters}>
           지난 소식 보러가기
           <OpenIcon fill={theme.colors.primary} width={16} height={16} />
@@ -60,8 +60,8 @@ const PreviousTab = ({
   }
 
   return (
-    <Container isMobile={isMobile}>
-      <img width={200} src={sadBom} alt="empty" />
+    <Container>
+      <img width={isMobile ? 160 : 200} src={sadBom} alt="empty" />
       지난 뉴스레터가 존재하지 않습니다.
     </Container>
   );
@@ -69,7 +69,7 @@ const PreviousTab = ({
 
 export default PreviousTab;
 
-const Container = styled.div<{ isMobile: boolean }>`
+const Container = styled.div`
   padding: 24px 0;
 
   display: flex;
@@ -79,8 +79,7 @@ const Container = styled.div<{ isMobile: boolean }>`
   justify-content: center;
 
   color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme, isMobile }) =>
-    isMobile ? theme.fonts.body3 : theme.fonts.body2};
+  font: ${({ theme }) => theme.fonts.body1};
 `;
 
 const OpenSubscribeButton = styled.button`

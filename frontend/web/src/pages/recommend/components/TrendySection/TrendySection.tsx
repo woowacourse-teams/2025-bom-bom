@@ -23,7 +23,7 @@ const TrendySection = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category>('전체');
   const [selectedNewsletterId, setSelectedNewsletterId] = useQueryState(
     'newsletterDetail',
-    parseAsInteger.withDefault(0),
+    parseAsInteger,
   );
   const { data: newsletters, isLoading } = useQuery(queries.newsletters());
 

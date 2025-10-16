@@ -37,6 +37,7 @@ class NewsletterServiceTest {
 
     private List<Newsletter> newsletters;
     private List<NewsletterDetail> newsletterDetails;
+    private List<Category> categories;
 
     @BeforeEach
     void setup() {
@@ -46,7 +47,7 @@ class NewsletterServiceTest {
 
         newsletterDetails = TestFixture.createNewsletterDetails();
         newsletterDetails = newsletterDetailRepository.saveAll(newsletterDetails);
-        List<Category> categories = TestFixture.createCategories();
+        categories = TestFixture.createCategories();
         categoryRepository.saveAll(categories);
         newsletters = List.of(
                 TestFixture.createNewsletter("뉴스픽", "news@newspick.com", categories.get(0).getId(), newsletterDetails.get(0).getId()),
@@ -87,11 +88,13 @@ class NewsletterServiceTest {
         NewsletterWithDetailResponse result = newsletterService.getNewsletterWithDetail(newsletter.getId());
 
         // then
+        Category category = categoryRepository.findById(newsletter.getCategoryId()).get();
+
         assertSoftly(softly -> {
              softly.assertThat(result.description()).isEqualTo(newsletter.getDescription());
              softly.assertThat(result.name()).isEqualTo(newsletter.getName());
              softly.assertThat(result.imageUrl()).isEqualTo(newsletter.getImageUrl());
-             softly.assertThat(result.categoryId()).isEqualTo(newsletter.getCategoryId());
+             softly.assertThat(result.category()).isEqualTo(category.getName());
              softly.assertThat(result.mainPageUrl()).isEqualTo(expectedDetail.getMainPageUrl());
              softly.assertThat(result.subscribeUrl()).isEqualTo(expectedDetail.getSubscribeUrl());
              softly.assertThat(result.issueCycle()).isEqualTo(expectedDetail.getIssueCycle());
@@ -112,11 +115,13 @@ class NewsletterServiceTest {
         NewsletterWithDetailResponse result = newsletterService.getNewsletterWithDetail(newsletter.getId());
 
         // then
+        Category category = categoryRepository.findById(newsletter.getCategoryId()).get();
+
         assertSoftly(softly -> {
             softly.assertThat(result.name()).isEqualTo(newsletter.getName());
             softly.assertThat(result.description()).isEqualTo(newsletter.getDescription());
             softly.assertThat(result.imageUrl()).isEqualTo(newsletter.getImageUrl());
-            softly.assertThat(result.categoryId()).isEqualTo(newsletter.getCategoryId());
+            softly.assertThat(result.category()).isEqualTo(category.getName());
             softly.assertThat(result.mainPageUrl()).isEqualTo(expectedDetail.getMainPageUrl());
             softly.assertThat(result.subscribeUrl()).isEqualTo(expectedDetail.getSubscribeUrl());
             softly.assertThat(result.issueCycle()).isEqualTo(expectedDetail.getIssueCycle());

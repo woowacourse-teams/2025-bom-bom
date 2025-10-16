@@ -23,7 +23,7 @@ export const getNewsletterDetail = async ({
 };
 
 export type GetMyNewslettersResponse =
-  components['schemas']['NewsletterResponse'][];
+  components['schemas']['SubscribedNewsletterResponse'][];
 
 export const getMyNewsletters = async () => {
   return await fetcher.get<GetMyNewslettersResponse>({

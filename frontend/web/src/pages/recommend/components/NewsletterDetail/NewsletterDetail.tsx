@@ -16,13 +16,9 @@ import HomeIcon from '#/assets/svg/home.svg';
 
 interface NewsletterDetailProps {
   newsletterId: number;
-  category: string;
 }
 
-const NewsletterDetail = ({
-  newsletterId,
-  category,
-}: NewsletterDetailProps) => {
+const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
   const { userInfo, isLoggedIn } = useUserInfo();
   const { data: newsletterDetail } = useQuery({
     ...queries.newsletterDetail({ id: newsletterId }),
@@ -62,7 +58,7 @@ const NewsletterDetail = ({
             </TitleWrapper>
 
             <NewsletterInfo isMobile={isMobile}>
-              <StyledBadge text={category} isMobile={isMobile} />
+              <StyledBadge text={'dfd'} isMobile={isMobile} />
               <IssueCycle>{`${newsletterDetail.issueCycle} 발행`}</IssueCycle>
             </NewsletterInfo>
           </InfoBox>

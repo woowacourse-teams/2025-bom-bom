@@ -48,6 +48,9 @@ class ArticleServiceTest {
     private NewsletterRepository newsletterRepository;
 
     @Autowired
+    private NewsletterDetailRepository newsletterDetailRepository;
+
+    @Autowired
     private ArticleRepository articleRepository;
 
     @Autowired
@@ -60,8 +63,6 @@ class ArticleServiceTest {
     List<Newsletter> newsletters;
     List<Article> articles;
     Member member;
-    @Autowired
-    private NewsletterDetailRepository newsletterDetailRepository;
 
     @BeforeEach
     public void setup() {

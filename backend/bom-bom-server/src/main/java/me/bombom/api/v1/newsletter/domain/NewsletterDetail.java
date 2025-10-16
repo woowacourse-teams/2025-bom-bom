@@ -38,6 +38,9 @@ public class NewsletterDetail {
     @Column(length=512)
     private String previousNewsletterUrl;
 
+    @Column(nullable = false)
+    private boolean previousAllowed;
+
     @Column(length=512)
     private String subscribeMethod;
 
@@ -50,6 +53,7 @@ public class NewsletterDetail {
             int subscribeCount,
             @NonNull String sender,
             String previousNewsletterUrl,
+            boolean previousAllowed,
             String subscribeMethod
     ) {
         this.id = id;
@@ -59,6 +63,7 @@ public class NewsletterDetail {
         this.subscribeCount = subscribeCount;
         this.sender = sender;
         this.previousNewsletterUrl = previousNewsletterUrl;
+        this.previousAllowed = previousAllowed;
         this.subscribeMethod = subscribeMethod;
     }
 }

@@ -90,16 +90,11 @@ public final class TestFixture {
     /**
      * Newsletter
      */
-    public static List<Newsletter> createNewsletters(List<Category> categories) {
-        return List.of(
-                createNewsletter("뉴스픽", "news@newspick.com", categories.get(0).getId(), 1L),
-                createNewsletter("IT타임즈", "editor@ittimes.io", categories.get(1).getId(), 2L),
-                createNewsletter("비즈레터", "biz@biz.com", categories.get(2).getId(), 3L)
+    public static List<Newsletter> createNewslettersWithDetails(List<Category> categories, List<NewsletterDetail> details) {
+        return createNewsletters(
+                categories,
+                List.of(details.get(0).getId(), details.get(1).getId(), details.get(2).getId())
         );
-    }
-
-    public static Newsletter createNewsletter(String name, String email, Long categoryId) {
-        return createNewsletter(name, email, categoryId, 1L);
     }
 
     public static Newsletter createNewsletter(String name, String email, Long categoryId, Long detailId) {
@@ -113,6 +108,13 @@ public final class TestFixture {
                 .build();
     }
 
+    private static List<Newsletter> createNewsletters(List<Category> categories, List<Long> detailIds) {
+        return List.of(
+                createNewsletter("뉴스픽", "news@newspick.com", categories.get(0).getId(), detailIds.get(0)),
+                createNewsletter("IT타임즈", "editor@ittimes.io", categories.get(1).getId(), detailIds.get(1)),
+                createNewsletter("비즈레터", "biz@biz.com", categories.get(2).getId(), detailIds.get(2))
+        );
+    }
     /**
      * NewsletterDetail
      */
@@ -140,6 +142,17 @@ public final class TestFixture {
                         .sender("발신자")
                         .build()
         );
+    }
+
+    public static NewsletterDetail createNewsletterDetail(boolean previousAllowed) {
+        return NewsletterDetail.builder()
+                .mainPageUrl("https://news1.com")
+                .subscribeUrl("https://news1.com/subscribe")
+                .issueCycle("매일 발행")
+                .subscribeCount(1000)
+                .sender("발신자")
+                .previousAllowed(previousAllowed)
+                .build();
     }
 
     /**

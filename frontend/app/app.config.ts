@@ -35,6 +35,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       },
       edgeToEdgeEnabled: true,
       package: 'com.antarctica.bombom',
+      googleServicesFile: './google-services.json',
     },
     web: {
       bundler: 'metro',
@@ -79,6 +80,13 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           android: {
             usesCleartextTraffic: true,
           },
+        },
+      ],
+      [
+        'expo-notifications',
+        {
+          icon: './app/assets/images/logo-android.png',
+          color: '#FE5E04',
         },
       ],
     ],

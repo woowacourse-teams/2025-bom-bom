@@ -29,19 +29,11 @@ const AppInstallPromptModal = ({
       <Container>
         <ContentWrapper>
           <LogoSection>
-            <LogoImage src="/app/assets/images/logo.png" alt="봄봄 로고" />
+            <LogoImage src="/assets/avif/logo.avif" alt="봄봄 로고" />
           </LogoSection>
           <TextSection>
             <MainText>앱에서는 1초만에!</MainText>
             <SubText>간편하게 로그인하기</SubText>
-            <RatingSection>
-              <StarIcon>⭐</StarIcon>
-              <StarIcon>⭐</StarIcon>
-              <StarIcon>⭐</StarIcon>
-              <StarIcon>⭐</StarIcon>
-              <StarIcon>⭐</StarIcon>
-              <RatingText>특가, 쿠폰 등 전용 혜택까지</RatingText>
-            </RatingSection>
           </TextSection>
         </ContentWrapper>
         <ButtonSection>
@@ -105,24 +97,6 @@ const SubText = styled.p`
   font: ${({ theme }) => theme.fonts.heading5};
   color: ${({ theme }) => theme.colors.textPrimary};
   margin: 0;
-`;
-
-const RatingSection = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 8px;
-`;
-
-const StarIcon = styled.span`
-  font-size: 16px;
-  line-height: 1;
-`;
-
-const RatingText = styled.span`
-  font: ${({ theme }) => theme.fonts.body3};
-  color: ${({ theme }) => theme.colors.textSecondary};
-  margin-left: 4px;
 `;
 
 const ButtonSection = styled.div`

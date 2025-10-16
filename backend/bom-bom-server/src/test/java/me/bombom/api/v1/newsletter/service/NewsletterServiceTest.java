@@ -95,7 +95,6 @@ class NewsletterServiceTest {
              softly.assertThat(result.mainPageUrl()).isEqualTo(expectedDetail.getMainPageUrl());
              softly.assertThat(result.subscribeUrl()).isEqualTo(expectedDetail.getSubscribeUrl());
              softly.assertThat(result.issueCycle()).isEqualTo(expectedDetail.getIssueCycle());
-             softly.assertThat(result.subscribePageImageUrl()).isEqualTo(expectedDetail.getSubscribePageImageUrl());
              softly.assertThat(result.previousNewsletterUrl()).isEqualTo(expectedDetail.getPreviousNewsletterUrl());
         });
     }
@@ -121,7 +120,6 @@ class NewsletterServiceTest {
             softly.assertThat(result.mainPageUrl()).isEqualTo(expectedDetail.getMainPageUrl());
             softly.assertThat(result.subscribeUrl()).isEqualTo(expectedDetail.getSubscribeUrl());
             softly.assertThat(result.issueCycle()).isEqualTo(expectedDetail.getIssueCycle());
-            softly.assertThat(result.subscribePageImageUrl()).isEqualTo(expectedDetail.getSubscribePageImageUrl());
             softly.assertThat(result.previousNewsletterUrl()).isEqualTo(expectedDetail.getPreviousNewsletterUrl());
         });
     }

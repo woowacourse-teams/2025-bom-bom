@@ -27,9 +27,9 @@ public record NewsletterWithDetailResponse(
         @NotNull
         String issueCycle,
 
-        String subscribePageImageUrl,
+        String previousNewsletterUrl,
 
-        String previousNewsletterUrl
+        String subscribeMethod
 ) {
     public static NewsletterWithDetailResponse of(Newsletter newsletter, NewsletterDetail newsletterDetail) {
         return new NewsletterWithDetailResponse(
@@ -40,8 +40,8 @@ public record NewsletterWithDetailResponse(
                 newsletterDetail.getMainPageUrl(),
                 newsletterDetail.getSubscribeUrl(),
                 newsletterDetail.getIssueCycle(),
-                newsletterDetail.getSubscribePageImageUrl(),
-                newsletterDetail.getPreviousNewsletterUrl()
+                newsletterDetail.getPreviousNewsletterUrl(),
+                newsletterDetail.getSubscribeMethod()
         );
     }
 }

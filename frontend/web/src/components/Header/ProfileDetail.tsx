@@ -83,10 +83,6 @@ const ProfileDetail = ({ userInfo, onClose }: ProfileDetailProps) => {
         마이 페이지
       </MyPageButton>
 
-      <MyPageButton to="/my?tab=profile" onClick={onClose}>
-        내 정보
-      </MyPageButton>
-
       <MyPageButton to="/my?tab=newsletters" onClick={onClose}>
         구독 뉴스레터
       </MyPageButton>

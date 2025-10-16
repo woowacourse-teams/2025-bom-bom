@@ -205,18 +205,20 @@ const tabsWrapperStyles: Record<Device, (theme: Theme) => CSSObject> = {
 
 const TabPanel = styled.div<{ device: Device }>`
   width: 100%;
-  flex: 1;
   min-width: 0;
+
+  flex: 1;
+
+  animation: fadein 0.2s ease-in-out;
 
   order: 1;
 
-  animation: fadeIn 0.2s ease-in-out;
-
-  @keyframes fadeIn {
+  @keyframes fadein {
     from {
       opacity: 0;
       transform: translateY(-8px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);

@@ -5,6 +5,7 @@ import { patchMemberInfo } from '@/apis/members';
 import Button from '@/components/Button/Button';
 import InputField from '@/components/InputField/InputField';
 import { toast } from '@/components/Toast/utils/toastActions';
+import type ApiError from '@/apis/ApiError';
 import type { UserInfo } from '@/types/me';
 
 interface NicknameSectionProps {
@@ -22,10 +23,15 @@ const NicknameSection = ({ userInfo }: NicknameSectionProps) => {
       mutationFn: patchMemberInfo,
       onSuccess: () => {
         toast.success('닉네임이 변경되었습니다.');
+        setNicknameError(null);
         queryClient.invalidateQueries({ queryKey: ['members', 'me'] });
       },
-      onError: (error) => {
-        toast.error(error?.rawBody?.message ?? '닉네임 변경에 실패했습니다.');
+      onError: (error: ApiError) => {
+        const errorMessage =
+          (error?.rawBody as { message?: string })?.message ??
+          error?.message ??
+          '닉네임 변경에 실패했습니다.';
+        setNicknameError(errorMessage);
       },
     });
 
@@ -47,7 +53,7 @@ const NicknameSection = ({ userInfo }: NicknameSectionProps) => {
   const handleNicknameUpdate = () => {
     if (!validateNickname(nickname)) return;
     if (nickname === userInfo?.nickname) {
-      toast.error('이전과 다른 닉네임을 설정해주세요.');
+      setNicknameError('이전과 다른 닉네임을 설정해주세요.');
       return;
     }
     mutateMemberInfo({ nickname });
@@ -85,5 +91,5 @@ const Wrapper = styled.div`
 const NicknameWrapper = styled.div`
   display: flex;
   gap: 12px;
-  align-items: flex-end;
+  align-items: center;
 `;

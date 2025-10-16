@@ -79,7 +79,7 @@ const Container = styled.div`
   justify-content: center;
 
   color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.body1};
+  font: ${({ theme }) => theme.fonts.heading6};
 `;
 
 const OpenSubscribeButton = styled.button`

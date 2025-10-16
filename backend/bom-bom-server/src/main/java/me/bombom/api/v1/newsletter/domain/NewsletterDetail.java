@@ -36,10 +36,10 @@ public class NewsletterDetail {
     private String sender;
 
     @Column(length=512)
-    private String subscribePageImageUrl;
-
-    @Column(length=512)
     private String previousNewsletterUrl;
+
+    @Column(nullable = false)
+    private boolean previousAllowed;
 
     @Column(length=512)
     private String subscribeMethod;
@@ -52,8 +52,8 @@ public class NewsletterDetail {
             @NonNull String issueCycle,
             int subscribeCount,
             @NonNull String sender,
-            String subscribePageImageUrl,
             String previousNewsletterUrl,
+            boolean previousAllowed,
             String subscribeMethod
     ) {
         this.id = id;
@@ -62,8 +62,8 @@ public class NewsletterDetail {
         this.issueCycle = issueCycle;
         this.subscribeCount = subscribeCount;
         this.sender = sender;
-        this.subscribePageImageUrl = subscribePageImageUrl;
         this.previousNewsletterUrl = previousNewsletterUrl;
+        this.previousAllowed = previousAllowed;
         this.subscribeMethod = subscribeMethod;
     }
 }

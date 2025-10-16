@@ -1,6 +1,7 @@
 package me.bombom.api.v1.member.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDate;
 import me.bombom.api.v1.TestFixture;
@@ -9,6 +10,7 @@ import me.bombom.api.v1.auth.service.AppleOAuth2Service;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.dto.request.MemberInfoUpdateRequest;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -89,5 +91,52 @@ class MemberServiceTest {
         assertThatThrownBy(() -> memberService.signup(oAuth2Member, memberSignupRequest))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.DUPLICATE_EMAIL);
+    }
+
+    @Test
+    void 회원_정보_수정_성공() {
+        //given
+        Member member = TestFixture.normalMemberFixture();
+        memberRepository.save(member);
+        MemberInfoUpdateRequest request = new MemberInfoUpdateRequest(
+                "newNickname",
+                "newProfileImageUrl",
+                LocalDate.of(2000, 1, 1),
+                Gender.FEMALE
+        );
+
+        //when
+        memberService.updateInfo(member.getId(), request);
+
+        //then
+        Member updatedMember = memberRepository.findById(member.getId()).get();
+        assertSoftly(softly -> {
+            softly.assertThat(updatedMember.getNickname()).isEqualTo(request.nickname());
+            softly.assertThat(updatedMember.getProfileImageUrl()).isEqualTo(request.profileImageUrl());
+            softly.assertThat(updatedMember.getBirthDate()).isEqualTo(request.birthDate());
+            softly.assertThat(updatedMember.getGender()).isEqualTo(request.gender());
+        });
+    }
+
+    @Test
+    void 회원_정보_수정_중_이미_존재하는_닉네임이면_예외_발생() {
+        //given
+        String nickname = "nickname";
+        String duplicateNickname = "duplicateNickname";
+        Member member1 = TestFixture.createUniqueMember(nickname, "providerId1");
+        memberRepository.save(member1);
+        Member member2 = TestFixture.createUniqueMember(duplicateNickname, "providerId2");
+        memberRepository.save(member2);
+        MemberInfoUpdateRequest request = new MemberInfoUpdateRequest(
+                duplicateNickname,
+                "newProfileImageUrl",
+                LocalDate.of(2000, 1, 1),
+                Gender.FEMALE
+        );
+
+        //then
+        assertThatThrownBy(() -> memberService.updateInfo(member1.getId(), request))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.DUPLICATE_NICKNAME);
     }
 }

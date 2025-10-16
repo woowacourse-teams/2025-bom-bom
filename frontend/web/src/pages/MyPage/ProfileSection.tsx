@@ -119,7 +119,7 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
 
     mutateMemberInfo({
       nickname,
-      birthDate: birthDate || undefined,
+      birthDate,
       gender,
     });
   };
@@ -227,10 +227,11 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
 export default ProfileSection;
 
 const Container = styled.div`
+  max-width: 400px;
+
   display: flex;
   gap: 16px;
   flex-direction: column;
-  max-width: 400px;
 `;
 
 const FieldGroup = styled.div`
@@ -298,9 +299,9 @@ const RadioButtonLabel = styled.label<{ selected: boolean }>`
   text-align: center;
 
   cursor: pointer;
-  user-select: none;
 
   transition: all 0.2s ease;
+  user-select: none;
 
   &:hover {
     border-color: ${({ theme, selected }) =>

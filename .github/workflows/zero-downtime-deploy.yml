@@ -157,7 +157,7 @@ jobs:
       - name: 현재 실행 중 컨테이너 이미지 latest-stable로 백업
         run: |
           echo "🧩 현재 실행 중 bombom-server 이미지 백업 시작"
-          CURRENT_IMAGE=$(sudo docker inspect bombom-server --format='{{.Config.Image}}' || echo "none")
+          CURRENT_IMAGE=$(sudo docker inspect bombom-server-prod-sub --format='{{.Config.Image}}' || echo "none")
           echo "현재 이미지: $CURRENT_IMAGE"
 
           if [ "$CURRENT_IMAGE" != "none" ]; then
@@ -167,7 +167,7 @@ jobs:
             sudo docker push ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
             echo "✅ 백업 완료: latest-stable"
           else
-            echo "⚠️ 실행 중인 bombom-server 컨테이너가 없어 백업을 건너뜀"
+            echo "⚠️ 실행 중인 bombom-server-prod-sub 컨테이너가 없어 백업을 건너뜀"
 
       - name: .env file 생성
         run: |
@@ -182,10 +182,10 @@ jobs:
 
       - name: 기존 컨테이너 중지 및 삭제
         run: |
-          if sudo docker ps --format "{{.Names}}" | grep -q "bombom-server"; then
+          if sudo docker ps --format "{{.Names}}" | grep -q "bombom-server-prod-sub"; then
             echo "🛑 기존 컨테이너 중지 및 삭제"
-            sudo docker stop bombom-server || true
-            sudo docker rm bombom-server || true
+            sudo docker stop bombom-server-prod-sub || true
+            sudo docker rm bombom-server-prod-sub || true
           fi
 
       - name: 컨테이너 재실행
@@ -245,7 +245,7 @@ jobs:
           done
           
           echo "❌ 헬스체크 실패 (연속 ${REQUIRED_SUCCESS}회 성공 조건 미충족)"
-          sudo docker logs bombom-server --tail 50 || true
+          sudo docker logs bombom-server-prod-sub --tail 50 || true
           exit 1
 
   # ---------------------------------------------------
@@ -271,9 +271,9 @@ jobs:
     steps:
       - name: prod-sub를 이전 버전 컨테이너로 build
         run: |
-          sudo docker stop bombom-server || true
-          sudo docker rm   bombom-server || true
-          sudo docker run -d --name bombom-server \
+          sudo docker stop bombom-server-prod-sub || true
+          sudo docker rm   bombom-server-prod-sub || true
+          sudo docker run -d --name bombom-server-prod-sub \
             -p 80:8080 -p 8081:8081 \
             -e SPRING_PROFILES_ACTIVE=prod \
             ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
@@ -340,7 +340,7 @@ jobs:
       - name: 현재 실행 중 컨테이너 이미지 latest-stable로 백업
         run: |
           echo "🧩 현재 실행 중 bombom-server 이미지 백업 시작"
-          CURRENT_IMAGE=$(sudo docker inspect bombom-server --format='{{.Config.Image}}' || echo "none")
+          CURRENT_IMAGE=$(sudo docker inspect bombom-server-prod-sub --format='{{.Config.Image}}' || echo "none")
           echo "현재 이미지: $CURRENT_IMAGE"
 
           if [ "$CURRENT_IMAGE" != "none" ]; then
@@ -365,10 +365,10 @@ jobs:
 
       - name: 기존 컨테이너 중지 및 삭제
         run: |
-          if sudo docker ps --format "{{.Names}}" | grep -q "bombom-server"; then
+          if sudo docker ps --format "{{.Names}}" | grep -q "bombom-server-prod-sub"; then
             echo "🛑 기존 컨테이너 중지 및 삭제"
-            sudo docker stop bombom-server || true
-            sudo docker rm bombom-server || true
+            sudo docker stop bombom-server-prod-sub || true
+            sudo docker rm bombom-server-prod-sub || true
           fi
 
       - name: 컨테이너 재실행
@@ -428,7 +428,7 @@ jobs:
           done
           
           echo "❌ 헬스체크 실패 (연속 ${REQUIRED_SUCCESS}회 성공 조건 미충족)"
-          sudo docker logs bombom-server --tail 50 || true
+          sudo docker logs bombom-server-prod-sub --tail 50 || true
           exit 1
 
   # ---------------------------------------------------
@@ -454,9 +454,9 @@ jobs:
     steps:
       - name: prod-main을 이전 버전 컨테이너로 build
         run: |
-          sudo docker stop bombom-server || true
-          sudo docker rm   bombom-server || true
-          sudo docker run -d --name bombom-server \
+          sudo docker stop bombom-server-prod-sub || true
+          sudo docker rm   bombom-server-prod-sub || true
+          sudo docker run -d --name bombom-server-prod-sub \
             -p 80:8080 -p 8081:8081 \
             -e SPRING_PROFILES_ACTIVE=prod \
             ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
@@ -488,9 +488,9 @@ jobs:
     steps:
       - name: prod-sub를 이전 버전 컨테이너로 build
         run: |
-          sudo docker stop bombom-server || true
-          sudo docker rm   bombom-server || true
-          sudo docker run -d --name bombom-server \
+          sudo docker stop bombom-server-prod-sub || true
+          sudo docker rm   bombom-server-prod-sub || true
+          sudo docker run -d --name bombom-server-prod-sub \
             -p 80:8080 -p 8081:8081 \
             -e SPRING_PROFILES_ACTIVE=prod \
             ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable

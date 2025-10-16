@@ -41,7 +41,7 @@ public class Newsletter extends BaseEntity {
     @Column(nullable = false)
     private Long categoryId;
 
-    @Column(name = "detail_id", nullable = false)
+    @Column(nullable = false)
     private Long detailId;
 
     @Builder

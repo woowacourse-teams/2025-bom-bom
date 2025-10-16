@@ -1,14 +1,17 @@
+import { theme } from '@bombom/shared';
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, useRouterState } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
-import Button from '@/components/Button/Button';
+import ChevronIcon from '@/components/icons/ChevronIcon';
+import { useDevice } from '@/hooks/useDevice';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import {
   extractBodyContent,
   processContent,
 } from '@/pages/detail/components/ArticleContent/ArticleContent.utils';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
+import PreviousHeader from '@/pages/previous-newsletter/components/PreviousHeader/PreviousHeader';
 import { openSubscribeLink } from '@/pages/recommend/components/NewsletterDetail/NewsletterDetail.utils';
 
 export const Route = createFileRoute('/_bombom/articles/previous/$articleId')({
@@ -27,7 +30,8 @@ export const Route = createFileRoute('/_bombom/articles/previous/$articleId')({
 });
 
 function RouteComponent() {
-  const { userInfo, isLoggedIn } = useUserInfo();
+  const device = useDevice();
+  const { userInfo } = useUserInfo();
   const { articleId } = Route.useParams();
   const subscribeUrl = useRouterState({
     select: (routerState) => routerState.location.state.subscribeUrl,
@@ -41,33 +45,55 @@ function RouteComponent() {
 
   if (!article) return null;
 
+  const handleSubscribeClick = () => {
+    openSubscribeLink(subscribeUrl, article.newsletter.name, userInfo);
+  };
+
+  const handleScrollUp = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <Container>
-      <ArticleHeader
-        title={article.title}
-        newsletterCategory={article.newsletter.category}
-        newsletterName={article.newsletter.name}
-        arrivedDateTime={new Date(article.arrivedDateTime)}
-        expectedReadTime={article.expectedReadTime}
-      />
-      <Divider />
+    <>
+      {device !== 'pc' && (
+        <PreviousHeader onSubscribeClick={handleSubscribeClick} />
+      )}
 
-      <Content
-        dangerouslySetInnerHTML={{
-          __html: processContent(article.newsletter.name, bodyContent),
-        }}
-      />
-      <Divider />
+      <Container>
+        <ArticleHeader
+          title={article.title}
+          newsletterCategory={article.newsletter.category}
+          newsletterName={article.newsletter.name}
+          arrivedDateTime={new Date(article.arrivedDateTime)}
+          expectedReadTime={article.expectedReadTime}
+        />
+        <Divider />
 
-      <SubscribeButton
-        disabled={!userInfo}
-        onClick={() =>
-          openSubscribeLink(subscribeUrl, article.newsletter.name, userInfo)
-        }
-      >
-        {isLoggedIn ? '구독하기' : '로그인 후 구독할 수 있어요'}
-      </SubscribeButton>
-    </Container>
+        <Content
+          dangerouslySetInnerHTML={{
+            __html: processContent(article.newsletter.name, bodyContent),
+          }}
+        />
+        <Divider />
+
+        {device === 'pc' && (
+          <ActionButtonWrapper>
+            <ActionButton type="button" onClick={handleSubscribeClick}>
+              구독
+            </ActionButton>
+
+            <ActionButton type="button" onClick={handleScrollUp}>
+              <ChevronIcon
+                direction="up"
+                width={28}
+                height={28}
+                color={theme.colors.icons}
+              />
+            </ActionButton>
+          </ActionButtonWrapper>
+        )}
+      </Container>
+    </>
   );
 }
 
@@ -120,10 +146,42 @@ const Content = styled.div`
   }
 `;
 
-const SubscribeButton = styled(Button)`
-  width: 100%;
-  height: 48px;
+const ActionButtonWrapper = styled.div`
+  position: fixed;
+  top: 80vh;
+  left: 10%;
+  z-index: ${({ theme }) => theme.zIndex.floating};
+  width: 56px;
+  padding: 4px 0;
+  border: 1px solid ${({ theme }) => theme.colors.stroke};
   border-radius: 12px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
 
-  font: ${({ theme }) => theme.fonts.heading6};
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+  align-items: center;
+
+  background-color: ${({ theme }) => theme.colors.dividers};
+`;
+
+const ActionButton = styled.button`
+  width: 44px;
+  height: 44px;
+  padding: 8px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: ${({ theme }) => theme.colors.white};
+
+  & > svg {
+    transition: transform 0.2s ease;
+  }
+
+  &:hover > svg {
+    transform: scale(1.1);
+  }
 `;

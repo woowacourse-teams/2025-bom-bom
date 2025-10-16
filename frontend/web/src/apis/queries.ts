@@ -21,6 +21,10 @@ import {
   getUserInfo,
 } from './members';
 import { getNewsletterDetail, getNewsletters } from './newsLetters';
+import {
+  getPreviousArticleDetail,
+  getPreviousArticles,
+} from './previousArticles';
 import type { GetSignupCheckParams } from './auth';
 import type {
   GetArticleBookmarkStatusParams,
@@ -29,6 +33,10 @@ import type {
 import type { GetHighlightsParams } from './highlight';
 import type { GetMonthlyReadingRankParams } from './members';
 import type { GetNewsletterDetailParams } from './newsLetters';
+import type {
+  GetPreviousArticleDetailParams,
+  GetPreviousArticlesParams,
+} from './previousArticles';
 
 export const queries = {
   // articles
@@ -99,6 +107,8 @@ export const queries = {
     queryOptions({
       queryKey: ['newsletters'],
       queryFn: getNewsletters,
+      staleTime: 1000 * 60 * 60 * 24 * 3, // 3 days
+      gcTime: 1000 * 60 * 60 * 24 * 7, // 7 days
     }),
 
   newsletterDetail: (params: GetNewsletterDetailParams) =>
@@ -145,5 +155,18 @@ export const queries = {
       queryKey: ['auth', 'signup', 'check', params],
       queryFn: () => getSignupCheck(params),
       enabled: false,
+    }),
+
+  // previous articles
+  previousArticles: (params: GetPreviousArticlesParams) =>
+    queryOptions({
+      queryKey: ['articles', 'previous', params],
+      queryFn: () => getPreviousArticles(params),
+    }),
+
+  previousArticleDetail: (params: GetPreviousArticleDetailParams) =>
+    queryOptions({
+      queryKey: ['articles', 'previous', params],
+      queryFn: () => getPreviousArticleDetail(params),
     }),
 };

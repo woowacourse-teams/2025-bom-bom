@@ -5,6 +5,7 @@ import { useDevice } from '@/hooks/useDevice';
 import NewsletterHero from '@/pages/recommend/components/NewsletterHero/NewsletterHero';
 import TrendySection from '@/pages/recommend/components/TrendySection/TrendySection';
 import type { Device } from '@/hooks/useDevice';
+import type { NewsletterTab } from '@/pages/recommend/components/NewsletterDetail/useNewsletterTab';
 
 export const Route = createFileRoute('/_bombom/')({
   head: () => ({
@@ -15,6 +16,15 @@ export const Route = createFileRoute('/_bombom/')({
     ],
   }),
   component: Index,
+  validateSearch: (search: {
+    newsletterDetail?: number;
+    tab?: NewsletterTab;
+  }) => {
+    return {
+      newsletterDetail: search.newsletterDetail,
+      tab: search.tab,
+    };
+  },
 });
 
 function Index() {

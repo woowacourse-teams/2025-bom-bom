@@ -1,11 +1,12 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import NewsletterList from './NewsletterList';
 import NewsletterDetail from '../NewsletterDetail/NewsletterDetail';
 import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
-import ImageInfoCard from '@/components/ImageInfoCard/ImageInfoCard';
 import ImageInfoCardSkeleton from '@/components/ImageInfoCard/ImageInfoCardSkeleton';
 import Modal from '@/components/Modal/Modal';
 import useModal from '@/components/Modal/useModal';
@@ -18,7 +19,9 @@ import type { Newsletter } from '@/types/newsletter';
 import TrendingUpIcon from '#/assets/svg/trending-up.svg';
 
 const TrendySection = () => {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<Category>('전체');
+  const { newsletterDetail } = useSearch({ from: '/_bombom/' });
   const [selectedNewsletter, setSelectedNewsletter] =
     useState<Newsletter | null>(null);
 
@@ -28,7 +31,15 @@ const TrendySection = () => {
     openModal: openDetailModal,
     closeModal: closeDetailModal,
     isOpen,
-  } = useModal();
+  } = useModal({
+    onClose: () => {
+      navigate({
+        to: '.',
+        search: () => ({}),
+        replace: true,
+      });
+    },
+  });
   const device = useDevice();
 
   const filteredNewsletters = newsletters?.filter(
@@ -38,7 +49,13 @@ const TrendySection = () => {
 
   const handleCardClick = (newsletter: Newsletter) => {
     setSelectedNewsletter(newsletter);
-    openDetailModal();
+    navigate({
+      to: '.',
+      search: (prev) => ({
+        ...prev,
+        newsletterDetail: newsletter.newsletterId,
+      }),
+    });
 
     trackEvent({
       category: 'Newsletter',
@@ -46,6 +63,20 @@ const TrendySection = () => {
       label: newsletter.name ?? 'Unknown Newsletter',
     });
   };
+
+  useEffect(() => {
+    if (newsletterDetail) {
+      const newsletter = newsletters?.find(
+        (newsletter) => newsletter.newsletterId === newsletterDetail,
+      );
+      if (newsletter) {
+        setSelectedNewsletter(newsletter);
+        openDetailModal();
+      }
+    } else {
+      closeDetailModal();
+    }
+  }, [closeDetailModal, newsletterDetail, newsletters, openDetailModal]);
 
   return (
     <>
@@ -68,22 +99,20 @@ const TrendySection = () => {
         </TagContainer>
         <TrendyGrid device={device}>
           {isLoading ? (
-            Array.from({ length: NEWSLETTER_COUNT }).map((_, index) => (
+            Array.from({
+              length:
+                device === 'mobile'
+                  ? NEWSLETTER_COUNT.mobile
+                  : NEWSLETTER_COUNT.nonMobile,
+            }).map((_, index) => (
               <ImageInfoCardSkeleton key={`skeleton-card-${index}`} />
             ))
-          ) : filteredNewsletters?.length === 0 ? (
-            <p>해당 카테고리에 뉴스레터가 없습니다.</p>
           ) : (
-            filteredNewsletters?.map((newsletter) => (
-              <NewsletterCard
-                key={newsletter.newsletterId}
-                imageUrl={newsletter.imageUrl ?? ''}
-                title={newsletter.name}
-                description={newsletter.description}
-                onClick={() => handleCardClick(newsletter)}
-                as="button"
-              />
-            ))
+            <NewsletterList
+              key={selectedCategory}
+              newsletters={filteredNewsletters ?? []}
+              handleCardClick={handleCardClick}
+            />
           )}
         </TrendyGrid>
       </Container>
@@ -166,31 +195,4 @@ const TrendyGrid = styled.div<{ device: Device }>`
 
   grid-template-columns: ${({ device }) =>
     device === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
-`;
-
-const NewsletterCard = styled(ImageInfoCard)`
-  border-radius: 16px;
-
-  cursor: pointer;
-
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-
-  &:hover {
-    box-shadow: 0 8px 25px -8px rgb(0 0 0 / 12%);
-    transform: translateY(-2px);
-  }
-
-  &:active {
-    transform: translateY(-1px);
-  }
-
-  &:focus-visible {
-    outline: none;
-  }
-
-  &:focus:not(:focus-visible) {
-    outline: none;
-  }
 `;

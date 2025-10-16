@@ -1,16 +1,17 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { buildSubscribeUrl, isMaily, isStibee } from './NewsletterDetail.utils';
+import DetailTab from './DetailTab';
+import { openSubscribeLink } from './NewsletterDetail.utils';
+import NewsletterTabs from './NewsletterTabs';
+import PreviousTab from './PreviousTab';
+import { useNewsletterTab } from './useNewsletterTab';
 import { queries } from '@/apis/queries';
 import Badge from '@/components/Badge/Badge';
 import Button from '@/components/Button/Button';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { useDevice } from '@/hooks/useDevice';
 import { useUserInfo } from '@/hooks/useUserInfo';
-import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { copyToClipboard } from '@/utils/copy';
 import { openExternalLink } from '@/utils/externalLink';
-import ArticleHistoryIcon from '#/assets/svg/article-history.svg';
 import HomeIcon from '#/assets/svg/home.svg';
 
 interface NewsletterDetailProps {
@@ -27,44 +28,18 @@ const NewsletterDetail = ({
     ...queries.newsletterDetail({ id: newsletterId }),
     enabled: Boolean(newsletterId),
   });
+  const { data: previousArticles } = useQuery({
+    ...queries.previousArticles({ newsletterId, limit: 10 }),
+  });
   const deviceType = useDevice();
+  const { activeTab, changeTab } = useNewsletterTab();
 
   const isMobile = deviceType === 'mobile';
 
   if (!newsletterId || !newsletterDetail) return null;
 
-  const openSubscribe = () => {
-    if (!isLoggedIn || !userInfo) return;
-
-    if (
-      !isStibee(newsletterDetail.subscribeUrl) &&
-      !isMaily(newsletterDetail.subscribeUrl)
-    ) {
-      copyToClipboard(userInfo.email);
-      alert('이메일이 복사되었습니다. 이 이메일로 뉴스레터를 구독해주세요.');
-    }
-
-    trackEvent({
-      category: 'Newsletter',
-      action: '구독하기 버튼 클릭',
-      label: newsletterDetail.name ?? 'Unknown Newsletter',
-    });
-
-    const subscribeUrl = buildSubscribeUrl(
-      newsletterDetail.subscribeUrl,
-      userInfo,
-    );
-
-    openExternalLink(subscribeUrl);
-  };
-
   const openMainSite = () => {
     openExternalLink(newsletterDetail.mainPageUrl);
-  };
-
-  const openPreviousLetters = () => {
-    if (!newsletterDetail.previousNewsletterUrl) return;
-    openExternalLink(newsletterDetail.previousNewsletterUrl);
   };
 
   return (
@@ -95,81 +70,35 @@ const NewsletterDetail = ({
 
         <SubscribeButton
           text={isLoggedIn ? '구독하기' : '로그인 후 구독할 수 있어요'}
-          onClick={openSubscribe}
+          onClick={() =>
+            openSubscribeLink(
+              newsletterDetail.subscribeUrl,
+              newsletterDetail.name,
+              userInfo,
+            )
+          }
           disabled={!isLoggedIn}
           isMobile={isMobile}
         />
       </FixedWrapper>
 
-      <ScrollableWrapper isMobile={isMobile}>
-        <Description isMobile={isMobile}>
-          {newsletterDetail.description}
-        </Description>
+      <NewsletterTabs activeTab={activeTab} onTabChange={changeTab} />
 
-        {newsletterDetail.previousNewsletterUrl && (
-          <DetailLink onClick={openPreviousLetters} isMobile={isMobile}>
-            <ArticleHistoryIcon width={16} height={16} />
-            지난 소식 보기
-          </DetailLink>
+      <ScrollableWrapper isMobile={isMobile}>
+        {activeTab === 'detail' && (
+          <DetailTab
+            newsletterDescription={newsletterDetail.description}
+            isMobile={isMobile}
+          />
         )}
 
-        {!isMobile && (
-          <SubscribeWrapper>
-            <SubscribeHeader>
-              <SubscribeTitle>구독 방법</SubscribeTitle>
-            </SubscribeHeader>
-            <SubscribeContent>
-              <StepsWrapper>
-                <StepItem>
-                  <StepNumber>1</StepNumber>
-                  <StepContent>
-                    <StepTitle>구독하기 버튼 클릭</StepTitle>
-                    <StepDescription>
-                      {'위의 "구독하기" 버튼을 눌러주세요.'}
-                    </StepDescription>
-                  </StepContent>
-                </StepItem>
-                <StepItem>
-                  <StepNumber>2</StepNumber>
-                  <StepContent>
-                    <StepTitle>구독 페이지 접속</StepTitle>
-                    <StepDescription>
-                      {'뉴스레터 공식 구독 페이지로 이동합니다.'}
-                    </StepDescription>
-                  </StepContent>
-                </StepItem>
-                <StepItem>
-                  <StepNumber>3</StepNumber>
-                  <StepContent>
-                    <StepTitle>봄봄 메일 붙여넣기</StepTitle>
-                    <StepDescription>
-                      {'이메일 칸에 봄봄 메일을 입력해주세요.'}
-                    </StepDescription>
-                    <StepDescription>
-                      {
-                        '봄봄을 통해 접속한 유저라면 즉시 붙여넣기가 가능합니다!'
-                      }
-                    </StepDescription>
-                  </StepContent>
-                </StepItem>
-                <StepItem>
-                  <StepNumber>4</StepNumber>
-                  <StepContent>
-                    <StepTitle>구독 완료!</StepTitle>
-                    <StepDescription>
-                      {'축하합니다! 이제 정기적으로 뉴스레터를 받아보세요.'}
-                    </StepDescription>
-                  </StepContent>
-                </StepItem>
-              </StepsWrapper>
-              {newsletterDetail.subscribePageImageUrl && (
-                <Screenshot
-                  src={newsletterDetail.subscribePageImageUrl}
-                  alt="구독 페이지 스크린샷"
-                />
-              )}
-            </SubscribeContent>
-          </SubscribeWrapper>
+        {activeTab === 'previous' && (
+          <PreviousTab
+            previousArticles={previousArticles}
+            previousNewsletterUrl={newsletterDetail.previousNewsletterUrl}
+            newsletterSubscribeUrl={newsletterDetail.subscribeUrl}
+            isMobile={isMobile}
+          />
         )}
       </ScrollableWrapper>
     </Container>
@@ -189,7 +118,6 @@ const Container = styled.div`
 
 const FixedWrapper = styled.div<{ isMobile: boolean }>`
   padding-bottom: ${({ isMobile }) => (isMobile ? '16px' : '24px')};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.dividers};
 
   display: flex;
   gap: ${({ isMobile }) => (isMobile ? '16px' : '24px')};
@@ -197,14 +125,8 @@ const FixedWrapper = styled.div<{ isMobile: boolean }>`
 `;
 
 const ScrollableWrapper = styled.div<{ isMobile: boolean }>`
-  min-height: 0;
   margin-right: -16px;
-  padding-top: ${({ isMobile }) => (isMobile ? '16px' : '24px')};
-  padding-right: 16px;
-
-  display: flex;
-  gap: ${({ isMobile }) => (isMobile ? '16px' : '24px')};
-  flex-direction: column;
+  padding: 8px;
 
   overflow-y: auto;
   scrollbar-gutter: stable;
@@ -274,12 +196,6 @@ const IssueCycle = styled.p`
   text-align: center;
 `;
 
-const Description = styled.p<{ isMobile: boolean }>`
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ isMobile, theme }) =>
-    isMobile ? theme.fonts.body2 : theme.fonts.body1};
-`;
-
 const DetailLink = styled.button<{ isMobile: boolean }>`
   display: flex;
   gap: 4px;
@@ -305,113 +221,4 @@ const SubscribeButton = styled(Button)<{ isMobile: boolean }>`
 
   font: ${({ theme, isMobile }) =>
     isMobile ? theme.fonts.body2 : theme.fonts.heading6};
-
-  transition: all 0.2s ease;
-
-  &:hover {
-    filter: brightness(90%);
-  }
-`;
-
-const SubscribeWrapper = styled.div`
-  padding: 8px 16px;
-  border: 1px solid ${({ theme }) => theme.colors.stroke};
-  border-radius: 8px;
-
-  display: flex;
-  gap: 8px;
-  flex-direction: column;
-  align-items: center;
-
-  background: ${({ theme }) => theme.colors.white};
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.body2};
-`;
-
-const SubscribeHeader = styled.div`
-  width: 100%;
-  padding: 8px 0;
-`;
-
-const SubscribeTitle = styled.h3`
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.heading6};
-`;
-
-const Screenshot = styled(ImageWithFallback)`
-  width: 100%;
-  border-radius: 12px;
-
-  object-fit: cover;
-  object-position: center;
-`;
-
-const SubscribeContent = styled.div`
-  width: 100%;
-  padding: 16px;
-  border-top: 1px solid ${({ theme }) => theme.colors.dividers};
-`;
-
-const StepsWrapper = styled.div`
-  position: relative;
-  padding: 20px 16px;
-
-  &::before {
-    position: absolute;
-    top: 36px;
-    bottom: 68px;
-    left: 32px;
-    width: 2px;
-
-    background: ${({ theme }) => theme.colors.dividers};
-
-    content: '';
-  }
-`;
-
-const StepItem = styled.div`
-  position: relative;
-  margin-bottom: 32px;
-
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-`;
-
-const StepNumber = styled.span`
-  z-index: ${({ theme }) => theme.zIndex.content};
-  width: 32px;
-  height: 32px;
-  border: 2px solid ${({ theme }) => theme.colors.white};
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
-
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-
-  background: ${({ theme }) => theme.colors.primary};
-  color: ${({ theme }) => theme.colors.white};
-  font: ${({ theme }) => theme.fonts.body2};
-`;
-
-const StepContent = styled.div`
-  display: flex;
-  gap: 4px;
-  flex-direction: column;
-`;
-
-const StepTitle = styled.p`
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font: ${({ theme }) => theme.fonts.body2};
-`;
-
-const StepDescription = styled.p`
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font: ${({ theme }) => theme.fonts.body2};
 `;

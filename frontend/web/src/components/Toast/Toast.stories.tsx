@@ -67,16 +67,19 @@ function Controls() {
           flexWrap: 'wrap',
         }}
       >
-        <Button onClick={() => toast.success('Saved successfully!')}>
-          ✅ Success
-        </Button>
-        <Button onClick={() => toast.info('Here is some information.')}>
-          ℹ️ Info
-        </Button>
+        <Button
+          text={'✅ Success'}
+          onClick={() => toast.success('Saved successfully!')}
+        />
+        <Button
+          text={'ℹ️ Info'}
+          onClick={() => toast.info('Here is some information.')}
+        />
 
-        <Button onClick={() => toast.error('Something went wrong.')}>
-          ⛔ Error
-        </Button>
+        <Button
+          text={'⛔ Error'}
+          onClick={() => toast.error('Something went wrong.')}
+        />
       </div>
     </div>
   );

@@ -2,7 +2,6 @@ import { theme } from '@bombom/shared';
 import styled from '@emotion/styled';
 import { useNavigate } from '@tanstack/react-router';
 import PreviousArticleListItem from './PreviousArticleListItem';
-import Button from '@/components/Button/Button';
 import { openExternalLink } from '@/utils/externalLink';
 import type { GetPreviousArticlesResponse } from '@/apis/previousArticles';
 import sadBom from '#/assets/avif/sad-bom.avif';
@@ -84,14 +83,17 @@ const Container = styled.div<{ isMobile: boolean }>`
     isMobile ? theme.fonts.body3 : theme.fonts.body2};
 `;
 
-const OpenSubscribeButton = styled(Button)`
+const OpenSubscribeButton = styled.button`
+  width: fit-content;
+  padding: 8px 16px;
   border: 1px solid ${({ theme }) => theme.colors.primary};
+  border-radius: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   background-color: ${({ theme }) => theme.colors.white};
   color: ${({ theme }) => theme.colors.primary};
   font: ${({ theme }) => theme.fonts.body2};
-
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.white};
-  }
 `;

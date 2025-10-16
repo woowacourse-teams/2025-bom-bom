@@ -19,7 +19,7 @@ const PreviousHeader = ({ onSubscribeClick }: PreviousHeaderProps) => {
       <BackButton type="button" onClick={handleBackClick} aria-label="뒤로가기">
         <StyledChevronIcon direction="left" />
       </BackButton>
-      <Button onClick={onSubscribeClick}>구독하기</Button>
+      <Button text="구독하기" onClick={onSubscribeClick} />
     </Container>
   );
 };

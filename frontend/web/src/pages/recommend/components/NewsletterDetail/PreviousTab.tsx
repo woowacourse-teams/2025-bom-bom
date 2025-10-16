@@ -51,7 +51,7 @@ const PreviousTab = ({
   if (previousNewsletterUrl) {
     return (
       <Container isMobile={isMobile}>
-        <img width={250} src={subscribeBom} alt="empty" />
+        <img width={160} src={subscribeBom} alt="empty" />
         <OpenSubscribeButton onClick={openPreviousLetters}>
           지난 소식 보러가기
           <OpenIcon fill={theme.colors.primary} width={16} height={16} />
@@ -62,7 +62,7 @@ const PreviousTab = ({
 
   return (
     <Container isMobile={isMobile}>
-      <img width={250} src={sadBom} alt="empty" />
+      <img width={200} src={sadBom} alt="empty" />
       지난 뉴스레터가 존재하지 않습니다.
     </Container>
   );

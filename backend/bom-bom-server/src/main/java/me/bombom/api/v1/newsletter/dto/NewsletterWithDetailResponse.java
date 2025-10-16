@@ -35,7 +35,8 @@ public record NewsletterWithDetailResponse(
     public static NewsletterWithDetailResponse of(
             Newsletter newsletter,
             NewsletterDetail newsletterDetail,
-            Category category) {
+            Category category
+    ) {
         return new NewsletterWithDetailResponse(
                 newsletter.getName(),
                 newsletter.getDescription(),

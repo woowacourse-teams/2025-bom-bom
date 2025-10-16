@@ -153,6 +153,22 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # 🧩 배포 전 현재 실행 중 컨테이너 이미지 백업
+      - name: 현재 실행 중 컨테이너 이미지 latest-stable로 백업
+        run: |
+          echo "🧩 현재 실행 중 bombom-server 이미지 백업 시작"
+          CURRENT_IMAGE=$(sudo docker inspect bombom-server --format='{{.Config.Image}}' || echo "none")
+          echo "현재 이미지: $CURRENT_IMAGE"
+
+          if [ "$CURRENT_IMAGE" != "none" ]; then
+            echo "🔄 현재 이미지를 latest-stable로 태깅 및 푸시"
+            sudo docker pull "$CURRENT_IMAGE" || true
+            sudo docker tag "$CURRENT_IMAGE" ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+            sudo docker push ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+            echo "✅ 백업 완료: latest-stable"
+          else
+            echo "⚠️ 실행 중인 bombom-server 컨테이너가 없어 백업을 건너뜀"
+
       - name: .env file 생성
         run: |
           cat <<EOF > .env
@@ -233,6 +249,55 @@ jobs:
           exit 1
 
   # ---------------------------------------------------
+  # 4️⃣ prod-sub 배포 실패 시 rollback
+  # ---------------------------------------------------
+  # X-1) 메인 롤백 시작: 트래픽 상태 정리 (sub만 활성, main 비활성 보장)
+  rollback-sub-prepare:
+    if: failure() && needs.deploy-sub.result == 'failure'
+    needs: deploy-sub
+    runs-on: [ self-hosted, lb ]
+    steps:
+      - name: 트래픽 상태 정리 (main active / sub disabled)
+        run: |
+          echo "enable server app_servers/prod-main" | sudo socat stdio /var/run/haproxy.sock
+          echo "disable server app_servers/prod-sub"   | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ 트래픽 상태 정리 완료"
+
+  # X-4) sub도 이전 버전으로 복구 + readiness 헬스체크
+  rollback-sub-deploy:
+    if: failure() && needs.deploy-sub.result == 'failure'
+    needs: rollback-sub-prepare
+    runs-on: [self-hosted, prod-sub]
+    steps:
+      - name: prod-sub를 이전 버전 컨테이너로 build
+        run: |
+          sudo docker stop bombom-server || true
+          sudo docker rm   bombom-server || true
+          sudo docker run -d --name bombom-server \
+            -p 80:8080 -p 8081:8081 \
+            -e SPRING_PROFILES_ACTIVE=prod \
+            ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+          echo "⏳ wait sub readiness..."
+          for i in {1..40}; do
+            s=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/actuator/health/readiness || true)
+            [ "$s" = "200" ] && echo "✅ prod-sub ready" && exit 0
+            sleep 10
+          done
+          echo "❌ prod-sub not ready"; exit 1
+
+  # X-5) 최종 트래픽 정상화(원래의 양쪽 활성/가중치로 복귀)
+  rollback-sub-restore-final-traffic:
+    if: failure() && needs.deploy-sub.result == 'failure'
+    needs: rollback-sub-deploy
+    runs-on: [self-hosted, lb]
+    steps:
+      - name: 트래픽 정상화
+        run: |
+          echo "enable server app_servers/prod-main" | sudo socat stdio /var/run/haproxy.sock
+          echo "enable server app_servers/prod-sub"  | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ 전체 롤백 후 트래픽 정상화 완료"
+
+  # ---------------------------------------------------
   # 4️⃣ 트래픽 전환: prod-main → prod-sub
   # ---------------------------------------------------
   shift-traffic-to-sub:
@@ -270,6 +335,22 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 🧩 배포 전 현재 실행 중 컨테이너 이미지 백업
+      - name: 현재 실행 중 컨테이너 이미지 latest-stable로 백업
+        run: |
+          echo "🧩 현재 실행 중 bombom-server 이미지 백업 시작"
+          CURRENT_IMAGE=$(sudo docker inspect bombom-server --format='{{.Config.Image}}' || echo "none")
+          echo "현재 이미지: $CURRENT_IMAGE"
+
+          if [ "$CURRENT_IMAGE" != "none" ]; then
+            echo "🔄 현재 이미지를 latest-stable로 태깅 및 푸시"
+            sudo docker pull "$CURRENT_IMAGE" || true
+            sudo docker tag "$CURRENT_IMAGE" ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+            sudo docker push ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+            echo "✅ 백업 완료: latest-stable"
+          else
+            echo "⚠️ 실행 중인 bombom-server 컨테이너가 없어 백업을 건너뜀"
 
       - name: .env file 생성
         run: |
@@ -351,10 +432,93 @@ jobs:
           exit 1
 
   # ---------------------------------------------------
-  # 6️⃣ 트래픽 복귀
+  # 5️⃣ prod-main 배포 실패 시 rollback
+  # ---------------------------------------------------
+  # X-1) 메인 롤백 시작: 트래픽 상태 정리 (sub만 활성, main 비활성 보장)
+  rollback-main-prepare:
+    if: failure() && needs.deploy-main.result == 'failure'
+    needs: deploy-main
+    runs-on: [self-hosted, lb]
+    steps:
+      - name: 트래픽 상태 정리 (sub active / main disabled)
+        run: |
+          echo "disable server app_servers/prod-main" | sudo socat stdio /var/run/haproxy.sock
+          echo "enable server app_servers/prod-sub"   | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ 트래픽 상태 정리 완료"
+
+  # X-2) main 이전 버전으로 복구 + readiness 헬스체크
+  rollback-main-redeploy:
+    if: failure() && needs.deploy-main.result == 'failure'
+    needs: rollback-main-prepare
+    runs-on: [self-hosted, prod-main]
+    steps:
+      - name: prod-main을 이전 버전 컨테이너로 build
+        run: |
+          sudo docker stop bombom-server || true
+          sudo docker rm   bombom-server || true
+          sudo docker run -d --name bombom-server \
+            -p 80:8080 -p 8081:8081 \
+            -e SPRING_PROFILES_ACTIVE=prod \
+            ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+          echo "⏳ wait main readiness..."
+          for i in {1..40}; do
+            s=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/actuator/health/readiness || true)
+            [ "$s" = "200" ] && echo "✅ prod-main ready" && exit 0
+            sleep 10
+          done
+          echo "❌ prod-main not ready"; exit 1
+
+  # X-3) main이 살아났으니 트래픽 전체를 main으로 전환
+  rollback-shift-traffic-to-main:
+    if: failure() && needs.deploy-main.result == 'failure'
+    needs: rollback-main-redeploy
+    runs-on: [self-hosted, lb]
+    steps:
+      - name: 모든 트래픽을 prod-main으로 전환
+        run: |
+          echo "enable  server app_servers/prod-main" | sudo socat stdio /var/run/haproxy.sock
+          echo "disable server app_servers/prod-sub"  | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ main으로 트래픽 전환 완료"
+
+  # X-4) sub도 이전 버전으로 복구 + readiness 헬스체크
+  rollback-sub-redeploy:
+    if: failure() && needs.deploy-main.result == 'failure'
+    needs: rollback-shift-traffic-to-main
+    runs-on: [self-hosted, prod-sub]
+    steps:
+      - name: prod-sub를 이전 버전 컨테이너로 build
+        run: |
+          sudo docker stop bombom-server || true
+          sudo docker rm   bombom-server || true
+          sudo docker run -d --name bombom-server \
+            -p 80:8080 -p 8081:8081 \
+            -e SPRING_PROFILES_ACTIVE=prod \
+            ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+          echo "⏳ wait sub readiness..."
+          for i in {1..40}; do
+            s=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/actuator/health/readiness || true)
+            [ "$s" = "200" ] && echo "✅ prod-sub ready" && exit 0
+            sleep 10
+          done
+          echo "❌ prod-sub not ready"; exit 1
+
+  # X-5) 최종 트래픽 정상화(원래의 양쪽 활성/가중치로 복귀)
+  rollback-prod-restore-final-traffic:
+    if: failure() && needs.deploy-main.result == 'failure'
+    needs: rollback-sub-redeploy
+    runs-on: [self-hosted, lb]
+    steps:
+      - name: 트래픽 정상화
+        run: |
+          echo "enable server app_servers/prod-main" | sudo socat stdio /var/run/haproxy.sock
+          echo "enable server app_servers/prod-sub"  | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ 전체 롤백 후 트래픽 정상화 완료"
+
+  # ---------------------------------------------------
+  # 6️⃣ 트래픽 복구
   # ---------------------------------------------------
   restore-final-traffic:
-    name: "🔁 Step 5: 트래픽 원상복귀"
+    name: "🔁 Step 5: 트래픽 원상복구"
     needs: deploy-main
     runs-on: [self-hosted, lb]
     steps:

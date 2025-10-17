@@ -68,10 +68,6 @@ const NewsletterCard = styled.div<{ device: Device }>`
   background: ${({ theme }) => theme.colors.white};
 
   transition: all 0.2s ease-in-out;
-
-  &:hover {
-    box-shadow: 0 4px 12px 0 rgb(0 0 0 / 10%);
-  }
 `;
 
 const NewsletterImage = styled(ImageWithFallback)`

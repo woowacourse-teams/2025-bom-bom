@@ -23,6 +23,7 @@ const router = createRouter({
   context: {
     queryClient,
   },
+  scrollRestoration: true,
 });
 
 initSentry({
@@ -35,6 +36,9 @@ initSentry({
 declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router;
+  }
+  interface HistoryState {
+    subscribeUrl: string;
   }
 }
 

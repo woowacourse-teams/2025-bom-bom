@@ -11,6 +11,7 @@ type SlideButtonPosition = 'middle' | 'bottom';
 type CarouselProps = PropsWithChildren & {
   hasSlideButton?: boolean;
   hasAnimation?: boolean;
+  showNextSlidePart?: boolean;
 } & (
     | { autoPlay?: true; autoPlaySpeedMs?: number }
     | { autoPlay: false; autoPlaySpeedMs?: never }
@@ -26,18 +27,14 @@ const Carousel = ({
   hasSlideButton = true,
   slideButtonPosition = 'middle',
   hasAnimation = true,
+  showNextSlidePart = false,
   children,
 }: CarouselProps) => {
   const originSlides = Children.toArray(children);
   const slideCount = originSlides.length;
+  const hasMultipleSlides = slideCount > 1;
 
   if (process.env.NODE_ENV === 'development') {
-    if (originSlides.length === 0) {
-      throw new Error(
-        'Carousel 컴포넌트에 최소 한 개 이상의 child가 필요합니다.',
-      );
-    }
-
     if (autoPlay && autoPlaySpeedMs < 100) {
       throw new Error('timer 주기는 100ms 이상이어야 합니다.');
     }
@@ -60,7 +57,11 @@ const Carousel = ({
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
-  } = useCarousel({ slideCount, autoPlay, autoPlaySpeedMs });
+  } = useCarousel({
+    slideCount,
+    autoPlay: hasMultipleSlides ? autoPlay : false,
+    autoPlaySpeedMs,
+  });
 
   return (
     <Container slideButtonPosition={slideButtonPosition}>
@@ -70,17 +71,20 @@ const Carousel = ({
         isTransitioning={isTransitioning}
         isSwiping={isSwiping}
         onTransitionEnd={handleTransitionEnd}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        hasAnimation={hasAnimation}
+        hasAnimation={hasMultipleSlides ? hasAnimation : false}
+        showNextSlidePart={hasMultipleSlides ? showNextSlidePart : false}
+        {...(hasMultipleSlides && {
+          onTouchStart: handleTouchStart,
+          onTouchMove: handleTouchMove,
+          onTouchEnd: handleTouchEnd,
+        })}
       >
         {infinitySlides.map((slideContent, index) => (
           <Slide key={`slide-${index}`}>{slideContent}</Slide>
         ))}
       </SlidesWrapper>
 
-      {hasSlideButton && (
+      {hasSlideButton && hasMultipleSlides && (
         <>
           <PrevSlideButton
             type="button"
@@ -138,9 +142,11 @@ const SlidesWrapper = styled.ul<{
   isTransitioning: boolean;
   isSwiping: boolean;
   hasAnimation: boolean;
+  showNextSlidePart: boolean;
 }>`
   position: relative;
-  margin: 0 -12px;
+  margin: ${({ showNextSlidePart }) =>
+    showNextSlidePart ? '0 20px 0 -12px' : '0 -12px'};
 
   display: flex;
 

@@ -16,6 +16,7 @@ const fonts = {
 
 const colors = {
   primary: '#FE5E04',
+  primaryDark: '#E35400',
   primaryLight: '#FFD6C2',
   textPrimary: '#181818',
   textSecondary: '#5C5C5C',
@@ -31,6 +32,7 @@ const colors = {
   error: '#FF4D4F',
   info: '#0D6EFD',
   success: '#198754',
+  backgroundHover: '#F9F9F9',
 };
 
 const heights = {

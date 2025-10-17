@@ -222,7 +222,7 @@ jobs:
           sleep 20
           
           SUCCESS_COUNT=0
-          MAX_RETRIES=40        # 총 40번(약 400초) 시도
+          MAX_RETRIES=10        # 총 40번(약 400초) 시도
           REQUIRED_SUCCESS=5    # 연속 5회 성공해야 진짜 Healthy
           
           for ((i=1; i<=MAX_RETRIES; i++)); do
@@ -282,7 +282,7 @@ jobs:
             --env-file .env \
             ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
           echo "⏳ wait sub readiness..."
-          for i in {1..40}; do
+          for i in {1..10}; do
             s=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
             [ "$s" = "200" ] && echo "✅ prod-sub ready" && exit 0
             sleep 10
@@ -408,7 +408,7 @@ jobs:
           sleep 20
           
           SUCCESS_COUNT=0
-          MAX_RETRIES=40        # 총 40번(약 400초) 시도
+          MAX_RETRIES=10        # 총 10번(약 100초) 시도
           REQUIRED_SUCCESS=5    # 연속 5회 성공해야 진짜 Healthy
           
           for ((i=1; i<=MAX_RETRIES; i++)); do
@@ -468,7 +468,7 @@ jobs:
             --env-file .env \
             ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
           echo "⏳ wait main readiness..."
-          for i in {1..40}; do
+          for i in {1..10}; do
             s=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
             [ "$s" = "200" ] && echo "✅ prod-main ready" && exit 0
             sleep 10
@@ -502,7 +502,7 @@ jobs:
             --env-file .env \
             ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
           echo "⏳ wait sub readiness..."
-          for i in {1..40}; do
+          for i in {1..10}; do
             s=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
             [ "$s" = "200" ] && echo "✅ prod-sub ready" && exit 0
             sleep 10

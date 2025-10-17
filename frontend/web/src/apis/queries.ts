@@ -19,13 +19,10 @@ import {
   getMyMonthlyReadingRank,
   getReadingStatus,
   getUserInfo,
+  getMyNewsletters,
   getUserProfile,
 } from './members';
-import {
-  getMyNewsletters,
-  getNewsletterDetail,
-  getNewsletters,
-} from './newsLetters';
+import { getNewsletterDetail, getNewsletters } from './newsLetters';
 import {
   getPreviousArticleDetail,
   getPreviousArticles,

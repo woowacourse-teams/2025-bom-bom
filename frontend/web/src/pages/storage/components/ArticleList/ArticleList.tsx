@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import Checkbox from '@/components/Checkbox/Checkbox';
 import { useDevice } from '@/hooks/useDevice';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import type { Device } from '@/hooks/useDevice';
@@ -6,20 +7,27 @@ import type { Article } from '@/types/articles';
 
 interface ArticleListProps {
   articles: Article[];
+  editMode: boolean;
 }
 
-const ArticleList = ({ articles }: ArticleListProps) => {
+const ArticleList = ({ articles, editMode }: ArticleListProps) => {
   const device = useDevice();
+  const isMobile = device === 'mobile';
 
   return (
     <Container device={device}>
-      {articles.map((article) =>
-        article ? (
-          <li key={article.articleId}>
-            <ArticleCard data={article} readVariant="badge" />
-          </li>
-        ) : null,
-      )}
+      {articles.map((article) => (
+        <ArticleItem key={article.articleId} isMobile={isMobile}>
+          {editMode && (
+            <Checkbox
+              id={article.articleId}
+              checked={false}
+              onChange={() => {}}
+            />
+          )}
+          <ArticleCard data={article} readVariant="badge" />
+        </ArticleItem>
+      ))}
     </Container>
   );
 };
@@ -32,15 +40,16 @@ const Container = styled.ul<{ device: Device }>`
   display: flex;
   gap: ${({ device }) => (device === 'mobile' ? '0' : '16px')};
   flex-direction: column;
+`;
 
-  ${({ device, theme }) =>
-    device === 'mobile' &&
-    `
-    li {
-      padding: 8px 0;
-    }
-    li:not(:last-child) {
-      border-bottom: 2px solid ${theme.colors.dividers};
-    }
-  `}
+const ArticleItem = styled.li<{ isMobile: boolean }>`
+  padding: ${({ isMobile }) => isMobile && '8px 0'};
+
+  display: flex;
+  gap: 8px;
+
+  &:not(:last-child) {
+    border-bottom: ${({ theme, isMobile }) =>
+      isMobile && `2px solid ${theme.colors.dividers}`};
+  }
 `;

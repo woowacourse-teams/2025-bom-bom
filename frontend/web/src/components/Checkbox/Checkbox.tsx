@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import type { ChangeEvent, PropsWithChildren } from 'react';
 
 interface CheckboxProps {
-  id: string;
+  id: string | number;
   checked: boolean;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
@@ -16,12 +16,12 @@ const Checkbox = ({
   return (
     <CheckboxWrapper>
       <HiddenCheckbox
-        id={id}
+        id={String(id)}
         type="checkbox"
         checked={checked}
         onChange={onChange}
       />
-      <CheckboxLabel htmlFor={id} checked={checked}>
+      <CheckboxLabel htmlFor={String(id)} checked={checked}>
         <CheckboxSquare checked={checked}>
           {checked && <CheckMark>✓</CheckMark>}
         </CheckboxSquare>

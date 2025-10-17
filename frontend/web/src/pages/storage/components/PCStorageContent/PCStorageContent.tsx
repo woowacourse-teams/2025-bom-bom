@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import ArticleList from '../ArticleList/ArticleList';
 import ArticleListControls from '../ArticleListControls/ArticleListControls';
 import EmptySearchCard from '../EmptySearchCard/EmptySearchCard';
@@ -37,6 +37,11 @@ export default function PCStorageContent({
       page: page - 1,
     }),
   );
+  const [editMode, setEditMode] = useState(false);
+
+  const enableEditMode = () => {
+    setEditMode(true);
+  };
 
   useEffect(() => {
     resetPage();
@@ -52,6 +57,10 @@ export default function PCStorageContent({
         onSearchChange={onSearchChange}
         sortFilter={sortFilter}
         onSortChange={onSortChange}
+        editMode={editMode}
+        onSelectDeleteButtonClick={enableEditMode}
+        onDeleteButtonClick={() => console.log('delete')}
+        onAllSelectClick={() => console.log('all delete')}
       />
       {haveNoContent && searchInput !== '' ? (
         <EmptySearchCard searchQuery={searchInput} />
@@ -61,7 +70,7 @@ export default function PCStorageContent({
         <ArticleCardListSkeleton />
       ) : (
         <>
-          <ArticleList articles={articleList} />
+          <ArticleList articles={articleList} editMode={editMode} />
           <Pagination
             currentPage={page}
             totalPages={articles?.totalPages ?? 1}

@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import Checkbox from '@/components/Checkbox/Checkbox';
 import SearchInput from '@/components/SearchInput/SearchInput';
 import Select from '@/components/Select/Select';
 
@@ -7,6 +8,10 @@ interface ArticleListControlsProps {
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   sortFilter: 'DESC' | 'ASC';
   onSortChange: (value: 'DESC' | 'ASC') => void;
+  editMode: boolean;
+  onSelectDeleteButtonClick: () => void;
+  onDeleteButtonClick: () => void;
+  onAllSelectClick: () => void;
 }
 
 export default function ArticleListControls({
@@ -14,6 +19,9 @@ export default function ArticleListControls({
   onSearchChange,
   sortFilter,
   onSortChange,
+  editMode,
+  onSelectDeleteButtonClick,
+  onAllSelectClick,
 }: ArticleListControlsProps) {
   return (
     <Container>
@@ -23,7 +31,13 @@ export default function ArticleListControls({
         onChange={onSearchChange}
       />
       <SummaryBar>
-        <DeleteButton>선택 삭제</DeleteButton>
+        {editMode ? (
+          <Checkbox id="all" checked={false} onChange={onAllSelectClick} />
+        ) : (
+          <DeleteButton onClick={onSelectDeleteButtonClick}>
+            선택 삭제
+          </DeleteButton>
+        )}
 
         <Select
           options={[

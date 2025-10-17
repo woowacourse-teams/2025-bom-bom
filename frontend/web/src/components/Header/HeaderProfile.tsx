@@ -45,7 +45,7 @@ const HeaderProfile = ({ userInfo, device }: HeaderProfileProps) => {
           showCloseButton={false}
           showBackdrop={false}
         >
-          <ProfileDetail userInfo={userInfo} />
+          <ProfileDetail userInfo={userInfo} onClose={closeProfileModal} />
         </Modal>
       )}
     </Container>

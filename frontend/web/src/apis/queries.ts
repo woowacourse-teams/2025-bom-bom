@@ -83,13 +83,13 @@ export const queries = {
     queryOptions({
       queryKey: ['members', 'me'],
       queryFn: getUserInfo,
-      retry: false,
     }),
 
   userProfile: () =>
     queryOptions({
       queryKey: ['members', 'me', 'profile'],
       queryFn: getUserProfile,
+      retry: false,
     }),
 
   readingStatus: () =>

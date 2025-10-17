@@ -108,6 +108,10 @@ public class MemberService {
         log.info("회원 탈퇴 처리 완료. MemberId: {}", memberId);
     }
 
+    public long countNormalMembers() {
+        return memberRepository.countByRoleId(MEMBER_ROLE_ID);
+    }
+
     private SignupValidateStatus validateSignupNickname(String value) {
         if (!userInfoValidator.isValidNicknameFormat(value)) {
             return SignupValidateStatus.INVALID_FORMAT;

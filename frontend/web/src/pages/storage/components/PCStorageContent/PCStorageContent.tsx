@@ -42,7 +42,6 @@ export default function PCStorageContent({
     resetPage();
   }, [baseQueryParams.keyword, resetPage]);
 
-  const totalElements = articles?.totalElements;
   const articleList = articles?.content || [];
   const haveNoContent = !isLoading && articleList.length === 0;
 
@@ -53,8 +52,6 @@ export default function PCStorageContent({
         onSearchChange={onSearchChange}
         sortFilter={sortFilter}
         onSortChange={onSortChange}
-        totalElements={totalElements}
-        isLoading={isLoading}
       />
       {haveNoContent && searchInput !== '' ? (
         <EmptySearchCard searchQuery={searchInput} />

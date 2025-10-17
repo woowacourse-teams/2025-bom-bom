@@ -65,7 +65,6 @@ export default function MobileStorageContent({
   const articleList = infiniteArticlesPages.flatMap(
     (page) => page?.content || [],
   );
-  const totalElements = infiniteArticlesPages[0]?.totalElements;
   const IsContentsEmpty = !isInfiniteLoading && articleList.length === 0;
 
   return (
@@ -75,8 +74,6 @@ export default function MobileStorageContent({
         onSearchChange={onSearchChange}
         sortFilter={sortFilter}
         onSortChange={onSortChange}
-        totalElements={totalElements}
-        isLoading={isInfiniteLoading}
       />
       {IsContentsEmpty && searchInput !== '' ? (
         <EmptySearchCard searchQuery={searchInput} />

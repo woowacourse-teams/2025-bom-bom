@@ -1,15 +1,12 @@
 import styled from '@emotion/styled';
 import SearchInput from '@/components/SearchInput/SearchInput';
 import Select from '@/components/Select/Select';
-import Skeleton from '@/components/Skeleton/Skeleton';
 
 interface ArticleListControlsProps {
   searchInput: string;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   sortFilter: 'DESC' | 'ASC';
   onSortChange: (value: 'DESC' | 'ASC') => void;
-  totalElements: number | undefined;
-  isLoading: boolean;
 }
 
 export default function ArticleListControls({
@@ -17,8 +14,6 @@ export default function ArticleListControls({
   onSearchChange,
   sortFilter,
   onSortChange,
-  totalElements,
-  isLoading,
 }: ArticleListControlsProps) {
   return (
     <Container>
@@ -28,11 +23,7 @@ export default function ArticleListControls({
         onChange={onSearchChange}
       />
       <SummaryBar>
-        {isLoading ? (
-          <Skeleton width="80px" height="20px" />
-        ) : (
-          <SummaryText>총 {totalElements ?? 0}개</SummaryText>
-        )}
+        <DeleteButton>선택 삭제</DeleteButton>
 
         <Select
           options={[
@@ -61,7 +52,18 @@ const SummaryBar = styled.div`
   justify-content: space-between;
 `;
 
-const SummaryText = styled.p`
+const DeleteButton = styled.button`
+  padding-left: 8px;
+
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body2};
+
+  &:hover {
+    text-decoration: underline;
+    transition: all 0.2s ease-in-out;
+  }
 `;

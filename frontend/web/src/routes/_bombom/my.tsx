@@ -156,14 +156,14 @@ const ContentWrapper = styled.div<{ device: Device }>`
   width: 100%;
 
   display: flex;
-  gap: ${({ device }) => (device === 'pc' ? '24px' : '16px')};
-  flex-direction: ${({ device }) => (device === 'pc' ? 'row' : 'column')};
+  gap: ${({ device }) => (device === 'mobile' ? '16px' : '20px')};
+  flex-direction: ${({ device }) => (device === 'mobile' ? 'column' : 'row')};
   align-items: flex-start;
   align-self: stretch;
 `;
 
 const TabsWrapper = styled.div<{ device: Device }>`
-  width: ${({ device }) => (device === 'pc' ? '310px' : '100%')};
+  width: ${({ device }) => (device === 'mobile' ? '100%' : '280px')};
 
   display: flex;
   flex-direction: column;
@@ -182,8 +182,11 @@ const tabsWrapperStyles: Record<Device, (theme: Theme) => CSSObject> = {
     borderRadius: '12px',
     padding: '16px',
   }),
-  tablet: () => ({
+  tablet: (theme) => ({
     flexShrink: 0,
+    border: `1px solid ${theme.colors.stroke}`,
+    borderRadius: '12px',
+    padding: '16px',
   }),
   mobile: () => ({
     gap: '8px',

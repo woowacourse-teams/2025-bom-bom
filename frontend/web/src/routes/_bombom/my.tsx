@@ -33,6 +33,10 @@ export const Route = createFileRoute('/_bombom/my')({
       {
         title: '봄봄 | 마이페이지',
       },
+      {
+        name: 'robots',
+        content: 'noindex, nofollow',
+      },
     ],
   }),
   validateSearch: (search: Record<string, unknown>): MyPageSearch => {

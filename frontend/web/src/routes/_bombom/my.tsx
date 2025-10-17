@@ -35,8 +35,8 @@ export const Route = createFileRoute('/_bombom/my')({
       },
     ],
   }),
-  validateSearch: (search: { tab: MyPageTab }) => {
-    return { tab: search.tab };
+  validateSearch: (search: { tab?: MyPageTab }) => {
+    return { tab: search.tab ?? 'profile' };
   },
   component: MyPage,
 });

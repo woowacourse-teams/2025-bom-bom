@@ -151,5 +151,9 @@ export const useUserInfoValidation = () => {
     clearAllErrors,
 
     formatBirthDate,
+
+    setNicknameError,
+    setEmailError,
+    setBirthDateError,
   };
 };

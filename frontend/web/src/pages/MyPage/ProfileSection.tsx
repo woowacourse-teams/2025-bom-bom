@@ -31,6 +31,7 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
     clearNicknameError,
     clearBirthDateError,
     formatBirthDate,
+    setNicknameError,
   } = useUserInfoValidation();
 
   const { mutate: mutateWithdraw } = useMutation({
@@ -56,8 +57,7 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
       onError: (error: ApiError) => {
         const errorMessage =
           error?.rawBody?.message || '프로필 정보 변경에 실패했습니다.';
-        // API 에러는 별도로 처리 (닉네임 중복 등)
-        // setNicknameError(errorMessage);
+        setNicknameError(errorMessage);
       },
     });
 

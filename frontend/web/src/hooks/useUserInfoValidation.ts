@@ -1,4 +1,6 @@
-import type { FieldError } from './SignupCard.types';
+import { useState, useCallback } from 'react';
+
+export type FieldError = string | null;
 
 const nicknameRegex = /^[가-힣a-zA-Z0-9_]{2,12}$/;
 const emailLocalRegex = /^[A-Za-z0-9._-]{3,30}$/;
@@ -63,4 +65,91 @@ export const formatBirthDate = (input: string): string => {
   if (digits.length <= 4) return digits;
   if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4, 6)}`;
   return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+};
+
+export const useUserInfoValidation = () => {
+  const [nicknameError, setNicknameError] = useState<FieldError>(null);
+  const [emailError, setEmailError] = useState<FieldError>(null);
+  const [birthDateError, setBirthDateError] = useState<FieldError>(null);
+
+  const validateNicknameField = useCallback((nickname: string) => {
+    const error = validateNickname(nickname);
+    setNicknameError(error);
+    return error === null;
+  }, []);
+
+  const validateEmailField = useCallback((emailLocal: string) => {
+    const error = validateEmailLocal(emailLocal);
+    setEmailError(error);
+    return error === null;
+  }, []);
+
+  const validateBirthDateField = useCallback((birthDate: string) => {
+    const error = validateBirthDate(birthDate);
+    setBirthDateError(error);
+    return error === null;
+  }, []);
+
+  const clearNicknameError = useCallback(() => {
+    setNicknameError(null);
+  }, []);
+
+  const clearEmailError = useCallback(() => {
+    setEmailError(null);
+  }, []);
+
+  const clearBirthDateError = useCallback(() => {
+    setBirthDateError(null);
+  }, []);
+
+  const clearAllErrors = useCallback(() => {
+    setNicknameError(null);
+    setEmailError(null);
+    setBirthDateError(null);
+  }, []);
+
+  const isFormValid = useCallback(
+    (fields: {
+      nickname?: string;
+      emailLocal?: string;
+      birthDate?: string;
+    }) => {
+      const { nickname, emailLocal, birthDate } = fields;
+
+      let isValid = true;
+
+      if (nickname !== undefined) {
+        isValid = isValid && validateNicknameField(nickname);
+      }
+
+      if (emailLocal !== undefined) {
+        isValid = isValid && validateEmailField(emailLocal);
+      }
+
+      if (birthDate !== undefined && birthDate.trim()) {
+        isValid = isValid && validateBirthDateField(birthDate);
+      }
+
+      return isValid;
+    },
+    [validateNicknameField, validateEmailField, validateBirthDateField],
+  );
+
+  return {
+    nicknameError,
+    emailError,
+    birthDateError,
+
+    validateNicknameField,
+    validateEmailField,
+    validateBirthDateField,
+    isFormValid,
+
+    clearNicknameError,
+    clearEmailError,
+    clearBirthDateError,
+    clearAllErrors,
+
+    formatBirthDate,
+  };
 };

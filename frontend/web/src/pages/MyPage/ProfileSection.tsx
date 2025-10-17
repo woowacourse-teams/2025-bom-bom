@@ -7,10 +7,7 @@ import { patchMemberInfo } from '@/apis/members';
 import Button from '@/components/Button/Button';
 import InputField from '@/components/InputField/InputField';
 import { toast } from '@/components/Toast/utils/toastActions';
-import {
-  formatBirthDate,
-  validateBirthDate,
-} from '@/pages/signup/components/SignupCard.utils';
+import { useUserInfoValidation } from '@/hooks/useUserInfoValidation';
 import type ApiError from '@/apis/ApiError';
 import type { Gender } from '@/pages/signup/components/SignupCard.types';
 import type { UserInfo } from '@/types/me';
@@ -26,8 +23,15 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
   const [birthDate, setBirthDate] = useState(userInfo?.birthDate || '');
   const [gender, setGender] = useState<Gender>(userInfo?.gender || 'NONE');
 
-  const [nicknameError, setNicknameError] = useState<string | null>(null);
-  const [birthDateError, setBirthDateError] = useState<string | null>(null);
+  const {
+    nicknameError,
+    birthDateError,
+    validateNicknameField,
+    validateBirthDateField,
+    clearNicknameError,
+    clearBirthDateError,
+    formatBirthDate,
+  } = useUserInfoValidation();
 
   const { mutate: mutateWithdraw } = useMutation({
     mutationKey: ['withdraw'],
@@ -45,42 +49,32 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
       mutationFn: patchMemberInfo,
       onSuccess: () => {
         toast.success('프로필 정보가 변경되었습니다.');
-        setNicknameError(null);
-        setBirthDateError(null);
+        clearNicknameError();
+        clearBirthDateError();
         queryClient.invalidateQueries({ queryKey: ['members', 'me'] });
       },
       onError: (error: ApiError) => {
         const errorMessage =
           error?.rawBody?.message || '프로필 정보 변경에 실패했습니다.';
-        setNicknameError(errorMessage);
+        // API 에러는 별도로 처리 (닉네임 중복 등)
+        // setNicknameError(errorMessage);
       },
     });
-
-  const validateNickname = (value: string) => {
-    if (value.length < 2 || value.length > 10) {
-      setNicknameError('닉네임은 2자 이상 10자 이하로 입력해주세요.');
-      return false;
-    }
-
-    setNicknameError(null);
-    return true;
-  };
 
   const handleNicknameChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setNickname(value);
-    validateNickname(value);
+    validateNicknameField(value);
   };
 
   const handleBirthDateChange = (e: ChangeEvent<HTMLInputElement>) => {
     const formatted = formatBirthDate(e.target.value);
     setBirthDate(formatted);
-    if (birthDateError) setBirthDateError(null);
+    if (birthDateError) clearBirthDateError();
   };
 
   const handleBirthDateBlur = () => {
-    const error = validateBirthDate(birthDate);
-    setBirthDateError(error);
+    validateBirthDateField(birthDate);
   };
 
   const handleGenderChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -98,14 +92,10 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
   };
 
   const handleProfileUpdate = () => {
-    if (!validateNickname(nickname)) return;
+    if (!validateNicknameField(nickname)) return;
 
-    if (birthDate) {
-      const birthDateValidationError = validateBirthDate(birthDate);
-      if (birthDateValidationError) {
-        setBirthDateError(birthDateValidationError);
-        return;
-      }
+    if (birthDate && !validateBirthDateField(birthDate)) {
+      return;
     }
 
     const hasNicknameChanged = nickname !== userInfo?.nickname;

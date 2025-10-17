@@ -8,7 +8,7 @@ on:
 
 env:
   WORKING_BRANCH: server-blue-green
-  HEALTH_CHECK_URL: http://localhost:8081/actuator/health
+  HEALTH_CHECK_URL: http://localhost:8081/actuator/health/readiness
 
 jobs:
   # ---------------------------------------------------
@@ -282,7 +282,7 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
           echo "⏳ wait sub readiness..."
           for i in {1..40}; do
-            s=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/actuator/health || true)
+            s=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
             [ "$s" = "200" ] && echo "✅ prod-sub ready" && exit 0
             sleep 10
           done
@@ -468,7 +468,7 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
           echo "⏳ wait main readiness..."
           for i in {1..40}; do
-            s=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/actuator/health || true)
+            s=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
             [ "$s" = "200" ] && echo "✅ prod-main ready" && exit 0
             sleep 10
           done
@@ -502,7 +502,7 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
           echo "⏳ wait sub readiness..."
           for i in {1..40}; do
-            s=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/actuator/health || true)
+            s=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
             [ "$s" = "200" ] && echo "✅ prod-sub ready" && exit 0
             sleep 10
           done

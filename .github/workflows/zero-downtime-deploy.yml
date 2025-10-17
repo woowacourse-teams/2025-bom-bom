@@ -172,7 +172,6 @@ jobs:
             echo "⚠️ 실행 중인 bombom-server-prod-sub 컨테이너가 없어 백업을 건너뜀"
           fi
 
-
       - name: .env file 생성
         run: |
           cat <<EOF > .env
@@ -279,11 +278,11 @@ jobs:
           sudo docker rm   bombom-server-prod-sub || true
           sudo docker run -d --name bombom-server-prod-sub \
             -p 80:8080 -p 8081:8081 \
-            -e SPRING_PROFILES_ACTIVE=prod \
+            --env-file .env \
             ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
           echo "⏳ wait sub readiness..."
           for i in {1..40}; do
-            s=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/actuator/health/readiness || true)
+            s=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/actuator/health || true)
             [ "$s" = "200" ] && echo "✅ prod-sub ready" && exit 0
             sleep 10
           done
@@ -465,11 +464,11 @@ jobs:
           sudo docker rm   bombom-server-prod-sub || true
           sudo docker run -d --name bombom-server-prod-sub \
             -p 80:8080 -p 8081:8081 \
-            -e SPRING_PROFILES_ACTIVE=prod \
+            --env-file .env \
             ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
           echo "⏳ wait main readiness..."
           for i in {1..40}; do
-            s=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/actuator/health/readiness || true)
+            s=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/actuator/health || true)
             [ "$s" = "200" ] && echo "✅ prod-main ready" && exit 0
             sleep 10
           done
@@ -499,11 +498,11 @@ jobs:
           sudo docker rm   bombom-server-prod-sub || true
           sudo docker run -d --name bombom-server-prod-sub \
             -p 80:8080 -p 8081:8081 \
-            -e SPRING_PROFILES_ACTIVE=prod \
+            --env-file .env \
             ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
           echo "⏳ wait sub readiness..."
           for i in {1..40}; do
-            s=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/actuator/health/readiness || true)
+            s=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/actuator/health || true)
             [ "$s" = "200" ] && echo "✅ prod-sub ready" && exit 0
             sleep 10
           done

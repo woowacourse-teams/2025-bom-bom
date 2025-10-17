@@ -81,6 +81,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           android: {
             usesCleartextTraffic: true,
           },
+          ios: {
+            useFrameworks: 'static',
+            buildReactNativeFromSource: true,
+          },
         },
       ],
       [
@@ -105,7 +109,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         projectId: 'd2ce3cbd-5c00-4471-8f7f-b4309d071e84',
       },
     },
-
     owner: 'antarctica-bombom',
   };
 };

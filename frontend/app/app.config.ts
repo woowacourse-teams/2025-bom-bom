@@ -89,6 +89,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           color: '#FE5E04',
         },
       ],
+      '@react-native-firebase/app',
+      '@react-native-firebase/messaging',
     ],
 
     experiments: {

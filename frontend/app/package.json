@@ -19,6 +19,8 @@
     "@emotion/native": "^11.11.0",
     "@emotion/react": "^11.14.0",
     "@expo/vector-icons": "^15.0.2",
+    "@react-native-firebase/app": "^23.4.1",
+    "@react-native-firebase/messaging": "^23.4.1",
     "@react-native-google-signin/google-signin": "^16.0.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",

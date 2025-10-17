@@ -56,6 +56,9 @@ dependencies {
 
     // db
     runtimeOnly("com.mysql:mysql-connector-j")
+
+    // webclient
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
 }
 
 tasks.withType<Test> {

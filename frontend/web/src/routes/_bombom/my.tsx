@@ -44,8 +44,7 @@ export const Route = createFileRoute('/_bombom/my')({
 function MyPage() {
   const device = useDevice();
   const navigate = useNavigate();
-  const { tab } = useSearch({ from: '/_bombom/my' });
-  const activeTab = tab;
+  const { tab: activeTab } = useSearch({ from: '/_bombom/my' });
 
   const { data: userInfo } = useQuery(queries.me());
   const { data: myNewsletters } = useQuery(queries.myNewsletters());

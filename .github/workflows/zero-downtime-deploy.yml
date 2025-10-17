@@ -273,21 +273,64 @@ jobs:
     needs: rollback-sub-prepare
     runs-on: [self-hosted, prod-sub]
     steps:
-      - name: prod-sub를 이전 버전 컨테이너로 build
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: .env file 생성
         run: |
-          sudo docker stop ${{ env.SERVER_CONTAINER_NAME }} || true
-          sudo docker rm   ${{ env.SERVER_CONTAINER_NAME }} || true
-          sudo docker run -d --name ${{ env.SERVER_CONTAINER_NAME }} \
-            -p 80:8080 -p 8081:8081 \
-            --env-file .env \
-            ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
-          echo "⏳ wait sub readiness..."
+          cat <<EOF > .env
+          RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
+          DATABASE=${{ secrets.PROD_DATABASE }}
+          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          SPRING_PROFILES_ACTIVE=prod
+          PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
+          EOF
+
+      - name: latest-stable 이미지 Pull
+        run: |
+          echo "📦 latest-stable 이미지 가져오기"
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+          
+      - name: 컨테이너 롤백 (latest-stable)
+        shell: bash
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          set -euo pipefail
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          
+          echo "🛑 기존 컨테이너 종료 및 제거"
+          sudo docker compose -f docker-compose-prod-sub.yml --env-file .env down || true
+          
+          echo "🚀 안정 버전 컨테이너 재시작"
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+          -f docker-compose-prod-sub.yml --env-file .env \
+          up -d --remove-orphans --force-recreate \
+          --build-arg IMAGE_TAG=latest-stable
+          
+          echo "⏳ 헬스체크 중..."
           for i in {1..10}; do
-            s=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
-            [ "$s" = "200" ] && echo "✅ prod-sub ready" && exit 0
-            sleep 10
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
+          if [ "$STATUS" = "200" ]; then
+           echo "✅ prod-sub 롤백 성공 (서비스 정상)"
+           exit 0
+          fi
+          echo "⏳ 상태: $STATUS ($i/20)"
+          sleep 10
           done
-          echo "❌ prod-sub not ready"; exit 1
+          
+          echo "❌ readiness 실패"
+          sudo docker logs ${{ env.SERVER_CONTAINER_NAME }} --tail 50 || true
+          exit 1      
 
   # X-5) 최종 트래픽 정상화(원래의 양쪽 활성/가중치로 복귀)
   rollback-sub-restore-final-traffic:
@@ -459,21 +502,64 @@ jobs:
     needs: rollback-main-prepare
     runs-on: [self-hosted, prod-main]
     steps:
-      - name: prod-main을 이전 버전 컨테이너로 build
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: .env file 생성
         run: |
-          sudo docker stop ${{ env.SERVER_CONTAINER_NAME }} || true
-          sudo docker rm   ${{ env.SERVER_CONTAINER_NAME }} || true
-          sudo docker run -d --name ${{ env.SERVER_CONTAINER_NAME }} \
-            -p 80:8080 -p 8081:8081 \
-            --env-file .env \
-            ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
-          echo "⏳ wait main readiness..."
+          cat <<EOF > .env
+          RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
+          DATABASE=${{ secrets.PROD_DATABASE }}
+          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          SPRING_PROFILES_ACTIVE=prod
+          PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
+          EOF
+
+      - name: latest-stable 이미지 Pull
+        run: |
+          echo "📦 latest-stable 이미지 가져오기"
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+
+      - name: 컨테이너 롤백 (latest-stable)
+        shell: bash
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          set -euo pipefail
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+
+          echo "🛑 기존 컨테이너 종료 및 제거"
+          sudo docker compose -f docker-compose-prod-sub.yml --env-file .env down || true
+
+          echo "🚀 안정 버전 컨테이너 재시작"
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+          -f docker-compose-prod-sub.yml --env-file .env \
+          up -d --remove-orphans --force-recreate \
+          --build-arg IMAGE_TAG=latest-stable
+
+          echo "⏳ 헬스체크 중..."
           for i in {1..10}; do
-            s=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
-            [ "$s" = "200" ] && echo "✅ prod-main ready" && exit 0
-            sleep 10
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
+          if [ "$STATUS" = "200" ]; then
+           echo "✅ prod-sub 롤백 성공 (서비스 정상)"
+           exit 0
+          fi
+          echo "⏳ 상태: $STATUS ($i/20)"
+          sleep 10
           done
-          echo "❌ prod-main not ready"; exit 1
+
+          echo "❌ readiness 실패"
+          sudo docker logs ${{ env.SERVER_CONTAINER_NAME }} --tail 50 || true
+          exit 1
 
   # X-3) main이 살아났으니 트래픽 전체를 main으로 전환
   rollback-shift-traffic-to-main:
@@ -491,23 +577,66 @@ jobs:
   rollback-sub-redeploy:
     if: failure() && needs.deploy-main.result == 'failure'
     needs: rollback-shift-traffic-to-main
-    runs-on: [self-hosted, prod-sub]
+    runs-on: [ self-hosted, prod-sub ]
     steps:
-      - name: prod-sub를 이전 버전 컨테이너로 build
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: .env file 생성
         run: |
-          sudo docker stop ${{ env.SERVER_CONTAINER_NAME }} || true
-          sudo docker rm   ${{ env.SERVER_CONTAINER_NAME }} || true
-          sudo docker run -d --name ${{ env.SERVER_CONTAINER_NAME }} \
-            -p 80:8080 -p 8081:8081 \
-            --env-file .env \
-            ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
-          echo "⏳ wait sub readiness..."
+          cat <<EOF > .env
+          RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
+          DATABASE=${{ secrets.PROD_DATABASE }}
+          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          SPRING_PROFILES_ACTIVE=prod
+          PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
+          EOF
+
+      - name: latest-stable 이미지 Pull
+        run: |
+          echo "📦 latest-stable 이미지 가져오기"
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+
+      - name: 컨테이너 롤백 (latest-stable)
+        shell: bash
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          set -euo pipefail
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+
+          echo "🛑 기존 컨테이너 종료 및 제거"
+          sudo docker compose -f docker-compose-prod-sub.yml --env-file .env down || true
+
+          echo "🚀 안정 버전 컨테이너 재시작"
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+          -f docker-compose-prod-sub.yml --env-file .env \
+          up -d --remove-orphans --force-recreate \
+          --build-arg IMAGE_TAG=latest-stable
+
+          echo "⏳ 헬스체크 중..."
           for i in {1..10}; do
-            s=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
-            [ "$s" = "200" ] && echo "✅ prod-sub ready" && exit 0
-            sleep 10
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
+          if [ "$STATUS" = "200" ]; then
+           echo "✅ prod-sub 롤백 성공 (서비스 정상)"
+           exit 0
+          fi
+          echo "⏳ 상태: $STATUS ($i/20)"
+          sleep 10
           done
-          echo "❌ prod-sub not ready"; exit 1
+
+          echo "❌ readiness 실패"
+          sudo docker logs ${{ env.SERVER_CONTAINER_NAME }} --tail 50 || true
+          exit 1
 
   # X-5) 최종 트래픽 정상화(원래의 양쪽 활성/가중치로 복귀)
   rollback-prod-restore-final-traffic:

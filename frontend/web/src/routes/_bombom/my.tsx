@@ -23,10 +23,6 @@ const TABS = [
   { id: 'newsletters', label: '구독 뉴스레터' },
 ] as const;
 
-type MyPageSearch = {
-  tab: MyPageTab;
-};
-
 export const Route = createFileRoute('/_bombom/my')({
   head: () => ({
     meta: [
@@ -39,14 +35,8 @@ export const Route = createFileRoute('/_bombom/my')({
       },
     ],
   }),
-  validateSearch: (search: Record<string, unknown>): MyPageSearch => {
-    const tab = search.tab as string | undefined;
-    const isValidTab = (value: string): value is MyPageTab =>
-      ['profile', 'newsletters'].includes(value);
-
-    return {
-      tab: tab && isValidTab(tab) ? tab : 'profile',
-    };
+  validateSearch: (search: { tab: MyPageTab }) => {
+    return { tab: search.tab };
   },
   component: MyPage,
 });

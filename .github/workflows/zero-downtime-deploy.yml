@@ -8,7 +8,7 @@ on:
 
 env:
   WORKING_BRANCH: server-blue-green
-  HEALTH_CHECK_URL: http://localhost:8081/actuator/health/readiness
+  HEALTH_CHECK_URL: http://localhost:8081/actuator/health
 
 jobs:
   # ---------------------------------------------------

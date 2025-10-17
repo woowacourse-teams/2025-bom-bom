@@ -6,6 +6,7 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.core.MethodParameter;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -29,10 +30,16 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             NativeWebRequest webRequest,
             WebDataBinderFactory binderFactory
     ) {
+        LoginMember loginMember = parameter.getParameterAnnotation(LoginMember.class);
+        boolean nullable = loginMember != null && loginMember.nullable();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null ||  !authentication.isAuthenticated()) {
+        if (isAnonymous(authentication)) {
+            if (nullable) {
+                return null;
+            }
             throw new UnauthorizedException(ErrorDetail.UNAUTHORIZED);
         }
+
         Object principal = authentication.getPrincipal();
         if (principal instanceof CustomOAuth2User) {
             Member member = ((CustomOAuth2User) principal).getMember();
@@ -42,5 +49,11 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             return member;
         }
         throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN);
+    }
+
+    private boolean isAnonymous(Authentication authentication) {
+        return authentication == null
+                || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken;
     }
 }

@@ -33,7 +33,10 @@ public class PreviousArticleController implements PreviousArticleControllerApi {
 
     @Override
     @GetMapping("/{id}")
-    public PreviousArticleDetailResponse getPreviousArticleDetail(@PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id) {
+    public PreviousArticleDetailResponse getPreviousArticleDetail(
+//            @LoginMember(nullable = true) Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+    ) {
         return articleService.getPreviousArticleDetail(id);
     }
 }

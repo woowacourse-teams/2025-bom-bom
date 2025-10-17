@@ -14,6 +14,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ios: {
       buildNumber: '5',
       supportsTablet: true,
+      googleServicesFile: './GoogleService-Info.plist',
       infoPlist: {
         NSExceptionDomains: {
           'bombom.news': {

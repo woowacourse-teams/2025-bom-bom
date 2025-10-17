@@ -34,3 +34,6 @@ services:
     volumes:
       - /home/ec2-user/bombom-prod/logs:/logs
       - /home/ec2-user/bombom-prod/opentelemetry/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
+
+    # 컨테이너 graceful shutdown 대기 시간
+    stop_grace_period: 40s

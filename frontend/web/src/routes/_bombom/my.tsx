@@ -67,7 +67,7 @@ function MyPage() {
       case 'newsletters':
         return (
           <SubscribedNewslettersSection
-            newsletters={myNewsletters}
+            newsletters={myNewsletters ?? []}
             device={device}
           />
         );
@@ -77,15 +77,13 @@ function MyPage() {
   };
 
   return (
-    <Container device={device}>
-      {device !== 'mobile' && (
-        <TitleWrapper>
-          <TitleIconBox>
-            <AvatarIcon width={20} height={20} color={theme.colors.white} />
-          </TitleIconBox>
-          <Title>마이페이지</Title>
-        </TitleWrapper>
-      )}
+    <Container>
+      <TitleWrapper>
+        <TitleIconBox>
+          <AvatarIcon width={20} height={20} color={theme.colors.white} />
+        </TitleIconBox>
+        <Title>마이페이지</Title>
+      </TitleWrapper>
 
       <ContentWrapper device={device}>
         <TabsWrapper device={device}>
@@ -117,7 +115,7 @@ function MyPage() {
   );
 }
 
-const Container = styled.div<{ device: Device }>`
+const Container = styled.div`
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
@@ -172,7 +170,7 @@ const TabsWrapper = styled.div<{ device: Device }>`
 
   box-sizing: border-box;
 
-  order: ${({ device }) => (device === 'pc' ? 0 : 0)};
+  order: 0;
 
   ${({ device, theme }) => tabsWrapperStyles[device](theme)}
 `;

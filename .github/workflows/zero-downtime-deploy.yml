@@ -9,6 +9,7 @@ on:
 env:
   WORKING_BRANCH: server-blue-green
   HEALTH_CHECK_URL: http://localhost:8081/actuator/health
+  SERVER_CONTAINER_NAME: bombom-server-prod-sub
 
 jobs:
   # ---------------------------------------------------
@@ -156,9 +157,9 @@ jobs:
       # 🧩 배포 전 현재 실행 중 컨테이너 이미지 백업
       - name: 현재 실행 중 컨테이너 이미지 latest-stable로 백업
         run: |
-          echo "🧩 현재 실행 중 bombom-server-prod-sub 이미지 백업 시작"
+          echo "🧩 현재 실행 중 ${{ env.SERVER_CONTAINER_NAME }} 이미지 백업 시작"
           sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-          CURRENT_IMAGE=$(sudo docker inspect bombom-server-prod-sub --format='{{.Config.Image}}' 2>/dev/null || echo "none")
+          CURRENT_IMAGE=$(sudo docker inspect ${{ env.SERVER_CONTAINER_NAME }} --format='{{.Config.Image}}' 2>/dev/null || echo "none")
           CURRENT_IMAGE=$(echo "$CURRENT_IMAGE" | tr -d '\r\n')   # ✅ 공백/개행 제거
           echo "현재 이미지: $CURRENT_IMAGE"
           
@@ -169,7 +170,7 @@ jobs:
             sudo docker push bombomnewsletter/bom-bom:latest-stable
             echo "✅ 백업 완료: latest-stable"
           else
-            echo "⚠️ 실행 중인 bombom-server-prod-sub 컨테이너가 없어 백업을 건너뜀"
+            echo "⚠️ 실행 중인 ${{ env.SERVER_CONTAINER_NAME }} 컨테이너가 없어 백업을 건너뜀"
           fi
 
       - name: .env file 생성
@@ -185,10 +186,10 @@ jobs:
 
       - name: 기존 컨테이너 중지 및 삭제
         run: |
-          if sudo docker ps --format "{{.Names}}" | grep -q "bombom-server-prod-sub"; then
+          if sudo docker ps --format "{{.Names}}" | grep -q "${{ env.SERVER_CONTAINER_NAME }}"; then
             echo "🛑 기존 컨테이너 중지 및 삭제"
-            sudo docker stop bombom-server-prod-sub || true
-            sudo docker rm bombom-server-prod-sub || true
+            sudo docker stop ${{ env.SERVER_CONTAINER_NAME }} || true
+            sudo docker rm ${{ env.SERVER_CONTAINER_NAME }} || true
           fi
 
       - name: 컨테이너 재실행
@@ -248,7 +249,7 @@ jobs:
           done
           
           echo "❌ 헬스체크 실패 (연속 ${REQUIRED_SUCCESS}회 성공 조건 미충족)"
-          sudo docker logs bombom-server-prod-sub --tail 50 || true
+          sudo docker logs ${{ env.SERVER_CONTAINER_NAME }} --tail 50 || true
           exit 1
 
   # ---------------------------------------------------
@@ -274,9 +275,9 @@ jobs:
     steps:
       - name: prod-sub를 이전 버전 컨테이너로 build
         run: |
-          sudo docker stop bombom-server-prod-sub || true
-          sudo docker rm   bombom-server-prod-sub || true
-          sudo docker run -d --name bombom-server-prod-sub \
+          sudo docker stop ${{ env.SERVER_CONTAINER_NAME }} || true
+          sudo docker rm   ${{ env.SERVER_CONTAINER_NAME }} || true
+          sudo docker run -d --name ${{ env.SERVER_CONTAINER_NAME }} \
             -p 80:8080 -p 8081:8081 \
             --env-file .env \
             ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
@@ -342,9 +343,9 @@ jobs:
       # 🧩 배포 전 현재 실행 중 컨테이너 이미지 백업
       - name: 현재 실행 중 컨테이너 이미지 latest-stable로 백업
         run: |
-          echo "🧩 현재 실행 중 bombom-server-prod-sub 이미지 백업 시작"
+          echo "🧩 현재 실행 중 ${{ env.SERVER_CONTAINER_NAME }} 이미지 백업 시작"
           sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-          CURRENT_IMAGE=$(sudo docker inspect bombom-server-prod-sub --format='{{.Config.Image}}' 2>/dev/null || echo "none")
+          CURRENT_IMAGE=$(sudo docker inspect ${{ env.SERVER_CONTAINER_NAME }} --format='{{.Config.Image}}' 2>/dev/null || echo "none")
           CURRENT_IMAGE=$(echo "$CURRENT_IMAGE" | tr -d '\r\n')   # ✅ 공백/개행 제거
           echo "현재 이미지: $CURRENT_IMAGE"
           
@@ -355,7 +356,7 @@ jobs:
             sudo docker push bombomnewsletter/bom-bom:latest-stable
             echo "✅ 백업 완료: latest-stable"
           else
-            echo "⚠️ 실행 중인 bombom-server-prod-sub 컨테이너가 없어 백업을 건너뜀"
+            echo "⚠️ 실행 중인 ${{ env.SERVER_CONTAINER_NAME }} 컨테이너가 없어 백업을 건너뜀"
           fi
 
       - name: .env file 생성
@@ -371,10 +372,10 @@ jobs:
 
       - name: 기존 컨테이너 중지 및 삭제
         run: |
-          if sudo docker ps --format "{{.Names}}" | grep -q "bombom-server-prod-sub"; then
+          if sudo docker ps --format "{{.Names}}" | grep -q "${{ env.SERVER_CONTAINER_NAME }}"; then
             echo "🛑 기존 컨테이너 중지 및 삭제"
-            sudo docker stop bombom-server-prod-sub || true
-            sudo docker rm bombom-server-prod-sub || true
+            sudo docker stop ${{ env.SERVER_CONTAINER_NAME }} || true
+            sudo docker rm ${{ env.SERVER_CONTAINER_NAME }} || true
           fi
 
       - name: 컨테이너 재실행
@@ -434,7 +435,7 @@ jobs:
           done
           
           echo "❌ 헬스체크 실패 (연속 ${REQUIRED_SUCCESS}회 성공 조건 미충족)"
-          sudo docker logs bombom-server-prod-sub --tail 50 || true
+          sudo docker logs ${{ env.SERVER_CONTAINER_NAME }} --tail 50 || true
           exit 1
 
   # ---------------------------------------------------
@@ -460,9 +461,9 @@ jobs:
     steps:
       - name: prod-main을 이전 버전 컨테이너로 build
         run: |
-          sudo docker stop bombom-server-prod-sub || true
-          sudo docker rm   bombom-server-prod-sub || true
-          sudo docker run -d --name bombom-server-prod-sub \
+          sudo docker stop ${{ env.SERVER_CONTAINER_NAME }} || true
+          sudo docker rm   ${{ env.SERVER_CONTAINER_NAME }} || true
+          sudo docker run -d --name ${{ env.SERVER_CONTAINER_NAME }} \
             -p 80:8080 -p 8081:8081 \
             --env-file .env \
             ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
@@ -494,9 +495,9 @@ jobs:
     steps:
       - name: prod-sub를 이전 버전 컨테이너로 build
         run: |
-          sudo docker stop bombom-server-prod-sub || true
-          sudo docker rm   bombom-server-prod-sub || true
-          sudo docker run -d --name bombom-server-prod-sub \
+          sudo docker stop ${{ env.SERVER_CONTAINER_NAME }} || true
+          sudo docker rm   ${{ env.SERVER_CONTAINER_NAME }} || true
+          sudo docker run -d --name ${{ env.SERVER_CONTAINER_NAME }} \
             -p 80:8080 -p 8081:8081 \
             --env-file .env \
             ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable

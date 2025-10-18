@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocalStorageState } from './useLocalStorageState';
 import { isWebView } from '@/libs/webview/webview.utils';
 import { isMobileByUserAgent } from '@/utils/device';
+import { openOrDownloadApp } from '@/utils/downloadApp';
 
 const APP_INSTALL_DISMISSED_KEY = 'app-install-prompt-dismissed';
 const DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
@@ -20,7 +21,7 @@ export function useAppInstallPrompt() {
   }, [dismissedUntil]);
 
   const handleInstallClick = async () => {
-    // 앱 설치
+    openOrDownloadApp();
   };
 
   const handleLaterClick = () => {

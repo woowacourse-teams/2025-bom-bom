@@ -20,7 +20,7 @@ export function useAppInstallPrompt() {
     setShowModal(true);
   }, [dismissedUntil]);
 
-  const handleInstallClick = async () => {
+  const handleInstallClick = () => {
     downloadApp();
   };
 

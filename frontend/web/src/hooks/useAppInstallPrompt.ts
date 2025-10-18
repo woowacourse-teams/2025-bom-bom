@@ -1,77 +1,26 @@
 import { useEffect, useState } from 'react';
-import { useDevice } from './useDevice';
 import { useLocalStorageState } from './useLocalStorageState';
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-}
+import { isWebView } from '@/libs/webview/webview.utils';
+import { isMobileByUserAgent } from '@/utils/device';
 
 const APP_INSTALL_DISMISSED_KEY = 'app-install-prompt-dismissed';
 const DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 export function useAppInstallPrompt() {
-  const device = useDevice();
-  const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
   const [dismissedUntil, setDismissedUntil] = useLocalStorageState<number>(
     APP_INSTALL_DISMISSED_KEY,
   );
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    if (device !== 'mobile') {
-      return;
-    }
+    if (!isMobileByUserAgent() || isWebView()) return;
+    if (dismissedUntil && Date.now() < dismissedUntil) return;
 
-    if (dismissedUntil && Date.now() < dismissedUntil) {
-      return;
-    }
-
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-
-      const event = e as BeforeInstallPromptEvent;
-      setDeferredPrompt(event);
-      setShowModal(true);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    const isStandalone = window.matchMedia(
-      '(display-mode: standalone)',
-    ).matches;
-    const isInApp = window.navigator.standalone === true || isStandalone;
-
-    if (!isInApp && device === 'mobile') {
-      setShowModal(true);
-    }
-
-    return () => {
-      window.removeEventListener(
-        'beforeinstallprompt',
-        handleBeforeInstallPrompt,
-      );
-    };
-  }, [device, dismissedUntil]);
+    setShowModal(true);
+  }, [dismissedUntil]);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) {
-      setShowModal(false);
-      return;
-    }
-
-    await deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-    } else {
-      console.log('User dismissed the install prompt');
-    }
-
-    setDeferredPrompt(null);
-    setShowModal(false);
+    // 앱 설치
   };
 
   const handleLaterClick = () => {

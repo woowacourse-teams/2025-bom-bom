@@ -1,7 +1,7 @@
 import path from 'path';
+import { tanstackRouter } from '@tanstack/router-plugin/webpack';
 import webpack from 'webpack';
 import nodeExternals from 'webpack-node-externals';
-import { tanstackRouter } from '@tanstack/router-plugin/webpack';
 
 const config: webpack.Configuration = {
   mode: 'production',
@@ -12,7 +12,11 @@ const config: webpack.Configuration = {
     path: path.resolve(__dirname, 'dist'),
     clean: false, // 클라이언트 빌드 파일 유지
   },
-  externals: [nodeExternals()],
+  externals: [
+    nodeExternals({
+      allowlist: [/@bombom\//], // workspace 패키지는 번들에 포함
+    }),
+  ],
   module: {
     rules: [
       {

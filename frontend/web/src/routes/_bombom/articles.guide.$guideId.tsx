@@ -32,10 +32,8 @@ export const Route = createFileRoute('/_bombom/articles/guide/$guideId')({
 function GuideMailPage() {
   const { guideId } = Route.useParams();
   const guideIdNumber = Number(guideId);
-  const [guideArticles, setGuideArticles] = useLocalStorageState<
-    LocalGuideMail,
-    string
-  >(GUIDE_MAIL_STORAGE_KEY);
+  const [guideArticles, setGuideArticles] =
+    useLocalStorageState<LocalGuideMail>(GUIDE_MAIL_STORAGE_KEY);
 
   const guideArticle = GUIDE_MAILS.find(
     (article) => article.articleId === guideIdNumber,

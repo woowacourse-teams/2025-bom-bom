@@ -30,8 +30,8 @@ export const Route = createFileRoute('/_bombom/guide')({
 
 function GuidePage() {
   const guideMailReadMailIds =
-    createStorage<LocalGuideMail, string>(GUIDE_MAIL_STORAGE_KEY).get()
-      ?.readMailIds ?? [];
+    createStorage<LocalGuideMail>(GUIDE_MAIL_STORAGE_KEY).get()?.readMailIds ??
+    [];
 
   const guideArticles = GUIDE_MAILS.map((article) => {
     return {

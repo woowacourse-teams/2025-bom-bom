@@ -452,6 +452,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/members/me/newsletters': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 구독한 뉴스레터 목록 조회
+     * @description 로그인한 회원이 구독중인 뉴스레터 목록을 조회합니다.
+     */
+    get: operations['getSubscribedNewsletters'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/highlights/statistics/newsletters': {
     parameters: {
       query?: never;
@@ -846,8 +866,8 @@ export interface components {
       mainPageUrl: string;
       subscribeUrl: string;
       issueCycle: string;
-      subscribePageImageUrl?: string;
       previousNewsletterUrl?: string;
+      subscribeMethod?: string;
     };
     ReadingInformationResponse: {
       /**
@@ -931,6 +951,14 @@ export interface components {
       /** @description 출석 여부 */
       isAttended: boolean;
     };
+    SubscribedNewsletterResponse: {
+      /** Format: int64 */
+      newsletterId: number;
+      name: string;
+      imageUrl?: string;
+      description: string;
+      category: string;
+    };
     Pageable: {
       /** Format: int32 */
       page?: number;
@@ -966,15 +994,20 @@ export interface components {
       sort?: components['schemas']['SortObject'];
       first?: boolean;
       last?: boolean;
+      pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
-      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     PageableObject: {
       /** Format: int64 */
       offset?: number;
       sort?: components['schemas']['SortObject'];
+      paged?: boolean;
+      /** Format: int32 */
+      pageNumber?: number;
+      /** Format: int32 */
+      pageSize?: number;
       /** Format: int32 */
       pageSize?: number;
       paged?: boolean;
@@ -1047,9 +1080,9 @@ export interface components {
       sort?: components['schemas']['SortObject'];
       first?: boolean;
       last?: boolean;
+      pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
-      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     BookmarkStatusResponse: {
@@ -1107,9 +1140,9 @@ export interface components {
       sort?: components['schemas']['SortObject'];
       first?: boolean;
       last?: boolean;
+      pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
-      pageable?: components['schemas']['PageableObject'];
       empty?: boolean;
     };
     ArticleDetailResponse: {
@@ -2053,6 +2086,33 @@ export interface operations {
         content: {
           '*/*': components['schemas']['PetResponse'];
         };
+      };
+    };
+  };
+  getSubscribedNewsletters: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description 구독한 뉴스레터 목록 조회 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['SubscribedNewsletterResponse'][];
+        };
+      };
+      /** @description 인증 실패 (로그인 필요) */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

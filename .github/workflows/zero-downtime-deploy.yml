@@ -12,11 +12,21 @@ env:
   SERVER_CONTAINER_NAME: bombom-server-prod-sub
 
 jobs:
+  # 0) Release ID 생성 (후보/안정판 폴더 공통 식별자)
+  prepare-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.mk.outputs.release_id }}
+    steps:
+      - id: mk
+        run: echo "release_id=$(date +%Y%m%d-%H%M%S)-${GITHUB_SHA::12}" >> $GITHUB_OUTPUT
+
   # ---------------------------------------------------
   # 1️⃣ Build & Test & Push
   # ---------------------------------------------------
   build:
     runs-on: ubuntu-latest
+    needs: prepare-release
     defaults:
       run:
         working-directory: ./backend/bom-bom-server
@@ -136,7 +146,7 @@ jobs:
   # ---------------------------------------------------
   deploy-sub:
     name: "🚀 Step 2: prod-sub 배포"
-    needs: shift-traffic-to-main
+    needs: [prepare-release, shift-traffic-to-main]
     runs-on: [self-hosted, prod-sub]
     defaults:
       run:
@@ -160,7 +170,7 @@ jobs:
           echo "🧩 현재 실행 중 ${{ env.SERVER_CONTAINER_NAME }} 이미지 백업 시작"
           sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
           CURRENT_IMAGE=$(sudo docker inspect ${{ env.SERVER_CONTAINER_NAME }} --format='{{.Config.Image}}' 2>/dev/null || echo "none")
-          CURRENT_IMAGE=$(echo "$CURRENT_IMAGE" | tr -d '\r\n')   # ✅ 공백/개행 제거
+          CURRENT_IMAGE=$(echo "$CURRENT_IMAGE" | tr -d '\r\n')
           echo "현재 이미지: $CURRENT_IMAGE"
           
           if [ "$CURRENT_IMAGE" != "none" ]; then
@@ -251,6 +261,29 @@ jobs:
           echo "❌ 헬스체크 실패 (연속 ${REQUIRED_SUCCESS}회 성공 조건 미충족)"
           sudo docker logs ${{ env.SERVER_CONTAINER_NAME }} --tail 50 || true
           exit 1
+      - name: 릴리스 번들 저장 (후보로 저장 - compose + 메타데이터)
+        if: ${{ success() }}
+        env:
+          RELEASE_ID: ${{ needs.prepare-release.outputs.release_id }}
+        run: |
+          set -euo pipefail
+          CAND_DIR="/opt/bom-bom/candidates/${RELEASE_ID}"
+          sudo mkdir -p "$CAND_DIR"
+          sudo cp docker-compose-prod-sub.yml "$CAND_DIR/"
+          IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod"
+          IMAGE_DIGEST="$(sudo docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" 2>/dev/null || echo unknown)"
+          TS="$(date -Iseconds)"
+          sudo bash -c "cat > '$CAND_DIR/release.json' <<EOF
+          {
+            \"commit\": \"${GITHUB_SHA}\",
+            \"image\": \"${IMAGE_NAME}\",
+            \"image_digest\": \"${IMAGE_DIGEST}\",
+            \"compose_file\": \"docker-compose-prod-sub.yml\",
+            \"candidate_at\": \"${TS}\"
+          }
+          EOF"
+          sudo ln -sfn "$CAND_DIR" "/opt/bom-bom/candidates/latest"
+          echo "🗃 후보 저장 완료: $CAND_DIR"
 
   # ---------------------------------------------------
   # 4️⃣ prod-sub 배포 실패 시 rollback
@@ -299,38 +332,42 @@ jobs:
         run: |
           echo "📦 latest-stable 이미지 가져오기"
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
-          
-      - name: 컨테이너 롤백 (latest-stable)
+          echo "🏷  latest-stable → prod retag"
+          sudo docker tag  ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable \
+                           ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod
+
+      - name: 저장된 안정판 compose로 롤백 실행
         shell: bash
         env:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           set -euo pipefail
-          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          FALLBACK_COMPOSE="/opt/bom-bom/releases/stable/docker-compose-prod-sub.yml"
+          if [ ! -f "$FALLBACK_COMPOSE" ]; then
+            echo "⚠️ 안정판 compose가 없어 레포의 compose를 사용합니다."
+            FALLBACK_COMPOSE="docker-compose-prod-sub.yml"
+          fi
           
           echo "🛑 기존 컨테이너 종료 및 제거"
-          sudo docker compose -f docker-compose-prod-sub.yml --env-file .env down || true
+          sudo docker compose -f "$FALLBACK_COMPOSE" --env-file .env down || true
           
-          echo "🚀 안정 버전 컨테이너 재시작"
-          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
-          -f docker-compose-prod-sub.yml --env-file .env \
-          up -d --remove-orphans --force-recreate \
-          --build-arg IMAGE_TAG=latest-stable
+          echo "🚀 안정 버전 compose로 재기동"
+          sudo docker compose -f "$FALLBACK_COMPOSE" --env-file .env \
+            up -d --remove-orphans --force-recreate
           
           echo "⏳ 헬스체크 중..."
           for i in {1..10}; do
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
-          if [ "$STATUS" = "200" ]; then
-           echo "✅ prod-sub 롤백 성공 (서비스 정상)"
-           exit 0
-          fi
-          echo "⏳ 상태: $STATUS ($i/20)"
-          sleep 10
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ prod-sub 롤백 성공 (서비스 정상)"
+              exit 0
+            fi
+            echo "⏳ 상태: $STATUS ($i/10)"
+            sleep 10
           done
-          
           echo "❌ readiness 실패"
           sudo docker logs ${{ env.SERVER_CONTAINER_NAME }} --tail 50 || true
-          exit 1      
+          exit 1
 
   # X-5) 최종 트래픽 정상화(원래의 양쪽 활성/가중치로 복귀)
   rollback-sub-restore-final-traffic:
@@ -389,7 +426,7 @@ jobs:
           echo "🧩 현재 실행 중 ${{ env.SERVER_CONTAINER_NAME }} 이미지 백업 시작"
           sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
           CURRENT_IMAGE=$(sudo docker inspect ${{ env.SERVER_CONTAINER_NAME }} --format='{{.Config.Image}}' 2>/dev/null || echo "none")
-          CURRENT_IMAGE=$(echo "$CURRENT_IMAGE" | tr -d '\r\n')   # ✅ 공백/개행 제거
+          CURRENT_IMAGE=$(echo "$CURRENT_IMAGE" | tr -d '\r\n')
           echo "현재 이미지: $CURRENT_IMAGE"
           
           if [ "$CURRENT_IMAGE" != "none" ]; then
@@ -445,14 +482,12 @@ jobs:
       - name: 컨테이너 헬스체크
         run: |
           echo "🏥 컨테이너 헬스체크 시작..."
-          
-          # 컨테이너가 완전히 기동될 시간을 약간 기다림
           echo "⏳ 컨테이너 기동 대기 (20초)"
           sleep 20
           
           SUCCESS_COUNT=0
-          MAX_RETRIES=10        # 총 10번(약 100초) 시도
-          REQUIRED_SUCCESS=5    # 연속 5회 성공해야 진짜 Healthy
+          MAX_RETRIES=10
+          REQUIRED_SUCCESS=5
           
           for ((i=1; i<=MAX_RETRIES; i++)); do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
@@ -524,37 +559,39 @@ jobs:
           PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
           EOF
 
-      - name: latest-stable 이미지 Pull
+      - name: latest-stable 이미지 Pull 및 prod로 retag
         run: |
           echo "📦 latest-stable 이미지 가져오기"
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+          echo "🏷  latest-stable → prod retag"
+          sudo docker tag  ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable \
+                           ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod
 
-      - name: 컨테이너 롤백 (latest-stable)
+      - name: 저장된 안정판 compose로 롤백 실행
         shell: bash
         env:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           set -euo pipefail
-          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
-
+          FALLBACK_COMPOSE="/opt/bom-bom/releases/stable/docker-compose-prod-sub.yml"
+          if [ ! -f "$FALLBACK_COMPOSE" ]; then
+            echo "⚠️ 안정판 compose가 없어 레포의 compose를 사용합니다."
+            FALLBACK_COMPOSE="docker-compose-prod-sub.yml"
+          fi
           echo "🛑 기존 컨테이너 종료 및 제거"
-          sudo docker compose -f docker-compose-prod-sub.yml --env-file .env down || true
-
-          echo "🚀 안정 버전 컨테이너 재시작"
-          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
-          -f docker-compose-prod-sub.yml --env-file .env \
-          up -d --remove-orphans --force-recreate \
-          --build-arg IMAGE_TAG=latest-stable
-
+          sudo docker compose -f "$FALLBACK_COMPOSE" --env-file .env down || true
+          echo "🚀 안정 버전 compose로 재기동"
+          sudo docker compose -f "$FALLBACK_COMPOSE" --env-file .env \
+            up -d --remove-orphans --force-recreate
           echo "⏳ 헬스체크 중..."
           for i in {1..10}; do
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
-          if [ "$STATUS" = "200" ]; then
-           echo "✅ prod-sub 롤백 성공 (서비스 정상)"
-           exit 0
-          fi
-          echo "⏳ 상태: $STATUS ($i/20)"
-          sleep 10
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ prod-main 롤백 성공 (서비스 정상)"
+              exit 0
+            fi
+            echo "⏳ 상태: $STATUS ($i/10)"
+            sleep 10
           done
 
           echo "❌ readiness 실패"
@@ -601,37 +638,42 @@ jobs:
           PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
           EOF
 
-      - name: latest-stable 이미지 Pull
+      - name: latest-stable 이미지 Pull 및 prod로 retag
         run: |
           echo "📦 latest-stable 이미지 가져오기"
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+          echo "🏷  latest-stable → prod retag"
+          sudo docker tag  ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable \
+                           ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod
 
-      - name: 컨테이너 롤백 (latest-stable)
+      - name: 저장된 안정판 compose로 롤백 실행
         shell: bash
         env:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           set -euo pipefail
-          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          FALLBACK_COMPOSE="/opt/bom-bom/releases/stable/docker-compose-prod-sub.yml"
+          if [ ! -f "$FALLBACK_COMPOSE" ]; then
+            echo "⚠️ 안정판 compose가 없어 레포의 compose를 사용합니다."
+            FALLBACK_COMPOSE="docker-compose-prod-sub.yml"
+          fi
 
           echo "🛑 기존 컨테이너 종료 및 제거"
-          sudo docker compose -f docker-compose-prod-sub.yml --env-file .env down || true
+          sudo docker compose -f "$FALLBACK_COMPOSE" --env-file .env down || true
 
-          echo "🚀 안정 버전 컨테이너 재시작"
-          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
-          -f docker-compose-prod-sub.yml --env-file .env \
-          up -d --remove-orphans --force-recreate \
-          --build-arg IMAGE_TAG=latest-stable
+          echo "🚀 안정 버전 compose로 재기동"
+          sudo docker compose -f "$FALLBACK_COMPOSE" --env-file .env \
+            up -d --remove-orphans --force-recreate
 
           echo "⏳ 헬스체크 중..."
           for i in {1..10}; do
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
-          if [ "$STATUS" = "200" ]; then
-           echo "✅ prod-sub 롤백 성공 (서비스 정상)"
-           exit 0
-          fi
-          echo "⏳ 상태: $STATUS ($i/20)"
-          sleep 10
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ prod-sub 롤백 성공 (서비스 정상)"
+              exit 0
+            fi
+            echo "⏳ 상태: $STATUS ($i/10)"
+            sleep 10
           done
 
           echo "❌ readiness 실패"
@@ -651,7 +693,66 @@ jobs:
           echo "✅ 전체 롤백 후 트래픽 정상화 완료"
 
   # ---------------------------------------------------
-  # 6️⃣ 트래픽 복구
+  # 6️⃣ 성공 시 안정판 승격 (compose & 이미지)
+  # ---------------------------------------------------
+  promote-stable-sub:
+    needs: [prepare-release, deploy-sub, deploy-main]
+    if: ${{ needs.deploy-sub.result == 'success' && needs.deploy-main.result == 'success' }}
+    runs-on: [self-hosted, prod-sub]
+    env:
+      RELEASE_ID: ${{ needs.prepare-release.outputs.release_id }}
+    steps:
+      - name: 후보 → 안정판 승격 (sub)
+        run: |
+          set -euo pipefail
+          CAND_DIR="/opt/bom-bom/candidates/${RELEASE_ID}"
+          REL_DIR="/opt/bom-bom/releases/${RELEASE_ID}"
+          sudo mkdir -p "$REL_DIR"
+          if [ -f "$CAND_DIR/docker-compose-prod-sub.yml" ]; then
+            sudo cp "$CAND_DIR/docker-compose-prod-sub.yml" "$REL_DIR/"
+          fi
+          sudo ln -sfn "$REL_DIR" "/opt/bom-bom/releases/stable"
+          echo "✅ SUB 안정판 승격: $REL_DIR → /opt/bom-bom/releases/stable"
+
+  promote-stable-main:
+    needs: [prepare-release, deploy-sub, deploy-main]
+    if: ${{ needs.deploy-sub.result == 'success' && needs.deploy-main.result == 'success' }}
+    runs-on: [self-hosted, prod-main]
+    env:
+      RELEASE_ID: ${{ needs.prepare-release.outputs.release_id }}
+    steps:
+      - name: 후보 → 안정판 승격 (main)
+        run: |
+          set -euo pipefail
+          CAND_DIR="/opt/bom-bom/candidates/${RELEASE_ID}"
+          REL_DIR="/opt/bom-bom/releases/${RELEASE_ID}"
+          sudo mkdir -p "$REL_DIR"
+          if [ -f "$CAND_DIR/docker-compose-prod-sub.yml" ]; then
+            sudo cp "$CAND_DIR/docker-compose-prod-sub.yml" "$REL_DIR/"
+          fi
+          sudo ln -sfn "$REL_DIR" "/opt/bom-bom/releases/stable"
+          echo "✅ MAIN 안정판 승격: $REL_DIR → /opt/bom-bom/releases/stable"
+
+  promote-stable-image:
+    needs: [deploy-sub, deploy-main]
+    if: ${{ needs.deploy-sub.result == 'success' && needs.deploy-main.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: latest-stable → 새 안정판으로 갱신
+        run: |
+          SRC="${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod"
+          docker pull "$SRC"
+          docker tag "$SRC" "${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable"
+          docker push "${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable"
+          echo "✅ latest-stable 갱신 완료"
+
+  # ---------------------------------------------------
+  # 7️⃣ 트래픽 복구
   # ---------------------------------------------------
   restore-final-traffic:
     name: "🔁 Step 5: 트래픽 원상복구"

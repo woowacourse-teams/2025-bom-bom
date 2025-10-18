@@ -18,7 +18,7 @@ export default (env: Env, argv: Argv) => {
 
   const config: webpack.Configuration = {
     mode: argv.mode,
-    entry: './src/main.tsx',
+    entry: isProduction ? './src/entry-client.tsx' : './src/main.tsx',
     output: {
       filename: 'js/[name].[contenthash:8].js',
       chunkFilename: 'js/[name].[contenthash:8].chunk.js',

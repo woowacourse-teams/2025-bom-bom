@@ -5,9 +5,8 @@ import type {
   WindowWithWebkit,
 } from '@bombom/shared/webview';
 
-export const isAndroid = (): boolean => !!window.ReactNativeWebView;
-export const isIOS = (): boolean =>
-  !!(window as WindowWithWebkit).webkit?.messageHandlers?.ReactNativeWebView;
+export const isAndroid = (): boolean => navigator.userAgent.includes('google');
+export const isIOS = (): boolean => navigator.userAgent.includes('Apple');
 
 export const isWebView = (): boolean => {
   return !!(isAndroid() || isIOS());

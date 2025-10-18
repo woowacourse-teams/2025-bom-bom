@@ -270,6 +270,9 @@ importers:
       '@types/semver':
         specifier: ^7.7.1
         version: 7.7.1
+      '@types/serve-static':
+        specifier: ^1.15.9
+        version: 1.15.9
       '@types/webpack':
         specifier: ^5.28.5
         version: 5.28.5(@swc/core@1.13.5)(esbuild@0.25.10)(webpack-cli@6.0.1)

@@ -10,6 +10,7 @@ import Chip from '@/components/Chip/Chip';
 import ImageInfoCardSkeleton from '@/components/ImageInfoCard/ImageInfoCardSkeleton';
 import Modal from '@/components/Modal/Modal';
 import useModal from '@/components/Modal/useModal';
+import SearchInput from '@/components/SearchInput/SearchInput';
 import { CATEGORIES, NEWSLETTER_COUNT } from '@/constants/newsletter';
 import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
@@ -21,6 +22,7 @@ import TrendingUpIcon from '#/assets/svg/trending-up.svg';
 const TrendySection = () => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<Category>('전체');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const { newsletterDetail } = useSearch({ from: '/_bombom/' });
   const [selectedNewsletter, setSelectedNewsletter] =
     useState<Newsletter | null>(null);
@@ -42,10 +44,14 @@ const TrendySection = () => {
   });
   const device = useDevice();
 
-  const filteredNewsletters = newsletters?.filter(
-    (newsletter) =>
-      selectedCategory === '전체' || newsletter.category === selectedCategory,
-  );
+  const filteredNewsletters = newsletters?.filter((newsletter) => {
+    const matchesCategory =
+      selectedCategory === '전체' || newsletter.category === selectedCategory;
+    const matchesSearch =
+      searchQuery === '' ||
+      newsletter.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   const handleCardClick = (newsletter: Newsletter) => {
     setSelectedNewsletter(newsletter);
@@ -87,6 +93,14 @@ const TrendySection = () => {
           </SectionIconBox>
           <SectionTitle>트렌디한 뉴스레터</SectionTitle>
         </SectionHeader>
+        <SearchInputWrapper>
+          <SearchInput
+            placeholder="뉴스레터 이름으로 검색"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="뉴스레터 검색"
+          />
+        </SearchInputWrapper>
         <TagContainer>
           {CATEGORIES.map((category, index) => (
             <Chip
@@ -179,6 +193,10 @@ const SectionTitle = styled.h2`
 
   color: ${({ theme }) => theme.colors.black};
   font: ${({ theme }) => theme.fonts.heading5};
+`;
+
+const SearchInputWrapper = styled.div`
+  margin-bottom: 16px;
 `;
 
 const TagContainer = styled.div`

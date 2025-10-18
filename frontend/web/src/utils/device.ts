@@ -1,5 +1,11 @@
+export const isAndroidByUserAgent = () => {
+  return /Android/i.test(navigator.userAgent);
+};
+
+export const isIOSByUserAgent = () => {
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+};
+
 export const isMobileByUserAgent = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent,
-  );
+  return isAndroidByUserAgent() || isIOSByUserAgent();
 };

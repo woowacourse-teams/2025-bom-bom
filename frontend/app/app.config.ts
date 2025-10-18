@@ -1,11 +1,12 @@
 import { ConfigContext, ExpoConfig } from 'expo/config';
+import { APP_VERSION } from './constants/app';
 
 export default ({ config }: ConfigContext): ExpoConfig => {
   return {
     ...config,
     name: '봄봄',
     slug: 'bombom',
-    version: '1.0.3',
+    version: APP_VERSION,
     orientation: 'portrait',
     icon: './app/assets/images/logo.png',
     scheme: 'bombom',

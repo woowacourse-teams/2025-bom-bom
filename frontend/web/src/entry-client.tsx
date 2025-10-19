@@ -14,7 +14,7 @@ import { routeTree } from './routeTree.gen';
 import reset from './styles/reset';
 import { isDevelopment, isProduction } from './utils/environment';
 
-if (isProduction) Clarity.init(ENV.clarityProjectId);
+// if (isProduction) Clarity.init(ENV.clarityProjectId);
 
 export const queryClient = new QueryClient();
 

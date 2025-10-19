@@ -1,17 +1,16 @@
 import { theme } from '@bombom/shared';
 import styled from '@emotion/styled';
-import { type ChangeEvent } from 'react';
+import { useQueryState } from 'nuqs';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import Checkbox from '@/components/Checkbox/Checkbox';
 import SearchInput from '@/components/SearchInput/SearchInput';
 import Select from '@/components/Select/Select';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import type { Sort } from './ArticleListControls.types';
 import CancelIcon from '#/assets/svg/close.svg';
 import DeleteIcon from '#/assets/svg/delete.svg';
 
 interface ArticleListControlsProps {
-  searchInput: string;
-  onSearchChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  sortFilter: 'DESC' | 'ASC';
-  onSortChange: (value: 'DESC' | 'ASC') => void;
   editMode: boolean;
   onSelectDeleteButtonClick: () => void;
   onSelectCancelButtonClick: () => void;
@@ -21,10 +20,6 @@ interface ArticleListControlsProps {
 }
 
 export default function ArticleListControls({
-  searchInput,
-  onSearchChange,
-  sortFilter,
-  onSortChange,
   editMode,
   onSelectDeleteButtonClick,
   onSelectCancelButtonClick,
@@ -32,12 +27,31 @@ export default function ArticleListControls({
   allChecked,
   onAllSelectClick,
 }: ArticleListControlsProps) {
+  const [search, setSearch] = useState('');
+  const [, setSearchParam] = useQueryState('search', {
+    defaultValue: '',
+  });
+  const [sort, setSort] = useQueryState('sort', { defaultValue: 'DESC' });
+  const debouncedSearchInput = useDebouncedValue(search, 500);
+
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+  };
+
+  const handleSortChange = (value: 'DESC' | 'ASC') => {
+    setSort(value);
+  };
+
+  useEffect(() => {
+    setSearchParam(debouncedSearchInput);
+  }, [debouncedSearchInput, setSearchParam]);
+
   return (
     <Container>
       <SearchInput
         placeholder="뉴스레터 제목으로 검색하세요..."
-        value={searchInput}
-        onChange={onSearchChange}
+        value={search}
+        onChange={handleSearchChange}
       />
       <SummaryBar>
         {editMode ? (
@@ -67,8 +81,8 @@ export default function ArticleListControls({
             { value: 'DESC', label: '최신순' },
             { value: 'ASC', label: '오래된순' },
           ]}
-          selectedValue={sortFilter}
-          onSelectOption={onSortChange}
+          selectedValue={sort as Sort}
+          onSelectOption={handleSortChange}
         />
       </SummaryBar>
     </Container>

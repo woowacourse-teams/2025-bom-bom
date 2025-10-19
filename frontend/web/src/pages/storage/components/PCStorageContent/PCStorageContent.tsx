@@ -12,10 +12,6 @@ import type { GetArticlesParams } from '@/apis/articles';
 
 interface PCStorageContentProps {
   baseQueryParams: GetArticlesParams;
-  searchInput: string;
-  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  sortFilter: 'DESC' | 'ASC';
-  onSortChange: (value: 'DESC' | 'ASC') => void;
   onPageChange: (page: number) => void;
   page: number;
   resetPage: () => void;
@@ -23,10 +19,6 @@ interface PCStorageContentProps {
 
 export default function PCStorageContent({
   baseQueryParams,
-  searchInput,
-  onSearchChange,
-  sortFilter,
-  onSortChange,
   onPageChange,
   page,
   resetPage,
@@ -35,7 +27,7 @@ export default function PCStorageContent({
     queries.articles({
       ...baseQueryParams,
       newsletterId: baseQueryParams.newsletterId || undefined,
-      page: page - 1,
+      page: baseQueryParams.page ?? 1 - 1,
     }),
   );
   const [editMode, setEditMode] = useState(false);
@@ -54,29 +46,35 @@ export default function PCStorageContent({
     setEditMode(true);
   };
 
+  const disableEditMode = () => {
+    setEditMode(false);
+  };
+
   useEffect(() => {
     resetPage();
   }, [baseQueryParams.keyword, resetPage]);
 
   useEffect(() => {
     clearSelection();
-  }, [searchInput, sortFilter, page, clearSelection]);
+  }, [
+    baseQueryParams.keyword,
+    baseQueryParams.sort,
+    baseQueryParams.page,
+    clearSelection,
+  ]);
 
   return (
     <>
       <ArticleListControls
-        searchInput={searchInput}
-        onSearchChange={onSearchChange}
-        sortFilter={sortFilter}
-        onSortChange={onSortChange}
         editMode={editMode}
         onSelectDeleteButtonClick={enableEditMode}
+        onSelectCancelButtonClick={disableEditMode}
         onDeleteButtonClick={() => console.log('delete')}
         allChecked={isAllSelected}
         onAllSelectClick={toggleSelectAll}
       />
-      {haveNoContent && searchInput !== '' ? (
-        <EmptySearchCard searchQuery={searchInput} />
+      {haveNoContent && baseQueryParams.keyword !== '' ? (
+        <EmptySearchCard searchQuery={baseQueryParams.keyword ?? ''} />
       ) : haveNoContent ? (
         <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
       ) : isLoading ? (

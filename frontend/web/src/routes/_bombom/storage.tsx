@@ -1,14 +1,15 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
+import { Suspense } from 'react';
 import RequireLogin from '@/hocs/RequireLogin';
 import { useDevice } from '@/hooks/useDevice';
-import MobileStorageContent from '@/pages/storage/components/MobileStorageContent/MobileStorageContent';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import NewsletterFilterSkeleton from '@/pages/storage/components/NewsletterFilter/NewsletterFilterSkeleton';
 import PCStorageContent from '@/pages/storage/components/PCStorageContent/PCStorageContent';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import { useStorageFilters } from '@/pages/storage/hooks/useStorageFilters';
+import type { Sort } from '@/pages/storage/components/ArticleListControls/ArticleListControls.types';
 import StorageIcon from '#/assets/svg/storage.svg';
 
 export const Route = createFileRoute('/_bombom/storage')({
@@ -28,6 +29,17 @@ export const Route = createFileRoute('/_bombom/storage')({
       <Storage />
     </RequireLogin>
   ),
+  validateSearch: (search: {
+    search?: string;
+    sort?: Sort;
+    newsletterId?: number;
+  }) => {
+    return {
+      search: search.search,
+      sort: search.sort,
+      newsletterId: search.newsletterId,
+    };
+  },
 });
 
 function Storage() {
@@ -35,20 +47,8 @@ function Storage() {
   const isPC = device === 'pc';
   const isMobile = device === 'mobile';
 
-  const {
-    selectedNewsletterId,
-    sortFilter,
-    searchInput,
-    baseQueryParams,
-    newsletterCounts,
-    isLoading,
-    handleNewsletterChange,
-    handleSortChange,
-    handleSearchChange,
-    handlePageChange,
-    page,
-    resetPage,
-  } = useStorageFilters();
+  const { baseQueryParams, handlePageChange, page, resetPage } =
+    useStorageFilters();
 
   return (
     <Container>
@@ -63,43 +63,20 @@ function Storage() {
 
       <ContentWrapper isPC={isPC}>
         <SidebarSection isPC={isPC}>
-          {isLoading ? (
-            <NewsletterFilterSkeleton />
-          ) : (
-            <NewsLetterFilter
-              newsLetterList={[
-                {
-                  id: 0,
-                  name: '전체',
-                  articleCount: newsletterCounts?.totalCount ?? 0,
-                  imageUrl: '',
-                },
-                ...(newsletterCounts?.newsletters
-                  .map((newsletter) => ({
-                    ...newsletter,
-                    articleCount: newsletter.articleCount ?? 0,
-                  }))
-                  .filter((newsletter) => newsletter.articleCount !== 0) ?? []),
-              ]}
-              selectedNewsletterId={selectedNewsletterId}
-              onSelectNewsletter={handleNewsletterChange}
-            />
-          )}
+          <Suspense fallback={<NewsletterFilterSkeleton />}>
+            <NewsLetterFilter />
+          </Suspense>
           <QuickMenu />
         </SidebarSection>
         <MainContentSection isPC={isPC}>
-          {isPC ? (
-            <PCStorageContent
-              baseQueryParams={baseQueryParams}
-              searchInput={searchInput}
-              onSearchChange={handleSearchChange}
-              sortFilter={sortFilter}
-              onSortChange={handleSortChange}
-              onPageChange={handlePageChange}
-              page={page}
-              resetPage={resetPage}
-            />
-          ) : (
+          {/* {isPC ? ( */}
+          <PCStorageContent
+            baseQueryParams={baseQueryParams}
+            onPageChange={handlePageChange}
+            page={page}
+            resetPage={resetPage}
+          />
+          {/* ) : (
             <MobileStorageContent
               baseQueryParams={baseQueryParams}
               searchInput={searchInput}
@@ -108,7 +85,7 @@ function Storage() {
               onSortChange={handleSortChange}
               resetPage={resetPage}
             />
-          )}
+           )} */}
         </MainContentSection>
       </ContentWrapper>
     </Container>

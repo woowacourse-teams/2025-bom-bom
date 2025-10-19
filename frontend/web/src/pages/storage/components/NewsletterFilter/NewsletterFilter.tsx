@@ -1,24 +1,49 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { useSearch } from '@tanstack/react-router';
+import { parseAsInteger, useQueryState } from 'nuqs';
+import { queries } from '@/apis/queries';
 import Badge from '@/components/Badge/Badge';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
 import { useDevice } from '@/hooks/useDevice';
-import type { Newsletter } from '@/types/articles';
 import NewsIcon from '#/assets/svg/news.svg';
 
-interface NewsLetterFilterProps {
-  newsLetterList: Newsletter['newsletters'];
-  selectedNewsletterId: number | null;
-  onSelectNewsletter: (id: number | null) => void;
-}
-
-function NewsLetterFilter({
-  newsLetterList,
-  selectedNewsletterId,
-  onSelectNewsletter,
-}: NewsLetterFilterProps) {
+function NewsLetterFilter() {
   const device = useDevice();
+  const searchParam = useSearch({
+    from: '/_bombom/storage',
+    select: (search) => search.search,
+  });
+  const { data: newsletterFilters } = useSuspenseQuery(
+    queries.articlesStatisticsNewsletters({
+      keyword: searchParam,
+    }),
+  );
+  const [selectedNewsletterId, setSelectedNewsletterId] = useQueryState(
+    'newsletterId',
+    parseAsInteger.withDefault(0),
+  );
+
+  const newsletterFiltersWithAll = [
+    {
+      id: 0,
+      name: '전체',
+      articleCount: newsletterFilters?.totalCount ?? 0,
+      imageUrl: '',
+    },
+    ...(newsletterFilters?.newsletters
+      .map((newsletter) => ({
+        ...newsletter,
+        articleCount: newsletter.articleCount ?? 0,
+      }))
+      .filter((newsletter) => newsletter.articleCount !== 0) ?? []),
+  ];
+
+  const handleSelectNewsletterId = (id: number | null) => {
+    setSelectedNewsletterId(id);
+  };
 
   return (
     <Container aria-label="뉴스레터" isPc={device === 'pc'}>
@@ -31,24 +56,26 @@ function NewsLetterFilter({
         </TitleWrapper>
       )}
       <StyledTabs direction={device === 'pc' ? 'vertical' : 'horizontal'}>
-        {newsLetterList.map(({ name, articleCount, imageUrl, id }) => (
-          <Tab
-            key={name}
-            value={id ?? null}
-            label={name}
-            selected={
-              selectedNewsletterId === null
-                ? name === '전체'
-                : id === selectedNewsletterId
-            }
-            onTabSelect={onSelectNewsletter}
-            StartComponent={
-              imageUrl ? <NewsLetterImage src={imageUrl} /> : null
-            }
-            EndComponent={<Badge text={String(articleCount)} />}
-            textAlign={device === 'pc' ? 'start' : 'center'}
-          />
-        ))}
+        {newsletterFiltersWithAll.map(
+          ({ name, articleCount, imageUrl, id }) => (
+            <Tab
+              key={name}
+              value={id ?? null}
+              label={name}
+              selected={
+                selectedNewsletterId === null
+                  ? name === '전체'
+                  : id === selectedNewsletterId
+              }
+              onTabSelect={handleSelectNewsletterId}
+              StartComponent={
+                imageUrl ? <NewsLetterImage src={imageUrl} /> : null
+              }
+              EndComponent={<Badge text={String(articleCount)} />}
+              textAlign={device === 'pc' ? 'start' : 'center'}
+            />
+          ),
+        )}
       </StyledTabs>
     </Container>
   );

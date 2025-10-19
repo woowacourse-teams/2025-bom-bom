@@ -861,8 +861,7 @@ export interface components {
       name: string;
       description: string;
       imageUrl: string;
-      /** Format: int64 */
-      categoryId: number;
+      category: string;
       mainPageUrl: string;
       subscribeUrl: string;
       issueCycle: string;
@@ -1008,11 +1007,6 @@ export interface components {
       pageNumber?: number;
       /** Format: int32 */
       pageSize?: number;
-      /** Format: int32 */
-      pageSize?: number;
-      paged?: boolean;
-      /** Format: int32 */
-      pageNumber?: number;
       unpaged?: boolean;
     };
     SortObject: {

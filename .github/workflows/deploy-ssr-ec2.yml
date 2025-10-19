@@ -1,0 +1,164 @@
+name: Deploy SSR Server to EC2
+
+on:
+  push:
+    branches:
+      - client
+      - BOM-602-ssr # 현재 개발 브랜치
+    paths:
+      - "frontend/web/**"
+      - ".github/workflows/deploy-ssr-ec2.yml"
+  workflow_dispatch: # 수동 배포 허용
+
+env:
+  NODE_VERSION: "20"
+  WORKING_DIRECTORY: frontend/web
+
+jobs:
+  build:
+    name: Build SSR Application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: pnpm run type-check
+
+      - name: Lint
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: pnpm run lint
+
+      - name: Build client
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: pnpm run build:client
+
+      - name: Build server
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: pnpm run build:server
+
+      - name: Prepare deployment package
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          # 배포에 필요한 파일만 포함
+          mkdir -p deploy-package
+
+          # 빌드 결과물 복사
+          cp -r dist deploy-package/
+
+          # PM2 설정 파일 복사
+          cp ecosystem.config.js deploy-package/
+
+          # 압축
+          tar -czf deploy.tar.gz -C deploy-package .
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ssr-build
+          path: ${{ env.WORKING_DIRECTORY }}/deploy.tar.gz
+          retention-days: 1
+
+  deploy:
+    name: Deploy to EC2
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production # GitHub Environment 사용
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ssr-build
+          path: ./artifact
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Upload deployment package to EC2
+        run: |
+          scp -i ~/.ssh/id_rsa \
+            ./artifact/deploy.tar.gz \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/tmp/deploy.tar.gz
+
+      - name: Upload deployment script to EC2
+        run: |
+          scp -i ~/.ssh/id_rsa \
+            frontend/web/scripts/deploy.sh \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/tmp/deploy.sh
+
+      - name: Execute deployment script on EC2
+        run: |
+          ssh -i ~/.ssh/id_rsa \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
+            'bash /tmp/deploy.sh'
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -rf ~/.ssh/id_rsa
+          ssh-keyscan -R ${{ secrets.EC2_HOST }} ~/.ssh/known_hosts || true
+
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ 배포가 성공적으로 완료되었습니다"
+          else
+            echo "❌ 배포가 실패했습니다"
+          fi
+
+  health-check:
+    name: Post-deployment Health Check
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: success()
+
+    steps:
+      - name: Wait for server to stabilize
+        run: sleep 10
+
+      - name: Check server health
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://${{ secrets.EC2_HOST }} || echo "000")
+
+          if [ "$response" == "200" ]; then
+            echo "✅ Health check passed (Status: $response)"
+          else
+            echo "⚠️ Health check returned unexpected status: $response"
+            exit 1
+          fi
+
+      - name: Notify health check result
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ 서버가 정상적으로 실행 중입니다"
+          else
+            echo "⚠️ 서버 헬스 체크에 실패했습니다"
+          fi

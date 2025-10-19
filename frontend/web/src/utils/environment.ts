@@ -1,6 +1,6 @@
 import { ENV } from '@/apis/env';
 
-const hostname = window.location.hostname;
+const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
 
 export const isProduction =
   ENV.nodeEnv === 'production' && hostname === 'www.bombom.news';

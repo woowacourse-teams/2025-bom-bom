@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Platform } from 'react-native';
-import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import messaging from '@react-native-firebase/messaging';
+import {
+  createAndroidChannel,
+  requestNotificationPermission,
+} from '@/utils/notification';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -18,30 +20,6 @@ const useNotification = () => {
   const [notification, setNotification] =
     useState<Notifications.Notification | null>(null);
 
-  // 안드로이드 알림 채널 생성
-  const createAndroidChannel = useCallback(async () => {
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('default', {
-        name: '기본 알림',
-        importance: Notifications.AndroidImportance.DEFAULT,
-      });
-    }
-  }, []);
-
-  // 사용자 알림 권한 요청
-  const requestNotificationPermission = useCallback(async () => {
-    if (Device.isDevice) {
-      const authStatus = await messaging().requestPermission();
-      const enabled =
-        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-      return enabled;
-    }
-
-    return false;
-  }, []);
-
   const getFcmToken = useCallback(async () => {
     try {
       const hasPermission = await requestNotificationPermission();
@@ -54,7 +32,7 @@ const useNotification = () => {
     } catch (error) {
       console.error('FCM 토큰을 가져오는데 실패했습니다.', error);
     }
-  }, [requestNotificationPermission]);
+  }, []);
 
   // 앱 종료 상태에서 알림을 탭한 경우
   const coldStartNotificationOpen = useCallback(async () => {
@@ -120,7 +98,7 @@ const useNotification = () => {
       notificationListener.remove(); // 알림 수신 리스너 제거
       responseListener.remove(); // 알림 탭 리스너 제거
     };
-  }, [coldStartNotificationOpen, createAndroidChannel, getFcmToken]);
+  }, [coldStartNotificationOpen, getFcmToken]);
 
   return {
     fcmToken,

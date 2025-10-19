@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build:client": "rimraf dist/static && webpack --config webpack.client.config.ts --mode production",
-    "build:server": "rimraf dist/server && webpack --config webpack.server.config.ts --mode production",
+    "build:client": "webpack --config webpack.client.config.ts --mode production",
+    "build:server": "webpack --config webpack.server.config.ts --mode production",
     "build": "pnpm run build:client && pnpm run build:server",
     "start": "webpack serve --config webpack.client.config.ts --mode development",
     "start:server": "node dist/server/server.js",

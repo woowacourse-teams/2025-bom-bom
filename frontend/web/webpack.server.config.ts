@@ -8,7 +8,7 @@ const config: webpack.Configuration = {
   target: 'node',
   entry: './server/index.ts',
   output: {
-    filename: 'server.js',
+    filename: 'server/server.js',
     path: path.resolve(__dirname, 'dist'),
     clean: false, // 클라이언트 빌드 파일 유지
   },

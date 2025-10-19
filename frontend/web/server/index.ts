@@ -1,22 +1,18 @@
 import path from 'path';
-import compression from 'compression';
+// import compression from 'compression';
 import express from 'express';
-import serveStatic from 'serve-static';
 import { handleSSR } from './render';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Compression middleware
-app.use(compression());
-
 // 정적 파일 제공
-const distPath = path.join(__dirname, '../dist');
-app.use(serveStatic(distPath, { index: false }));
+const distPath = path.join(__dirname, '../static');
+app.use('/static', express.static(distPath, { index: false }));
 
-// public 폴더도 제공
+// public 폴더 제공
 const publicPath = path.join(__dirname, '../public');
-app.use('/public', serveStatic(publicPath));
+app.use('/public', express.static(publicPath));
 
 // SSR이 필요한 경로들
 const ssrRoutes = ['/'];

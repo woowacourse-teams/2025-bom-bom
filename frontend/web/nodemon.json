@@ -1,0 +1,7 @@
+{
+  "watch": ["server", "src"],
+  "ext": "ts,tsx,js",
+  "ignore": ["dist", "node_modules", "*.test.ts", "*.spec.ts"],
+  "exec": "pnpm run build:server && node dist/server/server.js",
+  "delay": 500
+}

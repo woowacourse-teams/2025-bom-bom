@@ -1,6 +1,6 @@
 import { theme } from '@bombom/shared/theme';
 import { ThemeProvider } from '@emotion/react';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
 import {
   createRootRouteWithContext,
   HeadContent,
@@ -11,7 +11,6 @@ import Toast from '@/components/Toast/Toast';
 import usePageTracking from '@/libs/googleAnalytics/usePageTracking';
 import { useWebViewAuth } from '@/libs/webview/useWebViewAuth';
 import { queryClient } from '@/main';
-import type { QueryClient } from '@tanstack/react-query';
 import type { redirect } from '@tanstack/react-router';
 
 interface BomBomRouterContext {
@@ -23,15 +22,13 @@ const RootComponent = () => {
   useWebViewAuth();
 
   return (
-    <>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={theme}>
-          <Outlet />
-          <Toast />
-        </ThemeProvider>
-      </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <Outlet />
+        <Toast />
+      </ThemeProvider>
       <TanStackRouterDevtools />
-    </>
+    </QueryClientProvider>
   );
 };
 

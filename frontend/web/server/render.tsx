@@ -1,8 +1,8 @@
-import type { Request, Response } from 'express';
-import { render as renderApp } from '../src/entry-server';
-import { htmlTemplate } from './template';
 import fs from 'fs';
 import path from 'path';
+import { htmlTemplate } from './template';
+import { render } from '../src/entry-server';
+import type { Request, Response } from 'express';
 
 // 빌드된 assets 매니페스트 (webpack에서 생성)
 let manifest: Record<string, string> = {};
@@ -21,7 +21,7 @@ export async function handleSSR(req: Request, res: Response) {
     const url = req.originalUrl;
 
     // SSR 렌더링
-    const { html, css } = await renderApp(url);
+    const { html, css } = await render(url);
 
     // 빌드된 JavaScript와 CSS 파일 찾기
     const scripts: string[] = [];

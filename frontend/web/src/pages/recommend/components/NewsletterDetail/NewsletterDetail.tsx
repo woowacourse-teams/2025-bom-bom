@@ -1,10 +1,10 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
+import { useQueryState } from 'nuqs';
 import DetailTab from './DetailTab';
 import { openSubscribeLink } from './NewsletterDetail.utils';
 import NewsletterTabs from './NewsletterTabs';
 import PreviousTab from './PreviousTab';
-import { useNewsletterTab } from './useNewsletterTab';
 import { queries } from '@/apis/queries';
 import Badge from '@/components/Badge/Badge';
 import Button from '@/components/Button/Button';
@@ -12,18 +12,19 @@ import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback'
 import { useDevice } from '@/hooks/useDevice';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import { openExternalLink } from '@/utils/externalLink';
+import type { NewsletterTab } from './NewsletterDetail.types';
 import HomeIcon from '#/assets/svg/home.svg';
 
 interface NewsletterDetailProps {
   newsletterId: number;
-  category: string;
 }
 
-const NewsletterDetail = ({
-  newsletterId,
-  category,
-}: NewsletterDetailProps) => {
+const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
+  const deviceType = useDevice();
   const { userInfo, isLoggedIn } = useUserInfo();
+  const [activeTab, setActiveTab] = useQueryState('tab', {
+    defaultValue: 'detail',
+  });
   const { data: newsletterDetail } = useQuery({
     ...queries.newsletterDetail({ id: newsletterId }),
     enabled: Boolean(newsletterId),
@@ -31,8 +32,6 @@ const NewsletterDetail = ({
   const { data: previousArticles } = useQuery({
     ...queries.previousArticles({ newsletterId, limit: 10 }),
   });
-  const deviceType = useDevice();
-  const { activeTab, changeTab } = useNewsletterTab();
 
   const isMobile = deviceType === 'mobile';
 
@@ -62,7 +61,10 @@ const NewsletterDetail = ({
             </TitleWrapper>
 
             <NewsletterInfo isMobile={isMobile}>
-              <StyledBadge text={category} isMobile={isMobile} />
+              <StyledBadge
+                text={newsletterDetail.category}
+                isMobile={isMobile}
+              />
               <IssueCycle>{`${newsletterDetail.issueCycle} 발행`}</IssueCycle>
             </NewsletterInfo>
           </InfoBox>
@@ -82,7 +84,10 @@ const NewsletterDetail = ({
         />
       </FixedWrapper>
 
-      <NewsletterTabs activeTab={activeTab} onTabChange={changeTab} />
+      <NewsletterTabs
+        activeTab={activeTab as NewsletterTab}
+        onTabChange={(newTab) => setActiveTab(newTab)}
+      />
 
       <ScrollableWrapper isMobile={isMobile}>
         {activeTab === 'detail' && (

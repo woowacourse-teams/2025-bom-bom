@@ -2,9 +2,9 @@ import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query';
 import {
   getArticleById,
   getArticles,
-  type GetArticlesParams,
   getArticlesStatisticsNewsletters,
   type GetArticleByIdParams,
+  type GetArticlesParams,
   type GetArticleStatisticsNewslettersParams,
 } from './articles';
 import { getSignupCheck } from './auth';
@@ -19,6 +19,8 @@ import {
   getMyMonthlyReadingRank,
   getReadingStatus,
   getUserInfo,
+  getMyNewsletters,
+  getUserProfile,
 } from './members';
 import { getNewsletterDetail, getNewsletters } from './newsLetters';
 import {
@@ -81,6 +83,12 @@ export const queries = {
     queryOptions({
       queryKey: ['members', 'me'],
       queryFn: getUserInfo,
+    }),
+
+  userProfile: () =>
+    queryOptions({
+      queryKey: ['members', 'me', 'profile'],
+      queryFn: getUserProfile,
       retry: false,
     }),
 
@@ -109,6 +117,12 @@ export const queries = {
       queryFn: getNewsletters,
       staleTime: 1000 * 60 * 60 * 24 * 3, // 3 days
       gcTime: 1000 * 60 * 60 * 24 * 7, // 7 days
+    }),
+
+  myNewsletters: () =>
+    queryOptions({
+      queryKey: ['newsletters', 'me'],
+      queryFn: getMyNewsletters,
     }),
 
   newsletterDetail: (params: GetNewsletterDetailParams) =>

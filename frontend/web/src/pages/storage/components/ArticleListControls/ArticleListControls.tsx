@@ -11,6 +11,7 @@ interface ArticleListControlsProps {
   editMode: boolean;
   onSelectDeleteButtonClick: () => void;
   onDeleteButtonClick: () => void;
+  allChecked: boolean;
   onAllSelectClick: () => void;
 }
 
@@ -21,6 +22,7 @@ export default function ArticleListControls({
   onSortChange,
   editMode,
   onSelectDeleteButtonClick,
+  allChecked,
   onAllSelectClick,
 }: ArticleListControlsProps) {
   return (
@@ -32,7 +34,7 @@ export default function ArticleListControls({
       />
       <SummaryBar>
         {editMode ? (
-          <Checkbox id="all" checked={false} onChange={onAllSelectClick} />
+          <Checkbox id="all" checked={allChecked} onChange={onAllSelectClick} />
         ) : (
           <DeleteButton onClick={onSelectDeleteButtonClick}>
             선택 삭제

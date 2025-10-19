@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { Suspense, useEffect, useState } from 'react';
 import ArticleList from '../ArticleList/ArticleList';
 import ArticleListControls from '../ArticleListControls/ArticleListControls';
 import EmptySearchCard from '../EmptySearchCard/EmptySearchCard';
@@ -38,17 +38,40 @@ export default function PCStorageContent({
     }),
   );
   const [editMode, setEditMode] = useState(false);
+  const [selectedDeleteIds, setSelectedDeleteIds] = useState<number[]>([]);
+
+  const articleList = articles?.content || [];
+  const haveNoContent = articleList.length === 0;
 
   const enableEditMode = () => {
     setEditMode(true);
   };
 
+  const allChecked = selectedDeleteIds.length === articleList.length;
+
+  const changeAllSelectedDeleteIds = () => {
+    if (selectedDeleteIds.length === articleList.length) {
+      setSelectedDeleteIds([]);
+    } else {
+      setSelectedDeleteIds(
+        articleList.map((article) => article.articleId) || [],
+      );
+    }
+  };
+
+  const changeSelectedDeleteIds = (id: number) => {
+    if (selectedDeleteIds.includes(id)) {
+      setSelectedDeleteIds(
+        selectedDeleteIds.filter((selectedId) => selectedId !== id),
+      );
+    } else {
+      setSelectedDeleteIds([...selectedDeleteIds, id]);
+    }
+  };
+
   useEffect(() => {
     resetPage();
   }, [baseQueryParams.keyword, resetPage]);
-
-  const articleList = articles?.content || [];
-  const haveNoContent = !isLoading && articleList.length === 0;
 
   return (
     <>
@@ -60,7 +83,8 @@ export default function PCStorageContent({
         editMode={editMode}
         onSelectDeleteButtonClick={enableEditMode}
         onDeleteButtonClick={() => console.log('delete')}
-        onAllSelectClick={() => console.log('all delete')}
+        allChecked={allChecked}
+        onAllSelectClick={changeAllSelectedDeleteIds}
       />
       {haveNoContent && searchInput !== '' ? (
         <EmptySearchCard searchQuery={searchInput} />
@@ -70,7 +94,12 @@ export default function PCStorageContent({
         <ArticleCardListSkeleton />
       ) : (
         <>
-          <ArticleList articles={articleList} editMode={editMode} />
+          <ArticleList
+            articles={articleList}
+            editMode={editMode}
+            checkedIds={selectedDeleteIds}
+            onCheck={changeSelectedDeleteIds}
+          />
           <Pagination
             currentPage={page}
             totalPages={articles?.totalPages ?? 1}

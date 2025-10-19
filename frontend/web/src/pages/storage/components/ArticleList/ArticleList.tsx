@@ -8,9 +8,16 @@ import type { Article } from '@/types/articles';
 interface ArticleListProps {
   articles: Article[];
   editMode: boolean;
+  checkedIds: number[];
+  onCheck: (id: number) => void;
 }
 
-const ArticleList = ({ articles, editMode }: ArticleListProps) => {
+const ArticleList = ({
+  articles,
+  editMode,
+  checkedIds,
+  onCheck,
+}: ArticleListProps) => {
   const device = useDevice();
   const isMobile = device === 'mobile';
 
@@ -21,8 +28,8 @@ const ArticleList = ({ articles, editMode }: ArticleListProps) => {
           {editMode && (
             <Checkbox
               id={article.articleId}
-              checked={false}
-              onChange={() => {}}
+              checked={checkedIds.includes(article.articleId)}
+              onChange={() => onCheck(article.articleId)}
             />
           )}
           <ArticleCard data={article} readVariant="badge" />

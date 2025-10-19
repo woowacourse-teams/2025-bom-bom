@@ -21,11 +21,9 @@ const useNotification = () => {
   // 안드로이드 알림 채널 생성
   const createAndroidChannel = useCallback(async () => {
     if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('myNotificationChannel', {
-        name: 'A channel is needed for the permissions prompt to appear',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
+      await Notifications.setNotificationChannelAsync('default', {
+        name: '기본 알림',
+        importance: Notifications.AndroidImportance.DEFAULT,
       });
     }
   }, []);

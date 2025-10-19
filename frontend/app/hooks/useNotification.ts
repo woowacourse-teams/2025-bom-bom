@@ -24,6 +24,28 @@ const useNotification = () => {
       (token) => token && setFcmToken(token),
     );
 
+    // FCM 토큰 갱신 리스너
+    const unsubscribeTokenRefresh = messaging().onTokenRefresh((newToken) => {
+      setFcmToken(newToken);
+      // ToDo: 백엔드에 새 토큰 전송
+    });
+
+    // 백그라운드/종료 상태에서 알림을 탭하고 앱이 열린 경우
+    messaging()
+      .getInitialNotification()
+      .then((remoteMessage) => {
+        if (remoteMessage) {
+          // ToDo: 특정 화면으로 이동
+        }
+      });
+
+    // 백그라운드 상태에서 알림을 탭한 경우
+    const unsubscribeNotificationOpened = messaging().onNotificationOpenedApp(
+      (remoteMessage) => {
+        // ToDo: 특정 화면으로 이동
+      },
+    );
+
     // FCM 포그라운드 메시지 리스너: 앱이 열려있을 때 FCM 메시지를 받으면 즉시 로컬 알림으로 표시
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       // FCM에서 메시지를 받으면 Expo Notifications로 로컬 알림 표시
@@ -48,13 +70,13 @@ const useNotification = () => {
 
     // 알림 탭 리스너: 사용자가 알림을 탭했을 때 동작을 처리
     const responseListener =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log('Notification tapped:', response);
-      });
+      Notifications.addNotificationResponseReceivedListener((response) => {});
 
     // 클린업
     return () => {
+      unsubscribeTokenRefresh(); // FCM 토큰 갱신 리스너 제거
       unsubscribe(); // FCM 포그라운드 메시지 리스너 제거
+      unsubscribeNotificationOpened(); // 백그라운드 알림 탭 리스너 제거
       notificationListener.remove(); // 알림 수신 리스너 제거
       responseListener.remove(); // 알림 탭 리스너 제거
     };

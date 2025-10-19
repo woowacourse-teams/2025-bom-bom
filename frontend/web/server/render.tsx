@@ -10,7 +10,7 @@ export async function handleSSR(req: Request, res: Response) {
     console.log(`[SSR] Rendering URL: ${url}`);
 
     // SSR 렌더링
-    const { html, css } = await render(url);
+    const { html, css, dehydratedState } = await render(url);
     console.log(
       `[SSR] Success - HTML length: ${html.length}, CSS length: ${css.length}`,
     );
@@ -55,6 +55,7 @@ export async function handleSSR(req: Request, res: Response) {
       css,
       scripts,
       styles,
+      dehydratedState,
       ...metaInfo,
     });
 

@@ -1,7 +1,11 @@
 import createCache from '@emotion/cache';
 import { CacheProvider, Global } from '@emotion/react';
 import createEmotionServer from '@emotion/server/create-instance';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  QueryClient,
+  QueryClientProvider,
+  dehydrate,
+} from '@tanstack/react-query';
 import {
   createMemoryHistory,
   createRouter,
@@ -15,7 +19,7 @@ import reset from './styles/reset';
 interface RenderResult {
   html: string;
   css: string;
-  dehydratedState?: string;
+  dehydratedState: string;
 }
 
 export async function render(url: string): Promise<RenderResult> {
@@ -65,8 +69,12 @@ export async function render(url: string): Promise<RenderResult> {
   const emotionChunks = extractCriticalToChunks(html);
   const emotionCss = constructStyleTagsFromChunks(emotionChunks);
 
+  // QueryClient 상태를 dehydrate하여 직렬화
+  const dehydratedState = JSON.stringify(dehydrate(queryClient));
+
   return {
     html,
     css: emotionCss,
+    dehydratedState,
   };
 }

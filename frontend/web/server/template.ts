@@ -3,6 +3,7 @@ interface TemplateParams {
   css: string;
   scripts: string[];
   styles: string[];
+  dehydratedState: string;
   title?: string;
   description?: string;
   ogImage?: string;
@@ -14,6 +15,7 @@ export function htmlTemplate({
   css,
   scripts,
   styles,
+  dehydratedState,
   title = '봄봄',
   description = '봄봄 - 뉴스레터, 아티클, 트렌드 정보를 한 곳에!',
   ogImage = '/public/assets/png/logo.png',
@@ -63,6 +65,9 @@ export function htmlTemplate({
   </head>
   <body>
     <div id="root">${html}</div>
+    <script>
+      window.__REACT_QUERY_STATE__ = ${dehydratedState};
+    </script>
     ${scripts.map((src) => `<script src="${src}" defer></script>`).join('\n    ')}
   </body>
 </html>`;

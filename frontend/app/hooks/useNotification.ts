@@ -56,9 +56,22 @@ const useNotification = () => {
     }
   }, [requestNotificationPermission]);
 
+  // 앱 종료 상태에서 알림을 탭한 경우
+  const coldStartNotificationOpen = useCallback(async () => {
+    try {
+      const message = await messaging().getInitialNotification();
+      if (message) {
+        // ToDo: 특정 화면으로 이동
+      }
+    } catch (error) {
+      console.error('앱 종료 상태의 알림 수신에 문제가 발생했습니다.', error);
+    }
+  }, []);
+
   useEffect(() => {
     createAndroidChannel();
     getFcmToken();
+    coldStartNotificationOpen();
 
     // FCM 포그라운드 메시지 리스너: 앱이 열려있을 때 FCM 메시지를 받으면 즉시 로컬 알림으로 표시
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
@@ -80,15 +93,6 @@ const useNotification = () => {
       setFcmToken(newToken);
       // ToDo: 백엔드에 새 토큰 전송
     });
-
-    // 앱 종료 상태에서 알림을 탭한 경우
-    messaging()
-      .getInitialNotification()
-      .then((remoteMessage) => {
-        if (remoteMessage) {
-          // ToDo: 특정 화면으로 이동
-        }
-      });
 
     // 백그라운드 상태에서 알림을 탭한 경우
     const unsubscribeNotificationOpened = messaging().onNotificationOpenedApp(
@@ -116,7 +120,7 @@ const useNotification = () => {
       notificationListener.remove(); // 알림 수신 리스너 제거
       responseListener.remove(); // 알림 탭 리스너 제거
     };
-  }, [createAndroidChannel, getFcmToken]);
+  }, [coldStartNotificationOpen, createAndroidChannel, getFcmToken]);
 
   return {
     fcmToken,

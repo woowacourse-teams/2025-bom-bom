@@ -46,7 +46,7 @@ const useNotification = () => {
     try {
       const hasPermission = await requestNotificationPermission();
       if (!hasPermission) {
-        console.error('푸시 알림 권한이 없습니다.');
+        throw new Error('푸시 알림 권한이 없습니다.');
       }
 
       const token = await messaging().getToken();

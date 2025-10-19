@@ -22,7 +22,7 @@ export default (env: Env, argv: Argv) => {
     output: {
       filename: 'js/[name].[contenthash:8].js',
       chunkFilename: 'js/[name].[contenthash:8].chunk.js',
-      path: path.resolve(__dirname, 'dist/static'),
+      path: path.resolve(__dirname, 'dist'),
       publicPath: '/',
     },
     module: {

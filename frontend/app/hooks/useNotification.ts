@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Platform } from 'react-native';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
@@ -18,59 +18,97 @@ const useNotification = () => {
   const [notification, setNotification] =
     useState<Notifications.Notification | null>(null);
 
-  useEffect(() => {
-    // 앱 실행 시 FCM 토큰을 가져와서 state에 저장
-    registerForPushNotificationsAsync().then(
-      (token) => token && setFcmToken(token),
-    );
-
-    // FCM 토큰 갱신 리스너
-    const unsubscribeTokenRefresh = messaging().onTokenRefresh((newToken) => {
-      setFcmToken(newToken);
-      // ToDo: 백엔드에 새 토큰 전송
-    });
-
-    // 백그라운드/종료 상태에서 알림을 탭하고 앱이 열린 경우
-    messaging()
-      .getInitialNotification()
-      .then((remoteMessage) => {
-        if (remoteMessage) {
-          // ToDo: 특정 화면으로 이동
-        }
+  // 안드로이드 알림 채널 생성
+  const createAndroidChannel = useCallback(async () => {
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('myNotificationChannel', {
+        name: 'A channel is needed for the permissions prompt to appear',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
       });
+    }
+  }, []);
 
-    // 백그라운드 상태에서 알림을 탭한 경우
-    const unsubscribeNotificationOpened = messaging().onNotificationOpenedApp(
-      (remoteMessage) => {
+  // 사용자 알림 권한 요청
+  const requestNotificationPermission = useCallback(async () => {
+    if (Device.isDevice) {
+      const authStatus = await messaging().requestPermission();
+      const enabled =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+      return enabled;
+    }
+
+    return false;
+  }, []);
+
+  const getFcmToken = useCallback(async () => {
+    try {
+      const hasPermission = await requestNotificationPermission();
+      if (!hasPermission) {
+        console.error('푸시 알림 권한이 없습니다.');
+      }
+
+      const token = await messaging().getToken();
+      setFcmToken(token);
+    } catch (error) {
+      console.error('FCM 토큰을 가져오는데 실패했습니다.', error);
+    }
+  }, [requestNotificationPermission]);
+
+  // FCM 토큰 갱신 리스너
+  const unsubscribeTokenRefresh = messaging().onTokenRefresh((newToken) => {
+    setFcmToken(newToken);
+    // ToDo: 백엔드에 새 토큰 전송
+  });
+
+  // 백그라운드 및 앱 종료 상태에서 알림을 탭하여 앱을 연 경우 실행
+  messaging()
+    .getInitialNotification()
+    .then((remoteMessage) => {
+      if (remoteMessage) {
         // ToDo: 특정 화면으로 이동
-      },
-    );
-
-    // FCM 포그라운드 메시지 리스너: 앱이 열려있을 때 FCM 메시지를 받으면 즉시 로컬 알림으로 표시
-    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      // FCM에서 메시지를 받으면 Expo Notifications로 로컬 알림 표시
-      if (remoteMessage.notification) {
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: remoteMessage.notification.title || '',
-            body: remoteMessage.notification.body || '',
-            data: remoteMessage.data,
-          },
-          trigger: null, // 즉시 표시
-        });
       }
     });
 
-    // 알림 수신 리스너: 알림이 표시되면 state에 저장
-    const notificationListener = Notifications.addNotificationReceivedListener(
-      (notification) => {
-        setNotification(notification);
-      },
-    );
+  // 백그라운드 상태에서 알림을 탭한 경우
+  const unsubscribeNotificationOpened = messaging().onNotificationOpenedApp(
+    (remoteMessage) => {
+      // ToDo: 특정 화면으로 이동
+    },
+  );
 
-    // 알림 탭 리스너: 사용자가 알림을 탭했을 때 동작을 처리
-    const responseListener =
-      Notifications.addNotificationResponseReceivedListener((response) => {});
+  // FCM 포그라운드 메시지 리스너: 앱이 열려있을 때 FCM 메시지를 받으면 즉시 로컬 알림으로 표시
+  const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+    // FCM에서 메시지를 받으면 Expo Notifications로 로컬 알림 표시
+    if (remoteMessage.notification) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: remoteMessage.notification.title || '',
+          body: remoteMessage.notification.body || '',
+          data: remoteMessage.data,
+        },
+        trigger: null, // 즉시 표시
+      });
+    }
+  });
+
+  // 알림 수신 리스너: 알림이 표시되면 state에 저장
+  const notificationListener = Notifications.addNotificationReceivedListener(
+    (notification) => {
+      setNotification(notification);
+    },
+  );
+
+  // 알림 탭 리스너: 사용자가 알림을 탭했을 때 동작을 처리
+  const responseListener =
+    Notifications.addNotificationResponseReceivedListener((response) => {});
+
+  useEffect(() => {
+    createAndroidChannel();
+    getFcmToken();
 
     // 클린업
     return () => {
@@ -80,51 +118,20 @@ const useNotification = () => {
       notificationListener.remove(); // 알림 수신 리스너 제거
       responseListener.remove(); // 알림 탭 리스너 제거
     };
-  }, []);
+  }, [
+    createAndroidChannel,
+    getFcmToken,
+    notificationListener,
+    responseListener,
+    unsubscribe,
+    unsubscribeNotificationOpened,
+    unsubscribeTokenRefresh,
+  ]);
 
   return {
     fcmToken,
     notification,
   };
 };
-
-async function registerForPushNotificationsAsync() {
-  let token;
-
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('myNotificationChannel', {
-      name: 'A channel is needed for the permissions prompt to appear',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
-    });
-  }
-
-  if (Device.isDevice) {
-    // FCM 권한 요청
-    const authStatus = await messaging().requestPermission();
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-    if (!enabled) {
-      alert('Failed to get push notification permission!');
-      return;
-    }
-
-    try {
-      // FCM 토큰 가져오기
-      token = await messaging().getToken();
-      console.log('FCM Token:', token);
-    } catch (e) {
-      console.error('Error getting FCM token:', e);
-      token = `${e}`;
-    }
-  } else {
-    alert('Must use physical device for Push Notifications');
-  }
-
-  return token;
-}
 
 export default useNotification;

@@ -15,11 +15,13 @@ const publicPath = path.join(__dirname, '../public');
 app.use('/public', express.static(publicPath));
 
 // 루트 페이지만 SSR 적용
-app.get('/', handleSSR);
+app.use('/', handleSSR);
 
+// 나머지 모든 경로는 SPA fallback (CSR로 작동)
+app.use((_req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
 app.listen(PORT, () => {
-  console.log(`SSR Server running at http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT} (SSR enabled for /)`);
 });

@@ -1,15 +1,17 @@
 import createCache from '@emotion/cache';
-import { CacheProvider } from '@emotion/react';
+import { CacheProvider, Global } from '@emotion/react';
 import createEmotionServer from '@emotion/server/create-instance';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   createMemoryHistory,
   createRouter,
   RouterProvider,
 } from '@tanstack/react-router';
-import { renderToString } from 'react-dom/server';
+import { StrictMode } from 'react';
+import { renderToPipeableStream } from 'react-dom/server';
 import { routeTree } from './routeTree.gen';
 import reset from './styles/reset';
+import type { Writable } from 'stream';
 
 interface RenderResult {
   html: string;
@@ -18,6 +20,7 @@ interface RenderResult {
 }
 
 export async function render(url: string): Promise<RenderResult> {
+  // 각 요청마다 새로운 QueryClient 생성
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -47,22 +50,55 @@ export async function render(url: string): Promise<RenderResult> {
   const { extractCriticalToChunks, constructStyleTagsFromChunks } =
     createEmotionServer(cache);
 
-  // 서버 렌더링
-  const html = renderToString(
-    <CacheProvider value={cache}>
-      <RouterProvider router={router} />
-    </CacheProvider>,
-  );
+  // Promise를 사용하여 스트림 완료 대기
+  const html = await new Promise<string>((resolve, reject) => {
+    let htmlContent = '';
+
+    const writable: Writable = {
+      write(chunk: string) {
+        htmlContent += chunk;
+        return true;
+      },
+      end() {
+        resolve(htmlContent);
+      },
+      on() {
+        return this;
+      },
+      once() {
+        return this;
+      },
+      emit() {
+        return false;
+      },
+    } as unknown as Writable;
+
+    const { pipe } = renderToPipeableStream(
+      <StrictMode>
+        <CacheProvider value={cache}>
+          <QueryClientProvider client={queryClient}>
+            <Global styles={reset} />
+            <RouterProvider router={router} />
+          </QueryClientProvider>
+        </CacheProvider>
+      </StrictMode>,
+      {
+        onShellReady() {
+          pipe(writable);
+        },
+        onError(error) {
+          reject(error);
+        },
+      },
+    );
+  });
 
   // Critical CSS 추출
   const emotionChunks = extractCriticalToChunks(html);
   const emotionCss = constructStyleTagsFromChunks(emotionChunks);
 
-  // Reset styles를 문자열로 변환
-  const resetCss = `<style>${reset.styles}</style>`;
-
   return {
     html,
-    css: resetCss + emotionCss,
+    css: emotionCss,
   };
 }

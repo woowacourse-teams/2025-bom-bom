@@ -63,7 +63,7 @@ export function htmlTemplate({
   </head>
   <body>
     <div id="root">${html}</div>
-    ${scripts.map((src) => `<script src="${src}"></script>`).join('\n    ')}
+    ${scripts.map((src) => `<script src="${src}" defer></script>`).join('\n    ')}
   </body>
 </html>`;
 }

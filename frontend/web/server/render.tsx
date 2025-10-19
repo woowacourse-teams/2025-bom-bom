@@ -4,18 +4,6 @@ import { htmlTemplate } from './template';
 import { render } from '../src/entry-server';
 import type { Request, Response } from 'express';
 
-// 빌드된 assets 매니페스트 (webpack에서 생성)
-let manifest: Record<string, string> = {};
-
-try {
-  const manifestPath = path.join(__dirname, '../dist/asset-manifest.json');
-  if (fs.existsSync(manifestPath)) {
-    manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-  }
-} catch (error) {
-  console.error('Failed to load asset manifest:', error);
-}
-
 export async function handleSSR(req: Request, res: Response) {
   try {
     const url = req.originalUrl;
@@ -23,30 +11,31 @@ export async function handleSSR(req: Request, res: Response) {
     // SSR 렌더링
     const { html, css } = await render(url);
 
-    // 빌드된 JavaScript와 CSS 파일 찾기
+    // 빌드된 index.html에서 스크립트 목록 추출
     const scripts: string[] = [];
     const styles: string[] = [];
 
-    // dist/static/js 폴더에서 실제 파일 찾기
-    const jsDir = path.join(__dirname, '../static/js');
-
     try {
-      if (fs.existsSync(jsDir)) {
-        const files = fs.readdirSync(jsDir);
+      const indexPath = path.join(__dirname, '../static/index.html');
+      if (fs.existsSync(indexPath)) {
+        const indexHtml = fs.readFileSync(indexPath, 'utf-8');
 
-        // main.xxx.js 파일 먼저 찾기
-        const mainFile = files.find(f => f.startsWith('main.') && f.endsWith('.js'));
-        if (mainFile) {
-          scripts.push(`/js/${mainFile}`);
+        // <script> 태그에서 src 추출
+        const scriptRegex = /<script[^>]+src="([^"]+)"[^>]*><\/script>/g;
+        let match: RegExpExecArray | null;
+        while ((match = scriptRegex.exec(indexHtml)) !== null) {
+          scripts.push(match[1]);
+        }
+
+        // <link rel="stylesheet"> 태그에서 href 추출
+        const linkRegex =
+          /<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"[^>]*>/g;
+        while ((match = linkRegex.exec(indexHtml)) !== null) {
+          styles.push(match[1]);
         }
       }
     } catch (error) {
-      console.error('Failed to read JS directory:', error);
-    }
-
-    // 파일을 못 찾으면 기본 경로 사용
-    if (scripts.length === 0) {
-      scripts.push('/js/main.js');
+      console.error('Failed to read index.html:', error);
     }
 
     // 메타 정보 (라우트 기반으로 동적 생성 가능)

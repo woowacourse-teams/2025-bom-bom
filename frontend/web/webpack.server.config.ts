@@ -1,7 +1,10 @@
 import path from 'path';
 import { tanstackRouter } from '@tanstack/router-plugin/webpack';
+import dotenv from 'dotenv';
 import webpack from 'webpack';
 import nodeExternals from 'webpack-node-externals';
+
+dotenv.config();
 
 const config: webpack.Configuration = {
   mode: 'production',
@@ -74,6 +77,7 @@ const config: webpack.Configuration = {
       semicolons: true,
     }),
     new webpack.DefinePlugin({
+      'process.env': JSON.stringify(process.env),
       'process.env.NODE_ENV': JSON.stringify('production'),
     }),
   ],

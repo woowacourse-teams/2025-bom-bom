@@ -52,7 +52,7 @@ const request = async <TRequest, TResponse>({
   query = {},
   body,
   headers,
-}: RequestOptions<TRequest>): Promise<TResponse | null> => {
+}: RequestOptions<TRequest>): Promise<TResponse | undefined> => {
   try {
     const url = new URL(ENV.baseUrl + path);
     const stringifiedQuery: Record<string, string> = Object.fromEntries(
@@ -105,11 +105,11 @@ const request = async <TRequest, TResponse>({
       try {
         return await response.json();
       } catch {
-        return null;
+        return undefined;
       }
     }
 
-    return null;
+    return undefined;
   } catch (error) {
     logger.error(error);
     throw error;

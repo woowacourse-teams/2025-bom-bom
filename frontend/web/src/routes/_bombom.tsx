@@ -23,7 +23,7 @@ export const Route = createFileRoute('/_bombom')({
     try {
       const user = await queryClient.fetchQuery(queries.userProfile());
 
-      if (user) {
+      if (user && typeof window !== 'undefined') {
         window.gtag?.('set', { user_id: user.id });
       }
     } catch {

@@ -7,9 +7,11 @@ import type { Request, Response } from 'express';
 export async function handleSSR(req: Request, res: Response) {
   try {
     const url = req.originalUrl;
+    console.log(`[SSR] Rendering URL: ${url}`);
 
     // SSR 렌더링
     const { html, css } = await render(url);
+    console.log(`[SSR] Success - HTML length: ${html.length}, CSS length: ${css.length}`);
 
     // 빌드된 index.html에서 스크립트 목록 추출
     const scripts: string[] = [];
@@ -35,7 +37,7 @@ export async function handleSSR(req: Request, res: Response) {
         }
       }
     } catch (error) {
-      console.error('Failed to read index.html:', error);
+      console.error('[SSR] Failed to read index.html:', error);
     }
 
     // 메타 정보 (라우트 기반으로 동적 생성 가능)
@@ -56,7 +58,24 @@ export async function handleSSR(req: Request, res: Response) {
 
     res.status(200).set({ 'Content-Type': 'text/html' }).end(fullHtml);
   } catch (error) {
-    console.error('SSR error:', error);
-    res.status(500).send('Internal Server Error');
+    console.error('[SSR] Error occurred:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      url: req.originalUrl,
+      timestamp: new Date().toISOString(),
+    });
+    
+    // 개발 환경에서는 상세 에러 정보 포함
+    if (process.env.NODE_ENV === 'development') {
+      res.status(500).send(`
+        <h1>SSR Error</h1>
+        <pre>${error instanceof Error ? error.stack : error}</pre>
+        <p>URL: ${req.originalUrl}</p>
+        <p>Timestamp: ${new Date().toISOString()}</p>
+      `);
+    } else {
+      res.status(500).send('Internal Server Error');
+    }
   }
 }
+`

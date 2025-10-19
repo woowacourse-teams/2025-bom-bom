@@ -66,11 +66,11 @@ const useNotification = () => {
       if (remoteMessage.notification) {
         await Notifications.scheduleNotificationAsync({
           content: {
-            title: remoteMessage.notification.title || '',
-            body: remoteMessage.notification.body || '',
+            title: remoteMessage.notification.title,
+            body: remoteMessage.notification.body,
             data: remoteMessage.data,
           },
-          trigger: null, // 즉시 표시
+          trigger: null, // 즉시 표시 (타이머 없음)
         });
       }
     });
@@ -81,7 +81,7 @@ const useNotification = () => {
       // ToDo: 백엔드에 새 토큰 전송
     });
 
-    // 백그라운드 및 앱 종료 상태에서 알림을 탭하여 앱을 연 경우 실행
+    // 앱 종료 상태에서 알림을 탭한 경우
     messaging()
       .getInitialNotification()
       .then((remoteMessage) => {

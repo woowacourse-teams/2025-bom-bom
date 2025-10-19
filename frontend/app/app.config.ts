@@ -16,6 +16,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       supportsTablet: true,
       googleServicesFile: './GoogleService-Info.plist',
       infoPlist: {
+        UIBackgroundModes: ['remote-notification'],
         NSExceptionDomains: {
           'bombom.news': {
             NSIncludesSubdomains: true,

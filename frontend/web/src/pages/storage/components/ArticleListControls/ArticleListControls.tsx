@@ -1,15 +1,20 @@
+import { theme } from '@bombom/shared';
 import styled from '@emotion/styled';
+import { type ChangeEvent } from 'react';
 import Checkbox from '@/components/Checkbox/Checkbox';
 import SearchInput from '@/components/SearchInput/SearchInput';
 import Select from '@/components/Select/Select';
+import CancelIcon from '#/assets/svg/close.svg';
+import DeleteIcon from '#/assets/svg/delete.svg';
 
 interface ArticleListControlsProps {
   searchInput: string;
-  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSearchChange: (e: ChangeEvent<HTMLInputElement>) => void;
   sortFilter: 'DESC' | 'ASC';
   onSortChange: (value: 'DESC' | 'ASC') => void;
   editMode: boolean;
   onSelectDeleteButtonClick: () => void;
+  onSelectCancelButtonClick: () => void;
   onDeleteButtonClick: () => void;
   allChecked: boolean;
   onAllSelectClick: () => void;
@@ -22,6 +27,8 @@ export default function ArticleListControls({
   onSortChange,
   editMode,
   onSelectDeleteButtonClick,
+  onSelectCancelButtonClick,
+  onDeleteButtonClick,
   allChecked,
   onAllSelectClick,
 }: ArticleListControlsProps) {
@@ -34,7 +41,21 @@ export default function ArticleListControls({
       />
       <SummaryBar>
         {editMode ? (
-          <Checkbox id="all" checked={allChecked} onChange={onAllSelectClick} />
+          <DeleteWrapper>
+            <Checkbox
+              id="all"
+              checked={allChecked}
+              onChange={onAllSelectClick}
+            />
+            <DeleteIcon
+              fill={theme.colors.error}
+              onClick={onDeleteButtonClick}
+            />
+            <CancelIcon
+              fill={theme.colors.black}
+              onClick={onSelectCancelButtonClick}
+            />
+          </DeleteWrapper>
         ) : (
           <DeleteButton onClick={onSelectDeleteButtonClick}>
             선택 삭제
@@ -66,6 +87,12 @@ const SummaryBar = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+`;
+
+const DeleteWrapper = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
 `;
 
 const DeleteButton = styled.button`

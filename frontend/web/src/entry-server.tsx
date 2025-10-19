@@ -8,10 +8,9 @@ import {
   RouterProvider,
 } from '@tanstack/react-router';
 import { StrictMode } from 'react';
-import { renderToPipeableStream } from 'react-dom/server';
+import { renderToString } from 'react-dom/server';
 import { routeTree } from './routeTree.gen';
 import reset from './styles/reset';
-import type { Writable } from 'stream';
 
 interface RenderResult {
   html: string;
@@ -50,48 +49,17 @@ export async function render(url: string): Promise<RenderResult> {
   const { extractCriticalToChunks, constructStyleTagsFromChunks } =
     createEmotionServer(cache);
 
-  // Promise를 사용하여 스트림 완료 대기
-  const html = await new Promise<string>((resolve, reject) => {
-    let htmlContent = '';
-
-    const writable: Writable = {
-      write(chunk: string) {
-        htmlContent += chunk;
-        return true;
-      },
-      end() {
-        resolve(htmlContent);
-      },
-      on() {
-        return this;
-      },
-      once() {
-        return this;
-      },
-      emit() {
-        return false;
-      },
-    } as unknown as Writable;
-
-    const { pipe } = renderToPipeableStream(
-      <StrictMode>
-        <CacheProvider value={cache}>
-          <QueryClientProvider client={queryClient}>
-            <Global styles={reset} />
-            <RouterProvider router={router} />
-          </QueryClientProvider>
-        </CacheProvider>
-      </StrictMode>,
-      {
-        onShellReady() {
-          pipe(writable);
-        },
-        onError(error) {
-          reject(error);
-        },
-      },
-    );
-  });
+  // renderToString을 사용하여 HTML 생성
+  const html = renderToString(
+    <StrictMode>
+      <CacheProvider value={cache}>
+        <QueryClientProvider client={queryClient}>
+          <Global styles={reset} />
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      </CacheProvider>
+    </StrictMode>,
+  );
 
   // Critical CSS 추출
   const emotionChunks = extractCriticalToChunks(html);

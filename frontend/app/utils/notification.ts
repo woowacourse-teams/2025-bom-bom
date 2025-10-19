@@ -1,7 +1,7 @@
-import { Platform } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
-import messaging from '@react-native-firebase/messaging';
+import { Platform } from 'react-native';
 
 // 안드로이드 알림 채널 생성
 export const createAndroidChannel = async () => {

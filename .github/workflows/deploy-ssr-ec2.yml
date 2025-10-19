@@ -37,7 +37,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Type check
         working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -96,33 +96,33 @@ jobs:
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSR_EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.SSR_EC2_HOST }} >> ~/.ssh/known_hosts
 
       - name: Upload deployment package to EC2
         run: |
           scp -i ~/.ssh/id_rsa \
             ./artifact/deploy.tar.gz \
-            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/tmp/deploy.tar.gz
+            ${{ secrets.SSR_EC2_USER }}@${{ secrets.SSR_EC2_HOST }}:/tmp/deploy.tar.gz
 
       - name: Upload deployment script to EC2
         run: |
           scp -i ~/.ssh/id_rsa \
             frontend/web/scripts/deploy.sh \
-            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/tmp/deploy.sh
+            ${{ secrets.SSR_EC2_USER }}@${{ secrets.SSR_EC2_HOST }}:/tmp/deploy.sh
 
       - name: Execute deployment script on EC2
         run: |
           ssh -i ~/.ssh/id_rsa \
-            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
+            ${{ secrets.SSR_EC2_USER }}@${{ secrets.SSR_EC2_HOST }} \
             'bash /tmp/deploy.sh'
 
       - name: Cleanup
         if: always()
         run: |
           rm -rf ~/.ssh/id_rsa
-          ssh-keyscan -R ${{ secrets.EC2_HOST }} ~/.ssh/known_hosts || true
+          ssh-keyscan -R ${{ secrets.SSR_EC2_HOST }} ~/.ssh/known_hosts || true
 
       - name: Notify deployment status
         if: always()
@@ -145,7 +145,7 @@ jobs:
 
       - name: Check server health
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://${{ secrets.EC2_HOST }} || echo "000")
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://${{ secrets.SSR_EC2_HOST }} || echo "000")
 
           if [ "$response" == "200" ]; then
             echo "✅ Health check passed (Status: $response)"

@@ -4,7 +4,7 @@ import {
   init as initSentry,
   tanstackRouterBrowserTracingIntegration,
 } from '@sentry/react';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
@@ -63,9 +63,11 @@ enableMocking().then(() => {
   hydrateRoot(
     document.getElementById('root')!,
     <StrictMode>
-      <Global styles={reset} />
-      <RouterProvider router={router} />
-      <GAInitializer />
+      <QueryClientProvider client={queryClient}>
+        <Global styles={reset} />
+        <RouterProvider router={router} />
+        <GAInitializer />
+      </QueryClientProvider>
     </StrictMode>,
   );
 });

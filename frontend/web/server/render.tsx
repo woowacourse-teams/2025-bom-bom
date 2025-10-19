@@ -27,16 +27,24 @@ export async function handleSSR(req: Request, res: Response) {
     const scripts: string[] = [];
     const styles: string[] = [];
 
-    // manifest에서 main 파일들 추출
-    Object.entries(manifest).forEach(([key, value]) => {
-      if (key.endsWith('.js')) {
-        scripts.push(value);
-      } else if (key.endsWith('.css')) {
-        styles.push(value);
-      }
-    });
+    // dist/static/js 폴더에서 실제 파일 찾기
+    const jsDir = path.join(__dirname, '../static/js');
 
-    // manifest가 없으면 기본 경로 사용
+    try {
+      if (fs.existsSync(jsDir)) {
+        const files = fs.readdirSync(jsDir);
+
+        // main.xxx.js 파일 먼저 찾기
+        const mainFile = files.find(f => f.startsWith('main.') && f.endsWith('.js'));
+        if (mainFile) {
+          scripts.push(`/js/${mainFile}`);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to read JS directory:', error);
+    }
+
+    // 파일을 못 찾으면 기본 경로 사용
     if (scripts.length === 0) {
       scripts.push('/js/main.js');
     }

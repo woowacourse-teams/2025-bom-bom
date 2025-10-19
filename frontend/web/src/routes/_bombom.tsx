@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
 import PageLayout from '@/components/PageLayout/PageLayout';
+import { isServer } from '@/utils/environment';
 
 let isFirstVisit = true;
 
@@ -23,7 +24,7 @@ export const Route = createFileRoute('/_bombom')({
     try {
       const user = await queryClient.fetchQuery(queries.userProfile());
 
-      if (user && typeof window !== 'undefined') {
+      if (user && !isServer) {
         window.gtag?.('set', { user_id: user.id });
       }
     } catch {

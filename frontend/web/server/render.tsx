@@ -11,7 +11,9 @@ export async function handleSSR(req: Request, res: Response) {
 
     // SSR 렌더링
     const { html, css } = await render(url);
-    console.log(`[SSR] Success - HTML length: ${html.length}, CSS length: ${css.length}`);
+    console.log(
+      `[SSR] Success - HTML length: ${html.length}, CSS length: ${css.length}`,
+    );
 
     // 빌드된 index.html에서 스크립트 목록 추출
     const scripts: string[] = [];
@@ -64,7 +66,7 @@ export async function handleSSR(req: Request, res: Response) {
       url: req.originalUrl,
       timestamp: new Date().toISOString(),
     });
-    
+
     // 개발 환경에서는 상세 에러 정보 포함
     if (process.env.NODE_ENV === 'development') {
       res.status(500).send(`
@@ -78,4 +80,3 @@ export async function handleSSR(req: Request, res: Response) {
     }
   }
 }
-`

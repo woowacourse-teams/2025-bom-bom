@@ -13,6 +13,7 @@ import {
 } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { renderToString } from 'react-dom/server';
+import { queries } from './apis/queries';
 import { routeTree } from './routeTree.gen';
 import reset from './styles/reset';
 
@@ -44,6 +45,20 @@ export async function render(url: string): Promise<RenderResult> {
       queryClient,
     },
   });
+
+  if (url === '/') {
+    try {
+      await Promise.all([
+        queryClient.prefetchQuery(queries.newsletters()),
+        queryClient.prefetchQuery(queries.monthlyReadingRank({ limit: 10 })),
+        // queryClient.prefetchQuery(queries.myMonthlyReadingRank()), // 서버와 클라이언트 쿠키 동기화 이후
+        // queryClient.prefetchQuery(queries.userProfile()), // 서버와 클라이언트 쿠키 동기화 이후
+      ]);
+    } catch (error) {
+      // 프리페칭 실패 시에도 렌더링은 계속 진행
+      console.warn('[SSR] Data prefetching failed:', error);
+    }
+  }
 
   // Router 로드 및 데이터 프리페칭
   await router.load();

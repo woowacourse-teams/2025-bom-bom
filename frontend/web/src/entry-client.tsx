@@ -1,5 +1,4 @@
 import { Global } from '@emotion/react';
-import Clarity from '@microsoft/clarity';
 import {
   init as initSentry,
   tanstackRouterBrowserTracingIntegration,
@@ -12,7 +11,7 @@ import { ENV } from './apis/env';
 import GAInitializer from './libs/googleAnalytics/GAInitializer';
 import { routeTree } from './routeTree.gen';
 import reset from './styles/reset';
-import { isDevelopment, isProduction } from './utils/environment';
+import { isDevelopment } from './utils/environment';
 
 // if (isProduction) Clarity.init(ENV.clarityProjectId);
 

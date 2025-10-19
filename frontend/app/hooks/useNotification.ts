@@ -72,31 +72,31 @@ const useNotification = () => {
       // ToDo: 백엔드에 새 토큰 전송
     });
 
-    // 백그라운드 상태에서 알림을 탭한 경우
+    // 백그라운드에서 알림을 탭한 경우
     const unsubscribeNotificationOpened = messaging().onNotificationOpenedApp(
       (remoteMessage) => {
         // ToDo: 특정 화면으로 이동
       },
     );
 
-    // 알림 수신 리스너: 알림이 표시되면 state에 저장
+    // 포그라운드에서 알림을 수신한 경우
     const notificationListener = Notifications.addNotificationReceivedListener(
       (notification) => {
         setNotification(notification);
       },
     );
 
-    // 알림 탭 리스너: 사용자가 알림을 탭했을 때 동작을 처리
+    // 포그라운드에서 알림을 탭한 경우
     const responseListener =
       Notifications.addNotificationResponseReceivedListener((response) => {});
 
     // 클린업
     return () => {
-      unsubscribeTokenRefresh(); // FCM 토큰 갱신 리스너 제거
-      unsubscribe(); // FCM 포그라운드 메시지 리스너 제거
-      unsubscribeNotificationOpened(); // 백그라운드 알림 탭 리스너 제거
-      notificationListener.remove(); // 알림 수신 리스너 제거
-      responseListener.remove(); // 알림 탭 리스너 제거
+      unsubscribeTokenRefresh();
+      unsubscribe();
+      unsubscribeNotificationOpened();
+      notificationListener.remove();
+      responseListener.remove();
     };
   }, [coldStartNotificationOpen, getFcmToken]);
 

@@ -58,57 +58,57 @@ const useNotification = () => {
     }
   }, [requestNotificationPermission]);
 
-  // FCM 토큰 갱신 리스너
-  const unsubscribeTokenRefresh = messaging().onTokenRefresh((newToken) => {
-    setFcmToken(newToken);
-    // ToDo: 백엔드에 새 토큰 전송
-  });
-
-  // 백그라운드 및 앱 종료 상태에서 알림을 탭하여 앱을 연 경우 실행
-  messaging()
-    .getInitialNotification()
-    .then((remoteMessage) => {
-      if (remoteMessage) {
-        // ToDo: 특정 화면으로 이동
-      }
-    });
-
-  // 백그라운드 상태에서 알림을 탭한 경우
-  const unsubscribeNotificationOpened = messaging().onNotificationOpenedApp(
-    (remoteMessage) => {
-      // ToDo: 특정 화면으로 이동
-    },
-  );
-
-  // FCM 포그라운드 메시지 리스너: 앱이 열려있을 때 FCM 메시지를 받으면 즉시 로컬 알림으로 표시
-  const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-    // FCM에서 메시지를 받으면 Expo Notifications로 로컬 알림 표시
-    if (remoteMessage.notification) {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: remoteMessage.notification.title || '',
-          body: remoteMessage.notification.body || '',
-          data: remoteMessage.data,
-        },
-        trigger: null, // 즉시 표시
-      });
-    }
-  });
-
-  // 알림 수신 리스너: 알림이 표시되면 state에 저장
-  const notificationListener = Notifications.addNotificationReceivedListener(
-    (notification) => {
-      setNotification(notification);
-    },
-  );
-
-  // 알림 탭 리스너: 사용자가 알림을 탭했을 때 동작을 처리
-  const responseListener =
-    Notifications.addNotificationResponseReceivedListener((response) => {});
-
   useEffect(() => {
     createAndroidChannel();
     getFcmToken();
+
+    // FCM 포그라운드 메시지 리스너: 앱이 열려있을 때 FCM 메시지를 받으면 즉시 로컬 알림으로 표시
+    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+      // FCM에서 메시지를 받으면 Expo Notifications로 로컬 알림 표시
+      if (remoteMessage.notification) {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: remoteMessage.notification.title || '',
+            body: remoteMessage.notification.body || '',
+            data: remoteMessage.data,
+          },
+          trigger: null, // 즉시 표시
+        });
+      }
+    });
+
+    // FCM 토큰 갱신 리스너
+    const unsubscribeTokenRefresh = messaging().onTokenRefresh((newToken) => {
+      setFcmToken(newToken);
+      // ToDo: 백엔드에 새 토큰 전송
+    });
+
+    // 백그라운드 및 앱 종료 상태에서 알림을 탭하여 앱을 연 경우 실행
+    messaging()
+      .getInitialNotification()
+      .then((remoteMessage) => {
+        if (remoteMessage) {
+          // ToDo: 특정 화면으로 이동
+        }
+      });
+
+    // 백그라운드 상태에서 알림을 탭한 경우
+    const unsubscribeNotificationOpened = messaging().onNotificationOpenedApp(
+      (remoteMessage) => {
+        // ToDo: 특정 화면으로 이동
+      },
+    );
+
+    // 알림 수신 리스너: 알림이 표시되면 state에 저장
+    const notificationListener = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        setNotification(notification);
+      },
+    );
+
+    // 알림 탭 리스너: 사용자가 알림을 탭했을 때 동작을 처리
+    const responseListener =
+      Notifications.addNotificationResponseReceivedListener((response) => {});
 
     // 클린업
     return () => {
@@ -118,15 +118,7 @@ const useNotification = () => {
       notificationListener.remove(); // 알림 수신 리스너 제거
       responseListener.remove(); // 알림 탭 리스너 제거
     };
-  }, [
-    createAndroidChannel,
-    getFcmToken,
-    notificationListener,
-    responseListener,
-    unsubscribe,
-    unsubscribeNotificationOpened,
-    unsubscribeTokenRefresh,
-  ]);
+  }, [createAndroidChannel, getFcmToken]);
 
   return {
     fcmToken,

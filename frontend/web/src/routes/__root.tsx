@@ -1,5 +1,6 @@
 import { theme } from '@bombom/shared/theme';
 import { ThemeProvider } from '@emotion/react';
+import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
 import {
   createRootRouteWithContext,
   HeadContent,
@@ -9,7 +10,7 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import Toast from '@/components/Toast/Toast';
 import usePageTracking from '@/libs/googleAnalytics/usePageTracking';
 import { useWebViewAuth } from '@/libs/webview/useWebViewAuth';
-import type { QueryClient } from '@tanstack/react-query';
+import { queryClient } from '@/main';
 import type { redirect } from '@tanstack/react-router';
 
 interface BomBomRouterContext {
@@ -20,16 +21,14 @@ const RootComponent = () => {
   usePageTracking();
   useWebViewAuth();
 
-  // SSR/CSR 모두 QueryClientProvider가 상위에서 제공됨
-  // entry-server.tsx와 entry-client.tsx에서 각각 제공
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <Outlet />
         <Toast />
       </ThemeProvider>
       <TanStackRouterDevtools />
-    </>
+    </QueryClientProvider>
   );
 };
 

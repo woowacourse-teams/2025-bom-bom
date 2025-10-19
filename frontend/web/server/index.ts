@@ -1,6 +1,6 @@
 import path from 'path';
 import express from 'express';
-// import { handleSSR } from './render';
+import { handleSSR } from './render';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 const staticPath = path.join(__dirname, '../static');
 const publicPath = path.join(__dirname, '../public');
 
-// app.get('/', handleSSR);
+app.get('/', handleSSR);
 
 app.use(
   express.static(staticPath, {

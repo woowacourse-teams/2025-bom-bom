@@ -13,6 +13,7 @@ import useModal from '@/components/Modal/useModal';
 import { CATEGORIES, NEWSLETTER_COUNT } from '@/constants/newsletter';
 import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
+import { isServer } from '@/utils/environment';
 import type { Category } from '@/constants/newsletter';
 import type { Device } from '@/hooks/useDevice';
 import type { Newsletter } from '@/types/newsletter';
@@ -116,23 +117,24 @@ const TrendySection = () => {
           )}
         </TrendyGrid>
       </Container>
-      {createPortal(
-        <Modal
-          modalRef={detailModalRef}
-          closeModal={closeDetailModal}
-          isOpen={isOpen}
-          position={device === 'mobile' ? 'bottom' : 'center'}
-          showCloseButton={device !== 'mobile'}
-        >
-          {selectedNewsletter && (
-            <NewsletterDetail
-              newsletterId={selectedNewsletter.newsletterId}
-              category={selectedNewsletter.category}
-            />
-          )}
-        </Modal>,
-        document.body,
-      )}
+      {!isServer &&
+        createPortal(
+          <Modal
+            modalRef={detailModalRef}
+            closeModal={closeDetailModal}
+            isOpen={isOpen}
+            position={device === 'mobile' ? 'bottom' : 'center'}
+            showCloseButton={device !== 'mobile'}
+          >
+            {selectedNewsletter && (
+              <NewsletterDetail
+                newsletterId={selectedNewsletter.newsletterId}
+                category={selectedNewsletter.category}
+              />
+            )}
+          </Modal>,
+          document.body,
+        )}
     </>
   );
 };

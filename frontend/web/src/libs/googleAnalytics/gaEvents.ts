@@ -1,3 +1,4 @@
+import { isServer } from '@/utils/environment';
 import { logger } from '@/utils/logger';
 
 interface TrackEventParams {
@@ -13,7 +14,7 @@ export const trackEvent = ({
   label,
   value,
 }: TrackEventParams) => {
-  if (typeof window.gtag !== 'function') {
+  if (isServer || typeof window.gtag !== 'function') {
     logger.warn('[GA] gtag is not initialized');
     return;
   }

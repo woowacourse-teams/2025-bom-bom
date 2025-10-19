@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { isServer } from '@/utils/environment';
 
 const MEDIA_FEATURE_KEYS = [
   'max-width',
@@ -82,7 +83,7 @@ function convertToMediaQueryString(condition: MediaCondition): string {
 const useMediaQuery = (condition: MediaCondition): boolean => {
   const getInitialMatches = () => {
     const query = convertToMediaQueryString(condition);
-    return window.matchMedia(query).matches;
+    return isServer ? false : window.matchMedia(query).matches;
   };
 
   const [matches, setMatches] = useState<boolean>(getInitialMatches);

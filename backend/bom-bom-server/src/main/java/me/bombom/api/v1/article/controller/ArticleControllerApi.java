@@ -101,9 +101,8 @@ public interface ArticleControllerApi {
             description = "1개 이상의 아티클들을 삭제합니다."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "아티클 삭제 성공"),
-        @ApiResponse(responseCode = "403", description = "아티클에 대한 접근 권한 없음", content = @Content),
-        @ApiResponse(responseCode = "404", description = "아티클을 찾을 수 없음", content = @Content)
+        @ApiResponse(responseCode = "204", description = "아티클 삭제 성공"),
+        @ApiResponse(responseCode = "403", description = "아티클에 대한 접근 권한 없음", content = @Content)
     })
     void deleteArticles(
         @Parameter(hidden = true) Member member,

@@ -9,16 +9,16 @@ import type { TouchEvent } from 'react';
 
 interface UseCarouselProps {
   slideCount: number;
-  isInfinity?: boolean;
-  autoPlay?: boolean;
-  autoPlaySpeedMs?: number;
+  isInfinity: boolean;
+  autoPlay: boolean;
+  autoPlaySpeedMs: number;
 }
 
 const useCarousel = ({
   slideCount,
-  isInfinity = true,
-  autoPlay = true,
-  autoPlaySpeedMs = DEFAULT_SPEED,
+  isInfinity,
+  autoPlay,
+  autoPlaySpeedMs,
 }: UseCarouselProps) => {
   const [slideIndex, setSlideIndex] = useState(
     isInfinity ? INFINITY_START_SLIDE_INDEX : FINITE_START_SLIDE_INDEX,

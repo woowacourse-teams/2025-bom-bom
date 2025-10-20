@@ -71,6 +71,8 @@ function Storage() {
   const { baseQueryParams, handlePageChange, page, resetPage } =
     useStorageFilters();
 
+  console.log(page);
+
   return (
     <Container>
       {!isMobile && (

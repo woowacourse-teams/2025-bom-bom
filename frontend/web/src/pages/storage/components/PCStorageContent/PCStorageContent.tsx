@@ -49,13 +49,17 @@ export default function PCStorageContent({
 
   useEffect(() => {
     resetPage();
-    clearSelection();
+  }, [baseQueryParams.keyword, resetPage]);
+
+  useEffect(() => {
+    if (selectedIds.length) clearSelection();
   }, [
+    baseQueryParams.newsletterId,
     baseQueryParams.keyword,
     baseQueryParams.sort,
     baseQueryParams.page,
     clearSelection,
-    resetPage,
+    selectedIds.length,
   ]);
 
   return (

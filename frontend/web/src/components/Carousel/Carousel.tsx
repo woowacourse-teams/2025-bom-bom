@@ -6,31 +6,31 @@ import useCarousel from './useCarousel';
 import ChevronIcon from '../icons/ChevronIcon';
 import type { PropsWithChildren } from 'react';
 
+/**
+ * 1. 무한 캐러셀만 자동 재생 설정 가능
+ * 2. 자동 재생 활성화 상태에서만 재생 속도 설정 가능
+ */
+type PlayOption =
+  | { isInfinity?: false; autoPlay?: false; autoPlaySpeedMs?: never }
+  | ({ isInfinity: true } & (
+      | { autoPlay?: true; autoPlaySpeedMs?: number }
+      | { autoPlay: false; autoPlaySpeedMs?: never }
+    ));
+
+/**
+ * 슬라이드 버튼이 존재하는 경우에만 버튼 위치 설정 가능
+ */
 type SlideButtonPosition = 'middle' | 'bottom';
+type SlideButtonOption =
+  | { hasSlideButton?: true; slideButtonPosition?: SlideButtonPosition }
+  | { hasSlideButton: false; slideButtonPosition?: never };
 
 type CarouselProps = PropsWithChildren & {
   hasSlideButton?: boolean;
   hasAnimation?: boolean;
   showNextSlidePart?: boolean;
-} &
-  /**
-   * isInfinity가 true일 경우에만 autoPlay 사용 가능
-   * - autoPlay: 자동 슬라이드 재생 여부 (기본값: true)
-   * - autoPlaySpeedMs: 자동 재생 간격 (밀리초, 기본값: 4000)
-   */
-  (| { isInfinity?: false; autoPlay?: false; autoPlaySpeedMs?: never }
-    | ({ isInfinity: true } & (
-        | { autoPlay?: true; autoPlaySpeedMs?: number }
-        | { autoPlay: false; autoPlaySpeedMs?: never }
-      ))
-  ) &
-  /**
-   * hasSlideButton이 true일 경우에만 slideButtonPosition 사용 가능
-   * - slideButtonPosition: 슬라이드 버튼 위치 ('middle' | 'bottom')
-   */
-  (| { hasSlideButton?: true; slideButtonPosition?: SlideButtonPosition }
-    | { hasSlideButton: false; slideButtonPosition?: never }
-  );
+} & PlayOption &
+  SlideButtonOption;
 
 const Carousel = ({
   isInfinity = true,

@@ -65,6 +65,7 @@ export default function PCStorageContent({
         onSelectDeleteButtonClick={enableEditMode}
         onSelectCancelButtonClick={disableEditMode}
         onDeleteButtonClick={() => console.log('delete')}
+        checkedCount={selectedIds.length}
         allChecked={isAllSelected}
         onAllSelectClick={toggleSelectAll}
       />

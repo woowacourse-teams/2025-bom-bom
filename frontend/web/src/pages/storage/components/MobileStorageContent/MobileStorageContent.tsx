@@ -83,6 +83,7 @@ export default function MobileStorageContent({
         onSelectDeleteButtonClick={enableEditMode}
         onSelectCancelButtonClick={disableEditMode}
         onDeleteButtonClick={() => console.log('delete')}
+        checkedCount={selectedIds.length}
         allChecked={isAllSelected}
         onAllSelectClick={toggleSelectAll}
       />

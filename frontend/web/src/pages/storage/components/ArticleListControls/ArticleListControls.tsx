@@ -15,6 +15,7 @@ interface ArticleListControlsProps {
   onSelectDeleteButtonClick: () => void;
   onSelectCancelButtonClick: () => void;
   onDeleteButtonClick: () => void;
+  checkedCount: number;
   allChecked: boolean;
   onAllSelectClick: () => void;
 }
@@ -24,6 +25,7 @@ export default function ArticleListControls({
   onSelectDeleteButtonClick,
   onSelectCancelButtonClick,
   onDeleteButtonClick,
+  checkedCount,
   allChecked,
   onAllSelectClick,
 }: ArticleListControlsProps) {
@@ -61,6 +63,7 @@ export default function ArticleListControls({
               checked={allChecked}
               onChange={onAllSelectClick}
             />
+            <DeleteCount>{checkedCount}개 선택됨</DeleteCount>
             <DeleteIcon
               fill={theme.colors.error}
               onClick={onDeleteButtonClick}
@@ -71,9 +74,7 @@ export default function ArticleListControls({
             />
           </DeleteWrapper>
         ) : (
-          <DeleteButton onClick={onSelectDeleteButtonClick}>
-            선택 삭제
-          </DeleteButton>
+          <TextButton onClick={onSelectDeleteButtonClick}>선택 삭제</TextButton>
         )}
 
         <Select
@@ -109,7 +110,12 @@ const DeleteWrapper = styled.div`
   align-items: center;
 `;
 
-const DeleteButton = styled.button`
+const DeleteCount = styled.p`
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font: ${({ theme }) => theme.fonts.body2};
+`;
+
+const TextButton = styled.button`
   padding-left: 8px;
 
   display: flex;

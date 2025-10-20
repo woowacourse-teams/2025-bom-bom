@@ -353,8 +353,18 @@ jobs:
           sudo docker rm ${{ env.SERVER_CONTAINER_NAME }} || true
           
           echo "🚀 안정 버전 compose로 재기동"
-          sudo docker compose -f "$FALLBACK_COMPOSE" --env-file .env \
-            up -d --remove-orphans --force-recreate
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env down || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env \
+            up -d --remove-orphans --pull=always --force-recreate
           
           echo "⏳ 헬스체크 중..."
           for i in {1..10}; do
@@ -585,8 +595,18 @@ jobs:
           sudo docker rm ${{ env.SERVER_CONTAINER_NAME }} || true
           
           echo "🚀 안정 버전 compose로 재기동"
-          sudo docker compose -f "$FALLBACK_COMPOSE" --env-file .env \
-            up -d --remove-orphans --force-recreate
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env down || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env \
+            up -d --remove-orphans --pull=always --force-recreate
           
           echo "⏳ 헬스체크 중..."
           for i in {1..10}; do
@@ -668,8 +688,18 @@ jobs:
           sudo docker rm ${{ env.SERVER_CONTAINER_NAME }} || true
 
           echo "🚀 안정 버전 compose로 재기동"
-          sudo docker compose -f "$FALLBACK_COMPOSE" --env-file .env \
-            up -d --remove-orphans --force-recreate
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env down || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f docker-compose-prod-sub.yml --env-file .env \
+            up -d --remove-orphans --pull=always --force-recreate
 
           echo "⏳ 헬스체크 중..."
           for i in {1..10}; do

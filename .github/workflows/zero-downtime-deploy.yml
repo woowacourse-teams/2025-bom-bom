@@ -578,11 +578,15 @@ jobs:
             echo "⚠️ 안정판 compose가 없어 레포의 compose를 사용합니다."
             FALLBACK_COMPOSE="docker-compose-prod-sub.yml"
           fi
-          echo "🛑 기존 컨테이너 종료 및 제거"
-          sudo docker compose -f "$FALLBACK_COMPOSE" --env-file .env down || true
+          
+          echo "🛑 기존 컨테이너 중지 및 삭제"
+          sudo docker stop ${{ env.SERVER_CONTAINER_NAME }} || true
+          sudo docker rm ${{ env.SERVER_CONTAINER_NAME }} || true
+          
           echo "🚀 안정 버전 compose로 재기동"
           sudo docker compose -f "$FALLBACK_COMPOSE" --env-file .env \
             up -d --remove-orphans --force-recreate
+          
           echo "⏳ 헬스체크 중..."
           for i in {1..10}; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
@@ -658,8 +662,9 @@ jobs:
             FALLBACK_COMPOSE="docker-compose-prod-sub.yml"
           fi
 
-          echo "🛑 기존 컨테이너 종료 및 제거"
-          sudo docker compose -f "$FALLBACK_COMPOSE" --env-file .env down || true
+          echo "🛑 기존 컨테이너 중지 및 삭제"
+          sudo docker stop ${{ env.SERVER_CONTAINER_NAME }} || true
+          sudo docker rm ${{ env.SERVER_CONTAINER_NAME }} || true
 
           echo "🚀 안정 버전 compose로 재기동"
           sudo docker compose -f "$FALLBACK_COMPOSE" --env-file .env \

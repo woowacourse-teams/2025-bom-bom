@@ -33,7 +33,7 @@ export default function PCStorageContent({
     queries.articles({
       ...baseQueryParams,
       newsletterId: baseQueryParams.newsletterId || undefined,
-      page: baseQueryParams.page ?? 1 - 1,
+      page: (baseQueryParams.page ?? 1) - 1,
     }),
   );
   const articleList = articles?.content || [];

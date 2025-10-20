@@ -64,6 +64,7 @@ export default function ArticleListControls({
               onChange={onToggleSelectAll}
             />
             <DeleteCount>{checkedCount}개 선택됨</DeleteCount>
+            <HorizontalDivider />
             <DeleteIcon fill={theme.colors.error} onClick={onDeleteSelected} />
             <CancelIcon fill={theme.colors.black} onClick={onExitEditMode} />
           </DeleteWrapper>
@@ -107,6 +108,13 @@ const DeleteWrapper = styled.div`
 const DeleteCount = styled.p`
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body2};
+`;
+
+const HorizontalDivider = styled.div`
+  width: 2px;
+  height: 16px;
+
+  background-color: ${({ theme }) => theme.colors.stroke};
 `;
 
 const TextButton = styled.button`

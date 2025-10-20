@@ -50,4 +50,21 @@ class SubscribeServiceTest {
                 .count();
         assertThat(count).isEqualTo(1);
     }
+
+    @Test
+    void 이미_구독된_경우_구독_취소_URL을_업데이트한다() {
+        // given
+        Long newsletterId = 1L;
+        Long memberId = 2L;
+        String oldUrl = "oldUnsubscribeUrl";
+        String newUrl = "newUnsubscribeUrl";
+        subscribeService.save(newsletterId, memberId, oldUrl);
+
+        // when
+        subscribeService.save(newsletterId, memberId, newUrl);
+
+        // then
+        subscribeRepository.findByMemberIdAndNewsletterId(newsletterId, memberId)
+                .ifPresent(subscribe -> assertThat(subscribe.getUnsubscribeUrl()).isEqualTo(newUrl));
+    }
 } 

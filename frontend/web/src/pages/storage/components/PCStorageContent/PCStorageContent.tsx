@@ -62,12 +62,12 @@ export default function PCStorageContent({
     <>
       <ArticleListControls
         editMode={editMode}
-        onSelectDeleteButtonClick={enableEditMode}
-        onSelectCancelButtonClick={disableEditMode}
-        onDeleteButtonClick={() => console.log('delete')}
+        onEnterEditMode={enableEditMode}
+        onExitEditMode={disableEditMode}
+        onDeleteSelected={() => console.log('delete')}
         checkedCount={selectedIds.length}
-        allChecked={isAllSelected}
-        onAllSelectClick={toggleSelectAll}
+        isAllSelected={isAllSelected}
+        onToggleSelectAll={toggleSelectAll}
       />
       {isLoading ? (
         <ArticleCardListSkeleton />

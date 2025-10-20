@@ -12,22 +12,22 @@ import DeleteIcon from '#/assets/svg/delete.svg';
 
 interface ArticleListControlsProps {
   editMode: boolean;
-  onSelectDeleteButtonClick: () => void;
-  onSelectCancelButtonClick: () => void;
-  onDeleteButtonClick: () => void;
+  onEnterEditMode: () => void;
+  onExitEditMode: () => void;
+  onDeleteSelected: () => void;
   checkedCount: number;
-  allChecked: boolean;
-  onAllSelectClick: () => void;
+  isAllSelected: boolean;
+  onToggleSelectAll: () => void;
 }
 
 export default function ArticleListControls({
   editMode,
-  onSelectDeleteButtonClick,
-  onSelectCancelButtonClick,
-  onDeleteButtonClick,
+  onEnterEditMode,
+  onExitEditMode,
+  onDeleteSelected,
   checkedCount,
-  allChecked,
-  onAllSelectClick,
+  isAllSelected,
+  onToggleSelectAll,
 }: ArticleListControlsProps) {
   const [search, setSearch] = useState('');
   const [, setSearchParam] = useQueryState('search', {
@@ -60,21 +60,15 @@ export default function ArticleListControls({
           <DeleteWrapper>
             <Checkbox
               id="all"
-              checked={allChecked}
-              onChange={onAllSelectClick}
+              checked={isAllSelected}
+              onChange={onToggleSelectAll}
             />
             <DeleteCount>{checkedCount}개 선택됨</DeleteCount>
-            <DeleteIcon
-              fill={theme.colors.error}
-              onClick={onDeleteButtonClick}
-            />
-            <CancelIcon
-              fill={theme.colors.black}
-              onClick={onSelectCancelButtonClick}
-            />
+            <DeleteIcon fill={theme.colors.error} onClick={onDeleteSelected} />
+            <CancelIcon fill={theme.colors.black} onClick={onExitEditMode} />
           </DeleteWrapper>
         ) : (
-          <TextButton onClick={onSelectDeleteButtonClick}>선택 삭제</TextButton>
+          <TextButton onClick={onEnterEditMode}>선택 삭제</TextButton>
         )}
 
         <Select

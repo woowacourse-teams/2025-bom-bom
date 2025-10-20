@@ -10,6 +10,7 @@ import java.util.Properties;
 import news.bombomemail.article.domain.Article;
 import news.bombomemail.article.repository.ArticleRepository;
 import news.bombomemail.article.service.ArticleService;
+import news.bombomemail.article.util.UnsubscribeUrlExtractor;
 import news.bombomemail.email.extractor.EmailContentExtractor;
 import news.bombomemail.member.domain.Gender;
 import news.bombomemail.member.domain.Member;
@@ -25,7 +26,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({ArticleService.class})
+@Import({ArticleService.class, UnsubscribeUrlExtractor.class})
 class ArticleServiceTest {
 
     @Autowired

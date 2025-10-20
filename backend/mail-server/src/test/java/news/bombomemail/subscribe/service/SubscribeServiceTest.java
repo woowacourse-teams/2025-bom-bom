@@ -20,9 +20,15 @@ class SubscribeServiceTest {
 
     @Test
     void 구독이_정상적으로_저장된다() {
+        // given
         Long newsletterId = 1L;
         Long memberId = 2L;
-        subscribeService.save(newsletterId, memberId);
+        String unsubscribeUrl = "unsubscribeUrl";
+
+        // when
+        subscribeService.save(newsletterId, memberId, unsubscribeUrl);
+
+        // then
         boolean exists = subscribeRepository.existsByNewsletterIdAndMemberId(newsletterId, memberId);
         assertThat(exists).isTrue();
     }
@@ -32,10 +38,11 @@ class SubscribeServiceTest {
         // given
         Long newsletterId = 1L;
         Long memberId = 2L;
+        String unsubscribeUrl = "unsubscribeUrl";
 
         // when
-        subscribeService.save(newsletterId, memberId);
-        subscribeService.save(newsletterId, memberId);
+        subscribeService.save(newsletterId, memberId, unsubscribeUrl);
+        subscribeService.save(newsletterId, memberId, unsubscribeUrl);
 
         // then
         long count = subscribeRepository.findAll().stream()

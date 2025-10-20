@@ -26,14 +26,15 @@ class SubscribeListenerTest {
         // given
         Long newsletterId = 1L;
         Long memberId     = 2L;
+        String unsubscribeUrl = "unsubscribeUrl";
 
         // when
-        eventPublisher.publishEvent(SubscribeEvent.of(newsletterId, memberId));
+        eventPublisher.publishEvent(SubscribeEvent.of(newsletterId, memberId, unsubscribeUrl));
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
         // then
-        verify(subscribeService).save(newsletterId, memberId);
+        verify(subscribeService).save(newsletterId, memberId, unsubscribeUrl);
     }
 }

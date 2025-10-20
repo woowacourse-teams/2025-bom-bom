@@ -106,7 +106,6 @@ const ContentWrapper = styled.div<{ position: Position }>`
 const containerStyles = {
   dropdown: {
     height: 'auto',
-    maxHeight: '300px',
     borderRadius: '8px',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
   },
@@ -116,7 +115,7 @@ const containerStyles = {
     right: 0,
     width: '100%',
     height: '100%',
-    maxHeight: '45vh',
+    maxHeight: '80vh',
     borderRadius: '12px 12px 0 0',
     boxShadow: 'none',
   },

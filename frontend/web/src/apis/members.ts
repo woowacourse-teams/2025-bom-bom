@@ -10,13 +10,20 @@ export const getReadingStatus = async () => {
   });
 };
 
-type GetUserInfoResponse = components['schemas']['MemberProfileResponse'];
+type GetUserInfoResponse = components['schemas']['MemberInfoResponse'];
 
 export const getUserInfo = async () => {
   return await fetcher.get<GetUserInfoResponse>({
     path: '/members/me',
   });
 };
+
+type GetUserProfileResponse = components['schemas']['MemberProfileResponse'];
+
+export const getUserProfile = () =>
+  fetcher.get<GetUserProfileResponse>({
+    path: '/members/me/profile',
+  });
 
 type PatchWeeklyReadingGoalParams =
   operations['updateWeeklyGoalCount']['parameters']['query'];
@@ -57,5 +64,24 @@ export type GetMyMonthlyReadingRankResponse =
 export const getMyMonthlyReadingRank = async () => {
   return await fetcher.get<GetMyMonthlyReadingRankResponse>({
     path: '/members/me/reading/month/rank/me',
+  });
+};
+
+export type PatchMembersInfoParams =
+  components['schemas']['MemberInfoUpdateRequest'];
+
+export const patchMemberInfo = async (params: PatchMembersInfoParams) => {
+  return await fetcher.patch<PatchMembersInfoParams, never>({
+    path: '/members/me',
+    body: params,
+  });
+};
+
+export type GetMyNewslettersResponse =
+  components['schemas']['SubscribedNewsletterResponse'][];
+
+export const getMyNewsletters = async () => {
+  return await fetcher.get<GetMyNewslettersResponse>({
+    path: '/members/me/newsletters',
   });
 };

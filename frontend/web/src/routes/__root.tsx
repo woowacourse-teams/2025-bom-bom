@@ -7,6 +7,7 @@ import {
   Outlet,
 } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+import { NuqsAdapter } from 'nuqs/adapters/tanstack-router';
 import Toast from '@/components/Toast/Toast';
 import usePageTracking from '@/libs/googleAnalytics/usePageTracking';
 import { useWebViewAuth } from '@/libs/webview/useWebViewAuth';
@@ -26,8 +27,10 @@ const RootComponent = () => {
     <>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={theme}>
-          <Outlet />
-          <Toast />
+          <NuqsAdapter>
+            <Outlet />
+            <Toast />
+          </NuqsAdapter>
         </ThemeProvider>
       </QueryClientProvider>
       <TanStackRouterDevtools />

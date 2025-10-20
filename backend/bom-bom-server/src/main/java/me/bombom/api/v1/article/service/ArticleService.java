@@ -1,11 +1,13 @@
 package me.bombom.api.v1.article.service;
 
+import jakarta.validation.Valid;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
 import me.bombom.api.v1.article.dto.request.PreviousArticleRequest;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
@@ -15,9 +17,11 @@ import me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.PreviousArticleResponse;
 import me.bombom.api.v1.article.event.MarkAsReadEvent;
 import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
@@ -55,6 +59,7 @@ public class ArticleService {
     private final NewsletterRepository newsletterRepository;
     private final HighlightRepository highlightRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final BookmarkRepository bookmarkRepository;
 
     public Page<ArticleResponse> getArticles(
             Member member,
@@ -154,6 +159,26 @@ public class ArticleService {
     @Transactional
     public int cleanupOldPreviousArticles() {
         return articleRepository.cleanupOldPreviousArticles(PREVIOUS_ARTICLE_ADMIN_ID, PREVIOUS_ARTICLE_KEEP_COUNT);
+    }
+
+    @Transactional
+    public void delete(Member member, DeleteArticlesRequest request) {
+        if(request.articleIds().isEmpty()){
+            return;
+        }
+
+        List<Long> target = request.articleIds().stream().distinct().toList();
+
+        long mine = articleRepository.countByIdInAndMemberId(target, member.getId());
+        if (mine != target.size()) {
+            throw new UnauthorizedException(ErrorDetail.FORBIDDEN_RESOURCE)
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext(ErrorContextKeys.OPERATION, "deleteArticles")
+                    .addContext(ErrorContextKeys.ARTICLE_ID, request.articleIds());
+        }
+        bookmarkRepository.deleteAllByArticleIds(target);
+        highlightRepository.updateArticleDeleted(target);
+        articleRepository.deleteAllByIdsAndMemberId(target, member.getId());
     }
 
     private Article findArticleById(Long articleId, Long memberId) {

@@ -1,9 +1,10 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
 import { createFileRoute } from '@tanstack/react-router';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import RequireLogin from '@/hocs/RequireLogin';
 import { useDevice } from '@/hooks/useDevice';
+import MobileStorageContent from '@/pages/storage/components/MobileStorageContent/MobileStorageContent';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import NewsletterFilterSkeleton from '@/pages/storage/components/NewsletterFilter/NewsletterFilterSkeleton';
 import PCStorageContent from '@/pages/storage/components/PCStorageContent/PCStorageContent';
@@ -46,6 +47,15 @@ function Storage() {
   const device = useDevice();
   const isPC = device === 'pc';
   const isMobile = device === 'mobile';
+  const [editMode, setEditMode] = useState(false);
+
+  const enableEditMode = () => {
+    setEditMode(true);
+  };
+
+  const disableEditMode = () => {
+    setEditMode(false);
+  };
 
   const { baseQueryParams, handlePageChange, page, resetPage } =
     useStorageFilters();
@@ -69,23 +79,25 @@ function Storage() {
           <QuickMenu />
         </SidebarSection>
         <MainContentSection isPC={isPC}>
-          {/* {isPC ? ( */}
-          <PCStorageContent
-            baseQueryParams={baseQueryParams}
-            onPageChange={handlePageChange}
-            page={page}
-            resetPage={resetPage}
-          />
-          {/* ) : (
-            <MobileStorageContent
+          {isPC ? (
+            <PCStorageContent
               baseQueryParams={baseQueryParams}
-              searchInput={searchInput}
-              onSearchChange={handleSearchChange}
-              sortFilter={sortFilter}
-              onSortChange={handleSortChange}
+              editMode={editMode}
+              enableEditMode={enableEditMode}
+              disableEditMode={disableEditMode}
+              onPageChange={handlePageChange}
+              page={page}
               resetPage={resetPage}
             />
-           )} */}
+          ) : (
+            <MobileStorageContent
+              baseQueryParams={baseQueryParams}
+              editMode={editMode}
+              enableEditMode={enableEditMode}
+              disableEditMode={disableEditMode}
+              resetPage={resetPage}
+            />
+          )}
         </MainContentSection>
       </ContentWrapper>
     </Container>

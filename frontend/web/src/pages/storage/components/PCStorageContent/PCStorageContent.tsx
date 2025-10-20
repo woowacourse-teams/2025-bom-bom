@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSelectedDeleteIds } from '../../hooks/useSelectedDeleteIds';
 import ArticleList from '../ArticleList/ArticleList';
 import ArticleListControls from '../ArticleListControls/ArticleListControls';
@@ -12,6 +12,9 @@ import type { GetArticlesParams } from '@/apis/articles';
 
 interface PCStorageContentProps {
   baseQueryParams: GetArticlesParams;
+  editMode: boolean;
+  enableEditMode: () => void;
+  disableEditMode: () => void;
   onPageChange: (page: number) => void;
   page: number;
   resetPage: () => void;
@@ -19,6 +22,9 @@ interface PCStorageContentProps {
 
 export default function PCStorageContent({
   baseQueryParams,
+  editMode,
+  enableEditMode,
+  disableEditMode,
   onPageChange,
   page,
   resetPage,
@@ -30,7 +36,6 @@ export default function PCStorageContent({
       page: baseQueryParams.page ?? 1 - 1,
     }),
   );
-  const [editMode, setEditMode] = useState(false);
   const articleList = articles?.content || [];
   const {
     selectedIds,
@@ -42,25 +47,15 @@ export default function PCStorageContent({
 
   const haveNoContent = articleList.length === 0;
 
-  const enableEditMode = () => {
-    setEditMode(true);
-  };
-
-  const disableEditMode = () => {
-    setEditMode(false);
-  };
-
   useEffect(() => {
     resetPage();
-  }, [baseQueryParams.keyword, resetPage]);
-
-  useEffect(() => {
     clearSelection();
   }, [
     baseQueryParams.keyword,
     baseQueryParams.sort,
     baseQueryParams.page,
     clearSelection,
+    resetPage,
   ]);
 
   return (

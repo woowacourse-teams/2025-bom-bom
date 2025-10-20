@@ -50,13 +50,13 @@ function Storage() {
   const isPC = device === 'pc';
   const isMobile = device === 'mobile';
   const [editMode, setEditMode] = useState(false);
-  const search = useSearch({
+  const searchParam = useSearch({
     from: '/_bombom/storage',
     select: (state) => state.search,
   });
   const { data: newsletterFilters } = useQuery(
     queries.articlesStatisticsNewsletters({
-      keyword: search,
+      keyword: searchParam,
     }),
   );
 

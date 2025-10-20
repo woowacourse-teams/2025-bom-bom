@@ -44,7 +44,7 @@ export const Route = createFileRoute('/_bombom/my')({
 function MyPage() {
   const device = useDevice();
   const navigate = useNavigate();
-  const { tab: activeTab } = useSearch({ from: '/_bombom/my' });
+  const { tab: activeTabParam } = useSearch({ from: '/_bombom/my' });
 
   const { data: userInfo } = useQuery(queries.me());
   const { data: myNewsletters } = useQuery(queries.myNewsletters());
@@ -60,7 +60,7 @@ function MyPage() {
   };
 
   const renderTabContent = () => {
-    switch (activeTab) {
+    switch (activeTabParam) {
       case 'profile':
         return <ProfileSection userInfo={userInfo} />;
       case 'newsletters':
@@ -93,7 +93,7 @@ function MyPage() {
                 value={tab.id}
                 label={tab.label}
                 onTabSelect={() => handleTabSelect(tab.id)}
-                selected={activeTab === tab.id}
+                selected={activeTabParam === tab.id}
                 aria-controls={`panel-${tab.id}`}
                 textAlign="start"
               />
@@ -102,9 +102,9 @@ function MyPage() {
         </TabsWrapper>
 
         <TabPanel
-          id={`panel-${activeTab}`}
+          id={`panel-${activeTabParam}`}
           role="tabpanel"
-          aria-labelledby={`tab-${activeTab}`}
+          aria-labelledby={`tab-${activeTabParam}`}
           device={device}
         >
           {renderTabContent()}

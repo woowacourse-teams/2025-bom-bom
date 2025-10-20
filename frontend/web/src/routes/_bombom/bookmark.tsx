@@ -34,13 +34,13 @@ export const Route = createFileRoute('/_bombom/bookmark')({
 });
 
 function BookmarkPage() {
-  const newsletterId = useSearch({
+  const newsletterIdParam = useSearch({
     from: '/_bombom/bookmark',
     select: (state) => state.newsletterId,
   });
   const { data: articles, isLoading } = useQuery(
     queries.bookmarks({
-      newsletterId: newsletterId,
+      newsletterId: newsletterIdParam,
       size: 100, // 페이지네이션 없이 구현
     }),
   );

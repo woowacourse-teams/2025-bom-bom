@@ -4,14 +4,18 @@ import { ARTICLE_SIZE } from '../constants/article';
 import type { GetArticlesParams } from '@/apis/articles';
 
 export const useStorageFilters = () => {
-  const param = useSearch({ from: '/_bombom/storage' });
+  const {
+    sort: sortParam,
+    search: searchParam,
+    newsletterId: newsletterIdParams,
+  } = useSearch({ from: '/_bombom/storage' });
   const [page, setPage] = useState(1);
 
   const baseQueryParams: GetArticlesParams = {
-    sort: ['arrivedDateTime', param.sort ?? 'DESC'],
-    keyword: param.search,
+    sort: ['arrivedDateTime', sortParam ?? 'DESC'],
+    keyword: searchParam,
     size: ARTICLE_SIZE,
-    newsletterId: param.newsletterId ?? undefined,
+    newsletterId: newsletterIdParams ?? undefined,
     page,
   };
 

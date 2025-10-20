@@ -56,7 +56,7 @@ public class Member extends BaseEntity implements Serializable {
     private Gender gender;
 
     @Column(nullable = false, columnDefinition = "BIGINT")
-    private Long roleId = 0L;
+    private Long roleId = 1L;
 
     @Builder
     public Member(

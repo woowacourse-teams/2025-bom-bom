@@ -102,7 +102,7 @@ public interface ArticleControllerApi {
     )
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "아티클 삭제 성공"),
-        @ApiResponse(responseCode = "403", description = "아티클에 대한 접근 권한 없음", content = @Content)
+        @ApiResponse(responseCode = "403", description = "아티클에 대한 접근 권한 없음")
     })
     void deleteArticles(
         @Parameter(hidden = true) Member member,

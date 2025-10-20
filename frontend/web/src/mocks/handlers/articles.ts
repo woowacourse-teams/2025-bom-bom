@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import { ARTICLE_DETAIL } from '../datas/articleDetail';
-import { ARTICLES } from '../datas/articles';
+import { ARTICLES as ORIGINAL_ARTICLES } from '../datas/articles';
 import {
   PREVIOUS_ARTICLE_DETAILS,
   PREVIOUS_ARTICLES,
@@ -8,6 +8,7 @@ import {
 import { ENV } from '@/apis/env';
 
 const baseURL = ENV.baseUrl;
+let ARTICLES = [...ORIGINAL_ARTICLES];
 
 export const articleHandlers = [
   // 뉴스레터 통계
@@ -127,7 +128,10 @@ export const articleHandlers = [
       );
     }
 
-    // 실제 데이터 삭제 로직은 필요 없고, 모킹이라면 성공 응답만 반환해도 충분함
+    ARTICLES = ARTICLES.filter(
+      (article) => !articleIds.includes(article.articleId),
+    );
+
     return new HttpResponse(null, { status: 204 });
   }),
 ];

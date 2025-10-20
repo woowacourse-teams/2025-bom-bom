@@ -1,5 +1,6 @@
 package news.bombomemail.subscribe.service;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import news.bombomemail.subscribe.domain.Subscribe;
 import news.bombomemail.subscribe.event.NewsletterSubscribedEvent;
@@ -18,17 +19,21 @@ public class SubscribeService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void save(Long newsletterId, Long memberId) {
-        boolean isSubscribe = subscribeRepository.existsByNewsletterIdAndMemberId(newsletterId, memberId);
-        if (isSubscribe) {
-            return;
-        }
-
-        Subscribe subscribe = Subscribe.builder()
-                .newsletterId(newsletterId)
-                .memberId(memberId)
-                .build();
-        subscribeRepository.save(subscribe);
-        applicationEventPublisher.publishEvent(NewsletterSubscribedEvent.of(newsletterId, memberId));
+    public void save(Long newsletterId, Long memberId, String unsubscribeUrl) {
+        subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId)
+                .ifPresentOrElse(
+                        subscribe -> subscribe.updateUnsubscribeUrl(unsubscribeUrl),
+                        () -> {
+                            Subscribe newSubscribe = Subscribe.builder()
+                                    .newsletterId(newsletterId)
+                                    .memberId(memberId)
+                                    .unsubscribeUrl(unsubscribeUrl)
+                                    .build();
+                            subscribeRepository.save(newSubscribe);
+                            applicationEventPublisher.publishEvent(
+                                    NewsletterSubscribedEvent.of(newsletterId, memberId)
+                            );
+                        }
+                );
     }
 }

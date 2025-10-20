@@ -28,4 +28,10 @@ public class Subscribe extends BaseEntity {
 
     @Column(nullable = false)
     private Long memberId;
+
+    private String unsubscribeUrl;
+
+    public void updateUnsubscribeUrl(String unsubscribeUrl) {
+        this.unsubscribeUrl = unsubscribeUrl;
+    }
 }

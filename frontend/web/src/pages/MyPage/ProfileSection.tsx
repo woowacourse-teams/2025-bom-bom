@@ -94,14 +94,20 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
   const handleProfileUpdate = () => {
     if (!validateNicknameField(nickname)) return;
 
-    if (birthDate && !validateBirthDateField(birthDate)) {
+    if (!birthDate) {
+      toast.error('생년월일을 입력해주세요.');
+      return;
+    }
+
+    if (!validateBirthDateField(birthDate)) {
       return;
     }
 
     const hasNicknameChanged = nickname !== userInfo?.nickname;
+    const hasBirthDateChanged = birthDate !== userInfo?.birthDate;
     const hasGenderChanged = gender !== (userInfo?.gender || 'NONE');
 
-    if (!hasNicknameChanged && !hasGenderChanged) {
+    if (!hasNicknameChanged && !hasBirthDateChanged && !hasGenderChanged) {
       toast.error('변경된 정보가 없습니다.');
       return;
     }
@@ -113,6 +119,7 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
     });
   };
 
+  const isBirthDateDisabled = !!userInfo?.birthDate;
   const isGenderDisabled = userInfo?.gender && userInfo.gender !== 'NONE';
 
   const hasError = !!nicknameError || !!birthDateError;
@@ -135,13 +142,13 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
 
       <InputField
         name="birthDate"
-        label="생년월일(선택)"
+        label="생년월일"
         inputValue={birthDate}
         onInputChange={handleBirthDateChange}
         onBlur={handleBirthDateBlur}
         placeholder="YYYY-MM-DD"
         errorString={birthDateError}
-        disabled
+        disabled={isBirthDateDisabled}
       />
 
       <FieldGroup>
@@ -278,7 +285,10 @@ const HiddenRadio = styled.input`
   }
 `;
 
-const RadioButtonLabel = styled.label<{ selected: boolean; disabled?: boolean }>`
+const RadioButtonLabel = styled.label<{
+  selected: boolean;
+  disabled?: boolean;
+}>`
   min-width: 60px;
   padding: 10px 12px;
   border: 2px solid
@@ -304,7 +314,13 @@ const RadioButtonLabel = styled.label<{ selected: boolean; disabled?: boolean }>
 
   &:hover {
     border-color: ${({ theme, selected, disabled }) =>
-      disabled ? (selected ? 'transparent' : theme.colors.stroke) : selected ? 'transparent' : theme.colors.primary};
+      disabled
+        ? selected
+          ? 'transparent'
+          : theme.colors.stroke
+        : selected
+          ? 'transparent'
+          : theme.colors.primary};
   }
 `;
 

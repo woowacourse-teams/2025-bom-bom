@@ -16,7 +16,7 @@ public class SubscribeListener {
     @TransactionalEventListener
     public void on(SubscribeEvent event) {
         try {
-            subscribeService.save(event.newsletterId(), event.memberId());
+            subscribeService.save(event.newsletterId(), event.memberId(), event.unsubscribeUrl());
         } catch (Exception e) {
             // FIXME :: 로깅 시스템 구축후 추가될 예정
             log.error("구독 리스트 저장 실패");

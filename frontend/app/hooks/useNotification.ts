@@ -28,6 +28,7 @@ const useNotification = () => {
       }
 
       const token = await messaging().getToken();
+      console.log(token);
       setFcmToken(token);
     } catch (error) {
       console.error('FCM 토큰을 가져오는데 실패했습니다.', error);

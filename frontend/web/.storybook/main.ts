@@ -9,6 +9,7 @@ const config: StorybookConfig = {
     name: '@storybook/react-webpack5',
     options: {},
   },
+  staticDirs: ['../public'],
   webpackFinal: async (config) => {
     config.plugins?.push(
       new webpack.EnvironmentPlugin({
@@ -36,6 +37,14 @@ const config: StorybookConfig = {
     config.module?.rules?.push({
       test: /\.svg$/,
       use: ['@svgr/webpack'],
+    });
+
+    config.module?.rules?.push({
+      test: /\.(avif|png|jpe?g|gif|svg)$/i,
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/media/[name].[hash][ext]',
+      },
     });
 
     return {

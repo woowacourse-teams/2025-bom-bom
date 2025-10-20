@@ -163,10 +163,6 @@ public class ArticleService {
 
     @Transactional
     public void delete(Member member, DeleteArticlesRequest request) {
-        if(request.articleIds().isEmpty()){
-            return;
-        }
-
         List<Long> target = request.articleIds().stream().distinct().toList();
 
         long mine = articleRepository.countByIdInAndMemberId(target, member.getId());

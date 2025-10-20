@@ -31,7 +31,7 @@ export default ImageInfoCard;
 
 export const Container = styled.div`
   width: 100%;
-  padding: 0px;
+  padding: 0;
 
   display: flex;
   gap: 12px;

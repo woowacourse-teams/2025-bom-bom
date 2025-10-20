@@ -552,6 +552,30 @@ jobs:
           sudo docker logs ${{ env.SERVER_CONTAINER_NAME }} --tail 50 || true
           exit 1
 
+      - name: 릴리스 번들 저장 (후보로 저장 - compose + 메타데이터)
+        if: ${{ success() }}
+        env:
+          RELEASE_ID: ${{ needs.prepare-release.outputs.release_id }}
+        run: |
+          set -euo pipefail
+          CAND_DIR="/opt/bom-bom/candidates/${RELEASE_ID}"
+          sudo mkdir -p "$CAND_DIR"
+          sudo cp docker-compose-prod-sub.yml "$CAND_DIR/"
+          IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod"
+          IMAGE_DIGEST="$(sudo docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" 2>/dev/null || echo unknown)"
+          TS="$(date -Iseconds)"
+          sudo bash -c "cat > '$CAND_DIR/release.json' <<EOF
+          {
+            \"commit\": \"${GITHUB_SHA}\",
+            \"image\": \"${IMAGE_NAME}\",
+            \"image_digest\": \"${IMAGE_DIGEST}\",
+            \"compose_file\": \"docker-compose-prod-sub.yml\",
+            \"candidate_at\": \"${TS}\"
+          }
+          EOF"
+          sudo ln -sfn "$CAND_DIR" "/opt/bom-bom/candidates/latest"
+          echo "🗃 후보 저장 완료: $CAND_DIR"
+
   # ---------------------------------------------------
   # 5️⃣ prod-main 배포 실패 시 rollback
   # ---------------------------------------------------

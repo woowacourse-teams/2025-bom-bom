@@ -1,12 +1,12 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
-import { useCallback, useState } from 'react';
+import { createFileRoute, useSearch } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import { useDevice } from '@/hooks/useDevice';
 import ArticleList from '@/pages/storage/components/ArticleList/ArticleList';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
+import NewsletterFilterSkeleton from '@/pages/storage/components/NewsletterFilter/NewsletterFilterSkeleton';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
@@ -26,25 +26,27 @@ export const Route = createFileRoute('/_bombom/bookmark')({
     ],
   }),
   component: BookmarkPage,
+  validateSearch: (search: { newsletterId?: number }) => {
+    return {
+      newsletterId: search.newsletterId,
+    };
+  },
 });
 
 function BookmarkPage() {
-  const [selectedNewsletterId, setSelectedNewsletterId] = useState<
-    number | null
-  >(null);
+  const newsletterId = useSearch({
+    from: '/_bombom/bookmark',
+    select: (state) => state.newsletterId,
+  });
   const { data: articles, isLoading } = useQuery(
     queries.bookmarks({
-      newsletterId: selectedNewsletterId || undefined,
+      newsletterId: newsletterId,
       size: 100, // 페이지네이션 없이 구현
     }),
   );
   const device = useDevice();
 
   const totalElements = articles?.totalElements ?? 0;
-
-  const handleNewsletterChange = useCallback((id: number | null) => {
-    setSelectedNewsletterId(id);
-  }, []);
 
   const { data: newsletterCounts } = useQuery(
     queries.bookmarksStatisticsNewsletters(),
@@ -66,23 +68,12 @@ function BookmarkPage() {
 
         <ContentWrapper device={device}>
           <SidebarSection device={device}>
-            <NewsLetterFilter
-              newsLetterList={[
-                {
-                  id: 0,
-                  name: '전체',
-                  articleCount: newsletterCounts?.totalCount ?? 0,
-                  imageUrl: '',
-                },
-                ...(newsletterCounts?.newsletters.map((newsletter) => ({
-                  ...newsletter,
-                  name: newsletter.name,
-                  articleCount: newsletter.bookmarkCount ?? 0,
-                })) ?? []),
-              ]}
-              selectedNewsletterId={selectedNewsletterId}
-              onSelectNewsletter={handleNewsletterChange}
-            />
+            {!newsletterCounts ? (
+              <NewsletterFilterSkeleton />
+            ) : (
+              <NewsLetterFilter filters={newsletterCounts} />
+            )}
+
             <QuickMenu />
           </SidebarSection>
 

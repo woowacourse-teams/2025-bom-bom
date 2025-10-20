@@ -1,42 +1,59 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { useSearch } from '@tanstack/react-router';
 import { parseAsInteger, useQueryState } from 'nuqs';
-import { queries } from '@/apis/queries';
 import Badge from '@/components/Badge/Badge';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
 import { useDevice } from '@/hooks/useDevice';
+import type {
+  BookmarkFilters,
+  HighlightFilters,
+  NewsletterFilters,
+} from '@/types/articles';
 import NewsIcon from '#/assets/svg/news.svg';
 
-function NewsLetterFilter() {
+interface NewsLetterFilterProps {
+  filters: NewsletterFilters | BookmarkFilters | HighlightFilters;
+}
+
+function NewsLetterFilter({ filters }: NewsLetterFilterProps) {
   const device = useDevice();
-  const searchParam = useSearch({
-    from: '/_bombom/storage',
-    select: (search) => search.search,
-  });
-  const { data: newsletterFilters } = useSuspenseQuery(
-    queries.articlesStatisticsNewsletters({
-      keyword: searchParam,
-    }),
-  );
   const [selectedNewsletterId, setSelectedNewsletterId] = useQueryState(
     'newsletterId',
     parseAsInteger.withDefault(0),
   );
 
+  const isNewsletterFilter = (
+    newsletter:
+      | NewsletterFilters['newsletters'][0]
+      | BookmarkFilters['newsletters'][0]
+      | HighlightFilters['newsletters'][0],
+  ): newsletter is NewsletterFilters['newsletters'][0] =>
+    'articleCount' in newsletter;
+
+  const isBookmarkFilter = (
+    newsletter:
+      | NewsletterFilters['newsletters'][0]
+      | BookmarkFilters['newsletters'][0]
+      | HighlightFilters['newsletters'][0],
+  ): newsletter is BookmarkFilters['newsletters'][0] =>
+    'bookmarkCount' in newsletter;
+
   const newsletterFiltersWithAll = [
     {
       id: 0,
       name: '전체',
-      articleCount: newsletterFilters?.totalCount ?? 0,
+      articleCount: filters?.totalCount ?? 0,
       imageUrl: '',
     },
-    ...(newsletterFilters?.newsletters
+    ...(filters?.newsletters
       .map((newsletter) => ({
         ...newsletter,
-        articleCount: newsletter.articleCount ?? 0,
+        articleCount: isNewsletterFilter(newsletter)
+          ? newsletter.articleCount
+          : isBookmarkFilter(newsletter)
+            ? newsletter.bookmarkCount
+            : newsletter.highlightCount,
       }))
       .filter((newsletter) => newsletter.articleCount !== 0) ?? []),
   ];

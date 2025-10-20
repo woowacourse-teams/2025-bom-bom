@@ -1,7 +1,9 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
-import { createFileRoute } from '@tanstack/react-router';
-import { Suspense, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { createFileRoute, useSearch } from '@tanstack/react-router';
+import { useState } from 'react';
+import { queries } from '@/apis/queries';
 import RequireLogin from '@/hocs/RequireLogin';
 import { useDevice } from '@/hooks/useDevice';
 import MobileStorageContent from '@/pages/storage/components/MobileStorageContent/MobileStorageContent';
@@ -48,6 +50,15 @@ function Storage() {
   const isPC = device === 'pc';
   const isMobile = device === 'mobile';
   const [editMode, setEditMode] = useState(false);
+  const search = useSearch({
+    from: '/_bombom/storage',
+    select: (state) => state.search,
+  });
+  const { data: newsletterFilters } = useQuery(
+    queries.articlesStatisticsNewsletters({
+      keyword: search,
+    }),
+  );
 
   const enableEditMode = () => {
     setEditMode(true);
@@ -73,9 +84,11 @@ function Storage() {
 
       <ContentWrapper isPC={isPC}>
         <SidebarSection isPC={isPC}>
-          <Suspense fallback={<NewsletterFilterSkeleton />}>
-            <NewsLetterFilter />
-          </Suspense>
+          {!newsletterFilters ? (
+            <NewsletterFilterSkeleton />
+          ) : (
+            <NewsLetterFilter filters={newsletterFilters} />
+          )}
           <QuickMenu />
         </SidebarSection>
         <MainContentSection isPC={isPC}>

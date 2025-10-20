@@ -115,4 +115,19 @@ export const articleHandlers = [
       empty: ARTICLES.length === 0,
     });
   }),
+
+  http.delete(`${baseURL}/articles`, async ({ request }) => {
+    const body = (await request.json()) as { articleIds?: number[] };
+    const { articleIds } = body;
+
+    if (!Array.isArray(articleIds) || articleIds.length === 0) {
+      return HttpResponse.json(
+        { message: 'ids는 1개 이상의 숫자 배열이어야 합니다.' },
+        { status: 400 },
+      );
+    }
+
+    // 실제 데이터 삭제 로직은 필요 없고, 모킹이라면 성공 응답만 반환해도 충분함
+    return new HttpResponse(null, { status: 204 });
+  }),
 ];

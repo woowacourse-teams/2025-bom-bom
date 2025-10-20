@@ -14,6 +14,17 @@ export const getArticles = async (params: GetArticlesParams) => {
   });
 };
 
+export const deleteArticle = async ({
+  articleIds,
+}: {
+  articleIds: number[];
+}) => {
+  return await fetcher.delete({
+    path: '/articles',
+    body: { articleIds },
+  });
+};
+
 export type GetArticleByIdParams =
   operations['getArticleDetail']['parameters']['path'];
 export type GetArticleByIdResponse =

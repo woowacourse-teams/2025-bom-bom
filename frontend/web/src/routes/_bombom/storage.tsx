@@ -1,8 +1,9 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { createFileRoute, useSearch } from '@tanstack/react-router';
 import { useState } from 'react';
+import { deleteArticle } from '@/apis/articles';
 import { queries } from '@/apis/queries';
 import RequireLogin from '@/hocs/RequireLogin';
 import { useDevice } from '@/hooks/useDevice';
@@ -59,6 +60,9 @@ function Storage() {
       keyword: searchParam,
     }),
   );
+  const { mutate: deleteArticles } = useMutation({
+    mutationFn: deleteArticle,
+  });
 
   const enableEditMode = () => {
     setEditMode(true);
@@ -98,6 +102,7 @@ function Storage() {
               editMode={editMode}
               enableEditMode={enableEditMode}
               disableEditMode={disableEditMode}
+              deleteArticles={deleteArticles}
               onPageChange={handlePageChange}
               page={page}
               resetPage={resetPage}
@@ -108,6 +113,7 @@ function Storage() {
               editMode={editMode}
               enableEditMode={enableEditMode}
               disableEditMode={disableEditMode}
+              deleteArticles={deleteArticles}
               resetPage={resetPage}
             />
           )}

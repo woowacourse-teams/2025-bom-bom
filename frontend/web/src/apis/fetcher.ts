@@ -3,9 +3,9 @@ import { DEFAULT_ERROR_MESSAGES } from './constants/defaultErrorMessage';
 import { ENV } from './env';
 import { logger } from '@/utils/logger';
 
-type JsonBody = Record<string, unknown>;
+type JsonBody = Record<string, unknown> | unknown[];
 
-type FetcherOptions<TRequest extends JsonBody> = {
+type FetcherOptions<TRequest = undefined> = {
   path: string;
   query?: Record<string, string | number | undefined | string[]>;
   body?: TRequest;
@@ -32,13 +32,16 @@ export const fetcher = {
     body,
   }: FetcherOptions<TRequest>) =>
     request<TRequest, TResponse>({ path, body, method: 'PUT' }),
-  delete: async <TResponse>({ path }: FetcherOptions<never>) =>
-    request<never, TResponse>({ path, method: 'DELETE' }),
+  delete: async <TRequest extends JsonBody, TResponse>({
+    path,
+    body,
+  }: FetcherOptions<TRequest>) =>
+    request<TRequest, TResponse>({ path, body, method: 'DELETE' }),
 };
 
 type FetchMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT';
 
-type RequestOptions<TRequest> = {
+type RequestOptions<TRequest = undefined> = {
   path: string;
   method: FetchMethod;
   query?: Record<string, string | number | undefined | string[]>;
@@ -72,7 +75,13 @@ const request = async <TRequest, TResponse>({
       },
     };
 
-    if (body && (method === 'POST' || method === 'PATCH')) {
+    if (
+      body &&
+      (method === 'POST' ||
+        method === 'PATCH' ||
+        method === 'DELETE' ||
+        method === 'PUT')
+    ) {
       config.body = JSON.stringify(body);
     }
 

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import NewsletterFilter from './NewsletterFilter';
 import type { Meta, StoryObj } from '@storybook/react-webpack5';
 
@@ -49,20 +48,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: (args) => {
-    const { selectedNewsletterId: initialNewsletterId, ...rest } = args;
-    const [currentSelected, setCurrentSelected] = useState<number | null>(
-      initialNewsletterId,
-    );
-
-    return (
-      <NewsletterFilter
-        {...rest}
-        selectedNewsletterId={currentSelected}
-        onSelectNewsletter={(id: number | null) => {
-          setCurrentSelected(id);
-        }}
-      />
-    );
+  render: () => {
+    return <NewsletterFilter />;
   },
 };

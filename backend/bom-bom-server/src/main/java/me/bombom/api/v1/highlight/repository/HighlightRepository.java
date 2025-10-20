@@ -34,7 +34,7 @@ public interface HighlightRepository extends JpaRepository<Highlight, Long>, Cus
     )
     void deleteAllByMemberId(Long memberId);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(clearAutomatically = true)
     @Query("""
         UPDATE Highlight h 
         SET h.articleId = 0 

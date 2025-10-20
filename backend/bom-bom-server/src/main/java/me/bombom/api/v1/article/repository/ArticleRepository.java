@@ -88,7 +88,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
 
     long countByIdInAndMemberId(List<Long> ids, Long memberId);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(clearAutomatically = true)
     @Query("DELETE FROM Article a WHERE a.id IN :ids AND a.memberId = :memberId")
     void deleteAllByIdsAndMemberId(@Param("ids") List<Long> ids, @Param("memberId") Long memberId);
 }

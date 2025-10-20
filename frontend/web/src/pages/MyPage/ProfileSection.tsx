@@ -99,10 +99,9 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
     }
 
     const hasNicknameChanged = nickname !== userInfo?.nickname;
-    const hasBirthDateChanged = birthDate !== (userInfo?.birthDate || '');
     const hasGenderChanged = gender !== (userInfo?.gender || 'NONE');
 
-    if (!hasNicknameChanged && !hasBirthDateChanged && !hasGenderChanged) {
+    if (!hasNicknameChanged && !hasGenderChanged) {
       toast.error('변경된 정보가 없습니다.');
       return;
     }
@@ -113,6 +112,8 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
       gender,
     });
   };
+
+  const isGenderDisabled = userInfo?.gender && userInfo.gender !== 'NONE';
 
   const hasError = !!nicknameError || !!birthDateError;
 
@@ -140,6 +141,7 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
         onBlur={handleBirthDateBlur}
         placeholder="YYYY-MM-DD"
         errorString={birthDateError}
+        disabled
       />
 
       <FieldGroup>
@@ -153,10 +155,12 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
               type="radio"
               checked={gender === 'MALE'}
               onChange={handleGenderChange}
+              disabled={isGenderDisabled}
             />
             <RadioButtonLabel
               selected={gender === 'MALE'}
               htmlFor="gender-male"
+              disabled={isGenderDisabled}
             >
               남성
             </RadioButtonLabel>
@@ -170,10 +174,12 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
               type="radio"
               checked={gender === 'FEMALE'}
               onChange={handleGenderChange}
+              disabled={isGenderDisabled}
             />
             <RadioButtonLabel
               selected={gender === 'FEMALE'}
               htmlFor="gender-female"
+              disabled={isGenderDisabled}
             >
               여성
             </RadioButtonLabel>
@@ -187,10 +193,12 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
               type="radio"
               checked={gender === 'NONE'}
               onChange={handleGenderChange}
+              disabled={isGenderDisabled}
             />
             <RadioButtonLabel
               selected={gender === 'NONE'}
               htmlFor="gender-none"
+              disabled={isGenderDisabled}
             >
               선택 안 함
             </RadioButtonLabel>
@@ -270,7 +278,7 @@ const HiddenRadio = styled.input`
   }
 `;
 
-const RadioButtonLabel = styled.label<{ selected: boolean }>`
+const RadioButtonLabel = styled.label<{ selected: boolean; disabled?: boolean }>`
   min-width: 60px;
   padding: 10px 12px;
   border: 2px solid
@@ -288,14 +296,15 @@ const RadioButtonLabel = styled.label<{ selected: boolean }>`
   font: ${({ theme }) => theme.fonts.body2};
   text-align: center;
 
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
 
   transition: all 0.2s ease;
   user-select: none;
 
   &:hover {
-    border-color: ${({ theme, selected }) =>
-      selected ? 'transparent' : theme.colors.primary};
+    border-color: ${({ theme, selected, disabled }) =>
+      disabled ? (selected ? 'transparent' : theme.colors.stroke) : selected ? 'transparent' : theme.colors.primary};
   }
 `;
 

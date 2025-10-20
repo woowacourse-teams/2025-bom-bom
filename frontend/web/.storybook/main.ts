@@ -9,7 +9,6 @@ const config: StorybookConfig = {
     name: '@storybook/react-webpack5',
     options: {},
   },
-  staticDirs: ['../public'],
   webpackFinal: async (config) => {
     config.plugins?.push(
       new webpack.EnvironmentPlugin({

@@ -73,12 +73,12 @@ export default function PCStorageContent({
         allChecked={isAllSelected}
         onAllSelectClick={toggleSelectAll}
       />
-      {haveNoContent && baseQueryParams.keyword !== '' ? (
+      {isLoading ? (
+        <ArticleCardListSkeleton />
+      ) : haveNoContent && baseQueryParams.keyword !== '' ? (
         <EmptySearchCard searchQuery={baseQueryParams.keyword ?? ''} />
       ) : haveNoContent ? (
         <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
-      ) : isLoading ? (
-        <ArticleCardListSkeleton />
       ) : (
         <>
           <ArticleList

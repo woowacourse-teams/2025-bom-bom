@@ -21,7 +21,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @IntegrationTest
 @AutoConfigureMockMvc
 class MemberControllerTest {
@@ -40,7 +42,7 @@ class MemberControllerTest {
 
     @BeforeEach
     void setUp() {
-        memberRepository.deleteAllInBatch();
+//        memberRepository.deleteAllInBatch();
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
 
@@ -72,7 +74,7 @@ class MemberControllerTest {
                 .andExpect(status().isBadRequest())
                 .andDo(print());
     }
-    
+
     @Test
     void 너무_짧은_닉네임으로_변경_시도_시_400_예외가_발생한다() throws Exception {
         // given

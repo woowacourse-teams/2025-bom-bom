@@ -1,11 +1,15 @@
-export const isAndroidByUserAgent = () => {
-  return /Android/i.test(navigator.userAgent);
+export const isWebView = () => navigator.userAgent.includes('bombom');
+
+export const getDeviceInWebView = () => {
+  if (!isWebView()) return null;
+  if (navigator.userAgent.includes('google')) return 'android';
+  if (navigator.userAgent.includes('Apple')) return 'ios';
+  return null;
 };
 
-export const isIOSByUserAgent = () => {
-  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-};
-
-export const isMobileByUserAgent = () => {
-  return isAndroidByUserAgent() || isIOSByUserAgent();
+export const getDeviceInWebApp = () => {
+  if (isWebView()) return null;
+  if (navigator.userAgent.includes('google')) return 'android';
+  if (navigator.userAgent.includes('Apple')) return 'ios';
+  return null;
 };

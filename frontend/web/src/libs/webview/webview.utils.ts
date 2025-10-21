@@ -1,16 +1,10 @@
+import { getDeviceInWebView } from '@/utils/device';
 import { logger } from '@/utils/logger';
 import type {
   RNToWebMessage,
   WebToRNMessage,
   WindowWithWebkit,
 } from '@bombom/shared/webview';
-
-export const isAndroid = (): boolean =>
-  navigator.userAgent.includes('bombom') &&
-  navigator.userAgent.includes('google');
-export const isIOS = (): boolean =>
-  navigator.userAgent.includes('bombom') &&
-  navigator.userAgent.includes('Apple');
 
 export const isWebView = (): boolean => navigator.userAgent.includes('bombom');
 
@@ -27,8 +21,12 @@ export const sendMessageToRN = (message: WebToRNMessage): void => {
   try {
     const messageString = JSON.stringify(message);
 
-    if (isAndroid()) window.ReactNativeWebView?.postMessage(messageString);
-    else if (isIOS())
+    const device = getDeviceInWebView();
+    if (!device) return;
+
+    if (device === 'android')
+      window.ReactNativeWebView?.postMessage(messageString);
+    else if (device === 'ios')
       (
         window as WindowWithWebkit
       ).webkit?.messageHandlers?.ReactNativeWebView?.postMessage(messageString);

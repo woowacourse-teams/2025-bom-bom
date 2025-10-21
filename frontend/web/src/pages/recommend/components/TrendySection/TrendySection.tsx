@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { getChoseong } from 'es-hangul';
+import { parseAsInteger, useQueryState } from 'nuqs';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import NewsletterList from './NewsletterList';
@@ -21,14 +22,16 @@ import type { Newsletter } from '@/types/newsletter';
 import TrendingUpIcon from '#/assets/svg/trending-up.svg';
 
 const TrendySection = () => {
-  const navigate = useNavigate();
+  const device = useDevice();
   const [selectedCategory, setSelectedCategory] = useState<Category>('전체');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const { newsletterDetail } = useSearch({ from: '/_bombom/' });
-  const [selectedNewsletter, setSelectedNewsletter] =
-    useState<Newsletter | null>(null);
 
+  const [selectedNewsletterId, setSelectedNewsletterId] = useQueryState(
+    'newsletterDetail',
+    parseAsInteger,
+  );
   const { data: newsletters, isLoading } = useQuery(queries.newsletters());
+
   const {
     modalRef: detailModalRef,
     openModal: openDetailModal,
@@ -36,14 +39,9 @@ const TrendySection = () => {
     isOpen,
   } = useModal({
     onClose: () => {
-      navigate({
-        to: '.',
-        search: () => ({}),
-        replace: true,
-      });
+      setSelectedNewsletterId(null);
     },
   });
-  const device = useDevice();
 
   const filteredNewsletters = newsletters?.filter((newsletter) => {
     const matchesCategory =
@@ -56,15 +54,7 @@ const TrendySection = () => {
   });
 
   const handleCardClick = (newsletter: Newsletter) => {
-    setSelectedNewsletter(newsletter);
-    navigate({
-      to: '.',
-      search: (prev) => ({
-        ...prev,
-        newsletterDetail: newsletter.newsletterId,
-      }),
-    });
-
+    setSelectedNewsletterId(newsletter.newsletterId);
     trackEvent({
       category: 'Newsletter',
       action: '뉴스레터 카드 클릭',
@@ -73,18 +63,17 @@ const TrendySection = () => {
   };
 
   useEffect(() => {
-    if (newsletterDetail) {
+    if (selectedNewsletterId) {
       const newsletter = newsletters?.find(
-        (newsletter) => newsletter.newsletterId === newsletterDetail,
+        (newsletter) => newsletter.newsletterId === selectedNewsletterId,
       );
       if (newsletter) {
-        setSelectedNewsletter(newsletter);
         openDetailModal();
       }
     } else {
       closeDetailModal();
     }
-  }, [closeDetailModal, newsletterDetail, newsletters, openDetailModal]);
+  }, [closeDetailModal, selectedNewsletterId, newsletters, openDetailModal]);
 
   return (
     <>
@@ -140,11 +129,8 @@ const TrendySection = () => {
           position={device === 'mobile' ? 'bottom' : 'center'}
           showCloseButton={device !== 'mobile'}
         >
-          {selectedNewsletter && (
-            <NewsletterDetail
-              newsletterId={selectedNewsletter.newsletterId}
-              category={selectedNewsletter.category}
-            />
+          {selectedNewsletterId && (
+            <NewsletterDetail newsletterId={selectedNewsletterId} />
           )}
         </Modal>,
         document.body,

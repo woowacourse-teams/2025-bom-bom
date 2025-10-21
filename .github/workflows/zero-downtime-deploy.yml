@@ -10,6 +10,8 @@ env:
   WORKING_BRANCH: server-blue-green
   HEALTH_CHECK_URL: http://localhost:8081/actuator/health
   SERVER_CONTAINER_NAME: bombom-server-prod-sub
+  PROD_SUB_COMPOSE_YAML: docker-compose-prod-sub.yml
+  PROD_MAIN_COMPOSE_YAML: docker-compose-prod-sub.yml
 
 jobs:
   # 0) Release ID 생성 (후보/안정판 폴더 공통 식별자)
@@ -212,13 +214,13 @@ jobs:
           echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
 
           sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
-            -f docker-compose-prod-sub.yml --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
+            -f ${{ env.PROD_SUB_COMPOSE_YAML }} --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
 
           sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
-            -f docker-compose-prod-sub.yml --env-file .env down || true
+            -f ${{ env.PROD_SUB_COMPOSE_YAML }} --env-file .env down || true
 
           sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
-            -f docker-compose-prod-sub.yml --env-file .env \
+            -f ${{ env.PROD_SUB_COMPOSE_YAML }} --env-file .env \
             up -d --remove-orphans --pull=always --force-recreate
           
           echo "✅ prod-sub 컨테이너 실행 완료"
@@ -270,7 +272,7 @@ jobs:
           set -euo pipefail
           CAND_DIR="/opt/bom-bom/candidates/${RELEASE_ID}"
           sudo mkdir -p "$CAND_DIR"
-          sudo cp docker-compose-prod-sub.yml "$CAND_DIR/"
+          sudo cp ${{ env.PROD_SUB_COMPOSE_YAML }} "$CAND_DIR/"
           IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod"
           IMAGE_DIGEST="$(sudo docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" 2>/dev/null || echo unknown)"
           TS="$(date -Iseconds)"
@@ -279,7 +281,7 @@ jobs:
             \"commit\": \"${GITHUB_SHA}\",
             \"image\": \"${IMAGE_NAME}\",
             \"image_digest\": \"${IMAGE_DIGEST}\",
-            \"compose_file\": \"docker-compose-prod-sub.yml\",
+            \"compose_file\": \"${{ env.PROD_SUB_COMPOSE_YAML }}\",
             \"candidate_at\": \"${TS}\"
           }
           EOF"
@@ -343,10 +345,10 @@ jobs:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           set -euo pipefail
-          FALLBACK_COMPOSE="/opt/bom-bom/releases/stable/docker-compose-prod-sub.yml"
+          FALLBACK_COMPOSE="/opt/bom-bom/releases/stable/${{ env.PROD_SUB_COMPOSE_YAML }}"
           if [ ! -f "$FALLBACK_COMPOSE" ]; then
             echo "⚠️ 안정판 compose가 없어 레포의 compose를 사용합니다."
-            FALLBACK_COMPOSE="docker-compose-prod-sub.yml"
+            FALLBACK_COMPOSE="${{ env.PROD_SUB_COMPOSE_YAML }}"
           fi
 
           echo "🛑 기존 컨테이너 중지 및 삭제"
@@ -505,13 +507,13 @@ jobs:
           echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
 
           sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
-            -f docker-compose-prod-sub.yml --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
+            -f ${{ env.PROD_MAIN_COMPOSE_YAML }} --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
 
           sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
-            -f docker-compose-prod-sub.yml --env-file .env down || true
+            -f ${{ env.PROD_MAIN_COMPOSE_YAML }} --env-file .env down || true
 
           sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
-            -f docker-compose-prod-sub.yml --env-file .env \
+            -f ${{ env.PROD_MAIN_COMPOSE_YAML }} --env-file .env \
             up -d --remove-orphans --pull=always --force-recreate
           
           echo "✅ prod-main 컨테이너 실행 완료"
@@ -561,7 +563,7 @@ jobs:
           set -euo pipefail
           CAND_DIR="/opt/bom-bom/candidates/${RELEASE_ID}"
           sudo mkdir -p "$CAND_DIR"
-          sudo cp docker-compose-prod-sub.yml "$CAND_DIR/"
+          sudo cp ${{ env.PROD_MAIN_COMPOSE_YAML }} "$CAND_DIR/"
           IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod"
           IMAGE_DIGEST="$(sudo docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" 2>/dev/null || echo unknown)"
           TS="$(date -Iseconds)"
@@ -570,7 +572,7 @@ jobs:
             \"commit\": \"${GITHUB_SHA}\",
             \"image\": \"${IMAGE_NAME}\",
             \"image_digest\": \"${IMAGE_DIGEST}\",
-            \"compose_file\": \"docker-compose-prod-sub.yml\",
+            \"compose_file\": \"${{ env.PROD_MAIN_COMPOSE_YAML }}\",
             \"candidate_at\": \"${TS}\"
           }
           EOF"
@@ -634,10 +636,10 @@ jobs:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           set -euo pipefail
-          FALLBACK_COMPOSE="/opt/bom-bom/releases/stable/docker-compose-prod-sub.yml"
+          FALLBACK_COMPOSE="/opt/bom-bom/releases/stable/${{ env.PROD_MAIN_COMPOSE_YAML }}"
           if [ ! -f "$FALLBACK_COMPOSE" ]; then
             echo "⚠️ 안정판 compose가 없어 레포의 compose를 사용합니다."
-            FALLBACK_COMPOSE="docker-compose-prod-sub.yml"
+            FALLBACK_COMPOSE="${{ env.PROD_MAIN_COMPOSE_YAML }}"
           fi
 
           echo "🛑 기존 컨테이너 중지 및 삭제"
@@ -751,10 +753,10 @@ jobs:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           set -euo pipefail
-          FALLBACK_COMPOSE="/opt/bom-bom/releases/stable/docker-compose-prod-sub.yml"
+          FALLBACK_COMPOSE="/opt/bom-bom/releases/stable/${{ env.PROD_SUB_COMPOSE_YAML }}"
           if [ ! -f "$FALLBACK_COMPOSE" ]; then
             echo "⚠️ 안정판 compose가 없어 레포의 compose를 사용합니다."
-            FALLBACK_COMPOSE="docker-compose-prod-sub.yml"
+            FALLBACK_COMPOSE="${{ env.PROD_SUB_COMPOSE_YAML }}"
           fi
 
           echo "🛑 기존 컨테이너 중지 및 삭제"
@@ -842,8 +844,8 @@ jobs:
           CAND_DIR="/opt/bom-bom/candidates/${RELEASE_ID}"
           REL_DIR="/opt/bom-bom/releases/${RELEASE_ID}"
           sudo mkdir -p "$REL_DIR"
-          if [ -f "$CAND_DIR/docker-compose-prod-sub.yml" ]; then
-            sudo cp "$CAND_DIR/docker-compose-prod-sub.yml" "$REL_DIR/"
+          if [ -f "$CAND_DIR/${{ env.PROD_SUB_COMPOSE_YAML }}" ]; then
+            sudo cp "$CAND_DIR/${{ env.PROD_SUB_COMPOSE_YAML }}" "$REL_DIR/"
           fi
           sudo ln -sfn "$REL_DIR" "/opt/bom-bom/releases/stable"
           echo "✅ SUB 안정판 승격: $REL_DIR → /opt/bom-bom/releases/stable"
@@ -861,8 +863,8 @@ jobs:
           CAND_DIR="/opt/bom-bom/candidates/${RELEASE_ID}"
           REL_DIR="/opt/bom-bom/releases/${RELEASE_ID}"
           sudo mkdir -p "$REL_DIR"
-          if [ -f "$CAND_DIR/docker-compose-prod-sub.yml" ]; then
-            sudo cp "$CAND_DIR/docker-compose-prod-sub.yml" "$REL_DIR/"
+          if [ -f "$CAND_DIR/${{ env.PROD_MAIN_COMPOSE_YAML }}" ]; then
+            sudo cp "$CAND_DIR/${{ env.PROD_MAIN_COMPOSE_YAML }}" "$REL_DIR/"
           fi
           sudo ln -sfn "$REL_DIR" "/opt/bom-bom/releases/stable"
           echo "✅ MAIN 안정판 승격: $REL_DIR → /opt/bom-bom/releases/stable"

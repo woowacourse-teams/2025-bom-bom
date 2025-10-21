@@ -185,6 +185,23 @@ jobs:
             echo "⚠️ 실행 중인 ${{ env.SERVER_CONTAINER_NAME }} 컨테이너가 없어 백업을 건너뜀"
           fi
 
+      # 🆕 안정판 compose 파일 백업 (신규 추가)
+      - name: 안정판 compose 파일 백업
+        run: |
+          set -euo pipefail
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          BACKUP_DIR="/opt/bom-bom/releases/backup-${TIMESTAMP}"
+          STABLE_COMPOSE="/opt/bom-bom/releases/stable/${{ env.PROD_SUB_COMPOSE_YAML }}"
+          
+          if [ -f "$STABLE_COMPOSE" ]; then
+            echo "📦 안정판 compose 백업 시작"
+            sudo mkdir -p "$BACKUP_DIR"
+            sudo cp "$STABLE_COMPOSE" "$BACKUP_DIR/"
+            echo "✅ 안정판 compose 백업 완료: $BACKUP_DIR"
+          else
+            echo "⚠️ 기존 안정판 compose 파일이 없어 백업을 건너뜁니다."
+          fi
+
       - name: .env file 생성
         run: |
           cat <<EOF > .env
@@ -476,6 +493,23 @@ jobs:
             echo "✅ 백업 완료: latest-stable"
           else
             echo "⚠️ 실행 중인 ${{ env.SERVER_CONTAINER_NAME }} 컨테이너가 없어 백업을 건너뜀"
+          fi
+
+      # 🆕 안정판 compose 파일 백업 (신규 추가)
+      - name: 안정판 compose 파일 백업
+        run: |
+          set -euo pipefail
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          BACKUP_DIR="/opt/bom-bom/releases/backup-${TIMESTAMP}"
+          STABLE_COMPOSE="/opt/bom-bom/releases/stable/${{ env.PROD_MAIN_COMPOSE_YAML }}"
+          
+          if [ -f "$STABLE_COMPOSE" ]; then
+            echo "📦 안정판 compose 백업 시작"
+            sudo mkdir -p "$BACKUP_DIR"
+            sudo cp "$STABLE_COMPOSE" "$BACKUP_DIR/"
+            echo "✅ 안정판 compose 백업 완료: $BACKUP_DIR"
+          else
+            echo "⚠️ 기존 안정판 compose 파일이 없어 백업을 건너뜁니다."
           fi
 
       - name: .env file 생성

@@ -79,6 +79,7 @@ function Index() {
     ...(guideArticles.map((guide) => ({
       ...guide,
       isRead: guideMailReadMailIds.includes(guide.articleId),
+      isBookmarked: false,
       type: 'guide' as const,
     })) ?? []),
   ];

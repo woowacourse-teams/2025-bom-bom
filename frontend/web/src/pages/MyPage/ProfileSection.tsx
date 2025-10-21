@@ -140,77 +140,87 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
         <EmailText>{userInfo?.email}</EmailText>
       </FieldGroup>
 
-      <InputField
-        name="birthDate"
-        label="생년월일"
-        inputValue={birthDate}
-        onInputChange={handleBirthDateChange}
-        onBlur={handleBirthDateBlur}
-        placeholder="YYYY-MM-DD"
-        errorString={birthDateError}
-        disabled={isBirthDateDisabled}
-      />
+      {isBirthDateDisabled ? (
+        <FieldGroup>
+          <Label>생년월일</Label>
+          <EmailText>{birthDate}</EmailText>
+        </FieldGroup>
+      ) : (
+        <InputField
+          name="birthDate"
+          label="생년월일"
+          inputValue={birthDate}
+          onInputChange={handleBirthDateChange}
+          onBlur={handleBirthDateBlur}
+          placeholder="YYYY-MM-DD"
+          errorString={birthDateError}
+        />
+      )}
 
       <FieldGroup>
-        <Label as="p">성별(선택)</Label>
-        <RadioGroup role="radiogroup">
-          <RadioItem>
-            <HiddenRadio
-              id="gender-male"
-              name="gender"
-              value="MALE"
-              type="radio"
-              checked={gender === 'MALE'}
-              onChange={handleGenderChange}
-              disabled={isGenderDisabled}
-            />
-            <RadioButtonLabel
-              selected={gender === 'MALE'}
-              htmlFor="gender-male"
-              disabled={isGenderDisabled}
-            >
-              남성
-            </RadioButtonLabel>
-          </RadioItem>
+        <Label as="p">성별</Label>
+        {isGenderDisabled ? (
+          <EmailText>
+            {gender === 'MALE'
+              ? '남성'
+              : gender === 'FEMALE'
+                ? '여성'
+                : '선택 안 함'}
+          </EmailText>
+        ) : (
+          <RadioGroup role="radiogroup">
+            <RadioItem>
+              <HiddenRadio
+                id="gender-male"
+                name="gender"
+                value="MALE"
+                type="radio"
+                checked={gender === 'MALE'}
+                onChange={handleGenderChange}
+              />
+              <RadioButtonLabel
+                selected={gender === 'MALE'}
+                htmlFor="gender-male"
+              >
+                남성
+              </RadioButtonLabel>
+            </RadioItem>
 
-          <RadioItem>
-            <HiddenRadio
-              id="gender-female"
-              name="gender"
-              value="FEMALE"
-              type="radio"
-              checked={gender === 'FEMALE'}
-              onChange={handleGenderChange}
-              disabled={isGenderDisabled}
-            />
-            <RadioButtonLabel
-              selected={gender === 'FEMALE'}
-              htmlFor="gender-female"
-              disabled={isGenderDisabled}
-            >
-              여성
-            </RadioButtonLabel>
-          </RadioItem>
+            <RadioItem>
+              <HiddenRadio
+                id="gender-female"
+                name="gender"
+                value="FEMALE"
+                type="radio"
+                checked={gender === 'FEMALE'}
+                onChange={handleGenderChange}
+              />
+              <RadioButtonLabel
+                selected={gender === 'FEMALE'}
+                htmlFor="gender-female"
+              >
+                여성
+              </RadioButtonLabel>
+            </RadioItem>
 
-          <RadioItem>
-            <HiddenRadio
-              id="gender-none"
-              name="gender"
-              value="NONE"
-              type="radio"
-              checked={gender === 'NONE'}
-              onChange={handleGenderChange}
-              disabled={isGenderDisabled}
-            />
-            <RadioButtonLabel
-              selected={gender === 'NONE'}
-              htmlFor="gender-none"
-              disabled={isGenderDisabled}
-            >
-              선택 안 함
-            </RadioButtonLabel>
-          </RadioItem>
-        </RadioGroup>
+            <RadioItem>
+              <HiddenRadio
+                id="gender-none"
+                name="gender"
+                value="NONE"
+                type="radio"
+                checked={gender === 'NONE'}
+                onChange={handleGenderChange}
+              />
+              <RadioButtonLabel
+                selected={gender === 'NONE'}
+                htmlFor="gender-none"
+              >
+                선택 안 함
+              </RadioButtonLabel>
+            </RadioItem>
+          </RadioGroup>
+        )}
       </FieldGroup>
 
       <Button

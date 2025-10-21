@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import Modal from '../Modal/Modal';
 import type { Ref } from 'react';
+import logo from '#/assets/avif/logo.avif';
 
 interface AppInstallPromptModalProps {
   modalRef: Ref<HTMLDivElement | null>;
@@ -29,7 +30,7 @@ const AppInstallPromptModal = ({
       <Container>
         <ContentWrapper>
           <LogoSection>
-            <LogoImage src="/assets/avif/logo.avif" alt="봄봄 로고" />
+            <LogoImage src={logo} alt="봄봄 로고" />
           </LogoSection>
           <TextWrapper>
             <MainText>앱에서는 1초만에!</MainText>

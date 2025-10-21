@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocalStorageState } from './useLocalStorageState';
-import { isWebView } from '@/utils/device';
+import { getDeviceInWebApp, isWebView } from '@/utils/device';
 import { downloadApp } from '@/utils/downloadApp';
 
 const APP_INSTALL_DISMISSED_KEY = 'app-install-prompt-dismissed';
@@ -14,7 +14,8 @@ export function useAppInstallPrompt() {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    if (isWebView()) return;
+    const device = getDeviceInWebApp();
+    if (isWebView() || !device) return;
     if (dismissedUntil && Date.now() < dismissedUntil) return;
 
     setShowModal(true);

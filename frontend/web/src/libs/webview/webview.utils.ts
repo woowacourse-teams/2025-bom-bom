@@ -1,16 +1,10 @@
-import { getDeviceInWebView } from '@/utils/device';
+import { isWebView, getDeviceInWebView } from '@/utils/device';
 import { logger } from '@/utils/logger';
 import type {
   RNToWebMessage,
   WebToRNMessage,
   WindowWithWebkit,
 } from '@bombom/shared/webview';
-
-export const isWebView = (): boolean => navigator.userAgent.includes('bombom');
-
-export const isWeb = (): boolean => {
-  return !isWebView();
-};
 
 export const sendMessageToRN = (message: WebToRNMessage): void => {
   if (!isWebView()) {

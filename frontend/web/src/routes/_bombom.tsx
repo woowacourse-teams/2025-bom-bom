@@ -1,5 +1,4 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
-import { useRef } from 'react';
 import { queries } from '@/apis/queries';
 import AppInstallPromptModal from '@/components/AppInstallPromptModal/AppInstallPromptModal';
 import PageLayout from '@/components/PageLayout/PageLayout';
@@ -38,9 +37,13 @@ export const Route = createFileRoute('/_bombom')({
 });
 
 function RouteComponent() {
-  const modalRef = useRef<HTMLDivElement>(null);
-  const { showModal, handleInstallClick, handleLaterClick, handleCloseModal } =
-    useAppInstallPrompt();
+  const {
+    showModal,
+    handleInstallClick,
+    handleLaterClick,
+    handleCloseModal,
+    modalRef,
+  } = useAppInstallPrompt();
 
   return (
     <PageLayout>

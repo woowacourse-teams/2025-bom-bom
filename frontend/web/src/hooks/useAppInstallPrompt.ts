@@ -1,20 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocalStorageState } from './useLocalStorageState';
-import { isWebView } from '@/libs/webview/webview.utils';
-import { isMobileByUserAgent } from '@/utils/device';
+import { isWebView } from '@/utils/device';
 import { downloadApp } from '@/utils/downloadApp';
 
 const APP_INSTALL_DISMISSED_KEY = 'app-install-prompt-dismissed';
 const DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000; // 7일
 
 export function useAppInstallPrompt() {
+  const modalRef = useRef<HTMLDivElement>(null);
   const [dismissedUntil, setDismissedUntil] = useLocalStorageState<number>(
     APP_INSTALL_DISMISSED_KEY,
   );
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    if (!isMobileByUserAgent() || isWebView()) return;
+    if (isWebView()) return;
     if (dismissedUntil && Date.now() < dismissedUntil) return;
 
     setShowModal(true);
@@ -38,5 +38,6 @@ export function useAppInstallPrompt() {
     handleInstallClick,
     handleLaterClick,
     handleCloseModal,
+    modalRef,
   };
 }

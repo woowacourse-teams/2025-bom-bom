@@ -13,3 +13,19 @@ export const getDeviceInWebApp = () => {
   if (navigator.userAgent.includes('Apple')) return 'ios';
   return null;
 };
+
+export const getDevice = () => {
+  if (isWebView()) {
+    return getDeviceInWebView();
+  } else {
+    return getDeviceInWebApp();
+  }
+};
+
+export const isAndroid = () => {
+  return getDevice() === 'android';
+};
+
+export const isIOS = () => {
+  return getDevice() === 'ios';
+};

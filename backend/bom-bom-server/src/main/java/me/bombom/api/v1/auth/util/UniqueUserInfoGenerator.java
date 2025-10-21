@@ -1,5 +1,6 @@
 package me.bombom.api.v1.auth.util;
 
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,8 +60,13 @@ public class UniqueUserInfoGenerator {
     }
 
     public String getUniqueEmailLocalPart(String email) {
+        if (!StringUtils.hasText(email)) {
+            return generateRandomEmailLocalPart();
+        }
+        
         String normalizedEmailLocalPart = email.strip().toLowerCase();
         String localPart = extractEmailLocalPart(normalizedEmailLocalPart);
+
         if (userInfoValidator.isEmailAvailable(normalizedEmailLocalPart)) {
             return localPart;
         }
@@ -83,12 +89,13 @@ public class UniqueUserInfoGenerator {
         return randomNickname;
     }
 
-    private String generateUniqueNickname(String baseNickname) {
-        String random = getRandomValue();
-        String trimmedBase = trimNicknameForSuffix(baseNickname, random);
-        String uniqueNickname = trimmedBase + NICKNAME_RANDOM_DELIMITER + random;
-        log.debug("고유 닉네임 생성 - 원본: {}, 생성: {}", baseNickname, uniqueNickname);
-        return uniqueNickname;
+    private String generateRandomEmailLocalPart() {
+        String randomEmailLocalPart = UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, 8);
+        log.debug("완전 랜덤 이메일 로컬파트 생성 - 생성: {}", randomEmailLocalPart);
+        return randomEmailLocalPart;
     }
 
     private String generateUniqueEmailLocalPart(String baseLocalPart) {
@@ -107,14 +114,6 @@ public class UniqueUserInfoGenerator {
     private static String getRandomValue() {
         int randomValue = ThreadLocalRandom.current().nextInt(1, 10000);
         return String.format("%04d", randomValue);
-    }
-
-    private String trimNicknameForSuffix(String baseNickname, String random) {
-        // (닉네임 최대 길이 - 랜덤값 추가로 붙는 길이)보다 사용자의 닉네임이 길면 자름
-        int availableLength = NICKNAME_MAX_LENGTH - NICKNAME_RANDOM_DELIMITER.length() - random.length();
-        return baseNickname.length() > availableLength && availableLength > 0
-                ? baseNickname.substring(0, availableLength)
-                : baseNickname;
     }
 
     private String trimEmailLocalPartForSuffix(String baseLocalPart, String random) {

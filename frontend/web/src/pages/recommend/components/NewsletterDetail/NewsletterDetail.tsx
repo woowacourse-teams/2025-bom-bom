@@ -42,7 +42,7 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
   };
 
   return (
-    <Container>
+    <Container isMobile={isMobile}>
       <FixedWrapper isMobile={isMobile}>
         <InfoWrapper isMobile={isMobile}>
           <NewsletterImage
@@ -112,10 +112,10 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
 
 export default NewsletterDetail;
 
-const Container = styled.div`
-  width: 100%;
+const Container = styled.div<{ isMobile: boolean }>`
+  width: ${({ isMobile }) => (isMobile ? '100%' : '720px')};
   height: 100%;
-  max-width: 560px;
+  padding: ${({ isMobile }) => (isMobile ? '32px' : '36px 52px')};
 
   display: flex;
   flex-direction: column;

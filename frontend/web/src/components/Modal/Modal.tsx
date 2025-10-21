@@ -98,7 +98,6 @@ const ContentWrapper = styled.div<{ position: Position }>`
   flex-direction: column;
 
   overflow-y: auto;
-  scrollbar-gutter: stable;
 
   ${({ position }) => contentWrapperStyles[position]}
 `;
@@ -123,8 +122,7 @@ const containerStyles = {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: '720px',
-    height: '100%',
+    maxWidth: '90vw',
     maxHeight: '90vh',
     borderRadius: '12px',
     boxShadow: 'none',
@@ -134,17 +132,15 @@ const containerStyles = {
 const contentWrapperStyles = {
   dropdown: {
     height: 'auto',
-    padding: '16px',
     alignItems: 'stretch',
   },
   bottom: {
     height: '100%',
-    padding: '32px',
     alignItems: 'center',
   },
   center: {
     height: '100%',
-    padding: '36px 52px',
+    width: '100%',
     alignItems: 'center',
   },
 };

@@ -98,6 +98,8 @@ const ProfileDetail = ({ userInfo, onClose }: ProfileDetailProps) => {
 export default ProfileDetail;
 
 const Container = styled.div`
+  padding: 16px;
+
   display: flex;
   gap: 16px;
   flex-direction: column;

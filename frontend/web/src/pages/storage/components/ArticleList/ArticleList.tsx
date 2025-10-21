@@ -10,6 +10,7 @@ interface ArticleListProps {
   editMode?: boolean;
   checkedIds?: number[];
   onCheck?: (id: number) => void;
+  onDeleteArticle?: (articleIds: number[]) => void;
 }
 
 const ArticleList = ({
@@ -17,6 +18,7 @@ const ArticleList = ({
   editMode,
   checkedIds,
   onCheck,
+  onDeleteArticle,
 }: ArticleListProps) => {
   const device = useDevice();
   const isMobile = device === 'mobile';
@@ -32,7 +34,11 @@ const ArticleList = ({
               onChange={() => onCheck?.(article.articleId)}
             />
           )}
-          <ArticleCard data={article} readVariant="badge" />
+          <ArticleCard
+            data={article}
+            readVariant="badge"
+            onDelete={(articleId) => onDeleteArticle?.([articleId])}
+          />
         </ArticleItem>
       ))}
     </Container>

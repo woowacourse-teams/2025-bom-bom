@@ -14,9 +14,13 @@ type ExtendedArticle = Article & {
 
 interface ArticleCardListProps {
   articles: ExtendedArticle[];
+  onDeleteArticles?: (articleIds: number[]) => void;
 }
 
-const ArticleCardList = ({ articles }: ArticleCardListProps) => {
+const ArticleCardList = ({
+  articles,
+  onDeleteArticles,
+}: ArticleCardListProps) => {
   const device = useDevice();
   const isMobile = device === 'mobile';
 
@@ -62,6 +66,7 @@ const ArticleCardList = ({ articles }: ArticleCardListProps) => {
                     label: article.title ?? 'Unknown Article',
                   });
                 }}
+                onDelete={(articleId) => onDeleteArticles?.([articleId])}
               />
             </li>
           ))}
@@ -94,6 +99,7 @@ const ArticleCardList = ({ articles }: ArticleCardListProps) => {
                     label: article.title ?? 'Unknown Article',
                   });
                 }}
+                onDelete={(articleId) => onDeleteArticles?.([articleId])}
               />
             </li>
           ))}

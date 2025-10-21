@@ -1,11 +1,9 @@
 import styled from '@emotion/styled';
-import { useQueryClient, type UseMutateFunction } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useSelectedDeleteIds } from '../../hooks/useSelectedDeleteIds';
 import ArticleList from '../ArticleList/ArticleList';
 import ArticleListControls from '../ArticleListControls/ArticleListControls';
 import EmptySearchCard from '../EmptySearchCard/EmptySearchCard';
-import { queries } from '@/apis/queries';
 import useInfiniteArticles from '@/pages/storage/hooks/useInfiniteArticles';
 import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
@@ -16,12 +14,7 @@ interface MobileStorageContentProps {
   editMode: boolean;
   enableEditMode: () => void;
   disableEditMode: () => void;
-  deleteArticles: UseMutateFunction<
-    unknown,
-    Error,
-    { articleIds: number[] },
-    unknown
-  >;
+  deleteArticles: (articleIds: number[]) => void;
   resetPage: () => void;
 }
 
@@ -34,7 +27,6 @@ export default function MobileStorageContent({
   resetPage,
 }: MobileStorageContentProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const queryClient = useQueryClient();
 
   const {
     data: infiniteArticles,
@@ -92,18 +84,7 @@ export default function MobileStorageContent({
         editMode={editMode}
         onEnterEditMode={enableEditMode}
         onExitEditMode={disableEditMode}
-        onDeleteSelected={() =>
-          deleteArticles(
-            { articleIds: selectedIds },
-            {
-              onSuccess: () => {
-                queryClient.invalidateQueries({
-                  queryKey: queries.infiniteArticles(baseQueryParams).queryKey,
-                });
-              },
-            },
-          )
-        }
+        onDeleteSelected={() => deleteArticles(selectedIds)}
         checkedCount={selectedIds.length}
         isAllSelected={isAllSelected}
         onToggleSelectAll={toggleSelectAll}
@@ -121,6 +102,7 @@ export default function MobileStorageContent({
             editMode={editMode}
             checkedIds={selectedIds}
             onCheck={toggleSelect}
+            onDeleteArticle={(articleIds) => deleteArticles(articleIds)}
           />
           {/* 무한 스크롤 로딩 트리거 */}
           <LoadMoreTrigger ref={loadMoreRef} />

@@ -1,9 +1,8 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, useSearch } from '@tanstack/react-router';
 import { useState } from 'react';
-import { deleteArticle } from '@/apis/articles';
 import { queries } from '@/apis/queries';
 import RequireLogin from '@/hocs/RequireLogin';
 import { useDevice } from '@/hooks/useDevice';
@@ -12,6 +11,7 @@ import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/Newsle
 import NewsletterFilterSkeleton from '@/pages/storage/components/NewsletterFilter/NewsletterFilterSkeleton';
 import PCStorageContent from '@/pages/storage/components/PCStorageContent/PCStorageContent';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
+import { useDeleteArticlesMutation } from '@/pages/storage/hooks/useDeleteArticlesMutation';
 import { useStorageFilters } from '@/pages/storage/hooks/useStorageFilters';
 import type { Sort } from '@/pages/storage/components/ArticleListControls/ArticleListControls.types';
 import StorageIcon from '#/assets/svg/storage.svg';
@@ -60,9 +60,8 @@ function Storage() {
       keyword: searchParam,
     }),
   );
-  const { mutate: deleteArticles } = useMutation({
-    mutationFn: deleteArticle,
-  });
+
+  const { mutate: deleteArticles } = useDeleteArticlesMutation();
 
   const enableEditMode = () => {
     setEditMode(true);
@@ -102,7 +101,7 @@ function Storage() {
               editMode={editMode}
               enableEditMode={enableEditMode}
               disableEditMode={disableEditMode}
-              deleteArticles={deleteArticles}
+              deleteArticles={(articleIds) => deleteArticles(articleIds)}
               onPageChange={handlePageChange}
               page={page}
               resetPage={resetPage}
@@ -113,7 +112,7 @@ function Storage() {
               editMode={editMode}
               enableEditMode={enableEditMode}
               disableEditMode={disableEditMode}
-              deleteArticles={deleteArticles}
+              deleteArticles={(articleIds) => deleteArticles(articleIds)}
               resetPage={resetPage}
             />
           )}

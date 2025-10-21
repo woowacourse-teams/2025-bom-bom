@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useSelectedDeleteIds } from '../../hooks/useSelectedDeleteIds';
 import ArticleList from '../ArticleList/ArticleList';
@@ -9,19 +9,13 @@ import Pagination from '@/components/Pagination/Pagination';
 import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import type { GetArticlesParams } from '@/apis/articles';
-import type { UseMutateFunction } from '@tanstack/react-query';
 
 interface PCStorageContentProps {
   baseQueryParams: GetArticlesParams;
   editMode: boolean;
   enableEditMode: () => void;
   disableEditMode: () => void;
-  deleteArticles: UseMutateFunction<
-    unknown,
-    Error,
-    { articleIds: number[] },
-    unknown
-  >;
+  deleteArticles: (articleIds: number[]) => void;
   onPageChange: (page: number) => void;
   page: number;
   resetPage: () => void;
@@ -41,7 +35,6 @@ export default function PCStorageContent({
     ...baseQueryParams,
     page: (baseQueryParams.page ?? 1) - 1,
   };
-  const queryClient = useQueryClient();
   const { data: articles, isLoading } = useQuery(queries.articles(queryParams));
   const articleList = articles?.content || [];
   const {
@@ -74,18 +67,7 @@ export default function PCStorageContent({
         editMode={editMode}
         onEnterEditMode={enableEditMode}
         onExitEditMode={disableEditMode}
-        onDeleteSelected={() =>
-          deleteArticles(
-            { articleIds: selectedIds },
-            {
-              onSuccess: () => {
-                queryClient.invalidateQueries({
-                  queryKey: queries.articles(queryParams).queryKey,
-                });
-              },
-            },
-          )
-        }
+        onDeleteSelected={() => deleteArticles(selectedIds)}
         checkedCount={selectedIds.length}
         isAllSelected={isAllSelected}
         onToggleSelectAll={toggleSelectAll}
@@ -103,6 +85,7 @@ export default function PCStorageContent({
             editMode={editMode}
             checkedIds={selectedIds}
             onCheck={toggleSelect}
+            onDeleteArticle={(articleIds) => deleteArticles(articleIds)}
           />
           <Pagination
             currentPage={page}

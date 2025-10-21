@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import Button from '../Button/Button';
 import Modal from '../Modal/Modal';
 import type { Ref } from 'react';
 import logo from '#/assets/avif/logo.avif';
@@ -38,10 +39,14 @@ const AppInstallPromptModal = ({
           </TextWrapper>
         </ContentWrapper>
         <ButtonSection>
-          <InstallButton onClick={onInstallClick}>
-            편리한 앱으로 보기
-          </InstallButton>
-          <LaterButton onClick={onLaterClick}>모바일 웹으로 볼래요</LaterButton>
+          <StyledPrimaryButton
+            text="편리한 앱으로 보기"
+            onClick={onInstallClick}
+          />
+          <StyledTextButton
+            text="모바일 웹으로 볼래요"
+            onClick={onLaterClick}
+          />
         </ButtonSection>
       </Container>
     </Modal>
@@ -112,25 +117,15 @@ const ButtonSection = styled.div`
   flex-direction: column;
 `;
 
-const InstallButton = styled.button`
+const StyledPrimaryButton = styled(Button)`
   width: 100%;
   height: 56px;
-  border: none;
   border-radius: 12px;
 
-  background: ${({ theme }) => theme.colors.primary};
-  color: ${({ theme }) => theme.colors.white};
   font: ${({ theme }) => theme.fonts.heading5};
-
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:active {
-    transform: scale(0.98);
-  }
 `;
 
-const LaterButton = styled.button`
+const StyledTextButton = styled(Button)`
   width: 100%;
   height: 48px;
   border: none;
@@ -139,14 +134,5 @@ const LaterButton = styled.button`
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body1};
 
-  cursor: pointer;
   transition: color 0.2s ease;
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.textPrimary};
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
 `;

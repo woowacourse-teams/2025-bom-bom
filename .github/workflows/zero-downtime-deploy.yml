@@ -261,6 +261,7 @@ jobs:
           echo "❌ 헬스체크 실패 (연속 ${REQUIRED_SUCCESS}회 성공 조건 미충족)"
           sudo docker logs ${{ env.SERVER_CONTAINER_NAME }} --tail 50 || true
           exit 1
+
       - name: 릴리스 번들 저장 (후보로 저장 - compose + 메타데이터)
         if: ${{ success() }}
         env:
@@ -438,7 +439,7 @@ jobs:
   # ---------------------------------------------------
   deploy-main:
     name: "🚀 Step 4: prod-main 배포"
-    needs: shift-traffic-to-sub
+    needs: [prepare-release, shift-traffic-to-sub]
     runs-on: [self-hosted, prod-main]
     defaults:
       run:

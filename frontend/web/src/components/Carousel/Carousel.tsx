@@ -63,8 +63,19 @@ const Carousel = ({
     autoPlaySpeedMs,
   });
 
+  const currentSlideNumber =
+    slideIndex === 0
+      ? slideCount
+      : slideIndex === slideCount + 1
+        ? 1
+        : slideIndex;
+
   return (
-    <Container slideButtonPosition={slideButtonPosition}>
+    <Container
+      slideButtonPosition={slideButtonPosition}
+      role="region"
+      aria-label="배너 슬라이드"
+    >
       <SlidesWrapper
         ref={slideWrapperRef}
         slideIndex={slideIndex}
@@ -73,6 +84,8 @@ const Carousel = ({
         onTransitionEnd={handleTransitionEnd}
         hasAnimation={hasMultipleSlides ? hasAnimation : false}
         showNextSlidePart={hasMultipleSlides ? showNextSlidePart : false}
+        aria-live="polite"
+        aria-label={`총 ${slideCount}개 중 ${currentSlideNumber}번째 슬라이드`}
         {...(hasMultipleSlides && {
           onTouchStart: handleTouchStart,
           onTouchMove: handleTouchMove,

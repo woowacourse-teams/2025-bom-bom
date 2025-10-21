@@ -35,6 +35,6 @@ class SubscribeListenerTest {
         TestTransaction.end();
 
         // then
-        verify(subscribeService).save(newsletterId, memberId, unsubscribeUrl);
+        verify(subscribeService).saveOrUpdate(newsletterId, memberId, unsubscribeUrl);
     }
 }

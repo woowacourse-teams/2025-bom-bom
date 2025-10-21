@@ -44,13 +44,14 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
   const newsletterSummary = `${newsletterDetail.name}, ${newsletterDetail.category} 카테고리, ${newsletterDetail.issueCycle} 발행. ${newsletterDetail.description}`;
 
   return (
-    <Container>
+    <Container
+      tabIndex={-1}
+      aria-label={newsletterSummary}
+      role="region"
+      aria-roledescription="뉴스레터 상세 정보"
+    >
       <FixedWrapper isMobile={isMobile}>
-        <InfoWrapper
-          isMobile={isMobile}
-          aria-label={newsletterSummary}
-          tabIndex={0}
-        >
+        <InfoWrapper isMobile={isMobile} aria-hidden="true">
           <NewsletterImage
             src={newsletterDetail.imageUrl}
             alt=""

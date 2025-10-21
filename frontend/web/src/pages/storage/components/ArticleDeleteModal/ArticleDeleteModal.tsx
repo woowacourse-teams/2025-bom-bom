@@ -16,7 +16,7 @@ const ArticleDeleteModal = ({
   isOpen,
   closeModal,
   onDelete,
-  hasBookmarkedArticles = true,
+  hasBookmarkedArticles = false,
 }: ArticleDeleteModalProps) => {
   const device = useDevice();
   const isMobile = device === 'mobile';

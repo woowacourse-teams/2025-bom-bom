@@ -68,9 +68,11 @@ const ArticleListControls = ({
             />
             <DeleteCount>{checkedCount}개 선택됨</DeleteCount>
             <HorizontalDivider />
-            <DeleteIcon
-              fill={theme.colors.error}
+            <DeleteIconButton
+              disabled={checkedCount === 0}
               onClick={() => {
+                if (checkedCount === 0) return;
+
                 openModal();
               }}
             />
@@ -122,6 +124,8 @@ const DeleteWrapper = styled.div`
 `;
 
 const DeleteCount = styled.p`
+  width: 68px;
+
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body2};
 `;
@@ -147,4 +151,9 @@ const TextButton = styled.button`
     text-decoration: underline;
     transition: all 0.2s ease-in-out;
   }
+`;
+
+const DeleteIconButton = styled(DeleteIcon)<{ disabled: boolean }>`
+  fill: ${({ theme, disabled }) =>
+    disabled ? theme.colors.disabledBackground : theme.colors.error};
 `;

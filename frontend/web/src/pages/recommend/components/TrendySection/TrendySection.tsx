@@ -99,7 +99,12 @@ const TrendySection = () => {
             />
           ))}
         </TagContainer>
-        <TrendyGrid device={device}>
+        <TrendyGrid
+          device={device}
+          hasContent={
+            isLoading || (filteredNewsletters && filteredNewsletters.length > 0)
+          }
+        >
           {isLoading ? (
             Array.from({
               length:
@@ -193,9 +198,12 @@ const TagContainer = styled.div`
 `;
 
 const TrendyGrid = styled.div<{ device: Device }>`
+  height: ${({ device }) => (device === 'mobile' ? '400px' : '600px')};
+
   display: grid;
   gap: 12px;
 
   grid-template-columns: ${({ device }) =>
     device === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
+  overflow-y: auto;
 `;

@@ -47,7 +47,7 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
         <InfoWrapper isMobile={isMobile}>
           <NewsletterImage
             src={newsletterDetail.imageUrl}
-            alt={`${newsletterDetail.name} 뉴스레터 이미지`}
+            alt=""
             isMobile={isMobile}
           />
           <InfoBox>
@@ -55,7 +55,11 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
               <NewsletterTitle isMobile={isMobile}>
                 {newsletterDetail.name}
               </NewsletterTitle>
-              <DetailLink onClick={openMainSite} isMobile={isMobile}>
+              <DetailLink
+                onClick={openMainSite}
+                isMobile={isMobile}
+                aria-description="클릭 시 뉴스레터 공식 페이지로 이동합니다."
+              >
                 <StyledHomeIcon isMobile={isMobile} />
               </DetailLink>
             </TitleWrapper>

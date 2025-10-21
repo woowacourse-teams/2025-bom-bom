@@ -9,8 +9,8 @@ export const getDeviceInWebView = () => {
 
 export const getDeviceInWebApp = () => {
   if (isWebView()) return null;
-  if (navigator.userAgent.includes('google')) return 'android';
-  if (navigator.userAgent.includes('Apple')) return 'ios';
+  if (/Android/i.test(navigator.userAgent)) return 'android';
+  if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) return 'ios';
   return null;
 };
 

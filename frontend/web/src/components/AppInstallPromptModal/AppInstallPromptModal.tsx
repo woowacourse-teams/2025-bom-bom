@@ -31,10 +31,10 @@ const AppInstallPromptModal = ({
           <LogoSection>
             <LogoImage src="/assets/avif/logo.avif" alt="봄봄 로고" />
           </LogoSection>
-          <TextSection>
+          <TextWrapper>
             <MainText>앱에서는 1초만에!</MainText>
             <SubText>간편하게 로그인하기</SubText>
-          </TextSection>
+          </TextWrapper>
         </ContentWrapper>
         <ButtonSection>
           <InstallButton onClick={onInstallClick}>
@@ -51,58 +51,64 @@ export default AppInstallPromptModal;
 
 const Container = styled.div`
   width: 100%;
+
   display: flex;
-  flex-direction: column;
   gap: 24px;
+  flex-direction: column;
 `;
 
 const ContentWrapper = styled.div`
   display: flex;
-  align-items: center;
   gap: 20px;
+  align-items: center;
 `;
 
 const LogoSection = styled.div`
-  flex-shrink: 0;
+  overflow: hidden;
   width: 96px;
   height: 96px;
   border-radius: 24px;
-  background: ${({ theme }) => theme.colors.primary};
+
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+
+  background: ${({ theme }) => theme.colors.primary};
 `;
 
 const LogoImage = styled.img`
   width: 72px;
   height: 72px;
+
   object-fit: contain;
 `;
 
-const TextSection = styled.div`
-  flex: 1;
+const TextWrapper = styled.div`
   display: flex;
-  flex-direction: column;
   gap: 4px;
+  flex: 1;
+  flex-direction: column;
 `;
 
 const MainText = styled.h2`
-  font: ${({ theme }) => theme.fonts.heading4};
-  color: ${({ theme }) => theme.colors.textPrimary};
   margin: 0;
+
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.heading4};
 `;
 
 const SubText = styled.p`
-  font: ${({ theme }) => theme.fonts.heading5};
-  color: ${({ theme }) => theme.colors.textPrimary};
   margin: 0;
+
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.heading5};
 `;
 
 const ButtonSection = styled.div`
   display: flex;
-  flex-direction: column;
   gap: 12px;
+  flex-direction: column;
 `;
 
 const InstallButton = styled.button`
@@ -110,9 +116,11 @@ const InstallButton = styled.button`
   height: 56px;
   border: none;
   border-radius: 12px;
+
   background: ${({ theme }) => theme.colors.primary};
   color: ${({ theme }) => theme.colors.white};
   font: ${({ theme }) => theme.fonts.heading5};
+
   cursor: pointer;
   transition: background 0.2s ease;
 
@@ -125,9 +133,11 @@ const LaterButton = styled.button`
   width: 100%;
   height: 48px;
   border: none;
+
   background: transparent;
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body1};
+
   cursor: pointer;
   transition: color 0.2s ease;
 

@@ -21,6 +21,7 @@ const NewsletterCardList = ({
           description={newsletter.description}
           onClick={() => handleCardClick(newsletter)}
           as="button"
+          aria-label={`${newsletter.name} 뉴스레터 상세보기`}
         />
       ))}
     </>
@@ -47,10 +48,6 @@ const NewsletterCard = styled(ImageInfoCard)`
 
   &:active {
     transform: translateY(-1px);
-  }
-
-  &:focus-visible {
-    outline: none;
   }
 
   &:focus:not(:focus-visible) {

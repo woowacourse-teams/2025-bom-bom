@@ -5,7 +5,7 @@ import { logger } from '@/utils/logger';
 
 type JsonBody = Record<string, unknown> | unknown[];
 
-type FetcherOptions<TRequest = undefined> = {
+type FetcherOptions<TRequest extends JsonBody> = {
   path: string;
   query?: Record<string, string | number | undefined | string[]>;
   body?: TRequest;
@@ -41,7 +41,7 @@ export const fetcher = {
 
 type FetchMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT';
 
-type RequestOptions<TRequest = undefined> = {
+type RequestOptions<TRequest> = {
   path: string;
   method: FetchMethod;
   query?: Record<string, string | number | undefined | string[]>;

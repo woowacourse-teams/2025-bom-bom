@@ -27,7 +27,7 @@ const ArticleList = ({
         <ArticleItem key={article.articleId} isMobile={isMobile}>
           {editMode && checkedIds && (
             <Checkbox
-              id={article.articleId}
+              id={String(article.articleId)}
               checked={checkedIds.includes(article.articleId)}
               onChange={() => onCheck?.(article.articleId)}
             />

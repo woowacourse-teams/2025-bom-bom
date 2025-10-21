@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import type { ChangeEvent, PropsWithChildren } from 'react';
 
 interface CheckboxProps {
-  id: string | number;
+  id: string;
   checked: boolean;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }

@@ -206,4 +206,22 @@ const TrendyGrid = styled.div<{ device: Device }>`
   grid-template-columns: ${({ device }) =>
     device === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
   overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    border-radius: 4px;
+    background: ${({ theme }) => theme.colors.dividers};
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background: ${({ theme }) => theme.colors.stroke};
+
+    &:hover {
+      background: ${({ theme }) => theme.colors.textTertiary};
+    }
+  }
 `;

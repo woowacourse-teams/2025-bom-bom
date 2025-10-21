@@ -1,9 +1,12 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
+import { useState } from 'react';
 import ArticleCard from '../ArticleCard/ArticleCard';
 import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
+import useModal from '@/components/Modal/useModal';
 import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
+import ArticleDeleteModal from '@/pages/storage/components/ArticleDeleteModal/ArticleDeleteModal';
 import type { Article } from '@/types/articles';
 import CheckIcon from '#/assets/svg/check.svg';
 import LetterIcon from '#/assets/svg/letter.svg';
@@ -23,6 +26,10 @@ const ArticleCardList = ({
 }: ArticleCardListProps) => {
   const device = useDevice();
   const isMobile = device === 'mobile';
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<number[] | null>(
+    null,
+  );
+  const { modalRef, isOpen, openModal, closeModal } = useModal();
 
   const grouped = articles.reduce<{
     read: ExtendedArticle[];
@@ -35,6 +42,18 @@ const ArticleCardList = ({
     },
     { read: [], unread: [] },
   );
+
+  const handleDeleteClick = (articleIds: number[]) => {
+    setPendingDeleteIds(articleIds);
+    openModal();
+  };
+
+  const handleConfirmDelete = () => {
+    if (pendingDeleteIds) {
+      onDeleteArticles?.(pendingDeleteIds);
+      setPendingDeleteIds(null);
+    }
+  };
 
   if (articles.length === 0)
     return <EmptyLetterCard title="새로운 뉴스레터가 없어요" />;
@@ -66,7 +85,7 @@ const ArticleCardList = ({
                     label: article.title ?? 'Unknown Article',
                   });
                 }}
-                onDelete={(articleId) => onDeleteArticles?.([articleId])}
+                onDelete={(articleId) => handleDeleteClick([articleId])}
               />
             </li>
           ))}
@@ -99,12 +118,18 @@ const ArticleCardList = ({
                     label: article.title ?? 'Unknown Article',
                   });
                 }}
-                onDelete={(articleId) => onDeleteArticles?.([articleId])}
+                onDelete={(articleId) => handleDeleteClick([articleId])}
               />
             </li>
           ))}
         </CardList>
       </LettersWrapper>
+      <ArticleDeleteModal
+        modalRef={modalRef}
+        isOpen={isOpen}
+        closeModal={closeModal}
+        onDelete={handleConfirmDelete}
+      />
     </Container>
   );
 };

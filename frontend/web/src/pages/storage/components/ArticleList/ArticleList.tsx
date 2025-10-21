@@ -1,5 +1,8 @@
 import styled from '@emotion/styled';
+import { useState } from 'react';
+import ArticleDeleteModal from '../ArticleDeleteModal/ArticleDeleteModal';
 import Checkbox from '@/components/Checkbox/Checkbox';
+import useModal from '@/components/Modal/useModal';
 import { useDevice } from '@/hooks/useDevice';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import type { Device } from '@/hooks/useDevice';
@@ -22,26 +25,50 @@ const ArticleList = ({
 }: ArticleListProps) => {
   const device = useDevice();
   const isMobile = device === 'mobile';
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<number[] | null>(
+    null,
+  );
+  const { modalRef, isOpen, openModal, closeModal } = useModal();
+
+  const handleDeleteClick = (articleIds: number[]) => {
+    setPendingDeleteIds(articleIds);
+    openModal();
+  };
+
+  const handleConfirmDelete = () => {
+    if (pendingDeleteIds) {
+      onDeleteArticle?.(pendingDeleteIds);
+      setPendingDeleteIds(null);
+    }
+  };
 
   return (
-    <Container device={device}>
-      {articles.map((article) => (
-        <ArticleItem key={article.articleId} isMobile={isMobile}>
-          {editMode && checkedIds && (
-            <Checkbox
-              id={String(article.articleId)}
-              checked={checkedIds.includes(article.articleId)}
-              onChange={() => onCheck?.(article.articleId)}
+    <>
+      <Container device={device}>
+        {articles.map((article) => (
+          <ArticleItem key={article.articleId} isMobile={isMobile}>
+            {editMode && checkedIds && (
+              <Checkbox
+                id={String(article.articleId)}
+                checked={checkedIds.includes(article.articleId)}
+                onChange={() => onCheck?.(article.articleId)}
+              />
+            )}
+            <ArticleCard
+              data={article}
+              readVariant="badge"
+              onDelete={(articleId) => handleDeleteClick([articleId])}
             />
-          )}
-          <ArticleCard
-            data={article}
-            readVariant="badge"
-            onDelete={(articleId) => onDeleteArticle?.([articleId])}
-          />
-        </ArticleItem>
-      ))}
-    </Container>
+          </ArticleItem>
+        ))}
+      </Container>
+      <ArticleDeleteModal
+        modalRef={modalRef}
+        isOpen={isOpen}
+        closeModal={closeModal}
+        onDelete={handleConfirmDelete}
+      />
+    </>
   );
 };
 

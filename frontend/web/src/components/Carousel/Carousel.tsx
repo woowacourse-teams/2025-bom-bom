@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import { Children } from 'react';
 import { DEFAULT_SPEED } from './Carousel.constants';
 import useCarousel from './useCarousel';
+import useCarouselAccessibility from './useCarouselAccessibility';
 import ChevronIcon from '../icons/ChevronIcon';
 import type { PropsWithChildren } from 'react';
 
@@ -70,13 +71,7 @@ const Carousel = ({
         ? 1
         : slideIndex;
 
-  const handleFocus = (e: React.FocusEvent<HTMLUListElement>) => {
-    e.currentTarget.setAttribute('aria-live', 'polite');
-  };
-
-  const handleBlur = (e: React.FocusEvent<HTMLUListElement>) => {
-    e.currentTarget.setAttribute('aria-live', 'off');
-  };
+  const { handleFocus, handleBlur } = useCarouselAccessibility();
 
   return (
     <Container

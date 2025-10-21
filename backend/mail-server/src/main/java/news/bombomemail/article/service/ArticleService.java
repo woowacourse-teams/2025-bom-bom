@@ -15,10 +15,10 @@ import news.bombomemail.article.domain.Article;
 import news.bombomemail.article.repository.ArticleRepository;
 import news.bombomemail.article.util.ReadingTimeCalculator;
 import news.bombomemail.article.util.SummaryGenerator;
-import news.bombomemail.newsletter.domain.NewsletterVerification;
 import news.bombomemail.newsletter.repository.NewsletterVerificationRepository;
 import news.bombomemail.subscribe.event.SubscribeEvent;
 import news.bombomemail.reading.event.TodayReadingEvent;
+import news.bombomemail.email.event.ArticleArrivedEvent;
 import news.bombomemail.member.domain.Member;
 import news.bombomemail.member.repository.MemberRepository;
 import news.bombomemail.newsletter.domain.Newsletter;
@@ -52,9 +52,18 @@ public class ArticleService {
             return false;
         }
 
-        articleRepository.save(buildArticle(message, contents, member, newsletter));
+        Article article = buildArticle(message, contents, member, newsletter);
+        articleRepository.save(article);
+        
+        // 이벤트 발행
         applicationEventPublisher.publishEvent(TodayReadingEvent.from(member.getId()));
         applicationEventPublisher.publishEvent(SubscribeEvent.of(newsletter.getId(), member.getId()));
+        applicationEventPublisher.publishEvent(ArticleArrivedEvent.of(
+                member.getId(), 
+                newsletter.getName(), 
+                article.getTitle()
+        ));
+        
         return true;
     }
 

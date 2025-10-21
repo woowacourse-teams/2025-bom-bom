@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import ProgressBar from '@/components/ProgressBar/ProgressBar';
+import { calculateRate } from '@/utils/math';
 import type { components } from '@/types/openapi';
 
 interface ReadingKingMyRankProps {
@@ -7,8 +8,15 @@ interface ReadingKingMyRankProps {
 }
 
 const ReadingKingMyRank = ({ userRank }: ReadingKingMyRankProps) => {
+  const progressRate = calculateRate(
+    userRank.readCount,
+    userRank.readCount + userRank.nextRankDifference,
+  );
+
+  const rankSummary = `현재 나의 순위 ${userRank.rank}위. 읽은 뉴스레터 ${userRank.readCount}개. 다음 순위까지 ${userRank.nextRankDifference}개 더 읽기. 진행률 ${progressRate}%`;
+
   return (
-    <Container>
+    <Container aria-label={rankSummary} tabIndex={0}>
       <MyRankInfo>
         <InfoWrapper>
           <MyRankLabel>나의 순위</MyRankLabel>
@@ -25,13 +33,7 @@ const ReadingKingMyRank = ({ userRank }: ReadingKingMyRankProps) => {
           <ProgressLabel>다음 순위까지</ProgressLabel>
           <ProgressLabel>{userRank.nextRankDifference}개 더 읽기</ProgressLabel>
         </InfoWrapper>
-        <ProgressBar
-          rate={
-            (userRank.readCount /
-              (userRank.readCount + userRank.nextRankDifference)) *
-            100
-          }
-        />
+        <ProgressBar rate={progressRate} />
       </ProgressBox>
     </Container>
   );

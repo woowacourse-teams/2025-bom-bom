@@ -100,7 +100,7 @@ const Carousel = ({
           <PrevSlideButton
             type="button"
             onClick={handlePrevButtonClick}
-            slideButtonPosition={slideButtonPosition}
+            position={slideButtonPosition}
             aria-label="이전 슬라이드 이동"
           >
             <ChevronIcon
@@ -114,7 +114,7 @@ const Carousel = ({
           <NextSlideButton
             type="button"
             onClick={handleNextButtonClick}
-            slideButtonPosition={slideButtonPosition}
+            position={slideButtonPosition}
             aria-label="다음 슬라이드 이동"
           >
             <ChevronIcon
@@ -174,13 +174,11 @@ const Slide = styled.li`
 `;
 
 const PrevSlideButton = styled.button<{
-  slideButtonPosition: SlideButtonPosition;
+  position: SlideButtonPosition;
 }>`
   position: absolute;
-  top: ${({ slideButtonPosition }) =>
-    slideButtonPosition === 'middle' ? '50%' : 'auto'};
-  bottom: ${({ slideButtonPosition }) =>
-    slideButtonPosition === 'bottom' ? '8px' : 'auto'};
+  top: ${({ position }) => (position === 'middle' ? '50%' : 'auto')};
+  bottom: ${({ position }) => (position === 'bottom' ? '8px' : 'auto')};
   left: 8px;
   width: clamp(32px, 10%, 48px);
   border-radius: 50%;
@@ -191,8 +189,8 @@ const PrevSlideButton = styled.button<{
 
   background-color: ${({ theme }) => theme.colors.white};
 
-  transform: ${({ slideButtonPosition }) =>
-    slideButtonPosition === 'middle' ? 'translateY(-50%)' : 'none'};
+  transform: ${({ position }) =>
+    position === 'middle' ? 'translateY(-50%)' : 'none'};
 
   &:hover {
     background-color: ${({ theme }) => theme.colors.dividers};
@@ -200,14 +198,12 @@ const PrevSlideButton = styled.button<{
 `;
 
 const NextSlideButton = styled.button<{
-  slideButtonPosition: SlideButtonPosition;
+  position: SlideButtonPosition;
 }>`
   position: absolute;
-  top: ${({ slideButtonPosition }) =>
-    slideButtonPosition === 'middle' ? '50%' : 'auto'};
+  top: ${({ position }) => (position === 'middle' ? '50%' : 'auto')};
   right: 8px;
-  bottom: ${({ slideButtonPosition }) =>
-    slideButtonPosition === 'bottom' ? '8px' : 'auto'};
+  bottom: ${({ position }) => (position === 'bottom' ? '8px' : 'auto')};
   width: clamp(32px, 10%, 48px);
   border-radius: 50%;
   box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
@@ -217,8 +213,8 @@ const NextSlideButton = styled.button<{
 
   background-color: ${({ theme }) => theme.colors.white};
 
-  transform: ${({ slideButtonPosition }) =>
-    slideButtonPosition === 'middle' ? 'translateY(-50%)' : 'none'};
+  transform: ${({ position }) =>
+    position === 'middle' ? 'translateY(-50%)' : 'none'};
 
   &:hover {
     background-color: ${({ theme }) => theme.colors.dividers};

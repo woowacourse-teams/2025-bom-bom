@@ -16,22 +16,20 @@ const BANNER_LABELS = [
 const SlideCardList = () => {
   return (
     <Carousel>
-      <Banner imageUrl={banner1} aria-label={BANNER_LABELS[0]} />
-      <Banner imageUrl={banner2} aria-label={BANNER_LABELS[1]} />
-      <Banner imageUrl={banner3} aria-label={BANNER_LABELS[2]} />
-      <Banner imageUrl={banner4} aria-label={BANNER_LABELS[3]} />
+      <Banner src={banner1} alt={BANNER_LABELS[0]} />
+      <Banner src={banner2} alt={BANNER_LABELS[1]} />
+      <Banner src={banner3} alt={BANNER_LABELS[2]} />
+      <Banner src={banner4} alt={BANNER_LABELS[3]} />
     </Carousel>
   );
 };
 
 export default SlideCardList;
 
-const Banner = styled.div<{ imageUrl: string }>`
+const Banner = styled.img`
   width: 100%;
   height: 280px;
 
-  background-image: url(${({ imageUrl }) => imageUrl});
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
+  object-fit: contain;
+  object-position: center;
 `;

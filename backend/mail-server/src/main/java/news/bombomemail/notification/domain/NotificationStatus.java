@@ -5,5 +5,3 @@ public enum NotificationStatus {
     SENT,
     FAILED
 }
-
-

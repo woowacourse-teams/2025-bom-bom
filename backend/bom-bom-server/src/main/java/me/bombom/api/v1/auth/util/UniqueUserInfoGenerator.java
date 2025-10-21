@@ -17,7 +17,6 @@ public class UniqueUserInfoGenerator {
     public static final String NICKNAME_RANDOM_DELIMITER = "#";
     public static final String EMAIL_RANDOM_DELIMITER = ".";
     private static final String EMAIL_DOMAIN = "@bombom.news"; // 동일 도메인 정책
-    private static final int NICKNAME_MAX_LENGTH = 20; // 컬럼/검증과 일치
     private static final int EMAIL_MAX_LENGTH = 50; // 컬럼과 일치 (전체 길이)
     private static final String[] RANDOM_NICKNAME_ADJECTIVES = {
         "행복한","즐거운","밝은","따뜻한","귀여운","시원한","새로운","친절한","용감한","강한",
@@ -52,10 +51,9 @@ public class UniqueUserInfoGenerator {
             return nickname.strip();
         }
 
-        String baseNickname = getBaseNickname(nickname);
-        String uniqueNickname = generateUniqueNickname(baseNickname);
+        String uniqueNickname = generateUniqueNickname();
         while (userInfoValidator.isDuplicateNickname(uniqueNickname)) {
-            uniqueNickname = generateUniqueNickname(baseNickname);
+            uniqueNickname = generateUniqueNickname();
         }
         return uniqueNickname;
     }
@@ -69,11 +67,11 @@ public class UniqueUserInfoGenerator {
         return generateUniqueEmailLocalPart(localPart);
     }
 
-    private String getBaseNickname(String nickname) {
-        if (!StringUtils.hasText(nickname)) {
-            return generateRandomNickname();
-        }
-        return nickname;
+    private String generateUniqueNickname() {
+        String baseNickname = generateRandomNickname();
+        String uniqueNickname = baseNickname + NICKNAME_RANDOM_DELIMITER + getRandomValue();
+        log.debug("고유 닉네임 생성 - 원본: {}, 생성: {}", baseNickname, uniqueNickname);
+        return uniqueNickname;
     }
 
     private String generateRandomNickname() {

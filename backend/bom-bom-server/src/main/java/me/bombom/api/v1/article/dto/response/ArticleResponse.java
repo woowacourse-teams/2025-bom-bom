@@ -28,6 +28,9 @@ public record ArticleResponse(
         @Schema(required = true)
         boolean isRead,
 
+        @Schema(required = true)
+        boolean isBookmarked,
+
         @NotNull
         @Schema(type = "object", description = "뉴스레터 정보", required = true)
         NewsletterSummaryResponse newsletter

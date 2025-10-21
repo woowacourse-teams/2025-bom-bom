@@ -72,7 +72,7 @@ class MemberControllerTest {
                 .andExpect(status().isBadRequest())
                 .andDo(print());
     }
-    
+
     @Test
     void 너무_짧은_닉네임으로_변경_시도_시_400_예외가_발생한다() throws Exception {
         // given

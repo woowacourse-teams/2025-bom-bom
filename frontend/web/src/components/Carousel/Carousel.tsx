@@ -97,7 +97,11 @@ const Carousel = ({
         {infinitySlides.map((slideContent, index) => {
           const isCurrentSlide = index === slideIndex;
           return (
-            <Slide key={`slide-${index}`} aria-hidden={!isCurrentSlide}>
+            <Slide
+              key={`slide-${index}`}
+              aria-hidden={!isCurrentSlide}
+              {...(!isCurrentSlide && { inert: true })}
+            >
               {slideContent}
             </Slide>
           );

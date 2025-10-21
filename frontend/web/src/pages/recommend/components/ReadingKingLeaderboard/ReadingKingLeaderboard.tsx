@@ -33,7 +33,7 @@ const ReadingKingLeaderboard = () => {
   return (
     <Container>
       <TitleWrapper>
-        <TitleIcon>
+        <TitleIcon aria-hidden="true">
           <ArrowIcon width={16} height={16} direction="upRight" />
         </TitleIcon>
         <Title>이달의 독서왕</Title>
@@ -70,7 +70,11 @@ const ReadingKingLeaderboard = () => {
       >
         {chunk(monthlyReadingRankContent, RANKING.boardUnit).map(
           (leaderboard, leaderboardIndex) => (
-            <LeaderboardList key={`leaderboard-${leaderboardIndex}`}>
+            <LeaderboardList
+              key={`leaderboard-${leaderboardIndex}`}
+              role="list"
+              aria-label={`이달의 독서왕 순위 ${leaderboardIndex + 1}페이지`}
+            >
               {leaderboard.map((item, index) => (
                 <LeaderboardItem
                   key={`rank-${index}` + item.nickname}
@@ -86,7 +90,7 @@ const ReadingKingLeaderboard = () => {
 
       {userRank && (
         <>
-          <Divider />
+          <Divider role="separator" aria-hidden="true" />
           <ReadingKingMyRank userRank={userRank} />
         </>
       )}
@@ -96,7 +100,7 @@ const ReadingKingLeaderboard = () => {
 
 export default ReadingKingLeaderboard;
 
-export const Container = styled.div`
+export const Container = styled.section`
   width: 100%;
   max-width: 400px;
   padding: 22px;

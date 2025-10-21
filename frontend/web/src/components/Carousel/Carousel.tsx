@@ -70,6 +70,14 @@ const Carousel = ({
         ? 1
         : slideIndex;
 
+  const handleFocus = (e: React.FocusEvent<HTMLUListElement>) => {
+    e.currentTarget.setAttribute('aria-live', 'polite');
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLUListElement>) => {
+    e.currentTarget.setAttribute('aria-live', 'off');
+  };
+
   return (
     <Container
       slideButtonPosition={slideButtonPosition}
@@ -85,9 +93,11 @@ const Carousel = ({
         hasAnimation={hasMultipleSlides ? hasAnimation : false}
         showNextSlidePart={hasMultipleSlides ? showNextSlidePart : false}
         tabIndex={0}
-        aria-live="polite"
+        aria-live="off"
         aria-atomic="true"
         aria-label={`총 ${slideCount}개 중 ${currentSlideNumber}번째 슬라이드`}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         {...(hasMultipleSlides && {
           onTouchStart: handleTouchStart,
           onTouchMove: handleTouchMove,

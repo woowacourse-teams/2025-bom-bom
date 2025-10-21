@@ -41,10 +41,16 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
     openExternalLink(newsletterDetail.mainPageUrl);
   };
 
+  const newsletterSummary = `${newsletterDetail.name}, ${newsletterDetail.category} 카테고리, ${newsletterDetail.issueCycle} 발행. ${newsletterDetail.description}`;
+
   return (
     <Container>
       <FixedWrapper isMobile={isMobile}>
-        <InfoWrapper isMobile={isMobile}>
+        <InfoWrapper
+          isMobile={isMobile}
+          aria-label={newsletterSummary}
+          tabIndex={0}
+        >
           <NewsletterImage
             src={newsletterDetail.imageUrl}
             alt=""
@@ -60,7 +66,7 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
                 isMobile={isMobile}
                 aria-description="클릭 시 뉴스레터 공식 페이지로 이동합니다."
               >
-                <StyledHomeIcon isMobile={isMobile} />
+                <StyledHomeIcon isMobile={isMobile} aria-hidden="true" />
               </DetailLink>
             </TitleWrapper>
 
@@ -123,6 +129,10 @@ const Container = styled.div`
 
   display: flex;
   flex-direction: column;
+
+  &:focus {
+    outline: none;
+  }
 `;
 
 const FixedWrapper = styled.div<{ isMobile: boolean }>`

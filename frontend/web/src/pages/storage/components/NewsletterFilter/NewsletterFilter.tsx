@@ -12,6 +12,11 @@ import type {
 } from '@/types/articles';
 import NewsIcon from '#/assets/svg/news.svg';
 
+type Newsletter =
+  | NewsletterFilters['newsletters'][0]
+  | BookmarkFilters['newsletters'][0]
+  | HighlightFilters['newsletters'][0];
+
 interface NewsLetterFilterProps {
   filters: NewsletterFilters | BookmarkFilters | HighlightFilters;
 }
@@ -24,18 +29,12 @@ function NewsLetterFilter({ filters }: NewsLetterFilterProps) {
   );
 
   const isNewsletterFilter = (
-    newsletter:
-      | NewsletterFilters['newsletters'][0]
-      | BookmarkFilters['newsletters'][0]
-      | HighlightFilters['newsletters'][0],
+    newsletter: Newsletter,
   ): newsletter is NewsletterFilters['newsletters'][0] =>
     'articleCount' in newsletter;
 
   const isBookmarkFilter = (
-    newsletter:
-      | NewsletterFilters['newsletters'][0]
-      | BookmarkFilters['newsletters'][0]
-      | HighlightFilters['newsletters'][0],
+    newsletter: Newsletter,
   ): newsletter is BookmarkFilters['newsletters'][0] =>
     'bookmarkCount' in newsletter;
 

@@ -1,8 +1,8 @@
+import { css, type Theme } from '@emotion/react';
 import styled from '@emotion/styled';
-import type { Theme } from '@emotion/react';
 import type { ComponentProps } from 'react';
 
-type Variant = 'default';
+type Variant = 'default' | 'secondary';
 
 interface ButtonProps extends ComponentProps<'button'> {
   text: string;
@@ -10,13 +10,18 @@ interface ButtonProps extends ComponentProps<'button'> {
   variant?: Variant;
 }
 
-function Button({ text, onClick, variant = 'default', ...props }: ButtonProps) {
+const Button = ({
+  text,
+  onClick,
+  variant = 'default',
+  ...props
+}: ButtonProps) => {
   return (
     <Container type="button" onClick={onClick} variant={variant} {...props}>
       {text}
     </Container>
   );
-}
+};
 
 export default Button;
 
@@ -45,9 +50,24 @@ const Container = styled.button<{
 `;
 
 const variantStyles = {
-  default: (theme: Theme) => ({
-    border: 'none',
-    backgroundColor: theme.colors.primary,
-    color: theme.colors.white,
-  }),
+  default: (theme: Theme) => css`
+    border: none;
+
+    background-color: ${theme.colors.primary};
+    color: ${theme.colors.white};
+
+    &:hover {
+      background-color: ${theme.colors.primaryDark};
+    }
+  `,
+  secondary: (theme: Theme) => css`
+    border: none;
+
+    background-color: ${theme.colors.white};
+    color: ${theme.colors.textPrimary};
+
+    &:hover {
+      background-color: ${theme.colors.disabledBackground};
+    }
+  `,
 };

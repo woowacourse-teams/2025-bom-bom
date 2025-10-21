@@ -2,7 +2,9 @@ import { theme } from '@bombom/shared';
 import styled from '@emotion/styled';
 import { useQueryState } from 'nuqs';
 import { useEffect, useState, type ChangeEvent } from 'react';
+import ArticleDeleteModal from '../ArticleDeleteModal/ArticleDeleteModal';
 import Checkbox from '@/components/Checkbox/Checkbox';
+import useModal from '@/components/Modal/useModal';
 import SearchInput from '@/components/SearchInput/SearchInput';
 import Select from '@/components/Select/Select';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -20,7 +22,7 @@ interface ArticleListControlsProps {
   onToggleSelectAll: () => void;
 }
 
-export default function ArticleListControls({
+const ArticleListControls = ({
   editMode,
   onEnterEditMode,
   onExitEditMode,
@@ -28,13 +30,14 @@ export default function ArticleListControls({
   checkedCount,
   isAllSelected,
   onToggleSelectAll,
-}: ArticleListControlsProps) {
+}: ArticleListControlsProps) => {
   const [search, setSearch] = useState('');
   const [, setSearchParam] = useQueryState('search', {
     defaultValue: '',
   });
   const [sort, setSort] = useQueryState('sort', { defaultValue: 'DESC' });
   const debouncedSearchInput = useDebouncedValue(search, 500);
+  const { modalRef, isOpen, openModal, closeModal } = useModal();
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -65,7 +68,12 @@ export default function ArticleListControls({
             />
             <DeleteCount>{checkedCount}개 선택됨</DeleteCount>
             <HorizontalDivider />
-            <DeleteIcon fill={theme.colors.error} onClick={onDeleteSelected} />
+            <DeleteIcon
+              fill={theme.colors.error}
+              onClick={() => {
+                openModal();
+              }}
+            />
             <CancelIcon fill={theme.colors.black} onClick={onExitEditMode} />
           </DeleteWrapper>
         ) : (
@@ -81,9 +89,17 @@ export default function ArticleListControls({
           onSelectOption={handleSortChange}
         />
       </SummaryBar>
+      <ArticleDeleteModal
+        modalRef={modalRef}
+        isOpen={isOpen}
+        closeModal={closeModal}
+        onDelete={onDeleteSelected}
+      />
     </Container>
   );
-}
+};
+
+export default ArticleListControls;
 
 const Container = styled.div`
   display: flex;

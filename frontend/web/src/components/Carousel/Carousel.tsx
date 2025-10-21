@@ -84,7 +84,9 @@ const Carousel = ({
         onTransitionEnd={handleTransitionEnd}
         hasAnimation={hasMultipleSlides ? hasAnimation : false}
         showNextSlidePart={hasMultipleSlides ? showNextSlidePart : false}
+        tabIndex={0}
         aria-live="polite"
+        aria-atomic="true"
         aria-label={`총 ${slideCount}개 중 ${currentSlideNumber}번째 슬라이드`}
         {...(hasMultipleSlides && {
           onTouchStart: handleTouchStart,
@@ -92,9 +94,14 @@ const Carousel = ({
           onTouchEnd: handleTouchEnd,
         })}
       >
-        {infinitySlides.map((slideContent, index) => (
-          <Slide key={`slide-${index}`}>{slideContent}</Slide>
-        ))}
+        {infinitySlides.map((slideContent, index) => {
+          const isCurrentSlide = index === slideIndex;
+          return (
+            <Slide key={`slide-${index}`} aria-hidden={!isCurrentSlide}>
+              {slideContent}
+            </Slide>
+          );
+        })}
       </SlidesWrapper>
 
       {hasSlideButton && hasMultipleSlides && (

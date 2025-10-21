@@ -24,7 +24,7 @@ const SlideCardList = () => {
   return (
     <Carousel>
       {BANNERS.map(({ src, alt }, index) => (
-        <Banner key={`banner-${index}`} src={src} alt={alt} tabIndex={0} />
+        <Banner key={`banner-${index}`} src={src} alt={alt} />
       ))}
     </Carousel>
   );

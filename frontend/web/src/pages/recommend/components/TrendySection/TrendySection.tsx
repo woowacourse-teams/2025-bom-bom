@@ -1,7 +1,5 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate, useSearch } from '@tanstack/react-router';
-import { getChoseong } from 'es-hangul';
 import { parseAsInteger, useQueryState } from 'nuqs';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -48,8 +46,7 @@ const TrendySection = () => {
       selectedCategory === '전체' || newsletter.category === selectedCategory;
     const matchesSearch =
       searchQuery === '' ||
-      newsletter.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      getChoseong(newsletter.name).includes(getChoseong(searchQuery));
+      newsletter.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 

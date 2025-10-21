@@ -27,7 +27,13 @@ public class Highlight extends BaseEntity {
     private HighlightLocation highlightLocation;
 
     @Column(nullable = false)
+    private Long memberId;
+
+    @Column(nullable = false)
     private Long articleId;
+
+    @Column(nullable = false)
+    private Long newsletterId;
 
     /**
      * @Column 변경 시, Color 내부 주석에도 변경 필요
@@ -35,6 +41,9 @@ public class Highlight extends BaseEntity {
     @Embedded
     @AttributeOverride(name = "value", column = @Column(nullable = false, name = "color", length = 10))
     private Color color;
+
+    @Column(nullable = false)
+    private String title;
 
     @Column(nullable = false, columnDefinition = "text")
     private String text;
@@ -46,15 +55,21 @@ public class Highlight extends BaseEntity {
     public Highlight(
             Long id,
             @NotNull HighlightLocation highlightLocation,
+            @NotNull Long memberId,
             @NotNull Long articleId,
+            @NotNull Long newsletterId,
             @NotNull Color color,
+            @NotNull String title,
             @NotNull String text,
             String memo
     ) {
         this.id = id;
         this.highlightLocation = highlightLocation;
+        this.memberId = memberId;
         this.articleId = articleId;
+        this.newsletterId = newsletterId;
         this.color = color;
+        this.title = title;
         this.text = text;
         this.memo = memo;
     }

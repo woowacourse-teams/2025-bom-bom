@@ -50,7 +50,7 @@ public class HighlightService {
         return highlightRepository.findByArticleIdAndHighlightLocation(article.getId(), location)
                 .map(ArticleHighlightResponse::from)
                 .orElseGet(() -> {
-                    Highlight highlight = highlightRepository.save(buildHighlight(request, location));
+                    Highlight highlight = highlightRepository.save(buildHighlight(request, article, location));
                     return ArticleHighlightResponse.from(highlight);
                 });
     }
@@ -88,9 +88,12 @@ public class HighlightService {
         }
     }
 
-    private Highlight buildHighlight(HighlightCreateRequest createRequest, HighlightLocation location) {
+    private Highlight buildHighlight(HighlightCreateRequest createRequest, Article article, HighlightLocation location) {
         return Highlight.builder()
+                .memberId(article.getMemberId())
                 .articleId(createRequest.articleId())
+                .newsletterId(article.getNewsletterId())
+                .title(article.getTitle())
                 .highlightLocation(location)
                 .color(createRequest.color())
                 .text(createRequest.text())

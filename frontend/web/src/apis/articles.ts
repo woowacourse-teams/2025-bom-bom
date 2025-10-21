@@ -14,14 +14,13 @@ export const getArticles = async (params: GetArticlesParams) => {
   });
 };
 
-export const deleteArticle = async ({
-  articleIds,
-}: {
-  articleIds: number[];
-}) => {
+export type DeleteArticlesParams =
+  components['schemas']['DeleteArticlesRequest'];
+
+export const deleteArticle = async (params: DeleteArticlesParams) => {
   return await fetcher.delete({
     path: '/articles',
-    body: { articleIds },
+    body: params,
   });
 };
 

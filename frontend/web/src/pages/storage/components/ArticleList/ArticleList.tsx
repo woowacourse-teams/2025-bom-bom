@@ -25,20 +25,21 @@ const ArticleList = ({
 }: ArticleListProps) => {
   const device = useDevice();
   const isMobile = device === 'mobile';
-  const [pendingDeleteIds, setPendingDeleteIds] = useState<number[] | null>(
-    null,
-  );
+  const [pendingDeleteArticle, setPendingDeleteArticle] =
+    useState<Article | null>(null);
   const { modalRef, isOpen, openModal, closeModal } = useModal();
 
-  const handleDeleteClick = (articleIds: number[]) => {
-    setPendingDeleteIds(articleIds);
+  const hasBookmarkedArticles = pendingDeleteArticle?.isBookmarked ?? false;
+
+  const handleDeleteClick = (article: Article) => {
+    setPendingDeleteArticle(article);
     openModal();
   };
 
   const handleConfirmDelete = () => {
-    if (pendingDeleteIds) {
-      onDeleteArticle?.(pendingDeleteIds);
-      setPendingDeleteIds(null);
+    if (pendingDeleteArticle) {
+      onDeleteArticle?.([pendingDeleteArticle.articleId]);
+      setPendingDeleteArticle(null);
     }
   };
 
@@ -57,7 +58,7 @@ const ArticleList = ({
             <ArticleCard
               data={article}
               readVariant="badge"
-              onDelete={(articleId) => handleDeleteClick([articleId])}
+              onDelete={() => handleDeleteClick(article)}
             />
           </ArticleItem>
         ))}
@@ -67,6 +68,7 @@ const ArticleList = ({
         isOpen={isOpen}
         closeModal={closeModal}
         onDelete={handleConfirmDelete}
+        hasBookmarkedArticles={hasBookmarkedArticles}
       />
     </>
   );

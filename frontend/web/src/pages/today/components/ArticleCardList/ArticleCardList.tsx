@@ -26,9 +26,8 @@ const ArticleCardList = ({
 }: ArticleCardListProps) => {
   const device = useDevice();
   const isMobile = device === 'mobile';
-  const [pendingDeleteIds, setPendingDeleteIds] = useState<number[] | null>(
-    null,
-  );
+  const [pendingDeleteArticle, setPendingDeleteArticle] =
+    useState<ExtendedArticle | null>(null);
   const { modalRef, isOpen, openModal, closeModal } = useModal();
 
   const grouped = articles.reduce<{
@@ -43,15 +42,17 @@ const ArticleCardList = ({
     { read: [], unread: [] },
   );
 
-  const handleDeleteClick = (articleIds: number[]) => {
-    setPendingDeleteIds(articleIds);
+  const hasBookmarkedArticles = pendingDeleteArticle?.isBookmarked ?? false;
+
+  const handleDeleteClick = (article: ExtendedArticle) => {
+    setPendingDeleteArticle(article);
     openModal();
   };
 
   const handleConfirmDelete = () => {
-    if (pendingDeleteIds) {
-      onDeleteArticles?.(pendingDeleteIds);
-      setPendingDeleteIds(null);
+    if (pendingDeleteArticle) {
+      onDeleteArticles?.([pendingDeleteArticle?.articleId]);
+      setPendingDeleteArticle(null);
     }
   };
 
@@ -85,7 +86,7 @@ const ArticleCardList = ({
                     label: article.title ?? 'Unknown Article',
                   });
                 }}
-                onDelete={(articleId) => handleDeleteClick([articleId])}
+                onDelete={() => handleDeleteClick(article)}
               />
             </li>
           ))}
@@ -118,7 +119,7 @@ const ArticleCardList = ({
                     label: article.title ?? 'Unknown Article',
                   });
                 }}
-                onDelete={(articleId) => handleDeleteClick([articleId])}
+                onDelete={() => handleDeleteClick(article)}
               />
             </li>
           ))}
@@ -129,6 +130,7 @@ const ArticleCardList = ({
         isOpen={isOpen}
         closeModal={closeModal}
         onDelete={handleConfirmDelete}
+        hasBookmarkedArticles={hasBookmarkedArticles}
       />
     </Container>
   );

@@ -39,6 +39,7 @@ export default function PCStorageContent({
   const articleList = articles?.content || [];
   const {
     selectedIds,
+    hasBookmarkedArticles,
     isAllSelected,
     toggleSelectAll,
     toggleSelect,
@@ -71,6 +72,7 @@ export default function PCStorageContent({
         checkedCount={selectedIds.length}
         isAllSelected={isAllSelected}
         onToggleSelectAll={toggleSelectAll}
+        hasBookmarkedArticles={hasBookmarkedArticles}
       />
       {isLoading ? (
         <ArticleCardListSkeleton />

@@ -14,7 +14,7 @@ type ReadVariant = 'transparent' | 'badge';
 interface ArticleCardProps extends ComponentProps<typeof Link> {
   data: components['schemas']['ArticleResponse'];
   readVariant?: ReadVariant;
-  onDelete?: (articleId: number) => void;
+  onDelete?: () => void;
 }
 
 const ArticleCard = ({
@@ -80,7 +80,7 @@ const ArticleCard = ({
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            onDelete?.(articleId);
+            onDelete?.();
           }}
           isMobile={isMobile}
         >

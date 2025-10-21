@@ -20,6 +20,7 @@ interface ArticleListControlsProps {
   checkedCount: number;
   isAllSelected: boolean;
   onToggleSelectAll: () => void;
+  hasBookmarkedArticles?: boolean;
 }
 
 const ArticleListControls = ({
@@ -30,6 +31,7 @@ const ArticleListControls = ({
   checkedCount,
   isAllSelected,
   onToggleSelectAll,
+  hasBookmarkedArticles = false,
 }: ArticleListControlsProps) => {
   const [search, setSearch] = useState('');
   const [, setSearchParam] = useQueryState('search', {
@@ -96,6 +98,7 @@ const ArticleListControls = ({
         isOpen={isOpen}
         closeModal={closeModal}
         onDelete={onDeleteSelected}
+        hasBookmarkedArticles={hasBookmarkedArticles}
       />
     </Container>
   );

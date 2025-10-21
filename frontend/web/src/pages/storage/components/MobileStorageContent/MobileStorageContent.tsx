@@ -44,6 +44,7 @@ export default function MobileStorageContent({
 
   const {
     selectedIds,
+    hasBookmarkedArticles,
     isAllSelected,
     toggleSelectAll,
     toggleSelect,
@@ -88,6 +89,7 @@ export default function MobileStorageContent({
         checkedCount={selectedIds.length}
         isAllSelected={isAllSelected}
         onToggleSelectAll={toggleSelectAll}
+        hasBookmarkedArticles={hasBookmarkedArticles}
       />
       {isInfiniteLoading ? (
         <ArticleCardListSkeleton />

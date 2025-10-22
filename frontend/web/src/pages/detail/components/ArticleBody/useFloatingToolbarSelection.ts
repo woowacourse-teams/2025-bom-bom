@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useDevice } from '@/hooks/useDevice';
-import { isAndroid, isIOS, isWeb } from '@/libs/webview/webview.utils';
+import { isAndroid, isIOS, isWebView } from '@/utils/device';
 import type { FloatingToolbarMode } from '../FloatingToolbar/FloatingToolbar.types';
 import type { Position } from '@/types/position';
 import type { RefObject } from 'react';
@@ -121,7 +121,7 @@ export const useFloatingToolbarSelection = ({
     } else if (isAndroid()) {
       contentEl.addEventListener('contextmenu', handleSelectionComplete);
       contentEl.addEventListener('click', handleHighlightClick);
-    } else if (isWeb()) {
+    } else if (!isWebView()) {
       contentEl.addEventListener('mouseup', handleHighlightClickOrSelection);
       document.addEventListener('selectionchange', handleSelectionClear);
     }
@@ -137,7 +137,7 @@ export const useFloatingToolbarSelection = ({
       } else if (isAndroid()) {
         contentEl.removeEventListener('contextmenu', handleSelectionComplete);
         contentEl.removeEventListener('click', handleHighlightClick);
-      } else if (isWeb()) {
+      } else if (!isWebView()) {
         contentEl.removeEventListener(
           'mouseup',
           handleHighlightClickOrSelection,

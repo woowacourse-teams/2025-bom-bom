@@ -44,12 +44,10 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
   const newsletterSummary = `${newsletterDetail.name}, ${newsletterDetail.category} 카테고리, ${newsletterDetail.issueCycle} 발행. ${newsletterDetail.description}`;
 
   return (
-    <Container
-      tabIndex={-1}
-      aria-label={newsletterSummary}
-      role="region"
-      aria-roledescription="뉴스레터 상세 정보"
-    >
+    <Container>
+      <VisuallyHidden aria-label={newsletterSummary}>
+        뉴스레터 정보
+      </VisuallyHidden>
       <FixedWrapper isMobile={isMobile}>
         <InfoWrapper isMobile={isMobile} aria-hidden="true">
           <NewsletterImage
@@ -130,6 +128,22 @@ const Container = styled.div`
 
   display: flex;
   flex-direction: column;
+`;
+
+const VisuallyHidden = styled.button`
+  overflow: hidden;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: none;
+  border-width: 0;
+
+  background: none;
+  white-space: nowrap;
+
+  clip: rect(0, 0, 0, 0);
 
   &:focus {
     outline: none;

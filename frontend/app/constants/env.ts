@@ -5,4 +5,7 @@ export const ENV = {
 
   // Web URLs
   webUrl: process.env.EXPO_PUBLIC_WEB_URL ?? '',
+
+  // API
+  baseUrl: process.env.EXPO_PUBLIC_API_BASE_URL,
 } as const;

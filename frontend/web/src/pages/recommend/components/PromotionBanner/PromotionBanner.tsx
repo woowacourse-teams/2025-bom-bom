@@ -1,11 +1,14 @@
-/** @jsxImportSource @emotion/react */
-
 import styled from '@emotion/styled';
+import type { StoreType } from './PromotionBanner.types';
 import appleIcon from '#/assets/avif/apple.avif';
 import bookBomIcon from '#/assets/avif/book_bom.avif';
 import playStoreIcon from '#/assets/avif/play_store.avif';
 
-const PromotionBanner = () => {
+interface PromotionBannerProps {
+  openModal: (storeType: StoreType) => void;
+}
+
+const PromotionBanner = ({ openModal }: PromotionBannerProps) => {
   return (
     <Container>
       <Content>
@@ -13,11 +16,11 @@ const PromotionBanner = () => {
           <Text>뉴스레터</Text>
           <Text>더 이상 놓치지 않도록</Text>
           <StoreButtons>
-            <StoreButton>
+            <StoreButton onClick={() => openModal('appStore')}>
               <img src={appleIcon} alt="App Store" width={20} height={20} />
               App Store
             </StoreButton>
-            <StoreButton>
+            <StoreButton onClick={() => openModal('playStore')}>
               <img
                 src={playStoreIcon}
                 alt="Google Play"
@@ -73,6 +76,7 @@ const StoreButtons = styled.div`
 `;
 
 const StoreButton = styled.button`
+  width: 128px;
   padding: 12px 18px;
   border-radius: 8px;
 

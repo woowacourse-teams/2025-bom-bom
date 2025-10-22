@@ -1,24 +1,65 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
+import { parseAsInteger, useQueryState } from 'nuqs';
 import Badge from '@/components/Badge/Badge';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
 import { useDevice } from '@/hooks/useDevice';
-import type { Newsletter } from '@/types/articles';
+import type {
+  BookmarkFilters,
+  HighlightFilters,
+  NewsletterFilters,
+} from '@/types/articles';
 import NewsIcon from '#/assets/svg/news.svg';
 
+type Newsletter =
+  | NewsletterFilters['newsletters'][0]
+  | BookmarkFilters['newsletters'][0]
+  | HighlightFilters['newsletters'][0];
+
 interface NewsLetterFilterProps {
-  newsLetterList: Newsletter['newsletters'];
-  selectedNewsletterId: number | null;
-  onSelectNewsletter: (id: number | null) => void;
+  filters: NewsletterFilters | BookmarkFilters | HighlightFilters;
 }
 
-function NewsLetterFilter({
-  newsLetterList,
-  selectedNewsletterId,
-  onSelectNewsletter,
-}: NewsLetterFilterProps) {
+function NewsLetterFilter({ filters }: NewsLetterFilterProps) {
   const device = useDevice();
+  const [selectedNewsletterId, setSelectedNewsletterId] = useQueryState(
+    'newsletterId',
+    parseAsInteger.withDefault(0),
+  );
+
+  const isNewsletterFilter = (
+    newsletter: Newsletter,
+  ): newsletter is NewsletterFilters['newsletters'][0] =>
+    'articleCount' in newsletter;
+
+  const isBookmarkFilter = (
+    newsletter: Newsletter,
+  ): newsletter is BookmarkFilters['newsletters'][0] =>
+    'bookmarkCount' in newsletter;
+
+  const newsletterFiltersWithAll = [
+    {
+      id: 0,
+      name: '전체',
+      articleCount: filters?.totalCount ?? 0,
+      imageUrl: '',
+    },
+    ...(filters?.newsletters
+      .map((newsletter) => ({
+        ...newsletter,
+        articleCount: isNewsletterFilter(newsletter)
+          ? newsletter.articleCount
+          : isBookmarkFilter(newsletter)
+            ? newsletter.bookmarkCount
+            : newsletter.highlightCount,
+      }))
+      .filter((newsletter) => newsletter.articleCount !== 0) ?? []),
+  ];
+
+  const handleSelectNewsletterId = (id: number | null) => {
+    setSelectedNewsletterId(id);
+  };
 
   return (
     <Container aria-label="뉴스레터" isPc={device === 'pc'}>
@@ -31,24 +72,26 @@ function NewsLetterFilter({
         </TitleWrapper>
       )}
       <StyledTabs direction={device === 'pc' ? 'vertical' : 'horizontal'}>
-        {newsLetterList.map(({ name, articleCount, imageUrl, id }) => (
-          <Tab
-            key={name}
-            value={id ?? null}
-            label={name}
-            selected={
-              selectedNewsletterId === null
-                ? name === '전체'
-                : id === selectedNewsletterId
-            }
-            onTabSelect={onSelectNewsletter}
-            StartComponent={
-              imageUrl ? <NewsLetterImage src={imageUrl} /> : null
-            }
-            EndComponent={<Badge text={String(articleCount)} />}
-            textAlign={device === 'pc' ? 'start' : 'center'}
-          />
-        ))}
+        {newsletterFiltersWithAll.map(
+          ({ name, articleCount, imageUrl, id }) => (
+            <Tab
+              key={name}
+              value={id ?? null}
+              label={name}
+              selected={
+                selectedNewsletterId === null
+                  ? name === '전체'
+                  : id === selectedNewsletterId
+              }
+              onTabSelect={handleSelectNewsletterId}
+              StartComponent={
+                imageUrl ? <NewsLetterImage src={imageUrl} /> : null
+              }
+              EndComponent={<Badge text={String(articleCount)} />}
+              textAlign={device === 'pc' ? 'start' : 'center'}
+            />
+          ),
+        )}
       </StyledTabs>
     </Container>
   );

@@ -38,6 +38,14 @@ const config: StorybookConfig = {
       use: ['@svgr/webpack'],
     });
 
+    config.module?.rules?.push({
+      test: /\.(avif|png|jpe?g|gif|svg)$/i,
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/media/[name].[hash][ext]',
+      },
+    });
+
     return {
       ...config,
       resolve: {

@@ -1,45 +1,23 @@
-import { useQuery } from '@tanstack/react-query';
+import { useSearch } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 import { ARTICLE_SIZE } from '../constants/article';
-import { queries } from '@/apis/queries';
-import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import type { GetArticlesParams } from '@/apis/articles';
-import type { ChangeEvent } from 'react';
 
 export const useStorageFilters = () => {
-  const [selectedNewsletterId, setSelectedNewsletterId] = useState<
-    number | null
-  >(null);
-  const [sortFilter, setSortFilter] = useState<'DESC' | 'ASC'>('DESC');
-  const [searchInput, setSearchInput] = useState('');
+  const {
+    sort: sortParam,
+    search: searchParam,
+    newsletterId: newsletterIdParams,
+  } = useSearch({ from: '/_bombom/storage' });
   const [page, setPage] = useState(1);
-  const debouncedSearchInput = useDebouncedValue(searchInput, 500);
 
   const baseQueryParams: GetArticlesParams = {
-    sort: ['arrivedDateTime', sortFilter],
-    keyword: debouncedSearchInput,
+    sort: ['arrivedDateTime', sortParam ?? 'DESC'],
+    keyword: searchParam,
     size: ARTICLE_SIZE,
-    newsletterId: selectedNewsletterId ?? undefined,
+    newsletterId: newsletterIdParams ?? undefined,
     page,
   };
-
-  const { data: newsletterCounts, isLoading } = useQuery(
-    queries.articlesStatisticsNewsletters({
-      keyword: debouncedSearchInput,
-    }),
-  );
-
-  const handleNewsletterChange = useCallback((id: number | null) => {
-    setSelectedNewsletterId(id);
-  }, []);
-
-  const handleSortChange = useCallback((value: 'DESC' | 'ASC') => {
-    setSortFilter(value);
-  }, []);
-
-  const handleSearchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setSearchInput(e.target.value);
-  }, []);
 
   const handlePageChange = useCallback((value: number) => {
     setPage(value);
@@ -50,15 +28,7 @@ export const useStorageFilters = () => {
   }, []);
 
   return {
-    selectedNewsletterId,
-    sortFilter,
-    searchInput,
     baseQueryParams,
-    newsletterCounts,
-    isLoading,
-    handleNewsletterChange,
-    handleSortChange,
-    handleSearchChange,
     handlePageChange,
     resetPage,
     page,

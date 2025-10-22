@@ -32,6 +32,7 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
     clearBirthDateError,
     formatBirthDate,
     setNicknameError,
+    setBirthDateError,
   } = useUserInfoValidation();
 
   const { mutate: mutateWithdraw } = useMutation({
@@ -95,7 +96,7 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
     if (!validateNicknameField(nickname)) return;
 
     if (!birthDate) {
-      toast.error('생년월일을 입력해주세요.');
+      setBirthDateError('생년월일을 입력해주세요');
       return;
     }
 

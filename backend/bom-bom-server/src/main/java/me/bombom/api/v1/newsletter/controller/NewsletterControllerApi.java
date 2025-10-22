@@ -7,10 +7,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
+import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
-
-import java.util.List;
 
 @Tag(name = "Newsletter", description = "뉴스레터 관련 API")
 public interface NewsletterControllerApi {
@@ -22,7 +22,9 @@ public interface NewsletterControllerApi {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "뉴스레터 목록 조회 성공")
     })
-    List<NewsletterResponse> getNewsletters();
+    List<NewsletterResponse> getNewsletters(
+            @Parameter(hidden = true) Member member
+    );
 
     @Operation(
             summary = "뉴스레터 상세 조회",
@@ -34,6 +36,7 @@ public interface NewsletterControllerApi {
             @ApiResponse(responseCode = "404", description = "뉴스레터를 찾을 수 없음", content = @Content)
     })
     NewsletterWithDetailResponse getNewsletterWithDetail(
+            @Parameter(hidden = true) Member member,
             @Positive(message = "id는 1 이상의 값이어야 합니다.")
             @Parameter(description = "뉴스레터 ID") Long id
     );

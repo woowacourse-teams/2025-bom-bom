@@ -101,12 +101,7 @@ const TrendySection = () => {
         </TagContainer>
         <TrendyGrid
           device={device}
-          hasContent={
-            !!(
-              isLoading ||
-              (filteredNewsletters && filteredNewsletters.length > 0)
-            )
-          }
+          hasContent={!!(filteredNewsletters && filteredNewsletters.length > 0)}
         >
           {isLoading ? (
             Array.from({

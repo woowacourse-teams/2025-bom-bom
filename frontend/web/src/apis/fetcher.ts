@@ -1,5 +1,4 @@
-import ApiError from './ApiError';
-import { DEFAULT_ERROR_MESSAGES } from './constants/defaultErrorMessage';
+import { ApiError, DEFAULT_ERROR_MESSAGES } from '@bombom/shared';
 import { ENV } from './env';
 import { logger } from '@/utils/logger';
 import type {

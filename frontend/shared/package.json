@@ -12,6 +12,8 @@
     ".": "./src/index.ts",
     "./theme": "./src/theme.ts",
     "./webview": "./src/webview.ts",
-    "./fetcher": "./src/fetcher.ts"
+    "./fetcher": "./src/fetcher.ts",
+    "./ApiError": "./src/ApiError.ts",
+    "./defaultErrorMessage": "./src/defaultErrorMessage.ts"
   }
 }

@@ -49,8 +49,4 @@ const NewsletterCard = styled(ImageInfoCard)`
   &:active {
     transform: translateY(-1px);
   }
-
-  &:focus:not(:focus-visible) {
-    outline: none;
-  }
 `;

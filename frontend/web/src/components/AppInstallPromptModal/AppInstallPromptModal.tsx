@@ -57,6 +57,7 @@ export default AppInstallPromptModal;
 
 const Container = styled.div`
   width: 100%;
+  padding: 32px;
 
   display: flex;
   gap: 24px;

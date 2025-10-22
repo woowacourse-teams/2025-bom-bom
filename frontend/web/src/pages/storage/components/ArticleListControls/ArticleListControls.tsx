@@ -77,7 +77,16 @@ const ArticleListControls = ({
 
                 openModal();
               }}
-            />
+            >
+              <DeleteIcon
+                fill={
+                  checkedCount === 0
+                    ? theme.colors.disabledBackground
+                    : theme.colors.error
+                }
+              />
+            </DeleteIconButton>
+
             <CancelIcon fill={theme.colors.black} onClick={onExitEditMode} />
           </DeleteWrapper>
         ) : (
@@ -156,7 +165,4 @@ const TextButton = styled.button`
   }
 `;
 
-const DeleteIconButton = styled(DeleteIcon)<{ disabled: boolean }>`
-  fill: ${({ theme, disabled }) =>
-    disabled ? theme.colors.disabledBackground : theme.colors.error};
-`;
+const DeleteIconButton = styled.button``;

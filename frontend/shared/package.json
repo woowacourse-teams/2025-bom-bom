@@ -11,6 +11,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./theme": "./src/theme.ts",
-    "./webview": "./src/webview.ts"
+    "./webview": "./src/webview.ts",
+    "./fetcher": "./src/fetcher.ts"
   }
 }

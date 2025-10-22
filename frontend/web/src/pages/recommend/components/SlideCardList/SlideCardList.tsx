@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import PromotionBanner from '../PromotionBanner/PromotionBanner';
 import Carousel from '@/components/Carousel/Carousel';
 
 const banner1 = '/assets/avif/banner_1.avif';
@@ -8,7 +9,8 @@ const banner4 = '/assets/avif/banner_4.avif';
 
 const SlideCardList = () => {
   return (
-    <Carousel isInfinity={true} autoPlay={true}>
+    <Carousel isInfinity={true} autoPlay={false}>
+      <PromotionBanner />
       <Banner imageUrl={banner1} />
       <Banner imageUrl={banner2} />
       <Banner imageUrl={banner3} />

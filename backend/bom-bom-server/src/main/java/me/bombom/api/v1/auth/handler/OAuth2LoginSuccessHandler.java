@@ -15,7 +15,6 @@ import me.bombom.api.v1.auth.extractor.AppleUserInfoExtractor;
 import me.bombom.api.v1.auth.extractor.GoogleUserInfoExtractor;
 import me.bombom.api.v1.auth.extractor.OAuth2UserInfoExtractor;
 import me.bombom.api.v1.auth.util.UniqueUserInfoGenerator;
-import me.bombom.api.v1.auth.util.UserInfoValidator;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
@@ -51,7 +50,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private String frontendLocalUrl;
 
     private final MemberService memberService;
-    private final UserInfoValidator userInfoValidator;
     private final UniqueUserInfoGenerator uniqueUserInfoGenerator;
 
     @Override

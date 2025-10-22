@@ -17,6 +17,8 @@ import useArticleAsReadMutation from '@/pages/detail/hooks/useArticleAsReadMutat
 import { useArticleBookmark } from '@/pages/detail/hooks/useArticleBookmark';
 import type { Device } from '@/hooks/useDevice';
 
+const ARTICLE_MAX_WIDTH = 700;
+
 export const Route = createFileRoute('/_bombom/articles/$articleId')({
   head: () => ({
     meta: [
@@ -121,11 +123,11 @@ const Container = styled.div`
 const ArticleActionButtons = styled(FloatingActionButtons)`
   position: fixed;
   top: 80vh;
-  left: calc(50% - 440px);
+  left: calc(50% - (${ARTICLE_MAX_WIDTH / 2}px + 90px));
 `;
 
 const ArticleContent = styled.div<{ device: Device }>`
-  max-width: 700px;
+  max-width: ${ARTICLE_MAX_WIDTH}px;
   margin: 0 auto;
   padding: ${({ device }) => (device === 'mobile' ? '0' : '0 16px')};
   border-right: 1px solid

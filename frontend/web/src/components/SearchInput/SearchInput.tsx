@@ -1,31 +1,38 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
-import type { ComponentProps } from 'react';
+import { forwardRef, type ComponentProps } from 'react';
 import ReadingGlassesIcon from '#/assets/svg/reading-glasses.svg';
 
-export default function SearchInput({ ...props }: ComponentProps<'input'>) {
-  return (
-    <Container>
-      <ReadingGlassesIconWrapper>
-        <ReadingGlassesIcon
-          color={theme.colors.textTertiary}
-          width={16}
-          height={16}
+const SearchInput = forwardRef<HTMLInputElement, ComponentProps<'input'>>(
+  ({ ...props }, ref) => {
+    return (
+      <Container>
+        <ReadingGlassesIconWrapper>
+          <ReadingGlassesIcon
+            color={theme.colors.textTertiary}
+            width={16}
+            height={16}
+          />
+        </ReadingGlassesIconWrapper>
+        <StyledInput
+          ref={ref}
+          type="search"
+          aria-label={props['aria-label'] || '검색'}
+          {...props}
         />
-      </ReadingGlassesIconWrapper>
-      <StyledInput
-        type="search"
-        aria-label={props['aria-label'] || '검색'}
-        {...props}
-      />
-    </Container>
-  );
-}
+      </Container>
+    );
+  },
+);
+
+SearchInput.displayName = 'SearchInput';
+
+export default SearchInput;
 
 const Container = styled.div`
   position: relative;
   width: 100%;
-  height: 42px;
+  height: 32px;
 `;
 
 const ReadingGlassesIconWrapper = styled.div`

@@ -4,9 +4,7 @@ import {
   INFINITY_START_SLIDE_INDEX,
   FINITE_START_SLIDE_INDEX,
   SWIPE_OFFSET_THRESHOLD,
-  SWIPE_ANGLE_THRESHOLD,
 } from './Carousel.constants';
-import { calculateAngle } from '@/utils/math';
 import type { TouchEvent } from 'react';
 
 interface UseCarouselProps {
@@ -29,7 +27,7 @@ const useCarousel = ({
   const [isSwiping, setIsSwiping] = useState(false);
   const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const swipeOffsetRef = useRef(0);
-  const swipeStartRef = useRef({ x: 0, y: 0 });
+  const swipeStartRef = useRef(0);
   const slideWrapperRef = useRef<HTMLUListElement>(null);
 
   const updateTransform = useCallback(() => {
@@ -88,38 +86,20 @@ const useCarousel = ({
   }, [isTransitioning, isSwiping, isInfinity, slideIndex, slideCount]);
 
   const swipeStart = useCallback(
-    (clientX: number, clientY: number) => {
+    (clientX: number) => {
       if (isTransitioning) return;
 
       setIsSwiping(true);
-      swipeStartRef.current = { x: clientX, y: clientY };
+      swipeStartRef.current = clientX;
       swipeOffsetRef.current = 0;
     },
     [isTransitioning],
   );
   const swipeMove = useCallback(
-    (clientX: number, clientY: number) => {
+    (clientX: number) => {
       if (!isSwiping) return;
 
-      const angle = Math.abs(
-        calculateAngle(
-          swipeStartRef.current.x,
-          swipeStartRef.current.y,
-          clientX,
-          clientY,
-        ),
-      );
-
-      if (
-        angle > SWIPE_ANGLE_THRESHOLD &&
-        angle < 180 - SWIPE_ANGLE_THRESHOLD
-      ) {
-        setIsSwiping(false);
-        swipeOffsetRef.current = 0;
-        return;
-      }
-
-      const offset = clientX - swipeStartRef.current.x;
+      const offset = clientX - swipeStartRef.current;
       const isFirstSlide = slideIndex === FINITE_START_SLIDE_INDEX;
       const isLastSlide = slideIndex === slideCount - 1;
 
@@ -154,7 +134,7 @@ const useCarousel = ({
     (e: TouchEvent) => {
       const touchPoint = e.touches[0];
       if (!touchPoint) return;
-      swipeStart(touchPoint.clientX, touchPoint.clientY);
+      swipeStart(touchPoint.clientX);
     },
     [swipeStart],
   );
@@ -163,7 +143,7 @@ const useCarousel = ({
     (e: TouchEvent) => {
       const touchPoint = e.touches[0];
       if (!touchPoint) return;
-      swipeMove(touchPoint.clientX, touchPoint.clientY);
+      swipeMove(touchPoint.clientX);
     },
     [swipeMove],
   );

@@ -18,21 +18,24 @@ public class SubscribeService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void saveOrUpdate(Long newsletterId, Long memberId, String unsubscribeUrl) {
+    public void upsertSubscribe(Long newsletterId, Long memberId, String unsubscribeUrl) {
         subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId)
                 .ifPresentOrElse(
                         subscribe -> subscribe.updateUnsubscribeUrl(unsubscribeUrl),
-                        () -> {
-                            Subscribe newSubscribe = Subscribe.builder()
-                                    .newsletterId(newsletterId)
-                                    .memberId(memberId)
-                                    .unsubscribeUrl(unsubscribeUrl)
-                                    .build();
-                            subscribeRepository.save(newSubscribe);
-                            applicationEventPublisher.publishEvent(
-                                    NewsletterSubscribedEvent.of(newsletterId, memberId)
-                            );
-                        }
+                        () -> createNewSubscribe(newsletterId, memberId, unsubscribeUrl)
                 );
+    }
+
+    private void createNewSubscribe(Long newsletterId, Long memberId, String unsubscribeUrl) {
+        Subscribe newSubscribe = Subscribe.builder()
+                .newsletterId(newsletterId)
+                .memberId(memberId)
+                .unsubscribeUrl(unsubscribeUrl)
+                .build();
+        subscribeRepository.save(newSubscribe);
+
+        applicationEventPublisher.publishEvent(
+                NewsletterSubscribedEvent.of(newsletterId, memberId)
+        );
     }
 }

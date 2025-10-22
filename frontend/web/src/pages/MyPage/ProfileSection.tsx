@@ -118,7 +118,8 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
   const hasNicknameChanged = nickname !== userInfo.nickname;
   const hasBirthDateChanged = birthDate !== userInfo.birthDate;
   const hasGenderChanged = gender !== (userInfo.gender || 'NONE');
-  const hasChanges = hasNicknameChanged || hasBirthDateChanged || hasGenderChanged;
+  const hasChanges =
+    hasNicknameChanged || hasBirthDateChanged || hasGenderChanged;
 
   return (
     <Container>

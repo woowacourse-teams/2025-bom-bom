@@ -22,11 +22,11 @@ public class SubscribeService {
         subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId)
                 .ifPresentOrElse(
                         subscribe -> subscribe.updateUnsubscribeUrl(unsubscribeUrl),
-                        () -> createNewSubscribe(newsletterId, memberId, unsubscribeUrl)
+                        () -> registerSubscribe(newsletterId, memberId, unsubscribeUrl)
                 );
     }
 
-    private void createNewSubscribe(Long newsletterId, Long memberId, String unsubscribeUrl) {
+    private void registerSubscribe(Long newsletterId, Long memberId, String unsubscribeUrl) {
         Subscribe newSubscribe = Subscribe.builder()
                 .newsletterId(newsletterId)
                 .memberId(memberId)

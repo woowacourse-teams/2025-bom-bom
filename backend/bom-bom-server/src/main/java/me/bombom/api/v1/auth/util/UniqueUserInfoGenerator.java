@@ -74,9 +74,8 @@ public class UniqueUserInfoGenerator {
     }
 
     private String generateUniqueNickname() {
-        String baseNickname = generateRandomNickname();
-        String uniqueNickname = baseNickname + NICKNAME_RANDOM_DELIMITER + getRandomValue();
-        log.debug("고유 닉네임 생성 - 원본: {}, 생성: {}", baseNickname, uniqueNickname);
+        String uniqueNickname = generateRandomNickname() + NICKNAME_RANDOM_DELIMITER + getRandomValue();
+        log.debug("고유 닉네임 생성: {}", uniqueNickname);
         return uniqueNickname;
     }
 

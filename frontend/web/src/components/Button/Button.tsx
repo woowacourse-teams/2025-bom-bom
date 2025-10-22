@@ -2,7 +2,7 @@ import { css, type Theme } from '@emotion/react';
 import styled from '@emotion/styled';
 import type { ComponentProps } from 'react';
 
-type Variant = 'default' | 'secondary';
+type Variant = 'default' | 'outlined';
 
 interface ButtonProps extends ComponentProps<'button'> {
   text: string;
@@ -60,8 +60,8 @@ const variantStyles = {
       background-color: ${theme.colors.primaryDark};
     }
   `,
-  secondary: (theme: Theme) => css`
-    border: none;
+  outlined: (theme: Theme) => css`
+    border: 1px solid ${theme.colors.stroke};
 
     background-color: ${theme.colors.white};
     color: ${theme.colors.textPrimary};

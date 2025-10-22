@@ -56,7 +56,7 @@ const ArticleDeleteModal = ({
           />
           <CancelButton
             isMobile={isMobile}
-            variant="secondary"
+            variant="outlined"
             text="취소"
             onClick={closeModal}
           />

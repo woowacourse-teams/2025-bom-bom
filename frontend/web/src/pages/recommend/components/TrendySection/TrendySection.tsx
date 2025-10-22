@@ -102,7 +102,10 @@ const TrendySection = () => {
         <TrendyGrid
           device={device}
           hasContent={
-            isLoading || (filteredNewsletters && filteredNewsletters.length > 0)
+            !!(
+              isLoading ||
+              (filteredNewsletters && filteredNewsletters.length > 0)
+            )
           }
         >
           {isLoading ? (
@@ -197,14 +200,16 @@ const TagContainer = styled.div`
   flex-wrap: wrap;
 `;
 
-const TrendyGrid = styled.div<{ device: Device }>`
+const TrendyGrid = styled.div<{ device: Device; hasContent: boolean }>`
   height: ${({ device }) => (device === 'mobile' ? '400px' : '600px')};
 
   display: grid;
   gap: 12px;
 
-  grid-template-columns: ${({ device }) =>
-    device === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
+  grid-auto-rows: min-content;
+
+  grid-template-columns: ${({ device, hasContent }) =>
+    device === 'mobile' || !hasContent ? '1fr' : 'repeat(2, 1fr)'};
   overflow-y: auto;
 
   &::-webkit-scrollbar {

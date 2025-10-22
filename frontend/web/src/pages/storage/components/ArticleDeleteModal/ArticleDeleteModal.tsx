@@ -93,7 +93,6 @@ const ModalDescription = styled.p<{ isMobile: boolean }>`
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme, isMobile }) =>
     isMobile ? theme.fonts.body3 : theme.fonts.body2};
-  line-height: 1.5;
   white-space: pre-wrap;
 `;
 
@@ -106,7 +105,6 @@ const HighlightedWarning = styled.div<{ isMobile: boolean }>`
   color: ${({ theme }) => theme.colors.error};
   font: ${({ theme, isMobile }) =>
     isMobile ? theme.fonts.body3 : theme.fonts.body2};
-  font-weight: 600;
 `;
 
 const ModalButtonGroup = styled.div`

@@ -16,12 +16,12 @@ const Checkbox = ({
   return (
     <CheckboxWrapper>
       <HiddenCheckbox
-        id={String(id)}
+        id={id}
         type="checkbox"
         checked={checked}
         onChange={onChange}
       />
-      <CheckboxLabel htmlFor={String(id)} checked={checked}>
+      <CheckboxLabel htmlFor={id} checked={checked}>
         <CheckboxSquare checked={checked}>
           {checked && <CheckMark>✓</CheckMark>}
         </CheckboxSquare>

@@ -4,6 +4,7 @@ import PromotionBanner from '../PromotionBanner/PromotionBanner';
 import QRCodeModal from '../QRCodeModal/QRCodeModal';
 import Carousel from '@/components/Carousel/Carousel';
 import useModal from '@/components/Modal/useModal';
+import { useDevice } from '@/hooks/useDevice';
 import type { StoreType } from '../PromotionBanner/PromotionBanner.types';
 
 const banner1 = '/assets/avif/banner_1.avif';
@@ -12,6 +13,7 @@ const banner3 = '/assets/avif/banner_3.avif';
 const banner4 = '/assets/avif/banner_4.avif';
 
 const SlideCardList = () => {
+  const device = useDevice();
   const { modalRef, closeModal, isOpen, openModal } = useModal();
   const [storeType, setStoreType] = useState<StoreType | null>(null);
 
@@ -28,7 +30,7 @@ const SlideCardList = () => {
   return (
     <>
       <Carousel isInfinity={true} autoPlay={false}>
-        <PromotionBanner openModal={handleOpenModal} />
+        {device === 'pc' && <PromotionBanner openModal={handleOpenModal} />}
         <Banner imageUrl={banner1} />
         <Banner imageUrl={banner2} />
         <Banner imageUrl={banner3} />

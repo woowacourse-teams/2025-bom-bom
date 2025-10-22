@@ -54,6 +54,30 @@
 | 뉴스레터가 쌓여만 간다 | 읽기 기록 + 알림 + 목표 설정 | **읽는 습관 형성** |
 | 어디까지 읽었는지 기억 안 남 | 읽기 진행률 자동 기록 | 편의성 |
 
+### 🎨 Frontend 
+
+**WEB**
+
+![Typescript](https://img.shields.io/badge/typescript-%233178C6.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/react-%23333333.svg?style=for-the-badge&logo=react&logoColor=#61DAFB)
+![Webpack](https://img.shields.io/badge/webpack-%238DD6F9.svg?style=for-the-badge&logo=webpack&logoColor=000)
+![Emotion CSS](https://img.shields.io/badge/Emotion-%23F786AD.svg?style=for-the-badge&logo=styledcomponents&logoColor=white)
+
+**App**
+
+![Expo](https://img.shields.io/badge/Expo-000000?style=for-the-badge&logo=Expo&logoColor=white)
+![React Native](https://img.shields.io/badge/React%20Native-61DAFB?style=for-the-badge&logo=React&logoColor=black)
+
+### 🌐 Backend
+
+![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white)
+![MySQL](https://img.shields.io/badge/mysql-4479A1.svg?style=for-the-badge&logo=mysql&logoColor=white)
+![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
+![AWS](https://img.shields.io/badge/amazonaws-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white)
+
 ## 팀원
 ## Backend 🔧
 

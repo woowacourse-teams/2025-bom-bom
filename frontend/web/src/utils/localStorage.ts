@@ -14,8 +14,8 @@ interface StorageType<T extends Serializable> {
 
 const storage = window.localStorage;
 
-export const createStorage = <T extends Serializable, K extends string>(
-  key: K,
+export const createStorage = <T extends Serializable>(
+  key: string,
   defaultData?: T,
 ): StorageType<T> => ({
   get() {

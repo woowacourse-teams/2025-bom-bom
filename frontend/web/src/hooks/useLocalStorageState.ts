@@ -9,12 +9,12 @@ type Serializable =
   | Serializable[]
   | { [key: string]: Serializable };
 
-export const useLocalStorageState = <T extends Serializable, K extends string>(
-  key: K,
+export const useLocalStorageState = <T extends Serializable>(
+  key: string,
   defaultValue?: T,
 ) => {
   const storage = useMemo(
-    () => createStorage<T, K>(key, defaultValue),
+    () => createStorage<T>(key, defaultValue),
     [key, defaultValue],
   );
   const [storedValue, setStoredValue] = useState(() => storage.get());

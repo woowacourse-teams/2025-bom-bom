@@ -5,7 +5,8 @@ import Skeleton from '@/components/Skeleton/Skeleton';
 import { useDevice } from '@/hooks/useDevice';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
-import { isWebView, sendMessageToRN } from '@/libs/webview/webview.utils';
+import { sendMessageToRN } from '@/libs/webview/webview.utils';
+import { isWebView } from '@/utils/device';
 import logo from '#/assets/avif/logo.avif';
 
 const NewsletterHero = () => {

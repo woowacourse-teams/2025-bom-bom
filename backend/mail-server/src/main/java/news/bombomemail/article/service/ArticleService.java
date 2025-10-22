@@ -22,7 +22,7 @@ import news.bombomemail.newsletter.domain.Newsletter;
 import news.bombomemail.newsletter.repository.NewsletterRepository;
 import news.bombomemail.newsletter.repository.NewsletterVerificationRepository;
 import news.bombomemail.reading.event.TodayReadingEvent;
-import news.bombomemail.subscribe.event.SubscribeEvent;
+import news.bombomemail.article.event.ArticleArrivedEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -56,7 +56,7 @@ public class ArticleService {
         Article article = articleRepository.save(buildArticle(message, contents, member, newsletter));
         String unsubscribeUrl = unsubscribeUrlExtractor.extract(article.getContents());
 
-        applicationEventPublisher.publishEvent(SubscribeEvent.of(newsletter.getId(), member.getId(), unsubscribeUrl));
+        applicationEventPublisher.publishEvent(ArticleArrivedEvent.of(newsletter.getId(), member.getId(), unsubscribeUrl));
         applicationEventPublisher.publishEvent(TodayReadingEvent.from(member.getId()));
 
         return true;

@@ -2,6 +2,7 @@ package news.bombomemail.subscribe.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import news.bombomemail.article.event.ArticleArrivedEvent;
 import news.bombomemail.subscribe.service.SubscribeService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -9,12 +10,12 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SubscribeListener {
+public class SubscribeArticleArrivedListener {
 
     private final SubscribeService subscribeService;
 
     @TransactionalEventListener
-    public void on(SubscribeEvent event) {
+    public void on(ArticleArrivedEvent event) {
         try {
             subscribeService.upsertSubscribe(event.newsletterId(), event.memberId(), event.unsubscribeUrl());
         } catch (Exception e) {

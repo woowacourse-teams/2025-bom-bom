@@ -10,10 +10,8 @@ type StorageKey = `guide-highlight-${string}`;
 
 export const useLocalHighlightData = ({ articleId }: { articleId: number }) => {
   const storageKey: StorageKey = `guide-highlight-${articleId}`;
-  const [highlights, setHighlights] = useLocalStorageState<
-    Highlight[],
-    typeof storageKey
-  >(storageKey);
+  const [highlights, setHighlights] =
+    useLocalStorageState<Highlight[]>(storageKey);
 
   const addHighlight = useCallback(
     (highlight: Omit<Highlight, 'id' | 'memo'>) => {

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { useSelectedDeleteIds } from '../../hooks/useSelectedDeleteIds';
 import ArticleList from '../ArticleList/ArticleList';
 import ArticleListControls from '../ArticleListControls/ArticleListControls';
 import EmptySearchCard from '../EmptySearchCard/EmptySearchCard';
@@ -11,10 +12,9 @@ import type { GetArticlesParams } from '@/apis/articles';
 
 interface PCStorageContentProps {
   baseQueryParams: GetArticlesParams;
-  searchInput: string;
-  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  sortFilter: 'DESC' | 'ASC';
-  onSortChange: (value: 'DESC' | 'ASC') => void;
+  editMode: boolean;
+  enableEditMode: () => void;
+  disableEditMode: () => void;
   onPageChange: (page: number) => void;
   page: number;
   resetPage: () => void;
@@ -22,10 +22,9 @@ interface PCStorageContentProps {
 
 export default function PCStorageContent({
   baseQueryParams,
-  searchInput,
-  onSearchChange,
-  sortFilter,
-  onSortChange,
+  editMode,
+  enableEditMode,
+  disableEditMode,
   onPageChange,
   page,
   resetPage,
@@ -34,37 +33,59 @@ export default function PCStorageContent({
     queries.articles({
       ...baseQueryParams,
       newsletterId: baseQueryParams.newsletterId || undefined,
-      page: page - 1,
+      page: (baseQueryParams.page ?? 1) - 1,
     }),
   );
+  const articleList = articles?.content || [];
+  const {
+    selectedIds,
+    isAllSelected,
+    toggleSelectAll,
+    toggleSelect,
+    clearSelection,
+  } = useSelectedDeleteIds(articleList);
+
+  const haveNoContent = articleList.length === 0;
 
   useEffect(() => {
     resetPage();
   }, [baseQueryParams.keyword, resetPage]);
 
-  const totalElements = articles?.totalElements;
-  const articleList = articles?.content || [];
-  const haveNoContent = !isLoading && articleList.length === 0;
+  useEffect(() => {
+    clearSelection();
+  }, [
+    baseQueryParams.newsletterId,
+    baseQueryParams.keyword,
+    baseQueryParams.sort,
+    baseQueryParams.page,
+    clearSelection,
+  ]);
 
   return (
     <>
       <ArticleListControls
-        searchInput={searchInput}
-        onSearchChange={onSearchChange}
-        sortFilter={sortFilter}
-        onSortChange={onSortChange}
-        totalElements={totalElements}
-        isLoading={isLoading}
+        editMode={editMode}
+        onEnterEditMode={enableEditMode}
+        onExitEditMode={disableEditMode}
+        onDeleteSelected={() => console.log('delete')}
+        checkedCount={selectedIds.length}
+        isAllSelected={isAllSelected}
+        onToggleSelectAll={toggleSelectAll}
       />
-      {haveNoContent && searchInput !== '' ? (
-        <EmptySearchCard searchQuery={searchInput} />
+      {isLoading ? (
+        <ArticleCardListSkeleton />
+      ) : haveNoContent && baseQueryParams.keyword !== '' ? (
+        <EmptySearchCard searchQuery={baseQueryParams.keyword ?? ''} />
       ) : haveNoContent ? (
         <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
-      ) : isLoading ? (
-        <ArticleCardListSkeleton />
       ) : (
         <>
-          <ArticleList articles={articleList} />
+          <ArticleList
+            articles={articleList}
+            editMode={editMode}
+            checkedIds={selectedIds}
+            onCheck={toggleSelect}
+          />
           <Pagination
             currentPage={page}
             totalPages={articles?.totalPages ?? 1}

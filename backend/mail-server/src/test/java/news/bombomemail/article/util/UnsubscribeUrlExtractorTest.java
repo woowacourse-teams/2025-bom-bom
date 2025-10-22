@@ -8,20 +8,13 @@ import org.junit.jupiter.api.Test;
 
 class UnsubscribeUrlExtractorTest {
 
-    private UnsubscribeUrlExtractor extractor;
-
-    @BeforeEach
-    void setUp() {
-        extractor = new UnsubscribeUrlExtractor();
-    }
-
     @Test
     void 구독_취소_URL을_성공적으로_추출한다() {
         // given
         String htmlContent = "<html><body><a href=\"https://example.com/unsubscribe?id=123\">Unsubscribe</a></body></html>";
 
         // when
-        String unsubscribeUrl = extractor.extract(htmlContent);
+        String unsubscribeUrl = UnsubscribeUrlExtractor.extract(htmlContent);
 
         // then
         assertThat(unsubscribeUrl).isEqualTo("https://example.com/unsubscribe?id=123");
@@ -33,7 +26,7 @@ class UnsubscribeUrlExtractorTest {
         String htmlContent = "<html><body><a href=\"https://example.com/subscribe\">Subscribe</a></body></html>";
 
         // when
-        String unsubscribeUrl = extractor.extract(htmlContent);
+        String unsubscribeUrl = UnsubscribeUrlExtractor.extract(htmlContent);
 
         // then
         assertThat(unsubscribeUrl).isNull();

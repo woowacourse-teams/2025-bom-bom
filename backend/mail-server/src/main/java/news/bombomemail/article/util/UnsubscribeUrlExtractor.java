@@ -5,11 +5,13 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UnsubscribeUrlExtractor {
+public final class UnsubscribeUrlExtractor {
 
     private static final Pattern UNSUBSCRIBE_URL_PATTERN = Pattern.compile("href=\"([^\"]*unsubscribe[^\"]*)\"", Pattern.CASE_INSENSITIVE);
 
-    public String extract(String articleContents) {
+    private UnsubscribeUrlExtractor() {}
+
+    public static String extract(String articleContents) {
         if (articleContents == null) {
             return null;
         }

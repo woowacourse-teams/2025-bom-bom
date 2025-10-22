@@ -8,7 +8,7 @@ const banner4 = '/assets/avif/banner_4.avif';
 
 const SlideCardList = () => {
   return (
-    <Carousel>
+    <Carousel isInfinity={true} autoPlay={true}>
       <Banner imageUrl={banner1} />
       <Banner imageUrl={banner2} />
       <Banner imageUrl={banner3} />

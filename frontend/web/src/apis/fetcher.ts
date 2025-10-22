@@ -2,15 +2,11 @@ import ApiError from './ApiError';
 import { DEFAULT_ERROR_MESSAGES } from './constants/defaultErrorMessage';
 import { ENV } from './env';
 import { logger } from '@/utils/logger';
-
-type JsonBody = Record<string, unknown> | unknown[];
-
-type FetcherOptions<TRequest extends JsonBody> = {
-  path: string;
-  query?: Record<string, string | number | undefined | string[]>;
-  body?: TRequest;
-  headers?: HeadersInit;
-};
+import type {
+  FetcherOptions,
+  JsonBody,
+  RequestOptions,
+} from '@bombom/shared/fetcher';
 
 export const fetcher = {
   get: async <TResponse>({ path, query }: FetcherOptions<never>) =>
@@ -37,16 +33,6 @@ export const fetcher = {
     body,
   }: FetcherOptions<TRequest>) =>
     request<TRequest, TResponse>({ path, body, method: 'DELETE' }),
-};
-
-type FetchMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT';
-
-type RequestOptions<TRequest> = {
-  path: string;
-  method: FetchMethod;
-  query?: Record<string, string | number | undefined | string[]>;
-  body?: TRequest;
-  headers?: HeadersInit;
 };
 
 const request = async <TRequest, TResponse>({

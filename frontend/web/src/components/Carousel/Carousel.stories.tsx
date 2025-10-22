@@ -60,13 +60,18 @@ export const DefaultAutoPlay: Story = {
 
 export const CustomAutoPlay: Story = {
   args: {
+    isInfinity: true,
     autoPlay: true,
     autoPlaySpeedMs: 1000,
     children: [],
   },
 
   render: ({ autoPlaySpeedMs }) => (
-    <Carousel autoPlay={true} autoPlaySpeedMs={autoPlaySpeedMs}>
+    <Carousel
+      isInfinity={true}
+      autoPlay={true}
+      autoPlaySpeedMs={autoPlaySpeedMs}
+    >
       {slides.map(({ label, backgroundColor }) => (
         <SlideBox key={label} backgroundColor={backgroundColor}>
           {label}

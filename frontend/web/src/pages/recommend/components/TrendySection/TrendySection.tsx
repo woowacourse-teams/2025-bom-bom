@@ -10,6 +10,7 @@ import Chip from '@/components/Chip/Chip';
 import ImageInfoCardSkeleton from '@/components/ImageInfoCard/ImageInfoCardSkeleton';
 import Modal from '@/components/Modal/Modal';
 import useModal from '@/components/Modal/useModal';
+import SearchInput from '@/components/SearchInput/SearchInput';
 import { CATEGORIES, NEWSLETTER_COUNT } from '@/constants/newsletter';
 import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
@@ -21,6 +22,8 @@ import TrendingUpIcon from '#/assets/svg/trending-up.svg';
 const TrendySection = () => {
   const device = useDevice();
   const [selectedCategory, setSelectedCategory] = useState<Category>('전체');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
   const [selectedNewsletterId, setSelectedNewsletterId] = useQueryState(
     'newsletterDetail',
     parseAsInteger,
@@ -38,10 +41,14 @@ const TrendySection = () => {
     },
   });
 
-  const filteredNewsletters = newsletters?.filter(
-    (newsletter) =>
-      selectedCategory === '전체' || newsletter.category === selectedCategory,
-  );
+  const filteredNewsletters = newsletters?.filter((newsletter) => {
+    const matchesCategory =
+      selectedCategory === '전체' || newsletter.category === selectedCategory;
+    const matchesSearch =
+      searchQuery === '' ||
+      newsletter.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   const handleCardClick = (newsletter: Newsletter) => {
     setSelectedNewsletterId(newsletter.newsletterId);
@@ -74,6 +81,14 @@ const TrendySection = () => {
           </SectionIconBox>
           <SectionTitle>트렌디한 뉴스레터</SectionTitle>
         </SectionHeader>
+        <SearchInputWrapper>
+          <SearchInput
+            placeholder="뉴스레터 이름으로 검색"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="뉴스레터 검색"
+          />
+        </SearchInputWrapper>
         <TagContainer>
           {CATEGORIES.map((category, index) => (
             <Chip
@@ -84,7 +99,10 @@ const TrendySection = () => {
             />
           ))}
         </TagContainer>
-        <TrendyGrid device={device}>
+        <TrendyGrid
+          device={device}
+          hasContent={!!(filteredNewsletters && filteredNewsletters.length > 0)}
+        >
           {isLoading ? (
             Array.from({
               length:
@@ -165,6 +183,10 @@ const SectionTitle = styled.h2`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
+const SearchInputWrapper = styled.div`
+  margin-bottom: 16px;
+`;
+
 const TagContainer = styled.div`
   margin-bottom: 16px;
 
@@ -173,10 +195,33 @@ const TagContainer = styled.div`
   flex-wrap: wrap;
 `;
 
-const TrendyGrid = styled.div<{ device: Device }>`
+const TrendyGrid = styled.div<{ device: Device; hasContent: boolean }>`
+  height: ${({ device }) => (device === 'mobile' ? '400px' : '600px')};
+
   display: grid;
   gap: 12px;
 
-  grid-template-columns: ${({ device }) =>
-    device === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
+  grid-auto-rows: min-content;
+
+  grid-template-columns: ${({ device, hasContent }) =>
+    device === 'mobile' || !hasContent ? '1fr' : 'repeat(2, 1fr)'};
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    border-radius: 4px;
+    background: ${({ theme }) => theme.colors.dividers};
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background: ${({ theme }) => theme.colors.stroke};
+
+    &:hover {
+      background: ${({ theme }) => theme.colors.textTertiary};
+    }
+  }
 `;

@@ -15,12 +15,7 @@ const NewsletterCarousel = ({
   handleCardClick,
 }: NewsletterCarouselProps) => {
   return (
-    <Carousel
-      isInfinity={false}
-      autoPlay={false}
-      hasSlideButton={false}
-      showNextSlidePart={true}
-    >
+    <Carousel hasSlideButton={false} showNextSlidePart={true}>
       {chunk(newsletters, ITEMS_PER_SLIDE).map(
         (newslettersOfSlide, slideIndex) => (
           <NewsletterCardList

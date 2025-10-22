@@ -33,8 +33,8 @@ type CarouselProps = PropsWithChildren & {
   SlideButtonOption;
 
 const Carousel = ({
-  isInfinity = true,
-  autoPlay = true,
+  isInfinity = false,
+  autoPlay = false,
   autoPlaySpeedMs = DEFAULT_SPEED,
   hasSlideButton = true,
   slideButtonPosition = 'middle',

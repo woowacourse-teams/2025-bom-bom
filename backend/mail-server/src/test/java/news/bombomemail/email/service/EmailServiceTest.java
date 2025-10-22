@@ -7,7 +7,6 @@ import java.util.List;
 import news.bombomemail.article.domain.Article;
 import news.bombomemail.article.repository.ArticleRepository;
 import news.bombomemail.article.service.ArticleService;
-import news.bombomemail.article.util.UnsubscribeUrlExtractor;
 import news.bombomemail.email.EmailConfig;
 import news.bombomemail.member.domain.Member;
 import news.bombomemail.member.repository.MemberRepository;
@@ -31,7 +30,7 @@ import static org.assertj.core.api.SoftAssertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({EmailService.class, EmailConfig.class, ArticleService.class, UnsubscribeUrlExtractor.class})
+@Import({EmailService.class, EmailConfig.class, ArticleService.class})
 class EmailServiceTest {
 
     @Autowired

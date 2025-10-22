@@ -39,7 +39,6 @@ public class ArticleService {
     private final NewsletterRepository newsletterRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final NewsletterVerificationRepository newsletterVerificationRepository;
-    private final UnsubscribeUrlExtractor unsubscribeUrlExtractor;
 
     @Transactional
     public boolean save(MimeMessage message, String contents) throws MessagingException, DataAccessException {
@@ -54,7 +53,7 @@ public class ArticleService {
         }
 
         Article article = articleRepository.save(buildArticle(message, contents, member, newsletter));
-        String unsubscribeUrl = unsubscribeUrlExtractor.extract(article.getContents());
+        String unsubscribeUrl = UnsubscribeUrlExtractor.extract(article.getContents());
 
         applicationEventPublisher.publishEvent(ArticleArrivedEvent.of(newsletter.getId(), member.getId(), unsubscribeUrl));
         applicationEventPublisher.publishEvent(TodayReadingEvent.from(member.getId()));

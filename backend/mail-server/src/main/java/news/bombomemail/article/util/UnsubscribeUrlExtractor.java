@@ -2,12 +2,13 @@ package news.bombomemail.article.util;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UnsubscribeUrlExtractor {
 
     private static final Pattern UNSUBSCRIBE_URL_PATTERN = Pattern.compile("href=\"([^\"]*unsubscribe[^\"]*)\"", Pattern.CASE_INSENSITIVE);
-
-    private UnsubscribeUrlExtractor() {}
 
     public static String extract(String articleContents) {
         if (articleContents == null) {

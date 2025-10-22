@@ -19,9 +19,9 @@ interface ProfileSectionProps {
 const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
   const queryClient = useQueryClient();
 
-  const [nickname, setNickname] = useState(userInfo?.nickname || '');
-  const [birthDate, setBirthDate] = useState(userInfo?.birthDate || '');
-  const [gender, setGender] = useState<Gender>(userInfo?.gender || 'NONE');
+  const [nickname, setNickname] = useState(userInfo.nickname || '');
+  const [birthDate, setBirthDate] = useState(userInfo.birthDate || '');
+  const [gender, setGender] = useState<Gender>(userInfo.gender || 'NONE');
 
   const {
     nicknameError,
@@ -78,7 +78,7 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
   };
 
   const handleGenderChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setGender(e.target.value as Gender);
+    setGender(e.currentTarget.value as Gender);
   };
 
   const handleWithdrawClick = () => {
@@ -104,8 +104,8 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
     }
 
     const hasNicknameChanged = nickname !== userInfo.nickname;
-    const hasBirthDateChanged = birthDate !== userInfo?.birthDate;
-    const hasGenderChanged = gender !== (userInfo?.gender || 'NONE');
+    const hasBirthDateChanged = birthDate !== userInfo.birthDate;
+    const hasGenderChanged = gender !== (userInfo.gender || 'NONE');
 
     if (!hasNicknameChanged && !hasBirthDateChanged && !hasGenderChanged) {
       toast.error('변경된 정보가 없습니다.');
@@ -119,8 +119,8 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
     });
   };
 
-  const isBirthDateDisabled = !!userInfo?.birthDate;
-  const isGenderDisabled = userInfo?.gender && userInfo.gender !== 'NONE';
+  const isBirthDateDisabled = !!userInfo.birthDate;
+  const isGenderDisabled = userInfo.gender && userInfo.gender !== 'NONE';
 
   const hasError = !!nicknameError || !!birthDateError;
 
@@ -137,13 +137,13 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
 
       <FieldGroup>
         <Label>이메일</Label>
-        <EmailText>{userInfo?.email}</EmailText>
+        <EmailText>{userInfo.email}</EmailText>
       </FieldGroup>
 
       {isBirthDateDisabled ? (
         <FieldGroup>
           <Label>생년월일</Label>
-          <EmailText>{birthDate}</EmailText>
+          <DisabledText>{birthDate}</DisabledText>
         </FieldGroup>
       ) : (
         <InputField
@@ -160,13 +160,13 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
       <FieldGroup>
         <Label as="p">성별</Label>
         {isGenderDisabled ? (
-          <EmailText>
+          <DisabledText>
             {gender === 'MALE'
               ? '남성'
               : gender === 'FEMALE'
                 ? '여성'
                 : '선택 안 함'}
-          </EmailText>
+          </DisabledText>
         ) : (
           <RadioGroup role="radiogroup">
             <RadioItem>
@@ -264,6 +264,13 @@ const Label = styled.label`
 
 const EmailText = styled.p`
   color: ${({ theme }) => theme.colors.textSecondary};
+  font: ${({ theme }) => theme.fonts.body1};
+
+  user-select: text;
+`;
+
+const DisabledText = styled.p`
+  color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body1};
 
   user-select: text;

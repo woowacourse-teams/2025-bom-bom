@@ -103,15 +103,6 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
       return;
     }
 
-    const hasNicknameChanged = nickname !== userInfo.nickname;
-    const hasBirthDateChanged = birthDate !== userInfo.birthDate;
-    const hasGenderChanged = gender !== (userInfo.gender || 'NONE');
-
-    if (!hasNicknameChanged && !hasBirthDateChanged && !hasGenderChanged) {
-      toast.error('변경된 정보가 없습니다.');
-      return;
-    }
-
     mutateMemberInfo({
       nickname,
       birthDate,
@@ -119,10 +110,15 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
     });
   };
 
-  const isBirthDateDisabled = !!userInfo.birthDate;
-  const isGenderDisabled = userInfo.gender && userInfo.gender !== 'NONE';
+  const hasBirthDate = !!userInfo.birthDate;
+  const hasGender = userInfo.gender && userInfo.gender !== 'NONE';
 
   const hasError = !!nicknameError || !!birthDateError;
+
+  const hasNicknameChanged = nickname !== userInfo.nickname;
+  const hasBirthDateChanged = birthDate !== userInfo.birthDate;
+  const hasGenderChanged = gender !== (userInfo.gender || 'NONE');
+  const hasChanges = hasNicknameChanged || hasBirthDateChanged || hasGenderChanged;
 
   return (
     <Container>
@@ -137,10 +133,10 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
 
       <FieldGroup>
         <Label>이메일</Label>
-        <EmailText>{userInfo.email}</EmailText>
+        <ValueText>{userInfo.email}</ValueText>
       </FieldGroup>
 
-      {isBirthDateDisabled ? (
+      {hasBirthDate ? (
         <FieldGroup>
           <Label>생년월일</Label>
           <DisabledText>{birthDate}</DisabledText>
@@ -159,7 +155,7 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
 
       <FieldGroup>
         <Label as="p">성별</Label>
-        {isGenderDisabled ? (
+        {hasGender ? (
           <DisabledText>
             {gender === 'MALE'
               ? '남성'
@@ -226,7 +222,7 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
       <Button
         text="변경"
         onClick={handleProfileUpdate}
-        disabled={isMemberInfoUpdating || hasError}
+        disabled={isMemberInfoUpdating || hasError || !hasChanges}
         style={{ marginLeft: 'auto' }}
       />
 
@@ -262,7 +258,7 @@ const Label = styled.label`
   font: ${({ theme }) => theme.fonts.body2};
 `;
 
-const EmailText = styled.p`
+const ValueText = styled.p`
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body1};
 
@@ -304,7 +300,6 @@ const HiddenRadio = styled.input`
 
 const RadioButtonLabel = styled.label<{
   selected: boolean;
-  disabled?: boolean;
 }>`
   min-width: 60px;
   padding: 10px 12px;
@@ -323,21 +318,14 @@ const RadioButtonLabel = styled.label<{
   font: ${({ theme }) => theme.fonts.body2};
   text-align: center;
 
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
-  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
+  cursor: pointer;
 
   transition: all 0.2s ease;
   user-select: none;
 
   &:hover {
-    border-color: ${({ theme, selected, disabled }) =>
-      disabled
-        ? selected
-          ? 'transparent'
-          : theme.colors.stroke
-        : selected
-          ? 'transparent'
-          : theme.colors.primary};
+    border-color: ${({ theme, selected }) =>
+      selected ? 'transparent' : theme.colors.primary};
   }
 `;
 

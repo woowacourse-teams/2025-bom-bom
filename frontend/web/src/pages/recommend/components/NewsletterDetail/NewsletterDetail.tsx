@@ -130,7 +130,7 @@ const FixedWrapper = styled.div<{ isMobile: boolean }>`
 `;
 
 const ScrollableWrapper = styled.div<{ isMobile: boolean }>`
-  height: 260px;
+  height: ${({ isMobile }) => (isMobile ? '260px' : '450px')};
   margin-right: -16px;
   padding: 8px;
 

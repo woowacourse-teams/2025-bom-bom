@@ -1,4 +1,4 @@
-name: Backend Blue-Green CI/CD
+name: Backend Blue-Green Production Deploy
 
 on:
   push:

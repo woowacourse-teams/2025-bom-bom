@@ -12,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import me.bombom.api.v1.common.BaseEntity;
 
 @Entity
@@ -54,13 +55,13 @@ public class Highlight extends BaseEntity {
     @Builder
     public Highlight(
             Long id,
-            @NotNull HighlightLocation highlightLocation,
-            @NotNull Long memberId,
-            @NotNull Long articleId,
-            @NotNull Long newsletterId,
-            @NotNull Color color,
-            @NotNull String title,
-            @NotNull String text,
+            @NonNull HighlightLocation highlightLocation,
+            @NonNull Long memberId,
+            @NonNull Long articleId,
+            @NonNull Long newsletterId,
+            @NonNull Color color,
+            @NonNull String title,
+            @NonNull String text,
             String memo
     ) {
         this.id = id;

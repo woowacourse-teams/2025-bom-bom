@@ -22,7 +22,7 @@ public enum ErrorContextKeys {
     ENTITY_TYPE("entityType"),
     ACTUAL_OWNER_ID("actualOwnerId"),
     OPERATION("operation"),
-    ;
+    HIGHLIGHT_ID("highlightId");
     
     private final String key;
 }

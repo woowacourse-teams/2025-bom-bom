@@ -9,6 +9,8 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.ArrayList;
@@ -79,6 +81,7 @@ public class BookmarkRepositoryImpl implements CustomBookmarkRepository {
                                 article.thumbnailUrl,
                                 article.expectedReadTime,
                                 article.isRead,
+                                Expressions.constant(true),
                                 new QNewsletterSummaryResponse(newsletter.name, newsletter.imageUrl, category.name)
                         )
                 ))

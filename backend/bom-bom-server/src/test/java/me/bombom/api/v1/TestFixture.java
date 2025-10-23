@@ -90,7 +90,8 @@ public final class TestFixture {
     /**
      * Newsletter
      */
-    public static List<Newsletter> createNewslettersWithDetails(List<Category> categories, List<NewsletterDetail> details) {
+    public static List<Newsletter> createNewslettersWithDetails(List<Category> categories,
+                                                                List<NewsletterDetail> details) {
         return createNewsletters(
                 categories,
                 List.of(details.get(0).getId(), details.get(1).getId(), details.get(2).getId())
@@ -115,6 +116,7 @@ public final class TestFixture {
                 createNewsletter("비즈레터", "biz@biz.com", categories.get(2).getId(), detailIds.get(2))
         );
     }
+
     /**
      * NewsletterDetail
      */
@@ -235,48 +237,66 @@ public final class TestFixture {
      * Highlight
      */
     public static List<Highlight> createHighlightFixtures(List<Article> articles) {
-        Long firstArticleId = articles.get(0).getId();
-        Long secondArticleId = articles.get(1).getId();
-        Long thirdArticleId = articles.get(2).getId();
+        Article firstArticle = articles.get(0);
+        Article secondArticle = articles.get(1);
+        Article thirdArticle = articles.get(2);
         return List.of(
                 Highlight.builder()
                         .highlightLocation(new HighlightLocation(0, "div[0]/p[0]", 10, "div[0]/p[0]"))
-                        .articleId(firstArticleId)
+                        .memberId(firstArticle.getMemberId())
+                        .newsletterId(firstArticle.getNewsletterId())
+                        .articleId(firstArticle.getId())
+                        .title(firstArticle.getTitle())
                         .color(Color.from("#ffeb3b"))
                         .text("첫 번째 하이라이트")
                         .memo("메모")
                         .build(),
                 Highlight.builder()
                         .highlightLocation(new HighlightLocation(15, "div[0]/p[1]", 25, "div[0]/p[1]"))
-                        .articleId(firstArticleId)
+                        .memberId(firstArticle.getMemberId())
+                        .newsletterId(firstArticle.getNewsletterId())
+                        .articleId(firstArticle.getId())
+                        .title(firstArticle.getTitle())
                         .color(Color.from("#4caf50"))
                         .text("두 번째 하이라이트")
                         .memo("메모")
                         .build(),
                 Highlight.builder()
                         .highlightLocation(new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
-                        .articleId(secondArticleId)
+                        .memberId(secondArticle.getMemberId())
+                        .newsletterId(secondArticle.getNewsletterId())
+                        .articleId(secondArticle.getId())
+                        .title(secondArticle.getTitle())
                         .color(Color.from("#2196f3"))
                         .text("세 번째 하이라이트")
                         .memo("메모")
                         .build(),
                 Highlight.builder()
                         .highlightLocation(new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
-                        .articleId(thirdArticleId)
+                        .memberId(thirdArticle.getMemberId())
+                        .newsletterId(thirdArticle.getNewsletterId())
+                        .articleId(thirdArticle.getId())
+                        .title(thirdArticle.getTitle())
                         .color(Color.from("#0016fb"))
                         .text("네 번째 하이라이트")
                         .memo("메모")
                         .build(),
                 Highlight.builder()
                         .highlightLocation(new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
-                        .articleId(thirdArticleId)
+                        .memberId(thirdArticle.getMemberId())
+                        .newsletterId(thirdArticle.getNewsletterId())
+                        .articleId(thirdArticle.getId())
+                        .title(thirdArticle.getTitle())
                         .color(Color.from("#21b6f3"))
                         .text("디섯 번째 하이라이트")
                         .memo("메모")
                         .build(),
                 Highlight.builder()
                         .highlightLocation(new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
-                        .articleId(thirdArticleId)
+                        .memberId(thirdArticle.getMemberId())
+                        .newsletterId(thirdArticle.getNewsletterId())
+                        .articleId(thirdArticle.getId())
+                        .title(thirdArticle.getTitle())
                         .color(Color.from("#b196f2"))
                         .text("여섯 번째 하이라이트")
                         .memo("메모")

@@ -9,12 +9,17 @@ import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.bookmark.domain.Bookmark;
+import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.common.exception.UnauthorizedException;
+import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -59,6 +64,12 @@ class ArticleServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private BookmarkRepository bookmarkRepository;
+
+    @Autowired
+    private HighlightRepository highlightRepository;
+
     List<Category> categories;
     List<Newsletter> newsletters;
     List<Article> articles;
@@ -70,6 +81,8 @@ class ArticleServiceTest {
         articleRepository.deleteAllInBatch();
         categoryRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+        bookmarkRepository.deleteAllInBatch();
+        highlightRepository.deleteAllInBatch();
 
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
@@ -320,6 +333,35 @@ class ArticleServiceTest {
     }
 
     @Test
+    void 아티클_목록_조회_북마크_여부_표시_테스트() {
+        // given
+        // 내 북마크 생성
+        bookmarkRepository.save(
+                Bookmark.builder()
+                        .articleId(articles.getFirst().getId())
+                        .memberId(member.getId())
+                        .build()
+        );
+
+        Pageable pageable = PageRequest.of(0, 10); // 전체 포함
+
+        // when
+        Page<ArticleResponse> result = articleService.getArticles(
+                member,
+                ArticlesOptionsRequest.of(null, null, null),
+                pageable
+        );
+
+        // then
+        List<ArticleResponse> content = result.getContent();
+        assertSoftly(softly -> {
+            softly.assertThat(content.get(0).isBookmarked()).isTrue();
+            softly.assertThat(content.get(1).isBookmarked()).isFalse();
+            softly.assertThat(content.get(2).isBookmarked()).isFalse();
+        });
+    }
+
+    @Test
     void 아티클_상세_조회_성공_테스트() {
         // given
         Article article = articles.getFirst();
@@ -370,7 +412,8 @@ class ArticleServiceTest {
         // given
         NewsletterDetail newsletterDetail = TestFixture.createNewsletterDetail(false);
         newsletterDetailRepository.save(newsletterDetail);
-        Newsletter newsletter = TestFixture.createNewsletter("테스트 뉴스레터", "test@example.com", 0L, newsletterDetail.getId());
+        Newsletter newsletter = TestFixture.createNewsletter("테스트 뉴스레터", "test@example.com", 0L,
+                newsletterDetail.getId());
         newsletterRepository.save(newsletter);
         Article article = TestFixture.createArticle("제목", member.getId(), newsletter.getId(), BASE_TIME);
         articleRepository.save(article);
@@ -633,24 +676,24 @@ class ArticleServiceTest {
                 .roleId(1L)
                 .build();
         memberRepository.save(admin);
-        
+
         // 테스트용 설정값 오버라이드
         ReflectionTestUtils.setField(articleService, "PREVIOUS_ARTICLE_ADMIN_ID", admin.getId());
 
         Newsletter newsletter1 = newsletters.get(0);
-        
+
         List<Article> adminArticles = new ArrayList<>();
 
         for (int i = 0; i < 12; i++) {
             Article article = TestFixture.createArticle(
-                "관리자 아티클 " + i,
-                admin.getId(),
-                newsletter1.getId(),
-                BASE_TIME.minusDays(i)
+                    "관리자 아티클 " + i,
+                    admin.getId(),
+                    newsletter1.getId(),
+                    BASE_TIME.minusDays(i)
             );
             adminArticles.add(article);
         }
-        
+
         articleRepository.saveAll(adminArticles);
 
         // when - 서비스를 통해 호출 (트랜잭션 처리)
@@ -662,17 +705,80 @@ class ArticleServiceTest {
 
             // 뉴스레터1에 10개만 남아있는지 확인
             long newsletter1Count = articleRepository.findAll().stream()
-                .filter(article ->
-                        article.getMemberId().equals(admin.getId()) &&
-                                article.getNewsletterId().equals(newsletter1.getId()))
-                .count();
+                    .filter(article ->
+                            article.getMemberId().equals(admin.getId()) &&
+                                    article.getNewsletterId().equals(newsletter1.getId()))
+                    .count();
             softly.assertThat(newsletter1Count).isEqualTo(10);
-            
+
             // 일반 사용자 아티클은 영향받지 않았는지 확인
             long memberCount = articleRepository.findAll().stream()
-                .filter(article -> article.getMemberId().equals(member.getId()))
-                .count();
+                    .filter(article -> article.getMemberId().equals(member.getId()))
+                    .count();
             softly.assertThat(memberCount).isEqualTo(4);
+        });
+    }
+
+    @Test
+    void 아티클_삭제_성공시_북마크와_아티클이_삭제된다() {
+        // given
+        // 내 글 2개를 타겟으로, 각 글에 내 북마크 1개씩 생성
+        Long article1 = articles.get(0).getId();
+        Long article2 = articles.get(1).getId();
+
+        bookmarkRepository.save(Bookmark.builder()
+                .articleId(articles.get(0).getId())
+                .memberId(member.getId())
+                .build());
+        bookmarkRepository.save(Bookmark.builder()
+                .articleId(articles.get(1).getId())
+                .memberId(member.getId())
+                .build());
+        highlightRepository.saveAll(TestFixture.createHighlightFixtures(articles));
+
+        // 중복 ID가 들어와도 서비스에서 distinct 처리됨
+        DeleteArticlesRequest req = new DeleteArticlesRequest(List.of(article1, article2, article1));
+
+        // when
+        articleService.delete(member, req);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(articleRepository.findById(article1)).isEmpty();
+            softly.assertThat(articleRepository.findById(article2)).isEmpty();
+            softly.assertThat(articleRepository.findAll().size()).isEqualTo(2);
+            softly.assertThat(bookmarkRepository.findAll()).hasSize(0);
+            softly.assertThat(highlightRepository.findAllByArticleId(0L)).hasSize(3); // fixture 6개 중 포함된건 3개
+        });
+    }
+
+    @Test
+    void 아티클_삭제_권한_없으면_예외_발생() {
+        // given
+        Member other = TestFixture.createMemberFixture("email2", "nickname2");
+        memberRepository.save(other);
+
+        Long foreignArticleId = articleRepository.save(
+                TestFixture.createArticle("남의글", other.getId(), newsletters.get(0).getId(), BASE_TIME)
+        ).getId();
+
+        Long myArticleId = articles.get(2).getId();
+        bookmarkRepository.save(Bookmark.builder()
+                .articleId(myArticleId)
+                .memberId(member.getId())
+                .build());
+
+        DeleteArticlesRequest req = new DeleteArticlesRequest(List.of(myArticleId, foreignArticleId));
+
+        // when & then
+        assertThatThrownBy(() -> articleService.delete(member, req))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
+
+        assertSoftly(softly -> {
+            softly.assertThat(articleRepository.findById(myArticleId)).isPresent();
+            softly.assertThat(articleRepository.findById(foreignArticleId)).isPresent();
+            softly.assertThat(bookmarkRepository.findAll()).hasSize(1);
         });
     }
 }

@@ -51,7 +51,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private String frontendLocalUrl;
 
     private final MemberService memberService;
-    private final UserInfoValidator userInfoValidator;
     private final UniqueUserInfoGenerator uniqueUserInfoGenerator;
 
     @Override

@@ -1,5 +1,6 @@
 package me.bombom.api.v1.auth.util;
 
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,6 @@ public class UniqueUserInfoGenerator {
     public static final String NICKNAME_RANDOM_DELIMITER = "#";
     public static final String EMAIL_RANDOM_DELIMITER = ".";
     private static final String EMAIL_DOMAIN = "@bombom.news"; // 동일 도메인 정책
-    private static final int NICKNAME_MAX_LENGTH = 20; // 컬럼/검증과 일치
     private static final int EMAIL_MAX_LENGTH = 50; // 컬럼과 일치 (전체 길이)
     private static final String[] RANDOM_NICKNAME_ADJECTIVES = {
         "행복한","즐거운","밝은","따뜻한","귀여운","시원한","새로운","친절한","용감한","강한",
@@ -52,28 +52,31 @@ public class UniqueUserInfoGenerator {
             return nickname.strip();
         }
 
-        String baseNickname = getBaseNickname(nickname);
-        String uniqueNickname = generateUniqueNickname(baseNickname);
+        String uniqueNickname = generateUniqueNickname();
         while (userInfoValidator.isDuplicateNickname(uniqueNickname)) {
-            uniqueNickname = generateUniqueNickname(baseNickname);
+            uniqueNickname = generateUniqueNickname();
         }
         return uniqueNickname;
     }
 
     public String getUniqueEmailLocalPart(String email) {
+        if (!StringUtils.hasText(email)) {
+            return generateRandomEmailLocalPart();
+        }
+        
         String normalizedEmailLocalPart = email.strip().toLowerCase();
         String localPart = extractEmailLocalPart(normalizedEmailLocalPart);
+
         if (userInfoValidator.isEmailAvailable(normalizedEmailLocalPart)) {
             return localPart;
         }
         return generateUniqueEmailLocalPart(localPart);
     }
 
-    private String getBaseNickname(String nickname) {
-        if (!StringUtils.hasText(nickname)) {
-            return generateRandomNickname();
-        }
-        return nickname;
+    private String generateUniqueNickname() {
+        String uniqueNickname = generateRandomNickname() + NICKNAME_RANDOM_DELIMITER + getRandomValue();
+        log.debug("고유 닉네임 생성: {}", uniqueNickname);
+        return uniqueNickname;
     }
 
     private String generateRandomNickname() {
@@ -85,12 +88,13 @@ public class UniqueUserInfoGenerator {
         return randomNickname;
     }
 
-    private String generateUniqueNickname(String baseNickname) {
-        String random = getRandomValue();
-        String trimmedBase = trimNicknameForSuffix(baseNickname, random);
-        String uniqueNickname = trimmedBase + NICKNAME_RANDOM_DELIMITER + random;
-        log.debug("고유 닉네임 생성 - 원본: {}, 생성: {}", baseNickname, uniqueNickname);
-        return uniqueNickname;
+    private String generateRandomEmailLocalPart() {
+        String randomEmailLocalPart = UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, 8);
+        log.debug("완전 랜덤 이메일 로컬파트 생성 - 생성: {}", randomEmailLocalPart);
+        return randomEmailLocalPart;
     }
 
     private String generateUniqueEmailLocalPart(String baseLocalPart) {
@@ -109,14 +113,6 @@ public class UniqueUserInfoGenerator {
     private static String getRandomValue() {
         int randomValue = ThreadLocalRandom.current().nextInt(1, 10000);
         return String.format("%04d", randomValue);
-    }
-
-    private String trimNicknameForSuffix(String baseNickname, String random) {
-        // (닉네임 최대 길이 - 랜덤값 추가로 붙는 길이)보다 사용자의 닉네임이 길면 자름
-        int availableLength = NICKNAME_MAX_LENGTH - NICKNAME_RANDOM_DELIMITER.length() - random.length();
-        return baseNickname.length() > availableLength && availableLength > 0
-                ? baseNickname.substring(0, availableLength)
-                : baseNickname;
     }
 
     private String trimEmailLocalPartForSuffix(String baseLocalPart, String random) {

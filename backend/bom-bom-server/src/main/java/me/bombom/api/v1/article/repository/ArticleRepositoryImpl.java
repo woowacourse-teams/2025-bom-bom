@@ -1,6 +1,7 @@
 package me.bombom.api.v1.article.repository;
 
 import static me.bombom.api.v1.article.domain.QArticle.article;
+import static me.bombom.api.v1.bookmark.domain.QBookmark.bookmark;
 import static me.bombom.api.v1.newsletter.domain.QCategory.category;
 import static me.bombom.api.v1.newsletter.domain.QNewsletter.newsletter;
 
@@ -8,6 +9,7 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
@@ -87,6 +89,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                         article.thumbnailUrl,
                         article.expectedReadTime,
                         article.isRead,
+                        getIsBookmarked(memberId),
                         new QNewsletterSummaryResponse(newsletter.name, newsletter.imageUrl, category.name)
                 ))
                 .from(article)
@@ -100,6 +103,16 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
+    }
+
+    private BooleanExpression getIsBookmarked(Long memberId) {
+        return JPAExpressions.selectOne()
+                .from(bookmark)
+                .where(
+                        bookmark.articleId.eq(article.id)
+                                .and(bookmark.memberId.eq(memberId))
+                )
+                .exists();
     }
 
     private BooleanExpression createMemberWhereClause(Long memberId) {

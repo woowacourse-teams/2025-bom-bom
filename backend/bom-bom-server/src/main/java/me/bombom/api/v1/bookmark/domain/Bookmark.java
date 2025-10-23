@@ -12,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import me.bombom.api.v1.common.BaseEntity;
 
 @Entity
@@ -36,8 +37,8 @@ public class Bookmark extends BaseEntity {
     @Builder
     public Bookmark(
             Long id,
-            @NotNull Long articleId,
-            @NotNull Long memberId
+            @NonNull Long articleId,
+            @NonNull Long memberId
     ) {
         this.id = id;
         this.articleId = articleId;

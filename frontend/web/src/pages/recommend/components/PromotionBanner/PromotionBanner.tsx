@@ -12,7 +12,7 @@ const PromotionBanner = ({ openModal }: PromotionBannerProps) => {
   return (
     <Container>
       <Content>
-        <TextBox>
+        <TextWrapper>
           <Text>뉴스레터</Text>
           <Text>더 이상 놓치지 않도록</Text>
           <StoreButtons>
@@ -30,7 +30,7 @@ const PromotionBanner = ({ openModal }: PromotionBannerProps) => {
               Google Play
             </StoreButton>
           </StoreButtons>
-        </TextBox>
+        </TextWrapper>
         <Character src={bookBomIcon} width={200} alt="봄이 캐릭터" />
       </Content>
     </Container>
@@ -61,7 +61,7 @@ const Content = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
 `;
 
-const TextBox = styled.div``;
+const TextWrapper = styled.div``;
 
 const Text = styled.h2`
   color: ${({ theme }) => theme.colors.white};

@@ -119,10 +119,6 @@ const TrendySection = () => {
               <CloseIcon width={20} height={20} />
             </CloseButton>
           </ExpandableSearchContainer>
-          <SectionIconBox aria-hidden="true">
-            <TrendingUpIcon width={16} height={16} />
-          </SectionIconBox>
-          <SectionTitle>트렌디한 뉴스레터</SectionTitle>
         </SectionHeader>
         <TagContainer>
           {CATEGORIES.map((category, index) => (

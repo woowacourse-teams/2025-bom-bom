@@ -48,6 +48,11 @@ export default function PCStorageContent({
 
   const haveNoContent = articleList.length === 0;
 
+  const handleDeleteArticles = () => {
+    deleteArticles(selectedIds);
+    clearSelection();
+  };
+
   useEffect(() => {
     resetPage();
   }, [
@@ -75,7 +80,7 @@ export default function PCStorageContent({
         editMode={editMode}
         onEnterEditMode={enableEditMode}
         onExitEditMode={disableEditMode}
-        onDeleteSelected={() => deleteArticles(selectedIds)}
+        onDeleteSelected={handleDeleteArticles}
         checkedCount={selectedIds.length}
         isAllSelected={isAllSelected}
         onToggleSelectAll={toggleSelectAll}

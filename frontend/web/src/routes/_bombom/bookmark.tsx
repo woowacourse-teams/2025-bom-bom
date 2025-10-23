@@ -8,6 +8,7 @@ import ArticleList from '@/pages/storage/components/ArticleList/ArticleList';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
 import NewsletterFilterSkeleton from '@/pages/storage/components/NewsletterFilter/NewsletterFilterSkeleton';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
+import { useDeleteArticlesMutation } from '@/pages/storage/hooks/useDeleteArticlesMutation';
 import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
 import type { Device } from '@/hooks/useDevice';
@@ -51,6 +52,7 @@ function BookmarkPage() {
   const { data: newsletterCounts } = useQuery(
     queries.bookmarksStatisticsNewsletters(),
   );
+  const { mutate: deleteArticles } = useDeleteArticlesMutation('bookmark');
 
   const bookmarkContent = articles?.content ?? [];
   const haveNoContent = !isLoading && bookmarkContent.length === 0;
@@ -88,7 +90,10 @@ function BookmarkPage() {
             {isLoading ? (
               <ArticleCardListSkeleton />
             ) : (
-              <ArticleList articles={bookmarkContent} />
+              <ArticleList
+                articles={bookmarkContent}
+                onDeleteArticle={deleteArticles}
+              />
             )}
           </MainContentSection>
         </ContentWrapper>

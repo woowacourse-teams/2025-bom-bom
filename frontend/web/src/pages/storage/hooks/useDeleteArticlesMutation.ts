@@ -1,27 +1,29 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteArticle } from '@/apis/articles';
 import { queries } from '@/apis/queries';
+import { formatDate } from '@/utils/date';
 
-interface UseDeleteArticlesMutationProps {
-  date?: string;
-}
-
-export const useDeleteArticlesMutation = ({
-  date,
-}: UseDeleteArticlesMutationProps = {}) => {
+export const useDeleteArticlesMutation = (
+  deleteType: 'today' | 'article' | 'bookmark' = 'article',
+) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (articleIds: number[]) =>
       deleteArticle({ articleIds: articleIds }),
     onSuccess: () => {
-      if (date) {
+      if (deleteType === 'today') {
         queryClient.invalidateQueries({
-          queryKey: queries.articles({ date }).queryKey,
+          queryKey: queries.articles({ date: formatDate(new Date(), '-') })
+            .queryKey,
+        });
+      } else if (deleteType === 'article') {
+        queryClient.invalidateQueries({
+          queryKey: ['articles'],
         });
       } else {
         queryClient.invalidateQueries({
-          queryKey: ['articles'],
+          queryKey: ['bookmarks'],
         });
       }
     },

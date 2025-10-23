@@ -1,8 +1,8 @@
-import { APP_STORE_LINK, PLAY_STORE_LINK } from '@bombom/shared';
 import styled from '@emotion/styled';
-import QRCode from 'react-qr-code';
 import Modal from '@/components/Modal/Modal';
 import type { StoreType } from '../PromotionBanner/PromotionBanner.types';
+import appStoreQRCodeIcon from '#/assets/avif/app_store_qr_code.avif';
+import playStoreQRCodeIcon from '#/assets/avif/play_store_qr_code.avif';
 
 interface QRCodeModalProps {
   modalRef: (node: HTMLDivElement) => void;
@@ -19,9 +19,9 @@ const QRCodeModal = ({
 }: QRCodeModalProps) => {
   const getStoreInfo = () => {
     if (storeType === 'appStore') {
-      return { link: APP_STORE_LINK, title: 'App Store 앱 설치' };
+      return { title: 'App Store 앱 설치', src: appStoreQRCodeIcon, alt: '' };
     }
-    return { link: PLAY_STORE_LINK, title: 'Google Play 앱 설치' };
+    return { title: 'Google Play 앱 설치', src: playStoreQRCodeIcon, alt: '' };
   };
 
   const storeInfo = getStoreInfo();
@@ -35,7 +35,12 @@ const QRCodeModal = ({
       <Container>
         <QRModalTitle>{storeInfo.title}</QRModalTitle>
         <QRCodeWrapper>
-          <QRCode size={256} value={storeInfo.link} viewBox="0 0 256 256" />
+          <img
+            src={storeInfo.src}
+            width={256}
+            height={256}
+            alt={storeInfo.alt}
+          />
         </QRCodeWrapper>
         <QRModalDescription>
           QR 코드를 스캔하여 앱을 설치하세요

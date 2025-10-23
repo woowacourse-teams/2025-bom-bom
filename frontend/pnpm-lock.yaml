@@ -197,9 +197,6 @@ importers:
       react-dom:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
-      react-qr-code:
-        specifier: ^2.0.18
-        version: 2.0.18(react@19.1.0)
       semver:
         specifier: ^7.7.3
         version: 7.7.3
@@ -6723,9 +6720,6 @@ packages:
     resolution: {integrity: sha512-Zj6Q/Vc/SQ+Fzc87N90jJUzBzxD7MVQ2ZvGyMmYtnl2u1a07CejAhvtk4ZwASos+SiHKCAIylyGHJKIek75QBw==}
     engines: {node: '>=20'}
 
-  qr.js@0.0.0:
-    resolution: {integrity: sha512-c4iYnWb+k2E+vYpRimHqSu575b1/wKl4XFeJGpFmrJQz5I88v9aY2czh7s0w36srfCM1sXgC/xpoJz5dJfq+OQ==}
-
   qrcode-terminal@0.11.0:
     resolution: {integrity: sha512-Uu7ii+FQy4Qf82G4xu7ShHhjhGahEpCWc3x8UavY3CTcWV+ufmmCtwkr7ZKsX42jdL0kr1B5FKUeqJvAn51jzQ==}
     hasBin: true
@@ -6849,11 +6843,6 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
-
-  react-qr-code@2.0.18:
-    resolution: {integrity: sha512-v1Jqz7urLMhkO6jkgJuBYhnqvXagzceg3qJUWayuCK/c6LTIonpWbwxR1f1APGd4xrW/QcQEovNrAojbUz65Tg==}
-    peerDependencies:
-      react: '*'
 
   react-refresh@0.14.2:
     resolution: {integrity: sha512-jCvmsr+1IUSMUyzOkRcvnVbX3ZYC6g9TDrDbFuFmRDq7PD4yaGbLKNQL6k2jnArV8hjYxh7hVhAZB6s9HDGpZA==}
@@ -16090,8 +16079,6 @@ snapshots:
     dependencies:
       hookified: 1.12.1
 
-  qr.js@0.0.0: {}
-
   qrcode-terminal@0.11.0: {}
 
   qs@6.13.0:
@@ -16279,12 +16266,6 @@ snapshots:
       - bufferutil
       - supports-color
       - utf-8-validate
-
-  react-qr-code@2.0.18(react@19.1.0):
-    dependencies:
-      prop-types: 15.8.1
-      qr.js: 0.0.0
-      react: 19.1.0
 
   react-refresh@0.14.2: {}
 

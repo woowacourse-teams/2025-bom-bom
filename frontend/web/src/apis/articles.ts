@@ -18,8 +18,8 @@ export type DeleteArticlesParams =
   components['schemas']['DeleteArticlesRequest'];
 
 export const deleteArticle = async (params: DeleteArticlesParams) => {
-  return await fetcher.delete({
-    path: '/articles',
+  return await fetcher.post({
+    path: '/articles/delete',
     body: params,
   });
 };

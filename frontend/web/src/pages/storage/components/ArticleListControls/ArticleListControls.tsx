@@ -136,7 +136,7 @@ const DeleteWrapper = styled.div`
 `;
 
 const DeleteCount = styled.p`
-  width: 68px;
+  min-width: 68px;
 
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body2};

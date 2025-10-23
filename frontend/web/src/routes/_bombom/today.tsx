@@ -56,9 +56,7 @@ function Index() {
     queryFn: getPet,
   });
 
-  const { mutate: deleteArticles } = useDeleteArticlesMutation({
-    date: todayDateStr,
-  });
+  const { mutate: deleteArticles } = useDeleteArticlesMutation('today');
 
   const guideMails = createStorage<LocalGuideMail>(
     GUIDE_MAIL_STORAGE_KEY,

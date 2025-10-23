@@ -46,7 +46,7 @@ const ArticleDeleteModal = ({
         </ModalDescription>
 
         <ModalButtonGroup>
-          <DeleteButton
+          <ModalButton
             isMobile={isMobile}
             text="삭제"
             onClick={() => {
@@ -54,7 +54,7 @@ const ArticleDeleteModal = ({
               closeModal();
             }}
           />
-          <CancelButton
+          <ModalButton
             isMobile={isMobile}
             variant="outlined"
             text="취소"
@@ -120,7 +120,3 @@ const ModalButton = styled(Button)<{ isMobile: boolean }>`
   font: ${({ theme, isMobile }) =>
     isMobile ? theme.fonts.body3 : theme.fonts.body2};
 `;
-
-const DeleteButton = styled(ModalButton)``;
-
-const CancelButton = styled(ModalButton)``;

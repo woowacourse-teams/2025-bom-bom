@@ -39,7 +39,11 @@ const Modal = ({
         position={position}
       >
         {showCloseButton && (
-          <CloseButton type="button" onClick={closeModal}>
+          <CloseButton
+            type="button"
+            onClick={closeModal}
+            aria-label="모달 닫기"
+          >
             <CloseIcon width={36} height={36} fill={theme.colors.black} />
           </CloseButton>
         )}

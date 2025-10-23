@@ -41,13 +41,18 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
     openExternalLink(newsletterDetail.mainPageUrl);
   };
 
+  const newsletterSummary = `${newsletterDetail.name}, ${newsletterDetail.category} 카테고리, ${newsletterDetail.issueCycle} 발행. ${newsletterDetail.description}`;
+
   return (
     <Container isMobile={isMobile}>
+      <VisuallyHidden aria-label={newsletterSummary}>
+        뉴스레터 정보
+      </VisuallyHidden>
       <FixedWrapper isMobile={isMobile}>
-        <InfoWrapper isMobile={isMobile}>
+        <InfoWrapper isMobile={isMobile} aria-hidden="true">
           <NewsletterImage
             src={newsletterDetail.imageUrl}
-            alt={`${newsletterDetail.name} 뉴스레터 이미지`}
+            alt=""
             isMobile={isMobile}
           />
           <InfoBox>
@@ -55,8 +60,12 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
               <NewsletterTitle isMobile={isMobile}>
                 {newsletterDetail.name}
               </NewsletterTitle>
-              <DetailLink onClick={openMainSite} isMobile={isMobile}>
-                <StyledHomeIcon isMobile={isMobile} />
+              <DetailLink
+                onClick={openMainSite}
+                isMobile={isMobile}
+                aria-description="클릭 시 뉴스레터 공식 페이지로 이동합니다."
+              >
+                <StyledHomeIcon isMobile={isMobile} aria-hidden="true" />
               </DetailLink>
             </TitleWrapper>
 
@@ -118,6 +127,26 @@ const Container = styled.div<{ isMobile: boolean }>`
 
   display: flex;
   flex-direction: column;
+`;
+
+const VisuallyHidden = styled.button`
+  overflow: hidden;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: none;
+  border-width: 0;
+
+  background: none;
+  white-space: nowrap;
+
+  clip: rect(0, 0, 0, 0);
+
+  &:focus {
+    outline: none;
+  }
 `;
 
 const FixedWrapper = styled.div<{ isMobile: boolean }>`

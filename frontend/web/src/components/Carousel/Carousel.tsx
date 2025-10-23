@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import { Children } from 'react';
 import { DEFAULT_SPEED } from './Carousel.constants';
 import useCarousel from './useCarousel';
+import useCarouselAccessibility from './useCarouselAccessibility';
 import ChevronIcon from '../icons/ChevronIcon';
 import type { PropsWithChildren } from 'react';
 
@@ -74,8 +75,21 @@ const Carousel = ({
     autoPlaySpeedMs,
   });
 
+  const currentSlideNumber =
+    slideIndex === 0
+      ? slideCount
+      : slideIndex === slideCount + 1
+        ? 1
+        : slideIndex;
+
+  const { handleFocus, handleBlur } = useCarouselAccessibility();
+
   return (
-    <Container slideButtonPosition={slideButtonPosition}>
+    <Container
+      slideButtonPosition={slideButtonPosition}
+      role="region"
+      aria-label="배너 슬라이드"
+    >
       <SlidesWrapper
         ref={slideWrapperRef}
         slideIndex={slideIndex}
@@ -84,15 +98,30 @@ const Carousel = ({
         onTransitionEnd={handleTransitionEnd}
         hasAnimation={hasMultipleSlides ? hasAnimation : false}
         showNextSlidePart={hasMultipleSlides ? showNextSlidePart : false}
+        tabIndex={0}
+        aria-live="off"
+        aria-atomic="true"
+        aria-label={`총 ${slideCount}개 중 ${currentSlideNumber}번째 슬라이드`}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         {...(hasMultipleSlides && {
           onTouchStart: handleTouchStart,
           onTouchMove: handleTouchMove,
           onTouchEnd: handleTouchEnd,
         })}
       >
-        {slides.map((slideContent, index) => (
-          <Slide key={`slide-${index}`}>{slideContent}</Slide>
-        ))}
+        {slides.map((slideContent, index) => {
+          const isCurrentSlide = index === slideIndex;
+          return (
+            <Slide
+              key={`slide-${index}`}
+              aria-hidden={!isCurrentSlide}
+              {...(!isCurrentSlide && { inert: true })}
+            >
+              {slideContent}
+            </Slide>
+          );
+        })}
       </SlidesWrapper>
 
       {hasSlideButton && hasMultipleSlides && (

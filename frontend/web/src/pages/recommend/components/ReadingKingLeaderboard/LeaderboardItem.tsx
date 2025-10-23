@@ -13,10 +13,16 @@ interface LeaderboardItemProps {
 }
 
 const LeaderboardItem = ({ rank, name, readCount }: LeaderboardItemProps) => (
-  <Container>
-    <RankIconWrapper>{RANK_ICON_MAP[rank] ?? `#${rank}`}</RankIconWrapper>
+  <Container
+    role="listitem"
+    tabIndex={0}
+    aria-label={`${rank}위: ${name}, ${readCount}개 읽음`}
+  >
+    <RankIconWrapper aria-hidden="true">
+      {RANK_ICON_MAP[rank] ?? `#${rank}`}
+    </RankIconWrapper>
 
-    <UserInfoBox>
+    <UserInfoBox aria-hidden="true">
       <UserName>{name}</UserName>
       <ReadCount>{readCount}개 읽음</ReadCount>
     </UserInfoBox>

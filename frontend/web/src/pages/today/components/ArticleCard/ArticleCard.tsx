@@ -75,7 +75,7 @@ const ArticleCard = ({
           />
         )}
       </ThumbnailWrapper>
-      {onDelete && (
+      {!isMobile && (
         <DeleteButton
           onClick={(e) => {
             e.preventDefault();

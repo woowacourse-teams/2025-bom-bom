@@ -2,6 +2,7 @@ package me.bombom.api.v1.highlight.repository;
 
 import static me.bombom.api.v1.article.domain.QArticle.article;
 import static me.bombom.api.v1.highlight.domain.QHighlight.highlight;
+import static me.bombom.api.v1.member.domain.QMember.member;
 import static me.bombom.api.v1.newsletter.domain.QNewsletter.newsletter;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -46,8 +47,7 @@ public class HighlightRepositoryImpl implements CustomHighlightRepository {
                         highlight.id.count()
                 ))
                 .from(highlight)
-                .join(article).on(article.id.eq(highlight.articleId))
-                .join(newsletter).on(newsletter.id.eq(article.newsletterId))
+                .join(newsletter).on(newsletter.id.eq(highlight.newsletterId))
                 .where(createMemberIdWhereClause(memberId))
                 .groupBy(newsletter.id, newsletter.name, newsletter.imageUrl)
                 .having(highlight.id.count().gt(0))
@@ -70,12 +70,11 @@ public class HighlightRepositoryImpl implements CustomHighlightRepository {
                         highlight.memo,
                         newsletter.name,
                         newsletter.imageUrl,
-                        article.title,
+                        highlight.title,
                         highlight.createdAt
                 ))
                 .from(highlight)
-                .join(article).on(article.id.eq(highlight.articleId))
-                .join(newsletter).on(newsletter.id.eq(article.newsletterId))
+                .join(newsletter).on(newsletter.id.eq(highlight.newsletterId))
                 .where(createMemberIdWhereClause(memberId))
                 .where(createArticleIdWhereClause(articleId))
                 .where(createNewsletterIdWhereClause(newsletterId))
@@ -88,15 +87,13 @@ public class HighlightRepositoryImpl implements CustomHighlightRepository {
     private JPAQuery<Long> getTotalQuery(Long memberId, Long articleId, Long newsletterId) {
         return jpaQueryFactory.select(highlight.count())
                 .from(highlight)
-                .join(article).on(article.id.eq(highlight.articleId))
-                .join(newsletter).on(newsletter.id.eq(article.newsletterId))
                 .where(createMemberIdWhereClause(memberId))
                 .where(createArticleIdWhereClause(articleId))
                 .where(createNewsletterIdWhereClause(newsletterId));
     }
 
     private BooleanExpression createMemberIdWhereClause(Long memberId) {
-        return article.memberId.eq(memberId);
+        return highlight.memberId.eq(memberId);
     }
 
     private BooleanExpression createArticleIdWhereClause(Long articleId) {
@@ -107,7 +104,7 @@ public class HighlightRepositoryImpl implements CustomHighlightRepository {
 
     private BooleanExpression createNewsletterIdWhereClause(Long newsletterId) {
         return Optional.ofNullable(newsletterId)
-                .map(article.newsletterId::eq)
+                .map(highlight.newsletterId::eq)
                 .orElse(null);
     }
 }

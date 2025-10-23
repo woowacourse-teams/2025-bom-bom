@@ -56,7 +56,7 @@ public class WithdrawnMember extends BaseEntity {
     @Builder
     public WithdrawnMember(
             Long id,
-            @NotNull Long memberId,
+            @NonNull Long memberId,
             @NonNull String email,
             LocalDate birthDate,
             Gender gender,

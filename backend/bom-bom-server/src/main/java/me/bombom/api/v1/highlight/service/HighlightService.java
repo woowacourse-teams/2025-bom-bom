@@ -50,7 +50,7 @@ public class HighlightService {
         return highlightRepository.findByArticleIdAndHighlightLocation(article.getId(), location)
                 .map(ArticleHighlightResponse::from)
                 .orElseGet(() -> {
-                    Highlight highlight = highlightRepository.save(buildHighlight(request, location));
+                    Highlight highlight = highlightRepository.save(buildHighlight(request, article, location));
                     return ArticleHighlightResponse.from(highlight);
                 });
     }
@@ -88,9 +88,12 @@ public class HighlightService {
         }
     }
 
-    private Highlight buildHighlight(HighlightCreateRequest createRequest, HighlightLocation location) {
+    private Highlight buildHighlight(HighlightCreateRequest createRequest, Article article, HighlightLocation location) {
         return Highlight.builder()
+                .memberId(article.getMemberId())
                 .articleId(createRequest.articleId())
+                .newsletterId(article.getNewsletterId())
+                .title(article.getTitle())
                 .highlightLocation(location)
                 .color(createRequest.color())
                 .text(createRequest.text())
@@ -104,14 +107,17 @@ public class HighlightService {
                     .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "Highlight")
                     .addContext("highlightId", id));
-        Article article = articleRepository.findById(highlight.getArticleId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
-                    .addContext(ErrorContextKeys.ARTICLE_ID, highlight.getArticleId())
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "Article")
-                    .addContext("highlightId", id));
-        validateArticleOwner(member, article);
+        validateHighlightOwner(member, highlight);
         return highlight;
+    }
+
+    private void validateHighlightOwner(Member member, Highlight highlight) {
+        if (highlight.isNotOwner(member.getId())) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext(ErrorContextKeys.HIGHLIGHT_ID, highlight.getId())
+                    .addContext(ErrorContextKeys.ACTUAL_OWNER_ID, highlight.getMemberId());
+        }
     }
 
     private void updateHighlight(UpdateHighlightRequest request, Highlight highlight) {

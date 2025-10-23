@@ -12,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import me.bombom.api.v1.common.BaseEntity;
 
 @Entity
@@ -27,7 +28,13 @@ public class Highlight extends BaseEntity {
     private HighlightLocation highlightLocation;
 
     @Column(nullable = false)
+    private Long memberId;
+
+    @Column(nullable = false)
     private Long articleId;
+
+    @Column(nullable = false)
+    private Long newsletterId;
 
     /**
      * @Column 변경 시, Color 내부 주석에도 변경 필요
@@ -35,6 +42,9 @@ public class Highlight extends BaseEntity {
     @Embedded
     @AttributeOverride(name = "value", column = @Column(nullable = false, name = "color", length = 10))
     private Color color;
+
+    @Column(nullable = false)
+    private String title;
 
     @Column(nullable = false, columnDefinition = "text")
     private String text;
@@ -45,16 +55,22 @@ public class Highlight extends BaseEntity {
     @Builder
     public Highlight(
             Long id,
-            @NotNull HighlightLocation highlightLocation,
-            @NotNull Long articleId,
-            @NotNull Color color,
-            @NotNull String text,
+            @NonNull HighlightLocation highlightLocation,
+            @NonNull Long memberId,
+            @NonNull Long articleId,
+            @NonNull Long newsletterId,
+            @NonNull Color color,
+            @NonNull String title,
+            @NonNull String text,
             String memo
     ) {
         this.id = id;
         this.highlightLocation = highlightLocation;
+        this.memberId = memberId;
         this.articleId = articleId;
+        this.newsletterId = newsletterId;
         this.color = color;
+        this.title = title;
         this.text = text;
         this.memo = memo;
     }
@@ -65,5 +81,9 @@ public class Highlight extends BaseEntity {
 
     public void editMemo(String memo) {
         this.memo = memo;
+    }
+
+    public boolean isNotOwner(Long memberId) {
+        return !this.memberId.equals(memberId);
     }
 }

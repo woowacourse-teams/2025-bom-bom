@@ -12,6 +12,7 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.highlight.domain.Color;
 import me.bombom.api.v1.highlight.domain.Highlight;
+import me.bombom.api.v1.highlight.domain.HighlightLocation;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
 import me.bombom.api.v1.highlight.dto.request.HighlightLocationRequest;
 import me.bombom.api.v1.highlight.dto.request.UpdateHighlightRequest;
@@ -139,16 +140,27 @@ class HighlightServiceTest {
     @Test
     void 멤버로_하이라이트를_조회할_수_있다() {
         // given
-        Pageable pageable = PageRequest.of(0, 2, Sort.by(Direction.DESC, "createdAt"));
+        // 삭제된 아티클에 대한 하이라이트 추가 저장
+        highlightRepository.save(
+                Highlight.builder()
+                        .highlightLocation(new HighlightLocation(0, "div[0]/p[0]", 10, "div[0]/p[0]"))
+                        .memberId(member.getId())
+                        .newsletterId(newsletters.getFirst().getId())
+                        .articleId(0L)
+                        .title("삭제된 아티클의 제목")
+                        .color(Color.from("#ffeb3b"))
+                        .text("첫 번째 하이라이트")
+                        .memo("메모")
+                        .build()
+        );
+
+        Pageable pageable = PageRequest.of(0, 8, Sort.by(Direction.DESC, "createdAt"));
 
         // when
         Page<HighlightResponse> responses = highlightService.getHighlights(member, null, null, pageable);
 
         // then
-        assertSoftly(softly -> {
-            assertThat(responses).hasSize(2);
-            assertThat(responses.getTotalElements()).isEqualTo(highlights.size());
-        });
+        assertThat(responses.getTotalElements()).isEqualTo(highlights.size() + 1);
     }
 
     @Test

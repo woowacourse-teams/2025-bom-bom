@@ -1,10 +1,6 @@
-import { isWebView, getDeviceInWebView } from '@/utils/device';
+import { isWebView } from '@/utils/device';
 import { logger } from '@/utils/logger';
-import type {
-  RNToWebMessage,
-  WebToRNMessage,
-  WindowWithWebkit,
-} from '@bombom/shared/webview';
+import type { RNToWebMessage, WebToRNMessage } from '@bombom/shared/webview';
 
 export const sendMessageToRN = (message: WebToRNMessage): void => {
   if (!isWebView()) {
@@ -15,15 +11,9 @@ export const sendMessageToRN = (message: WebToRNMessage): void => {
   try {
     const messageString = JSON.stringify(message);
 
-    const device = getDeviceInWebView();
-    if (!device) return;
+    if (!isWebView()) return;
 
-    if (device === 'android')
-      window.ReactNativeWebView?.postMessage(messageString);
-    else if (device === 'ios')
-      (
-        window as WindowWithWebkit
-      ).webkit?.messageHandlers?.ReactNativeWebView?.postMessage(messageString);
+    window.ReactNativeWebView?.postMessage(messageString);
 
     logger.log('WebView 메시지 전송:', message);
   } catch (error) {

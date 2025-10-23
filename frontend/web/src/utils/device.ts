@@ -1,30 +1,13 @@
 import { isAppVersionSupported } from './version';
-import type { WindowWithWebkit } from '@bombom/shared';
 
 export const isWebView = () => {
-  const isUserAgentSupported = isAppVersionSupported('1.0.3');
-  if (!isUserAgentSupported) {
-    return (
-      !!window.ReactNativeWebView ||
-      !!(window as WindowWithWebkit).webkit?.messageHandlers?.ReactNativeWebView
-    );
-  }
-
+  const isUserAgentSupported = isAppVersionSupported('1.0.4');
+  if (!isUserAgentSupported) return !!window.ReactNativeWebView;
   return navigator.userAgent.includes('bombom');
 };
 
 export const getDeviceInWebView = () => {
   if (!isWebView()) return null;
-
-  const isUserAgentSupported = isAppVersionSupported('1.0.3');
-  if (!isUserAgentSupported) {
-    if (window.ReactNativeWebView) return 'android';
-    if (
-      (window as WindowWithWebkit).webkit?.messageHandlers?.ReactNativeWebView
-    )
-      return 'ios';
-    return null;
-  }
 
   if (navigator.userAgent.includes('google')) return 'android';
   if (navigator.userAgent.includes('Apple')) return 'ios';

@@ -21,8 +21,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
     JOIN Newsletter n ON n.id = a.newsletterId
     WHERE a.memberId = :memberId
       AND (:keyword IS NULL OR :keyword = ''
-           OR LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-           OR LOWER(a.contentsSummary) LIKE LOWER(CONCAT('%', :keyword, '%')))
+           OR LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%')))
     GROUP BY n.id, n.name, n.imageUrl
     ORDER BY COUNT(a.id) DESC
     """)

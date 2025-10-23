@@ -9,6 +9,7 @@
     "web:lint": "pnpm --filter web lint",
     "web:type-check": "pnpm --filter web type-check",
     "web:test": "pnpm --filter web test",
+    "web:generate-openapi-types": "pnpm --filter web generate-openapi-types",
     "app:start": "pnpm --filter app start",
     "app:android": "pnpm --filter app android",
     "app:ios": "pnpm --filter app ios",

@@ -59,7 +59,7 @@ function GuidePage() {
           {guideArticles.map((article) => (
             <li key={article.articleId}>
               <ArticleCard
-                data={article}
+                data={{ ...article, isBookmarked: false }}
                 readVariant="badge"
                 to={`/articles/guide/${article.articleId}`}
               />

@@ -12,10 +12,7 @@ const useInfiniteArticles = ({
   isPc,
 }: UseInfiniteArticlesParams) => {
   return useInfiniteQuery({
-    ...queries.infiniteArticles({
-      ...baseQueryParams,
-      newsletterId: baseQueryParams.newsletterId || undefined,
-    }),
+    ...queries.infiniteArticles(baseQueryParams),
     enabled: !isPc,
   });
 };

@@ -70,7 +70,6 @@ export default ArticleDeleteModal;
 
 const Container = styled.div<{ isMobile: boolean }>`
   width: ${({ isMobile }) => (isMobile ? '320px' : '440px')};
-  padding: ${({ isMobile }) => (isMobile ? '24px' : '32px 52px')};
 
   display: flex;
   gap: ${({ isMobile }) => (isMobile ? '12px' : '20px')};

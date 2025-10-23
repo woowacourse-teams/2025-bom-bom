@@ -115,7 +115,6 @@ export default NewsletterDetail;
 const Container = styled.div<{ isMobile: boolean }>`
   width: ${({ isMobile }) => (isMobile ? '100%' : '720px')};
   height: 100%;
-  padding: ${({ isMobile }) => (isMobile ? '32px' : '36px 52px')};
 
   display: flex;
   flex-direction: column;

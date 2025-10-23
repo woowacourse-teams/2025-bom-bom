@@ -1,5 +1,11 @@
 import styled from '@emotion/styled';
+import { useState } from 'react';
+import PromotionBanner from '../PromotionBanner/PromotionBanner';
+import QRCodeModal from '../QRCodeModal/QRCodeModal';
 import Carousel from '@/components/Carousel/Carousel';
+import useModal from '@/components/Modal/useModal';
+import { useDevice } from '@/hooks/useDevice';
+import type { StoreType } from '../PromotionBanner/PromotionBanner.types';
 
 const BANNERS = [
   {
@@ -21,12 +27,35 @@ const BANNERS = [
 ];
 
 const SlideCardList = () => {
+  const device = useDevice();
+  const { modalRef, closeModal, isOpen, openModal } = useModal();
+  const [storeType, setStoreType] = useState<StoreType | null>(null);
+
+  const handleOpenModal = (type: StoreType) => {
+    setStoreType(type);
+    openModal();
+  };
+
+  const handleCloseModal = () => {
+    setStoreType(null);
+    closeModal();
+  };
+
   return (
-    <Carousel isInfinity={true} autoPlay={true}>
-      {BANNERS.map(({ src, alt }, index) => (
-        <Banner key={`banner-${index}`} src={src} alt={alt} />
-      ))}
-    </Carousel>
+    <>
+      <Carousel isInfinity={true} autoPlay={true}>
+        {device === 'pc' && <PromotionBanner openModal={handleOpenModal} />}
+        {BANNERS.map(({ src, alt }, index) => (
+          <Banner key={`banner-${index}`} src={src} alt={alt} />
+        ))}
+      </Carousel>
+      <QRCodeModal
+        modalRef={modalRef}
+        isOpen={isOpen}
+        onClose={handleCloseModal}
+        storeType={storeType}
+      />
+    </>
   );
 };
 

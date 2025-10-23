@@ -11,8 +11,6 @@ export const sendMessageToRN = (message: WebToRNMessage): void => {
   try {
     const messageString = JSON.stringify(message);
 
-    if (!isWebView()) return;
-
     window.ReactNativeWebView?.postMessage(messageString);
 
     logger.log('WebView 메시지 전송:', message);

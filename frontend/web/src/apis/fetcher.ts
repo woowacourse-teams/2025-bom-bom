@@ -3,7 +3,7 @@ import { DEFAULT_ERROR_MESSAGES } from './constants/defaultErrorMessage';
 import { ENV } from './env';
 import { logger } from '@/utils/logger';
 
-type JsonBody = Record<string, unknown>;
+type JsonBody = Record<string, unknown> | unknown[];
 
 type FetcherOptions<TRequest extends JsonBody> = {
   path: string;
@@ -32,8 +32,11 @@ export const fetcher = {
     body,
   }: FetcherOptions<TRequest>) =>
     request<TRequest, TResponse>({ path, body, method: 'PUT' }),
-  delete: async <TResponse>({ path }: FetcherOptions<never>) =>
-    request<never, TResponse>({ path, method: 'DELETE' }),
+  delete: async <TRequest extends JsonBody, TResponse>({
+    path,
+    body,
+  }: FetcherOptions<TRequest>) =>
+    request<TRequest, TResponse>({ path, body, method: 'DELETE' }),
 };
 
 type FetchMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT';
@@ -72,7 +75,13 @@ const request = async <TRequest, TResponse>({
       },
     };
 
-    if (body && (method === 'POST' || method === 'PATCH')) {
+    if (
+      body &&
+      (method === 'POST' ||
+        method === 'PATCH' ||
+        method === 'DELETE' ||
+        method === 'PUT')
+    ) {
       config.body = JSON.stringify(body);
     }
 

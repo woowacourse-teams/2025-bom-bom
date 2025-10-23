@@ -1,8 +1,8 @@
-import type { Article } from '@/types/articles';
+import type { GuideArticle } from '@/types/articles';
 
 export const GUIDE_MAIL_STORAGE_KEY = 'guideMail';
 
-export const GUIDE_MAILS: Article[] = [
+export const GUIDE_MAILS: GuideArticle[] = [
   {
     articleId: 1,
     title: '[봄봄 가이드] 뉴스레터 구독하기',

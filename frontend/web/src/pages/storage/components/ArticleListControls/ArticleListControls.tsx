@@ -2,7 +2,9 @@ import { theme } from '@bombom/shared';
 import styled from '@emotion/styled';
 import { useQueryState } from 'nuqs';
 import { useEffect, useState, type ChangeEvent } from 'react';
+import ArticleDeleteModal from '../ArticleDeleteModal/ArticleDeleteModal';
 import Checkbox from '@/components/Checkbox/Checkbox';
+import useModal from '@/components/Modal/useModal';
 import SearchInput from '@/components/SearchInput/SearchInput';
 import Select from '@/components/Select/Select';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -18,9 +20,10 @@ interface ArticleListControlsProps {
   checkedCount: number;
   isAllSelected: boolean;
   onToggleSelectAll: () => void;
+  hasBookmarkedArticles?: boolean;
 }
 
-export default function ArticleListControls({
+const ArticleListControls = ({
   editMode,
   onEnterEditMode,
   onExitEditMode,
@@ -28,13 +31,15 @@ export default function ArticleListControls({
   checkedCount,
   isAllSelected,
   onToggleSelectAll,
-}: ArticleListControlsProps) {
+  hasBookmarkedArticles = false,
+}: ArticleListControlsProps) => {
   const [search, setSearch] = useState('');
   const [, setSearchParam] = useQueryState('search', {
     defaultValue: '',
   });
   const [sort, setSort] = useQueryState('sort', { defaultValue: 'DESC' });
   const debouncedSearchInput = useDebouncedValue(search, 500);
+  const { modalRef, isOpen, openModal, closeModal } = useModal();
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -65,7 +70,23 @@ export default function ArticleListControls({
             />
             <DeleteCount>{checkedCount}개 선택됨</DeleteCount>
             <HorizontalDivider />
-            <DeleteIcon fill={theme.colors.error} onClick={onDeleteSelected} />
+            <DeleteIconButton
+              disabled={checkedCount === 0}
+              onClick={() => {
+                if (checkedCount === 0) return;
+
+                openModal();
+              }}
+            >
+              <DeleteIcon
+                fill={
+                  checkedCount === 0
+                    ? theme.colors.disabledBackground
+                    : theme.colors.error
+                }
+              />
+            </DeleteIconButton>
+
             <CancelIcon fill={theme.colors.black} onClick={onExitEditMode} />
           </DeleteWrapper>
         ) : (
@@ -81,9 +102,18 @@ export default function ArticleListControls({
           onSelectOption={handleSortChange}
         />
       </SummaryBar>
+      <ArticleDeleteModal
+        modalRef={modalRef}
+        isOpen={isOpen}
+        closeModal={closeModal}
+        onDelete={onDeleteSelected}
+        hasBookmarkedArticles={hasBookmarkedArticles}
+      />
     </Container>
   );
-}
+};
+
+export default ArticleListControls;
 
 const Container = styled.div`
   display: flex;
@@ -106,6 +136,8 @@ const DeleteWrapper = styled.div`
 `;
 
 const DeleteCount = styled.p`
+  min-width: 68px;
+
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body2};
 `;
@@ -132,3 +164,5 @@ const TextButton = styled.button`
     transition: all 0.2s ease-in-out;
   }
 `;
+
+const DeleteIconButton = styled.button``;

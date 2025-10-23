@@ -44,7 +44,7 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
   const newsletterSummary = `${newsletterDetail.name}, ${newsletterDetail.category} 카테고리, ${newsletterDetail.issueCycle} 발행. ${newsletterDetail.description}`;
 
   return (
-    <Container>
+    <Container isMobile={isMobile}>
       <VisuallyHidden aria-label={newsletterSummary}>
         뉴스레터 정보
       </VisuallyHidden>
@@ -121,10 +121,9 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
 
 export default NewsletterDetail;
 
-const Container = styled.div`
-  width: 100%;
+const Container = styled.div<{ isMobile: boolean }>`
+  width: ${({ isMobile }) => (isMobile ? '100%' : '720px')};
   height: 100%;
-  max-width: 560px;
 
   display: flex;
   flex-direction: column;
@@ -159,6 +158,7 @@ const FixedWrapper = styled.div<{ isMobile: boolean }>`
 `;
 
 const ScrollableWrapper = styled.div<{ isMobile: boolean }>`
+  height: ${({ isMobile }) => (isMobile ? '260px' : '450px')};
   margin-right: -16px;
   padding: 8px;
 

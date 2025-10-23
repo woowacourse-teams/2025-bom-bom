@@ -1,5 +1,7 @@
 import { theme } from '@bombom/shared/theme';
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+import { useDevice } from '@/hooks/useDevice';
 import type { PropsWithChildren, Ref } from 'react';
 import CloseIcon from '#/assets/svg/close.svg';
 
@@ -23,6 +25,8 @@ const Modal = ({
   isOpen,
   children,
 }: UseModalParams) => {
+  const device = useDevice();
+  const isMobile = device === 'mobile';
   if (!isOpen) return null;
 
   return (
@@ -43,7 +47,9 @@ const Modal = ({
             <CloseIcon width={36} height={36} fill={theme.colors.black} />
           </CloseButton>
         )}
-        <ContentWrapper position={position}>{children}</ContentWrapper>
+        <ContentWrapper position={position} isMobile={isMobile}>
+          {children}
+        </ContentWrapper>
       </Container>
     </>
   );
@@ -95,16 +101,15 @@ const CloseButton = styled.button`
   background: none;
 `;
 
-const ContentWrapper = styled.div<{ position: Position }>`
+const ContentWrapper = styled.div<{ position: Position; isMobile: boolean }>`
   min-height: 0;
 
   display: flex;
   flex-direction: column;
 
   overflow-y: auto;
-  scrollbar-gutter: stable;
 
-  ${({ position }) => contentWrapperStyles[position]}
+  ${({ position, isMobile }) => contentWrapperStyles(isMobile)[position]}
 `;
 
 const containerStyles = {
@@ -118,7 +123,6 @@ const containerStyles = {
     left: 0,
     right: 0,
     width: '100%',
-    height: '100%',
     maxHeight: '80vh',
     borderRadius: '12px 12px 0 0',
     boxShadow: 'none',
@@ -127,28 +131,31 @@ const containerStyles = {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: '720px',
-    height: '100%',
+    maxWidth: '90vw',
     maxHeight: '90vh',
     borderRadius: '12px',
     boxShadow: 'none',
   },
 };
 
-const contentWrapperStyles = {
-  dropdown: {
-    height: 'auto',
-    padding: '16px',
-    alignItems: 'stretch',
-  },
-  bottom: {
-    height: '100%',
-    padding: '32px',
-    alignItems: 'center',
-  },
-  center: {
-    height: '100%',
-    padding: '36px 52px',
-    alignItems: 'center',
-  },
-};
+const contentWrapperStyles = (isMobile: boolean) => ({
+  dropdown: css`
+    height: auto;
+    padding: 16px;
+
+    align-items: stretch;
+  `,
+  bottom: css`
+    height: 100%;
+    padding: 32px;
+
+    align-items: center;
+  `,
+  center: css`
+    width: 100%;
+    height: 100%;
+    padding: ${isMobile ? '24px' : '36px 52px'};
+
+    align-items: center;
+  `,
+});

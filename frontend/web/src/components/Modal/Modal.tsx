@@ -141,6 +141,7 @@ const contentWrapperStyles = {
   },
   center: {
     height: '100%',
+    padding: '36px 52px',
     alignItems: 'center',
   },
 };

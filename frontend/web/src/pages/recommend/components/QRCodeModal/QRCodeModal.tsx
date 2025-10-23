@@ -53,7 +53,7 @@ const QRCodeModal = ({
 export default QRCodeModal;
 
 const Container = styled.div`
-  padding: 60px 48px 48px;
+  padding: 24px 0 0;
 
   display: flex;
   gap: 24px;

@@ -19,9 +19,9 @@ interface ProfileSectionProps {
 const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
   const queryClient = useQueryClient();
 
-  const [nickname, setNickname] = useState(userInfo?.nickname || '');
-  const [birthDate, setBirthDate] = useState(userInfo?.birthDate || '');
-  const [gender, setGender] = useState<Gender>(userInfo?.gender || 'NONE');
+  const [nickname, setNickname] = useState(userInfo.nickname || '');
+  const [birthDate, setBirthDate] = useState(userInfo.birthDate || '');
+  const [gender, setGender] = useState<Gender>(userInfo.gender || 'NONE');
 
   const {
     nicknameError,
@@ -32,6 +32,7 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
     clearBirthDateError,
     formatBirthDate,
     setNicknameError,
+    setBirthDateError,
   } = useUserInfoValidation();
 
   const { mutate: mutateWithdraw } = useMutation({
@@ -78,7 +79,7 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
   };
 
   const handleGenderChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setGender(e.target.value as Gender);
+    setGender(e.currentTarget.value as Gender);
   };
 
   const handleWithdrawClick = () => {
@@ -94,16 +95,12 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
   const handleProfileUpdate = () => {
     if (!validateNicknameField(nickname)) return;
 
-    if (birthDate && !validateBirthDateField(birthDate)) {
+    if (!birthDate) {
+      setBirthDateError('생년월일을 입력해주세요');
       return;
     }
 
-    const hasNicknameChanged = nickname !== userInfo?.nickname;
-    const hasBirthDateChanged = birthDate !== (userInfo?.birthDate || '');
-    const hasGenderChanged = gender !== (userInfo?.gender || 'NONE');
-
-    if (!hasNicknameChanged && !hasBirthDateChanged && !hasGenderChanged) {
-      toast.error('변경된 정보가 없습니다.');
+    if (!validateBirthDateField(birthDate)) {
       return;
     }
 
@@ -114,7 +111,16 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
     });
   };
 
+  const hasBirthDate = !!userInfo.birthDate;
+  const hasGender = userInfo.gender && userInfo.gender !== 'NONE';
+
   const hasError = !!nicknameError || !!birthDateError;
+
+  const hasNicknameChanged = nickname !== userInfo.nickname;
+  const hasBirthDateChanged = birthDate !== userInfo.birthDate;
+  const hasGenderChanged = gender !== (userInfo.gender || 'NONE');
+  const hasChanges =
+    hasNicknameChanged || hasBirthDateChanged || hasGenderChanged;
 
   return (
     <Container>
@@ -129,79 +135,96 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
 
       <FieldGroup>
         <Label>이메일</Label>
-        <EmailText>{userInfo?.email}</EmailText>
+        <ValueText>{userInfo.email}</ValueText>
       </FieldGroup>
 
-      <InputField
-        name="birthDate"
-        label="생년월일(선택)"
-        inputValue={birthDate}
-        onInputChange={handleBirthDateChange}
-        onBlur={handleBirthDateBlur}
-        placeholder="YYYY-MM-DD"
-        errorString={birthDateError}
-      />
+      {hasBirthDate ? (
+        <FieldGroup>
+          <Label>생년월일</Label>
+          <DisabledText>{birthDate}</DisabledText>
+        </FieldGroup>
+      ) : (
+        <InputField
+          name="birthDate"
+          label="생년월일"
+          inputValue={birthDate}
+          onInputChange={handleBirthDateChange}
+          onBlur={handleBirthDateBlur}
+          placeholder="YYYY-MM-DD"
+          errorString={birthDateError}
+        />
+      )}
 
       <FieldGroup>
-        <Label as="p">성별(선택)</Label>
-        <RadioGroup role="radiogroup">
-          <RadioItem>
-            <HiddenRadio
-              id="gender-male"
-              name="gender"
-              value="MALE"
-              type="radio"
-              checked={gender === 'MALE'}
-              onChange={handleGenderChange}
-            />
-            <RadioButtonLabel
-              selected={gender === 'MALE'}
-              htmlFor="gender-male"
-            >
-              남성
-            </RadioButtonLabel>
-          </RadioItem>
+        <Label as="p">성별</Label>
+        {hasGender ? (
+          <DisabledText>
+            {gender === 'MALE'
+              ? '남성'
+              : gender === 'FEMALE'
+                ? '여성'
+                : '선택 안 함'}
+          </DisabledText>
+        ) : (
+          <RadioGroup role="radiogroup">
+            <RadioItem>
+              <HiddenRadio
+                id="gender-male"
+                name="gender"
+                value="MALE"
+                type="radio"
+                checked={gender === 'MALE'}
+                onChange={handleGenderChange}
+              />
+              <RadioButtonLabel
+                selected={gender === 'MALE'}
+                htmlFor="gender-male"
+              >
+                남성
+              </RadioButtonLabel>
+            </RadioItem>
 
-          <RadioItem>
-            <HiddenRadio
-              id="gender-female"
-              name="gender"
-              value="FEMALE"
-              type="radio"
-              checked={gender === 'FEMALE'}
-              onChange={handleGenderChange}
-            />
-            <RadioButtonLabel
-              selected={gender === 'FEMALE'}
-              htmlFor="gender-female"
-            >
-              여성
-            </RadioButtonLabel>
-          </RadioItem>
+            <RadioItem>
+              <HiddenRadio
+                id="gender-female"
+                name="gender"
+                value="FEMALE"
+                type="radio"
+                checked={gender === 'FEMALE'}
+                onChange={handleGenderChange}
+              />
+              <RadioButtonLabel
+                selected={gender === 'FEMALE'}
+                htmlFor="gender-female"
+              >
+                여성
+              </RadioButtonLabel>
+            </RadioItem>
 
-          <RadioItem>
-            <HiddenRadio
-              id="gender-none"
-              name="gender"
-              value="NONE"
-              type="radio"
-              checked={gender === 'NONE'}
-              onChange={handleGenderChange}
-            />
-            <RadioButtonLabel
-              selected={gender === 'NONE'}
-              htmlFor="gender-none"
-            >
-              선택 안 함
-            </RadioButtonLabel>
-          </RadioItem>
-        </RadioGroup>
+            <RadioItem>
+              <HiddenRadio
+                id="gender-none"
+                name="gender"
+                value="NONE"
+                type="radio"
+                checked={gender === 'NONE'}
+                onChange={handleGenderChange}
+              />
+              <RadioButtonLabel
+                selected={gender === 'NONE'}
+                htmlFor="gender-none"
+              >
+                선택 안 함
+              </RadioButtonLabel>
+            </RadioItem>
+          </RadioGroup>
+        )}
       </FieldGroup>
 
       <Button
         text="변경"
         onClick={handleProfileUpdate}
-        disabled={isMemberInfoUpdating || hasError}
+        disabled={isMemberInfoUpdating || hasError || !hasChanges}
         style={{ marginLeft: 'auto' }}
       />
 
@@ -237,8 +260,15 @@ const Label = styled.label`
   font: ${({ theme }) => theme.fonts.body2};
 `;
 
-const EmailText = styled.p`
+const ValueText = styled.p`
   color: ${({ theme }) => theme.colors.textSecondary};
+  font: ${({ theme }) => theme.fonts.body1};
+
+  user-select: text;
+`;
+
+const DisabledText = styled.p`
+  color: ${({ theme }) => theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body1};
 
   user-select: text;
@@ -270,7 +300,9 @@ const HiddenRadio = styled.input`
   }
 `;
 
-const RadioButtonLabel = styled.label<{ selected: boolean }>`
+const RadioButtonLabel = styled.label<{
+  selected: boolean;
+}>`
   min-width: 60px;
   padding: 10px 12px;
   border: 2px solid

@@ -59,7 +59,7 @@ const SignupCard = () => {
   };
 
   const handleGenderChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setGender(e.target.value as Gender);
+    setGender(e.currentTarget.value as Gender);
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -168,7 +168,7 @@ const SignupCard = () => {
                 value="FEMALE"
                 type="radio"
                 checked={gender === 'FEMALE'}
-                onChange={(e) => setGender(e.target.value as Gender)}
+                onChange={handleGenderChange}
               />
               <RadioButtonLabel
                 selected={gender === 'FEMALE'}

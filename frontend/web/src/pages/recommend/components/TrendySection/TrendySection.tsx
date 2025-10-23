@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { parseAsInteger, useQueryState } from 'nuqs';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import NewsletterList from './NewsletterList';
@@ -10,6 +10,7 @@ import Chip from '@/components/Chip/Chip';
 import ImageInfoCardSkeleton from '@/components/ImageInfoCard/ImageInfoCardSkeleton';
 import Modal from '@/components/Modal/Modal';
 import useModal from '@/components/Modal/useModal';
+import SearchInput from '@/components/SearchInput/SearchInput';
 import { CATEGORIES, NEWSLETTER_COUNT } from '@/constants/newsletter';
 import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
@@ -19,13 +20,16 @@ import type { Newsletter } from '@/types/newsletter';
 import TrendingUpIcon from '#/assets/svg/trending-up.svg';
 
 const TrendySection = () => {
-  const navigate = useNavigate();
+  const device = useDevice();
   const [selectedCategory, setSelectedCategory] = useState<Category>('전체');
-  const { newsletterDetail } = useSearch({ from: '/_bombom/' });
-  const [selectedNewsletter, setSelectedNewsletter] =
-    useState<Newsletter | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
+  const [selectedNewsletterId, setSelectedNewsletterId] = useQueryState(
+    'newsletterDetail',
+    parseAsInteger,
+  );
   const { data: newsletters, isLoading } = useQuery(queries.newsletters());
+
   const {
     modalRef: detailModalRef,
     openModal: openDetailModal,
@@ -33,30 +37,21 @@ const TrendySection = () => {
     isOpen,
   } = useModal({
     onClose: () => {
-      navigate({
-        to: '.',
-        search: () => ({}),
-        replace: true,
-      });
+      setSelectedNewsletterId(null);
     },
   });
-  const device = useDevice();
 
-  const filteredNewsletters = newsletters?.filter(
-    (newsletter) =>
-      selectedCategory === '전체' || newsletter.category === selectedCategory,
-  );
+  const filteredNewsletters = newsletters?.filter((newsletter) => {
+    const matchesCategory =
+      selectedCategory === '전체' || newsletter.category === selectedCategory;
+    const matchesSearch =
+      searchQuery === '' ||
+      newsletter.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   const handleCardClick = (newsletter: Newsletter) => {
-    setSelectedNewsletter(newsletter);
-    navigate({
-      to: '.',
-      search: (prev) => ({
-        ...prev,
-        newsletterDetail: newsletter.newsletterId,
-      }),
-    });
-
+    setSelectedNewsletterId(newsletter.newsletterId);
     trackEvent({
       category: 'Newsletter',
       action: '뉴스레터 카드 클릭',
@@ -65,18 +60,17 @@ const TrendySection = () => {
   };
 
   useEffect(() => {
-    if (newsletterDetail) {
+    if (selectedNewsletterId) {
       const newsletter = newsletters?.find(
-        (newsletter) => newsletter.newsletterId === newsletterDetail,
+        (newsletter) => newsletter.newsletterId === selectedNewsletterId,
       );
       if (newsletter) {
-        setSelectedNewsletter(newsletter);
         openDetailModal();
       }
     } else {
       closeDetailModal();
     }
-  }, [closeDetailModal, newsletterDetail, newsletters, openDetailModal]);
+  }, [closeDetailModal, selectedNewsletterId, newsletters, openDetailModal]);
 
   return (
     <>
@@ -87,6 +81,14 @@ const TrendySection = () => {
           </SectionIconBox>
           <SectionTitle>트렌디한 뉴스레터</SectionTitle>
         </SectionHeader>
+        <SearchInputWrapper>
+          <SearchInput
+            placeholder="뉴스레터 이름으로 검색"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="뉴스레터 검색"
+          />
+        </SearchInputWrapper>
         <TagContainer>
           {CATEGORIES.map((category, index) => (
             <Chip
@@ -97,7 +99,10 @@ const TrendySection = () => {
             />
           ))}
         </TagContainer>
-        <TrendyGrid device={device}>
+        <TrendyGrid
+          device={device}
+          hasContent={!!(filteredNewsletters && filteredNewsletters.length > 0)}
+        >
           {isLoading ? (
             Array.from({
               length:
@@ -124,11 +129,8 @@ const TrendySection = () => {
           position={device === 'mobile' ? 'bottom' : 'center'}
           showCloseButton={device !== 'mobile'}
         >
-          {selectedNewsletter && (
-            <NewsletterDetail
-              newsletterId={selectedNewsletter.newsletterId}
-              category={selectedNewsletter.category}
-            />
+          {selectedNewsletterId && (
+            <NewsletterDetail newsletterId={selectedNewsletterId} />
           )}
         </Modal>,
         document.body,
@@ -181,6 +183,10 @@ const SectionTitle = styled.h2`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
+const SearchInputWrapper = styled.div`
+  margin-bottom: 16px;
+`;
+
 const TagContainer = styled.div`
   margin-bottom: 16px;
 
@@ -189,10 +195,33 @@ const TagContainer = styled.div`
   flex-wrap: wrap;
 `;
 
-const TrendyGrid = styled.div<{ device: Device }>`
+const TrendyGrid = styled.div<{ device: Device; hasContent: boolean }>`
+  height: ${({ device }) => (device === 'mobile' ? '400px' : '600px')};
+
   display: grid;
   gap: 12px;
 
-  grid-template-columns: ${({ device }) =>
-    device === 'mobile' ? '1fr' : 'repeat(2, 1fr)'};
+  grid-auto-rows: min-content;
+
+  grid-template-columns: ${({ device, hasContent }) =>
+    device === 'mobile' || !hasContent ? '1fr' : 'repeat(2, 1fr)'};
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    border-radius: 4px;
+    background: ${({ theme }) => theme.colors.dividers};
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background: ${({ theme }) => theme.colors.stroke};
+
+    &:hover {
+      background: ${({ theme }) => theme.colors.textTertiary};
+    }
+  }
 `;

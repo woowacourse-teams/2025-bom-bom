@@ -5,6 +5,7 @@ import { useDevice } from '@/hooks/useDevice';
 import PCMemoContent from '@/pages/memo/components/PCMemoContent/PCMemoContent';
 import { useMemoFilters } from '@/pages/memo/hooks/useMemoFilters';
 import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/NewsletterFilter';
+import NewsletterFilterSkeleton from '@/pages/storage/components/NewsletterFilter/NewsletterFilterSkeleton';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import MemoIcon from '#/assets/svg/memo.svg';
 
@@ -28,10 +29,8 @@ function MemoPage() {
   const isPC = device === 'pc';
 
   const {
-    selectedNewsletterId,
     baseQueryParams,
-    newletterCounts,
-    handleNewsletterChange,
+    newsletterCounts,
     handlePageChange,
     page,
     resetPage,
@@ -47,26 +46,11 @@ function MemoPage() {
 
         <ContentWrapper isPC={isPC}>
           <SidebarSection isPC={isPC}>
-            <NewsLetterFilter
-              newsLetterList={[
-                {
-                  id: 0,
-                  name: '전체',
-                  articleCount: newletterCounts?.totalCount ?? 0,
-                  imageUrl: '',
-                },
-                ...(newletterCounts?.newsletters
-                  .filter((newsletter) => newsletter.highlightCount > 0)
-                  .map((newsletter) => ({
-                    id: newsletter.id,
-                    name: newsletter.name,
-                    articleCount: newsletter.highlightCount,
-                    imageUrl: newsletter.imageUrl,
-                  })) ?? []),
-              ]}
-              selectedNewsletterId={selectedNewsletterId}
-              onSelectNewsletter={handleNewsletterChange}
-            />
+            {!newsletterCounts ? (
+              <NewsletterFilterSkeleton />
+            ) : (
+              <NewsLetterFilter filters={newsletterCounts} />
+            )}
             <QuickMenu />
           </SidebarSection>
 

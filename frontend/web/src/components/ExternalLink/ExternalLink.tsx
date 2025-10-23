@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { Link } from '@tanstack/react-router';
 
-import { isWebView } from '@/libs/webview/webview.utils';
+import { isWebView } from '@/utils/device';
 import { openExternalLink } from '@/utils/externalLink';
 import type { ReactNode } from 'react';
 

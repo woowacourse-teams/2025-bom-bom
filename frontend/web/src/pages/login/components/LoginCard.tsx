@@ -2,7 +2,7 @@ import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
 import { ENV } from '@/apis/env';
 import { useDevice } from '@/hooks/useDevice';
-import { isWeb, isIOS } from '@/libs/webview/webview.utils';
+import { isIOS, isWebView } from '@/utils/device';
 import { isLocal } from '@/utils/environment';
 import AppleIcon from '#/assets/svg/apple.svg';
 import GoogleIcon from '#/assets/svg/google.svg';
@@ -40,7 +40,7 @@ const LoginCard = () => {
         <GoogleIcon width={24} height={24} fill="black" />
         Google로 계속하기
       </LoginButton>
-      {(isWeb() || isIOS()) && (
+      {(!isWebView() || isIOS()) && (
         <LoginButton
           onClick={() => {
             const envQuery = isLocal ? '?env=local' : '';

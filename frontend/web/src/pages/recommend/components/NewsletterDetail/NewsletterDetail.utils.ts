@@ -2,7 +2,7 @@ import { MAILY_DOMAIN, STIBEE_DOMAIN } from './NewsletterDetail.constant';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { copyToClipboard } from '@/utils/copy';
 import { openExternalLink } from '@/utils/externalLink';
-import type { GetUserInfoResponse } from '@/apis/members';
+import type { UserInfo } from '@/types/me';
 
 export const isStibee = (baseUrl: string) => {
   return baseUrl.includes(STIBEE_DOMAIN);
@@ -34,7 +34,7 @@ export const buildSubscribeUrl = (
 export const openSubscribeLink = (
   link: string,
   newsletterName: string,
-  userInfo?: GetUserInfoResponse | null,
+  userInfo?: UserInfo,
 ) => {
   if (!userInfo) return;
 

@@ -17,7 +17,7 @@ export const useMemoFilters = () => {
     page,
   };
 
-  const { data: newletterCounts } = useQuery(
+  const { data: newsletterCounts } = useQuery(
     queries.highlightStatisticsNewsletter(),
   );
 
@@ -36,7 +36,7 @@ export const useMemoFilters = () => {
   return {
     selectedNewsletterId,
     baseQueryParams,
-    newletterCounts,
+    newsletterCounts,
     handleNewsletterChange,
     handlePageChange,
     resetPage,

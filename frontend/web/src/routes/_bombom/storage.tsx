@@ -1,6 +1,9 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
-import { createFileRoute } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
+import { createFileRoute, useSearch } from '@tanstack/react-router';
+import { useState } from 'react';
+import { queries } from '@/apis/queries';
 import RequireLogin from '@/hocs/RequireLogin';
 import { useDevice } from '@/hooks/useDevice';
 import MobileStorageContent from '@/pages/storage/components/MobileStorageContent/MobileStorageContent';
@@ -9,6 +12,7 @@ import NewsletterFilterSkeleton from '@/pages/storage/components/NewsletterFilte
 import PCStorageContent from '@/pages/storage/components/PCStorageContent/PCStorageContent';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import { useStorageFilters } from '@/pages/storage/hooks/useStorageFilters';
+import type { Sort } from '@/pages/storage/components/ArticleListControls/ArticleListControls.types';
 import StorageIcon from '#/assets/svg/storage.svg';
 
 export const Route = createFileRoute('/_bombom/storage')({
@@ -28,27 +32,44 @@ export const Route = createFileRoute('/_bombom/storage')({
       <Storage />
     </RequireLogin>
   ),
+  validateSearch: (search: {
+    search?: string;
+    sort?: Sort;
+    newsletterId?: number;
+  }) => {
+    return {
+      search: search.search,
+      sort: search.sort,
+      newsletterId: search.newsletterId,
+    };
+  },
 });
 
 function Storage() {
   const device = useDevice();
   const isPC = device === 'pc';
   const isMobile = device === 'mobile';
+  const [editMode, setEditMode] = useState(false);
+  const searchParam = useSearch({
+    from: '/_bombom/storage',
+    select: (state) => state.search,
+  });
+  const { data: newsletterFilters } = useQuery(
+    queries.articlesStatisticsNewsletters({
+      keyword: searchParam,
+    }),
+  );
 
-  const {
-    selectedNewsletterId,
-    sortFilter,
-    searchInput,
-    baseQueryParams,
-    newsletterCounts,
-    isLoading,
-    handleNewsletterChange,
-    handleSortChange,
-    handleSearchChange,
-    handlePageChange,
-    page,
-    resetPage,
-  } = useStorageFilters();
+  const enableEditMode = () => {
+    setEditMode(true);
+  };
+
+  const disableEditMode = () => {
+    setEditMode(false);
+  };
+
+  const { baseQueryParams, handlePageChange, page, resetPage } =
+    useStorageFilters();
 
   return (
     <Container>
@@ -63,27 +84,10 @@ function Storage() {
 
       <ContentWrapper isPC={isPC}>
         <SidebarSection isPC={isPC}>
-          {isLoading ? (
+          {!newsletterFilters ? (
             <NewsletterFilterSkeleton />
           ) : (
-            <NewsLetterFilter
-              newsLetterList={[
-                {
-                  id: 0,
-                  name: '전체',
-                  articleCount: newsletterCounts?.totalCount ?? 0,
-                  imageUrl: '',
-                },
-                ...(newsletterCounts?.newsletters
-                  .map((newsletter) => ({
-                    ...newsletter,
-                    articleCount: newsletter.articleCount ?? 0,
-                  }))
-                  .filter((newsletter) => newsletter.articleCount !== 0) ?? []),
-              ]}
-              selectedNewsletterId={selectedNewsletterId}
-              onSelectNewsletter={handleNewsletterChange}
-            />
+            <NewsLetterFilter filters={newsletterFilters} />
           )}
           <QuickMenu />
         </SidebarSection>
@@ -91,10 +95,9 @@ function Storage() {
           {isPC ? (
             <PCStorageContent
               baseQueryParams={baseQueryParams}
-              searchInput={searchInput}
-              onSearchChange={handleSearchChange}
-              sortFilter={sortFilter}
-              onSortChange={handleSortChange}
+              editMode={editMode}
+              enableEditMode={enableEditMode}
+              disableEditMode={disableEditMode}
               onPageChange={handlePageChange}
               page={page}
               resetPage={resetPage}
@@ -102,10 +105,9 @@ function Storage() {
           ) : (
             <MobileStorageContent
               baseQueryParams={baseQueryParams}
-              searchInput={searchInput}
-              onSearchChange={handleSearchChange}
-              sortFilter={sortFilter}
-              onSortChange={handleSortChange}
+              editMode={editMode}
+              enableEditMode={enableEditMode}
+              disableEditMode={disableEditMode}
               resetPage={resetPage}
             />
           )}
@@ -172,7 +174,6 @@ const MainContentSection = styled.div<{ isPC: boolean }>`
   width: 100%;
 
   display: flex;
-  gap: 16px;
   flex: 1;
   flex-direction: column;
 

@@ -2,14 +2,14 @@ import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
 import { useSearch } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { formatBirthDate, validateBirthDate } from './SignupCard.utils';
 import { useSignupMutation } from '../hooks/useSignupMutation';
 import Checkbox from '@/components/Checkbox/Checkbox';
 import { ExternalLink } from '@/components/ExternalLink/ExternalLink';
 import InputField from '@/components/InputField/InputField';
 import Tooltip from '@/components/Tooltip/Tooltip';
 import { useDevice } from '@/hooks/useDevice';
-import type { FieldError, Gender } from './SignupCard.types';
+import { useUserInfoValidation } from '@/hooks/useUserInfoValidation';
+import type { Gender } from './SignupCard.types';
 import type { Device } from '@/hooks/useDevice';
 import type { ChangeEvent, FormEvent } from 'react';
 import HelpIcon from '#/assets/svg/help.svg';
@@ -29,7 +29,12 @@ const SignupCard = () => {
   const [termsAgreed, setTermsAgreed] = useState(false);
   const { email: emailParam, name: nameParam } = useSearch({ from: '/signup' });
 
-  const [birthDateError, setBirthDateError] = useState<FieldError>(null);
+  const {
+    birthDateError,
+    validateBirthDateField,
+    clearBirthDateError,
+    formatBirthDate,
+  } = useUserInfoValidation();
 
   const email = `${emailPart.trim()}${EMAIL_DOMAIN}`;
   const isFormValid =
@@ -43,18 +48,18 @@ const SignupCard = () => {
   });
 
   const handleBirthDateBlur = () => {
-    setBirthDateError(validateBirthDate(birthDate));
+    validateBirthDateField(birthDate);
   };
 
   const handleBirthDateChange = (e: ChangeEvent<HTMLInputElement>) => {
     const target = e.currentTarget;
     const formatted = formatBirthDate(target.value);
     setBirthDate(formatted);
-    if (birthDateError) setBirthDateError(null);
+    if (birthDateError) clearBirthDateError();
   };
 
   const handleGenderChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setGender(e.target.value as Gender);
+    setGender(e.currentTarget.value as Gender);
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -163,7 +168,7 @@ const SignupCard = () => {
                 value="FEMALE"
                 type="radio"
                 checked={gender === 'FEMALE'}
-                onChange={(e) => setGender(e.target.value as Gender)}
+                onChange={handleGenderChange}
               />
               <RadioButtonLabel
                 selected={gender === 'FEMALE'}

@@ -5,7 +5,7 @@ import RequireLoginCard from '@/components/RequireLoginCard/RequireLoginCard';
 import type { PropsWithChildren } from 'react';
 
 const RequireLogin = ({ children }: PropsWithChildren) => {
-  const { data: user, error } = useQuery(queries.me());
+  const { data: user, error } = useQuery(queries.userProfile());
 
   if (error || !user) {
     return (

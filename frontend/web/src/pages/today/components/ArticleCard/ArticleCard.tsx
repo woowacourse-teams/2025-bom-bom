@@ -86,6 +86,7 @@ export const Container = styled(Link, {
   readVariant: ReadVariant;
   isMobile: boolean;
 }>`
+  width: 100%;
   padding: ${({ isMobile }) => (isMobile ? '8px 0' : '20px')};
 
   display: flex;

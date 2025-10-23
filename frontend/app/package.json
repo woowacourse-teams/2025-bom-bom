@@ -2,7 +2,7 @@
   "name": "@bombom/app",
   "private": true,
   "main": "expo-router/entry",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "scripts": {
     "start": "expo start",
     "build:android": "eas build --platform android --local",
@@ -31,6 +31,7 @@
     "expo-constants": "~18.0.9",
     "expo-crypto": "~15.0.7",
     "expo-dev-client": "~6.0.13",
+    "expo-device": "^8.0.9",
     "expo-font": "~14.0.8",
     "expo-haptics": "~15.0.7",
     "expo-image": "~3.0.8",

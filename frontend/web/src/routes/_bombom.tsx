@@ -1,6 +1,8 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
+import AppInstallPromptModal from '@/components/AppInstallPromptModal/AppInstallPromptModal';
 import PageLayout from '@/components/PageLayout/PageLayout';
+import { useAppInstallPrompt } from '@/hooks/useAppInstallPrompt';
 
 let isFirstVisit = true;
 
@@ -17,11 +19,11 @@ export const Route = createFileRoute('/_bombom')({
       return;
     }
 
-    const data = queryClient.getQueryData(queries.me().queryKey);
+    const data = queryClient.getQueryData(queries.userProfile().queryKey);
     if (data) return;
 
     try {
-      const user = await queryClient.fetchQuery(queries.me());
+      const user = await queryClient.fetchQuery(queries.userProfile());
 
       if (user) {
         window.gtag?.('set', { user_id: user.id });
@@ -35,9 +37,24 @@ export const Route = createFileRoute('/_bombom')({
 });
 
 function RouteComponent() {
+  const {
+    showModal,
+    handleInstallClick,
+    handleLaterClick,
+    handleCloseModal,
+    modalRef,
+  } = useAppInstallPrompt();
+
   return (
     <PageLayout>
       <Outlet />
+      <AppInstallPromptModal
+        modalRef={modalRef}
+        isOpen={showModal}
+        closeModal={handleCloseModal}
+        onInstallClick={handleInstallClick}
+        onLaterClick={handleLaterClick}
+      />
     </PageLayout>
   );
 }

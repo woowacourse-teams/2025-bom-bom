@@ -74,6 +74,9 @@ importers:
       expo-dev-client:
         specifier: ~6.0.13
         version: 6.0.13(expo@54.0.12)
+      expo-device:
+        specifier: ^8.0.9
+        version: 8.0.9(expo@54.0.12)
       expo-font:
         specifier: ~14.0.8
         version: 14.0.8(expo@54.0.12)(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -185,6 +188,9 @@ importers:
       dotenv:
         specifier: ^17.2.0
         version: 17.2.3
+      nuqs:
+        specifier: ^2.7.1
+        version: 2.7.2(@tanstack/react-router@1.132.47(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
       react:
         specifier: ^19.1.0
         version: 19.1.0
@@ -2365,6 +2371,9 @@ packages:
 
   '@sinonjs/fake-timers@13.0.5':
     resolution: {integrity: sha512-36/hTbH2uaWuGVERyC6da9YwGWnzUZXuPro/F2LfsdOsLnCojz/iSH8MxUt/FD2S5XBSVPhmArFUXcpCQ2Hkiw==}
+
+  '@standard-schema/spec@1.0.0':
+    resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
 
   '@storybook/addon-docs@9.1.10':
     resolution: {integrity: sha512-LYK3oXy/0PgY39FhkYVd9D0bzatLGTsMhaPPwSjBOmZgK0f0yBLqaePy7urUFeHYm/rjwAaRmDJNBqUnGTVoig==}
@@ -4588,6 +4597,11 @@ packages:
     peerDependencies:
       expo: '*'
 
+  expo-device@8.0.9:
+    resolution: {integrity: sha512-XqRpaljDNAYZGZzMpC+b9KZfzfydtkwx3pJAp6ODDH+O/5wjAw+mLc5wQMGJCx8/aqVmMsAokec7iebxDPFZDA==}
+    peerDependencies:
+      expo: '*'
+
   expo-file-system@19.0.16:
     resolution: {integrity: sha512-9Ee6HpcUEfO7dOet/on9yAg7ysegBua35Q0oGrJzoRc+xW6IlTxoSFbmK8QhjA3MZpkukP3DhaiYENYOzkw9SQ==}
     peerDependencies:
@@ -6293,6 +6307,27 @@ packages:
   nullthrows@1.1.1:
     resolution: {integrity: sha512-2vPPEi+Z7WqML2jZYddDIfy5Dqb0r2fze2zTxNNknZaFpVHU3mFB3R+DWeJWGVx0ecvttSGlJTI+WG+8Z4cDWw==}
 
+  nuqs@2.7.2:
+    resolution: {integrity: sha512-wOPJoz5om7jMJQick9zU1S/Q+joL+B2DZTZxfCleHEcUzjUnPoujGod4+nAmUWb+G9TwZnyv+mfNqlyfEi8Zag==}
+    peerDependencies:
+      '@remix-run/react': '>=2'
+      '@tanstack/react-router': ^1
+      next: '>=14.2.0'
+      react: '>=18.2.0 || ^19.0.0-0'
+      react-router: ^6 || ^7
+      react-router-dom: ^6 || ^7
+    peerDependenciesMeta:
+      '@remix-run/react':
+        optional: true
+      '@tanstack/react-router':
+        optional: true
+      next:
+        optional: true
+      react-router:
+        optional: true
+      react-router-dom:
+        optional: true
+
   nwsapi@2.2.22:
     resolution: {integrity: sha512-ujSMe1OWVn55euT1ihwCI1ZcAaAU3nxUiDwfDQldc51ZXaB9m2AyOn6/jh1BLe2t/G8xd6uKG1UBF2aZJeg2SQ==}
 
@@ -7691,6 +7726,10 @@ packages:
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
+    hasBin: true
+
+  ua-parser-js@0.7.41:
+    resolution: {integrity: sha512-O3oYyCMPYgNNHuO7Jjk3uacJWZF8loBgwrfd/5LE/HyZ3lUIOdniQ7DNXJcIgZbwioZxk0fLfI4EVnetdiX5jg==}
     hasBin: true
 
   ua-parser-js@1.0.41:
@@ -10685,6 +10724,8 @@ snapshots:
     dependencies:
       '@sinonjs/commons': 3.0.1
 
+  '@standard-schema/spec@1.0.0': {}
+
   '@storybook/addon-docs@9.1.10(@types/react@19.1.17)(storybook@9.1.10(@testing-library/dom@10.4.1)(msw@2.11.3(@types/node@24.7.0)(typescript@5.9.3))(prettier@3.6.2)(vite@7.1.9(@types/node@24.7.0)(lightningcss@1.30.2)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1)))':
     dependencies:
       '@mdx-js/react': 3.1.1(@types/react@19.1.17)(react@19.1.0)
@@ -13451,6 +13492,11 @@ snapshots:
       expo: 54.0.12(@babel/core@7.28.4)(@expo/metro-runtime@6.1.2)(expo-router@6.0.10)(graphql@16.11.0)(react-native-webview@13.15.0(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       expo-dev-menu-interface: 2.0.0(expo@54.0.12)
 
+  expo-device@8.0.9(expo@54.0.12):
+    dependencies:
+      expo: 54.0.12(@babel/core@7.28.4)(@expo/metro-runtime@6.1.2)(expo-router@6.0.10)(graphql@16.11.0)(react-native-webview@13.15.0(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      ua-parser-js: 0.7.41
+
   expo-file-system@19.0.16(expo@54.0.12)(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.17)(react@19.1.0)):
     dependencies:
       expo: 54.0.12(@babel/core@7.28.4)(@expo/metro-runtime@6.1.2)(expo-router@6.0.10)(graphql@16.11.0)(react-native-webview@13.15.0(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -15633,6 +15679,13 @@ snapshots:
 
   nullthrows@1.1.1: {}
 
+  nuqs@2.7.2(@tanstack/react-router@1.132.47(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0):
+    dependencies:
+      '@standard-schema/spec': 1.0.0
+      react: 19.1.0
+    optionalDependencies:
+      '@tanstack/react-router': 1.132.47(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+
   nwsapi@2.2.22: {}
 
   ob1@0.83.1:
@@ -17244,6 +17297,8 @@ snapshots:
       reflect.getprototypeof: 1.0.10
 
   typescript@5.9.3: {}
+
+  ua-parser-js@0.7.41: {}
 
   ua-parser-js@1.0.41: {}
 

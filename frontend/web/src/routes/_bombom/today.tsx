@@ -53,7 +53,7 @@ function Index() {
     queryFn: getPet,
   });
 
-  const guideMails = createStorage<LocalGuideMail, string>(
+  const guideMails = createStorage<LocalGuideMail>(
     GUIDE_MAIL_STORAGE_KEY,
   ).get();
 

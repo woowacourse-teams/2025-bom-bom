@@ -1,3 +1,4 @@
+import EmptyNewsletter from './EmptyNewsletter';
 import NewsletterCardList from './NewsletterCardList';
 import NewsletterCarousel from './NewsletterCarousel';
 import { useDevice } from '@/hooks/useDevice';
@@ -15,7 +16,7 @@ const NewsletterList = ({
   const device = useDevice();
 
   if (newsletters.length === 0) {
-    return <p>해당 카테고리에 뉴스레터가 없습니다.</p>;
+    return <EmptyNewsletter />;
   }
 
   return device === 'mobile' ? (

@@ -50,14 +50,21 @@ export default function PCStorageContent({
 
   useEffect(() => {
     resetPage();
-  }, [baseQueryParams.keyword, resetPage]);
+  }, [
+    baseQueryParams.newsletterId,
+    baseQueryParams.keyword,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(baseQueryParams.sort),
+    resetPage,
+  ]);
 
   useEffect(() => {
     clearSelection();
   }, [
     baseQueryParams.newsletterId,
     baseQueryParams.keyword,
-    baseQueryParams.sort,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(baseQueryParams.sort),
     baseQueryParams.page,
     clearSelection,
   ]);

@@ -3,6 +3,7 @@ package me.bombom.api.v1.auth.util;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.member.util.UserInfoValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

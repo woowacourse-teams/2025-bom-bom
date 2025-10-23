@@ -82,4 +82,8 @@ public class Highlight extends BaseEntity {
     public void editMemo(String memo) {
         this.memo = memo;
     }
+
+    public boolean isNotOwner(Long memberId) {
+        return !this.memberId.equals(memberId);
+    }
 }

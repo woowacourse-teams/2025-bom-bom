@@ -107,14 +107,17 @@ public class HighlightService {
                     .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "Highlight")
                     .addContext("highlightId", id));
-        Article article = articleRepository.findById(highlight.getArticleId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
-                    .addContext(ErrorContextKeys.ARTICLE_ID, highlight.getArticleId())
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "Article")
-                    .addContext("highlightId", id));
-        validateArticleOwner(member, article);
+        validateHighlightOwner(member, highlight);
         return highlight;
+    }
+
+    private void validateHighlightOwner(Member member, Highlight highlight) {
+        if (highlight.isNotOwner(member.getId())) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext(ErrorContextKeys.HIGHLIGHT_ID, highlight.getId())
+                    .addContext(ErrorContextKeys.ACTUAL_OWNER_ID, highlight.getMemberId());
+        }
     }
 
     private void updateHighlight(UpdateHighlightRequest request, Highlight highlight) {

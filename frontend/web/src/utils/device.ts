@@ -1,4 +1,16 @@
-export const isWebView = () => navigator.userAgent.includes('bombom');
+import { isAppVersionSupported } from './version';
+import type { WindowWithWebkit } from '@bombom/shared';
+
+export const isWebView = () => {
+  const isUserAgentSupported = isAppVersionSupported('1.0.4');
+  if (!isUserAgentSupported)
+    return (
+      !!window.ReactNativeWebView ||
+      !!(window as WindowWithWebkit).webkit?.messageHandlers?.ReactNativeWebView
+    );
+
+  return navigator.userAgent.includes('bombom');
+};
 
 export const getDeviceInWebView = () => {
   if (!isWebView()) return null;

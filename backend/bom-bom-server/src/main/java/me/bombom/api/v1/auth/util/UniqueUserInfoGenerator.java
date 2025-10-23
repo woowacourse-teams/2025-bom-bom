@@ -45,7 +45,6 @@ public class UniqueUserInfoGenerator {
             "별","달","태양","은하","행성","우주","돌","산","바다","강"
     };
 
-
     private final UserInfoValidator userInfoValidator;
 
     public String getUniqueNickname(String nickname) {

@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
@@ -35,6 +36,7 @@ import org.springframework.web.client.RestClient;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AppleOAuth2Service extends OidcUserService {
 
     private static final String ACCESS_TOKEN_KEY = "access_token";
@@ -56,6 +58,7 @@ public class AppleOAuth2Service extends OidcUserService {
     private String bundleId;
 
     @Override
+    @Transactional
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
         log.info("Apple OIDC 로그인 처리 시작");
         
@@ -127,6 +130,7 @@ public class AppleOAuth2Service extends OidcUserService {
     /**
      *  iOS 네이티브 로그인 처리: 번들 ID로 client_secret 생성하여 코드 교환
      */
+    @Transactional
     public Optional<Member> loginWithNative(NativeLoginRequest request) {
         try {
             if (bundleId == null || bundleId.isBlank()) {
@@ -280,18 +284,26 @@ public class AppleOAuth2Service extends OidcUserService {
 
     // 공통: 기존 회원 조회 + 신규면 pendingMember 세션 저장
     private Optional<Member> findMemberAndSetPendingIfNew(String providerId) {
-        Optional<Member> member = memberRepository.findByProviderAndProviderId("apple", providerId);
-        if (member.isEmpty()) {
-            PendingOAuth2Member pendingMember = PendingOAuth2Member.builder()
-                    .provider("apple")
-                    .providerId(providerId)
-                    .profileUrl(null)
-                    .build();
-            session.setAttribute("pendingMember", pendingMember);
-            log.info("Apple 신규 사용자 - 회원가입 대기 상태로 설정, providerId: {}", providerId);
-        } else {
-            log.info("Apple 기존 사용자 - memberId: {}", member.get().getId());
+        try {
+            Optional<Member> member = memberRepository.findByProviderAndProviderId("apple", providerId);
+            
+            if (member.isEmpty()) {
+                log.info("회원 없음 - 신규 사용자 처리 시작");
+                PendingOAuth2Member pendingMember = PendingOAuth2Member.builder()
+                        .provider("apple")
+                        .providerId(providerId)
+                        .profileUrl(null)
+                        .build();
+                session.setAttribute("pendingMember", pendingMember);
+                log.info("Apple 신규 사용자 - 회원가입 대기 상태로 설정, providerId: {}", providerId);
+            } else {
+                log.info("Apple 기존 사용자 - memberId: {}", member.get().getId());
+            }
+            return member;
+        } catch (Exception e) {
+            log.error("예외 타입: {}", e.getClass().getSimpleName());
+            log.error("예외 메시지: {}", e.getMessage());
+            throw e;
         }
-        return member;
     }
 }

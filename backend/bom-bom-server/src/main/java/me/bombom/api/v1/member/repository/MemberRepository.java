@@ -3,10 +3,17 @@ package me.bombom.api.v1.member.repository;
 import java.util.Optional;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    Optional<Member> findByProviderAndProviderId(String provider, String providerId);
+    @Query("""
+        SELECT m
+        FROM Member m
+        WHERE m.provider = :provider AND m.providerId = :providerId
+    """)
+    Optional<Member> findByProviderAndProviderId(@Param("provider") String provider, @Param("providerId") String providerId);
 
     boolean existsByEmail(String email);
 

@@ -57,7 +57,13 @@ const request = async <TRequest, TResponse>({
       },
     };
 
-    if (body && (method === 'POST' || method === 'PATCH')) {
+    if (
+      body &&
+      (method === 'POST' ||
+        method === 'PATCH' ||
+        method === 'DELETE' ||
+        method === 'PUT')
+    ) {
       config.body = JSON.stringify(body);
     }
 

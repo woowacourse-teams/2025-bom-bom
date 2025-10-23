@@ -21,6 +21,7 @@ export const Default: Story = {
         'https://img.freepik.com/free-vector/illustration-south-korea-flag_53876-27132.jpg',
       expectedReadTime: 5,
       isRead: false,
+      isBookmarked: false,
       newsletter: {
         category: '기술',
         name: 'UPPITY',
@@ -42,6 +43,7 @@ export const Read: Story = {
         'https://img.freepik.com/free-vector/illustration-south-korea-flag_53876-27132.jpg',
       expectedReadTime: 5,
       isRead: true,
+      isBookmarked: false,
       newsletter: {
         category: '기술',
         name: 'UPPITY',

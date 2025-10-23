@@ -606,7 +606,11 @@ export interface paths {
     get: operations['getArticles'];
     put?: never;
     post?: never;
-    delete?: never;
+    /**
+     * 아티클 여러 개 삭제
+     * @description 1개 이상의 아티클들을 삭제합니다.
+     */
+    delete: operations['deleteArticles'];
     options?: never;
     head?: never;
     patch?: never;
@@ -1118,6 +1122,7 @@ export interface components {
       /** Format: int32 */
       expectedReadTime: number;
       isRead: boolean;
+      isBookmarked: boolean;
       /** @description 뉴스레터 정보 */
       newsletter: components['schemas']['NewsletterSummaryResponse'];
     };
@@ -1205,6 +1210,10 @@ export interface components {
       activeSessions?: number;
       /** Format: int32 */
       expiredSessions?: number;
+    };
+    /** @description 아티클 ID */
+    DeleteArticlesRequest: {
+      articleIds: number[];
     };
   };
   responses: never;
@@ -2295,6 +2304,35 @@ export interface operations {
       };
       /** @description 잘못된 정렬 파라미터 요청 */
       400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  deleteArticles: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DeleteArticlesRequest'];
+      };
+    };
+    responses: {
+      /** @description 아티클 삭제 성공 */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 아티클에 대한 접근 권한 없음 */
+      403: {
         headers: {
           [name: string]: unknown;
         };

@@ -33,6 +33,7 @@ export const LongTitle: Story = {
       articleId: 1,
       thumbnailUrl: 'https://example.com/newsletter-image.jpg',
       isRead: false,
+      isBookmarked: false,
     },
   },
 };
@@ -53,6 +54,7 @@ export const ShortContent: Story = {
       articleId: 1,
       thumbnailUrl: 'https://example.com/newsletter-image.jpg',
       isRead: false,
+      isBookmarked: false,
     },
   },
 };
@@ -75,6 +77,7 @@ export const MultipleArticles: Story = {
           thumbnailUrl: 'https://example.com/newsletter-image.jpg',
           expectedReadTime: 3,
           isRead: false,
+          isBookmarked: false,
         }}
       />
       <NewsletterItemCard
@@ -93,6 +96,7 @@ export const MultipleArticles: Story = {
           thumbnailUrl: 'https://example.com/newsletter-image.jpg',
           expectedReadTime: 3,
           isRead: false,
+          isBookmarked: false,
         }}
       />
       <NewsletterItemCard
@@ -111,6 +115,7 @@ export const MultipleArticles: Story = {
           thumbnailUrl: 'https://example.com/newsletter-image.jpg',
           expectedReadTime: 3,
           isRead: false,
+          isBookmarked: false,
         }}
       />
     </div>

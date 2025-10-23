@@ -79,7 +79,6 @@ const ArticleCard = ({
         <DeleteButton
           onClick={(e) => {
             e.preventDefault();
-            e.stopPropagation();
             onDelete?.();
           }}
           isMobile={isMobile}

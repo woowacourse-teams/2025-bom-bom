@@ -63,11 +63,7 @@ const ReadingKingLeaderboard = () => {
         </Tooltip>
       </TitleWrapper>
 
-      <Carousel
-        autoPlay={false}
-        hasSlideButton={true}
-        slideButtonPosition="bottom"
-      >
+      <Carousel hasSlideButton={true} slideButtonPosition="bottom">
         {chunk(monthlyReadingRankContent, RANKING.boardUnit).map(
           (leaderboard, leaderboardIndex) => (
             <LeaderboardList

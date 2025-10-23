@@ -22,7 +22,7 @@ const BANNERS = [
 
 const SlideCardList = () => {
   return (
-    <Carousel>
+    <Carousel isInfinity={true} autoPlay={true}>
       {BANNERS.map(({ src, alt }, index) => (
         <Banner key={`banner-${index}`} src={src} alt={alt} />
       ))}

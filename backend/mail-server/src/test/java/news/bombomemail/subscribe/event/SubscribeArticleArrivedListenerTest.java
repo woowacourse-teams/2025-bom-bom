@@ -1,5 +1,6 @@
 package news.bombomemail.subscribe.event;
 
+import news.bombomemail.article.event.ArticleArrivedEvent;
 import news.bombomemail.subscribe.service.SubscribeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest
-class SubscribeListenerTest {
+class SubscribeArticleArrivedListenerTest {
 
     @Autowired
     ApplicationEventPublisher eventPublisher;
@@ -26,14 +27,15 @@ class SubscribeListenerTest {
         // given
         Long newsletterId = 1L;
         Long memberId     = 2L;
+        String unsubscribeUrl = "unsubscribeUrl";
 
         // when
-        eventPublisher.publishEvent(SubscribeEvent.of(newsletterId, memberId));
+        eventPublisher.publishEvent(ArticleArrivedEvent.of(newsletterId, memberId, unsubscribeUrl));
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
         // then
-        verify(subscribeService).save(newsletterId, memberId);
+        verify(subscribeService).upsertSubscribe(newsletterId, memberId, unsubscribeUrl);
     }
 }

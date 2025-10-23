@@ -15,14 +15,14 @@ import news.bombomemail.article.domain.Article;
 import news.bombomemail.article.repository.ArticleRepository;
 import news.bombomemail.article.util.ReadingTimeCalculator;
 import news.bombomemail.article.util.SummaryGenerator;
-import news.bombomemail.newsletter.domain.NewsletterVerification;
-import news.bombomemail.newsletter.repository.NewsletterVerificationRepository;
-import news.bombomemail.subscribe.event.SubscribeEvent;
-import news.bombomemail.reading.event.TodayReadingEvent;
+import news.bombomemail.article.util.UnsubscribeUrlExtractor;
 import news.bombomemail.member.domain.Member;
 import news.bombomemail.member.repository.MemberRepository;
 import news.bombomemail.newsletter.domain.Newsletter;
 import news.bombomemail.newsletter.repository.NewsletterRepository;
+import news.bombomemail.newsletter.repository.NewsletterVerificationRepository;
+import news.bombomemail.reading.event.TodayReadingEvent;
+import news.bombomemail.article.event.ArticleArrivedEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -52,9 +52,12 @@ public class ArticleService {
             return false;
         }
 
-        articleRepository.save(buildArticle(message, contents, member, newsletter));
+        Article article = articleRepository.save(buildArticle(message, contents, member, newsletter));
+        String unsubscribeUrl = UnsubscribeUrlExtractor.extract(article.getContents());
+
+        applicationEventPublisher.publishEvent(ArticleArrivedEvent.of(newsletter.getId(), member.getId(), unsubscribeUrl));
         applicationEventPublisher.publishEvent(TodayReadingEvent.from(member.getId()));
-        applicationEventPublisher.publishEvent(SubscribeEvent.of(newsletter.getId(), member.getId()));
+
         return true;
     }
 

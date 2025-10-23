@@ -19,6 +19,8 @@ import type { Device } from '@/hooks/useDevice';
 import type { Newsletter } from '@/types/newsletter';
 import TrendingUpIcon from '#/assets/svg/trending-up.svg';
 
+const HIDE_NEWSLETTERS = ['계발메이트'];
+
 const TrendySection = () => {
   const device = useDevice();
   const [selectedCategory, setSelectedCategory] = useState<Category>('전체');
@@ -41,14 +43,17 @@ const TrendySection = () => {
     },
   });
 
-  const filteredNewsletters = newsletters?.filter((newsletter) => {
-    const matchesCategory =
-      selectedCategory === '전체' || newsletter.category === selectedCategory;
-    const matchesSearch =
-      searchQuery === '' ||
-      newsletter.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const filteredNewsletters = newsletters
+    ?.filter(
+      (newsletter) =>
+        selectedCategory === '전체' || newsletter.category === selectedCategory,
+    )
+    .filter(
+      (newsletter) =>
+        searchQuery === '' ||
+        newsletter.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    )
+    .filter((newsletter) => !HIDE_NEWSLETTERS.includes(newsletter.name));
 
   const handleCardClick = (newsletter: Newsletter) => {
     setSelectedNewsletterId(newsletter.newsletterId);
@@ -76,7 +81,7 @@ const TrendySection = () => {
     <>
       <Container>
         <SectionHeader>
-          <SectionIconBox>
+          <SectionIconBox aria-hidden="true">
             <TrendingUpIcon width={16} height={16} />
           </SectionIconBox>
           <SectionTitle>트렌디한 뉴스레터</SectionTitle>
@@ -96,11 +101,14 @@ const TrendySection = () => {
               text={category}
               selected={selectedCategory === category}
               onSelect={() => setSelectedCategory(category)}
+              aria-label={`${category} 필터링`}
             />
           ))}
         </TagContainer>
         <TrendyGrid
           device={device}
+          aria-live="polite"
+          aria-label={`${selectedCategory} 카테고리 뉴스레터 목록`}
           hasContent={!!(filteredNewsletters && filteredNewsletters.length > 0)}
         >
           {isLoading ? (
@@ -141,7 +149,7 @@ const TrendySection = () => {
 
 export default TrendySection;
 
-const Container = styled.div`
+const Container = styled.section`
   width: 100%;
   padding: 24px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};

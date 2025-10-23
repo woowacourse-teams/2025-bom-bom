@@ -11,6 +11,7 @@ import NewsLetterFilter from '@/pages/storage/components/NewsletterFilter/Newsle
 import NewsletterFilterSkeleton from '@/pages/storage/components/NewsletterFilter/NewsletterFilterSkeleton';
 import PCStorageContent from '@/pages/storage/components/PCStorageContent/PCStorageContent';
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
+import { useDeleteArticlesMutation } from '@/pages/storage/hooks/useDeleteArticlesMutation';
 import { useStorageFilters } from '@/pages/storage/hooks/useStorageFilters';
 import type { Sort } from '@/pages/storage/components/ArticleListControls/ArticleListControls.types';
 import StorageIcon from '#/assets/svg/storage.svg';
@@ -60,6 +61,8 @@ function Storage() {
     }),
   );
 
+  const { mutate: deleteArticles } = useDeleteArticlesMutation();
+
   const enableEditMode = () => {
     setEditMode(true);
   };
@@ -98,6 +101,7 @@ function Storage() {
               editMode={editMode}
               enableEditMode={enableEditMode}
               disableEditMode={disableEditMode}
+              deleteArticles={(articleIds) => deleteArticles(articleIds)}
               onPageChange={handlePageChange}
               page={page}
               resetPage={resetPage}
@@ -108,6 +112,7 @@ function Storage() {
               editMode={editMode}
               enableEditMode={enableEditMode}
               disableEditMode={disableEditMode}
+              deleteArticles={(articleIds) => deleteArticles(articleIds)}
               resetPage={resetPage}
             />
           )}

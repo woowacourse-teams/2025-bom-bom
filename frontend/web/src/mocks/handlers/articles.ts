@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import { ARTICLE_DETAIL } from '../datas/articleDetail';
-import { ARTICLES } from '../datas/articles';
+import { ARTICLES as ORIGINAL_ARTICLES } from '../datas/articles';
 import {
   PREVIOUS_ARTICLE_DETAILS,
   PREVIOUS_ARTICLES,
@@ -8,6 +8,7 @@ import {
 import { ENV } from '@/apis/env';
 
 const baseURL = ENV.baseUrl;
+let ARTICLES = [...ORIGINAL_ARTICLES];
 
 export const articleHandlers = [
   // 뉴스레터 통계
@@ -114,5 +115,23 @@ export const articleHandlers = [
       numberOfElements: ARTICLES.length,
       empty: ARTICLES.length === 0,
     });
+  }),
+
+  http.delete(`${baseURL}/articles`, async ({ request }) => {
+    const body = (await request.json()) as { articleIds?: number[] };
+    const { articleIds } = body;
+
+    if (!Array.isArray(articleIds) || articleIds.length === 0) {
+      return HttpResponse.json(
+        { message: 'ids는 1개 이상의 숫자 배열이어야 합니다.' },
+        { status: 400 },
+      );
+    }
+
+    ARTICLES = ARTICLES.filter(
+      (article) => !articleIds.includes(article.articleId),
+    );
+
+    return new HttpResponse(null, { status: 204 });
   }),
 ];

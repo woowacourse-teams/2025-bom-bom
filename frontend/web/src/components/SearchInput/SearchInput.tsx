@@ -1,15 +1,19 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
 import { type ComponentProps } from 'react';
+import { useClickOutsideRef } from '@/hooks/useClickOutsideRef';
 import ReadingGlassesIcon from '#/assets/svg/reading-glasses.svg';
 
 interface SearchInputProps extends ComponentProps<'input'> {
   ref?: React.Ref<HTMLInputElement>;
+  onBlur?: () => void;
 }
 
-const SearchInput = ({ ref, ...props }: SearchInputProps) => {
+const SearchInput = ({ ref, onBlur, ...props }: SearchInputProps) => {
+  const containerRef = useClickOutsideRef<HTMLDivElement>(onBlur || null);
+
   return (
-    <Container>
+    <Container ref={containerRef}>
       <ReadingGlassesIconWrapper>
         <ReadingGlassesIcon
           color={theme.colors.textTertiary}

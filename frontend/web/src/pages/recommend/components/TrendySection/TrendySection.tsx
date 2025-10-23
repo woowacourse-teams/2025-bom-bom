@@ -29,7 +29,6 @@ const TrendySection = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSearchExpanded, setIsSearchExpanded] = useState<boolean>(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const [selectedNewsletterId, setSelectedNewsletterId] = useQueryState(
     'newsletterDetail',
@@ -88,25 +87,6 @@ const TrendySection = () => {
     }
   }, [isSearchExpanded]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        searchContainerRef.current &&
-        !searchContainerRef.current.contains(event.target as Node)
-      ) {
-        setIsSearchExpanded(false);
-      }
-    };
-
-    if (isSearchExpanded) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isSearchExpanded]);
-
   return (
     <>
       <Container>
@@ -123,15 +103,13 @@ const TrendySection = () => {
           >
             <ReadingGlassesIcon width={20} height={20} />
           </SearchIconButton>
-          <ExpandableSearchContainer
-            ref={searchContainerRef}
-            isExpanded={isSearchExpanded}
-          >
+          <ExpandableSearchContainer isExpanded={isSearchExpanded}>
             <SearchInput
               ref={searchInputRef}
               placeholder="뉴스레터 이름으로 검색"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onBlur={() => setIsSearchExpanded(false)}
               aria-label="뉴스레터 검색"
             />
             <CloseButton
@@ -283,7 +261,7 @@ const ExpandableSearchContainer = styled.div<{ isExpanded: boolean }>`
   top: 0;
   right: 0;
   left: 0;
-  z-index: 10;
+  z-index: ${({ theme }) => theme.zIndex.elevated};
 
   display: flex;
   gap: 8px;

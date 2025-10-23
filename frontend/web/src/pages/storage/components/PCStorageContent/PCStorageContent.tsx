@@ -15,6 +15,7 @@ interface PCStorageContentProps {
   editMode: boolean;
   enableEditMode: () => void;
   disableEditMode: () => void;
+  deleteArticles: (articleIds: number[]) => void;
   onPageChange: (page: number) => void;
   page: number;
   resetPage: () => void;
@@ -25,20 +26,20 @@ export default function PCStorageContent({
   editMode,
   enableEditMode,
   disableEditMode,
+  deleteArticles,
   onPageChange,
   page,
   resetPage,
 }: PCStorageContentProps) {
-  const { data: articles, isLoading } = useQuery(
-    queries.articles({
-      ...baseQueryParams,
-      newsletterId: baseQueryParams.newsletterId || undefined,
-      page: (baseQueryParams.page ?? 1) - 1,
-    }),
-  );
+  const queryParams = {
+    ...baseQueryParams,
+    page: (baseQueryParams.page ?? 1) - 1,
+  };
+  const { data: articles, isLoading } = useQuery(queries.articles(queryParams));
   const articleList = articles?.content || [];
   const {
     selectedIds,
+    hasBookmarkedArticles,
     isAllSelected,
     toggleSelectAll,
     toggleSelect,
@@ -67,10 +68,11 @@ export default function PCStorageContent({
         editMode={editMode}
         onEnterEditMode={enableEditMode}
         onExitEditMode={disableEditMode}
-        onDeleteSelected={() => console.log('delete')}
+        onDeleteSelected={() => deleteArticles(selectedIds)}
         checkedCount={selectedIds.length}
         isAllSelected={isAllSelected}
         onToggleSelectAll={toggleSelectAll}
+        hasBookmarkedArticles={hasBookmarkedArticles}
       />
       {isLoading ? (
         <ArticleCardListSkeleton />
@@ -85,6 +87,7 @@ export default function PCStorageContent({
             editMode={editMode}
             checkedIds={selectedIds}
             onCheck={toggleSelect}
+            onDeleteArticle={(articleIds) => deleteArticles(articleIds)}
           />
           <Pagination
             currentPage={page}

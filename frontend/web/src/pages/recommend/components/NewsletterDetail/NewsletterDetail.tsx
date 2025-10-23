@@ -42,7 +42,7 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
   };
 
   return (
-    <Container>
+    <Container isMobile={isMobile}>
       <FixedWrapper isMobile={isMobile}>
         <InfoWrapper isMobile={isMobile}>
           <NewsletterImage
@@ -112,10 +112,9 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
 
 export default NewsletterDetail;
 
-const Container = styled.div`
-  width: 100%;
+const Container = styled.div<{ isMobile: boolean }>`
+  width: ${({ isMobile }) => (isMobile ? '100%' : '720px')};
   height: 100%;
-  max-width: 560px;
 
   display: flex;
   flex-direction: column;
@@ -130,6 +129,7 @@ const FixedWrapper = styled.div<{ isMobile: boolean }>`
 `;
 
 const ScrollableWrapper = styled.div<{ isMobile: boolean }>`
+  height: ${({ isMobile }) => (isMobile ? '260px' : '450px')};
   margin-right: -16px;
   padding: 8px;
 

@@ -1,31 +1,31 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
-import { forwardRef, type ComponentProps } from 'react';
+import { type ComponentProps } from 'react';
 import ReadingGlassesIcon from '#/assets/svg/reading-glasses.svg';
 
-const SearchInput = forwardRef<HTMLInputElement, ComponentProps<'input'>>(
-  ({ ...props }, ref) => {
-    return (
-      <Container>
-        <ReadingGlassesIconWrapper>
-          <ReadingGlassesIcon
-            color={theme.colors.textTertiary}
-            width={16}
-            height={16}
-          />
-        </ReadingGlassesIconWrapper>
-        <StyledInput
-          ref={ref}
-          type="search"
-          aria-label={props['aria-label'] || '검색'}
-          {...props}
-        />
-      </Container>
-    );
-  },
-);
+interface SearchInputProps extends ComponentProps<'input'> {
+  ref?: React.Ref<HTMLInputElement>;
+}
 
-SearchInput.displayName = 'SearchInput';
+const SearchInput = ({ ref, ...props }: SearchInputProps) => {
+  return (
+    <Container>
+      <ReadingGlassesIconWrapper>
+        <ReadingGlassesIcon
+          color={theme.colors.textTertiary}
+          width={16}
+          height={16}
+        />
+      </ReadingGlassesIconWrapper>
+      <StyledInput
+        ref={ref}
+        type="search"
+        aria-label={props['aria-label'] || '검색'}
+        {...props}
+      />
+    </Container>
+  );
+};
 
 export default SearchInput;
 

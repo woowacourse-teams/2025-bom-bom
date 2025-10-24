@@ -1,10 +1,10 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
-import { parseAsInteger, useQueryState } from 'nuqs';
 import Badge from '@/components/Badge/Badge';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
 import { useDevice } from '@/hooks/useDevice';
+import { useSearchParamState } from '@/hooks/useSearchParamState';
 import type {
   BookmarkFilters,
   HighlightFilters,
@@ -23,10 +23,11 @@ interface NewsLetterFilterProps {
 
 function NewsLetterFilter({ filters }: NewsLetterFilterProps) {
   const device = useDevice();
-  const [selectedNewsletterId, setSelectedNewsletterId] = useQueryState(
-    'newsletterId',
-    parseAsInteger.withDefault(0),
-  );
+  const [selectedNewsletterId, setSelectedNewsletterId] = useSearchParamState<
+    number | null
+  >('newsletterId', {
+    defaultValue: null,
+  });
 
   const isNewsletterFilter = (
     newsletter: Newsletter,
@@ -40,7 +41,7 @@ function NewsLetterFilter({ filters }: NewsLetterFilterProps) {
 
   const newsletterFiltersWithAll = [
     {
-      id: 0,
+      id: null,
       name: '전체',
       articleCount: filters?.totalCount ?? 0,
       imageUrl: '',
@@ -78,11 +79,7 @@ function NewsLetterFilter({ filters }: NewsLetterFilterProps) {
               key={name}
               value={id ?? null}
               label={name}
-              selected={
-                selectedNewsletterId === null
-                  ? name === '전체'
-                  : id === selectedNewsletterId
-              }
+              selected={selectedNewsletterId === id}
               onTabSelect={handleSelectNewsletterId}
               StartComponent={
                 imageUrl ? <NewsLetterImage src={imageUrl} /> : null

@@ -23,10 +23,7 @@ export default function PCMemoContent({
   const navigate = useNavigate();
 
   const { data: highlights, isLoading } = useQuery({
-    ...queries.highlights({
-      ...baseQueryParams,
-      newsletterId: baseQueryParams.newsletterId || undefined,
-    }),
+    ...queries.highlights(baseQueryParams),
     enabled: true,
   });
 

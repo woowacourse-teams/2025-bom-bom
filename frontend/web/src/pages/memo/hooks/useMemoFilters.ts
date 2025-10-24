@@ -1,22 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
-import { parseAsInteger, useQueryState } from 'nuqs';
-import { useCallback, useEffect } from 'react';
+import { useSearch } from '@tanstack/react-router';
+import { useCallback, useEffect, useState } from 'react';
 import { queries } from '@/apis/queries';
 
 export const useMemoFilters = () => {
-  const [selectedNewsletterId, setSelectedNewsletterId] = useQueryState(
-    'newsletterId',
-    parseAsInteger.withDefault(0),
-  );
-  const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(0));
+  const { newsletterId: newsletterIdParams } = useSearch({
+    from: '/_bombom/memo',
+  });
+  const [page, setPage] = useState(0);
 
   const baseQueryParams = {
     keyword: '',
     size: 12,
-    newsletterId:
-      selectedNewsletterId && selectedNewsletterId !== 0
-        ? selectedNewsletterId
-        : undefined,
+    newsletterId: newsletterIdParams,
     page,
   };
 
@@ -24,12 +20,9 @@ export const useMemoFilters = () => {
     queries.highlightStatisticsNewsletter(),
   );
 
-  const handlePageChange = useCallback(
-    (value: number) => {
-      setPage(value);
-    },
-    [setPage],
-  );
+  const handlePageChange = useCallback((value: number) => {
+    setPage(value);
+  }, []);
 
   const resetPage = useCallback(() => {
     setPage(0);
@@ -38,10 +31,9 @@ export const useMemoFilters = () => {
   // newsletterId가 변경될 때 page를 0으로 리셋
   useEffect(() => {
     resetPage();
-  }, [selectedNewsletterId, resetPage]);
+  }, [resetPage]);
 
   return {
-    selectedNewsletterId,
     baseQueryParams,
     newsletterCounts,
     handlePageChange,

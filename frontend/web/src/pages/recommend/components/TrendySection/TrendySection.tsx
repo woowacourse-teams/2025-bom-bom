@@ -111,12 +111,14 @@ const TrendySection = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               onBlur={() => {
                 setIsSearchExpanded(false);
-                setSearchQuery('');
               }}
               aria-label="뉴스레터 검색"
             />
             <CloseButton
-              onClick={() => setIsSearchExpanded(false)}
+              onClick={() => {
+                setIsSearchExpanded(false);
+                setSearchQuery('');
+              }}
               aria-label="검색 닫기"
             >
               <CloseIcon width={20} height={20} />

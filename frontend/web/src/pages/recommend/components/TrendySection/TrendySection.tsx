@@ -109,7 +109,10 @@ const TrendySection = () => {
               placeholder="뉴스레터 이름으로 검색"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onBlur={() => setIsSearchExpanded(false)}
+              onBlur={() => {
+                setIsSearchExpanded(false);
+                setSearchQuery('');
+              }}
               aria-label="뉴스레터 검색"
             />
             <CloseButton

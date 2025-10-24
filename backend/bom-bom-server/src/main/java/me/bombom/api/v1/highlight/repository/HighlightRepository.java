@@ -18,12 +18,6 @@ public interface HighlightRepository extends JpaRepository<Highlight, Long>, Cus
 
     List<Highlight> findAllByArticleId(Long articleId);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query(
-            value = "DELETE h FROM highlight h "
-                    + "WHERE h.member_id = :memberId",
-            nativeQuery = true
-    )
     void deleteAllByMemberId(Long memberId);
 
     @Modifying(clearAutomatically = true)

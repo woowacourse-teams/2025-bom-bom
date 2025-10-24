@@ -5,6 +5,7 @@ import {
   createAndroidChannel,
   requestNotificationPermission,
 } from '@/utils/notification';
+import { useWebView } from '@/contexts/WebViewContext';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -17,8 +18,7 @@ Notifications.setNotificationHandler({
 
 const useNotification = () => {
   const [fcmToken, setFcmToken] = useState('');
-  const [notification, setNotification] =
-    useState<Notifications.Notification | null>(null);
+  const { sendMessageToWeb } = useWebView();
 
   const getFcmToken = useCallback(async () => {
     try {
@@ -38,13 +38,16 @@ const useNotification = () => {
   const coldStartNotificationOpen = useCallback(async () => {
     try {
       const message = await messaging().getInitialNotification();
-      if (message) {
-        // ToDo: 특정 화면으로 이동
+      if (message && message.data?.notificationType === 'ARTICLE') {
+        sendMessageToWeb({
+          type: 'NOTIFICATION_ROUTING',
+          payload: { url: `/articles/${message.data?.articleId}` },
+        });
       }
     } catch (error) {
       console.error('앱 종료 상태의 알림 수신에 문제가 발생했습니다.', error);
     }
-  }, []);
+  }, [sendMessageToWeb]);
 
   useEffect(() => {
     createAndroidChannel();
@@ -75,20 +78,34 @@ const useNotification = () => {
     // 백그라운드에서 알림을 탭한 경우
     const unsubscribeNotificationOpened = messaging().onNotificationOpenedApp(
       (remoteMessage) => {
-        // ToDo: 특정 화면으로 이동
+        if (remoteMessage.data?.notificationType === 'ARTICLE') {
+          sendMessageToWeb({
+            type: 'NOTIFICATION_ROUTING',
+            payload: { url: `/articles/${remoteMessage.data?.articleId}` },
+          });
+        }
       },
     );
 
     // 포그라운드에서 알림을 수신한 경우
     const notificationListener = Notifications.addNotificationReceivedListener(
-      (notification) => {
-        setNotification(notification);
-      },
+      (notification) => {},
     );
 
     // 포그라운드에서 알림을 탭한 경우
     const responseListener =
-      Notifications.addNotificationResponseReceivedListener((response) => {});
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        const { data } = response.notification.request.content;
+
+        if (data.notificationType === 'ARTICLE') {
+          sendMessageToWeb({
+            type: 'NOTIFICATION_ROUTING',
+            payload: {
+              url: `/articles/${data.articleId}`,
+            },
+          });
+        }
+      });
 
     // 클린업
     return () => {
@@ -99,11 +116,6 @@ const useNotification = () => {
       responseListener.remove();
     };
   }, [coldStartNotificationOpen, getFcmToken]);
-
-  return {
-    fcmToken,
-    notification,
-  };
 };
 
 export default useNotification;

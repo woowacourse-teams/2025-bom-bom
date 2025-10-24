@@ -39,4 +39,10 @@ export type RNToWebMessage =
         email: string;
         name: string;
       };
+    }
+  | {
+      type: 'NOTIFICATION_ROUTING';
+      payload: {
+        url: string;
+      };
     };

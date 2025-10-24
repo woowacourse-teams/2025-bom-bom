@@ -11,6 +11,7 @@ import { NuqsAdapter } from 'nuqs/adapters/tanstack-router';
 import Toast from '@/components/Toast/Toast';
 import usePageTracking from '@/libs/googleAnalytics/usePageTracking';
 import { useWebViewAuth } from '@/libs/webview/useWebViewAuth';
+import { useWebViewRouting } from '@/libs/webview/useWebViewRouting';
 import { queryClient } from '@/main';
 import type { QueryClient } from '@tanstack/react-query';
 import type { redirect } from '@tanstack/react-router';
@@ -22,6 +23,7 @@ interface BomBomRouterContext {
 const RootComponent = () => {
   usePageTracking();
   useWebViewAuth();
+  useWebViewRouting();
 
   return (
     <>

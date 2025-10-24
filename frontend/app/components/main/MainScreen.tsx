@@ -13,12 +13,14 @@ import * as WebBrowser from 'expo-web-browser';
 
 import { ENV } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
+import useNotification from '@/hooks/useNotification';
 
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
   const { webViewRef } = useWebView();
 
   const { handleNavigationStateChange } = useAndroidNavigationState();
+  useNotification();
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {
     try {

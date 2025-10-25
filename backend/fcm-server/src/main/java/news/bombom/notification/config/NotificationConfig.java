@@ -1,4 +1,4 @@
-package news.bombom.fcm.config;
+package news.bombom.notification.config;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
@@ -14,7 +14,7 @@ import org.springframework.core.io.ClassPathResource;
 
 @Slf4j
 @Configuration
-public class FcmConfig {
+public class NotificationConfig {
 
     @Value("${fcm.service-account-key:}")
     private String serviceAccountKeyPath;
@@ -22,10 +22,9 @@ public class FcmConfig {
     @Bean
     public FirebaseMessaging firebaseMessaging() throws IOException {
         if (FirebaseApp.getApps().isEmpty()) {
-            // 테스트용으로 더미 Firebase 앱 초기화
             if (serviceAccountKeyPath == null || serviceAccountKeyPath.isEmpty()) {
                 log.warn("Firebase 서비스 계정 키가 설정되지 않았습니다. 테스트 모드로 실행합니다.");
-                return null; // 테스트 모드에서는 null 반환
+                return null;
             }
             
             InputStream serviceAccount = new ClassPathResource(serviceAccountKeyPath).getInputStream();

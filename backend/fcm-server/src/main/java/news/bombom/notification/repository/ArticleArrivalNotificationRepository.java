@@ -1,0 +1,19 @@
+package news.bombom.fcm.repository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import news.bombom.fcm.domain.ArticleArrivalNotification;
+import news.bombom.fcm.domain.NotificationStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+public interface ArticleArrivalNotificationRepository extends JpaRepository<ArticleArrivalNotification, Long> {
+
+    @Query("""
+            SELECT n 
+            FROM ArticleArrivalNotification n 
+            WHERE n.status = :status AND (n.nextRetryAt IS NULL OR n.nextRetryAt <= :now)
+    """)
+    List<ArticleArrivalNotification> findRetryCandidates(@Param("status") NotificationStatus status, @Param("now") LocalDateTime now);
+}

@@ -26,3 +26,19 @@ export const requestNotificationPermission = async () => {
 
   return enabled;
 };
+
+// FCM 토큰 생성
+export const getFCMToken = async () => {
+  try {
+    const hasPermission = await requestNotificationPermission();
+    if (!hasPermission) {
+      throw new Error('푸시 알림 권한이 없습니다.');
+    }
+
+    const token = await messaging().getToken();
+    console.log(token);
+    return token;
+  } catch (error) {
+    console.error('FCM 토큰을 가져오는데 실패했습니다.', error);
+  }
+};

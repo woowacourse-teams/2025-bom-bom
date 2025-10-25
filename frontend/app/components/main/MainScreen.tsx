@@ -20,7 +20,7 @@ export const MainScreen = () => {
   const { webViewRef, setWebViewReady } = useWebView();
 
   const { handleNavigationStateChange } = useAndroidNavigationState();
-  useNotification();
+  const { registerFCMToken } = useNotification();
 
   const handleWebViewLoadEnd = () => {
     console.log('WebView 로드 완료');
@@ -40,6 +40,7 @@ export const MainScreen = () => {
         case 'LOGIN_SUCCESS':
           console.log('웹뷰에서 로그인 성공 알림 수신:', message.payload);
           hideLogin();
+          registerFCMToken(message.payload?.userId);
           break;
 
         case 'LOGIN_FAILED':

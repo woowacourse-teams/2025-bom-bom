@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Positive;
 import java.util.List;
 import me.bombom.api.v1.article.dto.request.ArticleNewsletterStatisticOptionsRequest;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Article", description = "아티클 관련 API")
 public interface ArticleControllerApi {
@@ -92,5 +94,18 @@ public interface ArticleControllerApi {
     List<ArticleHighlightResponse> getHighlights(
         @Parameter(hidden = true) Member member,
         @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
+    );
+
+    @Operation(
+            summary = "아티클 여러 개 삭제",
+            description = "1개 이상의 아티클들을 삭제합니다."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "아티클 삭제 성공"),
+        @ApiResponse(responseCode = "403", description = "아티클에 대한 접근 권한 없음")
+    })
+    void deleteArticles(
+        @Parameter(hidden = true) Member member,
+        @Parameter(description = "아티클 ID") @Valid @RequestBody DeleteArticlesRequest request
     );
 }

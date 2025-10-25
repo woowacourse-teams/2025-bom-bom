@@ -31,7 +31,8 @@ dependencies {
 
     // db
 	implementation("mysql:mysql-connector-java:8.0.33")
-    runtimeOnly("com.h2database:h2")
+  runtimeOnly("com.h2database:h2")
+
 
     // fcm
 	implementation("com.google.firebase:firebase-admin:9.2.0")

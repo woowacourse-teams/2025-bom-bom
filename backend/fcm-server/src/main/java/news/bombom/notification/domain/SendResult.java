@@ -1,4 +1,4 @@
-package news.bombom.notification.dto;
+package news.bombom.notification.domain;
 
 public record SendResult(SendStatus status, String errorMessage) {
     public static SendResult success() {

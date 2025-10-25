@@ -1,9 +1,9 @@
-package news.bombom.fcm.repository;
+package news.bombom.notification.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import news.bombom.fcm.domain.ArticleArrivalNotification;
-import news.bombom.fcm.domain.NotificationStatus;
+import news.bombom.notification.domain.ArticleArrivalNotification;
+import news.bombom.notification.domain.NotificationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

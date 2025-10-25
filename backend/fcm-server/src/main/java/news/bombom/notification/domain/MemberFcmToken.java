@@ -1,4 +1,4 @@
-package news.bombom.fcm.domain;
+package news.bombom.notification.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

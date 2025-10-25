@@ -1,4 +1,4 @@
-package news.bombom.fcm.domain;
+package news.bombom.notification.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,7 +13,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import news.bombom.fcm.common.BaseEntity;
+import news.bombom.notification.common.BaseEntity;
 
 @Entity
 @Getter

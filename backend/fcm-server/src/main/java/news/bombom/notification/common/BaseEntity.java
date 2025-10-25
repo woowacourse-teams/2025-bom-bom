@@ -1,4 +1,4 @@
-package news.bombom.fcm.common;
+package news.bombom.notification.common;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

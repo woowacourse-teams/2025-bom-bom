@@ -1,4 +1,4 @@
-package news.bombom.fcm.domain;
+package news.bombom.notification.domain;
 
 public enum NotificationStatus {
     PENDING,

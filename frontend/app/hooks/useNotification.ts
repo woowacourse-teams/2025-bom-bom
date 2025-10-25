@@ -92,11 +92,6 @@ const useNotification = () => {
       },
     );
 
-    // 포그라운드에서 알림을 수신한 경우
-    const notificationListener = Notifications.addNotificationReceivedListener(
-      (notification) => {},
-    );
-
     // 포그라운드에서 알림을 탭한 경우
     const responseListener =
       Notifications.addNotificationResponseReceivedListener((response) => {
@@ -117,7 +112,6 @@ const useNotification = () => {
       unsubscribeTokenRefresh();
       unsubscribe();
       unsubscribeNotificationOpened();
-      notificationListener.remove();
       responseListener.remove();
     };
   }, [coldStartNotificationOpen, isWebViewReady]);

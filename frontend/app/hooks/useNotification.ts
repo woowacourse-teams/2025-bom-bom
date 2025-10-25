@@ -1,11 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import * as Notifications from 'expo-notifications';
 import messaging from '@react-native-firebase/messaging';
-import {
-  createAndroidChannel,
-  requestNotificationPermission,
-} from '@/utils/notification';
+import { createAndroidChannel, getFCMToken } from '@/utils/notification';
 import { useWebView } from '@/contexts/WebViewContext';
+import { getDeviceUUID } from '@/utils/device';
+import { postFCMToken } from '@/apis/notification';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -17,21 +16,22 @@ Notifications.setNotificationHandler({
 });
 
 const useNotification = () => {
-  const [fcmToken, setFcmToken] = useState('');
   const { sendMessageToWeb, isWebViewReady } = useWebView();
 
-  const getFcmToken = useCallback(async () => {
+  const registerFCMToken = useCallback(async (memberId: string | undefined) => {
     try {
-      const hasPermission = await requestNotificationPermission();
-      if (!hasPermission) {
-        throw new Error('푸시 알림 권한이 없습니다.');
-      }
+      const deviceUuid = await getDeviceUUID();
+      const token = await getFCMToken();
 
-      const token = await messaging().getToken();
-      console.log(token);
-      setFcmToken(token);
+      if (memberId && token && deviceUuid) {
+        await postFCMToken({
+          memberId,
+          deviceUuid,
+          token,
+        });
+      }
     } catch (error) {
-      console.error('FCM 토큰을 가져오는데 실패했습니다.', error);
+      console.error('FCM 토큰 등록에 실패했습니다.', error);
     }
   }, []);
 
@@ -52,8 +52,7 @@ const useNotification = () => {
 
   useEffect(() => {
     createAndroidChannel();
-    getFcmToken();
-  }, [getFcmToken]);
+  }, []);
 
   // WebView가 준비된 후에만 cold start 알림 처리
   useEffect(() => {
@@ -78,7 +77,6 @@ const useNotification = () => {
 
     // FCM 토큰 갱신 리스너
     const unsubscribeTokenRefresh = messaging().onTokenRefresh((newToken) => {
-      setFcmToken(newToken);
       // ToDo: 백엔드에 새 토큰 전송
     });
 
@@ -123,6 +121,10 @@ const useNotification = () => {
       responseListener.remove();
     };
   }, [coldStartNotificationOpen, isWebViewReady]);
+
+  return {
+    registerFCMToken,
+  };
 };
 
 export default useNotification;

@@ -17,10 +17,15 @@ import useNotification from '@/hooks/useNotification';
 
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
-  const { webViewRef } = useWebView();
+  const { webViewRef, setWebViewReady } = useWebView();
 
   const { handleNavigationStateChange } = useAndroidNavigationState();
   useNotification();
+
+  const handleWebViewLoadEnd = () => {
+    console.log('WebView 로드 완료');
+    setWebViewReady(true);
+  };
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {
     try {
@@ -77,6 +82,7 @@ export const MainScreen = () => {
           originWhitelist={['*']}
           onMessage={handleWebViewMessage}
           onNavigationStateChange={handleNavigationStateChange}
+          onLoadEnd={handleWebViewLoadEnd}
           onContentProcessDidTerminate={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent;
             console.warn('WebView Content Process Did Terminate:', nativeEvent);

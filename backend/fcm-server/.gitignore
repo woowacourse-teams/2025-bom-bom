@@ -6,3 +6,7 @@ key/
 **/key/
 **/*-key.json
 **/*-service-account.json
+
+# Application configuration (managed by CI/CD)
+application.yml
+application-*.yml

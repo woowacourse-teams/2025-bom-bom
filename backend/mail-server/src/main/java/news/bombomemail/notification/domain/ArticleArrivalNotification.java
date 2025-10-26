@@ -28,13 +28,16 @@ public class ArticleArrivalNotification extends BaseEntity {
     private Long memberId;
 
     @Column(nullable = false)
+    private Long articleId;
+
+    @Column(nullable = false)
     private String newsletterName;
 
     @Column(nullable = false)
     private String articleTitle;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private NotificationStatus status;
 
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
@@ -52,9 +55,10 @@ public class ArticleArrivalNotification extends BaseEntity {
     public ArticleArrivalNotification(
             Long id,
             @NonNull Long memberId,
+            @NonNull Long articleId,
             @NonNull String newsletterName,
             @NonNull String articleTitle,
-            @NonNull NotificationStatus status,
+            NotificationStatus status,
             int attempts,
             LocalDateTime nextRetryAt,
             String lastError,
@@ -62,16 +66,44 @@ public class ArticleArrivalNotification extends BaseEntity {
     ) {
         this.id = id;
         this.memberId = memberId;
+        this.articleId = articleId;
         this.newsletterName = newsletterName;
         this.articleTitle = articleTitle;
-        this.status = status;
+        this.status = status != null ? status : NotificationStatus.PENDING;
         this.attempts = attempts;
         this.nextRetryAt = nextRetryAt;
         this.lastError = lastError;
         this.isRead = isRead;
     }
 
+    public void markSent() {
+        this.status = NotificationStatus.SENT;
+        this.nextRetryAt = null;
+        this.lastError = null;
+    }
+
+    public void markFailed(String reason) {
+        this.status = NotificationStatus.FAILED;
+        this.attempts++;
+        this.lastError = reason;
+        this.nextRetryAt = calculateNextRetryTime(this.attempts);
+    }
+
+    public void resetForRetry() {
+        this.status = NotificationStatus.PENDING;
+        this.nextRetryAt = null;
+        this.lastError = null;
+    }
+
     public void markAsRead() {
         this.isRead = true;
+    }
+
+    private LocalDateTime calculateNextRetryTime(int attempts) {
+        long delaySeconds = 30L * (long) Math.pow(2, attempts - 1); // 30s, 60s, 120s...
+        if (delaySeconds > 1800) { // Max 30 minutes
+            delaySeconds = 1800;
+        }
+        return LocalDateTime.now().plusSeconds(delaySeconds);
     }
 }

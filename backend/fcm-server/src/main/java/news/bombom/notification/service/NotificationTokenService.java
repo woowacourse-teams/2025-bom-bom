@@ -1,6 +1,5 @@
 package news.bombom.notification.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +29,6 @@ public class NotificationTokenService {
                 .deviceUuid(deviceUuid)
                 .fcmToken(fcmToken)
                 .isNotificationEnabled(true)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
         fcmTokenRepository.save(token);
         log.info("알림 토큰 등록 완료: memberId={}, deviceUuid={}", memberId, deviceUuid);
@@ -45,7 +42,7 @@ public class NotificationTokenService {
         Optional<MemberFcmToken> fcmTokenOptional = fcmTokenRepository.findByMemberIdAndDeviceUuid(memberId,
                 deviceUuid);
 
-        if(fcmTokenOptional.isPresent()) {
+        if (fcmTokenOptional.isPresent()) {
             MemberFcmToken token = fcmTokenOptional.get();
             token.updateToken(fcmToken);
         }
@@ -56,8 +53,6 @@ public class NotificationTokenService {
                 .deviceUuid(deviceUuid)
                 .fcmToken(fcmToken)
                 .isNotificationEnabled(true)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
         fcmTokenRepository.save(token);
         log.info("알림 토큰 처리 완료: memberId={}, deviceUuid={}", memberId, deviceUuid);
@@ -69,7 +64,7 @@ public class NotificationTokenService {
     @Transactional
     public void updateNotificationSetting(Long memberId, String deviceUuid, boolean enabled) {
         Optional<MemberFcmToken> existingToken = fcmTokenRepository.findByMemberIdAndDeviceUuid(memberId, deviceUuid);
-        
+
         if (existingToken.isPresent()) {
             MemberFcmToken fcmToken = existingToken.get();
             fcmToken.updateNotificationSetting(enabled);

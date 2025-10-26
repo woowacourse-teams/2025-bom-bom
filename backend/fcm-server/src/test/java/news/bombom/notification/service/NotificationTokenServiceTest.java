@@ -1,5 +1,15 @@
 package news.bombom.notification.service;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
 import news.bombom.notification.domain.MemberFcmToken;
 import news.bombom.notification.repository.MemberFcmTokenRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -8,13 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("알림 토큰 서비스 테스트")
@@ -134,8 +137,6 @@ class NotificationTokenServiceTest {
                 .memberId(TEST_MEMBER_ID)
                 .deviceUuid(TEST_DEVICE_UUID)
                 .fcmToken(TEST_FCM_TOKEN)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .isNotificationEnabled(true)
                 .build();
     }

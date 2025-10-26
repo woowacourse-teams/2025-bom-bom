@@ -26,10 +26,7 @@ public class FcmNotificationSender implements NotificationSender {
         try {
             Message fcmMessage = Message.builder()
                     .setToken(message.getRecipient())
-                    .setNotification(Notification.builder()
-                            .setTitle(message.getTitle())
-                            .setBody(message.getContent())
-                            .build())
+                    .setNotification(createNotification(message.getTitle(), message.getContent()))
                     .putAllData(convertToStringMap(message.getData()))
                     .build();
 
@@ -55,10 +52,7 @@ public class FcmNotificationSender implements NotificationSender {
         try {
             Message message = Message.builder()
                     .setTopic(topic)
-                    .setNotification(Notification.builder()
-                            .setTitle(title)
-                            .setBody(content)
-                            .build())
+                    .setNotification(createNotification(title, content))
                     .putAllData(convertToStringMap(data))
                     .build();
 
@@ -71,6 +65,7 @@ public class FcmNotificationSender implements NotificationSender {
             return NotificationResult.failure("FCM 토픽 발송 실패: " + e.getMessage());
         }
     }
+
 
     /**
      * 데이터만 전송 (알림 표시 없음)
@@ -101,5 +96,12 @@ public class FcmNotificationSender implements NotificationSender {
                         Map.Entry::getKey,
                         entry -> String.valueOf(entry.getValue())
                 ));
+    }
+
+    private Notification createNotification(String title, String content) {
+        return Notification.builder()
+                .setTitle(title)
+                .setBody(content)
+                .build();
     }
 }

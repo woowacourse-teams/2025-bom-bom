@@ -40,10 +40,12 @@ const useNotification = () => {
     try {
       const message = await messaging().getInitialNotification();
       if (message && message.data?.notificationType === 'ARTICLE') {
-        sendMessageToWeb({
-          type: 'NOTIFICATION_ROUTING',
-          payload: { url: `/articles/${message.data?.articleId}` },
-        });
+        setTimeout(() => {
+          sendMessageToWeb({
+            type: 'NOTIFICATION_ROUTING',
+            payload: { url: `/articles/${message.data?.articleId}` },
+          });
+        }, 800);
       }
     } catch (error) {
       console.error('앱 종료 상태의 알림 수신에 문제가 발생했습니다.', error);

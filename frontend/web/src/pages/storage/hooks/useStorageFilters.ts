@@ -15,7 +15,7 @@ export const useStorageFilters = () => {
     sort: ['arrivedDateTime', sortParam ?? 'DESC'],
     keyword: searchParam,
     size: ARTICLE_SIZE,
-    newsletterId: newsletterIdParams ?? undefined,
+    newsletterId: newsletterIdParams,
     page,
   };
 

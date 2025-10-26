@@ -48,16 +48,28 @@ export default function PCStorageContent({
 
   const haveNoContent = articleList.length === 0;
 
+  const handleDeleteArticles = () => {
+    deleteArticles(selectedIds);
+    clearSelection();
+  };
+
   useEffect(() => {
     resetPage();
-  }, [baseQueryParams.keyword, resetPage]);
+  }, [
+    baseQueryParams.newsletterId,
+    baseQueryParams.keyword,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(baseQueryParams.sort),
+    resetPage,
+  ]);
 
   useEffect(() => {
     clearSelection();
   }, [
     baseQueryParams.newsletterId,
     baseQueryParams.keyword,
-    baseQueryParams.sort,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(baseQueryParams.sort),
     baseQueryParams.page,
     clearSelection,
   ]);
@@ -68,7 +80,7 @@ export default function PCStorageContent({
         editMode={editMode}
         onEnterEditMode={enableEditMode}
         onExitEditMode={disableEditMode}
-        onDeleteSelected={() => deleteArticles(selectedIds)}
+        onDeleteSelected={handleDeleteArticles}
         checkedCount={selectedIds.length}
         isAllSelected={isAllSelected}
         onToggleSelectAll={toggleSelectAll}

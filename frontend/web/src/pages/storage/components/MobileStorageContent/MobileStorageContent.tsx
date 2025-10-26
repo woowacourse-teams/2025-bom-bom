@@ -51,6 +51,11 @@ export default function MobileStorageContent({
     clearSelection,
   } = useSelectedDeleteIds(articleList);
 
+  const handleDeleteArticles = () => {
+    deleteArticles(selectedIds);
+    clearSelection();
+  };
+
   useEffect(() => {
     if (!loadMoreRef.current) return;
 
@@ -85,7 +90,7 @@ export default function MobileStorageContent({
         editMode={editMode}
         onEnterEditMode={enableEditMode}
         onExitEditMode={disableEditMode}
-        onDeleteSelected={() => deleteArticles(selectedIds)}
+        onDeleteSelected={handleDeleteArticles}
         checkedCount={selectedIds.length}
         isAllSelected={isAllSelected}
         onToggleSelectAll={toggleSelectAll}

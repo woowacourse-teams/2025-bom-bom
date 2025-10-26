@@ -46,7 +46,7 @@ public class Member extends BaseEntity implements Serializable {
     @Column(nullable = false, unique = true, length = 20)
     private String nickname;
 
-    @Column(length = 512)
+    @Column(length = 2000)
     private String profileImageUrl;
 
     private LocalDate birthDate;

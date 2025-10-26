@@ -91,7 +91,3 @@
 |:--------:|:------:|:------:|
 | <img src="https://avatars.githubusercontent.com/u/61729032?v=4" alt="재오" style="width:100px;height:100px;object-fit:cover;" /> | <img src="https://avatars.githubusercontent.com/u/106021313?v=4" alt="제나" style="width:100px;height:100px;object-fit:cover;" /> | <img src="https://avatars.githubusercontent.com/u/62178788?v=4" alt="피터" style="width:100px;height:100px;object-fit:cover;" /> |
 | [@jaeyoung-kwon](https://github.com/jaeyoung-kwon) | [@JeLee-river](https://github.com/JeLee-river) | [@guesung](https://github.com/guesung) |
-
-| 혼자 읽으면 재미가 없다 | 팔로우/리더보드 비교 | **소셜 기반 동기 유발** |
-| 뉴스레터 내용이 흘러간다 | 메모 저장 | **지식 자산화** |
-| 각종 메일이 섞여있다 | 통합 수신 + 필터링 | **콘텐츠 정리 효율성** |

@@ -7,19 +7,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import news.bombom.notification.common.BaseEntity;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "member_fcm_token",
        uniqueConstraints = @UniqueConstraint(columnNames = {"memberId", "deviceUuid"}))
-public class MemberFcmToken {
+public class MemberFcmToken extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,12 +34,6 @@ public class MemberFcmToken {
     @Column(nullable = false, length = 300)
     private String fcmToken;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
-
     @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean isNotificationEnabled = true;
 
@@ -49,26 +43,20 @@ public class MemberFcmToken {
             @NonNull Long memberId,
             @NonNull String deviceUuid,
             @NonNull String fcmToken,
-            @NonNull LocalDateTime createdAt,
-            @NonNull LocalDateTime updatedAt,
             boolean isNotificationEnabled
     ) {
         this.id = id;
         this.memberId = memberId;
         this.deviceUuid = deviceUuid;
         this.fcmToken = fcmToken;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
         this.isNotificationEnabled = isNotificationEnabled;
     }
 
     public void updateToken(String newToken) {
         this.fcmToken = newToken;
-        this.updatedAt = LocalDateTime.now();
     }
 
     public void updateNotificationSetting(boolean enabled) {
         this.isNotificationEnabled = enabled;
-        this.updatedAt = LocalDateTime.now();
     }
 }

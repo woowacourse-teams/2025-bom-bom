@@ -36,8 +36,8 @@ public class ArticleArrivalNotification extends BaseEntity {
     @Column(nullable = false)
     private String articleTitle;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private NotificationStatus status;
 
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")

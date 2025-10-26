@@ -11,6 +11,7 @@ public record NotificationResultResponse(
         @NotNull
         String errorMessages
 ) {
+
     public int totalDevices() {
         return successCount + failCount + skippedCount;
     }

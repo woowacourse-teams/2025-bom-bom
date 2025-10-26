@@ -4,15 +4,15 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import news.bombom.notification.dto.NotificationMessage;
-import news.bombom.notification.dto.NotificationResult;
 import news.bombom.notification.client.NotificationSender;
 import news.bombom.notification.domain.NotificationType;
+import news.bombom.notification.dto.NotificationMessage;
+import news.bombom.notification.dto.NotificationResult;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -97,7 +97,7 @@ public class FcmNotificationSender implements NotificationSender {
             return Map.of();
         }
         return data.entrySet().stream()
-                .collect(java.util.stream.Collectors.toMap(
+                .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         entry -> String.valueOf(entry.getValue())
                 ));

@@ -18,7 +18,7 @@ import news.bombom.notification.common.BaseEntity;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "member_fcm_token",
-       uniqueConstraints = @UniqueConstraint(columnNames = {"memberId", "deviceUuid"}))
+        uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "device_uuid"}))
 public class MemberFcmToken extends BaseEntity {
 
     @Id

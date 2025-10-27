@@ -1,19 +1,19 @@
 import { fetcher } from './fetcher';
 
 interface PostTokenParams {
-  memberId: string;
+  memberId: number;
   deviceUuid: string;
   token: string;
 }
 
 interface PutTokenParams {
-  memberId: string;
+  memberId: number;
   deviceUuid: string;
   token: string;
 }
 
 interface PutNotificationSettingsParams {
-  memberId: string;
+  memberId: number;
   deviceUuid: string;
   enabled: boolean;
 }

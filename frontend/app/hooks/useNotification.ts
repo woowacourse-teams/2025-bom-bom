@@ -18,7 +18,7 @@ Notifications.setNotificationHandler({
 const useNotification = () => {
   const { sendMessageToWeb, isWebViewReady } = useWebView();
 
-  const registerFCMToken = useCallback(async (memberId: string | undefined) => {
+  const registerFCMToken = useCallback(async (memberId: number | undefined) => {
     try {
       const deviceUuid = await getDeviceUUID();
       const token = await getFCMToken();

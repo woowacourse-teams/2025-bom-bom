@@ -10,18 +10,22 @@ import { queries } from '@/apis/queries';
 import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
 import { useDevice } from '@/hooks/useDevice';
+import NotificationSettingsSection from '@/pages/MyPage/NotificationSettingsSection';
 import ProfileSection from '@/pages/MyPage/ProfileSection';
 import SubscribedNewslettersSection from '@/pages/MyPage/SubscribedNewslettersSection';
+import { isWebView } from '@/utils/device';
 import type { Device } from '@/hooks/useDevice';
 import type { CSSObject, Theme } from '@emotion/react';
 import AvatarIcon from '#/assets/svg/avatar.svg';
 
-type MyPageTab = 'profile' | 'newsletters';
+type MyPageTab = 'profile' | 'newsletters' | 'notification';
 
-const TABS = [
+const DEFAULT_TABS = [
   { id: 'profile', label: '내 정보' },
   { id: 'newsletters', label: '구독 뉴스레터' },
 ] as const;
+
+const WEBVIEW_TABS = [{ id: 'notification', label: '알림 설정' }] as const;
 
 export const Route = createFileRoute('/_bombom/my')({
   head: () => ({
@@ -49,6 +53,8 @@ function MyPage() {
   const { data: userInfo } = useQuery(queries.me());
   const { data: myNewsletters } = useQuery(queries.myNewsletters());
 
+  const tabs = isWebView() ? [...DEFAULT_TABS, ...WEBVIEW_TABS] : DEFAULT_TABS;
+
   if (!userInfo) return null;
 
   const handleTabSelect = (tabId: MyPageTab) => {
@@ -70,6 +76,8 @@ function MyPage() {
             device={device}
           />
         );
+      case 'notification':
+        return <NotificationSettingsSection />;
       default:
         return null;
     }
@@ -87,7 +95,7 @@ function MyPage() {
       <ContentWrapper device={device}>
         <TabsWrapper device={device}>
           <Tabs direction={device === 'mobile' ? 'horizontal' : 'vertical'}>
-            {TABS.map((tab) => (
+            {tabs.map((tab) => (
               <Tab
                 key={tab.id}
                 value={tab.id}

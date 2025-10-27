@@ -7,6 +7,7 @@ import { postLogout } from '@/apis/auth';
 import { useDevice } from '@/hooks/useDevice';
 import { showMessenger } from '@/libs/channelTalk/channelTalk.utils';
 import { copyToClipboard } from '@/utils/copy';
+import { isWebView } from '@/utils/device';
 import type { UserInfo } from '@/types/me';
 import ChatIcon from '#/assets/svg/chat.svg';
 import CopyIcon from '#/assets/svg/copy.svg';
@@ -86,6 +87,12 @@ const ProfileDetail = ({ userInfo, onClose }: ProfileDetailProps) => {
       <MyPageButton to="/my?tab=newsletters" onClick={onClose}>
         구독 뉴스레터
       </MyPageButton>
+
+      {isWebView() && (
+        <MyPageButton to="/my?tab=notification" onClick={onClose}>
+          알림 설정
+        </MyPageButton>
+      )}
 
       <LogoutButton type="button" onClick={handleLogoutClick}>
         <LogoutIcon width={16} height={16} />

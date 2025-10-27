@@ -12,26 +12,12 @@ public interface HighlightRepository extends JpaRepository<Highlight, Long>, Cus
 
     Optional<Highlight> findByArticleIdAndHighlightLocation(Long articleId, HighlightLocation highlightLocation);
 
-    @Query("""
-        SELECT COUNT(*)
-        FROM Highlight h
-        JOIN Article a
-        ON h.articleId = a.id
-        WHERE a.memberId = :memberId
-    """)
     int countByMemberId(Long memberId);
 
     int countByArticleId(Long articleId);
 
     List<Highlight> findAllByArticleId(Long articleId);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query(
-            value = "DELETE h FROM highlight h "
-                    + "JOIN article a ON h.article_id = a.id "
-                    + "WHERE a.member_id = :memberId",
-            nativeQuery = true
-    )
     void deleteAllByMemberId(Long memberId);
 
     @Modifying(clearAutomatically = true)

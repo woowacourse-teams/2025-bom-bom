@@ -12,20 +12,11 @@ interface PutTokenParams {
   token: string;
 }
 
-export const postFCMToken = ({
-  memberId,
-  deviceUuid,
-  token,
-}: PostTokenParams) => {
-  return fetcher.post({
-    path: '/notifications/tokens',
-    body: {
-      memberId,
-      deviceUuid,
-      token,
-    },
-  });
-};
+interface PutNotificationSettingsParams {
+  memberId: number;
+  deviceUuid: string;
+  enabled: boolean;
+}
 
 export const putFCMToken = ({
   memberId,
@@ -39,5 +30,16 @@ export const putFCMToken = ({
       deviceUuid,
       token,
     },
+  });
+};
+
+export const putNotificationSettings = ({
+  memberId,
+  deviceUuid,
+  enabled,
+}: PutNotificationSettingsParams) => {
+  return fetcher.put({
+    path: `/notifications/tokens/${memberId}/${deviceUuid}/settings`,
+    body: { enabled },
   });
 };

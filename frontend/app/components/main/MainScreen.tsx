@@ -46,8 +46,10 @@ export const MainScreen = () => {
         case 'LOGIN_SUCCESS':
           console.log('웹뷰에서 로그인 성공 알림 수신:', message.payload);
           hideLogin();
-          setMemberId(message.payload?.memberId);
-          registerFCMToken(message.payload?.memberId);
+          const memberId = message.payload?.memberId;
+          setMemberId(memberId);
+          registerFCMToken(memberId);
+          sendNotificationStatusToWeb(memberId);
           break;
 
         case 'LOGIN_FAILED':

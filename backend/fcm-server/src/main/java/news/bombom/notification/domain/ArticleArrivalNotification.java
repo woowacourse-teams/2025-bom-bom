@@ -20,6 +20,8 @@ import news.bombom.notification.common.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ArticleArrivalNotification extends BaseEntity {
 
+    private static final int MAX_RETRY_ATTEMPTS = 3;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -97,6 +99,10 @@ public class ArticleArrivalNotification extends BaseEntity {
 
     public void markAsRead() {
         this.isRead = true;
+    }
+
+    public boolean shouldRetry() {
+        return this.attempts < MAX_RETRY_ATTEMPTS;
     }
 
     private LocalDateTime calculateNextRetryTime(int attempts) {

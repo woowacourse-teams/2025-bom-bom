@@ -23,13 +23,22 @@ public class NotificationScheduler {
     @Transactional
     @Scheduled(fixedDelay = 30000)
     public void processPendingNotifications() {
-        List<ArticleArrivalNotification> pendingNotifications = 
-            notificationRepository.findRetryCandidates(NotificationStatus.PENDING, LocalDateTime.now());
+        List<ArticleArrivalNotification> pendingNotifications =
+                notificationRepository.findRetryCandidates(
+                        List.of(NotificationStatus.PENDING, NotificationStatus.FAILED),
+                        LocalDateTime.now()
+                );
 
         log.info("처리할 알림 개수: {}", pendingNotifications.size());
 
         for (ArticleArrivalNotification notification : pendingNotifications) {
             try {
+                if (!notification.shouldRetry()) {
+                    log.warn("최대 재시도 횟수 초과: notificationId={}, attempts={}",
+                            notification.getId(), notification.getAttempts());
+                    continue;
+                }
+
                 notificationProcessingService.processNotification(notification);
             } catch (Exception e) {
                 log.error("알림 처리 중 오류 발생: notificationId={}", notification.getId(), e);

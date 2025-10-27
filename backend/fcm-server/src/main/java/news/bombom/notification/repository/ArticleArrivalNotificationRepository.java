@@ -13,7 +13,7 @@ public interface ArticleArrivalNotificationRepository extends JpaRepository<Arti
     @Query("""
             SELECT n 
             FROM ArticleArrivalNotification n 
-            WHERE n.status = :status AND (n.nextRetryAt IS NULL OR n.nextRetryAt <= :now)
+            WHERE n.status IN :statuses AND (n.nextRetryAt IS NULL OR n.nextRetryAt <= :now)
     """)
-    List<ArticleArrivalNotification> findRetryCandidates(@Param("status") NotificationStatus status, @Param("now") LocalDateTime now);
+    List<ArticleArrivalNotification> findRetryCandidates(@Param("statuses") List<NotificationStatus> statuses, @Param("now") LocalDateTime now);
 }

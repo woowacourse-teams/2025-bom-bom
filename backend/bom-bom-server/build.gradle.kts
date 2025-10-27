@@ -90,6 +90,9 @@ dependencies {
 
     // for : webhook
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+
+    // FCM
+    implementation("com.google.firebase:firebase-admin:9.7.0")
 }
 
 // Querydsl 생성된 파일 정리

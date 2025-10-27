@@ -1,3 +1,14 @@
+
+# Firebase 키 파일 보안
+key/
+*.json
+**/key/
+**/*-key.json
+**/*-service-account.json
+
+# Application configuration (managed by CI/CD)
+application.yml
+
 HELP.md
 .gradle
 build/

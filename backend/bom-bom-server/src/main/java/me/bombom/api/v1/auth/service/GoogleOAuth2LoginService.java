@@ -56,7 +56,7 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
         OAuth2User oAuth2User = defaultOAuth2UserService.loadUser(userRequest);
 
         String providerId = oAuth2User.getAttribute("sub");
-        String profileUrl = oAuth2User.getAttribute("picture");
+//        String profileUrl = oAuth2User.getAttribute("picture");
 
         // 기존 회원 확인
         Optional<Member> member = memberRepository.findByProviderAndProviderId("google", providerId);
@@ -65,7 +65,7 @@ public class GoogleOAuth2LoginService implements OAuth2LoginService {
             PendingOAuth2Member pendingMember = PendingOAuth2Member.builder()
                     .provider("google")
                     .providerId(providerId)
-                    .profileUrl(profileUrl)
+                    .profileUrl(null)
                     .build();
             session.setAttribute("pendingMember", pendingMember);
             log.info("Google 신규 회원 - 회원가입 대기 상태로 설정");

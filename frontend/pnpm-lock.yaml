@@ -80,7 +80,7 @@ importers:
         specifier: ~6.0.13
         version: 6.0.13(expo@54.0.12)
       expo-device:
-        specifier: ~8.0.9
+        specifier: ^8.0.9
         version: 8.0.9(expo@54.0.12)
       expo-font:
         specifier: ~14.0.8

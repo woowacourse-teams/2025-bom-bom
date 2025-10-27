@@ -15,11 +15,14 @@ export type WebToRNMessage =
       payload?: {
         isAuthenticated?: boolean;
         provider?: string;
-        userId?: string;
+        memberId?: number;
       };
     }
   | { type: 'LOGIN_FAILED'; payload?: { error?: string; provider?: string } }
-  | { type: 'OPEN_BROWSER'; payload: { url: string } };
+  | { type: 'OPEN_BROWSER'; payload: { url: string } }
+  | { type: 'OPEN_NOTIFICATION_SETTINGS' }
+  | { type: 'REQUEST_NOTIFICATION_STATUS' }
+  | { type: 'TOGGLE_NOTIFICATION'; payload: { enabled: boolean } };
 
 export type RNToWebMessage =
   | {
@@ -44,5 +47,11 @@ export type RNToWebMessage =
       type: 'NOTIFICATION_ROUTING';
       payload: {
         url: string;
+      };
+    }
+  | {
+      type: 'NOTIFICATION_STATUS';
+      payload: {
+        enabled: boolean;
       };
     };

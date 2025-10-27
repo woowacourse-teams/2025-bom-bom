@@ -1,4 +1,5 @@
 import styled from '@emotion/native';
+import { useState } from 'react';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
@@ -14,6 +15,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { ENV } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
 import useNotification from '@/hooks/useNotification';
+import { useNotificationSettings } from '@/hooks/useNotificationSettings';
 
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
@@ -21,6 +23,10 @@ export const MainScreen = () => {
 
   const { handleNavigationStateChange } = useAndroidNavigationState();
   const { registerFCMToken } = useNotification();
+  const { sendNotificationStatusToWeb, handleToggleNotification } =
+    useNotificationSettings();
+
+  const [memberId, setMemberId] = useState<number | undefined>(undefined);
 
   const handleWebViewLoadEnd = () => {
     console.log('WebView 로드 완료');
@@ -40,7 +46,8 @@ export const MainScreen = () => {
         case 'LOGIN_SUCCESS':
           console.log('웹뷰에서 로그인 성공 알림 수신:', message.payload);
           hideLogin();
-          registerFCMToken(message.payload?.userId);
+          setMemberId(message.payload?.memberId);
+          registerFCMToken(message.payload?.memberId);
           break;
 
         case 'LOGIN_FAILED':
@@ -56,6 +63,16 @@ export const MainScreen = () => {
               dismissButtonStyle: 'close',
             });
           }
+          break;
+
+        case 'REQUEST_NOTIFICATION_STATUS':
+          console.log('알림 상태 요청');
+          sendNotificationStatusToWeb(memberId);
+          break;
+
+        case 'TOGGLE_NOTIFICATION':
+          console.log('알림 토글:', message.payload?.enabled);
+          handleToggleNotification(memberId, message.payload?.enabled ?? false);
           break;
 
         default:

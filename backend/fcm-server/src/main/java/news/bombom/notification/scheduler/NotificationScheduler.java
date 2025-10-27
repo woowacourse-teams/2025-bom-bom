@@ -10,7 +10,6 @@ import news.bombom.notification.repository.ArticleArrivalNotificationRepository;
 import news.bombom.notification.service.NotificationProcessingService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -20,7 +19,6 @@ public class NotificationScheduler {
     private final ArticleArrivalNotificationRepository notificationRepository;
     private final NotificationProcessingService notificationProcessingService;
 
-    @Transactional
     @Scheduled(fixedDelay = 30000)
     public void processPendingNotifications() {
         List<ArticleArrivalNotification> pendingNotifications =

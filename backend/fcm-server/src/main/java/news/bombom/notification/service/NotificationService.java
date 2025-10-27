@@ -23,15 +23,15 @@ public class NotificationService {
      */
     public NotificationResult sendNotification(String token, String title, String body, String articleId) {
         // 비즈니스 로직: 토큰 유효성 검증, 알림 설정 확인 등
-        if (StringUtils.hasText(token)) {
+        if (!StringUtils.hasText(token)) {
             return NotificationResult.failure("FCM 토큰이 유효하지 않습니다.");
         }
 
-        if (StringUtils.hasText(token)) {
+        if (!StringUtils.hasText(token)) {
             return NotificationResult.failure("알림 제목이 필요합니다.");
         }
 
-        if (StringUtils.hasText(token)) {
+        if (!StringUtils.hasText(token)) {
             return NotificationResult.failure("알림 내용이 필요합니다.");
         }
 
@@ -82,7 +82,7 @@ public class NotificationService {
      * 토픽으로 알림 전송 (비즈니스 로직 포함)
      */
     public NotificationResult sendNotificationToTopic(String topic, String title, String body, String articleId) {
-        if (StringUtils.hasText(topic)) {
+        if (!StringUtils.hasText(topic)) {
             return NotificationResult.failure("토픽명이 유효하지 않습니다.");
         }
 
@@ -100,7 +100,7 @@ public class NotificationService {
      * 데이터만 전송 (알림 표시 없음) - 비즈니스 로직 포함
      */
     public NotificationResult sendDataOnly(String token, Map<String, Object> data) {
-        if (StringUtils.hasText(token)) {
+        if (!StringUtils.hasText(token)) {
             return NotificationResult.failure("FCM 토큰이 유효하지 않습니다.");
         }
 

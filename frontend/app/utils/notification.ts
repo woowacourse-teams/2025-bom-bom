@@ -62,6 +62,17 @@ export const goToSystemPermission = async (enabled: boolean) => {
   }
 };
 
+export const checkNotificationPermission = async () => {
+  if (Device.isDevice) {
+    const authStatus = await messaging().hasPermission();
+    return (
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL
+    );
+  }
+  return false;
+};
+
 // FCM 토큰 생성
 export const getFCMToken = async () => {
   try {

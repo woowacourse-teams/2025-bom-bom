@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { postSignup } from '@/apis/auth';
+import { getUserInfo } from '@/apis/members';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import { sendMessageToRN } from '@/libs/webview/webview.utils';
 import { GUIDE_MAIL_STORAGE_KEY } from '@/pages/guide-detail/constants/guideMail';
@@ -36,11 +37,16 @@ export const useSignupMutation = ({
         gender,
         birthDate,
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       initializeGuideMailStorage();
 
+      const userInfo = await getUserInfo();
       sendMessageToRN({
         type: 'LOGIN_SUCCESS',
+        payload: {
+          isAuthenticated: true,
+          memberId: userInfo?.id,
+        },
       });
       navigate({ to: '/today' });
       trackEvent({

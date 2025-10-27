@@ -1,9 +1,31 @@
 import styled from '@emotion/styled';
-import { sendMessageToRN } from '@/libs/webview/webview.utils';
+import { useState, useEffect } from 'react';
+import {
+  sendMessageToRN,
+  addWebViewMessageListener,
+} from '@/libs/webview/webview.utils';
 
 const NotificationSettingsSection = () => {
+  const [isEnabled, setIsEnabled] = useState(false);
+
+  useEffect(() => {
+    sendMessageToRN({ type: 'REQUEST_NOTIFICATION_STATUS' });
+
+    const unsubscribe = addWebViewMessageListener((message) => {
+      if (message.type === 'NOTIFICATION_STATUS') {
+        setIsEnabled(message.payload.enabled);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
   const handleToggleClick = () => {
-    sendMessageToRN({ type: 'OPEN_NOTIFICATION_SETTINGS' });
+    const newEnabled = !isEnabled;
+    sendMessageToRN({
+      type: 'TOGGLE_NOTIFICATION',
+      payload: { enabled: newEnabled },
+    });
   };
 
   return (
@@ -11,8 +33,8 @@ const NotificationSettingsSection = () => {
       <SettingOption>
         <SettingLabel>새로운 아티클 알림 받기</SettingLabel>
         <ToggleWrapper type="button" onClick={handleToggleClick}>
-          <ToggleTrack>
-            <ToggleThumb />
+          <ToggleTrack isEnabled={isEnabled}>
+            <ToggleThumb isEnabled={isEnabled} />
           </ToggleTrack>
         </ToggleWrapper>
       </SettingOption>
@@ -45,30 +67,33 @@ const SettingLabel = styled.p`
   font: ${({ theme }) => theme.fonts.body1};
 `;
 
-const ToggleWrapper = styled.button`
+const ToggleWrapper = styled.button<{ disabled?: boolean }>`
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
   transition: opacity 0.2s;
 
-  &:hover {
+  &:hover:not(:disabled) {
     opacity: 0.8;
   }
 
-  &:active {
+  &:active:not(:disabled) {
     opacity: 0.6;
   }
 `;
 
-const ToggleTrack = styled.div`
+const ToggleTrack = styled.div<{ isEnabled: boolean }>`
   position: relative;
   width: 51px;
   height: 31px;
   border-radius: 16px;
 
-  background-color: ${({ theme }) => theme.colors.disabledText};
+  background-color: ${({ theme, isEnabled }) =>
+    isEnabled ? theme.colors.primary : theme.colors.disabledText};
 
   transition: background-color 0.3s;
 `;
 
-const ToggleThumb = styled.div`
+const ToggleThumb = styled.div<{ isEnabled: boolean }>`
   position: absolute;
   top: 3px;
   left: 3px;
@@ -79,6 +104,7 @@ const ToggleThumb = styled.div`
 
   background-color: ${({ theme }) => theme.colors.white};
 
+  transform: translateX(${({ isEnabled }) => (isEnabled ? '20px' : '0')});
   transition: transform 0.3s;
 `;
 

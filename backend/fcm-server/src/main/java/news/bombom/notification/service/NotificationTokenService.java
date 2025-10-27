@@ -45,6 +45,7 @@ public class NotificationTokenService {
         if (fcmTokenOptional.isPresent()) {
             MemberFcmToken token = fcmTokenOptional.get();
             token.updateToken(fcmToken);
+            return;
         }
 
         fcmTokenRepository.deleteByDeviceUuid(deviceUuid);

@@ -1,5 +1,6 @@
 package news.bombom.notification.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -95,5 +96,20 @@ public class NotificationTokenService {
         }
 
         return fcmTokens;
+    }
+
+    public boolean getNotificationEnabled(Long memberId, String deviceUuid) {
+        MemberFcmToken memberFcmToken = fcmTokenRepository.findByMemberIdAndDeviceUuid(memberId, deviceUuid)
+                .orElseThrow(() -> {
+                    log.warn("FCM 토큰 조회 실패: memberId={}, deviceUuid={}", memberId, deviceUuid);
+                    return new EntityNotFoundException(
+                            String.format(
+                                    "memberId=%d, deviceUuid=%s 에 해당하는 FCM 토큰이 존재하지 않습니다.",
+                                    memberId,
+                                    deviceUuid
+                            )
+                    );
+                });
+        return memberFcmToken.isNotificationEnabled();
     }
 }

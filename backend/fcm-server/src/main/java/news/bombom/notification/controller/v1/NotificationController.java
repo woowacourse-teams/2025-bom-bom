@@ -11,6 +11,7 @@ import news.bombom.notification.service.NotificationService;
 import news.bombom.notification.service.NotificationTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -47,6 +48,13 @@ public class NotificationController {
             @PathVariable @NotBlank String deviceUuid,
             @Valid @RequestBody NotificationSettingRequest request) {
         notificationTokenService.updateNotificationSetting(memberId, deviceUuid, request.enabled());
+    }
+
+    @GetMapping("/tokens/{memberId}/{deviceUuid}/settings/status")
+    public boolean getNotificationSettingsStatus(
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long memberId,
+            @PathVariable @NotBlank String deviceUuid) {
+        return notificationTokenService.getNotificationEnabled(memberId, deviceUuid);
     }
 
     /**

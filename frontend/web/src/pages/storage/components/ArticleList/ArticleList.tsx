@@ -1,5 +1,8 @@
 import styled from '@emotion/styled';
+import { useState } from 'react';
+import ArticleDeleteModal from '../ArticleDeleteModal/ArticleDeleteModal';
 import Checkbox from '@/components/Checkbox/Checkbox';
+import useModal from '@/components/Modal/useModal';
 import { useDevice } from '@/hooks/useDevice';
 import ArticleCard from '@/pages/today/components/ArticleCard/ArticleCard';
 import type { Device } from '@/hooks/useDevice';
@@ -10,6 +13,7 @@ interface ArticleListProps {
   editMode?: boolean;
   checkedIds?: number[];
   onCheck?: (id: number) => void;
+  onDeleteArticle?: (articleIds: number[]) => void;
 }
 
 const ArticleList = ({
@@ -17,25 +21,56 @@ const ArticleList = ({
   editMode,
   checkedIds,
   onCheck,
+  onDeleteArticle,
 }: ArticleListProps) => {
   const device = useDevice();
   const isMobile = device === 'mobile';
+  const [pendingDeleteArticle, setPendingDeleteArticle] =
+    useState<Article | null>(null);
+  const { modalRef, isOpen, openModal, closeModal } = useModal();
+
+  const hasBookmarkedArticles = pendingDeleteArticle?.isBookmarked ?? false;
+
+  const handleDeleteClick = (article: Article) => {
+    setPendingDeleteArticle(article);
+    openModal();
+  };
+
+  const handleConfirmDelete = () => {
+    if (pendingDeleteArticle) {
+      onDeleteArticle?.([pendingDeleteArticle.articleId]);
+      setPendingDeleteArticle(null);
+    }
+  };
 
   return (
-    <Container device={device}>
-      {articles.map((article) => (
-        <ArticleItem key={article.articleId} isMobile={isMobile}>
-          {editMode && checkedIds && (
-            <Checkbox
-              id={String(article.articleId)}
-              checked={checkedIds.includes(article.articleId)}
-              onChange={() => onCheck?.(article.articleId)}
+    <>
+      <Container device={device}>
+        {articles.map((article) => (
+          <ArticleItem key={article.articleId} isMobile={isMobile}>
+            {editMode && checkedIds && (
+              <Checkbox
+                id={String(article.articleId)}
+                checked={checkedIds.includes(article.articleId)}
+                onChange={() => onCheck?.(article.articleId)}
+              />
+            )}
+            <ArticleCard
+              data={article}
+              readVariant="badge"
+              onDelete={() => handleDeleteClick(article)}
             />
-          )}
-          <ArticleCard data={article} readVariant="badge" />
-        </ArticleItem>
-      ))}
-    </Container>
+          </ArticleItem>
+        ))}
+      </Container>
+      <ArticleDeleteModal
+        modalRef={modalRef}
+        isOpen={isOpen}
+        closeModal={closeModal}
+        onDelete={handleConfirmDelete}
+        hasBookmarkedArticles={hasBookmarkedArticles}
+      />
+    </>
   );
 };
 

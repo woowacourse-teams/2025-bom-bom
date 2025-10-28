@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { parseAsInteger, useQueryState } from 'nuqs';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import NewsletterList from './NewsletterList';
 import NewsletterDetail from '../NewsletterDetail/NewsletterDetail';
@@ -17,12 +17,18 @@ import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import type { Category } from '@/constants/newsletter';
 import type { Device } from '@/hooks/useDevice';
 import type { Newsletter } from '@/types/newsletter';
+import CloseIcon from '#/assets/svg/close.svg';
+import ReadingGlassesIcon from '#/assets/svg/reading-glasses.svg';
 import TrendingUpIcon from '#/assets/svg/trending-up.svg';
+
+const HIDE_NEWSLETTERS = ['계발메이트'];
 
 const TrendySection = () => {
   const device = useDevice();
   const [selectedCategory, setSelectedCategory] = useState<Category>('전체');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isSearchExpanded, setIsSearchExpanded] = useState<boolean>(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedNewsletterId, setSelectedNewsletterId] = useQueryState(
     'newsletterDetail',
@@ -41,14 +47,17 @@ const TrendySection = () => {
     },
   });
 
-  const filteredNewsletters = newsletters?.filter((newsletter) => {
-    const matchesCategory =
-      selectedCategory === '전체' || newsletter.category === selectedCategory;
-    const matchesSearch =
-      searchQuery === '' ||
-      newsletter.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const filteredNewsletters = newsletters
+    ?.filter(
+      (newsletter) =>
+        selectedCategory === '전체' || newsletter.category === selectedCategory,
+    )
+    .filter(
+      (newsletter) =>
+        searchQuery === '' ||
+        newsletter.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    )
+    .filter((newsletter) => !HIDE_NEWSLETTERS.includes(newsletter.name));
 
   const handleCardClick = (newsletter: Newsletter) => {
     setSelectedNewsletterId(newsletter.newsletterId);
@@ -72,23 +81,45 @@ const TrendySection = () => {
     }
   }, [closeDetailModal, selectedNewsletterId, newsletters, openDetailModal]);
 
+  useEffect(() => {
+    if (isSearchExpanded && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isSearchExpanded]);
+
   return (
     <>
       <Container>
         <SectionHeader>
-          <SectionIconBox>
-            <TrendingUpIcon width={16} height={16} />
-          </SectionIconBox>
-          <SectionTitle>트렌디한 뉴스레터</SectionTitle>
+          <HeaderLeft>
+            <SectionIconBox>
+              <TrendingUpIcon width={16} height={16} />
+            </SectionIconBox>
+            <SectionTitle>트렌디한 뉴스레터</SectionTitle>
+          </HeaderLeft>
+          <SearchIconButton
+            onClick={() => setIsSearchExpanded(true)}
+            aria-label="검색 열기"
+          >
+            <ReadingGlassesIcon width={20} height={20} />
+          </SearchIconButton>
+          <ExpandableSearchContainer isExpanded={isSearchExpanded}>
+            <SearchInput
+              ref={searchInputRef}
+              placeholder="뉴스레터 이름으로 검색"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onBlur={() => setIsSearchExpanded(false)}
+              aria-label="뉴스레터 검색"
+            />
+            <CloseButton
+              onClick={() => setIsSearchExpanded(false)}
+              aria-label="검색 닫기"
+            >
+              <CloseIcon width={20} height={20} />
+            </CloseButton>
+          </ExpandableSearchContainer>
         </SectionHeader>
-        <SearchInputWrapper>
-          <SearchInput
-            placeholder="뉴스레터 이름으로 검색"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            aria-label="뉴스레터 검색"
-          />
-        </SearchInputWrapper>
         <TagContainer>
           {CATEGORIES.map((category, index) => (
             <Chip
@@ -96,11 +127,14 @@ const TrendySection = () => {
               text={category}
               selected={selectedCategory === category}
               onSelect={() => setSelectedCategory(category)}
+              aria-label={`${category} 필터링`}
             />
           ))}
         </TagContainer>
         <TrendyGrid
           device={device}
+          aria-live="polite"
+          aria-label={`${selectedCategory} 카테고리 뉴스레터 목록`}
           hasContent={!!(filteredNewsletters && filteredNewsletters.length > 0)}
         >
           {isLoading ? (
@@ -141,7 +175,7 @@ const TrendySection = () => {
 
 export default TrendySection;
 
-const Container = styled.div`
+const Container = styled.section`
   width: 100%;
   padding: 24px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
@@ -156,8 +190,16 @@ const Container = styled.div`
 `;
 
 const SectionHeader = styled.div`
+  position: relative;
   margin-bottom: 16px;
 
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const HeaderLeft = styled.div`
   display: flex;
   gap: 8px;
   align-items: center;
@@ -183,8 +225,79 @@ const SectionTitle = styled.h2`
   font: ${({ theme }) => theme.fonts.heading5};
 `;
 
-const SearchInputWrapper = styled.div`
-  margin-bottom: 16px;
+const SearchIconButton = styled.button`
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: transparent;
+  color: ${({ theme }) => theme.colors.textSecondary};
+
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.dividers};
+    color: ${({ theme }) => theme.colors.textPrimary};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+`;
+
+const ExpandableSearchContainer = styled.div<{ isExpanded: boolean }>`
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: ${({ theme }) => theme.zIndex.elevated};
+
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  background: ${({ theme }) => theme.colors.white};
+
+  opacity: ${({ isExpanded }) => (isExpanded ? 1 : 0)};
+  pointer-events: ${({ isExpanded }) => (isExpanded ? 'auto' : 'none')};
+
+  transform: translateX(${({ isExpanded }) => (isExpanded ? '0' : '20px')});
+
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+`;
+
+const CloseButton = styled.button`
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  background: ${({ theme }) => theme.colors.dividers};
+  color: ${({ theme }) => theme.colors.textPrimary};
+
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.stroke};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
 `;
 
 const TagContainer = styled.div`

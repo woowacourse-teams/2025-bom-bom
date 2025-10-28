@@ -15,6 +15,7 @@ import {
   GUIDE_MAIL_STORAGE_KEY,
   GUIDE_MAILS,
 } from '@/pages/guide-detail/constants/guideMail';
+import { useDeleteArticlesMutation } from '@/pages/storage/hooks/useDeleteArticlesMutation';
 import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import { formatDate } from '@/utils/date';
 import { createStorage } from '@/utils/localStorage';
@@ -44,14 +45,18 @@ export const Route = createFileRoute('/_bombom/today')({
 
 function Index() {
   const today = useMemo(() => new Date(), []);
+  const todayDateStr = useMemo(() => formatDate(today, '-'), [today]);
+
   const { data: todayArticles, isLoading: isArticlesLoading } = useQuery(
-    queries.articles({ date: formatDate(today, '-') }),
+    queries.articles({ date: todayDateStr }),
   );
 
   const { data: pet, isLoading: isPetLoading } = useQuery({
     queryKey: ['pet'],
     queryFn: getPet,
   });
+
+  const { mutate: deleteArticles } = useDeleteArticlesMutation('today');
 
   const guideMails = createStorage<LocalGuideMail>(
     GUIDE_MAIL_STORAGE_KEY,
@@ -72,6 +77,7 @@ function Index() {
     ...(guideArticles.map((guide) => ({
       ...guide,
       isRead: guideMailReadMailIds.includes(guide.articleId),
+      isBookmarked: false,
       type: 'guide' as const,
     })) ?? []),
   ];
@@ -95,7 +101,10 @@ function Index() {
         {isArticlesLoading ? (
           <ArticleCardListSkeleton />
         ) : (
-          <ArticleCardList articles={mergedArticles} />
+          <ArticleCardList
+            articles={mergedArticles}
+            onDeleteArticles={(articleIds) => deleteArticles(articleIds)}
+          />
         )}
         <ReaderCompanion device={device}>
           {isPetLoading ? <PetCardSkeleton /> : pet && <PetCard pet={pet} />}

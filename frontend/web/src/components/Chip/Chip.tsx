@@ -6,9 +6,9 @@ interface ChipProps {
   onSelect?: () => void;
 }
 
-function Chip({ text, selected = false, onSelect }: ChipProps) {
+function Chip({ text, selected = false, onSelect, ...props }: ChipProps) {
   return (
-    <Container type="button" selected={selected} onClick={onSelect}>
+    <Container type="button" selected={selected} onClick={onSelect} {...props}>
       {text}
     </Container>
   );

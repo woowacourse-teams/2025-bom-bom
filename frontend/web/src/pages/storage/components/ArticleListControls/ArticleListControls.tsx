@@ -1,6 +1,5 @@
 import { theme } from '@bombom/shared';
 import styled from '@emotion/styled';
-import { useQueryState } from 'nuqs';
 import { useEffect, useState, type ChangeEvent } from 'react';
 import ArticleDeleteModal from '../ArticleDeleteModal/ArticleDeleteModal';
 import Checkbox from '@/components/Checkbox/Checkbox';
@@ -8,6 +7,7 @@ import useModal from '@/components/Modal/useModal';
 import SearchInput from '@/components/SearchInput/SearchInput';
 import Select from '@/components/Select/Select';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { useSearchParamState } from '@/hooks/useSearchParamState';
 import type { Sort } from './ArticleListControls.types';
 import CancelIcon from '#/assets/svg/close.svg';
 import DeleteIcon from '#/assets/svg/delete.svg';
@@ -34,10 +34,10 @@ const ArticleListControls = ({
   hasBookmarkedArticles = false,
 }: ArticleListControlsProps) => {
   const [search, setSearch] = useState('');
-  const [, setSearchParam] = useQueryState('search', {
-    defaultValue: '',
+  const [, setSearchParam] = useSearchParamState('search');
+  const [sort, setSort] = useSearchParamState<Sort>('sort', {
+    defaultValue: 'DESC',
   });
-  const [sort, setSort] = useQueryState('sort', { defaultValue: 'DESC' });
   const debouncedSearchInput = useDebouncedValue(search, 500);
   const { modalRef, isOpen, openModal, closeModal } = useModal();
 

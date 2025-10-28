@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { queries } from '@/apis/queries';
 
 export const useMemoFilters = () => {
@@ -26,12 +26,7 @@ export const useMemoFilters = () => {
 
   const resetPage = useCallback(() => {
     setPage(0);
-  }, [setPage]);
-
-  // newsletterId가 변경될 때 page를 0으로 리셋
-  useEffect(() => {
-    resetPage();
-  }, [resetPage]);
+  }, []);
 
   return {
     baseQueryParams,

@@ -22,10 +22,9 @@ export default function PCMemoContent({
 }: PCMemoContentProps) {
   const navigate = useNavigate();
 
-  const { data: highlights, isLoading } = useQuery({
-    ...queries.highlights(baseQueryParams),
-    enabled: true,
-  });
+  const { data: highlights, isLoading } = useQuery(
+    queries.highlights(baseQueryParams),
+  );
 
   const totalPages = highlights?.totalPages ?? 1;
   const totalElements = highlights?.totalElements ?? 0;

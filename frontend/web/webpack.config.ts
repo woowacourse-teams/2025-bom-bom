@@ -98,6 +98,10 @@ export default (env: Env, argv: Argv) => {
             to: 'assets',
           },
           {
+            from: 'public/prerendered',
+            to: 'prerendered',
+          },
+          {
             from: path.resolve(
               __dirname,
               'public',

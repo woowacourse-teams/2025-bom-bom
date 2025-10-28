@@ -51,17 +51,11 @@ export default function PCMemoContent({
         {highlightContent.map((highlight) => (
           <li key={highlight.id}>
             <ReadOnlyMemoCard
-              id={highlight.id}
-              content={highlight.text}
-              memo={highlight.memo}
+              data={highlight}
               as="button"
               onClick={() =>
                 navigate({ to: `/articles/${highlight.articleId}` })
               }
-              newsletterName={highlight.newsletterName ?? ''}
-              newsletterImageUrl={highlight.newsletterImageUrl ?? ''}
-              articleTitle={highlight.articleTitle ?? ''}
-              createdAt={highlight.createdAt ?? ''}
             />
           </li>
         ))}

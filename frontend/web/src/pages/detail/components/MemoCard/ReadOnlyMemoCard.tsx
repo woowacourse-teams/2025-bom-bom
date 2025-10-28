@@ -21,14 +21,15 @@ const ReadOnlyMemoCard = ({ data, as, onClick }: ReadOnlyMemoCardProps) => {
     articleTitle,
     createdAt,
   } = data;
-  const isDeleted = articleId === DELETE_MEMO_ARTICLE_ID;
+
+  const deleted = articleId === DELETE_MEMO_ARTICLE_ID;
 
   return (
-    <Container as={as} onClick={onClick} disabled={isDeleted}>
+    <Container as={as} onClick={onClick} disabled={deleted}>
       <HeaderBox>
-        <ArticleTitle disabled={isDeleted}>
+        <ArticleTitle disabled={deleted}>
           {articleTitle}
-          {isDeleted && <DeleteText>(삭제됨)</DeleteText>}
+          {deleted && <DeleteText>(삭제됨)</DeleteText>}
         </ArticleTitle>
       </HeaderBox>
 

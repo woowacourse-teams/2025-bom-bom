@@ -17,7 +17,7 @@ export function useSearchParamState<T extends SearchParamValue = string>(
 
   const value = useMemo(() => {
     const raw = search[key];
-    return raw as unknown as T;
+    return raw as T;
   }, [search, key]);
 
   const setValue = useCallback(

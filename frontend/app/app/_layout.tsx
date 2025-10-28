@@ -8,6 +8,7 @@ import { Platform } from 'react-native';
 import { AuthProvider } from '../contexts/AuthContext';
 import { EmotionThemeProvider } from '../contexts/ThemeContext';
 import { WebViewProvider } from '../contexts/WebViewContext';
+import useNotification from '../hooks/useNotification';
 
 SplashScreen.setOptions({
   duration: 1_500,
@@ -15,6 +16,7 @@ SplashScreen.setOptions({
 });
 
 export default function RootLayout() {
+  useNotification();
 
   useEffect(() => {
     if (Platform.OS === 'web') return;

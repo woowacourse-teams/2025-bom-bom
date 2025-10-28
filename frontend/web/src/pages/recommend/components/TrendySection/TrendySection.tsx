@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { parseAsInteger, useQueryState } from 'nuqs';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import NewsletterList from './NewsletterList';
@@ -13,6 +12,7 @@ import useModal from '@/components/Modal/useModal';
 import SearchInput from '@/components/SearchInput/SearchInput';
 import { CATEGORIES, NEWSLETTER_COUNT } from '@/constants/newsletter';
 import { useDevice } from '@/hooks/useDevice';
+import { useSearchParamState } from '@/hooks/useSearchParamState';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import type { Category } from '@/constants/newsletter';
 import type { Device } from '@/hooks/useDevice';
@@ -30,10 +30,9 @@ const TrendySection = () => {
   const [isSearchExpanded, setIsSearchExpanded] = useState<boolean>(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const [selectedNewsletterId, setSelectedNewsletterId] = useQueryState(
-    'newsletterDetail',
-    parseAsInteger,
-  );
+  const [selectedNewsletterId, setSelectedNewsletterId] = useSearchParamState<
+    number | null
+  >('newsletterDetail', { replace: false });
   const { data: newsletters, isLoading } = useQuery(queries.newsletters());
 
   const {
@@ -109,11 +108,16 @@ const TrendySection = () => {
               placeholder="뉴스레터 이름으로 검색"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onBlur={() => setIsSearchExpanded(false)}
+              onBlur={() => {
+                setIsSearchExpanded(false);
+              }}
               aria-label="뉴스레터 검색"
             />
             <CloseButton
-              onClick={() => setIsSearchExpanded(false)}
+              onClick={() => {
+                setIsSearchExpanded(false);
+                setSearchQuery('');
+              }}
               aria-label="검색 닫기"
             >
               <CloseIcon width={20} height={20} />

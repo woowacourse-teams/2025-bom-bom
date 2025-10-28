@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useQueryState } from 'nuqs';
 import DetailTab from './DetailTab';
 import { openSubscribeLink } from './NewsletterDetail.utils';
 import NewsletterTabs from './NewsletterTabs';
@@ -10,6 +9,7 @@ import Badge from '@/components/Badge/Badge';
 import Button from '@/components/Button/Button';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { useDevice } from '@/hooks/useDevice';
+import { useSearchParamState } from '@/hooks/useSearchParamState';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import { openExternalLink } from '@/utils/externalLink';
 import type { NewsletterTab } from './NewsletterDetail.types';
@@ -22,7 +22,7 @@ interface NewsletterDetailProps {
 const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
   const deviceType = useDevice();
   const { userInfo, isLoggedIn } = useUserInfo();
-  const [activeTab, setActiveTab] = useQueryState('tab', {
+  const [activeTab, setActiveTab] = useSearchParamState<NewsletterTab>('tab', {
     defaultValue: 'detail',
   });
   const { data: newsletterDetail } = useQuery({

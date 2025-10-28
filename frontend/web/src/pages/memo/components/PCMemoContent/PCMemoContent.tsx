@@ -22,13 +22,9 @@ export default function PCMemoContent({
 }: PCMemoContentProps) {
   const navigate = useNavigate();
 
-  const { data: highlights, isLoading } = useQuery({
-    ...queries.highlights({
-      ...baseQueryParams,
-      newsletterId: baseQueryParams.newsletterId || undefined,
-    }),
-    enabled: true,
-  });
+  const { data: highlights, isLoading } = useQuery(
+    queries.highlights(baseQueryParams),
+  );
 
   const totalPages = highlights?.totalPages ?? 1;
   const totalElements = highlights?.totalElements ?? 0;
@@ -54,17 +50,11 @@ export default function PCMemoContent({
         {highlightContent.map((highlight) => (
           <li key={highlight.id}>
             <ReadOnlyMemoCard
-              id={highlight.id}
-              content={highlight.text}
-              memo={highlight.memo}
+              data={highlight}
               as="button"
               onClick={() =>
                 navigate({ to: `/articles/${highlight.articleId}` })
               }
-              newsletterName={highlight.newsletterName ?? ''}
-              newsletterImageUrl={highlight.newsletterImageUrl ?? ''}
-              articleTitle={highlight.articleTitle ?? ''}
-              createdAt={highlight.createdAt ?? ''}
             />
           </li>
         ))}

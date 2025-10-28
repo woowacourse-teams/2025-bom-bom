@@ -22,6 +22,11 @@ export const Route = createFileRoute('/_bombom/memo')({
     ],
   }),
   component: MemoPage,
+  validateSearch: (search: { newsletterId?: number }) => {
+    return {
+      newsletterId: search.newsletterId,
+    };
+  },
 });
 
 function MemoPage() {

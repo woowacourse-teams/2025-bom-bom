@@ -46,14 +46,16 @@ public class NotificationController {
     public void updateNotificationSettings(
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long memberId,
             @PathVariable @NotBlank String deviceUuid,
-            @Valid @RequestBody NotificationSettingRequest request) {
+            @Valid @RequestBody NotificationSettingRequest request
+    ) {
         notificationTokenService.updateNotificationSetting(memberId, deviceUuid, request.enabled());
     }
 
     @GetMapping("/tokens/{memberId}/{deviceUuid}/settings/status")
     public boolean getNotificationSettingsStatus(
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long memberId,
-            @PathVariable @NotBlank String deviceUuid) {
+            @PathVariable @NotBlank String deviceUuid
+    ) {
         return notificationTokenService.getNotificationEnabled(memberId, deviceUuid);
     }
 

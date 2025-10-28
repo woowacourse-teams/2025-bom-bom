@@ -15,7 +15,6 @@ SplashScreen.setOptions({
 });
 
 export default function RootLayout() {
-
   useEffect(() => {
     if (Platform.OS === 'web') return;
 

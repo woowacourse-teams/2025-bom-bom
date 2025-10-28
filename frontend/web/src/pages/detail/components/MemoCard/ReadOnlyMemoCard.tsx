@@ -26,12 +26,12 @@ const ReadOnlyMemoCard = ({ data, as, onClick }: ReadOnlyMemoCardProps) => {
 
   return (
     <Container as={as} onClick={onClick} disabled={deleted}>
-      <HeaderBox>
+      <HeaderWrapper>
         <ArticleTitle disabled={deleted}>
           {articleTitle}
           {deleted && <DeleteText>(삭제됨)</DeleteText>}
         </ArticleTitle>
-      </HeaderBox>
+      </HeaderWrapper>
 
       <MemoContent>
         <MemoContentText>{text}</MemoContentText>
@@ -39,7 +39,7 @@ const ReadOnlyMemoCard = ({ data, as, onClick }: ReadOnlyMemoCardProps) => {
 
       <MemoText>{memo || '메모가 없습니다.'}</MemoText>
 
-      <MemoFooter>
+      <FooterWrapper>
         <NewsletterMeta>
           <NewsletterImage src={newsletterImageUrl} alt={newsletterName} />
           <NewsletterName>{newsletterName}</NewsletterName>
@@ -47,7 +47,7 @@ const ReadOnlyMemoCard = ({ data, as, onClick }: ReadOnlyMemoCardProps) => {
         <CreatedAtText>
           {formatDate(new Date(createdAt ?? ''), '. ')}
         </CreatedAtText>
-      </MemoFooter>
+      </FooterWrapper>
     </Container>
   );
 };
@@ -89,7 +89,7 @@ const Container = styled.div<{ disabled: boolean }>`
   }
 `;
 
-const HeaderBox = styled.div`
+const HeaderWrapper = styled.div`
   display: flex;
   align-items: flex-start;
   align-self: stretch;
@@ -131,7 +131,7 @@ const DeleteText = styled.span`
   white-space: nowrap;
 `;
 
-const MemoFooter = styled.div`
+const FooterWrapper = styled.div`
   width: 100%;
 
   display: flex;

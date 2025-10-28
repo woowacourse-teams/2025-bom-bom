@@ -8,7 +8,7 @@ import { postFCMToken } from '@/apis/notification';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldPlaySound: false,
+    shouldPlaySound: true,
     shouldSetBadge: true,
     shouldShowBanner: true,
     shouldShowList: true,

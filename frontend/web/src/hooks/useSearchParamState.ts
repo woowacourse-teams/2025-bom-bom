@@ -3,6 +3,22 @@ import { useCallback, useMemo } from 'react';
 
 type SearchParamValue = string | number | boolean | null;
 
+export function useSearchParamState<T extends SearchParamValue>(
+  key: string,
+  options: {
+    defaultValue: T;
+    replace?: boolean;
+  },
+): [T, (newValue: T | ((prev: T) => T)) => void];
+
+export function useSearchParamState<T extends SearchParamValue = string>(
+  key: string,
+  options?: {
+    defaultValue?: undefined;
+    replace?: boolean;
+  },
+): [T | null, (newValue: T | null | ((prev: T | null) => T | null)) => void];
+
 export function useSearchParamState<T extends SearchParamValue = string>(
   key: string,
   options?: {
@@ -13,18 +29,18 @@ export function useSearchParamState<T extends SearchParamValue = string>(
   const navigate = useNavigate();
   const search = useSearch({ strict: false }) as Record<string, unknown>;
 
-  const { defaultValue, replace = true } = options || {};
+  const { defaultValue = null, replace = true } = options || {};
 
   const value = useMemo(() => {
-    const raw = search[key];
-    return raw as T;
-  }, [search, key]);
+    const raw = search[key] ?? defaultValue;
+    return raw as T | null;
+  }, [search, key, defaultValue]);
 
   const setValue = useCallback(
-    (newValue: T | ((prev: T) => T)) => {
+    (newValue: (T | null) | ((prev: T | null) => T | null)) => {
       const resolved =
         typeof newValue === 'function'
-          ? (newValue as (prev: T) => T)(value ?? defaultValue!)
+          ? (newValue as (prev: T | null) => T | null)(value)
           : newValue;
 
       navigate({
@@ -43,8 +59,8 @@ export function useSearchParamState<T extends SearchParamValue = string>(
         resetScroll: false,
       });
     },
-    [key, navigate, replace, value, defaultValue],
+    [key, navigate, replace, value],
   );
 
-  return [value ?? defaultValue, setValue] as const;
+  return [value, setValue] as const;
 }

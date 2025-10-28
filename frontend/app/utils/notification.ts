@@ -15,16 +15,16 @@ export const createAndroidChannel = async () => {
 
 // 사용자 알림 권한 요청
 export const requestNotificationPermission = async () => {
-  if (Device.isDevice) {
-    const authStatus = await messaging().requestPermission();
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-    return enabled;
+  if (!Device.isDevice) {
+    return false;
   }
 
-  return false;
+  const authStatus = await messaging().requestPermission();
+  const enabled =
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+  return enabled;
 };
 
 // FCM 토큰 생성

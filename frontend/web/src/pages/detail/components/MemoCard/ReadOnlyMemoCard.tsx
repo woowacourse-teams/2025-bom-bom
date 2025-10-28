@@ -1,57 +1,60 @@
 import styled from '@emotion/styled';
+import { formatDate } from '@/utils/date';
+import type { Highlight } from '../../types/highlight';
 import type { ElementType } from 'react';
 
+const DELETE_MEMO_ARTICLE_ID = 0;
+
 interface ReadOnlyMemoCardProps {
-  id: number;
-  content: string;
-  memo?: string;
-  newsletterName: string;
-  newsletterImageUrl: string;
-  articleTitle: string;
-  createdAt: string;
+  data: Highlight;
   as?: ElementType;
   onClick?: () => void;
 }
 
-const ReadOnlyMemoCard = ({
-  content,
-  memo,
-  newsletterName,
-  newsletterImageUrl,
-  articleTitle,
-  createdAt,
-  as,
-  onClick,
-}: ReadOnlyMemoCardProps) => {
+const ReadOnlyMemoCard = ({ data, as, onClick }: ReadOnlyMemoCardProps) => {
+  const {
+    text,
+    memo,
+    newsletterName,
+    newsletterImageUrl,
+    articleId,
+    articleTitle,
+    createdAt,
+  } = data;
+
+  const deleted = articleId === DELETE_MEMO_ARTICLE_ID;
+
   return (
-    <Container as={as} onClick={onClick}>
-      <HeaderBox>
-        <ArticleTitle>{articleTitle}</ArticleTitle>
-      </HeaderBox>
+    <Container as={as} onClick={onClick} disabled={deleted}>
+      <HeaderWrapper>
+        <ArticleTitle disabled={deleted}>
+          {articleTitle}
+          {deleted && <DeleteText>(삭제됨)</DeleteText>}
+        </ArticleTitle>
+      </HeaderWrapper>
 
       <MemoContent>
-        <MemoContentText>{content}</MemoContentText>
+        <MemoContentText>{text}</MemoContentText>
       </MemoContent>
 
       <MemoText>{memo || '메모가 없습니다.'}</MemoText>
 
-      <MemoFooter>
+      <FooterWrapper>
         <NewsletterMeta>
           <NewsletterImage src={newsletterImageUrl} alt={newsletterName} />
           <NewsletterName>{newsletterName}</NewsletterName>
         </NewsletterMeta>
         <CreatedAtText>
-          {new Date(createdAt).toLocaleDateString('ko-KR')}
+          {formatDate(new Date(createdAt ?? ''), '. ')}
         </CreatedAtText>
-      </MemoFooter>
+      </FooterWrapper>
     </Container>
   );
 };
 
 export default ReadOnlyMemoCard;
 
-const Container = styled.div`
-  position: relative;
+const Container = styled.div<{ disabled: boolean }>`
   width: 100%;
   padding: 20px;
   border: 1px solid ${({ theme }) => theme.colors.stroke};
@@ -75,9 +78,18 @@ const Container = styled.div`
     border-color: ${({ theme }) => theme.colors.primary};
     transform: translateY(-1px);
   }
+
+  &:disabled {
+    box-shadow: none;
+
+    background-color: ${({ theme }) => theme.colors.disabledBackground};
+
+    border-color: transparent;
+    transform: none;
+  }
 `;
 
-const HeaderBox = styled.div`
+const HeaderWrapper = styled.div`
   display: flex;
   align-items: flex-start;
   align-self: stretch;
@@ -104,15 +116,22 @@ const NewsletterName = styled.span`
   font: ${({ theme }) => theme.fonts.caption};
 `;
 
-const ArticleTitle = styled.h3`
+const ArticleTitle = styled.h3<{ disabled: boolean }>`
   margin: 0;
 
-  color: ${({ theme }) => theme.colors.textPrimary};
+  color: ${({ theme, disabled }) =>
+    disabled ? theme.colors.disabledText : theme.colors.textPrimary};
   font: ${({ theme }) => theme.fonts.body1};
   font-weight: 600;
 `;
 
-const MemoFooter = styled.div`
+const DeleteText = styled.span`
+  color: ${({ theme }) => theme.colors.textTertiary};
+  font: ${({ theme }) => theme.fonts.caption};
+  white-space: nowrap;
+`;
+
+const FooterWrapper = styled.div`
   width: 100%;
 
   display: flex;

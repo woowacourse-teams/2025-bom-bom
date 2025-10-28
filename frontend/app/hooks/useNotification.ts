@@ -77,11 +77,6 @@ const useNotification = () => {
       }
     });
 
-    // FCM 토큰 갱신 리스너
-    const unsubscribeTokenRefresh = messaging().onTokenRefresh((newToken) => {
-      // ToDo: 백엔드에 새 토큰 전송
-    });
-
     // 백그라운드에서 알림을 탭한 경우
     const unsubscribeNotificationOpened = messaging().onNotificationOpenedApp(
       (remoteMessage) => {
@@ -116,7 +111,6 @@ const useNotification = () => {
 
     // 클린업
     return () => {
-      unsubscribeTokenRefresh();
       unsubscribe();
       unsubscribeNotificationOpened();
       notificationListener.remove();

@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useQueryState } from 'nuqs';
 import DetailTab from './DetailTab';
 import { openSubscribeLink } from './NewsletterDetail.utils';
 import NewsletterTabs from './NewsletterTabs';
@@ -10,6 +9,7 @@ import Badge from '@/components/Badge/Badge';
 import Button from '@/components/Button/Button';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
 import { useDevice } from '@/hooks/useDevice';
+import { useSearchParamState } from '@/hooks/useSearchParamState';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import { openExternalLink } from '@/utils/externalLink';
 import type { NewsletterTab } from './NewsletterDetail.types';
@@ -22,7 +22,7 @@ interface NewsletterDetailProps {
 const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
   const deviceType = useDevice();
   const { userInfo, isLoggedIn } = useUserInfo();
-  const [activeTab, setActiveTab] = useQueryState('tab', {
+  const [activeTab, setActiveTab] = useSearchParamState<NewsletterTab>('tab', {
     defaultValue: 'detail',
   });
   const { data: newsletterDetail } = useQuery({
@@ -41,13 +41,18 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
     openExternalLink(newsletterDetail.mainPageUrl);
   };
 
+  const newsletterSummary = `${newsletterDetail.name}, ${newsletterDetail.category} 카테고리, ${newsletterDetail.issueCycle} 발행. ${newsletterDetail.description}`;
+
   return (
-    <Container>
+    <Container isMobile={isMobile}>
+      <VisuallyHidden aria-label={newsletterSummary}>
+        뉴스레터 정보
+      </VisuallyHidden>
       <FixedWrapper isMobile={isMobile}>
-        <InfoWrapper isMobile={isMobile}>
+        <InfoWrapper isMobile={isMobile} aria-hidden="true">
           <NewsletterImage
             src={newsletterDetail.imageUrl}
-            alt={`${newsletterDetail.name} 뉴스레터 이미지`}
+            alt=""
             isMobile={isMobile}
           />
           <InfoBox>
@@ -55,8 +60,12 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
               <NewsletterTitle isMobile={isMobile}>
                 {newsletterDetail.name}
               </NewsletterTitle>
-              <DetailLink onClick={openMainSite} isMobile={isMobile}>
-                <StyledHomeIcon isMobile={isMobile} />
+              <DetailLink
+                onClick={openMainSite}
+                isMobile={isMobile}
+                aria-description="클릭 시 뉴스레터 공식 페이지로 이동합니다."
+              >
+                <StyledHomeIcon isMobile={isMobile} aria-hidden="true" />
               </DetailLink>
             </TitleWrapper>
 
@@ -112,13 +121,32 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
 
 export default NewsletterDetail;
 
-const Container = styled.div`
-  width: 100%;
+const Container = styled.div<{ isMobile: boolean }>`
+  width: ${({ isMobile }) => (isMobile ? '100%' : '720px')};
   height: 100%;
-  max-width: 560px;
 
   display: flex;
   flex-direction: column;
+`;
+
+const VisuallyHidden = styled.button`
+  overflow: hidden;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: none;
+  border-width: 0;
+
+  background: none;
+  white-space: nowrap;
+
+  clip: rect(0, 0, 0, 0);
+
+  &:focus {
+    outline: none;
+  }
 `;
 
 const FixedWrapper = styled.div<{ isMobile: boolean }>`
@@ -130,6 +158,7 @@ const FixedWrapper = styled.div<{ isMobile: boolean }>`
 `;
 
 const ScrollableWrapper = styled.div<{ isMobile: boolean }>`
+  height: ${({ isMobile }) => (isMobile ? '260px' : '450px')};
   margin-right: -16px;
   padding: 8px;
 

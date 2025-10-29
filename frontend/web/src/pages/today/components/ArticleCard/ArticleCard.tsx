@@ -7,18 +7,21 @@ import { formatDate } from '@/utils/date';
 import type { components } from '@/types/openapi';
 import type { ComponentProps } from 'react';
 import ClockIcon from '#/assets/svg/clock.svg';
+import DeleteIcon from '#/assets/svg/delete.svg';
 
 type ReadVariant = 'transparent' | 'badge';
 
 interface ArticleCardProps extends ComponentProps<typeof Link> {
   data: components['schemas']['ArticleResponse'];
   readVariant?: ReadVariant;
+  onDelete?: () => void;
 }
 
 const ArticleCard = ({
   data,
   readVariant = 'transparent',
   to,
+  onDelete,
   ...props
 }: ArticleCardProps) => {
   const {
@@ -72,6 +75,17 @@ const ArticleCard = ({
           />
         )}
       </ThumbnailWrapper>
+      {!isMobile && (
+        <DeleteButton
+          onClick={(e) => {
+            e.preventDefault();
+            onDelete?.();
+          }}
+          isMobile={isMobile}
+        >
+          <DeleteIcon width={20} height={20} />
+        </DeleteButton>
+      )}
     </Container>
   );
 };
@@ -86,6 +100,7 @@ export const Container = styled(Link, {
   readVariant: ReadVariant;
   isMobile: boolean;
 }>`
+  position: relative;
   width: 100%;
   padding: ${({ isMobile }) => (isMobile ? '8px 0' : '20px')};
 
@@ -110,6 +125,11 @@ export const Container = styled(Link, {
     border-radius: 20px;
     box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%);
   `};
+
+  &:hover button {
+    opacity: 1;
+    pointer-events: auto;
+  }
 `;
 
 export const InfoWrapper = styled.div<{ isMobile: boolean }>`
@@ -188,4 +208,22 @@ const ReadingBadge = styled(Badge)<{ isMobile: boolean }>`
   top: 4px;
   right: 4px;
   padding: ${({ isMobile }) => (isMobile ? '2px 4px' : '4px 8px')};
+`;
+
+const DeleteButton = styled.button<{ isMobile: boolean }>`
+  position: absolute;
+  top: ${({ isMobile }) => (isMobile ? '24px' : '36px')};
+  right: ${({ isMobile }) => (isMobile ? '72px' : '154px')};
+  width: 28px;
+  height: 28px;
+
+  color: ${({ theme }) => theme.colors.error};
+
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.2s ease-in-out;
+
+  &:hover {
+    opacity: 0.85;
+  }
 `;

@@ -27,8 +27,11 @@ export const fetcher = {
     body,
   }: FetcherOptions<TRequest>) =>
     request<TRequest, TResponse>({ path, body, method: 'PUT' }),
-  delete: async <TResponse>({ path }: FetcherOptions<never>) =>
-    request<never, TResponse>({ path, method: 'DELETE' }),
+  delete: async <TRequest extends JsonBody, TResponse>({
+    path,
+    body,
+  }: FetcherOptions<TRequest>) =>
+    request<TRequest, TResponse>({ path, body, method: 'DELETE' }),
 };
 
 const request = async <TRequest, TResponse>({
@@ -57,7 +60,7 @@ const request = async <TRequest, TResponse>({
       },
     };
 
-    if (body && (method === 'POST' || method === 'PATCH')) {
+    if (body && (method === 'POST' || method === 'PATCH' || method === 'PUT')) {
       config.body = JSON.stringify(body);
     }
 

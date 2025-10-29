@@ -1,9 +1,12 @@
 import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
+import { useState } from 'react';
 import ArticleCard from '../ArticleCard/ArticleCard';
 import EmptyLetterCard from '../EmptyLetterCard/EmptyLetterCard';
+import useModal from '@/components/Modal/useModal';
 import { useDevice } from '@/hooks/useDevice';
 import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
+import ArticleDeleteModal from '@/pages/storage/components/ArticleDeleteModal/ArticleDeleteModal';
 import type { Article } from '@/types/articles';
 import CheckIcon from '#/assets/svg/check.svg';
 import LetterIcon from '#/assets/svg/letter.svg';
@@ -14,11 +17,18 @@ type ExtendedArticle = Article & {
 
 interface ArticleCardListProps {
   articles: ExtendedArticle[];
+  onDeleteArticles?: (articleIds: number[]) => void;
 }
 
-const ArticleCardList = ({ articles }: ArticleCardListProps) => {
+const ArticleCardList = ({
+  articles,
+  onDeleteArticles,
+}: ArticleCardListProps) => {
   const device = useDevice();
   const isMobile = device === 'mobile';
+  const [pendingDeleteArticle, setPendingDeleteArticle] =
+    useState<ExtendedArticle | null>(null);
+  const { modalRef, isOpen, openModal, closeModal } = useModal();
 
   const grouped = articles.reduce<{
     read: ExtendedArticle[];
@@ -31,6 +41,20 @@ const ArticleCardList = ({ articles }: ArticleCardListProps) => {
     },
     { read: [], unread: [] },
   );
+
+  const hasBookmarkedArticles = pendingDeleteArticle?.isBookmarked ?? false;
+
+  const handleDeleteClick = (article: ExtendedArticle) => {
+    setPendingDeleteArticle(article);
+    openModal();
+  };
+
+  const handleConfirmDelete = () => {
+    if (pendingDeleteArticle) {
+      onDeleteArticles?.([pendingDeleteArticle?.articleId]);
+      setPendingDeleteArticle(null);
+    }
+  };
 
   if (articles.length === 0)
     return <EmptyLetterCard title="새로운 뉴스레터가 없어요" />;
@@ -62,6 +86,7 @@ const ArticleCardList = ({ articles }: ArticleCardListProps) => {
                     label: article.title ?? 'Unknown Article',
                   });
                 }}
+                onDelete={() => handleDeleteClick(article)}
               />
             </li>
           ))}
@@ -94,11 +119,19 @@ const ArticleCardList = ({ articles }: ArticleCardListProps) => {
                     label: article.title ?? 'Unknown Article',
                   });
                 }}
+                onDelete={() => handleDeleteClick(article)}
               />
             </li>
           ))}
         </CardList>
       </LettersWrapper>
+      <ArticleDeleteModal
+        modalRef={modalRef}
+        isOpen={isOpen}
+        closeModal={closeModal}
+        onDelete={handleConfirmDelete}
+        hasBookmarkedArticles={hasBookmarkedArticles}
+      />
     </Container>
   );
 };

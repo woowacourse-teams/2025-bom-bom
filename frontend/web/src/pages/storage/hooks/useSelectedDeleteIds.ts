@@ -2,35 +2,52 @@ import { useState, useMemo, useCallback } from 'react';
 import type { Article } from '@/types/articles';
 
 export function useSelectedDeleteIds(articleList: Article[]) {
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedList, setSelectedList] = useState<Article[]>([]);
 
   const isAllSelected = useMemo(
-    () => selectedIds.length === articleList.length && articleList.length > 0,
-    [selectedIds, articleList],
+    () => selectedList.length === articleList.length && articleList.length > 0,
+    [selectedList, articleList],
+  );
+
+  const selectedIds = useMemo(
+    () => selectedList.map((article) => article.articleId),
+    [selectedList],
+  );
+
+  const hasBookmarkedArticles = useMemo(
+    () => selectedList.some((article) => article.isBookmarked),
+    [selectedList],
   );
 
   const toggleSelectAll = useCallback(() => {
     if (isAllSelected) {
-      setSelectedIds([]);
+      setSelectedList([]);
     } else {
-      setSelectedIds(articleList.map((article) => article.articleId));
+      setSelectedList(articleList);
     }
   }, [articleList, isAllSelected]);
 
-  const toggleSelect = useCallback((id: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(id)
-        ? prev.filter((selectedId) => selectedId !== id)
-        : [...prev, id],
-    );
-  }, []);
+  const toggleSelect = useCallback(
+    (id: number) => {
+      setSelectedList((prev) => {
+        const article = articleList.find((a) => a.articleId === id);
+        if (!article) return prev;
+
+        return prev.some((a) => a.articleId === id)
+          ? prev.filter((a) => a.articleId !== id)
+          : [...prev, article];
+      });
+    },
+    [articleList],
+  );
 
   const clearSelection = useCallback(() => {
-    setSelectedIds([]);
+    setSelectedList([]);
   }, []);
 
   return {
     selectedIds,
+    hasBookmarkedArticles,
     isAllSelected,
     toggleSelectAll,
     toggleSelect,

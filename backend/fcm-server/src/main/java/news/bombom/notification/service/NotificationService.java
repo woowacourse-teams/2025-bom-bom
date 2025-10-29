@@ -27,11 +27,11 @@ public class NotificationService {
             return NotificationResult.failure("FCM 토큰이 유효하지 않습니다.");
         }
 
-        if (!StringUtils.hasText(token)) {
+        if (!StringUtils.hasText(title)) {
             return NotificationResult.failure("알림 제목이 필요합니다.");
         }
 
-        if (!StringUtils.hasText(token)) {
+        if (!StringUtils.hasText(body)) {
             return NotificationResult.failure("알림 내용이 필요합니다.");
         }
 

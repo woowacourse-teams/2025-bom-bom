@@ -40,6 +40,5 @@ public class NotificationStatusService {
     public void markAsFailed(ArticleArrivalNotification notification, String reason) {
         log.warn("FCM 토큰이 없습니다: memberId={}", notification.getMemberId());
         notification.markFailed(reason);
-        notificationRepository.save(notification);
     }
 }

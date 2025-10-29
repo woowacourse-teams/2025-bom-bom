@@ -41,7 +41,7 @@ export const checkNotificationPermission = async () => {
 // FCM 토큰 생성
 export const getFCMToken = async () => {
   try {
-    const hasPermission = await requestNotificationPermission();
+    const hasPermission = await checkNotificationPermission();
     if (!hasPermission) {
       throw new Error('푸시 알림 권한이 없습니다.');
     }

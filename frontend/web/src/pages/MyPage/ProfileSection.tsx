@@ -8,9 +8,9 @@ import Button from '@/components/Button/Button';
 import InputField from '@/components/InputField/InputField';
 import { toast } from '@/components/Toast/utils/toastActions';
 import { useUserInfoValidation } from '@/hooks/useUserInfoValidation';
-import type ApiError from '@/apis/ApiError';
 import type { Gender } from '@/pages/signup/components/SignupCard.types';
 import type { UserInfo } from '@/types/me';
+import type ApiError from '@bombom/shared/ApiError';
 
 interface ProfileSectionProps {
   userInfo: UserInfo;

@@ -73,6 +73,29 @@ export const checkNotificationPermission = async () => {
   return false;
 };
 
+export const goToSystemPermission = async (enabled: boolean) => {
+  try {
+    const hasPermission = await checkNotificationPermission();
+    if (enabled && !hasPermission) {
+      Alert.alert(
+        '알림 권한 필요',
+        '알림을 받으려면 시스템 설정에서 알림 권한을 허용해주세요.',
+        [
+          { text: '취소', style: 'cancel' },
+          {
+            text: '설정 열기',
+            onPress: () => {
+              Linking.openSettings();
+            },
+          },
+        ],
+      );
+    }
+  } catch (error) {
+    console.error('알림 권한 확인 실패:', error);
+  }
+};
+
 // FCM 토큰 생성
 export const getFCMToken = async () => {
   try {

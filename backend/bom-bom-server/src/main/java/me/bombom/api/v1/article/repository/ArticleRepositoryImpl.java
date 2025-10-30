@@ -8,6 +8,7 @@ import static me.bombom.api.v1.newsletter.domain.QNewsletter.newsletter;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.dto.response.QArticleResponse;
@@ -69,6 +71,28 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .intValue();
     }
 
+    @Override
+    public List<ArticleCountPerNewsletterResponse> countPerNewsletter(Long memberId, String keyword) {
+        return jpaQueryFactory
+                .select(Projections.constructor(
+                        ArticleCountPerNewsletterResponse.class,
+                        newsletter.id,
+                        newsletter.name,
+                        newsletter.imageUrl.coalesce(""),
+                        article.id.count().castToNum(Integer.class)
+                ))
+                .from(article)
+                .join(newsletter).on(newsletter.id.eq(article.newsletterId))
+                .where(
+                        article.memberId.eq(memberId),
+                        keywordFilter(keyword)
+                )
+                .groupBy(newsletter.id, newsletter.name, newsletter.imageUrl)
+                .orderBy(article.id.count().desc())
+                .fetch();
+    }
+
+
     private JPAQuery<Long> getTotalQuery(Long memberId, ArticlesOptionsRequest options) {
         return jpaQueryFactory.select(article.count())
                 .from(article)
@@ -98,6 +122,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .where(createMemberWhereClause(memberId))
                 .where(createDateWhereClause(options.date()))
                 .where(createKeywordWhereClause(options.keyword()))
+                .where(createContentKeywordWhereClause(options.keyword()))
                 .where(createNewsletterIdWhereClause(options.newsletterId()))
                 .orderBy(getOrderSpecifiers(pageable).toArray(OrderSpecifier[]::new))
                 .offset(pageable.getOffset())
@@ -136,6 +161,10 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     private BooleanExpression createKeywordWhereClause(String keyword) {
         return StringUtils.hasText(keyword) ? article.title.like("%" + keyword.strip() + "%") : null;
     }
+
+    private BooleanExpression createContentKeywordWhereClause(String keyword) {
+        return StringUtils.hasText(keyword) ? article.contents.containsIgnoreCase("%" + keyword.strip() + "%") : null;
+    }
   
     private List<OrderSpecifier<?>> getOrderSpecifiers(Pageable pageable) {
         List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
@@ -162,5 +191,16 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                     log.debug("허용되지 않는 정렬 키: {}", property);
                     return new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
                 });
+    }
+
+    private BooleanExpression keywordFilter(String keyword) {
+        if (!StringUtils.hasText(keyword)) {
+            return null;
+        }
+
+        String lowerKeyword = "%" + keyword.strip().toLowerCase() + "%";
+
+        return article.title.lower().like(lowerKeyword)
+                .or(article.contents.stringValue().lower().like(lowerKeyword));
     }
 }

@@ -15,9 +15,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ios: {
       buildNumber: '5',
       supportsTablet: true,
-      googleServicesFile: './GoogleService-Info.plist',
       infoPlist: {
-        UIBackgroundModes: ['remote-notification'],
         NSExceptionDomains: {
           'bombom.news': {
             NSIncludesSubdomains: true,
@@ -38,7 +36,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       },
       edgeToEdgeEnabled: true,
       package: 'com.antarctica.bombom',
-      googleServicesFile: './google-services.json',
     },
     web: {
       bundler: 'metro',
@@ -83,22 +80,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           android: {
             usesCleartextTraffic: true,
           },
-          ios: {
-            useFrameworks: 'static',
-            buildReactNativeFromSource: true,
-          },
         },
       ],
-      [
-        'expo-notifications',
-        {
-          icon: './app/assets/images/logo-android.png',
-          color: '#FE5E04',
-        },
-      ],
-      '@react-native-firebase/app',
-      '@react-native-firebase/messaging',
-      './plugins/withAndroidManifestFix',
     ],
 
     experiments: {
@@ -111,6 +94,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         projectId: 'd2ce3cbd-5c00-4471-8f7f-b4309d071e84',
       },
     },
+
     owner: 'antarctica-bombom',
   };
 };

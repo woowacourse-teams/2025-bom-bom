@@ -13,8 +13,12 @@ interface PutTokenParams {
 }
 
 interface GetNotificationSettingsParams {
-  memberId: string;
+  memberId: number;
   deviceUuid: string;
+}
+
+interface GetNotificationSettingsResponse {
+  enabled: boolean;
 }
 
 interface PutNotificationSettingsParams {
@@ -57,7 +61,7 @@ export const getNotificationSettings = ({
   memberId,
   deviceUuid,
 }: GetNotificationSettingsParams) => {
-  return fetcher.post({
+  return fetcher.get<GetNotificationSettingsResponse>({
     path: `/notifications/tokens/${memberId}/${deviceUuid}/settings/status`,
   });
 };

@@ -114,3 +114,20 @@ export const getFCMToken = async () => {
     console.error('FCM 토큰을 가져오는데 실패했습니다.', error);
   }
 };
+
+export const handleLoggedInPermission = async (
+  memberId: number | undefined,
+  registerFCMToken: (memberId: number | undefined) => Promise<void>,
+) => {
+  try {
+    const alreadyPermission = await checkNotificationPermission();
+    if (!alreadyPermission) {
+      const updatedPermission = await requestNotificationPermission();
+      if (updatedPermission) {
+        await registerFCMToken(memberId);
+      }
+    }
+  } catch (error) {
+    console.error('권한 요청 및 등록 실패:', error);
+  }
+};

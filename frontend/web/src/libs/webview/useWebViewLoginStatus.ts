@@ -36,5 +36,5 @@ export const useWebViewLoginStatus = () => {
     );
 
     return cleanup;
-  }, []);
+  }, [isLoggedIn, userInfo]);
 };

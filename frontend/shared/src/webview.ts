@@ -22,6 +22,7 @@ export type WebToRNMessage =
   | { type: 'OPEN_BROWSER'; payload: { url: string } }
   | { type: 'OPEN_NOTIFICATION_SETTINGS' }
   | { type: 'REQUEST_NOTIFICATION_STATUS' }
+  | { type: 'REQUEST_DEVICE_INFO' }
   | { type: 'TOGGLE_NOTIFICATION'; payload: { enabled: boolean } };
 
 export type RNToWebMessage =
@@ -53,5 +54,11 @@ export type RNToWebMessage =
       type: 'NOTIFICATION_STATUS';
       payload: {
         enabled: boolean;
+      };
+    }
+  | {
+      type: 'DEVICE_INFO';
+      payload: {
+        deviceUuid: string;
       };
     };

@@ -1,31 +1,47 @@
 import styled from '@emotion/styled';
+import { useQuery } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
+import useNotificationMutation from './useNotificationMutation';
+import { queries } from '@/apis/queries';
+import { useUserInfo } from '@/hooks/useUserInfo';
 import {
   sendMessageToRN,
   addWebViewMessageListener,
 } from '@/libs/webview/webview.utils';
 
 const NotificationSettingsSection = () => {
-  const [isEnabled, setIsEnabled] = useState(false);
+  const [deviceUuid, setDeviceUuid] = useState<string>('');
+  const { userInfo } = useUserInfo();
+
+  const { data: notificationStatus } = useQuery(
+    queries.notificationStatus({
+      memberId: userInfo?.id ?? 0,
+      deviceUuid,
+    }),
+  );
 
   useEffect(() => {
-    sendMessageToRN({ type: 'REQUEST_NOTIFICATION_STATUS' });
+    sendMessageToRN({ type: 'REQUEST_DEVICE_INFO' });
 
     const unsubscribe = addWebViewMessageListener((message) => {
-      if (message.type === 'NOTIFICATION_STATUS') {
-        setIsEnabled(message.payload.enabled);
+      if (message.type === 'DEVICE_INFO') {
+        setDeviceUuid(message.payload.deviceUuid);
       }
     });
 
     return unsubscribe;
   }, []);
 
+  const { mutate: updateNotificationSettings } = useNotificationMutation({
+    memberId: userInfo?.id ?? 0,
+    deviceUuid,
+    enabled: !notificationStatus?.enabled,
+  });
+
   const handleToggleClick = () => {
-    const newEnabled = !isEnabled;
-    sendMessageToRN({
-      type: 'TOGGLE_NOTIFICATION',
-      payload: { enabled: newEnabled },
-    });
+    if (!userInfo?.id || !deviceUuid) return;
+
+    updateNotificationSettings();
   };
 
   return (
@@ -33,8 +49,8 @@ const NotificationSettingsSection = () => {
       <SettingOption>
         <SettingLabel>새로운 아티클 알림 받기</SettingLabel>
         <ToggleWrapper type="button" onClick={handleToggleClick}>
-          <ToggleTrack isEnabled={isEnabled}>
-            <ToggleThumb isEnabled={isEnabled} />
+          <ToggleTrack isEnabled={notificationStatus?.enabled ?? false}>
+            <ToggleThumb isEnabled={notificationStatus?.enabled ?? false} />
           </ToggleTrack>
         </ToggleWrapper>
       </SettingOption>

@@ -162,9 +162,9 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             return null;
         }
 
-        String lowerKeyword = "%" + keyword.strip().toLowerCase() + "%";
-        return article.title.lower().like(lowerKeyword)
-                .or(article.contents.containsIgnoreCase(lowerKeyword));
+        String trimmed = "%" + keyword.strip() + "%";
+        return article.title.like(trimmed)
+                .or(article.contents.like(trimmed));
     }
   
     private List<OrderSpecifier<?>> getOrderSpecifiers(Pageable pageable) {

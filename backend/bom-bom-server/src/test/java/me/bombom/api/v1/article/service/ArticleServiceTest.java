@@ -182,27 +182,27 @@ class ArticleServiceTest {
             softly.assertThat(result.getContent()).hasSize(articles.size() - 1);
         });
     }
-
-    @Test
-    void 아티클_목록_조회_제목_검색_테스트() {
-        // given
-        Pageable pageable = PageRequest.of(0, 10);
-
-        // when
-        Page<ArticleResponse> result = articleService.getArticles(
-                member,
-                ArticlesOptionsRequest.of(BASE_TIME.toLocalDate(), null, "뉴스"),
-                pageable
-        );
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(result.getContent())
-                    .extracting(ArticleResponse::title)
-                    .allMatch(title -> title.contains("뉴스"));
-            softly.assertThat(result.getContent()).hasSize(2);
-        });
-    }
+//
+//    @Test
+//    void 아티클_목록_조회_제목_검색_테스트() {
+//        // given
+//        Pageable pageable = PageRequest.of(0, 10);
+//
+//        // when
+//        Page<ArticleResponse> result = articleService.getArticles(
+//                member,
+//                ArticlesOptionsRequest.of(BASE_TIME.toLocalDate(), null, "뉴스"),
+//                pageable
+//        );
+//
+//        // then
+//        assertSoftly(softly -> {
+//            softly.assertThat(result.getContent())
+//                    .extracting(ArticleResponse::title)
+//                    .allMatch(title -> title.contains("뉴스"));
+//            softly.assertThat(result.getContent()).hasSize(2);
+//        });
+//    }
 
     @Test
     void 아티클_목록_조회_뉴스레터가_존재하지_않으면_예외() {

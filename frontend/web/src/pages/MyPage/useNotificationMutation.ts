@@ -6,18 +6,16 @@ import { toast } from '@/components/Toast/utils/toastActions';
 interface useNotificationMutationParams {
   memberId: number;
   deviceUuid: string;
-  enabled: boolean;
 }
 
 const useNotificationMutation = ({
   memberId,
   deviceUuid,
-  enabled,
 }: useNotificationMutationParams) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () =>
+    mutationFn: (enabled: boolean) =>
       putNotificationSettings({ memberId, deviceUuid, enabled }),
     onSuccess: () => {
       queryClient.invalidateQueries({

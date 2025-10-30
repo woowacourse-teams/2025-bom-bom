@@ -35,13 +35,12 @@ const NotificationSettingsSection = () => {
   const { mutate: updateNotificationSettings } = useNotificationMutation({
     memberId: userInfo?.id ?? 0,
     deviceUuid,
-    enabled: !notificationStatus?.enabled,
   });
 
   const handleToggleClick = () => {
     if (!userInfo?.id || !deviceUuid) return;
 
-    updateNotificationSettings();
+    updateNotificationSettings(!notificationStatus);
   };
 
   return (
@@ -49,8 +48,8 @@ const NotificationSettingsSection = () => {
       <SettingOption>
         <SettingLabel>새로운 아티클 알림 받기</SettingLabel>
         <ToggleWrapper type="button" onClick={handleToggleClick}>
-          <ToggleTrack isEnabled={notificationStatus?.enabled ?? false}>
-            <ToggleThumb isEnabled={notificationStatus?.enabled ?? false} />
+          <ToggleTrack enabled={notificationStatus ?? false}>
+            <ToggleThumb enabled={notificationStatus ?? false} />
           </ToggleTrack>
         </ToggleWrapper>
       </SettingOption>
@@ -97,19 +96,19 @@ const ToggleWrapper = styled.button<{ disabled?: boolean }>`
   }
 `;
 
-const ToggleTrack = styled.div<{ isEnabled: boolean }>`
+const ToggleTrack = styled.div<{ enabled: boolean }>`
   position: relative;
   width: 51px;
   height: 31px;
   border-radius: 16px;
 
-  background-color: ${({ theme, isEnabled }) =>
-    isEnabled ? theme.colors.primary : theme.colors.disabledText};
+  background-color: ${({ theme, enabled }) =>
+    enabled ? theme.colors.primary : theme.colors.disabledText};
 
   transition: background-color 0.3s;
 `;
 
-const ToggleThumb = styled.div<{ isEnabled: boolean }>`
+const ToggleThumb = styled.div<{ enabled: boolean }>`
   position: absolute;
   top: 3px;
   left: 3px;
@@ -120,7 +119,7 @@ const ToggleThumb = styled.div<{ isEnabled: boolean }>`
 
   background-color: ${({ theme }) => theme.colors.white};
 
-  transform: translateX(${({ isEnabled }) => (isEnabled ? '20px' : '0')});
+  transform: translateX(${({ enabled }) => (enabled ? '20px' : '0')});
   transition: transform 0.3s;
 `;
 

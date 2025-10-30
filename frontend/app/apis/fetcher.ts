@@ -42,9 +42,7 @@ const request = async <TRequest, TResponse>({
       config.body = JSON.stringify(body);
     }
 
-    const isNotificationRequest = path.startsWith('/notifications');
-    const apiBaseUrl = isNotificationRequest ? ENV.baseUrlFCM : ENV.baseUrl;
-    const response = await fetch(`${apiBaseUrl}${path}`, config);
+    const response = await fetch(`${ENV.baseUrl}${path}`, config);
 
     if (!response.ok) {
       const status = response.status;

@@ -25,7 +25,7 @@ export type WebToRNMessage =
   | { type: 'REQUEST_DEVICE_INFO' }
   | { type: 'CHECK_NOTIFICATION_PERMISSION'; payload: { enabled: boolean } }
   | {
-      type: 'LOGIN_STATUS_RESPONSE';
+      type: 'LOGIN_STATUS';
       payload: {
         isLoggedIn: boolean;
         memberId?: number;

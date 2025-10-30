@@ -16,7 +16,7 @@ export const useWebViewLoginStatus = () => {
         if (message.type === 'CHECK_LOGIN_STATUS') {
           try {
             sendMessageToRN({
-              type: 'LOGIN_STATUS_RESPONSE',
+              type: 'LOGIN_STATUS',
               payload: {
                 isLoggedIn,
                 memberId: userInfo?.id,
@@ -25,7 +25,7 @@ export const useWebViewLoginStatus = () => {
           } catch (error) {
             logger.error('로그인 상태 확인 실패:', error);
             sendMessageToRN({
-              type: 'LOGIN_STATUS_RESPONSE',
+              type: 'LOGIN_STATUS',
               payload: {
                 isLoggedIn: false,
               },

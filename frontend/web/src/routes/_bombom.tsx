@@ -12,26 +12,25 @@ export const Route = createFileRoute('/_bombom')({
     context,
     location,
   }): Promise<void | ReturnType<typeof redirect>> => {
+    if (!isFirstVisit) return;
+
     const { queryClient } = context;
 
-    if (location.pathname === '/') {
+    const data = queryClient.getQueryData(queries.userProfile().queryKey);
+    if (data) {
       isFirstVisit = false;
       return;
     }
 
-    const data = queryClient.getQueryData(queries.userProfile().queryKey);
-    if (data) return;
-
     try {
       const user = await queryClient.fetchQuery(queries.userProfile());
-
       if (user) {
         window.gtag?.('set', { user_id: user.id });
+        isFirstVisit = false;
       }
     } catch {
-      if (isFirstVisit) return redirect({ to: '/' });
-    } finally {
-      isFirstVisit = false;
+      if (isFirstVisit && location.pathname !== '/')
+        return redirect({ to: '/' });
     }
   },
 });

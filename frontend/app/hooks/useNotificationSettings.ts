@@ -1,6 +1,9 @@
 import { useCallback } from 'react';
 import { Alert, Linking } from 'react-native';
-import { putNotificationSettings } from '@/apis/notification';
+import {
+  getNotificationSettings,
+  putNotificationSettings,
+} from '@/apis/notification';
 import { getDeviceUUID } from '@/utils/device';
 import { useWebView } from '@/contexts/WebViewContext';
 import { checkNotificationPermission } from '@/utils/notification';
@@ -17,11 +20,16 @@ export const useNotificationSettings = () => {
         if (!deviceUuid) return;
 
         const hasPermission = await checkNotificationPermission();
+        const enabled = await getNotificationSettings({ memberId, deviceUuid });
+
+        if (typeof enabled !== 'boolean') {
+          throw new Error('알림 설정 정보를 가져올 수 없습니다.');
+        }
 
         sendMessageToWeb({
           type: 'NOTIFICATION_STATUS',
           payload: {
-            enabled: hasPermission,
+            enabled: hasPermission && enabled,
           },
         });
       } catch (error) {
@@ -83,7 +91,7 @@ export const useNotificationSettings = () => {
         sendMessageToWeb({
           type: 'NOTIFICATION_STATUS',
           payload: {
-            enabled: enabled && hasPermission,
+            enabled: hasPermission && enabled,
           },
         });
       } catch (error) {

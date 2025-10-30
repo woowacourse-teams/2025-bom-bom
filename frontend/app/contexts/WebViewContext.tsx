@@ -2,6 +2,7 @@ import {
   createContext,
   PropsWithChildren,
   RefObject,
+  useCallback,
   useContext,
   useRef,
   useState,
@@ -23,7 +24,7 @@ export const WebViewProvider = ({ children }: PropsWithChildren) => {
   const webViewRef = useRef<WebView | null>(null);
   const [isWebViewReady, setWebViewReady] = useState(false);
 
-  const sendMessageToWeb = (message: RNToWebMessage) => {
+  const sendMessageToWeb = useCallback((message: RNToWebMessage) => {
     try {
       const messageString = JSON.stringify(message);
       webViewRef.current?.postMessage(messageString);
@@ -31,7 +32,7 @@ export const WebViewProvider = ({ children }: PropsWithChildren) => {
     } catch (error) {
       console.error('WebView 메시지 전송 실패:', error);
     }
-  };
+  }, []);
 
   return (
     <WebViewContext.Provider

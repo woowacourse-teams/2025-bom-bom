@@ -110,7 +110,7 @@ const useNotification = () => {
       unsubscribeNotificationOpened();
       responseListener.remove();
     };
-  }, [coldStartNotificationOpen, isWebViewReady]);
+  }, [coldStartNotificationOpen, isWebViewReady, sendMessageToWeb]);
 
   return {
     registerFCMToken,

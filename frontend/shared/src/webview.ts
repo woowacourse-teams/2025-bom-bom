@@ -23,7 +23,7 @@ export type WebToRNMessage =
   | { type: 'OPEN_NOTIFICATION_SETTINGS' }
   | { type: 'REQUEST_NOTIFICATION_STATUS' }
   | { type: 'REQUEST_DEVICE_INFO' }
-  | { type: 'TOGGLE_NOTIFICATION'; payload: { enabled: boolean } };
+  | { type: 'CHECK_NOTIFICATION_PERMISSION'; payload: { enabled: boolean } };
 
 export type RNToWebMessage =
   | {

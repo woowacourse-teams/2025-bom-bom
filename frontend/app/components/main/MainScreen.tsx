@@ -1,5 +1,4 @@
 import styled from '@emotion/native';
-import { useState } from 'react';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
@@ -16,6 +15,10 @@ import { ENV } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
 import useNotification from '@/hooks/useNotification';
 import { sendDeviceInfoToWeb } from '@/utils/device';
+import {
+  goToSystemPermission,
+  requestNotificationPermission,
+} from '@/utils/notification';
 
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
@@ -26,6 +29,7 @@ export const MainScreen = () => {
 
   const handleWebViewLoadEnd = () => {
     console.log('WebView 로드 완료');
+    requestNotificationPermission();
     setWebViewReady(true);
   };
 
@@ -63,6 +67,10 @@ export const MainScreen = () => {
         case 'REQUEST_DEVICE_INFO':
           console.log('디바이스 정보 요청');
           sendDeviceInfoToWeb(sendMessageToWeb);
+          break;
+
+        case 'CHECK_NOTIFICATION_PERMISSION':
+          goToSystemPermission(message.payload.enabled);
           break;
 
         default:

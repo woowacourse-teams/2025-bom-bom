@@ -40,7 +40,14 @@ const NotificationSettingsSection = () => {
   const handleToggleClick = () => {
     if (!userInfo?.id || !deviceUuid) return;
 
-    updateNotificationSettings(!notificationStatus);
+    const newStatus = !notificationStatus;
+
+    sendMessageToRN({
+      type: 'CHECK_NOTIFICATION_PERMISSION',
+      payload: { enabled: newStatus },
+    });
+
+    updateNotificationSettings(newStatus);
   };
 
   return (

@@ -53,4 +53,5 @@ export type RNToWebMessage =
       payload: {
         deviceUuid: string;
       };
-    };
+    }
+  | { type: 'CHECK_LOGIN_STATUS' };

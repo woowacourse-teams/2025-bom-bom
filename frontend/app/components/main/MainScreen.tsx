@@ -87,6 +87,14 @@ export const MainScreen = () => {
           goToSystemPermission(message.payload.enabled);
           break;
 
+        case 'LOGIN_STATUS_RESPONSE':
+          console.log('로그인 상태 응답:', message.payload);
+          if (message.payload.isLoggedIn) {
+            requestNotificationPermission();
+            registerFCMToken(message.payload.memberId);
+          }
+          break;
+
         default:
           console.log('알수 없는 메시지 수신:', message);
           break;

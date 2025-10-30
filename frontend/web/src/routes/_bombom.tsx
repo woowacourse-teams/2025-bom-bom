@@ -26,11 +26,12 @@ export const Route = createFileRoute('/_bombom')({
       const user = await queryClient.fetchQuery(queries.userProfile());
       if (user) {
         window.gtag?.('set', { user_id: user.id });
-        isFirstVisit = false;
       }
     } catch {
       if (isFirstVisit && location.pathname !== '/')
         return redirect({ to: '/' });
+    } finally {
+      isFirstVisit = false;
     }
   },
 });

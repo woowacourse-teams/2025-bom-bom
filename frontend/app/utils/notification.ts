@@ -15,16 +15,20 @@ export const createAndroidChannel = async () => {
 
 // 사용자 알림 권한 요청
 export const requestNotificationPermission = async () => {
-  if (!Device.isDevice) {
-    return false;
+  if (Platform.OS === 'ios') {
+    const auth = await messaging().requestPermission();
+    return (
+      auth === messaging.AuthorizationStatus.AUTHORIZED ||
+      auth === messaging.AuthorizationStatus.PROVISIONAL
+    );
   }
 
-  const authStatus = await messaging().requestPermission();
-  const enabled =
-    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  if (Platform.OS === 'android') {
+    const { status } = await Notifications.requestPermissionsAsync();
+    return status === 'granted';
+  }
 
-  return enabled;
+  return false;
 };
 
 const checkNotificationPermission = async () => {

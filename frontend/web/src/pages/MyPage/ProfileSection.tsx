@@ -39,6 +39,7 @@ const ProfileSection = ({ userInfo }: ProfileSectionProps) => {
     mutationKey: ['withdraw'],
     mutationFn: postWithdraw,
     onSuccess: () => {
+      window.gtag?.('set', { user_id: null });
       window.location.reload();
     },
     onError: () => {

@@ -17,7 +17,7 @@ import useNotification from '@/hooks/useNotification';
 import { sendDeviceInfoToWeb } from '@/utils/device';
 import {
   goToSystemPermission,
-  requestNotificationPermission,
+  handleLoggedInPermission,
 } from '@/utils/notification';
 
 export const MainScreen = () => {
@@ -46,8 +46,7 @@ export const MainScreen = () => {
         case 'LOGIN_SUCCESS':
           console.log('웹뷰에서 로그인 성공 알림 수신:', message.payload);
           hideLogin();
-          requestNotificationPermission();
-          registerFCMToken(message.payload?.memberId);
+          handleLoggedInPermission(message.payload?.memberId, registerFCMToken);
           break;
 
         case 'LOGIN_FAILED':
@@ -77,8 +76,10 @@ export const MainScreen = () => {
         case 'LOGIN_STATUS':
           console.log('로그인 상태 응답:', message.payload);
           if (message.payload.isLoggedIn) {
-            requestNotificationPermission();
-            registerFCMToken(message.payload.memberId);
+            handleLoggedInPermission(
+              message.payload.memberId,
+              registerFCMToken,
+            );
           }
           break;
 

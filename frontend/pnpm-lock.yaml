@@ -156,6 +156,9 @@ importers:
       '@babel/core':
         specifier: ^7.25.2
         version: 7.28.4
+      '@expo/config-plugins':
+        specifier: ^54.0.2
+        version: 54.0.2
       '@types/react':
         specifier: ~19.1.10
         version: 19.1.17
@@ -9838,7 +9841,7 @@ snapshots:
       getenv: 2.0.0
       glob: 10.4.5
       resolve-from: 5.0.0
-      semver: 7.7.2
+      semver: 7.7.3
       slash: 3.0.0
       slugify: 1.6.6
       xcode: 3.0.1
@@ -15056,7 +15059,7 @@ snapshots:
 
   is-bun-module@2.0.0:
     dependencies:
-      semver: 7.7.2
+      semver: 7.7.3
 
   is-callable@1.2.7: {}
 
@@ -16416,7 +16419,7 @@ snapshots:
     dependencies:
       hosted-git-info: 7.0.2
       proc-log: 4.2.0
-      semver: 7.7.2
+      semver: 7.7.3
       validate-npm-package-name: 5.0.1
 
   npm-run-path@4.0.1:

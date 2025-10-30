@@ -85,7 +85,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .join(newsletter).on(newsletter.id.eq(article.newsletterId))
                 .where(
                         article.memberId.eq(memberId),
-                        keywordFilter(keyword)
+                        createKeywordWhereClause(keyword)
                 )
                 .groupBy(newsletter.id, newsletter.name, newsletter.imageUrl)
                 .orderBy(article.id.count().desc())
@@ -122,7 +122,6 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .where(createMemberWhereClause(memberId))
                 .where(createDateWhereClause(options.date()))
                 .where(createKeywordWhereClause(options.keyword()))
-                .where(createContentKeywordWhereClause(options.keyword()))
                 .where(createNewsletterIdWhereClause(options.newsletterId()))
                 .orderBy(getOrderSpecifiers(pageable).toArray(OrderSpecifier[]::new))
                 .offset(pageable.getOffset())
@@ -159,11 +158,13 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     }
 
     private BooleanExpression createKeywordWhereClause(String keyword) {
-        return StringUtils.hasText(keyword) ? article.title.like("%" + keyword.strip() + "%") : null;
-    }
+        if (!StringUtils.hasText(keyword)) {
+            return null;
+        }
 
-    private BooleanExpression createContentKeywordWhereClause(String keyword) {
-        return StringUtils.hasText(keyword) ? article.contents.containsIgnoreCase("%" + keyword.strip() + "%") : null;
+        String lowerKeyword = "%" + keyword.strip().toLowerCase() + "%";
+        return article.title.lower().like(lowerKeyword)
+                .or(article.contents.stringValue().lower().like(lowerKeyword));
     }
   
     private List<OrderSpecifier<?>> getOrderSpecifiers(Pageable pageable) {
@@ -191,16 +192,5 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                     log.debug("허용되지 않는 정렬 키: {}", property);
                     return new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
                 });
-    }
-
-    private BooleanExpression keywordFilter(String keyword) {
-        if (!StringUtils.hasText(keyword)) {
-            return null;
-        }
-
-        String lowerKeyword = "%" + keyword.strip().toLowerCase() + "%";
-
-        return article.title.lower().like(lowerKeyword)
-                .or(article.contents.stringValue().lower().like(lowerKeyword));
     }
 }

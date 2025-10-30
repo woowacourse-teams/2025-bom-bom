@@ -13,7 +13,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     ios: {
-      buildNumber: '5',
       supportsTablet: true,
       googleServicesFile: './GoogleService-Info.plist',
       infoPlist: {

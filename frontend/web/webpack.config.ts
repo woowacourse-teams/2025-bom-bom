@@ -44,6 +44,7 @@ export default (env: Env, argv: Argv) => {
                     },
                   },
                 },
+                cacheDirectory: true,
               },
             },
           ],
@@ -116,7 +117,7 @@ export default (env: Env, argv: Argv) => {
             ),
             to: path.resolve(__dirname, 'dist', 'robots.txt'),
           },
-          ...(process.env.SERVER_TYPE === 'prod'
+          ...(isProduction
             ? [
                 {
                   from: path.resolve(__dirname, 'public', 'sitemap.xml'),

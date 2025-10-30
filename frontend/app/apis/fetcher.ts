@@ -7,6 +7,8 @@ import type {
 import { ApiError, DEFAULT_ERROR_MESSAGES } from '@bombom/shared';
 
 export const fetcher = {
+  get: async <TResponse>({ path }: FetcherOptions<never>) =>
+    request<never, TResponse>({ path, method: 'GET' }),
   post: async <TRequest extends JsonBody, TResponse>({
     path,
     body,
@@ -36,13 +38,12 @@ const request = async <TRequest, TResponse>({
       },
     };
 
-    if (body) {
+    if (body && (method === 'POST' || method === 'PUT')) {
       config.body = JSON.stringify(body);
     }
 
-    const apiBaseUrl = path.startsWith('/notifications')
-      ? ENV.baseUrlFCM
-      : ENV.baseUrl;
+    const isNotificationRequest = path.startsWith('/notifications');
+    const apiBaseUrl = isNotificationRequest ? ENV.baseUrlFCM : ENV.baseUrl;
     const response = await fetch(`${apiBaseUrl}${path}`, config);
 
     if (!response.ok) {

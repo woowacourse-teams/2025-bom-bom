@@ -14,10 +14,15 @@ import * as WebBrowser from 'expo-web-browser';
 import { ENV } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
 import useNotification from '@/hooks/useNotification';
+import { sendDeviceInfoToWeb } from '@/utils/device';
+import {
+  goToSystemPermission,
+  requestNotificationPermission,
+} from '@/utils/notification';
 
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
-  const { webViewRef, setWebViewReady } = useWebView();
+  const { webViewRef, setWebViewReady, sendMessageToWeb } = useWebView();
 
   const { handleNavigationStateChange } = useAndroidNavigationState();
   const { registerFCMToken } = useNotification();
@@ -25,6 +30,7 @@ export const MainScreen = () => {
   const handleWebViewLoadEnd = () => {
     console.log('WebView 로드 완료');
     setWebViewReady(true);
+    requestNotificationPermission();
   };
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {
@@ -40,7 +46,8 @@ export const MainScreen = () => {
         case 'LOGIN_SUCCESS':
           console.log('웹뷰에서 로그인 성공 알림 수신:', message.payload);
           hideLogin();
-          registerFCMToken(message.payload?.userId);
+          requestNotificationPermission();
+          registerFCMToken(message.payload?.memberId);
           break;
 
         case 'LOGIN_FAILED':
@@ -56,6 +63,15 @@ export const MainScreen = () => {
               dismissButtonStyle: 'close',
             });
           }
+          break;
+
+        case 'REQUEST_DEVICE_INFO':
+          console.log('디바이스 정보 요청');
+          sendDeviceInfoToWeb(sendMessageToWeb);
+          break;
+
+        case 'CHECK_NOTIFICATION_PERMISSION':
+          goToSystemPermission(message.payload.enabled);
           break;
 
         default:

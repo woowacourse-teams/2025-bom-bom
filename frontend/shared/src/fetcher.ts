@@ -1,4 +1,4 @@
-export type JsonBody = Record<string, unknown>;
+export type JsonBody = Record<string, unknown> | unknown[];
 
 export type FetcherOptions<TRequest extends JsonBody> = {
   path: string;

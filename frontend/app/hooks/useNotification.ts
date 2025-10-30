@@ -18,7 +18,7 @@ Notifications.setNotificationHandler({
 const useNotification = () => {
   const { sendMessageToWeb, isWebViewReady } = useWebView();
 
-  const registerFCMToken = useCallback(async (memberId: string | undefined) => {
+  const registerFCMToken = useCallback(async (memberId: number | undefined) => {
     try {
       const deviceUuid = await getDeviceUUID();
       const token = await getFCMToken();
@@ -89,11 +89,6 @@ const useNotification = () => {
       },
     );
 
-    // 포그라운드에서 알림을 수신한 경우
-    const notificationListener = Notifications.addNotificationReceivedListener(
-      (notification) => {},
-    );
-
     // 포그라운드에서 알림을 탭한 경우
     const responseListener =
       Notifications.addNotificationResponseReceivedListener((response) => {
@@ -113,7 +108,6 @@ const useNotification = () => {
     return () => {
       unsubscribe();
       unsubscribeNotificationOpened();
-      notificationListener.remove();
       responseListener.remove();
     };
   }, [coldStartNotificationOpen, isWebViewReady]);

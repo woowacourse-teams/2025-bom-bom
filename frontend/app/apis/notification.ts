@@ -1,21 +1,15 @@
 import { fetcher } from './fetcher';
 
 interface PostTokenParams {
-  memberId: string;
+  memberId: number;
   deviceUuid: string;
   token: string;
 }
 
 interface PutTokenParams {
-  memberId: string;
+  memberId: number;
   deviceUuid: string;
   token: string;
-}
-
-interface PutNotificationSettingsParams {
-  memberId: string;
-  deviceUuid: string;
-  enabled: boolean;
 }
 
 export const postFCMToken = ({
@@ -45,16 +39,5 @@ export const putFCMToken = ({
       deviceUuid,
       token,
     },
-  });
-};
-
-export const putNotificationSettings = ({
-  memberId,
-  deviceUuid,
-  enabled,
-}: PutNotificationSettingsParams) => {
-  return fetcher.put({
-    path: `/notifications/tokens/${memberId}/${deviceUuid}/settings`,
-    body: { enabled },
   });
 };

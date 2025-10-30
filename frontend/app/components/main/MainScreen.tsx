@@ -29,8 +29,8 @@ export const MainScreen = () => {
 
   const handleWebViewLoadEnd = () => {
     console.log('WebView 로드 완료');
-    requestNotificationPermission();
     setWebViewReady(true);
+    requestNotificationPermission();
   };
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {
@@ -46,6 +46,7 @@ export const MainScreen = () => {
         case 'LOGIN_SUCCESS':
           console.log('웹뷰에서 로그인 성공 알림 수신:', message.payload);
           hideLogin();
+          requestNotificationPermission();
           registerFCMToken(message.payload?.memberId);
           break;
 

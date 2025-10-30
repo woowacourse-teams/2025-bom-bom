@@ -30,7 +30,7 @@ export const MainScreen = () => {
   const handleWebViewLoadEnd = () => {
     console.log('WebView 로드 완료');
     setWebViewReady(true);
-    requestNotificationPermission();
+    sendMessageToWeb({ type: 'CHECK_LOGIN_STATUS' });
   };
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {
@@ -72,6 +72,14 @@ export const MainScreen = () => {
 
         case 'CHECK_NOTIFICATION_PERMISSION':
           goToSystemPermission(message.payload.enabled);
+          break;
+
+        case 'LOGIN_STATUS_RESPONSE':
+          console.log('로그인 상태 응답:', message.payload);
+          if (message.payload.isLoggedIn) {
+            requestNotificationPermission();
+            registerFCMToken(message.payload.memberId);
+          }
           break;
 
         default:

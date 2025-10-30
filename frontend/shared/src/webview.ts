@@ -23,7 +23,14 @@ export type WebToRNMessage =
   | { type: 'OPEN_NOTIFICATION_SETTINGS' }
   | { type: 'REQUEST_NOTIFICATION_STATUS' }
   | { type: 'REQUEST_DEVICE_INFO' }
-  | { type: 'CHECK_NOTIFICATION_PERMISSION'; payload: { enabled: boolean } };
+  | { type: 'CHECK_NOTIFICATION_PERMISSION'; payload: { enabled: boolean } }
+  | {
+      type: 'LOGIN_STATUS_RESPONSE';
+      payload: {
+        isLoggedIn: boolean;
+        memberId?: number;
+      };
+    };
 
 export type RNToWebMessage =
   | {
@@ -61,4 +68,5 @@ export type RNToWebMessage =
       payload: {
         deviceUuid: string;
       };
-    };
+    }
+  | { type: 'CHECK_LOGIN_STATUS' };

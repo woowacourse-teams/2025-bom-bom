@@ -1,5 +1,12 @@
 version: 0.2
 
+cache:
+  paths:
+    - '/root/.pnpm-store' # pnpm 전역 캐시 저장소
+    - 'frontend/web/.swc' # SWC 트랜스파일 캐시
+    - 'frontend/web/.webpack-cache' # Webpack 빌드 캐시
+  location: 'techcourse-project-2025/bombom/fe-cache-dev' # ✅ 별도 경로 지정
+
 phases:
   install:
     runtime-versions:
@@ -8,7 +15,7 @@ phases:
       - echo "Installing dependencies..."
       - cd ./frontend
       - npm install -g pnpm@10.12.1
-      - pnpm install --frozen-lockfile
+      - pnpm install --frozen-lockfile --prefer-offline
 
   pre_build:
     commands:

@@ -10,7 +10,7 @@ import { toast } from '@/components/Toast/utils/toastActions';
 import { useUserInfoValidation } from '@/hooks/useUserInfoValidation';
 import type { Gender } from '@/pages/signup/components/SignupCard.types';
 import type { UserInfo } from '@/types/me';
-import type ApiError from '@bombom/shared/ApiError';
+import type { ApiError } from '@bombom/shared/apis';
 
 interface ProfileSectionProps {
   userInfo: UserInfo;

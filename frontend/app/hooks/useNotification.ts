@@ -16,7 +16,7 @@ Notifications.setNotificationHandler({
 });
 
 const useNotification = () => {
-  const { sendMessageToWeb, isWebViewReady } = useWebView();
+  const { sendMessageToWeb } = useWebView();
 
   const registerFCMToken = useCallback(async (memberId: number | undefined) => {
     try {
@@ -52,14 +52,7 @@ const useNotification = () => {
     }
   }, [sendMessageToWeb]);
 
-  useEffect(() => {
-    createAndroidChannel();
-  }, []);
-
-  // WebView가 준비된 후에만 cold start 알림 처리
-  useEffect(() => {
-    if (!isWebViewReady) return;
-
+  const onNotification = useCallback(() => {
     coldStartNotificationOpen();
 
     // FCM 포그라운드 메시지 리스너: 앱이 열려있을 때 FCM 메시지를 받으면 즉시 로컬 알림으로 표시
@@ -110,10 +103,15 @@ const useNotification = () => {
       unsubscribeNotificationOpened();
       responseListener.remove();
     };
-  }, [coldStartNotificationOpen, isWebViewReady, sendMessageToWeb]);
+  }, [coldStartNotificationOpen, sendMessageToWeb]);
+
+  useEffect(() => {
+    createAndroidChannel();
+  }, []);
 
   return {
     registerFCMToken,
+    onNotification,
   };
 };
 

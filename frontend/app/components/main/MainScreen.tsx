@@ -19,19 +19,31 @@ import {
   goToSystemPermission,
   requestNotificationPermission,
 } from '@/utils/notification';
+import { useEffect, useRef } from 'react';
 
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
-  const { webViewRef, setWebViewReady, sendMessageToWeb } = useWebView();
+  const { webViewRef, sendMessageToWeb } = useWebView();
+  const webViewLoadEndCleanupRef = useRef<() => void>(null);
 
   const { handleNavigationStateChange } = useAndroidNavigationState();
-  const { registerFCMToken } = useNotification();
+  const { registerFCMToken, onNotification } = useNotification();
 
   const handleWebViewLoadEnd = () => {
     console.log('WebView 로드 완료');
-    setWebViewReady(true);
+    if (webViewLoadEndCleanupRef.current) {
+      webViewLoadEndCleanupRef.current();
+    }
+
     requestNotificationPermission();
+    webViewLoadEndCleanupRef.current = onNotification();
   };
+
+  useEffect(() => {
+    return () => {
+      webViewLoadEndCleanupRef.current?.();
+    };
+  }, []);
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {
     try {

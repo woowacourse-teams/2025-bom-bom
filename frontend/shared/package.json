@@ -14,5 +14,8 @@
     "./webview": "./src/webview.ts",
     "./apis": "./src/apis/index.ts",
     "./utils": "./src/utils/index.ts"
+  },
+  "dependencies": {
+    "@bombom/env": "workspace:*"
   }
 }

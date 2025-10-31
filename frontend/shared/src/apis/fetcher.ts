@@ -1,3 +1,4 @@
+import { getEnv } from '@bombom/env';
 import { logger } from '../utils';
 import ApiError from './ApiError';
 
@@ -63,7 +64,8 @@ const request = async <TRequest, TResponse>({
   headers,
 }: RequestOptions<TRequest>): Promise<TResponse | undefined> => {
   try {
-    const url = new URL(ENV.baseUrl + path);
+    const env = getEnv();
+    const url = new URL(env.baseUrl + path);
     const stringifiedQuery: Record<string, string> = Object.fromEntries(
       Object.entries(query)
         .map(([key, value]) => [key, value?.toString()])
@@ -76,7 +78,7 @@ const request = async <TRequest, TResponse>({
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Basic ${ENV.token}`,
+        Authorization: `Basic ${env.token}`,
         ...headers,
       },
     };

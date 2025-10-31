@@ -1,11 +1,22 @@
-import { ApiError, DEFAULT_ERROR_MESSAGES } from '@bombom/shared';
-import { ENV } from './env';
-import { logger } from '@/utils/logger';
-import type {
-  FetcherOptions,
-  JsonBody,
-  RequestOptions,
-} from '@bombom/shared/fetcher';
+import { logger } from '../utils';
+import ApiError from './ApiError';
+
+const DEFAULT_ERROR_MESSAGES: Record<number, string> = {
+  400: '잘못된 요청입니다. 입력값을 확인해주세요.',
+  401: '로그인이 필요합니다.',
+  403: '접근 권한이 없습니다.',
+  404: '요청한 리소스를 찾을 수 없습니다.',
+  500: '서버에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
+};
+
+type JsonBody = Record<string, unknown> | unknown[];
+
+type FetcherOptions<TRequest extends JsonBody> = {
+  path: string;
+  query?: Record<string, string | number | undefined | string[]>;
+  body?: TRequest;
+  headers?: HeadersInit;
+};
 
 export const fetcher = {
   get: async <TResponse>({ path, query }: FetcherOptions<never>) =>
@@ -32,6 +43,16 @@ export const fetcher = {
     body,
   }: FetcherOptions<TRequest>) =>
     request<TRequest, TResponse>({ path, body, method: 'DELETE' }),
+};
+
+type FetchMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT';
+
+type RequestOptions<TRequest> = {
+  path: string;
+  method: FetchMethod;
+  query?: Record<string, string | number | undefined | string[]>;
+  body?: TRequest;
+  headers?: HeadersInit;
 };
 
 const request = async <TRequest, TResponse>({

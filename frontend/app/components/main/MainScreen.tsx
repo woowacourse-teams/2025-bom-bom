@@ -14,16 +14,17 @@ import * as WebBrowser from 'expo-web-browser';
 import { ENV } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
 import useNotification from '@/hooks/useNotification';
-import { sendDeviceInfoToWeb } from '@/utils/device';
 import {
   goToSystemPermission,
   requestNotificationPermission,
 } from '@/utils/notification';
 import { useEffect, useRef } from 'react';
+import { useDeviceInfo } from '@/hooks/useDeviceInfo';
 
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
-  const { webViewRef, sendMessageToWeb } = useWebView();
+  const { webViewRef } = useWebView();
+  const { sendDeviceInfoToWeb } = useDeviceInfo();
   const webViewLoadEndCleanupRef = useRef<() => void>(null);
 
   const { handleNavigationStateChange } = useAndroidNavigationState();
@@ -79,7 +80,7 @@ export const MainScreen = () => {
 
         case 'REQUEST_DEVICE_INFO':
           console.log('디바이스 정보 요청');
-          sendDeviceInfoToWeb(sendMessageToWeb);
+          sendDeviceInfoToWeb();
           break;
 
         case 'CHECK_NOTIFICATION_PERMISSION':

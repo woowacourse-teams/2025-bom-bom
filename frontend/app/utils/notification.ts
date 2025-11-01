@@ -27,7 +27,7 @@ export const requestNotificationPermission = async () => {
   return enabled;
 };
 
-export const checkNotificationPermission = async () => {
+const checkNotificationPermission = async () => {
   if (!Device.isDevice) {
     return false;
   }

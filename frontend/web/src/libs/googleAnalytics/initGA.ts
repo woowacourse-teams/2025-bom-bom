@@ -1,5 +1,5 @@
+import { logger } from '@bombom/shared/utils';
 import { GOOGLE_ANALYTICS_ID } from './constants';
-import { logger } from '@/utils/logger';
 
 declare global {
   interface Window {

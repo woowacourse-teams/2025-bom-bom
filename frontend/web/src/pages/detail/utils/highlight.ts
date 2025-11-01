@@ -1,10 +1,10 @@
 import { theme } from '@bombom/shared/theme';
+import { logger } from '@bombom/shared/utils';
 import {
   getNodeByXPath,
   getTextNodesInRange,
   getXPathForNode,
 } from './selection';
-import { logger } from '@/utils/logger';
 import type { Highlight } from '../types/highlight';
 
 export const highlightNodeSegment = (

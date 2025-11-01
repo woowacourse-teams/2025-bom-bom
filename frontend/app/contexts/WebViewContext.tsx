@@ -2,8 +2,10 @@ import {
   createContext,
   PropsWithChildren,
   RefObject,
+  useCallback,
   useContext,
   useRef,
+  useState,
 } from 'react';
 import { WebView } from 'react-native-webview';
 
@@ -12,14 +14,17 @@ import { RNToWebMessage } from '@bombom/shared/webview';
 export interface WebViewContextType {
   webViewRef: RefObject<WebView | null>;
   sendMessageToWeb: (message: RNToWebMessage) => void;
+  isWebViewReady: boolean;
+  setWebViewReady: (ready: boolean) => void;
 }
 
 const WebViewContext = createContext<WebViewContextType | undefined>(undefined);
 
 export const WebViewProvider = ({ children }: PropsWithChildren) => {
   const webViewRef = useRef<WebView | null>(null);
+  const [isWebViewReady, setWebViewReady] = useState(false);
 
-  const sendMessageToWeb = (message: RNToWebMessage) => {
+  const sendMessageToWeb = useCallback((message: RNToWebMessage) => {
     try {
       const messageString = JSON.stringify(message);
       webViewRef.current?.postMessage(messageString);
@@ -27,13 +32,15 @@ export const WebViewProvider = ({ children }: PropsWithChildren) => {
     } catch (error) {
       console.error('WebView 메시지 전송 실패:', error);
     }
-  };
+  }, []);
 
   return (
     <WebViewContext.Provider
       value={{
         webViewRef,
         sendMessageToWeb,
+        isWebViewReady,
+        setWebViewReady,
       }}
     >
       {children}

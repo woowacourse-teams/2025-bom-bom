@@ -1,4 +1,4 @@
-import { fetcher } from './fetcher';
+import { fetcher } from '@bombom/shared/apis';
 import type { components, operations } from '@/types/openapi';
 
 export type GetPreviousArticlesParams =

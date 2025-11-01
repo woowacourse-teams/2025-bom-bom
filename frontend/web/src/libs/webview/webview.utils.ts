@@ -1,5 +1,5 @@
+import { logger } from '@bombom/shared/utils';
 import { isWebView } from '@/utils/device';
-import { logger } from '@/utils/logger';
 import type { RNToWebMessage, WebToRNMessage } from '@bombom/shared/webview';
 
 export const sendMessageToRN = (message: WebToRNMessage): void => {

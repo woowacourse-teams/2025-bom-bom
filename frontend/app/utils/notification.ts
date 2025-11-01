@@ -28,14 +28,15 @@ export const requestNotificationPermission = async () => {
 };
 
 export const checkNotificationPermission = async () => {
-  if (Device.isDevice) {
-    const authStatus = await messaging().hasPermission();
-    return (
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL
-    );
+  if (!Device.isDevice) {
+    return false;
   }
-  return false;
+
+  const authStatus = await messaging().hasPermission();
+  return (
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL
+  );
 };
 
 export const goToSystemPermission = async (enabled: boolean) => {

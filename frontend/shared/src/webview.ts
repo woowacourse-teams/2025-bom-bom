@@ -20,8 +20,6 @@ export type WebToRNMessage =
     }
   | { type: 'LOGIN_FAILED'; payload?: { error?: string; provider?: string } }
   | { type: 'OPEN_BROWSER'; payload: { url: string } }
-  | { type: 'OPEN_NOTIFICATION_SETTINGS' }
-  | { type: 'REQUEST_NOTIFICATION_STATUS' }
   | { type: 'REQUEST_DEVICE_INFO' }
   | { type: 'CHECK_NOTIFICATION_PERMISSION'; payload: { enabled: boolean } };
 
@@ -48,12 +46,6 @@ export type RNToWebMessage =
       type: 'NOTIFICATION_ROUTING';
       payload: {
         url: string;
-      };
-    }
-  | {
-      type: 'NOTIFICATION_STATUS';
-      payload: {
-        enabled: boolean;
       };
     }
   | {

@@ -26,6 +26,9 @@ importers:
 
   app:
     dependencies:
+      '@bombom/env':
+        specifier: workspace:*
+        version: link:../env
       '@bombom/shared':
         specifier: workspace:*
         version: link:../shared
@@ -172,10 +175,19 @@ importers:
         specifier: ~5.9.2
         version: 5.9.3
 
-  shared: {}
+  env: {}
+
+  shared:
+    dependencies:
+      '@bombom/env':
+        specifier: workspace:*
+        version: link:../env
 
   web:
     dependencies:
+      '@bombom/env':
+        specifier: workspace:*
+        version: link:../env
       '@bombom/shared':
         specifier: workspace:*
         version: link:../shared

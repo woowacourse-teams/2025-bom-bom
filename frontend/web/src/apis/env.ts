@@ -1,3 +1,5 @@
+import { setEnv } from '@bombom/env';
+
 export const ENV = {
   baseUrl: `${process.env.API_BASE_URL}`,
   token: `${process.env.API_TOKEN}`,
@@ -8,3 +10,7 @@ export const ENV = {
   monitoringStatusUrl: `${process.env.MONITORING_STATUS_URL}`,
   channelTalkPluginKey: `${process.env.CHANNEL_TALK_PLUGIN_KEY}`,
 } as const;
+
+setEnv({
+  baseUrl: ENV.baseUrl,
+});

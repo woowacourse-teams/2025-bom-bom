@@ -12,8 +12,10 @@
     ".": "./src/index.ts",
     "./theme": "./src/theme.ts",
     "./webview": "./src/webview.ts",
-    "./fetcher": "./src/fetcher.ts",
-    "./ApiError": "./src/ApiError.ts",
-    "./defaultErrorMessage": "./src/defaultErrorMessage.ts"
+    "./apis": "./src/apis/index.ts",
+    "./utils": "./src/utils/index.ts"
+  },
+  "dependencies": {
+    "@bombom/env": "workspace:*"
   }
 }

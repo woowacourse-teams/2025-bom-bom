@@ -1,4 +1,4 @@
-import { logger } from '@/utils/logger';
+import { logger } from '@bombom/shared/utils';
 
 interface TrackEventParams {
   category: string;

@@ -13,25 +13,38 @@ import * as WebBrowser from 'expo-web-browser';
 
 import { ENV } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
-import useNotification from '@/hooks/useNotification';
-import { sendDeviceInfoToWeb } from '@/utils/device';
 import {
   goToSystemPermission,
   handleLoggedInPermission,
 } from '@/utils/notification';
+import useNotification from '@/hooks/useNotification';
+import { useEffect, useRef } from 'react';
+import { useDeviceInfo } from '@/hooks/useDeviceInfo';
 
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
-  const { webViewRef, setWebViewReady, sendMessageToWeb } = useWebView();
+  const { webViewRef, sendMessageToWeb } = useWebView();
+  const { sendDeviceInfoToWeb } = useDeviceInfo();
+  const webViewLoadEndCleanupRef = useRef<() => void>(null);
 
   const { handleNavigationStateChange } = useAndroidNavigationState();
-  const { registerFCMToken } = useNotification();
+  const { registerFCMToken, onNotification } = useNotification();
 
   const handleWebViewLoadEnd = () => {
     console.log('WebView 로드 완료');
-    setWebViewReady(true);
+    if (webViewLoadEndCleanupRef.current) {
+      webViewLoadEndCleanupRef.current();
+    }
+
     sendMessageToWeb({ type: 'CHECK_LOGIN_STATUS' });
+    webViewLoadEndCleanupRef.current = onNotification();
   };
+
+  useEffect(() => {
+    return () => {
+      webViewLoadEndCleanupRef.current?.();
+    };
+  }, []);
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {
     try {
@@ -64,9 +77,9 @@ export const MainScreen = () => {
           }
           break;
 
-        case 'REQUEST_DEVICE_INFO':
+        case 'REQUEST_DEVICE_UUID':
           console.log('디바이스 정보 요청');
-          sendDeviceInfoToWeb(sendMessageToWeb);
+          sendDeviceInfoToWeb();
           break;
 
         case 'CHECK_NOTIFICATION_PERMISSION':
@@ -98,7 +111,7 @@ export const MainScreen = () => {
         <StyledWebView
           ref={webViewRef}
           source={{ uri: ENV.webUrl }}
-          userAgent={WEBVIEW_USER_AGENT}
+          userAgent={`${navigator.userAgent} ${WEBVIEW_USER_AGENT}`}
           allowsBackForwardNavigationGestures
           sharedCookiesEnabled
           thirdPartyCookiesEnabled

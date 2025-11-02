@@ -26,6 +26,7 @@ const ProfileDetail = ({ userInfo, onClose }: ProfileDetailProps) => {
     mutationKey: ['logout'],
     mutationFn: postLogout,
     onSuccess: () => {
+      window.gtag?.('set', { user_id: null });
       window.location.reload();
     },
     onError: () => {

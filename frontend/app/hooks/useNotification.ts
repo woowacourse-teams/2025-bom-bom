@@ -39,7 +39,9 @@ const useNotification = () => {
   const coldStartNotificationOpen = useCallback(async () => {
     try {
       const message = await messaging().getInitialNotification();
-      if (message && message.data?.notificationType === 'ARTICLE') {
+      if (!message) return;
+
+      if (message.data?.notificationType === 'ARTICLE') {
         setTimeout(() => {
           sendMessageToWeb({
             type: 'NOTIFICATION_ROUTING',

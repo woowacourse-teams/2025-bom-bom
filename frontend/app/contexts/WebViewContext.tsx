@@ -5,7 +5,6 @@ import {
   useCallback,
   useContext,
   useRef,
-  useState,
 } from 'react';
 import { WebView } from 'react-native-webview';
 
@@ -14,15 +13,12 @@ import { RNToWebMessage } from '@bombom/shared/webview';
 export interface WebViewContextType {
   webViewRef: RefObject<WebView | null>;
   sendMessageToWeb: (message: RNToWebMessage) => void;
-  isWebViewReady: boolean;
-  setWebViewReady: (ready: boolean) => void;
 }
 
 const WebViewContext = createContext<WebViewContextType | undefined>(undefined);
 
 export const WebViewProvider = ({ children }: PropsWithChildren) => {
   const webViewRef = useRef<WebView | null>(null);
-  const [isWebViewReady, setWebViewReady] = useState(false);
 
   const sendMessageToWeb = useCallback((message: RNToWebMessage) => {
     try {
@@ -39,8 +35,6 @@ export const WebViewProvider = ({ children }: PropsWithChildren) => {
       value={{
         webViewRef,
         sendMessageToWeb,
-        isWebViewReady,
-        setWebViewReady,
       }}
     >
       {children}

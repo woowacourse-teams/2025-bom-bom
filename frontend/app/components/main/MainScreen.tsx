@@ -102,7 +102,7 @@ export const MainScreen = () => {
         <StyledWebView
           ref={webViewRef}
           source={{ uri: ENV.webUrl }}
-          userAgent={WEBVIEW_USER_AGENT}
+          userAgent={`${navigator.userAgent} ${WEBVIEW_USER_AGENT}`}
           allowsBackForwardNavigationGestures
           sharedCookiesEnabled
           thirdPartyCookiesEnabled

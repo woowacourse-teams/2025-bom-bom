@@ -1,6 +1,5 @@
 interface EnvConfig {
   baseUrl: string;
-  token?: string;
 }
 
 let envInstance: EnvConfig | null = null;

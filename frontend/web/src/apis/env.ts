@@ -13,5 +13,4 @@ export const ENV = {
 
 setEnv({
   baseUrl: ENV.baseUrl,
-  token: ENV.token,
 });

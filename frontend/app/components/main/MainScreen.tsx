@@ -78,7 +78,7 @@ export const MainScreen = () => {
           }
           break;
 
-        case 'REQUEST_DEVICE_INFO':
+        case 'REQUEST_DEVICE_UUID':
           console.log('디바이스 정보 요청');
           sendDeviceInfoToWeb();
           break;

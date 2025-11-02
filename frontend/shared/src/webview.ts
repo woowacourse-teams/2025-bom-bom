@@ -20,7 +20,7 @@ export type WebToRNMessage =
     }
   | { type: 'LOGIN_FAILED'; payload?: { error?: string; provider?: string } }
   | { type: 'OPEN_BROWSER'; payload: { url: string } }
-  | { type: 'REQUEST_DEVICE_INFO' }
+  | { type: 'REQUEST_DEVICE_UUID' }
   | { type: 'CHECK_NOTIFICATION_PERMISSION'; payload: { enabled: boolean } };
 
 export type RNToWebMessage =
@@ -49,7 +49,7 @@ export type RNToWebMessage =
       };
     }
   | {
-      type: 'DEVICE_INFO';
+      type: 'GET_DEVICE_UUID';
       payload: {
         deviceUuid: string;
       };

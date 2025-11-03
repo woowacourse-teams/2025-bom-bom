@@ -9,7 +9,7 @@ import {
 } from '@/utils/notification';
 import { useWebView } from '@/contexts/WebViewContext';
 import { getDeviceUUID } from '@/utils/device';
-import { postFCMToken } from '@/apis/notification';
+import { putFCMToken } from '@/apis/notification';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -29,7 +29,7 @@ const useNotification = () => {
       const token = await getFCMToken();
 
       if (memberId && token && deviceUuid) {
-        await postFCMToken({
+        await putFCMToken({
           memberId,
           deviceUuid,
           token,
@@ -136,7 +136,6 @@ const useNotification = () => {
   }, []);
 
   return {
-    registerFCMToken,
     onNotification,
     handleLoggedInPermission,
   };

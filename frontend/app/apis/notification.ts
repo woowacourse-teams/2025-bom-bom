@@ -1,11 +1,5 @@
 import { fetcher } from '@bombom/shared/apis';
 
-interface PostTokenParams {
-  memberId: number;
-  deviceUuid: string;
-  token: string;
-}
-
 interface PutTokenParams {
   memberId: number;
   deviceUuid: string;

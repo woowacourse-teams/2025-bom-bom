@@ -29,7 +29,7 @@ const NotificationSettingsSection = () => {
       }
     });
 
-    return unsubscribe;
+    return () => unsubscribe();
   }, []);
 
   const { mutate: updateNotificationSettings } = useNotificationMutation({

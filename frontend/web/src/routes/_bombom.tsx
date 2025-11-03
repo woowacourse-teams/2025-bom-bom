@@ -3,6 +3,7 @@ import { queries } from '@/apis/queries';
 import AppInstallPromptModal from '@/components/AppInstallPromptModal/AppInstallPromptModal';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { useAppInstallPrompt } from '@/hooks/useAppInstallPrompt';
+import { useWebViewLoginStatus } from '@/libs/webview/useWebViewLoginStatus';
 
 let isFirstVisit = true;
 
@@ -44,6 +45,8 @@ function RouteComponent() {
     handleCloseModal,
     modalRef,
   } = useAppInstallPrompt();
+
+  useWebViewLoginStatus();
 
   return (
     <PageLayout>

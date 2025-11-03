@@ -1,4 +1,4 @@
-import { fetcher } from './fetcher';
+import { fetcher } from '@bombom/shared/apis';
 
 export interface GetNotificationSettingsParams {
   memberId: number;

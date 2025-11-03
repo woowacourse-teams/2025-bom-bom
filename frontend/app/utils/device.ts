@@ -27,7 +27,7 @@ export const sendDeviceInfoToWeb = async (
     const deviceUuid = await getDeviceUUID();
     if (deviceUuid) {
       sendMessageToWeb({
-        type: 'DEVICE_INFO',
+        type: 'GET_DEVICE_UUID',
         payload: { deviceUuid },
       });
     }

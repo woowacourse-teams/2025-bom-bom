@@ -1,7 +1,12 @@
 import { useEffect, useCallback } from 'react';
 import * as Notifications from 'expo-notifications';
 import messaging from '@react-native-firebase/messaging';
-import { createAndroidChannel, getFCMToken } from '@/utils/notification';
+import {
+  createAndroidChannel,
+  getFCMToken,
+  hasRequestedPermission,
+  requestNotificationPermission,
+} from '@/utils/notification';
 import { useWebView } from '@/contexts/WebViewContext';
 import { getDeviceUUID } from '@/utils/device';
 import { postFCMToken } from '@/apis/notification';
@@ -53,6 +58,25 @@ const useNotification = () => {
       console.error('앱 종료 상태의 알림 수신에 문제가 발생했습니다.', error);
     }
   }, [sendMessageToWeb]);
+
+  const handleLoggedInPermission = async (memberId?: number) => {
+    try {
+      if (!memberId) {
+        console.log('memberId가 없어 권한 요청을 건너뜁니다.');
+        return;
+      }
+
+      const alreadyRequested = await hasRequestedPermission();
+      if (alreadyRequested) return;
+
+      const updatedPermission = await requestNotificationPermission();
+      if (updatedPermission) {
+        await registerFCMToken(memberId);
+      }
+    } catch (error) {
+      console.error('권한 요청 및 등록 실패:', error);
+    }
+  };
 
   const onNotification = useCallback(() => {
     coldStartNotificationOpen();
@@ -114,6 +138,7 @@ const useNotification = () => {
   return {
     registerFCMToken,
     onNotification,
+    handleLoggedInPermission,
   };
 };
 

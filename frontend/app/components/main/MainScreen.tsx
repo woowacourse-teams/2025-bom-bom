@@ -28,7 +28,7 @@ export const MainScreen = () => {
   const webViewLoadEndCleanupRef = useRef<() => void>(null);
 
   const { handleNavigationStateChange } = useAndroidNavigationState();
-  const { registerFCMToken, onNotification } = useNotification();
+  const { onNotification, handleLoggedInPermission } = useNotification();
 
   const handleWebViewLoadEnd = () => {
     console.log('WebView 로드 완료');
@@ -36,7 +36,6 @@ export const MainScreen = () => {
       webViewLoadEndCleanupRef.current();
     }
 
-    requestNotificationPermission();
     webViewLoadEndCleanupRef.current = onNotification();
   };
 
@@ -59,7 +58,7 @@ export const MainScreen = () => {
         case 'LOGIN_SUCCESS':
           console.log('웹뷰에서 로그인 성공 알림 수신:', message.payload);
           hideLogin();
-          handleLoggedInPermission(message.payload?.memberId, registerFCMToken);
+          handleLoggedInPermission(message.payload?.memberId);
           break;
 
         case 'LOGIN_FAILED':
@@ -89,10 +88,7 @@ export const MainScreen = () => {
         case 'LOGIN_STATUS':
           console.log('로그인 상태 응답:', message.payload);
           if (message.payload.isLoggedIn) {
-            handleLoggedInPermission(
-              message.payload.memberId,
-              registerFCMToken,
-            );
+            handleLoggedInPermission(message.payload.memberId);
           }
           break;
 

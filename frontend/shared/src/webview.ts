@@ -61,10 +61,4 @@ export type RNToWebMessage =
         deviceUuid: string;
       };
     }
-  | {
-      type: 'DEVICE_INFO';
-      payload: {
-        deviceUuid: string;
-      };
-    }
   | { type: 'CHECK_LOGIN_STATUS' };

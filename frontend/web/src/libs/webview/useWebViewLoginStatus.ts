@@ -1,8 +1,8 @@
+import { logger } from '@bombom/shared/utils';
 import { useEffect } from 'react';
 import { addWebViewMessageListener, sendMessageToRN } from './webview.utils';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import { isWebView } from '@/utils/device';
-import { logger } from '@/utils/logger';
 import type { RNToWebMessage } from '@bombom/shared/webview';
 
 export const useWebViewLoginStatus = () => {

@@ -21,10 +21,10 @@ const NotificationSettingsSection = () => {
   );
 
   useEffect(() => {
-    sendMessageToRN({ type: 'REQUEST_DEVICE_INFO' });
+    sendMessageToRN({ type: 'REQUEST_DEVICE_UUID' });
 
     const unsubscribe = addWebViewMessageListener((message) => {
-      if (message.type === 'DEVICE_INFO') {
+      if (message.type === 'GET_DEVICE_UUID') {
         setDeviceUuid(message.payload.deviceUuid);
       }
     });

@@ -1,4 +1,5 @@
 import messaging from '@react-native-firebase/messaging';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Alert, Linking, Platform } from 'react-native';
@@ -15,6 +16,8 @@ export const createAndroidChannel = async () => {
 
 // 사용자 알림 권한 요청
 export const requestNotificationPermission = async () => {
+  await setPermissionRequested();
+
   if (Platform.OS === 'ios') {
     const auth = await messaging().requestPermission();
     return (
@@ -80,19 +83,22 @@ export const getFCMToken = async () => {
   }
 };
 
-export const handleLoggedInPermission = async (
-  memberId: number | undefined,
-  registerFCMToken: (memberId: number | undefined) => Promise<void>,
-) => {
+export const hasRequestedPermission = async (): Promise<boolean> => {
   try {
-    const alreadyPermission = await checkNotificationPermission();
-    if (!alreadyPermission) {
-      const updatedPermission = await requestNotificationPermission();
-      if (updatedPermission) {
-        await registerFCMToken(memberId);
-      }
-    }
+    const key = 'notification_permission_requested';
+    const permissionRequested = await AsyncStorage.getItem(key);
+    return permissionRequested === 'true';
   } catch (error) {
-    console.error('권한 요청 및 등록 실패:', error);
+    console.error('권한 요청 기록 확인 실패:', error);
+    return false;
+  }
+};
+
+const setPermissionRequested = async (): Promise<void> => {
+  try {
+    const key = 'notification_permission_requested';
+    await AsyncStorage.setItem(key, 'true');
+  } catch (error) {
+    console.error('권한 요청 기록 저장 실패:', error);
   }
 };

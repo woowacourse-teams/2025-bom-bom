@@ -3,7 +3,7 @@ import { tanstackRouter } from '@tanstack/router-plugin/webpack';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import dotenv from 'dotenv';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import TerserPlugin from 'terser-webpack-plugin';
+import { SwcMinifyWebpackPlugin } from 'swc-minify-webpack-plugin';
 import webpack from 'webpack';
 import 'webpack-dev-server';
 
@@ -147,21 +147,18 @@ export default (env: Env, argv: Argv) => {
       minimize: isProduction,
       minimizer: isProduction
         ? [
-            new TerserPlugin({
-              terserOptions: {
-                compress: {
-                  drop_debugger: true, // debugger 제거
-                  pure_funcs: ['console.log', 'console.info', 'console.warn'], // console.log 제거
-                },
-                mangle: {
-                  toplevel: true,
-                  reserved: [], // 변수 이름 변경 방지
-                },
-                format: {
-                  comments: false, // 주석 제거
-                },
+            new SwcMinifyWebpackPlugin({
+              compress: {
+                drop_debugger: true, // debugger 제거
+                pure_funcs: ['console.log', 'console.info', 'console.warn'], // console 제거
               },
-              extractComments: false, // 주석 제거
+              mangle: {
+                toplevel: true, // 상위 스코프 변수명 난독화
+                reserved: [], // 특정 변수 이름 보호
+              },
+              format: {
+                comments: false, // 주석 제거
+              },
             }),
           ]
         : [],

@@ -81,15 +81,15 @@ export const MainScreen = () => {
           sendDeviceInfoToWeb();
           break;
 
-        case 'CHECK_NOTIFICATION_PERMISSION':
-          goToSystemPermission(message.payload.enabled);
-          break;
-
-        case 'LOGIN_STATUS':
-          console.log('로그인 상태 응답:', message.payload);
-          if (message.payload.isLoggedIn) {
+        case 'REGISTER_FCM_TOKEN':
+          console.log('FCM 토큰 등록:', message.payload);
+          if (message.payload.memberId) {
             handleLoggedInPermission(message.payload.memberId);
           }
+          break;
+
+        case 'CHECK_NOTIFICATION_PERMISSION':
+          goToSystemPermission(message.payload.enabled);
           break;
 
         default:

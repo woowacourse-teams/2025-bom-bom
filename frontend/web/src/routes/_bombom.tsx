@@ -1,9 +1,12 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
+import { useEffect } from 'react';
 import { queries } from '@/apis/queries';
 import AppInstallPromptModal from '@/components/AppInstallPromptModal/AppInstallPromptModal';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { useAppInstallPrompt } from '@/hooks/useAppInstallPrompt';
-import { useWebViewLoginStatus } from '@/libs/webview/useWebViewLoginStatus';
+import { sendMessageToRN } from '@/libs/webview/webview.utils';
+import { isWebView } from '@/utils/device';
 
 let isFirstVisit = true;
 
@@ -38,6 +41,7 @@ export const Route = createFileRoute('/_bombom')({
 });
 
 function RouteComponent() {
+  const queryClient = useQueryClient();
   const {
     showModal,
     handleInstallClick,
@@ -46,7 +50,22 @@ function RouteComponent() {
     modalRef,
   } = useAppInstallPrompt();
 
-  useWebViewLoginStatus();
+  useEffect(() => {
+    if (!isWebView()) return;
+
+    const data = queryClient.getQueryData(queries.userProfile().queryKey);
+    const isLoggedIn = data && data.id;
+    console.log('registerFCMToken', data);
+
+    if (isLoggedIn) {
+      sendMessageToRN({
+        type: 'REGISTER_FCM_TOKEN',
+        payload: {
+          memberId: data.id,
+        },
+      });
+    }
+  }, []);
 
   return (
     <PageLayout>

@@ -22,13 +22,7 @@ export type WebToRNMessage =
   | { type: 'OPEN_BROWSER'; payload: { url: string } }
   | { type: 'REQUEST_DEVICE_UUID' }
   | { type: 'CHECK_NOTIFICATION_PERMISSION'; payload: { enabled: boolean } }
-  | {
-      type: 'LOGIN_STATUS';
-      payload: {
-        isLoggedIn: boolean;
-        memberId?: number;
-      };
-    };
+  | { type: 'REGISTER_FCM_TOKEN'; payload: { memberId: number } };
 
 export type RNToWebMessage =
   | {
@@ -60,5 +54,4 @@ export type RNToWebMessage =
       payload: {
         deviceUuid: string;
       };
-    }
-  | { type: 'CHECK_LOGIN_STATUS' };
+    };

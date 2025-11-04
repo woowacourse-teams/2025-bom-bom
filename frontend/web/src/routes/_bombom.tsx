@@ -51,6 +51,7 @@ function RouteComponent() {
   } = useAppInstallPrompt();
 
   useEffect(() => {
+    console.log('registerFCMTokenㄹㅁㄴㅇㄹㄴㅁㅇㄹ');
     if (!isWebView()) return;
 
     const data = queryClient.getQueryData(queries.userProfile().queryKey);

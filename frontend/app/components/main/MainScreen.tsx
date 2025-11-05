@@ -20,7 +20,7 @@ import { useDeviceInfo } from '@/hooks/useDeviceInfo';
 
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
-  const { webViewRef, sendMessageToWeb } = useWebView();
+  const { webViewRef } = useWebView();
   const { sendDeviceInfoToWeb } = useDeviceInfo();
   const webViewLoadEndCleanupRef = useRef<() => void>(null);
 
@@ -55,7 +55,6 @@ export const MainScreen = () => {
         case 'LOGIN_SUCCESS':
           console.log('웹뷰에서 로그인 성공 알림 수신:', message.payload);
           hideLogin();
-          handleLoggedInPermission(message.payload?.memberId);
           break;
 
         case 'LOGIN_FAILED':

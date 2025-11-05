@@ -12,11 +12,7 @@ export type WebToRNMessage =
   | { type: 'SHOW_LOGIN_SCREEN' }
   | {
       type: 'LOGIN_SUCCESS';
-      payload?: {
-        isAuthenticated?: boolean;
-        provider?: string;
-        memberId?: number;
-      };
+      payload?: { isAuthenticated?: boolean; provider?: string };
     }
   | { type: 'LOGIN_FAILED'; payload?: { error?: string; provider?: string } }
   | { type: 'OPEN_BROWSER'; payload: { url: string } }

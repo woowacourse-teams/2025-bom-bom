@@ -2,7 +2,7 @@
   "name": "@bombom/app",
   "private": true,
   "main": "expo-router/entry",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "scripts": {
     "start": "expo start",
     "build:android": "eas build --platform android --local",

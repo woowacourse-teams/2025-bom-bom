@@ -3,7 +3,6 @@ import { useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { addWebViewMessageListener, sendMessageToRN } from './webview.utils';
 import { postAppleLogin, postGoogleLogin } from '@/apis/auth';
-import { getUserInfo } from '@/apis/members';
 import { isWebView } from '@/utils/device';
 import type { RNToWebMessage } from '@bombom/shared/webview';
 
@@ -29,13 +28,11 @@ export const useWebViewAuth = () => {
 
             if (!response) throw new Error('Google 로그인 실패');
 
-            const userInfo = await getUserInfo();
             sendMessageToRN({
               type: 'LOGIN_SUCCESS',
               payload: {
                 isAuthenticated: true,
                 provider: 'google',
-                memberId: userInfo?.id,
               },
             });
 
@@ -75,13 +72,11 @@ export const useWebViewAuth = () => {
 
             if (!response) throw new Error('Apple 로그인 실패');
 
-            const userInfo = await getUserInfo();
             sendMessageToRN({
               type: 'LOGIN_SUCCESS',
               payload: {
                 isAuthenticated: true,
                 provider: 'apple',
-                memberId: userInfo?.id,
               },
             });
 

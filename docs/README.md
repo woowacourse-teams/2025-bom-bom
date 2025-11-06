@@ -1,5 +1,16 @@
 # 봄봄
+
 단순한 뉴스레터 리더를 넘어 읽는 습관을 만들고, 읽은 콘텐츠를 나만의 자산으로 바꾸는 **읽기의 라이프 로그**
+
+<div align="center">
+
+[![Website](https://img.shields.io/badge/Web-%23212121?style=for-the-badge&logo=google-chrome&logoColor=white)](https://www.bombom.news)
+[![App Store](https://img.shields.io/badge/App_Store-%230D96F6?style=for-the-badge&logo=apple&logoColor=white)](https://apps.apple.com/kr/app/%EB%B4%84%EB%B4%84/id6752014462)
+[![Google Play](https://img.shields.io/badge/Google_Play-%233DDC84?style=for-the-badge&logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.antarctica.bombom&pcampaignid=web_share)
+
+</div>
+
+
 
 ## 브랜드 스토리
 

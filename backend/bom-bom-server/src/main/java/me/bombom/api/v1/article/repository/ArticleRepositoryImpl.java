@@ -13,12 +13,17 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
@@ -44,7 +49,12 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             "expectedReadTime", article.expectedReadTime
     );
 
+    private static final int RECENT_DAYS = 3;
+
     private final JPAQueryFactory jpaQueryFactory;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     public Page<ArticleResponse> findArticles(
@@ -52,9 +62,219 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             ArticlesOptionsRequest options,
             Pageable pageable
     ) {
+        if (StringUtils.hasText(options.keyword())) {
+            return findArticlesWithUnion(memberId, options, pageable);
+        }
+
         JPAQuery<Long> totalQuery = getTotalQuery(memberId, options);
         List<ArticleResponse> content = getContent(memberId, options, pageable);
         return PageableExecutionUtils.getPage(content, pageable, totalQuery::fetchOne);
+    }
+
+    private Page<ArticleResponse> findArticlesWithUnion(
+            Long memberId,
+            ArticlesOptionsRequest options,
+            Pageable pageable
+    ) {
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(RECENT_DAYS);
+        String keyword = options.keyword().strip();
+
+        String unionQuery = buildUnionQuery(options, cutoffDate);
+        Query query = entityManager.createNativeQuery(unionQuery);
+        setUnionQueryParameters(query, memberId, options, cutoffDate, keyword, pageable);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = query.getResultList();
+        List<ArticleResponse> content = mapToArticleResponse(results);
+
+        long totalCount = getTotalCountWithUnion(memberId, options, cutoffDate, keyword);
+
+        return PageableExecutionUtils.getPage(content, pageable, () -> totalCount);
+    }
+
+    private String buildUnionQuery(ArticlesOptionsRequest options, LocalDateTime cutoffDate) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT DISTINCT ")
+                .append("article_id, ")
+                .append("title, ")
+                .append("contents_summary, ")
+                .append("arrived_date_time, ")
+                .append("thumbnail_url, ")
+                .append("expected_read_time, ")
+                .append("is_read, ")
+                .append("is_bookmarked, ")
+                .append("newsletter_name, ")
+                .append("newsletter_image_url, ")
+                .append("category_name ")
+                .append("FROM (")
+                .append("SELECT ")
+                .append("sr.article_id, ")
+                .append("sr.title, ")
+                .append("a.contents_summary, ")
+                .append("sr.arrived_date_time, ")
+                .append("a.thumbnail_url, ")
+                .append("a.expected_read_time, ")
+                .append("a.is_read, ")
+                .append("EXISTS(SELECT 1 FROM bookmark b WHERE b.article_id = sr.article_id AND b.member_id = :memberId) as is_bookmarked, ")
+                .append("n.name as newsletter_name, ")
+                .append("n.image_url as newsletter_image_url, ")
+                .append("c.name as category_name ")
+                .append("FROM search_recent sr ")
+                .append("INNER JOIN article a ON a.id = sr.article_id ")
+                .append("INNER JOIN newsletter n ON n.id = sr.newsletter_id ")
+                .append("INNER JOIN category c ON c.id = n.category_id ")
+                .append("WHERE sr.member_id = :memberId ")
+                .append("AND sr.arrived_date_time >= :cutoffDate ");
+
+        if (options.newsletterId() != null) {
+            sql.append("AND sr.newsletter_id = :newsletterId ");
+        }
+
+        if (options.date() != null) {
+            sql.append("AND DATE(sr.arrived_date_time) = :date ");
+        }
+
+        sql.append("AND MATCH(sr.title, sr.contents) AGAINST(:keyword IN BOOLEAN MODE) ")
+                .append("UNION ALL ")
+                .append("SELECT ")
+                .append("a.id as article_id, ")
+                .append("a.title, ")
+                .append("a.contents_summary, ")
+                .append("a.arrived_date_time, ")
+                .append("a.thumbnail_url, ")
+                .append("a.expected_read_time, ")
+                .append("a.is_read, ")
+                .append("EXISTS(SELECT 1 FROM bookmark b WHERE b.article_id = a.id AND b.member_id = :memberId) as is_bookmarked, ")
+                .append("n.name as newsletter_name, ")
+                .append("n.image_url as newsletter_image_url, ")
+                .append("c.name as category_name ")
+                .append("FROM article a ")
+                .append("INNER JOIN newsletter n ON n.id = a.newsletter_id ")
+                .append("INNER JOIN category c ON c.id = n.category_id ")
+                .append("WHERE a.member_id = :memberId ")
+                .append("AND a.arrived_date_time < :cutoffDate ");
+
+        if (options.newsletterId() != null) {
+            sql.append("AND a.newsletter_id = :newsletterId ");
+        }
+
+        if (options.date() != null) {
+            sql.append("AND DATE(a.arrived_date_time) = :date ");
+        }
+
+        sql.append("AND MATCH(a.title, a.contents) AGAINST(:keyword IN BOOLEAN MODE) ")
+                .append(") AS union_result ")
+                .append("ORDER BY arrived_date_time DESC ")
+                .append("LIMIT :limit OFFSET :offset");
+
+        return sql.toString();
+    }
+
+    private void setUnionQueryParameters(
+            Query query,
+            Long memberId,
+            ArticlesOptionsRequest options,
+            LocalDateTime cutoffDate,
+            String keyword,
+            Pageable pageable
+    ) {
+        query.setParameter("memberId", memberId);
+        query.setParameter("cutoffDate", cutoffDate);
+        query.setParameter("keyword", keyword);
+        query.setParameter("limit", pageable.getPageSize());
+        query.setParameter("offset", pageable.getOffset());
+
+        if (options.newsletterId() != null) {
+            query.setParameter("newsletterId", options.newsletterId());
+        }
+
+        if (options.date() != null) {
+            query.setParameter("date", options.date());
+        }
+    }
+
+    private List<ArticleResponse> mapToArticleResponse(List<Object[]> results) {
+        return results.stream()
+                .map(row -> {
+                    Long articleId = ((Number) row[0]).longValue();
+                    String title = (String) row[1];
+                    String contentsSummary = (String) row[2];
+                    LocalDateTime arrivedDateTime = ((java.sql.Timestamp) row[3]).toLocalDateTime();
+                    String thumbnailUrl = (String) row[4];
+                    Integer expectedReadTime = row[5] != null ? ((Number) row[5]).intValue() : 0;
+                    Boolean isRead = row[6] != null && ((Number) row[6]).intValue() == 1;
+                    Boolean isBookmarked = row[7] != null && ((Number) row[7]).intValue() == 1;
+                    String newsletterName = (String) row[8];
+                    String newsletterImageUrl = (String) row[9];
+                    String categoryName = (String) row[10];
+
+                    return new ArticleResponse(
+                            articleId,
+                            title,
+                            contentsSummary,
+                            arrivedDateTime,
+                            thumbnailUrl,
+                            expectedReadTime,
+                            isRead,
+                            isBookmarked,
+                            new me.bombom.api.v1.newsletter.dto.NewsletterSummaryResponse(
+                                    newsletterName,
+                                    newsletterImageUrl,
+                                    categoryName
+                            )
+                    );
+                })
+                .collect(Collectors.toList());
+    }
+
+    private long getTotalCountWithUnion(Long memberId, ArticlesOptionsRequest options, LocalDateTime cutoffDate, String keyword) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(*) FROM (")
+                .append("SELECT sr.article_id ")
+                .append("FROM search_recent sr ")
+                .append("WHERE sr.member_id = :memberId ")
+                .append("AND sr.arrived_date_time >= :cutoffDate ");
+
+        if (options.newsletterId() != null) {
+            sql.append("AND sr.newsletter_id = :newsletterId ");
+        }
+
+        if (options.date() != null) {
+            sql.append("AND DATE(sr.arrived_date_time) = :date ");
+        }
+
+        sql.append("AND MATCH(sr.title, sr.contents) AGAINST(:keyword IN BOOLEAN MODE) ")
+                .append("UNION ALL ")
+                .append("SELECT a.id ")
+                .append("FROM article a ")
+                .append("WHERE a.member_id = :memberId ")
+                .append("AND a.arrived_date_time < :cutoffDate ");
+
+        if (options.newsletterId() != null) {
+            sql.append("AND a.newsletter_id = :newsletterId ");
+        }
+
+        if (options.date() != null) {
+            sql.append("AND DATE(a.arrived_date_time) = :date ");
+        }
+
+        sql.append("AND MATCH(a.title, a.contents) AGAINST(:keyword IN BOOLEAN MODE) ")
+                .append(") AS union_result");
+
+        Query query = entityManager.createNativeQuery(sql.toString());
+        query.setParameter("memberId", memberId);
+        query.setParameter("cutoffDate", cutoffDate);
+        query.setParameter("keyword", keyword);
+
+        if (options.newsletterId() != null) {
+            query.setParameter("newsletterId", options.newsletterId());
+        }
+
+        if (options.date() != null) {
+            query.setParameter("date", options.date());
+        }
+
+        return ((Number) query.getSingleResult()).longValue();
     }
 
     @Override

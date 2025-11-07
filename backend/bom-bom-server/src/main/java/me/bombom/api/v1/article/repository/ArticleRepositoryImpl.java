@@ -134,7 +134,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             sql.append("AND DATE(sr.arrived_date_time) = :date ");
         }
 
-        sql.append("AND MATCH(sr.title, sr.contents) AGAINST(:keyword IN BOOLEAN MODE) ")
+        sql.append("AND MATCH(sr.title, sr.contents_text) AGAINST(:keyword IN BOOLEAN MODE) ")
                 .append("UNION ALL ")
                 .append("SELECT ")
                 .append("a.id as article_id, ")
@@ -162,7 +162,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             sql.append("AND DATE(a.arrived_date_time) = :date ");
         }
 
-        sql.append("AND MATCH(a.title, a.contents) AGAINST(:keyword IN BOOLEAN MODE) ")
+        sql.append("AND MATCH(a.title, a.contents_text) AGAINST(:keyword IN BOOLEAN MODE) ")
                 .append(") AS union_result ")
                 .append("ORDER BY arrived_date_time DESC ")
                 .append("LIMIT :limit OFFSET :offset");
@@ -243,7 +243,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             sql.append("AND DATE(sr.arrived_date_time) = :date ");
         }
 
-        sql.append("AND MATCH(sr.title, sr.contents) AGAINST(:keyword IN BOOLEAN MODE) ")
+        sql.append("AND MATCH(sr.title, sr.contents_text) AGAINST(:keyword IN BOOLEAN MODE) ")
                 .append("UNION ALL ")
                 .append("SELECT a.id ")
                 .append("FROM article a ")
@@ -258,7 +258,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             sql.append("AND DATE(a.arrived_date_time) = :date ");
         }
 
-        sql.append("AND MATCH(a.title, a.contents) AGAINST(:keyword IN BOOLEAN MODE) ")
+        sql.append("AND MATCH(a.title, a.contents_text) AGAINST(:keyword IN BOOLEAN MODE) ")
                 .append(") AS union_result");
 
         Query query = entityManager.createNativeQuery(sql.toString());

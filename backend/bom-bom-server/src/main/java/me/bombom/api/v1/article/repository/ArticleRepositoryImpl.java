@@ -94,35 +94,21 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
 
     private String buildUnionQuery(ArticlesOptionsRequest options, LocalDateTime cutoffDate) {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT DISTINCT ")
-                .append("article_id, ")
-                .append("title, ")
-                .append("contents_summary, ")
-                .append("arrived_date_time, ")
-                .append("thumbnail_url, ")
-                .append("expected_read_time, ")
-                .append("is_read, ")
-                .append("is_bookmarked, ")
-                .append("newsletter_name, ")
-                .append("newsletter_image_url, ")
-                .append("category_name ")
-                .append("FROM (")
-                .append("SELECT ")
-                .append("sr.article_id, ")
-                .append("sr.title, ")
+        sql.append("SELECT ")
+                .append("matched.article_id, ")
+                .append("a.title, ")
                 .append("a.contents_summary, ")
-                .append("sr.arrived_date_time, ")
+                .append("matched.arrived_date_time, ")
                 .append("a.thumbnail_url, ")
                 .append("a.expected_read_time, ")
                 .append("a.is_read, ")
-                .append("EXISTS(SELECT 1 FROM bookmark b WHERE b.article_id = sr.article_id AND b.member_id = :memberId) as is_bookmarked, ")
-                .append("n.name as newsletter_name, ")
-                .append("n.image_url as newsletter_image_url, ")
-                .append("c.name as category_name ")
+                .append("CASE WHEN b.article_id IS NOT NULL THEN 1 ELSE 0 END AS is_bookmarked, ")
+                .append("n.name AS newsletter_name, ")
+                .append("n.image_url AS newsletter_image_url, ")
+                .append("c.name AS category_name ")
+                .append("FROM (")
+                .append("SELECT sr.article_id, sr.arrived_date_time ")
                 .append("FROM search_recent sr ")
-                .append("INNER JOIN article a ON a.id = sr.article_id ")
-                .append("INNER JOIN newsletter n ON n.id = sr.newsletter_id ")
-                .append("INNER JOIN category c ON c.id = n.category_id ")
                 .append("WHERE sr.member_id = :memberId ")
                 .append("AND sr.arrived_date_time >= :cutoffDate ");
 
@@ -136,21 +122,8 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
 
         sql.append("AND MATCH(sr.title, sr.contents_text) AGAINST(:keyword IN BOOLEAN MODE) ")
                 .append("UNION ALL ")
-                .append("SELECT ")
-                .append("a.id as article_id, ")
-                .append("a.title, ")
-                .append("a.contents_summary, ")
-                .append("a.arrived_date_time, ")
-                .append("a.thumbnail_url, ")
-                .append("a.expected_read_time, ")
-                .append("a.is_read, ")
-                .append("EXISTS(SELECT 1 FROM bookmark b WHERE b.article_id = a.id AND b.member_id = :memberId) as is_bookmarked, ")
-                .append("n.name as newsletter_name, ")
-                .append("n.image_url as newsletter_image_url, ")
-                .append("c.name as category_name ")
+                .append("SELECT a.id AS article_id, a.arrived_date_time ")
                 .append("FROM article a ")
-                .append("INNER JOIN newsletter n ON n.id = a.newsletter_id ")
-                .append("INNER JOIN category c ON c.id = n.category_id ")
                 .append("WHERE a.member_id = :memberId ")
                 .append("AND a.arrived_date_time < :cutoffDate ");
 
@@ -163,8 +136,12 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         }
 
         sql.append("AND MATCH(a.title, a.contents_text) AGAINST(:keyword IN BOOLEAN MODE) ")
-                .append(") AS union_result ")
-                .append("ORDER BY arrived_date_time DESC ")
+                .append(") AS matched ")
+                .append("INNER JOIN article a ON a.id = matched.article_id ")
+                .append("INNER JOIN newsletter n ON n.id = a.newsletter_id ")
+                .append("INNER JOIN category c ON c.id = n.category_id ")
+                .append("LEFT JOIN bookmark b ON b.article_id = a.id AND b.member_id = :memberId ")
+                .append("ORDER BY matched.arrived_date_time DESC, matched.article_id DESC ")
                 .append("LIMIT :limit OFFSET :offset");
 
         return sql.toString();

@@ -33,6 +33,7 @@ import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.dto.response.QArticleResponse;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.newsletter.dto.QNewsletterSummaryResponse;
 import org.springframework.data.domain.Page;
@@ -78,44 +79,52 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             ArticlesOptionsRequest options,
             Pageable pageable
     ) {
-        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(RECENT_DAYS);
-        String keyword = options.keyword().strip();
+        try {
+            LocalDateTime cutoffDate = LocalDateTime.now().minusDays(RECENT_DAYS);
+            String keyword = options.keyword().strip();
 
-        // 각 쿼리에서 충분히 가져오기 위해 LIMIT을 pageSize * 2로 설정
-        int fetchLimit = Math.max(pageable.getPageSize() * 2, 100);
+            // 각 쿼리에서 충분히 가져오기 위해 LIMIT을 pageSize * 2로 설정
+            int fetchLimit = Math.max(pageable.getPageSize() * 2, 100);
 
-        // 최근 3일 쿼리 실행
-        String recentQuery = buildRecentQuery(options, cutoffDate, fetchLimit);
-        Query recentQueryObj = entityManager.createNativeQuery(recentQuery);
-        setQueryParameters(recentQueryObj, memberId, options, cutoffDate, keyword, fetchLimit);
+            // 최근 3일 쿼리 실행
+            String recentQuery = buildRecentQuery(options, cutoffDate, fetchLimit);
+            Query recentQueryObj = entityManager.createNativeQuery(recentQuery);
+            setQueryParameters(recentQueryObj, memberId, options, cutoffDate, keyword, fetchLimit);
+            // 타임아웃 설정 (30초)
+            recentQueryObj.setHint("jakarta.persistence.query.timeout", 30000);
 
-        @SuppressWarnings("unchecked")
-        List<Object[]> recentResults = recentQueryObj.getResultList();
-        List<ArticleResponse> recentArticles = mapToArticleResponse(recentResults);
+            @SuppressWarnings("unchecked")
+            List<Object[]> recentResults = recentQueryObj.getResultList();
+            List<ArticleResponse> recentArticles = mapToArticleResponse(recentResults);
 
-        // 과거 쿼리 실행
-        String olderQuery = buildOlderQuery(options, cutoffDate, fetchLimit);
-        Query olderQueryObj = entityManager.createNativeQuery(olderQuery);
-        setQueryParameters(olderQueryObj, memberId, options, cutoffDate, keyword, fetchLimit);
+            // 과거 쿼리 실행
+            String olderQuery = buildOlderQuery(options, cutoffDate, fetchLimit);
+            Query olderQueryObj = entityManager.createNativeQuery(olderQuery);
+            setQueryParameters(olderQueryObj, memberId, options, cutoffDate, keyword, fetchLimit);
+            // 타임아웃 설정 (30초)
+            olderQueryObj.setHint("jakarta.persistence.query.timeout", 30000);
 
-        @SuppressWarnings("unchecked")
-        List<Object[]> olderResults = olderQueryObj.getResultList();
-        List<ArticleResponse> olderArticles = mapToArticleResponse(olderResults);
+            @SuppressWarnings("unchecked")
+            List<Object[]> olderResults = olderQueryObj.getResultList();
+            List<ArticleResponse> olderArticles = mapToArticleResponse(olderResults);
 
-        // 애플리케이션에서 병합, 정렬, 최종 LIMIT 적용
-        List<ArticleResponse> merged = Stream.concat(recentArticles.stream(), olderArticles.stream())
-                .sorted(Comparator.comparing(ArticleResponse::arrivedDateTime)
-                        .thenComparing(ArticleResponse::articleId)
-                        .reversed())
-                .limit(pageable.getPageSize())
-                .collect(Collectors.toList());
+            // 애플리케이션에서 병합, 정렬, 최종 LIMIT 적용
+            List<ArticleResponse> merged = Stream.concat(recentArticles.stream(), olderArticles.stream())
+                    .sorted(Comparator.comparing(ArticleResponse::arrivedDateTime)
+                            .thenComparing(ArticleResponse::articleId)
+                            .reversed())
+                    .limit(pageable.getPageSize())
+                    .collect(Collectors.toList());
 
-        // 페이징을 위해 전체 카운트 계산
-        long recentCount = getRecentCount(memberId, options, cutoffDate, keyword);
-        long olderCount = getOlderCount(memberId, options, cutoffDate, keyword);
-        long totalCount = recentCount + olderCount;
+            final long totalCount = calculateTotalCount(memberId, options, cutoffDate, keyword, merged.size(), pageable.getPageSize());
 
-        return PageableExecutionUtils.getPage(merged, pageable, () -> totalCount);
+            return PageableExecutionUtils.getPage(merged, pageable, () -> totalCount);
+        } catch (Exception e) {
+            log.error("검색 쿼리 실행 실패 - memberId: {}, keyword: '{}'", memberId, options.keyword(), e);
+            throw new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
+                    .addContext("memberId", memberId)
+                    .addContext("keyword", options.keyword());
+        }
     }
 
     private String buildRecentQuery(ArticlesOptionsRequest options, LocalDateTime cutoffDate, int limit) {
@@ -216,35 +225,124 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     private List<ArticleResponse> mapToArticleResponse(List<Object[]> results) {
         return results.stream()
                 .map(row -> {
-                    Long articleId = ((Number) row[0]).longValue();
-                    String title = (String) row[1];
-                    String contentsSummary = (String) row[2];
-                    LocalDateTime arrivedDateTime = ((java.sql.Timestamp) row[3]).toLocalDateTime();
-                    String thumbnailUrl = (String) row[4];
-                    Integer expectedReadTime = row[5] != null ? ((Number) row[5]).intValue() : 0;
-                    Boolean isRead = row[6] != null && ((Number) row[6]).intValue() == 1;
-                    Boolean isBookmarked = row[7] != null && ((Number) row[7]).intValue() == 1;
-                    String newsletterName = (String) row[8];
-                    String newsletterImageUrl = (String) row[9];
-                    String categoryName = (String) row[10];
+                    try {
+                        Long articleId = extractLong(row[0]);
+                        String title = extractString(row[1]);
+                        String contentsSummary = extractString(row[2]);
+                        LocalDateTime arrivedDateTime = extractLocalDateTime(row[3]);
+                        String thumbnailUrl = extractString(row[4]);
+                        Integer expectedReadTime = extractInteger(row[5], 0);
+                        Boolean isRead = extractBoolean(row[6]);
+                        Boolean isBookmarked = extractBoolean(row[7]);
+                        String newsletterName = extractString(row[8]);
+                        String newsletterImageUrl = extractString(row[9]);
+                        String categoryName = extractString(row[10]);
 
-                    return new ArticleResponse(
-                            articleId,
-                            title,
-                            contentsSummary,
-                            arrivedDateTime,
-                            thumbnailUrl,
-                            expectedReadTime,
-                            isRead,
-                            isBookmarked,
-                            new me.bombom.api.v1.newsletter.dto.NewsletterSummaryResponse(
-                                    newsletterName,
-                                    newsletterImageUrl,
-                                    categoryName
-                            )
-                    );
+                        if (articleId == null) {
+                            return null;
+                        }
+
+                        return new ArticleResponse(
+                                articleId,
+                                title != null ? title : "",
+                                contentsSummary != null ? contentsSummary : "",
+                                arrivedDateTime,
+                                thumbnailUrl,
+                                expectedReadTime,
+                                isRead,
+                                isBookmarked,
+                                new me.bombom.api.v1.newsletter.dto.NewsletterSummaryResponse(
+                                        newsletterName != null ? newsletterName : "",
+                                        newsletterImageUrl,
+                                        categoryName != null ? categoryName : ""
+                                )
+                        );
+                    } catch (Exception e) {
+                        log.error("데이터 매핑 실패. row: {}", java.util.Arrays.toString(row), e);
+                        return null;
+                    }
                 })
+                .filter(java.util.Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    private Long extractLong(Object obj) {
+        if (obj == null) return null;
+        if (obj instanceof Number) {
+            return ((Number) obj).longValue();
+        }
+        if (obj instanceof String) {
+            try {
+                return Long.parseLong((String) obj);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private String extractString(Object obj) {
+        if (obj == null) return null;
+        if (obj instanceof String) {
+            return (String) obj;
+        }
+        return obj.toString();
+    }
+
+    private LocalDateTime extractLocalDateTime(Object obj) {
+        if (obj == null) return LocalDateTime.now();
+        if (obj instanceof java.sql.Timestamp) {
+            return ((java.sql.Timestamp) obj).toLocalDateTime();
+        }
+        if (obj instanceof java.sql.Date) {
+            return ((java.sql.Date) obj).toLocalDate().atStartOfDay();
+        }
+        if (obj instanceof java.time.LocalDateTime) {
+            return (LocalDateTime) obj;
+        }
+        return LocalDateTime.now();
+    }
+
+    private Integer extractInteger(Object obj, int defaultValue) {
+        if (obj == null) return defaultValue;
+        if (obj instanceof Number) {
+            return ((Number) obj).intValue();
+        }
+        if (obj instanceof String) {
+            try {
+                return Integer.parseInt((String) obj);
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            }
+        }
+        return defaultValue;
+    }
+
+    private Boolean extractBoolean(Object obj) {
+        if (obj == null) return false;
+        if (obj instanceof Boolean) {
+            return (Boolean) obj;
+        }
+        if (obj instanceof Number) {
+            return ((Number) obj).intValue() == 1;
+        }
+        if (obj instanceof String) {
+            String str = ((String) obj).trim();
+            return "1".equals(str) || "true".equalsIgnoreCase(str) || "Y".equalsIgnoreCase(str);
+        }
+        return false;
+    }
+
+    private long calculateTotalCount(Long memberId, ArticlesOptionsRequest options, LocalDateTime cutoffDate, String keyword, int mergedSize, int pageSize) {
+        try {
+            long recentCount = getRecentCount(memberId, options, cutoffDate, keyword);
+            long olderCount = getOlderCount(memberId, options, cutoffDate, keyword);
+            return recentCount + olderCount;
+        } catch (Exception e) {
+            log.warn("카운트 쿼리 실패, 근사치 사용 - memberId: {}, keyword: {}", memberId, keyword, e);
+            // 카운트 쿼리 실패 시 merged.size()로 근사치 사용
+            return mergedSize + pageSize;
+        }
     }
 
     private long getRecentCount(Long memberId, ArticlesOptionsRequest options, LocalDateTime cutoffDate, String keyword) {

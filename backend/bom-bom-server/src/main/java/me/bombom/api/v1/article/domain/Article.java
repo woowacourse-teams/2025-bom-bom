@@ -2,7 +2,6 @@ package me.bombom.api.v1.article.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,7 +17,6 @@ import me.bombom.api.v1.common.BaseEntity;
 
 @Entity
 @Getter
-@EntityListeners(ArticleEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Article extends BaseEntity {
 

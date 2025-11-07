@@ -20,10 +20,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
@@ -79,26 +81,50 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         LocalDateTime cutoffDate = LocalDateTime.now().minusDays(RECENT_DAYS);
         String keyword = options.keyword().strip();
 
-        String unionQuery = buildUnionQuery(options, cutoffDate);
-        Query query = entityManager.createNativeQuery(unionQuery);
-        setUnionQueryParameters(query, memberId, options, cutoffDate, keyword, pageable);
+        // 각 쿼리에서 충분히 가져오기 위해 LIMIT을 pageSize * 2로 설정
+        int fetchLimit = Math.max(pageable.getPageSize() * 2, 100);
+
+        // 최근 3일 쿼리 실행
+        String recentQuery = buildRecentQuery(options, cutoffDate, fetchLimit);
+        Query recentQueryObj = entityManager.createNativeQuery(recentQuery);
+        setQueryParameters(recentQueryObj, memberId, options, cutoffDate, keyword, fetchLimit);
 
         @SuppressWarnings("unchecked")
-        List<Object[]> results = query.getResultList();
-        List<ArticleResponse> content = mapToArticleResponse(results);
+        List<Object[]> recentResults = recentQueryObj.getResultList();
+        List<ArticleResponse> recentArticles = mapToArticleResponse(recentResults);
 
-        long totalCount = getTotalCountWithUnion(memberId, options, cutoffDate, keyword);
+        // 과거 쿼리 실행
+        String olderQuery = buildOlderQuery(options, cutoffDate, fetchLimit);
+        Query olderQueryObj = entityManager.createNativeQuery(olderQuery);
+        setQueryParameters(olderQueryObj, memberId, options, cutoffDate, keyword, fetchLimit);
 
-        return PageableExecutionUtils.getPage(content, pageable, () -> totalCount);
+        @SuppressWarnings("unchecked")
+        List<Object[]> olderResults = olderQueryObj.getResultList();
+        List<ArticleResponse> olderArticles = mapToArticleResponse(olderResults);
+
+        // 애플리케이션에서 병합, 정렬, 최종 LIMIT 적용
+        List<ArticleResponse> merged = Stream.concat(recentArticles.stream(), olderArticles.stream())
+                .sorted(Comparator.comparing(ArticleResponse::arrivedDateTime)
+                        .thenComparing(ArticleResponse::articleId)
+                        .reversed())
+                .limit(pageable.getPageSize())
+                .collect(Collectors.toList());
+
+        // 페이징을 위해 전체 카운트 계산
+        long recentCount = getRecentCount(memberId, options, cutoffDate, keyword);
+        long olderCount = getOlderCount(memberId, options, cutoffDate, keyword);
+        long totalCount = recentCount + olderCount;
+
+        return PageableExecutionUtils.getPage(merged, pageable, () -> totalCount);
     }
 
-    private String buildUnionQuery(ArticlesOptionsRequest options, LocalDateTime cutoffDate) {
+    private String buildRecentQuery(ArticlesOptionsRequest options, LocalDateTime cutoffDate, int limit) {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT ")
-                .append("matched.article_id, ")
+                .append("a.id AS article_id, ")
                 .append("a.title, ")
                 .append("a.contents_summary, ")
-                .append("matched.arrived_date_time, ")
+                .append("sr.arrived_date_time, ")
                 .append("a.thumbnail_url, ")
                 .append("a.expected_read_time, ")
                 .append("a.is_read, ")
@@ -106,9 +132,11 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .append("n.name AS newsletter_name, ")
                 .append("n.image_url AS newsletter_image_url, ")
                 .append("c.name AS category_name ")
-                .append("FROM (")
-                .append("SELECT sr.article_id, sr.arrived_date_time ")
                 .append("FROM search_recent sr ")
+                .append("INNER JOIN article a ON a.id = sr.article_id ")
+                .append("INNER JOIN newsletter n ON n.id = sr.newsletter_id ")
+                .append("INNER JOIN category c ON c.id = n.category_id ")
+                .append("LEFT JOIN bookmark b ON b.article_id = a.id AND b.member_id = :memberId ")
                 .append("WHERE sr.member_id = :memberId ")
                 .append("AND sr.arrived_date_time >= :cutoffDate ");
 
@@ -121,9 +149,30 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         }
 
         sql.append("AND MATCH(sr.title, sr.contents_text) AGAINST(:keyword IN BOOLEAN MODE) ")
-                .append("UNION ALL ")
-                .append("SELECT a.id AS article_id, a.arrived_date_time ")
+                .append("ORDER BY sr.arrived_date_time DESC, a.id DESC ")
+                .append("LIMIT :limit");
+
+        return sql.toString();
+    }
+
+    private String buildOlderQuery(ArticlesOptionsRequest options, LocalDateTime cutoffDate, int limit) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT ")
+                .append("a.id AS article_id, ")
+                .append("a.title, ")
+                .append("a.contents_summary, ")
+                .append("a.arrived_date_time, ")
+                .append("a.thumbnail_url, ")
+                .append("a.expected_read_time, ")
+                .append("a.is_read, ")
+                .append("CASE WHEN b.article_id IS NOT NULL THEN 1 ELSE 0 END AS is_bookmarked, ")
+                .append("n.name AS newsletter_name, ")
+                .append("n.image_url AS newsletter_image_url, ")
+                .append("c.name AS category_name ")
                 .append("FROM article a ")
+                .append("INNER JOIN newsletter n ON n.id = a.newsletter_id ")
+                .append("INNER JOIN category c ON c.id = n.category_id ")
+                .append("LEFT JOIN bookmark b ON b.article_id = a.id AND b.member_id = :memberId ")
                 .append("WHERE a.member_id = :memberId ")
                 .append("AND a.arrived_date_time < :cutoffDate ");
 
@@ -136,30 +185,24 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         }
 
         sql.append("AND MATCH(a.title, a.contents_text) AGAINST(:keyword IN BOOLEAN MODE) ")
-                .append(") AS matched ")
-                .append("INNER JOIN article a ON a.id = matched.article_id ")
-                .append("INNER JOIN newsletter n ON n.id = a.newsletter_id ")
-                .append("INNER JOIN category c ON c.id = n.category_id ")
-                .append("LEFT JOIN bookmark b ON b.article_id = a.id AND b.member_id = :memberId ")
-                .append("ORDER BY matched.arrived_date_time DESC, matched.article_id DESC ")
-                .append("LIMIT :limit OFFSET :offset");
+                .append("ORDER BY a.arrived_date_time DESC, a.id DESC ")
+                .append("LIMIT :limit");
 
         return sql.toString();
     }
 
-    private void setUnionQueryParameters(
+    private void setQueryParameters(
             Query query,
             Long memberId,
             ArticlesOptionsRequest options,
             LocalDateTime cutoffDate,
             String keyword,
-            Pageable pageable
+            int limit
     ) {
         query.setParameter("memberId", memberId);
         query.setParameter("cutoffDate", cutoffDate);
         query.setParameter("keyword", keyword);
-        query.setParameter("limit", pageable.getPageSize());
-        query.setParameter("offset", pageable.getOffset());
+        query.setParameter("limit", limit);
 
         if (options.newsletterId() != null) {
             query.setParameter("newsletterId", options.newsletterId());
@@ -204,10 +247,9 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .collect(Collectors.toList());
     }
 
-    private long getTotalCountWithUnion(Long memberId, ArticlesOptionsRequest options, LocalDateTime cutoffDate, String keyword) {
+    private long getRecentCount(Long memberId, ArticlesOptionsRequest options, LocalDateTime cutoffDate, String keyword) {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT COUNT(*) FROM (")
-                .append("SELECT sr.article_id ")
+        sql.append("SELECT COUNT(*) ")
                 .append("FROM search_recent sr ")
                 .append("WHERE sr.member_id = :memberId ")
                 .append("AND sr.arrived_date_time >= :cutoffDate ");
@@ -220,9 +262,27 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             sql.append("AND DATE(sr.arrived_date_time) = :date ");
         }
 
-        sql.append("AND MATCH(sr.title, sr.contents_text) AGAINST(:keyword IN BOOLEAN MODE) ")
-                .append("UNION ALL ")
-                .append("SELECT a.id ")
+        sql.append("AND MATCH(sr.title, sr.contents_text) AGAINST(:keyword IN BOOLEAN MODE)");
+
+        Query query = entityManager.createNativeQuery(sql.toString());
+        query.setParameter("memberId", memberId);
+        query.setParameter("cutoffDate", cutoffDate);
+        query.setParameter("keyword", keyword);
+
+        if (options.newsletterId() != null) {
+            query.setParameter("newsletterId", options.newsletterId());
+        }
+
+        if (options.date() != null) {
+            query.setParameter("date", options.date());
+        }
+
+        return ((Number) query.getSingleResult()).longValue();
+    }
+
+    private long getOlderCount(Long memberId, ArticlesOptionsRequest options, LocalDateTime cutoffDate, String keyword) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(*) ")
                 .append("FROM article a ")
                 .append("WHERE a.member_id = :memberId ")
                 .append("AND a.arrived_date_time < :cutoffDate ");
@@ -235,8 +295,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             sql.append("AND DATE(a.arrived_date_time) = :date ");
         }
 
-        sql.append("AND MATCH(a.title, a.contents_text) AGAINST(:keyword IN BOOLEAN MODE) ")
-                .append(") AS union_result");
+        sql.append("AND MATCH(a.title, a.contents_text) AGAINST(:keyword IN BOOLEAN MODE)");
 
         Query query = entityManager.createNativeQuery(sql.toString());
         query.setParameter("memberId", memberId);

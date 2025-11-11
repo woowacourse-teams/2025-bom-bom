@@ -49,7 +49,7 @@ export type RNToWebMessage =
       };
     }
   | {
-      type: 'GET_DEVICE_UUID';
+      type: 'DEVICE_UUID';
       payload: {
         deviceUuid: string;
       };

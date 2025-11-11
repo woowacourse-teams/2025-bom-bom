@@ -9,7 +9,7 @@ export const useDeviceInfo = () => {
       const deviceUuid = await getDeviceUUID();
       if (deviceUuid) {
         sendMessageToWeb({
-          type: 'GET_DEVICE_UUID',
+          type: 'DEVICE_UUID',
           payload: { deviceUuid },
         });
       }

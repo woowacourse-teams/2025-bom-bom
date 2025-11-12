@@ -2,6 +2,7 @@ package news.bombomemail.reading.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import news.bombomemail.article.event.ArticleArrivedEvent;
 import news.bombomemail.reading.service.TodayReadingService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -14,7 +15,7 @@ public class TodayReadingListener {
     private final TodayReadingService todayReadingService;
 
     @TransactionalEventListener
-    public void on(TodayReadingEvent event) {
+    public void on(ArticleArrivedEvent event) {
         try {
             todayReadingService.updateTodayTotalCount(event.memberId());
         } catch (Exception e) {

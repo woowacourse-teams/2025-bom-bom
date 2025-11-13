@@ -31,10 +31,10 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             WebDataBinderFactory binderFactory
     ) {
         LoginMember loginMember = parameter.getParameterAnnotation(LoginMember.class);
-        boolean nullable = loginMember != null && loginMember.nullable();
+        boolean anonymous = loginMember != null && loginMember.anonymous();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (isAnonymous(authentication)) {
-            if (nullable) {
+            if (anonymous) {
                 return null;
             }
             throw new UnauthorizedException(ErrorDetail.UNAUTHORIZED);

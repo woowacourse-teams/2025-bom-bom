@@ -22,14 +22,14 @@ public class NewsletterController implements NewsletterControllerApi{
 
     @Override
     @GetMapping
-    public List<NewsletterResponse> getNewsletters(@LoginMember(nullable = true) Member member) {
+    public List<NewsletterResponse> getNewsletters(@LoginMember(anonymous = true) Member member) {
         return newsletterService.getNewsletters(member);
     }
 
     @Override
     @GetMapping("/{id}")
     public NewsletterWithDetailResponse getNewsletterWithDetail(
-            @LoginMember(nullable = true) Member member,
+            @LoginMember(anonymous = true) Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
     ) {
         return newsletterService.getNewsletterWithDetail(id, member);

@@ -30,12 +30,12 @@ class LoginMemberArgumentResolverTest {
     }
 
     static class StubController {
-        public void endpointNullableTrue(@LoginMember(nullable = true) Member member) {}
-        public void endpointNullableFalse(@LoginMember(nullable = false) Member member) {}
+        public void endpointNullableTrue(@LoginMember(anonymous = true) Member member) {}
+        public void endpointNullableFalse(@LoginMember(anonymous = false) Member member) {}
     }
 
     @Test
-    void 익명_요청_nullable_true이면_null_반환() throws Exception {
+    void 익명_요청_anonymous_true이면_null_반환() throws Exception {
         //익명 토큰 = 로그인하지 않은 유저
         Authentication anonymous = new AnonymousAuthenticationToken(
                 "key",
@@ -49,7 +49,7 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    void 익명_요청_nullable_false이면_UNAUTHORIZED() {
+    void 익명_요청_anonymous_false이면_UNAUTHORIZED() {
         Authentication anonymous = new AnonymousAuthenticationToken(
                 "key",
                 "anonymousUser",

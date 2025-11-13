@@ -106,7 +106,7 @@ class NewsletterServiceTest {
     @Test
     void 로그인_상태로_뉴스레터_목록_조회_시_구독_여부가_함께_온다() {
         //given
-        Member member = TestFixture.createUniqueMember("nickname", "uniqueProviderId");
+        Member member = TestFixture.createUniqueMember("uniqueNickname", "uniqueProviderId");
         memberRepository.save(member);
         Subscribe subscribe = TestFixture.createSubscribe(newsletters.getFirst(), member);
         subscribeRepository.save(subscribe);

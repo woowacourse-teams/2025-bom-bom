@@ -1,5 +1,9 @@
 version: 0.2
 
+cache:
+  paths:
+    - '.pnpm-store/**/*'
+
 phases:
   install:
     runtime-versions:
@@ -12,6 +16,8 @@ phases:
 
   pre_build:
     commands:
+      - echo "===== PRINT PNPM STORE PATH ====="
+      - pnpm store path
       - echo "Running lint..."
       - pnpm run web:lint
       - echo "Running type-check..."

@@ -20,6 +20,7 @@ public class ArticleArrivedEventListener {
     public void onArticleArrived(ArticleArrivedEvent event) {
         try {
             ArticleArrivalNotification articleArrivalNotification = ArticleArrivalNotification.builder()
+                    .articleId(event.articleId())
                     .memberId(event.memberId())
                     .newsletterName(event.newsletterName())
                     .articleTitle(event.articleTitle())

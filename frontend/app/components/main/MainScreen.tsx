@@ -81,7 +81,7 @@ export const MainScreen = () => {
           break;
 
         case 'REGISTER_FCM_TOKEN':
-          console.log('FCM 토큰 등록:', message.payload);
+          console.log('FCM 토큰 등록');
           if (message.payload.memberId) {
             handleLoggedInPermission(message.payload.memberId);
           }

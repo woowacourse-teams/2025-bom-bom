@@ -51,12 +51,10 @@ function RouteComponent() {
   } = useAppInstallPrompt();
 
   useEffect(() => {
-    console.log('registerFCMTokenㄹㅁㄴㅇㄹㄴㅁㅇㄹ');
     if (!isWebView()) return;
 
     const data = queryClient.getQueryData(queries.userProfile().queryKey);
     const isLoggedIn = data && data.id;
-    console.log('registerFCMToken', data);
 
     if (isLoggedIn) {
       sendMessageToRN({

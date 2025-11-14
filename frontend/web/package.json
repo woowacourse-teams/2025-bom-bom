@@ -80,7 +80,6 @@
   },
   "dependencies": {
     "@bombom/shared": "workspace:*",
-    "@bombom/env": "workspace:*",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@microsoft/clarity": "^1.0.0",

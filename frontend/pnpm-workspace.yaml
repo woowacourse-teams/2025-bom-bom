@@ -2,4 +2,3 @@ packages:
   - 'app'
   - 'web'
   - 'shared'
-  - 'env'

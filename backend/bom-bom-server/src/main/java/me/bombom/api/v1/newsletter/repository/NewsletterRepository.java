@@ -27,10 +27,10 @@ public interface NewsletterRepository extends JpaRepository<Newsletter, Long> {
         )
         FROM Newsletter n
         JOIN NewsletterDetail d ON d.id = n.detailId
-        JOIN NewsletterSubscriptionCount nsc ON nsc.newsletterId = n.id
+        LEFT JOIN NewsletterSubscriptionCount nsc ON nsc.newsletterId = n.id
         JOIN Category c ON c.id = n.categoryId
         LEFT JOIN Subscribe s ON s.newsletterId = n.id AND s.memberId = :memberId
-        ORDER BY nsc.total DESC, n.name ASC
+        ORDER BY COALESCE(nsc.total, 0) DESC, n.name ASC
     """)
     List<NewsletterResponse> findNewslettersInfo(@Param("memberId") Long memberId);
 

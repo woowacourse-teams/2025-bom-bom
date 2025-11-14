@@ -63,6 +63,7 @@
     "@types/react": "~19.1.10",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
+    "metro-resolver": "^0.83.3",
     "typescript": "~5.9.2"
   }
 }

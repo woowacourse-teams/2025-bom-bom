@@ -13,12 +13,38 @@ import * as WebBrowser from 'expo-web-browser';
 
 import { ENV } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
+import useNotification from '@/hooks/useNotification';
+import {
+  goToSystemPermission,
+  requestNotificationPermission,
+} from '@/utils/notification';
+import { useEffect, useRef } from 'react';
+import { useDeviceInfo } from '@/hooks/useDeviceInfo';
 
 export const MainScreen = () => {
   const { showWebViewLogin, showLogin, hideLogin } = useAuth();
   const { webViewRef } = useWebView();
+  const { sendDeviceInfoToWeb } = useDeviceInfo();
+  const webViewLoadEndCleanupRef = useRef<() => void>(null);
 
   const { handleNavigationStateChange } = useAndroidNavigationState();
+  const { registerFCMToken, onNotification } = useNotification();
+
+  const handleWebViewLoadEnd = () => {
+    console.log('WebView 로드 완료');
+    if (webViewLoadEndCleanupRef.current) {
+      webViewLoadEndCleanupRef.current();
+    }
+
+    requestNotificationPermission();
+    webViewLoadEndCleanupRef.current = onNotification();
+  };
+
+  useEffect(() => {
+    return () => {
+      webViewLoadEndCleanupRef.current?.();
+    };
+  }, []);
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {
     try {
@@ -33,6 +59,8 @@ export const MainScreen = () => {
         case 'LOGIN_SUCCESS':
           console.log('웹뷰에서 로그인 성공 알림 수신:', message.payload);
           hideLogin();
+          requestNotificationPermission();
+          registerFCMToken(message.payload?.memberId);
           break;
 
         case 'LOGIN_FAILED':
@@ -48,6 +76,15 @@ export const MainScreen = () => {
               dismissButtonStyle: 'close',
             });
           }
+          break;
+
+        case 'REQUEST_DEVICE_UUID':
+          console.log('디바이스 정보 요청');
+          sendDeviceInfoToWeb();
+          break;
+
+        case 'CHECK_NOTIFICATION_PERMISSION':
+          goToSystemPermission(message.payload.enabled);
           break;
 
         default:
@@ -75,6 +112,7 @@ export const MainScreen = () => {
           originWhitelist={['*']}
           onMessage={handleWebViewMessage}
           onNavigationStateChange={handleNavigationStateChange}
+          onLoadEnd={handleWebViewLoadEnd}
           onContentProcessDidTerminate={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent;
             console.warn('WebView Content Process Did Terminate:', nativeEvent);

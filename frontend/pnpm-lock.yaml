@@ -171,6 +171,9 @@ importers:
       eslint-config-expo:
         specifier: ~10.0.0
         version: 10.0.0(eslint@9.37.0)(typescript@5.9.3)
+      metro-resolver:
+        specifier: ^0.83.3
+        version: 0.83.3
       typescript:
         specifier: ~5.9.2
         version: 5.9.3

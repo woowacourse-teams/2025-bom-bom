@@ -1,6 +1,6 @@
 import { logger } from '../utils';
 import ApiError from './ApiError';
-import { ENV } from '@bombom/shared/apis/env';
+import { ENV } from '@bombom/shared/env';
 
 const DEFAULT_ERROR_MESSAGES: Record<number, string> = {
   400: '잘못된 요청입니다. 입력값을 확인해주세요.',

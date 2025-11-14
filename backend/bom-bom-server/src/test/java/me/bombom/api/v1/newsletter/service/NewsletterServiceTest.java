@@ -259,4 +259,29 @@ class NewsletterServiceTest {
                 }
         );
     }
+
+    @Test
+    void NewsletterSubscriptionCount가_없는_뉴스레터도_조회된다() {
+        //given - NewsletterSubscriptionCount가 없는 새로운 뉴스레터 생성
+        NewsletterDetail newDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        Newsletter newNewsletter = newsletterRepository.save(
+                TestFixture.createNewsletter(
+                        "새뉴스레터",
+                        "new@news.com",
+                        categories.getFirst().getId(),
+                        newDetail.getId()
+                )
+        );
+
+        //when
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null);
+
+        //then
+        assertSoftly(softly -> {
+            softly.assertThat(result.size()).isEqualTo(4); // 기존 3개 + 새로 생성한 1개
+            softly.assertThat(result)
+                    .extracting("newsletterId")
+                    .contains(newNewsletter.getId());
+        });
+    }
 }

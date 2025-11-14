@@ -5,7 +5,7 @@ const path = require('path');
 const config = getDefaultConfig(__dirname);
 
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  if (moduleName === '@bombom/shared/apis/env') {
+  if (moduleName === '@bombom/shared/env') {
     return {
       filePath: path.resolve(__dirname, 'constants/env.ts'),
       type: 'sourceFile',

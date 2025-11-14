@@ -15,7 +15,7 @@
     "resolveJsonModule": true,
     "types": [],
     "paths": {
-      "@bombom/shared/apis/env": ["./src/apis/env.ts"]
+      "@bombom/shared/env": ["./src/env.ts"]
     }
   },
   "include": ["src/**/*"],

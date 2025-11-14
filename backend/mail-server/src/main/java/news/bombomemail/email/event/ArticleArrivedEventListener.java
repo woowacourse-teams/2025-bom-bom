@@ -18,6 +18,7 @@ public class ArticleArrivedEventListener {
 
     private final ArticleArrivalNotificationRepository articleArrivalNotificationRepository;
 
+    // TODO: 피크 타임에 onArticleArrived 처리 시간이 길어질 경우, 비동기(@Async + ThreadPoolTaskExecutor)로 분리 검토
     @TransactionalEventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onArticleArrived(ArticleArrivedEvent event) {

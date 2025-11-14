@@ -24,7 +24,7 @@ const NotificationSettingsSection = () => {
     sendMessageToRN({ type: 'REQUEST_DEVICE_UUID' });
 
     const unsubscribe = addWebViewMessageListener((message) => {
-      if (message.type === 'GET_DEVICE_UUID') {
+      if (message.type === 'DEVICE_UUID') {
         setDeviceUuid(message.payload.deviceUuid);
       }
     });

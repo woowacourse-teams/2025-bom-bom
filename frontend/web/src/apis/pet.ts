@@ -1,4 +1,4 @@
-import { fetcher } from './fetcher';
+import { fetcher } from '@bombom/shared/apis';
 import type { components } from '@/types/openapi';
 
 export type GetPetResponse = components['schemas']['PetResponse'];

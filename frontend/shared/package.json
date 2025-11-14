@@ -11,6 +11,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./theme": "./src/theme.ts",
-    "./webview": "./src/webview.ts"
+    "./webview": "./src/webview.ts",
+    "./apis": "./src/apis/index.ts",
+    "./env": "./src/env.ts",
+    "./utils": "./src/utils/index.ts"
   }
 }

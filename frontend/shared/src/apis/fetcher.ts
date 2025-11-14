@@ -1,6 +1,6 @@
-import { getEnv } from '@bombom/env';
 import { logger } from '../utils';
 import ApiError from './ApiError';
+import { ENV } from '@bombom/shared/apis/env';
 
 const DEFAULT_ERROR_MESSAGES: Record<number, string> = {
   400: '잘못된 요청입니다. 입력값을 확인해주세요.',
@@ -61,8 +61,7 @@ const request = async <TRequest, TResponse>({
   headers,
 }: RequestOptions<TRequest>): Promise<TResponse | undefined> => {
   try {
-    const env = getEnv();
-    const url = new URL(env.baseUrl + path);
+    const url = new URL(ENV.baseUrl + path);
     const stringifiedQuery: Record<string, string> = Object.fromEntries(
       Object.entries(query)
         .map(([key, value]) => [key, value?.toString()])

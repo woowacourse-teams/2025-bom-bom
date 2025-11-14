@@ -1,5 +1,3 @@
-import { setEnv } from '@bombom/env';
-
 export const ENV = {
   // Google OAuth Client IDs
   webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '',
@@ -11,7 +9,3 @@ export const ENV = {
   // API
   baseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? '',
 } as const;
-
-setEnv({
-  baseUrl: ENV.baseUrl,
-});

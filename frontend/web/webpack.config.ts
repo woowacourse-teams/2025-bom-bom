@@ -73,6 +73,7 @@ export default (env: Env, argv: Argv) => {
       alias: {
         '#': path.resolve(__dirname, 'public'),
         '@': path.resolve(__dirname, 'src'),
+        '@bombom/shared/apis/env': path.resolve(__dirname, 'src/apis/env.ts'),
       },
     },
     plugins: [

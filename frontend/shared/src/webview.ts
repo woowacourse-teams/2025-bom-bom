@@ -50,4 +50,7 @@ export type RNToWebMessage =
       payload: {
         deviceUuid: string;
       };
+    }
+  | {
+      type: 'REQUEST_NOTIFICATION_ACTIVE';
     };

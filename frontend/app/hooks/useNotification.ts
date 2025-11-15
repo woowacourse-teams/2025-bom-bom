@@ -72,6 +72,9 @@ const useNotification = () => {
       const updatedPermission = await requestNotificationPermission();
       if (updatedPermission) {
         await registerFCMToken(memberId);
+        sendMessageToWeb({
+          type: 'REQUEST_NOTIFICATION_ACTIVE',
+        });
       }
     } catch (error) {
       console.error('권한 요청 및 등록 실패:', error);

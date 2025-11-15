@@ -10,6 +10,7 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import Toast from '@/components/Toast/Toast';
 import usePageTracking from '@/libs/googleAnalytics/usePageTracking';
 import { useWebViewAuth } from '@/libs/webview/useWebViewAuth';
+import { useWebViewNotificationActive } from '@/libs/webview/useWebViewNotificationActive';
 import { useWebViewRouting } from '@/libs/webview/useWebViewRouting';
 import { queryClient } from '@/main';
 import type { QueryClient } from '@tanstack/react-query';
@@ -23,6 +24,7 @@ const RootComponent = () => {
   usePageTracking();
   useWebViewAuth();
   useWebViewRouting();
+  useWebViewNotificationActive();
 
   return (
     <>

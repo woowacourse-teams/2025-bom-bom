@@ -1,7 +1,6 @@
-import { getDefaultConfig } from 'expo/metro-config';
-import path from 'path';
-import { resolve } from 'metro-resolver';
-import type { ResolutionContext, Resolution } from 'metro-resolver';
+const { getDefaultConfig } = require('expo/metro-config');
+const path = require('path');
+const { resolve } = require('metro-resolver');
 
 const defaultConfig = getDefaultConfig(__dirname);
 
@@ -9,11 +8,7 @@ if (!defaultConfig.resolver) {
   throw new Error('Metro resolver 설정이 없습니다.');
 }
 
-const customResolveRequest = (
-  context: ResolutionContext,
-  moduleName: string,
-  platform: string | null,
-): Resolution => {
+const customResolveRequest = (context, moduleName, platform) => {
   if (moduleName === '@bombom/shared/env') {
     return {
       filePath: path.resolve(__dirname, 'constants/env.ts'),
@@ -24,6 +19,7 @@ const customResolveRequest = (
   return resolve(context, moduleName, platform);
 };
 
+/** @type {import('metro-config').ConfigT} */
 const config = {
   ...defaultConfig,
   resolver: {
@@ -32,4 +28,4 @@ const config = {
   },
 };
 
-export default config;
+module.exports = config;

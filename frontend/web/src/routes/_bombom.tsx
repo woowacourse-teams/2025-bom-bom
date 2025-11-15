@@ -5,6 +5,7 @@ import { queries } from '@/apis/queries';
 import AppInstallPromptModal from '@/components/AppInstallPromptModal/AppInstallPromptModal';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { useAppInstallPrompt } from '@/hooks/useAppInstallPrompt';
+import { useWebViewNotificationActive } from '@/libs/webview/useWebViewNotificationActive';
 import { sendMessageToRN } from '@/libs/webview/webview.utils';
 import { isWebView } from '@/utils/device';
 
@@ -49,6 +50,7 @@ function RouteComponent() {
     handleCloseModal,
     modalRef,
   } = useAppInstallPrompt();
+  useWebViewNotificationActive();
 
   useEffect(() => {
     if (!isWebView()) return;

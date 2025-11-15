@@ -7,6 +7,8 @@ import news.bombomemail.notification.domain.ArticleArrivalNotification;
 import news.bombomemail.notification.domain.NotificationStatus;
 import news.bombomemail.notification.repository.ArticleArrivalNotificationRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 @Slf4j
@@ -16,7 +18,9 @@ public class ArticleArrivedEventListener {
 
     private final ArticleArrivalNotificationRepository articleArrivalNotificationRepository;
 
+    // TODO: 피크 타임에 onArticleArrived 처리 시간이 길어질 경우, 비동기(@Async + ThreadPoolTaskExecutor)로 분리 검토
     @TransactionalEventListener
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onArticleArrived(ArticleArrivedEvent event) {
         try {
             ArticleArrivalNotification articleArrivalNotification = ArticleArrivalNotification.builder()

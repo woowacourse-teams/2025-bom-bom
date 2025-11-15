@@ -13,11 +13,8 @@ import * as WebBrowser from 'expo-web-browser';
 
 import { ENV } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
+import { goToSystemPermission } from '@/utils/notification';
 import useNotification from '@/hooks/useNotification';
-import {
-  goToSystemPermission,
-  handleLoggedInPermission,
-} from '@/utils/notification';
 import { useEffect, useRef } from 'react';
 import { useDeviceInfo } from '@/hooks/useDeviceInfo';
 

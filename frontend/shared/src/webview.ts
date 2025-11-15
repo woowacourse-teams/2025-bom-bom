@@ -17,7 +17,8 @@ export type WebToRNMessage =
   | { type: 'LOGIN_FAILED'; payload?: { error?: string; provider?: string } }
   | { type: 'OPEN_BROWSER'; payload: { url: string } }
   | { type: 'REQUEST_DEVICE_UUID' }
-  | { type: 'CHECK_NOTIFICATION_PERMISSION'; payload: { enabled: boolean } };
+  | { type: 'CHECK_NOTIFICATION_PERMISSION'; payload: { enabled: boolean } }
+  | { type: 'REGISTER_FCM_TOKEN'; payload: { memberId: number } };
 
 export type RNToWebMessage =
   | {

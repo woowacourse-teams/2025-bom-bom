@@ -14,6 +14,26 @@ export const createAndroidChannel = async () => {
   }
 };
 
+export const hasRequestedPermission = async (): Promise<boolean> => {
+  try {
+    const key = 'notification_permission_requested';
+    const permissionRequested = await AsyncStorage.getItem(key);
+    return permissionRequested === 'true';
+  } catch (error) {
+    console.error('권한 요청 기록 확인 실패:', error);
+    return false;
+  }
+};
+
+const setPermissionRequested = async (): Promise<void> => {
+  try {
+    const key = 'notification_permission_requested';
+    await AsyncStorage.setItem(key, 'true');
+  } catch (error) {
+    console.error('권한 요청 기록 저장 실패:', error);
+  }
+};
+
 // 사용자 알림 권한 요청
 export const requestNotificationPermission = async () => {
   await setPermissionRequested();
@@ -69,41 +89,6 @@ export const goToSystemPermission = async (enabled: boolean) => {
   }
 };
 
-export const checkNotificationPermission = async () => {
-  if (Device.isDevice) {
-    const authStatus = await messaging().hasPermission();
-    return (
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL
-    );
-  }
-  return false;
-};
-
-export const goToSystemPermission = async (enabled: boolean) => {
-  try {
-    const hasPermission = await checkNotificationPermission();
-    if (enabled && !hasPermission) {
-      Alert.alert(
-        '알림 권한 필요',
-        '알림을 받으려면 시스템 설정에서 알림 권한을 허용해주세요.',
-        [
-          { text: '취소', style: 'cancel' },
-          {
-            text: '설정 열기',
-            onPress: () => {
-              Linking.openSettings();
-            },
-          },
-        ],
-      );
-    }
-  } catch (error) {
-    console.error('알림 권한 확인 실패:', error);
-  }
-};
-
-// FCM 토큰 생성
 export const getFCMToken = async () => {
   try {
     const hasPermission = await checkNotificationPermission();
@@ -115,25 +100,5 @@ export const getFCMToken = async () => {
     return token;
   } catch (error) {
     console.error('FCM 토큰을 가져오는데 실패했습니다.', error);
-  }
-};
-
-export const hasRequestedPermission = async (): Promise<boolean> => {
-  try {
-    const key = 'notification_permission_requested';
-    const permissionRequested = await AsyncStorage.getItem(key);
-    return permissionRequested === 'true';
-  } catch (error) {
-    console.error('권한 요청 기록 확인 실패:', error);
-    return false;
-  }
-};
-
-const setPermissionRequested = async (): Promise<void> => {
-  try {
-    const key = 'notification_permission_requested';
-    await AsyncStorage.setItem(key, 'true');
-  } catch (error) {
-    console.error('권한 요청 기록 저장 실패:', error);
   }
 };

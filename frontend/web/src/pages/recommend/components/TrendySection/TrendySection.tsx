@@ -17,6 +17,7 @@ import { trackEvent } from '@/libs/googleAnalytics/gaEvents';
 import type { Category } from '@/constants/newsletter';
 import type { Device } from '@/hooks/useDevice';
 import type { Newsletter } from '@/types/newsletter';
+import type { ChangeEvent } from 'react';
 import CloseIcon from '#/assets/svg/close.svg';
 import ReadingGlassesIcon from '#/assets/svg/reading-glasses.svg';
 import TrendingUpIcon from '#/assets/svg/trending-up.svg';
@@ -57,6 +58,12 @@ const TrendySection = () => {
         newsletter.name.toLowerCase().includes(searchQuery.toLowerCase()),
     )
     .filter((newsletter) => !HIDE_NEWSLETTERS.includes(newsletter.name));
+
+  const handleSearchInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (selectedCategory !== '전체') setSelectedCategory('전체');
+
+    setSearchQuery(e.target.value);
+  };
 
   const handleCardClick = (newsletter: Newsletter) => {
     setSelectedNewsletterId(newsletter.newsletterId);
@@ -107,8 +114,10 @@ const TrendySection = () => {
               ref={searchInputRef}
               placeholder="뉴스레터 이름으로 검색"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearchInputChange}
               onBlur={() => {
+                if (searchQuery !== '') return;
+
                 setIsSearchExpanded(false);
               }}
               aria-label="뉴스레터 검색"

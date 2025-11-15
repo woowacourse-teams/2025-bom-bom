@@ -1,39 +1,25 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
 import useNotificationMutation from './useNotificationMutation';
 import { queries } from '@/apis/queries';
 import { useUserInfo } from '@/hooks/useUserInfo';
-import {
-  sendMessageToRN,
-  addWebViewMessageListener,
-} from '@/libs/webview/webview.utils';
+import { useWebViewDeviceUuid } from '@/libs/webview/useWebViewDeviceUuid';
+import { sendMessageToRN } from '@/libs/webview/webview.utils';
 
 const NotificationSettingsSection = () => {
-  const [deviceUuid, setDeviceUuid] = useState<string>('');
   const { userInfo } = useUserInfo();
+  const deviceUuid = useWebViewDeviceUuid();
+  const memberId = userInfo?.id ?? 0;
 
-  const { data: notificationStatus } = useQuery(
-    queries.notificationStatus({
-      memberId: userInfo?.id ?? 0,
+  const { data: notificationStatus } = useQuery({
+    ...queries.notificationStatus({
+      memberId,
       deviceUuid,
     }),
-  );
-
-  useEffect(() => {
-    sendMessageToRN({ type: 'REQUEST_DEVICE_UUID' });
-
-    const unsubscribe = addWebViewMessageListener((message) => {
-      if (message.type === 'DEVICE_UUID') {
-        setDeviceUuid(message.payload.deviceUuid);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
+  });
 
   const { mutate: updateNotificationSettings } = useNotificationMutation({
-    memberId: userInfo?.id ?? 0,
+    memberId,
     deviceUuid,
   });
 

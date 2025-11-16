@@ -16,6 +16,7 @@ import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
+import me.bombom.api.v1.subscribe.dto.UnsubscribeResponse;
 import me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import me.bombom.support.IntegrationTest;
@@ -87,11 +88,12 @@ class SubscribeServiceTest {
             .build());
 
         // when
-        subscribeService.cancelSubscription(member.getId(), subscribe.getId());
+        UnsubscribeResponse response = subscribeService.unsubscribe(member.getId(), subscribe.getId());
 
         // then
         List<Subscribe> subscribes = subscribeRepository.findAll();
         assertThat(subscribes).isEmpty();
+        assertThat(response.hasUnsubscribeUrl()).isFalse();
     }
 
     @Test
@@ -113,7 +115,7 @@ class SubscribeServiceTest {
             .build());
 
         // when & then
-        assertThatThrownBy(() -> subscribeService.cancelSubscription(member.getId(), subscribe.getId()))
+        assertThatThrownBy(() -> subscribeService.unsubscribe(member.getId(), subscribe.getId()))
             .isInstanceOf(UnauthorizedException.class);
     }
     @Test
@@ -123,7 +125,34 @@ class SubscribeServiceTest {
         memberRepository.save(member);
 
         // when & then
-        assertThatThrownBy(() -> subscribeService.cancelSubscription(member.getId(), 999L))
+        assertThatThrownBy(() -> subscribeService.unsubscribe(member.getId(), 999L))
             .isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void unsubscribeUrl이_있는_구독을_취소하면_unsubscribeUrl을_반환한다() {
+        // given
+        Member member = TestFixture.normalMemberFixture();
+        memberRepository.save(member);
+
+        Category category = categoryRepository.save(TestFixture.createCategory());
+        NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
+        Newsletter newsletter = newsletterRepository.save(
+            TestFixture.createNewsletter("테스트 뉴스레터", "test@test.com", category.getId(), newsletterDetail.getId()));
+        String expectedUnsubscribeUrl = "https://example.com/unsubscribe";
+        Subscribe subscribe = subscribeRepository.save(Subscribe.builder()
+            .memberId(member.getId())
+            .newsletterId(newsletter.getId())
+            .unsubscribeUrl(expectedUnsubscribeUrl)
+            .build());
+
+        // when
+        UnsubscribeResponse response = subscribeService.unsubscribe(member.getId(), subscribe.getId());
+
+        // then
+        List<Subscribe> subscribes = subscribeRepository.findAll();
+        assertThat(subscribes).isEmpty();
+        assertThat(response.hasUnsubscribeUrl()).isTrue();
+        assertThat(response.getUnsubscribeUrl()).isEqualTo(expectedUnsubscribeUrl);
     }
 }

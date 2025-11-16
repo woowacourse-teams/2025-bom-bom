@@ -8,6 +8,7 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
+import me.bombom.api.v1.subscribe.dto.UnsubscribeResponse;
 import me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class SubscribeService {
     }
 
     @Transactional
-    public void cancelSubscription(Long memberId, Long subscribeId) {
+    public UnsubscribeResponse unsubscribe(Long memberId, Long subscribeId) {
         Subscribe subscribe = subscribeRepository.findById(subscribeId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
 
@@ -40,6 +41,9 @@ public class SubscribeService {
             throw new UnauthorizedException(ErrorDetail.FORBIDDEN_RESOURCE);
         }
 
+        String unsubscribeUrl = subscribe.getUnsubscribeUrl();
         subscribeRepository.delete(subscribe);
+
+        return new UnsubscribeResponse(unsubscribeUrl);
     }
 }

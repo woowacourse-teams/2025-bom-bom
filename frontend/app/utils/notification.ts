@@ -36,25 +36,32 @@ const setPermissionRequested = async (): Promise<void> => {
 
 // 사용자 알림 권한 요청
 export const requestNotificationPermission = async () => {
-  await setPermissionRequested();
+  try {
+    if (Platform.OS === 'ios') {
+      const auth = await messaging().requestPermission();
+      await setPermissionRequested();
 
-  if (Platform.OS === 'ios') {
-    const auth = await messaging().requestPermission();
-    return (
-      auth === messaging.AuthorizationStatus.AUTHORIZED ||
-      auth === messaging.AuthorizationStatus.PROVISIONAL
-    );
+      return (
+        auth === messaging.AuthorizationStatus.AUTHORIZED ||
+        auth === messaging.AuthorizationStatus.PROVISIONAL
+      );
+    }
+
+    if (Platform.OS === 'android') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      await setPermissionRequested();
+
+      return status === 'granted';
+    }
+
+    return false;
+  } catch (error) {
+    console.error('권한 요청 실패:', error);
+    return false;
   }
-
-  if (Platform.OS === 'android') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    return status === 'granted';
-  }
-
-  return false;
 };
 
-const checkNotificationPermission = async () => {
+export const checkNotificationPermission = async () => {
   if (!Device.isDevice) {
     return false;
   }

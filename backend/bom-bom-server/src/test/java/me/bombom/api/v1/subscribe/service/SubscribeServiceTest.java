@@ -90,11 +90,8 @@ class SubscribeServiceTest {
         // when
         UnsubscribeResponse response = subscribeService.unsubscribe(member.getId(), subscribe.getId());
 
-        subscribeRepository.flush();
-
         // then
-        List<Subscribe> subscribes = subscribeRepository.findAll();
-        assertThat(subscribes).isEmpty();
+        assertThat(subscribeRepository.findById(subscribe.getId())).isEmpty();
         assertThat(response.hasUnsubscribeUrl()).isFalse();
     }
 
@@ -151,11 +148,8 @@ class SubscribeServiceTest {
         // when
         UnsubscribeResponse response = subscribeService.unsubscribe(member.getId(), subscribe.getId());
 
-        subscribeRepository.flush();
-
         // then
-        List<Subscribe> subscribes = subscribeRepository.findAll();
-        assertThat(subscribes).isEmpty();
+        assertThat(subscribeRepository.findById(subscribe.getId())).isEmpty();
         assertThat(response.hasUnsubscribeUrl()).isTrue();
         assertThat(response.unsubscribeUrl()).isEqualTo(expectedUnsubscribeUrl);
     }

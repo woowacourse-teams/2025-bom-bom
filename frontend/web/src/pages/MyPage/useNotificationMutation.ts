@@ -1,7 +1,9 @@
+import { ApiError } from '@bombom/shared/apis';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { putNotificationSettings } from '@/apis/notification';
 import { queries } from '@/apis/queries';
 import { toast } from '@/components/Toast/utils/toastActions';
+import { sendMessageToRN } from '@/libs/webview/webview.utils';
 
 interface useNotificationMutationParams {
   memberId: number;
@@ -25,7 +27,15 @@ const useNotificationMutation = ({
         }).queryKey,
       });
     },
-    onError: () => {
+    onError: (error, enabled) => {
+      if (enabled && error instanceof ApiError && error.status === 404) {
+        sendMessageToRN({
+          type: 'REGISTER_FCM_TOKEN',
+          payload: { memberId },
+        });
+        return;
+      }
+
       toast.error('알림 설정 변경에 실패했습니다. 다시 시도해주세요.');
     },
   });

@@ -153,6 +153,6 @@ class SubscribeServiceTest {
         List<Subscribe> subscribes = subscribeRepository.findAll();
         assertThat(subscribes).isEmpty();
         assertThat(response.hasUnsubscribeUrl()).isTrue();
-        assertThat(response.getUnsubscribeUrl()).isEqualTo(expectedUnsubscribeUrl);
+        assertThat(response.unsubscribeUrl()).isEqualTo(expectedUnsubscribeUrl);
     }
 }

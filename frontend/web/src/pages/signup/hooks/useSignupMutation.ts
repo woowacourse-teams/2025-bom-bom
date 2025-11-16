@@ -36,14 +36,11 @@ export const useSignupMutation = ({
         gender,
         birthDate,
       }),
-    onSuccess: async () => {
+    onSuccess: () => {
       initializeGuideMailStorage();
 
       sendMessageToRN({
         type: 'LOGIN_SUCCESS',
-        payload: {
-          isAuthenticated: true,
-        },
       });
       navigate({ to: '/today' });
       trackEvent({

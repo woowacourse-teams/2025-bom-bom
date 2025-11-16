@@ -53,7 +53,7 @@ public class ReadingScheduler {
     }
 
     @Scheduled(cron = EVERY_TEN_MINUTES_CRON, zone = TIME_ZONE)
-    @SchedulerLock(name = "ten_minutely_calculate_member_rank", lockAtLeastFor = "PT3S", lockAtMostFor = "PT15S")
+    @SchedulerLock(name = "ten_minutely_calculate_member_rank", lockAtLeastFor = "PT6S", lockAtMostFor = "PT15S")
     public void tenMinutelyCalculateMemberRank() {
         log.info("이달의 독서왕 순위 업데이트");
 

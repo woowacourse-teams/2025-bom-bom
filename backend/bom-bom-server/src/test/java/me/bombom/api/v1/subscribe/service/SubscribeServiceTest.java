@@ -90,6 +90,8 @@ class SubscribeServiceTest {
         // when
         UnsubscribeResponse response = subscribeService.unsubscribe(member.getId(), subscribe.getId());
 
+        subscribeRepository.flush();
+
         // then
         List<Subscribe> subscribes = subscribeRepository.findAll();
         assertThat(subscribes).isEmpty();
@@ -148,6 +150,8 @@ class SubscribeServiceTest {
 
         // when
         UnsubscribeResponse response = subscribeService.unsubscribe(member.getId(), subscribe.getId());
+
+        subscribeRepository.flush();
 
         // then
         List<Subscribe> subscribes = subscribeRepository.findAll();

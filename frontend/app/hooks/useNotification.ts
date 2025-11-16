@@ -140,6 +140,7 @@ const useNotification = () => {
 
   return {
     onNotification,
+    registerFCMToken,
     handleLoggedInPermission,
   };
 };

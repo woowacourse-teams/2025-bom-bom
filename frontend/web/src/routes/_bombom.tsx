@@ -60,7 +60,7 @@ function RouteComponent() {
 
     if (isLoggedIn) {
       sendMessageToRN({
-        type: 'REGISTER_FCM_TOKEN',
+        type: 'REGISTER_FCM_TOKEN_LOGGED_IN',
         payload: {
           memberId: data.id,
         },

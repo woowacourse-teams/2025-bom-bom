@@ -25,7 +25,8 @@ export const MainScreen = () => {
   const webViewLoadEndCleanupRef = useRef<() => void>(null);
 
   const { handleNavigationStateChange } = useAndroidNavigationState();
-  const { onNotification, handleLoggedInPermission } = useNotification();
+  const { onNotification, registerFCMToken, handleLoggedInPermission } =
+    useNotification();
 
   const handleWebViewLoadEnd = () => {
     console.log('WebView 로드 완료');
@@ -78,6 +79,12 @@ export const MainScreen = () => {
           break;
 
         case 'REGISTER_FCM_TOKEN':
+          if (message.payload.memberId) {
+            registerFCMToken(message.payload.memberId);
+          }
+          break;
+
+        case 'REGISTER_FCM_TOKEN_LOGGED_IN':
           if (message.payload.memberId) {
             handleLoggedInPermission(message.payload.memberId);
           }

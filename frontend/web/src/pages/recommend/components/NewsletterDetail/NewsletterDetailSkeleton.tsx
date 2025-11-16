@@ -37,7 +37,7 @@ const NewsletterDetailSkeleton = () => {
         </InfoWrapper>
 
         <Skeleton
-          width="100%"
+          width="60%"
           height={isMobile ? '28px' : '36px'}
           maxWidth="400px"
           borderRadius="12px"
@@ -55,7 +55,7 @@ const NewsletterDetailSkeleton = () => {
       </TabSkeletonWrapper>
 
       <ScrollableWrapper isMobile={isMobile}>
-        <Skeleton width="100%" height="100%" />
+        <Skeleton width="100%" height={isMobile ? '240px' : '100%'} />
       </ScrollableWrapper>
     </Container>
   );

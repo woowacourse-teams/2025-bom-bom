@@ -160,7 +160,7 @@ export const FixedWrapper = styled.div<{ isMobile: boolean }>`
 `;
 
 export const ScrollableWrapper = styled.div<{ isMobile: boolean }>`
-  height: ${({ isMobile }) => (isMobile ? '260px' : '450px')};
+  height: ${({ isMobile }) => (isMobile ? 'auto' : '450px')};
   margin-right: -16px;
   padding: 8px;
 

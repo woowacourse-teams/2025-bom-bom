@@ -46,7 +46,6 @@ export const MainScreen = () => {
     try {
       const message: WebToRNMessage = JSON.parse(event.nativeEvent.data);
       console.log('WebView에서 메시지 수신:', message);
-      console.log('[DEBUG] message.type:', message.type, 'typeof:', typeof message.type, 'length:', message.type.length);
 
       switch (message.type) {
         case 'SHOW_LOGIN_SCREEN':
@@ -80,7 +79,12 @@ export const MainScreen = () => {
 
         case 'REGISTER_FCM_TOKEN':
           console.log('[v1.1.3-BUILD] FCM 토큰 등록 케이스 진입 성공!');
-          console.log('[DEBUG] payload:', message.payload, 'memberId:', message.payload.memberId);
+          console.log(
+            '[DEBUG] payload:',
+            message.payload,
+            'memberId:',
+            message.payload.memberId,
+          );
           if (message.payload.memberId) {
             handleLoggedInPermission(message.payload.memberId);
           }

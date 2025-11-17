@@ -27,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class PreviousArticleService {
 
     private static final int PREVIOUS_ARTICLE_KEEP_COUNT = 10;
-    private static final int PREVIOUS_ARTICLE_SHOW_COUNT = 5;
 
     @Value("${admin.previous-article.member-id}")
     private Long PREVIOUS_ARTICLE_ADMIN_ID;
@@ -57,8 +56,8 @@ public class PreviousArticleService {
 
         return previousArticleStrategy.execute(
                 previousArticleRequest.newsletterId(),
-                PREVIOUS_ARTICLE_SHOW_COUNT,
-                newsletterPreviousPolicy.getFixedArticleCount()
+                newsletterPreviousPolicy.getTotalCount(),
+                newsletterPreviousPolicy.getFixedCount()
         );
     }
 

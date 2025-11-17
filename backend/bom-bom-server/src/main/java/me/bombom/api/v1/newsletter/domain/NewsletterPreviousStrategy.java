@@ -8,5 +8,5 @@ public enum NewsletterPreviousStrategy {
     FIXED_WITH_LATEST,
     FIXED_ONLY,
     LATEST_ONLY,
-    NONE
+    INACTIVE
 }

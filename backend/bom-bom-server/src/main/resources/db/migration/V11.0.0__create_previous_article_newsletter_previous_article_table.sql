@@ -14,7 +14,7 @@ CREATE TABLE `previous_article` (
 CREATE TABLE newsletter_previous_policy (
                                                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
                                                     newsletter_id BIGINT NOT NULL,
-                                                    strategy ENUM('FIXED_WITH_LATEST', 'FIXED_ONLY', 'LATEST_ONLY', 'NONE') NOT NULL,
+                                                    strategy ENUM('FIXED_WITH_LATEST', 'FIXED_ONLY', 'LATEST_ONLY', 'INACTIVE') NOT NULL,
                                                     fixed_article_count INT NOT NULL DEFAULT 0,
                                                     exposure_ratio TINYINT NOT NULL DEFAULT 0,
                                                     created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),

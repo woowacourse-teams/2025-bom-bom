@@ -67,6 +67,8 @@ export const Route = createRootRouteWithContext<BomBomRouterContext>()({
 
       if (!isServerOn && location.pathname !== maintenancePath) {
         return redirect({ to: maintenancePath });
+      } else if (isServerOn && location.pathname === maintenancePath) {
+        return redirect({ to: '/' });
       }
     } catch (err) {
       console.error('Server status check failed:', err);

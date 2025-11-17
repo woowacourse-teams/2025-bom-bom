@@ -16,7 +16,6 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousPolicy;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy;
 import me.bombom.api.v1.newsletter.repository.NewsletterPreviousPolicyRepository;
-import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,34 +31,29 @@ public class PreviousArticleService {
     private Long PREVIOUS_ARTICLE_ADMIN_ID;
 
     private final ArticleRepository articleRepository;
-    private final NewsletterRepository newsletterRepository;
     private final NewsletterPreviousPolicyRepository newsletterPreviousPolicyRepository;
     private final Map<NewsletterPreviousStrategy, PreviousArticleStrategy> strategyMap;
 
     public PreviousArticleService(
             ArticleRepository articleRepository,
-            NewsletterRepository newsletterRepository,
             NewsletterPreviousPolicyRepository newsletterPreviousPolicyRepository,
             List<PreviousArticleStrategy> strategies
     ) {
         this.articleRepository = articleRepository;
-        this.newsletterRepository = newsletterRepository;
         this.newsletterPreviousPolicyRepository = newsletterPreviousPolicyRepository;
         this.strategyMap = strategies.stream()
                 .collect(Collectors.toUnmodifiableMap(PreviousArticleStrategy::getStrategy, Function.identity()));
     }
 
-    public List<PreviousArticleResponse> getPreviousArticles(PreviousArticleRequest previousArticleRequest) {
-        validateNewsletterId(previousArticleRequest.newsletterId());
-        NewsletterPreviousPolicy newsletterPreviousPolicy = newsletterPreviousPolicyRepository.findByNewsletterId(previousArticleRequest.newsletterId());
-        PreviousArticleStrategy previousArticleStrategy = strategyMap.get(newsletterPreviousPolicy.getStrategy());
-
-        return previousArticleStrategy.execute(
-                previousArticleRequest.newsletterId(),
-                newsletterPreviousPolicy.getTotalCount(),
-                newsletterPreviousPolicy.getFixedCount()
-        );
+    public List<PreviousArticleResponse> getPreviousArticles(PreviousArticleRequest request) {
+        return newsletterPreviousPolicyRepository.findByNewsletterId(request.newsletterId())
+                .map(this::executeStrategy) // 정책이 있으면 전략 실행
+                .orElseGet(() -> { // 정책이 없으면 빈 리스트 반환
+                    log.info("뉴스레터 {}에 대한 지난 아티클 정책이 설정되지 않았습니다.", request.newsletterId());
+                    return List.of();
+                });
     }
+
 
     public PreviousArticleDetailResponse getPreviousArticleDetail(Long id) {
         return articleRepository.getPreviousArticleDetailsByMemberId(id, PREVIOUS_ARTICLE_ADMIN_ID)
@@ -74,11 +68,12 @@ public class PreviousArticleService {
         return articleRepository.cleanupOldPreviousArticles(PREVIOUS_ARTICLE_ADMIN_ID, PREVIOUS_ARTICLE_KEEP_COUNT);
     }
 
-    private void validateNewsletterId(Long newsletterId) {
-        if (newsletterId != null && !newsletterRepository.existsById(newsletterId)) {
-            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.OPERATION, "validateNewsletterId")
-                    .addContext(ErrorContextKeys.NEWSLETTER_ID, newsletterId);
-        }
+    private List<PreviousArticleResponse> executeStrategy(NewsletterPreviousPolicy policy) {
+        PreviousArticleStrategy strategy = getStrategy(policy);
+        return strategy.execute(policy.getNewsletterId(), policy.getTotalCount(), policy.getFixedCount());
+    }
+
+    private PreviousArticleStrategy getStrategy(NewsletterPreviousPolicy policy) {
+        return strategyMap.getOrDefault(policy.getStrategy(), strategyMap.get(NewsletterPreviousStrategy.INACTIVE));
     }
 }

@@ -40,27 +40,8 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
         )
         FROM Article a
         JOIN Newsletter n ON n.id = a.newsletterId
-        JOIN NewsletterDetail nd ON nd.id = n.detailId
-        WHERE a.newsletterId = :newsletterId AND a.memberId = :memberId AND nd.previousAllowed = true
-        ORDER BY a.arrivedDateTime DESC
-        LIMIT :limit
-    """)
-    List<PreviousArticleResponse> findArticlesByMemberIdAndNewsletterId(
-            @Param("newsletterId") Long newsletterId,
-            @Param("memberId") Long memberId,
-            @Param("limit") int limit
-    );
-
-    @Query("""
-        SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleResponse(
-            a.id, a.title, a.contentsSummary, a.expectedReadTime
-        )
-        FROM Article a
-        JOIN Newsletter n ON n.id = a.newsletterId
-        JOIN NewsletterDetail nd ON nd.id = n.detailId
         WHERE a.newsletterId = :newsletterId
           AND a.memberId = :memberId
-          AND nd.previousAllowed = true
           AND a.arrivedDateTime < (
                 SELECT MAX(a2.arrivedDateTime)
                 FROM Article a2

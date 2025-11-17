@@ -11,12 +11,12 @@ const NotificationSettingsSection = () => {
   const deviceUuid = useWebViewDeviceUuid();
   const memberId = userInfo?.id ?? 0;
 
-  const { data: notificationStatus } = useQuery({
-    ...queries.notificationStatus({
+  const { data: notificationStatus } = useQuery(
+    queries.notificationStatus({
       memberId,
       deviceUuid,
     }),
-  });
+  );
 
   const { mutate: updateNotificationSettings } = useNotificationMutation({
     memberId,

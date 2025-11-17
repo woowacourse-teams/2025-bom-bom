@@ -51,16 +51,17 @@ export const Route = createRootRouteWithContext<BomBomRouterContext>()({
     const maintenancePath = '/maintenance';
 
     try {
-      const res = await fetch(ENV.monitoringStatusUrl, {
+      const response = await fetch(ENV.monitoringStatusUrl, {
         cache: 'no-store',
       });
 
-      if (!res.ok) {
-        throw new Error(`Failed to fetch status: ${res.status}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch status: ${response.status}`);
       }
 
-      const serverStatus = (await res.json()) as PrometheusResponse;
-      const status = serverStatus.data.result[0]?.value[1] ?? SERVER_STATUS.off;
+      const prometheusResult = (await response.json()) as PrometheusResponse;
+      const status =
+        prometheusResult.data.result[0]?.value[1] ?? SERVER_STATUS.off;
 
       const isServerOn = status === SERVER_STATUS.on;
 

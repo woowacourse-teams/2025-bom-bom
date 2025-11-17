@@ -4,8 +4,8 @@ export const ENV = {
   iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
 
   // Web URLs
-  webUrl: process.env.EXPO_PUBLIC_WEB_URL,
+  webUrl: process.env.EXPO_PUBLIC_WEB_URL ?? '',
 
   // API
-  baseUrl: process.env.EXPO_PUBLIC_API_BASE_URL,
+  baseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? '',
 } as const;

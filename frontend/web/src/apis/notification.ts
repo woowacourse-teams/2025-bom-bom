@@ -5,12 +5,6 @@ export interface GetNotificationSettingsParams {
   deviceUuid: string;
 }
 
-interface PutNotificationSettingsParams {
-  memberId: number;
-  deviceUuid: string;
-  enabled: boolean;
-}
-
 export const getNotificationSettings = ({
   memberId,
   deviceUuid,
@@ -19,6 +13,12 @@ export const getNotificationSettings = ({
     path: `/notifications/tokens/${memberId}/${deviceUuid}/settings/status`,
   });
 };
+
+interface PutNotificationSettingsParams {
+  memberId: number;
+  deviceUuid: string;
+  enabled: boolean;
+}
 
 export const putNotificationSettings = ({
   memberId,

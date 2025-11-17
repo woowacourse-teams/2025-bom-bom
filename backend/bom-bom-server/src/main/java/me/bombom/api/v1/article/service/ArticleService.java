@@ -1,6 +1,5 @@
 package me.bombom.api.v1.article.service;
 
-import jakarta.validation.Valid;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -8,13 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
-import me.bombom.api.v1.article.dto.request.PreviousArticleRequest;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
-import me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse;
-import me.bombom.api.v1.article.dto.response.PreviousArticleResponse;
 import me.bombom.api.v1.article.event.MarkAsReadEvent;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
@@ -33,7 +29,6 @@ import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.pet.ScorePolicyConstants;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,11 +42,6 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ArticleService {
-
-    private static final int PREVIOUS_ARTICLE_KEEP_COUNT = 10;
-
-    @Value("${admin.previous-article.member-id}")
-    private Long PREVIOUS_ARTICLE_ADMIN_ID;
 
     private final ArticleRepository articleRepository;
     private final TodayReadingRepository todayReadingRepository;
@@ -84,23 +74,6 @@ public class ArticleService {
                         .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
                         .addContext("categoryId", newsletter.getCategoryId()));
         return ArticleDetailResponse.of(article, newsletter, category);
-    }
-
-    public List<PreviousArticleResponse> getPreviousArticles(PreviousArticleRequest previousArticleRequest) {
-        validateNewsletterId(previousArticleRequest.newsletterId());
-        return articleRepository.findArticlesByMemberIdAndNewsletterId(
-                previousArticleRequest.newsletterId(),
-                PREVIOUS_ARTICLE_ADMIN_ID,
-                previousArticleRequest.limit()
-        );
-    }
-
-    public PreviousArticleDetailResponse getPreviousArticleDetail(Long id) {
-        return articleRepository.getPreviousArticleDetailsByMemberId(id, PREVIOUS_ARTICLE_ADMIN_ID)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ARTICLE_ID, id)
-                        .addContext(ErrorContextKeys.MEMBER_ID, PREVIOUS_ARTICLE_ADMIN_ID)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "article"));
     }
 
     @Transactional
@@ -154,11 +127,6 @@ public class ArticleService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteAllByMemberId(Long memberId) {
         articleRepository.deleteAllByMemberId(memberId);
-    }
-
-    @Transactional
-    public int cleanupOldPreviousArticles() {
-        return articleRepository.cleanupOldPreviousArticles(PREVIOUS_ARTICLE_ADMIN_ID, PREVIOUS_ARTICLE_KEEP_COUNT);
     }
 
     @Transactional

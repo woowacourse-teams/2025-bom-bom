@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.dto.request.PreviousArticleRequest;
 import me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.PreviousArticleResponse;
-import me.bombom.api.v1.article.service.ArticleService;
+import me.bombom.api.v1.article.service.PreviousArticleService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -21,14 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/articles/previous")
 public class PreviousArticleController implements PreviousArticleControllerApi {
 
-    private final ArticleService articleService;
+    private final PreviousArticleService previousArticleService;
 
     @Override
     @GetMapping
     public List<PreviousArticleResponse> getPreviousArticles(
             @Valid @ModelAttribute PreviousArticleRequest previousArticleRequest
     ) {
-        return articleService.getPreviousArticles(previousArticleRequest);
+        return previousArticleService.getPreviousArticles(previousArticleRequest);
     }
 
     @Override
@@ -38,6 +38,6 @@ public class PreviousArticleController implements PreviousArticleControllerApi {
             // @LoginMember(nullable = true) Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
     ) {
-        return articleService.getPreviousArticleDetail(id);
+        return previousArticleService.getPreviousArticleDetail(id);
     }
 }

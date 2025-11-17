@@ -13,6 +13,8 @@ import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
+import me.bombom.api.v1.newsletter.domain.NewsletterPreviousPolicy;
+import me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy;
 import me.bombom.api.v1.pet.domain.Pet;
 import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.reading.domain.ContinueReading;
@@ -217,6 +219,52 @@ public final class TestFixture {
                 .contentsSummary("요약")
                 .isRead(false)
                 .memberId(memberId)
+                .newsletterId(newsletterId)
+                .arrivedDateTime(arrivedTime)
+                .build();
+    }
+
+    /**
+     * NewsletterPreviousPolicy
+     */
+    public static NewsletterPreviousPolicy createNewsletterPreviousPolicy(
+            Long newsletterId,
+            NewsletterPreviousStrategy strategy,
+            int totalCount,
+            int fixedCount,
+            int exposureRatio
+    ) {
+        return NewsletterPreviousPolicy.builder()
+                .newsletterId(newsletterId)
+                .strategy(strategy)
+                .totalCount(totalCount)
+                .fixedCount(fixedCount)
+                .exposureRatio(exposureRatio)
+                .build();
+    }
+
+    public static NewsletterPreviousPolicy createNewsletterPreviousPolicy(
+            Long newsletterId,
+            NewsletterPreviousStrategy strategy,
+            int totalCount,
+            int fixedCount
+    ) {
+        return createNewsletterPreviousPolicy(newsletterId, strategy, totalCount, fixedCount, 100);
+    }
+
+    /**
+     * PreviousArticle
+     */
+    public static me.bombom.api.v1.article.domain.PreviousArticle createPreviousArticle(
+            String title,
+            Long newsletterId,
+            LocalDateTime arrivedTime
+    ) {
+        return me.bombom.api.v1.article.domain.PreviousArticle.builder()
+                .title(title)
+                .contents("<h1>고정 아티클 내용</h1>")
+                .contentsSummary("고정 아티클 요약")
+                .expectedReadTime(5)
                 .newsletterId(newsletterId)
                 .arrivedDateTime(arrivedTime)
                 .build();

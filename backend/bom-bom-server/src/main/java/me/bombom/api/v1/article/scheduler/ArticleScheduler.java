@@ -2,7 +2,6 @@ package me.bombom.api.v1.article.scheduler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.article.repository.SearchRecentRepository;
 import me.bombom.api.v1.article.service.PreviousArticleService;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,7 +16,6 @@ public class ArticleScheduler {
     private static final String DAILY_2AM_CRON = "0 0 2 * * *";
 
     private final PreviousArticleService previousArticleService;
-    private final SearchRecentRepository searchRecentRepository;
 
     @Scheduled(cron = DAILY_2AM_CRON, zone = TIME_ZONE)
     @SchedulerLock(name = "cleanup_old_previous_articles", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")

@@ -14,6 +14,7 @@ import { SERVER_STATUS } from '@/constants/serverStatus';
 import usePageTracking from '@/libs/googleAnalytics/usePageTracking';
 import { useWebViewAuth } from '@/libs/webview/useWebViewAuth';
 import { queryClient } from '@/main';
+import type { PrometheusResponse } from '@/types/prometheus';
 import type { QueryClient } from '@tanstack/react-query';
 
 interface BomBomRouterContext {
@@ -58,9 +59,8 @@ export const Route = createRootRouteWithContext<BomBomRouterContext>()({
         throw new Error(`Failed to fetch status: ${res.status}`);
       }
 
-      const serverStatus = await res.json();
-      const status =
-        serverStatus?.data?.result?.[0]?.value[1] ?? SERVER_STATUS.off;
+      const serverStatus = (await res.json()) as PrometheusResponse;
+      const status = serverStatus.data.result[0]?.value[1] ?? SERVER_STATUS.off;
 
       const isServerOn = status === SERVER_STATUS.on;
 

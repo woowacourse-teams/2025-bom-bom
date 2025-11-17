@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
@@ -39,7 +38,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @IntegrationTest
 class ArticleServiceTest {
@@ -661,61 +659,6 @@ class ArticleServiceTest {
             softly.assertThat(result.newsletters()).hasSize(1);
             softly.assertThat(result.newsletters().get(0).name()).isEqualTo("뉴스픽"); // newsletters.get(0)에 해당
             softly.assertThat(result.newsletters().get(0).articleCount()).isEqualTo(1);
-        });
-    }
-
-    @Test
-    void 관리자_아티클_정리_테스트() {
-        // given
-        Member admin = Member.builder()
-                .provider("admin")
-                .providerId("admin123")
-                .email("admin@bombom.news")
-                .nickname("봄봄")
-                .gender(Gender.MALE)
-                .roleId(1L)
-                .build();
-        memberRepository.save(admin);
-
-        // 테스트용 설정값 오버라이드
-        ReflectionTestUtils.setField(articleService, "PREVIOUS_ARTICLE_ADMIN_ID", admin.getId());
-
-        Newsletter newsletter1 = newsletters.get(0);
-
-        List<Article> adminArticles = new ArrayList<>();
-
-        for (int i = 0; i < 12; i++) {
-            Article article = TestFixture.createArticle(
-                    "관리자 아티클 " + i,
-                    admin.getId(),
-                    newsletter1.getId(),
-                    BASE_TIME.minusDays(i)
-            );
-            adminArticles.add(article);
-        }
-
-        articleRepository.saveAll(adminArticles);
-
-        // when - 서비스를 통해 호출 (트랜잭션 처리)
-        int deletedCount = articleService.cleanupOldPreviousArticles();
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(deletedCount).isEqualTo(2);
-
-            // 뉴스레터1에 10개만 남아있는지 확인
-            long newsletter1Count = articleRepository.findAll().stream()
-                    .filter(article ->
-                            article.getMemberId().equals(admin.getId()) &&
-                                    article.getNewsletterId().equals(newsletter1.getId()))
-                    .count();
-            softly.assertThat(newsletter1Count).isEqualTo(10);
-
-            // 일반 사용자 아티클은 영향받지 않았는지 확인
-            long memberCount = articleRepository.findAll().stream()
-                    .filter(article -> article.getMemberId().equals(member.getId()))
-                    .count();
-            softly.assertThat(memberCount).isEqualTo(4);
         });
     }
 

@@ -1,8 +1,7 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import DetailTab from './DetailTab';
 import { openSubscribeLink } from './NewsletterDetail.utils';
-import NewsletterDetailSkeleton from './NewsletterDetailSkeleton';
 import NewsletterTabs from './NewsletterTabs';
 import PreviousTab from './PreviousTab';
 import { queries } from '@/apis/queries';
@@ -26,17 +25,16 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
   const [activeTab, setActiveTab] = useSearchParamState<NewsletterTab>('tab', {
     defaultValue: 'detail',
   });
-  const { data: newsletterDetail, isLoading } = useQuery({
-    ...queries.newsletterDetail({ id: newsletterId }),
-    enabled: Boolean(newsletterId),
-  });
+
+  const { data: newsletterDetail } = useSuspenseQuery(
+    queries.newsletterDetail({ id: newsletterId }),
+  );
   const { data: previousArticles } = useQuery({
     ...queries.previousArticles({ newsletterId, limit: 10 }),
   });
 
   const isMobile = deviceType === 'mobile';
 
-  if (isLoading) return <NewsletterDetailSkeleton />;
   if (!newsletterDetail || !newsletterId) return null;
 
   const openMainSite = () => {

@@ -85,7 +85,7 @@ class PreviousArticleServiceTest {
 
         // 테스트용 설정값 오버라이드
         ReflectionTestUtils.setField(previousArticleService, "PREVIOUS_ARTICLE_ADMIN_ID", admin.getId());
-        Newsletter newsletter1 = newsletters.get(0);
+        Newsletter newsletter1 = newsletters.getFirst();
         List<Article> adminArticles = new ArrayList<>();
 
         for (int i = 0; i < 12; i++) {

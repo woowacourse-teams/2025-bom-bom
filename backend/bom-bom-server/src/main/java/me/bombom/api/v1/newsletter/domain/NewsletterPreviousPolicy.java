@@ -36,10 +36,13 @@ public class NewsletterPreviousPolicy extends BaseEntity {
     @Column(nullable = false, length = 30)
     private NewsletterPreviousStrategy strategy;
 
-    @Column(nullable = false)
-    private int fixedArticleCount;
+    @Column(nullable = false, columnDefinition = "TINYINT")
+    private int totalCount;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT")
+    private int fixedCount;
+
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private int exposureRatio;
 
     @Builder
@@ -47,13 +50,15 @@ public class NewsletterPreviousPolicy extends BaseEntity {
             Long id,
             @NonNull Long newsletterId,
             @NonNull NewsletterPreviousStrategy strategy,
-            int fixedArticleCount,
+            int totalCount,
+            int fixedCount,
             int exposureRatio
     ) {
         this.id = id;
         this.newsletterId = newsletterId;
         this.strategy = strategy;
-        this.fixedArticleCount = fixedArticleCount;
+        this.totalCount = totalCount;
+        this.fixedCount = fixedCount;
         this.exposureRatio = exposureRatio;
     }
 }

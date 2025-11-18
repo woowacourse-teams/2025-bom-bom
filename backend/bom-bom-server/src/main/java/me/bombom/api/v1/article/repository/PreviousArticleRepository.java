@@ -22,10 +22,11 @@ public interface PreviousArticleRepository extends JpaRepository<PreviousArticle
         )
         FROM PreviousArticle pa
         WHERE pa.newsletterId = :newsletterId
+        AND pa.isFixed = true
         ORDER BY pa.arrivedDateTime DESC
         LIMIT :limit
     """)
-    List<PreviousArticleResponse> findByNewsletterId(@Param("newsletterId") Long newsletterId, @Param("limit") int limit);
+    List<PreviousArticleResponse> findFixedByNewsletterId(@Param("newsletterId") Long newsletterId, @Param("limit") int limit);
 
     @Query("""
         SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse(

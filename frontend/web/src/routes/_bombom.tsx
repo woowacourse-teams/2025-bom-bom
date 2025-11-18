@@ -3,6 +3,8 @@ import { queries } from '@/apis/queries';
 import AppInstallPromptModal from '@/components/AppInstallPromptModal/AppInstallPromptModal';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { useAppInstallPrompt } from '@/hooks/useAppInstallPrompt';
+import { useWebViewNotificationActive } from '@/libs/webview/useWebViewNotificationActive';
+import { useWebViewRegisterToken } from '@/libs/webview/useWebViewRegisterToken';
 
 let isFirstVisit = true;
 
@@ -44,6 +46,9 @@ function RouteComponent() {
     handleCloseModal,
     modalRef,
   } = useAppInstallPrompt();
+
+  useWebViewRegisterToken();
+  useWebViewNotificationActive();
 
   return (
     <PageLayout>

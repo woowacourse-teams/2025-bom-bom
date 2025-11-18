@@ -3,9 +3,11 @@ import {
   getArticleById,
   getArticles,
   getArticlesStatisticsNewsletters,
+  getArticlesWithSearch,
   type GetArticleByIdParams,
   type GetArticlesParams,
   type GetArticleStatisticsNewslettersParams,
+  type GetArticlesWithSearchParams,
 } from './articles';
 import { getSignupCheck } from './auth';
 import {
@@ -23,6 +25,10 @@ import {
   getUserProfile,
 } from './members';
 import { getNewsletterDetail, getNewsletters } from './newsLetters';
+import {
+  getNotificationSettings,
+  type GetNotificationSettingsParams,
+} from './notification';
 import {
   getPreviousArticleDetail,
   getPreviousArticles,
@@ -42,18 +48,40 @@ import type {
 
 export const queries = {
   // articles
-  articles: (params?: GetArticlesParams) =>
+  articles: (params: GetArticlesParams) =>
     queryOptions({
       queryKey: ['articles', params],
-      queryFn: () => getArticles(params ?? {}),
+      queryFn: () => getArticles(params),
     }),
 
-  infiniteArticles: (params?: GetArticlesParams) =>
+  articlesWithSearch: (params: GetArticlesWithSearchParams) =>
+    queryOptions({
+      queryKey: ['articles', 'search', params],
+      queryFn: () => getArticlesWithSearch(params),
+    }),
+
+  infiniteArticles: (params: GetArticlesParams) =>
     infiniteQueryOptions({
       queryKey: ['articles', 'infinite', params],
       queryFn: ({ pageParam }) =>
         getArticles({
-          ...(params ?? {}),
+          ...params,
+          page: typeof pageParam === 'number' ? pageParam : 0,
+        }),
+      getNextPageParam: (lastPage) => {
+        if (!lastPage) return undefined;
+        if (lastPage.last) return undefined;
+        return (lastPage.number ?? 0) + 1;
+      },
+      initialPageParam: 0,
+    }),
+
+  infiniteArticlesWithSearch: (params: GetArticlesWithSearchParams) =>
+    infiniteQueryOptions({
+      queryKey: ['articles', 'search', 'infinite', params],
+      queryFn: ({ pageParam }) =>
+        getArticlesWithSearch({
+          ...params,
           page: typeof pageParam === 'number' ? pageParam : 0,
         }),
       getNextPageParam: (lastPage) => {
@@ -182,5 +210,12 @@ export const queries = {
     queryOptions({
       queryKey: ['articles', 'previous', params],
       queryFn: () => getPreviousArticleDetail(params),
+    }),
+
+  // notification
+  notificationStatus: (params: GetNotificationSettingsParams) =>
+    queryOptions({
+      queryKey: ['notifications', 'tokens', 'settings', 'status', params],
+      queryFn: () => getNotificationSettings(params),
     }),
 };

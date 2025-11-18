@@ -30,7 +30,6 @@ public class PreviousArticle extends BaseEntity {
     @Column(nullable = false, columnDefinition = "mediumtext")
     private String contents;
 
-    //TODO: 이거 아티클 받을 때 계산되어서 들어오는 값인데 직접 계산할지, 아니면 아예 없앨지
     @Column(columnDefinition = "tinyint")
     private int expectedReadTime;
 
@@ -43,6 +42,9 @@ public class PreviousArticle extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime arrivedDateTime;
 
+    @Column(nullable = false)
+    private boolean isFixed;
+
     @Builder
     public PreviousArticle (
             Long id,
@@ -51,7 +53,8 @@ public class PreviousArticle extends BaseEntity {
             int expectedReadTime,
             @NonNull String contentsSummary,
             @NonNull Long newsletterId,
-            @NonNull LocalDateTime arrivedDateTime
+            @NonNull LocalDateTime arrivedDateTime,
+            boolean isFixed
     ) {
         this.id = id;
         this.title = title;
@@ -60,5 +63,6 @@ public class PreviousArticle extends BaseEntity {
         this.contentsSummary = contentsSummary;
         this.newsletterId = newsletterId;
         this.arrivedDateTime = arrivedDateTime;
+        this.isFixed = isFixed;
     }
 }

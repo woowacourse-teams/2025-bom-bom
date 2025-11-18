@@ -6,6 +6,7 @@ import me.bombom.api.v1.article.domain.PreviousArticle;
 import me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.PreviousArticleResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -57,4 +58,29 @@ public interface PreviousArticleRepository extends JpaRepository<PreviousArticle
             @Param("id") Long id,
             @Param("memberId") Long memberId
     );
+
+
+    /**
+     * previous_article 테이블에서 오래된 자동 이동 아티클 정리
+     * - isFixed = false인 것만 대상 (직접 지정한 고정 아티클은 유지)
+     * - 뉴스레터별로 최신 N개만 유지
+     */
+    @Modifying(clearAutomatically = true)
+    @Query(value = """
+        WITH cleanup_candidates AS (
+            SELECT id,
+                   ROW_NUMBER() OVER (
+                       PARTITION BY newsletter_id
+                       ORDER BY arrived_date_time DESC, id DESC
+                   ) AS keep_order
+            FROM previous_article
+            WHERE is_fixed = false
+        )
+        DELETE FROM previous_article
+        WHERE id IN (
+            SELECT id FROM cleanup_candidates
+            WHERE keep_order > :keepCount
+        )
+    """, nativeQuery = true)
+    int cleanupOldPreviousArticles(@Param("keepCount") int keepCount);
 }

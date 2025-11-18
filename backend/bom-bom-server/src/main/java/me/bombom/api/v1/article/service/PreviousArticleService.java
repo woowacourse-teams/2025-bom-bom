@@ -77,7 +77,16 @@ public class PreviousArticleService {
 
     @Transactional
     public int cleanupOldPreviousArticles() {
-        return articleRepository.cleanupOldPreviousArticles(PREVIOUS_ARTICLE_ADMIN_ID, PREVIOUS_ARTICLE_KEEP_COUNT);
+        int deleted = previousArticleRepository.cleanupOldPreviousArticles(PREVIOUS_ARTICLE_KEEP_COUNT);
+        log.info("previous_article 정리 완료: {}건 삭제 (isFixed=false)", deleted);
+        return deleted;
+    }
+
+    @Transactional
+    public void moveAdminArticles() {
+        int copied = articleRepository.safeCopyToArchive(PREVIOUS_ARTICLE_ADMIN_ID);
+        int deleted = articleRepository.safeDeleteArchived(PREVIOUS_ARTICLE_ADMIN_ID, PREVIOUS_ARTICLE_KEEP_COUNT);
+        log.info("아티클 이동 완료: {}건 복사, {}건 삭제", copied, deleted);
     }
 
     private List<PreviousArticleResponse> executeStrategy(NewsletterPreviousPolicy policy) {

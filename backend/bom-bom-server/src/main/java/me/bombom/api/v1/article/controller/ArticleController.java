@@ -48,8 +48,9 @@ public class ArticleController implements ArticleControllerApi{
             @Valid @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
             @PageableDefault(sort = "arrivedDateTime", direction = Direction.DESC) Pageable pageable
     ) {
-        if (!StringUtils.hasText(articlesOptionsRequest.keyword())) {
-            throw new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
+        if (StringUtils.hasText(articlesOptionsRequest.keyword())) {
+            throw new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION)
+                    .addContext("message", "검색요청을 할 수 없습니다.");
         }
 
         return articleService.getArticles(
@@ -66,6 +67,11 @@ public class ArticleController implements ArticleControllerApi{
             @Valid @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
             @PageableDefault(sort = "arrivedDateTime", direction = Direction.DESC) Pageable pageable
     ) {
+        if (!StringUtils.hasText(articlesOptionsRequest.keyword())) {
+            throw new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION)
+                    .addContext("message", "검색어는 필수입니다.");
+        }
+
         return articleService.getArticles(
                 member,
                 articlesOptionsRequest,

@@ -7,17 +7,26 @@ type Variant = 'default' | 'outlinePrimary';
 interface BadgeProps extends ComponentProps<'div'> {
   text: string;
   variant?: Variant;
+  icon?: React.ReactNode;
 }
 
-function Badge({ text, variant = 'default', ...props }: BadgeProps) {
+function Badge({ text, variant = 'default', icon, ...props }: BadgeProps) {
   return (
     <Container variant={variant} {...props}>
+      {icon && <IconWrapper>{icon}</IconWrapper>}
+
       {text}
     </Container>
   );
 }
 
 export default Badge;
+
+const IconWrapper = styled.span`
+  display: inline-flex;
+  margin-right: 4px;
+  line-height: 0;
+`;
 
 const Container = styled.div<{ variant: Variant }>`
   width: fit-content;

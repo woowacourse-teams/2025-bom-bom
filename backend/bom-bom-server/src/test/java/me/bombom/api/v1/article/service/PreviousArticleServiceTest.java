@@ -262,7 +262,7 @@ class PreviousArticleServiceTest {
 
         assertSoftly(softly -> {
             softly.assertThat(result).hasSize(3);
-            softly.assertThat(result.stream().map(PreviousArticleResponse::id).toList())
+            softly.assertThat(result.stream().map(PreviousArticleResponse::articleId).toList())
                     .containsExactlyElementsOf(expectedIds);
         });
     }
@@ -297,7 +297,7 @@ class PreviousArticleServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(result).hasSize(3);
-            softly.assertThat(result.stream().map(PreviousArticleResponse::id).toList())
+            softly.assertThat(result.stream().map(PreviousArticleResponse::articleId).toList())
                     .containsExactlyElementsOf(fixedArticles.stream().map(PreviousArticle::getId).toList());
         });
     }
@@ -353,7 +353,7 @@ class PreviousArticleServiceTest {
 
         assertSoftly(softly -> {
             softly.assertThat(result).hasSize(5);
-            softly.assertThat(result.stream().map(PreviousArticleResponse::id).toList())
+            softly.assertThat(result.stream().map(PreviousArticleResponse::articleId).toList())
                     .containsExactlyElementsOf(expectedOrder);
         });
     }

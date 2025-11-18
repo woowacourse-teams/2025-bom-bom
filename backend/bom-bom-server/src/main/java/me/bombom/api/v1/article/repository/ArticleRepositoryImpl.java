@@ -123,10 +123,10 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         params.add(fiveDaysAgoDate.atStartOfDay());
         
         if (StringUtils.hasText(options.keyword())) {
-            String keyword = options.keyword().strip().toLowerCase();
-            sql.append("AND (LOWER(ra.title) LIKE ? OR LOWER(ra.contents_text) LIKE ?) ");
-            params.add("%" + keyword + "%");
-            params.add("%" + keyword + "%");
+            String keyword = options.keyword().strip();
+            sql.append("AND (LOWER(ra.title) LIKE ? OR MATCH(ra.contents_text) AGAINST(? IN BOOLEAN MODE)) ");
+            params.add("%" + keyword.toLowerCase() + "%");
+            params.add(keyword);
         }
         
         if (options.newsletterId() != null) {
@@ -134,13 +134,18 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             params.add(options.newsletterId());
         }
         
-        Query nativeQuery = entityManager.createNativeQuery(sql.toString());
-        for (int i = 0; i < params.size(); i++) {
-            nativeQuery.setParameter(i + 1, params.get(i));
+        try {
+            Query nativeQuery = entityManager.createNativeQuery(sql.toString());
+            for (int i = 0; i < params.size(); i++) {
+                nativeQuery.setParameter(i + 1, params.get(i));
+            }
+            
+            Object result = nativeQuery.getSingleResult();
+            return result instanceof Number ? ((Number) result).longValue() : 0L;
+        } catch (Exception e) {
+            log.error("recent_article 테이블 개수 조회 실패: {}", e.getMessage(), e);
+            throw e;
         }
-        
-        Object result = nativeQuery.getSingleResult();
-        return result instanceof Number ? ((Number) result).longValue() : 0L;
     }
     
     /**
@@ -264,10 +269,10 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         params.add(fiveDaysAgoDate.atStartOfDay());
         
         if (StringUtils.hasText(options.keyword())) {
-            String keyword = options.keyword().strip().toLowerCase();
-            sql.append("AND (LOWER(ra.title) LIKE ? OR LOWER(ra.contents_text) LIKE ?) ");
-            params.add("%" + keyword + "%");
-            params.add("%" + keyword + "%");
+            String keyword = options.keyword().strip();
+            sql.append("AND (LOWER(ra.title) LIKE ? OR MATCH(ra.contents_text) AGAINST(? IN BOOLEAN MODE)) ");
+            params.add("%" + keyword.toLowerCase() + "%");
+            params.add(keyword);
         }
         
         if (options.newsletterId() != null) {

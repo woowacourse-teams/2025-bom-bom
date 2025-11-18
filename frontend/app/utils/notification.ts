@@ -1,4 +1,5 @@
 import messaging from '@react-native-firebase/messaging';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Alert, Linking, Platform } from 'react-native';
@@ -13,21 +14,54 @@ export const createAndroidChannel = async () => {
   }
 };
 
-// 사용자 알림 권한 요청
-export const requestNotificationPermission = async () => {
-  if (!Device.isDevice) {
+export const hasRequestedPermission = async (): Promise<boolean> => {
+  try {
+    const key = 'notification_permission_requested';
+    const permissionRequested = await AsyncStorage.getItem(key);
+    return permissionRequested === 'true';
+  } catch (error) {
+    console.error('권한 요청 기록 확인 실패:', error);
     return false;
   }
-
-  const authStatus = await messaging().requestPermission();
-  const enabled =
-    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-  return enabled;
 };
 
-const checkNotificationPermission = async () => {
+const setPermissionRequested = async (): Promise<void> => {
+  try {
+    const key = 'notification_permission_requested';
+    await AsyncStorage.setItem(key, 'true');
+  } catch (error) {
+    console.error('권한 요청 기록 저장 실패:', error);
+  }
+};
+
+// 사용자 알림 권한 요청
+export const requestNotificationPermission = async () => {
+  try {
+    if (Platform.OS === 'ios') {
+      const auth = await messaging().requestPermission();
+      await setPermissionRequested();
+
+      return (
+        auth === messaging.AuthorizationStatus.AUTHORIZED ||
+        auth === messaging.AuthorizationStatus.PROVISIONAL
+      );
+    }
+
+    if (Platform.OS === 'android') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      await setPermissionRequested();
+
+      return status === 'granted';
+    }
+
+    return false;
+  } catch (error) {
+    console.error('권한 요청 실패:', error);
+    return false;
+  }
+};
+
+export const checkNotificationPermission = async () => {
   if (!Device.isDevice) {
     return false;
   }
@@ -62,7 +96,6 @@ export const goToSystemPermission = async (enabled: boolean) => {
   }
 };
 
-// FCM 토큰 생성
 export const getFCMToken = async () => {
   try {
     const hasPermission = await checkNotificationPermission();

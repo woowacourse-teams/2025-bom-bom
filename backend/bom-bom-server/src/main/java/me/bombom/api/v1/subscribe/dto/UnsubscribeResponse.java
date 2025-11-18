@@ -11,8 +11,8 @@ public record UnsubscribeResponse(
     boolean hasUnsubscribeUrl
 ) {
 
-    public UnsubscribeResponse(String unsubscribeUrl) {
-        this(unsubscribeUrl, StringUtils.hasText(unsubscribeUrl));
+    public static UnsubscribeResponse of(String unsubscribeUrl) {
+        return new UnsubscribeResponse(unsubscribeUrl, StringUtils.hasText(unsubscribeUrl));
     }
 }
 

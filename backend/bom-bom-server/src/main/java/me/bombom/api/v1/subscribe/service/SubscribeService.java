@@ -52,6 +52,6 @@ public class SubscribeService {
         String unsubscribeUrl = subscribe.getUnsubscribeUrl();
         subscribeRepository.delete(subscribe);
 
-        return new UnsubscribeResponse(unsubscribeUrl);
+        return UnsubscribeResponse.of(unsubscribeUrl);
     }
 }

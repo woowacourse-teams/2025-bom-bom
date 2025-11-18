@@ -91,16 +91,17 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     
     /**
      * recent_article 테이블 존재 여부 확인
+     * 실제 쿼리를 시도해서 테이블 존재 여부를 확인 (H2와 MySQL 모두 지원)
      */
     private boolean checkRecentArticleTableExists() {
         try {
-            Query checkTableQuery = entityManager.createNativeQuery(
-                    "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'recent_article'"
-            );
-            Long count = ((Number) checkTableQuery.getSingleResult()).longValue();
-            return count > 0;
+            // 실제로 테이블에 쿼리를 시도해서 존재 여부 확인
+            Query testQuery = entityManager.createNativeQuery("SELECT 1 FROM recent_article LIMIT 1");
+            testQuery.getResultList();
+            return true;
         } catch (Exception e) {
-            log.warn("recent_article 테이블 존재 여부 확인 실패: {}", e.getMessage());
+            // 테이블이 없거나 접근할 수 없으면 false 반환
+            log.debug("recent_article 테이블이 존재하지 않거나 접근할 수 없음: {}", e.getMessage());
             return false;
         }
     }

@@ -232,6 +232,9 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         int pageSize = pageable.getPageSize();
         int offset = (int) pageable.getOffset();
         
+        // UNION 쿼리를 서브쿼리로 감싸서 ORDER BY 적용
+        sql.append("SELECT * FROM (");
+        
         // UNION 쿼리 구성 - RecentArticle (최근 5일)
         sql.append("SELECT ")
            .append("ra.id as article_id, ")
@@ -301,7 +304,9 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             params.add(options.newsletterId());
         }
         
-        sql.append("ORDER BY ").append(orderBy).append(" ")
+        // 서브쿼리 닫고 ORDER BY 적용
+        sql.append(") AS combined ")
+           .append("ORDER BY ").append(orderBy).append(" ")
            .append("LIMIT ? OFFSET ?");
         params.add(pageSize);
         params.add(offset);

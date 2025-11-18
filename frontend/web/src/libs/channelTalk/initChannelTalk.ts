@@ -1,5 +1,5 @@
+import { logger } from '@bombom/shared/utils';
 import { ENV } from '@/apis/env';
-import { logger } from '@/utils/logger';
 import type { IChannelIO } from './channelTalk.types';
 
 const CHANNEL_TALK_SCRIPT_SOURCE =

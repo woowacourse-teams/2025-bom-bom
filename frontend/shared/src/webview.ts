@@ -12,14 +12,14 @@ export type WebToRNMessage =
   | { type: 'SHOW_LOGIN_SCREEN' }
   | {
       type: 'LOGIN_SUCCESS';
-      payload?: {
-        isAuthenticated?: boolean;
-        provider?: string;
-        userId?: string;
-      };
+      payload?: { isAuthenticated?: boolean; provider?: string };
     }
   | { type: 'LOGIN_FAILED'; payload?: { error?: string; provider?: string } }
-  | { type: 'OPEN_BROWSER'; payload: { url: string } };
+  | { type: 'OPEN_BROWSER'; payload: { url: string } }
+  | { type: 'REQUEST_DEVICE_UUID' }
+  | { type: 'CHECK_NOTIFICATION_PERMISSION'; payload: { enabled: boolean } }
+  | { type: 'REGISTER_FCM_TOKEN'; payload: { memberId: number } }
+  | { type: 'REGISTER_FCM_TOKEN_LOGGED_IN'; payload: { memberId: number } };
 
 export type RNToWebMessage =
   | {
@@ -39,4 +39,19 @@ export type RNToWebMessage =
         email: string;
         name: string;
       };
+    }
+  | {
+      type: 'NOTIFICATION_ROUTING';
+      payload: {
+        url: string;
+      };
+    }
+  | {
+      type: 'DEVICE_UUID';
+      payload: {
+        deviceUuid: string;
+      };
+    }
+  | {
+      type: 'REQUEST_NOTIFICATION_ACTIVE';
     };

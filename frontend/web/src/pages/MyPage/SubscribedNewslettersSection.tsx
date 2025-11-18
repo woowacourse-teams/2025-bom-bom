@@ -6,11 +6,13 @@ import type { Device } from '@/hooks/useDevice';
 interface SubscribedNewslettersSectionProps {
   newsletters: GetMyNewslettersResponse;
   device: Device;
+  onUnsubscribe: (newsletterId: number) => void;
 }
 
 const SubscribedNewslettersSection = ({
   newsletters,
   device,
+  onUnsubscribe,
 }: SubscribedNewslettersSectionProps) => {
   return (
     <Container>
@@ -18,18 +20,26 @@ const SubscribedNewslettersSection = ({
         <NewsletterGrid device={device}>
           {newsletters.map((newsletter) => (
             <NewsletterCard key={newsletter.newsletterId} device={device}>
-              <NewsletterImage
-                src={newsletter.imageUrl ?? ''}
-                alt={newsletter.name}
-                width={60}
-                height={60}
-              />
-              <NewsletterInfo>
-                <NewsletterName>{newsletter.name}</NewsletterName>
-                <NewsletterDescription>
-                  {newsletter.description}
-                </NewsletterDescription>
-              </NewsletterInfo>
+              <NewsletterContent>
+                <NewsletterImage
+                  src={newsletter.imageUrl ?? ''}
+                  alt={newsletter.name}
+                  width={60}
+                  height={60}
+                />
+                <NewsletterInfo>
+                  <NewsletterName>{newsletter.name}</NewsletterName>
+                  <NewsletterDescription>
+                    {newsletter.description}
+                  </NewsletterDescription>
+                </NewsletterInfo>
+              </NewsletterContent>
+              <UnsubscribeButton
+                type="button"
+                onClick={() => onUnsubscribe(newsletter.newsletterId)}
+              >
+                구독 취소
+              </UnsubscribeButton>
             </NewsletterCard>
           ))}
         </NewsletterGrid>
@@ -63,11 +73,19 @@ const NewsletterCard = styled.div<{ device: Device }>`
 
   display: flex;
   gap: 12px;
+  flex-direction: column;
   align-items: center;
 
   background: ${({ theme }) => theme.colors.white};
 
   transition: all 0.2s ease-in-out;
+`;
+
+const NewsletterContent = styled.div`
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
 `;
 
 const NewsletterImage = styled(ImageWithFallback)`
@@ -116,4 +134,23 @@ const EmptyMessage = styled.p`
   color: ${({ theme }) => theme.colors.textTertiary};
   font: ${({ theme }) => theme.fonts.body2};
   text-align: center;
+`;
+
+const UnsubscribeButton = styled.button`
+  padding: 4px 8px;
+  border: 1px solid ${({ theme }) => theme.colors.stroke};
+  border-radius: 8px;
+
+  align-self: flex-end;
+
+  background: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font: ${({ theme }) => theme.fonts.body3};
+
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primaryLight};
+  }
 `;

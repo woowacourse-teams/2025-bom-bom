@@ -1,17 +1,16 @@
-import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import useArticles from '../../hooks/useArticles';
 import { useSelectedDeleteIds } from '../../hooks/useSelectedDeleteIds';
 import ArticleList from '../ArticleList/ArticleList';
 import ArticleListControls from '../ArticleListControls/ArticleListControls';
 import EmptySearchCard from '../EmptySearchCard/EmptySearchCard';
-import { queries } from '@/apis/queries';
 import Pagination from '@/components/Pagination/Pagination';
 import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
-import type { GetArticlesParams } from '@/apis/articles';
+import type { GetArticlesWithSearchParams } from '@/apis/articles';
 
 interface PCStorageContentProps {
-  baseQueryParams: GetArticlesParams;
+  baseQueryParams: GetArticlesWithSearchParams;
   editMode: boolean;
   enableEditMode: () => void;
   disableEditMode: () => void;
@@ -35,8 +34,10 @@ export default function PCStorageContent({
     ...baseQueryParams,
     page: (baseQueryParams.page ?? 1) - 1,
   };
-  const { data: articles, isLoading } = useQuery(queries.articles(queryParams));
+
+  const { data: articles, isLoading } = useArticles(queryParams);
   const articleList = articles?.content || [];
+
   const {
     selectedIds,
     hasBookmarkedArticles,

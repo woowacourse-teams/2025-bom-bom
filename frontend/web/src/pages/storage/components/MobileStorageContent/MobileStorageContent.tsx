@@ -7,10 +7,10 @@ import EmptySearchCard from '../EmptySearchCard/EmptySearchCard';
 import useInfiniteArticles from '@/pages/storage/hooks/useInfiniteArticles';
 import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
-import type { GetArticlesParams } from '@/apis/articles';
+import type { GetArticlesWithSearchParams } from '@/apis/articles';
 
 interface MobileStorageContentProps {
-  baseQueryParams: GetArticlesParams;
+  baseQueryParams: GetArticlesWithSearchParams;
   editMode: boolean;
   enableEditMode: () => void;
   disableEditMode: () => void;

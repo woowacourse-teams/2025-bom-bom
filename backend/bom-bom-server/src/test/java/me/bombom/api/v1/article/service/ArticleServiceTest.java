@@ -393,6 +393,7 @@ class ArticleServiceTest {
                 .contents("<p>테스트 내용</p>")
                 .thumbnailUrl("https://example.com/test.png")
                 .expectedReadTime(3)
+                .contentsText("텍스트")
                 .contentsSummary("테스트 요약")
                 .isRead(false)
                 .memberId(member.getId())

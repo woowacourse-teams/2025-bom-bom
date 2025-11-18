@@ -36,7 +36,11 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
 
     @Query("""
         SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleResponse(
-            a.id, a.title, a.contentsSummary, a.expectedReadTime
+            a.id,
+            me.bombom.api.v1.newsletter.domain.PreviousArticleSource.LATEST,
+            a.title,
+            a.contentsSummary,
+            a.expectedReadTime
         )
         FROM Article a
         JOIN Newsletter n ON n.id = a.newsletterId

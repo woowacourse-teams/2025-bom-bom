@@ -11,7 +11,11 @@ public interface PreviousArticleRepository extends JpaRepository<PreviousArticle
 
     @Query("""
         SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleResponse(
-            pa.id, pa.title, pa.contentsSummary, pa.expectedReadTime
+            pa.id,
+            me.bombom.api.v1.newsletter.domain.PreviousArticleSource.FIXED,
+            pa.title,
+            pa.contentsSummary,
+            pa.expectedReadTime
         )
         FROM PreviousArticle pa
         WHERE pa.newsletterId = :newsletterId

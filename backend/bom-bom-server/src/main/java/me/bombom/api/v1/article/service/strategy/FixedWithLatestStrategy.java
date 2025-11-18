@@ -37,7 +37,6 @@ public class FixedWithLatestStrategy implements PreviousArticleStrategy {
                 latestCount
         );
 
-        //TODO: 순서가 보장되나 ?
         return Stream.concat(fixedArticles.stream(), latestArticles.stream())
                 .distinct()
                 .toList();

@@ -72,6 +72,7 @@ class SubscribeServiceTest {
             .extracting("name")
             .containsExactlyInAnyOrder(newsletters.getFirst().getName(), newsletters.getLast().getName());
     }
+
     @Test
     void 구독을_취소한다() {
         // given
@@ -117,6 +118,7 @@ class SubscribeServiceTest {
         assertThatThrownBy(() -> subscribeService.unsubscribe(member.getId(), subscribe.getId()))
             .isInstanceOf(UnauthorizedException.class);
     }
+
     @Test
     void 존재하지_않는_구독을_취소하면_예외가_발생한다() {
         // given

@@ -1,5 +1,4 @@
 import { logger } from '@bombom/shared/utils';
-import { GOOGLE_ANALYTICS_ID } from './constants';
 
 declare global {
   interface Window {
@@ -31,7 +30,8 @@ export const initGA = (
   };
 
   window.gtag('js', new Date());
-  window.gtag('config', GOOGLE_ANALYTICS_ID, {
+
+  window.gtag('config', googleAnalyticsId, {
     send_page_view: false,
   });
 };

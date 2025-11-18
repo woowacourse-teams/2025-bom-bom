@@ -149,37 +149,63 @@ class PreviousArticleServiceTest {
     }
 
     @Test
-    void 관리자_아티클_정리_테스트() {
+    void previous_article_자동이동_아티클_정리_테스트() {
         // given
         Newsletter newsletter1 = newsletters.getFirst();
-        List<Article> adminArticles = new ArrayList<>();
-
+        
+        // 자동 이동된 아티클(isFixed=false) 12개 생성
+        List<PreviousArticle> autoMovedArticles = new ArrayList<>();
         for (int i = 0; i < 12; i++) {
-            Article article = TestFixture.createArticle(
-                    "관리자 아티클 " + i,
-                    admin.getId(),
-                    newsletter1.getId(),
-                    BASE_TIME.minusDays(i)
-            );
-            adminArticles.add(article);
+            PreviousArticle article = PreviousArticle.builder()
+                    .title("자동 이동 아티클 " + i)
+                    .contents("<h1>내용</h1>")
+                    .contentsSummary("요약")
+                    .expectedReadTime(5)
+                    .newsletterId(newsletter1.getId())
+                    .arrivedDateTime(BASE_TIME.minusDays(i))
+                    .isFixed(false)  // 자동 이동
+                    .build();
+            autoMovedArticles.add(article);
         }
-
-        articleRepository.saveAll(adminArticles);
+        previousArticleRepository.saveAll(autoMovedArticles);
+        
+        // 고정 아티클(isFixed=true) 3개 추가 (이건 삭제 안됨)
+        List<PreviousArticle> fixedArticles = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            PreviousArticle article = PreviousArticle.builder()
+                    .title("고정 아티클 " + i)
+                    .contents("<h1>내용</h1>")
+                    .contentsSummary("요약")
+                    .expectedReadTime(5)
+                    .newsletterId(newsletter1.getId())
+                    .arrivedDateTime(BASE_TIME.minusDays(20 + i))
+                    .isFixed(true)  // 고정
+                    .build();
+            fixedArticles.add(article);
+        }
+        previousArticleRepository.saveAll(fixedArticles);
 
         // when
         int deletedCount = previousArticleService.cleanupOldPreviousArticles();
 
         // then
         assertSoftly(softly -> {
+            // 자동 이동 12개 중 2개 삭제됨 (최신 10개만 유지)
             softly.assertThat(deletedCount).isEqualTo(2);
 
-            // 뉴스레터1에 10개만 남아있는지 확인
-            long newsletter1Count = articleRepository.findAll().stream()
-                    .filter(article ->
-                            article.getMemberId().equals(admin.getId()) &&
-                                    article.getNewsletterId().equals(newsletter1.getId()))
+            // 자동 이동 아티클은 10개만 남아야 함
+            long autoMovedCount = previousArticleRepository.findAll().stream()
+                    .filter(pa -> pa.getNewsletterId().equals(newsletter1.getId()))
+                    .filter(pa -> !pa.isFixed())
                     .count();
-            softly.assertThat(newsletter1Count).isEqualTo(10);
+            softly.assertThat(autoMovedCount).isEqualTo(10);
+            
+            // 고정 아티클은 그대로 3개 유지
+            long fixedCount = previousArticleRepository.findAll().stream()
+                    .filter(pa -> pa.getNewsletterId().equals(newsletter1.getId()))
+                    .filter(PreviousArticle::isFixed)
+                    .count();
+            softly.assertThat(fixedCount).isEqualTo(3);
         });
     }
 

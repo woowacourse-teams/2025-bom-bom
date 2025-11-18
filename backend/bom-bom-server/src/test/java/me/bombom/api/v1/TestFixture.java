@@ -267,6 +267,7 @@ public final class TestFixture {
                 .expectedReadTime(5)
                 .newsletterId(newsletterId)
                 .arrivedDateTime(arrivedTime)
+                .isFixed(true)  // 직접 생성된 고정 아티클
                 .build();
     }
 

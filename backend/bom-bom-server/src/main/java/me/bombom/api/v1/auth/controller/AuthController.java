@@ -90,11 +90,13 @@ public class AuthController implements AuthControllerApi{
     @GetMapping("/login/{provider}")
     public void login(
             @PathVariable("provider") String provider,
-            @RequestParam(defaultValue = "deploy") String env,
+            @RequestParam(required = false) String redirectUrl,
             HttpServletResponse response,
             HttpSession httpSession
     ) throws IOException {
-        httpSession.setAttribute("env", env);
+        if (redirectUrl != null && !redirectUrl.isEmpty()) {
+            httpSession.setAttribute("redirectUrl", redirectUrl);
+        }
         response.sendRedirect("/oauth2/authorization/" + provider);
     }
 

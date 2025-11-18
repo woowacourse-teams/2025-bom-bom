@@ -1,6 +1,7 @@
 package me.bombom.api.v1.subscribe.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.util.StringUtils;
 
 public record UnsubscribeResponse(
 
@@ -11,7 +12,7 @@ public record UnsubscribeResponse(
 ) {
 
     public UnsubscribeResponse(String unsubscribeUrl) {
-        this(unsubscribeUrl, unsubscribeUrl != null && !unsubscribeUrl.isBlank());
+        this(unsubscribeUrl, StringUtils.hasText(unsubscribeUrl));
     }
 }
 

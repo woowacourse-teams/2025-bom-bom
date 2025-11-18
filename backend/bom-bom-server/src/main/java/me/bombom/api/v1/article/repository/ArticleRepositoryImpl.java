@@ -48,17 +48,126 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         LocalDateTime fiveDaysAgo = LocalDateTime.now().minusDays(RECENT_DAYS);
         LocalDate fiveDaysAgoDate = fiveDaysAgo.toLocalDate();
         
+        // recent_article 테이블 존재 여부 확인
+        boolean recentTableExists = checkRecentArticleTableExists();
+        
         // 전체 개수 조회
-        Long recentCountResult = getRecentTotalQuery(memberId, options).fetchOne();
+        long recentCount = 0L;
+        if (recentTableExists) {
+            try {
+                Long recentCountResult = getRecentTotalQuery(memberId, options).fetchOne();
+                recentCount = recentCountResult != null ? recentCountResult : 0L;
+            } catch (Exception e) {
+                log.warn("recent_article 테이블 조회 실패, article 테이블만 사용: {}", e.getMessage());
+                recentCount = 0L;
+            }
+        }
+        
         Long oldCountResult = getTotalQuery(memberId, options).fetchOne();
-        long recentCount = recentCountResult != null ? recentCountResult : 0L;
         long oldCount = oldCountResult != null ? oldCountResult : 0L;
         long total = recentCount + oldCount;
         
         // UNION 쿼리로 두 테이블을 합쳐서 DB에서 정렬/페이징 처리
-        List<ArticleResponse> content = findArticlesWithUnion(memberId, options, pageable, fiveDaysAgoDate);
+        List<ArticleResponse> content;
+        if (recentTableExists) {
+            try {
+                content = findArticlesWithUnion(memberId, options, pageable, fiveDaysAgoDate);
+            } catch (Exception e) {
+                log.warn("UNION 쿼리 실패, article 테이블만 사용: {}", e.getMessage());
+                content = findArticlesFromArticleOnly(memberId, options, pageable, fiveDaysAgoDate);
+            }
+        } else {
+            // recent_article 테이블이 없으면 article 테이블만 사용
+            content = findArticlesFromArticleOnly(memberId, options, pageable, fiveDaysAgoDate);
+        }
         
         return PageableExecutionUtils.getPage(content, pageable, () -> total);
+    }
+    
+    /**
+     * recent_article 테이블 존재 여부 확인
+     */
+    private boolean checkRecentArticleTableExists() {
+        try {
+            Query checkTableQuery = entityManager.createNativeQuery(
+                    "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'recent_article'"
+            );
+            Long count = ((Number) checkTableQuery.getSingleResult()).longValue();
+            return count > 0;
+        } catch (Exception e) {
+            log.warn("recent_article 테이블 존재 여부 확인 실패: {}", e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * article 테이블만 사용하여 조회 (recent_article 테이블이 없을 때)
+     */
+    private List<ArticleResponse> findArticlesFromArticleOnly(
+            Long memberId,
+            ArticlesOptionsRequest options,
+            Pageable pageable,
+            LocalDate fiveDaysAgoDate
+    ) {
+        StringBuilder sql = new StringBuilder();
+        List<Object> params = new ArrayList<>();
+        
+        // 정렬 조건
+        String orderBy = buildOrderByClause(pageable);
+        
+        // 페이징
+        int pageSize = pageable.getPageSize();
+        int offset = (int) pageable.getOffset();
+        
+        sql.append("SELECT ")
+           .append("a.id as article_id, ")
+           .append("a.title, ")
+           .append("a.contents_summary, ")
+           .append("a.arrived_date_time, ")
+           .append("a.thumbnail_url, ")
+           .append("a.expected_read_time, ")
+           .append("a.is_read, ")
+           .append("CASE WHEN EXISTS(SELECT 1 FROM bookmark b WHERE b.article_id = a.id AND b.member_id = ?) THEN 1 ELSE 0 END as is_bookmarked, ")
+           .append("n.name as newsletter_name, ")
+           .append("COALESCE(n.image_url, '') as newsletter_image_url, ")
+           .append("c.name as category_name ")
+           .append("FROM article a ")
+           .append("INNER JOIN newsletter n ON n.id = a.newsletter_id ")
+           .append("INNER JOIN category c ON c.id = n.category_id ")
+           .append("WHERE a.member_id = ? ");
+        params.add(memberId); // bookmark 서브쿼리용
+        params.add(memberId); // member_id
+        
+        if (StringUtils.hasText(options.keyword())) {
+            String keyword = options.keyword().strip().toLowerCase();
+            sql.append("AND (LOWER(a.title) LIKE ? OR LOWER(a.contents_text) LIKE ?) ");
+            params.add("%" + keyword + "%");
+            params.add("%" + keyword + "%");
+        }
+        
+        if (options.newsletterId() != null) {
+            sql.append("AND a.newsletter_id = ? ");
+            params.add(options.newsletterId());
+        }
+        
+        sql.append("ORDER BY ").append(orderBy).append(" ")
+           .append("LIMIT ? OFFSET ?");
+        params.add(pageSize);
+        params.add(offset);
+        
+        // Native Query 실행
+        Query nativeQuery = entityManager.createNativeQuery(sql.toString());
+        for (int i = 0; i < params.size(); i++) {
+            nativeQuery.setParameter(i + 1, params.get(i));
+        }
+        
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = nativeQuery.getResultList();
+        
+        // 결과를 ArticleResponse로 매핑
+        return results.stream()
+                .map(row -> mapToArticleResponse(row))
+                .toList();
     }
     
     /**
@@ -90,13 +199,13 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
            .append("ra.thumbnail_url, ")
            .append("ra.expected_read_time, ")
            .append("ra.is_read, ")
-           .append("(SELECT COUNT(*) > 0 FROM bookmark b WHERE b.article_id = ra.id AND b.member_id = ?) as is_bookmarked, ")
+           .append("CASE WHEN EXISTS(SELECT 1 FROM bookmark b WHERE b.article_id = ra.id AND b.member_id = ?) THEN 1 ELSE 0 END as is_bookmarked, ")
            .append("n.name as newsletter_name, ")
            .append("COALESCE(n.image_url, '') as newsletter_image_url, ")
            .append("c.name as category_name ")
            .append("FROM recent_article ra ")
-           .append("JOIN newsletter n ON n.id = ra.newsletter_id ")
-           .append("JOIN category c ON c.id = n.category_id ")
+           .append("INNER JOIN newsletter n ON n.id = ra.newsletter_id ")
+           .append("INNER JOIN category c ON c.id = n.category_id ")
            .append("WHERE ra.member_id = ? ")
            .append("AND ra.arrived_date_time >= ? ");
         params.add(memberId); // bookmark 서브쿼리용
@@ -125,13 +234,13 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
            .append("a.thumbnail_url, ")
            .append("a.expected_read_time, ")
            .append("a.is_read, ")
-           .append("(SELECT COUNT(*) > 0 FROM bookmark b WHERE b.article_id = a.id AND b.member_id = ?) as is_bookmarked, ")
+           .append("CASE WHEN EXISTS(SELECT 1 FROM bookmark b WHERE b.article_id = a.id AND b.member_id = ?) THEN 1 ELSE 0 END as is_bookmarked, ")
            .append("n.name as newsletter_name, ")
            .append("COALESCE(n.image_url, '') as newsletter_image_url, ")
            .append("c.name as category_name ")
            .append("FROM article a ")
-           .append("JOIN newsletter n ON n.id = a.newsletter_id ")
-           .append("JOIN category c ON c.id = n.category_id ")
+           .append("INNER JOIN newsletter n ON n.id = a.newsletter_id ")
+           .append("INNER JOIN category c ON c.id = n.category_id ")
            .append("WHERE a.member_id = ? ")
            .append("AND a.arrived_date_time < ? ");
         params.add(memberId); // bookmark 서브쿼리용

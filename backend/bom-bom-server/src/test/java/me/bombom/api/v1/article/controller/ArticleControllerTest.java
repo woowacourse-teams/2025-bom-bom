@@ -129,7 +129,7 @@ class ArticleControllerTest {
     @Test
     @DisplayName("기본 아티클 목록 조회 성공")
     void 아티클_목록_조회_성공() throws Exception {
-        // when & then
+        // when & then - getArticles는 keyword가 있으면 에러 (keyword 없어야 함)
         mockMvc.perform(get("/api/v1/articles")
                         .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -150,7 +150,7 @@ class ArticleControllerTest {
         Long newsletterId = newsletter.getId();
         String newsletterName = newsletter.getName();
 
-        // when & then
+        // when & then - getArticles는 keyword가 있으면 에러 (keyword 없어야 함)
         mockMvc.perform(get("/api/v1/articles")
                         .with(authentication(authToken))
                         .param("newsletterId", newsletterId.toString()))
@@ -201,7 +201,7 @@ class ArticleControllerTest {
 
     @Test
     void 기본값이_DESC_정렬인지_확인() throws Exception {
-        // when & then - 정렬 파라미터 없는 기본값
+        // when & then - 정렬 파라미터 없는 기본값 (getArticles는 keyword 없어야 함)
         MvcResult defaultResult = mockMvc.perform(get("/api/v1/articles")
                         .with(authentication(authToken)))
                 .andExpect(status().isOk())
@@ -234,8 +234,9 @@ class ArticleControllerTest {
     @Test
     void DESC_정렬_아티클_목록_조회() throws Exception {
         // when & then
-        MvcResult result = mockMvc.perform(get("/api/v1/articles")
+        MvcResult result = mockMvc.perform(get("/api/v1/articles/search")
                         .with(authentication(authToken))
+                        .param("keyword", "테스트")
                         .param("sorted", "desc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
@@ -256,8 +257,9 @@ class ArticleControllerTest {
     @Test
     void ASC_정렬_아티클_목록_조회() throws Exception {
         // when & then
-        MvcResult result = mockMvc.perform(get("/api/v1/articles")
+        MvcResult result = mockMvc.perform(get("/api/v1/articles/search")
                         .with(authentication(authToken))
+                        .param("keyword", "테스트")
                         .param("sort", "arrivedDateTime")
                         .param("direction", "asc"))
                 .andExpect(status().isOk())
@@ -279,8 +281,9 @@ class ArticleControllerTest {
     @Test
     void 첫번째_페이지_아티클_목록_조회() throws Exception {
         // when & then
-        mockMvc.perform(get("/api/v1/articles")
+        mockMvc.perform(get("/api/v1/articles/search")
                         .with(authentication(authToken))
+                        .param("keyword", "테스트")
                         .param("page", "0")
                         .param("size", "2"))
                 .andExpect(status().isOk())
@@ -297,8 +300,9 @@ class ArticleControllerTest {
     @Test
     void 두번째_페이지_아티클_목록_조회() throws Exception {
         // when & then
-        mockMvc.perform(get("/api/v1/articles")
+        mockMvc.perform(get("/api/v1/articles/search")
                         .with(authentication(authToken))
+                        .param("keyword", "테스트")
                         .param("page", "1")
                         .param("size", "2"))
                 .andExpect(status().isOk())
@@ -317,8 +321,9 @@ class ArticleControllerTest {
         LocalDate baseDate = LocalDate.of(2025, 7, 15);
 
         // when & then - 특정 날짜로 필터링
-        mockMvc.perform(get("/api/v1/articles")
+        mockMvc.perform(get("/api/v1/articles/search")
                         .with(authentication(authToken))
+                        .param("keyword", "테스트")
                         .param("date", baseDate.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())

@@ -231,6 +231,90 @@ class ArticleControllerTest {
         });
     }
 
+    // FULLTEXT 인덱스가 필요한 테스트 (테스트 환경에서 인덱스가 없어서 주석 처리)
+//    @Test
+//    void DESC_정렬_아티클_목록_조회() throws Exception {
+//        // when & then - contents에 "아티클"이 포함되어 있어서 4개 모두 검색됨
+//        MvcResult result = mockMvc.perform(get("/api/v1/articles/search")
+//                        .with(authentication(authToken))
+//                        .param("keyword", "아티클")
+//                        .param("sorted", "desc"))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.content").isArray())
+//                .andExpect(jsonPath("$.totalElements").value(4))
+//                .andReturn();
+//
+//        String responseContent = result.getResponse().getContentAsString();
+//        JsonNode jsonResponse = objectMapper.readTree(responseContent);
+//        String firstDateTime = jsonResponse.get("content").get(0).get("arrivedDateTime").asText();
+//        String lastDateTime = jsonResponse.get("content").get(3).get("arrivedDateTime").asText();
+//
+//        assertSoftly(softly -> {
+//            softly.assertThat(firstDateTime).isEqualTo("2025-07-15T09:55:00"); // 최신
+//            softly.assertThat(lastDateTime).isEqualTo("2025-07-14T10:00:00");  // 오래됨
+//        });
+//    }
+//
+//    @Test
+//    void ASC_정렬_아티클_목록_조회() throws Exception {
+//        // when & then - contents에 "아티클"이 포함되어 있어서 4개 모두 검색됨
+//        MvcResult result = mockMvc.perform(get("/api/v1/articles/search")
+//                        .with(authentication(authToken))
+//                        .param("keyword", "아티클")
+//                        .param("sort", "arrivedDateTime")
+//                        .param("direction", "asc"))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.content").isArray())
+//                .andExpect(jsonPath("$.totalElements").value(4))
+//                .andReturn();
+//
+//        String responseContent = result.getResponse().getContentAsString();
+//        JsonNode jsonResponse = objectMapper.readTree(responseContent);
+//        String firstDateTime = jsonResponse.get("content").get(0).get("arrivedDateTime").asText();
+//        String lastDateTime = jsonResponse.get("content").get(3).get("arrivedDateTime").asText();
+//
+//        assertSoftly(softly -> {
+//            softly.assertThat(firstDateTime).isEqualTo("2025-07-14T10:00:00");  // 오래됨
+//            softly.assertThat(lastDateTime).isEqualTo("2025-07-15T09:55:00");   // 최신
+//        });
+//    }
+//
+//    @Test
+//    void 첫번째_페이지_아티클_목록_조회() throws Exception {
+//        // when & then - contents에 "아티클"이 포함되어 있어서 4개 모두 검색됨
+//        mockMvc.perform(get("/api/v1/articles/search")
+//                        .with(authentication(authToken))
+//                        .param("keyword", "아티클")
+//                        .param("page", "0")
+//                        .param("size", "2"))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.content").isArray())
+//                .andExpect(jsonPath("$.content").isNotEmpty())
+//                .andExpect(jsonPath("$.size").value(2))
+//                .andExpect(jsonPath("$.number").value(0))
+//                .andExpect(jsonPath("$.totalElements").value(4))
+//                .andExpect(jsonPath("$.totalPages").value(2))
+//                .andExpect(jsonPath("$.first").value(true))
+//                .andExpect(jsonPath("$.last").value(false));
+//    }
+//
+//    @Test
+//    void 두번째_페이지_아티클_목록_조회() throws Exception {
+//        // when & then - contents에 "아티클"이 포함되어 있어서 4개 모두 검색됨
+//        mockMvc.perform(get("/api/v1/articles/search")
+//                        .with(authentication(authToken))
+//                        .param("keyword", "아티클")
+//                        .param("page", "1")
+//                        .param("size", "2"))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.content").isArray())
+//                .andExpect(jsonPath("$.size").value(2))
+//                .andExpect(jsonPath("$.number").value(1))
+//                .andExpect(jsonPath("$.totalElements").value(4))
+//                .andExpect(jsonPath("$.totalPages").value(2))
+//                .andExpect(jsonPath("$.first").value(false))
+//                .andExpect(jsonPath("$.last").value(true));
+//    }
 
 //    @Test
 //    void 뉴스레터_키워드_날짜_복합_필터링_아티클_목록_조회() throws Exception {

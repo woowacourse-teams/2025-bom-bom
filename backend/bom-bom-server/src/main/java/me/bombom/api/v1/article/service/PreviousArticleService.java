@@ -17,7 +17,6 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousPolicy;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy;
-import me.bombom.api.v1.newsletter.domain.PreviousArticleSource;
 import me.bombom.api.v1.newsletter.repository.NewsletterPreviousPolicyRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -59,20 +58,13 @@ public class PreviousArticleService {
                 });
     }
 
-    public PreviousArticleDetailResponse getPreviousArticleDetail(Long id, PreviousArticleSource source, Member member) {
+    public PreviousArticleDetailResponse getPreviousArticleDetail(Long id, Member member) {
         Long memberId = member != null ? member.getId() : null;
-        if (source.equals(PreviousArticleSource.FIXED)) {
-            return previousArticleRepository.findPreviousArticleDetailById(id, memberId)
-                    .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                            .addContext(ErrorContextKeys.ARTICLE_ID, id)
-                            .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                            .addContext(ErrorContextKeys.ENTITY_TYPE, "previousArticle"));
-        }
-        return articleRepository.getPreviousArticleDetailsByMemberId(id, PREVIOUS_ARTICLE_ADMIN_ID, memberId)
+        return previousArticleRepository.findPreviousArticleDetailById(id, memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ARTICLE_ID, id)
                         .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "article"));
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "previousArticle"));
     }
 
     @Transactional

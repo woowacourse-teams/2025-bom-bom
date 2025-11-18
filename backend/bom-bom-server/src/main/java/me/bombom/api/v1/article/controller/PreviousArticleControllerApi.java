@@ -13,10 +13,8 @@ import me.bombom.api.v1.article.dto.request.PreviousArticleRequest;
 import me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.PreviousArticleResponse;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.newsletter.domain.PreviousArticleSource;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "Article", description = "지난 아티클 관련 API")
 public interface PreviousArticleControllerApi {
@@ -45,7 +43,6 @@ public interface PreviousArticleControllerApi {
     PreviousArticleDetailResponse getPreviousArticleDetail(
             @Parameter(hidden = true) Member member,
             @Parameter(description = "아티클 ID")
-            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
-            @RequestParam PreviousArticleSource previousArticleSource
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
     );
 }

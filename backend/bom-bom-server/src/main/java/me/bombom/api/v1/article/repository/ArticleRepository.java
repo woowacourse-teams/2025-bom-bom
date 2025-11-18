@@ -1,10 +1,8 @@
 package me.bombom.api.v1.article.repository;
 
 import java.util.List;
-import java.util.Optional;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
-import me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -32,40 +30,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Article a WHERE a.memberId = :memberId")
     void deleteAllByMemberId(Long memberId);
-
-    @Query("""
-        SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse(
-            a.title,
-            a.contents,
-            a.arrivedDateTime,
-            a.expectedReadTime,
-            npp.exposureRatio,
-            CASE
-                WHEN :memberId IS NULL THEN false
-                WHEN s.id IS NULL THEN false
-                ELSE true
-            END,
-            new me.bombom.api.v1.newsletter.dto.NewsletterBasicResponse(
-                n.name, n.email, n.imageUrl, c.name
-            )
-        )
-        FROM Article a
-        JOIN Newsletter n ON n.id = a.newsletterId
-        JOIN Category c ON c.id = n.categoryId
-        JOIN NewsletterPreviousPolicy npp ON npp.newsletterId = n.id
-        LEFT JOIN Subscribe s ON s.newsletterId = n.id AND s.memberId = :memberId
-        WHERE a.id = :id
-        AND a.memberId = :adminId
-        AND npp.strategy IN (
-            me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy.FIXED_WITH_LATEST,
-            me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy.LATEST_ONLY
-        )
-    """)
-    Optional<PreviousArticleDetailResponse> getPreviousArticleDetailsByMemberId(
-            @Param("id") Long id,
-            @Param("adminId") Long adminId,
-            @Param("memberId") Long memberId
-    );
 
     long countByIdInAndMemberId(List<Long> ids, Long memberId);
 

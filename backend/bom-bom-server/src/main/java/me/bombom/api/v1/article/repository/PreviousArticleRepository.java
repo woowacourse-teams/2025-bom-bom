@@ -49,10 +49,7 @@ public interface PreviousArticleRepository extends JpaRepository<PreviousArticle
         JOIN NewsletterPreviousPolicy npp ON npp.newsletterId = n.id
         LEFT JOIN Subscribe s ON s.newsletterId = n.id AND s.memberId = :memberId
         WHERE pa.id = :id
-        AND npp.strategy IN (
-            me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy.FIXED_WITH_LATEST,
-            me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy.FIXED_ONLY
-        )
+        AND npp.strategy != me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy.INACTIVE
     """)
     Optional<PreviousArticleDetailResponse> findPreviousArticleDetailById(
             @Param("id") Long id,

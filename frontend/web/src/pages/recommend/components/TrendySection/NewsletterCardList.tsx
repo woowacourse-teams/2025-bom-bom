@@ -19,6 +19,7 @@ const NewsletterCardList = ({
           imageUrl={newsletter.imageUrl ?? ''}
           title={newsletter.name}
           description={newsletter.description}
+          isSubscribed={newsletter.isSubscribed}
           onClick={() => handleCardClick(newsletter)}
           as="button"
           aria-label={`${newsletter.name} 뉴스레터 상세보기`}

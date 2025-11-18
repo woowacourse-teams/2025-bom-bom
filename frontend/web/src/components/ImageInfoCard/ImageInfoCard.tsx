@@ -1,11 +1,15 @@
+import { theme } from '@bombom/shared/theme';
 import styled from '@emotion/styled';
+import Badge from '../Badge/Badge';
 import ImageWithFallback from '../ImageWithFallback/ImageWithFallback';
 import type { ComponentProps } from 'react';
+import CheckIcon from '#/assets/svg/check-circle.svg';
 
 interface ImageInfoCardProps extends ComponentProps<'div'> {
   imageUrl: string;
   title: string;
   description: string;
+  isSubscribed: boolean;
   as?: React.ElementType;
 }
 
@@ -13,6 +17,7 @@ function ImageInfoCard({
   imageUrl,
   title,
   description,
+  isSubscribed,
   as = 'div',
   ...props
 }: ImageInfoCardProps) {
@@ -20,7 +25,20 @@ function ImageInfoCard({
     <Container as={as} {...props}>
       <Image src={imageUrl} alt={`${title} 뉴스레터 이미지`} />
       <InfoBox>
-        <Title>{title}</Title>
+        <TitleBox>
+          <Title>{title}</Title>
+          {isSubscribed && (
+            <>
+              <Badge
+                text="구독 중"
+                variant="outlinePrimary"
+                icon={
+                  <CheckIcon width={16} height={16} fill={theme.colors.white} />
+                }
+              ></Badge>
+            </>
+          )}
+        </TitleBox>
         <Description>{description || title}</Description>
       </InfoBox>
     </Container>
@@ -61,6 +79,14 @@ export const InfoBox = styled.div`
   flex: 1;
   flex-direction: column;
   justify-content: center;
+`;
+
+const TitleBox = styled.div`
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
 `;
 
 const Title = styled.h3`

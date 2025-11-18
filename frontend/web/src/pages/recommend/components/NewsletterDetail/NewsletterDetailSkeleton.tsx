@@ -1,4 +1,3 @@
-import styled from '@emotion/styled';
 import {
   Container,
   FixedWrapper,
@@ -8,6 +7,7 @@ import {
   ScrollableWrapper,
   TitleWrapper,
 } from './NewsletterDetail';
+import NewsletterTabs from './NewsletterTabs';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import { useDevice } from '@/hooks/useDevice';
 
@@ -45,14 +45,7 @@ const NewsletterDetailSkeleton = () => {
         />
       </FixedWrapper>
 
-      <TabSkeletonWrapper>
-        <TabSkeletonBox>
-          <Skeleton width="80px" height="20px" />
-        </TabSkeletonBox>
-        <TabSkeletonBox>
-          <Skeleton width="80px" height="20px" />
-        </TabSkeletonBox>
-      </TabSkeletonWrapper>
+      <NewsletterTabs activeTab="detail" onTabChange={() => {}} />
 
       <ScrollableWrapper isMobile={isMobile}>
         <Skeleton width="100%" height={isMobile ? '240px' : '100%'} />
@@ -62,17 +55,3 @@ const NewsletterDetailSkeleton = () => {
 };
 
 export default NewsletterDetailSkeleton;
-
-const TabSkeletonWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.colors.dividers};
-  display: flex;
-`;
-
-const TabSkeletonBox = styled.div`
-  padding: 12px 0;
-
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-`;

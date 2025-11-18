@@ -10,9 +10,11 @@ phases:
     runtime-versions:
       nodejs: 22
     commands:
-      - echo "Installing dependencies.."
+      - echo "Installing dependencies..."
       - cd ./frontend/web
-      - npm install -g pnpm@10.12.1
+
+      - corepack enable
+      - corepack prepare pnpm@10.12.1 --activate
 
       - pnpm config set store-dir $CODEBUILD_SRC_DIR/.pnpm-store
       - pnpm install --frozen-lockfile --prefer-offline

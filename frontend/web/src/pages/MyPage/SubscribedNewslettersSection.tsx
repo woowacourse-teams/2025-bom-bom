@@ -70,7 +70,7 @@ const SubscribedNewslettersSection = ({
                     handleOpenUnsubscribeModal(newsletter.newsletterId)
                   }
                 >
-                  구독 취소
+                  구독 해지
                 </UnsubscribeButton>
               </NewsletterCard>
             ))}

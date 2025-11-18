@@ -7,7 +7,7 @@ const unsubscribeNewsletter = async ({
 }: {
   newsletterId: number;
 }) => {
-  console.log('구독 취소', newsletterId);
+  console.log('구독 해지', newsletterId);
 };
 
 export const useUnsubscribeNewsletterMutation = () => {
@@ -19,10 +19,10 @@ export const useUnsubscribeNewsletterMutation = () => {
       await queryClient.invalidateQueries({
         queryKey: queries.myNewsletters().queryKey,
       });
-      toast.success('뉴스레터 구독을 취소했습니다.');
+      toast.success('뉴스레터 구독을 해지했습니다.');
     },
     onError: () => {
-      toast.error('구독 취소에 실패했습니다. 다시 시도해주세요.');
+      toast.error('구독 해지에 실패했습니다. 다시 시도해주세요.');
     },
   });
 };

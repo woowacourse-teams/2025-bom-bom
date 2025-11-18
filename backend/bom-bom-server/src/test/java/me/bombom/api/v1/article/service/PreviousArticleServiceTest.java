@@ -1,6 +1,7 @@
 package me.bombom.api.v1.article.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDateTime;
@@ -10,22 +11,26 @@ import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.PreviousArticle;
 import me.bombom.api.v1.article.dto.request.PreviousArticleRequest;
+import me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.PreviousArticleResponse;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.article.repository.PreviousArticleRepository;
 import me.bombom.api.v1.article.service.strategy.PreviousArticleStrategy;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousPolicy;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy;
+import me.bombom.api.v1.newsletter.domain.PreviousArticleSource;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterPreviousPolicyRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
+import me.bombom.api.v1.subscribe.domain.Subscribe;
+import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,15 +69,20 @@ class PreviousArticleServiceTest {
     @Autowired
     private PreviousArticleService previousArticleService;
 
+    @Autowired
+    private SubscribeRepository subscribeRepository;
+
     List<Category> categories;
     List<Newsletter> newsletters;
     Member admin;
+    Member normalMember;
     Newsletter testNewsletter;
     List<PreviousArticle> fixedArticles;
     List<Article> adminArticles;
 
     @BeforeEach
     public void setup() {
+        subscribeRepository.deleteAllInBatch();
         newsletterRepository.deleteAllInBatch();
         articleRepository.deleteAllInBatch();
         previousArticleRepository.deleteAllInBatch();
@@ -81,15 +91,12 @@ class PreviousArticleServiceTest {
         newsletterPreviousPolicyRepository.deleteAllInBatch();
 
         // 관리자 멤버 생성
-        admin = Member.builder()
-                .provider("admin")
-                .providerId("prev-admin")
-                .email("admin@bombom.news")
-                .nickname("지난아티클관리자")
-                .gender(Gender.MALE)
-                .roleId(1L)
-                .build();
+        admin = TestFixture.createUniqueMember("지난아티클관리자", "prev-admin");
         memberRepository.save(admin);
+
+        // 일반 회원 생성
+        normalMember = TestFixture.createUniqueMember("일반사용자", "normal-user");
+        memberRepository.save(normalMember);
 
         // 서비스와 전략들의 ADMIN_ID 오버라이드
         ReflectionTestUtils.setField(previousArticleService, "PREVIOUS_ARTICLE_ADMIN_ID", admin.getId());
@@ -303,5 +310,180 @@ class PreviousArticleServiceTest {
 
         // then
         assertThat(result).hasSize(3); // 실제로는 3개만 존재
+    }
+
+    @Test
+    void FIXED_소스_로그인_사용자_구독중_상세_조회() {
+        // given
+        NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
+                testNewsletter.getId(), NewsletterPreviousStrategy.FIXED_ONLY, 3, 3, 80);
+        newsletterPreviousPolicyRepository.save(policy);
+
+        Subscribe subscribe = TestFixture.createSubscribe(testNewsletter, normalMember);
+        subscribeRepository.save(subscribe);
+
+        PreviousArticle targetArticle = fixedArticles.getFirst();
+
+        // when
+        PreviousArticleDetailResponse result = previousArticleService.getPreviousArticleDetail(
+                targetArticle.getId(), PreviousArticleSource.FIXED, normalMember);
+
+        // then
+        assertThat(result.title()).isEqualTo(targetArticle.getTitle());
+    }
+
+    @Test
+    void FIXED_소스_로그인_사용자_구독안함_상세_조회() {
+        // given
+        NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
+                testNewsletter.getId(), NewsletterPreviousStrategy.FIXED_ONLY, 3, 3, 80);
+        newsletterPreviousPolicyRepository.save(policy);
+
+        PreviousArticle targetArticle = fixedArticles.getFirst();
+
+        // when
+        PreviousArticleDetailResponse result = previousArticleService.getPreviousArticleDetail(
+                targetArticle.getId(), PreviousArticleSource.FIXED, normalMember);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.title()).isEqualTo(targetArticle.getTitle());
+            softly.assertThat(result.isSubscribed()).isFalse();
+        });
+    }
+
+    @Test
+    void FIXED_소스_비로그인_사용자_상세_조회() {
+        // given
+        NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
+                testNewsletter.getId(), NewsletterPreviousStrategy.FIXED_ONLY, 3, 3, 80);
+        newsletterPreviousPolicyRepository.save(policy);
+
+        PreviousArticle targetArticle = fixedArticles.getFirst();
+
+        // when
+        PreviousArticleDetailResponse result = previousArticleService.getPreviousArticleDetail(
+                targetArticle.getId(), PreviousArticleSource.FIXED, null);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.title()).isEqualTo(targetArticle.getTitle());
+            softly.assertThat(result.isSubscribed()).isFalse();
+        });
+    }
+
+    @Test
+    void LATEST_소스_로그인_사용자_구독중_상세_조회() {
+        // given
+        NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
+                testNewsletter.getId(), NewsletterPreviousStrategy.LATEST_ONLY, 3, 0, 90);
+        newsletterPreviousPolicyRepository.save(policy);
+
+        Subscribe subscribe = TestFixture.createSubscribe(testNewsletter, normalMember);
+        subscribeRepository.save(subscribe);
+
+        Article targetArticle = adminArticles.getFirst();
+
+        // when
+        PreviousArticleDetailResponse result = previousArticleService.getPreviousArticleDetail(
+                targetArticle.getId(), PreviousArticleSource.LATEST, normalMember);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.title()).isEqualTo(targetArticle.getTitle());
+            softly.assertThat(result.isSubscribed()).isTrue();
+        });
+    }
+
+    @Test
+    void LATEST_소스_로그인_사용자_구독안함_상세_조회() {
+        // given
+        NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
+                testNewsletter.getId(), NewsletterPreviousStrategy.LATEST_ONLY, 3, 0, 90);
+        newsletterPreviousPolicyRepository.save(policy);
+
+        Article targetArticle = adminArticles.getFirst();
+
+        // when
+        PreviousArticleDetailResponse result = previousArticleService.getPreviousArticleDetail(
+                targetArticle.getId(), PreviousArticleSource.LATEST, normalMember);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.title()).isEqualTo(targetArticle.getTitle());
+            softly.assertThat(result.isSubscribed()).isFalse();
+        });
+    }
+
+    @Test
+    void LATEST_소스_비로그인_사용자_상세_조회() {
+        // given
+        NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
+                testNewsletter.getId(), NewsletterPreviousStrategy.LATEST_ONLY, 3, 0, 90);
+        newsletterPreviousPolicyRepository.save(policy);
+
+        Article targetArticle = adminArticles.getFirst();
+
+        // when
+        PreviousArticleDetailResponse result = previousArticleService.getPreviousArticleDetail(
+                targetArticle.getId(), PreviousArticleSource.LATEST, null);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.title()).isEqualTo(targetArticle.getTitle());
+            softly.assertThat(result.isSubscribed()).isFalse();
+        });
+    }
+
+    @Test
+    void FIXED_소스_존재하지_않는_아티클_조회시_예외() {
+        // given
+        Long invalidArticleId = 99999L;
+
+        // when & then
+        assertThatThrownBy(() -> previousArticleService.getPreviousArticleDetail(
+                invalidArticleId, PreviousArticleSource.FIXED, normalMember))
+                .isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void LATEST_소스_존재하지_않는_아티클_조회시_예외() {
+        // given
+        Long invalidArticleId = 99999L;
+
+        // when & then
+        assertThatThrownBy(() -> previousArticleService.getPreviousArticleDetail(
+                invalidArticleId, PreviousArticleSource.LATEST, normalMember))
+                .isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void FIXED_소스_INACTIVE_정책인_경우_조회_실패() {
+        // given
+        NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
+                testNewsletter.getId(), NewsletterPreviousStrategy.INACTIVE, 0, 0, 0);
+        newsletterPreviousPolicyRepository.save(policy);
+
+        PreviousArticle targetArticle = fixedArticles.getFirst();
+
+        // when & then - INACTIVE 정책이면 조회 불가
+        assertThatThrownBy(() -> previousArticleService.getPreviousArticleDetail(
+                targetArticle.getId(), PreviousArticleSource.FIXED, normalMember))
+                .isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void FIXED_소스_LATEST_ONLY_정책인_경우_조회_실패() {
+        // given
+        NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
+                testNewsletter.getId(), NewsletterPreviousStrategy.LATEST_ONLY, 3, 0, 80);
+        newsletterPreviousPolicyRepository.save(policy);
+
+        PreviousArticle targetArticle = fixedArticles.getFirst();
+
+        // when & then - LATEST_ONLY 정책이면 FIXED 아티클 조회 불가
+        assertThatThrownBy(() -> previousArticleService.getPreviousArticleDetail(
+                targetArticle.getId(), PreviousArticleSource.FIXED, normalMember))
+                .isInstanceOf(CIllegalArgumentException.class);
     }
 }

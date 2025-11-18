@@ -20,12 +20,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
@@ -33,7 +31,6 @@ import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.dto.response.QArticleResponse;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
-import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.newsletter.dto.QNewsletterSummaryResponse;
 import org.springframework.data.domain.Page;
@@ -79,73 +76,53 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             ArticlesOptionsRequest options,
             Pageable pageable
     ) {
-        try {
-            LocalDateTime cutoffDate = LocalDateTime.now().minusDays(RECENT_DAYS);
-            String keyword = options.keyword().strip();
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(RECENT_DAYS);
+        String keyword = options.keyword().strip();
 
-            // 각 쿼리에서 충분히 가져오기 위해 LIMIT을 pageSize * 2로 설정
-            int fetchLimit = Math.max(pageable.getPageSize() * 2, 100);
+        String unionQuery = buildUnionQuery(options, cutoffDate);
+        Query query = entityManager.createNativeQuery(unionQuery);
+        setUnionQueryParameters(query, memberId, options, cutoffDate, keyword, pageable);
 
-            // 최근 3일 쿼리 실행
-            String recentQuery = buildRecentQuery(options, cutoffDate, fetchLimit);
-            Query recentQueryObj = entityManager.createNativeQuery(recentQuery);
-            setQueryParameters(recentQueryObj, memberId, options, cutoffDate, keyword, fetchLimit);
-            // 타임아웃 설정 (30초)
-            recentQueryObj.setHint("jakarta.persistence.query.timeout", 30000);
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = query.getResultList();
+        List<ArticleResponse> content = mapToArticleResponse(results);
 
-            @SuppressWarnings("unchecked")
-            List<Object[]> recentResults = recentQueryObj.getResultList();
-            List<ArticleResponse> recentArticles = mapToArticleResponse(recentResults);
+        long totalCount = getTotalCountWithUnion(memberId, options, cutoffDate, keyword);
 
-            // 과거 쿼리 실행
-            String olderQuery = buildOlderQuery(options, cutoffDate, fetchLimit);
-            Query olderQueryObj = entityManager.createNativeQuery(olderQuery);
-            setQueryParameters(olderQueryObj, memberId, options, cutoffDate, keyword, fetchLimit);
-            // 타임아웃 설정 (30초)
-            olderQueryObj.setHint("jakarta.persistence.query.timeout", 30000);
-
-            @SuppressWarnings("unchecked")
-            List<Object[]> olderResults = olderQueryObj.getResultList();
-            List<ArticleResponse> olderArticles = mapToArticleResponse(olderResults);
-
-            // 애플리케이션에서 병합, 정렬, 최종 LIMIT 적용
-            List<ArticleResponse> merged = Stream.concat(recentArticles.stream(), olderArticles.stream())
-                    .sorted(Comparator.comparing(ArticleResponse::arrivedDateTime)
-                            .thenComparing(ArticleResponse::articleId)
-                            .reversed())
-                    .limit(pageable.getPageSize())
-                    .collect(Collectors.toList());
-
-            final long totalCount = calculateTotalCount(memberId, options, cutoffDate, keyword, merged.size(), pageable.getPageSize());
-
-            return PageableExecutionUtils.getPage(merged, pageable, () -> totalCount);
-        } catch (Exception e) {
-            log.error("검색 쿼리 실행 실패 - memberId: {}, keyword: '{}'", memberId, options.keyword(), e);
-            throw new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
-                    .addContext("memberId", memberId)
-                    .addContext("keyword", options.keyword());
-        }
+        return PageableExecutionUtils.getPage(content, pageable, () -> totalCount);
     }
 
-    private String buildRecentQuery(ArticlesOptionsRequest options, LocalDateTime cutoffDate, int limit) {
+    private String buildUnionQuery(ArticlesOptionsRequest options, LocalDateTime cutoffDate) {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT ")
-                .append("a.id AS article_id, ")
-                .append("a.title, ")
+        sql.append("SELECT DISTINCT ")
+                .append("article_id, ")
+                .append("title, ")
+                .append("contents_summary, ")
+                .append("arrived_date_time, ")
+                .append("thumbnail_url, ")
+                .append("expected_read_time, ")
+                .append("is_read, ")
+                .append("is_bookmarked, ")
+                .append("newsletter_name, ")
+                .append("newsletter_image_url, ")
+                .append("category_name ")
+                .append("FROM (")
+                .append("SELECT ")
+                .append("sr.article_id, ")
+                .append("sr.title, ")
                 .append("a.contents_summary, ")
                 .append("sr.arrived_date_time, ")
                 .append("a.thumbnail_url, ")
                 .append("a.expected_read_time, ")
                 .append("a.is_read, ")
-                .append("CASE WHEN b.article_id IS NOT NULL THEN 1 ELSE 0 END AS is_bookmarked, ")
-                .append("n.name AS newsletter_name, ")
-                .append("n.image_url AS newsletter_image_url, ")
-                .append("c.name AS category_name ")
+                .append("EXISTS(SELECT 1 FROM bookmark b WHERE b.article_id = sr.article_id AND b.member_id = :memberId) as is_bookmarked, ")
+                .append("n.name as newsletter_name, ")
+                .append("n.image_url as newsletter_image_url, ")
+                .append("c.name as category_name ")
                 .append("FROM search_recent sr ")
                 .append("INNER JOIN article a ON a.id = sr.article_id ")
                 .append("INNER JOIN newsletter n ON n.id = sr.newsletter_id ")
                 .append("INNER JOIN category c ON c.id = n.category_id ")
-                .append("LEFT JOIN bookmark b ON b.article_id = a.id AND b.member_id = :memberId ")
                 .append("WHERE sr.member_id = :memberId ")
                 .append("AND sr.arrived_date_time >= :cutoffDate ");
 
@@ -157,31 +134,23 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             sql.append("AND DATE(sr.arrived_date_time) = :date ");
         }
 
-        sql.append("AND MATCH(sr.title, sr.contents_text) AGAINST(:keyword IN BOOLEAN MODE) ")
-                .append("ORDER BY sr.arrived_date_time DESC, a.id DESC ")
-                .append("LIMIT :limit");
-
-        return sql.toString();
-    }
-
-    private String buildOlderQuery(ArticlesOptionsRequest options, LocalDateTime cutoffDate, int limit) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT ")
-                .append("a.id AS article_id, ")
+        sql.append("AND MATCH(sr.title, sr.contents) AGAINST(:keyword IN BOOLEAN MODE) ")
+                .append("UNION ALL ")
+                .append("SELECT ")
+                .append("a.id as article_id, ")
                 .append("a.title, ")
                 .append("a.contents_summary, ")
                 .append("a.arrived_date_time, ")
                 .append("a.thumbnail_url, ")
                 .append("a.expected_read_time, ")
                 .append("a.is_read, ")
-                .append("CASE WHEN b.article_id IS NOT NULL THEN 1 ELSE 0 END AS is_bookmarked, ")
-                .append("n.name AS newsletter_name, ")
-                .append("n.image_url AS newsletter_image_url, ")
-                .append("c.name AS category_name ")
+                .append("EXISTS(SELECT 1 FROM bookmark b WHERE b.article_id = a.id AND b.member_id = :memberId) as is_bookmarked, ")
+                .append("n.name as newsletter_name, ")
+                .append("n.image_url as newsletter_image_url, ")
+                .append("c.name as category_name ")
                 .append("FROM article a ")
                 .append("INNER JOIN newsletter n ON n.id = a.newsletter_id ")
                 .append("INNER JOIN category c ON c.id = n.category_id ")
-                .append("LEFT JOIN bookmark b ON b.article_id = a.id AND b.member_id = :memberId ")
                 .append("WHERE a.member_id = :memberId ")
                 .append("AND a.arrived_date_time < :cutoffDate ");
 
@@ -193,25 +162,27 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             sql.append("AND DATE(a.arrived_date_time) = :date ");
         }
 
-        sql.append("AND MATCH(a.title, a.contents_text) AGAINST(:keyword IN BOOLEAN MODE) ")
-                .append("ORDER BY a.arrived_date_time DESC, a.id DESC ")
-                .append("LIMIT :limit");
+        sql.append("AND MATCH(a.title, a.contents) AGAINST(:keyword IN BOOLEAN MODE) ")
+                .append(") AS union_result ")
+                .append("ORDER BY arrived_date_time DESC ")
+                .append("LIMIT :limit OFFSET :offset");
 
         return sql.toString();
     }
 
-    private void setQueryParameters(
+    private void setUnionQueryParameters(
             Query query,
             Long memberId,
             ArticlesOptionsRequest options,
             LocalDateTime cutoffDate,
             String keyword,
-            int limit
+            Pageable pageable
     ) {
         query.setParameter("memberId", memberId);
         query.setParameter("cutoffDate", cutoffDate);
         query.setParameter("keyword", keyword);
-        query.setParameter("limit", limit);
+        query.setParameter("limit", pageable.getPageSize());
+        query.setParameter("offset", pageable.getOffset());
 
         if (options.newsletterId() != null) {
             query.setParameter("newsletterId", options.newsletterId());
@@ -225,129 +196,41 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     private List<ArticleResponse> mapToArticleResponse(List<Object[]> results) {
         return results.stream()
                 .map(row -> {
-                    try {
-                        Long articleId = extractLong(row[0]);
-                        String title = extractString(row[1]);
-                        String contentsSummary = extractString(row[2]);
-                        LocalDateTime arrivedDateTime = extractLocalDateTime(row[3]);
-                        String thumbnailUrl = extractString(row[4]);
-                        Integer expectedReadTime = extractInteger(row[5], 0);
-                        Boolean isRead = extractBoolean(row[6]);
-                        Boolean isBookmarked = extractBoolean(row[7]);
-                        String newsletterName = extractString(row[8]);
-                        String newsletterImageUrl = extractString(row[9]);
-                        String categoryName = extractString(row[10]);
+                    Long articleId = ((Number) row[0]).longValue();
+                    String title = (String) row[1];
+                    String contentsSummary = (String) row[2];
+                    LocalDateTime arrivedDateTime = ((java.sql.Timestamp) row[3]).toLocalDateTime();
+                    String thumbnailUrl = (String) row[4];
+                    Integer expectedReadTime = row[5] != null ? ((Number) row[5]).intValue() : 0;
+                    Boolean isRead = row[6] != null && ((Number) row[6]).intValue() == 1;
+                    Boolean isBookmarked = row[7] != null && ((Number) row[7]).intValue() == 1;
+                    String newsletterName = (String) row[8];
+                    String newsletterImageUrl = (String) row[9];
+                    String categoryName = (String) row[10];
 
-                        if (articleId == null) {
-                            return null;
-                        }
-
-                        return new ArticleResponse(
-                                articleId,
-                                title != null ? title : "",
-                                contentsSummary != null ? contentsSummary : "",
-                                arrivedDateTime,
-                                thumbnailUrl,
-                                expectedReadTime,
-                                isRead,
-                                isBookmarked,
-                                new me.bombom.api.v1.newsletter.dto.NewsletterSummaryResponse(
-                                        newsletterName != null ? newsletterName : "",
-                                        newsletterImageUrl,
-                                        categoryName != null ? categoryName : ""
-                                )
-                        );
-                    } catch (Exception e) {
-                        log.error("데이터 매핑 실패. row: {}", java.util.Arrays.toString(row), e);
-                        return null;
-                    }
+                    return new ArticleResponse(
+                            articleId,
+                            title,
+                            contentsSummary,
+                            arrivedDateTime,
+                            thumbnailUrl,
+                            expectedReadTime,
+                            isRead,
+                            isBookmarked,
+                            new me.bombom.api.v1.newsletter.dto.NewsletterSummaryResponse(
+                                    newsletterName,
+                                    newsletterImageUrl,
+                                    categoryName
+                            )
+                    );
                 })
-                .filter(java.util.Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
-    private Long extractLong(Object obj) {
-        if (obj == null) return null;
-        if (obj instanceof Number) {
-            return ((Number) obj).longValue();
-        }
-        if (obj instanceof String) {
-            try {
-                return Long.parseLong((String) obj);
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    private String extractString(Object obj) {
-        if (obj == null) return null;
-        if (obj instanceof String) {
-            return (String) obj;
-        }
-        return obj.toString();
-    }
-
-    private LocalDateTime extractLocalDateTime(Object obj) {
-        if (obj == null) return LocalDateTime.now();
-        if (obj instanceof java.sql.Timestamp) {
-            return ((java.sql.Timestamp) obj).toLocalDateTime();
-        }
-        if (obj instanceof java.sql.Date) {
-            return ((java.sql.Date) obj).toLocalDate().atStartOfDay();
-        }
-        if (obj instanceof java.time.LocalDateTime) {
-            return (LocalDateTime) obj;
-        }
-        return LocalDateTime.now();
-    }
-
-    private Integer extractInteger(Object obj, int defaultValue) {
-        if (obj == null) return defaultValue;
-        if (obj instanceof Number) {
-            return ((Number) obj).intValue();
-        }
-        if (obj instanceof String) {
-            try {
-                return Integer.parseInt((String) obj);
-            } catch (NumberFormatException e) {
-                return defaultValue;
-            }
-        }
-        return defaultValue;
-    }
-
-    private Boolean extractBoolean(Object obj) {
-        if (obj == null) return false;
-        if (obj instanceof Boolean) {
-            return (Boolean) obj;
-        }
-        if (obj instanceof Number) {
-            return ((Number) obj).intValue() == 1;
-        }
-        if (obj instanceof String) {
-            String str = ((String) obj).trim();
-            return "1".equals(str) || "true".equalsIgnoreCase(str) || "Y".equalsIgnoreCase(str);
-        }
-        return false;
-    }
-
-    private long calculateTotalCount(Long memberId, ArticlesOptionsRequest options, LocalDateTime cutoffDate, String keyword, int mergedSize, int pageSize) {
-        try {
-            long recentCount = getRecentCount(memberId, options, cutoffDate, keyword);
-            long olderCount = getOlderCount(memberId, options, cutoffDate, keyword);
-            return recentCount + olderCount;
-        } catch (Exception e) {
-            log.warn("카운트 쿼리 실패, 근사치 사용 - memberId: {}, keyword: {}", memberId, keyword, e);
-            // 카운트 쿼리 실패 시 merged.size()로 근사치 사용
-            return mergedSize + pageSize;
-        }
-    }
-
-    private long getRecentCount(Long memberId, ArticlesOptionsRequest options, LocalDateTime cutoffDate, String keyword) {
+    private long getTotalCountWithUnion(Long memberId, ArticlesOptionsRequest options, LocalDateTime cutoffDate, String keyword) {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT COUNT(*) ")
+        sql.append("SELECT COUNT(*) FROM (")
+                .append("SELECT sr.article_id ")
                 .append("FROM search_recent sr ")
                 .append("WHERE sr.member_id = :memberId ")
                 .append("AND sr.arrived_date_time >= :cutoffDate ");
@@ -360,27 +243,9 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             sql.append("AND DATE(sr.arrived_date_time) = :date ");
         }
 
-        sql.append("AND MATCH(sr.title, sr.contents_text) AGAINST(:keyword IN BOOLEAN MODE)");
-
-        Query query = entityManager.createNativeQuery(sql.toString());
-        query.setParameter("memberId", memberId);
-        query.setParameter("cutoffDate", cutoffDate);
-        query.setParameter("keyword", keyword);
-
-        if (options.newsletterId() != null) {
-            query.setParameter("newsletterId", options.newsletterId());
-        }
-
-        if (options.date() != null) {
-            query.setParameter("date", options.date());
-        }
-
-        return ((Number) query.getSingleResult()).longValue();
-    }
-
-    private long getOlderCount(Long memberId, ArticlesOptionsRequest options, LocalDateTime cutoffDate, String keyword) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT COUNT(*) ")
+        sql.append("AND MATCH(sr.title, sr.contents) AGAINST(:keyword IN BOOLEAN MODE) ")
+                .append("UNION ALL ")
+                .append("SELECT a.id ")
                 .append("FROM article a ")
                 .append("WHERE a.member_id = :memberId ")
                 .append("AND a.arrived_date_time < :cutoffDate ");
@@ -393,7 +258,8 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             sql.append("AND DATE(a.arrived_date_time) = :date ");
         }
 
-        sql.append("AND MATCH(a.title, a.contents_text) AGAINST(:keyword IN BOOLEAN MODE)");
+        sql.append("AND MATCH(a.title, a.contents) AGAINST(:keyword IN BOOLEAN MODE) ")
+                .append(") AS union_result");
 
         Query query = entityManager.createNativeQuery(sql.toString());
         query.setParameter("memberId", memberId);

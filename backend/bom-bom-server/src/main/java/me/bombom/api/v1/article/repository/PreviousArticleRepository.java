@@ -15,7 +15,6 @@ public interface PreviousArticleRepository extends JpaRepository<PreviousArticle
     @Query("""
         SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleResponse(
             pa.id,
-            me.bombom.api.v1.newsletter.domain.PreviousArticleSource.FIXED,
             pa.title,
             pa.contentsSummary,
             pa.expectedReadTime
@@ -60,6 +59,31 @@ public interface PreviousArticleRepository extends JpaRepository<PreviousArticle
             @Param("memberId") Long memberId
     );
 
+    /**
+     * 자동 이동된 아티클 중 최신 제외하고 조회
+     * - isFixed=false (자동 이동)
+     * - article의 최신보다 오래된 것만
+     */
+    @Query("""
+        SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleResponse(
+            pa.id,
+            pa.title,
+            pa.contentsSummary,
+            pa.expectedReadTime
+        )
+        FROM PreviousArticle pa
+        WHERE pa.newsletterId = :newsletterId
+          AND pa.arrivedDateTime < (
+                SELECT MAX(pa2.arrivedDateTime)
+                FROM PreviousArticle pa2
+                WHERE pa2.newsletterId = :newsletterId
+                  AND pa2.isFixed = false
+            )
+          AND pa.isFixed = false
+        ORDER BY pa.arrivedDateTime DESC
+        LIMIT :limit
+    """)
+    List<PreviousArticleResponse> findExceptLatestByNewsletterId(@Param("newsletterId") Long newsletterId, @Param("limit") int limit);
 
     /**
      * previous_article 테이블에서 오래된 자동 이동 아티클 정리

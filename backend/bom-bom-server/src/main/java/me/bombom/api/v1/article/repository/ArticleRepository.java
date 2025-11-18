@@ -5,7 +5,6 @@ import java.util.Optional;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse;
-import me.bombom.api.v1.article.dto.response.PreviousArticleResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -33,32 +32,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Article a WHERE a.memberId = :memberId")
     void deleteAllByMemberId(Long memberId);
-
-    @Query("""
-        SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleResponse(
-            a.id,
-            me.bombom.api.v1.newsletter.domain.PreviousArticleSource.LATEST,
-            a.title,
-            a.contentsSummary,
-            a.expectedReadTime
-        )
-        FROM Article a
-        JOIN Newsletter n ON n.id = a.newsletterId
-        WHERE a.newsletterId = :newsletterId
-          AND a.memberId = :memberId
-          AND a.arrivedDateTime < (
-                SELECT MAX(a2.arrivedDateTime)
-                FROM Article a2
-                WHERE a2.newsletterId = :newsletterId AND a2.memberId = :memberId
-            )
-        ORDER BY a.arrivedDateTime DESC
-        LIMIT :limit
-    """)
-    List<PreviousArticleResponse> findArticlesExceptLatestByMemberIdAndNewsletterId(
-            @Param("newsletterId") Long newsletterId,
-            @Param("memberId") Long memberId,
-            @Param("limit") int limit
-    );
 
     @Query("""
         SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse(

@@ -23,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import org.springframework.data.domain.Page;
@@ -55,10 +57,10 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         long recentCount = 0L;
         if (recentTableExists) {
             try {
-                Long recentCountResult = getRecentTotalQuery(memberId, options).fetchOne();
-                recentCount = recentCountResult != null ? recentCountResult : 0L;
+                recentCount = getRecentTotalCountNative(memberId, options, fiveDaysAgoDate);
             } catch (Exception e) {
                 log.warn("recent_article 테이블 조회 실패, article 테이블만 사용: {}", e.getMessage());
+                recentTableExists = false; // 폴백으로 전환
                 recentCount = 0L;
             }
         }
@@ -72,8 +74,11 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         if (recentTableExists) {
             try {
                 content = findArticlesWithUnion(memberId, options, pageable, fiveDaysAgoDate);
+            } catch (CIllegalArgumentException e) {
+                // 정렬 필드 검증 실패 등은 그대로 전파
+                throw e;
             } catch (Exception e) {
-                log.warn("UNION 쿼리 실패, article 테이블만 사용: {}", e.getMessage());
+                log.error("UNION 쿼리 실패, article 테이블만 사용: {}", e.getMessage(), e);
                 content = findArticlesFromArticleOnly(memberId, options, pageable, fiveDaysAgoDate);
             }
         } else {
@@ -98,6 +103,43 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             log.warn("recent_article 테이블 존재 여부 확인 실패: {}", e.getMessage());
             return false;
         }
+    }
+    
+    /**
+     * Native Query로 recent_article 테이블의 전체 개수 조회
+     */
+    private long getRecentTotalCountNative(Long memberId, ArticlesOptionsRequest options, LocalDate fiveDaysAgoDate) {
+        StringBuilder sql = new StringBuilder();
+        List<Object> params = new ArrayList<>();
+        
+        sql.append("SELECT COUNT(*) ")
+           .append("FROM recent_article ra ")
+           .append("INNER JOIN newsletter n ON n.id = ra.newsletter_id ")
+           .append("INNER JOIN category c ON c.id = n.category_id ")
+           .append("WHERE ra.member_id = ? ")
+           .append("AND ra.arrived_date_time >= ? ");
+        params.add(memberId);
+        params.add(fiveDaysAgoDate.atStartOfDay());
+        
+        if (StringUtils.hasText(options.keyword())) {
+            String keyword = options.keyword().strip();
+            sql.append("AND (LOWER(ra.title) LIKE ? OR MATCH(ra.contents_text) AGAINST(? IN BOOLEAN MODE)) ");
+            params.add("%" + keyword.toLowerCase() + "%");
+            params.add(keyword);
+        }
+        
+        if (options.newsletterId() != null) {
+            sql.append("AND ra.newsletter_id = ? ");
+            params.add(options.newsletterId());
+        }
+        
+        Query nativeQuery = entityManager.createNativeQuery(sql.toString());
+        for (int i = 0; i < params.size(); i++) {
+            nativeQuery.setParameter(i + 1, params.get(i));
+        }
+        
+        Object result = nativeQuery.getSingleResult();
+        return result instanceof Number ? ((Number) result).longValue() : 0L;
     }
     
     /**
@@ -315,12 +357,21 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             }
             
             String property = order.getProperty();
-            String column = switch (property) {
+            if (!StringUtils.hasText(property)) {
+                throw new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION)
+                        .addContext("message", "정렬 필드가 비어있습니다.");
+            }
+            
+            String column = switch (property.strip()) {
                 case "arrivedDateTime" -> "arrived_date_time";
                 case "title" -> "title";
                 case "expectedReadTime" -> "expected_read_time";
                 case "createdAt" -> "arrived_date_time"; // createdAt은 arrivedDateTime으로 대체
-                default -> "arrived_date_time";
+                default -> {
+                    log.debug("허용되지 않는 정렬 키: {}", property);
+                    throw new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION)
+                            .addContext("message", "허용되지 않는 정렬 필드입니다: " + property);
+                }
             };
             
             orderBy.append(column);

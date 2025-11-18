@@ -317,17 +317,14 @@ class ArticleControllerTest {
 
     @Test
     void 날짜_필터링_아티클_목록_조회() throws Exception {
-        // given
-        LocalDate baseDate = LocalDate.of(2025, 7, 15);
-
-        // when & then - 특정 날짜로 필터링 (contents에 "아티클"이 포함되어 있어서 검색됨)
+        // given - date 필터가 제거되었으므로 keyword만으로 검색
+        // when & then - contents에 "아티클"이 포함되어 있어서 검색됨
         mockMvc.perform(get("/api/v1/articles/search")
                         .with(authentication(authToken))
-                        .param("keyword", "아티클")
-                        .param("date", baseDate.toString()))
+                        .param("keyword", "아티클"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.totalElements").value(3)); // 하루 전 제외하고 3개
+                .andExpect(jsonPath("$.totalElements").value(4)); // 모든 아티클 검색
     }
 
 //    @Test

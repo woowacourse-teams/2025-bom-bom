@@ -49,8 +49,10 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         LocalDate fiveDaysAgoDate = fiveDaysAgo.toLocalDate();
         
         // 전체 개수 조회
-        long recentCount = getRecentTotalQuery(memberId, options).fetchOne();
-        long oldCount = getTotalQuery(memberId, options).fetchOne();
+        Long recentCountResult = getRecentTotalQuery(memberId, options).fetchOne();
+        Long oldCountResult = getTotalQuery(memberId, options).fetchOne();
+        long recentCount = recentCountResult != null ? recentCountResult : 0L;
+        long oldCount = oldCountResult != null ? oldCountResult : 0L;
         long total = recentCount + oldCount;
         
         // UNION 쿼리로 두 테이블을 합쳐서 DB에서 정렬/페이징 처리
@@ -88,7 +90,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
            .append("ra.thumbnail_url, ")
            .append("ra.expected_read_time, ")
            .append("ra.is_read, ")
-           .append("EXISTS(SELECT 1 FROM bookmark b WHERE b.article_id = ra.id AND b.member_id = ?) as is_bookmarked, ")
+           .append("(SELECT COUNT(*) > 0 FROM bookmark b WHERE b.article_id = ra.id AND b.member_id = ?) as is_bookmarked, ")
            .append("n.name as newsletter_name, ")
            .append("COALESCE(n.image_url, '') as newsletter_image_url, ")
            .append("c.name as category_name ")
@@ -123,7 +125,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
            .append("a.thumbnail_url, ")
            .append("a.expected_read_time, ")
            .append("a.is_read, ")
-           .append("EXISTS(SELECT 1 FROM bookmark b WHERE b.article_id = a.id AND b.member_id = ?) as is_bookmarked, ")
+           .append("(SELECT COUNT(*) > 0 FROM bookmark b WHERE b.article_id = a.id AND b.member_id = ?) as is_bookmarked, ")
            .append("n.name as newsletter_name, ")
            .append("COALESCE(n.image_url, '') as newsletter_image_url, ")
            .append("c.name as category_name ")

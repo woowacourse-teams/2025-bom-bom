@@ -199,18 +199,23 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         params.add(offset);
         
         // Native Query 실행
-        Query nativeQuery = entityManager.createNativeQuery(sql.toString());
-        for (int i = 0; i < params.size(); i++) {
-            nativeQuery.setParameter(i + 1, params.get(i));
+        try {
+            Query nativeQuery = entityManager.createNativeQuery(sql.toString());
+            for (int i = 0; i < params.size(); i++) {
+                nativeQuery.setParameter(i + 1, params.get(i));
+            }
+            
+            @SuppressWarnings("unchecked")
+            List<Object[]> results = nativeQuery.getResultList();
+            
+            // 결과를 ArticleResponse로 매핑
+            return results.stream()
+                    .map(row -> mapToArticleResponse(row))
+                    .toList();
+        } catch (Exception e) {
+            log.error("SQL 쿼리 실행 실패 (article 테이블만) - SQL: {}, Params: {}", sql.toString(), params, e);
+            throw e;
         }
-        
-        @SuppressWarnings("unchecked")
-        List<Object[]> results = nativeQuery.getResultList();
-        
-        // 결과를 ArticleResponse로 매핑
-        return results.stream()
-                .map(row -> mapToArticleResponse(row))
-                .toList();
     }
     
     /**
@@ -313,18 +318,23 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         params.add(offset);
         
         // Native Query 실행
-        Query nativeQuery = entityManager.createNativeQuery(sql.toString());
-        for (int i = 0; i < params.size(); i++) {
-            nativeQuery.setParameter(i + 1, params.get(i));
+        try {
+            Query nativeQuery = entityManager.createNativeQuery(sql.toString());
+            for (int i = 0; i < params.size(); i++) {
+                nativeQuery.setParameter(i + 1, params.get(i));
+            }
+            
+            @SuppressWarnings("unchecked")
+            List<Object[]> results = nativeQuery.getResultList();
+            
+            // 결과를 ArticleResponse로 매핑
+            return results.stream()
+                    .map(row -> mapToArticleResponse(row))
+                    .toList();
+        } catch (Exception e) {
+            log.error("SQL 쿼리 실행 실패 (UNION) - SQL: {}, Params: {}", sql.toString(), params, e);
+            throw e;
         }
-        
-        @SuppressWarnings("unchecked")
-        List<Object[]> results = nativeQuery.getResultList();
-        
-        // 결과를 ArticleResponse로 매핑
-        return results.stream()
-                .map(row -> mapToArticleResponse(row))
-                .toList();
     }
     
     private ArticleResponse mapToArticleResponse(Object[] row) {

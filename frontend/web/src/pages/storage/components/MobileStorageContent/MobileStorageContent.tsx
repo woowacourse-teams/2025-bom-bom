@@ -34,7 +34,7 @@ export default function MobileStorageContent({
     hasNextPage,
     isFetchingNextPage,
     isLoading: isInfiniteLoading,
-  } = useInfiniteArticles({ baseQueryParams, isPc: false });
+  } = useInfiniteArticles(baseQueryParams);
 
   const infiniteArticlesPages = infiniteArticles?.pages || [];
   const articleList = infiniteArticlesPages.flatMap(

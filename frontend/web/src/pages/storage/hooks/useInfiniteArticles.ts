@@ -2,22 +2,15 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { queries } from '@/apis/queries';
 import type { GetArticlesWithSearchParams } from '@/apis/articles';
 
-interface UseInfiniteArticlesParams {
-  baseQueryParams: GetArticlesWithSearchParams;
-  isPc: boolean;
-}
+const useInfiniteArticles = (params: GetArticlesWithSearchParams) => {
+  const { keyword, ...paramsWithoutKeyword } = params;
+  const hasKeyword = !!keyword;
 
-const useInfiniteArticles = ({
-  baseQueryParams,
-  isPc,
-}: UseInfiniteArticlesParams) => {
-  const hasKeyword = !!baseQueryParams.keyword;
-  return useInfiniteQuery({
-    ...(hasKeyword
-      ? queries.infiniteArticlesWithSearch(baseQueryParams)
-      : queries.infiniteArticles(baseQueryParams)),
-    enabled: !isPc,
-  });
+  return useInfiniteQuery(
+    hasKeyword
+      ? queries.infiniteArticlesWithSearch(params)
+      : queries.infiniteArticles(paramsWithoutKeyword),
+  );
 };
 
 export default useInfiniteArticles;

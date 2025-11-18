@@ -71,7 +71,8 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         
         // UNION 쿼리로 두 테이블을 합쳐서 DB에서 정렬/페이징 처리
         List<ArticleResponse> content;
-        if (recentTableExists) {
+        if (recentTableExists && recentCount > 0) {
+            // recent_article 테이블이 있고 데이터가 있을 때만 UNION 쿼리 사용
             try {
                 content = findArticlesWithUnion(memberId, options, pageable, fiveDaysAgoDate);
             } catch (CIllegalArgumentException e) {
@@ -82,7 +83,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 content = findArticlesFromArticleOnly(memberId, options, pageable, fiveDaysAgoDate);
             }
         } else {
-            // recent_article 테이블이 없으면 article 테이블만 사용
+            // recent_article 테이블이 없거나 데이터가 없으면 article 테이블만 사용
             content = findArticlesFromArticleOnly(memberId, options, pageable, fiveDaysAgoDate);
         }
         
@@ -90,18 +91,17 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
     }
     
     /**
-     * recent_article 테이블 존재 여부 확인
-     * 실제 쿼리를 시도해서 테이블 존재 여부를 확인 (H2와 MySQL 모두 지원)
+     * recent_article 테이블 존재 여부 확인 (MySQL)
      */
     private boolean checkRecentArticleTableExists() {
         try {
-            // 실제로 테이블에 쿼리를 시도해서 존재 여부 확인
-            Query testQuery = entityManager.createNativeQuery("SELECT 1 FROM recent_article LIMIT 1");
-            testQuery.getResultList();
-            return true;
+            Query checkTableQuery = entityManager.createNativeQuery(
+                    "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'recent_article'"
+            );
+            Long count = ((Number) checkTableQuery.getSingleResult()).longValue();
+            return count > 0;
         } catch (Exception e) {
-            // 테이블이 없거나 접근할 수 없으면 false 반환
-            log.debug("recent_article 테이블이 존재하지 않거나 접근할 수 없음: {}", e.getMessage());
+            log.debug("recent_article 테이블 존재 여부 확인 실패: {}", e.getMessage());
             return false;
         }
     }

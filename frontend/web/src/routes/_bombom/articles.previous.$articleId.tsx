@@ -6,13 +6,11 @@ import { queries } from '@/apis/queries';
 import ChevronIcon from '@/components/icons/ChevronIcon';
 import { useDevice } from '@/hooks/useDevice';
 import { useUserInfo } from '@/hooks/useUserInfo';
-import {
-  extractBodyContent,
-  processContent,
-} from '@/pages/detail/components/ArticleContent/ArticleContent.utils';
+import { processContent } from '@/pages/detail/components/ArticleContent/ArticleContent.utils';
 import ArticleHeader from '@/pages/detail/components/ArticleHeader/ArticleHeader';
 import PreviousHeader from '@/pages/previous-newsletter/components/PreviousHeader/PreviousHeader';
 import { openSubscribeLink } from '@/pages/recommend/components/NewsletterDetail/NewsletterDetail.utils';
+import { cutHtmlByTextRatio } from '@/utils/element';
 
 export const Route = createFileRoute('/_bombom/articles/previous/$articleId')({
   head: () => ({
@@ -41,7 +39,7 @@ function RouteComponent() {
   const { data: article } = useQuery(
     queries.previousArticleDetail({ id: articleIdNumber }),
   );
-  const bodyContent = extractBodyContent(article?.contents ?? '');
+  const bodyContent = cutHtmlByTextRatio(article?.contents, 0.5);
 
   if (!article) return null;
 

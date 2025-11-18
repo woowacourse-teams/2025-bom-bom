@@ -1,8 +1,9 @@
 import styled from '@emotion/styled';
 import { memo } from 'react';
-import { extractBodyContent, processContent } from './ArticleContent.utils';
+import { processContent } from './ArticleContent.utils';
 import { useAutoScaleContent } from '../../hooks/useAutoScaleContent';
 import { useHighlightHoverEffect } from '../../hooks/useHighlightHoverEffect';
+import { extractBodyContent } from '@/utils/element';
 import type { RefObject } from 'react';
 
 interface ArticleContentProps {

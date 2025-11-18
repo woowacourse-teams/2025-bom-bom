@@ -23,11 +23,3 @@ export const processContent = (category: string, content: string): string => {
     .replace(/\n/g, '') // Unix/Linux 개행
     .trim();
 };
-
-export const extractBodyContent = (content: string) => {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(content, 'text/html');
-  const bodyContent = doc.body.innerHTML;
-
-  return bodyContent;
-};

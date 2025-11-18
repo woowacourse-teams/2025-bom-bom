@@ -13,7 +13,7 @@ const SubscribedNewslettersSection = ({
   device,
 }: SubscribedNewslettersSectionProps) => {
   return (
-    <Wrapper>
+    <Container>
       {newsletters && newsletters.length > 0 ? (
         <NewsletterGrid device={device}>
           {newsletters.map((newsletter) => (
@@ -36,13 +36,13 @@ const SubscribedNewslettersSection = ({
       ) : (
         <EmptyMessage>구독 중인 뉴스레터가 없습니다.</EmptyMessage>
       )}
-    </Wrapper>
+    </Container>
   );
 };
 
 export default SubscribedNewslettersSection;
 
-const Wrapper = styled.div`
+const Container = styled.div`
   display: flex;
   gap: 16px;
   flex-direction: column;

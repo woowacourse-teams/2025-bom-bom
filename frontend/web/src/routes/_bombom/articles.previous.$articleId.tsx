@@ -72,6 +72,16 @@ function RouteComponent() {
             __html: processContent(article.newsletter.name, bodyContent),
           }}
         />
+
+        <SubscribePrompt>
+          <SubscribePromptText>
+            지속적으로 받아보고 싶다면 구독해주세요!
+          </SubscribePromptText>
+          <SubscribePromptButton type="button" onClick={handleSubscribeClick}>
+            구독하러 가기
+          </SubscribePromptButton>
+        </SubscribePrompt>
+
         <Divider />
 
         {device === 'pc' && (
@@ -206,4 +216,51 @@ const ActionButton = styled.button`
 const SubscribeButton = styled(ActionButton)`
   background-color: ${({ theme }) => theme.colors.primary};
   color: ${({ theme }) => theme.colors.white};
+`;
+
+const SubscribePrompt = styled.div`
+  width: 100%;
+  padding: 24px 16px;
+  border: 1px solid ${({ theme }) => theme.colors.stroke};
+  border-radius: 12px;
+
+  display: flex;
+  gap: 16px;
+  flex-direction: column;
+  align-items: center;
+
+  background-color: ${({ theme }) => theme.colors.white};
+`;
+
+const SubscribePromptText = styled.p`
+  margin: 0;
+
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font: ${({ theme }) => theme.fonts.body1};
+  font-size: 16px;
+  line-height: 24px;
+  text-align: center;
+`;
+
+const SubscribePromptButton = styled.button`
+  width: 100%;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+
+  background-color: ${({ theme }) => theme.colors.primary};
+  color: ${({ theme }) => theme.colors.white};
+  font-weight: 600;
+  font-size: 16px;
+
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primaryDark};
+  }
+
+  &:active {
+    opacity: 0.8;
+  }
 `;

@@ -72,7 +72,7 @@ public class ArticleController implements ArticleControllerApi{
                     .addContext("message", "검색 키워드는 필수입니다.");
         }
 
-        return articleService.getArticles(
+        return articleService.getArticlesBySearch(
                 member,
                 articlesOptionsRequest,
                 pageable

@@ -316,8 +316,8 @@ class ArticleControllerTest {
     }
 
     @Test
-    void 날짜_필터링_아티클_목록_조회() throws Exception {
-        // given - date 필터가 제거되었으므로 keyword만으로 검색
+    @DisplayName("키워드로 아티클 검색 성공")
+    void 키워드로_아티클_검색_성공() throws Exception {
         // when & then - contents에 "아티클"이 포함되어 있어서 검색됨
         mockMvc.perform(get("/api/v1/articles/search")
                         .with(authentication(authToken))

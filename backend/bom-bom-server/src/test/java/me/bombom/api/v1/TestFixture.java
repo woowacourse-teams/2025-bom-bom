@@ -212,6 +212,7 @@ public final class TestFixture {
         return Article.builder()
                 .title(title)
                 .contents("<h1>아티클</h1>")
+                .contentsText("아티클")
                 .thumbnailUrl("https://example.com/images/thumb.png")
                 .expectedReadTime(5)
                 .contentsSummary("요약")

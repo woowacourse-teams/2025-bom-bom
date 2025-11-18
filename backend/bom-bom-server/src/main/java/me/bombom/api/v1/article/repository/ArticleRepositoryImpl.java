@@ -162,9 +162,9 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             return null;
         }
 
-        String trimmed = "%" + keyword.strip() + "%";
-        return article.title.like(trimmed)
-                .or(article.contents.like(trimmed));
+        String trimmed = "%" + keyword.strip().toLowerCase() + "%";
+        return article.title.lower().like(trimmed)
+                .or(article.contentsText.lower().like(trimmed));
     }
   
     private List<OrderSpecifier<?>> getOrderSpecifiers(Pageable pageable) {

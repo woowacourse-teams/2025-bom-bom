@@ -194,7 +194,6 @@ const UnsubscribeButton = styled.button`
   color: ${({ theme }) => theme.colors.textSecondary};
   font: ${({ theme }) => theme.fonts.body3};
 
-  cursor: pointer;
   transition: all 0.2s ease-in-out;
 
   &:hover {

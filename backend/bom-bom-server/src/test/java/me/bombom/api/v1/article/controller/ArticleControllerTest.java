@@ -232,12 +232,13 @@ class ArticleControllerTest {
     }
 
     @Test
-    void DESC_정렬_아티클_목록_조회() throws Exception {
+    @DisplayName("검색 결과 DESC 정렬 조회")
+    void 검색_DESC_정렬_아티클_목록_조회() throws Exception {
         // when & then - contents에 "아티클"이 포함되어 있어서 4개 모두 검색됨
         MvcResult result = mockMvc.perform(get("/api/v1/articles/search")
                         .with(authentication(authToken))
                         .param("keyword", "아티클")
-                        .param("sorted", "desc"))
+                        .param("sort", "arrivedDateTime,desc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.totalElements").value(4))
@@ -255,13 +256,13 @@ class ArticleControllerTest {
     }
 
     @Test
-    void ASC_정렬_아티클_목록_조회() throws Exception {
+    @DisplayName("검색 결과 ASC 정렬 조회")
+    void 검색_ASC_정렬_아티클_목록_조회() throws Exception {
         // when & then - contents에 "아티클"이 포함되어 있어서 4개 모두 검색됨
         MvcResult result = mockMvc.perform(get("/api/v1/articles/search")
                         .with(authentication(authToken))
                         .param("keyword", "아티클")
-                        .param("sort", "arrivedDateTime")
-                        .param("direction", "asc"))
+                        .param("sort", "arrivedDateTime,asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.totalElements").value(4))
@@ -279,7 +280,8 @@ class ArticleControllerTest {
     }
 
     @Test
-    void 첫번째_페이지_아티클_목록_조회() throws Exception {
+    @DisplayName("검색 결과 첫번째 페이지 조회")
+    void 검색_첫번째_페이지_아티클_목록_조회() throws Exception {
         // when & then - contents에 "아티클"이 포함되어 있어서 4개 모두 검색됨
         mockMvc.perform(get("/api/v1/articles/search")
                         .with(authentication(authToken))
@@ -298,7 +300,8 @@ class ArticleControllerTest {
     }
 
     @Test
-    void 두번째_페이지_아티클_목록_조회() throws Exception {
+    @DisplayName("검색 결과 두번째 페이지 조회")
+    void 검색_두번째_페이지_아티클_목록_조회() throws Exception {
         // when & then - contents에 "아티클"이 포함되어 있어서 4개 모두 검색됨
         mockMvc.perform(get("/api/v1/articles/search")
                         .with(authentication(authToken))

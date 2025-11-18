@@ -8,6 +8,9 @@ import me.bombom.api.v1.article.dto.request.PreviousArticleRequest;
 import me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.PreviousArticleResponse;
 import me.bombom.api.v1.article.service.PreviousArticleService;
+import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.newsletter.domain.PreviousArticleSource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -34,10 +37,10 @@ public class PreviousArticleController implements PreviousArticleControllerApi {
     @Override
     @GetMapping("/{id}")
     public PreviousArticleDetailResponse getPreviousArticleDetail(
-            //TODO: 이미 구독되어 있으면 구독 버튼 안보이게
-            // @LoginMember(nullable = true) Member member,
-            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
-    ) {
-        return previousArticleService.getPreviousArticleDetail(id);
+            @LoginMember(anonymous = true) Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
+            @RequestParam PreviousArticleSource source
+            ) {
+        return previousArticleService.getPreviousArticleDetail(id, source, member);
     }
 }

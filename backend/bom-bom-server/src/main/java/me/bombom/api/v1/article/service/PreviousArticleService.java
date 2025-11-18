@@ -9,12 +9,15 @@ import me.bombom.api.v1.article.dto.request.PreviousArticleRequest;
 import me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.PreviousArticleResponse;
 import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.article.repository.PreviousArticleRepository;
 import me.bombom.api.v1.article.service.strategy.PreviousArticleStrategy;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousPolicy;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy;
+import me.bombom.api.v1.newsletter.domain.PreviousArticleSource;
 import me.bombom.api.v1.newsletter.repository.NewsletterPreviousPolicyRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PreviousArticleService {
 
     private static final int PREVIOUS_ARTICLE_KEEP_COUNT = 10;
+    private final PreviousArticleRepository previousArticleRepository;
 
     @Value("${admin.previous-article.member-id}")
     private Long PREVIOUS_ARTICLE_ADMIN_ID;
@@ -37,12 +41,13 @@ public class PreviousArticleService {
     public PreviousArticleService(
             ArticleRepository articleRepository,
             NewsletterPreviousPolicyRepository newsletterPreviousPolicyRepository,
-            List<PreviousArticleStrategy> strategies
-    ) {
+            List<PreviousArticleStrategy> strategies,
+            PreviousArticleRepository previousArticleRepository) {
         this.articleRepository = articleRepository;
         this.newsletterPreviousPolicyRepository = newsletterPreviousPolicyRepository;
         this.strategyMap = strategies.stream()
                 .collect(Collectors.toUnmodifiableMap(PreviousArticleStrategy::getStrategy, Function.identity()));
+        this.previousArticleRepository = previousArticleRepository;
     }
 
     public List<PreviousArticleResponse> getPreviousArticles(PreviousArticleRequest request) {
@@ -54,12 +59,19 @@ public class PreviousArticleService {
                 });
     }
 
-
-    public PreviousArticleDetailResponse getPreviousArticleDetail(Long id) {
-        return articleRepository.getPreviousArticleDetailsByMemberId(id, PREVIOUS_ARTICLE_ADMIN_ID)
+    public PreviousArticleDetailResponse getPreviousArticleDetail(Long id, PreviousArticleSource source, Member member) {
+        Long memberId = member != null ? member.getId() : null;
+        if (source.equals(PreviousArticleSource.FIXED)) {
+            return previousArticleRepository.findPreviousArticleDetailById(id, memberId)
+                    .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                            .addContext(ErrorContextKeys.ARTICLE_ID, id)
+                            .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                            .addContext(ErrorContextKeys.ENTITY_TYPE, "previousArticle"));
+        }
+        return articleRepository.getPreviousArticleDetailsByMemberId(id, PREVIOUS_ARTICLE_ADMIN_ID, memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ARTICLE_ID, id)
-                        .addContext(ErrorContextKeys.MEMBER_ID, PREVIOUS_ARTICLE_ADMIN_ID)
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "article"));
     }
 

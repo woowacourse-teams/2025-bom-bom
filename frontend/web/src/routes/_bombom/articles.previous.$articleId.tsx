@@ -117,6 +117,7 @@ const Divider = styled.div`
 
 const Content = styled.div`
   overflow: visible;
+  position: relative;
 
   display: flex;
   flex-direction: column;
@@ -131,6 +132,24 @@ const Content = styled.div`
 
   word-break: break-all;
   word-wrap: break-word;
+
+  &::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 200px;
+
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      ${({ theme }) => theme.colors.white}
+    );
+
+    content: '';
+
+    pointer-events: none;
+  }
 
   a {
     color: ${({ theme }) => theme.colors.info};

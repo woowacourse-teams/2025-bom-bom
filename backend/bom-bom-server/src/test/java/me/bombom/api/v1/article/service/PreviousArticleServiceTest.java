@@ -211,7 +211,7 @@ class PreviousArticleServiceTest {
 
         assertSoftly(softly -> {
             softly.assertThat(result).hasSize(3);
-            softly.assertThat(result.stream().map(PreviousArticleResponse::articleId).toList())
+            softly.assertThat(result.stream().map(PreviousArticleResponse::id).toList())
                     .containsExactlyElementsOf(expectedIds);
         });
     }
@@ -246,7 +246,7 @@ class PreviousArticleServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(result).hasSize(3);
-            softly.assertThat(result.stream().map(PreviousArticleResponse::articleId).toList())
+            softly.assertThat(result.stream().map(PreviousArticleResponse::id).toList())
                     .containsExactlyElementsOf(fixedArticles.stream().map(PreviousArticle::getId).toList());
         });
     }
@@ -280,10 +280,10 @@ class PreviousArticleServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(result).hasSize(5);
             // 고정 아티클이 포함되어 있는지 확인
-            softly.assertThat(result.stream().map(PreviousArticleResponse::articleId).toList())
+            softly.assertThat(result.stream().map(PreviousArticleResponse::id).toList())
                     .containsAll(expectedFixedIds);
             // 최신 아티클도 포함되어 있는지 확인
-            softly.assertThat(result.stream().map(PreviousArticleResponse::articleId).toList())
+            softly.assertThat(result.stream().map(PreviousArticleResponse::id).toList())
                     .containsAll(expectedLatestIds);
         });
     }

@@ -1,52 +1,99 @@
 import styled from '@emotion/styled';
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import ImageWithFallback from '@/components/ImageWithFallback/ImageWithFallback';
+import Modal from '@/components/Modal/Modal';
+import useModal from '@/components/Modal/useModal';
+import NewsletterUnsubscribeConfirmation from '@/pages/MyPage/NewsletterUnsubscribeConfirmation';
+import { useUnsubscribeNewsletterMutation } from '@/pages/MyPage/useUnsubscribeNewsletterMutation';
 import type { GetMyNewslettersResponse } from '@/apis/members';
 import type { Device } from '@/hooks/useDevice';
 
 interface SubscribedNewslettersSectionProps {
   newsletters: GetMyNewslettersResponse;
   device: Device;
-  onUnsubscribe: (newsletterId: number) => void;
 }
 
 const SubscribedNewslettersSection = ({
   newsletters,
   device,
-  onUnsubscribe,
 }: SubscribedNewslettersSectionProps) => {
+  const [selectedNewsletterId, setSelectedNewsletterId] = useState<
+    number | null
+  >(null);
+
+  const {
+    modalRef: UnsubscribeConfirmModalRef,
+    openModal: openUnsubscribeConfirmModal,
+    closeModal: closeUnsubscribeConfirmModal,
+    isOpen,
+  } = useModal();
+
+  const unsubscribeMutation = useUnsubscribeNewsletterMutation();
+
+  const handleOpenUnsubscribeModal = (newsletterId: number) => {
+    setSelectedNewsletterId(newsletterId);
+    openUnsubscribeConfirmModal();
+  };
+
+  const handleConfirmUnsubscribe = () => {
+    if (!selectedNewsletterId) return;
+
+    unsubscribeMutation.mutate({ newsletterId: selectedNewsletterId });
+    closeUnsubscribeConfirmModal();
+    setSelectedNewsletterId(null);
+  };
   return (
-    <Container>
-      {newsletters && newsletters.length > 0 ? (
-        <NewsletterGrid device={device}>
-          {newsletters.map((newsletter) => (
-            <NewsletterCard key={newsletter.newsletterId} device={device}>
-              <NewsletterContent>
-                <NewsletterImage
-                  src={newsletter.imageUrl ?? ''}
-                  alt={newsletter.name}
-                  width={60}
-                  height={60}
-                />
-                <NewsletterInfo>
-                  <NewsletterName>{newsletter.name}</NewsletterName>
-                  <NewsletterDescription>
-                    {newsletter.description}
-                  </NewsletterDescription>
-                </NewsletterInfo>
-              </NewsletterContent>
-              <UnsubscribeButton
-                type="button"
-                onClick={() => onUnsubscribe(newsletter.newsletterId)}
-              >
-                구독 취소
-              </UnsubscribeButton>
-            </NewsletterCard>
-          ))}
-        </NewsletterGrid>
-      ) : (
-        <EmptyMessage>구독 중인 뉴스레터가 없습니다.</EmptyMessage>
+    <>
+      <Container>
+        {newsletters && newsletters.length > 0 ? (
+          <NewsletterGrid device={device}>
+            {newsletters.map((newsletter) => (
+              <NewsletterCard key={newsletter.newsletterId} device={device}>
+                <NewsletterContent>
+                  <NewsletterImage
+                    src={newsletter.imageUrl ?? ''}
+                    alt={newsletter.name}
+                    width={60}
+                    height={60}
+                  />
+                  <NewsletterInfo>
+                    <NewsletterName>{newsletter.name}</NewsletterName>
+                    <NewsletterDescription>
+                      {newsletter.description}
+                    </NewsletterDescription>
+                  </NewsletterInfo>
+                </NewsletterContent>
+                <UnsubscribeButton
+                  type="button"
+                  onClick={() =>
+                    handleOpenUnsubscribeModal(newsletter.newsletterId)
+                  }
+                >
+                  구독 취소
+                </UnsubscribeButton>
+              </NewsletterCard>
+            ))}
+          </NewsletterGrid>
+        ) : (
+          <EmptyMessage>구독 중인 뉴스레터가 없습니다.</EmptyMessage>
+        )}
+      </Container>
+      {createPortal(
+        <Modal
+          modalRef={UnsubscribeConfirmModalRef}
+          closeModal={closeUnsubscribeConfirmModal}
+          isOpen={isOpen}
+          showCloseButton={false}
+        >
+          <NewsletterUnsubscribeConfirmation
+            onUnsubscribe={handleConfirmUnsubscribe}
+            onClose={closeUnsubscribeConfirmModal}
+          />
+        </Modal>,
+        document.body,
       )}
-    </Container>
+    </>
   );
 };
 

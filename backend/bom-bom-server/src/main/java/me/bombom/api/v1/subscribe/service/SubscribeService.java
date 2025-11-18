@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
@@ -35,10 +36,17 @@ public class SubscribeService {
     @Transactional
     public UnsubscribeResponse unsubscribe(Long memberId, Long subscribeId) {
         Subscribe subscribe = subscribeRepository.findById(subscribeId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "subscribe")
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext("subscribeId", subscribeId));
 
         if (subscribe.isNotOwner(memberId)) {
-            throw new UnauthorizedException(ErrorDetail.FORBIDDEN_RESOURCE);
+            throw new UnauthorizedException(ErrorDetail.FORBIDDEN_RESOURCE)
+                .addContext(ErrorContextKeys.ENTITY_TYPE, "subscribe")
+                .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                .addContext(ErrorContextKeys.ACTUAL_OWNER_ID, subscribe.getMemberId())
+                .addContext("subscribeId", subscribeId);
         }
 
         String unsubscribeUrl = subscribe.getUnsubscribeUrl();

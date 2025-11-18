@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import DetailTab from './DetailTab';
 import { openSubscribeLink } from './NewsletterDetail.utils';
 import NewsletterTabs from './NewsletterTabs';
@@ -25,17 +25,17 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
   const [activeTab, setActiveTab] = useSearchParamState<NewsletterTab>('tab', {
     defaultValue: 'detail',
   });
-  const { data: newsletterDetail } = useQuery({
-    ...queries.newsletterDetail({ id: newsletterId }),
-    enabled: Boolean(newsletterId),
-  });
+
+  const { data: newsletterDetail } = useSuspenseQuery(
+    queries.newsletterDetail({ id: newsletterId }),
+  );
   const { data: previousArticles } = useQuery({
     ...queries.previousArticles({ newsletterId, limit: 10 }),
   });
 
   const isMobile = deviceType === 'mobile';
 
-  if (!newsletterId || !newsletterDetail) return null;
+  if (!newsletterDetail || !newsletterId) return null;
 
   const openMainSite = () => {
     openExternalLink(newsletterDetail.mainPageUrl);
@@ -121,7 +121,7 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
 
 export default NewsletterDetail;
 
-const Container = styled.div<{ isMobile: boolean }>`
+export const Container = styled.div<{ isMobile: boolean }>`
   width: ${({ isMobile }) => (isMobile ? '100%' : '720px')};
   height: 100%;
 
@@ -149,7 +149,7 @@ const VisuallyHidden = styled.button`
   }
 `;
 
-const FixedWrapper = styled.div<{ isMobile: boolean }>`
+export const FixedWrapper = styled.div<{ isMobile: boolean }>`
   padding-bottom: ${({ isMobile }) => (isMobile ? '16px' : '24px')};
 
   display: flex;
@@ -157,8 +157,8 @@ const FixedWrapper = styled.div<{ isMobile: boolean }>`
   flex-direction: column;
 `;
 
-const ScrollableWrapper = styled.div<{ isMobile: boolean }>`
-  height: ${({ isMobile }) => (isMobile ? '260px' : '450px')};
+export const ScrollableWrapper = styled.div<{ isMobile: boolean }>`
+  height: ${({ isMobile }) => (isMobile ? 'auto' : '450px')};
   margin-right: -16px;
   padding: 8px;
 
@@ -166,7 +166,7 @@ const ScrollableWrapper = styled.div<{ isMobile: boolean }>`
   scrollbar-gutter: stable;
 `;
 
-const InfoWrapper = styled.div<{ isMobile: boolean }>`
+export const InfoWrapper = styled.div<{ isMobile: boolean }>`
   display: flex;
   gap: ${({ isMobile }) => (isMobile ? '12px' : '16px')};
   align-items: center;
@@ -185,7 +185,7 @@ const NewsletterImage = styled(ImageWithFallback, {
   object-fit: cover;
 `;
 
-const InfoBox = styled.div`
+export const InfoBox = styled.div`
   width: 100%;
 
   display: flex;
@@ -193,7 +193,7 @@ const InfoBox = styled.div`
   flex-direction: column;
 `;
 
-const TitleWrapper = styled.div<{ isMobile: boolean }>`
+export const TitleWrapper = styled.div<{ isMobile: boolean }>`
   display: flex;
   gap: ${({ isMobile }) => (isMobile ? '4px' : '8px')};
 `;
@@ -211,7 +211,7 @@ const StyledHomeIcon = styled(HomeIcon)<{ isMobile: boolean }>`
   fill: ${({ theme }) => theme.colors.primary};
 `;
 
-const NewsletterInfo = styled.div<{ isMobile: boolean }>`
+export const NewsletterInfo = styled.div<{ isMobile: boolean }>`
   display: flex;
   gap: 12px;
   align-items: center;

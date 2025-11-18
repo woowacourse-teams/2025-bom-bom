@@ -7,6 +7,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.PreviousArticle;
@@ -24,7 +25,6 @@ import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousPolicy;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy;
-import me.bombom.api.v1.newsletter.domain.PreviousArticleSource;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterPreviousPolicyRepository;
@@ -225,6 +225,22 @@ class PreviousArticleServiceTest {
     @Test
     void 정책에_맞는_LATEST_ONLY_전략을_사용해_아티클을_반환한다() {
         // given
+        // 자동 이동된 아티클 (isFixed=false) 생성
+        // arrivedDateTime: BASE_TIME, -1일, -2일, -3일, -4일
+        List<PreviousArticle> autoMovedArticles = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            autoMovedArticles.add(PreviousArticle.builder()
+                    .title("자동 이동 아티클 " + i)
+                    .contents("<h1>내용</h1>")
+                    .contentsSummary("요약")
+                    .expectedReadTime(5)
+                    .newsletterId(testNewsletter.getId())
+                    .arrivedDateTime(BASE_TIME.minusDays(i))
+                    .isFixed(false)
+                    .build());
+        }
+        previousArticleRepository.saveAll(autoMovedArticles);
+        
         NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
                 testNewsletter.getId(), NewsletterPreviousStrategy.LATEST_ONLY, 3, 0);
         newsletterPreviousPolicyRepository.save(policy);
@@ -235,11 +251,13 @@ class PreviousArticleServiceTest {
         List<PreviousArticleResponse> result = previousArticleService.getPreviousArticles(request);
 
         // then
-        List<Long> expectedIds = adminArticles.stream()
+        // previous_article 중 최신(BASE_TIME) 1개 제외하고 나머지 중 3개
+        // 예상: -1일, -2일, -3일 (arrivedDateTime DESC 정렬)
+        List<Long> expectedIds = autoMovedArticles.stream()
                 .sorted((a, b) -> b.getArrivedDateTime().compareTo(a.getArrivedDateTime()))
-                .skip(1) // LATEST_ONLY 전략은 가장 최신 1개를 제외
+                .skip(1) // 최신 1개(BASE_TIME) 제외
                 .limit(3)
-                .map(Article::getId)
+                .map(PreviousArticle::getId)
                 .toList();
 
         assertSoftly(softly -> {
@@ -287,7 +305,23 @@ class PreviousArticleServiceTest {
     @Test
     void 정책에_맞는_FIXED_WITH_LATEST_전략을_사용해_고정_아티클과_최신_아티클을_반환한다() {
         // given
-        // totalCount=5, fixedCount=2 이므로 고정 2개 + 최신 3개(단, 가장 최신 1개 제외)
+        // 자동 이동된 아티클 (isFixed=false) 생성
+        // arrivedDateTime: BASE_TIME, -1일, -2일, -3일, -4일
+        List<PreviousArticle> autoMovedArticles = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            autoMovedArticles.add(PreviousArticle.builder()
+                    .title("자동 이동 아티클 " + i)
+                    .contents("<h1>내용</h1>")
+                    .contentsSummary("요약")
+                    .expectedReadTime(5)
+                    .newsletterId(testNewsletter.getId())
+                    .arrivedDateTime(BASE_TIME.minusDays(i))
+                    .isFixed(false)
+                    .build());
+        }
+        previousArticleRepository.saveAll(autoMovedArticles);
+        
+        // totalCount=5, fixedCount=2 이므로 고정 2개 + 자동 이동 3개
         NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
                 testNewsletter.getId(), NewsletterPreviousStrategy.FIXED_WITH_LATEST, 5, 2);
         newsletterPreviousPolicyRepository.save(policy);
@@ -298,26 +332,29 @@ class PreviousArticleServiceTest {
         List<PreviousArticleResponse> result = previousArticleService.getPreviousArticles(request);
 
         // then
+        // 예상 순서: 고정 2개 (arrivedDateTime DESC) + 자동 3개 (arrivedDateTime DESC, 최신 제외)
         List<Long> expectedFixedIds = fixedArticles.stream()
                 .limit(2)
                 .map(PreviousArticle::getId)
                 .toList();
 
-        List<Long> expectedLatestIds = adminArticles.stream()
+        List<Long> expectedAutoMovedIds = autoMovedArticles.stream()
                 .sorted((a, b) -> b.getArrivedDateTime().compareTo(a.getArrivedDateTime()))
-                .skip(1) // 가장 최신 1개 제외
+                .skip(1) // 최신 1개(BASE_TIME) 제외
                 .limit(3)
-                .map(Article::getId)
+                .map(PreviousArticle::getId)
                 .toList();
+
+        // 결과: [고정0, 고정1, 자동1, 자동2, 자동3]
+        List<Long> expectedOrder = Stream.concat(
+                expectedFixedIds.stream(),
+                expectedAutoMovedIds.stream()
+        ).toList();
 
         assertSoftly(softly -> {
             softly.assertThat(result).hasSize(5);
-            // 고정 아티클이 포함되어 있는지 확인
             softly.assertThat(result.stream().map(PreviousArticleResponse::id).toList())
-                    .containsAll(expectedFixedIds);
-            // 최신 아티클도 포함되어 있는지 확인
-            softly.assertThat(result.stream().map(PreviousArticleResponse::id).toList())
-                    .containsAll(expectedLatestIds);
+                    .containsExactlyElementsOf(expectedOrder);
         });
     }
 
@@ -339,7 +376,7 @@ class PreviousArticleServiceTest {
     }
 
     @Test
-    void FIXED_소스_로그인_사용자_구독중_상세_조회() {
+    void 로그인_구독중_사용자의_지난_아티클_상세_조회() {
         // given
         NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
                 testNewsletter.getId(), NewsletterPreviousStrategy.FIXED_ONLY, 3, 3, 80);
@@ -352,67 +389,7 @@ class PreviousArticleServiceTest {
 
         // when
         PreviousArticleDetailResponse result = previousArticleService.getPreviousArticleDetail(
-                targetArticle.getId(), PreviousArticleSource.FIXED, normalMember);
-
-        // then
-        assertThat(result.title()).isEqualTo(targetArticle.getTitle());
-    }
-
-    @Test
-    void FIXED_소스_로그인_사용자_구독안함_상세_조회() {
-        // given
-        NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
-                testNewsletter.getId(), NewsletterPreviousStrategy.FIXED_ONLY, 3, 3, 80);
-        newsletterPreviousPolicyRepository.save(policy);
-
-        PreviousArticle targetArticle = fixedArticles.getFirst();
-
-        // when
-        PreviousArticleDetailResponse result = previousArticleService.getPreviousArticleDetail(
-                targetArticle.getId(), PreviousArticleSource.FIXED, normalMember);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(result.title()).isEqualTo(targetArticle.getTitle());
-            softly.assertThat(result.isSubscribed()).isFalse();
-        });
-    }
-
-    @Test
-    void FIXED_소스_비로그인_사용자_상세_조회() {
-        // given
-        NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
-                testNewsletter.getId(), NewsletterPreviousStrategy.FIXED_ONLY, 3, 3, 80);
-        newsletterPreviousPolicyRepository.save(policy);
-
-        PreviousArticle targetArticle = fixedArticles.getFirst();
-
-        // when
-        PreviousArticleDetailResponse result = previousArticleService.getPreviousArticleDetail(
-                targetArticle.getId(), PreviousArticleSource.FIXED, null);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(result.title()).isEqualTo(targetArticle.getTitle());
-            softly.assertThat(result.isSubscribed()).isFalse();
-        });
-    }
-
-    @Test
-    void LATEST_소스_로그인_사용자_구독중_상세_조회() {
-        // given
-        NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
-                testNewsletter.getId(), NewsletterPreviousStrategy.LATEST_ONLY, 3, 0, 90);
-        newsletterPreviousPolicyRepository.save(policy);
-
-        Subscribe subscribe = TestFixture.createSubscribe(testNewsletter, normalMember);
-        subscribeRepository.save(subscribe);
-
-        Article targetArticle = adminArticles.getFirst();
-
-        // when
-        PreviousArticleDetailResponse result = previousArticleService.getPreviousArticleDetail(
-                targetArticle.getId(), PreviousArticleSource.LATEST, normalMember);
+                targetArticle.getId(), normalMember);
 
         // then
         assertSoftly(softly -> {
@@ -422,17 +399,17 @@ class PreviousArticleServiceTest {
     }
 
     @Test
-    void LATEST_소스_로그인_사용자_구독안함_상세_조회() {
+    void 로그인_구독안함_사용자의_지난_아티클_상세_조회() {
         // given
         NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
-                testNewsletter.getId(), NewsletterPreviousStrategy.LATEST_ONLY, 3, 0, 90);
+                testNewsletter.getId(), NewsletterPreviousStrategy.FIXED_ONLY, 3, 3, 80);
         newsletterPreviousPolicyRepository.save(policy);
 
-        Article targetArticle = adminArticles.getFirst();
+        PreviousArticle targetArticle = fixedArticles.getFirst();
 
         // when
         PreviousArticleDetailResponse result = previousArticleService.getPreviousArticleDetail(
-                targetArticle.getId(), PreviousArticleSource.LATEST, normalMember);
+                targetArticle.getId(), normalMember);
 
         // then
         assertSoftly(softly -> {
@@ -442,17 +419,17 @@ class PreviousArticleServiceTest {
     }
 
     @Test
-    void LATEST_소스_비로그인_사용자_상세_조회() {
+    void 비로그인_사용자의_지난_아티클_상세_조회() {
         // given
         NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
-                testNewsletter.getId(), NewsletterPreviousStrategy.LATEST_ONLY, 3, 0, 90);
+                testNewsletter.getId(), NewsletterPreviousStrategy.FIXED_ONLY, 3, 3, 80);
         newsletterPreviousPolicyRepository.save(policy);
 
-        Article targetArticle = adminArticles.getFirst();
+        PreviousArticle targetArticle = fixedArticles.getFirst();
 
         // when
         PreviousArticleDetailResponse result = previousArticleService.getPreviousArticleDetail(
-                targetArticle.getId(), PreviousArticleSource.LATEST, null);
+                targetArticle.getId(), null);
 
         // then
         assertSoftly(softly -> {
@@ -462,29 +439,18 @@ class PreviousArticleServiceTest {
     }
 
     @Test
-    void FIXED_소스_존재하지_않는_아티클_조회시_예외() {
+    void 존재하지_않는_지난_아티클_조회시_예외() {
         // given
         Long invalidArticleId = 99999L;
 
         // when & then
         assertThatThrownBy(() -> previousArticleService.getPreviousArticleDetail(
-                invalidArticleId, PreviousArticleSource.FIXED, normalMember))
+                invalidArticleId, normalMember))
                 .isInstanceOf(CIllegalArgumentException.class);
     }
 
     @Test
-    void LATEST_소스_존재하지_않는_아티클_조회시_예외() {
-        // given
-        Long invalidArticleId = 99999L;
-
-        // when & then
-        assertThatThrownBy(() -> previousArticleService.getPreviousArticleDetail(
-                invalidArticleId, PreviousArticleSource.LATEST, normalMember))
-                .isInstanceOf(CIllegalArgumentException.class);
-    }
-
-    @Test
-    void FIXED_소스_INACTIVE_정책인_경우_조회_실패() {
+    void INACTIVE_정책인_경우_지난_아티클_상세_조회_실패() {
         // given
         NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
                 testNewsletter.getId(), NewsletterPreviousStrategy.INACTIVE, 0, 0, 0);
@@ -492,24 +458,10 @@ class PreviousArticleServiceTest {
 
         PreviousArticle targetArticle = fixedArticles.getFirst();
 
-        // when & then - INACTIVE 정책이면 조회 불가
+        // when & then
         assertThatThrownBy(() -> previousArticleService.getPreviousArticleDetail(
-                targetArticle.getId(), PreviousArticleSource.FIXED, normalMember))
+                targetArticle.getId(), normalMember))
                 .isInstanceOf(CIllegalArgumentException.class);
     }
 
-    @Test
-    void FIXED_소스_LATEST_ONLY_정책인_경우_조회_실패() {
-        // given
-        NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
-                testNewsletter.getId(), NewsletterPreviousStrategy.LATEST_ONLY, 3, 0, 80);
-        newsletterPreviousPolicyRepository.save(policy);
-
-        PreviousArticle targetArticle = fixedArticles.getFirst();
-
-        // when & then - LATEST_ONLY 정책이면 FIXED 아티클 조회 불가
-        assertThatThrownBy(() -> previousArticleService.getPreviousArticleDetail(
-                targetArticle.getId(), PreviousArticleSource.FIXED, normalMember))
-                .isInstanceOf(CIllegalArgumentException.class);
-    }
 }

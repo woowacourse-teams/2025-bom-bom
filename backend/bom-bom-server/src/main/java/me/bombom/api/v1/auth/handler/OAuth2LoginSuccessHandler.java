@@ -20,7 +20,6 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.service.MemberService;
-import me.bombom.api.v1.member.util.UserInfoValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,25 +32,24 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private final List<OAuth2UserInfoExtractor> extractors = List.of(
-            new AppleUserInfoExtractor(),
-            new GoogleUserInfoExtractor()
-    );
-
-    private static final String LOCAL_ENV = "local";
     private static final String SIGNUP_PATH = "/signup";
     private static final String HOME_PATH = "/";
     private static final String EMAIL_PARAM = "email";
     private static final String NAME_PARAM = "name";
 
+    private final MemberService memberService;
+    private final UniqueUserInfoGenerator uniqueUserInfoGenerator;
+
+    @Value("${app.auth.redirect-uri-whitelist}")
+    private List<String> redirectUriWhitelist;
+
     @Value("${frontend.base-url}")
     private String frontendBaseUrl;
 
-    @Value("${frontend.local-url}")
-    private String frontendLocalUrl;
-
-    private final MemberService memberService;
-    private final UniqueUserInfoGenerator uniqueUserInfoGenerator;
+    private final List<OAuth2UserInfoExtractor> extractors = List.of(
+            new AppleUserInfoExtractor(),
+            new GoogleUserInfoExtractor()
+    );
 
     @Override
     public void onAuthenticationSuccess(
@@ -75,7 +73,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         }
     }
 
-    private void handleWithdrawAfterReAuth(Long withdrawMemberId, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void handleWithdrawAfterReAuth(Long withdrawMemberId, HttpServletRequest request,
+                                           HttpServletResponse response) throws IOException {
         try {
             memberService.withdraw(withdrawMemberId);
         } catch (Exception e) {
@@ -84,7 +83,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             HttpSession session = request.getSession();
             session.invalidate();
             SecurityContextHolder.clearContext();
-            response.sendRedirect(getBaseUrlByEnv(request));
+            response.sendRedirect(getBaseUrl(request));
         }
     }
 
@@ -125,7 +124,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     }
 
     private String buildRedirectUrl(HttpServletRequest request, Member member, OAuth2LoginInfo oauth2Info) {
-        String baseUrl = getBaseUrlByEnv(request);
+        String baseUrl = getBaseUrl(request);
         if (member != null) {
             return baseUrl + HOME_PATH;
         }
@@ -147,7 +146,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                         .append(URLEncoder.encode(uniqueEmailLocalPart, StandardCharsets.UTF_8));
                 hasParam = true;
             }
-            if (hasParam) params.append("&");
+            if (hasParam) {
+                params.append("&");
+            }
             String uniqueNickname = uniqueUserInfoGenerator.getUniqueNickname(oauth2Info.getName());
             params.append(NAME_PARAM)
                     .append("=")
@@ -158,11 +159,18 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         return params.toString();
     }
 
-    private String getBaseUrlByEnv(HttpServletRequest request) {
+    private String getBaseUrl(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
-        String env = session != null ? (String) session.getAttribute("env") : null;
-        if (LOCAL_ENV.equals(env)) {
-            return frontendLocalUrl;
+        if (session != null) {
+            String redirectUrl = (String) session.getAttribute("redirectUrl");
+            if (redirectUrl != null && !redirectUrl.isEmpty()) {
+                final String finalRedirectUrl = redirectUrl;
+                if (redirectUriWhitelist.stream().anyMatch(finalRedirectUrl::startsWith)) {
+                    return redirectUrl;
+                } else {
+                    log.warn("Redirect URL not in whitelist: {}", redirectUrl);
+                }
+            }
         }
         return frontendBaseUrl;
     }

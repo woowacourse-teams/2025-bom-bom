@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 public record PreviousArticleResponse(
 
         @NotNull
-        Long id,
+        Long articleId,
 
         @NotNull
         String title,

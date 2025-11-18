@@ -30,6 +30,7 @@ import me.bombom.api.v1.member.service.MemberService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -94,7 +95,7 @@ public class AuthController implements AuthControllerApi{
             HttpServletResponse response,
             HttpSession httpSession
     ) throws IOException {
-        if (redirectUrl != null && !redirectUrl.isEmpty()) {
+        if (StringUtils.hasText(redirectUrl)) {
             httpSession.setAttribute("redirectUrl", redirectUrl);
         }
         response.sendRedirect("/oauth2/authorization/" + provider);

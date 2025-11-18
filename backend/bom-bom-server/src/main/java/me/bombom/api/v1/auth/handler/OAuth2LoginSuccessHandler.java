@@ -26,6 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Component
@@ -163,9 +164,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         HttpSession session = request.getSession(false);
         if (session != null) {
             String redirectUrl = (String) session.getAttribute("redirectUrl");
-            if (redirectUrl != null && !redirectUrl.isEmpty()) {
-                final String finalRedirectUrl = redirectUrl;
-                if (redirectUriWhitelist.stream().anyMatch(finalRedirectUrl::startsWith)) {
+            if (StringUtils.hasText(redirectUrl)) {
+                if (redirectUriWhitelist.stream().anyMatch(redirectUrl::startsWith)) {
                     return redirectUrl;
                 } else {
                     log.warn("Redirect URL not in whitelist: {}", redirectUrl);

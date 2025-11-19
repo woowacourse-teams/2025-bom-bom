@@ -21,6 +21,7 @@ public class FixedWithLatestStrategy implements PreviousArticleStrategy {
         List<PreviousArticleResponse> fixedArticles = findFixedArticles(newsletterId, fixedCount);
         List<PreviousArticleResponse> latestArticles = findLatestArticles(newsletterId, latestCount);
         return Stream.concat(fixedArticles.stream(), latestArticles.stream())
+                .distinct()
                 .toList();
     }
 

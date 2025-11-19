@@ -1,15 +1,11 @@
 package me.bombom.api.v1.article.repository;
 
 import static me.bombom.api.v1.article.domain.QArticle.article;
-import static me.bombom.api.v1.article.domain.QRecentArticle.recentArticle;
-import static me.bombom.api.v1.bookmark.domain.QBookmark.bookmark;
 import static me.bombom.api.v1.newsletter.domain.QCategory.category;
 import static me.bombom.api.v1.newsletter.domain.QNewsletter.newsletter;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
@@ -65,29 +61,51 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             }
         }
         
-        Long oldCountResult = getTotalQuery(memberId, options).fetchOne();
-        long oldCount = oldCountResult != null ? oldCountResult : 0L;
-        long total = recentCount + oldCount;
+
+        long total;
         
         // UNION 쿼리로 두 테이블을 합쳐서 DB에서 정렬/페이징 처리
         List<ArticleResponse> content;
         if (recentTableExists && recentCount > 0) {
             // recent_article 테이블이 있고 데이터가 있을 때만 UNION 쿼리 사용
             try {
+                Long oldCountResult = getTotalQuery(memberId, options).fetchOne();
+                long oldCount = oldCountResult != null ? oldCountResult : 0L;
+                total = recentCount + oldCount;
+
                 content = findArticlesWithUnion(memberId, options, pageable, fiveDaysAgoDate);
             } catch (CIllegalArgumentException e) {
                 // 정렬 필드 검증 실패 등은 그대로 전파
                 throw e;
             } catch (Exception e) {
                 log.error("UNION 쿼리 실패, article 테이블만 사용: {}", e.getMessage(), e);
+                total = getArticleOnlyTotalCount(memberId, options);
                 content = findArticlesFromArticleOnly(memberId, options, pageable, fiveDaysAgoDate);
             }
         } else {
             // recent_article 테이블이 없거나 데이터가 없으면 article 테이블만 사용
+            total = getArticleOnlyTotalCount(memberId, options);
             content = findArticlesFromArticleOnly(memberId, options, pageable, fiveDaysAgoDate);
         }
-        
-        return PageableExecutionUtils.getPage(content, pageable, () -> total);
+
+        final long totalCount = total;
+        return PageableExecutionUtils.getPage(content, pageable, () -> totalCount);
+    }
+
+    private long getArticleOnlyTotalCount(Long memberId, ArticlesOptionsRequest options) {
+        Long result = jpaQueryFactory
+                .select(article.count())
+                .from(article)
+                .join(newsletter).on(article.newsletterId.eq(newsletter.id))
+                .join(category).on(newsletter.categoryId.eq(category.id))
+                .where(
+                        createMemberWhereClause(memberId),
+                        createKeywordWhereClause(options.keyword()),
+                        createNewsletterIdWhereClause(options.newsletterId())
+                )
+                .fetchOne();
+
+        return result != null ? result : 0L;
     }
     
     /**
@@ -124,8 +142,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         
         if (StringUtils.hasText(options.keyword())) {
             String keyword = options.keyword().strip();
-            sql.append("AND (MATCH(ra.title) AGAINST(?) OR MATCH(ra.contents_text) AGAINST(?)) ");
-            params.add(keyword);
+            sql.append("AND MATCH(ra.title, ra.contents_text) AGAINST(?) ");
             params.add(keyword);
         }
         
@@ -272,7 +289,6 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             String keyword = options.keyword().strip();
             sql.append("AND MATCH(ra.title, ra.contents_text) AGAINST(?) ");
             params.add(keyword);
-            params.add(keyword);
         }
         
         if (options.newsletterId() != null) {
@@ -413,17 +429,6 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         return orderBy.toString();
     }
     
-    private JPAQuery<Long> getRecentTotalQuery(Long memberId, ArticlesOptionsRequest options) {
-        return jpaQueryFactory.select(recentArticle.count())
-                .from(recentArticle)
-                .join(newsletter).on(recentArticle.newsletterId.eq(newsletter.id))
-                .join(category).on(newsletter.categoryId.eq(category.id))
-                .where(createRecentMemberWhereClause(memberId))
-                .where(createRecentDateWhereClause())
-                .where(createRecentKeywordWhereClause(options.keyword()))
-                .where(createRecentNewsletterIdWhereClause(options.newsletterId()));
-    }
-    
 
     @Override
     public int countByMemberIdAndArrivedDateTimeAndIsRead(Long memberId, LocalDate date, boolean isRead) {
@@ -475,42 +480,6 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .where(createDateWhereClause())
                 .where(createKeywordWhereClause(options.keyword()))
                 .where(createNewsletterIdWhereClause(options.newsletterId()));
-    }
-
-    // RecentArticle용 헬퍼 메서드
-    private BooleanExpression createRecentMemberWhereClause(Long memberId) {
-        return recentArticle.memberId.eq(memberId);
-    }
-
-    private BooleanExpression createRecentDateWhereClause() {
-        LocalDate fiveDaysAgo = LocalDate.now().minusDays(RECENT_DAYS);
-        return recentArticle.arrivedDateTime.goe(fiveDaysAgo.atTime(LocalTime.MIN));
-    }
-
-    private BooleanExpression createRecentKeywordWhereClause(String keyword) {
-        if (!StringUtils.hasText(keyword)) {
-            return null;
-        }
-        String trimmed = keyword.strip();
-        NumberExpression<Double> titleMatchScore = Expressions.numberTemplate(
-                Double.class,
-                "MATCH({0}) AGAINST({1})",
-                recentArticle.title,
-                Expressions.constant(trimmed)
-        );
-        NumberExpression<Double> contentsMatchScore = Expressions.numberTemplate(
-                Double.class,
-                "MATCH({0}) AGAINST({1})",
-                recentArticle.contentsText,
-                Expressions.constant(trimmed)
-        );
-        return titleMatchScore.gt(0).or(contentsMatchScore.gt(0));
-    }
-
-    private BooleanExpression createRecentNewsletterIdWhereClause(Long newsletterId) {
-        return Optional.ofNullable(newsletterId)
-                .map(newsletter.id::eq)
-                .orElse(null);
     }
 
     // Article용 헬퍼 메서드

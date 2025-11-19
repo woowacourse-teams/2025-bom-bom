@@ -124,8 +124,8 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         
         if (StringUtils.hasText(options.keyword())) {
             String keyword = options.keyword().strip();
-            sql.append("AND (LOWER(ra.title) LIKE ? OR MATCH(ra.contents_text) AGAINST(? IN BOOLEAN MODE)) ");
-            params.add("%" + keyword.toLowerCase() + "%");
+            sql.append("AND (MATCH(ra.title) AGAINST(?) OR MATCH(ra.contents_text) AGAINST(?)) ");
+            params.add(keyword);
             params.add(keyword);
         }
         
@@ -270,8 +270,8 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         
         if (StringUtils.hasText(options.keyword())) {
             String keyword = options.keyword().strip();
-            sql.append("AND (LOWER(ra.title) LIKE ? OR MATCH(ra.contents_text) AGAINST(? IN BOOLEAN MODE)) ");
-            params.add("%" + keyword.toLowerCase() + "%");
+            sql.append("AND (MATCH(ra.title) AGAINST(?) OR MATCH(ra.contents_text) AGAINST(?)) ");
+            params.add(keyword);
             params.add(keyword);
         }
         
@@ -487,14 +487,19 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             return null;
         }
         String trimmed = keyword.strip();
-        BooleanExpression titleMatch = recentArticle.title.lower().like("%" + trimmed.toLowerCase() + "%");
-        NumberExpression<Double> matchScore = Expressions.numberTemplate(
+        NumberExpression<Double> titleMatchScore = Expressions.numberTemplate(
                 Double.class,
-                "MATCH({0}) AGAINST({1} IN BOOLEAN MODE)",
+                "MATCH({0}) AGAINST({1})",
+                recentArticle.title,
+                Expressions.constant(trimmed)
+        );
+        NumberExpression<Double> contentsMatchScore = Expressions.numberTemplate(
+                Double.class,
+                "MATCH({0}) AGAINST({1})",
                 recentArticle.contentsText,
                 Expressions.constant(trimmed)
         );
-        return titleMatch.or(matchScore.gt(0));
+        return titleMatchScore.gt(0).or(contentsMatchScore.gt(0));
     }
 
     private BooleanExpression createRecentNewsletterIdWhereClause(Long newsletterId) {

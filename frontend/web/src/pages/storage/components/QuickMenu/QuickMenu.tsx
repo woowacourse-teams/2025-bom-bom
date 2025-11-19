@@ -7,7 +7,7 @@ import Tab from '@/components/Tab/Tab';
 import Tabs from '@/components/Tabs/Tabs';
 import { useDevice } from '@/hooks/useDevice';
 import type { Device } from '@/hooks/useDevice';
-import LinkIcon from '#/assets/svg/link.svg';
+import MenuIcon from '#/assets/svg/menu.svg';
 
 const QuickMenu = () => {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ const QuickMenu = () => {
   if (device !== 'pc') {
     return (
       <FloatingActionButton
-        icon={<LinkIcon width={24} height={24} fill={theme.colors.white} />}
+        icon={<MenuIcon width={24} height={30} fill={theme.colors.white} />}
       >
         <Tabs direction="vertical">
           {MENU_ITEMS.map(({ key, label, path, Icon }) => {
@@ -51,7 +51,7 @@ const QuickMenu = () => {
     <Container>
       <TitleWrapper>
         <QuickMenuIconWrapper>
-          <StyledLinkIcon />
+          <StyledMenuIcon />
         </QuickMenuIconWrapper>
         <Title>바로 가기</Title>
       </TitleWrapper>
@@ -110,7 +110,7 @@ const QuickMenuIconWrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.primary};
 `;
 
-const StyledLinkIcon = styled(LinkIcon)`
+const StyledMenuIcon = styled(MenuIcon)`
   width: 16px;
   height: 16px;
 

@@ -40,6 +40,14 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
   const openMainSite = () => {
     openExternalLink(newsletterDetail.mainPageUrl);
   };
+  const getSubscribeButtonText = () => {
+    if (!isLoggedIn) return '로그인 후 구독할 수 있어요';
+    if (newsletterDetail.isSubscribed) {
+      return '구독 중';
+    } else {
+      return '구독 하기';
+    }
+  };
 
   const newsletterSummary = `${newsletterDetail.name}, ${newsletterDetail.category} 카테고리, ${newsletterDetail.issueCycle} 발행. ${newsletterDetail.description}`;
 
@@ -80,7 +88,7 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
         </InfoWrapper>
 
         <SubscribeButton
-          text={isLoggedIn ? '구독하기' : '로그인 후 구독할 수 있어요'}
+          text={getSubscribeButtonText()}
           onClick={() =>
             openSubscribeLink(
               newsletterDetail.subscribeUrl,
@@ -88,7 +96,9 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
               userInfo,
             )
           }
-          disabled={!isLoggedIn}
+          disabled={
+            !isLoggedIn || (isLoggedIn && newsletterDetail.isSubscribed)
+          }
           isMobile={isMobile}
         />
       </FixedWrapper>

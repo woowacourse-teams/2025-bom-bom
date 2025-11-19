@@ -168,6 +168,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/articles/delete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 아티클 여러 개 삭제
+     * @description 1개 이상의 아티클들을 삭제합니다.
+     */
+    post: operations['deleteArticles'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/admin/sessions/cleanup': {
     parameters: {
       query?: never;
@@ -606,11 +626,7 @@ export interface paths {
     get: operations['getArticles'];
     put?: never;
     post?: never;
-    /**
-     * 아티클 여러 개 삭제
-     * @description 1개 이상의 아티클들을 삭제합니다.
-     */
-    delete: operations['deleteArticles'];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -800,6 +816,10 @@ export interface components {
       email?: string;
       nickname?: string;
     };
+    /** @description 아티클 ID */
+    DeleteArticlesRequest: {
+      articleIds: number[];
+    };
     SessionCleanupResponse: {
       /** Format: int32 */
       deletedCount?: number;
@@ -845,21 +865,14 @@ export interface components {
       memo?: string;
     };
     NewsletterResponse: {
-      /**
-       * Format: int64
-       * @description 뉴스레터 ID
-       */
+      /** Format: int64 */
       newsletterId: number;
-      /** @description 뉴스레터명 */
       name: string;
-      /** @description 이미지 URL */
       imageUrl?: string;
-      /** @description 설명 */
       description: string;
-      /** @description 구독 URL */
       subscribeUrl: string;
-      /** @description 카테고리 */
       category: string;
+      isSubscribed: boolean;
     };
     NewsletterWithDetailResponse: {
       name: string;
@@ -871,6 +884,7 @@ export interface components {
       issueCycle: string;
       previousNewsletterUrl?: string;
       subscribeMethod?: string;
+      isSubscribed?: boolean;
     };
     ReadingInformationResponse: {
       /**
@@ -1006,9 +1020,9 @@ export interface components {
       /** Format: int64 */
       offset?: number;
       sort?: components['schemas']['SortObject'];
-      paged?: boolean;
       /** Format: int32 */
       pageNumber?: number;
+      paged?: boolean;
       /** Format: int32 */
       pageSize?: number;
       unpaged?: boolean;
@@ -1210,10 +1224,6 @@ export interface components {
       activeSessions?: number;
       /** Format: int32 */
       expiredSessions?: number;
-    };
-    /** @description 아티클 ID */
-    DeleteArticlesRequest: {
-      articleIds: number[];
     };
   };
   responses: never;
@@ -1561,6 +1571,35 @@ export interface operations {
         content: {
           '*/*': components['schemas']['NativeLoginResponse'];
         };
+      };
+    };
+  };
+  deleteArticles: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DeleteArticlesRequest'];
+      };
+    };
+    responses: {
+      /** @description 아티클 삭제 성공 */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 아티클에 대한 접근 권한 없음 */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -2304,35 +2343,6 @@ export interface operations {
       };
       /** @description 잘못된 정렬 파라미터 요청 */
       400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  deleteArticles: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['DeleteArticlesRequest'];
-      };
-    };
-    responses: {
-      /** @description 아티클 삭제 성공 */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description 아티클에 대한 접근 권한 없음 */
-      403: {
         headers: {
           [name: string]: unknown;
         };

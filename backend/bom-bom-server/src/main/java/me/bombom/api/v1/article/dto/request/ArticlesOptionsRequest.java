@@ -8,7 +8,7 @@ public record ArticlesOptionsRequest(
         Long newsletterId
 ) {
 
-    public static ArticlesOptionsRequest of(Long newsletterId) {
+    public static ArticlesOptionsRequest from(Long newsletterId) {
         return new ArticlesOptionsRequest(newsletterId);
     }
 }

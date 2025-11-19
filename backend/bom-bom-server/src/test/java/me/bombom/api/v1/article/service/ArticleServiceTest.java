@@ -36,9 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @IntegrationTest
@@ -104,7 +101,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null),
+                ArticlesOptionsRequest.from(null),
                 pageable
         );
 
@@ -128,7 +125,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(newsletterId),
+                ArticlesOptionsRequest.from(newsletterId),
                 pageable
         );
 
@@ -172,7 +169,7 @@ class ArticleServiceTest {
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(0L),
+                ArticlesOptionsRequest.from(0L),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
@@ -186,7 +183,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null),
+                ArticlesOptionsRequest.from(null),
                 firstPage
         );
 
@@ -212,7 +209,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null),
+                ArticlesOptionsRequest.from(null),
                 secondPage
         );
 
@@ -238,7 +235,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null),
+                ArticlesOptionsRequest.from(null),
                 pageable
         );
 
@@ -268,7 +265,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null),
+                ArticlesOptionsRequest.from(null),
                 pageable
         );
 

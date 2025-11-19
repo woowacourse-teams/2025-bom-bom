@@ -38,14 +38,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private static final String EMAIL_PARAM = "email";
     private static final String NAME_PARAM = "name";
 
-    private final MemberService memberService;
-    private final UniqueUserInfoGenerator uniqueUserInfoGenerator;
-
     @Value("${app.auth.redirect-uri-whitelist:}")
     private List<String> redirectUriWhitelist;
 
     @Value("${frontend.base-url}")
     private String frontendBaseUrl;
+
+    private final MemberService memberService;
+    private final UniqueUserInfoGenerator uniqueUserInfoGenerator;
 
     private final List<OAuth2UserInfoExtractor> extractors = List.of(
             new AppleUserInfoExtractor(),

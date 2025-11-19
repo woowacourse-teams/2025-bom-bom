@@ -62,5 +62,3 @@ public class NewsletterPreviousPolicy extends BaseEntity {
         this.exposureRatio = exposureRatio;
     }
 }
-
-

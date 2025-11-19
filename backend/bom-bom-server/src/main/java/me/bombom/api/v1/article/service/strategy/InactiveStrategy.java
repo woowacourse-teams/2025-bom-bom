@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class InactiveStrategy implements PreviousArticleStrategy {
 
-
     @Override
     public List<PreviousArticleResponse> execute(Long newsletterId, int totalCount, int fixedCount) {
         return List.of();

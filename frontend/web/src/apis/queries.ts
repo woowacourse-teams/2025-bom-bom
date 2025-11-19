@@ -62,11 +62,11 @@ export const queries = {
       queryFn: ({ pageParam }) =>
         getArticles({
           ...params,
-          page: typeof pageParam === 'number' ? pageParam : 0,
+          page: pageParam,
         }),
       getNextPageParam: (lastPage) => {
-        if (!lastPage) return undefined;
-        if (lastPage.last) return undefined;
+        if (!lastPage || lastPage.last) return undefined;
+
         return (lastPage.number ?? 0) + 1;
       },
       initialPageParam: 0,
@@ -78,11 +78,11 @@ export const queries = {
       queryFn: ({ pageParam }) =>
         getArticlesWithSearch({
           ...params,
-          page: typeof pageParam === 'number' ? pageParam : 0,
+          page: pageParam,
         }),
       getNextPageParam: (lastPage) => {
-        if (!lastPage) return undefined;
-        if (lastPage.last) return undefined;
+        if (!lastPage || lastPage.last) return undefined;
+
         return (lastPage.number ?? 0) + 1;
       },
       initialPageParam: 0,

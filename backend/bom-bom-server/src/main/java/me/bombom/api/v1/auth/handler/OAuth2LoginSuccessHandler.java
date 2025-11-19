@@ -18,6 +18,7 @@ import me.bombom.api.v1.auth.util.UniqueUserInfoGenerator;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
+import jakarta.annotation.PostConstruct;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.service.MemberService;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +42,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final MemberService memberService;
     private final UniqueUserInfoGenerator uniqueUserInfoGenerator;
 
-    @Value("${app.auth.redirect-uri-whitelist}")
+    @Value("${app.auth.redirect-uri-whitelist:}")
     private List<String> redirectUriWhitelist;
 
     @Value("${frontend.base-url}")
@@ -165,7 +166,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         if (session != null) {
             String redirectUrl = (String) session.getAttribute("redirectUrl");
             if (StringUtils.hasText(redirectUrl)) {
+                log.debug("Checking redirectUrl: {} against whitelist: {}", redirectUrl, redirectUriWhitelist);
                 if (redirectUriWhitelist.stream().anyMatch(redirectUrl::startsWith)) {
+                    log.debug("Redirect URL matched whitelist: {}", redirectUrl);
                     return redirectUrl;
                 } else {
                     log.warn("Redirect URL not in whitelist: {}", redirectUrl);

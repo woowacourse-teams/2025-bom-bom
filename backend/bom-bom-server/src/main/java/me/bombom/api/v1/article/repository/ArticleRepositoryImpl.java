@@ -270,7 +270,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         
         if (StringUtils.hasText(options.keyword())) {
             String keyword = options.keyword().strip();
-            sql.append("AND MATCH(ra.title, ra.contents_text) AGAINST(?) ");
+            sql.append("AND (MATCH(ra.title) AGAINST(?) OR MATCH(ra.contents_text) AGAINST(?)) ");
             params.add(keyword);
             params.add(keyword);
         }
@@ -347,18 +347,13 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         boolean isRead = row[6] instanceof Number ? ((Number) row[6]).intValue() == 1 : (Boolean) row[6];
         boolean isBookmarked = row[7] instanceof Number ? ((Number) row[7]).intValue() == 1 : (Boolean) row[7];
         
-        // expected_read_time은 NULL일 수 있음
-        Integer expectedReadTime = row[5] != null && row[5] instanceof Number 
-                ? ((Number) row[5]).intValue() 
-                : null;
-        
         return new ArticleResponse(
                 ((Number) row[0]).longValue(), // article_id
                 (String) row[1], // title
                 (String) row[2], // contents_summary
                 ((java.sql.Timestamp) row[3]).toLocalDateTime(), // arrived_date_time
                 (String) row[4], // thumbnail_url
-                expectedReadTime, // expected_read_time
+                ((Number) row[5]).intValue(), // expected_read_time
                 isRead,
                 isBookmarked,
                 new me.bombom.api.v1.newsletter.dto.NewsletterSummaryResponse(

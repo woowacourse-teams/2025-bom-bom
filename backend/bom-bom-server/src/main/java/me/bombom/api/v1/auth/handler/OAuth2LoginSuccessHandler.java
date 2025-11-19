@@ -18,7 +18,6 @@ import me.bombom.api.v1.auth.util.UniqueUserInfoGenerator;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
-import jakarta.annotation.PostConstruct;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.service.MemberService;
 import org.springframework.beans.factory.annotation.Value;

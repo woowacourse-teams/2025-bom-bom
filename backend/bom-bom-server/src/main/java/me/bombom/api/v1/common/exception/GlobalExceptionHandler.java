@@ -19,14 +19,8 @@ public class GlobalExceptionHandler {
         } else {
             log.info("IllegalArgumentException: ", e);
         }
-        
-        // context에 message가 있으면 사용, 없으면 기본 메시지 사용
-        String message = e.getContext().containsKey("message") 
-                ? (String) e.getContext().get("message")
-                : e.getErrorDetail().getMessage();
-        
         return ResponseEntity.status(e.getHttpStatus())
-                .body(new ErrorResponse(e.getErrorDetail().getStatus(), e.getErrorDetail().getCode(), message));
+                .body(ErrorResponse.from(e.getErrorDetail()));
     }
 
     @ExceptionHandler(UnauthorizedException.class)

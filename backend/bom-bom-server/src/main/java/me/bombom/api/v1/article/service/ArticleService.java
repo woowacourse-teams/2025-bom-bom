@@ -1,5 +1,6 @@
 package me.bombom.api.v1.article.service;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.PreviousArticleResponse;
 import me.bombom.api.v1.article.event.MarkAsReadEvent;
 import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.article.repository.RecentArticleRepository;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -54,6 +56,7 @@ public class ArticleService {
     private Long PREVIOUS_ARTICLE_ADMIN_ID;
 
     private final ArticleRepository articleRepository;
+    private final RecentArticleRepository recentArticleRepository;
     private final TodayReadingRepository todayReadingRepository;
     private final CategoryRepository categoryRepository;
     private final NewsletterRepository newsletterRepository;
@@ -168,6 +171,12 @@ public class ArticleService {
     @Transactional
     public int cleanupOldPreviousArticles() {
         return articleRepository.cleanupOldPreviousArticles(PREVIOUS_ARTICLE_ADMIN_ID, PREVIOUS_ARTICLE_KEEP_COUNT);
+    }
+
+    @Transactional
+    public int cleanupOldRecentArticles() {
+        LocalDateTime fiveDaysAgo = LocalDateTime.now().minusDays(5);
+        return recentArticleRepository.deleteAllByArrivedDateTimeBefore(fiveDaysAgo);
     }
 
     @Transactional

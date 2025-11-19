@@ -67,7 +67,12 @@ public class ArticleController implements ArticleControllerApi{
             @Valid @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
             @PageableDefault(sort = "arrivedDateTime", direction = Direction.DESC) Pageable pageable
     ) {
-        return articleService.getArticles(
+        if (!StringUtils.hasText(articlesOptionsRequest.keyword())) {
+            throw new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION)
+                    .addContext("message", "검색 키워드는 필수입니다.");
+        }
+
+        return articleService.getArticlesBySearch(
                 member,
                 articlesOptionsRequest,
                 pageable

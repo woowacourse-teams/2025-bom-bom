@@ -104,7 +104,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 pageable
         );
 
@@ -126,7 +126,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 pageable
         );
 
@@ -150,7 +150,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, newsletterId, null),
+                ArticlesOptionsRequest.of(newsletterId, null),
                 pageable
         );
 
@@ -164,24 +164,6 @@ class ArticleServiceTest {
         });
     }
 
-    @Test
-    void 아티클_목록_조회_날짜_필터링_테스트() {
-        // given
-        Pageable pageable = PageRequest.of(0, 10);
-
-        // when
-        Page<ArticleResponse> result = articleService.getArticles(
-                member,
-                ArticlesOptionsRequest.of(BASE_TIME.toLocalDate(), null, null),
-                pageable
-        );
-
-        // then - 하루 전 아티클 제외하고 3개
-        assertSoftly(softly -> {
-            softly.assertThat(result.getTotalElements()).isEqualTo(articles.size() - 1);
-            softly.assertThat(result.getContent()).hasSize(articles.size() - 1);
-        });
-    }
 //
 //    @Test
 //    void 아티클_목록_조회_제목_검색_테스트() {
@@ -212,7 +194,7 @@ class ArticleServiceTest {
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, 0L, null),
+                ArticlesOptionsRequest.of(0L, null),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
@@ -230,7 +212,7 @@ class ArticleServiceTest {
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
@@ -244,7 +226,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 firstPage
         );
 
@@ -270,7 +252,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 secondPage
         );
 
@@ -296,7 +278,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 pageable
         );
 
@@ -318,7 +300,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 pageable
         );
 
@@ -348,7 +330,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 pageable
         );
 

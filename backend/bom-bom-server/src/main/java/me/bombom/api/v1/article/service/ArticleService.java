@@ -70,6 +70,15 @@ public class ArticleService {
         return articleRepository.findArticles(member.getId(), articlesOptionsRequest, pageable);
     }
 
+    public Page<ArticleResponse> getArticlesBySearch(
+            Member member,
+            ArticlesOptionsRequest articlesOptionsRequest,
+            Pageable pageable
+    ) {
+        validateNewsletterId(articlesOptionsRequest.newsletterId());
+        return articleRepository.findArticles(member.getId(), articlesOptionsRequest, pageable);
+    }
+
     public ArticleDetailResponse getArticleDetail(Long id, Member member) {
         Article article = findArticleById(id, member.getId());
         validateArticleOwner(article, member.getId());

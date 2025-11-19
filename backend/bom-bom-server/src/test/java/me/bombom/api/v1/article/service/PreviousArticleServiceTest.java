@@ -99,10 +99,10 @@ class PreviousArticleServiceTest {
         memberRepository.save(normalMember);
 
         // 서비스와 전략들의 ADMIN_ID 오버라이드
-        ReflectionTestUtils.setField(previousArticleService, "PREVIOUS_ARTICLE_ADMIN_ID", admin.getId());
+        ReflectionTestUtils.setField(previousArticleService, "previousArticleAdminId", admin.getId());
         previousArticleStrategies.forEach(strategy -> {
             try {
-                ReflectionTestUtils.setField(strategy, "PREVIOUS_ARTICLE_ADMIN_ID", admin.getId());
+                ReflectionTestUtils.setField(strategy, "previousArticleAdminId", admin.getId());
             } catch (IllegalArgumentException e) {
                 // PREVIOUS_ARTICLE_ADMIN_ID 필드가 없는 전략은 무시
             }
@@ -323,7 +323,7 @@ class PreviousArticleServiceTest {
         
         // totalCount=5, fixedCount=2 이므로 고정 2개 + 자동 이동 3개
         NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
-                testNewsletter.getId(), NewsletterPreviousStrategy.FIXED_WITH_LATEST, 5, 2);
+                testNewsletter.getId(), NewsletterPreviousStrategy.FIXED_WITH_LATEST, 3, 2);
         newsletterPreviousPolicyRepository.save(policy);
 
         PreviousArticleRequest request = new PreviousArticleRequest(testNewsletter.getId(), 5);

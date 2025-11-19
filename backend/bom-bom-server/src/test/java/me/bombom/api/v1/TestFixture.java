@@ -230,14 +230,14 @@ public final class TestFixture {
     public static NewsletterPreviousPolicy createNewsletterPreviousPolicy(
             Long newsletterId,
             NewsletterPreviousStrategy strategy,
-            int totalCount,
+            int latestCount,
             int fixedCount,
             int exposureRatio
     ) {
         return NewsletterPreviousPolicy.builder()
                 .newsletterId(newsletterId)
                 .strategy(strategy)
-                .totalCount(totalCount)
+                .latestCount(latestCount)
                 .fixedCount(fixedCount)
                 .exposureRatio(exposureRatio)
                 .build();
@@ -246,10 +246,10 @@ public final class TestFixture {
     public static NewsletterPreviousPolicy createNewsletterPreviousPolicy(
             Long newsletterId,
             NewsletterPreviousStrategy strategy,
-            int totalCount,
+            int lastestCount,
             int fixedCount
     ) {
-        return createNewsletterPreviousPolicy(newsletterId, strategy, totalCount, fixedCount, 100);
+        return createNewsletterPreviousPolicy(newsletterId, strategy, lastestCount, fixedCount, 100);
     }
 
     /**

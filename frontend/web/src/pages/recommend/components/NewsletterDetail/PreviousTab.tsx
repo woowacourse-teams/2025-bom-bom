@@ -40,6 +40,7 @@ const PreviousTab = ({
             to: `articles/previous/${article.articleId}`,
             state: {
               subscribeUrl: newsletterSubscribeUrl,
+              exposureRatio: article.exposureRatio,
             },
           })
         }

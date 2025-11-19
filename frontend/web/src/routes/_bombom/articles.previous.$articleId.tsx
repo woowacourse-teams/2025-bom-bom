@@ -31,15 +31,18 @@ function RouteComponent() {
   const device = useDevice();
   const { userInfo } = useUserInfo();
   const { articleId } = Route.useParams();
-  const subscribeUrl = useRouterState({
-    select: (routerState) => routerState.location.state.subscribeUrl,
+  const { subscribeUrl, exposureRatio } = useRouterState({
+    select: (routerState) => ({
+      subscribeUrl: routerState.location.state.subscribeUrl,
+      exposureRatio: routerState.location.state.exposureRatio,
+    }),
   });
   const articleIdNumber = Number(articleId);
 
   const { data: article } = useQuery(
     queries.previousArticleDetail({ id: articleIdNumber }),
   );
-  const bodyContent = cutHtmlByTextRatio(article?.contents, 0.5);
+  const bodyContent = cutHtmlByTextRatio(article?.contents, exposureRatio);
 
   if (!article) return null;
 

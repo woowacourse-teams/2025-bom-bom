@@ -39,6 +39,7 @@ declare module '@tanstack/react-router' {
   }
   interface HistoryState {
     subscribeUrl: string;
+    exposureRatio: number;
   }
 }
 

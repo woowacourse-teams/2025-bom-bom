@@ -28,15 +28,13 @@ function ImageInfoCard({
         <TitleBox>
           <Title>{title}</Title>
           {isSubscribed && (
-            <>
-              <Badge
-                text="구독 중"
-                variant="outlinePrimary"
-                icon={
-                  <CheckIcon width={16} height={16} fill={theme.colors.white} />
-                }
-              ></Badge>
-            </>
+            <Badge
+              text="구독 중"
+              variant="outlinePrimary"
+              icon={
+                <CheckIcon width={16} height={16} fill={theme.colors.white} />
+              }
+            />
           )}
         </TitleBox>
         <Description>{description || title}</Description>

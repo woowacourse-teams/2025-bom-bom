@@ -40,7 +40,7 @@ public class NewsletterPreviousPolicy extends BaseEntity {
     private int fixedCount;
 
     @Column(nullable = false, columnDefinition = "TINYINT")
-    private int latestCount;
+    private int recentCount;
 
     @Column(nullable = false, columnDefinition = "TINYINT")
     private int exposureRatio;
@@ -51,14 +51,14 @@ public class NewsletterPreviousPolicy extends BaseEntity {
             @NonNull Long newsletterId,
             @NonNull NewsletterPreviousStrategy strategy,
             int fixedCount,
-            int latestCount,
+            int recentCount,
             int exposureRatio
     ) {
         this.id = id;
         this.newsletterId = newsletterId;
         this.strategy = strategy;
         this.fixedCount = fixedCount;
-        this.latestCount = latestCount;
+        this.recentCount = recentCount;
         this.exposureRatio = exposureRatio;
     }
 }

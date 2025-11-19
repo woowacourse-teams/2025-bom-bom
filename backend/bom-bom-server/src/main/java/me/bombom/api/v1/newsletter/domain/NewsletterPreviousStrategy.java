@@ -5,8 +5,8 @@ import lombok.Getter;
 @Getter
 public enum NewsletterPreviousStrategy {
 
-    FIXED_WITH_LATEST,
+    FIXED_WITH_RECENT,
     FIXED_ONLY,
-    LATEST_ONLY,
+    RECENT_ONLY,
     INACTIVE
 }

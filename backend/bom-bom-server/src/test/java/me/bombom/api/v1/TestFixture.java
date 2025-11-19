@@ -230,14 +230,14 @@ public final class TestFixture {
     public static NewsletterPreviousPolicy createNewsletterPreviousPolicy(
             Long newsletterId,
             NewsletterPreviousStrategy strategy,
-            int latestCount,
+            int recentCount,
             int fixedCount,
             int exposureRatio
     ) {
         return NewsletterPreviousPolicy.builder()
                 .newsletterId(newsletterId)
                 .strategy(strategy)
-                .latestCount(latestCount)
+                .recentCount(recentCount)
                 .fixedCount(fixedCount)
                 .exposureRatio(exposureRatio)
                 .build();

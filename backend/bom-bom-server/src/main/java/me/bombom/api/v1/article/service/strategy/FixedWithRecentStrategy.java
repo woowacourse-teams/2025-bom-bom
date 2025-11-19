@@ -12,22 +12,22 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class FixedWithLatestStrategy implements PreviousArticleStrategy {
+public class FixedWithRecentStrategy implements PreviousArticleStrategy {
 
     private final PreviousArticleRepository previousArticleRepository;
 
     @Override
-    public List<PreviousArticleResponse> execute(Long newsletterId, int fixedCount, int latestCount) {
+    public List<PreviousArticleResponse> execute(Long newsletterId, int fixedCount, int recentCount) {
         List<PreviousArticleResponse> fixedArticles = findFixedArticles(newsletterId, fixedCount);
-        List<PreviousArticleResponse> latestArticles = findLatestArticles(newsletterId, latestCount);
-        return Stream.concat(fixedArticles.stream(), latestArticles.stream())
+        List<PreviousArticleResponse> recentArticles = findRecentArticles(newsletterId, recentCount);
+        return Stream.concat(fixedArticles.stream(), recentArticles.stream())
                 .distinct()
                 .toList();
     }
 
     @Override
     public NewsletterPreviousStrategy getStrategy() {
-        return NewsletterPreviousStrategy.FIXED_WITH_LATEST;
+        return NewsletterPreviousStrategy.FIXED_WITH_RECENT;
     }
 
     private List<PreviousArticleResponse> findFixedArticles(Long newsletterId, int fixedCount) {
@@ -42,10 +42,10 @@ public class FixedWithLatestStrategy implements PreviousArticleStrategy {
         return articles;
     }
 
-    private List<PreviousArticleResponse> findLatestArticles(Long newsletterId, int latestCount) {
-        if (latestCount <= 0) {
+    private List<PreviousArticleResponse> findRecentArticles(Long newsletterId, int recentCount) {
+        if (recentCount <= 0) {
             return List.of();
         }
-        return previousArticleRepository.findExceptLatestByNewsletterId(newsletterId, latestCount);
+        return previousArticleRepository.findExceptLatestByNewsletterId(newsletterId, recentCount);
     }
 }

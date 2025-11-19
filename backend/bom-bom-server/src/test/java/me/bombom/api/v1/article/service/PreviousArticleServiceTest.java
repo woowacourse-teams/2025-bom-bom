@@ -242,7 +242,7 @@ class PreviousArticleServiceTest {
         previousArticleRepository.saveAll(autoMovedArticles);
         
         NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
-                testNewsletter.getId(), NewsletterPreviousStrategy.LATEST_ONLY, 3, 0);
+                testNewsletter.getId(), NewsletterPreviousStrategy.RECENT_ONLY, 3, 0);
         newsletterPreviousPolicyRepository.save(policy);
 
         PreviousArticleRequest request = new PreviousArticleRequest(testNewsletter.getId(), 3);
@@ -323,7 +323,7 @@ class PreviousArticleServiceTest {
         
         // totalCount=5, fixedCount=2 이므로 고정 2개 + 자동 이동 3개
         NewsletterPreviousPolicy policy = TestFixture.createNewsletterPreviousPolicy(
-                testNewsletter.getId(), NewsletterPreviousStrategy.FIXED_WITH_LATEST, 3, 2);
+                testNewsletter.getId(), NewsletterPreviousStrategy.FIXED_WITH_RECENT, 3, 2);
         newsletterPreviousPolicyRepository.save(policy);
 
         PreviousArticleRequest request = new PreviousArticleRequest(testNewsletter.getId(), 5);

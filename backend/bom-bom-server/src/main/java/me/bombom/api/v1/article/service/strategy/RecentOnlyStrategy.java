@@ -9,17 +9,17 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class LatestOnlyStrategy implements PreviousArticleStrategy {
+public class RecentOnlyStrategy implements PreviousArticleStrategy {
 
     private final PreviousArticleRepository previousArticleRepository;
 
     @Override
-    public List<PreviousArticleResponse> execute(Long newsletterId, int fixedCount, int lastestCount) {
-        return previousArticleRepository.findExceptLatestByNewsletterId(newsletterId, lastestCount);
+    public List<PreviousArticleResponse> execute(Long newsletterId, int fixedCount, int recentCount) {
+        return previousArticleRepository.findExceptLatestByNewsletterId(newsletterId, recentCount);
     }
 
     @Override
     public NewsletterPreviousStrategy getStrategy() {
-        return NewsletterPreviousStrategy.LATEST_ONLY;
+        return NewsletterPreviousStrategy.RECENT_ONLY;
     }
 }

@@ -27,8 +27,8 @@ public class ArticleScheduler {
     }
 
     @Scheduled(cron = DAILY_3AM_CRON, zone = TIME_ZONE)
-    @SchedulerLock(name = "move_latest_admin_articles", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
-    public void moveLatestAdminArticles() {
+    @SchedulerLock(name = "move_recent_admin_articles", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
+    public void moveRecentAdminArticles() {
         log.info("어드민 아티클 복사 시작");
         previousArticleService.moveAdminArticles();
         log.info("어드민 아티클 이동 완료");

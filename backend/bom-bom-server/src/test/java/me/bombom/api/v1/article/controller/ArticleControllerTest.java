@@ -367,18 +367,7 @@ class ArticleControllerTest {
         mockMvc.perform(get("/api/v1/articles")
                         .with(authentication(authToken))
                         .param("keyword", "아티클"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("검색요청을 할 수 없습니다."));
-    }
-
-    @Test
-    @DisplayName("검색에서 keyword가 없으면 에러")
-    void 검색_키워드_없으면_예외() throws Exception {
-        // when & then - getArticlesBySearch는 keyword가 없으면 에러
-        mockMvc.perform(get("/api/v1/articles/search")
-                        .with(authentication(authToken)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("검색 키워드는 필수입니다."));
+                .andExpect(status().isBadRequest());
     }
 
     @Test

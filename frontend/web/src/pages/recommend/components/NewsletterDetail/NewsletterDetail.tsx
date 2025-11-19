@@ -41,10 +41,12 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
     openExternalLink(newsletterDetail.mainPageUrl);
   };
   const getSubscribeButtonText = () => {
-    if (isLoggedIn && newsletterDetail.isSubscribed) return '구독 중';
-    if (isLoggedIn && !newsletterDetail.isSubscribed) return '구독 하기';
     if (!isLoggedIn) return '로그인 후 구독할 수 있어요';
-    return '구독 상태 확인 중...';
+    if (newsletterDetail.isSubscribed) {
+      return '구독 중';
+    } else {
+      return '구독 하기';
+    }
   };
 
   const newsletterSummary = `${newsletterDetail.name}, ${newsletterDetail.category} 카테고리, ${newsletterDetail.issueCycle} 발행. ${newsletterDetail.description}`;
@@ -263,8 +265,4 @@ const SubscribeButton = styled(Button)<{ isMobile: boolean }>`
 
   font: ${({ theme, isMobile }) =>
     isMobile ? theme.fonts.body2 : theme.fonts.heading6};
-
-  :disabled {
-    background-color: ${({ theme }) => theme.colors.disabledBackground};
-  }
 `;

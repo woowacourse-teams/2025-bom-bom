@@ -59,7 +59,7 @@ export const queries = {
   infiniteArticles: (params: GetArticlesParams) =>
     infiniteQueryOptions({
       queryKey: ['articles', 'infinite', params],
-      queryFn: ({ pageParam }) =>
+      queryFn: ({ pageParam = 0 }) =>
         getArticles({
           ...params,
           page: pageParam,
@@ -75,7 +75,7 @@ export const queries = {
   infiniteArticlesWithSearch: (params: GetArticlesWithSearchParams) =>
     infiniteQueryOptions({
       queryKey: ['articles', 'search', 'infinite', params],
-      queryFn: ({ pageParam }) =>
+      queryFn: ({ pageParam = 0 }) =>
         getArticlesWithSearch({
           ...params,
           page: pageParam,

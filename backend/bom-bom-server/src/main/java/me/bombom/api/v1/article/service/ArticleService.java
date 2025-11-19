@@ -1,12 +1,12 @@
 package me.bombom.api.v1.article.service;
 
-import jakarta.validation.Valid;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.article.dto.request.ArticleSearchOptionsRequest;
 import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
 import me.bombom.api.v1.article.dto.request.PreviousArticleRequest;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
@@ -68,6 +68,15 @@ public class ArticleService {
     ) {
         validateNewsletterId(articlesOptionsRequest.newsletterId());
         return articleRepository.findArticles(member.getId(), articlesOptionsRequest, pageable);
+    }
+
+    public Page<ArticleResponse> getArticlesBySearch(
+            Member member,
+            ArticleSearchOptionsRequest articleSearchOptionsRequest,
+            Pageable pageable
+    ) {
+        validateNewsletterId(articleSearchOptionsRequest.newsletterId());
+        return articleRepository.findArticlesBySearch(member.getId(), articleSearchOptionsRequest, pageable);
     }
 
     public ArticleDetailResponse getArticleDetail(Long id, Member member) {

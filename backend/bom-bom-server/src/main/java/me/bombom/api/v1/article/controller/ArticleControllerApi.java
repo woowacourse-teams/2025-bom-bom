@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Positive;
 import java.util.List;
 import me.bombom.api.v1.article.dto.request.ArticleNewsletterStatisticOptionsRequest;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.article.dto.request.ArticleSearchOptionsRequest;
 import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
@@ -53,7 +54,7 @@ public interface ArticleControllerApi {
     })
     Page<ArticleResponse> getArticlesBySearch(
         @Parameter(hidden = true) Member member,
-        @Parameter(description = "검색 옵션") @Valid @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
+        @Parameter(description = "검색 옵션") @Valid @ModelAttribute ArticleSearchOptionsRequest articleSearchOptionsRequest,
         @Parameter(description = "페이징 관련 요청 (예: ?page=0&size=10&sort=arrivedDateTime,desc)") Pageable pageable
     );
 

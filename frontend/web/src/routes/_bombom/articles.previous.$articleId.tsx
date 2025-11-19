@@ -38,11 +38,12 @@ function RouteComponent() {
     }),
   });
   const articleIdNumber = Number(articleId);
+  const shouldShowSubscribePrompt = !!exposureRatio && exposureRatio !== 1;
 
   const { data: article } = useQuery(
     queries.previousArticleDetail({ id: articleIdNumber }),
   );
-  const bodyContent = cutHtmlByTextRatio(article?.contents, exposureRatio);
+  const bodyContent = cutHtmlByTextRatio(article?.contents, exposureRatio ?? 1);
 
   if (!article) return null;
 
@@ -71,19 +72,22 @@ function RouteComponent() {
         <Divider />
 
         <Content
+          showGradient={shouldShowSubscribePrompt}
           dangerouslySetInnerHTML={{
             __html: processContent(article.newsletter.name, bodyContent),
           }}
         />
 
-        <SubscribePrompt>
-          <SubscribePromptText>
-            지속적으로 받아보고 싶다면 구독해주세요!
-          </SubscribePromptText>
-          <SubscribePromptButton type="button" onClick={handleSubscribeClick}>
-            구독하러 가기
-          </SubscribePromptButton>
-        </SubscribePrompt>
+        {shouldShowSubscribePrompt && (
+          <SubscribePrompt>
+            <SubscribePromptText>
+              지속적으로 받아보고 싶다면 구독해주세요!
+            </SubscribePromptText>
+            <SubscribePromptButton type="button" onClick={handleSubscribeClick}>
+              구독하러 가기
+            </SubscribePromptButton>
+          </SubscribePrompt>
+        )}
 
         <Divider />
 
@@ -128,7 +132,7 @@ const Divider = styled.div`
   background-color: ${({ theme }) => theme.colors.dividers};
 `;
 
-const Content = styled.div`
+const Content = styled.div<{ showGradient: boolean }>`
   overflow: visible;
   position: relative;
 
@@ -152,6 +156,8 @@ const Content = styled.div`
     bottom: 0;
     left: 0;
     height: 200px;
+
+    display: ${({ showGradient }) => (showGradient ? 'block' : 'none')};
 
     background: linear-gradient(
       to bottom,

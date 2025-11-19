@@ -82,6 +82,6 @@ export type GetMyNewslettersResponse =
 
 export const getMyNewsletters = async () => {
   return await fetcher.get<GetMyNewslettersResponse>({
-    path: '/members/me/newsletters',
+    path: '/members/me/subscriptions',
   });
 };

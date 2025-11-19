@@ -67,7 +67,7 @@ public class ArticleController implements ArticleControllerApi{
             @Valid @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
             @PageableDefault(sort = "arrivedDateTime", direction = Direction.DESC) Pageable pageable
     ) {
-        return articleService.getArticlesBySearch(
+        return articleService.getArticles(
                 member,
                 articlesOptionsRequest,
                 pageable

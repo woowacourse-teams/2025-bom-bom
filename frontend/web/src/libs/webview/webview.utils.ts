@@ -22,6 +22,11 @@ export const sendMessageToRN = (message: WebToRNMessage): void => {
 export const addWebViewMessageListener = (
   callback: (message: RNToWebMessage) => void,
 ): (() => void) => {
+  if (!isWebView()) {
+    console.warn('WebView 환경이 아닙니다. 메시지를 수신하지 않습니다.');
+    return () => {};
+  }
+
   const messageHandler = (event: MessageEvent) => {
     try {
       const message: RNToWebMessage = JSON.parse(event.data);

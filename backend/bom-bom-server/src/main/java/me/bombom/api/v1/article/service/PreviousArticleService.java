@@ -31,7 +31,7 @@ public class PreviousArticleService {
     private final PreviousArticleRepository previousArticleRepository;
 
     @Value("${admin.previous-article.member-id}")
-    private Long PREVIOUS_ARTICLE_ADMIN_ID;
+    private Long previousArticleAdminId;
 
     private final ArticleRepository articleRepository;
     private final NewsletterPreviousPolicyRepository newsletterPreviousPolicyRepository;
@@ -76,8 +76,8 @@ public class PreviousArticleService {
 
     @Transactional
     public void moveAdminArticles() {
-        int copied = articleRepository.safeCopyToArchive(PREVIOUS_ARTICLE_ADMIN_ID);
-        int deleted = articleRepository.safeDeleteArchived(PREVIOUS_ARTICLE_ADMIN_ID, PREVIOUS_ARTICLE_KEEP_COUNT);
+        int copied = articleRepository.safeCopyToArchive(previousArticleAdminId);
+        int deleted = articleRepository.safeDeleteArchived(previousArticleAdminId, PREVIOUS_ARTICLE_KEEP_COUNT);
         log.info("아티클 이동 완료: {}건 복사, {}건 삭제", copied, deleted);
     }
 

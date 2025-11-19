@@ -14,8 +14,8 @@ public class LatestOnlyStrategy implements PreviousArticleStrategy {
     private final PreviousArticleRepository previousArticleRepository;
 
     @Override
-    public List<PreviousArticleResponse> execute(Long newsletterId, int totalCount, int fixedCount) {
-        return previousArticleRepository.findExceptLatestByNewsletterId(newsletterId, totalCount);
+    public List<PreviousArticleResponse> execute(Long newsletterId, int fixedCount, int lastestCount) {
+        return previousArticleRepository.findExceptLatestByNewsletterId(newsletterId, lastestCount);
     }
 
     @Override

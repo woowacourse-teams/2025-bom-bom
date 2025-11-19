@@ -83,7 +83,7 @@ public class PreviousArticleService {
 
     private List<PreviousArticleResponse> executeStrategy(NewsletterPreviousPolicy policy) {
         PreviousArticleStrategy strategy = getStrategy(policy);
-        return strategy.execute(policy.getNewsletterId(), policy.getTotalCount(), policy.getFixedCount());
+        return strategy.execute(policy.getNewsletterId(), policy.getFixedCount(), policy.getLatestCount());
     }
 
     private PreviousArticleStrategy getStrategy(NewsletterPreviousPolicy policy) {

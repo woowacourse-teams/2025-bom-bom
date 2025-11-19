@@ -17,25 +17,9 @@ public class FixedWithLatestStrategy implements PreviousArticleStrategy {
     private final PreviousArticleRepository previousArticleRepository;
 
     @Override
-    public List<PreviousArticleResponse> execute(Long newsletterId, int totalCount, int fixedCount) {
-        int latestCount = totalCount - fixedCount;
-        
-        // 1. 고정 아티클 조회 (isFixed=true)
-        List<PreviousArticleResponse> fixedArticles = 
-            previousArticleRepository.findFixedByNewsletterId(newsletterId, fixedCount);
-        
-        if (fixedCount != fixedArticles.size()) {
-            log.warn("지정된 지난 아티클 개수가 설정과 다릅니다. (뉴스레터 ID: {}, 설정값: {}, 실제 개수: {})",
-                    newsletterId,
-                    fixedCount,
-                    fixedArticles.size()
-            );
-        }
-
-        // 2. 자동 이동 아티클 조회 (isFixed=false, 최신 제외)
-        List<PreviousArticleResponse> latestArticles = 
-            previousArticleRepository.findExceptLatestByNewsletterId(newsletterId, latestCount);
-
+    public List<PreviousArticleResponse> execute(Long newsletterId, int fixedCount, int latestCount) {
+        List<PreviousArticleResponse> fixedArticles = findFixedArticles(newsletterId, fixedCount);
+        List<PreviousArticleResponse> latestArticles = findLatestArticles(newsletterId, latestCount);
         return Stream.concat(fixedArticles.stream(), latestArticles.stream())
                 .toList();
     }
@@ -43,5 +27,24 @@ public class FixedWithLatestStrategy implements PreviousArticleStrategy {
     @Override
     public NewsletterPreviousStrategy getStrategy() {
         return NewsletterPreviousStrategy.FIXED_WITH_LATEST;
+    }
+
+    private List<PreviousArticleResponse> findFixedArticles(Long newsletterId, int fixedCount) {
+        if (fixedCount <= 0) {
+            return List.of();
+        }
+        List<PreviousArticleResponse> articles = previousArticleRepository.findFixedByNewsletterId(newsletterId, fixedCount);
+        if (fixedCount != articles.size()) {
+            log.warn("지정된 지난 아티클 개수가 설정과 다릅니다. (뉴스레터 ID: {}, 설정값: {}, 실제 개수: {})",
+                    newsletterId, fixedCount, articles.size());
+        }
+        return articles;
+    }
+
+    private List<PreviousArticleResponse> findLatestArticles(Long newsletterId, int latestCount) {
+        if (latestCount <= 0) {
+            return List.of();
+        }
+        return previousArticleRepository.findExceptLatestByNewsletterId(newsletterId, latestCount);
     }
 }

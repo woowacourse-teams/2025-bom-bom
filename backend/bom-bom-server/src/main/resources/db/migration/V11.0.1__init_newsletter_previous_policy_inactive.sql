@@ -1,7 +1,7 @@
 INSERT INTO newsletter_previous_policy (
     newsletter_id,
     strategy,
-    total_count,
+    latest_count,
     fixed_count,
     exposure_ratio,
     created_at,

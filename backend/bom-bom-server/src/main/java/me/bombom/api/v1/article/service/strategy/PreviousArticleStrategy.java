@@ -6,7 +6,7 @@ import me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy;
 
 public interface PreviousArticleStrategy {
 
-    List<PreviousArticleResponse> execute(Long newsletterId, int totalCount, int fixedCount);
+    List<PreviousArticleResponse> execute(Long newsletterId, int fixedCount, int latestCount);
 
     NewsletterPreviousStrategy getStrategy();
 }

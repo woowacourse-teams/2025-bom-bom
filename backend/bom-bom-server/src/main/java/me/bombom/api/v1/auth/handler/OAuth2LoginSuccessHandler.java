@@ -74,8 +74,11 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         }
     }
 
-    private void handleWithdrawAfterReAuth(Long withdrawMemberId, HttpServletRequest request,
-                                           HttpServletResponse response) throws IOException {
+    private void handleWithdrawAfterReAuth(
+            Long withdrawMemberId,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException {
         try {
             memberService.withdraw(withdrawMemberId);
         } catch (Exception e) {

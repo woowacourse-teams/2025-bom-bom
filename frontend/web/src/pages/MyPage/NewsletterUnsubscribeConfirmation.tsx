@@ -16,17 +16,17 @@ const NewsletterUnsubscribeConfirmation = ({
 
   return (
     <Container isMobile={isMobile}>
-      <Title isMobile={isMobile}>정말 구독을 취소하시겠습니까?</Title>
+      <Title isMobile={isMobile}>구독을 해지하러 이동하시겠습니까?</Title>
 
       <UnsubscribeDescription isMobile={isMobile}>
-        구독을 취소하면 해당 뉴스레터의{'\n'}새로운 소식을 받아볼 수 없습니다.
+        구독을 해지하면 해당 뉴스레터의{'\n'}새로운 소식을 받아볼 수 없습니다.
       </UnsubscribeDescription>
 
       <ModalButtonWrapper>
         <ModalButton
           isMobile={isMobile}
           variant="outlined"
-          text="네, 취소할래요"
+          text="네, 해지할래요"
           onClick={() => {
             onUnsubscribe();
             onClose();

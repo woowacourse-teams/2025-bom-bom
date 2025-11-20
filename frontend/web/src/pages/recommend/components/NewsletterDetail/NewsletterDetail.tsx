@@ -14,6 +14,7 @@ import { useUserInfo } from '@/hooks/useUserInfo';
 import { openExternalLink } from '@/utils/externalLink';
 import type { NewsletterTab } from './NewsletterDetail.types';
 import HomeIcon from '#/assets/svg/home.svg';
+import InfoIcon from '#/assets/svg/info-circle.svg';
 
 interface NewsletterDetailProps {
   newsletterId: number;
@@ -86,6 +87,13 @@ const NewsletterDetail = ({ newsletterId }: NewsletterDetailProps) => {
             </NewsletterInfo>
           </InfoBox>
         </InfoWrapper>
+
+        {newsletterDetail.subscribeMethod && (
+          <SubscribeMethodInfo isMobile={isMobile}>
+            <StyledInfoIcon isMobile={isMobile} />
+            {newsletterDetail.subscribeMethod}
+          </SubscribeMethodInfo>
+        )}
 
         <SubscribeButton
           text={getSubscribeButtonText()}
@@ -219,6 +227,25 @@ const StyledHomeIcon = styled(HomeIcon)<{ isMobile: boolean }>`
   height: ${({ isMobile }) => (isMobile ? '20px' : '24px')};
 
   fill: ${({ theme }) => theme.colors.primary};
+`;
+
+const StyledInfoIcon = styled(InfoIcon)<{ isMobile: boolean }>`
+  width: ${({ isMobile }) => (isMobile ? '20px' : '24px')};
+  height: ${({ isMobile }) => (isMobile ? '20px' : '24px')};
+
+  fill: ${({ theme }) => theme.colors.primary};
+`;
+
+const SubscribeMethodInfo = styled.div<{ isMobile: boolean }>`
+  display: flex;
+  gap: 12px;
+  padding: 0.8rem 1rem;
+  align-items: center;
+  background-color: ${({ theme }) => theme.colors.primaryInfo};
+  border-radius: 1rem;
+
+  font: ${({ theme, isMobile }) =>
+    isMobile ? theme.fonts.body3 : theme.fonts.body2};
 `;
 
 export const NewsletterInfo = styled.div<{ isMobile: boolean }>`

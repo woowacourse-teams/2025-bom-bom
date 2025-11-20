@@ -21,15 +21,13 @@ const SubscribedNewslettersSection = ({
   const [selectedNewsletterId, setSelectedNewsletterId] = useState<
     number | null
   >(null);
-
+  const { mutate: unsubscribeNewsletter } = useUnsubscribeNewsletterMutation();
   const {
     modalRef: UnsubscribeConfirmModalRef,
     openModal: openUnsubscribeConfirmModal,
     closeModal: closeUnsubscribeConfirmModal,
     isOpen,
   } = useModal();
-
-  const unsubscribeMutation = useUnsubscribeNewsletterMutation();
 
   const handleOpenUnsubscribeModal = (newsletterId: number) => {
     setSelectedNewsletterId(newsletterId);
@@ -39,7 +37,7 @@ const SubscribedNewslettersSection = ({
   const handleConfirmUnsubscribe = () => {
     if (!selectedNewsletterId) return;
 
-    unsubscribeMutation.mutate({ newsletterId: selectedNewsletterId });
+    unsubscribeNewsletter({ subscriptionId: selectedNewsletterId });
     closeUnsubscribeConfirmModal();
     setSelectedNewsletterId(null);
   };

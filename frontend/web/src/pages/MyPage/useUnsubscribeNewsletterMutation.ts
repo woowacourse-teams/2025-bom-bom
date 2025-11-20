@@ -1,22 +1,17 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { postNewsletterUnsubscribe } from '@/apis/members';
 import { queries } from '@/apis/queries';
 import { toast } from '@/components/Toast/utils/toastActions';
-
-const unsubscribeNewsletter = async ({
-  newsletterId,
-}: {
-  newsletterId: number;
-}) => {
-  console.log('구독 해지', newsletterId);
-};
+import type { PostNewsletterUnsubscribeParams } from '@/apis/members';
 
 export const useUnsubscribeNewsletterMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: unsubscribeNewsletter,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
+    mutationFn: (params: PostNewsletterUnsubscribeParams) =>
+      postNewsletterUnsubscribe(params),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
         queryKey: queries.myNewsletters().queryKey,
       });
       toast.success('뉴스레터 구독을 해지했습니다.');

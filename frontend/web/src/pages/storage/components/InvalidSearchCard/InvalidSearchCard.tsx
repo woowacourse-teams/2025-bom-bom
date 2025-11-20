@@ -13,7 +13,7 @@ function InvalidSearchCard() {
       </EmptySearchIconWrapper>
 
       <EmptyTitle isMobile={isMobile}>
-        {`원하시는 뉴스레터를 찾기 위해 \n 2~100자를 입력해주세요`}
+        {`더 정확한 검색을 위해\n두 글자 이상 입력해주세요.`}
       </EmptyTitle>
     </Container>
   );
@@ -35,11 +35,11 @@ const EmptySearchIconWrapper = styled.div`
   padding: 38px;
 `;
 
-const EmptyTitle = styled.h2<{ isMobile: boolean }>`
+const EmptyTitle = styled.h3<{ isMobile: boolean }>`
   background: linear-gradient(90deg, #181818 0%, #f96 100%);
   background-clip: text;
   font: ${({ theme, isMobile }) =>
-    isMobile ? theme.fonts.heading4 : theme.fonts.heading2};
+    isMobile ? theme.fonts.heading4 : theme.fonts.heading3};
   text-align: center;
   white-space: pre-wrap;
 

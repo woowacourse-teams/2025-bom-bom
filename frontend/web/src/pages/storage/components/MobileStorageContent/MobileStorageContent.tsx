@@ -1,9 +1,10 @@
 import styled from '@emotion/styled';
-import { useEffect, useRef } from 'react';
+import { isValidElement, useEffect, useRef } from 'react';
 import { useSelectedDeleteIds } from '../../hooks/useSelectedDeleteIds';
 import ArticleList from '../ArticleList/ArticleList';
 import ArticleListControls from '../ArticleListControls/ArticleListControls';
 import EmptySearchCard from '../EmptySearchCard/EmptySearchCard';
+import InvalidSearchCard from '../InvalidSearchCard/InvalidSearchCard';
 import useInfiniteArticles from '@/pages/storage/hooks/useInfiniteArticles';
 import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
@@ -40,7 +41,9 @@ export default function MobileStorageContent({
   const articleList = infiniteArticlesPages.flatMap(
     (page) => page?.content || [],
   );
+
   const IsContentsEmpty = !isInfiniteLoading && articleList.length === 0;
+  const emptyKeyword = !baseQueryParams.keyword;
 
   const {
     selectedIds,
@@ -102,7 +105,7 @@ export default function MobileStorageContent({
         <EmptySearchCard searchQuery={baseQueryParams.keyword ?? ''} />
       ) : IsContentsEmpty ? (
         <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
-      ) : (
+      ) : emptyKeyword || isValidElement(baseQueryParams.keyword) ? (
         <>
           <ArticleList
             articles={articleList}
@@ -115,6 +118,8 @@ export default function MobileStorageContent({
           <LoadMoreTrigger ref={loadMoreRef} />
           {isFetchingNextPage && <LoadingSpinner>로딩 중...</LoadingSpinner>}
         </>
+      ) : (
+        <InvalidSearchCard />
       )}
     </>
   );

@@ -229,23 +229,23 @@ const StyledHomeIcon = styled(HomeIcon)<{ isMobile: boolean }>`
   fill: ${({ theme }) => theme.colors.primary};
 `;
 
+const SubscribeMethodInfo = styled.div<{ isMobile: boolean }>`
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  align-items: center;
+  background-color: ${({ theme }) => theme.colors.primaryInfo};
+  border-radius: 16px;
+
+  font: ${({ theme, isMobile }) =>
+    isMobile ? theme.fonts.body3 : theme.fonts.body2};
+`;
+
 const StyledInfoIcon = styled(InfoIcon)<{ isMobile: boolean }>`
   width: ${({ isMobile }) => (isMobile ? '20px' : '24px')};
   height: ${({ isMobile }) => (isMobile ? '20px' : '24px')};
 
   fill: ${({ theme }) => theme.colors.primary};
-`;
-
-const SubscribeMethodInfo = styled.div<{ isMobile: boolean }>`
-  display: flex;
-  gap: 12px;
-  padding: 0.8rem 1rem;
-  align-items: center;
-  background-color: ${({ theme }) => theme.colors.primaryInfo};
-  border-radius: 1rem;
-
-  font: ${({ theme, isMobile }) =>
-    isMobile ? theme.fonts.body3 : theme.fonts.body2};
 `;
 
 export const NewsletterInfo = styled.div<{ isMobile: boolean }>`

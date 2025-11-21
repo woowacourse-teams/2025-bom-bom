@@ -27,7 +27,6 @@ public class RecentArticle extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Lob
     @Column(nullable = false, columnDefinition = "mediumtext")
     private String contents;
 

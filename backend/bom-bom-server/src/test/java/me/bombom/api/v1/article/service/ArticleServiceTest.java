@@ -101,7 +101,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.from(null),
+                ArticlesOptionsRequest.of(null, null),
                 pageable
         );
 
@@ -125,7 +125,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.from(newsletterId),
+                ArticlesOptionsRequest.of(null, newsletterId),
                 pageable
         );
 
@@ -169,7 +169,7 @@ class ArticleServiceTest {
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.from(0L),
+                ArticlesOptionsRequest.of(null, 0L),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
@@ -183,7 +183,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.from(null),
+                ArticlesOptionsRequest.of(null, null),
                 firstPage
         );
 
@@ -209,7 +209,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.from(null),
+                ArticlesOptionsRequest.of(null, null),
                 secondPage
         );
 
@@ -235,7 +235,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.from(null),
+                ArticlesOptionsRequest.of(null, null),
                 pageable
         );
 
@@ -265,7 +265,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.from(null),
+                ArticlesOptionsRequest.of(null, null),
                 pageable
         );
 

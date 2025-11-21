@@ -74,6 +74,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .join(category).on(newsletter.categoryId.eq(category.id))
                 .where(
                         article.memberId.eq(memberId),
+                        createDateWhereClause(options.date()),
                         createNewsletterIdWhereClause(options.newsletterId())
                 )
                 .orderBy(article.arrivedDateTime.desc())
@@ -86,6 +87,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .from(article)
                 .where(
                         article.memberId.eq(memberId),
+                        createDateWhereClause(options.date()),
                         createNewsletterIdWhereClause(options.newsletterId())
                 );
 
@@ -491,6 +493,16 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         String trimmed = "%" + keyword.strip().toLowerCase() + "%";
         return article.title.lower().like(trimmed)
                 .or(article.contentsText.lower().like(trimmed));
+    }
+
+    private BooleanExpression createDateWhereClause(LocalDate date) {
+        if (date == null) {
+            return null;
+        }
+        return article.arrivedDateTime.between(
+                date.atStartOfDay(),
+                date.atTime(23, 59, 59, 999_999_999)
+        );
     }
 
     private BooleanExpression createNewsletterIdWhereClause(Long newsletterId) {

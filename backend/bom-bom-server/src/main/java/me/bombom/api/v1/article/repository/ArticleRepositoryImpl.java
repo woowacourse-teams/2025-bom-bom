@@ -287,7 +287,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         
         if (StringUtils.hasText(options.keyword())) {
             String keyword = options.keyword().strip();
-            sql.append("AND MATCH(ra.title, ra.contents_text) AGAINST(?)");
+            sql.append("AND MATCH(ra.title, ra.contents_text) AGAINST(?) ");
             params.add(keyword);
         }
         

@@ -103,7 +103,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
 
         // 전체 개수 조회
         long recentCount = getRecentTotalCountNative(memberId, options, fiveDaysAgoDate);
-        Long oldCountResult = getTotalQueryForSearch(memberId, options, fiveDaysAgoDate).fetchOne();
+        Long oldCountResult = getOldTotalQueryForSearch(memberId, options, fiveDaysAgoDate).fetchOne();
         long oldCount = oldCountResult != null ? oldCountResult : 0L;
         long total = recentCount + oldCount;
 
@@ -469,7 +469,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .fetch();
     }
 
-    private JPAQuery<Long> getTotalQueryForSearch(Long memberId, ArticleSearchOptionsRequest options, LocalDate fiveDaysAgoDate) {
+    private JPAQuery<Long> getOldTotalQueryForSearch(Long memberId, ArticleSearchOptionsRequest options, LocalDate fiveDaysAgoDate) {
         return jpaQueryFactory.select(article.count())
                 .from(article)
                 .join(newsletter).on(article.newsletterId.eq(newsletter.id))

@@ -45,7 +45,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-mail")
 
     // html parser
-    implementation("org.jsoup:jsoup:1.21.1")
+    implementation("org.jsoup:jsoup:1.21.2")
+    implementation("ch.digitalfondue.jfiveparse:jfiveparse:1.1.4")
 
     // test
     testRuntimeOnly("com.h2database:h2")
@@ -56,6 +57,7 @@ dependencies {
 
     // db
     runtimeOnly("com.mysql:mysql-connector-j")
+    runtimeOnly("com.h2database:h2")
 }
 
 tasks.withType<Test> {

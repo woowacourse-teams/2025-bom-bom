@@ -19,6 +19,12 @@ public record PreviousArticleDetailResponse(
         @Schema(required = true)
         int expectedReadTime,
 
+        @Schema(required = true)
+        int exposureRatio,
+
+        @Schema(required = true)
+        boolean isSubscribed,
+
         @NotNull
         NewsletterBasicResponse newsletter
 ) {

@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.dto.response.PreviousArticleResponse;
 import me.bombom.api.v1.article.repository.PreviousArticleRepository;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -37,7 +36,7 @@ public class FixedWithRecentStrategy implements PreviousArticleStrategy {
         }
         List<PreviousArticleResponse> articles = previousArticleRepository.findByNewsletterIdAndFixed(
                 newsletterId,
-                PageRequest.of(0, fixedCount)
+                fixedCount
         );
         if (fixedCount != articles.size()) {
             log.warn("지정된 지난 아티클 개수가 설정과 다릅니다. (뉴스레터 ID: {}, 설정값: {}, 실제 개수: {})",

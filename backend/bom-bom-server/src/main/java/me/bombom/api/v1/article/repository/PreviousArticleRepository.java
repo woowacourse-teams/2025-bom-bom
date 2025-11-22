@@ -5,7 +5,6 @@ import java.util.Optional;
 import me.bombom.api.v1.article.domain.PreviousArticle;
 import me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.PreviousArticleResponse;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,10 +23,11 @@ public interface PreviousArticleRepository extends JpaRepository<PreviousArticle
         WHERE pa.newsletterId = :newsletterId
         AND pa.isFixed = true
         ORDER BY pa.arrivedDateTime DESC
+        LIMIT :limit
     """)
     List<PreviousArticleResponse> findByNewsletterIdAndFixed(
             @Param("newsletterId") Long newsletterId,
-            Pageable pageable
+            int limit
     );
 
     @Query("""

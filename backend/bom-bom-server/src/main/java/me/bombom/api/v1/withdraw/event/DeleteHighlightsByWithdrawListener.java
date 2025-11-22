@@ -3,6 +3,7 @@ package me.bombom.api.v1.withdraw.event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.highlight.service.HighlightService;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ public class DeleteHighlightsByWithdrawListener {
 
     private final HighlightService highlightService;
 
+    @Async
     @TransactionalEventListener
     public void on(WithdrawEvent event) {
         log.info("회원 탈퇴 따른 하이라이트 삭제 처리 시작 - memberId={}", event.memberId());

@@ -3,6 +3,7 @@ package me.bombom.api.v1.withdraw.event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.subscribe.service.SubscribeService;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ public class DeleteSubscribeByWithdrawListener {
 
     private final SubscribeService subscribeService;
 
+    @Async
     @TransactionalEventListener
     public void on(WithdrawEvent event) {
         log.info("탈퇴한 회원에 대한 구독 삭제 시작 - memberId={}", event.memberId());

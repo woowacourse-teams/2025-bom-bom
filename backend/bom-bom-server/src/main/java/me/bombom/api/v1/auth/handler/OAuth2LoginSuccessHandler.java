@@ -168,6 +168,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         if (session != null) {
             String redirectUrl = (String) session.getAttribute("redirectUrl");
             if (StringUtils.hasText(redirectUrl)) {
+                redirectUrl = redirectUrl.strip();
                 log.debug("Checking redirectUrl: {} against whitelist: {}", redirectUrl, redirectUriWhitelist);
                 if (redirectUriWhitelist.stream().anyMatch(redirectUrl::startsWith)) {
                     log.debug("Redirect URL matched whitelist: {}", redirectUrl);

@@ -69,6 +69,9 @@
 | 뉴스레터가 쌓여만 간다 | 읽기 기록 + 알림 + 목표 설정 | **읽는 습관 형성** |
 | 어디까지 읽었는지 기억 안 남 | 읽기 진행률 자동 기록 | 편의성 |
 
+
+<br/>
+
 ## 🤠 How to use?
 
 <table>
@@ -147,6 +150,20 @@
   </tr>
 </table>
 
+<br/>
+<br/>
+
+## ⚒️ 아키텍처
+
+### 🎨 Client
+
+<img width="720" height="415" alt="image" src="https://github.com/user-attachments/assets/577c9ec8-e044-404c-9497-d07d550513d2" />
+
+### 🌐 Server
+
+<img width="720" height="529" alt="image" src="https://github.com/user-attachments/assets/8c6f82c2-ceb3-4fed-bd68-a373f5a2e130" />
+
+<br/>
 
 ### 🎨 Frontend 
 

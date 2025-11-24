@@ -161,7 +161,7 @@
 
 ### 🌐 Server
 
-<img width="720" height="529" alt="image" src="https://github.com/user-attachments/assets/8c6f82c2-ceb3-4fed-bd68-a373f5a2e130" />
+<img width="900" height="703" alt="스크린샷 2025-11-24 오후 1 53 44" src="https://github.com/user-attachments/assets/00309847-6a5b-4397-9a0d-a5f6be6937af" />
 
 <br/>
 

@@ -1,0 +1,6 @@
+From: test-newsletter@example.com
+To: test-member@example.com
+Date: Fri, 28 Jun 2024 12:00:00 +0900
+Content-Type: text/plain; charset=UTF-8
+
+본문만 있고 제목 없음

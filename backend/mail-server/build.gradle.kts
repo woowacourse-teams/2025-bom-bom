@@ -4,7 +4,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
 }
 
-group = "me.bombom"
+group = "news.bombomemail"
 version = "0.0.1-SNAPSHOT"
 
 java {
@@ -30,19 +30,29 @@ dependencies {
 
     // jpa
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    testImplementation("org.springframework.security:spring-security-test")
 
     // lombok
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
-    // spring security
-    implementation("org.springframework.boot:spring-boot-starter-security")
+    // spring integration
+    implementation("org.springframework.boot:spring-boot-starter-integration")
+    implementation("org.springframework.integration:spring-integration-http")
+    implementation("org.springframework.integration:spring-integration-jpa")
+    implementation("org.springframework.integration:spring-integration-file")
+
+    // spring mail
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+
+    // html parser
+    implementation("org.jsoup:jsoup:1.21.1")
 
     // test
     testRuntimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.springframework.integration:spring-integration-test")
+    testImplementation("org.springframework.security:spring-security-test")
 
     // db
     runtimeOnly("com.mysql:mysql-connector-j")

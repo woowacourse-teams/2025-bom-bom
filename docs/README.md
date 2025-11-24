@@ -1,4 +1,8 @@
-# 봄봄
+# 봄봄 🌸
+
+<p align="center">
+  <img width="599" height="287" alt="스크린샷" src="https://github.com/user-attachments/assets/2b661f18-5c04-4c46-8801-89196a118380" />
+</p>
 
 단순한 뉴스레터 리더를 넘어 읽는 습관을 만들고, 읽은 콘텐츠를 나만의 자산으로 바꾸는 **읽기의 라이프 로그**
 
@@ -64,6 +68,85 @@
 | --- | --- | --- |
 | 뉴스레터가 쌓여만 간다 | 읽기 기록 + 알림 + 목표 설정 | **읽는 습관 형성** |
 | 어디까지 읽었는지 기억 안 남 | 읽기 진행률 자동 기록 | 편의성 |
+
+## 🤠 How to use?
+
+<table>
+
+  <!-- Row 1 -->
+  <tr>
+    <td style="width: 50%; vertical-align: top; text-align: center;">
+      <img 
+        src="https://github.com/user-attachments/assets/fce87c25-69cb-4f4c-af74-7f4c3950e475"
+        height="300"
+      />
+    </td>
+    <td style="width: 50%; vertical-align: top;">
+
+### 간편하게 클릭 몇 번으로 구독하기
+
+- 구독할 뉴스레터 정보 페이지에 접속하여 **구독하기**를 눌러보세요.
+- 봄봄이 담아준 구독 이메일을 붙여넣기 하면 구독 완료!
+- 구독에 필요한 이메일은 저희 **봄봄을 통해 만들 수 있습니다.**
+
+    </td>
+  </tr>
+
+  <!-- Row 2 -->
+  <tr>
+    <td style="width: 50%; vertical-align: top; text-align: center;">
+      <img 
+        src="https://github.com/user-attachments/assets/48b6e101-3f7d-49f4-ac65-b6946ba01003"
+        height="300"
+      />
+    </td>
+    <td style="width: 50%; vertical-align: top;">
+
+### 🌱 봄이랑 함께하는 읽기 모험!
+
+- 매일 출석하고 아티클을 읽으면 귀여운 봄이가 쑥쑥 자라나요.
+- 봄이와 함께 새로운 지식으로 성장해 보세요!
+
+    </td>  
+  </tr>
+
+  <tr>
+
+    <td style="width: 50%; vertical-align: top; text-align: center;">
+      <img 
+        src="https://github.com/user-attachments/assets/7bb1b5dd-ac68-42fd-9e25-580d340ebad9" 
+        height="300"
+      />
+    </td>  
+    
+    <td style="width: 50%; vertical-align: top;">
+
+### 중요한 문장만 쏙! 하이라이트 & 메모
+
+- 중요한 구절을 **하이라이트**하고 메모를 남겨,  
+  지식을 체계적으로 정리해 보세요.
+
+- 원하는 문장을 드래그하여 선택하면  
+  **하이라이트와 메모를 사용할 수 있는 퀵 메뉴**가 나타나요.
+
+    </td>
+  </tr>
+
+    <!-- Row 4 -->
+  <tr>
+    <td style="width:50%; vertical-align:top; text-align:center;">
+      <img src="https://github.com/user-attachments/assets/e0871376-147f-4da2-af73-6dbef30e46fc" height="300"/>
+    </td>
+    <td style="width:50%; v1445ertical-align:top;">
+
+### 📚 내가 바로 이달의 독서왕
+- 매 달 갱신되는 **읽기 랭킹**에 도전해보세요!
+- 나의 **순위**를 확인하고 꾸준히 읽는 습관을 만들어보세요.
+
+    </td>
+  </tr>
+</table>
+
 
 ### 🎨 Frontend 
 

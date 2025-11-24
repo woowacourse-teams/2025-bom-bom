@@ -18,6 +18,7 @@ const colors = {
   primary: '#FE5E04',
   primaryDark: '#E35400',
   primaryLight: '#FFD6C2',
+  primaryInfo: '#ffebe0',
   textPrimary: '#181818',
   textSecondary: '#5C5C5C',
   textTertiary: '#747474',

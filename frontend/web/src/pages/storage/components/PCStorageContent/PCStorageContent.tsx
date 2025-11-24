@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { isValidElement, useEffect } from 'react';
 import useArticles from '../../hooks/useArticles';
 import { useSelectedDeleteIds } from '../../hooks/useSelectedDeleteIds';
 import ArticleList from '../ArticleList/ArticleList';
 import ArticleListControls from '../ArticleListControls/ArticleListControls';
 import EmptySearchCard from '../EmptySearchCard/EmptySearchCard';
+import InvalidSearchCard from '../InvalidSearchCard/InvalidSearchCard';
 import Pagination from '@/components/Pagination/Pagination';
 import ArticleCardListSkeleton from '@/pages/today/components/ArticleCardList/ArticleCardListSkeleton';
 import EmptyLetterCard from '@/pages/today/components/EmptyLetterCard/EmptyLetterCard';
@@ -48,6 +49,7 @@ export default function PCStorageContent({
   } = useSelectedDeleteIds(articleList);
 
   const haveNoContent = articleList.length === 0;
+  const emptyKeyword = !baseQueryParams.keyword;
 
   const handleDeleteArticles = () => {
     deleteArticles(selectedIds);
@@ -93,7 +95,7 @@ export default function PCStorageContent({
         <EmptySearchCard searchQuery={baseQueryParams.keyword ?? ''} />
       ) : haveNoContent ? (
         <EmptyLetterCard title="보관된 뉴스레터가 없어요" />
-      ) : (
+      ) : emptyKeyword || isValidElement(baseQueryParams.keyword) ? (
         <>
           <ArticleList
             articles={articleList}
@@ -108,6 +110,8 @@ export default function PCStorageContent({
             onPageChange={onPageChange}
           />
         </>
+      ) : (
+        <InvalidSearchCard />
       )}
     </>
   );

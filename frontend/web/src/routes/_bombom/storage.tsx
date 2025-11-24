@@ -13,6 +13,8 @@ import PCStorageContent from '@/pages/storage/components/PCStorageContent/PCStor
 import QuickMenu from '@/pages/storage/components/QuickMenu/QuickMenu';
 import { useDeleteArticlesMutation } from '@/pages/storage/hooks/useDeleteArticlesMutation';
 import { useStorageFilters } from '@/pages/storage/hooks/useStorageFilters';
+import { isValidKeyword } from '@/pages/storage/utils/isValidKeyword';
+import type { GetArticlesStatisticsNewslettersResponse } from '@/apis/articles';
 import type { Sort } from '@/pages/storage/components/ArticleListControls/ArticleListControls.types';
 import StorageIcon from '#/assets/svg/storage.svg';
 
@@ -55,11 +57,21 @@ function Storage() {
     from: '/_bombom/storage',
     select: (state) => state.search,
   });
+  const keywordIsValid = isValidKeyword(searchParam);
+  const emptyKeyword = !searchParam;
+  const keyword = keywordIsValid ? searchParam : undefined;
   const { data: newsletterFilters } = useQuery(
-    queries.articlesStatisticsNewsletters({
-      keyword: searchParam,
-    }),
+    queries.articlesStatisticsNewsletters({ keyword }),
   );
+  const emptyFilters = {
+    totalCount: 0,
+    newsletters: [],
+  } as GetArticlesStatisticsNewslettersResponse;
+
+  const filters =
+    emptyKeyword || keywordIsValid
+      ? (newsletterFilters ?? emptyFilters)
+      : emptyFilters;
 
   const { mutate: deleteArticles } = useDeleteArticlesMutation();
 
@@ -90,7 +102,7 @@ function Storage() {
           {!newsletterFilters ? (
             <NewsletterFilterSkeleton />
           ) : (
-            <NewsLetterFilter filters={newsletterFilters} />
+            <NewsLetterFilter filters={filters} />
           )}
           <QuickMenu />
         </SidebarSection>

@@ -63,14 +63,14 @@ export const queries = {
   infiniteArticles: (params: GetArticlesParams) =>
     infiniteQueryOptions({
       queryKey: ['articles', 'infinite', params],
-      queryFn: ({ pageParam }) =>
+      queryFn: ({ pageParam = 0 }) =>
         getArticles({
           ...params,
-          page: typeof pageParam === 'number' ? pageParam : 0,
+          page: pageParam,
         }),
       getNextPageParam: (lastPage) => {
-        if (!lastPage) return undefined;
-        if (lastPage.last) return undefined;
+        if (!lastPage || lastPage.last) return undefined;
+
         return (lastPage.number ?? 0) + 1;
       },
       initialPageParam: 0,
@@ -79,14 +79,14 @@ export const queries = {
   infiniteArticlesWithSearch: (params: GetArticlesWithSearchParams) =>
     infiniteQueryOptions({
       queryKey: ['articles', 'search', 'infinite', params],
-      queryFn: ({ pageParam }) =>
+      queryFn: ({ pageParam = 0 }) =>
         getArticlesWithSearch({
           ...params,
-          page: typeof pageParam === 'number' ? pageParam : 0,
+          page: pageParam,
         }),
       getNextPageParam: (lastPage) => {
-        if (!lastPage) return undefined;
-        if (lastPage.last) return undefined;
+        if (!lastPage || lastPage.last) return undefined;
+
         return (lastPage.number ?? 0) + 1;
       },
       initialPageParam: 0,

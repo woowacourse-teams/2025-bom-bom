@@ -13,11 +13,8 @@ import * as WebBrowser from 'expo-web-browser';
 
 import { ENV } from '@/constants/env';
 import { WEBVIEW_USER_AGENT } from '@/constants/webview';
+import { goToSystemPermission } from '@/utils/notification';
 import useNotification from '@/hooks/useNotification';
-import {
-  goToSystemPermission,
-  requestNotificationPermission,
-} from '@/utils/notification';
 import { useEffect, useRef } from 'react';
 import { useDeviceInfo } from '@/hooks/useDeviceInfo';
 
@@ -28,7 +25,8 @@ export const MainScreen = () => {
   const webViewLoadEndCleanupRef = useRef<() => void>(null);
 
   const { handleNavigationStateChange } = useAndroidNavigationState();
-  const { registerFCMToken, onNotification } = useNotification();
+  const { onNotification, registerFCMToken, handleLoggedInPermission } =
+    useNotification();
 
   const handleWebViewLoadEnd = () => {
     console.log('WebView 로드 완료');
@@ -36,7 +34,6 @@ export const MainScreen = () => {
       webViewLoadEndCleanupRef.current();
     }
 
-    requestNotificationPermission();
     webViewLoadEndCleanupRef.current = onNotification();
   };
 
@@ -59,8 +56,6 @@ export const MainScreen = () => {
         case 'LOGIN_SUCCESS':
           console.log('웹뷰에서 로그인 성공 알림 수신:', message.payload);
           hideLogin();
-          requestNotificationPermission();
-          registerFCMToken(message.payload?.memberId);
           break;
 
         case 'LOGIN_FAILED':
@@ -81,6 +76,18 @@ export const MainScreen = () => {
         case 'REQUEST_DEVICE_UUID':
           console.log('디바이스 정보 요청');
           sendDeviceInfoToWeb();
+          break;
+
+        case 'REGISTER_FCM_TOKEN':
+          if (message.payload.memberId) {
+            registerFCMToken(message.payload.memberId);
+          }
+          break;
+
+        case 'REGISTER_FCM_TOKEN_LOGGED_IN':
+          if (message.payload.memberId) {
+            handleLoggedInPermission(message.payload.memberId);
+          }
           break;
 
         case 'CHECK_NOTIFICATION_PERMISSION':

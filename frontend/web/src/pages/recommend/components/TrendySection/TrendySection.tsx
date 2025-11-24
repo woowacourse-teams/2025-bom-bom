@@ -1,9 +1,10 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import NewsletterList from './NewsletterList';
 import NewsletterDetail from '../NewsletterDetail/NewsletterDetail';
+import NewsletterDetailSkeleton from '../NewsletterDetail/NewsletterDetailSkeleton';
 import { queries } from '@/apis/queries';
 import Chip from '@/components/Chip/Chip';
 import ImageInfoCardSkeleton from '@/components/ImageInfoCard/ImageInfoCardSkeleton';
@@ -177,7 +178,9 @@ const TrendySection = () => {
           showCloseButton={device !== 'mobile'}
         >
           {selectedNewsletterId && (
-            <NewsletterDetail newsletterId={selectedNewsletterId} />
+            <Suspense fallback={<NewsletterDetailSkeleton />}>
+              <NewsletterDetail newsletterId={selectedNewsletterId} />
+            </Suspense>
           )}
         </Modal>,
         document.body,

@@ -1,26 +1,36 @@
 version: 0.2
 
+cache:
+  key: bombom-pnpm-store
+  paths:
+    - '.pnpm-store/**/*'
+
 phases:
   install:
     runtime-versions:
       nodejs: 22
     commands:
       - echo "Installing dependencies..."
-      - cd ./frontend
-      - npm install -g pnpm@10.12.1
-      - pnpm install --frozen-lockfile
+      - cd ./frontend/web
+
+      - corepack enable
+      - corepack prepare pnpm@10.12.1 --activate
+
+      - pnpm config set store-dir $CODEBUILD_SRC_DIR/.pnpm-store
+      - pnpm install --frozen-lockfile --prefer-offline
 
   pre_build:
     commands:
       - echo "Running lint..."
-      - pnpm run web:lint
+      - pnpm run lint
+
       - echo "Running type-check..."
-      - pnpm run web:type-check
+      - pnpm run type-check
 
   build:
     commands:
       - echo "Building project..."
-      - pnpm run web:build
+      - pnpm run build
 
 artifacts:
   base-directory: frontend/web/dist

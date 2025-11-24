@@ -7,13 +7,15 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     name: '봄봄',
     slug: 'bombom',
     version,
+    runtimeVersion: {
+      policy: 'appVersion',
+    },
     orientation: 'portrait',
     icon: './app/assets/images/logo.png',
     scheme: 'bombom',
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     ios: {
-      buildNumber: '5',
       supportsTablet: true,
       googleServicesFile: './GoogleService-Info.plist',
       infoPlist: {

@@ -26,6 +26,10 @@ import {
 } from './members';
 import { getNewsletterDetail, getNewsletters } from './newsLetters';
 import {
+  getNotificationSettings,
+  type GetNotificationSettingsParams,
+} from './notification';
+import {
   getPreviousArticleDetail,
   getPreviousArticles,
 } from './previousArticles';
@@ -206,5 +210,12 @@ export const queries = {
     queryOptions({
       queryKey: ['articles', 'previous', params],
       queryFn: () => getPreviousArticleDetail(params),
+    }),
+
+  // notification
+  notificationStatus: (params: GetNotificationSettingsParams) =>
+    queryOptions({
+      queryKey: ['notifications', 'tokens', 'settings', 'status', params],
+      queryFn: () => getNotificationSettings(params),
     }),
 };

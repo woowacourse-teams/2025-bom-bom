@@ -1,11 +1,8 @@
 package me.bombom.api.v1.article.repository;
 
 import java.util.List;
-import java.util.Optional;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
-import me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse;
-import me.bombom.api.v1.article.dto.response.PreviousArticleResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -34,60 +31,72 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
     @Query("DELETE FROM Article a WHERE a.memberId = :memberId")
     void deleteAllByMemberId(Long memberId);
 
-    @Query("""
-        SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleResponse(
-            a.id, a.title, a.contentsSummary, a.expectedReadTime
-        )
-        FROM Article a
-        JOIN Newsletter n ON n.id = a.newsletterId
-        JOIN NewsletterDetail nd ON nd.id = n.detailId
-        WHERE a.newsletterId = :newsletterId AND a.memberId = :memberId AND nd.previousAllowed = true
-        ORDER BY a.arrivedDateTime DESC
-        LIMIT :limit
-    """)
-    List<PreviousArticleResponse> findArticlesByMemberIdAndNewsletterId(
-            @Param("newsletterId") Long newsletterId,
-            @Param("memberId") Long memberId,
-            @Param("limit") int limit
-    );
-
-    @Query("""
-        SELECT new me.bombom.api.v1.article.dto.response.PreviousArticleDetailResponse(
-            a.title, a.contents, a.arrivedDateTime, a.expectedReadTime,
-                new me.bombom.api.v1.newsletter.dto.NewsletterBasicResponse(
-                    n.name, n.email, n.imageUrl, c.name
-                )
-        )
-        FROM Article a
-        JOIN Newsletter n ON n.id = a.newsletterId
-        JOIN Category c ON c.id = n.categoryId
-        JOIN NewsletterDetail nd ON nd.id = n.detailId
-        WHERE a.id = :id AND a.memberId = :memberId AND nd.previousAllowed = true
-    """)
-    Optional<PreviousArticleDetailResponse> getPreviousArticleDetailsByMemberId(@Param("id") Long id, @Param("memberId") Long memberId);
-
-    @Modifying(clearAutomatically = true)
-    @Query(value = """
-    WITH cleanup_candidates AS (
-        SELECT id,
-               ROW_NUMBER() OVER (
-                   PARTITION BY newsletter_id
-                   ORDER BY arrived_date_time DESC, id DESC
-               ) AS keep_order
-        FROM article
-        WHERE member_id = :memberId
-    )
-    DELETE FROM article
-    WHERE id IN (
-        SELECT id FROM cleanup_candidates
-        WHERE keep_order > :keepCount
-    )
-    """, nativeQuery = true)
-    int cleanupOldPreviousArticles(@Param("memberId") Long memberId, @Param("keepCount") int keepCount);
-
     long countByIdInAndMemberId(List<Long> ids, Long memberId);
 
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM Article a WHERE a.id IN :ids AND a.memberId = :memberId")
     void deleteAllByIdsAndMemberId(@Param("ids") List<Long> ids, @Param("memberId") Long memberId);
+
+    /**
+     * 관리자의 모든 article을 previous_article로 복사
+     * - 중복 방지: 이미 있으면 스킵
+     */
+    @Modifying
+    @Query(value = """
+        INSERT INTO previous_article (
+            title, contents, contents_summary,
+            expected_read_time, newsletter_id, arrived_date_time,
+            is_fixed, created_at, updated_at
+        )
+        SELECT 
+            a.title, 
+            a.contents, 
+            a.contents_summary,
+            a.expected_read_time, 
+            a.newsletter_id, 
+            a.arrived_date_time,
+            false,
+            a.created_at,
+            NOW()
+        FROM article a
+        WHERE a.member_id = :adminId
+        AND NOT EXISTS (
+            SELECT 1 FROM previous_article pa
+            WHERE pa.newsletter_id = a.newsletter_id
+            AND pa.title = a.title
+            AND pa.arrived_date_time = a.arrived_date_time
+        )
+    """, nativeQuery = true)
+    int safeCopyToArchive(@Param("adminId") Long adminId);
+
+    /**
+     * 뉴스레터별로 최신 N개만 남기고 나머지 삭제
+     * - previous_article로 복사 확인 후 삭제
+     */
+    @Modifying
+    @Query(value = """
+        DELETE a FROM article a
+        WHERE a.id IN (
+            SELECT id FROM (
+                SELECT id,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY newsletter_id 
+                           ORDER BY arrived_date_time DESC, id DESC
+                       ) AS row_num
+                FROM article
+                WHERE member_id = :adminId
+            ) ranked
+            WHERE ranked.row_num > :keepCount
+        )
+        AND EXISTS (
+            SELECT 1 FROM previous_article pa
+            WHERE pa.newsletter_id = a.newsletter_id
+            AND pa.title = a.title
+            AND pa.arrived_date_time = a.arrived_date_time
+        )
+    """, nativeQuery = true)
+    int safeDeleteArchived(
+            @Param("adminId") Long adminId,
+            @Param("keepCount") int keepCount
+    );
 }

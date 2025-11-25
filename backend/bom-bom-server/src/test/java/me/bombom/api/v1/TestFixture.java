@@ -13,6 +13,8 @@ import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
+import me.bombom.api.v1.newsletter.domain.NewsletterPreviousPolicy;
+import me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy;
 import me.bombom.api.v1.pet.domain.Pet;
 import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.reading.domain.ContinueReading;
@@ -220,6 +222,53 @@ public final class TestFixture {
                 .memberId(memberId)
                 .newsletterId(newsletterId)
                 .arrivedDateTime(arrivedTime)
+                .build();
+    }
+
+    /**
+     * NewsletterPreviousPolicy
+     */
+    public static NewsletterPreviousPolicy createNewsletterPreviousPolicy(
+            Long newsletterId,
+            NewsletterPreviousStrategy strategy,
+            int recentCount,
+            int fixedCount,
+            int exposureRatio
+    ) {
+        return NewsletterPreviousPolicy.builder()
+                .newsletterId(newsletterId)
+                .strategy(strategy)
+                .recentCount(recentCount)
+                .fixedCount(fixedCount)
+                .exposureRatio(exposureRatio)
+                .build();
+    }
+
+    public static NewsletterPreviousPolicy createNewsletterPreviousPolicy(
+            Long newsletterId,
+            NewsletterPreviousStrategy strategy,
+            int lastestCount,
+            int fixedCount
+    ) {
+        return createNewsletterPreviousPolicy(newsletterId, strategy, lastestCount, fixedCount, 100);
+    }
+
+    /**
+     * PreviousArticle
+     */
+    public static me.bombom.api.v1.article.domain.PreviousArticle createPreviousArticle(
+            String title,
+            Long newsletterId,
+            LocalDateTime arrivedTime
+    ) {
+        return me.bombom.api.v1.article.domain.PreviousArticle.builder()
+                .title(title)
+                .contents("<h1>고정 아티클 내용</h1>")
+                .contentsSummary("고정 아티클 요약")
+                .expectedReadTime(5)
+                .newsletterId(newsletterId)
+                .arrivedDateTime(arrivedTime)
+                .isFixed(true)  // 직접 생성된 고정 아티클
                 .build();
     }
 

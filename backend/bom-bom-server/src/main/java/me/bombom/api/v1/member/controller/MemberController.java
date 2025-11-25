@@ -42,10 +42,4 @@ public class MemberController implements MemberControllerApi {
   public MemberProfileResponse getMemberProfile(@LoginMember Member member) {
     return memberService.getProfile(member.getId());
   }
-
-  @Override
-  @GetMapping("/me/newsletters")
-  public List<SubscribedNewsletterResponse> getSubscribedNewsletters(@LoginMember Member member) {
-    return subscribeService.getSubscribedNewsletters(member);
-  }
 }

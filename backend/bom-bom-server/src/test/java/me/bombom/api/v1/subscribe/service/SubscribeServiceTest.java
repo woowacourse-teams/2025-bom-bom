@@ -20,6 +20,7 @@ import me.bombom.api.v1.subscribe.dto.UnsubscribeResponse;
 import me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import me.bombom.support.IntegrationTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,15 @@ class SubscribeServiceTest {
     private SubscribeRepository subscribeRepository;
     @Autowired
     private NewsletterDetailRepository newsletterDetailRepository;
+
+    @BeforeEach
+    void setUp() {
+        subscribeRepository.deleteAllInBatch();
+        newsletterRepository.deleteAllInBatch();
+        newsletterDetailRepository.deleteAllInBatch();
+        categoryRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+    }
 
     @Test
     void 구독중인_뉴스레터를_조회한다() {

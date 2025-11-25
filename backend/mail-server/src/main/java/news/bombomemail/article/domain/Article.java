@@ -30,6 +30,9 @@ public class Article extends BaseEntity {
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
     private String contents;
 
+    @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
+    private String contentsText;
+
     @Column(length = 512)
     private String thumbnailUrl;
 
@@ -56,6 +59,7 @@ public class Article extends BaseEntity {
             Long id,
             @NonNull String title,
             @NonNull String contents,
+            @NonNull String contentsText,
             String thumbnailUrl,
             int expectedReadTime,
             @NonNull String contentsSummary,
@@ -67,6 +71,7 @@ public class Article extends BaseEntity {
         this.id = id;
         this.title = title;
         this.contents = contents;
+        this.contentsText = contentsText;
         this.thumbnailUrl = thumbnailUrl;
         this.expectedReadTime = expectedReadTime;
         this.contentsSummary = contentsSummary;

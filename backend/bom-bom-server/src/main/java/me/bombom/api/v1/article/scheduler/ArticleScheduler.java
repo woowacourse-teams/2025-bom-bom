@@ -2,6 +2,7 @@ package me.bombom.api.v1.article.scheduler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.article.service.PreviousArticleService;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,6 +19,7 @@ public class ArticleScheduler {
     private static final String DAILY_3AM_CRON = "0 0 3 * * *";
 
     private final PreviousArticleService previousArticleService;
+    private final ArticleService articleService;
 
     @Scheduled(cron = DAILY_2AM_CRON, zone = TIME_ZONE)
     @SchedulerLock(name = "cleanup_old_previous_articles", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
@@ -33,7 +35,8 @@ public class ArticleScheduler {
         log.info("최신 아티클 정리 시작 (5일 이상 지난 데이터)");
         int deletedCount = articleService.cleanupOldRecentArticles();
         log.info("{}개 정리 완료", deletedCount);
-      
+    }
+
     @Scheduled(cron = DAILY_3AM_CRON, zone = TIME_ZONE)
     @SchedulerLock(name = "move_recent_admin_articles", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void moveRecentAdminArticles() {

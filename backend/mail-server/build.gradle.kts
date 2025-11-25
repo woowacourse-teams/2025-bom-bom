@@ -57,7 +57,6 @@ dependencies {
 
     // db
     runtimeOnly("com.mysql:mysql-connector-j")
-    runtimeOnly("com.h2database:h2")
 }
 
 tasks.withType<Test> {

@@ -21,6 +21,8 @@ CREATE TABLE `recent_article` (
     INDEX `idx_recent_article_newsletter` (`newsletter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+ALTER TABLE article ADD COLUMN contents_text TEXT;
+
 -- ngram FULLTEXT 인덱스 생성 (검색 성능 최적화)
 -- ngram 파서를 사용하여 한글 검색 성능 향상
 -- title과 contents_text를 함께 인덱싱하여 복합 검색 최적화

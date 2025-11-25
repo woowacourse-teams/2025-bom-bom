@@ -143,11 +143,6 @@ public class ArticleService {
     }
 
     @Transactional
-    public int cleanupOldPreviousArticles() {
-        return articleRepository.cleanupOldPreviousArticles(PREVIOUS_ARTICLE_ADMIN_ID, PREVIOUS_ARTICLE_KEEP_COUNT);
-    }
-
-    @Transactional
     public int cleanupOldRecentArticles() {
         LocalDateTime fiveDaysAgo = LocalDateTime.now().minusDays(5);
         return recentArticleRepository.deleteAllByArrivedDateTimeBefore(fiveDaysAgo);

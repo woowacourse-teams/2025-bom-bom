@@ -18,7 +18,7 @@ import me.bombom.api.v1.common.BaseEntity;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Article extends BaseEntity {
+public class RecentArticle extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,14 +30,14 @@ public class Article extends BaseEntity {
     @Column(nullable = false, columnDefinition = "mediumtext")
     private String contents;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "mediumtext")
     private String contentsText;
 
     @Column(length = 512)
     private String thumbnailUrl;
 
     @Column(columnDefinition = "tinyint")
-    private int expectedReadTime;
+    private Integer expectedReadTime;
 
     @Column(nullable = false)
     private String contentsSummary;
@@ -55,14 +55,14 @@ public class Article extends BaseEntity {
     private LocalDateTime arrivedDateTime;
 
     @Builder
-    public Article(
+    public RecentArticle(
             Long id,
             @NonNull String title,
             @NonNull String contents,
-            String thumbnailUrl,
-            int expectedReadTime,
-            @NonNull String contentsSummary,
             @NonNull String contentsText,
+            String thumbnailUrl,
+            Integer expectedReadTime,
+            @NonNull String contentsSummary,
             boolean isRead,
             @NonNull Long memberId,
             @NonNull Long newsletterId,
@@ -71,25 +71,14 @@ public class Article extends BaseEntity {
         this.id = id;
         this.title = title;
         this.contents = contents;
+        this.contentsText = contentsText;
         this.thumbnailUrl = thumbnailUrl;
         this.expectedReadTime = expectedReadTime;
         this.contentsSummary = contentsSummary;
-        this.contentsText = contentsText;
         this.isRead = isRead;
         this.memberId = memberId;
         this.newsletterId = newsletterId;
         this.arrivedDateTime = arrivedDateTime;
     }
-
-    public void markAsRead() {
-        isRead = true;
-    }
-
-    public boolean isArrivedToday() {
-        return arrivedDateTime.toLocalDate().isEqual(LocalDate.now());
-    }
-
-    public boolean isNotOwner(Long memberId) {
-        return !this.memberId.equals(memberId);
-    }
 }
+

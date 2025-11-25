@@ -1,11 +1,13 @@
 package me.bombom.api.v1.article.service;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.article.dto.request.ArticleSearchOptionsRequest;
 import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
@@ -13,6 +15,7 @@ import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.event.MarkAsReadEvent;
 import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.article.repository.RecentArticleRepository;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -44,6 +47,7 @@ import org.springframework.util.StringUtils;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
+    private final RecentArticleRepository recentArticleRepository;
     private final TodayReadingRepository todayReadingRepository;
     private final CategoryRepository categoryRepository;
     private final NewsletterRepository newsletterRepository;
@@ -58,6 +62,15 @@ public class ArticleService {
     ) {
         validateNewsletterId(articlesOptionsRequest.newsletterId());
         return articleRepository.findArticles(member.getId(), articlesOptionsRequest, pageable);
+    }
+
+    public Page<ArticleResponse> getArticlesBySearch(
+            Member member,
+            ArticleSearchOptionsRequest articleSearchOptionsRequest,
+            Pageable pageable
+    ) {
+        validateNewsletterId(articleSearchOptionsRequest.newsletterId());
+        return articleRepository.findArticlesBySearch(member.getId(), articleSearchOptionsRequest, pageable);
     }
 
     public ArticleDetailResponse getArticleDetail(Long id, Member member) {
@@ -127,6 +140,12 @@ public class ArticleService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteAllByMemberId(Long memberId) {
         articleRepository.deleteAllByMemberId(memberId);
+    }
+
+    @Transactional
+    public int cleanupOldRecentArticles() {
+        LocalDateTime fiveDaysAgo = LocalDateTime.now().minusDays(5);
+        return recentArticleRepository.deleteAllByArrivedDateTimeBefore(fiveDaysAgo);
     }
 
     @Transactional

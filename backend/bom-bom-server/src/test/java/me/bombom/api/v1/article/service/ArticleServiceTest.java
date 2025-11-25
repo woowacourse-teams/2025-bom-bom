@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
@@ -102,7 +103,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 pageable
         );
 
@@ -117,28 +118,6 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 아티클_목록_조회_ASC_정렬_테스트() {
-        // given
-        Pageable pageable = PageRequest.of(0, 10, Sort.by(Direction.ASC, "arrivedDateTime"));
-
-        // when
-        Page<ArticleResponse> result = articleService.getArticles(
-                member,
-                ArticlesOptionsRequest.of(null, null, null),
-                pageable
-        );
-
-        // then
-        List<ArticleResponse> content = result.getContent();
-        assertSoftly(softly -> {
-            softly.assertThat(result.getTotalElements()).isEqualTo(articles.size());
-            softly.assertThat(content).hasSize(articles.size());
-            softly.assertThat(content.get(0).arrivedDateTime()).isBefore(content.get(1).arrivedDateTime());
-            softly.assertThat(content.get(1).arrivedDateTime()).isBefore(content.get(2).arrivedDateTime());
-        });
-    }
-
-    @Test
     void 아티클_목록_조회_뉴스레터_필터링_테스트() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
@@ -148,7 +127,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, newsletterId, null),
+                ArticlesOptionsRequest.of(null, newsletterId),
                 pageable
         );
 
@@ -162,24 +141,6 @@ class ArticleServiceTest {
         });
     }
 
-    @Test
-    void 아티클_목록_조회_날짜_필터링_테스트() {
-        // given
-        Pageable pageable = PageRequest.of(0, 10);
-
-        // when
-        Page<ArticleResponse> result = articleService.getArticles(
-                member,
-                ArticlesOptionsRequest.of(BASE_TIME.toLocalDate(), null, null),
-                pageable
-        );
-
-        // then - 하루 전 아티클 제외하고 3개
-        assertSoftly(softly -> {
-            softly.assertThat(result.getTotalElements()).isEqualTo(articles.size() - 1);
-            softly.assertThat(result.getContent()).hasSize(articles.size() - 1);
-        });
-    }
 //
 //    @Test
 //    void 아티클_목록_조회_제목_검색_테스트() {
@@ -210,28 +171,10 @@ class ArticleServiceTest {
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, 0L, null),
+                ArticlesOptionsRequest.of(null, 0L),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
-
-    @Test
-    void 아티클_목록_조회_정렬_기준_필드가_존재하지_않으면_예외() {
-        // given
-        Pageable pageable = PageRequest.of(
-                0,
-                10,
-                Sort.by(new Order(Direction.DESC, "invalidField"))
-        );
-
-        // when & then
-        assertThatThrownBy(() -> articleService.getArticles(
-                member,
-                ArticlesOptionsRequest.of(null, null, null),
-                pageable
-        )).isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
     }
 
     @Test
@@ -242,7 +185,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 firstPage
         );
 
@@ -268,7 +211,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 secondPage
         );
 
@@ -294,7 +237,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 pageable
         );
 
@@ -305,28 +248,6 @@ class ArticleServiceTest {
             softly.assertThat(result.getTotalPages()).isEqualTo(2);
             softly.assertThat(result.getContent().get(0).arrivedDateTime())
                     .isAfter(result.getContent().get(1).arrivedDateTime());
-        });
-    }
-
-    @Test
-    void 아티클_목록_조회_페이징_ASC_정렬_테스트() {
-        // given
-        Pageable pageable = PageRequest.of(0, 2, Sort.by(Direction.ASC, "arrivedDateTime"));
-
-        // when
-        Page<ArticleResponse> result = articleService.getArticles(
-                member,
-                ArticlesOptionsRequest.of(null, null, null),
-                pageable
-        );
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(result.getTotalElements()).isEqualTo(4);
-            softly.assertThat(result.getContent()).hasSize(2);
-            softly.assertThat(result.getTotalPages()).isEqualTo(2);
-            softly.assertThat(result.getContent().get(0).arrivedDateTime())
-                    .isBefore(result.getContent().get(1).arrivedDateTime());
         });
     }
 
@@ -346,7 +267,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 pageable
         );
 

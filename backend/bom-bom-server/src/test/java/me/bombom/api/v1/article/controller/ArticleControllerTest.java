@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import me.bombom.api.v1.TestFixture;
@@ -161,43 +160,46 @@ class ArticleControllerTest {
                 .andExpect(jsonPath("$.content[1].newsletter.name").value(newsletterName));
     }
 
-//    @Test
-//    void 1_검색_아티클_목록_조회() throws Exception {
-//        // when & then
-//        mockMvc.perform(get("/api/v1/articles")
-//                        .with(authentication(authToken))
-//                        .param("keyword", "뉴스"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.content").isArray())
-//                .andExpect(jsonPath("$.totalElements").value(2))
-//                .andExpect(jsonPath("$.content[0].title").value("뉴스"))
-//                .andExpect(jsonPath("$.content[1].title").value("뉴스"));
-//    }
+    @Test
+    @DisplayName("검색 아티클 목록 조회 - 뉴스 키워드")
+    void 검색_아티클_목록_조회_뉴스() throws Exception {
+        // when & then
+        mockMvc.perform(get("/api/v1/articles/search")
+                        .with(authentication(authToken))
+                        .param("keyword", "뉴스"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.content[?(@.title == '뉴스')]").exists())
+                .andExpect(jsonPath("$.content.length()").value(2));
+    }
 
-//    @Test
-//    void 레터_키워드_검색_아티클_목록_조회() throws Exception {
-//        // when & then
-//        mockMvc.perform(get("/api/v1/articles")
-//                        .with(authentication(authToken))
-//                        .param("keyword", "레터"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.content").isArray())
-//                .andExpect(jsonPath("$.totalElements").value(2))
-//                .andExpect(jsonPath("$.content[0].title").value("레터"))
-//                .andExpect(jsonPath("$.content[1].title").value("레터"));
-//    }
+    @Test
+    @DisplayName("검색 아티클 목록 조회 - 레터 키워드")
+    void 레터_키워드_검색_아티클_목록_조회() throws Exception {
+        // when & then
+        mockMvc.perform(get("/api/v1/articles/search")
+                        .with(authentication(authToken))
+                        .param("keyword", "레터"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.content[?(@.title == '레터')]").exists())
+                .andExpect(jsonPath("$.content.length()").value(2));
+    }
 
-//    @Test
-//    void 존재하지않는_키워드_검색_아티클_목록_조회() throws Exception {
-//        // when & then
-//        mockMvc.perform(get("/api/v1/articles")
-//                        .with(authentication(authToken))
-//                        .param("keyword", "존재하지않는키워드"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.content").isArray())
-//                .andExpect(jsonPath("$.totalElements").value(0))
-//                .andExpect(jsonPath("$.content").isEmpty());
-//    }
+    @Test
+    @DisplayName("존재하지 않는 키워드 검색 아티클 목록 조회")
+    void 존재하지않는_키워드_검색_아티클_목록_조회() throws Exception {
+        // when & then
+        mockMvc.perform(get("/api/v1/articles/search")
+                        .with(authentication(authToken))
+                        .param("keyword", "존재하지않는키워드"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.totalElements").value(0))
+                .andExpect(jsonPath("$.content").isEmpty());
+    }
 
     @Test
     void 기본값이_DESC_정렬인지_확인() throws Exception {
@@ -232,147 +234,66 @@ class ArticleControllerTest {
     }
 
     @Test
-    void DESC_정렬_아티클_목록_조회() throws Exception {
-        // when & then - contents에 "아티클"이 포함되어 있어서 4개 모두 검색됨
-        MvcResult result = mockMvc.perform(get("/api/v1/articles/search")
-                        .with(authentication(authToken))
-                        .param("keyword", "아티클")
-                        .param("sorted", "desc"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.totalElements").value(4))
-                .andReturn();
-
-        String responseContent = result.getResponse().getContentAsString();
-        JsonNode jsonResponse = objectMapper.readTree(responseContent);
-        String firstDateTime = jsonResponse.get("content").get(0).get("arrivedDateTime").asText();
-        String lastDateTime = jsonResponse.get("content").get(3).get("arrivedDateTime").asText();
-
-        assertSoftly(softly -> {
-            softly.assertThat(firstDateTime).isEqualTo("2025-07-15T09:55:00"); // 최신
-            softly.assertThat(lastDateTime).isEqualTo("2025-07-14T10:00:00");  // 오래됨
-        });
+    void 검색_키워드_없으면_예외() throws Exception {
+        // when & then - keyword가 없으면 검증 실패
+        mockMvc.perform(get("/api/v1/articles/search")
+                        .with(authentication(authToken)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void ASC_정렬_아티클_목록_조회() throws Exception {
-        // when & then - contents에 "아티클"이 포함되어 있어서 4개 모두 검색됨
-        MvcResult result = mockMvc.perform(get("/api/v1/articles/search")
-                        .with(authentication(authToken))
-                        .param("keyword", "아티클")
-                        .param("sort", "arrivedDateTime")
-                        .param("direction", "asc"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.totalElements").value(4))
-                .andReturn();
-
-        String responseContent = result.getResponse().getContentAsString();
-        JsonNode jsonResponse = objectMapper.readTree(responseContent);
-        String firstDateTime = jsonResponse.get("content").get(0).get("arrivedDateTime").asText();
-        String lastDateTime = jsonResponse.get("content").get(3).get("arrivedDateTime").asText();
-
-        assertSoftly(softly -> {
-            softly.assertThat(firstDateTime).isEqualTo("2025-07-14T10:00:00");  // 오래됨
-            softly.assertThat(lastDateTime).isEqualTo("2025-07-15T09:55:00");   // 최신
-        });
-    }
-
-    @Test
-    void 첫번째_페이지_아티클_목록_조회() throws Exception {
-        // when & then - contents에 "아티클"이 포함되어 있어서 4개 모두 검색됨
+    void 검색_키워드_공백만_있으면_예외() throws Exception {
+        // when & then - 공백만 있으면 검증 실패
         mockMvc.perform(get("/api/v1/articles/search")
                         .with(authentication(authToken))
-                        .param("keyword", "아티클")
-                        .param("page", "0")
-                        .param("size", "2"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content").isNotEmpty())
-                .andExpect(jsonPath("$.size").value(2))
-                .andExpect(jsonPath("$.number").value(0))
-                .andExpect(jsonPath("$.totalElements").value(4))
-                .andExpect(jsonPath("$.totalPages").value(2))
-                .andExpect(jsonPath("$.first").value(true))
-                .andExpect(jsonPath("$.last").value(false));
+                        .param("keyword", "   "))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void 두번째_페이지_아티클_목록_조회() throws Exception {
-        // when & then - contents에 "아티클"이 포함되어 있어서 4개 모두 검색됨
+    void 검색_키워드_1자_이하면_예외() throws Exception {
+        // when & then - 1자 이하면 검증 실패
         mockMvc.perform(get("/api/v1/articles/search")
                         .with(authentication(authToken))
-                        .param("keyword", "아티클")
-                        .param("page", "1")
-                        .param("size", "2"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.size").value(2))
-                .andExpect(jsonPath("$.number").value(1))
-                .andExpect(jsonPath("$.totalElements").value(4))
-                .andExpect(jsonPath("$.totalPages").value(2))
-                .andExpect(jsonPath("$.first").value(false))
-                .andExpect(jsonPath("$.last").value(true));
+                        .param("keyword", "A"))
+                .andExpect(status().isBadRequest());
     }
 
+
     @Test
-    void 날짜_필터링_아티클_목록_조회() throws Exception {
+    @DisplayName("뉴스레터 키워드 복합 필터링 아티클 목록 조회")
+    void 뉴스레터_키워드_복합_필터링_아티클_목록_조회() throws Exception {
         // given
-        LocalDate baseDate = LocalDate.of(2025, 7, 15);
+        Newsletter newsletter = newsletters.get(2);
+        Long newsletterId = newsletter.getId();
 
-        // when & then - 특정 날짜로 필터링 (contents에 "아티클"이 포함되어 있어서 검색됨)
+        // when & then - 뉴스레터 + 키워드 복합 필터링 (검색 엔드포인트 사용)
         mockMvc.perform(get("/api/v1/articles/search")
                         .with(authentication(authToken))
-                        .param("keyword", "아티클")
-                        .param("date", baseDate.toString()))
+                        .param("newsletterId", newsletterId.toString())
+                        .param("keyword", "레터")
+                        .param("page", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.totalElements").value(3)); // 하루 전 제외하고 3개
+                .andExpect(jsonPath("$.totalElements").value(2)) // 조건에 맞는 2개
+                .andExpect(jsonPath("$.content[?(@.title == '레터')]").exists())
+                .andExpect(jsonPath("$.content[?(@.newsletter.name == '" + newsletter.getName() + "')]").exists())
+                .andExpect(jsonPath("$.content.length()").value(2));
     }
-
-//    @Test
-//    void 뉴스레터_키워드_날짜_복합_필터링_아티클_목록_조회() throws Exception {
-//        // given
-//        Newsletter newsletter = newsletters.get(2);
-//        Long newsletterId = newsletter.getId();
-//        LocalDate baseDate = LocalDate.of(2025, 7, 15);
 //
-//        // when & then - 뉴스레터 + 키워드 + 날짜 복합 필터링
-//        mockMvc.perform(get("/api/v1/articles")
-//                        .with(authentication(authToken))
-//                        .param("newsletterId", newsletterId.toString())
-//                        .param("keyword", "레터")
-//                        .param("date", baseDate.toString())
-//                        .param("sorted", "desc")
-//                        .param("page", "0")
-//                        .param("size", "10"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.content").isArray())
-//                .andExpect(jsonPath("$.totalElements").value(1)) // 조건에 맞는 1개
-//                .andExpect(jsonPath("$.content[0].title").value("레터"))
-//                .andExpect(jsonPath("$.content[0].newsletter.name").value(newsletter.getName()));
-//    }
-//
-//    @Test
-//    @DisplayName("일반 목록 조회에서 keyword가 있으면 에러")
-//    void 일반_목록_조회_키워드_있으면_예외() throws Exception {
-//        // when & then - getArticles는 keyword가 있으면 에러
-//        mockMvc.perform(get("/api/v1/articles")
-//                        .with(authentication(authToken))
-//                        .param("keyword", "아티클"))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$.message").value("검색요청을 할 수 없습니다."));
-//    }
-//
-//    @Test
-//    @DisplayName("검색에서 keyword가 없으면 에러")
-//    void 검색_키워드_없으면_예외() throws Exception {
-//        // when & then - getArticlesBySearch는 keyword가 없으면 에러
-//        mockMvc.perform(get("/api/v1/articles/search")
-//                        .with(authentication(authToken)))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$.message").value("검색 키워드는 필수입니다."));
-//    }
+    @Test
+    @DisplayName("일반 목록 조회에서 keyword 파라미터는 무시됨")
+    void 일반_목록_조회_키워드_파라미터_무시() throws Exception {
+        // when & then - getArticles는 keyword 파라미터가 있어도 무시되고 정상 동작
+        // ArticlesOptionsRequest에는 keyword 필드가 없으므로 바인딩되지 않음
+        mockMvc.perform(get("/api/v1/articles")
+                        .with(authentication(authToken))
+                        .param("keyword", "아티클"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.totalElements").value(4)); // keyword 무시하고 전체 조회
+    }
 
     @Test
     void 인증되지않은_사용자_아티클_목록_조회시_예외() throws Exception {

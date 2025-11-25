@@ -10,9 +10,8 @@ import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.article.dto.request.ArticleSearchOptionsRequest;
 import me.bombom.api.v1.article.service.ArticleService;
-import me.bombom.api.v1.common.exception.CIllegalArgumentException;
-import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
 import me.bombom.api.v1.member.domain.Member;
@@ -21,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -48,11 +46,6 @@ public class ArticleController implements ArticleControllerApi{
             @Valid @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
             @PageableDefault(sort = "arrivedDateTime", direction = Direction.DESC) Pageable pageable
     ) {
-        if (StringUtils.hasText(articlesOptionsRequest.keyword())) {
-            throw new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION)
-                    .addContext("message", "검색요청을 할 수 없습니다.");
-        }
-
         return articleService.getArticles(
                 member,
                 articlesOptionsRequest,
@@ -64,12 +57,12 @@ public class ArticleController implements ArticleControllerApi{
     @GetMapping("/search")
     public Page<ArticleResponse> getArticlesBySearch(
             @LoginMember Member member,
-            @Valid @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
+            @Valid @ModelAttribute ArticleSearchOptionsRequest articleSearchOptionsRequest,
             @PageableDefault(sort = "arrivedDateTime", direction = Direction.DESC) Pageable pageable
     ) {
-        return articleService.getArticles(
+        return articleService.getArticlesBySearch(
                 member,
-                articlesOptionsRequest,
+                articleSearchOptionsRequest,
                 pageable
         );
     }

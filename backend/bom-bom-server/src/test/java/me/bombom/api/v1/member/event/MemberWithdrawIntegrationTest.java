@@ -52,6 +52,7 @@ public class MemberWithdrawIntegrationTest {
     @Test
     void 회원_탈퇴_시_정보들을_삭제하는_메서드를_호출한다() {
         // given
+        memberRepository.deleteAllInBatch();
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
 
         // when

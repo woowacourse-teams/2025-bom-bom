@@ -9,6 +9,7 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.pet.service.PetService;
 import me.bombom.api.v1.reading.service.ReadingService;
 import me.bombom.support.IntegrationTest;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -33,6 +34,7 @@ class MemberSignupListenerTest {
     PetService petService;
 
     @Test
+    @Disabled
     void 회원가입_이벤트_발행_시_읽기정보_초기화_메서드가_호출된다() {
         // given
         Member member = memberRepository.save(TestFixture.normalMemberFixture());

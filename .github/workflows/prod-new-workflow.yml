@@ -63,7 +63,7 @@ jobs:
   deploy:
     name: Production Server 배포
     needs: build
-    runs-on: [ self-hosted, prod-new ]  # ✅ main → prod (runner에 따라 조정)
+    runs-on: [ self-hosted, prod-new2 ]  # ✅ main → prod (runner에 따라 조정)
     defaults:
       run:
         working-directory: ./backend/bom-bom-server

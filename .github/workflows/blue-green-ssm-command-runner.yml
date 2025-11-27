@@ -6,6 +6,10 @@ on:
       - server-new
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
   PROD1_ID: i-043b2198bd0564f99
   PROD2_ID: i-02583d84fc5e0c678
@@ -14,6 +18,7 @@ env:
   HEALTH_URL: http://localhost:8081/actuator/health
 
 jobs:
+
   prepare:
     runs-on: ubuntu-latest
     outputs:
@@ -80,19 +85,15 @@ jobs:
         working-directory: ./backend/bom-bom-server
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/download-artifact@v4
         with:
           name: bom-bom-jar
           path: ./backend/bom-bom-server/build/libs
-
       - uses: docker/setup-buildx-action@v3
-
       - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Build & Push Image
         run: |
           docker buildx build \
@@ -105,133 +106,151 @@ jobs:
     needs: docker-image
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSM
-        uses: aws-actions/aws-cli@v1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
-          args: |
-            ssm send-command \
-              --document-name "AWS-RunShellScript" \
-              --targets "Key=InstanceIds,Values=${{ env.PROD2_ID }}" \
-              --parameters commands='[
-                "cd /opt/bom-bom",
-                "sudo docker compose -f ${{ env.COMPOSE_FILE }} down || true",
-                "sudo docker compose -f ${{ env.COMPOSE_FILE }} pull",
-                "sudo docker compose -f ${{ env.COMPOSE_FILE }} up -d --remove-orphans --force-recreate"
-              ]' \
-              --comment "Deploy prod2"
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE }}
+          aws-region: ap-northeast-2
+
+      - name: Deploy via SSM
+        run: |
+          aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --targets "Key=InstanceIds,Values=${{ env.PROD2_ID }}" \
+            --parameters commands='[
+              "cd /opt/bom-bom",
+              "sudo docker compose -f ${{ env.COMPOSE_FILE }} down || true",
+              "sudo docker compose -f ${{ env.COMPOSE_FILE }} pull",
+              "sudo docker compose -f ${{ env.COMPOSE_FILE }} up -d --remove-orphans --force-recreate"
+            ]' \
+            --comment "Deploy prod2"
 
   healthcheck-prod2:
     name: "🩺 Step 2: Health Check Prod2"
     needs: deploy-prod2
     runs-on: ubuntu-latest
     steps:
-      - name: Check health via SSM curl
-        uses: aws-actions/aws-cli@v1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
-          args: |
-            for i in {1..30}; do
-              CMD=$(aws ssm send-command \
-                --document-name "AWS-RunShellScript" \
-                --targets "Key=InstanceIds,Values=${{ env.PROD2_ID }}" \
-                --parameters commands='["curl -o /dev/null -s -w \"%{http_code}\" ${{ env.HEALTH_URL }}"]' \
-                --query "Command.CommandId" --output text)
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE }}
+          aws-region: ap-northeast-2
 
-              sleep 3
+      - name: Health Check
+        run: |
+          for i in {1..30}; do
+            CMD=$(aws ssm send-command \
+              --document-name "AWS-RunShellScript" \
+              --targets "Key=InstanceIds,Values=${{ env.PROD2_ID }}" \
+              --parameters commands='["curl -o /dev/null -s -w \"%{http_code}\" ${{ env.HEALTH_URL }}"]' \
+              --query "Command.CommandId" --output text)
 
-              RES=$(aws ssm get-command-invocation \
-                --command-id "$CMD" \
-                --instance-id "${{ env.PROD2_ID }}" \
-                --query "StandardOutputContent" --output text || echo "000")
+            sleep 3
 
-              echo "STATUS: $RES"
-              if [ "$RES" = "200" ]; then exit 0; fi
+            RES=$(aws ssm get-command-invocation \
+              --command-id "$CMD" \
+              --instance-id "${{ env.PROD2_ID }}" \
+              --query "StandardOutputContent" --output text || echo "000")
 
-              sleep 5
-            done
+            echo "STATUS: $RES"
+            if [ "$RES" = "200" ]; then exit 0; fi
 
-            echo "❌ Health check failed"
-            exit 1
+            sleep 5
+          done
+
+          echo "❌ Health check failed"
+          exit 1
 
   shift-prod2-live:
     name: "🔀 Step 3: Switch traffic to prod2"
     needs: healthcheck-prod2
     runs-on: ubuntu-latest
     steps:
-      - name: Switch traffic inside HAProxy (via SSM)
-        uses: aws-actions/aws-cli@v1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
-          args: |
-            ssm send-command \
-              --document-name "AWS-RunShellScript" \
-              --targets "Key=InstanceIds,Values=${{ env.LB_TARGET }}" \
-              --parameters commands='[
-                "echo \"disable server app_servers/prod1\" | sudo socat stdio /var/run/haproxy.sock",
-                "echo \"enable server app_servers/prod2\" | sudo socat stdio /var/run/haproxy.sock"
-              ]' \
-              --comment "Shift live traffic to prod2"
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE }}
+          aws-region: ap-northeast-2
+
+      - name: HAProxy Switch
+        run: |
+          aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --targets "Key=InstanceIds,Values=${{ env.LB_TARGET }}" \
+            --parameters commands='[
+              "echo \"disable server app_servers/prod1\" | sudo socat stdio /var/run/haproxy.sock",
+              "echo \"enable server app_servers/prod2\" | sudo socat stdio /var/run/haproxy.sock"
+            ]'
 
   deploy-prod1:
     name: "🚀 Step 4: Deploy Prod1 (Green)"
     needs: shift-prod2-live
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSM
-        uses: aws-actions/aws-cli@v1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
-          args: |
-            ssm send-command \
-              --document-name "AWS-RunShellScript" \
-              --targets "Key=InstanceIds,Values=${{ env.PROD1_ID }}" \
-              --parameters commands='[
-                "cd /opt/bom-bom",
-                "sudo docker compose -f ${{ env.COMPOSE_FILE }} down || true",
-                "sudo docker compose -f ${{ env.COMPOSE_FILE }} pull",
-                "sudo docker compose -f ${{ env.COMPOSE_FILE }} up -d --remove-orphans --force-recreate"
-              ]'
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE }}
+          aws-region: ap-northeast-2
+
+      - name: Deploy via SSM
+        run: |
+          aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --targets "Key=InstanceIds,Values=${{ env.PROD1_ID }}" \
+            --parameters commands='[
+              "cd /opt/bom-bom",
+              "sudo docker compose -f ${{ env.COMPOSE_FILE }} down || true",
+              "sudo docker compose -f ${{ env.COMPOSE_FILE }} pull",
+              "sudo docker compose -f ${{ env.COMPOSE_FILE }} up -d --remove-orphans --force-recreate"
+            ]'
 
   healthcheck-prod1:
     name: "🩺 Step 5: Health Check Prod1"
     needs: deploy-prod1
     runs-on: ubuntu-latest
     steps:
-      - name: Check health via SSM curl
-        uses: aws-actions/aws-cli@v1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
-          args: |
-            for i in {1..30}; do
-              CMD=$(aws ssm send-command \
-                --document-name "AWS-RunShellScript" \
-                --targets "Key=InstanceIds,Values=${{ env.PROD1_ID }}" \
-                --parameters commands='["curl -o /dev/null -s -w \"%{http_code}\" ${{ env.HEALTH_URL }}"]' \
-                --query "Command.CommandId" --output text)
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE }}
+          aws-region: ap-northeast-2
 
-              sleep 3
+      - name: Health Check
+        run: |
+          for i in {1..30}; do
+            CMD=$(aws ssm send-command \
+              --document-name "AWS-RunShellScript" \
+              --targets "Key=InstanceIds,Values=${{ env.PROD1_ID }}" \
+              --parameters commands='["curl -o /dev/null -s -w \"%{http_code}\" ${{ env.HEALTH_URL }}"]' \
+              --query "Command.CommandId" --output text)
 
-              RES=$(aws ssm get-command-invocation \
-                --command-id "$CMD" \
-                --instance-id "${{ env.PROD1_ID }}" \
-                --query "StandardOutputContent" --output text || echo "000")
+            sleep 3
 
-              if [ "$RES" = "200" ]; then exit 0; fi
-              sleep 5
-            done
+            RES=$(aws ssm get-command-invocation \
+              --command-id "$CMD" \
+              --instance-id "${{ env.PROD1_ID }}" \
+              --query "StandardOutputContent" --output text || echo "000")
 
-            echo "❌ Health check failed"
-            exit 1
+            if [ "$RES" = "200" ]; then exit 0; fi
+
+            sleep 5
+          done
+
+          echo "❌ Health check failed"
+          exit 1
 
   switch-final:
     name: "🔁 Step 6: Restore traffic (prod1 + prod2)"
     needs: healthcheck-prod1
     runs-on: ubuntu-latest
     steps:
-      - name: HAProxy traffic restore
-        uses: aws-actions/aws-cli@v1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
-          args: |
-            ssm send-command \
-              --document-name "AWS-RunShellScript" \
-              --targets "Key=InstanceIds,Values=${{ env.LB_TARGET }}" \
-              --parameters commands='[
-                "echo \"enable server app_servers/prod1\" | sudo socat stdio /var/run/haproxy.sock",
-                "echo \"enable server app_servers/prod2\" | sudo socat stdio /var/run/haproxy.sock"
-              ]'
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE }}
+          aws-region: ap-northeast-2
+
+      - name: HAProxy Restore
+        run: |
+          aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --targets "Key=InstanceIds,Values=${{ env.LB_TARGET }}" \
+            --parameters commands='[
+              "echo \"enable server app_servers/prod1\" | sudo socat stdio /var/run/haproxy.sock",
+              "echo \"enable server app_servers/prod2\" | sudo socat stdio /var/run/haproxy.sock"
+            ]'

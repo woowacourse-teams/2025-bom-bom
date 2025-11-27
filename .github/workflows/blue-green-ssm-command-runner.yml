@@ -12,7 +12,7 @@ permissions:
 
 env:
   AWS_REGION: ap-northeast-2
-  ROLE_ARN: arn:aws:iam::<AWS_ACCOUNT_ID>:role/GithubActions-BomBom-Deploy-Role
+  ROLE_ARN: arn:aws:iam::715432481104:role/github_allow
 
   PROD1_ID: i-043b2198bd0564f99
   PROD2_ID: i-02583d84fc5e0c678

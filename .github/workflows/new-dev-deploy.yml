@@ -67,7 +67,7 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: [ self-hosted, main ]
+    runs-on: [ self-hosted, dev-new ]
     defaults:
       run:
         working-directory: ./backend/bom-bom-server

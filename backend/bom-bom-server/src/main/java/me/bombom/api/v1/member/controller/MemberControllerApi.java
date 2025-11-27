@@ -49,14 +49,4 @@ public interface MemberControllerApi {
             @ApiResponse(responseCode = "200", description = "프로필 조회 성공")
     })
     MemberProfileResponse getMemberProfile(@Parameter(hidden = true) @LoginMember Member member);
-
-    @Operation(
-            summary = "구독한 뉴스레터 목록 조회",
-            description = "로그인한 회원이 구독중인 뉴스레터 목록을 조회합니다."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "구독한 뉴스레터 목록 조회 성공")
-    })
-    List<SubscribedNewsletterResponse> getSubscribedNewsletters(@Parameter(hidden = true) @LoginMember Member member);
-
 }

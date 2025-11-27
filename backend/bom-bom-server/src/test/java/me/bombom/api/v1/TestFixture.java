@@ -13,12 +13,16 @@ import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
+import me.bombom.api.v1.newsletter.domain.NewsletterPreviousPolicy;
+import me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy;
 import me.bombom.api.v1.pet.domain.Pet;
 import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.reading.domain.ContinueReading;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
+import me.bombom.api.v1.subscribe.domain.NewsletterSubscriptionCount;
+import me.bombom.api.v1.subscribe.domain.Subscribe;
 
 public final class TestFixture {
 
@@ -118,6 +122,33 @@ public final class TestFixture {
     }
 
     /**
+     * NewsletterSubscriptionCount
+     */
+    public static List<NewsletterSubscriptionCount> createNewsletterSubscriptionCounts(List<Newsletter> newsletters) {
+        return List.of(
+                NewsletterSubscriptionCount.builder()
+                        .newsletterId(newsletters.get(0).getId())
+                        .total(1000)
+                        .build(),
+                NewsletterSubscriptionCount.builder()
+                        .newsletterId(newsletters.get(1).getId())
+                        .total(850)
+                        .build(),
+                NewsletterSubscriptionCount.builder()
+                        .newsletterId(newsletters.get(2).getId())
+                        .total(600)
+                        .build()
+        );
+    }
+
+    public static NewsletterSubscriptionCount createNewsletterSubscriptionCount(Long newsletterId, int total) {
+        return NewsletterSubscriptionCount.builder()
+                .newsletterId(newsletterId)
+                .total(total)
+                .build();
+    }
+
+    /**
      * NewsletterDetail
      */
     public static List<NewsletterDetail> createNewsletterDetails() {
@@ -158,6 +189,16 @@ public final class TestFixture {
     }
 
     /**
+     * Subscribe
+     */
+    public static Subscribe createSubscribe(Newsletter newsletter, Member member) {
+        return  Subscribe.builder()
+                .newsletterId(newsletter.getId())
+                .memberId(member.getId())
+                .build();
+    }
+
+    /**
      * Article
      */
     public static List<Article> createArticles(Member member, List<Newsletter> newsletters) {
@@ -173,6 +214,7 @@ public final class TestFixture {
         return Article.builder()
                 .title(title)
                 .contents("<h1>아티클</h1>")
+                .contentsText("아티클")
                 .thumbnailUrl("https://example.com/images/thumb.png")
                 .expectedReadTime(5)
                 .contentsSummary("요약")
@@ -180,6 +222,53 @@ public final class TestFixture {
                 .memberId(memberId)
                 .newsletterId(newsletterId)
                 .arrivedDateTime(arrivedTime)
+                .build();
+    }
+
+    /**
+     * NewsletterPreviousPolicy
+     */
+    public static NewsletterPreviousPolicy createNewsletterPreviousPolicy(
+            Long newsletterId,
+            NewsletterPreviousStrategy strategy,
+            int recentCount,
+            int fixedCount,
+            int exposureRatio
+    ) {
+        return NewsletterPreviousPolicy.builder()
+                .newsletterId(newsletterId)
+                .strategy(strategy)
+                .recentCount(recentCount)
+                .fixedCount(fixedCount)
+                .exposureRatio(exposureRatio)
+                .build();
+    }
+
+    public static NewsletterPreviousPolicy createNewsletterPreviousPolicy(
+            Long newsletterId,
+            NewsletterPreviousStrategy strategy,
+            int lastestCount,
+            int fixedCount
+    ) {
+        return createNewsletterPreviousPolicy(newsletterId, strategy, lastestCount, fixedCount, 100);
+    }
+
+    /**
+     * PreviousArticle
+     */
+    public static me.bombom.api.v1.article.domain.PreviousArticle createPreviousArticle(
+            String title,
+            Long newsletterId,
+            LocalDateTime arrivedTime
+    ) {
+        return me.bombom.api.v1.article.domain.PreviousArticle.builder()
+                .title(title)
+                .contents("<h1>고정 아티클 내용</h1>")
+                .contentsSummary("고정 아티클 요약")
+                .expectedReadTime(5)
+                .newsletterId(newsletterId)
+                .arrivedDateTime(arrivedTime)
+                .isFixed(true)  // 직접 생성된 고정 아티클
                 .build();
     }
 

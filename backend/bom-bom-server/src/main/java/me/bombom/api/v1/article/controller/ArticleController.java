@@ -10,6 +10,7 @@ import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.article.dto.request.ArticleSearchOptionsRequest;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
@@ -20,7 +21,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -49,6 +49,20 @@ public class ArticleController implements ArticleControllerApi{
         return articleService.getArticles(
                 member,
                 articlesOptionsRequest,
+                pageable
+        );
+    }
+
+    @Override
+    @GetMapping("/search")
+    public Page<ArticleResponse> getArticlesBySearch(
+            @LoginMember Member member,
+            @Valid @ModelAttribute ArticleSearchOptionsRequest articleSearchOptionsRequest,
+            @PageableDefault(sort = "arrivedDateTime", direction = Direction.DESC) Pageable pageable
+    ) {
+        return articleService.getArticlesBySearch(
+                member,
+                articleSearchOptionsRequest,
                 pageable
         );
     }

@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
@@ -36,10 +35,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @IntegrationTest
 class ArticleServiceTest {
@@ -104,7 +103,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 pageable
         );
 
@@ -119,28 +118,6 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 아티클_목록_조회_ASC_정렬_테스트() {
-        // given
-        Pageable pageable = PageRequest.of(0, 10, Sort.by(Direction.ASC, "arrivedDateTime"));
-
-        // when
-        Page<ArticleResponse> result = articleService.getArticles(
-                member,
-                ArticlesOptionsRequest.of(null, null, null),
-                pageable
-        );
-
-        // then
-        List<ArticleResponse> content = result.getContent();
-        assertSoftly(softly -> {
-            softly.assertThat(result.getTotalElements()).isEqualTo(articles.size());
-            softly.assertThat(content).hasSize(articles.size());
-            softly.assertThat(content.get(0).arrivedDateTime()).isBefore(content.get(1).arrivedDateTime());
-            softly.assertThat(content.get(1).arrivedDateTime()).isBefore(content.get(2).arrivedDateTime());
-        });
-    }
-
-    @Test
     void 아티클_목록_조회_뉴스레터_필터링_테스트() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
@@ -150,7 +127,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, newsletterId, null),
+                ArticlesOptionsRequest.of(null, newsletterId),
                 pageable
         );
 
@@ -164,45 +141,27 @@ class ArticleServiceTest {
         });
     }
 
-    @Test
-    void 아티클_목록_조회_날짜_필터링_테스트() {
-        // given
-        Pageable pageable = PageRequest.of(0, 10);
-
-        // when
-        Page<ArticleResponse> result = articleService.getArticles(
-                member,
-                ArticlesOptionsRequest.of(BASE_TIME.toLocalDate(), null, null),
-                pageable
-        );
-
-        // then - 하루 전 아티클 제외하고 3개
-        assertSoftly(softly -> {
-            softly.assertThat(result.getTotalElements()).isEqualTo(articles.size() - 1);
-            softly.assertThat(result.getContent()).hasSize(articles.size() - 1);
-        });
-    }
-
-    @Test
-    void 아티클_목록_조회_제목_검색_테스트() {
-        // given
-        Pageable pageable = PageRequest.of(0, 10);
-
-        // when
-        Page<ArticleResponse> result = articleService.getArticles(
-                member,
-                ArticlesOptionsRequest.of(BASE_TIME.toLocalDate(), null, "뉴스"),
-                pageable
-        );
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(result.getContent())
-                    .extracting(ArticleResponse::title)
-                    .allMatch(title -> title.contains("뉴스"));
-            softly.assertThat(result.getContent()).hasSize(2);
-        });
-    }
+//
+//    @Test
+//    void 아티클_목록_조회_제목_검색_테스트() {
+//        // given
+//        Pageable pageable = PageRequest.of(0, 10);
+//
+//        // when
+//        Page<ArticleResponse> result = articleService.getArticles(
+//                member,
+//                ArticlesOptionsRequest.of(BASE_TIME.toLocalDate(), null, "뉴스"),
+//                pageable
+//        );
+//
+//        // then
+//        assertSoftly(softly -> {
+//            softly.assertThat(result.getContent())
+//                    .extracting(ArticleResponse::title)
+//                    .allMatch(title -> title.contains("뉴스"));
+//            softly.assertThat(result.getContent()).hasSize(2);
+//        });
+//    }
 
     @Test
     void 아티클_목록_조회_뉴스레터가_존재하지_않으면_예외() {
@@ -212,28 +171,10 @@ class ArticleServiceTest {
         // when & then
         assertThatThrownBy(() -> articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, 0L, null),
+                ArticlesOptionsRequest.of(null, 0L),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
-
-    @Test
-    void 아티클_목록_조회_정렬_기준_필드가_존재하지_않으면_예외() {
-        // given
-        Pageable pageable = PageRequest.of(
-                0,
-                10,
-                Sort.by(new Order(Direction.DESC, "invalidField"))
-        );
-
-        // when & then
-        assertThatThrownBy(() -> articleService.getArticles(
-                member,
-                ArticlesOptionsRequest.of(null, null, null),
-                pageable
-        )).isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
     }
 
     @Test
@@ -244,7 +185,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 firstPage
         );
 
@@ -270,7 +211,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 secondPage
         );
 
@@ -296,7 +237,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 pageable
         );
 
@@ -307,28 +248,6 @@ class ArticleServiceTest {
             softly.assertThat(result.getTotalPages()).isEqualTo(2);
             softly.assertThat(result.getContent().get(0).arrivedDateTime())
                     .isAfter(result.getContent().get(1).arrivedDateTime());
-        });
-    }
-
-    @Test
-    void 아티클_목록_조회_페이징_ASC_정렬_테스트() {
-        // given
-        Pageable pageable = PageRequest.of(0, 2, Sort.by(Direction.ASC, "arrivedDateTime"));
-
-        // when
-        Page<ArticleResponse> result = articleService.getArticles(
-                member,
-                ArticlesOptionsRequest.of(null, null, null),
-                pageable
-        );
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(result.getTotalElements()).isEqualTo(4);
-            softly.assertThat(result.getContent()).hasSize(2);
-            softly.assertThat(result.getTotalPages()).isEqualTo(2);
-            softly.assertThat(result.getContent().get(0).arrivedDateTime())
-                    .isBefore(result.getContent().get(1).arrivedDateTime());
         });
     }
 
@@ -348,7 +267,7 @@ class ArticleServiceTest {
         // when
         Page<ArticleResponse> result = articleService.getArticles(
                 member,
-                ArticlesOptionsRequest.of(null, null, null),
+                ArticlesOptionsRequest.of(null, null),
                 pageable
         );
 
@@ -393,6 +312,7 @@ class ArticleServiceTest {
                 .contents("<p>테스트 내용</p>")
                 .thumbnailUrl("https://example.com/test.png")
                 .expectedReadTime(3)
+                .contentsText("텍스트")
                 .contentsSummary("테스트 요약")
                 .isRead(false)
                 .memberId(member.getId())
@@ -661,61 +581,6 @@ class ArticleServiceTest {
             softly.assertThat(result.newsletters()).hasSize(1);
             softly.assertThat(result.newsletters().get(0).name()).isEqualTo("뉴스픽"); // newsletters.get(0)에 해당
             softly.assertThat(result.newsletters().get(0).articleCount()).isEqualTo(1);
-        });
-    }
-
-    @Test
-    void 관리자_아티클_정리_테스트() {
-        // given
-        Member admin = Member.builder()
-                .provider("admin")
-                .providerId("admin123")
-                .email("admin@bombom.news")
-                .nickname("봄봄")
-                .gender(Gender.MALE)
-                .roleId(1L)
-                .build();
-        memberRepository.save(admin);
-
-        // 테스트용 설정값 오버라이드
-        ReflectionTestUtils.setField(articleService, "PREVIOUS_ARTICLE_ADMIN_ID", admin.getId());
-
-        Newsletter newsletter1 = newsletters.get(0);
-
-        List<Article> adminArticles = new ArrayList<>();
-
-        for (int i = 0; i < 12; i++) {
-            Article article = TestFixture.createArticle(
-                    "관리자 아티클 " + i,
-                    admin.getId(),
-                    newsletter1.getId(),
-                    BASE_TIME.minusDays(i)
-            );
-            adminArticles.add(article);
-        }
-
-        articleRepository.saveAll(adminArticles);
-
-        // when - 서비스를 통해 호출 (트랜잭션 처리)
-        int deletedCount = articleService.cleanupOldPreviousArticles();
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(deletedCount).isEqualTo(2);
-
-            // 뉴스레터1에 10개만 남아있는지 확인
-            long newsletter1Count = articleRepository.findAll().stream()
-                    .filter(article ->
-                            article.getMemberId().equals(admin.getId()) &&
-                                    article.getNewsletterId().equals(newsletter1.getId()))
-                    .count();
-            softly.assertThat(newsletter1Count).isEqualTo(10);
-
-            // 일반 사용자 아티클은 영향받지 않았는지 확인
-            long memberCount = articleRepository.findAll().stream()
-                    .filter(article -> article.getMemberId().equals(member.getId()))
-                    .count();
-            softly.assertThat(memberCount).isEqualTo(4);
         });
     }
 

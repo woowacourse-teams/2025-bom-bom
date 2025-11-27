@@ -35,6 +35,7 @@ class MemberSignupListenerTest {
     @Test
     void 회원가입_이벤트_발행_시_읽기정보_초기화_메서드가_호출된다() {
         // given
+        memberRepository.deleteAllInBatch();
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
 
         // when

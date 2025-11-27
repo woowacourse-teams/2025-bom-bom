@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Positive;
 import java.util.List;
 import me.bombom.api.v1.article.dto.request.ArticleNewsletterStatisticOptionsRequest;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
+import me.bombom.api.v1.article.dto.request.ArticleSearchOptionsRequest;
 import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
@@ -40,6 +41,21 @@ public interface ArticleControllerApi {
         @Parameter(hidden = true) Member member,
         @Parameter(description = "필터링 관련 요청") @Valid @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
         @Parameter(description = "페이징 관련 요청 (예: ?page=0&size=10&sort=createdAt,desc)") Pageable pageable
+    );
+
+    @Operation(
+        summary = "아티클 검색",
+        description = "키워드로 아티클을 검색하여 페이징하여 조회합니다. "
+                + "(정렬 기본값: ?page=0&size=10&sort=arrivedDateTime,desc)"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "아티클 검색 성공"),
+        @ApiResponse(responseCode = "400", description = "잘못된 정렬 파라미터 요청", content = @Content)
+    })
+    Page<ArticleResponse> getArticlesBySearch(
+        @Parameter(hidden = true) Member member,
+        @Parameter(description = "검색 옵션") @Valid @ModelAttribute ArticleSearchOptionsRequest articleSearchOptionsRequest,
+        @Parameter(description = "페이징 관련 요청 (예: ?page=0&size=10&sort=arrivedDateTime,desc)") Pageable pageable
     );
 
     @Operation(

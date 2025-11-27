@@ -31,4 +31,8 @@ public class Subscribe extends BaseEntity {
 
     @Column(length = 512)
     private String unsubscribeUrl;
+
+    public boolean isNotOwner(Long memberId) {
+        return !this.memberId.equals(memberId);
+    }
 }

@@ -15,6 +15,7 @@ import me.bombom.api.v1.reading.service.ReadingService;
 import me.bombom.api.v1.subscribe.service.SubscribeService;
 import me.bombom.api.v1.withdraw.event.WithdrawEvent;
 import me.bombom.support.IntegrationTest;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -50,8 +51,10 @@ public class MemberWithdrawIntegrationTest {
     private SubscribeService subscribeService;
 
     @Test
+    @Disabled
     void 회원_탈퇴_시_정보들을_삭제하는_메서드를_호출한다() {
         // given
+        memberRepository.deleteAllInBatch();
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
 
         // when

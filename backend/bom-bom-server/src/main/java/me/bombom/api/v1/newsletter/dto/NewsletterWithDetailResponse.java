@@ -30,12 +30,16 @@ public record NewsletterWithDetailResponse(
 
         String previousNewsletterUrl,
 
-        String subscribeMethod
+        String subscribeMethod,
+
+        boolean isSubscribed
 ) {
+
     public static NewsletterWithDetailResponse of(
             Newsletter newsletter,
             NewsletterDetail newsletterDetail,
-            Category category
+            Category category,
+            boolean isSubscribed
     ) {
         return new NewsletterWithDetailResponse(
                 newsletter.getName(),
@@ -46,7 +50,8 @@ public record NewsletterWithDetailResponse(
                 newsletterDetail.getSubscribeUrl(),
                 newsletterDetail.getIssueCycle(),
                 newsletterDetail.getPreviousNewsletterUrl(),
-                newsletterDetail.getSubscribeMethod()
+                newsletterDetail.getSubscribeMethod(),
+                isSubscribed
         );
     }
 }

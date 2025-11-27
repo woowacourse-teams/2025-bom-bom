@@ -27,9 +27,11 @@ public class Article extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Lob
     @Column(nullable = false, columnDefinition = "mediumtext")
     private String contents;
+
+    @Column(nullable = false)
+    private String contentsText;
 
     @Column(length = 512)
     private String thumbnailUrl;
@@ -60,6 +62,7 @@ public class Article extends BaseEntity {
             String thumbnailUrl,
             int expectedReadTime,
             @NonNull String contentsSummary,
+            @NonNull String contentsText,
             boolean isRead,
             @NonNull Long memberId,
             @NonNull Long newsletterId,
@@ -71,6 +74,7 @@ public class Article extends BaseEntity {
         this.thumbnailUrl = thumbnailUrl;
         this.expectedReadTime = expectedReadTime;
         this.contentsSummary = contentsSummary;
+        this.contentsText = contentsText;
         this.isRead = isRead;
         this.memberId = memberId;
         this.newsletterId = newsletterId;

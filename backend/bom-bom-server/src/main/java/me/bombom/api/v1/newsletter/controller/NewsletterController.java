@@ -3,6 +3,8 @@ package me.bombom.api.v1.newsletter.controller;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
 import me.bombom.api.v1.newsletter.service.NewsletterService;
@@ -20,13 +22,16 @@ public class NewsletterController implements NewsletterControllerApi{
 
     @Override
     @GetMapping
-    public List<NewsletterResponse> getNewsletters() {
-        return newsletterService.getNewsletters();
+    public List<NewsletterResponse> getNewsletters(@LoginMember(anonymous = true) Member member) {
+        return newsletterService.getNewsletters(member);
     }
 
     @Override
     @GetMapping("/{id}")
-    public NewsletterWithDetailResponse getNewsletterWithDetail(@PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id) {
-        return newsletterService.getNewsletterWithDetail(id);
+    public NewsletterWithDetailResponse getNewsletterWithDetail(
+            @LoginMember(anonymous = true) Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+    ) {
+        return newsletterService.getNewsletterWithDetail(id, member);
     }
 }

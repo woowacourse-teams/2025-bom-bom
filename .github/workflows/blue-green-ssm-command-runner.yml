@@ -9,7 +9,7 @@ on:
 env:
   PROD1_ID: i-043b2198bd0564f99
   PROD2_ID: i-02583d84fc5e0c678
-  LB_TARGET: i-06856239dadc6d1fa    # 필요하면 로드밸런서 EC2 ID
+  LB_TARGET: i-06856239dadc6d1fa
   COMPOSE_FILE: docker-compose-prod-sub.yml
   HEALTH_URL: http://localhost:8081/actuator/health
 
@@ -22,9 +22,6 @@ jobs:
       - id: mk
         run: echo "release_id=$(date +%Y%m%d-%H%M%S)-${GITHUB_SHA::12}" >> $GITHUB_OUTPUT
 
-  # ---------------------------------------------------
-  # 1. Build + Test + Docker Build (동일)
-  # ---------------------------------------------------
   build:
     runs-on: ubuntu-latest
     needs: prepare
@@ -73,8 +70,7 @@ jobs:
           printf '%s' "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
 
       - name: Run tests
-        run: |
-          ./gradlew test --no-daemon --stacktrace --info
+        run: ./gradlew test --no-daemon --stacktrace --info
 
   docker-image:
     runs-on: ubuntu-latest
@@ -104,16 +100,13 @@ jobs:
             -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod \
             --push .
 
-  # ---------------------------------------------------
-  # 2. SSM 명령 실행 함수
-  # ---------------------------------------------------
   deploy-prod2:
     name: "🚀 Step 1: Deploy Prod2 (Blue)"
     needs: docker-image
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSM
-        uses: aws-actions/aws-cli-action@v1
+        uses: aws-actions/aws-cli@v1
         with:
           args: |
             ssm send-command \
@@ -133,11 +126,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check health via SSM curl
-        uses: aws-actions/aws-cli-action@v1
+        uses: aws-actions/aws-cli@v1
         with:
           args: |
             for i in {1..30}; do
-              CODE=$(aws ssm send-command \
+              CMD=$(aws ssm send-command \
                 --document-name "AWS-RunShellScript" \
                 --targets "Key=InstanceIds,Values=${{ env.PROD2_ID }}" \
                 --parameters commands='["curl -o /dev/null -s -w \"%{http_code}\" ${{ env.HEALTH_URL }}"]' \
@@ -146,13 +139,13 @@ jobs:
               sleep 3
 
               RES=$(aws ssm get-command-invocation \
-                --command-id "$CODE" \
+                --command-id "$CMD" \
                 --instance-id "${{ env.PROD2_ID }}" \
                 --query "StandardOutputContent" --output text || echo "000")
 
               echo "STATUS: $RES"
-
               if [ "$RES" = "200" ]; then exit 0; fi
+
               sleep 5
             done
 
@@ -165,7 +158,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Switch traffic inside HAProxy (via SSM)
-        uses: aws-actions/aws-cli-action@v1
+        uses: aws-actions/aws-cli@v1
         with:
           args: |
             ssm send-command \
@@ -183,7 +176,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSM
-        uses: aws-actions/aws-cli-action@v1
+        uses: aws-actions/aws-cli@v1
         with:
           args: |
             ssm send-command \
@@ -202,11 +195,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check health via SSM curl
-        uses: aws-actions/aws-cli-action@v1
+        uses: aws-actions/aws-cli@v1
         with:
           args: |
             for i in {1..30}; do
-              CODE=$(aws ssm send-command \
+              CMD=$(aws ssm send-command \
                 --document-name "AWS-RunShellScript" \
                 --targets "Key=InstanceIds,Values=${{ env.PROD1_ID }}" \
                 --parameters commands='["curl -o /dev/null -s -w \"%{http_code}\" ${{ env.HEALTH_URL }}"]' \
@@ -215,7 +208,7 @@ jobs:
               sleep 3
 
               RES=$(aws ssm get-command-invocation \
-                --command-id "$CODE" \
+                --command-id "$CMD" \
                 --instance-id "${{ env.PROD1_ID }}" \
                 --query "StandardOutputContent" --output text || echo "000")
 
@@ -232,7 +225,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: HAProxy traffic restore
-        uses: aws-actions/aws-cli-action@v1
+        uses: aws-actions/aws-cli@v1
         with:
           args: |
             ssm send-command \

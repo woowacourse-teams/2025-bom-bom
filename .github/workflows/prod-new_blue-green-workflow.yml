@@ -3,7 +3,7 @@ name: Backend Blue-Green Production Deploy
 on:
   push:
     branches:
-      - server-11
+      - server-new
   workflow_dispatch:
 
 env:

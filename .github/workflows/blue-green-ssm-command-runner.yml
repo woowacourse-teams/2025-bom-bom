@@ -3,7 +3,7 @@ name: Backend Blue-Green Production Deploy (SSM)
 on:
   push:
     branches:
-      - server-
+      - server-new
   workflow_dispatch:
 
 permissions:

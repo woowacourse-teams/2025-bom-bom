@@ -19,8 +19,8 @@ services:
       # OpenTelemetry
       JAVA_TOOL_OPTIONS: >
         -javaagent:/otel/opentelemetry-javaagent.jar
-        -Xms256m
-        -Xmx384m
+        -Xms128m
+        -Xmx256m
       OTEL_SERVICE_NAME: bombom-server-prod
       OTEL_EXPORTER_OTLP_ENDPOINT: ${PROD_OTEL_ENDPOINT}
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf

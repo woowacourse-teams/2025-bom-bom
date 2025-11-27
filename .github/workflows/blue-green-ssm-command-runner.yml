@@ -6,6 +6,10 @@ on:
       - server-new
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
   AWS_REGION: ap-northeast-2
   ROLE_ARN: arn:aws:iam::<AWS_ACCOUNT_ID>:role/GithubActions-BomBom-Deploy-Role

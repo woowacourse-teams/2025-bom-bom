@@ -149,11 +149,6 @@ jobs:
           role-to-assume: ${{ env.ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Install AWS CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y awscli
-
       - name: Health Check
         run: |
           for i in {1..30}; do
@@ -194,10 +189,10 @@ jobs:
           role-to-assume: ${{ env.ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Install AWS CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y awscli
+      # - name: Install AWS CLI
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y awscli
 
       - name: Switch HAProxy
         run: |
@@ -222,10 +217,10 @@ jobs:
           role-to-assume: ${{ env.ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Install AWS CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y awscli
+      # - name: Install AWS CLI
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y awscli
 
       - name: Deploy via SSM
         run: |
@@ -252,10 +247,10 @@ jobs:
           role-to-assume: ${{ env.ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Install AWS CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y awscli
+      # - name: Install AWS CLI
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y awscli
 
       - name: Health Check
         run: |
@@ -295,10 +290,10 @@ jobs:
           role-to-assume: ${{ env.ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Install AWS CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y awscli
+      # - name: Install AWS CLI
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y awscli
 
       - name: Restore HAProxy
         run: |

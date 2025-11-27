@@ -16,27 +16,24 @@ services:
       # Apple p8 (ENV로 주입)
       OAUTH2_APPLE_PRIVATE_KEY: ${OAUTH2_APPLE_PRIVATE_KEY}
 
-      # OpenTelemetry
-      JAVA_TOOL_OPTIONS: >
-        -javaagent:/otel/opentelemetry-javaagent.jar
-        -Xms256m
-        -Xmx384m
-      OTEL_SERVICE_NAME: bombom-server-prod
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${PROD_OTEL_ENDPOINT}
-      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
-      OTEL_TRACES_EXPORTER: otlp
-      OTEL_TRACES_SAMPLER: always_on
-      OTEL_METRICS_EXPORTER: none
-      OTEL_LOGS_EXPORTER: none
-      OTEL_PROPAGATORS: tracecontext,baggage
-
-      # exclude
-      OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDE_URLS: /actuator/.*
-      OTEL_JAVAAGENT_DEBUG: "true"
+      # OpenTelemetry OFF
+      # JAVA_TOOL_OPTIONS: >
+      #   -javaagent:/otel/opentelemetry-javaagent.jar
+      #   -Xms256m
+      #   -Xmx384m
+      # OTEL_SERVICE_NAME: bombom-server-prod
+      # OTEL_EXPORTER_OTLP_ENDPOINT: ${PROD_OTEL_ENDPOINT}
+      # OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      # OTEL_TRACES_EXPORTER: otlp
+      # OTEL_TRACES_SAMPLER: always_on
+      # OTEL_METRICS_EXPORTER: none
+      # OTEL_LOGS_EXPORTER: none
+      # OTEL_PROPAGATORS: tracecontext,baggage
+      # OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDE_URLS: /actuator/.*
+      # OTEL_JAVAAGENT_DEBUG: "true"
 
     volumes:
       - /home/ec2-user/bombom-prod/logs:/logs
-      - /home/ec2-user/bombom-prod/opentelemetry/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
-    
-    # 컨테이너 graceful shutdown 대기 시간
+      # - /home/ec2-user/bombom-prod/opentelemetry/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
+
     stop_grace_period: 40s

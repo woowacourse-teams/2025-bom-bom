@@ -115,18 +115,14 @@ jobs:
     name: "🚀 Step 1: Deploy Prod2 (Blue)"
     needs: docker-image
     runs-on: ubuntu-latest
+  
     steps:
-      - uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ env.ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Install AWS CLI
-        run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
-
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GithubActions-BomBom-Deploy-Role
+          aws-region: ap-northeast-2
+  
       - name: Deploy via SSM
         run: |
           aws ssm send-command \
@@ -134,9 +130,9 @@ jobs:
             --targets "Key=InstanceIds,Values=${{ env.PROD2_ID }}" \
             --parameters commands='[
               "cd /opt/bom-bom",
-              "sudo docker compose -f '${{ env.COMPOSE_FILE }}' down || true",
-              "sudo docker compose -f '${{ env.COMPOSE_FILE }}' pull",
-              "sudo docker compose -f '${{ env.COMPOSE_FILE }}' up -d --remove-orphans --force-recreate"
+              "sudo docker compose -f ${{ env.COMPOSE_FILE }} down || true",
+              "sudo docker compose -f ${{ env.COMPOSE_FILE }} pull",
+              "sudo docker compose -f ${{ env.COMPOSE_FILE }} up -d --remove-orphans --force-recreate"
             ]' \
             --comment "Deploy prod2"
 

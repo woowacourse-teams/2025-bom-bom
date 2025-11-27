@@ -120,7 +120,7 @@ jobs:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GithubActions-BomBom-Deploy-Role
+          role-to-assume: ${{ env.ROLE_ARN }}
           aws-region: ap-northeast-2
   
       - name: Deploy via SSM

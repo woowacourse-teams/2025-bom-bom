@@ -2,7 +2,9 @@ import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 import { queries } from '@/apis/queries';
 import AppInstallPromptModal from '@/components/AppInstallPromptModal/AppInstallPromptModal';
 import PageLayout from '@/components/PageLayout/PageLayout';
+import ServerWarningModal from '@/components/ServerWarningModal/ServerWarningModal';
 import { useAppInstallPrompt } from '@/hooks/useAppInstallPrompt';
+import { useServerWarningModal } from '@/hooks/useServerWarningModal';
 import { useWebViewNotificationActive } from '@/libs/webview/useWebViewNotificationActive';
 import { useWebViewRegisterToken } from '@/libs/webview/useWebViewRegisterToken';
 
@@ -47,12 +49,24 @@ function RouteComponent() {
     modalRef,
   } = useAppInstallPrompt();
 
+  const {
+    modalRef: serverModalRef,
+    showModal: serverWarningOpen,
+    handleCloseModal: handleServerWarningClose,
+  } = useServerWarningModal();
+
   useWebViewRegisterToken();
   useWebViewNotificationActive();
 
   return (
     <PageLayout>
+      {/* 점검 모달 넣기 */}
       <Outlet />
+      <ServerWarningModal
+        modalRef={serverModalRef}
+        isOpen={serverWarningOpen}
+        closeModal={handleServerWarningClose}
+      />
       <AppInstallPromptModal
         modalRef={modalRef}
         isOpen={showModal}

@@ -169,7 +169,7 @@ jobs:
   deploy-server-main:
     name: Production Server main 배포
     needs: docker-image
-    runs-on: [ self-hosted, prod-main ]  
+    runs-on: [ self-hosted, prod-new2 ]  
     defaults:
       run:
         working-directory: ./backend/bom-bom-server

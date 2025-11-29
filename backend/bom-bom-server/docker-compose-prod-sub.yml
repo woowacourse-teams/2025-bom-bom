@@ -18,7 +18,6 @@ services:
 
       #### --------------------------------------
       #### OpenTelemetry (전체 주석 처리)
-      #### --------------------------------------
       # JAVA_TOOL_OPTIONS: "-javaagent:/otel/opentelemetry-javaagent.jar"
       # OTEL_SERVICE_NAME: bombom-server-prod
       # OTEL_EXPORTER_OTLP_ENDPOINT: ${PROD_OTEL_ENDPOINT}

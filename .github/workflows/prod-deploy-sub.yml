@@ -112,7 +112,7 @@ jobs:
   deploy-server-sub:
     name: Production Server sub 배포
     needs: docker-image
-    runs-on: [ self-hosted, prod-sub ] 
+    runs-on: [ self-hosted, prod5 ] 
     defaults:
       run:
         working-directory: ./backend/bom-bom-server

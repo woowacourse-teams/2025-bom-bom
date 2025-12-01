@@ -4,8 +4,8 @@ ENV TZ=Asia/Seoul
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 ARG APP_USER=app
-ARG APP_UID=1001
-ARG APP_GID=1001
+ARG APP_UID=1000
+ARG APP_GID=1000
 
 RUN addgroup -g ${APP_GID} ${APP_USER} \
  && adduser -u ${APP_UID} -G ${APP_USER} -s /bin/sh -D ${APP_USER}

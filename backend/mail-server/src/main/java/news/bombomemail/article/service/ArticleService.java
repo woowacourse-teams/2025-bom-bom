@@ -17,6 +17,7 @@ import news.bombomemail.article.repository.ArticleRepository;
 import news.bombomemail.article.util.ReadingTimeCalculator;
 import news.bombomemail.article.util.SummaryGenerator;
 import news.bombomemail.article.util.UnsubscribeUrlExtractor;
+import news.bombomemail.article.util.html.HtmlTagCleaner;
 import news.bombomemail.member.domain.Member;
 import news.bombomemail.member.repository.MemberRepository;
 import news.bombomemail.newsletter.domain.Newsletter;
@@ -38,6 +39,7 @@ public class ArticleService {
     private final NewsletterRepository newsletterRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final NewsletterVerificationRepository newsletterVerificationRepository;
+    private final HtmlTagCleaner htmlTagCleaner;
 
     @Transactional
     public boolean save(MimeMessage message, String contents) throws MessagingException, DataAccessException {
@@ -51,7 +53,8 @@ public class ArticleService {
             return false;
         }
 
-        Article article = articleRepository.save(buildArticle(message, contents, member, newsletter));
+        String contentsText = htmlTagCleaner.clean(contents);
+        Article article = articleRepository.save(buildArticle(message, contents, contentsText, member, newsletter));
         String unsubscribeUrl = UnsubscribeUrlExtractor.extract(article.getContents());
 
         applicationEventPublisher.publishEvent(ArticleArrivedEvent.of(
@@ -113,12 +116,14 @@ public class ArticleService {
     private Article buildArticle(
             MimeMessage message,
             String contents,
+            String contentsText,
             Member member,
             Newsletter newsletter
     ) throws MessagingException {
         return Article.builder()
                 .title(message.getSubject())
                 .contents(contents)
+                .contentsText(contentsText)
                 .expectedReadTime(ReadingTimeCalculator.calculate(contents))
                 .contentsSummary(SummaryGenerator.summarize(contents))
                 .memberId(member.getId())

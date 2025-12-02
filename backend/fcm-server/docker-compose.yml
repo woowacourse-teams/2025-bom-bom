@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  fcm-app:
+    container_name: bombom-fcm
+    image: bombom-fcm:latest
+    ports:
+      - "8080:8080"
+    restart: always
+    environment:
+      TZ: Asia/Seoul
+      GOOGLE_APPLICATION_CREDENTIALS: /app/key/bombom-fcm.json
+      SPRING_CONFIG_ADDITIONAL_LOCATION: file:/config/
+    volumes:
+      - /srv/bombom/secrets/bombom-fcm.json:/app/key/bombom-fcm.json:ro
+      - /srv/bombom/logs:/logs
+      - /srv/bombom/config:/config:ro
+    ulimits:
+      nofile: # 한 프로세스가 동시에 열어둘 수 있는 fd 최대 개수
+        soft: 32768
+        hard: 65536

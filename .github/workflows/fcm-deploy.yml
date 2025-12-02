@@ -1,0 +1,109 @@
+name: Backend FCM Server Deploy
+
+on:
+  push:
+    branches:
+      - fcm-server
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/fcm-server
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Gradle cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+
+      - name: fcm application.yml 생성 (prod,
+        run: |
+          mkdir -p src/main/resources
+          echo "${{ secrets.FCM_APPLICATION_PROD_YML }}" \
+            > src/main/resources/application.yml
+
+#          # test 필요할 시 활성화
+#          mkdir -p src/test/resources
+#          echo "${{ secrets.FCM_APPLICATION_TEST_YML }}" \
+#            > src/test/resources/application.yml
+
+      - name: Build JAR
+        run: ./gradlew clean build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & push Docker image
+        run: |
+          docker buildx build \
+            --platform linux/arm64,linux/amd64 \
+            --push \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/bombom-fcm:latest \
+            .
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: [ self-hosted, fcm ]
+    defaults:
+      run:
+        working-directory: backend/fcm-server
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Prepare config & key files
+        run: |
+          sudo mkdir -p /srv/bombom/secrets
+          sudo mkdir -p /srv/bombom/logs
+          sudo mkdir -p /srv/bombom/config
+
+          echo "${{ secrets.FCM_GOOGLE_CREDENTIALS_JSON }}" | \
+            sudo tee /srv/bombom/secrets/bombom-fcm.json > /dev/null
+          sudo chmod 600 /srv/bombom/secrets/bombom-fcm.json
+
+          echo "${{ secrets.FCM_APPLICATION_PROD_YML }}" | \
+            sudo tee /srv/bombom/config/application.yml > /dev/null
+          sudo chmod 600 /srv/bombom/config/application.yml
+
+      - name: Pull image & retag
+        run: |
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/bombom-fcm:latest
+          docker tag  ${{ secrets.DOCKERHUB_USERNAME }}/bombom-fcm:latest bombom-fcm:latest
+
+      - name: Stop and remove existing bombom-fcm container
+        run: |
+          docker rm -f bombom-fcm || true
+
+      - name: Deploy with Docker Compose
+        run: |
+          docker compose up -d fcm-app

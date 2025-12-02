@@ -112,7 +112,7 @@ jobs:
   deploy-server-sub:
     name: Production Server sub 배포
     needs: docker-image
-    runs-on: [ self-hosted, prod5 ] 
+    runs-on: [ self-hosted, prod ] 
     defaults:
       run:
         working-directory: ./backend/bom-bom-server
@@ -166,59 +166,59 @@ jobs:
           sudo docker container prune -f --filter "until=24h"
           sudo docker image prune     -f --filter "until=24h"
 
-  deploy-server-main:
-    name: Production Server main 배포
-    needs: docker-image
-    runs-on: [ self-hosted, prod-new2 ]  
-    defaults:
-      run:
-        working-directory: ./backend/bom-bom-server
+  # deploy-server-main:
+  #   name: Production Server main 배포
+  #   needs: docker-image
+  #   runs-on: [ self-hosted, prod-new2 ]  
+  #   defaults:
+  #     run:
+  #       working-directory: ./backend/bom-bom-server
 
-    environment:
-      name: production
-      url: https://api.bombom.news 
+  #   environment:
+  #     name: production
+  #     url: https://api.bombom.news 
 
-    steps:
-      - name: 코드 체크아웃
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: 코드 체크아웃
+  #       uses: actions/checkout@v4
 
-      - name: DockerHub 로그인
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     - name: DockerHub 로그인
+  #       uses: docker/login-action@v3
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: .env file 생성
-        run: |
-          cat <<EOF > .env
-          RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
-          DATABASE=${{ secrets.PROD_DATABASE }}
-          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
-          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
-          SPRING_PROFILES_ACTIVE=prod
-          PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
-          EOF
+  #     - name: .env file 생성
+  #       run: |
+  #         cat <<EOF > .env
+  #         RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
+  #         DATABASE=${{ secrets.PROD_DATABASE }}
+  #         MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+  #         MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+  #         SPRING_PROFILES_ACTIVE=prod
+  #         PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
+  #         EOF
 
-      - name: 컨테이너 재실행 (p8 ENV 주입)
-        shell: bash
-        env:
-          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
-        run: |
-          set -euo pipefail
-          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
-          echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
+  #     - name: 컨테이너 재실행 (p8 ENV 주입)
+  #       shell: bash
+  #       env:
+  #         APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+  #       run: |
+  #         set -euo pipefail
+  #         export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+  #         echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
 
-          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
-            -f docker-compose-prod-sub.yml --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
+  #         sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+  #           -f docker-compose-prod-sub.yml --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
           
-          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
-            -f docker-compose-prod-sub.yml --env-file .env down || true
+  #         sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+  #           -f docker-compose-prod-sub.yml --env-file .env down || true
 
-          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
-            -f docker-compose-prod-sub.yml --env-file .env \
-            up -d --remove-orphans --pull=always --force-recreate
+  #         sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+  #           -f docker-compose-prod-sub.yml --env-file .env \
+  #           up -d --remove-orphans --pull=always --force-recreate
               
-      - name: Docker 리소스 정리
-        run: |
-          sudo docker container prune -f --filter "until=24h"
-          sudo docker image prune     -f --filter "until=24h"
+  #     - name: Docker 리소스 정리
+  #       run: |
+  #         sudo docker container prune -f --filter "until=24h"
+  #         sudo docker image prune     -f --filter "until=24h"

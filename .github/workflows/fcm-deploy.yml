@@ -32,16 +32,15 @@ jobs:
           java-version: 21
           distribution: temurin
 
-      - name: fcm application.yml 생성 (prod,
+      - name: fcm application.yml 생성 (prod, test)
         run: |
           mkdir -p src/main/resources
           echo "${{ secrets.FCM_APPLICATION_PROD_YML }}" \
             > src/main/resources/application.yml
 
-#          # test 필요할 시 활성화
-#          mkdir -p src/test/resources
-#          echo "${{ secrets.FCM_APPLICATION_TEST_YML }}" \
-#            > src/test/resources/application.yml
+          mkdir -p src/test/resources
+          echo "${{ secrets.FCM_APPLICATION_TEST_YML }}" \
+            > src/test/resources/application.yml
 
       - name: Build JAR
         run: ./gradlew clean build

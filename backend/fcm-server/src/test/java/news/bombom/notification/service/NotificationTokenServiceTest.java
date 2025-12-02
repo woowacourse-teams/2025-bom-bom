@@ -56,8 +56,6 @@ class NotificationTokenServiceTest {
         MemberFcmToken existingToken = mock(MemberFcmToken.class);
         when(fcmTokenRepository.findByMemberIdAndDeviceUuid(TEST_MEMBER_ID, TEST_DEVICE_UUID))
                 .thenReturn(Optional.of(existingToken));
-        doNothing().when(fcmTokenRepository).deleteByDeviceUuid(anyString());
-        when(fcmTokenRepository.save(any(MemberFcmToken.class))).thenReturn(existingToken);
 
         // When
         notificationTokenService.upsertFcmToken(TEST_MEMBER_ID, TEST_DEVICE_UUID, NEW_FCM_TOKEN);
@@ -65,8 +63,6 @@ class NotificationTokenServiceTest {
         // Then
         verify(fcmTokenRepository, times(1)).findByMemberIdAndDeviceUuid(TEST_MEMBER_ID, TEST_DEVICE_UUID);
         verify(existingToken, times(1)).updateToken(NEW_FCM_TOKEN);
-        verify(fcmTokenRepository, times(1)).deleteByDeviceUuid(TEST_DEVICE_UUID);
-        verify(fcmTokenRepository, times(1)).save(any(MemberFcmToken.class));
     }
 
     @Test

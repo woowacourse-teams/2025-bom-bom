@@ -38,7 +38,7 @@ class NotificationConfigTest {
     @DisplayName("FirebaseMessaging 빈 생성 성공 - 정상적인 서비스 계정 키")
     void firebaseMessaging_Success() throws IOException {
         // Given
-        String serviceAccountKeyPath = "key/bombom-fcm.json";
+        String serviceAccountKeyPath = "test-fcm-service-account.json";
         ReflectionTestUtils.setField(notificationConfig, "serviceAccountKeyPath", serviceAccountKeyPath);
 
         try (MockedStatic<FirebaseApp> firebaseAppMock = mockStatic(FirebaseApp.class)) {

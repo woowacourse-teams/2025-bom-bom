@@ -40,7 +40,12 @@ jobs:
           mkdir -p src/test/resources
           printf '%s\n' "${{ secrets.FCM_APPLICATION_TEST_YML }}" \
             > src/test/resources/application.yml
-            
+
+      - name: Debug - check allowed-origins line
+        run: |
+          echo "===== allowed-origins in application.yml ====="
+          grep -n "allowed-origins" src/main/resources/application.yml || echo "not found"
+      
       - name: Build JAR
         run: ./gradlew clean build
 

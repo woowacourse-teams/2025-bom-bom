@@ -35,18 +35,12 @@ jobs:
       - name: fcm application.yml 생성 (prod, test)
         run: |
           mkdir -p src/main/resources
-          echo "${{ secrets.FCM_APPLICATION_PROD_YML }}" \
+          printf '%s\n' "${{ secrets.FCM_APPLICATION_PROD_YML }}" \
             > src/main/resources/application.yml
-
           mkdir -p src/test/resources
-          echo "${{ secrets.FCM_APPLICATION_TEST_YML }}" \
+          printf '%s\n' "${{ secrets.FCM_APPLICATION_TEST_YML }}" \
             > src/test/resources/application.yml
-
-      - name: Debug - check allowed-origins line
-        run: |
-          echo "===== allowed-origins in application.yml ====="
-          grep -n "allowed-origins" src/main/resources/application.yml || echo "not found"
-
+            
       - name: Build JAR
         run: ./gradlew clean build
 

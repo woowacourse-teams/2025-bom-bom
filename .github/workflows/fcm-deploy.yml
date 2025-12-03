@@ -89,10 +89,11 @@ jobs:
           sudo mkdir -p /srv/bombom/secrets
           sudo mkdir -p /srv/bombom/logs
 
-          echo "${{ secrets.FCM_GOOGLE_CREDENTIALS_JSON }}" | \
-            sudo tee /srv/bombom/secrets/bombom-fcm.json > /dev/null
+          printf '%s\n' "${{ secrets.FCM_GOOGLE_CREDENTIALS_JSON_BASE64 }}" \
+            | base64 -d \
+            | sudo tee /srv/bombom/secrets/bombom-fcm.json > /dev/null
           sudo chmod 644 /srv/bombom/secrets/bombom-fcm.json
-
+      
       - name: Pull image & retag
         run: |
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/bombom-fcm:latest

@@ -130,26 +130,26 @@ jobs:
           echo "✅ Docker 이미지 푸시 완료"
 
   # ---------------------------------------------------
-  # 2️⃣ prod-sub 배포 준비 (트래픽 전환)
+  # 2️⃣ prod6 배포 준비 (트래픽 전환)
   # ---------------------------------------------------
-  shift-traffic-to-main:
-    name: "🔀 Step 1: 트래픽을 prod-main으로 이동"
+  shift-traffic-to-prod6:
+    name: "🔀 Step 1: 트래픽을 prod6로 이동"
     needs: docker-image
     runs-on: [self-hosted, lb]
     steps:
-      - name: prod-sub → prod-main 트래픽 이동
+      - name: prod7 → prod6 트래픽 이동
         run: |
-          echo "🔄 prod-sub 서버 비활성화"
-          echo "disable server app_servers/prod-sub" | sudo socat stdio /var/run/haproxy.sock
-          echo "✅ 모든 트래픽이 prod-main으로 이동되었습니다."
+          echo "🔄 prod7 서버 비활성화"
+          echo "disable server app_servers/prod7" | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ 모든 트래픽이 prod6로 이동되었습니다."
 
   # ---------------------------------------------------
   # 3️⃣ prod-sub 배포
   # ---------------------------------------------------
-  deploy-sub:
-    name: "🚀 Step 2: prod-sub 배포"
-    needs: [prepare-release, shift-traffic-to-main]
-    runs-on: [self-hosted, prod-sub]
+  deploy-prod7:
+    name: "🚀 Step 2: prod7 배포"
+    needs: [prepare-release, shift-traffic-to-prod6]
+    runs-on: [self-hosted, prod7]
     defaults:
       run:
         working-directory: ./backend/bom-bom-server
@@ -240,7 +240,7 @@ jobs:
             -f ${{ env.PROD_SUB_COMPOSE_YAML }} --env-file .env \
             up -d --remove-orphans --pull=always --force-recreate
           
-          echo "✅ prod-sub 컨테이너 실행 완료"
+          echo "✅ prod7 컨테이너 실행 완료"
 
       - name: 컨테이너 헬스체크
         run: |
@@ -306,25 +306,25 @@ jobs:
           echo "🗃 후보 저장 완료: $CAND_DIR"
 
   # ---------------------------------------------------
-  # 4️⃣ prod-sub 배포 실패 시 rollback
+  # 4️⃣ prod7 배포 실패 시 rollback
   # ---------------------------------------------------
-  # X-1) 메인 롤백 시작: 트래픽 상태 정리 (sub만 활성, main 비활성 보장)
-  rollback-sub-prepare:
-    if: failure() && needs.deploy-sub.result == 'failure'
-    needs: deploy-sub
+  # X-1) 메인 롤백 시작: 트래픽 상태 정리 (prod6 활성, prod7 비활성 보장)
+  rollback-prod7-prepare:
+    if: failure() && needs.deploy-prod7.result == 'failure'
+    needs: deploy-prod7
     runs-on: [ self-hosted, lb ]
     steps:
-      - name: 트래픽 상태 정리 (main active / sub disabled)
+      - name: 트래픽 상태 정리 (prod6 active / prod7 disabled)
         run: |
-          echo "enable server app_servers/prod-main" | sudo socat stdio /var/run/haproxy.sock
-          echo "disable server app_servers/prod-sub"   | sudo socat stdio /var/run/haproxy.sock
+          echo "enable server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
+          echo "disable server app_servers/prod7"   | sudo socat stdio /var/run/haproxy.sock
           echo "✅ 트래픽 상태 정리 완료"
 
   # X-4) sub도 이전 버전으로 복구 + readiness 헬스체크
-  rollback-sub-deploy:
-    if: failure() && needs.deploy-sub.result == 'failure'
-    needs: rollback-sub-prepare
-    runs-on: [self-hosted, prod-sub]
+  rollback-prod7-deploy:
+    if: failure() && needs.deploy-prod7.result == 'failure'
+    needs: rollback-prod7-prepare
+    runs-on: [self-hosted, prod7]
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
@@ -426,40 +426,40 @@ jobs:
           exit 1
 
   # X-5) 최종 트래픽 정상화(원래의 양쪽 활성/가중치로 복귀)
-  rollback-sub-restore-final-traffic:
-    if: failure() && needs.deploy-sub.result == 'failure'
-    needs: rollback-sub-deploy
+  rollback-prod7-restore-final-traffic:
+    if: failure() && needs.deploy-prod7.result == 'failure'
+    needs: rollback-prod7-deploy
     runs-on: [self-hosted, lb]
     steps:
       - name: 트래픽 정상화
         run: |
-          echo "enable server app_servers/prod-main" | sudo socat stdio /var/run/haproxy.sock
-          echo "enable server app_servers/prod-sub"  | sudo socat stdio /var/run/haproxy.sock
+          echo "enable server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
+          echo "enable server app_servers/prod7"  | sudo socat stdio /var/run/haproxy.sock
           echo "✅ 전체 롤백 후 트래픽 정상화 완료"
 
   # ---------------------------------------------------
-  # 4️⃣ 트래픽 전환: prod-main → prod-sub
+  # 4️⃣ 트래픽 전환: prod6 → prod7
   # ---------------------------------------------------
-  shift-traffic-to-sub:
-    name: "🔀 Step 3: 트래픽을 prod-sub로 전환"
-    needs: deploy-sub
+  shift-traffic-to-prod7:
+    name: "🔀 Step 3: 트래픽을 prod7로 전환"
+    needs: deploy-prod7
     runs-on: [self-hosted, lb]
     steps:
-      - name: prod-main → prod-sub 트래픽 이동
+      - name: prod6 → prod7 트래픽 이동
         run: |
-          echo "🔄 prod-main 비활성화"
-          echo "disable server app_servers/prod-main" | sudo socat stdio /var/run/haproxy.sock
-          echo "🔄 prod-sub 활성화"
-          echo "enable server app_servers/prod-sub" | sudo socat stdio /var/run/haproxy.sock
-          echo "✅ 트래픽이 prod-sub로 이동되었습니다."
+          echo "🔄 prod6 비활성화"
+          echo "disable server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
+          echo "🔄 prod7 활성화"
+          echo "enable server app_servers/prod7" | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ 트래픽이 prod7으로 이동되었습니다."
 
   # ---------------------------------------------------
-  # 5️⃣ prod-main 배포
+  # 5️⃣ prod6 배포
   # ---------------------------------------------------
-  deploy-main:
-    name: "🚀 Step 4: prod-main 배포"
-    needs: [prepare-release, shift-traffic-to-sub]
-    runs-on: [self-hosted, prod-main]
+  deploy-prod6:
+    name: "🚀 Step 4: prod6 배포"
+    needs: [prepare-release, shift-traffic-to-prod7]
+    runs-on: [self-hosted, prod6]
     defaults:
       run:
         working-directory: ./backend/bom-bom-server
@@ -550,7 +550,7 @@ jobs:
             -f ${{ env.PROD_MAIN_COMPOSE_YAML }} --env-file .env \
             up -d --remove-orphans --pull=always --force-recreate
           
-          echo "✅ prod-main 컨테이너 실행 완료"
+          echo "✅ prod6 컨테이너 실행 완료"
 
       - name: 컨테이너 헬스체크
         run: |
@@ -614,25 +614,25 @@ jobs:
           echo "🗃 후보 저장 완료: $CAND_DIR"
 
   # ---------------------------------------------------
-  # 5️⃣ prod-main 배포 실패 시 rollback
+  # 5️⃣ prod6 배포 실패 시 rollback
   # ---------------------------------------------------
-  # X-1) 메인 롤백 시작: 트래픽 상태 정리 (sub만 활성, main 비활성 보장)
-  rollback-main-prepare:
-    if: failure() && needs.deploy-main.result == 'failure'
-    needs: deploy-main
+  # X-1) 메인 롤백 시작: 트래픽 상태 정리 (prod7만 활성, prod6 비활성 보장)
+  rollback-prod6-prepare:
+    if: failure() && needs.deploy-prod6.result == 'failure'
+    needs: deploy-prod6
     runs-on: [self-hosted, lb]
     steps:
-      - name: 트래픽 상태 정리 (sub active / main disabled)
+      - name: 트래픽 상태 정리 (prod7 active / prod6 disabled)
         run: |
-          echo "disable server app_servers/prod-main" | sudo socat stdio /var/run/haproxy.sock
-          echo "enable server app_servers/prod-sub"   | sudo socat stdio /var/run/haproxy.sock
+          echo "disable server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
+          echo "enable server app_servers/prod7"   | sudo socat stdio /var/run/haproxy.sock
           echo "✅ 트래픽 상태 정리 완료"
 
-  # X-2) main 이전 버전으로 복구 + readiness 헬스체크
-  rollback-main-redeploy:
-    if: failure() && needs.deploy-main.result == 'failure'
-    needs: rollback-main-prepare
-    runs-on: [self-hosted, prod-main]
+  # X-2) prod6 이전 버전으로 복구 + readiness 헬스체크
+  rollback-prod6-redeploy:
+    if: failure() && needs.deploy-prod6.result == 'failure'
+    needs: rollback-prod6-prepare
+    runs-on: [self-hosted, prod6]
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
@@ -733,23 +733,23 @@ jobs:
           sudo docker logs ${{ env.SERVER_CONTAINER_NAME }} --tail 50 || true
           exit 1
 
-  # X-3) main이 살아났으니 트래픽 전체를 main으로 전환
-  rollback-shift-traffic-to-main:
-    if: failure() && needs.deploy-main.result == 'failure'
-    needs: rollback-main-redeploy
+  # X-3) main이 살아났으니 트래픽 전체를 prod6로 전환
+  rollback-shift-traffic-to-prod6:
+    if: failure() && needs.deploy-prod6.result == 'failure'
+    needs: rollback-prod6-redeploy
     runs-on: [self-hosted, lb]
     steps:
-      - name: 모든 트래픽을 prod-main으로 전환
+      - name: 모든 트래픽을 prod6로 전환
         run: |
-          echo "enable  server app_servers/prod-main" | sudo socat stdio /var/run/haproxy.sock
-          echo "disable server app_servers/prod-sub"  | sudo socat stdio /var/run/haproxy.sock
-          echo "✅ main으로 트래픽 전환 완료"
+          echo "enable  server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
+          echo "disable server app_servers/prod7"  | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ prod6로 트래픽 전환 완료"
 
   # X-4) sub도 이전 버전으로 복구 + readiness 헬스체크
-  rollback-sub-redeploy:
-    if: failure() && needs.deploy-main.result == 'failure'
-    needs: rollback-shift-traffic-to-main
-    runs-on: [ self-hosted, prod-sub ]
+  rollback-prod7-redeploy:
+    if: failure() && needs.deploy-prod6.result == 'failure'
+    needs: rollback-shift-traffic-to-prod6
+    runs-on: [ self-hosted, prod7 ]
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
@@ -852,27 +852,27 @@ jobs:
 
   # X-5) 최종 트래픽 정상화(원래의 양쪽 활성/가중치로 복귀)
   rollback-prod-restore-final-traffic:
-    if: failure() && needs.deploy-main.result == 'failure'
-    needs: rollback-sub-redeploy
+    if: failure() && needs.deploy-prod6.result == 'failure'
+    needs: rollback-prod7-redeploy
     runs-on: [self-hosted, lb]
     steps:
       - name: 트래픽 정상화
         run: |
-          echo "enable server app_servers/prod-main" | sudo socat stdio /var/run/haproxy.sock
-          echo "enable server app_servers/prod-sub"  | sudo socat stdio /var/run/haproxy.sock
+          echo "enable server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
+          echo "enable server app_servers/prod7"  | sudo socat stdio /var/run/haproxy.sock
           echo "✅ 전체 롤백 후 트래픽 정상화 완료"
 
   # ---------------------------------------------------
   # 6️⃣ 성공 시 안정판 승격 (compose & 이미지)
   # ---------------------------------------------------
   promote-stable-sub:
-    needs: [prepare-release, deploy-sub, deploy-main]
-    if: ${{ needs.deploy-sub.result == 'success' && needs.deploy-main.result == 'success' }}
-    runs-on: [self-hosted, prod-sub]
+    needs: [prepare-release, deploy-prod7, deploy-prod6]
+    if: ${{ needs.deploy-prod7.result == 'success' && needs.deploy-prod6.result == 'success' }}
+    runs-on: [self-hosted, prod7]
     env:
       RELEASE_ID: ${{ needs.prepare-release.outputs.release_id }}
     steps:
-      - name: 후보 → 안정판 승격 (sub)
+      - name: 후보 → 안정판 승격 (prod7)
         run: |
           set -euo pipefail
           CAND_DIR="/opt/bom-bom/candidates/${RELEASE_ID}"
@@ -882,16 +882,16 @@ jobs:
             sudo cp "$CAND_DIR/${{ env.PROD_SUB_COMPOSE_YAML }}" "$REL_DIR/"
           fi
           sudo ln -sfn "$REL_DIR" "/opt/bom-bom/releases/stable"
-          echo "✅ SUB 안정판 승격: $REL_DIR → /opt/bom-bom/releases/stable"
+          echo "✅ prod7 안정판 승격: $REL_DIR → /opt/bom-bom/releases/stable"
 
   promote-stable-main:
-    needs: [prepare-release, deploy-sub, deploy-main]
-    if: ${{ needs.deploy-sub.result == 'success' && needs.deploy-main.result == 'success' }}
-    runs-on: [self-hosted, prod-main]
+    needs: [prepare-release, deploy-prod7, deploy-prod6]
+    if: ${{ needs.deploy-prod7.result == 'success' && needs.deploy-prod6.result == 'success' }}
+    runs-on: [self-hosted, prod6]
     env:
       RELEASE_ID: ${{ needs.prepare-release.outputs.release_id }}
     steps:
-      - name: 후보 → 안정판 승격 (main)
+      - name: 후보 → 안정판 승격 (prod6)
         run: |
           set -euo pipefail
           CAND_DIR="/opt/bom-bom/candidates/${RELEASE_ID}"
@@ -901,11 +901,11 @@ jobs:
             sudo cp "$CAND_DIR/${{ env.PROD_MAIN_COMPOSE_YAML }}" "$REL_DIR/"
           fi
           sudo ln -sfn "$REL_DIR" "/opt/bom-bom/releases/stable"
-          echo "✅ MAIN 안정판 승격: $REL_DIR → /opt/bom-bom/releases/stable"
+          echo "✅ prod6 안정판 승격: $REL_DIR → /opt/bom-bom/releases/stable"
 
   promote-stable-image:
-    needs: [deploy-sub, deploy-main]
-    if: ${{ needs.deploy-sub.result == 'success' && needs.deploy-main.result == 'success' }}
+    needs: [deploy-prod7, deploy-prod6]
+    if: ${{ needs.deploy-prod7.result == 'success' && needs.deploy-prod6.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: DockerHub 로그인
@@ -926,11 +926,12 @@ jobs:
   # ---------------------------------------------------
   restore-final-traffic:
     name: "🔁 Step 5: 트래픽 원상복구"
-    needs: deploy-main
+    needs: deploy-prod6
     runs-on: [self-hosted, lb]
     steps:
       - name: HAProxy 트래픽 비율 복귀
         run: |
-          echo "🔄 prod-main 재활성화"
-          echo "enable server app_servers/prod-main" | sudo socat stdio /var/run/haproxy.sock
+          echo "🔄 모두 재활성화"
+          echo "enable server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
+          echo "enable server app_servers/prod7" | sudo socat stdio /var/run/haproxy.sock
           echo "✅ 배포 완료 및 트래픽 정상화"

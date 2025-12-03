@@ -46,7 +46,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
         INSERT INTO previous_article (
             title, contents, contents_summary,
             expected_read_time, newsletter_id, arrived_date_time,
-            is_fixed, created_at, updated_at
+            is_fixed
         )
         SELECT 
             a.title, 
@@ -55,9 +55,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
             a.expected_read_time, 
             a.newsletter_id, 
             a.arrived_date_time,
-            false,
-            NOW(6),
-            NOW(6)
+            false
         FROM article a
         WHERE a.member_id = :adminId
         AND NOT EXISTS (

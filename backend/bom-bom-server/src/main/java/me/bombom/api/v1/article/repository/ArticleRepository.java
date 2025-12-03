@@ -56,8 +56,8 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
             a.newsletter_id, 
             a.arrived_date_time,
             false,
-            a.created_at,
-            NOW()
+            COALESCE(a.created_at, a.arrived_date_time, NOW(6)),
+            NOW(6)
         FROM article a
         WHERE a.member_id = :adminId
         AND NOT EXISTS (

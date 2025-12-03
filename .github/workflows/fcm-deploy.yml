@@ -84,15 +84,10 @@ jobs:
         run: |
           sudo mkdir -p /srv/bombom/secrets
           sudo mkdir -p /srv/bombom/logs
-          sudo mkdir -p /srv/bombom/config
 
           echo "${{ secrets.FCM_GOOGLE_CREDENTIALS_JSON }}" | \
             sudo tee /srv/bombom/secrets/bombom-fcm.json > /dev/null
-          sudo chmod 600 /srv/bombom/secrets/bombom-fcm.json
-
-          echo "${{ secrets.FCM_APPLICATION_PROD_YML }}" | \
-            sudo tee /srv/bombom/config/application.yml > /dev/null
-          sudo chmod 600 /srv/bombom/config/application.yml
+          sudo chmod 644 /srv/bombom/secrets/bombom-fcm.json
 
       - name: Pull image & retag
         run: |

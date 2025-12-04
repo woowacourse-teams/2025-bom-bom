@@ -5,6 +5,9 @@ import static me.bombom.api.v1.bookmark.domain.QBookmark.bookmark;
 import static me.bombom.api.v1.newsletter.domain.QCategory.category;
 import static me.bombom.api.v1.newsletter.domain.QNewsletter.newsletter;
 
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Path;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
@@ -15,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,59 +43,26 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
 
     private static final int RECENT_DAYS = 5;
 
+    private static final Map<String, Path<?>> SORT_FIELD_WHITELIST_MAP = Map.of(
+            "title", article.title,
+            "createdAt", article.createdAt,
+            "arrivedDateTime", article.arrivedDateTime,
+            "expectedReadTime", article.expectedReadTime
+    );
+
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
+
 
     @Override
     public Page<ArticleResponse> findArticles(
             Long memberId,
             ArticlesOptionsRequest options,
             Pageable pageable
-    ) {
-        List<ArticleResponse> content = jpaQueryFactory
-                .select(new QArticleResponse(
-                        article.id,
-                        article.title,
-                        article.contentsSummary,
-                        article.arrivedDateTime,
-                        article.thumbnailUrl,
-                        article.expectedReadTime,
-                        article.isRead,
-                        JPAExpressions
-                                .selectOne()
-                                .from(bookmark)
-                                .where(bookmark.articleId.eq(article.id)
-                                        .and(bookmark.memberId.eq(memberId)))
-                                .exists(),
-                        new QNewsletterSummaryResponse(
-                                newsletter.name,
-                                newsletter.imageUrl.coalesce(""),
-                                category.name
-                        )
-                ))
-                .from(article)
-                .join(newsletter).on(article.newsletterId.eq(newsletter.id))
-                .join(category).on(newsletter.categoryId.eq(category.id))
-                .where(
-                        article.memberId.eq(memberId),
-                        createDateWhereClause(options.date()),
-                        createNewsletterIdWhereClause(options.newsletterId())
-                )
-                .orderBy(article.arrivedDateTime.desc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        JPAQuery<Long> countQuery = jpaQueryFactory
-                .select(article.count())
-                .from(article)
-                .where(
-                        article.memberId.eq(memberId),
-                        createDateWhereClause(options.date()),
-                        createNewsletterIdWhereClause(options.newsletterId())
-                );
-
-        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    ){
+            JPAQuery<Long> totalQuery = getTotalQuery(memberId, options);
+            List<ArticleResponse> content = getContent(memberId, options, pageable);
+            return PageableExecutionUtils.getPage(content, pageable, totalQuery::fetchOne);
     }
 
     @Override
@@ -469,6 +440,76 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
                 .groupBy(newsletter.id, newsletter.name, newsletter.imageUrl)
                 .orderBy(article.id.count().desc())
                 .fetch();
+    }
+
+    private JPAQuery<Long> getTotalQuery(Long memberId, ArticlesOptionsRequest options) {
+        return jpaQueryFactory.select(article.count())
+                .from(article)
+                .join(newsletter).on(article.newsletterId.eq(newsletter.id))
+                .join(category).on(newsletter.categoryId.eq(category.id))
+                .where(createMemberWhereClause(memberId))
+                .where(createDateWhereClause(options.date()))
+                .where(createNewsletterIdWhereClause(options.newsletterId()));
+    }
+
+    private List<ArticleResponse> getContent(Long memberId, ArticlesOptionsRequest options, Pageable pageable) {
+        return jpaQueryFactory.select(new QArticleResponse(
+                        article.id,
+                        article.title,
+                        article.contentsSummary,
+                        article.arrivedDateTime,
+                        article.thumbnailUrl,
+                        article.expectedReadTime,
+                        article.isRead,
+                        getIsBookmarked(memberId),
+                        new QNewsletterSummaryResponse(newsletter.name, newsletter.imageUrl, category.name)
+                ))
+                .from(article)
+                .join(newsletter).on(article.newsletterId.eq(newsletter.id))
+                .join(category).on(newsletter.categoryId.eq(category.id))
+                .where(createMemberWhereClause(memberId))
+                .where(createDateWhereClause(options.date()))
+                .where(createNewsletterIdWhereClause(options.newsletterId()))
+                .orderBy(getOrderSpecifiers(pageable).toArray(OrderSpecifier[]::new))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+    }
+
+    private List<OrderSpecifier<?>> getOrderSpecifiers(Pageable pageable) {
+        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
+        pageable.getSort()
+                .stream()
+                .forEach(sort -> {
+                    Order order = sort.isAscending() ? Order.ASC : Order.DESC;
+                    String property = sort.getProperty();
+                    Path<?> target = resolveSortProperty(property);
+                    OrderSpecifier<?> orderSpecifier = new OrderSpecifier(order, target);
+                    orderSpecifiers.add(orderSpecifier);
+                });
+        return orderSpecifiers;
+    }
+
+    private Path<?> resolveSortProperty(String property) {
+        if (!StringUtils.hasText(property)) {
+            throw new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
+        }
+        String normalized = property.strip();
+        return Optional.ofNullable(SORT_FIELD_WHITELIST_MAP.get(normalized))
+                .orElseThrow(() -> {
+                    log.debug("허용되지 않는 정렬 키: {}", property);
+                    return new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
+                });
+    }
+
+    private BooleanExpression getIsBookmarked(Long memberId) {
+        return JPAExpressions.selectOne()
+                .from(bookmark)
+                .where(
+                        bookmark.articleId.eq(article.id)
+                                .and(bookmark.memberId.eq(memberId))
+                )
+                .exists();
     }
 
     private JPAQuery<Long> getOldTotalQueryForSearch(Long memberId, ArticleSearchOptionsRequest options, LocalDate fiveDaysAgoDate) {

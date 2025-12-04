@@ -18,23 +18,21 @@ services:
 
       #### --------------------------------------
       #### OpenTelemetry (전체 주석 처리)
-      # JAVA_TOOL_OPTIONS: "-javaagent:/otel/opentelemetry-javaagent.jar"
-      # OTEL_SERVICE_NAME: bombom-server-prod
-      # OTEL_EXPORTER_OTLP_ENDPOINT: ${PROD_OTEL_ENDPOINT}
-      # OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
-      # OTEL_TRACES_EXPORTER: otlp
-      # OTEL_TRACES_SAMPLER: always_on
-      # OTEL_METRICS_EXPORTER: none
-      # OTEL_LOGS_EXPORTER: none
-      # OTEL_PROPAGATORS: tracecontext,baggage
-      # OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDE_URLS: /actuator/.*
-      # OTEL_JAVAAGENT_DEBUG: "true"
+      JAVA_TOOL_OPTIONS: "-javaagent:/otel/opentelemetry-javaagent.jar"
+      OTEL_SERVICE_NAME: bombom-server-prod
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${PROD_OTEL_ENDPOINT}
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_TRACES_SAMPLER: always_on
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_PROPAGATORS: tracecontext,baggage
+      OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDE_URLS: /actuator/.*
+      OTEL_JAVAAGENT_DEBUG: "true"
 
     volumes:
       - /home/ec2-user/bombom-prod/logs:/logs
-
-      #### Agent JAR 파일도 비활성화
-      # - /home/ec2-user/bombom-prod/opentelemetry/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
+      - /home/ec2-user/bombom-prod/opentelemetry/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
 
     # 컨테이너 graceful shutdown 대기 시간
     stop_grace_period: 40s

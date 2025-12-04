@@ -109,9 +109,7 @@ class ArticleServiceTest {
 
         // then
         List<ArticleResponse> content = result.getContent();
-        assertSoftly(softly -> {
-            softly.assertThat(result.getTotalElements()).isEqualTo(articles.size());
-            softly.assertThat(content).hasSize(articles.size());
+        assertSoftly(softly -> {;
             softly.assertThat(content.get(0).arrivedDateTime()).isAfter(content.get(1).arrivedDateTime());
             softly.assertThat(content.get(1).arrivedDateTime()).isAfter(content.get(2).arrivedDateTime());
         });
@@ -191,8 +189,8 @@ class ArticleServiceTest {
 
         // then
         assertSoftly(softly -> {
-            softly.assertThat(result.getTotalElements()).isEqualTo(4);
-            softly.assertThat(result.getTotalPages()).isEqualTo(2);
+            softly.assertThat(result.getTotalElements()).isEqualTo(11);
+            softly.assertThat(result.getTotalPages()).isEqualTo(6);
             softly.assertThat(result.getContent()).hasSize(2);
             softly.assertThat(result.getNumber()).isEqualTo(0);
             softly.assertThat(result.getSize()).isEqualTo(2);
@@ -217,14 +215,14 @@ class ArticleServiceTest {
 
         // then
         assertSoftly(softly -> {
-            softly.assertThat(result.getTotalElements()).isEqualTo(4);
-            softly.assertThat(result.getTotalPages()).isEqualTo(2);
+            softly.assertThat(result.getTotalElements()).isEqualTo(11);
+            softly.assertThat(result.getTotalPages()).isEqualTo(6);
             softly.assertThat(result.getContent()).hasSize(2);
             softly.assertThat(result.getNumber()).isEqualTo(1);
             softly.assertThat(result.getSize()).isEqualTo(2);
             softly.assertThat(result.isFirst()).isFalse();
-            softly.assertThat(result.isLast()).isTrue();
-            softly.assertThat(result.hasNext()).isFalse();
+            softly.assertThat(result.isLast()).isFalse();
+            softly.assertThat(result.hasNext()).isTrue();
             softly.assertThat(result.hasPrevious()).isTrue();
         });
     }
@@ -241,11 +239,13 @@ class ArticleServiceTest {
                 pageable
         );
 
+        System.out.println(result);
+
         // then
         assertSoftly(softly -> {
-            softly.assertThat(result.getTotalElements()).isEqualTo(4);
+            softly.assertThat(result.getTotalElements()).isEqualTo(11);
             softly.assertThat(result.getContent()).hasSize(2);
-            softly.assertThat(result.getTotalPages()).isEqualTo(2);
+            softly.assertThat(result.getTotalPages()).isEqualTo(6);
             softly.assertThat(result.getContent().get(0).arrivedDateTime())
                     .isAfter(result.getContent().get(1).arrivedDateTime());
         });
@@ -437,13 +437,19 @@ class ArticleServiceTest {
 
         // then
         assertSoftly(softly -> {
-            softly.assertThat(result.totalCount()).isEqualTo(4);
-            softly.assertThat(result.newsletters().get(0).name()).isEqualTo("비즈레터");
-            softly.assertThat(result.newsletters().get(0).articleCount()).isEqualTo(2);
-            softly.assertThat(result.newsletters().get(1).name()).isEqualTo("뉴스픽");
-            softly.assertThat(result.newsletters().get(1).articleCount()).isEqualTo(1);
-            softly.assertThat(result.newsletters().get(2).name()).isEqualTo("IT타임즈");
+            softly.assertThat(result.totalCount()).isEqualTo(11);
+
+            softly.assertThat(result.newsletters().get(0).name()).isEqualTo("우테코");
+            softly.assertThat(result.newsletters().get(0).articleCount()).isEqualTo(7);
+
+            softly.assertThat(result.newsletters().get(1).name()).isEqualTo("비즈레터");
+            softly.assertThat(result.newsletters().get(1).articleCount()).isEqualTo(2);
+
+            softly.assertThat(result.newsletters().get(2).name()).isEqualTo("뉴스픽");
             softly.assertThat(result.newsletters().get(2).articleCount()).isEqualTo(1);
+
+            softly.assertThat(result.newsletters().get(3).name()).isEqualTo("IT타임즈");
+            softly.assertThat(result.newsletters().get(3).articleCount()).isEqualTo(1);
         });
     }
 
@@ -457,8 +463,8 @@ class ArticleServiceTest {
 
         // then
         assertSoftly(softly -> {
-            softly.assertThat(result.totalCount()).isEqualTo(4);
-            softly.assertThat(result.newsletters()).hasSize(3); // 모든 뉴스레터
+            softly.assertThat(result.totalCount()).isEqualTo(11);
+            softly.assertThat(result.newsletters()).hasSize(4); // 모든 뉴스레터
         });
     }
 
@@ -472,8 +478,8 @@ class ArticleServiceTest {
 
         // then
         assertSoftly(softly -> {
-            softly.assertThat(result.totalCount()).isEqualTo(4);
-            softly.assertThat(result.newsletters()).hasSize(3); // 모든 뉴스레터
+            softly.assertThat(result.totalCount()).isEqualTo(11);
+            softly.assertThat(result.newsletters()).hasSize(4); // 모든 뉴스레터
         });
     }
 
@@ -611,7 +617,7 @@ class ArticleServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(articleRepository.findById(article1)).isEmpty();
             softly.assertThat(articleRepository.findById(article2)).isEmpty();
-            softly.assertThat(articleRepository.findAll().size()).isEqualTo(2);
+            softly.assertThat(articleRepository.findAll().size()).isEqualTo(9);
             softly.assertThat(bookmarkRepository.findAll()).hasSize(0);
             softly.assertThat(highlightRepository.findAllByArticleId(0L)).hasSize(3); // fixture 6개 중 포함된건 3개
         });

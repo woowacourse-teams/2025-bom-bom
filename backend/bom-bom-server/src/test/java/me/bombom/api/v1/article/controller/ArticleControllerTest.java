@@ -135,10 +135,10 @@ class ArticleControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.totalElements").value(4))
+                .andExpect(jsonPath("$.totalElements").value(11))
                 .andExpect(jsonPath("$.first").value(true))
-                .andExpect(jsonPath("$.last").value(true))
-                .andExpect(jsonPath("$.numberOfElements").value(4))
+                .andExpect(jsonPath("$.last").value(false))
+                .andExpect(jsonPath("$.numberOfElements").value(10))
                 .andExpect(jsonPath("$.empty").value(false));
     }
 
@@ -156,6 +156,24 @@ class ArticleControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.content[0].newsletter.name").value(newsletterName))
+                .andExpect(jsonPath("$.content[1].newsletter.name").value(newsletterName));
+    }
+
+    @Test
+    void 뉴스레터_아티클_목록_조회2() throws Exception {
+        // given
+        Newsletter newsletter = newsletters.get(3);
+        Long newsletterId = newsletter.getId();
+        String newsletterName = newsletter.getName();
+
+        // when & then - getArticles는 keyword가 있으면 에러 (keyword 없어야 함)
+        mockMvc.perform(get("/api/v1/articles")
+                        .with(authentication(authToken))
+                        .param("newsletterId", newsletterId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.totalElements").value(7))
                 .andExpect(jsonPath("$.content[0].newsletter.name").value(newsletterName))
                 .andExpect(jsonPath("$.content[1].newsletter.name").value(newsletterName));
     }
@@ -208,7 +226,7 @@ class ArticleControllerTest {
                         .with(authentication(authToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.totalElements").value(4))
+                .andExpect(jsonPath("$.totalElements").value(11))
                 .andReturn();
 
         // when & then - 명시적 DESC 정렬
@@ -217,7 +235,7 @@ class ArticleControllerTest {
                         .param("sorted", "desc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.totalElements").value(4))
+                .andExpect(jsonPath("$.totalElements").value(11))
                 .andReturn();
 
         // 기본값이 DESC와 같은지 확인
@@ -292,7 +310,7 @@ class ArticleControllerTest {
                         .param("keyword", "아티클"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.totalElements").value(4)); // keyword 무시하고 전체 조회
+                .andExpect(jsonPath("$.totalElements").value(11)); // keyword 무시하고 전체 조회
     }
 
     @Test

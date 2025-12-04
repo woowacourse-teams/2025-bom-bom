@@ -98,7 +98,7 @@ public final class TestFixture {
                                                                 List<NewsletterDetail> details) {
         return createNewsletters(
                 categories,
-                List.of(details.get(0).getId(), details.get(1).getId(), details.get(2).getId())
+                List.of(details.get(0).getId(), details.get(1).getId(), details.get(2).getId(), details.get(3).getId())
         );
     }
 
@@ -117,7 +117,8 @@ public final class TestFixture {
         return List.of(
                 createNewsletter("뉴스픽", "news@newspick.com", categories.get(0).getId(), detailIds.get(0)),
                 createNewsletter("IT타임즈", "editor@ittimes.io", categories.get(1).getId(), detailIds.get(1)),
-                createNewsletter("비즈레터", "biz@biz.com", categories.get(2).getId(), detailIds.get(2))
+                createNewsletter("비즈레터", "biz@biz.com", categories.get(2).getId(), detailIds.get(2)),
+                createNewsletter("우테코", "woowa@biz.com", categories.get(2).getId(), detailIds.get(3))
         );
     }
 
@@ -137,6 +138,10 @@ public final class TestFixture {
                 NewsletterSubscriptionCount.builder()
                         .newsletterId(newsletters.get(2).getId())
                         .total(600)
+                        .build(),
+                NewsletterSubscriptionCount.builder()
+                        .newsletterId(newsletters.get(3).getId())
+                        .total(900)
                         .build()
         );
     }
@@ -173,6 +178,13 @@ public final class TestFixture {
                         .issueCycle("격주 화요일")
                         .subscribeCount(600)
                         .sender("발신자")
+                        .build(),
+                NewsletterDetail.builder()
+                        .mainPageUrl("https://biz.com")
+                        .subscribeUrl("https://biz.com/subscribe")
+                        .issueCycle("격주 토요일")
+                        .subscribeCount(900)
+                        .sender("발신자")
                         .build()
         );
     }
@@ -199,14 +211,21 @@ public final class TestFixture {
     }
 
     /**
-     * Article
+     * Article 11 개
      */
     public static List<Article> createArticles(Member member, List<Newsletter> newsletters) {
         return List.of(
                 createArticle("뉴스", member.getId(), newsletters.get(0).getId(), BASE_TIME.minusMinutes(5)),
                 createArticle("뉴스", member.getId(), newsletters.get(1).getId(), BASE_TIME.minusMinutes(10)),
                 createArticle("레터", member.getId(), newsletters.get(2).getId(), BASE_TIME.minusMinutes(20)),
-                createArticle("레터", member.getId(), newsletters.get(2).getId(), BASE_TIME.minusDays(1))
+                createArticle("레터", member.getId(), newsletters.get(2).getId(), BASE_TIME.minusDays(1)),
+                createArticle("공지", member.getId(), newsletters.get(3).getId(), BASE_TIME.minusDays(2)),
+                createArticle("공지", member.getId(), newsletters.get(3).getId(), BASE_TIME.minusDays(3)),
+                createArticle("공지", member.getId(), newsletters.get(3).getId(), BASE_TIME.minusDays(4)),
+                createArticle("공지", member.getId(), newsletters.get(3).getId(), BASE_TIME.minusDays(5)),
+                createArticle("공지", member.getId(), newsletters.get(3).getId(), BASE_TIME.minusDays(6)),
+                createArticle("공지", member.getId(), newsletters.get(3).getId(), BASE_TIME.minusDays(7)),
+                createArticle("공지", member.getId(), newsletters.get(3).getId(), BASE_TIME.minusDays(8))
         );
     }
 

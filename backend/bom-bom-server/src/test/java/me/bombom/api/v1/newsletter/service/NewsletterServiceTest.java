@@ -66,11 +66,7 @@ class NewsletterServiceTest {
         newsletterDetails = newsletterDetailRepository.saveAll(newsletterDetails);
         categories = TestFixture.createCategories();
         categoryRepository.saveAll(categories);
-        newsletters = List.of(
-                TestFixture.createNewsletter("뉴스픽", "news@newspick.com", categories.get(0).getId(), newsletterDetails.get(0).getId()),
-                TestFixture.createNewsletter("IT타임즈", "editor@ittimes.io", categories.get(1).getId(), newsletterDetails.get(1).getId()),
-                TestFixture.createNewsletter("비즈레터", "biz@biz.com", categories.get(2).getId(), newsletterDetails.get(2).getId())
-        );
+        newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
         newsletters = newsletterRepository.saveAll(newsletters);
         
         // NewsletterSubscriptionCount 생성 및 저장
@@ -95,7 +91,8 @@ class NewsletterServiceTest {
                             .containsExactlyInAnyOrder(
                                     newsletters.get(0).getId(),
                                     newsletters.get(1).getId(),
-                                    newsletters.get(2).getId()
+                                    newsletters.get(2).getId(),
+                                    newsletters.get(3).getId()
                             );
             softly.assertThat(result)
                             .extracting("isSubscribed")
@@ -278,7 +275,7 @@ class NewsletterServiceTest {
 
         //then
         assertSoftly(softly -> {
-            softly.assertThat(result.size()).isEqualTo(4); // 기존 3개 + 새로 생성한 1개
+            softly.assertThat(result.size()).isEqualTo(5); // 기존 4개 + 새로 생성한 1개
             softly.assertThat(result)
                     .extracting("newsletterId")
                     .contains(newNewsletter.getId());

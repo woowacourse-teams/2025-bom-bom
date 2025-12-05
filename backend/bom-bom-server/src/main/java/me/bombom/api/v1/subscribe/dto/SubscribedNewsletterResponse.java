@@ -23,7 +23,18 @@ public record SubscribedNewsletterResponse(
         @NotNull
         boolean hasUnsubscribeUrl
 ) {
-    public SubscribedNewsletterResponse(Long newsletterId, String name, String imageUrl, String description, String category, String unsubscribeUrl) {
-        this(newsletterId, name, imageUrl, description, category, StringUtils.hasText(unsubscribeUrl));
+
+    public static SubscribedNewsletterResponse of(
+            Long newsletterId,
+            String name,
+            String imageUrl,
+            String description,
+            String category,
+            String unsubscribeUrl
+    ) {
+        boolean hasUnsubscribeUrl = StringUtils.hasText(unsubscribeUrl);
+        return new SubscribedNewsletterResponse(
+                newsletterId, name, imageUrl, description, category, hasUnsubscribeUrl
+        );
     }
 }

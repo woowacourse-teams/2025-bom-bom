@@ -58,12 +58,15 @@ public class ArticleService {
         String unsubscribeUrl = UnsubscribeUrlExtractor.extract(article.getContents());
 
         applicationEventPublisher.publishEvent(ArticleArrivedEvent.of(
-                newsletter.getId(),
-                newsletter.getName(),
-                article.getId(),
-                article.getTitle(),
-                member.getId(),
-                unsubscribeUrl)
+                        newsletter.getId(),
+                        newsletter.getName(),
+                        article.getId(),
+                        article.getTitle(),
+                        member.getId(),
+                        unsubscribeUrl,
+                        message,
+                        contents
+                )
         );
         return true;
     }

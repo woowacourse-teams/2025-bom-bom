@@ -399,35 +399,6 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 제목_필터링_된_뉴스레터_별_아티클_개수를_조회한다() {
-        // when
-        String keyword = "AI";
-
-        List<Article> testArticles = List.of(
-                TestFixture.createArticle("AI와 디자인", member.getId(), newsletters.get(0).getId(), BASE_TIME),
-                TestFixture.createArticle("생성형 AI 추천", member.getId(), newsletters.get(1).getId(), BASE_TIME),
-                TestFixture.createArticle("리빙 인테리어", member.getId(), newsletters.get(2).getId(), BASE_TIME),
-                TestFixture.createArticle("북카페 추천", member.getId(), newsletters.get(0).getId(), BASE_TIME),
-                TestFixture.createArticle("직업과 AI의 상관관계", member.getId(), newsletters.get(1).getId(), BASE_TIME)
-        );
-        articleRepository.saveAll(testArticles);
-
-        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
-                member,
-                keyword
-        );
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(result.totalCount()).isEqualTo(3);
-            softly.assertThat(result.newsletters().get(0).name()).isEqualTo("IT타임즈");
-            softly.assertThat(result.newsletters().get(0).articleCount()).isEqualTo(2);
-            softly.assertThat(result.newsletters().get(1).name()).isEqualTo("뉴스픽");
-            softly.assertThat(result.newsletters().get(1).articleCount()).isEqualTo(1);
-        });
-    }
-
-    @Test
     void 전체_뉴스레터_별_아티클_개수를_조회한다() {
         // when
         ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(

@@ -3,12 +3,7 @@ package news.bombom.notification.config;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.StringUtils;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -42,31 +37,5 @@ public class CorsConfig implements WebMvcConfigurer {
         List<String> origins = Arrays.asList(allowedOrigins.split(","));
         corsRegistration.allowedOrigins(origins.toArray(new String[0]))
                 .allowCredentials(true);
-    }
-
-    /**
-     * CORS 필터를 통한 추가 설정
-     */
-    @Bean
-    public CorsFilter corsFilter() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-
-        if (ALL_ORIGINS.equals(allowedOrigins)) {
-            config.setAllowCredentials(false);
-            config.addAllowedOriginPattern(ALL_ORIGINS);
-        } else {
-            config.setAllowCredentials(true);
-            Arrays.stream(allowedOrigins.split(","))
-                    .filter(StringUtils::hasText)
-                    .forEach(config::addAllowedOrigin);
-        }
-
-        config.addAllowedHeader(ALL_ORIGINS);
-        config.addAllowedMethod(ALL_ORIGINS);
-        config.setMaxAge(maxAge);
-
-        source.registerCorsConfiguration(pathPatterns, config);
-        return new CorsFilter(source);
     }
 }

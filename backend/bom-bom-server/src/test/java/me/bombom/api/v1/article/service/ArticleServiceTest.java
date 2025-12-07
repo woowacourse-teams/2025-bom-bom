@@ -9,6 +9,7 @@ import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
+import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
@@ -35,10 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.domain.Sort.Order;
 
 @IntegrationTest
 class ArticleServiceTest {
@@ -621,6 +618,53 @@ class ArticleServiceTest {
             softly.assertThat(articleRepository.findById(myArticleId)).isPresent();
             softly.assertThat(articleRepository.findById(foreignArticleId)).isPresent();
             softly.assertThat(bookmarkRepository.findAll()).hasSize(1);
+        });
+    }
+
+    @Test
+    void 키워드가_null일_때_countWithoutKeyword가_호출된다() {
+        // when
+        List<ArticleCountPerNewsletterResponse> result = articleRepository.countPerNewsletter(member.getId(), null);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).hasSize(4); // 모든 뉴스레터
+            softly.assertThat(result.get(0).articleCount()).isEqualTo(7); // 우테코
+            softly.assertThat(result.get(1).articleCount()).isEqualTo(2); // 비즈레터
+        });
+    }
+
+    @Test
+    void 키워드가_공백일_때_countWithoutKeyword가_호출된다() {
+        // when
+        List<ArticleCountPerNewsletterResponse> result = articleRepository.countPerNewsletter(member.getId(), "   ");
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).hasSize(4); // 모든 뉴스레터
+            softly.assertThat(result.get(0).articleCount()).isEqualTo(7); // 우테코
+            softly.assertThat(result.get(1).articleCount()).isEqualTo(2); // 비즈레터
+        });
+    }
+
+    @Test
+    void 키워드가_있을_때_countWithKeyword가_호출된다() {
+        // given
+        Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
+        List<Article> testArticles = List.of(
+                TestFixture.createArticle("검색 테스트 아티클", member.getId(), targetNewsletter.getId(), BASE_TIME),
+                TestFixture.createArticle("일반 아티클", member.getId(), newsletters.get(1).getId(), BASE_TIME)
+        );
+        articleRepository.saveAll(testArticles);
+
+        // when
+        List<ArticleCountPerNewsletterResponse> result = articleRepository.countPerNewsletter(member.getId(), "검색");
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).isNotEmpty();
+            softly.assertThat(result.stream()
+                    .anyMatch(r -> r.name().equals(targetNewsletter.getName()) && r.articleCount() > 0)).isTrue();
         });
     }
 }

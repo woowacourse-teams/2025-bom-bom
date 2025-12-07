@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
+import me.bombom.api.v1.article.dto.response.QArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.QArticleResponse;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.dto.request.ArticleSearchOptionsRequest;
@@ -99,6 +100,79 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         
         return PageableExecutionUtils.getPage(content, pageable, () -> total);
     }
+
+    @Override
+    public List<ArticleCountPerNewsletterResponse> countPerNewsletter(Long memberId, String keyword) {
+        if (!StringUtils.hasText(keyword)) {
+            return countWithoutKeyword(memberId);
+        }
+        return countWithKeyword(memberId, keyword);
+    }
+
+    private List<ArticleCountPerNewsletterResponse> countWithoutKeyword(Long memberId) {
+        return jpaQueryFactory
+                .select(new QArticleCountPerNewsletterResponse(
+                        newsletter.id,
+                        newsletter.name,
+                        newsletter.imageUrl.coalesce(""),
+                        article.id.count().intValue()
+                ))
+                .from(article)
+                .join(newsletter).on(article.newsletterId.eq(newsletter.id))
+                .where(article.memberId.eq(memberId))
+                .groupBy(newsletter.id)
+                .orderBy(article.id.count().desc())
+                .fetch();
+    }
+
+    private List<ArticleCountPerNewsletterResponse> countWithKeyword(Long memberId, String keyword) {
+        String sql = """
+        (
+            SELECT 
+                n.id AS newsletterId,
+                n.name AS name,
+                COALESCE(n.image_url, '') AS imageUrl,
+                COUNT(a.id) AS articleCount
+            FROM article a
+            JOIN newsletter n ON n.id = a.newsletter_id
+            WHERE a.member_id = :memberId
+              AND a.arrived_date_time >= DATE_SUB(NOW(), INTERVAL 5 DAY)
+              AND (
+                    LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                 OR LOWER(a.contents_text) LIKE LOWER(CONCAT('%', :keyword, '%'))
+              )
+            GROUP BY n.id
+        )
+        UNION ALL
+        (
+            SELECT
+                n.id AS newsletterId,
+                n.name AS name,
+                COALESCE(n.image_url, '') AS imageUrl,
+                COUNT(ra.id) AS articleCount
+            FROM recent_article ra
+            JOIN newsletter n ON n.id = ra.newsletter_id
+            WHERE ra.member_id = :memberId
+              AND MATCH(ra.title, ra.contents_text) AGAINST(:keyword)
+            GROUP BY n.id
+        )
+        """;
+
+        List<Object[]> rows = entityManager.createNativeQuery(sql)
+                .setParameter("memberId", memberId)
+                .setParameter("keyword", keyword)
+                .getResultList();
+
+        return rows.stream()
+                .map(r -> new ArticleCountPerNewsletterResponse(
+                        ((Number) r[0]).longValue(),
+                        (String) r[1],
+                        (String) r[2],
+                        ((Number) r[3]).intValue()
+                ))
+                .toList();
+    }
+
 
     private long getRecentTotalCountNative(Long memberId, ArticleSearchOptionsRequest options, LocalDate fiveDaysAgoDate) {
         StringBuilder sql = new StringBuilder();
@@ -419,27 +493,6 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
         return Optional.ofNullable(count)
                 .orElse(0L)
                 .intValue();
-    }
-
-    @Override
-    public List<ArticleCountPerNewsletterResponse> countPerNewsletter(Long memberId, String keyword) {
-        return jpaQueryFactory
-                .select(Projections.constructor(
-                        ArticleCountPerNewsletterResponse.class,
-                        newsletter.id,
-                        newsletter.name,
-                        newsletter.imageUrl.coalesce(""),
-                        article.id.count().castToNum(Integer.class)
-                ))
-                .from(article)
-                .join(newsletter).on(newsletter.id.eq(article.newsletterId))
-                .where(
-                        article.memberId.eq(memberId),
-                        createKeywordWhereClause(keyword)
-                )
-                .groupBy(newsletter.id, newsletter.name, newsletter.imageUrl)
-                .orderBy(article.id.count().desc())
-                .fetch();
     }
 
     private JPAQuery<Long> getTotalQuery(Long memberId, ArticlesOptionsRequest options) {

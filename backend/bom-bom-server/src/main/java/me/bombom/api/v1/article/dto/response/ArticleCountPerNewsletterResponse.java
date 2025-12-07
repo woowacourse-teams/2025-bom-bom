@@ -1,5 +1,6 @@
 package me.bombom.api.v1.article.dto.response;
 
+import com.querydsl.core.annotations.QueryProjection;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
@@ -27,4 +28,7 @@ public record ArticleCountPerNewsletterResponse(
                 count
         );
     }
+
+    @QueryProjection
+    public ArticleCountPerNewsletterResponse {}
 }

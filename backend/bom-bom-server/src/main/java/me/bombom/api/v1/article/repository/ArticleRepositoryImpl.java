@@ -136,6 +136,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
             FROM article a
             JOIN newsletter n ON n.id = a.newsletter_id
             WHERE a.member_id = :memberId
+              AND a.arrived_date_time >= DATE_SUB(NOW(), INTERVAL 5 DAY)
               AND (
                     LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
                  OR LOWER(a.contents_text) LIKE LOWER(CONCAT('%', :keyword, '%'))

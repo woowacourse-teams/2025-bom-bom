@@ -11,6 +11,7 @@ import news.bombomemail.article.repository.RecentArticleRepository;
 import news.bombomemail.email.extractor.EmailContentExtractor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import news.bombomemail.article.util.html.HtmlCleanerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -18,7 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({RecentArticleService.class})
+@Import({RecentArticleService.class, HtmlCleanerConfig.class})
 class RecentArticleServiceTest {
 
     @Autowired

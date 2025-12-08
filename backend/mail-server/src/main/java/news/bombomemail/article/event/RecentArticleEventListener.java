@@ -25,7 +25,7 @@ public class RecentArticleEventListener {
                     event.memberId(), event.newsletterName(), event.articleTitle());
         } catch (Exception e) {
             // v2에서 저장 실패 고려 예정
-            log.error("아티클 저장 실패: 멤버 ID={}, 뉴스레터={}, 아티클 제목={}",
+            log.error("최신 아티클 저장 실패: 멤버 ID={}, 뉴스레터={}, 아티클 제목={}",
                     event.memberId(), event.newsletterName(), event.articleTitle(), e);
         }
     }

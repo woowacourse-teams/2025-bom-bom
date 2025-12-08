@@ -3,10 +3,12 @@ package me.bombom.api.v1.auth.dto;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
@@ -35,7 +37,10 @@ public class CustomOAuth2User implements OidcUser, Serializable {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList();
+        if (member == null) {
+            return Collections.emptyList();
+        }
+        return List.of(new SimpleGrantedAuthority("ROLE_" + member.getRoleId()));
     }
 
     @Override

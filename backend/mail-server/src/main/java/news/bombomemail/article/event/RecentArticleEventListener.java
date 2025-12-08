@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import news.bombomemail.article.service.RecentArticleService;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 @Slf4j
@@ -16,7 +14,6 @@ public class RecentArticleEventListener {
     private final RecentArticleService recentArticleService;
 
     @TransactionalEventListener
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onArticleArrived(ArticleArrivedEvent event) {
         try {
             recentArticleService.save(event.message(), event.contents(), event.memberId(), event.newsletterId());

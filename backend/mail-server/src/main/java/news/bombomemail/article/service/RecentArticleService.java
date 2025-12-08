@@ -12,6 +12,7 @@ import news.bombomemail.article.util.ReadingTimeCalculator;
 import news.bombomemail.article.util.SummaryGenerator;
 import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
@@ -23,6 +24,7 @@ public class RecentArticleService {
 
     private final RecentArticleRepository recentArticleRepository;
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void save(MimeMessage message, String contents, Long memberId, Long newsletterId)
             throws MessagingException {
         recentArticleRepository.save(buildRecentArticle(message, contents, memberId, newsletterId));

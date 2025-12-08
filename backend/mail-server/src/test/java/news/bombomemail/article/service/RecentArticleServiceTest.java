@@ -36,6 +36,7 @@ class RecentArticleServiceTest {
         session = Session.getDefaultInstance(new Properties());
         memberId = 1L;
         newsletterId = 1L;
+        recentArticleRepository.deleteAll();
     }
 
     @Test

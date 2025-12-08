@@ -12,7 +12,8 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
 
     @Query("""
         SELECT new me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse(
-            n.id, n.name, n.imageUrl, n.description, c.name, s.unsubscribeUrl
+            n.id, n.name, n.imageUrl, n.description, c.name,
+            CASE WHEN s.unsubscribeUrl IS NOT NULL AND s.unsubscribeUrl <> '' THEN true ELSE false END
         )
         FROM Subscribe s
         JOIN Newsletter n ON s.newsletterId = n.id

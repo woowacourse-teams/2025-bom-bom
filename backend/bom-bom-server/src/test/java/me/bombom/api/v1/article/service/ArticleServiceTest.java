@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
+import me.bombom.api.v1.article.domain.RecentArticle;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
@@ -15,6 +16,7 @@ import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.article.repository.RecentArticleRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -54,6 +56,9 @@ class ArticleServiceTest {
 
     @Autowired
     private ArticleRepository articleRepository;
+
+    @Autowired
+    private RecentArticleRepository recentArticleRepository;
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -454,13 +459,10 @@ class ArticleServiceTest {
 
     @Test
     void 키워드_앞뒤_공백이_제거되어_검색된다() {
-        // given
-        LocalDateTime now = LocalDateTime.now();
-        List<Article> testArticles = List.of(
-                TestFixture.createArticle("AI 기술", member.getId(), newsletters.get(0).getId(), now),
-                TestFixture.createArticle("머신러닝", member.getId(), newsletters.get(1).getId(), now)
-        );
-        articleRepository.saveAll(testArticles);
+        // given - 5일 이전 데이터로 생성하여 article 테이블에서 검색되도록 함
+        LocalDateTime sixDaysAgo = LocalDateTime.now().minusDays(6);
+        Article article = TestFixture.createArticle("AI 기술", member.getId(), newsletters.get(0).getId(), sixDaysAgo);
+        articleRepository.save(article);
 
         // when
         ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
@@ -515,12 +517,11 @@ class ArticleServiceTest {
 
     @Test
     void 부분_문자열로_키워드_검색이_된다() {
-        // given
-        LocalDateTime now = LocalDateTime.now();
+        // given - 5일 이전 데이터로 생성하여 article 테이블에서 검색되도록 함
+        LocalDateTime sixDaysAgo = LocalDateTime.now().minusDays(6);
         List<Article> testArticles = List.of(
-                TestFixture.createArticle("프로그래밍 언어", member.getId(), newsletters.get(0).getId(), now),
-                TestFixture.createArticle("그래픽 디자인", member.getId(), newsletters.get(1).getId(), now),
-                TestFixture.createArticle("데이터베이스", member.getId(), newsletters.get(2).getId(), now)
+                TestFixture.createArticle("프로그래밍 언어", member.getId(), newsletters.get(0).getId(), sixDaysAgo),
+                TestFixture.createArticle("그래픽 디자인", member.getId(), newsletters.get(1).getId(), sixDaysAgo)
         );
         articleRepository.saveAll(testArticles);
 
@@ -630,12 +631,9 @@ class ArticleServiceTest {
     void 키워드가_있을_때_countWithKeyword가_호출된다() {
         // given
         Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
-        LocalDateTime now = LocalDateTime.now();
-        List<Article> testArticles = List.of(
-                TestFixture.createArticle("검색 테스트 아티클", member.getId(), targetNewsletter.getId(), now),
-                TestFixture.createArticle("일반 아티클", member.getId(), newsletters.get(1).getId(), now)
-        );
-        articleRepository.saveAll(testArticles);
+        LocalDateTime sixDaysAgo = LocalDateTime.now().minusDays(6);
+        Article article = TestFixture.createArticle("검색 테스트 아티클", member.getId(), targetNewsletter.getId(), sixDaysAgo);
+        articleRepository.save(article);
 
         // when
         List<ArticleCountPerNewsletterResponse> result = articleRepository.countPerNewsletter(member.getId(), "검색");
@@ -665,17 +663,15 @@ class ArticleServiceTest {
         // when
         List<ArticleCountPerNewsletterResponse> result = articleRepository.countPerNewsletter(member.getId(), "검색");
 
-        // then - 5일 이내 데이터만 검색되어야 함
+        // then
         assertSoftly(softly -> {
             Optional<ArticleCountPerNewsletterResponse> targetResult = result.stream()
                     .filter(r -> r.name().equals(targetNewsletter.getName()))
                     .findFirst();
             
             if (targetResult.isPresent()) {
-                // 5일 이내 데이터 1개만 검색되어야 함
                 softly.assertThat(targetResult.get().articleCount()).isEqualTo(1);
             } else {
-                // 결과가 없을 수도 있음 (recent_article 테이블에 데이터가 없고, article 테이블에 5일 이내 데이터만 있는 경우)
                 softly.assertThat(result).isEmpty();
             }
         });
@@ -698,19 +694,77 @@ class ArticleServiceTest {
         // when
         List<ArticleCountPerNewsletterResponse> result = articleRepository.countPerNewsletter(member.getId(), "검색");
 
-        // then - 5일 이전 데이터는 검색되지 않아야 함
+        // then
         Optional<ArticleCountPerNewsletterResponse> targetResult = result.stream()
                 .filter(r -> r.name().equals(targetNewsletter.getName()))
                 .findFirst();
         
         assertSoftly(softly -> {
-            // 5일 이전 데이터는 검색되지 않아야 하므로, article 테이블에서는 결과가 없어야 함
-            // recent_article 테이블에 데이터가 있다면 그것만 검색될 수 있음
             if (targetResult.isPresent()) {
-                // recent_article 테이블에 데이터가 있는 경우만 결과가 있을 수 있음
-                // article 테이블의 5일 이전 데이터는 검색되지 않아야 함
                 softly.assertThat(targetResult.get().articleCount()).isGreaterThanOrEqualTo(0);
             }
+        });
+    }
+
+    @Test
+    void 키워드_검색시_recent_article_테이블에서_최근_5일_이내_데이터가_검색된다() {
+        // given
+        Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
+        LocalDateTime now = LocalDateTime.now();
+        RecentArticle recentArticle = TestFixture.createRecentArticle(
+                "최근 아티클 검색 테스트",
+                member.getId(),
+                targetNewsletter.getId(),
+                now
+        );
+        recentArticleRepository.save(recentArticle);
+
+        // when
+        List<ArticleCountPerNewsletterResponse> result = articleRepository.countPerNewsletter(member.getId(), "최근");
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).isNotEmpty();
+            Optional<ArticleCountPerNewsletterResponse> targetResult = result.stream()
+                    .filter(r -> r.name().equals(targetNewsletter.getName()))
+                    .findFirst();
+            softly.assertThat(targetResult).isPresent();
+            softly.assertThat(targetResult.get().articleCount()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void 키워드_검색시_recent_article과_article_테이블_모두에서_검색된다() {
+        // given
+        Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
+        LocalDateTime now = LocalDateTime.now();
+        
+        // recent_article 테이블에 최근 데이터 저장
+        RecentArticle recentArticle = TestFixture.createRecentArticle(
+                "통합 검색 테스트",
+                member.getId(),
+                targetNewsletter.getId(),
+                now
+        );
+        recentArticleRepository.save(recentArticle);
+        
+        // article 테이블에 5일 이전 데이터 저장
+        LocalDateTime sixDaysAgo = now.minusDays(6);
+        Article article = TestFixture.createArticle("통합 검색 테스트", member.getId(), targetNewsletter.getId(), sixDaysAgo);
+        articleRepository.save(article);
+
+        // when
+        List<ArticleCountPerNewsletterResponse> result = articleRepository.countPerNewsletter(member.getId(), "통합");
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).isNotEmpty();
+            Optional<ArticleCountPerNewsletterResponse> targetResult = result.stream()
+                    .filter(r -> r.name().equals(targetNewsletter.getName()))
+                    .findFirst();
+            softly.assertThat(targetResult).isPresent();
+            // recent_article과 article 테이블 모두에서 검색되므로 2개여야 함
+            softly.assertThat(targetResult.get().articleCount()).isEqualTo(2);
         });
     }
 }

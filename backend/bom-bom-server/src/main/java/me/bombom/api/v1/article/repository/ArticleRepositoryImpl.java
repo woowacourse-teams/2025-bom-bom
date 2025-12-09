@@ -127,40 +127,49 @@ public class ArticleRepositoryImpl implements CustomArticleRepository{
 
     private List<ArticleCountPerNewsletterResponse> countWithKeyword(Long memberId, String keyword) {
         String sql = """
-        (
             SELECT 
-                n.id AS newsletterId,
-                n.name AS name,
-                COALESCE(n.image_url, '') AS imageUrl,
-                COUNT(a.id) AS articleCount
-            FROM article a
-            JOIN newsletter n ON n.id = a.newsletter_id
-            WHERE a.member_id = :memberId
-              AND a.arrived_date_time >= DATE_SUB(NOW(), INTERVAL 5 DAY)
-              AND (
-                    LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                 OR LOWER(a.contents_text) LIKE LOWER(CONCAT('%', :keyword, '%'))
-              )
-            GROUP BY n.id
-        )
-        UNION ALL
-        (
-            SELECT
-                n.id AS newsletterId,
-                n.name AS name,
-                COALESCE(n.image_url, '') AS imageUrl,
-                COUNT(ra.id) AS articleCount
-            FROM recent_article ra
-            JOIN newsletter n ON n.id = ra.newsletter_id
-            WHERE ra.member_id = :memberId
-              AND MATCH(ra.title, ra.contents_text) AGAINST(:keyword)
-            GROUP BY n.id
-        )
+                merged.newsletterId,
+                merged.name,
+                merged.imageUrl,
+                SUM(merged.articleCount) AS articleCount
+            FROM (
+                SELECT 
+                    n.id AS newsletterId,
+                    n.name AS name,
+                    COALESCE(n.image_url, '') AS imageUrl,
+                    COUNT(a.id) AS articleCount
+                FROM article a
+                JOIN newsletter n ON n.id = a.newsletter_id
+                WHERE a.member_id = :memberId
+                  AND a.arrived_date_time < DATE_SUB(NOW(), INTERVAL :recentDays DAY)
+                  AND (
+                        LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                     OR LOWER(a.contents_text) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                  )
+                GROUP BY n.id
+        
+                UNION ALL
+        
+                -- 최근 아티클 검색 (recent_article)
+                SELECT
+                    n.id AS newsletterId,
+                    n.name AS name,
+                    COALESCE(n.image_url, '') AS imageUrl,
+                    COUNT(ra.id) AS articleCount
+                FROM recent_article ra
+                JOIN newsletter n ON n.id = ra.newsletter_id
+                WHERE ra.member_id = :memberId
+                  AND MATCH(ra.title, ra.contents_text) AGAINST(:keyword)
+                GROUP BY n.id
+            ) AS merged
+            GROUP BY merged.newsletterId, merged.name, merged.imageUrl
         """;
+
 
         List<Object[]> rows = entityManager.createNativeQuery(sql)
                 .setParameter("memberId", memberId)
                 .setParameter("keyword", keyword)
+                .setParameter("recentDays", RECENT_DAYS)
                 .getResultList();
 
         return rows.stream()

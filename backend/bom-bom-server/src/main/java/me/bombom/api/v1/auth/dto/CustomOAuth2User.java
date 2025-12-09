@@ -2,7 +2,6 @@ package me.bombom.api.v1.auth.dto;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
@@ -39,7 +38,7 @@ public class CustomOAuth2User implements OidcUser, Serializable {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (member == null) {
-            return Collections.emptyList();
+            return List.of();
         }
         return List.of(new SimpleGrantedAuthority(ROLE_PREFIX + member.getRoleId()));
     }

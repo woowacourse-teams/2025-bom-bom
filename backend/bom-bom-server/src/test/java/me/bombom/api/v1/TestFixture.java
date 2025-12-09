@@ -3,6 +3,7 @@ package me.bombom.api.v1;
 import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.article.domain.Article;
+import me.bombom.api.v1.article.domain.RecentArticle;
 import me.bombom.api.v1.highlight.domain.Color;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
@@ -234,6 +235,24 @@ public final class TestFixture {
                 .title(title)
                 .contents("<h1>아티클</h1>")
                 .contentsText("아티클")
+                .thumbnailUrl("https://example.com/images/thumb.png")
+                .expectedReadTime(5)
+                .contentsSummary("요약")
+                .isRead(false)
+                .memberId(memberId)
+                .newsletterId(newsletterId)
+                .arrivedDateTime(arrivedTime)
+                .build();
+    }
+
+    /**
+     * RecentArticle
+     */
+    public static RecentArticle createRecentArticle(String title, Long memberId, Long newsletterId, LocalDateTime arrivedTime) {
+        return RecentArticle.builder()
+                .title(title)
+                .contents("<h1>" + title + "</h1>")
+                .contentsText(title)
                 .thumbnailUrl("https://example.com/images/thumb.png")
                 .expectedReadTime(5)
                 .contentsSummary("요약")

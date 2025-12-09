@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 public class CustomOAuth2User implements OidcUser, Serializable {
 
     private static final long serialVersionUID = 1L;
+    public static final String ROLE_PREFIX = "ROLE_";
 
     private final Map<String, Object> attributes;
     private final Member member;
@@ -40,7 +41,7 @@ public class CustomOAuth2User implements OidcUser, Serializable {
         if (member == null) {
             return Collections.emptyList();
         }
-        return List.of(new SimpleGrantedAuthority("ROLE_" + member.getRoleId()));
+        return List.of(new SimpleGrantedAuthority(ROLE_PREFIX + member.getRoleId()));
     }
 
     @Override

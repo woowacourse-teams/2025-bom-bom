@@ -6,7 +6,6 @@ import me.bombom.api.v1.article.dto.request.UpdateWarningSettingRequest;
 import me.bombom.api.v1.article.dto.response.WarningSettingResponse;
 import me.bombom.api.v1.article.service.WarningService;
 import me.bombom.api.v1.common.resolver.LoginMember;
-import me.bombom.api.v1.highlight.dto.request.UpdateHighlightRequest;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;

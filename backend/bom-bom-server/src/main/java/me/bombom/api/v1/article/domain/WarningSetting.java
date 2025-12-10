@@ -34,4 +34,8 @@ public class WarningSetting {
         this.memberId = memberId;
         this.isVisible = isVisible;
     }
+
+    public void updateVisibility(boolean visible) {
+        this.isVisible = visible;
+    }
 }

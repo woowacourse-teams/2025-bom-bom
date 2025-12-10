@@ -3,6 +3,8 @@ CREATE TABLE warning_setting
     id         BIGINT NOT NULL AUTO_INCREMENT,
     member_id  BIGINT NOT NULL,
     is_visible BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at datetime(6) DEFAULT NULL,
+    updated_at datetime(6) DEFAULT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uk_warning_setting_member_id (member_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

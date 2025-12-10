@@ -1,7 +1,9 @@
 package me.bombom.api.v1.article.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -19,6 +21,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,6 +39,8 @@ class WarningControllerTest {
     @Autowired
     private WarningSettingRepository warningSettingRepository;
 
+    private Member member;
+
     @MockitoBean
     private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
@@ -46,7 +51,7 @@ class WarningControllerTest {
         warningSettingRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
 
-        Member member = TestFixture.normalMemberFixture();
+        member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
 
         WarningSetting warningSetting = WarningSetting.builder()
@@ -76,6 +81,25 @@ class WarningControllerTest {
         mockMvc.perform(get("/api/v1/articles/warning/near-capacity")
                         .with(authentication(authToken)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(true));
+                .andExpect(jsonPath("$.isVisible").value(true));
+    }
+
+    @Test
+    @DisplayName("임박 경고 설정 수정 성공")
+    void updateWarningSetting_success() throws Exception {
+        // when
+        mockMvc.perform(post("/api/v1/articles/warning/near-capacity")
+                        .with(authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "isVisible": false
+                                }
+                                """))
+                .andExpect(status().isOk());
+
+        // then
+        WarningSetting updatedSetting = warningSettingRepository.findByMemberId(member.getId()).orElseThrow();
+        assertThat(updatedSetting.isVisible()).isFalse();
     }
 }

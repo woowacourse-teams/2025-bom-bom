@@ -1,9 +1,11 @@
 package me.bombom.api.v1.article.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.WarningSetting;
+import me.bombom.api.v1.article.dto.request.UpdateWarningSettingRequest;
 import me.bombom.api.v1.article.dto.response.WarningSettingResponse;
 import me.bombom.api.v1.article.repository.WarningSettingRepository;
 import me.bombom.api.v1.member.domain.Member;
@@ -50,7 +52,20 @@ class WarningServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(response).isNotNull();
-            softly.assertThat(response.status()).isTrue();
+            softly.assertThat(response.isVisible()).isTrue();
         });
+    }
+
+    @Test
+    void 경고_설정_수정_성공() {
+        // given
+        UpdateWarningSettingRequest request = new UpdateWarningSettingRequest(false);
+
+        // when
+        warningService.updateWarningSetting(member, request);
+
+        // then
+        WarningSetting updatedSetting = warningSettingRepository.findByMemberId(member.getId()).orElseThrow();
+        assertThat(updatedSetting.isVisible()).isFalse();
     }
 }

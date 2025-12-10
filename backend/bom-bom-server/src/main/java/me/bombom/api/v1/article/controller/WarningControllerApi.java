@@ -23,7 +23,7 @@ public interface WarningControllerApi {
             @ApiResponse(responseCode = "200", description = "경고 설정 조회 성공"),
             @ApiResponse(responseCode = "404", description = "경고 설정 상태를 찾을 수 없음", content = @Content)
     })
-    WarningSettingResponse getCapacityWarningStatus(@Parameter(hidden = true) Member member);
+    WarningSettingResponse getWarningSetting(@Parameter(hidden = true) Member member);
 
     @Operation(
             summary = "최대 개수 임박 경고 설정 변경",

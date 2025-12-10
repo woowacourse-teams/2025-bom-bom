@@ -19,7 +19,7 @@ public class WarningService {
 
     private final WarningSettingRepository warningSettingRepository;
 
-    public WarningSettingResponse getCapacityWarningStatus(Member member) {
+    public WarningSettingResponse getWarningSetting(Member member) {
         WarningSetting setting = findWarningSettingByMemberId(member);
         return WarningSettingResponse.from(setting);
     }

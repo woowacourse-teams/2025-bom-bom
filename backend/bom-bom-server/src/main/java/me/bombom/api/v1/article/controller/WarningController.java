@@ -24,8 +24,8 @@ public class WarningController implements WarningControllerApi {
 
     @Override
     @GetMapping("/near-capacity")
-    public WarningSettingResponse getCapacityWarningStatus(@LoginMember Member member){
-        return warningService.getCapacityWarningStatus(member);
+    public WarningSettingResponse getWarningSetting(@LoginMember Member member){
+        return warningService.getWarningSetting(member);
     }
 
     @Override

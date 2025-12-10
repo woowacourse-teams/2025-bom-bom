@@ -47,7 +47,7 @@ class WarningServiceTest {
     @Test
     void 경고_설정_조회_성공() {
         // when
-        WarningSettingResponse response = warningService.getCapacityWarningStatus(member);
+        WarningSettingResponse response = warningService.getWarningSetting(member);
 
         // then
         assertSoftly(softly -> {

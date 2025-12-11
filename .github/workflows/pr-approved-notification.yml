@@ -1,0 +1,71 @@
+permissions:
+  pull-requests: write
+  contents: read
+
+name: Notify Discord (PR-Approved)
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  notify-on-review:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.review.state == 'approved' }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # notify_ids.json 기반으로 작성자를 mention 변환
+      - name: Load user mapping
+        id: load-users
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require("fs");
+            const mapping = JSON.parse(fs.readFileSync('.github/notify_ids.json', 'utf8'));
+
+            const pr = context.payload.pull_request;
+
+            const author = pr.user.login;
+            const authorMention   = mapping[author] ? `<@${mapping[author]}>` : author;
+
+            console.log(`Author Mention: ${authorMention}`);
+            core.setOutput("authorMention", authorMention);
+
+      # 🔍 현재까지 APPROVED 리뷰 수 계산
+      - name: Count approvals
+        id: approval-count
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            const approvals = reviews.filter(r => r.state === "APPROVED");
+
+            console.log(`Approved reviewers: ${approvals.map(a => a.user.login).join(', ')}`);
+            core.setOutput("count", approvals.length);
+            core.setOutput("approvedReviewers", approvals.map(a => a.user.login).join(', '));
+
+      # Discord 알림 전송 (조건: approve 2명 이상)
+      - name: Send notification to Discord
+        if: ${{ github.event.review.state == 'approved' && steps.approval-count.outputs.count >= 2 }}
+        uses: ./.github/actions/discord-notification
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_PR }}
+          content: "🎉 *PR이 최종 승인되었습니다!*"
+          mentions: ${{ steps.load-users.outputs.authorMention }}
+          title: ${{ github.event.pull_request.title }}
+          url: ${{ github.event.pull_request.html_url }}
+          color: 3066993
+          fields: |
+            [
+              { "name": "승인자 목록", "value": "${{ steps.approval-count.outputs.approvedReviewers }}" },
+              { "name": "승인 수", "value": "${{ steps.approval-count.outputs.count }}" }
+            ]

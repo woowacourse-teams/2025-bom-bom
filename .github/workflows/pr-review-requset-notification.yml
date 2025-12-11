@@ -1,0 +1,43 @@
+name: Notify Discord (PR-Review Request)
+
+on:
+  pull_request:
+    types: [review_requested]
+
+jobs:
+  notify-review-request:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # notify_ids.json 기반으로 리뷰어를 mention 변환
+      - name: Load user mapping
+        id: load-users
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require("fs");
+            const mapping = JSON.parse(fs.readFileSync('.github/notify_ids.json', 'utf8'));
+
+            const reviewer = context.payload.requested_reviewer.login;
+            const reviewerMention = mapping[reviewer] ? `<@${mapping[reviewer]}>` : reviewer;
+
+            console.log(`Reviewer Mention: ${reviewerMention}`);
+            core.setOutput("reviewer", reviewerMention);
+
+      # Discord 알림 전송
+      - name: Send Re-request Review Notification
+        uses: ./.github/actions/discord-notification
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_PR }}
+          content: "🔄 *리뷰가 다시 요청되었습니다!*"
+          mentions: ${{ steps.load-users.outputs.reviewer }}
+          title: ${{ github.event.pull_request.title }}
+          url: ${{ github.event.pull_request.html_url }}
+          color: 3447003
+          fields: |
+            [
+              { "name": "작성자", "value": "${{ github.event.pull_request.user.login }}" },
+              { "name": "요청된 리뷰어", "value": "${{ steps.load-users.outputs.reviewer }}" }
+            ]

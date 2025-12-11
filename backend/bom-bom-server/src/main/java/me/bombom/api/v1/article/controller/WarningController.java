@@ -7,11 +7,13 @@ import me.bombom.api.v1.article.dto.response.WarningSettingResponse;
 import me.bombom.api.v1.article.service.WarningService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @Validated
@@ -30,6 +32,7 @@ public class WarningController implements WarningControllerApi {
 
     @Override
     @PostMapping("/near-capacity")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void updateWarningSetting(
             @LoginMember Member member,
             @Valid @RequestBody UpdateWarningSettingRequest request

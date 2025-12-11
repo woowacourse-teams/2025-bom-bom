@@ -39,6 +39,11 @@ public class WarningService {
                 .build());
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteByMemberId(Long memberId) {
+        warningSettingRepository.deleteByMemberId(memberId);
+    }
+
     private WarningSetting findWarningSettingByMemberId(Member member) {
         WarningSetting setting = warningSettingRepository.findByMemberId(member.getId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)

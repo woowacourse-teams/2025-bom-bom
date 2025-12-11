@@ -19,7 +19,7 @@ public class InitializeReadingListener {
         try {
             readingService.initializeReadingInformation(event.memberId());
         } catch (Exception e) {
-            log.error("읽기 정보 초기화에 실패했습니다.");
+            log.error("읽기 정보 초기화에 실패했습니다. memberId: {}", event.memberId());
         }
     }
 }

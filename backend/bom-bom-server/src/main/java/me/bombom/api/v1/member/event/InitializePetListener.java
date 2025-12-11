@@ -18,7 +18,7 @@ public class InitializePetListener {
         try {
             petService.createPet(event.memberId());
         } catch (Exception e) {
-            log.error("펫 초기화에 실패했습니다.");
+            log.error("펫 초기화에 실패했습니다. memberId: {}", event.memberId());
         }
     }
 }

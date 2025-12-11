@@ -18,7 +18,7 @@ public class InitializeWarningSettingListener {
         try{
             warningService.initializeWarningSetting(event.memberId());
         } catch (Exception e) {
-            log.error("경고 설정 초기화에 실패했습니다.");
+            log.error("경고 설정 초기화에 실패했습니다. memberId: {}", event.memberId());
         }
     }
 }

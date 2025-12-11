@@ -31,7 +31,8 @@ public class WarningSetting extends BaseEntity {
     public WarningSetting(
             Long id,
             @NonNull Long memberId,
-            boolean isVisible) {
+            boolean isVisible
+    ) {
         this.memberId = memberId;
         this.isVisible = isVisible;
     }

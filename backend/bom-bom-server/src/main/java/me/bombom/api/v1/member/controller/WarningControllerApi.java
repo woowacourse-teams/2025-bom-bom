@@ -30,7 +30,7 @@ public interface WarningControllerApi {
             description = "아티클 최대 개수 임박 경고에 대해 '다시보지않기' 설정 여부를 변경합니다."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "경고 설정 변경 성공"),
+            @ApiResponse(responseCode = "204", description = "경고 설정 변경 성공"),
             @ApiResponse(responseCode = "404", description = "경고 설정 상태를 찾을 수 없음", content = @Content)
     })
     void updateWarningSetting(

@@ -33,14 +33,14 @@ jobs:
 
             console.log(`Assigned ${author} as PR assignee`);
 
-      # notify_ids.json 기반으로 reviewer = 3명, author 제외 후 멘션
+      # notification_ids.json 기반으로 reviewer = 4명, author 제외 후 멘션
       - name: Load Reviewers from JSON
         id: get-reviewers
         uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
-            const mapping = JSON.parse(fs.readFileSync('.github/notify_ids.json', 'utf8'));
+            const mapping = JSON.parse(fs.readFileSync('.github/notification_ids.json', 'utf8'));
             const members = Object.keys(mapping);
 
             const author = context.payload.pull_request.user.login;

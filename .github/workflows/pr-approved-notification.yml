@@ -16,14 +16,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # notify_ids.json 기반으로 작성자를 mention 변환
+      # notification_ids.json 기반으로 작성자를 mention 변환
       - name: Load user mapping
         id: load-users
         uses: actions/github-script@v8
         with:
           script: |
             const fs = require("fs");
-            const mapping = JSON.parse(fs.readFileSync('.github/notify_ids.json', 'utf8'));
+            const mapping = JSON.parse(fs.readFileSync('.github/notification_ids.json', 'utf8'));
 
             const pr = context.payload.pull_request;
 

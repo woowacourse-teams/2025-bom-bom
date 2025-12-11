@@ -17,7 +17,7 @@ public interface WarningControllerApi {
 
     @Operation(
             summary = "최대 개수 임박 경고 설정 조회",
-            description = "500개 임박 알림 대해 '다시보지않기' 설정 여부를 조회합니다."
+            description = "아티클 최대 개수 임박 알림 대해 '다시보지않기' 설정 여부를 조회합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "경고 설정 조회 성공"),
@@ -27,7 +27,7 @@ public interface WarningControllerApi {
 
     @Operation(
             summary = "최대 개수 임박 경고 설정 변경",
-            description = "500개 임박 알림에 대해 '다시보지않기' 설정 여부를 변경합니다."
+            description = "아티클 최대 개수 임박 알림에 대해 '다시보지않기' 설정 여부를 변경합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "경고 설정 변경 성공"),

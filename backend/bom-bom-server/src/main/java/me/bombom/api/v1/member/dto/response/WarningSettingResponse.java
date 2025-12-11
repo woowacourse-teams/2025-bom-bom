@@ -1,7 +1,7 @@
-package me.bombom.api.v1.article.dto.response;
+package me.bombom.api.v1.member.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import me.bombom.api.v1.article.domain.WarningSetting;
+import me.bombom.api.v1.member.domain.WarningSetting;
 
 public record WarningSettingResponse(
 

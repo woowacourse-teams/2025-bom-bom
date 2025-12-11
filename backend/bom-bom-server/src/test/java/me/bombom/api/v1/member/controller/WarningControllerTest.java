@@ -1,4 +1,4 @@
-package me.bombom.api.v1.article.controller;
+package me.bombom.api.v1.member.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
@@ -9,12 +9,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Map;
 import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.article.domain.WarningSetting;
-import me.bombom.api.v1.article.repository.WarningSettingRepository;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.domain.WarningSetting;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.member.repository.WarningSettingRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -78,7 +78,7 @@ class WarningControllerTest {
     @DisplayName("임박 경고 설정 조회 성공")
     void nearCapacityWarningStatus_success() throws Exception {
         // when & then
-        mockMvc.perform(get("/api/v1/articles/warning/near-capacity")
+        mockMvc.perform(get("/api/v1/members/me/warning/near-capacity")
                         .with(authentication(authToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isVisible").value(true));
@@ -88,7 +88,7 @@ class WarningControllerTest {
     @DisplayName("임박 경고 설정 수정 성공")
     void updateWarningSetting_success() throws Exception {
         // when
-        mockMvc.perform(post("/api/v1/articles/warning/near-capacity")
+        mockMvc.perform(post("/api/v1/members/me/warning/near-capacity")
                         .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -96,7 +96,7 @@ class WarningControllerTest {
                                   "isVisible": false
                                 }
                                 """))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         // then
         WarningSetting updatedSetting = warningSettingRepository.findByMemberId(member.getId()).orElseThrow();

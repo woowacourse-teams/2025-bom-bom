@@ -1,10 +1,10 @@
-package me.bombom.api.v1.article.controller;
+package me.bombom.api.v1.member.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.article.dto.request.UpdateWarningSettingRequest;
-import me.bombom.api.v1.article.dto.response.WarningSettingResponse;
-import me.bombom.api.v1.article.service.WarningService;
+import me.bombom.api.v1.member.dto.request.UpdateWarningSettingRequest;
+import me.bombom.api.v1.member.dto.response.WarningSettingResponse;
+import me.bombom.api.v1.member.service.WarningService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.http.HttpStatus;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/articles/warning")
+@RequestMapping("/api/v1/members/me/warning")
 public class WarningController implements WarningControllerApi {
 
     private final WarningService warningService;

@@ -10,6 +10,7 @@ import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -28,6 +29,14 @@ public class WarningService {
     public void updateWarningSetting(Member member, UpdateWarningSettingRequest request) {
         WarningSetting setting = findWarningSettingByMemberId(member);
         setting.updateVisibility(request.isVisible());
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void initializeWarningSetting(Long memberId) {
+        warningSettingRepository.save(WarningSetting.builder()
+                .memberId(memberId)
+                .isVisible(true)
+                .build());
     }
 
     private WarningSetting findWarningSettingByMemberId(Member member) {

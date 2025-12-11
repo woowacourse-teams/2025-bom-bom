@@ -1,0 +1,81 @@
+name: Notify Discord (PR-OPEN)
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, labeled]
+
+jobs:
+  notify-reviewers:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # PR 작성자를 Assignee로 자동 설정
+      - name: Auto Assign PR Author
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const author = pr.user.login;
+
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              assignees: [author]
+            });
+
+            console.log(`Assigned ${author} as PR assignee`);
+
+      # notification_ids.json 기반으로 reviewer = 4명, author 제외 후 멘션
+      - name: Load Reviewers from JSON
+        id: get-reviewers
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const mapping = JSON.parse(fs.readFileSync('.github/notification_ids.json', 'utf8'));
+            const members = Object.keys(mapping);
+
+            const author = context.payload.pull_request.user.login;
+            const filtered = members.filter(member => member !== author);
+
+            const mentions = filtered
+              .map(login => `<@${mapping[login]}>`)
+              .join(' ');
+
+            console.log(`Mentions: ${mentions}`);
+            core.setOutput("discord_mentions", mentions);
+
+      - name: Extract D-Tag
+        id: extract
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+
+            // 정규식으로 D-숫자 라벨만 찾기
+            const dLabel = labels.find(l => /^D-\d+$/.test(l)) || "";
+
+            core.setOutput("dlabel", dLabel);
+
+      - name: Send PR Open Notification
+        uses: ./.github/actions/discord-notification
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_PR }}
+          content: "🚀 새 PR이 생성되었습니다! 리뷰 부탁드립니다 🙏"
+          mentions: ${{ steps.get-reviewers.outputs.discord_mentions }}
+          title: "${{ steps.extract.outputs.dlabel }} | ${{ github.event.pull_request.title }}"
+          url: ${{ github.event.pull_request.html_url }}
+          color: 16753920
+          fields: |
+            [
+              { "name": "작성자", "value": "${{ github.event.pull_request.user.login }}" },
+              { "name": "D-Day", "value": "${{ steps.extract.outputs.dlabel }}" }
+            ]

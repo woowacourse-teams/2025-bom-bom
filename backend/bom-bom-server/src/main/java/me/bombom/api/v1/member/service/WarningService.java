@@ -39,7 +39,7 @@ public class WarningService {
                 .build());
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void deleteByMemberId(Long memberId) {
         warningSettingRepository.deleteByMemberId(memberId);
     }

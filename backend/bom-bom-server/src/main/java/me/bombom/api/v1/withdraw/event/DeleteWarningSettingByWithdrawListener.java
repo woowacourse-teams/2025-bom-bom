@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.member.service.WarningService;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 @Slf4j
@@ -16,6 +18,7 @@ public class DeleteWarningSettingByWithdrawListener {
 
     @Async
     @TransactionalEventListener
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void on(WithdrawEvent event) {
         log.info("탈퇴한 회원에 대한 경고 설정 삭제 시작 - memberId={}", event.memberId());
         try {

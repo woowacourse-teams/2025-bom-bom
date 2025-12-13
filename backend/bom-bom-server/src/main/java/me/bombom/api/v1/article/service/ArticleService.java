@@ -6,8 +6,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.domain.Article;
-import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.dto.request.ArticleSearchOptionsRequest;
+import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
@@ -15,6 +15,7 @@ import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.event.MarkAsReadEvent;
 import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.article.repository.MemberArticleCount;
 import me.bombom.api.v1.article.repository.RecentArticleRepository;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -25,6 +26,7 @@ import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.domain.Role;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
@@ -45,6 +47,9 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ArticleService {
+
+    private static final long ADMIN_ROLE_ID = 1L;
+    private static final int DEFAULT_ARTICLE_RETAIN_LIMIT = 500;
 
     private final ArticleRepository articleRepository;
     private final RecentArticleRepository recentArticleRepository;
@@ -164,6 +169,30 @@ public class ArticleService {
         articleRepository.deleteAllByIdsAndMemberId(target, member.getId());
     }
 
+    @Transactional
+    public int cleanupExcessArticles() {
+        List<MemberArticleCount> memberArticleCounts = articleRepository.countArticlesGroupedByMember();
+        if (memberArticleCounts.isEmpty()) {
+            return 0;
+        }
+
+        int totalDeleted = 0;
+        for (MemberArticleCount memberArticleCount : memberArticleCounts) {
+            if (Role.isAdmin(memberArticleCount.roleId())) {
+                continue;
+            }
+
+            int retainLimit = determineRetentionLimit(memberArticleCount.memberId());
+            if (memberArticleCount.articleCount() <= retainLimit) {
+                continue;
+            }
+            int deleted = articleRepository.deleteOldArticlesForMember(memberArticleCount.memberId(), retainLimit);
+            totalDeleted += deleted;
+            log.info("Deleted {} old articles for memberId={}, retainLimit={}", deleted, memberArticleCount.memberId(), retainLimit);
+        }
+        return totalDeleted;
+    }
+
     private Article findArticleById(Long articleId, Long memberId) {
         return articleRepository.findById(articleId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
@@ -188,5 +217,10 @@ public class ArticleService {
                     .addContext(ErrorContextKeys.OPERATION, "validateArticleOwner")
                     .addContext(ErrorContextKeys.ACTUAL_OWNER_ID, article.getMemberId());
         }
+    }
+
+    private int determineRetentionLimit(Long memberId) {
+        // 멤버십 등급에 따라 확장할 수 있도록 단일 책임 메서드로 분리
+        return DEFAULT_ARTICLE_RETAIN_LIMIT;
     }
 }

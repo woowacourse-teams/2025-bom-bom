@@ -35,6 +35,6 @@ public interface WarningControllerApi {
     })
     void updateWarningSetting(
             @Parameter(hidden = true) Member member,
-            @Parameter(description = "경고 설정 변경 요청") @Valid @RequestBody UpdateWarningSettingRequest request
+            @Parameter(description = "경고 설정 변경 요청") @RequestBody UpdateWarningSettingRequest request
     );
 }

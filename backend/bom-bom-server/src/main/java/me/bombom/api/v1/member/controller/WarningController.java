@@ -35,7 +35,7 @@ public class WarningController implements WarningControllerApi {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void updateWarningSetting(
             @LoginMember Member member,
-            @Valid @RequestBody UpdateWarningSettingRequest request
+            @RequestBody UpdateWarningSettingRequest request
     ){
         warningService.updateWarningSetting(member, request);
     }

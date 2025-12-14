@@ -16,6 +16,8 @@ import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousPolicy;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy;
+import me.bombom.api.v1.notice.domain.Notice;
+import me.bombom.api.v1.notice.domain.NoticeCategory;
 import me.bombom.api.v1.pet.domain.Pet;
 import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.reading.domain.ContinueReading;
@@ -205,7 +207,7 @@ public final class TestFixture {
      * Subscribe
      */
     public static Subscribe createSubscribe(Newsletter newsletter, Member member) {
-        return  Subscribe.builder()
+        return Subscribe.builder()
                 .newsletterId(newsletter.getId())
                 .memberId(member.getId())
                 .build();
@@ -248,7 +250,8 @@ public final class TestFixture {
     /**
      * RecentArticle
      */
-    public static RecentArticle createRecentArticle(String title, Long memberId, Long newsletterId, LocalDateTime arrivedTime) {
+    public static RecentArticle createRecentArticle(String title, Long memberId, Long newsletterId,
+                                                    LocalDateTime arrivedTime) {
         return RecentArticle.builder()
                 .title(title)
                 .contents("<h1>" + title + "</h1>")
@@ -477,6 +480,23 @@ public final class TestFixture {
                 .memberId(member.getId())
                 .stageId(stageId)
                 .currentScore(currentScore)
+                .build();
+    }
+
+    /*
+     * Notice
+     */
+    public static Notice createNotice(String title, Long categoryId) {
+        return Notice.builder()
+                .title(title)
+                .content("content")
+                .noticeCategoryId(categoryId)
+                .build();
+    }
+
+    public static NoticeCategory createNoticeCategory(String name) {
+        return NoticeCategory.builder()
+                .name(name)
                 .build();
     }
 }

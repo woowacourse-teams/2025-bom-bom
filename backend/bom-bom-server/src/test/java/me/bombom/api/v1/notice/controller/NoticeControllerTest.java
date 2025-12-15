@@ -38,9 +38,11 @@ class NoticeControllerTest {
     void getNotices() throws Exception {
         mockMvc.perform(get("/api/v1/notices"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("공지2"))
-                .andExpect(jsonPath("$[0].categoryName").value("이벤트"))
-                .andExpect(jsonPath("$[1].title").value("공지1"))
-                .andExpect(jsonPath("$[1].categoryName").value("업데이트"));
+                .andExpect(jsonPath("$.content[0].title").value("공지2"))
+                .andExpect(jsonPath("$.content[0].categoryName").value("이벤트"))
+                .andExpect(jsonPath("$.content[1].title").value("공지1"))
+                .andExpect(jsonPath("$.content[1].categoryName").value("업데이트"))
+                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.sort.sorted").value(true));
     }
 }

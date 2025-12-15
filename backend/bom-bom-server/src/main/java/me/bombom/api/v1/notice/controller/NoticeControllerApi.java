@@ -4,8 +4,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import me.bombom.api.v1.notice.dto.NoticeResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 
 @Tag(name = "Notice", description = "공지 관련 API")
 public interface NoticeControllerApi {
@@ -17,5 +20,7 @@ public interface NoticeControllerApi {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "공지 목록 조회 성공")
     })
-    List<NoticeResponse> getNotices();
+    Page<NoticeResponse> getNotices(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    );
 }

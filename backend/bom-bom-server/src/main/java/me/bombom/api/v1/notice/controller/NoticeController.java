@@ -1,10 +1,12 @@
 package me.bombom.api.v1.notice.controller;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.notice.dto.NoticeResponse;
 import me.bombom.api.v1.notice.service.NoticeService;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +20,9 @@ public class NoticeController implements NoticeControllerApi {
 
     @Override
     @GetMapping
-    public List<NoticeResponse> getNotices() {
-        return noticeService.getNotices();
+    public Page<NoticeResponse> getNotices(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return noticeService.getNotices(pageable);
     }
 }

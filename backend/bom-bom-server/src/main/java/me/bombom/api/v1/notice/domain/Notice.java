@@ -2,6 +2,8 @@ package me.bombom.api.v1.notice.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -29,18 +31,19 @@ public class Notice extends BaseEntity {
     private String content;
 
     @Column(nullable = false)
-    private Long noticeCategoryId;
+    @Enumerated(value = EnumType.STRING)
+    private NoticeCategory noticeCategory;
 
     @Builder
     public Notice(
             Long id,
             @NonNull String title,
             @NonNull String content,
-            @NonNull Long noticeCategoryId
+            @NonNull NoticeCategory noticeCategory
     ) {
         this.id = id;
         this.title = title;
         this.content = content;
-        this.noticeCategoryId = noticeCategoryId;
+        this.noticeCategory = noticeCategory;
     }
 }

@@ -21,4 +21,14 @@ public record NoticeResponse(
         @NotNull
         LocalDateTime createdAt
 ) {
+
+    public static NoticeResponse from(Notice notice) {
+        return new NoticeResponse(
+                notice.getId(),
+                notice.getNoticeCategory().getValue(),
+                notice.getTitle(),
+                notice.getContent(),
+                notice.getCreatedAt()
+        );
+    }
 }

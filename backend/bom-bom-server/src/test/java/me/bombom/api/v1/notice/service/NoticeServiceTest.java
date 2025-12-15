@@ -6,7 +6,6 @@ import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.notice.domain.NoticeCategory;
 import me.bombom.api.v1.notice.dto.NoticeResponse;
-import me.bombom.api.v1.notice.repository.NoticeCategoryRepository;
 import me.bombom.api.v1.notice.repository.NoticeRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,19 +22,12 @@ class NoticeServiceTest {
     @Autowired
     private NoticeRepository noticeRepository;
 
-    @Autowired
-    private NoticeCategoryRepository noticeCategoryRepository;
-
     @BeforeEach
     void setUp() {
         noticeRepository.deleteAllInBatch();
-        noticeCategoryRepository.deleteAllInBatch();
 
-        NoticeCategory category1 = noticeCategoryRepository.save(TestFixture.createNoticeCategory("점검"));
-        NoticeCategory category2 = noticeCategoryRepository.save(TestFixture.createNoticeCategory("이벤트"));
-
-        noticeRepository.save(TestFixture.createNotice("공지1", category1.getId()));
-        noticeRepository.save(TestFixture.createNotice("공지2", category2.getId()));
+        noticeRepository.save(TestFixture.createNotice("공지1", NoticeCategory.EVENT));
+        noticeRepository.save(TestFixture.createNotice("공지2", NoticeCategory.CHECK));
     }
 
     @Test
@@ -48,7 +40,9 @@ class NoticeServiceTest {
         assertSoftly(softly -> {
                     softly.assertThat(responses).hasSize(2);
                     softly.assertThat(responses.get(0).title()).isEqualTo("공지2");
+                    softly.assertThat(responses.get(0).categoryName()).isEqualTo("점검");
                     softly.assertThat(responses.get(1).title()).isEqualTo("공지1");
+                    softly.assertThat(responses.get(1).categoryName()).isEqualTo("이벤트");
                 }
         );
     }

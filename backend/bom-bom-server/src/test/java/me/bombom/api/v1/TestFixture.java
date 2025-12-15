@@ -486,17 +486,11 @@ public final class TestFixture {
     /*
      * Notice
      */
-    public static Notice createNotice(String title, Long categoryId) {
+    public static Notice createNotice(String title, NoticeCategory noticeCategory) {
         return Notice.builder()
                 .title(title)
                 .content("content")
-                .noticeCategoryId(categoryId)
-                .build();
-    }
-
-    public static NoticeCategory createNoticeCategory(String name) {
-        return NoticeCategory.builder()
-                .name(name)
+                .noticeCategory(noticeCategory)
                 .build();
     }
 }

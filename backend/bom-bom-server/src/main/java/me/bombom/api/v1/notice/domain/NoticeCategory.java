@@ -1,34 +1,17 @@
 package me.bombom.api.v1.notice.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
-@Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class NoticeCategory {
+@RequiredArgsConstructor
+public enum NoticeCategory {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    NOTICE("공지"),
+    UPDATE("업데이트"),
+    EVENT("이벤트"),
+    CHECK("점검"),
+    ;
 
-    @Column(nullable = false, unique = true)
-    private String name;
-
-    @Builder
-    public NoticeCategory(
-            Long id,
-            @NonNull String name
-    ) {
-        this.id = id;
-        this.name = name;
-    }
+    private final String value;
 }

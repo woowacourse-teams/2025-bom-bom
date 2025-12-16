@@ -37,7 +37,11 @@ class NoticeServiceTest {
     void getNoticesReturnsListWithCategory() {
         // when
         Page<NoticeResponse> responses = noticeService.getNotices(
-                PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "createdAt"))
+                PageRequest.of(
+                        0,
+                        20,
+                        Sort.by(Sort.Order.desc("createdAt"), Sort.Order.asc("id"))
+                )
         );
 
         // then

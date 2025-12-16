@@ -116,7 +116,7 @@ class ArticleControllerTest {
                 "name", member.getNickname()
         );
         customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
-        
+
         // OAuth2AuthenticationToken 생성
         authToken = new OAuth2AuthenticationToken(
                 customOAuth2User,
@@ -299,7 +299,7 @@ class ArticleControllerTest {
                 .andExpect(jsonPath("$.content[?(@.newsletter.name == '" + newsletter.getName() + "')]").exists())
                 .andExpect(jsonPath("$.content.length()").value(2));
     }
-//
+
     @Test
     @DisplayName("일반 목록 조회에서 keyword 파라미터는 무시됨")
     void 일반_목록_조회_키워드_파라미터_무시() throws Exception {

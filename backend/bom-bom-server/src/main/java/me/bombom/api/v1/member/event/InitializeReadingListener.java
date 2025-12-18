@@ -10,18 +10,16 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class MemberSignupListener {
+public class InitializeReadingListener {
 
     private final ReadingService readingService;
-    private final PetService petService;
 
     @TransactionalEventListener
     public void on(MemberSignupEvent event) {
         try {
             readingService.initializeReadingInformation(event.memberId());
-            petService.createPet(event.memberId());
         } catch (Exception e) {
-            log.error("읽기 정보 초기화에 실패했습니다.");
+            log.error("읽기 정보 초기화에 실패했습니다. memberId: {}", event.memberId());
         }
     }
 }

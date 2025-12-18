@@ -93,7 +93,6 @@ class SubscribeServiceTest {
 
         // then
         assertThat(subscribeRepository.findById(subscribe.getId())).isEmpty();
-        assertThat(response.hasUnsubscribeUrl()).isFalse();
     }
 
     @Test
@@ -152,7 +151,6 @@ class SubscribeServiceTest {
 
         // then
         assertThat(subscribeRepository.findById(subscribe.getId())).isEmpty();
-        assertThat(response.hasUnsubscribeUrl()).isTrue();
         assertThat(response.unsubscribeUrl()).isEqualTo(expectedUnsubscribeUrl);
     }
 }

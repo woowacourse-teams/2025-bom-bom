@@ -2,6 +2,8 @@ package me.bombom.api.v1.subscribe.dto;
 
 import jakarta.validation.constraints.NotNull;
 
+import org.springframework.util.StringUtils;
+
 public record SubscribedNewsletterResponse(
 
         @NotNull
@@ -16,6 +18,23 @@ public record SubscribedNewsletterResponse(
         String description,
 
         @NotNull
-        String category
+        String category,
+
+        @NotNull
+        boolean hasUnsubscribeUrl
 ) {
+
+    public static SubscribedNewsletterResponse of(
+            Long newsletterId,
+            String name,
+            String imageUrl,
+            String description,
+            String category,
+            String unsubscribeUrl
+    ) {
+        boolean hasUnsubscribeUrl = StringUtils.hasText(unsubscribeUrl);
+        return new SubscribedNewsletterResponse(
+                newsletterId, name, imageUrl, description, category, hasUnsubscribeUrl
+        );
+    }
 }

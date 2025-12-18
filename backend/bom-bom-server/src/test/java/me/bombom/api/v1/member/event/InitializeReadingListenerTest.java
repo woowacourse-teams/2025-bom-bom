@@ -6,7 +6,6 @@ import static org.mockito.Mockito.verify;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.pet.service.PetService;
 import me.bombom.api.v1.reading.service.ReadingService;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @IntegrationTest
-class MemberSignupListenerTest {
+class InitializeReadingListenerTest {
 
     @Autowired
     ApplicationEventPublisher publisher;
@@ -28,9 +27,6 @@ class MemberSignupListenerTest {
 
     @MockitoBean
     ReadingService readingService;
-
-    @MockitoBean
-    PetService petService;
 
     @Test
     void 회원가입_이벤트_발행_시_읽기정보_초기화_메서드가_호출된다() {
@@ -45,6 +41,5 @@ class MemberSignupListenerTest {
 
         // then
         verify(readingService, times(1)).initializeReadingInformation(member.getId());
-        verify(petService, times(1)).createPet(member.getId());
     }
 }

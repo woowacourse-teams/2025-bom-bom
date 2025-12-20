@@ -26,4 +26,14 @@ public class MonthlyReadingSnapshotMetaService {
                 .addContext(ErrorContextKeys.MEMBER_ID, SINGLE_ID)
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReadingSnapshotMeta"));
     }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateSnapshotAt() {
+        int updated = monthlyReadingSnapshotMetaRepository.updateSnapshotAt(SINGLE_ID);
+        if (updated == 0) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReadingSnapshotMeta")
+                    .addContext(ErrorContextKeys.MEMBER_ID, SINGLE_ID);
+        }
+    }
 }

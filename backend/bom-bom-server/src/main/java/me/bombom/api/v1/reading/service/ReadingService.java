@@ -228,6 +228,7 @@ public class ReadingService {
         try {
             log.info("Starting monthly ranking update");
             monthlyReadingSnapshotRepository.updateMonthlyRanking();
+            monthlyReadingSnapshotMetaService.updateSnapshotAt();
             log.info("Monthly ranking update completed successfully");
         } catch (Exception e) {
             log.error("Failed to update monthly ranking: {}", e.getMessage(), e);

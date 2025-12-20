@@ -211,8 +211,17 @@ public class ReadingService {
         LocalDateTime rankingUpdatedAt = monthlyReadingSnapshotMetaService.getSnapshotAt();
         ZonedDateTime serverNow = ZonedDateTime.now(scheduleProps.zoneId());
         ZonedDateTime nextRefreshAt = scheduleProps.cronExpression().next(serverNow);
+
+        if (nextRefreshAt == null) {
+            log.error(
+                    "다음 랭킹 갱신 시간을 계산할 수 없습니다. application.yml의 ranking 스케줄 설정을 확인하세요. serverNow={}",
+                    serverNow
+            );
+            throw new IllegalStateException("nextRefreshAt : 다음 랭킹 갱신 시간이 존재하지 않습니다.");
+        }
+
         return MonthlyReadingRankingResponse.of(
-                rankingUpdatedAt,
+                rankingUpdatedAt.atZone(scheduleProps.zoneId()).toLocalDateTime(),
                 nextRefreshAt.toLocalDateTime(),
                 serverNow.toLocalDateTime(),
                 monthlyRanking

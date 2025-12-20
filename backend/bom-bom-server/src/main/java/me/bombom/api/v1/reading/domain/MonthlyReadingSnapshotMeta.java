@@ -22,10 +22,6 @@ public class MonthlyReadingSnapshotMeta {
     @Column(nullable= false)
     private LocalDateTime snapshotAt;
 
-    public void touch(LocalDateTime now) {
-        snapshotAt = now;
-    }
-
     @Builder
     public MonthlyReadingSnapshotMeta(
             @NotNull Long id,

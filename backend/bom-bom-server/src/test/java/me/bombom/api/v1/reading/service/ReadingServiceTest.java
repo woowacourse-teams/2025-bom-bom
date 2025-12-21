@@ -5,6 +5,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.member.domain.Member;
@@ -188,7 +189,7 @@ class ReadingServiceTest {
     @Test
     void 랭킹_업데이트된_시간을_조회할_수_있다() {
         // given
-        LocalDateTime dateTime = LocalDateTime.now();
+        LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);;
         int limit = 2;
 
         // when

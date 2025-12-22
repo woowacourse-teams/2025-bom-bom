@@ -8,11 +8,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import java.util.List;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingCountResponse;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
-import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
+import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,7 +47,7 @@ public interface ReadingControllerApi {
             @ApiResponse(responseCode = "200", description = "이달의 독서왕 조회 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 값 (limit는 1 이상의 값이어야 함)", content = @Content),
     })
-    List<MonthlyReadingRankResponse> getMonthlyReadingRank(
+    MonthlyReadingRankingResponse getMonthlyReadingRank(
             @Parameter(description = "최대 조회 개수 (예: ?limit=10)") @RequestParam @Positive(message = "limit는 1 이상의 값이어야 합니다.") int limit);
 
     @Operation(summary = "나의 월간 순위 조회", description = "저장된 rank 기반으로 나의 순위와 총 랭킹 참여자 수를 반환합니다.")

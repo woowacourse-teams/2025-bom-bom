@@ -7,9 +7,6 @@ import org.springframework.util.StringUtils;
 public record SubscribedNewsletterResponse(
 
         @NotNull
-        Long subscriptionId,
-
-        @NotNull
         Long newsletterId,
 
         @NotNull
@@ -28,7 +25,6 @@ public record SubscribedNewsletterResponse(
 ) {
 
     public static SubscribedNewsletterResponse of(
-            Long subscriptionId,
             Long newsletterId,
             String name,
             String imageUrl,
@@ -38,7 +34,7 @@ public record SubscribedNewsletterResponse(
     ) {
         boolean hasUnsubscribeUrl = StringUtils.hasText(unsubscribeUrl);
         return new SubscribedNewsletterResponse(
-                subscriptionId, newsletterId, name, imageUrl, description, category, hasUnsubscribeUrl
+                newsletterId, name, imageUrl, description, category, hasUnsubscribeUrl
         );
     }
 }

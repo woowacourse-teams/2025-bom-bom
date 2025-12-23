@@ -47,9 +47,11 @@ jobs:
           cache: gradle
 
       - name: application.yml 생성 (Prod 환경)
+        env:
+          APPLICATION_PROD_PROPERTIES: ${{ secrets.APPLICATION_PROD_PROPERTIES }}
         run: |
           mkdir -p src/main/resources
-          printf '%s' "${{ secrets.APPLICATION_PROD_PROPERTIES }}" > src/main/resources/application.yml
+          printf '%s' "${APPLICATION_PROD_PROPERTIES}" > src/main/resources/application.yml
 
       - name: Gradle 빌드
         run: ./gradlew clean assemble --no-daemon --stacktrace --info
@@ -82,9 +84,11 @@ jobs:
           cache: gradle
 
       - name: application.yml 생성 (Test)
+        env:
+          APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICATION_TEST_PROPERTIES }}
         run: |
           mkdir -p src/test/resources
-          printf '%s' "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application.yml
+          printf '%s' "${APPLICATION_TEST_PROPERTIES}" > src/test/resources/application.yml
 
       - name: 테스트 실행
         env:

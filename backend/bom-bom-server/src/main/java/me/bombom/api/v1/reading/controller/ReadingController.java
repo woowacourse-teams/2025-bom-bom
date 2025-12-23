@@ -2,12 +2,13 @@ package me.bombom.api.v1.reading.controller;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingCountResponse;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
-import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
+import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.reading.service.ReadingService;
@@ -42,7 +43,7 @@ public class ReadingController implements ReadingControllerApi{
 
     @Override
     @GetMapping("/month/rank")
-    public MonthlyReadingRankingResponse getMonthlyReadingRank(@RequestParam @Positive(message = "limit는 1 이상의 값이어야 합니다.") int limit) {
+    public List<MonthlyReadingRankResponse> getMonthlyReadingRank(@RequestParam @Positive(message = "limit는 1 이상의 값이어야 합니다.") int limit) {
         return readingService.getMonthlyReadingRank(limit);
     }
 

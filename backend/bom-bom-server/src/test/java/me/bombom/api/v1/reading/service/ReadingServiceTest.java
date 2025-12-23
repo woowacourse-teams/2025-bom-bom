@@ -4,8 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.member.domain.Member;
@@ -13,15 +12,13 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.reading.domain.ContinueReading;
 import me.bombom.api.v1.reading.domain.MonthlyReadingRealtime;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
-import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshotMeta;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
-import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
+import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
-import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotMetaRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
@@ -55,9 +52,6 @@ class ReadingServiceTest {
 
     @Autowired
     private MonthlyReadingRealtimeRepository monthlyReadingRealtimeRepository;
-
-    @Autowired
-    private MonthlyReadingSnapshotMetaRepository monthlyReadingSnapshotMetaRepository;
 
     @Autowired
     private YearlyReadingRepository yearlyReadingRepository;
@@ -175,32 +169,15 @@ class ReadingServiceTest {
         // when: 순위 저장 배치 실행 후, 저장된 순위 기반 조회
         readingService.updateMonthlyRanking();
         int limit = 2;
-        MonthlyReadingRankingResponse result = readingService.getMonthlyReadingRank(limit);
+        List<MonthlyReadingRankResponse> result = readingService.getMonthlyReadingRank(limit);
 
         // then
         assertSoftly(softly -> {
-            softly.assertThat(result.data().size()).isEqualTo(limit);
-            softly.assertThat(result.data().get(0).rank()).isLessThanOrEqualTo(result.data().get(1).rank());
-            softly.assertThat(result.data().get(0).monthlyReadCount())
-                    .isGreaterThanOrEqualTo(result.data().get(1).monthlyReadCount());
+            softly.assertThat(result.size()).isEqualTo(limit);
+            softly.assertThat(result.get(0).rank()).isLessThanOrEqualTo(result.get(1).rank());
+            softly.assertThat(result.get(0).monthlyReadCount())
+                    .isGreaterThanOrEqualTo(result.get(1).monthlyReadCount());
         });
-    }
-
-    @Test
-    void 랭킹_업데이트된_시간을_조회할_수_있다() {
-        // given
-        LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);;
-        int limit = 2;
-
-        // when
-        monthlyReadingSnapshotMetaRepository.save(MonthlyReadingSnapshotMeta.builder()
-                .id(1L)
-                .snapshotAt(dateTime)
-                .build());
-        MonthlyReadingRankingResponse monthlyReadingRank = readingService.getMonthlyReadingRank(limit);
-
-        // then
-        assertThat(monthlyReadingRank.rankingUpdatedAt()).isEqualTo(dateTime);
     }
 
     @Test

@@ -2,12 +2,9 @@
 package me.bombom.api.v1.reading.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.common.MonthlyRankingScheduleProperties;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -24,7 +21,6 @@ import me.bombom.api.v1.reading.domain.YearlyReading;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingCountResponse;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
-import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
@@ -45,8 +41,6 @@ public class ReadingService {
 
     private static final int LAST_MONTH_OFFSET = 1;
 
-    private final MonthlyReadingSnapshotMetaService monthlyReadingSnapshotMetaService;
-
     private final MemberRepository memberRepository;
     private final ContinueReadingRepository continueReadingRepository;
     private final TodayReadingRepository todayReadingRepository;
@@ -54,8 +48,6 @@ public class ReadingService {
     private final MonthlyReadingSnapshotRepository monthlyReadingSnapshotRepository;
     private final MonthlyReadingRealtimeRepository monthlyReadingRealtimeRepository;
     private final YearlyReadingRepository yearlyReadingRepository;
-
-    private final MonthlyRankingScheduleProperties scheduleProps;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void initializeReadingInformation(Long memberId) {
@@ -206,26 +198,8 @@ public class ReadingService {
         return ReadingInformationResponse.of(continueReading, todayReading, weeklyReading);
     }
 
-    public MonthlyReadingRankingResponse getMonthlyReadingRank(int limit) {
-        List<MonthlyReadingRankResponse> monthlyRanking = monthlyReadingSnapshotRepository.findMonthlyRanking(limit);
-        LocalDateTime rankingUpdatedAt = monthlyReadingSnapshotMetaService.getSnapshotAt();
-        ZonedDateTime serverNow = ZonedDateTime.now(scheduleProps.zoneId());
-        ZonedDateTime nextRefreshAt = scheduleProps.cronExpression().next(serverNow);
-
-        if (nextRefreshAt == null) {
-            log.error(
-                    "다음 랭킹 갱신 시간을 계산할 수 없습니다. application.yml의 ranking 스케줄 설정을 확인하세요. serverNow={}",
-                    serverNow
-            );
-            throw new IllegalStateException("nextRefreshAt : 다음 랭킹 갱신 시간이 존재하지 않습니다.");
-        }
-
-        return MonthlyReadingRankingResponse.of(
-                rankingUpdatedAt.atZone(scheduleProps.zoneId()).toLocalDateTime(),
-                nextRefreshAt.toLocalDateTime(),
-                serverNow.toLocalDateTime(),
-                monthlyRanking
-        );
+    public List<MonthlyReadingRankResponse> getMonthlyReadingRank(int limit) {
+        return monthlyReadingSnapshotRepository.findMonthlyRanking(limit);
     }
 
     public MemberMonthlyReadingRankResponse getMemberMonthlyReadingRank(Member member) {
@@ -237,7 +211,6 @@ public class ReadingService {
         try {
             log.info("Starting monthly ranking update");
             monthlyReadingSnapshotRepository.updateMonthlyRanking();
-            monthlyReadingSnapshotMetaService.updateSnapshotAt();
             log.info("Monthly ranking update completed successfully");
         } catch (Exception e) {
             log.error("Failed to update monthly ranking: {}", e.getMessage(), e);

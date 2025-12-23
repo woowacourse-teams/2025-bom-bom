@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 public class ReadingScheduler {
 
     private static final String TIME_ZONE = "Asia/Seoul";
+    public static final String EVERY_TEN_MINUTES_CRON = "0 */10 * * * *";
     private static final String DAILY_CRON = "0 0 0 * * *";
     private static final String WEEKLY_CRON = "0 0 0 * * MON";
     private static final String MONTHLY_CRON = "0 0 0 1 * ?";
@@ -51,7 +52,7 @@ public class ReadingScheduler {
         log.info("초기화 완료 - 10분 후부터 랭킹 업데이트 시작됨");
     }
 
-    @Scheduled(cron = "${ranking.reading.monthly.cron}", zone = TIME_ZONE)
+    @Scheduled(cron = EVERY_TEN_MINUTES_CRON, zone = TIME_ZONE)
     @SchedulerLock(name = "ten_minutely_calculate_member_rank", lockAtLeastFor = "PT6S", lockAtMostFor = "PT15S")
     public void tenMinutelyCalculateMemberRank() {
         log.info("이달의 독서왕 순위 업데이트");

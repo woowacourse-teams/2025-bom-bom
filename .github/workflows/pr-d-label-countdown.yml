@@ -1,0 +1,210 @@
+name: Daily PR D-label Countdown (D-0 Discord Notify)
+
+on:
+  schedule:
+    # 매일 오전 9시(Asia/Seoul) = 매일 00:00(UTC)
+    - cron: "10 0 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  countdown_and_notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Decrement D-* labels on open PRs + Build D-0 Discord payload
+        id: build
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // 관리 범위: D-0 ~ D-5
+            const MIN = 0;
+            const MAX = 5;
+            const dLabelRegex = /^D-(\d+)$/;
+
+            // Discord ID 매핑 로드 (key normalize: 소문자)
+            const rawMapping = JSON.parse(fs.readFileSync(".github/notification_ids.json", "utf8"));
+            const discordIdByLogin = Object.fromEntries(
+              Object.entries(rawMapping).map(([login, discordId]) => [String(login).toLowerCase(), String(discordId)])
+            );
+
+            function mentionOf(login) {
+              const id = discordIdByLogin[String(login).toLowerCase()];
+              return id ? `<@${id}>` : "";
+            }
+
+            // 오픈 PR 전부 가져오기
+            const pulls = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: "open",
+              per_page: 100,
+            });
+
+            const becameD0 = [];
+
+            // 1) D-label 차감
+            for (const pr of pulls) {
+              const labels = (pr.labels || [])
+                .map(l => (typeof l === "string" ? l : l.name))
+                .filter(Boolean);
+
+              const dLabels = labels
+                .map(name => {
+                  const m = name.match(dLabelRegex);
+                  if (!m) return null;
+                  const n = Number(m[1]);
+                  if (Number.isNaN(n)) return null;
+                  if (n < MIN || n > MAX) return null;
+                  return { name, n };
+                })
+                .filter(Boolean);
+
+              if (dLabels.length === 0) continue;
+
+              dLabels.sort((a, b) => b.n - a.n);
+              const current = dLabels[0].n;
+
+              if (current <= MIN) continue;
+
+              const next = current - 1;
+              const nextLabel = `D-${next}`;
+
+              for (const dl of dLabels) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner,
+                    repo,
+                    issue_number: pr.number,
+                    name: dl.name,
+                  });
+                } catch (e) {}
+              }
+
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: pr.number,
+                labels: [nextLabel],
+              });
+
+              if (next === 0) {
+                becameD0.push({
+                  number: pr.number,
+                  title: pr.title,
+                  url: pr.html_url,
+                  author: pr.user?.login ?? "unknown",
+                });
+              }
+            }
+
+            if (becameD0.length === 0) {
+              core.setOutput("should_notify", "false");
+              console.log("No PR reached D-0 today.");
+              return;
+            }
+
+            // 팀 멤버 후보: notification_ids.json 기준
+            const teamMembers = Object.keys(discordIdByLogin); // lowercased
+
+            let content = "🌸 오늘 D-0 도착한 PR이에요! 지금 확인하면 딱 좋아요\n";
+
+            // 2) D-0 도달 PR별로 멘션/문구 구성
+            for (const pr of becameD0) {
+              const prNumber = pr.number;
+              const authorLogin = String(pr.author).toLowerCase();
+
+              const { data: reviews } = await github.rest.pulls.listReviews({
+                owner,
+                repo,
+                pull_number: prNumber,
+                per_page: 100,
+              });
+
+              // 리뷰어별 마지막 상태
+              const latestByUser = new Map();
+              reviews
+                .filter(r => r.user && r.user.login && r.submitted_at)
+                .sort((a, b) => new Date(a.submitted_at) - new Date(b.submitted_at))
+                .forEach(r => {
+                  latestByUser.set(String(r.user.login).toLowerCase(), String(r.state));
+                });
+
+              let approvedCount = 0;
+              let hasChangesRequested = false;
+
+              for (const state of latestByUser.values()) {
+                if (state === "APPROVED") approvedCount += 1;
+                if (state === "CHANGES_REQUESTED") hasChangesRequested = true;
+              }
+
+              // 기본 후보: 팀원 - author
+              const candidates = teamMembers.filter(m => m !== authorLogin);
+
+              // "미승인자" = 아직 APPROVED 아닌 사람(리뷰 안했거나 COMMENTED 포함)
+              const pendingReviewers = candidates.filter(login => {
+                const latestState = latestByUser.get(login);
+                return latestState !== "APPROVED";
+              });
+
+              // 멘션 대상 조합
+              const mentionSet = new Set();
+
+              // (A) 수정요청 있으면 작성자 호출은 항상 포함
+              if (hasChangesRequested) {
+                const m = mentionOf(authorLogin);
+                if (m) mentionSet.add(m);
+              }
+
+              // (B) 승인 부족(<2)이면 미승인자들도 호출
+              if (approvedCount < 2) {
+                for (const login of pendingReviewers) {
+                  const m = mentionOf(login);
+                  if (m) mentionSet.add(m);
+                }
+              } else {
+                // (C) 승인 2명 이상이면 "머지" 유도 -> 작성자 호출(매핑 있으면)
+                const m = mentionOf(authorLogin);
+                if (m) mentionSet.add(m);
+              }
+
+              const mentions = Array.from(mentionSet).join(" ");
+
+              // 상태 텍스트 결정(우선순위: 수정요청 > 머지 가능 > 리뷰 필요)
+              let statusText = "";
+              if (hasChangesRequested && approvedCount < 2) {
+                statusText = `🛠️ 수정 요청 있음 + 👀 추가 리뷰 필요 (현재 승인 ${approvedCount}명)`;
+              } else if (hasChangesRequested && approvedCount >= 2) {
+                statusText = `🛠️ 수정 요청 있음 (현재 승인 ${approvedCount}명)`;
+              } else if (!hasChangesRequested && approvedCount >= 2) {
+                statusText = `✅ 머지 가능 (현재 승인 ${approvedCount}명)`;
+              } else {
+                statusText = `👀 리뷰 필요 (현재 승인 ${approvedCount}명)`;
+              }
+
+              const mentionPrefix = mentions ? `${mentions} ` : "";
+
+              content += `\n- ${mentionPrefix}**${statusText}**\n  ${pr.title}\n  ${pr.url}\n`;
+            }
+
+            fs.writeFileSync("payload.json", JSON.stringify({ content }, null, 2), "utf8");
+            core.setOutput("should_notify", "true");
+            core.setOutput("d0_count", String(becameD0.length));
+
+      - name: Notify Discord (D-0 reached PRs)
+        if: steps.build.outputs.should_notify == 'true'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -sS -H "Content-Type: application/json" -d @payload.json "$DISCORD_WEBHOOK_URL"

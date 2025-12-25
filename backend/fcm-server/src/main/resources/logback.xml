@@ -1,0 +1,67 @@
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <!-- 공통 프로퍼티 -->
+    <property name="LOG_PATH" value="${LOG_PATH:-/logs}"/>
+
+    <!-- 콘솔: DEBUG 이상 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>NEUTRAL</onMismatch>
+        </filter>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 파일(JSON): INFO 이상 -->
+    <appender name="ALL_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <file>${LOG_PATH}/bombom-fcm.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/bombom-fcm.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <maxHistory>15</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp fieldName="time" pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX"/>
+                <pattern>{"level":"%level","logger":"%logger","thread":"%thread"}</pattern>
+
+                <!-- trace/MDC 미사용: message + stackTrace만 -->
+                <message/>
+                <stackTrace>
+                    <fieldName>stackTrace</fieldName>
+                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                        <maxLength>3000</maxLength>
+                        <shortenedClassNameLength>20</shortenedClassNameLength>
+                        <rootCauseFirst>true</rootCauseFirst>
+                        <exclude>sun\.reflect\..*</exclude>
+                        <exclude>java\.lang\.reflect\..*</exclude>
+                        <exclude>org\.springframework\.aop\..*</exclude>
+                        <exclude>org\.springframework\.cglib\..*</exclude>
+                    </throwableConverter>
+                </stackTrace>
+            </providers>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC_ALL_JSON" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="ALL_JSON"/>
+        <queueSize>5000</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
+
+    <!-- Root는 DEBUG, Appender별 필터가 실제 출력 레벨을 조정 -->
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="ASYNC_ALL_JSON"/>
+    </root>
+</configuration>

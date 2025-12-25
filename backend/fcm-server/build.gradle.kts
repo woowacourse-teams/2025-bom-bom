@@ -33,6 +33,9 @@ dependencies {
     implementation("mysql:mysql-connector-java:8.0.33")
     runtimeOnly("com.h2database:h2")
 
+    // logging
+    implementation(platform("org.springframework.cloud:spring-cloud-dependencies:2025.0.0"))
+    implementation("net.logstash.logback:logstash-logback-encoder:8.1")
 
     // fcm
     implementation("com.google.firebase:firebase-admin:9.2.0")

@@ -1,7 +1,7 @@
 <configuration scan="true" scanPeriod="30 seconds">
 
     <!-- 공통 프로퍼티 -->
-    <property name="LOG_PATH" value="${LOG_PATH:-/logs}"/>
+    <property name="LOG_PATH" value="${LOG_PATH:-./logs}"/>
 
     <!-- 콘솔: DEBUG 이상 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">

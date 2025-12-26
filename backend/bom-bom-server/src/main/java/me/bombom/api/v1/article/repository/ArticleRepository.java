@@ -91,25 +91,32 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
         )
         FROM Article a
         JOIN Member m ON m.id = a.memberId
+        WHERE NOT EXISTS (
+            SELECT 1 FROM Bookmark b
+            WHERE b.articleId = a.id
+            AND b.memberId = a.memberId
+        )
         GROUP BY a.memberId, m.roleId
     """)
-    List<MemberArticleCount> countArticlesGroupedByMember();
+    List<MemberArticleCount> countUnbookmarkedArticlesGroupedByMember();
 
     @Modifying
     @Query(value = """
         DELETE a FROM article a
         WHERE a.id IN (
             SELECT id FROM (
-                SELECT id,
+                SELECT a.id,
                        ROW_NUMBER() OVER (
-                           ORDER BY arrived_date_time DESC, id DESC
+                           ORDER BY a.arrived_date_time DESC, a.id DESC
                        ) AS row_num
-                FROM article
-                WHERE member_id = :memberId
+                FROM article a
+                LEFT JOIN bookmark b ON b.article_id = a.id AND b.member_id = a.member_id
+                WHERE a.member_id = :memberId
+                  AND b.id IS NULL
             ) ranked
             WHERE ranked.row_num > :keepCount
         )
         AND a.member_id = :memberId
     """, nativeQuery = true)
-    int deleteOldArticlesForMember(Long memberId, int keepCount);
+    int deleteOldUnbookmarkedArticlesForMember(Long memberId, int keepCount);
 }

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.article.service.PreviousArticleService;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,11 @@ public class ArticleScheduler {
     private static final String DAILY_2_20_AM_CRON = "0 20 2 * * *";
     private static final String DAILY_3AM_CRON = "0 0 3 * * *";
 
+    @Value("${scheduler.remove-article.max-count.admin}")
+    private int adminLimit;
+
+    @Value("${scheduler.remove-article.max-count.user}")
+    private int userLimit;
 
     private final PreviousArticleService previousArticleService;
     private final ArticleService articleService;
@@ -51,7 +57,7 @@ public class ArticleScheduler {
     @SchedulerLock(name = "cleanup_excess_member_articles", lockAtLeastFor = "PT5S", lockAtMostFor = "PT10S")
     public void cleanupExcessArticles() {
         log.info("회원별 최대 아티클 수를 초과한 데이터 정리 시작");
-        int deletedCount = articleService.cleanupExcessArticles();
+        int deletedCount = articleService.cleanupExcessArticles(adminLimit, userLimit);
         log.info("회원별 최대 아티클 수를 초과한 데이터 정리 완료: {}개", deletedCount);
     }
 }

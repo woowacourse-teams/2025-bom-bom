@@ -4,6 +4,6 @@ public record MemberArticleCount(
 
         Long memberId,
         Long roleId,
-        long articleCount
+        long unbookmarkedArticleCount
 ) {
 }

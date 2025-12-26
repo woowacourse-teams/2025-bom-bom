@@ -48,9 +48,6 @@ import org.springframework.util.StringUtils;
 @Transactional(readOnly = true)
 public class ArticleService {
 
-    private static final long ADMIN_ROLE_ID = 1L;
-    private static final int DEFAULT_ARTICLE_RETAIN_LIMIT = 500;
-
     private final ArticleRepository articleRepository;
     private final RecentArticleRepository recentArticleRepository;
     private final TodayReadingRepository todayReadingRepository;
@@ -170,25 +167,26 @@ public class ArticleService {
     }
 
     @Transactional
-    public int cleanupExcessArticles() {
-        List<MemberArticleCount> memberArticleCounts = articleRepository.countArticlesGroupedByMember();
+    public int cleanupExcessArticles(int adminRetainLimit, int userRetainLimit) {
+        List<MemberArticleCount> memberArticleCounts = articleRepository.countUnbookmarkedArticlesGroupedByMember();
         if (memberArticleCounts.isEmpty()) {
             return 0;
         }
 
         int totalDeleted = 0;
         for (MemberArticleCount memberArticleCount : memberArticleCounts) {
-            if (Role.isAdmin(memberArticleCount.roleId())) {
-                continue;
-            }
+            int retainLimit = determineRetentionLimit(
+                    memberArticleCount.roleId(),
+                    userRetainLimit,
+                    adminRetainLimit
+            );
 
-            int retainLimit = determineRetentionLimit(memberArticleCount.memberId());
-            if (memberArticleCount.articleCount() <= retainLimit) {
+            if (memberArticleCount.unbookmarkedArticleCount() <= retainLimit) {
                 continue;
             }
-            int deleted = articleRepository.deleteOldArticlesForMember(memberArticleCount.memberId(), retainLimit);
+            int deleted = articleRepository.deleteOldUnbookmarkedArticlesForMember(memberArticleCount.memberId(), retainLimit);
             totalDeleted += deleted;
-            log.info("Deleted {} old articles for memberId={}, retainLimit={}", deleted, memberArticleCount.memberId(), retainLimit);
+            log.info("Deleted {} old unbookmarked articles for memberId={}, retainLimit={}", deleted, memberArticleCount.memberId(), retainLimit);
         }
         return totalDeleted;
     }
@@ -219,8 +217,10 @@ public class ArticleService {
         }
     }
 
-    private int determineRetentionLimit(Long memberId) {
-        // 멤버십 등급에 따라 확장할 수 있도록 단일 책임 메서드로 분리
-        return DEFAULT_ARTICLE_RETAIN_LIMIT;
+    private int determineRetentionLimit(Long roleId, int userRetainLimit, int adminRetainLimit) {
+        if (Role.isAdmin(roleId)) {
+            return adminRetainLimit;
+        }
+        return userRetainLimit;
     }
 }

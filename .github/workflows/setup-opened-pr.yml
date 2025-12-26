@@ -19,7 +19,7 @@ jobs:
 
       # 1) 리뷰어/Assignee 자동 지정 (auto_assign_backend.yml 사용)
       - name: Auto assign reviewers & assignee
-        uses: kentaro-m/auto-assign-action@v2
+        uses: kentaro-m/auto-assign-action@v2.0.0
         with:
           configuration-path: ".github/auto_assign_backend.yml"
 

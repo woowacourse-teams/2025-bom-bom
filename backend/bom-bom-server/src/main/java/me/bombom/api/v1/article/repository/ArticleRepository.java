@@ -82,4 +82,41 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
             @Param("adminId") Long adminId,
             @Param("keepCount") int keepCount
     );
+
+    @Query("""
+        SELECT new me.bombom.api.v1.article.repository.MemberArticleCount(
+            a.memberId,
+            m.roleId,
+            COUNT(a.id)
+        )
+        FROM Article a
+        JOIN Member m ON m.id = a.memberId
+        WHERE NOT EXISTS (
+            SELECT 1 FROM Bookmark b
+            WHERE b.articleId = a.id
+            AND b.memberId = a.memberId
+        )
+        GROUP BY a.memberId, m.roleId
+    """)
+    List<MemberArticleCount> countUnbookmarkedArticlesGroupedByMember();
+
+    @Modifying
+    @Query(value = """
+        DELETE a FROM article a
+        WHERE a.id IN (
+            SELECT id FROM (
+                SELECT a.id,
+                       ROW_NUMBER() OVER (
+                           ORDER BY a.arrived_date_time DESC, a.id DESC
+                       ) AS row_num
+                FROM article a
+                LEFT JOIN bookmark b ON b.article_id = a.id AND b.member_id = a.member_id
+                WHERE a.member_id = :memberId
+                  AND b.id IS NULL
+            ) ranked
+            WHERE ranked.row_num > :keepCount
+        )
+        AND a.member_id = :memberId
+    """, nativeQuery = true)
+    int deleteOldUnbookmarkedArticlesForMember(Long memberId, int keepCount);
 }

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.article.service.PreviousArticleService;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +16,15 @@ public class ArticleScheduler {
 
     private static final String TIME_ZONE = "Asia/Seoul";
     private static final String DAILY_2AM_CRON = "0 0 2 * * *";
-    private static final String DAILY_4AM_CRON = "0 0 4 * * *";
+    private static final String DAILY_2_10_AM_CRON = "0 10 2 * * *";
+    private static final String DAILY_2_20_AM_CRON = "0 20 2 * * *";
     private static final String DAILY_3AM_CRON = "0 0 3 * * *";
+
+    @Value("${scheduler.remove-article.max-count.admin}")
+    private int adminLimit;
+
+    @Value("${scheduler.remove-article.max-count.user}")
+    private int userLimit;
 
     private final PreviousArticleService previousArticleService;
     private final ArticleService articleService;
@@ -29,7 +37,7 @@ public class ArticleScheduler {
         log.info("{}개 정리 완료", deletedCount);
     }
 
-    @Scheduled(cron = DAILY_4AM_CRON, zone = TIME_ZONE)
+    @Scheduled(cron = DAILY_2_20_AM_CRON, zone = TIME_ZONE)
     @SchedulerLock(name = "cleanup_old_recent_articles", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void cleanupOldRecentArticles() {
         log.info("최신 아티클 정리 시작 (5일 이상 지난 데이터)");
@@ -37,11 +45,19 @@ public class ArticleScheduler {
         log.info("{}개 정리 완료", deletedCount);
     }
 
-    @Scheduled(cron = DAILY_3AM_CRON, zone = TIME_ZONE)
+    @Scheduled(cron = DAILY_2_10_AM_CRON, zone = TIME_ZONE)
     @SchedulerLock(name = "move_recent_admin_articles", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void moveRecentAdminArticles() {
         log.info("어드민 아티클 복사 시작");
         previousArticleService.moveAdminArticles();
         log.info("어드민 아티클 이동 완료");
+    }
+
+    @Scheduled(cron = DAILY_3AM_CRON, zone = TIME_ZONE)
+    @SchedulerLock(name = "cleanup_excess_member_articles", lockAtLeastFor = "PT5S", lockAtMostFor = "PT10S")
+    public void cleanupExcessArticles() {
+        log.info("회원별 최대 아티클 수를 초과한 데이터 정리 시작");
+        int deletedCount = articleService.cleanupExcessArticles(adminLimit, userLimit);
+        log.info("회원별 최대 아티클 수를 초과한 데이터 정리 완료: {}개", deletedCount);
     }
 }

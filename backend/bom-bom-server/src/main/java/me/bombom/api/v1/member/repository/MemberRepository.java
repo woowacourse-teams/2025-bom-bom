@@ -1,5 +1,6 @@
 package me.bombom.api.v1.member.repository;
 
+import java.util.List;
 import java.util.Optional;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,4 +21,13 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByNickname(String nickname);
 
     long countByRoleId(long roleId);
+
+    @Query("""
+        SELECT m
+        FROM Member m
+        JOIN Role r ON m.roleId = r.id
+        WHERE r.authority = :authority
+        ORDER BY m.id ASC
+    """)
+    List<Member> findByRoleAuthority(@Param("authority") String authority);
 }

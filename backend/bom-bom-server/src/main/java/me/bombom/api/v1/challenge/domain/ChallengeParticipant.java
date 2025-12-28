@@ -18,7 +18,7 @@ import me.bombom.api.v1.common.BaseEntity;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "challenge_participant", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_challenge_participant", columnNames = { "challengeId", "memberId" })
+        @UniqueConstraint(name = "uk_challenge_participant", columnNames = { "challenge_id", "member_id" })
 })
 public class ChallengeParticipant extends BaseEntity {
 

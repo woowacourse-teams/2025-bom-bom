@@ -17,7 +17,7 @@ import lombok.NonNull;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "challenge_newsletter", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_challenge_newsletter", columnNames = { "challengeId", "newsletterId" })
+        @UniqueConstraint(name = "uk_challenge_newsletter", columnNames = { "challenge_id", "newsletter_id" })
 })
 public class ChallengeNewsletter {
 

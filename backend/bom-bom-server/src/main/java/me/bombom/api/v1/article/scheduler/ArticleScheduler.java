@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.article.service.PreviousArticleService;
+import me.bombom.api.v1.common.exception.CServerErrorException;
+import me.bombom.api.v1.common.exception.ErrorContextKeys;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,6 +22,7 @@ public class ArticleScheduler {
     private static final String DAILY_2_10_AM_CRON = "0 10 2 * * *";
     private static final String DAILY_2_20_AM_CRON = "0 20 2 * * *";
     private static final String DAILY_3AM_CRON = "0 0 3 * * *";
+    private static final int MINIMUM_ARTICLE_LIMIT = 500;
 
     @Value("${scheduler.remove-article.max-count.admin}")
     private int adminLimit;
@@ -57,6 +61,10 @@ public class ArticleScheduler {
     @SchedulerLock(name = "cleanup_excess_member_articles", lockAtLeastFor = "PT5S", lockAtMostFor = "PT10S")
     public void cleanupExcessArticles() {
         log.info("회원별 최대 아티클 수를 초과한 데이터 정리 시작");
+        if(adminLimit < MINIMUM_ARTICLE_LIMIT || userLimit < MINIMUM_ARTICLE_LIMIT){
+            throw new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
+                    .addContext(ErrorContextKeys.OPERATION, "getArticleCountLimit");
+        }
         int deletedCount = articleService.cleanupExcessArticles(adminLimit, userLimit);
         log.info("회원별 최대 아티클 수를 초과한 데이터 정리 완료: {}개", deletedCount);
     }

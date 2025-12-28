@@ -95,10 +95,13 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
                            PARTITION BY a.member_id 
                            ORDER BY a.arrived_date_time DESC, a.id DESC
                        ) AS row_num,
-                       CASE 
-                           WHEN r.authority = 'ADMIN' THEN :adminLimit 
-                           WHEN r.authority = 'USER' THEN :userLimit
-                       END AS keep_limit
+                        GREATEST(
+                            CASE
+                                WHEN r.authority = 'ADMIN' THEN :adminLimit
+                                WHEN r.authority = 'USER'  THEN :userLimit
+                            END,
+                            500
+                        ) AS keep_limit
                 FROM article a
                 JOIN member m ON m.id = a.member_id
                 JOIN role r ON r.id = m.role_id

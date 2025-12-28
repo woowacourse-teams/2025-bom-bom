@@ -29,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class PreviousArticleService {
 
     private static final int PREVIOUS_ARTICLE_KEEP_COUNT = 10;
-    private static final String ARCHIVE_ROLE_AUTHORITY = "ARCHIVE";
 
     private final PreviousArticleRepository previousArticleRepository;
     private final MemberRepository memberRepository;
@@ -42,8 +41,7 @@ public class PreviousArticleService {
             NewsletterPreviousPolicyRepository newsletterPreviousPolicyRepository,
             PreviousArticleRepository previousArticleRepository,
             MemberRepository memberRepository,
-            List<PreviousArticleStrategy> strategies
-    ) {
+            List<PreviousArticleStrategy> strategies) {
         this.articleRepository = articleRepository;
         this.newsletterPreviousPolicyRepository = newsletterPreviousPolicyRepository;
         this.previousArticleRepository = previousArticleRepository;
@@ -79,17 +77,14 @@ public class PreviousArticleService {
 
     @Transactional
     public void moveAdminArticles() {
-        List<Member> members = memberRepository.findByRoleAuthority(ARCHIVE_ROLE_AUTHORITY);
-        if (members.isEmpty()) {
-            throw new CServerErrorException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
-                    .addContext(ErrorContextKeys.OPERATION, "moveAdminArticles");
-        }
+        Long archiveAdminId = memberRepository.findArchiveAdminId()
+                .orElseThrow(() -> new CServerErrorException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
+                        .addContext(ErrorContextKeys.OPERATION, "moveAdminArticles"));
 
-        Long previousArticleAdminId = members.getFirst().getId();
-        int copied = articleRepository.safeCopyToArchive(previousArticleAdminId);
-        int deleted = articleRepository.safeDeleteArchived(previousArticleAdminId, PREVIOUS_ARTICLE_KEEP_COUNT);
-        log.info("아티클 이동 완료: {}건 복사, {}건 삭제 (adminId: {})", copied, deleted, previousArticleAdminId);
+        int copied = articleRepository.safeCopyToArchive(archiveAdminId);
+        int deleted = articleRepository.safeDeleteArchived(archiveAdminId, PREVIOUS_ARTICLE_KEEP_COUNT);
+        log.info("아티클 이동 완료: {}건 복사, {}건 삭제 (adminId: {})", copied, deleted, archiveAdminId);
     }
 
     private List<PreviousArticleResponse> executeStrategy(NewsletterPreviousPolicy policy) {

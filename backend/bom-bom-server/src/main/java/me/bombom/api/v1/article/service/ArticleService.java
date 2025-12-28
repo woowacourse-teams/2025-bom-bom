@@ -15,7 +15,6 @@ import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.event.MarkAsReadEvent;
 import me.bombom.api.v1.article.repository.ArticleRepository;
-import me.bombom.api.v1.article.repository.MemberArticleCount;
 import me.bombom.api.v1.article.repository.RecentArticleRepository;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -26,7 +25,6 @@ import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.domain.Role;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
@@ -168,27 +166,7 @@ public class ArticleService {
 
     @Transactional
     public int cleanupExcessArticles(int adminRetainLimit, int userRetainLimit) {
-        List<MemberArticleCount> memberArticleCounts = articleRepository.countUnbookmarkedArticlesGroupedByMember();
-        if (memberArticleCounts.isEmpty()) {
-            return 0;
-        }
-
-        int totalDeleted = 0;
-        for (MemberArticleCount memberArticleCount : memberArticleCounts) {
-            int retainLimit = determineRetentionLimit(
-                    memberArticleCount.roleId(),
-                    userRetainLimit,
-                    adminRetainLimit
-            );
-
-            if (memberArticleCount.unbookmarkedArticleCount() <= retainLimit) {
-                continue;
-            }
-            int deleted = articleRepository.deleteOldUnbookmarkedArticlesForMember(memberArticleCount.memberId(), retainLimit);
-            totalDeleted += deleted;
-            log.info("Deleted {} old unbookmarked articles for memberId={}, retainLimit={}", deleted, memberArticleCount.memberId(), retainLimit);
-        }
-        return totalDeleted;
+        return articleRepository.deleteExcessUnbookmarkedArticles(adminRetainLimit, userRetainLimit);
     }
 
     private Article findArticleById(Long articleId, Long memberId) {
@@ -217,10 +195,4 @@ public class ArticleService {
         }
     }
 
-    private int determineRetentionLimit(Long roleId, int userRetainLimit, int adminRetainLimit) {
-        if (Role.isAdmin(roleId)) {
-            return adminRetainLimit;
-        }
-        return userRetainLimit;
-    }
 }

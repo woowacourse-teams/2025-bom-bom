@@ -3,6 +3,7 @@ package me.bombom.api.v1.article.service;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +28,7 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.domain.Role;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
@@ -42,6 +44,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @IntegrationTest
 class ArticleServiceTest {
@@ -75,6 +79,15 @@ class ArticleServiceTest {
     @Autowired
     private HighlightRepository highlightRepository;
 
+    @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
+    private Long userRoleId;
+    private Long adminRoleId;
+
     List<Category> categories;
     List<Newsletter> newsletters;
     List<Article> articles;
@@ -82,6 +95,7 @@ class ArticleServiceTest {
 
     @BeforeEach
     public void setup() {
+        initializeRoles();
         newsletterRepository.deleteAllInBatch();
         articleRepository.deleteAllInBatch();
         categoryRepository.deleteAllInBatch();
@@ -89,7 +103,14 @@ class ArticleServiceTest {
         bookmarkRepository.deleteAllInBatch();
         highlightRepository.deleteAllInBatch();
 
-        member = TestFixture.normalMemberFixture();
+        member = Member.builder()
+                .provider("apple")
+                .providerId("providerId")
+                .email("email@bombom.news")
+                .nickname("nickname")
+                .gender(Gender.FEMALE)
+                .roleId(userRoleId)
+                .build();
         memberRepository.save(member);
         categories = TestFixture.createCategories();
         categoryRepository.saveAll(categories);
@@ -99,6 +120,20 @@ class ArticleServiceTest {
         newsletterRepository.saveAll(newsletters);
         articles = TestFixture.createArticles(member, newsletters);
         articleRepository.saveAll(articles);
+    }
+
+    private void initializeRoles() {
+        TransactionTemplate tx = new TransactionTemplate(transactionManager);
+        tx.executeWithoutResult(status -> {
+            entityManager.createNativeQuery("TRUNCATE TABLE role").executeUpdate();
+            Role userRole = Role.builder().authority("USER").build();
+            Role adminRole = Role.builder().authority("ADMIN").build();
+            entityManager.persist(userRole);
+            entityManager.persist(adminRole);
+            entityManager.flush();
+            userRoleId = userRole.getId();
+            adminRoleId = adminRole.getId();
+        });
     }
 
     @Test
@@ -360,7 +395,7 @@ class ArticleServiceTest {
                 .email("email2")
                 .nickname("nickname2")
                 .gender(Gender.FEMALE)
-                .roleId(1L)
+                .roleId(userRoleId)
                 .build();
         memberRepository.save(member2);
 
@@ -387,7 +422,7 @@ class ArticleServiceTest {
                 .email("email2")
                 .nickname("nickname2")
                 .gender(Gender.FEMALE)
-                .roleId(1L)
+                .roleId(userRoleId)
                 .build();
         memberRepository.save(otherMember);
 
@@ -634,7 +669,14 @@ class ArticleServiceTest {
     @Test
     void 아티클_삭제_권한_없으면_예외_발생() {
         // given
-        Member other = TestFixture.createMemberFixture("email2", "nickname2");
+        Member other = Member.builder()
+                .provider("provider")
+                .providerId("providerId")
+                .email("email2")
+                .nickname("nickname2")
+                .gender(Gender.FEMALE)
+                .roleId(userRoleId)
+                .build();
         memberRepository.save(other);
 
         Long foreignArticleId = articleRepository.save(

@@ -83,40 +83,31 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
             @Param("keepCount") int keepCount
     );
 
-    @Query("""
-        SELECT new me.bombom.api.v1.article.repository.MemberArticleCount(
-            a.memberId,
-            m.roleId,
-            COUNT(a.id)
-        )
-        FROM Article a
-        JOIN Member m ON m.id = a.memberId
-        WHERE NOT EXISTS (
-            SELECT 1 FROM Bookmark b
-            WHERE b.articleId = a.id
-            AND b.memberId = a.memberId
-        )
-        GROUP BY a.memberId, m.roleId
-    """)
-    List<MemberArticleCount> countUnbookmarkedArticlesGroupedByMember();
-
     @Modifying
     @Query(value = """
-        DELETE a FROM article a
-        WHERE a.id IN (
-            SELECT id FROM (
+        DELETE a
+        FROM article a
+        JOIN (
+            SELECT id
+            FROM (
                 SELECT a.id,
                        ROW_NUMBER() OVER (
+                           PARTITION BY a.member_id 
                            ORDER BY a.arrived_date_time DESC, a.id DESC
-                       ) AS row_num
+                       ) AS row_num,
+                       CASE 
+                           WHEN r.authority = 'ADMIN' THEN :adminLimit 
+                           WHEN r.authority = 'USER' THEN :userLimit
+                       END AS keep_limit
                 FROM article a
+                JOIN member m ON m.id = a.member_id
+                JOIN role r ON r.id = m.role_id
                 LEFT JOIN bookmark b ON b.article_id = a.id AND b.member_id = a.member_id
-                WHERE a.member_id = :memberId
-                  AND b.id IS NULL
+                WHERE b.id IS NULL
+                  AND r.authority IN ('ADMIN', 'USER')
             ) ranked
-            WHERE ranked.row_num > :keepCount
-        )
-        AND a.member_id = :memberId
+            WHERE ranked.row_num > ranked.keep_limit
+        ) target ON target.id = a.id
     """, nativeQuery = true)
-    int deleteOldUnbookmarkedArticlesForMember(Long memberId, int keepCount);
+    int deleteExcessUnbookmarkedArticles(@Param("adminLimit") int adminLimit, @Param("userLimit") int userLimit);
 }

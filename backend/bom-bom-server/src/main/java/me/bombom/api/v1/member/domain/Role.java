@@ -18,16 +18,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Role {
 
-    private static final Long ADMIN_ROLE_ID = 2L;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, length = 20)
     private String authority;
-
-    public static boolean isAdmin(Long roleId){
-        return roleId == ADMIN_ROLE_ID;
-    }
 }

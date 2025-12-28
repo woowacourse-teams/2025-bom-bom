@@ -151,7 +151,6 @@ class ArticleServiceTest {
         // then
         List<ArticleResponse> content = result.getContent();
         assertSoftly(softly -> {
-            ;
             softly.assertThat(content.get(0).arrivedDateTime()).isAfter(content.get(1).arrivedDateTime());
             softly.assertThat(content.get(1).arrivedDateTime()).isAfter(content.get(2).arrivedDateTime());
         });

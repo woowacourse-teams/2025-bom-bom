@@ -18,7 +18,8 @@ CREATE TABLE challenge_newsletter
     id            BIGINT NOT NULL AUTO_INCREMENT,
     challenge_id  BIGINT NOT NULL,
     newsletter_id BIGINT NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_challenge_newsletter (challenge_id, newsletter_id)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
@@ -34,7 +35,8 @@ CREATE TABLE challenge_participant
     shield            INT         NOT NULL DEFAULT 0,
     created_at        DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at        DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_challenge_participant (challenge_id, member_id)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
@@ -46,7 +48,8 @@ CREATE TABLE challenge_todo
     todo_type    ENUM ('READ','COMMENT') NOT NULL,
     created_at   DATETIME(6)             NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at   DATETIME(6)             NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_challenge_todo (challenge_id, todo_type)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
@@ -59,7 +62,8 @@ CREATE TABLE challenge_daily_todo
     challenge_todo_id BIGINT      NOT NULL,
     created_at        DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at        DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_challenge_daily_todo (participant_id, todo_date, challenge_todo_id)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
@@ -71,7 +75,8 @@ CREATE TABLE challenge_daily_result
     date           DATE        NOT NULL,
     created_at     DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at     DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_challenge_daily_result (participant_id, date)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;

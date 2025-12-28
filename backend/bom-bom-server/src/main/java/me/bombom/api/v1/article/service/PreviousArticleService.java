@@ -41,7 +41,8 @@ public class PreviousArticleService {
             NewsletterPreviousPolicyRepository newsletterPreviousPolicyRepository,
             PreviousArticleRepository previousArticleRepository,
             MemberRepository memberRepository,
-            List<PreviousArticleStrategy> strategies) {
+            List<PreviousArticleStrategy> strategies
+    ) {
         this.articleRepository = articleRepository;
         this.newsletterPreviousPolicyRepository = newsletterPreviousPolicyRepository;
         this.previousArticleRepository = previousArticleRepository;

@@ -27,6 +27,8 @@ public class ChallengeComment extends BaseEntity {
     @Column(nullable = false)
     private Long participantId;
 
+    private String quotation;
+
     @Column(nullable = false)
     private String comment;
 
@@ -35,11 +37,13 @@ public class ChallengeComment extends BaseEntity {
             Long id,
             @NonNull Long articleId,
             @NonNull Long participantId,
+            String quotation,
             @NonNull String comment
     ) {
         this.id = id;
         this.articleId = articleId;
         this.participantId = participantId;
+        this.quotation = quotation;
         this.comment = comment;
     }
 }

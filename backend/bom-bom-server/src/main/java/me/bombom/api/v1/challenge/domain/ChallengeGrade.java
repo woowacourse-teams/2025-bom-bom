@@ -10,7 +10,7 @@ public enum ChallengeGrade {
     GOLD("금메달", 100),
     SILVER("은메달", 80),
     BRONZE("동메달", 50),
-    NONE("참가", 0),
+    COMPLETE("완료", 0),
     FAIL("탈락", 0),
     ;
 
@@ -22,6 +22,6 @@ public enum ChallengeGrade {
         if (progress >= GOLD.minProgress) return GOLD;
         if (progress >= SILVER.minProgress) return SILVER;
         if (progress >= BRONZE.minProgress) return BRONZE;
-        return NONE;
+        return COMPLETE;
     }
 }

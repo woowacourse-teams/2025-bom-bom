@@ -53,15 +53,12 @@ public class ChallengeService {
         Map<Long, List<ChallengeNewsletterResponse>> newslettersByChallengeId = getNewslettersByChallengeId(challengeIds);
         Map<Long, ChallengeParticipant> myParticipation = findMyParticipation(member);
 
-        LocalDate today = LocalDate.now();
-
         return challenges.stream()
                 .map(challenge -> toChallengeResponse(
                         challenge,
                         participantCounts,
                         newslettersByChallengeId,
-                        myParticipation,
-                        today
+                        myParticipation
                 ))
                 .collect(toList());
     }
@@ -70,17 +67,16 @@ public class ChallengeService {
             Challenge challenge,
             Map<Long, Long> participantCounts,
             Map<Long, List<ChallengeNewsletterResponse>> newslettersByChallengeId,
-            Map<Long, ChallengeParticipant> myParticipation,
-            LocalDate today
+            Map<Long, ChallengeParticipant> myParticipation
     ) {
         long participantCount = participantCounts.getOrDefault(challenge.getId(), 0L);
         List<ChallengeNewsletterResponse> newsletterResponses = newslettersByChallengeId.getOrDefault(
                 challenge.getId(),
                 Collections.emptyList()
         );
-        ChallengeStatus status = challenge.getStatus(today);
+        ChallengeStatus status = challenge.getStatus(LocalDate.now());
         ChallengeParticipant myParticipant = myParticipation.get(challenge.getId());
-        ChallengeDetailResponse detailResponse = calculateDetailResponse(challenge, myParticipant, today);
+        ChallengeDetailResponse detailResponse = calculateDetailResponse(challenge, myParticipant);
 
         return ChallengeResponse.of(challenge, participantCount, newsletterResponses, status, detailResponse);
     }
@@ -127,15 +123,14 @@ public class ChallengeService {
 
     private ChallengeDetailResponse calculateDetailResponse(
             Challenge challenge,
-            ChallengeParticipant myParticipant,
-            LocalDate today
+            ChallengeParticipant myParticipant
     ) {
         if (myParticipant == null) {
             return ChallengeDetailResponse.notJoined();
         }
 
         int progress = myParticipant.calculateProgress(challenge.getTotalDays());
-        boolean isEnded = challenge.isEnded(today);
+        boolean isEnded = challenge.isEnded(LocalDate.now());
 
         if (isEnded) {
             return ChallengeDetailResponse.ended(progress, myParticipant.isSurvived());

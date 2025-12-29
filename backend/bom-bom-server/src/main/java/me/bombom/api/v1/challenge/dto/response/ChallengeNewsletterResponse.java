@@ -14,6 +14,7 @@ public record ChallengeNewsletterResponse(
         @NotNull
         String imageUrl
 ) {
+
     public static ChallengeNewsletterResponse from(Newsletter newsletter) {
         return new ChallengeNewsletterResponse(
                 newsletter.getId(),

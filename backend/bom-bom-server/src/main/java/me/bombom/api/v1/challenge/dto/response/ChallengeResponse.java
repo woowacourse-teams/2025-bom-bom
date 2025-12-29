@@ -9,19 +9,26 @@ import me.bombom.api.v1.challenge.domain.ChallengeStatus;
 
 public record ChallengeResponse(
 
-        @NotNull Long id,
+        @NotNull
+        Long id,
 
-        @NotNull String title,
+        @NotNull
+        String title,
 
-        @NotNull LocalDate startDate,
+        @NotNull
+        LocalDate startDate,
 
-        @NotNull LocalDate endDate,
+        @NotNull
+        LocalDate endDate,
 
-        @Schema(type = "integer", format = "int64", description = "참가자 수", required = true) long participantCount,
+        @Schema(type = "integer", format = "int64", description = "참가자 수", required = true)
+        long participantCount,
 
-        @NotNull List<ChallengeNewsletterResponse> newsletters,
+        @NotNull List<ChallengeNewsletterResponse>
+        newsletters,
 
-        @NotNull ChallengeStatus status,
+        @NotNull
+        ChallengeStatus status,
 
         ChallengeDetailResponse detail
 ) {
@@ -31,7 +38,8 @@ public record ChallengeResponse(
             long participantCount,
             List<ChallengeNewsletterResponse> newsletters,
             ChallengeStatus status,
-            ChallengeDetailResponse detail) {
+            ChallengeDetailResponse detail
+    ) {
         return new ChallengeResponse(
                 challenge.getId(),
                 challenge.getName(),
@@ -40,6 +48,7 @@ public record ChallengeResponse(
                 participantCount,
                 newsletters,
                 status,
-                detail);
+                detail
+        );
     }
 }

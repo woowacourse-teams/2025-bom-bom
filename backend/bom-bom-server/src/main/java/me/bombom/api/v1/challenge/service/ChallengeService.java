@@ -50,8 +50,7 @@ public class ChallengeService {
                 .toList();
 
         Map<Long, Long> participantCounts = getParticipantCounts(challengeIds);
-        Map<Long, List<ChallengeNewsletterResponse>> newslettersByChallengeId = getNewslettersByChallengeId(
-                challengeIds);
+        Map<Long, List<ChallengeNewsletterResponse>> newslettersByChallengeId = getNewslettersByChallengeId(challengeIds);
         Map<Long, ChallengeParticipant> myParticipation = findMyParticipation(member);
 
         LocalDate today = LocalDate.now();
@@ -76,7 +75,9 @@ public class ChallengeService {
     ) {
         long participantCount = participantCounts.getOrDefault(challenge.getId(), 0L);
         List<ChallengeNewsletterResponse> newsletterResponses = newslettersByChallengeId.getOrDefault(
-                challenge.getId(), Collections.emptyList());
+                challenge.getId(),
+                Collections.emptyList()
+        );
         ChallengeStatus status = challenge.getStatus(today);
         ChallengeParticipant myParticipant = myParticipation.get(challenge.getId());
         ChallengeDetailResponse detailResponse = calculateDetailResponse(challenge, myParticipant, today);
@@ -124,8 +125,11 @@ public class ChallengeService {
                 ));
     }
 
-    private ChallengeDetailResponse calculateDetailResponse(Challenge challenge, ChallengeParticipant myParticipant,
-                                                            LocalDate today) {
+    private ChallengeDetailResponse calculateDetailResponse(
+            Challenge challenge,
+            ChallengeParticipant myParticipant,
+            LocalDate today
+    ) {
         if (myParticipant == null) {
             return ChallengeDetailResponse.notJoined();
         }
@@ -140,4 +144,3 @@ public class ChallengeService {
         }
     }
 }
-

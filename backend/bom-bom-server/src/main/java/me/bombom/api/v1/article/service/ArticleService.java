@@ -6,8 +6,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.domain.Article;
-import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.dto.request.ArticleSearchOptionsRequest;
+import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
@@ -164,6 +164,11 @@ public class ArticleService {
         articleRepository.deleteAllByIdsAndMemberId(target, member.getId());
     }
 
+    @Transactional
+    public int cleanupExcessArticles(int adminRetainLimit, int userRetainLimit) {
+        return articleRepository.deleteExcessUnbookmarkedArticles(adminRetainLimit, userRetainLimit);
+    }
+
     private Article findArticleById(Long articleId, Long memberId) {
         return articleRepository.findById(articleId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
@@ -189,4 +194,5 @@ public class ArticleService {
                     .addContext(ErrorContextKeys.ACTUAL_OWNER_ID, article.getMemberId());
         }
     }
+
 }

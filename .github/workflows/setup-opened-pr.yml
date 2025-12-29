@@ -1,0 +1,48 @@
+name: PR Open - Auto Assign + Add BE Label
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  auto_assign_and_label:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1) 리뷰어/Assignee 자동 지정 (auto_assign_backend.yml 사용)
+      - name: Auto assign reviewers & assignee
+        uses: kentaro-m/auto-assign-action@v2.0.0
+        with:
+          configuration-path: ".github/auto_assign_backend.yml"
+
+      # 2) BE 라벨 자동 추가
+      - name: Add BE label
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = context.payload.pull_request.number;
+
+            const labels = (context.payload.pull_request.labels || []).map(l => l.name);
+            if (labels.includes("BE")) {
+              console.log("BE label already exists. Skip.");
+              return;
+            }
+
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: prNumber,
+              labels: ["BE"],
+            });
+
+            console.log("Added BE label.");

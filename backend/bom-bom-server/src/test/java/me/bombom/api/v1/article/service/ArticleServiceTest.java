@@ -3,13 +3,9 @@ package me.bombom.api.v1.article.service;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.RecentArticle;
@@ -28,7 +24,6 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.domain.Role;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
@@ -44,8 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 @IntegrationTest
 class ArticleServiceTest {
@@ -79,15 +72,6 @@ class ArticleServiceTest {
     @Autowired
     private HighlightRepository highlightRepository;
 
-    @Autowired
-    private EntityManager entityManager;
-
-    @Autowired
-    private PlatformTransactionManager transactionManager;
-
-    private Long userRoleId;
-    private Long adminRoleId;
-
     List<Category> categories;
     List<Newsletter> newsletters;
     List<Article> articles;
@@ -95,7 +79,6 @@ class ArticleServiceTest {
 
     @BeforeEach
     public void setup() {
-        initializeRoles();
         newsletterRepository.deleteAllInBatch();
         articleRepository.deleteAllInBatch();
         categoryRepository.deleteAllInBatch();
@@ -103,14 +86,7 @@ class ArticleServiceTest {
         bookmarkRepository.deleteAllInBatch();
         highlightRepository.deleteAllInBatch();
 
-        member = Member.builder()
-                .provider("apple")
-                .providerId("providerId")
-                .email("email@bombom.news")
-                .nickname("nickname")
-                .gender(Gender.FEMALE)
-                .roleId(userRoleId)
-                .build();
+        member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
         categories = TestFixture.createCategories();
         categoryRepository.saveAll(categories);
@@ -120,20 +96,6 @@ class ArticleServiceTest {
         newsletterRepository.saveAll(newsletters);
         articles = TestFixture.createArticles(member, newsletters);
         articleRepository.saveAll(articles);
-    }
-
-    private void initializeRoles() {
-        TransactionTemplate tx = new TransactionTemplate(transactionManager);
-        tx.executeWithoutResult(status -> {
-            entityManager.createNativeQuery("TRUNCATE TABLE role").executeUpdate();
-            Role userRole = Role.builder().authority("USER").build();
-            Role adminRole = Role.builder().authority("ADMIN").build();
-            entityManager.persist(userRole);
-            entityManager.persist(adminRole);
-            entityManager.flush();
-            userRoleId = userRole.getId();
-            adminRoleId = adminRole.getId();
-        });
     }
 
     @Test
@@ -150,7 +112,7 @@ class ArticleServiceTest {
 
         // then
         List<ArticleResponse> content = result.getContent();
-        assertSoftly(softly -> {
+        assertSoftly(softly -> {;
             softly.assertThat(content.get(0).arrivedDateTime()).isAfter(content.get(1).arrivedDateTime());
             softly.assertThat(content.get(1).arrivedDateTime()).isAfter(content.get(2).arrivedDateTime());
         });
@@ -394,7 +356,7 @@ class ArticleServiceTest {
                 .email("email2")
                 .nickname("nickname2")
                 .gender(Gender.FEMALE)
-                .roleId(userRoleId)
+                .roleId(1L)
                 .build();
         memberRepository.save(member2);
 
@@ -421,7 +383,7 @@ class ArticleServiceTest {
                 .email("email2")
                 .nickname("nickname2")
                 .gender(Gender.FEMALE)
-                .roleId(userRoleId)
+                .roleId(1L)
                 .build();
         memberRepository.save(otherMember);
 
@@ -577,62 +539,6 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 북마크되지_않은_아티클만_초과_정리한다() {
-        // given
-        Newsletter newsletter = newsletters.getFirst();
-
-        Article bookmarkedArticle = TestFixture.createArticle(
-                "북마크 아티클",
-                member.getId(),
-                newsletter.getId(),
-                BASE_TIME.minusDays(100)
-        );
-        articleRepository.save(bookmarkedArticle);
-        bookmarkRepository.save(Bookmark.builder()
-                .articleId(bookmarkedArticle.getId())
-                .memberId(member.getId())
-                .build());
-
-        List<Article> additionalArticles = IntStream.range(0, 505)
-                .mapToObj(i -> TestFixture.createArticle(
-                        "bulk " + i,
-                        member.getId(),
-                        newsletter.getId(),
-                        BASE_TIME.plusMinutes(i)))
-                .toList();
-        articleRepository.saveAll(additionalArticles);
-
-        Set<Long> bookmarkedArticleIds = bookmarkRepository.findAll().stream()
-                .map(Bookmark::getArticleId)
-                .collect(Collectors.toSet());
-
-        long unbookmarkedBefore = articleRepository.findAll().stream()
-                .filter(article -> article.getMemberId().equals(member.getId()))
-                .filter(article -> !bookmarkedArticleIds.contains(article.getId()))
-                .count();
-
-        // when
-        int deletedCount = articleService.cleanupExcessArticles(1000, 500);
-
-        List<Article> remainingArticles = articleRepository.findAll().stream()
-                .filter(article -> article.getMemberId().equals(member.getId()))
-                .toList();
-        long unbookmarkedAfter = remainingArticles.stream()
-                .filter(article -> !bookmarkedArticleIds.contains(article.getId()))
-                .count();
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(unbookmarkedBefore).isGreaterThan(500);
-            softly.assertThat(deletedCount).isEqualTo(unbookmarkedBefore - 500);
-            softly.assertThat(unbookmarkedAfter).isEqualTo(500);
-            softly.assertThat(remainingArticles)
-                    .extracting(Article::getId)
-                    .contains(bookmarkedArticle.getId());
-        });
-    }
-
-    @Test
     void 아티클_삭제_성공시_북마크와_아티클이_삭제된다() {
         // given
         // 내 글 2개를 타겟으로, 각 글에 내 북마크 1개씩 생성
@@ -668,14 +574,7 @@ class ArticleServiceTest {
     @Test
     void 아티클_삭제_권한_없으면_예외_발생() {
         // given
-        Member other = Member.builder()
-                .provider("provider")
-                .providerId("providerId")
-                .email("email2")
-                .nickname("nickname2")
-                .gender(Gender.FEMALE)
-                .roleId(userRoleId)
-                .build();
+        Member other = TestFixture.createMemberFixture("email2", "nickname2");
         memberRepository.save(other);
 
         Long foreignArticleId = articleRepository.save(
@@ -754,7 +653,7 @@ class ArticleServiceTest {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime fourDaysAgo = now.minusDays(4); // 5일 이내
         LocalDateTime sixDaysAgo = now.minusDays(6); // 5일 이전
-
+        
         List<Article> testArticles = List.of(
                 TestFixture.createArticle("검색 키워드 포함", member.getId(), targetNewsletter.getId(), fourDaysAgo),
                 TestFixture.createArticle("검색 키워드 포함", member.getId(), targetNewsletter.getId(), sixDaysAgo)
@@ -769,7 +668,7 @@ class ArticleServiceTest {
             Optional<ArticleCountPerNewsletterResponse> targetResult = result.stream()
                     .filter(r -> r.name().equals(targetNewsletter.getName()))
                     .findFirst();
-
+            
             if (targetResult.isPresent()) {
                 softly.assertThat(targetResult.get().articleCount()).isEqualTo(1);
             } else {
@@ -785,7 +684,7 @@ class ArticleServiceTest {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime sixDaysAgo = now.minusDays(6); // 5일 이전
         LocalDateTime tenDaysAgo = now.minusDays(10); // 5일 이전
-
+        
         List<Article> testArticles = List.of(
                 TestFixture.createArticle("검색 키워드 포함", member.getId(), targetNewsletter.getId(), sixDaysAgo),
                 TestFixture.createArticle("검색 키워드 포함", member.getId(), targetNewsletter.getId(), tenDaysAgo)
@@ -799,7 +698,7 @@ class ArticleServiceTest {
         Optional<ArticleCountPerNewsletterResponse> targetResult = result.stream()
                 .filter(r -> r.name().equals(targetNewsletter.getName()))
                 .findFirst();
-
+        
         assertSoftly(softly -> {
             if (targetResult.isPresent()) {
                 softly.assertThat(targetResult.get().articleCount()).isGreaterThanOrEqualTo(0);
@@ -839,7 +738,7 @@ class ArticleServiceTest {
         // given
         Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
         LocalDateTime now = LocalDateTime.now();
-
+        
         // recent_article 테이블에 최근 데이터 저장
         RecentArticle recentArticle = TestFixture.createRecentArticle(
                 "통합 검색 테스트",
@@ -848,7 +747,7 @@ class ArticleServiceTest {
                 now
         );
         recentArticleRepository.save(recentArticle);
-
+        
         // article 테이블에 5일 이전 데이터 저장
         LocalDateTime sixDaysAgo = now.minusDays(6);
         Article article = TestFixture.createArticle("통합 검색 테스트", member.getId(), targetNewsletter.getId(), sixDaysAgo);

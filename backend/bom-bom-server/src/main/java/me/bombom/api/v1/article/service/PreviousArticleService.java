@@ -12,13 +12,14 @@ import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.article.repository.PreviousArticleRepository;
 import me.bombom.api.v1.article.service.strategy.PreviousArticleStrategy;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousPolicy;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy;
 import me.bombom.api.v1.newsletter.repository.NewsletterPreviousPolicyRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,11 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class PreviousArticleService {
 
     private static final int PREVIOUS_ARTICLE_KEEP_COUNT = 10;
+
     private final PreviousArticleRepository previousArticleRepository;
-
-    @Value("${admin.previous-article.member-id}")
-    private Long previousArticleAdminId;
-
+    private final MemberRepository memberRepository;
     private final ArticleRepository articleRepository;
     private final NewsletterPreviousPolicyRepository newsletterPreviousPolicyRepository;
     private final Map<NewsletterPreviousStrategy, PreviousArticleStrategy> strategyMap;
@@ -40,13 +39,16 @@ public class PreviousArticleService {
     public PreviousArticleService(
             ArticleRepository articleRepository,
             NewsletterPreviousPolicyRepository newsletterPreviousPolicyRepository,
-            List<PreviousArticleStrategy> strategies,
-            PreviousArticleRepository previousArticleRepository) {
+            PreviousArticleRepository previousArticleRepository,
+            MemberRepository memberRepository,
+            List<PreviousArticleStrategy> strategies
+    ) {
         this.articleRepository = articleRepository;
         this.newsletterPreviousPolicyRepository = newsletterPreviousPolicyRepository;
+        this.previousArticleRepository = previousArticleRepository;
+        this.memberRepository = memberRepository;
         this.strategyMap = strategies.stream()
                 .collect(Collectors.toUnmodifiableMap(PreviousArticleStrategy::getStrategy, Function.identity()));
-        this.previousArticleRepository = previousArticleRepository;
     }
 
     public List<PreviousArticleResponse> getPreviousArticles(PreviousArticleRequest request) {
@@ -76,9 +78,14 @@ public class PreviousArticleService {
 
     @Transactional
     public void moveAdminArticles() {
-        int copied = articleRepository.safeCopyToArchive(previousArticleAdminId);
-        int deleted = articleRepository.safeDeleteArchived(previousArticleAdminId, PREVIOUS_ARTICLE_KEEP_COUNT);
-        log.info("아티클 이동 완료: {}건 복사, {}건 삭제", copied, deleted);
+        Long archiveAdminId = memberRepository.findArchiveAdminId()
+                .orElseThrow(() -> new CServerErrorException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
+                        .addContext(ErrorContextKeys.OPERATION, "moveAdminArticles"));
+
+        int copied = articleRepository.safeCopyToArchive(archiveAdminId);
+        int deleted = articleRepository.safeDeleteArchived(archiveAdminId, PREVIOUS_ARTICLE_KEEP_COUNT);
+        log.info("아티클 이동 완료: {}건 복사, {}건 삭제 (adminId: {})", copied, deleted, archiveAdminId);
     }
 
     private List<PreviousArticleResponse> executeStrategy(NewsletterPreviousPolicy policy) {

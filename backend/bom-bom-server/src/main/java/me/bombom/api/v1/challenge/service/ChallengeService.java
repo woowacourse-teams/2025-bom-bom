@@ -23,6 +23,10 @@ import me.bombom.api.v1.challenge.repository.ChallengeNewsletterRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.challenge.dto.ChallengeInfoResponse;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorContextKeys;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +35,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ChallengeService {
+
+    // TODO: 이후에 수료 처리 등 구현 시 관리 방법 고려
+    private static final int SUCCESS_REQUIRED_PERCENT = 80;
 
     private final ChallengeRepository challengeRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
@@ -58,6 +65,15 @@ public class ChallengeService {
                         myParticipation
                 ))
                 .toList();
+    }
+
+    public ChallengeInfoResponse getChallengeInfo(Long id) {
+        Challenge challenge = challengeRepository.findById(id)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.OPERATION, "getChallengeInfo"));
+
+        return ChallengeInfoResponse.of(challenge, SUCCESS_REQUIRED_PERCENT);
     }
 
     private ChallengeResponse toChallengeResponse(

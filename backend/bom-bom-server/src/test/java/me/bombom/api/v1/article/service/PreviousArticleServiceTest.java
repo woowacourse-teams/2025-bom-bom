@@ -18,8 +18,11 @@ import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.article.repository.PreviousArticleRepository;
 import me.bombom.api.v1.article.service.strategy.PreviousArticleStrategy;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.domain.Role;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.member.repository.RoleRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
@@ -72,6 +75,9 @@ class PreviousArticleServiceTest {
     @Autowired
     private SubscribeRepository subscribeRepository;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
     List<Category> categories;
     List<Newsletter> newsletters;
     Member admin;
@@ -89,17 +95,23 @@ class PreviousArticleServiceTest {
         categoryRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
         newsletterPreviousPolicyRepository.deleteAllInBatch();
+        roleRepository.deleteAllInBatch();
+
+        // Role 생성
+        Role memberRole = roleRepository.save(Role.builder().authority("MEMBER").build());
+        Role archiveRole = roleRepository.save(Role.builder().authority("ARCHIVE").build());
 
         // 관리자 멤버 생성
         admin = TestFixture.createUniqueMember("지난아티클관리자", "prev-admin");
+        ReflectionTestUtils.setField(admin, "roleId", archiveRole.getId());
         memberRepository.save(admin);
 
         // 일반 회원 생성
         normalMember = TestFixture.createUniqueMember("일반사용자", "normal-user");
+        ReflectionTestUtils.setField(normalMember, "roleId", memberRole.getId());
         memberRepository.save(normalMember);
 
-        // 서비스와 전략들의 ADMIN_ID 오버라이드
-        ReflectionTestUtils.setField(previousArticleService, "previousArticleAdminId", admin.getId());
+        // 전략들의 ADMIN_ID 오버라이드
         previousArticleStrategies.forEach(strategy -> {
             try {
                 ReflectionTestUtils.setField(strategy, "previousArticleAdminId", admin.getId());
@@ -107,8 +119,6 @@ class PreviousArticleServiceTest {
                 // PREVIOUS_ARTICLE_ADMIN_ID 필드가 없는 전략은 무시
             }
         });
-
-        // 카테고리 생성
         categories = TestFixture.createCategories();
         categoryRepository.saveAll(categories);
 
@@ -305,6 +315,7 @@ class PreviousArticleServiceTest {
     @Test
     void 정책에_맞는_FIXED_WITH_LATEST_전략을_사용해_고정_아티클과_최신_아티클을_반환한다() {
         // given
+
         // 자동 이동된 아티클 (isFixed=false) 생성
         // arrivedDateTime: BASE_TIME, -1일, -2일, -3일, -4일
         List<PreviousArticle> autoMovedArticles = new ArrayList<>();
@@ -464,4 +475,26 @@ class PreviousArticleServiceTest {
                 .isInstanceOf(CIllegalArgumentException.class);
     }
 
+    @Test
+    void moveAdminArticles_성공_Archive권한_멤버_존재() {
+        // given
+        long initialCount = previousArticleRepository.count();
+
+        // when
+        previousArticleService.moveAdminArticles();
+
+        // then
+        long finalCount = previousArticleRepository.count();
+        assertThat(finalCount).isGreaterThan(initialCount);
+    }
+
+    @Test
+    void moveAdminArticles_실패_Archive권한_멤버_없음() {
+        // given
+        memberRepository.deleteAll();
+
+        // when & then
+        assertThatThrownBy(() -> previousArticleService.moveAdminArticles())
+                .isInstanceOf(CServerErrorException.class);
+    }
 }

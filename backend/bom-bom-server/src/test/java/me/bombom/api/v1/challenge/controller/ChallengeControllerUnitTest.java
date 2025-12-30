@@ -46,7 +46,7 @@ class ChallengeControllerUnitTest {
                 .willReturn(response);
 
         //when & then
-        mockMvc.perform(get("/api/v1/challenge/{id}", 1L))
+        mockMvc.perform(get("/api/v1/challenges/{id}", 1L))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("챌린지1"));
@@ -55,7 +55,7 @@ class ChallengeControllerUnitTest {
     @Test
     void 챌린지_상세_정보를_요청시_음수_id면_400() throws Exception {
         //when & then
-        mockMvc.perform(get("/api/v1/challenge/{id}", -1L))
+        mockMvc.perform(get("/api/v1/challenges/{id}", -1L))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }

@@ -2,7 +2,7 @@ package me.bombom.api.v1.challenge.service;
 
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.challenge.dto.ChallengeInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;

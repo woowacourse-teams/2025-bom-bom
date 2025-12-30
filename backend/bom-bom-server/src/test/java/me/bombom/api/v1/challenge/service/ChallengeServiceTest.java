@@ -6,7 +6,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDate;
 import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.challenge.dto.ChallengeInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.support.IntegrationTest;

@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
-import me.bombom.api.v1.challenge.dto.ChallengeInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @Tag(name = "Challenge", description = "챌린지 관련 API")

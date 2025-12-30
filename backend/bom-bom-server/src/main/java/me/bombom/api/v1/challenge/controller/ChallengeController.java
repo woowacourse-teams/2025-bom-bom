@@ -2,7 +2,7 @@ package me.bombom.api.v1.challenge.controller;
 
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.challenge.dto.ChallengeInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import me.bombom.api.v1.challenge.service.ChallengeService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;

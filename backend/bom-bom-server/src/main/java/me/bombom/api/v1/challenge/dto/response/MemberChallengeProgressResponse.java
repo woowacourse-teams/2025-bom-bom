@@ -1,6 +1,7 @@
-package me.bombom.api.v1.challenge.dto;
+package me.bombom.api.v1.challenge.dto.response;
 
 import java.util.List;
+import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
 import me.bombom.api.v1.member.domain.Member;
 
 public record MemberChallengeProgressResponse(

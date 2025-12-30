@@ -34,6 +34,6 @@ public class ChallengeCommentService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
                     .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                     .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndMemberId"));
-        return challengeCommentRepository.findAllByTeamInDuration(participant.getChallengeTeamId(), startDate, endDate, pageable);
+        return challengeCommentRepository.findAllByTeamInDuration(participant.getChallengeTeamId(), memberId, startDate, endDate, pageable);
     }
 }

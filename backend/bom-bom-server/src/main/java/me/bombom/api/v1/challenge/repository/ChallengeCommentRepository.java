@@ -15,6 +15,10 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
         SELECT new me.bombom.api.v1.challenge.dto.ChallengeCommentResponse(
             m.nickname,
             n.name,
+            CASE
+                WHEN s.id IS NULL THEN false
+                ELSE true
+            END,
             a.title,
             cc.quotation,
             cc.comment,
@@ -25,11 +29,13 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
         JOIN Member m ON cp.memberId = m.id
         JOIN Article a ON cc.articleId = a.id
         JOIN Newsletter n ON a.newsletterId = n.id
+        LEFT JOIN Subscribe s ON s.newsletterId = n.id AND s.memberId = :currentMemberId
         WHERE cp.challengeTeamId = :teamId
         AND FUNCTION('DATE', cc.createdAt) BETWEEN :startDate AND :endDate
     """)
     Page<ChallengeCommentResponse> findAllByTeamInDuration(
             @Param("teamId") Long teamId,
+            @Param("currentMemberId") Long currentMemberId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             Pageable pageable

@@ -1,9 +1,15 @@
 package me.bombom.api.v1;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.RecentArticle;
+import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.ChallengeDailyTodo;
+import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
+import me.bombom.api.v1.challenge.domain.ChallengeTodo;
+import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.highlight.domain.Color;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
@@ -35,8 +41,8 @@ public final class TestFixture {
     }
 
     /**
-     * Member
-     */
+    * Member
+    */
 
     public static Member createUniqueMember(String nickname, String providerId) {
         return Member.builder()
@@ -72,8 +78,8 @@ public final class TestFixture {
     }
 
     /**
-     * Category
-     */
+    * Category
+    */
     public static Category createCategory() {
         return Category.builder()
                 .name("경제")
@@ -90,19 +96,18 @@ public final class TestFixture {
                         .build(),
                 Category.builder()
                         .name("푸드")
-                        .build()
-        );
+                        .build());
     }
 
     /**
-     * Newsletter
-     */
+    * Newsletter
+    */
     public static List<Newsletter> createNewslettersWithDetails(List<Category> categories,
-                                                                List<NewsletterDetail> details) {
+            List<NewsletterDetail> details) {
         return createNewsletters(
                 categories,
-                List.of(details.get(0).getId(), details.get(1).getId(), details.get(2).getId(), details.get(3).getId())
-        );
+                List.of(details.get(0).getId(), details.get(1).getId(), details.get(2).getId(),
+                        details.get(3).getId()));
     }
 
     public static Newsletter createNewsletter(String name, String email, Long categoryId, Long detailId) {
@@ -118,17 +123,19 @@ public final class TestFixture {
 
     private static List<Newsletter> createNewsletters(List<Category> categories, List<Long> detailIds) {
         return List.of(
-                createNewsletter("뉴스픽", "news@newspick.com", categories.get(0).getId(), detailIds.get(0)),
-                createNewsletter("IT타임즈", "editor@ittimes.io", categories.get(1).getId(), detailIds.get(1)),
+                createNewsletter("뉴스픽", "news@newspick.com", categories.get(0).getId(),
+                        detailIds.get(0)),
+                createNewsletter("IT타임즈", "editor@ittimes.io", categories.get(1).getId(),
+                        detailIds.get(1)),
                 createNewsletter("비즈레터", "biz@biz.com", categories.get(2).getId(), detailIds.get(2)),
-                createNewsletter("우테코", "woowa@biz.com", categories.get(2).getId(), detailIds.get(3))
-        );
+                createNewsletter("우테코", "woowa@biz.com", categories.get(2).getId(), detailIds.get(3)));
     }
 
     /**
-     * NewsletterSubscriptionCount
-     */
-    public static List<NewsletterSubscriptionCount> createNewsletterSubscriptionCounts(List<Newsletter> newsletters) {
+    * NewsletterSubscriptionCount
+    */
+    public static List<NewsletterSubscriptionCount> createNewsletterSubscriptionCounts(
+            List<Newsletter> newsletters) {
         return List.of(
                 NewsletterSubscriptionCount.builder()
                         .newsletterId(newsletters.get(0).getId())
@@ -145,8 +152,7 @@ public final class TestFixture {
                 NewsletterSubscriptionCount.builder()
                         .newsletterId(newsletters.get(3).getId())
                         .total(900)
-                        .build()
-        );
+                        .build());
     }
 
     public static NewsletterSubscriptionCount createNewsletterSubscriptionCount(Long newsletterId, int total) {
@@ -157,8 +163,8 @@ public final class TestFixture {
     }
 
     /**
-     * NewsletterDetail
-     */
+    * NewsletterDetail
+    */
     public static List<NewsletterDetail> createNewsletterDetails() {
         return List.of(
                 NewsletterDetail.builder()
@@ -188,8 +194,7 @@ public final class TestFixture {
                         .issueCycle("격주 토요일")
                         .subscribeCount(900)
                         .sender("발신자")
-                        .build()
-        );
+                        .build());
     }
 
     public static NewsletterDetail createNewsletterDetail(boolean previousAllowed) {
@@ -204,8 +209,8 @@ public final class TestFixture {
     }
 
     /**
-     * Subscribe
-     */
+    * Subscribe
+    */
     public static Subscribe createSubscribe(Newsletter newsletter, Member member) {
         return Subscribe.builder()
                 .newsletterId(newsletter.getId())
@@ -214,13 +219,16 @@ public final class TestFixture {
     }
 
     /**
-     * Article 11 개
-     */
+    * Article 11 개
+    */
     public static List<Article> createArticles(Member member, List<Newsletter> newsletters) {
         return List.of(
-                createArticle("뉴스", member.getId(), newsletters.get(0).getId(), BASE_TIME.minusMinutes(5)),
-                createArticle("뉴스", member.getId(), newsletters.get(1).getId(), BASE_TIME.minusMinutes(10)),
-                createArticle("레터", member.getId(), newsletters.get(2).getId(), BASE_TIME.minusMinutes(20)),
+                createArticle("뉴스", member.getId(), newsletters.get(0).getId(),
+                        BASE_TIME.minusMinutes(5)),
+                createArticle("뉴스", member.getId(), newsletters.get(1).getId(),
+                        BASE_TIME.minusMinutes(10)),
+                createArticle("레터", member.getId(), newsletters.get(2).getId(),
+                        BASE_TIME.minusMinutes(20)),
                 createArticle("레터", member.getId(), newsletters.get(2).getId(), BASE_TIME.minusDays(1)),
                 createArticle("공지", member.getId(), newsletters.get(3).getId(), BASE_TIME.minusDays(2)),
                 createArticle("공지", member.getId(), newsletters.get(3).getId(), BASE_TIME.minusDays(3)),
@@ -228,8 +236,8 @@ public final class TestFixture {
                 createArticle("공지", member.getId(), newsletters.get(3).getId(), BASE_TIME.minusDays(5)),
                 createArticle("공지", member.getId(), newsletters.get(3).getId(), BASE_TIME.minusDays(6)),
                 createArticle("공지", member.getId(), newsletters.get(3).getId(), BASE_TIME.minusDays(7)),
-                createArticle("공지", member.getId(), newsletters.get(3).getId(), BASE_TIME.minusDays(8))
-        );
+                createArticle("공지", member.getId(), newsletters.get(3).getId(),
+                        BASE_TIME.minusDays(8)));
     }
 
     public static Article createArticle(String title, Long memberId, Long newsletterId, LocalDateTime arrivedTime) {
@@ -248,10 +256,10 @@ public final class TestFixture {
     }
 
     /**
-     * RecentArticle
-     */
+    * RecentArticle
+    */
     public static RecentArticle createRecentArticle(String title, Long memberId, Long newsletterId,
-                                                    LocalDateTime arrivedTime) {
+            LocalDateTime arrivedTime) {
         return RecentArticle.builder()
                 .title(title)
                 .contents("<h1>" + title + "</h1>")
@@ -267,15 +275,14 @@ public final class TestFixture {
     }
 
     /**
-     * NewsletterPreviousPolicy
-     */
+    * NewsletterPreviousPolicy
+    */
     public static NewsletterPreviousPolicy createNewsletterPreviousPolicy(
             Long newsletterId,
             NewsletterPreviousStrategy strategy,
             int recentCount,
             int fixedCount,
-            int exposureRatio
-    ) {
+            int exposureRatio) {
         return NewsletterPreviousPolicy.builder()
                 .newsletterId(newsletterId)
                 .strategy(strategy)
@@ -289,19 +296,17 @@ public final class TestFixture {
             Long newsletterId,
             NewsletterPreviousStrategy strategy,
             int lastestCount,
-            int fixedCount
-    ) {
+            int fixedCount) {
         return createNewsletterPreviousPolicy(newsletterId, strategy, lastestCount, fixedCount, 100);
     }
 
     /**
-     * PreviousArticle
-     */
+    * PreviousArticle
+    */
     public static me.bombom.api.v1.article.domain.PreviousArticle createPreviousArticle(
             String title,
             Long newsletterId,
-            LocalDateTime arrivedTime
-    ) {
+            LocalDateTime arrivedTime) {
         return me.bombom.api.v1.article.domain.PreviousArticle.builder()
                 .title(title)
                 .contents("<h1>고정 아티클 내용</h1>")
@@ -309,13 +314,13 @@ public final class TestFixture {
                 .expectedReadTime(5)
                 .newsletterId(newsletterId)
                 .arrivedDateTime(arrivedTime)
-                .isFixed(true)  // 직접 생성된 고정 아티클
+                .isFixed(true) // 직접 생성된 고정 아티클
                 .build();
     }
 
     /**
-     * ContinueReading
-     */
+    * ContinueReading
+    */
     public static ContinueReading continueReadingFixture(Member member) {
         return ContinueReading.builder()
                 .memberId(member.getId())
@@ -324,8 +329,8 @@ public final class TestFixture {
     }
 
     /**
-     * TodayReading
-     */
+    * TodayReading
+    */
     public static TodayReading todayReadingFixture(Member member) {
         return TodayReading.builder()
                 .memberId(member.getId())
@@ -343,8 +348,8 @@ public final class TestFixture {
     }
 
     /**
-     * WeeklyReading
-     */
+    * WeeklyReading
+    */
     public static WeeklyReading weeklyReadingFixture(Member member) {
         return WeeklyReading.builder()
                 .memberId(member.getId())
@@ -354,8 +359,8 @@ public final class TestFixture {
     }
 
     /**
-     * MonthlyReadingSnapshot
-     */
+    * MonthlyReadingSnapshot
+    */
     public static MonthlyReadingSnapshot monthlyReadingFixture(Member member) {
         return MonthlyReadingSnapshot.builder()
                 .memberId(member.getId())
@@ -364,15 +369,16 @@ public final class TestFixture {
     }
 
     /**
-     * Highlight
-     */
+    * Highlight
+    */
     public static List<Highlight> createHighlightFixtures(List<Article> articles) {
         Article firstArticle = articles.get(0);
         Article secondArticle = articles.get(1);
         Article thirdArticle = articles.get(2);
         return List.of(
                 Highlight.builder()
-                        .highlightLocation(new HighlightLocation(0, "div[0]/p[0]", 10, "div[0]/p[0]"))
+                        .highlightLocation(new HighlightLocation(0, "div[0]/p[0]", 10,
+                                "div[0]/p[0]"))
                         .memberId(firstArticle.getMemberId())
                         .newsletterId(firstArticle.getNewsletterId())
                         .articleId(firstArticle.getId())
@@ -382,7 +388,8 @@ public final class TestFixture {
                         .memo("메모")
                         .build(),
                 Highlight.builder()
-                        .highlightLocation(new HighlightLocation(15, "div[0]/p[1]", 25, "div[0]/p[1]"))
+                        .highlightLocation(new HighlightLocation(15, "div[0]/p[1]", 25,
+                                "div[0]/p[1]"))
                         .memberId(firstArticle.getMemberId())
                         .newsletterId(firstArticle.getNewsletterId())
                         .articleId(firstArticle.getId())
@@ -392,7 +399,8 @@ public final class TestFixture {
                         .memo("메모")
                         .build(),
                 Highlight.builder()
-                        .highlightLocation(new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
+                        .highlightLocation(
+                                new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
                         .memberId(secondArticle.getMemberId())
                         .newsletterId(secondArticle.getNewsletterId())
                         .articleId(secondArticle.getId())
@@ -402,7 +410,8 @@ public final class TestFixture {
                         .memo("메모")
                         .build(),
                 Highlight.builder()
-                        .highlightLocation(new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
+                        .highlightLocation(
+                                new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
                         .memberId(thirdArticle.getMemberId())
                         .newsletterId(thirdArticle.getNewsletterId())
                         .articleId(thirdArticle.getId())
@@ -412,7 +421,8 @@ public final class TestFixture {
                         .memo("메모")
                         .build(),
                 Highlight.builder()
-                        .highlightLocation(new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
+                        .highlightLocation(
+                                new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
                         .memberId(thirdArticle.getMemberId())
                         .newsletterId(thirdArticle.getNewsletterId())
                         .articleId(thirdArticle.getId())
@@ -422,7 +432,8 @@ public final class TestFixture {
                         .memo("메모")
                         .build(),
                 Highlight.builder()
-                        .highlightLocation(new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
+                        .highlightLocation(
+                                new HighlightLocation(5, "div[0]/h1", 15, "div[0]/h1"))
                         .memberId(thirdArticle.getMemberId())
                         .newsletterId(thirdArticle.getNewsletterId())
                         .articleId(thirdArticle.getId())
@@ -430,8 +441,7 @@ public final class TestFixture {
                         .color(Color.from("#b196f2"))
                         .text("여섯 번째 하이라이트")
                         .memo("메모")
-                        .build()
-        );
+                        .build());
     }
 
     public static HighlightCreateRequest createHighlightRequest(Long articleId) {
@@ -440,13 +450,12 @@ public final class TestFixture {
                 articleId,
                 Color.from("#f44336"),
                 "새로운 하이라이트 텍스트",
-                "메모"
-        );
+                "메모");
     }
 
     /**
-     * Stage
-     */
+    * Stage
+    */
     public static Stage createStage(int level, int totalScore) {
         return Stage.builder()
                 .level(level)
@@ -460,13 +469,12 @@ public final class TestFixture {
                 createStage(2, 100),
                 createStage(3, 160),
                 createStage(4, 215),
-                createStage(5, 330)
-        );
+                createStage(5, 330));
     }
 
     /**
-     * Pet
-     */
+    * Pet
+    */
     public static Pet createPet(Member member, Long stageId) {
         return Pet.builder()
                 .memberId(member.getId())
@@ -484,13 +492,53 @@ public final class TestFixture {
     }
 
     /*
-     * Notice
-     */
+    * Notice
+    */
     public static Notice createNotice(String title, NoticeCategory noticeCategory) {
         return Notice.builder()
                 .title(title)
                 .content("content")
                 .noticeCategory(noticeCategory)
+                .build();
+    }
+
+    /**
+    * Challenge
+    */
+    public static Challenge createChallenge(String name, LocalDate startDate, LocalDate endDate, int totalDays) {
+        return Challenge.builder()
+                .name(name)
+                .generation(1)
+                .startDate(startDate)
+                .endDate(endDate)
+                .totalDays(totalDays)
+                .build();
+    }
+
+    public static ChallengeParticipant createChallengeParticipant(Long challengeId, Long memberId,
+            int completedDays) {
+        return ChallengeParticipant.builder()
+                .challengeId(challengeId)
+                .memberId(memberId)
+                .completedDays(completedDays)
+                .isSurvived(true)
+                .shield(0)
+                .build();
+    }
+
+    public static ChallengeTodo createChallengeTodo(Long challengeId, ChallengeTodoType todoType) {
+        return ChallengeTodo.builder()
+                .challengeId(challengeId)
+                .todoType(todoType)
+                .build();
+    }
+
+    public static ChallengeDailyTodo createChallengeDailyTodo(Long participantId, LocalDate todoDate,
+            Long challengeTodoId) {
+        return ChallengeDailyTodo.builder()
+                .participantId(participantId)
+                .todoDate(todoDate)
+                .challengeTodoId(challengeTodoId)
                 .build();
     }
 }

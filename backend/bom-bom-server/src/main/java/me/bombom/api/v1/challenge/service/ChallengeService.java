@@ -116,8 +116,9 @@ public class ChallengeService {
                 .filter(cn -> newslettersById.containsKey(cn.getNewsletterId()))
                 .collect(groupingBy(
                         ChallengeNewsletter::getChallengeId,
-                        mapping(cn -> ChallengeNewsletterResponse.from(newslettersById.get(cn.getNewsletterId())),
-                                toList())
+                        mapping(cn -> ChallengeNewsletterResponse.from(
+                                newslettersById.get(cn.getNewsletterId())), toList()
+                        )
                 ));
     }
 
@@ -134,8 +135,7 @@ public class ChallengeService {
 
         if (isEnded) {
             return ChallengeDetailResponse.ended(progress, myParticipant.isSurvived());
-        } else {
-            return ChallengeDetailResponse.ongoing(progress);
         }
+        return ChallengeDetailResponse.ongoing(progress);
     }
 }

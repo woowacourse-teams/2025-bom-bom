@@ -16,6 +16,9 @@ public record ChallengeResponse(
         String title,
 
         @NotNull
+        int generation,
+
+        @NotNull
         LocalDate startDate,
 
         @NotNull
@@ -43,6 +46,7 @@ public record ChallengeResponse(
         return new ChallengeResponse(
                 challenge.getId(),
                 challenge.getName(),
+                challenge.getGeneration(),
                 challenge.getStartDate(),
                 challenge.getEndDate(),
                 participantCount,

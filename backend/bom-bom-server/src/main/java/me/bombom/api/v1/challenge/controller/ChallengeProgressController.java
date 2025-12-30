@@ -16,10 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/challenges")
-public class ChallengeProgressController {
+public class ChallengeProgressController implements ChallengeProgressControllerApi {
 
     private final ChallengeProgressService challengeProgressService;
 
+    @Override
     @GetMapping("/{id}/progress/me")
     public MemberChallengeProgressResponse getMemberProgress(
             @LoginMember Member member,

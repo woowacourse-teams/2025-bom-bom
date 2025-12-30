@@ -4,5 +4,5 @@ public enum ChallengeTodoType {
 
     READ,
     COMMENT,
-    READ_COMMENT
+    ;
 }

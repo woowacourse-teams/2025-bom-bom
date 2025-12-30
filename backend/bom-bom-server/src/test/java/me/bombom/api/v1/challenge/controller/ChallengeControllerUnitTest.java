@@ -7,19 +7,55 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
+import java.util.List;
 import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import me.bombom.api.v1.challenge.service.ChallengeService;
+import me.bombom.api.v1.common.exception.GlobalExceptionHandler;
+import me.bombom.api.v1.member.domain.Member;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.core.MethodParameter;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @WithMockUser
 @WebMvcTest(ChallengeController.class)
+@Import({ChallengeController.class, GlobalExceptionHandler.class, ChallengeControllerUnitTest.TestConfig.class})
 class ChallengeControllerUnitTest {
+
+    @Configuration
+    static class TestConfig implements WebMvcConfigurer {
+
+        @Override
+        public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+            resolvers.add(new HandlerMethodArgumentResolver() {
+                @Override
+                public boolean supportsParameter(MethodParameter parameter) {
+                    return parameter.getParameterType().equals(Member.class);
+                }
+
+                @Override
+                public Object resolveArgument(
+                        MethodParameter parameter,
+                        ModelAndViewContainer mavContainer,
+                        NativeWebRequest webRequest,
+                        WebDataBinderFactory binderFactory
+                ) {
+                    return null;
+                }
+            });
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -56,6 +92,14 @@ class ChallengeControllerUnitTest {
     void 챌린지_상세_정보를_요청시_음수_id면_400() throws Exception {
         //when & then
         mockMvc.perform(get("/api/v1/challenges/{id}", -1L))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 챌린지_신청_가능_여부를_요청시_음수_id면_400() throws Exception {
+        //when & then
+        mockMvc.perform(get("/api/v1/challenges/{id}/eligibility", -1L))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }

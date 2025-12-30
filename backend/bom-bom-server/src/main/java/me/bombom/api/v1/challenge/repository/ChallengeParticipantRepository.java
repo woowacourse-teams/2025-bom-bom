@@ -1,0 +1,36 @@
+package me.bombom.api.v1.challenge.repository;
+
+import java.time.LocalDate;
+import java.util.List;
+import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
+import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+public interface ChallengeParticipantRepository extends JpaRepository<ChallengeParticipant, Long> {
+
+    @Query("""
+        SELECT new me.bombom.api.v1.challenge.dto.ChallengeProgressFlat(
+            c.totalDays,
+            cp.completedDays,
+            ct.todoType,
+            CASE
+                WHEN cdt.id IS NOT NULL THEN true
+                ELSE false
+            END
+        )
+        FROM ChallengeParticipant cp
+        JOIN Challenge c ON cp.challengeId = c.id
+        JOIN ChallengeTodo ct ON c.id = ct.challengeId
+        LEFT JOIN ChallengeDailyTodo cdt ON cp.id = cdt.participantId
+            AND ct.id = cdt.challengeTodoId
+            AND cdt.todoDate = :today
+        WHERE cp.challengeId = :challengeId AND cp.memberId = :memberId
+    """)
+    List<ChallengeProgressFlat> findMemberProgress(
+            @Param("challengeId") Long challengeId,
+            @Param("memberId") Long memberId,
+            @Param("today") LocalDate today
+    );
+}

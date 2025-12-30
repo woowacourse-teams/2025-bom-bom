@@ -60,7 +60,7 @@ public class ChallengeService {
                         newslettersByChallengeId,
                         myParticipation
                 ))
-                .collect(toList());
+                .toList();
     }
 
     private ChallengeResponse toChallengeResponse(

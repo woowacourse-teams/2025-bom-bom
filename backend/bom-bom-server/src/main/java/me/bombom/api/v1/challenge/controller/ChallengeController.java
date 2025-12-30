@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/challenge")
+@RequestMapping("/api/v1/challenges")
 public class ChallengeController implements ChallengeControllerApi{
 
     private final ChallengeService challengeService;

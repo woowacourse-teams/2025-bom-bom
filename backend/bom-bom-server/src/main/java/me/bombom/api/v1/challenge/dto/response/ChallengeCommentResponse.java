@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 
 public record ChallengeCommentResponse(
 
-        @NotNull
         String nickname,
 
         @NotNull

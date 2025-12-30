@@ -24,7 +24,8 @@ public class ChallengeProgressService {
         List<ChallengeProgressFlat> progressList = challengeParticipantRepository.findMemberProgress(
                 id,
                 member.getId(),
-                LocalDate.now());
+                LocalDate.now()
+        );
 
         if (progressList.isEmpty()) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)

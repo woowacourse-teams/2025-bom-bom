@@ -96,7 +96,7 @@ class ChallengeProgressControllerUnitTest {
                 .andExpect(jsonPath("$.todayTodos[0].challengeTodoType").value("READ"))
                 .andExpect(jsonPath("$.todayTodos[0].challengeTodoStatus").value("COMPLETE"))
                 .andDo(print());
-        }
+    }
 
     @Test
     void 챌린지_사용자_진행도_조회_실패_ID가_양수가_아님() throws Exception {

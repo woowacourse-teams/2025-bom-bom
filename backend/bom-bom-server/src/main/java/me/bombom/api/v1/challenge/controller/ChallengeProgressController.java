@@ -23,7 +23,8 @@ public class ChallengeProgressController {
     @GetMapping("/{id}/progress/me")
     public MemberChallengeProgressResponse getMemberProgress(
             @LoginMember Member member,
-            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id) {
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+    ) {
         return challengeProgressService.getMemberProgress(id, member);
     }
 }

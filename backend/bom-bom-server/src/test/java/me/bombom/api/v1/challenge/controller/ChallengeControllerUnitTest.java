@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WithMockUser
 @WebMvcTest(ChallengeController.class)
-class ChallengeControllerTest {
+class ChallengeControllerUnitTest {
 
     @Autowired
     private MockMvc mockMvc;

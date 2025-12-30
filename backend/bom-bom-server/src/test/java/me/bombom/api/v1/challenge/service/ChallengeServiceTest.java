@@ -25,11 +25,14 @@ import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
+import me.bombom.api.v1.challenge.domain.EligibilityReason;
+import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.subscribe.domain.Subscribe;
+import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -60,6 +63,9 @@ class ChallengeServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private SubscribeRepository subscribeRepository;
+
     private Member member;
     private List<Category> categories;
     private List<Newsletter> newsletters;
@@ -70,6 +76,7 @@ class ChallengeServiceTest {
         challengeParticipantRepository.deleteAllInBatch();
         challengeNewsletterRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
+        subscribeRepository.deleteAllInBatch();
         newsletterRepository.deleteAllInBatch();
         newsletterDetailRepository.deleteAllInBatch();
         categoryRepository.deleteAllInBatch();
@@ -316,8 +323,7 @@ class ChallengeServiceTest {
     }
 
     @Test
-    @DisplayName("챌린지 상세 정보를 조회할 수 있다.")
-    void getChallengeInfo() {
+    void 챌린지_상세_정보를_조회할_수_있다() {
         // given
         Challenge challenge = Challenge.builder()
                 .name("챌린지1")
@@ -341,10 +347,121 @@ class ChallengeServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 챌린지 ID로 조회 시 예외가 발생한다.")
-    void getChallengeInfoWithInvalidId() {
+    void 존재하지_않는_챌린지_ID로_조회_시_예외가_발생한다() {
         // when & then
         assertThatThrownBy(() -> challengeService.getChallengeInfo(0L))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasMessage(ErrorDetail.ENTITY_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 비로그인_상태에서_챌린지_신청_가능_여부_조회() {
+        // given
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        challengeRepository.save(challenge);
+
+        // when
+        ChallengeEligibilityResponse response = challengeService.checkEligibility(challenge.getId(), null);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.canApply()).isFalse();
+            softly.assertThat(response.reason()).isEqualTo(EligibilityReason.NOT_LOGGED_IN);
+        });
+    }
+
+    @Test
+    void 이미_시작된_챌린지의_신청_가능_여부_조회() {
+        // given
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(5), today.plusDays(10));
+        challengeRepository.save(challenge);
+
+        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
+        challengeNewsletterRepository.save(challengeNewsletter);
+
+        Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
+        subscribeRepository.save(subscribe);
+
+        // when
+        ChallengeEligibilityResponse response = challengeService.checkEligibility(challenge.getId(), member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.canApply()).isFalse();
+            softly.assertThat(response.reason()).isEqualTo(EligibilityReason.ALREADY_STARTED);
+        });
+    }
+
+    @Test
+    void 이미_신청한_챌린지의_신청_가능_여부_조회() {
+        // given
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        challengeRepository.save(challenge);
+
+        ChallengeParticipant participant = TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 0, true);
+        challengeParticipantRepository.save(participant);
+
+        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
+        challengeNewsletterRepository.save(challengeNewsletter);
+
+        Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
+        subscribeRepository.save(subscribe);
+
+        // when
+        ChallengeEligibilityResponse response = challengeService.checkEligibility(challenge.getId(), member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.canApply()).isFalse();
+            softly.assertThat(response.reason()).isEqualTo(EligibilityReason.ALREADY_APPLIED);
+        });
+    }
+
+    @Test
+    void 구독하지_않은_뉴스레터를_가진_챌린지의_신청_가능_여부_조회() {
+        // given
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        challengeRepository.save(challenge);
+
+        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
+        challengeNewsletterRepository.save(challengeNewsletter);
+
+        // when
+        ChallengeEligibilityResponse response = challengeService.checkEligibility(challenge.getId(), member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.canApply()).isFalse();
+            softly.assertThat(response.reason()).isEqualTo(EligibilityReason.NOT_SUBSCRIBED);
+        });
+    }
+
+    @Test
+    void 모든_조건을_만족하는_챌린지의_신청_가능_여부_조회() {
+        // given
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        challengeRepository.save(challenge);
+
+        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
+        challengeNewsletterRepository.save(challengeNewsletter);
+
+        Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
+        subscribeRepository.save(subscribe);
+
+        // when
+        ChallengeEligibilityResponse response = challengeService.checkEligibility(challenge.getId(), member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.canApply()).isTrue();
+            softly.assertThat(response.reason()).isEqualTo(EligibilityReason.ELIGIBLE);
+        });
+    }
+
+    @Test
+    void 존재하지_않는_챌린지_ID로_신청_가능_여부_조회_시_예외가_발생한다() {
+        // when & then
+        assertThatThrownBy(() -> challengeService.checkEligibility(0L, member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasMessage(ErrorDetail.ENTITY_NOT_FOUND.getMessage());
     }

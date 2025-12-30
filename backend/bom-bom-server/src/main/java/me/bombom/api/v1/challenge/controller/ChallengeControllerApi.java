@@ -19,7 +19,7 @@ public interface ChallengeControllerApi {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "챌린지 상세 조회 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 (유효하지 않은 ID)", content = @Content),
-            @ApiResponse(responseCode = "404", description = "뉴스레터를 찾을 수 없음", content = @Content)
+            @ApiResponse(responseCode = "404", description = "챌린지를 찾을 수 없음", content = @Content)
     })
     ChallengeInfoResponse getChallengeInfo(@PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id);
 }

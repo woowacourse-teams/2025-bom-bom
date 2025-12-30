@@ -92,9 +92,7 @@ public class ChallengeService {
             return new ChallengeEligibilityResponse(false, EligibilityReason.ALREADY_STARTED);
         }
 
-        boolean alreadyApplied = challengeParticipantRepository
-                .findByChallengeIdAndMemberId(challengeId, member.getId())
-                .isPresent();
+        boolean alreadyApplied = challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, member.getId());
         if (alreadyApplied) {
             return new ChallengeEligibilityResponse(false, EligibilityReason.ALREADY_APPLIED);
         }

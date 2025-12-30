@@ -7,6 +7,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
 import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
+import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
 import java.util.List;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;

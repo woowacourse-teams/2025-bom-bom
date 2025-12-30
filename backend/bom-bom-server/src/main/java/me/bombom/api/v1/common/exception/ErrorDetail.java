@@ -21,6 +21,7 @@ public enum ErrorDetail {
     INVALID_REQUEST_PARAMETER_VALIDATION(HttpStatus.BAD_REQUEST, "M008", "요청 파라미터 유효성이 맞지 않습니다."),
     DUPLICATED_DATA(HttpStatus.BAD_REQUEST, "M009", "이미 존재하는 데이터입니다."),
     BLANK_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "M010", "공백은 허용하지 않습니다"),
+    INVALID_REQUEST_BODY_VALIDATION(HttpStatus.BAD_REQUEST, "M011", "요청 바디 유효성이 맞지 않습니다."),
 
     /*
     * J : 인증

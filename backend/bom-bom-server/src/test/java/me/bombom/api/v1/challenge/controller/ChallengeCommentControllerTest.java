@@ -29,7 +29,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 
 @IntegrationTest
@@ -127,9 +129,9 @@ class ChallengeCommentControllerTest {
         mockMvc.perform(get("/api/v1/challenges/{challengeId}/comments", 1L)
                         .param("start", LocalDate.now().minusDays(1).toString())
                         .param("end", LocalDate.now().plusDays(1).toString())
-                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(
                                 authToken))
-                        .accept(org.springframework.http.MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].comment").value("comment"))
                 .andExpect(jsonPath("$.totalElements").value(1));
@@ -140,9 +142,9 @@ class ChallengeCommentControllerTest {
         String content = mockMvc.perform(get("/api/v1/challenges/{challengeId}/comments", 0L)
                         .param("start", LocalDate.now().toString())
                         .param("end", LocalDate.now().toString())
-                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(
                                 authToken))
-                        .accept(org.springframework.http.MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn()
                 .getResponse()

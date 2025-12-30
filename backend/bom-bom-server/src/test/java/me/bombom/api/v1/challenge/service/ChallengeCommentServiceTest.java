@@ -87,43 +87,13 @@ class ChallengeCommentServiceTest {
         articleRepository.save(article);
 
         participant = challengeParticipantRepository.save(
-                ChallengeParticipant.builder()
-                        .challengeId(1L)
-                        .memberId(member.getId())
-                        .challengeTeamId(10L)
-                        .completedDays(0)
-                        .shield(0)
-                        .build()
-        );
-
-        Member otherMember = TestFixture.createMemberFixture("other@bombom.news", "other");
-        memberRepository.save(otherMember);
-
-        ChallengeParticipant otherTeamParticipant = challengeParticipantRepository.save(
-                ChallengeParticipant.builder()
-                        .challengeId(2L)
-                        .memberId(otherMember.getId())
-                        .challengeTeamId(20L)
-                        .completedDays(0)
-                        .shield(0)
-                        .build()
-        );
-
-        challengeCommentRepository.save(
-                ChallengeComment.builder()
-                        .articleId(article.getId())
-                        .participantId(participant.getId())
-                        .quotation("quote")
-                        .comment("우리 팀 댓글")
-                        .build()
-        );
-        challengeCommentRepository.save(
-                ChallengeComment.builder()
-                        .articleId(article.getId())
-                        .participantId(otherTeamParticipant.getId())
-                        .quotation("quote2")
-                        .comment("다른 팀 댓글")
-                        .build()
+                TestFixture.createChallengeParticipant(
+                        1L,
+                        member.getId(),
+                        10L,
+                        0,
+                        0
+                )
         );
     }
 
@@ -132,6 +102,37 @@ class ChallengeCommentServiceTest {
         // given
         LocalDate start = LocalDate.now().minusDays(1);
         LocalDate end = LocalDate.now().plusDays(1);
+
+        Member otherMember = TestFixture.createMemberFixture("other@bombom.news", "other");
+        memberRepository.save(otherMember);
+
+        ChallengeParticipant otherTeamParticipant = challengeParticipantRepository.save(
+                TestFixture.createChallengeParticipant(
+                        2L,
+                        otherMember.getId(),
+                        20L,
+                        0,
+                        0
+                )
+        );
+
+        ChallengeComment otherTeamComment = challengeCommentRepository.save(
+                TestFixture.createChallengeComment(
+                        article.getId(),
+                        participant.getId(),
+                        "quote",
+                        "우리 팀 댓글"
+                )
+        );
+
+        challengeCommentRepository.save(
+                TestFixture.createChallengeComment(
+                        article.getId(),
+                        otherTeamParticipant.getId(),
+                        "quote2",
+                        "다른 팀 댓글"
+                )
+        );
 
         // when
         Page<ChallengeCommentResponse> result = challengeCommentService.getChallengeComments(
@@ -143,7 +144,7 @@ class ChallengeCommentServiceTest {
 
         // then
         assertThat(result.getTotalElements()).isEqualTo(1);
-        assertThat(result.getContent().get(0).comment()).isEqualTo("우리 팀 댓글");
+        assertThat(result.getContent().get(0).comment()).isEqualTo(otherTeamComment.getComment());
     }
 
     @Test

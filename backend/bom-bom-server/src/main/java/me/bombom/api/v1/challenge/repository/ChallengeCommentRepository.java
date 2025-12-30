@@ -1,8 +1,9 @@
 package me.bombom.api.v1.challenge.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
-import me.bombom.api.v1.challenge.dto.ChallengeCommentResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 public interface ChallengeCommentRepository extends JpaRepository<ChallengeComment, Long> {
 
     @Query("""
-        SELECT new me.bombom.api.v1.challenge.dto.ChallengeCommentResponse(
+        SELECT new me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse(
             m.nickname,
             n.name,
             CASE

@@ -6,13 +6,16 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
-import me.bombom.api.v1.challenge.dto.ChallengeCommentResponse;
+import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -35,8 +38,7 @@ public interface ChallengeCommentControllerApi {
     Page<ChallengeCommentResponse> getChallengeComments(
             @Parameter(hidden = true) Member member,
             @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
-            @Parameter(description = "조회 시작일 (포함, 예: 2025-03-01)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-            @Parameter(description = "조회 종료일 (포함, 예: 2025-03-31)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
+            @Parameter(description = "필터링 관련 요청") @Valid @ModelAttribute ChallengeCommentOptionsRequest request,
             @Parameter(description = "페이징 및 정렬 (예: ?page=0&size=20&sort=createdAt,desc)") Pageable pageable
     );
 }

@@ -10,7 +10,8 @@ import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
-import me.bombom.api.v1.challenge.dto.ChallengeCommentResponse;
+import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -136,8 +137,7 @@ class ChallengeCommentServiceTest {
         Page<ChallengeCommentResponse> result = challengeCommentService.getChallengeComments(
                 1L,
                 member.getId(),
-                start,
-                end,
+                new ChallengeCommentOptionsRequest(start, end),
                 PageRequest.of(0, 10)
         );
 
@@ -156,8 +156,7 @@ class ChallengeCommentServiceTest {
         Page<ChallengeCommentResponse> result = challengeCommentService.getChallengeComments(
                 1L,
                 member.getId(),
-                start,
-                end,
+                new ChallengeCommentOptionsRequest(start, end),
                 PageRequest.of(0, 10)
         );
 
@@ -176,8 +175,7 @@ class ChallengeCommentServiceTest {
         assertThatThrownBy(() -> challengeCommentService.getChallengeComments(
                 99L,
                 member.getId(),
-                start,
-                end,
+                new ChallengeCommentOptionsRequest(start, end),
                 PageRequest.of(0, 10)
         )).isInstanceOf(CIllegalArgumentException.class);
     }

@@ -19,6 +19,7 @@ public interface ChallengeNewsletterRepository extends JpaRepository<ChallengeNe
         FROM ChallengeNewsletter cn
         JOIN Newsletter n ON n.id = cn.newsletterId
         WHERE cn.challengeId IN :challengeIds
+        ORDER BY n.name ASC
     """)
     List<ChallengeNewsletterRow> findNewsletterResponsesByChallengeIds(
             @Param("challengeIds") List<Long> challengeIds

@@ -26,7 +26,7 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
         )
         FROM ChallengeComment cc
         JOIN ChallengeParticipant cp ON cc.participantId = cp.id
-        JOIN Member m ON cp.memberId = m.id
+        LEFT JOIN Member m ON cp.memberId = m.id
         JOIN Newsletter n ON cc.newsletterId = n.id
         LEFT JOIN Subscribe s ON s.newsletterId = cc.newsletterId AND s.memberId = :currentMemberId
         WHERE cp.challengeTeamId = :teamId

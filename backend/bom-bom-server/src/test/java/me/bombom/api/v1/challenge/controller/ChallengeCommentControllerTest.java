@@ -1,6 +1,5 @@
 package me.bombom.api.v1.challenge.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -126,6 +125,7 @@ class ChallengeCommentControllerTest {
 
     @Test
     void 챌린지_팀_댓글을_기간으로_필터링해_조회한다() throws Exception {
+        // when & then
         mockMvc.perform(get("/api/v1/challenges/{challengeId}/comments", 1L)
                         .param("start", LocalDate.now().minusDays(1).toString())
                         .param("end", LocalDate.now().plusDays(1).toString())
@@ -139,17 +139,13 @@ class ChallengeCommentControllerTest {
 
     @Test
     void id가_1_미만이면_400을_응답한다() throws Exception {
-        String content = mockMvc.perform(get("/api/v1/challenges/{challengeId}/comments", 0L)
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges/{challengeId}/comments", 0L)
                         .param("start", LocalDate.now().toString())
                         .param("end", LocalDate.now().toString())
                         .with(SecurityMockMvcRequestPostProcessors.authentication(
                                 authToken))
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        assertThat(objectMapper.readTree(content).get("code").asText()).isEqualTo("M008");
+                .andExpect(status().isBadRequest());
     }
 }

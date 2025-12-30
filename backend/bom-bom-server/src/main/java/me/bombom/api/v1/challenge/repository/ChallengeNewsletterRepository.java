@@ -24,4 +24,12 @@ public interface ChallengeNewsletterRepository extends JpaRepository<ChallengeNe
     List<ChallengeNewsletterRow> findNewsletterResponsesByChallengeIds(
             @Param("challengeIds") List<Long> challengeIds
     );
+
+    @Query("""
+        SELECT CASE WHEN COUNT(cn.id) > 0 THEN true ELSE false END
+        FROM ChallengeNewsletter cn
+        JOIN Subscribe s ON s.newsletterId = cn.newsletterId
+        WHERE cn.challengeId = :challengeId AND s.memberId = :memberId
+    """)
+    boolean existsSubscribedNewsletter(@Param("challengeId") Long challengeId, @Param("memberId") Long memberId);
 }

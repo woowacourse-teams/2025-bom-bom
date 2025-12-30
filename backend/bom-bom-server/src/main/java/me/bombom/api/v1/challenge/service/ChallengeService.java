@@ -14,9 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
+import me.bombom.api.v1.challenge.domain.EligibilityReason;
 import me.bombom.api.v1.challenge.dto.ChallengeNewsletterRow;
 import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
 import me.bombom.api.v1.challenge.dto.response.ChallengeDetailResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeNewsletterResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeNewsletterRepository;
@@ -74,6 +76,35 @@ public class ChallengeService {
                         .addContext(ErrorContextKeys.OPERATION, "getChallengeInfo"));
 
         return ChallengeInfoResponse.of(challenge, SUCCESS_REQUIRED_PERCENT);
+    }
+
+    public ChallengeEligibilityResponse checkEligibility(Long challengeId, Member member) {
+        Challenge challenge = challengeRepository.findById(challengeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.OPERATION, "checkEligibility"));
+
+        if (member == null) {
+            return new ChallengeEligibilityResponse(false, EligibilityReason.NOT_LOGGED_IN);
+        }
+
+        if (challenge.hasStarted(LocalDate.now())) {
+            return new ChallengeEligibilityResponse(false, EligibilityReason.ALREADY_STARTED);
+        }
+
+        boolean alreadyApplied = challengeParticipantRepository
+                .findByChallengeIdAndMemberId(challengeId, member.getId())
+                .isPresent();
+        if (alreadyApplied) {
+            return new ChallengeEligibilityResponse(false, EligibilityReason.ALREADY_APPLIED);
+        }
+
+        boolean hasSubscribedNewsletter = challengeNewsletterRepository.existsSubscribedNewsletter(challengeId, member.getId());
+        if (!hasSubscribedNewsletter) {
+            return new ChallengeEligibilityResponse(false, EligibilityReason.NOT_SUBSCRIBED);
+        }
+
+        return new ChallengeEligibilityResponse(true, EligibilityReason.ELIGIBLE);
     }
 
     private ChallengeResponse toChallengeResponse(

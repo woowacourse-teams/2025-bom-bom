@@ -554,14 +554,16 @@ public final class TestFixture {
      * ChallengeComment
      */
     public static ChallengeComment createChallengeComment(
-            Long articleId,
+            Long newsletterId,
             Long participantId,
+            String articleTitle,
             String quotation,
             String comment
     ) {
         return ChallengeComment.builder()
-                .articleId(articleId)
+                .newsletterId(newsletterId)
                 .participantId(participantId)
+                .articleTitle(articleTitle)
                 .quotation(quotation)
                 .comment(comment)
                 .build();

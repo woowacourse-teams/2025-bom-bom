@@ -118,8 +118,9 @@ class ChallengeCommentServiceTest {
 
         ChallengeComment otherTeamComment = challengeCommentRepository.save(
                 TestFixture.createChallengeComment(
-                        article.getId(),
+                        article.getNewsletterId(),
                         participant.getId(),
+                        article.getTitle(),
                         "quote",
                         "우리 팀 댓글"
                 )
@@ -127,8 +128,9 @@ class ChallengeCommentServiceTest {
 
         challengeCommentRepository.save(
                 TestFixture.createChallengeComment(
-                        article.getId(),
+                        article.getNewsletterId(),
                         otherTeamParticipant.getId(),
+                        article.getTitle(),
                         "quote2",
                         "다른 팀 댓글"
                 )

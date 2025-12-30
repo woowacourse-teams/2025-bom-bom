@@ -1,7 +1,6 @@
 package me.bombom.api.v1.challenge.repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import org.springframework.data.domain.Page;
@@ -20,7 +19,7 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
                 WHEN s.id IS NULL THEN false
                 ELSE true
             END,
-            a.title,
+            cc.articleTitle,
             cc.quotation,
             cc.comment,
             cc.createdAt
@@ -28,9 +27,8 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
         FROM ChallengeComment cc
         JOIN ChallengeParticipant cp ON cc.participantId = cp.id
         JOIN Member m ON cp.memberId = m.id
-        JOIN Article a ON cc.articleId = a.id
-        JOIN Newsletter n ON a.newsletterId = n.id
-        LEFT JOIN Subscribe s ON s.newsletterId = n.id AND s.memberId = :currentMemberId
+        JOIN Newsletter n ON cc.newsletterId = n.id
+        LEFT JOIN Subscribe s ON s.newsletterId = cc.newsletterId AND s.memberId = :currentMemberId
         WHERE cp.challengeTeamId = :teamId
         AND FUNCTION('DATE', cc.createdAt) BETWEEN :startDate AND :endDate
     """)

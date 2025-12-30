@@ -11,7 +11,6 @@ import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
-import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
@@ -104,22 +103,23 @@ class ChallengeCommentControllerTest {
         articleRepository.save(article);
 
         ChallengeParticipant participant = challengeParticipantRepository.save(
-                ChallengeParticipant.builder()
-                        .challengeId(1L)
-                        .memberId(member.getId())
-                        .challengeTeamId(10L)
-                        .completedDays(0)
-                        .shield(0)
-                        .build()
+                TestFixture.createChallengeParticipant(
+                        1L,
+                        member.getId(),
+                        10L,
+                        0,
+                        0
+                )
         );
 
         challengeCommentRepository.save(
-                ChallengeComment.builder()
-                        .articleId(article.getId())
-                        .participantId(participant.getId())
-                        .quotation("quote")
-                        .comment("comment")
-                        .build()
+                TestFixture.createChallengeComment(
+                        article.getNewsletterId(),
+                        participant.getId(),
+                        article.getTitle(),
+                        "quote",
+                        "comment"
+                )
         );
     }
 

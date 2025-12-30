@@ -35,9 +35,16 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.from(e.getErrorDetail()));
     }
 
-    @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(Exception e){
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e){
         log.info("Validation failed: ", e);
+        return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_BODY_VALIDATION.getStatus())
+                .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_BODY_VALIDATION));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e){
+        log.info("Constraint violation: ", e);
         return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION.getStatus())
                 .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION));
     }

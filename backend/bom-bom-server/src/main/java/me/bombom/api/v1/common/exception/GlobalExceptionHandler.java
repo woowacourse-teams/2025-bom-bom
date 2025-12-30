@@ -1,5 +1,6 @@
 package me.bombom.api.v1.common.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -15,7 +16,7 @@ import jakarta.validation.ConstraintViolationException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(CIllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(CIllegalArgumentException e){
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(CIllegalArgumentException e) {
         if (!e.getContext().isEmpty()) {
             log.info("IllegalArgumentException: {} - Context: {}", e.getMessage(), e.getContext(), e);
         } else {
@@ -26,7 +27,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException e){
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException e) {
         if (!e.getContext().isEmpty()) {
             log.warn("UnauthorizedException: {} - Context: {}", e.getMessage(), e.getContext(), e);
         } else {
@@ -39,6 +40,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e){
         log.info("Validation failed: ", e);
+        return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_BODY_VALIDATION.getStatus())
+                .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_BODY_VALIDATION));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e){
+        log.info("Constraint violation: ", e);
         return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION.getStatus())
                 .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION));
     }
@@ -72,7 +80,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNotReadable(HttpMessageNotReadableException e) {
         log.info("Request body parse error: ", e);
         return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION.getStatus())
-                 .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION));
+                .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION));
     }
 
     @ExceptionHandler(Exception.class)

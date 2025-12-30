@@ -33,14 +33,19 @@ public class ChallengeDailyResult extends BaseEntity {
     @Column(nullable = false)
     private LocalDate date;
 
+    @Column(nullable = false)
+    private ChallengeDailyStatus status;
+
     @Builder
     public ChallengeDailyResult(
             Long id,
             @NonNull Long participantId,
-            @NonNull LocalDate date
+            @NonNull LocalDate date,
+            @NonNull ChallengeDailyStatus status
     ) {
         this.id = id;
         this.participantId = participantId;
         this.date = date;
+        this.status = status;
     }
 }

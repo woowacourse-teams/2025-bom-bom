@@ -27,6 +27,7 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
             AND ct.id = cdt.challengeTodoId
             AND cdt.todoDate = :today
         WHERE cp.challengeId = :challengeId AND cp.memberId = :memberId
+        ORDER BY ct.todoType ASC
     """)
     List<ChallengeProgressFlat> findMemberProgress(
             @Param("challengeId") Long challengeId,

@@ -12,9 +12,9 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.challenge.domain.ChallengeNewsletter;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
+import me.bombom.api.v1.challenge.dto.ChallengeNewsletterRow;
 import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
 import me.bombom.api.v1.challenge.dto.response.ChallengeDetailResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeNewsletterResponse;
@@ -23,8 +23,6 @@ import me.bombom.api.v1.challenge.repository.ChallengeNewsletterRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.newsletter.domain.Newsletter;
-import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +35,6 @@ public class ChallengeService {
     private final ChallengeRepository challengeRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ChallengeNewsletterRepository challengeNewsletterRepository;
-    private final NewsletterRepository newsletterRepository;
 
     public List<ChallengeResponse> getChallenges(Member member) {
         List<Challenge> challenges = challengeRepository.findAll();
@@ -97,28 +94,12 @@ public class ChallengeService {
     }
 
     private Map<Long, List<ChallengeNewsletterResponse>> getNewslettersByChallengeId(List<Long> challengeIds) {
-        List<ChallengeNewsletter> challengeNewsletters = challengeNewsletterRepository.findAllByChallengeIdIn(
-                challengeIds);
-        if (challengeNewsletters.isEmpty()) {
-            return Collections.emptyMap();
-        }
+        List<ChallengeNewsletterRow> rows = challengeNewsletterRepository.findNewsletterResponsesByChallengeIds(challengeIds);
 
-        List<Long> newsletterIds = challengeNewsletters.stream()
-                .map(ChallengeNewsletter::getNewsletterId)
-                .distinct()
-                .toList();
-
-        Map<Long, Newsletter> newslettersById = newsletterRepository.findAllById(newsletterIds)
-                .stream()
-                .collect(toMap(Newsletter::getId, newsletter -> newsletter));
-
-        return challengeNewsletters.stream()
-                .filter(cn -> newslettersById.containsKey(cn.getNewsletterId()))
+        return rows.stream()
                 .collect(groupingBy(
-                        ChallengeNewsletter::getChallengeId,
-                        mapping(cn -> ChallengeNewsletterResponse.from(
-                                newslettersById.get(cn.getNewsletterId())), toList()
-                        )
+                        ChallengeNewsletterRow::challengeId,
+                        mapping(ChallengeNewsletterRow::response, toList())
                 ));
     }
 

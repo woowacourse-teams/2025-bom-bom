@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
-import me.bombom.api.v1.challenge.dto.GetChallengeInfoResponse;
+import me.bombom.api.v1.challenge.dto.ChallengeInfoResponse;
 import me.bombom.api.v1.challenge.service.ChallengeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ class ChallengeControllerTest {
     @Test
     void 챌린지_상세_정보를_요청할_수_있다() throws Exception {
         //given
-        GetChallengeInfoResponse response = new GetChallengeInfoResponse(
+        ChallengeInfoResponse response = new ChallengeInfoResponse(
                 "챌린지1",
                 LocalDate.of(2026, 1, 5),
                 LocalDate.of(2026, 2, 4),

@@ -2,7 +2,7 @@ package me.bombom.api.v1.challenge.controller;
 
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.challenge.dto.GetChallengeInfoResponse;
+import me.bombom.api.v1.challenge.dto.ChallengeInfoResponse;
 import me.bombom.api.v1.challenge.service.ChallengeService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +20,7 @@ public class ChallengeController implements ChallengeControllerApi{
 
     @Override
     @GetMapping("/{id}")
-    public GetChallengeInfoResponse getChallengeInfo(@PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id) {
+    public ChallengeInfoResponse getChallengeInfo(@PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id) {
         return challengeService.getChallengeInfo(id);
     }
 }

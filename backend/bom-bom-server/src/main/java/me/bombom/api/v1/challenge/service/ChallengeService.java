@@ -2,7 +2,7 @@ package me.bombom.api.v1.challenge.service;
 
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.challenge.dto.GetChallengeInfoResponse;
+import me.bombom.api.v1.challenge.dto.ChallengeInfoResponse;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -17,12 +17,12 @@ public class ChallengeService {
 
     private final ChallengeRepository challengeRepository;
 
-    public GetChallengeInfoResponse getChallengeInfo(Long id) {
+    public ChallengeInfoResponse getChallengeInfo(Long id) {
         Challenge challenge = challengeRepository.findById(id)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
                         .addContext(ErrorContextKeys.OPERATION, "getChallengeInfo"));
 
-        return GetChallengeInfoResponse.of(challenge, SUCCESS_REQUIRED_RATIO);
+        return ChallengeInfoResponse.of(challenge, SUCCESS_REQUIRED_RATIO);
     }
 }

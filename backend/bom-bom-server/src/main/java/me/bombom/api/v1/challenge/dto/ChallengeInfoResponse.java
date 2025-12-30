@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import me.bombom.api.v1.challenge.domain.Challenge;
 
-public record GetChallengeInfoResponse(
+public record ChallengeInfoResponse(
 
         @NotNull
         String name,
@@ -26,8 +26,8 @@ public record GetChallengeInfoResponse(
         int requiredDays
 ) {
 
-    public static GetChallengeInfoResponse of(Challenge challenge, int successRequiredRatio) {
-        return new GetChallengeInfoResponse(
+    public static ChallengeInfoResponse of(Challenge challenge, int successRequiredRatio) {
+        return new ChallengeInfoResponse(
                 challenge.getName(),
                 challenge.getStartDate(),
                 challenge.getEndDate(),

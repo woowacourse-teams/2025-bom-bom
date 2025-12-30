@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ChallengeService {
 
-    //TODO: 이후에 수료 처리 등 구현 시 관리 방법 고려
-    private static final int SUCCESS_REQUIRED_RATIO = 80;
+    // TODO: 이후에 수료 처리 등 구현 시 관리 방법 고려
+    private static final int SUCCESS_REQUIRED_PERCENT = 80;
 
     private final ChallengeRepository challengeRepository;
 
@@ -23,6 +23,6 @@ public class ChallengeService {
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
                         .addContext(ErrorContextKeys.OPERATION, "getChallengeInfo"));
 
-        return ChallengeInfoResponse.of(challenge, SUCCESS_REQUIRED_RATIO);
+        return ChallengeInfoResponse.of(challenge, SUCCESS_REQUIRED_PERCENT);
     }
 }

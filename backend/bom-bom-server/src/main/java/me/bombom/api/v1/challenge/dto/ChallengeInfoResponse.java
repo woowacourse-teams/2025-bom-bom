@@ -26,14 +26,13 @@ public record ChallengeInfoResponse(
         int requiredDays
 ) {
 
-    public static ChallengeInfoResponse of(Challenge challenge, int successRequiredRatio) {
+    public static ChallengeInfoResponse of(Challenge challenge, int successRequiredPercent) {
         return new ChallengeInfoResponse(
                 challenge.getName(),
                 challenge.getStartDate(),
                 challenge.getEndDate(),
                 challenge.getGeneration(),
                 challenge.getTotalDays(),
-                challenge.getTotalDays() * successRequiredRatio
-        );
+                (challenge.getTotalDays() * successRequiredPercent) / 100);
     }
 }

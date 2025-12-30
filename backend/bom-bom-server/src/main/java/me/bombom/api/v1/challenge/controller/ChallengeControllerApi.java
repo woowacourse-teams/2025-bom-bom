@@ -12,7 +12,7 @@ import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.web.bind.annotation.GetMapping;
 import jakarta.validation.constraints.Positive;
-import me.bombom.api.v1.challenge.dto.ChallengeInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @Tag(name = "Challenge", description = "챌린지 관련 API")

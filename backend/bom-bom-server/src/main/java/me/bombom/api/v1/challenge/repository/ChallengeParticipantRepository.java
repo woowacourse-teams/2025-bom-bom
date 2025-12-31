@@ -1,5 +1,6 @@
 package me.bombom.api.v1.challenge.repository;
 
+import java.util.Optional;
 import java.util.List;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
@@ -8,7 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ChallengeParticipantRepository extends JpaRepository<ChallengeParticipant, Long> {
-    
+
+    long countByChallengeId(Long challengeId);
+
     boolean existsByChallengeIdAndMemberId(Long challengeId, Long memberId);
 
     @Query("""
@@ -18,6 +21,8 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
         GROUP BY p.challengeId
     """)
     List<ChallengeParticipantCount> countByChallengeIdInGroupByChallengeId(@Param("challengeIds") List<Long> challengeIds);
-    
+
     List<ChallengeParticipant> findAllByMemberId(Long memberId);
+
+    Optional<ChallengeParticipant> findByChallengeIdAndMemberId(Long challengeId, Long memberId);
 }

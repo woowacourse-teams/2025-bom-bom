@@ -5,6 +5,7 @@ import java.util.List;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.RecentArticle;
 import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.domain.ChallengeNewsletter;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.highlight.domain.Color;
@@ -534,6 +535,22 @@ public final class TestFixture {
                 .build();
     }
 
+    public static ChallengeParticipant createChallengeParticipantWithTeam(
+            Long challengeId,
+            Long memberId,
+            Long challengeTeamId,
+            int completedDays,
+            int shield
+    ) {
+        return ChallengeParticipant.builder()
+                .challengeId(challengeId)
+                .memberId(memberId)
+                .challengeTeamId(challengeTeamId)
+                .completedDays(completedDays)
+                .shield(shield)
+                .build();
+    }
+
     /**
      * ChallengeNewsletter
      */
@@ -544,6 +561,25 @@ public final class TestFixture {
         return ChallengeNewsletter.builder()
                 .challengeId(challengeId)
                 .newsletterId(newsletterId)
+                .build();
+    }
+
+    /**
+     * ChallengeComment
+     */
+    public static ChallengeComment createChallengeComment(
+            Long newsletterId,
+            Long participantId,
+            String articleTitle,
+            String quotation,
+            String comment
+    ) {
+        return ChallengeComment.builder()
+                .newsletterId(newsletterId)
+                .participantId(participantId)
+                .articleTitle(articleTitle)
+                .quotation(quotation)
+                .comment(comment)
                 .build();
     }
 }

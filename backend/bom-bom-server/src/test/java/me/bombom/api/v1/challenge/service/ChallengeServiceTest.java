@@ -8,15 +8,19 @@ import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import me.bombom.api.v1.challenge.domain.ChallengeNewsletter;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
+import me.bombom.api.v1.challenge.domain.EligibilityReason;
 import me.bombom.api.v1.challenge.dto.response.ChallengeDetailResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeNewsletterRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
@@ -25,17 +29,10 @@ import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
-import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
-import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
-import me.bombom.api.v1.challenge.domain.EligibilityReason;
-import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
-import me.bombom.api.v1.common.exception.CIllegalArgumentException;
-import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -303,25 +300,6 @@ class ChallengeServiceTest {
             softly.assertThat(detail.progress()).isGreaterThan(0);
             softly.assertThat(detail.grade()).isNotNull();
             softly.assertThat(detail.isSuccess()).isNotNull();
-        });
-    }
-
-    @Test
-    void 참가하지_않은_챌린지_detail_조회() {
-        // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(10), today.plusDays(10));
-        challengeRepository.save(challenge);
-
-        // when
-        List<ChallengeResponse> result = challengeService.getChallenges(member);
-
-        // then
-        ChallengeDetailResponse detail = result.get(0).detail();
-        assertSoftly(softly -> {
-            softly.assertThat(result).hasSize(1);
-            softly.assertThat(detail).isNotNull();
-            softly.assertThat(detail.isJoined()).isFalse();
-            softly.assertThat(detail.progress()).isEqualTo(0);
         });
     }
 

@@ -15,6 +15,7 @@ import me.bombom.api.v1.challenge.dto.response.MemberChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayTodoResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;

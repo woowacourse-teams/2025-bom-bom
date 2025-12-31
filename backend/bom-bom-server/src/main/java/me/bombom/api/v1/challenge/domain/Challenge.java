@@ -67,4 +67,8 @@ public class Challenge extends BaseEntity {
     public boolean isEnded(LocalDate now) {
         return now.isAfter(this.endDate);
     }
+
+    public boolean hasStarted(LocalDate now) {
+        return !now.isBefore(this.startDate);
+    }
 }

@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 public interface ChallengeParticipantRepository extends JpaRepository<ChallengeParticipant, Long> {
 
     boolean existsByChallengeIdAndMemberId(Long challengeId, Long memberId);
+    
+    Optional<ChallengeParticipant> findByChallengeIdAndMemberId(Long challengeId, Long memberId);
 
     Optional<ChallengeParticipant> findByChallengeIdAndMemberId(Long challengeId, Long memberId);
 

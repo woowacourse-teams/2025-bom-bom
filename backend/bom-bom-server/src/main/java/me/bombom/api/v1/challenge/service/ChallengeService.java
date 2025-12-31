@@ -105,6 +105,10 @@ public class ChallengeService {
         return new ChallengeEligibilityResponse(true, EligibilityReason.ELIGIBLE);
     }
 
+    public List<Challenge> getOngoingChallenges(LocalDate date) {
+        return challengeRepository.findOngoingChallenges(date);
+    }
+
     private ChallengeResponse toChallengeResponse(
             Challenge challenge,
             Map<Long, Long> participantCounts,

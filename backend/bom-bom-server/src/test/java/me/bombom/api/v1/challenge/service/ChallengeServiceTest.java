@@ -514,13 +514,14 @@ class ChallengeServiceTest {
     }
 
     @Test
-    void 이미_신청한_챌린지_신청_시_예외가_발생한다() {
+    void 이미_신청한_챌린지_신청_시_정상_반환한다() {
         // given
         Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
         challengeRepository.save(challenge);
 
         ChallengeParticipant participant = TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 0, true);
         challengeParticipantRepository.save(participant);
+        long countBefore = challengeParticipantRepository.count();
 
         ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
         challengeNewsletterRepository.save(challengeNewsletter);
@@ -528,10 +529,13 @@ class ChallengeServiceTest {
         Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
         subscribeRepository.save(subscribe);
 
-        // when & then
-        assertThatThrownBy(() -> challengeService.applyChallenge(challenge.getId(), member))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasMessage(ErrorDetail.DUPLICATED_DATA.getMessage());
+        // when
+        challengeService.applyChallenge(challenge.getId(), member);
+        long countAfter = challengeParticipantRepository.count();
+
+        // then
+        assertThat(countBefore).isEqualTo(1);
+        assertThat(countAfter).isEqualTo(1); // 중복 신청되어도 개수 변경 없음
     }
 
     @Test

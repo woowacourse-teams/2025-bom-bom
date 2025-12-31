@@ -102,6 +102,12 @@ public class ChallengeService {
                         .addContext(ErrorContextKeys.OPERATION, "applyChallenge"));
 
         EligibilityReason reason = validateEligibility(challenge, challengeId, member.getId());
+
+        if (reason == EligibilityReason.ALREADY_APPLIED) {
+            log.debug("챌린지 신청 중복 요청 - challengeId={}, memberId={}", challengeId, member.getId());
+            return;
+        }
+        
         if (reason != EligibilityReason.ELIGIBLE) {
             throw createApplyException(challengeId, member, reason);
         }
@@ -207,12 +213,6 @@ public class ChallengeService {
             return new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
                     .addContext(ErrorContextKeys.OPERATION, "applyChallenge");
-        }
-        if (reason == EligibilityReason.ALREADY_APPLIED) {
-            return new CIllegalArgumentException(ErrorDetail.DUPLICATED_DATA)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
-                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
-                    .addContext("challengeId", challengeId);
         }
         if (reason == EligibilityReason.NOT_SUBSCRIBED) {
             return new CIllegalArgumentException(ErrorDetail.PRECONDITION_FAILED)

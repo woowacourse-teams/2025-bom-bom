@@ -7,14 +7,7 @@ import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.RecentArticle;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyTodo;
-import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
-import me.bombom.api.v1.challenge.domain.ChallengeTodo;
-import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
-import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeNewsletter;
-import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
-import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.challenge.domain.ChallengeDailyTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
@@ -500,8 +493,8 @@ public final class TestFixture {
     }
 
     /*
-    * Notice
-    */
+     * Notice
+     */
     public static Notice createNotice(String title, NoticeCategory noticeCategory) {
         return Notice.builder()
                 .title(title)
@@ -511,8 +504,8 @@ public final class TestFixture {
     }
 
     /**
-    * Challenge
-    */
+     * Challenge
+     */
     public static Challenge createChallenge(String name, LocalDate startDate, LocalDate endDate, int totalDays) {
         return Challenge.builder()
                 .name(name)
@@ -524,7 +517,7 @@ public final class TestFixture {
     }
 
     public static ChallengeParticipant createChallengeParticipant(Long challengeId, Long memberId,
-            int completedDays) {
+                                                                  int completedDays) {
         return ChallengeParticipant.builder()
                 .challengeId(challengeId)
                 .memberId(memberId)
@@ -542,7 +535,7 @@ public final class TestFixture {
     }
 
     public static ChallengeDailyTodo createChallengeDailyTodo(Long participantId, LocalDate todoDate,
-            Long challengeTodoId) {
+                                                              Long challengeTodoId) {
         return ChallengeDailyTodo.builder()
                 .participantId(participantId)
                 .todoDate(todoDate)

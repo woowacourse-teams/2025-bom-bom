@@ -57,7 +57,7 @@ public interface ChallengeControllerApi {
             description = "특정 챌린지에 신청합니다."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "챌린지 신청 성공"),
+            @ApiResponse(responseCode = "201", description = "챌린지 신청 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 (이미 시작된 챌린지, 중복 신청, 구독하지 않은 뉴스레터 등)", content = @Content),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),
             @ApiResponse(responseCode = "404", description = "챌린지를 찾을 수 없음", content = @Content)
@@ -72,7 +72,7 @@ public interface ChallengeControllerApi {
             description = "신청한 챌린지를 취소합니다."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "챌린지 취소 성공"),
+            @ApiResponse(responseCode = "204", description = "챌린지 취소 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 (이미 시작된 챌린지)", content = @Content),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),
             @ApiResponse(responseCode = "404", description = "챌린지 또는 신청 내역을 찾을 수 없음", content = @Content)

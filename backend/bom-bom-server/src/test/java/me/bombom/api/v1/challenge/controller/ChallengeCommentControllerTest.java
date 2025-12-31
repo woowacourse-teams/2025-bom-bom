@@ -103,12 +103,12 @@ class ChallengeCommentControllerTest {
         articleRepository.save(article);
 
         ChallengeParticipant participant = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(
+                TestFixture.createChallengeParticipantWithTeam(
                         1L,
                         member.getId(),
-                        10L,
-                        0,
-                        0
+                        10,
+                        true,
+                        100L
                 )
         );
 

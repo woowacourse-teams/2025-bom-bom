@@ -26,9 +26,11 @@ import me.bombom.api.v1.challenge.repository.ChallengeNewsletterRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.common.exception.UnauthorizedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,7 +59,7 @@ public class ChallengeService {
 
         Map<Long, Long> participantCounts = getParticipantCounts(challengeIds);
         Map<Long, List<ChallengeNewsletterResponse>> newslettersByChallengeId = getNewslettersByChallengeId(challengeIds);
-        Map<Long, ChallengeParticipant> myParticipation = findMyParticipation(member);
+        Map<Long, ChallengeParticipant> myParticipation = findMyParticipation(member, challengeIds);
 
         return challenges.stream()
                 .map(challenge -> toChallengeResponse(
@@ -88,21 +90,57 @@ public class ChallengeService {
             return new ChallengeEligibilityResponse(false, EligibilityReason.NOT_LOGGED_IN);
         }
 
+        EligibilityReason reason = validateEligibility(challenge, challengeId, member.getId());
+        return new ChallengeEligibilityResponse(reason == EligibilityReason.ELIGIBLE, reason);
+    }
+
+    @Transactional
+    public void applyChallenge(Long challengeId, Member member) {
+        Challenge challenge = challengeRepository.findById(challengeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.OPERATION, "applyChallenge"));
+
+        EligibilityReason reason = validateEligibility(challenge, challengeId, member.getId());
+
+        if (reason == EligibilityReason.ALREADY_APPLIED) {
+            log.debug("챌린지 신청 중복 요청 - challengeId={}, memberId={}", challengeId, member.getId());
+            return;
+        }
+        
+        if (reason != EligibilityReason.ELIGIBLE) {
+            throw createApplyException(challengeId, member, reason);
+        }
+
+        ChallengeParticipant participant = ChallengeParticipant.builder()
+                .challengeId(challengeId)
+                .memberId(member.getId())
+                .build();
+
+        challengeParticipantRepository.save(participant);
+    }
+
+    @Transactional
+    public void cancelChallenge(Long challengeId, Member member) {
+        Challenge challenge = challengeRepository.findById(challengeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.OPERATION, "cancelChallenge"));
+
         if (challenge.hasStarted(LocalDate.now())) {
-            return new ChallengeEligibilityResponse(false, EligibilityReason.ALREADY_STARTED);
+            throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                    .addContext(ErrorContextKeys.OPERATION, "cancelChallenge")
+                    .addContext("reason", "이미 시작된 챌린지는 취소할 수 없습니다.");
         }
 
-        boolean alreadyApplied = challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, member.getId());
-        if (alreadyApplied) {
-            return new ChallengeEligibilityResponse(false, EligibilityReason.ALREADY_APPLIED);
-        }
+        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, member.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
+                        .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                        .addContext("challengeId", challengeId));
 
-        boolean hasSubscribedNewsletter = challengeNewsletterRepository.existsSubscribedNewsletter(challengeId, member.getId());
-        if (!hasSubscribedNewsletter) {
-            return new ChallengeEligibilityResponse(false, EligibilityReason.NOT_SUBSCRIBED);
-        }
-
-        return new ChallengeEligibilityResponse(true, EligibilityReason.ELIGIBLE);
+        challengeParticipantRepository.delete(participant);
     }
 
     public List<Challenge> getOngoingChallenges(LocalDate date) {
@@ -133,11 +171,11 @@ public class ChallengeService {
                 .collect(toMap(ChallengeParticipantCount::challengeId, ChallengeParticipantCount::count));
     }
 
-    private Map<Long, ChallengeParticipant> findMyParticipation(Member member) {
+    private Map<Long, ChallengeParticipant> findMyParticipation(Member member, List<Long> challengeIds) {
         if (member == null) {
             return Collections.emptyMap();
         }
-        return challengeParticipantRepository.findAllByMemberId(member.getId())
+        return challengeParticipantRepository.findByMemberIdAndChallengeIdIn(member.getId(), challengeIds)
                 .stream()
                 .collect(toMap(ChallengeParticipant::getChallengeId, p -> p));
     }
@@ -167,5 +205,46 @@ public class ChallengeService {
             return ChallengeDetailResponse.ended(progress, myParticipant.isSurvived());
         }
         return ChallengeDetailResponse.ongoing(progress);
+    }
+
+    private RuntimeException createApplyException(Long challengeId, Member member, EligibilityReason reason) {
+        if (reason == EligibilityReason.NOT_LOGGED_IN) {
+            return new UnauthorizedException(ErrorDetail.UNAUTHORIZED)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                    .addContext(ErrorContextKeys.OPERATION, "applyChallenge");
+        }
+        if (reason == EligibilityReason.ALREADY_STARTED) {
+            return new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                    .addContext(ErrorContextKeys.OPERATION, "applyChallenge");
+        }
+        if (reason == EligibilityReason.NOT_SUBSCRIBED) {
+            return new CIllegalArgumentException(ErrorDetail.PRECONDITION_FAILED)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext("challengeId", challengeId);
+        }
+        return new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
+                .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                .addContext(ErrorContextKeys.OPERATION, "applyChallenge")
+                .addContext("reason", "ELIGIBLE 상태에서는 예외를 생성할 수 없습니다.");
+    }
+
+    private EligibilityReason validateEligibility(Challenge challenge, Long challengeId, Long memberId) {
+        if (challenge.hasStarted(LocalDate.now())) {
+            return EligibilityReason.ALREADY_STARTED;
+        }
+
+        boolean alreadyApplied = challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId);
+        if (alreadyApplied) {
+            return EligibilityReason.ALREADY_APPLIED;
+        }
+
+        boolean hasSubscribedNewsletter = challengeNewsletterRepository.existsSubscribedNewsletter(challengeId, memberId);
+        if (!hasSubscribedNewsletter) {
+            return EligibilityReason.NOT_SUBSCRIBED;
+        }
+
+        return EligibilityReason.ELIGIBLE;
     }
 }

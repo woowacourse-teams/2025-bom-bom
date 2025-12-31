@@ -465,4 +465,144 @@ class ChallengeServiceTest {
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasMessage(ErrorDetail.ENTITY_NOT_FOUND.getMessage());
     }
+
+    @Test
+    void 모든_조건을_만족하는_챌린지_신청() {
+        // given
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        challengeRepository.save(challenge);
+
+        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
+        challengeNewsletterRepository.save(challengeNewsletter);
+
+        Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
+        subscribeRepository.save(subscribe);
+
+        // when
+        challengeService.applyChallenge(challenge.getId(), member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(challengeParticipantRepository.existsByChallengeIdAndMemberId(challenge.getId(), member.getId())).isTrue();
+        });
+    }
+
+    @Test
+    void 존재하지_않는_챌린지_ID로_신청_시_예외가_발생한다() {
+        // when & then
+        assertThatThrownBy(() -> challengeService.applyChallenge(0L, member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasMessage(ErrorDetail.ENTITY_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 이미_시작된_챌린지_신청_시_예외가_발생한다() {
+        // given
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(5), today.plusDays(10));
+        challengeRepository.save(challenge);
+
+        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
+        challengeNewsletterRepository.save(challengeNewsletter);
+
+        Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
+        subscribeRepository.save(subscribe);
+
+        // when & then
+        assertThatThrownBy(() -> challengeService.applyChallenge(challenge.getId(), member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasMessage(ErrorDetail.INVALID_INPUT_VALUE.getMessage());
+    }
+
+    @Test
+    void 이미_신청한_챌린지_신청_시_정상_반환한다() {
+        // given
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        challengeRepository.save(challenge);
+
+        ChallengeParticipant participant = TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 0, true);
+        challengeParticipantRepository.save(participant);
+        long countBefore = challengeParticipantRepository.count();
+
+        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
+        challengeNewsletterRepository.save(challengeNewsletter);
+
+        Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
+        subscribeRepository.save(subscribe);
+
+        // when
+        challengeService.applyChallenge(challenge.getId(), member);
+        long countAfter = challengeParticipantRepository.count();
+
+        // then
+        assertThat(countBefore).isEqualTo(1);
+        assertThat(countAfter).isEqualTo(1); // 중복 신청되어도 개수 변경 없음
+    }
+
+    @Test
+    void 구독하지_않은_뉴스레터를_가진_챌린지_신청_시_예외가_발생한다() {
+        // given
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        challengeRepository.save(challenge);
+
+        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
+        challengeNewsletterRepository.save(challengeNewsletter);
+
+        // when & then
+        assertThatThrownBy(() -> challengeService.applyChallenge(challenge.getId(), member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasMessage(ErrorDetail.PRECONDITION_FAILED.getMessage());
+    }
+
+    @Test
+    void 신청한_챌린지_취소() {
+        // given
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        challengeRepository.save(challenge);
+
+        ChallengeParticipant participant = TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 0, true);
+        challengeParticipantRepository.save(participant);
+
+        // when
+        challengeService.cancelChallenge(challenge.getId(), member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(challengeParticipantRepository.existsByChallengeIdAndMemberId(challenge.getId(), member.getId())).isFalse();
+        });
+    }
+
+    @Test
+    void 존재하지_않는_챌린지_ID로_취소_시_예외가_발생한다() {
+        // when & then
+        assertThatThrownBy(() -> challengeService.cancelChallenge(0L, member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasMessage(ErrorDetail.ENTITY_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 이미_시작된_챌린지_취소_시_예외가_발생한다() {
+        // given
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(5), today.plusDays(10));
+        challengeRepository.save(challenge);
+
+        ChallengeParticipant participant = TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 5, true);
+        challengeParticipantRepository.save(participant);
+
+        // when & then
+        assertThatThrownBy(() -> challengeService.cancelChallenge(challenge.getId(), member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasMessage(ErrorDetail.INVALID_INPUT_VALUE.getMessage());
+    }
+
+    @Test
+    void 신청하지_않은_챌린지_취소_시_예외가_발생한다() {
+        // given
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        challengeRepository.save(challenge);
+
+        // when & then
+        assertThatThrownBy(() -> challengeService.cancelChallenge(challenge.getId(), member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasMessage(ErrorDetail.ENTITY_NOT_FOUND.getMessage());
+    }
 }

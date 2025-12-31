@@ -10,9 +10,13 @@ import me.bombom.api.v1.challenge.service.ChallengeService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @Validated
@@ -42,5 +46,25 @@ public class ChallengeController implements ChallengeControllerApi {
             @LoginMember(anonymous = true) Member member
     ) {
         return challengeService.checkEligibility(id, member);
+    }
+
+    @Override
+    @PostMapping("/{id}/application")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void applyChallenge(
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
+            @LoginMember Member member
+    ) {
+        challengeService.applyChallenge(id, member);
+    }
+
+    @Override
+    @DeleteMapping("/{id}/application")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancelChallenge(
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
+            @LoginMember Member member
+    ) {
+        challengeService.cancelChallenge(id, member);
     }
 }

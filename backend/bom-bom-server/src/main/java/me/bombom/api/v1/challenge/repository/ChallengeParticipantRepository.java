@@ -13,11 +13,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface ChallengeParticipantRepository extends JpaRepository<ChallengeParticipant, Long> {
 
-    long countByChallengeId(Long challengeId);
-
-    Optional<ChallengeParticipant> findByChallengeIdAndMemberId(Long challengeId, Long memberId);
-
     boolean existsByChallengeIdAndMemberId(Long challengeId, Long memberId);
+    
+    Optional<ChallengeParticipant> findByChallengeIdAndMemberId(Long challengeId, Long memberId);
 
     @Query("""
         SELECT new me.bombom.api.v1.challenge.dto.ChallengeParticipantCount(p.challengeId, COUNT(p.id))
@@ -33,6 +31,7 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
         SELECT new me.bombom.api.v1.challenge.dto.ChallengeProgressFlat(
             c.totalDays,
             cp.completedDays,
+            cp.isSurvived,
             ct.todoType,
             CASE
                 WHEN cdt.id IS NOT NULL THEN true
@@ -53,7 +52,7 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
             @Param("memberId") Long memberId,
             @Param("today") LocalDate today
     );
-
+           
     @Query("""
         SELECT new me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat(
             m.id,
@@ -88,4 +87,6 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
           )
     """)
     List<ChallengeParticipant> findAbsentees(@Param("challengeId") Long challengeId, @Param("date") LocalDate date);
+    
+    List<ChallengeParticipant> findByMemberIdAndChallengeIdIn(Long memberId, List<Long> challengeIds);
 }

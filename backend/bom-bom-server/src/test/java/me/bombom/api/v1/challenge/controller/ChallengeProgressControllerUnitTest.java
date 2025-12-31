@@ -80,6 +80,7 @@ class ChallengeProgressControllerUnitTest {
         MemberChallengeProgressResponse response = new MemberChallengeProgressResponse(
                 "tester",
                 20,
+                true,
                 5,
                 List.of(new TodayTodoResponse(ChallengeTodoType.READ, ChallengeTodoStatus.COMPLETE)));
 

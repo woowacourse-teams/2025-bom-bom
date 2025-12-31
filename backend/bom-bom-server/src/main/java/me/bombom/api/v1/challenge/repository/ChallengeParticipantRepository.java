@@ -14,8 +14,6 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
     
     Optional<ChallengeParticipant> findByChallengeIdAndMemberId(Long challengeId, Long memberId);
 
-    Optional<ChallengeParticipant> findByChallengeIdAndMemberId(Long challengeId, Long memberId);
-
     @Query("""
         SELECT new me.bombom.api.v1.challenge.dto.ChallengeParticipantCount(p.challengeId, COUNT(p.id))
         FROM ChallengeParticipant p

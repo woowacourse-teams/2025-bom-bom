@@ -6,6 +6,7 @@ import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.RecentArticle;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
+import me.bombom.api.v1.challenge.domain.ChallengeNewsletter;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.highlight.domain.Color;
 import me.bombom.api.v1.highlight.domain.Highlight;
@@ -534,7 +535,7 @@ public final class TestFixture {
                 .build();
     }
 
-    public static ChallengeParticipant createChallengeParticipant(
+    public static ChallengeParticipant createChallengeParticipantWithTeam(
             Long challengeId,
             Long memberId,
             Long challengeTeamId,
@@ -547,6 +548,19 @@ public final class TestFixture {
                 .challengeTeamId(challengeTeamId)
                 .completedDays(completedDays)
                 .shield(shield)
+                .build();
+    }
+
+    /**
+     * ChallengeNewsletter
+     */
+    public static ChallengeNewsletter createChallengeNewsletter(
+            Long challengeId,
+            Long newsletterId
+    ) {
+        return ChallengeNewsletter.builder()
+                .challengeId(challengeId)
+                .newsletterId(newsletterId)
                 .build();
     }
 

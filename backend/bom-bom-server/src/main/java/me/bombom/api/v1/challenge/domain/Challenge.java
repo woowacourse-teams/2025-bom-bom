@@ -53,4 +53,18 @@ public class Challenge extends BaseEntity {
         this.endDate = endDate;
         this.totalDays = totalDays;
     }
+
+    public ChallengeStatus getStatus(LocalDate now) {
+        if (now.isBefore(this.startDate)) {
+            return ChallengeStatus.BEFORE_START;
+        }
+        if (now.isAfter(this.endDate)) {
+            return ChallengeStatus.COMPLETED;
+        }
+        return ChallengeStatus.ONGOING;
+    }
+
+    public boolean isEnded(LocalDate now) {
+        return now.isAfter(this.endDate);
+    }
 }

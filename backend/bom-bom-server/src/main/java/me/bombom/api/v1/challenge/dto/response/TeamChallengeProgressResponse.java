@@ -21,7 +21,6 @@ public record TeamChallengeProgressResponse(
             Challenge challenge,
             List<TeamChallengeProgressFlat> progressList
     ) {
-
         TeamChallengeProgressFlat representative = progressList.getFirst();
         return new TeamChallengeProgressResponse(
                 ChallengeSummaryResponse.from(challenge),

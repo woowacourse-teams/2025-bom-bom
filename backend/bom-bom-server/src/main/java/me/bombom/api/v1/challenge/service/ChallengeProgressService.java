@@ -55,8 +55,7 @@ public class ChallengeProgressService {
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
                         .addContext(ErrorContextKeys.OPERATION, "getTeamProgress"));
 
-        List<TeamChallengeProgressFlat> progressList = challengeParticipantRepository
-                .findTeamProgress(participant.getChallengeTeamId());
+        List<TeamChallengeProgressFlat> progressList = challengeParticipantRepository.findTeamProgress(participant.getChallengeTeamId());
 
         return TeamChallengeProgressResponse.of(challenge, progressList);
     }

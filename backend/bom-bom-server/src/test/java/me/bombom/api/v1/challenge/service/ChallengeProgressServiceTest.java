@@ -98,8 +98,7 @@ class ChallengeProgressServiceTest {
         ChallengeTodo readTodo = TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ);
         challengeTodoRepository.save(readTodo);
 
-        ChallengeTodo commentTodo = TestFixture.createChallengeTodo(challenge.getId(),
-                ChallengeTodoType.COMMENT);
+        ChallengeTodo commentTodo = TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.COMMENT);
         challengeTodoRepository.save(commentTodo);
 
         ChallengeDailyTodo dailyTodo = TestFixture.createChallengeDailyTodo(
@@ -118,6 +117,7 @@ class ChallengeProgressServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(response.nickname()).isEqualTo("tester");
             softly.assertThat(response.totalDays()).isEqualTo(10);
+            softly.assertThat(response.isSurvived()).isEqualTo(true);
             softly.assertThat(response.completedDays()).isEqualTo(3);
             softly.assertThat(response.todayTodos()).hasSize(2);
 

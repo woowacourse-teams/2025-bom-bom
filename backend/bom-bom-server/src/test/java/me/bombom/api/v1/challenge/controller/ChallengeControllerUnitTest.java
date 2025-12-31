@@ -1,7 +1,9 @@
 package me.bombom.api.v1.challenge.controller;
 
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -15,11 +17,16 @@ import me.bombom.api.v1.member.domain.Member;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.MethodParameter;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -34,7 +41,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 class ChallengeControllerUnitTest {
 
     @Configuration
+    @EnableWebSecurity
     static class TestConfig implements WebMvcConfigurer {
+
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+            return http
+                    .csrf(AbstractHttpConfigurer::disable)
+                    .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                    .build();
+        }
 
         @Override
         public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
@@ -100,6 +116,22 @@ class ChallengeControllerUnitTest {
     void 챌린지_신청_가능_여부를_요청시_음수_id면_400() throws Exception {
         //when & then
         mockMvc.perform(get("/api/v1/challenges/{id}/eligibility", -1L))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 챌린지_신청시_음수_id면_400() throws Exception {
+        //when & then
+        mockMvc.perform(post("/api/v1/challenges/{id}/application", -1L))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 챌린지_취소시_음수_id면_400() throws Exception {
+        //when & then
+        mockMvc.perform(delete("/api/v1/challenges/{id}/application", -1L))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }

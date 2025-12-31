@@ -215,7 +215,7 @@ public class ChallengeService {
                     .addContext("challengeId", challengeId);
         }
         if (reason == EligibilityReason.NOT_SUBSCRIBED) {
-            return new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
+            return new CIllegalArgumentException(ErrorDetail.PRECONDITION_FAILED)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
                     .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
                     .addContext("challengeId", challengeId);

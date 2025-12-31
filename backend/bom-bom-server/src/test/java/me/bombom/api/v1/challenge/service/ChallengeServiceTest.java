@@ -546,7 +546,7 @@ class ChallengeServiceTest {
         // when & then
         assertThatThrownBy(() -> challengeService.applyChallenge(challenge.getId(), member))
                 .isInstanceOf(CIllegalArgumentException.class)
-                .hasMessage(ErrorDetail.INVALID_INPUT_VALUE.getMessage());
+                .hasMessage(ErrorDetail.PRECONDITION_FAILED.getMessage());
     }
 
     @Test

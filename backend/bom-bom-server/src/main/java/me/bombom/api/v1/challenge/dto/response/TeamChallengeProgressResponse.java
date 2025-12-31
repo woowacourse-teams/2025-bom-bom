@@ -1,6 +1,5 @@
 package me.bombom.api.v1.challenge.dto.response;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import me.bombom.api.v1.challenge.domain.Challenge;
@@ -9,10 +8,10 @@ import me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat;
 public record TeamChallengeProgressResponse(
 
         @NotNull
-        ChallengeSummaryResponse challengeSummaryResponse,
+        ChallengeSummaryResponse challenge,
 
-        @Schema(required = true)
-        int achievementAverage,
+        @NotNull
+        TeamSummaryResponse teamSummary,
 
         @NotNull
         List<MemberDailyResultResponse> members
@@ -22,9 +21,11 @@ public record TeamChallengeProgressResponse(
             Challenge challenge,
             List<TeamChallengeProgressFlat> progressList
     ) {
+
+        TeamChallengeProgressFlat representative = progressList.getFirst();
         return new TeamChallengeProgressResponse(
                 ChallengeSummaryResponse.from(challenge),
-                progressList.getFirst().teamProgress(),
+                TeamSummaryResponse.from(representative),
                 MemberDailyResultResponse.from(progressList)
         );
     }

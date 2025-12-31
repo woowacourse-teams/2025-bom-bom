@@ -43,7 +43,7 @@ public record MemberDailyResultResponse(
     }
 
     private void addDailyProgress(TeamChallengeProgressFlat progress) {
-        //null인 경우는 참여 기록이 없는 사용자
+        //null인 경우는 참여 기록이 없는 사용자 => 이름과 생존 여부만 표시
         if (progress.recordDate() != null) {
             this.dailyProgresses.add(new DailyProgress(progress.recordDate(), progress.status()));
         }

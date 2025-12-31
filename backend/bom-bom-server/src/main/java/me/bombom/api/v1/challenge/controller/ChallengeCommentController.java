@@ -3,8 +3,10 @@ package me.bombom.api.v1.challenge.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.challenge.service.ChallengeCommentService;
 import me.bombom.api.v1.common.resolver.LoginMember;
@@ -43,5 +45,14 @@ public class ChallengeCommentController implements ChallengeCommentControllerApi
             }) Pageable pageable
     ){
         return challengeCommentService.getChallengeComments(challengeId, member.getId(), request, pageable);
+    }
+
+    @Override
+    @GetMapping("/comments/candidates")
+    public List<ChallengeCommentCandidateArticleResponse> getChallengeCommentCandidateArticles(
+            @LoginMember Member member,
+            @RequestParam LocalDate date
+    ) {
+        return challengeCommentService.getChallengeCommentCandidateArticles(member.getId(), date);
     }
 }

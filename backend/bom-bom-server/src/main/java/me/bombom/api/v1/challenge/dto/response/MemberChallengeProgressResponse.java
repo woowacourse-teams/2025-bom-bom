@@ -15,6 +15,9 @@ public record MemberChallengeProgressResponse(
         int totalDays,
 
         @Schema(required = true)
+        boolean isSurvived,
+
+        @Schema(required = true)
         int completedDays,
 
         @NotNull
@@ -31,6 +34,7 @@ public record MemberChallengeProgressResponse(
         return new MemberChallengeProgressResponse(
                 member.getNickname(),
                 representative.totalDays(),
+                representative.isSurvived(),
                 representative.completedDays(),
                 todayTodos
         );

@@ -6,6 +6,7 @@ public record ChallengeProgressFlat(
 
         int totalDays,
         int completedDays,
+        boolean isSurvived,
         ChallengeTodoType todoType,
         boolean isDone
 ) {

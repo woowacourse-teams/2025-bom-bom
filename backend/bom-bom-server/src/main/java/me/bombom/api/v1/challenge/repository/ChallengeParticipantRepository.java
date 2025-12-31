@@ -32,6 +32,7 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
         SELECT new me.bombom.api.v1.challenge.dto.ChallengeProgressFlat(
             c.totalDays,
             cp.completedDays,
+            cp.isSurvived,
             ct.todoType,
             CASE
                 WHEN cdt.id IS NOT NULL THEN true

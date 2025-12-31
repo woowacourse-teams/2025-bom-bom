@@ -90,9 +90,9 @@ class ChallengeCommentServiceTest {
                 TestFixture.createChallengeParticipantWithTeam(
                         1L,
                         member.getId(),
-                        10,
-                        true,
-                        100L
+                        10L,
+                        0,
+                        0
                 )
         );
     }
@@ -110,9 +110,9 @@ class ChallengeCommentServiceTest {
                 TestFixture.createChallengeParticipantWithTeam(
                         2L,
                         otherMember.getId(),
-                        20,
-                        true,
-                        200L
+                        20L,
+                        0,
+                        0
                 )
         );
 

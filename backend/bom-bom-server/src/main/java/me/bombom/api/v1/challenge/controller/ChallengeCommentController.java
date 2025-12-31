@@ -1,5 +1,6 @@
 package me.bombom.api.v1.challenge.controller;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;

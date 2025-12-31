@@ -51,13 +51,6 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION));
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e){
-        log.info("Constraint violation: ", e);
-        return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION.getStatus())
-                .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION));
-    }
-
     @ExceptionHandler(CServerErrorException.class)
     public ResponseEntity<ErrorResponse> handleCServerErrorException(CServerErrorException e){
         if (!e.getContext().isEmpty()) {

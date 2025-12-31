@@ -8,6 +8,9 @@ import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
 import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
+import java.util.List;
+import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
+import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,6 +20,8 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
     long countByChallengeId(Long challengeId);
 
     Optional<ChallengeParticipant> findByChallengeIdAndMemberId(Long challengeId, Long memberId);
+    
+    boolean existsByChallengeIdAndMemberId(Long challengeId, Long memberId);
 
     @Query("""
         SELECT new me.bombom.api.v1.challenge.dto.ChallengeParticipantCount(p.challengeId, COUNT(p.id))
@@ -52,4 +57,6 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
             @Param("memberId") Long memberId,
             @Param("today") LocalDate today
     );
+    
+    List<ChallengeParticipant> findAllByMemberId(Long memberId);
 }

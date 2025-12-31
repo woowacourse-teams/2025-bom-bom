@@ -13,6 +13,12 @@ import me.bombom.api.v1.member.domain.Member;
 import org.springframework.web.bind.annotation.GetMapping;
 import jakarta.validation.constraints.Positive;
 import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
+import java.util.List;
+import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
+import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.member.domain.Member;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @Tag(name = "Challenge", description = "챌린지 관련 API")
@@ -38,4 +44,18 @@ public interface ChallengeControllerApi {
             @ApiResponse(responseCode = "404", description = "챌린지를 찾을 수 없음", content = @Content)
     })
     ChallengeInfoResponse getChallengeInfo(@PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id);
+
+    @Operation(
+            summary = "챌린지 신청 가능 여부 조회",
+            description = "특정 챌린지에 대한 신청 가능 여부를 조회합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "신청 가능 여부 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 (유효하지 않은 ID)", content = @Content),
+            @ApiResponse(responseCode = "404", description = "챌린지를 찾을 수 없음", content = @Content)
+    })
+    ChallengeEligibilityResponse checkEligibility(
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
+            @Parameter(hidden = true) @LoginMember(anonymous = true) Member member
+    );
 }

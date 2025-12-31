@@ -143,23 +143,25 @@ class ChallengeProgressServiceTest {
                         challenge.getId(),
                         memberA.getId(),
                         team.getId(),
-                        3,
-                        true
+                        2,
+                        false
                 )
         );
-        challengeParticipantRepository.save(
+        ChallengeParticipant participant2 = challengeParticipantRepository.save(
                 createTeamParticipant(
                         challenge.getId(),
                         memberB.getId(),
                         team.getId(),
-                        0,
-                        false
-                )
+                        3,
+                        true)
         );
 
-        ChallengeDailyResult resultA = createChallengeDailyResult(participant1.getId(), LocalDate.now(), ChallengeDailyStatus.COMPLETE);
-        ChallengeDailyResult resultB = createChallengeDailyResult(participant1.getId(), LocalDate.now().plusDays(1), ChallengeDailyStatus.SHIELD);
-        challengeDailyResultRepository.saveAll(List.of(resultA, resultB));
+        ChallengeDailyResult result1 = createChallengeDailyResult(participant1.getId(), LocalDate.now(), ChallengeDailyStatus.SHIELD);
+        ChallengeDailyResult result2 = createChallengeDailyResult(participant1.getId(), LocalDate.now().plusDays(1), ChallengeDailyStatus.COMPLETE);
+        ChallengeDailyResult result3 = createChallengeDailyResult(participant2.getId(), LocalDate.now(), ChallengeDailyStatus.COMPLETE);
+        ChallengeDailyResult result4 = createChallengeDailyResult(participant2.getId(), LocalDate.now().plusDays(1), ChallengeDailyStatus.SHIELD);
+        ChallengeDailyResult result5 = createChallengeDailyResult(participant2.getId(), LocalDate.now().plusDays(2), ChallengeDailyStatus.COMPLETE);
+        challengeDailyResultRepository.saveAll(List.of(result1, result2, result3, result4, result5));
 
         // when
         TeamChallengeProgressResponse response = challengeProgressService.getTeamProgress(challenge.getId(), memberA);
@@ -169,21 +171,28 @@ class ChallengeProgressServiceTest {
             softly.assertThat(response.teamSummary().achievementAverage()).isEqualTo(77);
             softly.assertThat(response.members()).hasSize(2);
 
+            //정렬 순서 검증
             softly.assertThat(response.members())
-                    .extracting("nickname", "isSurvived")
-                    .containsExactlyInAnyOrder(
-                            tuple(memberA.getNickname(), true),
-                            tuple(memberB.getNickname(), false));
+                    .extracting("nickname")
+                    .containsExactly(memberB.getNickname(), memberA.getNickname());
 
-            MemberDailyResultResponse responseA = response.members().stream()
-                    .filter(m -> "userA".equals(m.nickname()))
+            MemberDailyResultResponse responseB = response.members().stream()
+                    .filter(m -> memberB.getNickname().equals(m.nickname()))
                     .findFirst()
                     .orElseThrow();
 
-            softly.assertThat(responseA.dailyProgresses())
-                    .hasSize(2)
+            softly.assertThat(responseB.dailyProgresses())
+                    .hasSize(3)
                     .extracting("status")
-                    .containsExactlyInAnyOrder(ChallengeDailyStatus.COMPLETE, ChallengeDailyStatus.SHIELD);
+                    .containsExactlyInAnyOrder(ChallengeDailyStatus.COMPLETE, ChallengeDailyStatus.SHIELD, ChallengeDailyStatus.COMPLETE);
+
+            softly.assertThat(responseB.dailyProgresses())
+                    .extracting("date")
+                    .containsExactly(
+                            LocalDate.now(),
+                            LocalDate.now().plusDays(1),
+                            LocalDate.now().plusDays(2)
+                    );
         });
     }
 

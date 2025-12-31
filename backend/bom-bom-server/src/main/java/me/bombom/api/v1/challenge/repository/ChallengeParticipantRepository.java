@@ -16,7 +16,7 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
     long countByChallengeId(Long challengeId);
 
     Optional<ChallengeParticipant> findByChallengeIdAndMemberId(Long challengeId, Long memberId);
-    
+
     boolean existsByChallengeIdAndMemberId(Long challengeId, Long memberId);
 
     @Query("""
@@ -74,6 +74,4 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
         ORDER BY m.id, cdr.date
     """)
     List<TeamChallengeProgressFlat> findTeamProgress(@Param("teamId") Long teamId);
-
-    Optional<ChallengeParticipant> findByChallengeIdAndMemberId(Long challengeId, Long memberId);
 }

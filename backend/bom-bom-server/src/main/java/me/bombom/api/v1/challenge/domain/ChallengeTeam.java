@@ -25,13 +25,13 @@ public class ChallengeTeam extends BaseEntity {
     private Long challengeId;
 
     @Column(nullable = false)
-    private Long progress;
+    private int progress;
 
     @Builder
     public ChallengeTeam(
             Long id,
             @NonNull Long challengeId,
-            @NonNull Long progress
+            int progress
     ) {
         this.id = id;
         this.challengeId = challengeId;

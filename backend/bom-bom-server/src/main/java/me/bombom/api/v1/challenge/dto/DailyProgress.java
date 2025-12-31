@@ -2,7 +2,7 @@ package me.bombom.api.v1.challenge.dto;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import me.bombom.api.v1.challenge.domain.ChallengeTodoStatus;
+import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 
 public record DailyProgress(
 
@@ -10,6 +10,7 @@ public record DailyProgress(
         LocalDate date,
 
         @NotNull
-        ChallengeTodoStatus status
-) {
+        ChallengeDailyStatus status
+)
+{
 }

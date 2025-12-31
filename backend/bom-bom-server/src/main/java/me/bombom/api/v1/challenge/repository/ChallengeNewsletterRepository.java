@@ -26,10 +26,11 @@ public interface ChallengeNewsletterRepository extends JpaRepository<ChallengeNe
     );
 
     @Query("""
-        SELECT CASE WHEN COUNT(cn.id) > 0 THEN true ELSE false END
+        SELECT COUNT(1) > 0
         FROM ChallengeNewsletter cn
         JOIN Subscribe s ON s.newsletterId = cn.newsletterId
-        WHERE cn.challengeId = :challengeId AND s.memberId = :memberId
+        WHERE cn.challengeId = :challengeId
+          AND s.memberId = :memberId
     """)
     boolean existsSubscribedNewsletter(@Param("challengeId") Long challengeId, @Param("memberId") Long memberId);
 }

@@ -6,7 +6,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
+import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.member.domain.Member;
+import org.springframework.web.bind.annotation.GetMapping;
 import jakarta.validation.constraints.Positive;
+import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import java.util.List;
 import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
@@ -25,6 +31,7 @@ public interface ChallengeControllerApi {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "챌린지 목록 조회 성공")
     })
+    @GetMapping
     List<ChallengeResponse> getChallenges(@Parameter(hidden = true) @LoginMember Member member);
 
     @Operation(

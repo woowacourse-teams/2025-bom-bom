@@ -24,7 +24,7 @@ public interface ChallengeNewsletterRepository extends JpaRepository<ChallengeNe
     List<ChallengeNewsletterRow> findNewsletterResponsesByChallengeIds(
             @Param("challengeIds") List<Long> challengeIds
     );
-
+           
     @Query("""
         SELECT COUNT(1) > 0
         FROM ChallengeNewsletter cn

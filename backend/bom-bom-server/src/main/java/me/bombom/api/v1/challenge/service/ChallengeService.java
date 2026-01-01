@@ -139,7 +139,7 @@ public class ChallengeService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
                         .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
-                        .addContext("challengeId", challengeId));
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
 
         challengeParticipantRepository.delete(participant);
     }

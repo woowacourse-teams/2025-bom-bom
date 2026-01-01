@@ -18,6 +18,10 @@ public enum ChallengeGrade {
     private final int minProgress;
 
     public static ChallengeGrade calculate(int progress, boolean isSurvived) {
+        if (!isSurvived) return FAIL;
+        if (progress >= GOLD.minProgress) return GOLD;
+        if (progress >= SILVER.minProgress) return SILVER;
+        if (progress >= BRONZE.minProgress) return BRONZE;
         if (!isSurvived) {
             return FAIL;
         }

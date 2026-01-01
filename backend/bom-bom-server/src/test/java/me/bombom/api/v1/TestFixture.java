@@ -1,13 +1,17 @@
 package me.bombom.api.v1;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.RecentArticle;
 import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.ChallengeDailyTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.domain.ChallengeNewsletter;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
+import me.bombom.api.v1.challenge.domain.ChallengeTodo;
+import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.highlight.domain.Color;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
@@ -101,8 +105,7 @@ public final class TestFixture {
     /**
      * Newsletter
      */
-    public static List<Newsletter> createNewslettersWithDetails(List<Category> categories,
-                                                                List<NewsletterDetail> details) {
+    public static List<Newsletter> createNewslettersWithDetails(List<Category> categories, List<NewsletterDetail> details) {
         return createNewsletters(
                 categories,
                 List.of(details.get(0).getId(), details.get(1).getId(), details.get(2).getId(), details.get(3).getId())
@@ -254,8 +257,7 @@ public final class TestFixture {
     /**
      * RecentArticle
      */
-    public static RecentArticle createRecentArticle(String title, Long memberId, Long newsletterId,
-                                                    LocalDateTime arrivedTime) {
+    public static RecentArticle createRecentArticle(String title, Long memberId, Long newsletterId, LocalDateTime arrivedTime) {
         return RecentArticle.builder()
                 .title(title)
                 .contents("<h1>" + title + "</h1>")
@@ -501,11 +503,49 @@ public final class TestFixture {
     /**
      * Challenge
      */
+    public static Challenge createChallenge(String name, LocalDate startDate, LocalDate endDate, int totalDays) {
+        return Challenge.builder()
+                .name(name)
+                .generation(1)
+                .startDate(startDate)
+                .endDate(endDate)
+                .totalDays(totalDays)
+                .build();
+    }
+
+    public static ChallengeParticipant createChallengeParticipant(Long challengeId, Long memberId, int completedDays) {
+        return ChallengeParticipant.builder()
+                .challengeId(challengeId)
+                .memberId(memberId)
+                .completedDays(completedDays)
+                .isSurvived(true)
+                .shield(0)
+                .build();
+    }
+
+    public static ChallengeTodo createChallengeTodo(Long challengeId, ChallengeTodoType todoType) {
+        return ChallengeTodo.builder()
+                .challengeId(challengeId)
+                .todoType(todoType)
+                .build();
+    }
+
+    public static ChallengeDailyTodo createChallengeDailyTodo(Long participantId, LocalDate todoDate, Long challengeTodoId) {
+        return ChallengeDailyTodo.builder()
+                .participantId(participantId)
+                .todoDate(todoDate)
+                .challengeTodoId(challengeTodoId)
+                .build();
+    }
+
+    /**
+     * Challenge
+     */
     public static Challenge createChallenge(
             String name,
             int generation,
-            java.time.LocalDate startDate,
-            java.time.LocalDate endDate
+            LocalDate startDate,
+            LocalDate endDate
     ) {
         int totalDays = (int) java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
         return Challenge.builder()

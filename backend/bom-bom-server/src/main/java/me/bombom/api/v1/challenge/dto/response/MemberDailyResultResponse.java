@@ -30,7 +30,7 @@ public record MemberDailyResultResponse(
             map.computeIfAbsent(progress.memberId(), memberId -> createResponse(progress))
                     .addDailyProgress(progress);
         }
-        return new ArrayList<>(map.values());
+        return List.copyOf(map.values());
     }
 
     private static MemberDailyResultResponse createResponse(TeamChallengeProgressFlat progress) {

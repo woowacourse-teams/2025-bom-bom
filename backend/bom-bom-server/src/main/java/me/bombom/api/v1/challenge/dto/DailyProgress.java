@@ -11,6 +11,5 @@ public record DailyProgress(
 
         @NotNull
         ChallengeDailyStatus status
-)
-{
+) {
 }

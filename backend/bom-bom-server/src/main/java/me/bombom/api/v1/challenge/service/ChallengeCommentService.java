@@ -12,11 +12,13 @@ import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
+import me.bombom.api.v1.challenge.event.CreateChallengeCommentEvent;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ public class ChallengeCommentService {
     private final ChallengeCommentRepository challengeCommentRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ArticleRepository articleRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public Page<ChallengeCommentResponse> getChallengeComments(
             Long challengeId,
@@ -87,6 +90,6 @@ public class ChallengeCommentService {
                 .build();
 
         challengeCommentRepository.save(comment);
-        // TODO : 이벤트 발행 후 완료 처리 필요
+        applicationEventPublisher.publishEvent(new CreateChallengeCommentEvent(participant.getId()));
     }
 }

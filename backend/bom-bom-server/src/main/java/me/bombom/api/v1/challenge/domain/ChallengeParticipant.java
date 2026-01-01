@@ -69,4 +69,8 @@ public class ChallengeParticipant extends BaseEntity {
         int progress = (int) ((double) this.completedDays / totalDays * 100);
         return Math.min(progress, 100);
     }
+
+    public void increaseCompletedDays() {
+        this.completedDays += 1;
+    }
 }

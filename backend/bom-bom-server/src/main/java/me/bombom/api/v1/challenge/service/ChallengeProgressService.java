@@ -32,7 +32,9 @@ public class ChallengeProgressService {
         if (progressList.isEmpty()) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
-                    .addContext(ErrorContextKeys.OPERATION, "getMemberProgress");
+                    .addContext(ErrorContextKeys.OPERATION, "getMemberProgress")
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, id);
         }
 
         return MemberChallengeProgressResponse.of(member, progressList);

@@ -4,6 +4,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.RecentArticle;
+import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.ChallengeComment;
+import me.bombom.api.v1.challenge.domain.ChallengeNewsletter;
+import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.highlight.domain.Color;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
@@ -491,6 +495,91 @@ public final class TestFixture {
                 .title(title)
                 .content("content")
                 .noticeCategory(noticeCategory)
+                .build();
+    }
+
+    /**
+     * Challenge
+     */
+    public static Challenge createChallenge(
+            String name,
+            int generation,
+            java.time.LocalDate startDate,
+            java.time.LocalDate endDate
+    ) {
+        int totalDays = (int) java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        return Challenge.builder()
+                .name(name)
+                .generation(generation)
+                .startDate(startDate)
+                .endDate(endDate)
+                .totalDays(totalDays)
+                .build();
+    }
+
+    /**
+     * ChallengeParticipant
+     */
+    public static ChallengeParticipant createChallengeParticipant(
+            Long challengeId,
+            Long memberId,
+            int completedDays,
+            boolean isSurvived
+    ) {
+        return ChallengeParticipant.builder()
+                .challengeId(challengeId)
+                .memberId(memberId)
+                .completedDays(completedDays)
+                .isSurvived(isSurvived)
+                .shield(0)
+                .build();
+    }
+
+    public static ChallengeParticipant createChallengeParticipantWithTeam(
+            Long challengeId,
+            Long memberId,
+            Long challengeTeamId,
+            int completedDays,
+            int shield
+    ) {
+        return ChallengeParticipant.builder()
+                .challengeId(challengeId)
+                .memberId(memberId)
+                .challengeTeamId(challengeTeamId)
+                .completedDays(completedDays)
+                .shield(shield)
+                .build();
+    }
+
+    /**
+     * ChallengeNewsletter
+     */
+    public static ChallengeNewsletter createChallengeNewsletter(
+            Long challengeId,
+            Long newsletterId
+    ) {
+        return ChallengeNewsletter.builder()
+                .challengeId(challengeId)
+                .newsletterId(newsletterId)
+                .build();
+    }
+
+    /**
+     * ChallengeComment
+     */
+    public static ChallengeComment createChallengeComment(
+            Long newsletterId,
+            Long participantId,
+            String articleTitle,
+            String quotation,
+            String comment
+    ) {
+        return ChallengeComment.builder()
+                .newsletterId(newsletterId)
+                .participantId(participantId)
+                .articleTitle(articleTitle)
+                .quotation(quotation)
+                .comment(comment)
                 .build();
     }
 }

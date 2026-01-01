@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 public enum ErrorDetail {
 
     /*
-    * M : 모두 사용
-    */
+     * M : 모두 사용
+     */
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "M001", "잘못된 입력값입니다."),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "M002", "허용되지 않는 접근입니다."),
     ENTITY_NOT_FOUND(HttpStatus.NOT_FOUND, "M003", "존재하지 않는 데이터입니다."),
@@ -21,10 +21,12 @@ public enum ErrorDetail {
     INVALID_REQUEST_PARAMETER_VALIDATION(HttpStatus.BAD_REQUEST, "M008", "요청 파라미터 유효성이 맞지 않습니다."),
     DUPLICATED_DATA(HttpStatus.BAD_REQUEST, "M009", "이미 존재하는 데이터입니다."),
     BLANK_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "M010", "공백은 허용하지 않습니다"),
+    INVALID_REQUEST_BODY_VALIDATION(HttpStatus.BAD_REQUEST, "M011", "요청 바디 유효성이 맞지 않습니다."),
+    PRECONDITION_FAILED(HttpStatus.BAD_REQUEST, "M012", "사전 조건을 만족하지 않습니다."),
 
     /*
-    * J : 인증
-    */
+     * J : 인증
+     */
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "J001", "로그인이 필요합니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "J002", "유효하지 않은 인증 정보입니다. 다시 로그인 해주세요."),
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "J003", "유효하지 않은 인증 정보입니다. 다시 로그인 해주세요."),
@@ -37,7 +39,7 @@ public enum ErrorDetail {
     INVALID_EMAIL_FORMAT(HttpStatus.BAD_REQUEST, "J009", "잘못된 이메일 형식입니다."),
 
     /*
-    * G : 인가
+     * G : 인가
      */
     FORBIDDEN_RESOURCE(HttpStatus.FORBIDDEN, "A001", "접근 권한이 없는 리소스입니다."),
     ;

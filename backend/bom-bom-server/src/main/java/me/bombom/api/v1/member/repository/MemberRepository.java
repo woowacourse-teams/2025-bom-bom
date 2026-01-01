@@ -20,4 +20,13 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByNickname(String nickname);
 
     long countByRoleId(long roleId);
+
+    @Query("""
+        SELECT m.id
+        FROM Member m
+        JOIN Role r ON m.roleId = r.id
+        WHERE r.authority = 'ARCHIVE'
+    """)
+    Optional<Long> findArchiveAdminId();
+
 }

@@ -29,8 +29,8 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
-import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
+import me.bombom.api.v1.member.domain.Member;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -138,7 +138,7 @@ public class ChallengeService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
                         .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
-                        .addContext("challengeId", challengeId));
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
 
         challengeParticipantRepository.delete(participant);
     }

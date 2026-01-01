@@ -13,7 +13,7 @@ public record TodayTodoResponse(
     public static TodayTodoResponse from(ChallengeProgressFlat progress) {
         return new TodayTodoResponse(
                 progress.todoType(),
-                progress.isDone() ? ChallengeTodoStatus.COMPLETE : ChallengeTodoStatus.INCOMPLETE
+                ChallengeTodoStatus.getStatus(progress.isDone())
         );
     }
 }

@@ -24,6 +24,7 @@ public enum ErrorContextKeys {
     OPERATION("operation"),
     HIGHLIGHT_ID("highlightId"),
     CHALLENGE_ID("challengeId"),
+    DETAIL("detail"),
     ;
     
     private final String key;

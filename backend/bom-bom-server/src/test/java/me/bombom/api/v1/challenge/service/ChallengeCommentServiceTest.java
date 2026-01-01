@@ -2,6 +2,7 @@ package me.bombom.api.v1.challenge.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -209,11 +210,13 @@ class ChallengeCommentServiceTest {
         otherArticle.markAsRead();
         articleRepository.save(otherArticle);
 
+        LocalDate targetDate = articles.get(0).getArrivedDateTime().toLocalDate();
+
         // when
         List<ChallengeCommentCandidateArticleResponse> result =
                 challengeCommentService.getChallengeCommentCandidateArticles(
                         member.getId(),
-                        LocalDateTime.now().toLocalDate()
+                        targetDate
                 );
 
         // then
@@ -221,10 +224,13 @@ class ChallengeCommentServiceTest {
                 .map(ChallengeCommentCandidateArticleResponse::articleId)
                 .toList();
 
-        assertThat(resultArticleIds).containsExactlyInAnyOrderElementsOf(
-                List.of(articles.get(0).getId(), articles.get(1).getId())
-        );
-        assertThat(resultArticleIds).doesNotContain(otherArticle.getId());
-        assertThat(resultArticleIds).doesNotContain(articles.get(2).getId());
+        assertSoftly(softly -> {
+            softly.assertThat(resultArticleIds).containsExactly(
+                    articles.get(0).getId(),
+                    articles.get(1).getId()
+            );
+            softly.assertThat(resultArticleIds).doesNotContain(otherArticle.getId());
+            softly.assertThat(resultArticleIds).doesNotContain(articles.get(2).getId());
+        });
     }
 }

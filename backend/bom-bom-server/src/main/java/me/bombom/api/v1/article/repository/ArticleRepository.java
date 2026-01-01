@@ -125,9 +125,10 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
         FROM Article a
         JOIN Newsletter n ON n.id = a.newsletterId
         WHERE a.memberId = :memberId
-          AND a.createdAt >= :start
-          AND a.createdAt < :end
-          AND a.isRead IS TRUE
+          AND a.arrivedDateTime >= :start
+          AND a.arrivedDateTime < :end
+          AND a.isRead IS TRUE 
+        ORDER BY a.arrivedDateTime DESC
     """)
     List<ChallengeCommentCandidateArticleResponse> findChallengeCommentCandidateArticles(
             @Param("memberId") Long memberId,

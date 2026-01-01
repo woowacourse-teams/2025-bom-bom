@@ -170,7 +170,7 @@ class ChallengeCommentControllerTest {
         );
 
         // when & then
-        mockMvc.perform(get("/api/v1/challenges/comments/candidates")
+        mockMvc.perform(get("/api/v1/challenges/comments/articles/candidates")
                         .param("date", LocalDate.now().toString())
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .accept(MediaType.APPLICATION_JSON))

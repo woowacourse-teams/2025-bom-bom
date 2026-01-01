@@ -48,7 +48,7 @@ public class ChallengeCommentController implements ChallengeCommentControllerApi
     }
 
     @Override
-    @GetMapping("/comments/candidates")
+    @GetMapping("/comments/articles/candidates")
     public List<ChallengeCommentCandidateArticleResponse> getChallengeCommentCandidateArticles(
             @LoginMember Member member,
             @RequestParam LocalDate date

@@ -52,7 +52,7 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
             @Param("memberId") Long memberId,
             @Param("today") LocalDate today
     );
-           
+
     @Query("""
         SELECT new me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat(
             m.id,

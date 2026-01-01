@@ -115,6 +115,7 @@ public class ChallengeService {
         ChallengeParticipant participant = ChallengeParticipant.builder()
                 .challengeId(challengeId)
                 .memberId(member.getId())
+                .isSurvived(true)
                 .build();
 
         challengeParticipantRepository.save(participant);

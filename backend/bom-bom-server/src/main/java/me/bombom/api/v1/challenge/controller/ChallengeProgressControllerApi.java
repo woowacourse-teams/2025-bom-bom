@@ -19,7 +19,8 @@ public interface ChallengeProgressControllerApi {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "사용자 진행도 조회 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content),
-            @ApiResponse(responseCode = "404", description = "챌린지/사용자를 찾을 수 없음", content = @Content)
+            @ApiResponse(responseCode = "404", description = "챌린지/사용자를 찾을 수 없음", content = @Content),
+            @ApiResponse(responseCode = "500", description = "챌린지 참가자에 대한 데이터 정합성 불일치", content = @Content),
     })
     MemberChallengeProgressResponse getMemberProgress(
             @Parameter(hidden = true) @LoginMember Member member,

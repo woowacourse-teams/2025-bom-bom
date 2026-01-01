@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
+import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.member.domain.Member;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "Challenge Comment", description = "챌린지 코멘트 관련 API")
@@ -54,5 +56,20 @@ public interface ChallengeCommentControllerApi {
     List<ChallengeCommentCandidateArticleResponse> getChallengeCommentCandidateArticles(
             @Parameter(hidden = true) Member member,
             @Parameter(description = "대상 날짜 (예: 2025-12-31)") @RequestParam LocalDate date
+    );
+
+    @Operation(
+            summary = "챌린지 코멘트 생성",
+            description = "특정 챌린지에서 팀 코멘트를 작성합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "챌린지 코멘트 생성 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 값", content = @Content),
+            @ApiResponse(responseCode = "404", description = "아티클을 찾을 수 없음", content = @Content)
+    })
+    void createChallengeComment(
+            @Parameter(hidden = true) Member member,
+            @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
+            @Valid @RequestBody ChallengeCommentRequest request
     );
 }

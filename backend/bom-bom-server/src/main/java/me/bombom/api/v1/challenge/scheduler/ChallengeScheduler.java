@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.service.ChallengeProgressService;
 import me.bombom.api.v1.challenge.service.ChallengeService;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ public class ChallengeScheduler {
     private final ChallengeProgressService challengeProgressService;
 
     @Scheduled(cron = DAILY_CRON)
+    @SchedulerLock(name = "cleanup_old_previous_articles", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void checkSurvival() {
         LocalDate yesterday = LocalDate.now().minusDays(1);
         List<Challenge> challenges = challengeService.getOngoingChallenges(yesterday);

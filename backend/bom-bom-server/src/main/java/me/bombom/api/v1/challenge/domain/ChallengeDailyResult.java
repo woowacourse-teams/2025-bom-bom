@@ -2,6 +2,8 @@ package me.bombom.api.v1.challenge.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,14 +35,20 @@ public class ChallengeDailyResult extends BaseEntity {
     @Column(nullable = false)
     private LocalDate date;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ChallengeDailyStatus status;
+
     @Builder
     public ChallengeDailyResult(
             Long id,
             @NonNull Long participantId,
-            @NonNull LocalDate date
+            @NonNull LocalDate date,
+            @NonNull ChallengeDailyStatus status
     ) {
         this.id = id;
         this.participantId = participantId;
         this.date = date;
+        this.status = status;
     }
 }

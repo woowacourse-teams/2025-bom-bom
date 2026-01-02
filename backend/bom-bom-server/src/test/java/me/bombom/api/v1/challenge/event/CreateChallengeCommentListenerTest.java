@@ -6,12 +6,14 @@ import java.time.LocalDate;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
+import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.domain.ChallengeTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -42,6 +44,9 @@ class CreateChallengeCommentListenerTest {
     private ChallengeRepository challengeRepository;
 
     @Autowired
+    private ChallengeTeamRepository challengeTeamRepository;
+
+    @Autowired
     private MemberRepository memberRepository;
 
     private ChallengeParticipant participant;
@@ -53,6 +58,7 @@ class CreateChallengeCommentListenerTest {
         challengeDailyTodoRepository.deleteAllInBatch();
         challengeParticipantRepository.deleteAllInBatch();
         challengeTodoRepository.deleteAllInBatch();
+        challengeTeamRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
 
@@ -62,22 +68,42 @@ class CreateChallengeCommentListenerTest {
                 TestFixture.createChallenge(
                         "테스트 챌린지",
                         LocalDate.now().minusDays(1),
-                        LocalDate.now().plusDays(10),
-                        11
+                        LocalDate.now().plusDays(8),
+                        10
                 )
         );
+
+        ChallengeTeam challengeTeam = challengeTeamRepository.save(
+                TestFixture.createChallengeTeam(challenge.getId(), 0));
 
         commentTodo = challengeTodoRepository.save(
                 TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.COMMENT)
         );
 
         participant = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 0)
+                TestFixture.createChallengeParticipantWithTeam(
+                        challenge.getId(),
+                        member.getId(),
+                        challengeTeam.getId(),
+                        0,
+                        0
+                )
+        );
+
+        // 팀 평균 계산을 위해 다른 팀원 추가
+        challengeParticipantRepository.save(
+                TestFixture.createChallengeParticipantWithTeam(
+                        challenge.getId(),
+                        memberRepository.save(TestFixture.createMemberFixture("otherEmail", "otherNickname")).getId(),
+                        challengeTeam.getId(),
+                        5,
+                        0
+                )
         );
     }
 
     @Test
-    void 코멘트_작성_이벤트로_일일_TODO와_결과를_저장하고_완료일수를_증가시킨다() {
+    void 코멘트_작성_이벤트로_일일_TODO와_결과를_저장하고_완료일수와_팀_평균을_갱신한다() {
         // given
         LocalDate today = LocalDate.now();
 
@@ -86,6 +112,7 @@ class CreateChallengeCommentListenerTest {
 
         // then
         ChallengeParticipant updated = challengeParticipantRepository.findById(participant.getId()).orElseThrow();
+        ChallengeTeam updatedTeam = challengeTeamRepository.findById(participant.getChallengeTeamId()).orElseThrow();
         assertSoftly(softly -> {
             softly.assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
                     participant.getId(),
@@ -97,6 +124,7 @@ class CreateChallengeCommentListenerTest {
                     today
             )).isTrue();
             softly.assertThat(updated.getCompletedDays()).isEqualTo(1);
+            softly.assertThat(updatedTeam.getProgress()).isEqualTo(30); // (1/10*100 + 5/10*100) / 2 = 30
         });
     }
 
@@ -116,6 +144,7 @@ class CreateChallengeCommentListenerTest {
 
         // then
         ChallengeParticipant updated = challengeParticipantRepository.findById(participant.getId()).orElseThrow();
+        ChallengeTeam updatedTeam = challengeTeamRepository.findById(participant.getChallengeTeamId()).orElseThrow();
         assertSoftly(softly -> {
             softly.assertThat(challengeDailyTodoRepository.count()).isEqualTo(dailyTodoCount);
             softly.assertThat(challengeDailyResultRepository.count()).isEqualTo(dailyResultCount);
@@ -124,6 +153,7 @@ class CreateChallengeCommentListenerTest {
                     today
             )).isTrue();
             softly.assertThat(updated.getCompletedDays()).isEqualTo(completedDays);
+            softly.assertThat(updatedTeam.getProgress()).isEqualTo(30);
         });
     }
 }

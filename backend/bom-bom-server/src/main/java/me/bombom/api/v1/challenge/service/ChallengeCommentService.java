@@ -67,8 +67,10 @@ public class ChallengeCommentService {
             Long challengeId,
             ChallengeCommentRequest request
     ) {
-        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId,
-                        memberId)
+        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
+                        challengeId,
+                        memberId
+                )
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                         .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)

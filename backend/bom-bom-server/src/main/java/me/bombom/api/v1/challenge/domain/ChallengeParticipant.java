@@ -72,8 +72,8 @@ public class ChallengeParticipant extends BaseEntity {
 
     public boolean useShieldIfAvailable() {
         if (this.shield > 0) {
-            this.shield--;
-            this.completedDays++;
+            this.shield -= 1;
+            this.completedDays += 1;
             return true;
         }
         return false;

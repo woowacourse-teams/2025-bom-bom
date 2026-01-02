@@ -3,6 +3,7 @@ package me.bombom.api.v1.challenge.controller;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.dto.response.MemberChallengeProgressResponse;
+import me.bombom.api.v1.challenge.dto.response.TeamChallengeProgressResponse;
 import me.bombom.api.v1.challenge.service.ChallengeProgressService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
@@ -27,5 +28,14 @@ public class ChallengeProgressController implements ChallengeProgressControllerA
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
     ) {
         return challengeProgressService.getMemberProgress(id, member);
+    }
+
+    @Override
+    @GetMapping("/{id}/progress/team")
+    public TeamChallengeProgressResponse getTeamProgress(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+    ) {
+        return challengeProgressService.getTeamProgress(id, member);
     }
 }

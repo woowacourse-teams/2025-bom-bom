@@ -1,9 +1,12 @@
 package me.bombom.api.v1.challenge.service;
 
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
@@ -22,6 +25,7 @@ public class ChallengeCommentService {
 
     private final ChallengeCommentRepository challengeCommentRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
+    private final ArticleRepository articleRepository;
 
     public Page<ChallengeCommentResponse> getChallengeComments(
             Long challengeId,
@@ -39,6 +43,14 @@ public class ChallengeCommentService {
                 request.start(),
                 request.end(),
                 pageable
+        );
+    }
+
+    public List<ChallengeCommentCandidateArticleResponse> getChallengeCommentCandidateArticles(Long memberId, LocalDate date) {
+        return articleRepository.findChallengeCommentCandidateArticles(
+                memberId,
+                date.atStartOfDay(),
+                date.plusDays(1).atStartOfDay()
         );
     }
 }

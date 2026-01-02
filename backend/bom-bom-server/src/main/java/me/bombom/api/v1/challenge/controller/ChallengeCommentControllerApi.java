@@ -9,7 +9,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
+import java.util.List;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
@@ -40,5 +42,17 @@ public interface ChallengeCommentControllerApi {
             @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
             @Parameter(description = "필터링 관련 요청") @Valid @ModelAttribute ChallengeCommentOptionsRequest request,
             @Parameter(description = "페이징 및 정렬 (예: ?page=0&size=20&sort=createdAt,desc)") Pageable pageable
+    );
+
+    @Operation(
+            summary = "챌린지 코멘트 후보 아티클 조회",
+            description = "지정한 날짜에 도착한 아티클들 중 읽은 아티클들을 조회합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "챌린지 코멘트 후보 아티클 조회 성공")
+    })
+    List<ChallengeCommentCandidateArticleResponse> getChallengeCommentCandidateArticles(
+            @Parameter(hidden = true) Member member,
+            @Parameter(description = "대상 날짜 (예: 2025-12-31)") @RequestParam LocalDate date
     );
 }

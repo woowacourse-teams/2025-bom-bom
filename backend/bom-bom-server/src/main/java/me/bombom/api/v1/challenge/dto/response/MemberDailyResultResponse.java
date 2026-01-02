@@ -27,19 +27,21 @@ public record MemberDailyResultResponse(
     public static List<MemberDailyResultResponse> from(List<TeamChallengeProgressFlat> progressList) {
         Map<Long, MemberDailyResultResponse> map = new LinkedHashMap<>();
         for (TeamChallengeProgressFlat progress : progressList) {
-            map.computeIfAbsent(progress.memberId(), memberId -> createResponse(progress))
+            map.computeIfAbsent(
+                    progress.memberId(),
+                            memberId -> createResponse(
+                                    memberId,
+                                    progress.nickname(),
+                                    progress.isSurvived()
+                            )
+                    )
                     .addDailyProgress(progress);
         }
-        return new ArrayList<>(map.values());
+        return List.copyOf(map.values());
     }
 
-    private static MemberDailyResultResponse createResponse(TeamChallengeProgressFlat progress) {
-        return new MemberDailyResultResponse(
-                progress.memberId(),
-                progress.nickname(),
-                progress.isSurvived(),
-                new ArrayList<>()
-        );
+    private static MemberDailyResultResponse createResponse(Long memberId, String nickname, boolean isSurvived) {
+        return new MemberDailyResultResponse(memberId, nickname, isSurvived, new ArrayList<>());
     }
 
     private void addDailyProgress(TeamChallengeProgressFlat progress) {

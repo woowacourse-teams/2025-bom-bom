@@ -48,7 +48,6 @@ public class ChallengeProgressService {
         }
     }
 
-
     public MemberChallengeProgressResponse getMemberProgress(Long id, Member member) {
         validateParticipation(id, member);
 
@@ -60,6 +59,22 @@ public class ChallengeProgressService {
         validateMemberProgressDataIntegrity(id, member, progressList);
 
         return MemberChallengeProgressResponse.of(member, progressList);
+    }
+
+    public TeamChallengeProgressResponse getTeamProgress(Long challengeId, Member member) {
+        Challenge challenge = challengeRepository.findById(challengeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.OPERATION, "getTeamProgress"));
+
+        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, member.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
+                        .addContext(ErrorContextKeys.OPERATION, "getTeamProgress"));
+
+        List<TeamChallengeProgressFlat> progressList = challengeParticipantRepository.findTeamProgress(participant.getChallengeTeamId());
+
+        return TeamChallengeProgressResponse.of(challenge, progressList);
     }
 
     private void validateParticipation(Long id, Member member) {
@@ -82,21 +97,6 @@ public class ChallengeProgressService {
                     .addContext(ErrorContextKeys.CHALLENGE_ID, id)
                     .addContext(ErrorContextKeys.MEMBER_ID, member.getId());
         }
-    }
-    public TeamChallengeProgressResponse getTeamProgress(Long challengeId, Member member) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
-                        .addContext(ErrorContextKeys.OPERATION, "getTeamProgress"));
-
-        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, member.getId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
-                        .addContext(ErrorContextKeys.OPERATION, "getTeamProgress"));
-
-        List<TeamChallengeProgressFlat> progressList = challengeParticipantRepository.findTeamProgress(participant.getChallengeTeamId());
-
-        return TeamChallengeProgressResponse.of(challenge, progressList);
     }
 
     private void saveShieldDailyResult(ChallengeParticipant participant, LocalDate date) {

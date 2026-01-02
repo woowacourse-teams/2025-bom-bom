@@ -8,11 +8,11 @@ public record TeamChallengeProgressFlat(
         // 멤버 정보
         Long memberId,
         String nickname,
-        Boolean isSurvived,
+        boolean isSurvived,
 
         // 챌린지 진행 정보
-        Integer completedDays,
-        Integer totalDays,
+        int completedDays,
+        int totalDays,
         int teamProgress,
 
         // 일자별 기록 정보

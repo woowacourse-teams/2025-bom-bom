@@ -33,6 +33,14 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.AfterEach;
+import me.bombom.api.v1.challenge.dto.response.TodayTodoResponse;
+import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
+import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,7 +137,7 @@ class ChallengeProgressServiceTest {
                                                         tuple(ChallengeTodoType.READ, ChallengeTodoStatus.COMPLETE),
                                                         tuple(ChallengeTodoType.COMMENT,
                                                                         ChallengeTodoStatus.INCOMPLETE));
-=======
+                  
     @Autowired
     private ChallengeProgressService challengeProgressService;
 
@@ -531,4 +539,49 @@ class ChallengeProgressServiceTest {
                                 .orElseThrow();
                 assertThat(updatedParticipant.isSurvived()).isFalse();
         }
+=======
+    }
+
+    @Test
+    void 팀_챌린지_진행상황_조회_실패_팀_없음() {
+        // given
+        Member newMember = memberRepository.save(TestFixture.createUniqueMember("new", "new"));
+
+        // when & then
+        assertThatThrownBy(() -> challengeProgressService.getTeamProgress(challenge.getId(), newMember))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .satisfies(e -> {
+                    CIllegalArgumentException exception = (CIllegalArgumentException) e;
+                    assertThat(exception.getContext().get(ErrorContextKeys.ENTITY_TYPE.getKey()))
+                            .isEqualTo("challengeParticipant");
+                });
+    }
+
+    private ChallengeParticipant createTeamParticipant(Long challengeId, Long memberId, Long teamId,
+                                                       int completedDays, boolean isSurvived) {
+        return ChallengeParticipant.builder()
+                .challengeId(challengeId)
+                .memberId(memberId)
+                .challengeTeamId(teamId)
+                .completedDays(completedDays)
+                .isSurvived(isSurvived)
+                .shield(0)
+                .build();
+    }
+
+    private ChallengeTeam createChallengeTeam(Long challengeId, int progress) {
+        return ChallengeTeam.builder()
+                .challengeId(challengeId)
+                .progress(progress)
+                .build();
+    }
+
+    private ChallengeDailyResult createChallengeDailyResult(Long participantId, LocalDate date,
+                                                            ChallengeDailyStatus status) {
+        return ChallengeDailyResult.builder()
+                .participantId(participantId)
+                .date(date)
+                .status(status)
+                .build();
+    }
 }

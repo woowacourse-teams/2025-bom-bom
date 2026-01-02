@@ -70,23 +70,9 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
         JOIN ChallengeTeam ct ON cp.challengeTeamId = ct.id
         LEFT JOIN ChallengeDailyResult cdr ON cp.id = cdr.participantId
         WHERE cp.challengeTeamId = :teamId
-        ORDER BY cp.completedDays DESC, m.id ASC, cdr.date ASC
+        ORDER BY cp.completedDays DESC, m.id, cdr.date
     """)
     List<TeamChallengeProgressFlat> findTeamProgress(@Param("teamId") Long teamId);
-
-    @Query("""
-        SELECT cp
-        FROM ChallengeParticipant cp
-        WHERE cp.challengeId = :challengeId
-          AND cp.isSurvived = true
-          AND NOT EXISTS (
-              SELECT cdr
-              FROM ChallengeDailyResult cdr
-              WHERE cdr.participantId = cp.id
-                AND cdr.date = :date
-          )
-    """)
-    List<ChallengeParticipant> findAbsentees(@Param("challengeId") Long challengeId, @Param("date") LocalDate date);
     
     List<ChallengeParticipant> findByMemberIdAndChallengeIdIn(Long memberId, List<Long> challengeIds);
 }

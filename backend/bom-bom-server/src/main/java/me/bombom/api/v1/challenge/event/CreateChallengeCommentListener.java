@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyResult;
+import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeTodo;
@@ -67,6 +68,7 @@ public class CreateChallengeCommentListener {
                 ChallengeDailyResult.builder()
                 .participantId(participant.getId())
                 .date(today)
+                .status(ChallengeDailyStatus.COMPLETE)
                 .build()
         );
 

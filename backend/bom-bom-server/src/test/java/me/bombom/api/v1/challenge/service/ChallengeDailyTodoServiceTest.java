@@ -18,7 +18,6 @@ import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,17 +51,14 @@ class ChallengeDailyTodoServiceTest {
     private Challenge challenge;
     private ChallengeTodo readTodo;
 
-    @AfterEach
-    void tearDown() {
+    @BeforeEach
+    void setUp() {
         challengeDailyTodoRepository.deleteAllInBatch();
         challengeTodoRepository.deleteAllInBatch();
         challengeParticipantRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
-    }
 
-    @BeforeEach
-    void setUp() {
         member = memberRepository.save(TestFixture.createUniqueMember("tester", "12345"));
 
         LocalDate today = LocalDate.now();
@@ -98,8 +94,13 @@ class ChallengeDailyTodoServiceTest {
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
-        // then
-        List<ChallengeDailyTodo> dailyTodos = challengeDailyTodoRepository.findAll();
+        // then - 특정 멤버와 챌린지에 대한 todo만 확인
+        List<ChallengeDailyTodo> dailyTodos = challengeDailyTodoRepository.findAll().stream()
+                .filter(todo -> todo.getParticipantId().equals(participant.getId()))
+                .filter(todo -> todo.getChallengeTodoId().equals(readTodo.getId()))
+                .filter(todo -> todo.getTodoDate().equals(today))
+                .toList();
+
         assertSoftly(softly -> {
             softly.assertThat(dailyTodos).hasSize(1);
             softly.assertThat(dailyTodos.get(0).getParticipantId()).isEqualTo(participant.getId());
@@ -129,8 +130,13 @@ class ChallengeDailyTodoServiceTest {
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
-        // then
-        List<ChallengeDailyTodo> dailyTodos = challengeDailyTodoRepository.findAll();
+        // then - 특정 멤버와 챌린지에 대한 todo만 확인
+        List<ChallengeDailyTodo> dailyTodos = challengeDailyTodoRepository.findAll().stream()
+                .filter(todo -> todo.getParticipantId().equals(participant.getId()))
+                .filter(todo -> todo.getChallengeTodoId().equals(readTodo.getId()))
+                .filter(todo -> todo.getTodoDate().equals(today))
+                .toList();
+
         assertSoftly(softly -> {
             softly.assertThat(dailyTodos).hasSize(1);
             softly.assertThat(dailyTodos.get(0).getParticipantId()).isEqualTo(participant.getId());

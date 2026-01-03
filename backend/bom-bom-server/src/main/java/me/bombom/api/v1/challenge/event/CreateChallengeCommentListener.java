@@ -8,6 +8,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.service.ChallengeParticipantService;
 import me.bombom.api.v1.challenge.service.ChallengeTeamService;
 import me.bombom.api.v1.challenge.service.ChallengeTodoService;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,8 +47,8 @@ public class CreateChallengeCommentListener {
         try {
             challengeTodoService.insertCommentDone(participant, today);
             challengeTodoService.completeDailyTodo(participant, today);
-        } catch (Exception e) {
-            log.warn("Comment에 대해 ChallengeDailyTodo 완료 도중 에러가 발생했습니다. participantId: {}", participant.getId());
+        } catch (DuplicateKeyException e) {
+            log.warn("Comment에 대해 ChallengeDailyTodo 완료가 이미 존재합니다. participantId: {}", participant.getId());
         }
     }
 }

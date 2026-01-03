@@ -95,19 +95,22 @@ public class ChallengeAttendanceService {
 
         ChallengeTeam challengeTeam = challengeTeamRepository.findById(participant.getChallengeTeamId())
                 .orElseThrow(() -> new CServerErrorException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext("challengeTeamId", participant.getChallengeTeamId())
+                        .addContext(ErrorContextKeys.CHALLENGE_TEAM_ID, participant.getChallengeTeamId())
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeTeam")
                         .addContext(ErrorContextKeys.OPERATION, "findById"));
 
         List<ChallengeParticipant> teamParticipants = challengeParticipantRepository.findAllByChallengeTeamId(participant.getChallengeTeamId());
+        if (teamParticipants.isEmpty()) {
+            throw new CServerErrorException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.CHALLENGE_TEAM_ID, participant.getChallengeTeamId())
+                    .addContext(ErrorContextKeys.OPERATION, "findAllByChallengeTeamId");
+        }
+
         int averageProgress = calculateAverageProgress(teamParticipants, challenge.getTotalDays());
         challengeTeam.updateProgress(averageProgress);
     }
 
     private int calculateAverageProgress(List<ChallengeParticipant> participants, int totalDays) {
-        if (participants.isEmpty()) {
-            return 0;
-        }
         int totalProgress = participants.stream()
                 .mapToInt(teamMember -> teamMember.calculateProgress(totalDays))
                 .sum();

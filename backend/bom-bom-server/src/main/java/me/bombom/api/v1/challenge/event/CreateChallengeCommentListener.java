@@ -8,6 +8,8 @@ import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.service.ChallengeParticipantService;
 import me.bombom.api.v1.challenge.service.ChallengeTeamService;
 import me.bombom.api.v1.challenge.service.ChallengeTodoService;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -18,6 +20,8 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 @RequiredArgsConstructor
 public class CreateChallengeCommentListener {
+
+    private static final String UK_DAILY_TODO = "uk_challenge_daily_todo";
 
     private final ChallengeTodoService challengeTodoService;
     private final ChallengeParticipantService challengeParticipantService;
@@ -47,8 +51,25 @@ public class CreateChallengeCommentListener {
         try {
             challengeTodoService.insertCommentDone(participant, today);
             challengeTodoService.completeDailyTodo(participant, today);
-        } catch (DuplicateKeyException e) {
-            log.warn("Comment에 대해 ChallengeDailyTodo 완료가 이미 존재합니다. participantId: {}", participant.getId());
+        } catch (DataIntegrityViolationException e) {
+            String violated = extractConstraintName(e);
+
+            if (UK_DAILY_TODO.equalsIgnoreCase(violated)) {
+                log.warn("challenge TODO가 이미 존재합니다. -> skip. participantId={}, constraint={}", participant.getId(), violated);
+                return;
+            }
+            throw e;
         }
+    }
+
+    private String extractConstraintName(Throwable e) {
+        Throwable cur = e;
+        while (cur != null) {
+            if (cur instanceof ConstraintViolationException cve) {
+                return cve.getConstraintName();
+            }
+            cur = cur.getCause();
+        }
+        return null;
     }
 }

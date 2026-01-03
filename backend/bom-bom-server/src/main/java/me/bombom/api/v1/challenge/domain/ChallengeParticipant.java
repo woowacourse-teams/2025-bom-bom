@@ -82,4 +82,8 @@ public class ChallengeParticipant extends BaseEntity {
     public void markAsFailed() {
         this.isSurvived = false;
     }
+
+    public void increaseCompletedDays() {
+        this.completedDays += 1;
+    }
 }

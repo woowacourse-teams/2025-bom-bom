@@ -13,6 +13,7 @@ import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
+import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
@@ -232,5 +233,49 @@ class ChallengeCommentServiceTest {
             softly.assertThat(resultArticleIds).doesNotContain(otherArticle.getId());
             softly.assertThat(resultArticleIds).doesNotContain(articles.get(2).getId());
         });
+    }
+
+    @Test
+    void 챌린지_댓글을_생성한다() {
+        // given
+        ChallengeCommentRequest request = new ChallengeCommentRequest(
+                article.getId(),
+                null, // 인용구 optional 테스트
+                "챌린지 한 줄 코멘트로 20자 이상의 댓글을 작성했습니다."
+        );
+
+        // when
+        challengeCommentService.createChallengeComment(
+                member.getId(),
+                participant.getChallengeId(),
+                request
+        );
+
+        // then
+        List<ChallengeComment> comments = challengeCommentRepository.findAll();
+        assertSoftly(softly -> {
+            softly.assertThat(comments).hasSize(1);
+            softly.assertThat(comments.getFirst().getParticipantId()).isEqualTo(participant.getId());
+            softly.assertThat(comments.getFirst().getArticleTitle()).isEqualTo(article.getTitle());
+            softly.assertThat(comments.getFirst().getQuotation()).isNull();
+            softly.assertThat(comments.getFirst().getComment()).isEqualTo(request.comment());
+        });
+    }
+
+    @Test
+    void 챌린지_참가자가_없으면_댓글_생성시_예외가_발생한다() {
+        // given
+        ChallengeCommentRequest request = new ChallengeCommentRequest(
+                article.getId(),
+                "quote",
+                "챌린지 한 줄 코멘트로 20자 이상의 댓글을 작성했습니다."
+        );
+
+        // when & then
+        assertThatThrownBy(() -> challengeCommentService.createChallengeComment(
+                member.getId(),
+                999L,
+                request
+        )).isInstanceOf(CIllegalArgumentException.class);
     }
 }

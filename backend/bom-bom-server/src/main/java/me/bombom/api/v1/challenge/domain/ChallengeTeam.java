@@ -37,4 +37,8 @@ public class ChallengeTeam extends BaseEntity {
         this.challengeId = challengeId;
         this.progress = progress;
     }
+
+    public void updateProgress(int progress) {
+        this.progress = progress;
+    }
 }

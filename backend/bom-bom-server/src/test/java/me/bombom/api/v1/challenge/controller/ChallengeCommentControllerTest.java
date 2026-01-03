@@ -1,6 +1,7 @@
 package me.bombom.api.v1.challenge.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -13,6 +14,7 @@ import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
+import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.member.domain.Member;
@@ -66,6 +68,7 @@ class ChallengeCommentControllerTest {
 
     private Member member;
     private List<Newsletter> newsletters;
+    private Article article;
     private OAuth2AuthenticationToken authToken;
 
     @BeforeEach
@@ -101,7 +104,7 @@ class ChallengeCommentControllerTest {
         newsletters = TestFixture.createNewslettersWithDetails(categories, details);
         newsletterRepository.saveAll(newsletters);
 
-        Article article = TestFixture.createArticles(member, newsletters).get(0);
+        article = TestFixture.createArticles(member, newsletters).get(0);
         articleRepository.save(article);
 
         ChallengeParticipant participant = challengeParticipantRepository.save(
@@ -178,5 +181,39 @@ class ChallengeCommentControllerTest {
                 .andExpect(jsonPath("$[0].articleId").exists())
                 .andExpect(jsonPath("$[0].newsletterName").isNotEmpty())
                 .andExpect(jsonPath("$[0].articleTitle").isNotEmpty());
+    }
+
+    @Test
+    void 챌린지_코멘트를_생성한다() throws Exception {
+        // given
+        ChallengeCommentRequest request = new ChallengeCommentRequest(
+                article.getId(),
+                "quote",
+                "챌린지 한 줄 코멘트로 20자 이상의 댓글을 작성했습니다."
+        );
+
+        // when & then
+        mockMvc.perform(post("/api/v1/challenges/{challengeId}/comments", 1L)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void 코멘트가_20자_미만이면_400을_응답한다() throws Exception {
+        // given
+        ChallengeCommentRequest request = new ChallengeCommentRequest(
+                article.getId(),
+                "quote",
+                "너무 짧은 댓글"
+        );
+
+        // when & then
+        mockMvc.perform(post("/api/v1/challenges/{challengeId}/comments", 1L)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 }

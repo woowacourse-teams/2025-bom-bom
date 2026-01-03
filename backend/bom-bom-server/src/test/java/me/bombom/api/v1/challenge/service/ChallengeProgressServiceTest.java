@@ -129,7 +129,7 @@ class ChallengeProgressServiceTest {
     }
 
     @Test
-    void 팀_챌린지_진행상황을_조회한다() {
+    void 팀_챌린지_진행상황을_조회한다 () {
         // given
         ChallengeTeam team = challengeTeamRepository.save(createChallengeTeam(challenge.getId(), 77));
 
@@ -167,7 +167,8 @@ class ChallengeProgressServiceTest {
         challengeDailyResultRepository.saveAll(List.of(result1, result2, result3, result4, result5));
 
         // when
-        TeamChallengeProgressResponse response = challengeProgressService.getTeamProgress(challenge.getId(), memberA);
+        TeamChallengeProgressResponse response = challengeProgressService.getTeamProgress(
+                challenge.getId(), memberA);
 
         // then
         assertSoftly(softly -> {
@@ -201,12 +202,13 @@ class ChallengeProgressServiceTest {
     }
 
     @Test
-    void 팀_챌린지_진행상황_조회_실패_참가정보_없음() {
+    void 팀_챌린지_진행상황_조회_실패_참가정보_없음 () {
         // given
         Long nonExistentChallengeId = 0L;
 
         // when & then
-        assertThatThrownBy(() -> challengeProgressService.getTeamProgress(nonExistentChallengeId, member))
+        assertThatThrownBy(
+                () -> challengeProgressService.getTeamProgress(nonExistentChallengeId, member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .satisfies(e -> {
                     CIllegalArgumentException exception = (CIllegalArgumentException) e;
@@ -217,17 +219,121 @@ class ChallengeProgressServiceTest {
 
     @Test
     void 팀_챌린지_진행상황_조회_실패_팀_없음() {
-        // given
-        Member newMember = memberRepository.save(TestFixture.createUniqueMember("new", "new"));
+            // given
+            Member newMember = memberRepository.save(TestFixture.createUniqueMember("new", "new"));
 
-        // when & then
-        assertThatThrownBy(() -> challengeProgressService.getTeamProgress(challenge.getId(), newMember))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .satisfies(e -> {
-                    CIllegalArgumentException exception = (CIllegalArgumentException) e;
-                    assertThat(exception.getContext().get(ErrorContextKeys.ENTITY_TYPE.getKey()))
-                            .isEqualTo("challengeParticipant");
-                });
+            // when & then
+            assertThatThrownBy(() -> challengeProgressService.getTeamProgress(challenge.getId(), newMember))
+                            .isInstanceOf(CIllegalArgumentException.class)
+                            .satisfies(e -> {
+                                    CIllegalArgumentException exception = (CIllegalArgumentException) e;
+                                    assertThat(exception.getContext().get(ErrorContextKeys.ENTITY_TYPE.getKey()))
+                                                    .isEqualTo("challengeParticipant");
+                            });
+    }
+
+    @Test
+    void 쉴드를_보유한_참가자는_결석_시_쉴드를_사용하여_생존한다() {
+            // given
+            LocalDate yesterday = LocalDate.now().minusDays(1);
+
+            // Challenge: 총 10일. 80% = 8일. 최대 결석 = 2일
+            Challenge survivalChallenge = challengeRepository.save(TestFixture.createChallenge(
+                            "Survival Challenge",
+                            yesterday.minusDays(4),
+                            yesterday.plusDays(5),
+                            10));
+
+            ChallengeParticipant participant = challengeParticipantRepository.save(ChallengeParticipant.builder()
+                            .challengeId(survivalChallenge.getId())
+                            .memberId(member.getId())
+                            .completedDays(3)
+                            .shield(1)
+                            .isSurvived(true)
+                            .build());
+
+            // when
+            challengeProgressService.proceedDailySurvivalCheck(survivalChallenge, yesterday);
+
+            // then
+            ChallengeParticipant updatedParticipant = challengeParticipantRepository.findById(participant.getId())
+                            .orElseThrow();
+
+            assertSoftly(softly -> {
+                    softly.assertThat(updatedParticipant.getShield()).isEqualTo(participant.getShield() - 1);
+                    softly.assertThat(updatedParticipant.getCompletedDays()).isEqualTo(participant.getCompletedDays() + 1);
+                    softly.assertThat(updatedParticipant.isSurvived()).isTrue();
+
+                    List<ChallengeDailyResult> results = challengeDailyResultRepository.findAll();
+                    softly.assertThat(results).hasSize(1);
+                    softly.assertThat(results.getFirst().getStatus()).isEqualTo(ChallengeDailyStatus.SHIELD);
+                    softly.assertThat(results.getFirst().getDate()).isEqualTo(yesterday);
+            });
+    }
+
+    @Test
+    void 쉴드가_없어도_결석_허용일_이내라면_생존한다() {
+            // given
+            LocalDate yesterday = LocalDate.now().minusDays(1);
+
+            // Challenge: 총 10일. 80% = 8일. 최대 결석 = 2일
+            Challenge survivalChallenge = challengeRepository.save(TestFixture.createChallenge(
+                            "Survival Challenge 2",
+                            yesterday.minusDays(4),
+                            yesterday.plusDays(5),
+                            10));
+
+            // Participant: 챌린지 3일 수행
+            // 챌린지 시작한지 5일 지남, currentAbsent = 5 - 3 = 2, 2 >= 2 -> 생존.
+            ChallengeParticipant participant = challengeParticipantRepository.save(ChallengeParticipant.builder()
+                            .challengeId(survivalChallenge.getId())
+                            .memberId(member.getId())
+                            .completedDays(3)
+                            .shield(0)
+                            .isSurvived(true)
+                            .build());
+
+            // when
+            challengeProgressService.proceedDailySurvivalCheck(survivalChallenge, yesterday);
+
+            // then
+            ChallengeParticipant updatedParticipant = challengeParticipantRepository.findById(participant.getId())
+                            .orElseThrow();
+            assertSoftly(softly -> {
+                    softly.assertThat(updatedParticipant.isSurvived()).isTrue();
+                    softly.assertThat(updatedParticipant.getCompletedDays()).isEqualTo(3);
+            });
+    }
+
+    @Test
+    void 결석_허용일을_초과하면_생존에_실패한다() {
+            // given
+            LocalDate yesterday = LocalDate.now().minusDays(1);
+
+            // Challenge: 총 10일. 80% = 8일. 최대 결석 = 2일
+            Challenge survivalChallenge = challengeRepository.save(TestFixture.createChallenge(
+                            "Survival Challenge 3",
+                            yesterday.minusDays(4),
+                            yesterday.plusDays(5),
+                            10));
+
+            // Participant: 챌린지 2일 수행
+            // 챌린지 시작한지 5일 지남, currentAbsent = 5 - 2 = 3, 3 > 2 -> 탈락.
+            ChallengeParticipant participant = challengeParticipantRepository.save(ChallengeParticipant.builder()
+                            .challengeId(survivalChallenge.getId())
+                            .memberId(member.getId())
+                            .completedDays(2)
+                            .shield(0)
+                            .isSurvived(true)
+                            .build());
+
+            // when
+            challengeProgressService.proceedDailySurvivalCheck(survivalChallenge, yesterday);
+
+            // then
+            ChallengeParticipant updatedParticipant = challengeParticipantRepository.findById(participant.getId())
+                            .orElseThrow();
+            assertThat(updatedParticipant.isSurvived()).isFalse();
     }
 
     private ChallengeParticipant createTeamParticipant(Long challengeId, Long memberId, Long teamId,

@@ -6,10 +6,11 @@ import java.util.List;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.RecentArticle;
 import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.challenge.domain.ChallengeDailyTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
+import me.bombom.api.v1.challenge.domain.ChallengeDailyTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeNewsletter;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
+import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.domain.ChallengeTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.highlight.domain.Color;
@@ -105,7 +106,8 @@ public final class TestFixture {
     /**
      * Newsletter
      */
-    public static List<Newsletter> createNewslettersWithDetails(List<Category> categories, List<NewsletterDetail> details) {
+    public static List<Newsletter> createNewslettersWithDetails(List<Category> categories,
+                                                                List<NewsletterDetail> details) {
         return createNewsletters(
                 categories,
                 List.of(details.get(0).getId(), details.get(1).getId(), details.get(2).getId(), details.get(3).getId())
@@ -257,7 +259,8 @@ public final class TestFixture {
     /**
      * RecentArticle
      */
-    public static RecentArticle createRecentArticle(String title, Long memberId, Long newsletterId, LocalDateTime arrivedTime) {
+    public static RecentArticle createRecentArticle(String title, Long memberId, Long newsletterId,
+                                                    LocalDateTime arrivedTime) {
         return RecentArticle.builder()
                 .title(title)
                 .contents("<h1>" + title + "</h1>")
@@ -530,7 +533,8 @@ public final class TestFixture {
                 .build();
     }
 
-    public static ChallengeDailyTodo createChallengeDailyTodo(Long participantId, LocalDate todoDate, Long challengeTodoId) {
+    public static ChallengeDailyTodo createChallengeDailyTodo(Long participantId, LocalDate todoDate,
+                                                              Long challengeTodoId) {
         return ChallengeDailyTodo.builder()
                 .participantId(participantId)
                 .todoDate(todoDate)
@@ -588,6 +592,16 @@ public final class TestFixture {
                 .challengeTeamId(challengeTeamId)
                 .completedDays(completedDays)
                 .shield(shield)
+                .build();
+    }
+
+    /**
+     * ChallengeTeam
+     */
+    public static ChallengeTeam createChallengeTeam(Long challengeId, int progress) {
+        return ChallengeTeam.builder()
+                .challengeId(challengeId)
+                .progress(progress)
                 .build();
     }
 

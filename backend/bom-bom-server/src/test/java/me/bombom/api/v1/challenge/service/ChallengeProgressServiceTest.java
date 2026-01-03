@@ -32,7 +32,6 @@ import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,8 +66,8 @@ class ChallengeProgressServiceTest {
     private Member member;
     private Challenge challenge;
 
-    @AfterEach
-    void tearDown() {
+    @BeforeEach
+    void setUp() {
         challengeDailyResultRepository.deleteAllInBatch();
         challengeDailyTodoRepository.deleteAllInBatch();
         challengeTodoRepository.deleteAllInBatch();
@@ -76,10 +75,7 @@ class ChallengeProgressServiceTest {
         challengeTeamRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
-    }
 
-    @BeforeEach
-    void setUp() {
         member = memberRepository.save(
                 TestFixture.createUniqueMember("tester", java.util.UUID.randomUUID().toString()));
 

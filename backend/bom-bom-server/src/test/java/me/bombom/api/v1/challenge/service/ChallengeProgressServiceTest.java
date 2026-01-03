@@ -33,14 +33,6 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.AfterEach;
-import me.bombom.api.v1.challenge.dto.response.TodayTodoResponse;
-import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
-import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +80,8 @@ class ChallengeProgressServiceTest {
 
     @BeforeEach
     void setUp() {
-        member = memberRepository.save(TestFixture.createUniqueMember("tester", "12345"));
+        member = memberRepository.save(
+                TestFixture.createUniqueMember("tester", java.util.UUID.randomUUID().toString()));
 
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "Test Challenge",
@@ -119,7 +112,8 @@ class ChallengeProgressServiceTest {
     @Test
     void 유저의_챌린지_진행상황을_조회한다() {
         // when
-        MemberChallengeProgressResponse response = challengeProgressService.getMemberProgress(challenge.getId(), member);
+        MemberChallengeProgressResponse response = challengeProgressService.getMemberProgress(challenge.getId(),
+                member);
 
         // then
         assertSoftly(softly -> {
@@ -164,11 +158,16 @@ class ChallengeProgressServiceTest {
                         true)
         );
 
-        ChallengeDailyResult result1 = createChallengeDailyResult(participant1.getId(), LocalDate.now(), ChallengeDailyStatus.SHIELD);
-        ChallengeDailyResult result2 = createChallengeDailyResult(participant1.getId(), LocalDate.now().plusDays(1), ChallengeDailyStatus.COMPLETE);
-        ChallengeDailyResult result3 = createChallengeDailyResult(participant2.getId(), LocalDate.now(), ChallengeDailyStatus.COMPLETE);
-        ChallengeDailyResult result4 = createChallengeDailyResult(participant2.getId(), LocalDate.now().plusDays(1), ChallengeDailyStatus.SHIELD);
-        ChallengeDailyResult result5 = createChallengeDailyResult(participant2.getId(), LocalDate.now().plusDays(2), ChallengeDailyStatus.COMPLETE);
+        ChallengeDailyResult result1 = createChallengeDailyResult(participant1.getId(), LocalDate.now(),
+                ChallengeDailyStatus.SHIELD);
+        ChallengeDailyResult result2 = createChallengeDailyResult(participant1.getId(), LocalDate.now().plusDays(1),
+                ChallengeDailyStatus.COMPLETE);
+        ChallengeDailyResult result3 = createChallengeDailyResult(participant2.getId(), LocalDate.now(),
+                ChallengeDailyStatus.COMPLETE);
+        ChallengeDailyResult result4 = createChallengeDailyResult(participant2.getId(), LocalDate.now().plusDays(1),
+                ChallengeDailyStatus.SHIELD);
+        ChallengeDailyResult result5 = createChallengeDailyResult(participant2.getId(), LocalDate.now().plusDays(2),
+                ChallengeDailyStatus.COMPLETE);
         challengeDailyResultRepository.saveAll(List.of(result1, result2, result3, result4, result5));
 
         // when
@@ -192,7 +191,8 @@ class ChallengeProgressServiceTest {
             softly.assertThat(responseB.dailyProgresses())
                     .hasSize(3)
                     .extracting("status")
-                    .containsExactlyInAnyOrder(ChallengeDailyStatus.COMPLETE, ChallengeDailyStatus.SHIELD, ChallengeDailyStatus.COMPLETE);
+                    .containsExactlyInAnyOrder(ChallengeDailyStatus.COMPLETE, ChallengeDailyStatus.SHIELD,
+                            ChallengeDailyStatus.COMPLETE);
 
             softly.assertThat(responseB.dailyProgresses())
                     .extracting("date")

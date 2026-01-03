@@ -3,20 +3,11 @@ package me.bombom.api.v1.challenge.event;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.challenge.domain.ChallengeDailyResult;
-import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
-import me.bombom.api.v1.challenge.domain.ChallengeDailyTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
-import me.bombom.api.v1.challenge.domain.ChallengeTodo;
-import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
-import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
-import me.bombom.api.v1.challenge.service.ChallengeAttendanceService;
-import me.bombom.api.v1.common.exception.CServerErrorException;
-import me.bombom.api.v1.common.exception.ErrorContextKeys;
-import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.challenge.domain.ChallengeTeam;
+import me.bombom.api.v1.challenge.service.ChallengeParticipantService;
+import me.bombom.api.v1.challenge.service.ChallengeTeamService;
+import me.bombom.api.v1.challenge.service.ChallengeTodoService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,13 +18,36 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class CreateChallengeCommentListener {
 
-    private final ChallengeAttendanceService challengeAttendanceService;
+    private final ChallengeTodoService challengeTodoService;
+    private final ChallengeParticipantService challengeParticipantService;
+    private final ChallengeTeamService challengeTeamService;
 
     @TransactionalEventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void on(CreateChallengeCommentEvent event){
         log.info("챌린지 코멘트 작성 후 출석 처리 시작");
-        challengeAttendanceService.attend(event.participantId());
+
+        LocalDate today = LocalDate.now();
+        if(challengeTodoService.isCompletedToday(event.participantId(), today)){
+            log.info("이미 출석 처리 완료된 참여자입니다. participantId:{}", event.participantId());
+            return;
+        }
+
+        ChallengeParticipant participant = challengeParticipantService.getParticipant(event.participantId());
+        completeDailyTodoWithComment(participant, today);
+
+        ChallengeTeam challengeTeam = challengeTeamService.getChallengeTeamByParticipant(participant);
+        challengeTeamService.updateTeamProgress(challengeTeam);
+
         log.info("챌린지 코멘트 작성 후 출석 처리 완료");
+    }
+
+    private void completeDailyTodoWithComment(ChallengeParticipant participant, LocalDate today) {
+        try {
+            challengeTodoService.insertCommentDone(participant, today);
+            challengeTodoService.completeDailyTodo(participant, today);
+        } catch (Exception e) {
+            log.warn("Comment에 대해 ChallengeDailyTodo 완료 도중 에러가 발생했습니다. participantId: {}", participant.getId());
+        }
     }
 }

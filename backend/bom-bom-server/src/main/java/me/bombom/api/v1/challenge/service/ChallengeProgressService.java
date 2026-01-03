@@ -30,7 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ChallengeProgressService {
 
-    private static final int SUCCESS_REQUIRED_PERCENT = 80;
+    // TODO: 이후에 수료 처리 등 구현 시 관리 방법 고려
+    private static final double SUCCESS_REQUIRED_RATIO = 0.8;
 
     private final ChallengeRepository challengeRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
@@ -111,7 +112,7 @@ public class ChallengeProgressService {
     private void checkFailure(ChallengeParticipant participant, Challenge challenge, LocalDate yesterday) {
         // 종료 일은 포함하지 않아서 +1
         int totalDays = challenge.getTotalDays();
-        int requiredSuccessDays = (totalDays * SUCCESS_REQUIRED_PERCENT) / 100;
+        int requiredSuccessDays = (int) Math.ceil(totalDays * SUCCESS_REQUIRED_RATIO);
         int maxAllowedAbsent = totalDays - requiredSuccessDays;
 
         int daysSinceStart = (int) (ChronoUnit.DAYS.between(challenge.getStartDate(), yesterday) + 1);

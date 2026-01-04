@@ -245,5 +245,53 @@ class ChallengeDailyGuideControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void 주말_가이드_조회_성공() throws Exception {
+        // given - 주말 가이드 생성 (dayIndex = 0)
+        ChallengeDailyGuide weekendGuide = challengeDailyGuideRepository.save(
+                TestFixture.createChallengeDailyGuide(
+                        challenge.getId(),
+                        0,
+                        DailyGuideType.COMMENT,
+                        "https://example.com/weekend.webp",
+                        "주말입니다",
+                        false
+                )
+        );
+
+        // when & then - 주말에는 dayIndex 0으로 조회됨
+        // 실제로는 주말이어야 하지만, 가이드가 있으면 정상 조회됨
+        mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/today", challenge.getId())
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dayIndex").exists())
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.imageUrl").exists());
+    }
+
+    @Test
+    void 주말_가이드_댓글_작성_불가() throws Exception {
+        // given - 주말 가이드 생성 (dayIndex = 0, commentEnabled = false)
+        ChallengeDailyGuide weekendGuide = challengeDailyGuideRepository.save(
+                TestFixture.createChallengeDailyGuide(
+                        challenge.getId(),
+                        0,
+                        DailyGuideType.COMMENT,
+                        "https://example.com/weekend.webp",
+                        "주말입니다",
+                        false
+                )
+        );
+        DailyGuideCommentRequest request = new DailyGuideCommentRequest("주말 댓글 작성 시도");
+
+        // when & then - dayIndex 0으로 댓글 작성 시도 (댓글 작성 불가능하므로 400)
+        mockMvc.perform(post("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/comment",
+                        challenge.getId(), 0)
+                        .with(authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
 }
 

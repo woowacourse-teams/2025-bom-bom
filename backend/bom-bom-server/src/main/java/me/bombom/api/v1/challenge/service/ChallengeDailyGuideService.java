@@ -2,7 +2,9 @@ package me.bombom.api.v1.challenge.service;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuide;
@@ -27,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ChallengeDailyGuideService {
 
+    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
+
     private final ChallengeRepository challengeRepository;
     private final ChallengeDailyGuideRepository challengeDailyGuideRepository;
     private final ChallengeDailyGuideCommentRepository challengeDailyGuideCommentRepository;
@@ -45,7 +49,7 @@ public class ChallengeDailyGuideService {
                     .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId);
         }
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(SEOUL_ZONE);
         if (today.isBefore(challenge.getStartDate()) || today.isAfter(challenge.getEndDate())) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
@@ -87,7 +91,7 @@ public class ChallengeDailyGuideService {
                         .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                         .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
 
-        if (dayIndex < 1 || dayIndex > challenge.getTotalDays()) {
+        if (dayIndex != 0 && (dayIndex < 1 || dayIndex > challenge.getTotalDays())) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeDailyGuide")
                     .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
@@ -130,6 +134,12 @@ public class ChallengeDailyGuideService {
     }
 
     private int calculateDayIndex(LocalDate startDate, LocalDate today) {
+        DayOfWeek dayOfWeek = today.getDayOfWeek();
+        boolean isWeekend = dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
+        
+        if (isWeekend) {
+            return 0;
+        }
         return (int) DAYS.between(startDate, today) + 1;
     }
 

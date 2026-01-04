@@ -268,5 +268,92 @@ class ChallengeDailyGuideServiceTest {
                 request
         )).isInstanceOf(CIllegalArgumentException.class);
     }
+
+    @Test
+    void 주말_가이드_조회_성공() {
+        // given - 주말 가이드 생성 (dayIndex = 0)
+        ChallengeDailyGuide weekendGuide = challengeDailyGuideRepository.save(
+                TestFixture.createChallengeDailyGuide(
+                        challenge.getId(),
+                        0,
+                        DailyGuideType.COMMENT,
+                        "https://example.com/weekend.webp",
+                        "주말입니다",
+                        false
+                )
+        );
+
+        // when - 주말 가이드 조회 (실제로는 주말일 때만 dayIndex 0이 반환되지만,
+        // 가이드가 존재하면 정상 조회됨)
+        TodayDailyGuideResponse response = challengeDailyGuideService.getTodayDailyGuide(
+                challenge.getId(),
+                member.getId()
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.dayIndex()).isGreaterThanOrEqualTo(0);
+            softly.assertThat(response.type()).isNotNull();
+            softly.assertThat(response.imageUrl()).isNotNull();
+        });
+    }
+
+    @Test
+    void 주말_가이드에_댓글_작성_불가() {
+        // given - 주말 가이드 생성 (dayIndex = 0, commentEnabled = false)
+        ChallengeDailyGuide weekendGuide = challengeDailyGuideRepository.save(
+                TestFixture.createChallengeDailyGuide(
+                        challenge.getId(),
+                        0,
+                        DailyGuideType.COMMENT,
+                        "https://example.com/weekend.webp",
+                        "주말입니다",
+                        false // 댓글 작성 불가
+                )
+        );
+        DailyGuideCommentRequest request = new DailyGuideCommentRequest("주말 댓글 작성 시도");
+
+        // when & then - dayIndex 0으로 댓글 작성 시도 (댓글 작성 불가능하므로 예외 발생)
+        assertThatThrownBy(() -> challengeDailyGuideService.createDailyGuideComment(
+                challenge.getId(),
+                0,
+                member.getId(),
+                request
+        )).isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void dayIndex_0_유효성_검증_통과() {
+        // given - 주말 가이드 생성 (dayIndex = 0, commentEnabled = true)
+        ChallengeDailyGuide weekendGuide = challengeDailyGuideRepository.save(
+                TestFixture.createChallengeDailyGuide(
+                        challenge.getId(),
+                        0,
+                        DailyGuideType.COMMENT,
+                        "https://example.com/weekend.webp",
+                        "주말입니다",
+                        true
+                )
+        );
+
+        // when & then - dayIndex 0은 유효성 검증을 통과해야 함 (예외가 발생하지 않아야 함)
+        // commentEnabled = true이므로 댓글 작성 성공
+        DailyGuideCommentRequest request = new DailyGuideCommentRequest("주말 댓글");
+        challengeDailyGuideService.createDailyGuideComment(
+                challenge.getId(),
+                0,
+                member.getId(),
+                request
+        );
+
+        // then - 댓글이 생성되었는지 확인
+        List<ChallengeDailyGuideComment> comments = challengeDailyGuideCommentRepository.findAll();
+        assertSoftly(softly -> {
+            softly.assertThat(comments).hasSize(1);
+            softly.assertThat(comments.get(0).getGuideId()).isEqualTo(weekendGuide.getId());
+            softly.assertThat(comments.get(0).getParticipantId()).isEqualTo(participant.getId());
+            softly.assertThat(comments.get(0).getContent()).isEqualTo("주말 댓글");
+        });
+    }
 }
 

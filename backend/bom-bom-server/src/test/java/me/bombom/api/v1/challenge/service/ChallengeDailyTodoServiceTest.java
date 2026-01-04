@@ -3,6 +3,7 @@ package me.bombom.api.v1.challenge.service;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.event.MarkAsReadEvent;
@@ -27,6 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @IntegrationTest
 class ChallengeDailyTodoServiceTest {
+
+    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -60,7 +63,7 @@ class ChallengeDailyTodoServiceTest {
 
         member = memberRepository.save(TestFixture.createUniqueMember("tester", "12345"));
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(SEOUL_ZONE);
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "테스트 챌린지",
                 today.minusDays(5),
@@ -85,7 +88,7 @@ class ChallengeDailyTodoServiceTest {
     @Transactional
     void 아티클_읽기시_챌린지_투두_업데이트() {
         // given
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(SEOUL_ZONE);
         ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
                 challenge.getId(), member.getId()).orElseThrow();
 
@@ -113,7 +116,7 @@ class ChallengeDailyTodoServiceTest {
     @Transactional
     void 이미_존재하는_챌린지_투두_중복_생성_안함() {
         // given
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(SEOUL_ZONE);
         ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
                 challenge.getId(), member.getId()).orElseThrow();
 

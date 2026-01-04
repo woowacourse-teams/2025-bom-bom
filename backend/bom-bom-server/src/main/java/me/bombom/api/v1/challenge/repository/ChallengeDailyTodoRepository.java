@@ -15,7 +15,7 @@ public interface ChallengeDailyTodoRepository extends JpaRepository<ChallengeDai
                 SELECT cp.id, ct.id, :today
                 FROM challenge_participant cp
                 JOIN challenge c ON c.id = cp.challenge_id
-                JOIN challenge_todo ct ON ct.challenge_id = cp.challenge_id AND ct.todo_type = 'READ'
+                JOIN challenge_todo ct ON ct.challenge_id = cp.challenge_id AND ct.todo_type = :todoType
                 LEFT JOIN challenge_daily_todo dt
                     ON dt.participant_id = cp.id
                    AND dt.challenge_todo_id = ct.id
@@ -26,7 +26,8 @@ public interface ChallengeDailyTodoRepository extends JpaRepository<ChallengeDai
                   AND dt.id IS NULL
             """, nativeQuery = true)
     int insertTodayReadTodoIfMissing(@Param("memberId") Long memberId,
-                                     @Param("today") LocalDate today);
+                                     @Param("today") LocalDate today,
+                                     @Param("todoType") String todoType);
 
     boolean existsByParticipantIdAndTodoDateAndChallengeTodoId(Long participantId, LocalDate todoDate,
                                                                Long challengeTodoId);

@@ -2,6 +2,7 @@ package me.bombom.api.v1.challenge.service;
 
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,6 @@ public class ChallengeDailyTodoService {
     @Transactional
     public void updateChallengeDailyTodo(Long memberId) {
         LocalDate today = LocalDate.now();
-        challengeDailyTodoRepository.insertTodayReadTodoIfMissing(memberId, today);
+        challengeDailyTodoRepository.insertTodayReadTodoIfMissing(memberId, today, ChallengeTodoType.READ.name());
     }
 }

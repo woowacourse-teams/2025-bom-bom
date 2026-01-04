@@ -11,19 +11,19 @@ public interface ChallengeDailyTodoRepository extends JpaRepository<ChallengeDai
 
     @Modifying
     @Query(value = """
-                insert ignore into challenge_daily_todo(participant_id, challenge_todo_id, todo_date)
-                select cp.id, ct.id, :today
-                from challenge_participant cp
-                join challenge c on c.id = cp.challenge_id
-                join challenge_todo ct on ct.challenge_id = cp.challenge_id and ct.todo_type = 'READ'
-                left join challenge_daily_todo dt
-                    on dt.participant_id = cp.id
-                   and dt.challenge_todo_id = ct.id
-                   and dt.todo_date = :today
-                where cp.member_id = :memberId
-                  and :today between c.start_date and c.end_date
-                  and cp.is_survived = true
-                  and dt.id is null
+                INSERT IGNORE INTO challenge_daily_todo(participant_id, challenge_todo_id, todo_date)
+                SELECT cp.id, ct.id, :today
+                FROM challenge_participant cp
+                JOIN challenge c ON c.id = cp.challenge_id
+                JOIN challenge_todo ct ON ct.challenge_id = cp.challenge_id AND ct.todo_type = 'READ'
+                LEFT JOIN challenge_daily_todo dt
+                    ON dt.participant_id = cp.id
+                   AND dt.challenge_todo_id = ct.id
+                   AND dt.todo_date = :today
+                WHERE cp.member_id = :memberId
+                  AND :today BETWEEN c.start_date AND c.end_date
+                  AND cp.is_survived = true
+                  AND dt.id IS NULL
             """, nativeQuery = true)
     int insertTodayReadTodoIfMissing(@Param("memberId") Long memberId,
                                      @Param("today") LocalDate today);

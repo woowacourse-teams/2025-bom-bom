@@ -37,6 +37,7 @@ public class ChallengeDailyGuideService {
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ChallengeDailyTodoService challengeDailyTodoService;
     private final ChallengeTodoService challengeTodoService;
+    private final ChallengeTeamService challengeTeamService;
 
     public TodayDailyGuideResponse getTodayDailyGuide(Long challengeId, Long memberId) {
         Challenge challenge = challengeRepository.findById(challengeId)
@@ -140,6 +141,18 @@ public class ChallengeDailyGuideService {
             challengeDailyTodoService.updateChallengeDailyTodo(memberId, today);
             // COMMENT todo 생성 (한 줄 코멘트 작성)
             challengeTodoService.insertCommentDone(participant, today);
+            
+            // 이미 완료되지 않았으면 progress 처리
+            // day1에 두 todo(READ, COMMENT)가 모두 생성되므로 바로 완료 처리
+            if (!challengeTodoService.isCompletedToday(participant.getId(), today)) {
+                challengeTodoService.completeDailyTodo(participant, today);
+                
+                // 팀 progress 업데이트
+                if (participant.getChallengeTeamId() != null) {
+                    var challengeTeam = challengeTeamService.getChallengeTeamByParticipant(participant);
+                    challengeTeamService.updateTeamProgress(challengeTeam);
+                }
+            }
         }
     }
 

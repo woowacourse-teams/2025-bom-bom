@@ -22,6 +22,7 @@ import me.bombom.api.v1.challenge.dto.request.DailyGuideCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyGuideCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyGuideRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
@@ -63,6 +64,9 @@ class ChallengeDailyGuideServiceTest {
     @Autowired
     private ChallengeDailyTodoRepository challengeDailyTodoRepository;
 
+    @Autowired
+    private ChallengeDailyResultRepository challengeDailyResultRepository;
+
     private Member member;
     private Challenge challenge;
     private ChallengeParticipant participant;
@@ -74,6 +78,7 @@ class ChallengeDailyGuideServiceTest {
     @BeforeEach
     void setUp() {
         challengeDailyGuideCommentRepository.deleteAllInBatch();
+        challengeDailyResultRepository.deleteAllInBatch();
         challengeDailyTodoRepository.deleteAllInBatch();
         challengeTodoRepository.deleteAllInBatch();
         challengeDailyGuideRepository.deleteAllInBatch();
@@ -438,6 +443,15 @@ class ChallengeDailyGuideServiceTest {
         boolean commentTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
                 participant.getId(), today, commentTodo.getId());
         assertThat(commentTodoExists).isTrue();
+
+        // then - progress 처리 확인: ChallengeDailyResult 생성 확인
+        boolean dailyResultExists = challengeDailyResultRepository.existsByParticipantIdAndDate(
+                participant.getId(), today);
+        assertThat(dailyResultExists).isTrue();
+
+        // then - progress 처리 확인: completedDays 증가 확인
+        ChallengeParticipant updatedParticipant = challengeParticipantRepository.findById(participant.getId()).orElseThrow();
+        assertThat(updatedParticipant.getCompletedDays()).isEqualTo(1);
     }
 
     @Test

@@ -36,7 +36,7 @@ public class ChallengeDailyGuideController implements ChallengeDailyGuideControl
     }
 
     @Override
-    @PostMapping("/{challengeId}/daily-guides/{dayIndex}/comment")
+    @PostMapping("/{challengeId}/daily-guides/{dayIndex}/my-comment")
     @ResponseStatus(HttpStatus.CREATED)
     public void createDailyGuideComment(
             @LoginMember Member member,

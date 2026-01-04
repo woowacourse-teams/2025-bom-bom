@@ -62,6 +62,11 @@ public class ChallengeService {
         Map<Long, ChallengeParticipant> myParticipation = findMyParticipation(member, challengeIds);
 
         return challenges.stream()
+                .filter(challenge -> {
+                    ChallengeStatus status = challenge.getStatus(LocalDate.now());
+                    boolean isJoined = myParticipation.containsKey(challenge.getId());
+                    return status == ChallengeStatus.BEFORE_START || isJoined;
+                })
                 .map(challenge -> toChallengeResponse(
                         challenge,
                         participantCounts,

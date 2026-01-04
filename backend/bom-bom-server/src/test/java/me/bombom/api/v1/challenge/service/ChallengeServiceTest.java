@@ -111,22 +111,12 @@ class ChallengeServiceTest {
         // when
         List<ChallengeResponse> result = challengeService.getChallenges(null);
 
-        // then
+        // then - 시작전 챌린지만 반환되어야 함 (challenge2만)
         assertSoftly(softly -> {
-            softly.assertThat(result).hasSize(2);
-            softly.assertThat(result)
-                    .extracting("id")
-                    .containsExactlyInAnyOrder(challenge1.getId(), challenge2.getId());
-            softly.assertThat(result)
-                    .extracting("title")
-                    .containsExactlyInAnyOrder("첫 번째 챌린지", "두 번째 챌린지");
-            softly.assertThat(result)
-                    .extracting(ChallengeResponse::detail)
-                    .allMatch(detail -> !detail.isJoined());
-            softly.assertThat(result)
-                    .extracting(ChallengeResponse::detail)
-                    .extracting(ChallengeDetailResponse::progress)
-                    .containsOnly(0);
+            softly.assertThat(result).hasSize(1);
+            softly.assertThat(result.get(0).id()).isEqualTo(challenge2.getId());
+            softly.assertThat(result.get(0).detail().isJoined()).isFalse();
+            softly.assertThat(result.get(0).detail().progress()).isEqualTo(0);
         });
     }
 
@@ -183,7 +173,7 @@ class ChallengeServiceTest {
     @Test
     void 참가자_수_조회() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(10), today.plusDays(10));
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
         challengeRepository.save(challenge);
 
         Member member1 = TestFixture.createUniqueMember("member1", "provider1");
@@ -197,7 +187,7 @@ class ChallengeServiceTest {
         // when
         List<ChallengeResponse> result = challengeService.getChallenges(null);
 
-        // then
+        // then - 시작전 챌린지이므로 반환되어야 함
         assertSoftly(softly -> {
             softly.assertThat(result).hasSize(1);
             softly.assertThat(result.get(0).participantCount()).isEqualTo(2);
@@ -207,7 +197,7 @@ class ChallengeServiceTest {
     @Test
     void 챌린지별_뉴스레터_조회() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(10), today.plusDays(10));
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
         challengeRepository.save(challenge);
 
         ChallengeNewsletter challengeNewsletter1 = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
@@ -217,7 +207,7 @@ class ChallengeServiceTest {
         // when
         List<ChallengeResponse> result = challengeService.getChallenges(null);
 
-        // then
+        // then - 시작전 챌린지이므로 반환되어야 함
         assertSoftly(softly -> {
             softly.assertThat(result).hasSize(1);
             softly.assertThat(result.get(0).newsletters()).hasSize(2);
@@ -233,10 +223,18 @@ class ChallengeServiceTest {
         Challenge challenge = TestFixture.createChallenge("진행 중 챌린지", 1, today.minusDays(5), today.plusDays(5));
         challengeRepository.save(challenge);
 
-        // when
-        List<ChallengeResponse> result = challengeService.getChallenges(null);
+        ChallengeParticipant participant = TestFixture.createChallengeParticipant(
+                challenge.getId(),
+                member.getId(),
+                3,
+                true
+        );
+        challengeParticipantRepository.save(participant);
 
-        // then
+        // when
+        List<ChallengeResponse> result = challengeService.getChallenges(member);
+
+        // then - 참여한 진행중 챌린지이므로 반환되어야 함
         assertSoftly(softly -> {
             softly.assertThat(result).hasSize(1);
             softly.assertThat(result.get(0).status()).isEqualTo(ChallengeStatus.ONGOING);
@@ -249,10 +247,18 @@ class ChallengeServiceTest {
         Challenge challenge = TestFixture.createChallenge("종료된 챌린지", 1, today.minusDays(20), today.minusDays(1));
         challengeRepository.save(challenge);
 
-        // when
-        List<ChallengeResponse> result = challengeService.getChallenges(null);
+        ChallengeParticipant participant = TestFixture.createChallengeParticipant(
+                challenge.getId(),
+                member.getId(),
+                15,
+                true
+        );
+        challengeParticipantRepository.save(participant);
 
-        // then
+        // when
+        List<ChallengeResponse> result = challengeService.getChallenges(member);
+
+        // then - 참여한 종료된 챌린지이므로 반환되어야 함
         assertSoftly(softly -> {
             softly.assertThat(result).hasSize(1);
             softly.assertThat(result.get(0).status()).isEqualTo(ChallengeStatus.COMPLETED);
@@ -306,13 +312,13 @@ class ChallengeServiceTest {
     @Test
     void 참가하지_않은_챌린지_detail_조회() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(10), today.plusDays(10));
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
         challengeRepository.save(challenge);
 
         // when
         List<ChallengeResponse> result = challengeService.getChallenges(member);
 
-        // then
+        // then - 시작전 챌린지이므로 반환되어야 함
         ChallengeDetailResponse detail = result.get(0).detail();
         assertSoftly(softly -> {
             softly.assertThat(result).hasSize(1);

@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.event.MarkAsReadEvent;
 import me.bombom.api.v1.challenge.service.ChallengeDailyTodoService;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 @Slf4j
@@ -15,6 +17,7 @@ public class ChallengeParticipantTodoListener {
     private final ChallengeDailyTodoService challengeDailyTodoService;
 
     @TransactionalEventListener
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void on(MarkAsReadEvent event) {
         try {
             challengeDailyTodoService.updateChallengeDailyTodo(event.memberId());

@@ -69,4 +69,21 @@ public class ChallengeParticipant extends BaseEntity {
         int progress = (int) ((double) this.completedDays / totalDays * 100);
         return Math.min(progress, 100);
     }
+
+    public boolean useShieldIfAvailable() {
+        if (this.shield > 0) {
+            this.shield -= 1;
+            this.completedDays += 1;
+            return true;
+        }
+        return false;
+    }
+
+    public void markAsFailed() {
+        this.isSurvived = false;
+    }
+
+    public void increaseCompletedDays() {
+        this.completedDays += 1;
+    }
 }

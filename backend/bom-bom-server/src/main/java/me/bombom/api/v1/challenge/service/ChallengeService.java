@@ -41,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ChallengeService {
 
     // TODO: 이후에 수료 처리 등 구현 시 관리 방법 고려
-    private static final int SUCCESS_REQUIRED_PERCENT = 80;
+    private static final double SUCCESS_REQUIRED_RATIO = 0.8;
 
     private final ChallengeRepository challengeRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
@@ -62,6 +62,11 @@ public class ChallengeService {
         Map<Long, ChallengeParticipant> myParticipation = findMyParticipation(member, challengeIds);
 
         return challenges.stream()
+                .filter(challenge -> {
+                    ChallengeStatus status = challenge.getStatus(LocalDate.now());
+                    boolean isJoined = myParticipation.containsKey(challenge.getId());
+                    return status == ChallengeStatus.BEFORE_START || isJoined;
+                })
                 .map(challenge -> toChallengeResponse(
                         challenge,
                         participantCounts,
@@ -77,7 +82,7 @@ public class ChallengeService {
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
                         .addContext(ErrorContextKeys.OPERATION, "getChallengeInfo"));
 
-        return ChallengeInfoResponse.of(challenge, SUCCESS_REQUIRED_PERCENT);
+        return ChallengeInfoResponse.of(challenge, SUCCESS_REQUIRED_RATIO);
     }
 
     public ChallengeEligibilityResponse checkEligibility(Long challengeId, Member member) {
@@ -139,9 +144,13 @@ public class ChallengeService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
                         .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
-                        .addContext("challengeId", challengeId));
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
 
         challengeParticipantRepository.delete(participant);
+    }
+
+    public List<Challenge> getOngoingChallenges(LocalDate date) {
+        return challengeRepository.findOngoingChallenges(date);
     }
 
     private ChallengeResponse toChallengeResponse(

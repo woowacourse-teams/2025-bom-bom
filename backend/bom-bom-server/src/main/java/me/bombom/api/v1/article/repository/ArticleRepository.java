@@ -1,8 +1,10 @@
 package me.bombom.api.v1.article.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -113,4 +115,24 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
         ) target ON target.id = a.id
     """, nativeQuery = true)
     int deleteExcessUnbookmarkedArticles(@Param("adminLimit") int adminLimit, @Param("userLimit") int userLimit);
+
+    @Query("""
+        SELECT new me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse(
+            a.id,
+            n.name,
+            a.title
+        )
+        FROM Article a
+        JOIN Newsletter n ON n.id = a.newsletterId
+        WHERE a.memberId = :memberId
+          AND a.arrivedDateTime >= :start
+          AND a.arrivedDateTime < :end
+          AND a.isRead IS TRUE 
+        ORDER BY a.arrivedDateTime DESC
+    """)
+    List<ChallengeCommentCandidateArticleResponse> findChallengeCommentCandidateArticles(
+            @Param("memberId") Long memberId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 }

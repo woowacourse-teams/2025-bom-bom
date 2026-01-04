@@ -25,7 +25,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
 @IntegrationTest
 class ChallengeDailyTodoServiceTest {
 
@@ -83,6 +82,7 @@ class ChallengeDailyTodoServiceTest {
     }
 
     @Test
+    @Transactional
     void 아티클_읽기시_챌린지_투두_업데이트() {
         // given
         LocalDate today = LocalDate.now();
@@ -110,6 +110,7 @@ class ChallengeDailyTodoServiceTest {
     }
 
     @Test
+    @Transactional
     void 이미_존재하는_챌린지_투두_중복_생성_안함() {
         // given
         LocalDate today = LocalDate.now();

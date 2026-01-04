@@ -8,9 +8,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.challenge.domain.Challenge;
@@ -38,6 +42,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @IntegrationTest
 @AutoConfigureMockMvc
 class ChallengeDailyGuideControllerTest {
+
+    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
 
     @Autowired
     private MockMvc mockMvc;
@@ -81,7 +87,7 @@ class ChallengeDailyGuideControllerTest {
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
 
-        today = LocalDate.now();
+        today = LocalDate.now(SEOUL_ZONE);
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "테스트 챌린지",
                 today.minusDays(5),
@@ -97,7 +103,7 @@ class ChallengeDailyGuideControllerTest {
                 )
         );
 
-        int dayIndex = (int) java.time.temporal.ChronoUnit.DAYS.between(challenge.getStartDate(), today) + 1;
+        int dayIndex = calculateDayIndex(challenge.getStartDate(), today);
         guide = challengeDailyGuideRepository.save(
                 TestFixture.createChallengeDailyGuide(
                         challenge.getId(),
@@ -120,6 +126,16 @@ class ChallengeDailyGuideControllerTest {
                 customOAuth2User.getAuthorities(),
                 "registrationId"
         );
+    }
+
+    private int calculateDayIndex(LocalDate startDate, LocalDate today) {
+        DayOfWeek dayOfWeek = today.getDayOfWeek();
+        boolean isWeekend = dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
+        
+        if (isWeekend) {
+            return 0;
+        }
+        return (int) DAYS.between(startDate, today) + 1;
     }
 
     @Test

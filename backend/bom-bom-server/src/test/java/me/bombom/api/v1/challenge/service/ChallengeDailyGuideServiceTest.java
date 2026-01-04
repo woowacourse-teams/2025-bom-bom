@@ -1,9 +1,12 @@
 package me.bombom.api.v1.challenge.service;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
@@ -27,6 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @IntegrationTest
 class ChallengeDailyGuideServiceTest {
+
+    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
 
     @Autowired
     private ChallengeDailyGuideService challengeDailyGuideService;
@@ -63,7 +68,7 @@ class ChallengeDailyGuideServiceTest {
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
 
-        today = LocalDate.now();
+        today = LocalDate.now(SEOUL_ZONE);
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "테스트 챌린지",
                 today.minusDays(5),
@@ -79,7 +84,7 @@ class ChallengeDailyGuideServiceTest {
                 )
         );
 
-        int dayIndex = (int) java.time.temporal.ChronoUnit.DAYS.between(challenge.getStartDate(), today) + 1;
+        int dayIndex = calculateDayIndex(challenge.getStartDate(), today);
         guide = challengeDailyGuideRepository.save(
                 TestFixture.createChallengeDailyGuide(
                         challenge.getId(),
@@ -90,6 +95,16 @@ class ChallengeDailyGuideServiceTest {
                         true
                 )
         );
+    }
+
+    private int calculateDayIndex(LocalDate startDate, LocalDate today) {
+        DayOfWeek dayOfWeek = today.getDayOfWeek();
+        boolean isWeekend = dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
+        
+        if (isWeekend) {
+            return 0;
+        }
+        return (int) DAYS.between(startDate, today) + 1;
     }
 
     @Test

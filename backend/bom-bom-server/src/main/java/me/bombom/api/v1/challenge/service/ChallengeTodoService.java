@@ -40,6 +40,14 @@ public class ChallengeTodoService {
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "ChallengeTodo")
                         .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndTodoType"));
 
+        // 중복 체크
+        if (challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                participant.getId(), today, challengeTodo.getId())) {
+            log.debug("Comment todo already exists for participantId={}, date={}, todoId={}",
+                    participant.getId(), today, challengeTodo.getId());
+            return;
+        }
+
         ChallengeDailyTodo dailyTodo = ChallengeDailyTodo.builder()
                 .participantId(participant.getId())
                 .todoDate(today)

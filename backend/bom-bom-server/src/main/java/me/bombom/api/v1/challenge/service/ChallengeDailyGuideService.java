@@ -35,6 +35,8 @@ public class ChallengeDailyGuideService {
     private final ChallengeDailyGuideRepository challengeDailyGuideRepository;
     private final ChallengeDailyGuideCommentRepository challengeDailyGuideCommentRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
+    private final ChallengeDailyTodoService challengeDailyTodoService;
+    private final ChallengeTodoService challengeTodoService;
 
     public TodayDailyGuideResponse getTodayDailyGuide(Long challengeId, Long memberId) {
         Challenge challenge = challengeRepository.findById(challengeId)
@@ -78,7 +80,7 @@ public class ChallengeDailyGuideService {
 
     @Transactional
     public void createDailyGuideComment(Long challengeId, int dayIndex, Long memberId,
-                                        DailyGuideCommentRequest request) {
+                                        DailyGuideCommentRequest request, LocalDate today) {
         Challenge challenge = challengeRepository.findById(challengeId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
@@ -131,6 +133,14 @@ public class ChallengeDailyGuideService {
                 .content(request.content())
                 .build();
         challengeDailyGuideCommentRepository.save(comment);
+
+        // day1일 때만 체크리스트 자동 완료 처리
+        if (dayIndex == 1) {
+            // READ todo 자동 생성 (뉴스레터 1개 읽기)
+            challengeDailyTodoService.updateChallengeDailyTodo(memberId, today);
+            // COMMENT todo 생성 (한 줄 코멘트 작성)
+            challengeTodoService.insertCommentDone(participant, today);
+        }
     }
 
     private int calculateDayIndex(LocalDate startDate, LocalDate today) {

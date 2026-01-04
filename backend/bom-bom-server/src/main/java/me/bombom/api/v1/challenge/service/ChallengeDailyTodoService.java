@@ -15,8 +15,7 @@ public class ChallengeDailyTodoService {
     private final ChallengeDailyTodoRepository challengeDailyTodoRepository;
 
     @Transactional
-    public void updateChallengeDailyTodo(Long memberId) {
-        LocalDate today = LocalDate.now();
+    public void updateChallengeDailyTodo(Long memberId, LocalDate today) {
         challengeDailyTodoRepository.insertTodayReadTodoIfMissing(memberId, today, ChallengeTodoType.READ.name());
     }
 }

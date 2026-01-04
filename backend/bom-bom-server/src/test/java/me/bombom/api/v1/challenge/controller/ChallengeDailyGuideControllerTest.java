@@ -1,5 +1,6 @@
 package me.bombom.api.v1.challenge.controller;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -13,8 +14,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
-
-import static java.time.temporal.ChronoUnit.DAYS;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.challenge.domain.Challenge;
@@ -131,7 +130,7 @@ class ChallengeDailyGuideControllerTest {
     private int calculateDayIndex(LocalDate startDate, LocalDate today) {
         DayOfWeek dayOfWeek = today.getDayOfWeek();
         boolean isWeekend = dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
-        
+
         if (isWeekend) {
             return 0;
         }
@@ -181,7 +180,7 @@ class ChallengeDailyGuideControllerTest {
         int dayIndex = guide.getDayIndex();
 
         // when & then
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/comment",
+        mockMvc.perform(post("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/my-comment",
                         challenge.getId(), dayIndex)
                         .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -208,7 +207,7 @@ class ChallengeDailyGuideControllerTest {
         int dayIndex = guide.getDayIndex();
 
         // when & then
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/comment",
+        mockMvc.perform(post("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/my-comment",
                         challenge.getId(), dayIndex)
                         .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -254,7 +253,7 @@ class ChallengeDailyGuideControllerTest {
         int dayIndex = guide.getDayIndex();
 
         // when & then
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/comment",
+        mockMvc.perform(post("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/my-comment",
                         challenge.getId(), dayIndex)
                         .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -302,7 +301,7 @@ class ChallengeDailyGuideControllerTest {
         DailyGuideCommentRequest request = new DailyGuideCommentRequest("주말 댓글 작성 시도");
 
         // when & then - dayIndex 0으로 댓글 작성 시도 (댓글 작성 불가능하므로 400)
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/comment",
+        mockMvc.perform(post("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/my-comment",
                         challenge.getId(), 0)
                         .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)

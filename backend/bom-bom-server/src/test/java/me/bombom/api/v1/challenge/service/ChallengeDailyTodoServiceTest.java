@@ -3,10 +3,13 @@ package me.bombom.api.v1.challenge.service;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
+import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.event.MarkAsReadEvent;
+import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
@@ -49,13 +52,18 @@ class ChallengeDailyTodoServiceTest {
     @Autowired
     private ChallengeDailyTodoRepository challengeDailyTodoRepository;
 
+    @Autowired
+    private ArticleRepository articleRepository;
+
     private Member member;
     private Challenge challenge;
     private ChallengeTodo readTodo;
+    private Article todayArticle;
 
     @BeforeEach
     void setUp() {
         challengeDailyTodoRepository.deleteAllInBatch();
+        articleRepository.deleteAllInBatch();
         challengeTodoRepository.deleteAllInBatch();
         challengeParticipantRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
@@ -82,6 +90,15 @@ class ChallengeDailyTodoServiceTest {
         readTodo = challengeTodoRepository.save(
                 TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ)
         );
+
+        todayArticle = articleRepository.save(
+                TestFixture.createArticle(
+                        "오늘 뉴스레터",
+                        member.getId(),
+                        1L,
+                        LocalDateTime.now(SEOUL_ZONE)
+                )
+        );
     }
 
     @Test
@@ -93,7 +110,7 @@ class ChallengeDailyTodoServiceTest {
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), 1L));
+        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), todayArticle.getId()));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -130,7 +147,7 @@ class ChallengeDailyTodoServiceTest {
         );
 
         // when
-        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), 1L));
+        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), todayArticle.getId()));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 

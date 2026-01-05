@@ -1,6 +1,7 @@
 package me.bombom.api.v1.challenge.service;
 
 import static java.time.temporal.ChronoUnit.DAYS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -13,6 +14,10 @@ import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuide;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
+import me.bombom.api.v1.challenge.domain.ChallengeDailyTodo;
+import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
+import me.bombom.api.v1.challenge.domain.ChallengeTodo;
+import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.domain.DailyGuideType;
 import me.bombom.api.v1.challenge.dto.request.DailyGuideCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse;
@@ -20,6 +25,11 @@ import me.bombom.api.v1.challenge.repository.ChallengeDailyGuideCommentRepositor
 import me.bombom.api.v1.challenge.repository.ChallengeDailyGuideRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -51,15 +61,29 @@ class ChallengeDailyGuideServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private ChallengeTodoRepository challengeTodoRepository;
+
+    @Autowired
+    private ChallengeDailyTodoRepository challengeDailyTodoRepository;
+
+    @Autowired
+    private ChallengeDailyResultRepository challengeDailyResultRepository;
+
     private Member member;
     private Challenge challenge;
     private ChallengeParticipant participant;
     private ChallengeDailyGuide guide;
     private LocalDate today;
+    private ChallengeTodo readTodo;
+    private ChallengeTodo commentTodo;
 
     @BeforeEach
     void setUp() {
         challengeDailyGuideCommentRepository.deleteAllInBatch();
+        challengeDailyResultRepository.deleteAllInBatch();
+        challengeDailyTodoRepository.deleteAllInBatch();
+        challengeTodoRepository.deleteAllInBatch();
         challengeDailyGuideRepository.deleteAllInBatch();
         challengeParticipantRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
@@ -82,6 +106,14 @@ class ChallengeDailyGuideServiceTest {
                         member.getId(),
                         0
                 )
+        );
+
+        // READ, COMMENT todo 생성
+        readTodo = challengeTodoRepository.save(
+                TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ)
+        );
+        commentTodo = challengeTodoRepository.save(
+                TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.COMMENT)
         );
 
         int dayIndex = calculateDayIndex(challenge.getStartDate(), today);
@@ -164,7 +196,8 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 dayIndex,
                 member.getId(),
-                request
+                request,
+                today
         );
 
         // then
@@ -195,7 +228,8 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 dayIndex,
                 member.getId(),
-                request
+                request,
+                today
         )).isInstanceOf(CIllegalArgumentException.class);
     }
 
@@ -266,7 +300,8 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 disabledGuide.getDayIndex(),
                 member.getId(),
-                request
+                request,
+                today
         )).isInstanceOf(CIllegalArgumentException.class);
     }
 
@@ -280,7 +315,8 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 999, // 존재하지 않는 dayIndex
                 member.getId(),
-                request
+                request,
+                today
         )).isInstanceOf(CIllegalArgumentException.class);
     }
 
@@ -333,7 +369,8 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 0,
                 member.getId(),
-                request
+                request,
+                today
         )).isInstanceOf(CIllegalArgumentException.class);
     }
 
@@ -358,7 +395,8 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 0,
                 member.getId(),
-                request
+                request,
+                today
         );
 
         // then - 댓글이 생성되었는지 확인

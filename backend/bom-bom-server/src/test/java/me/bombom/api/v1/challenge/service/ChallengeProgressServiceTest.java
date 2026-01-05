@@ -32,7 +32,6 @@ import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,69 +66,66 @@ class ChallengeProgressServiceTest {
     private Member member;
     private Challenge challenge;
 
-    @AfterEach
-    void tearDown() {
-            challengeDailyResultRepository.deleteAllInBatch();
-            challengeDailyTodoRepository.deleteAllInBatch();
-            challengeTodoRepository.deleteAllInBatch();
-            challengeParticipantRepository.deleteAllInBatch();
-            challengeTeamRepository.deleteAllInBatch();
-            challengeRepository.deleteAllInBatch();
-            memberRepository.deleteAllInBatch();
-    }
-
     @BeforeEach
     void setUp() {
-            member = memberRepository.save(TestFixture.createUniqueMember("tester", "12345"));
+        challengeDailyResultRepository.deleteAllInBatch();
+        challengeDailyTodoRepository.deleteAllInBatch();
+        challengeTodoRepository.deleteAllInBatch();
+        challengeParticipantRepository.deleteAllInBatch();
+        challengeTeamRepository.deleteAllInBatch();
+        challengeRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
 
-            challenge = challengeRepository.save(TestFixture.createChallenge(
-                            "Test Challenge",
-                            LocalDate.now().minusDays(5),
-                            LocalDate.now().plusDays(5),
-                            10));
+        member = memberRepository.save(
+                TestFixture.createUniqueMember("tester", java.util.UUID.randomUUID().toString()));
 
-            // 3일 완료한 참여자 생성
-            ChallengeParticipant participant = challengeParticipantRepository
-                            .save(TestFixture.createChallengeParticipant(
-                                            challenge.getId(),
-                                            member.getId(),
-                                            3));
+        challenge = challengeRepository.save(TestFixture.createChallenge(
+                "Test Challenge",
+                LocalDate.now().minusDays(5),
+                LocalDate.now().plusDays(5),
+                10));
 
-            ChallengeTodo readTodo = TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ);
-            challengeTodoRepository.save(readTodo);
+        // 3일 완료한 참여자 생성
+        ChallengeParticipant participant = challengeParticipantRepository
+                .save(TestFixture.createChallengeParticipant(
+                        challenge.getId(),
+                        member.getId(),
+                        3));
 
-            ChallengeTodo commentTodo = TestFixture.createChallengeTodo(challenge.getId(),
-                            ChallengeTodoType.COMMENT);
-            challengeTodoRepository.save(commentTodo);
+        ChallengeTodo readTodo = TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ);
+        challengeTodoRepository.save(readTodo);
 
-            ChallengeDailyTodo dailyTodo = TestFixture.createChallengeDailyTodo(
-                            participant.getId(),
-                            LocalDate.now(),
-                            readTodo.getId());
-            challengeDailyTodoRepository.save(dailyTodo);
+        ChallengeTodo commentTodo = TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.COMMENT);
+        challengeTodoRepository.save(commentTodo);
+
+        ChallengeDailyTodo dailyTodo = TestFixture.createChallengeDailyTodo(
+                participant.getId(),
+                LocalDate.now(),
+                readTodo.getId());
+        challengeDailyTodoRepository.save(dailyTodo);
     }
 
     @Test
     void 유저의_챌린지_진행상황을_조회한다() {
-            // when
-            MemberChallengeProgressResponse response = challengeProgressService.getMemberProgress(challenge.getId(),
-                            member);
+        // when
+        MemberChallengeProgressResponse response = challengeProgressService.getMemberProgress(challenge.getId(),
+                member);
 
-            // then
-            assertSoftly(softly -> {
-                softly.assertThat(response.nickname()).isEqualTo("tester");
-                softly.assertThat(response.totalDays()).isEqualTo(10);
-                softly.assertThat(response.completedDays()).isEqualTo(3);
-                softly.assertThat(response.todayTodos()).hasSize(2);
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.nickname()).isEqualTo("tester");
+            softly.assertThat(response.totalDays()).isEqualTo(10);
+            softly.assertThat(response.isSurvived()).isEqualTo(true);
+            softly.assertThat(response.completedDays()).isEqualTo(3);
+            softly.assertThat(response.todayTodos()).hasSize(2);
 
-                softly.assertThat(response.todayTodos())
-                        .extracting(TodayTodoResponse::challengeTodoType,
-                                TodayTodoResponse::challengeTodoStatus)
-                        .contains(
-                                tuple(ChallengeTodoType.READ, ChallengeTodoStatus.COMPLETE),
-                                tuple(ChallengeTodoType.COMMENT,
-                                        ChallengeTodoStatus.INCOMPLETE));
-            });
+            softly.assertThat(response.todayTodos())
+                    .extracting(TodayTodoResponse::challengeTodoType, TodayTodoResponse::challengeTodoStatus)
+                    .contains(
+                            tuple(ChallengeTodoType.READ, ChallengeTodoStatus.COMPLETE),
+                            tuple(ChallengeTodoType.COMMENT, ChallengeTodoStatus.INCOMPLETE)
+                    );
+        });
     }
 
     @Test
@@ -160,14 +156,14 @@ class ChallengeProgressServiceTest {
 
         ChallengeDailyResult result1 = createChallengeDailyResult(participant1.getId(), LocalDate.now(),
                 ChallengeDailyStatus.SHIELD);
-        ChallengeDailyResult result2 = createChallengeDailyResult(participant1.getId(),
-                LocalDate.now().plusDays(1), ChallengeDailyStatus.COMPLETE);
+        ChallengeDailyResult result2 = createChallengeDailyResult(participant1.getId(), LocalDate.now().plusDays(1),
+                ChallengeDailyStatus.COMPLETE);
         ChallengeDailyResult result3 = createChallengeDailyResult(participant2.getId(), LocalDate.now(),
                 ChallengeDailyStatus.COMPLETE);
-        ChallengeDailyResult result4 = createChallengeDailyResult(participant2.getId(),
-                LocalDate.now().plusDays(1), ChallengeDailyStatus.SHIELD);
-        ChallengeDailyResult result5 = createChallengeDailyResult(participant2.getId(),
-                LocalDate.now().plusDays(2), ChallengeDailyStatus.COMPLETE);
+        ChallengeDailyResult result4 = createChallengeDailyResult(participant2.getId(), LocalDate.now().plusDays(1),
+                ChallengeDailyStatus.SHIELD);
+        ChallengeDailyResult result5 = createChallengeDailyResult(participant2.getId(), LocalDate.now().plusDays(2),
+                ChallengeDailyStatus.COMPLETE);
         challengeDailyResultRepository.saveAll(List.of(result1, result2, result3, result4, result5));
 
         // when
@@ -192,8 +188,8 @@ class ChallengeProgressServiceTest {
             softly.assertThat(responseB.dailyProgresses())
                     .hasSize(3)
                     .extracting("status")
-                    .containsExactlyInAnyOrder(ChallengeDailyStatus.COMPLETE,
-                            ChallengeDailyStatus.SHIELD, ChallengeDailyStatus.COMPLETE);
+                    .containsExactlyInAnyOrder(ChallengeDailyStatus.COMPLETE, ChallengeDailyStatus.SHIELD,
+                            ChallengeDailyStatus.COMPLETE);
 
             softly.assertThat(responseB.dailyProgresses())
                     .extracting("date")

@@ -111,7 +111,7 @@ class ChallengeControllerTest {
     @Test
     void 비로그인_상태로_챌린지_목록_조회() throws Exception {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(10), today.plusDays(10));
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
         challengeRepository.save(challenge);
 
         ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(
@@ -120,7 +120,7 @@ class ChallengeControllerTest {
         );
         challengeNewsletterRepository.save(challengeNewsletter);
 
-        // when & then
+        // when & then - 시작전 챌린지이므로 반환되어야 함
         mockMvc.perform(get("/api/v1/challenges"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())

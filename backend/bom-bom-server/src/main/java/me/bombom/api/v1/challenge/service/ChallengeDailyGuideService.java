@@ -138,7 +138,7 @@ public class ChallengeDailyGuideService {
         // day1일 때만 체크리스트 자동 완료 처리
         if (dayIndex == 1) {
             // READ todo 자동 생성 (뉴스레터 1개 읽기)
-            challengeDailyTodoService.updateChallengeDailyTodo(memberId, today);
+            challengeDailyTodoService.updateChallengeDailyTodo(memberId, null, today);
             // COMMENT todo 생성 (한 줄 코멘트 작성)
             challengeTodoService.insertCommentDone(participant, today);
             

@@ -24,8 +24,19 @@ public interface ChallengeDailyTodoRepository extends JpaRepository<ChallengeDai
                   AND :today BETWEEN c.start_date AND c.end_date
                   AND cp.is_survived = true
                   AND dt.id IS NULL
+                  AND (
+                        :articleId IS NULL
+                        OR EXISTS (
+                            SELECT 1
+                            FROM article a
+                            WHERE a.id = :articleId
+                              AND a.member_id = cp.member_id
+                              AND DATE(a.arrived_date_time) = :today
+                        )
+                  )
             """, nativeQuery = true)
     int insertTodayReadTodoIfMissing(@Param("memberId") Long memberId,
+                                     @Param("articleId") Long articleId,
                                      @Param("today") LocalDate today,
                                      @Param("todoType") String todoType);
 

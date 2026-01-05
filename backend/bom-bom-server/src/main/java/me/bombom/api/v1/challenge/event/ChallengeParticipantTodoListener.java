@@ -25,7 +25,7 @@ public class ChallengeParticipantTodoListener {
     public void on(MarkAsReadEvent event) {
         try {
             LocalDate today = LocalDate.now(SEOUL_ZONE);
-            challengeDailyTodoService.updateChallengeDailyTodo(event.memberId(), today);
+            challengeDailyTodoService.updateChallengeDailyTodo(event.memberId(), event.articleId(), today);
         } catch (Exception e) {
             log.error("챌린지 데일리 투두 저장 중 오류가 발생했습니다. memberId={}", event.memberId(), e);
         }

@@ -31,6 +31,7 @@ public class ChallengeComment extends BaseEntity {
     @Column(nullable = false)
     private String articleTitle;
 
+    @Column(length = 400)
     private String quotation;
 
     @Column(nullable = false)

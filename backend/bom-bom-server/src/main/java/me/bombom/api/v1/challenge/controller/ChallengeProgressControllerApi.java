@@ -13,7 +13,7 @@ import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@Tag(name = "ChallengeProgress", description = "챌린지 API")
+@Tag(name = "ChallengeProgress", description = "챌린지 진행도 관련 API")
 public interface ChallengeProgressControllerApi {
 
     @Operation(summary = "챌린지 내 사용자 진행도 조회", description = "사용자의 챌린지 진행도(투두 완료 현황, 총일수, 완료일수)를 조회합니다.")
@@ -28,14 +28,17 @@ public interface ChallengeProgressControllerApi {
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
     );
 
-    @Operation(summary = "챌린지 팀 진행도 조회", description = "챌린지 참여 팀원들의 진행도 및 팀 요약 정보를 조회합니다.")
+    @Operation(summary = "특정 팀 진행도 조회", description = "특정 팀의 진행도 및 팀원들의 진행 상황을 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "팀 진행도 조회 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content),
-            @ApiResponse(responseCode = "404", description = "챌린지/사용자를 찾을 수 없음", content = @Content)
+            @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),
+            @ApiResponse(responseCode = "403", description = "권한 없음 (챌린지에 참가하지 않음)", content = @Content),
+            @ApiResponse(responseCode = "404", description = "챌린지/팀을 찾을 수 없음", content = @Content)
     })
-    TeamChallengeProgressResponse getTeamProgress(
+    TeamChallengeProgressResponse getTeamProgressByTeamId(
             @Parameter(hidden = true) @LoginMember Member member,
-            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+            @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
+            @Parameter(description = "팀 ID") @PathVariable @Positive(message = "teamId는 1 이상의 값이어야 합니다.") Long teamId
     );
 }

@@ -15,10 +15,15 @@ import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.highlight.domain.Color;
+import me.bombom.api.v1.highlight.domain.Highlight;
+import me.bombom.api.v1.highlight.domain.HighlightLocation;
+import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
@@ -61,6 +66,9 @@ class ChallengeCommentServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private HighlightRepository highlightRepository;
+
     private Member member;
     private Article article;
     private List<Article> articles;
@@ -76,6 +84,7 @@ class ChallengeCommentServiceTest {
         newsletterDetailRepository.deleteAllInBatch();
         categoryRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+        highlightRepository.deleteAllInBatch();
 
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
@@ -277,5 +286,51 @@ class ChallengeCommentServiceTest {
                 999L,
                 request
         )).isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void 하이라이트_텍스트가_기사_8퍼센트를_넘으면_잘라서_반환한다() {
+        // given
+        String contentsText = "a".repeat(100);
+        Article longArticle = articleRepository.save(
+                Article.builder()
+                        .title("길이가 긴 아티클")
+                        .contents("<p>본문</p>")
+                        .contentsText(contentsText)
+                        .thumbnailUrl("https://example.com/thumb.png")
+                        .expectedReadTime(3)
+                        .contentsSummary("요약")
+                        .isRead(true)
+                        .memberId(member.getId())
+                        .newsletterId(newsletters.getFirst().getId())
+                        .arrivedDateTime(LocalDateTime.now())
+                        .build()
+        );
+
+        highlightRepository.save(
+                Highlight.builder()
+                        .highlightLocation(new HighlightLocation(0, "div[0]/p[0]", 10, "div[0]/p[0]"))
+                        .memberId(member.getId())
+                        .newsletterId(longArticle.getNewsletterId())
+                        .articleId(longArticle.getId())
+                        .title(longArticle.getTitle())
+                        .color(Color.from("#ff0000"))
+                        .text("0123456789")
+                        .memo("memo")
+                        .build()
+        );
+
+        // when
+        Page<ChallengeCommentHighlightResponse> result = challengeCommentService.getChallengeArticleHighlights(
+                member.getId(),
+                longArticle.getId(),
+                PageRequest.of(0, 10)
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.getTotalElements()).isEqualTo(1);
+            softly.assertThat(result.getContent().getFirst().text()).isEqualTo("01234567...");
+        });
     }
 }

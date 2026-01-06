@@ -7,15 +7,12 @@ import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.RecentArticle;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
-import me.bombom.api.v1.challenge.domain.ChallengeDailyGuide;
-import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeNewsletter;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.domain.ChallengeTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
-import me.bombom.api.v1.challenge.domain.DailyGuideType;
 import me.bombom.api.v1.highlight.domain.Color;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
@@ -637,42 +634,6 @@ public final class TestFixture {
                 .articleTitle(articleTitle)
                 .quotation(quotation)
                 .comment(comment)
-                .build();
-    }
-
-    /**
-     * ChallengeDailyGuide
-     */
-    public static ChallengeDailyGuide createChallengeDailyGuide(
-            Long challengeId,
-            int dayIndex,
-            DailyGuideType type,
-            String imageUrl,
-            String notice,
-            boolean commentEnabled
-    ) {
-        return ChallengeDailyGuide.builder()
-                .challengeId(challengeId)
-                .dayIndex(dayIndex)
-                .type(type)
-                .imageUrl(imageUrl)
-                .notice(notice)
-                .commentEnabled(commentEnabled)
-                .build();
-    }
-
-    /**
-     * ChallengeDailyGuideComment
-     */
-    public static ChallengeDailyGuideComment createChallengeDailyGuideComment(
-            Long guideId,
-            Long participantId,
-            String content
-    ) {
-        return ChallengeDailyGuideComment.builder()
-                .guideId(guideId)
-                .participantId(participantId)
-                .content(content)
                 .build();
     }
 }

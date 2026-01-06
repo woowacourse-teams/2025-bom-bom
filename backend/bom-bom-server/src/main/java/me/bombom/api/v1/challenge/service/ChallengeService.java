@@ -9,11 +9,13 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
+import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.domain.EligibilityReason;
 import me.bombom.api.v1.challenge.dto.ChallengeNewsletterRow;
 import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
@@ -22,9 +24,11 @@ import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeNewsletterResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeTeamListResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeNewsletterRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -46,6 +50,7 @@ public class ChallengeService {
     private final ChallengeRepository challengeRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ChallengeNewsletterRepository challengeNewsletterRepository;
+    private final ChallengeTeamRepository challengeTeamRepository;
 
     public List<ChallengeResponse> getChallenges(Member member) {
         List<Challenge> challenges = challengeRepository.findAll();
@@ -151,6 +156,32 @@ public class ChallengeService {
 
     public List<Challenge> getOngoingChallenges(LocalDate date) {
         return challengeRepository.findOngoingChallenges(date);
+    }
+
+    public ChallengeTeamListResponse getTeamList(Long challengeId, Member member) {
+        if (!challengeRepository.existsById(challengeId)) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                    .addContext(ErrorContextKeys.OPERATION, "getTeamList");
+        }
+
+        Long myTeamId = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, member.getId())
+                .map(ChallengeParticipant::getChallengeTeamId)
+                .orElse(null);
+
+        List<ChallengeTeam> teams = challengeTeamRepository.findAllByChallengeIdOrderByIdAsc(challengeId);
+
+        List<ChallengeTeamListResponse.TeamInfoResponse> teamInfos = IntStream.range(0, teams.size())
+                .mapToObj(index -> {
+                    ChallengeTeam team = teams.get(index);
+                    return new ChallengeTeamListResponse.TeamInfoResponse(
+                            team.getId(),
+                            index + 1,
+                            team.getId().equals(myTeamId));
+                })
+                .toList();
+
+        return new ChallengeTeamListResponse(teams.size(), myTeamId, teamInfos);
     }
 
     private ChallengeResponse toChallengeResponse(

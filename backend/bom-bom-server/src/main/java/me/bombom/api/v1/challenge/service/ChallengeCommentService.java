@@ -42,8 +42,7 @@ public class ChallengeCommentService {
             ChallengeCommentOptionsRequest request,
             Pageable pageable
     ) {
-        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId,
-                        memberId)
+        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
                         .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                         .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndMemberId"));
@@ -56,8 +55,7 @@ public class ChallengeCommentService {
         );
     }
 
-    public List<ChallengeCommentCandidateArticleResponse> getChallengeCommentCandidateArticles(Long memberId,
-                                                                                               LocalDate date) {
+    public List<ChallengeCommentCandidateArticleResponse> getChallengeCommentCandidateArticles(Long memberId, LocalDate date) {
         return articleRepository.findChallengeCommentCandidateArticles(
                 memberId,
                 date.atStartOfDay(),
@@ -71,10 +69,7 @@ public class ChallengeCommentService {
             Long challengeId,
             ChallengeCommentRequest request
     ) {
-        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
-                        challengeId,
-                        memberId
-                )
+        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                         .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)

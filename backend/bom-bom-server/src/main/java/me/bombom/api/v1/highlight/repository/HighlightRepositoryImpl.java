@@ -45,6 +45,7 @@ public class HighlightRepositoryImpl implements CustomHighlightRepository {
     public Page<ChallengeCommentHighlightResponse> findChallengeArticleHighlights(
             Long memberId,
             Long articleId,
+            double textTruncateRatio,
             Pageable pageable
     ) {
         JPAQuery<Long> totalQuery = getTotalQuery(memberId, articleId, null);
@@ -52,7 +53,7 @@ public class HighlightRepositoryImpl implements CustomHighlightRepository {
         List<ChallengeCommentHighlightResponse> content = jpaQueryFactory
                 .select(new QChallengeCommentHighlightResponse(
                         highlight.id,
-                        truncatedHighlightText(),
+                        truncatedHighlightText(textTruncateRatio),
                         highlight.memo
                 ))
                 .from(highlight)
@@ -138,11 +139,11 @@ public class HighlightRepositoryImpl implements CustomHighlightRepository {
                 .orElse(null);
     }
 
-    private Expression<String> truncatedHighlightText() {
+    private Expression<String> truncatedHighlightText(double textTruncateRatio) {
         NumberExpression<Integer> threshold =
                 article.contentsText.length()
                         .doubleValue()
-                        .multiply(0.08)
+                        .multiply(textTruncateRatio)
                         .ceil()
                         .intValue();
 

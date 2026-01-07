@@ -14,6 +14,7 @@ public interface CustomHighlightRepository {
     Page<ChallengeCommentHighlightResponse> findChallengeArticleHighlights(
             Long memberId,
             Long articleId,
+            double textTruncateRatio,
             Pageable pageable
     );
 

@@ -19,6 +19,7 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,9 @@ public class ChallengeCommentService {
     private final ArticleRepository articleRepository;
     private final HighlightRepository highlightRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+
+    @Value("${challenge.highlight.truncate-ratio}")
+    private double highlightTruncateRatio;
 
     public Page<ChallengeCommentResponse> getChallengeComments(
             Long challengeId,
@@ -99,6 +103,11 @@ public class ChallengeCommentService {
             Long articleId,
             Pageable pageable
     ) {
-        return highlightRepository.findChallengeArticleHighlights(memberId, articleId, pageable);
+        return highlightRepository.findChallengeArticleHighlights(
+                memberId,
+                articleId,
+                highlightTruncateRatio,
+                pageable
+        );
     }
 }

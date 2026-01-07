@@ -46,13 +46,14 @@ public class ChallengeCommentService {
             ChallengeCommentOptionsRequest request,
             Pageable pageable
     ) {
-        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
-                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                        .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndMemberId"));
+        if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext(ErrorContextKeys.OPERATION, "existsByChallengeIdAndMemberId");
+        }
 
         return challengeCommentRepository.findAllInDuration(
-                participant.getChallengeId(),
+                challengeId,
                 memberId,
                 request.start(),
                 request.end(),

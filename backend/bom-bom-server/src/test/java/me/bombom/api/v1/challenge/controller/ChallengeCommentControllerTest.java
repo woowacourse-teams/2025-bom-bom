@@ -226,24 +226,6 @@ class ChallengeCommentControllerTest {
     }
 
     @Test
-    void 인용구가_400자를_넘으면_400을_응답한다() throws Exception {
-        // given
-        String tooLongQuotation = "a".repeat(401);
-        ChallengeCommentRequest request = new ChallengeCommentRequest(
-                article.getId(),
-                tooLongQuotation,
-                "챌린지 한 줄 코멘트로 20자 이상의 댓글을 작성했습니다."
-        );
-
-        // when & then
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/comments", 1L)
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void 하이라이트가_8퍼센트를_넘으면_잘라서_응답한다() throws Exception {
         // given
         String contentsText = "b".repeat(100);

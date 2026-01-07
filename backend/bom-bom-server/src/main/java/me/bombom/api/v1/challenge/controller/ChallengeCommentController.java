@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.challenge.service.ChallengeCommentService;
 import me.bombom.api.v1.common.resolver.LoginMember;
@@ -15,6 +16,7 @@ import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
@@ -48,7 +50,7 @@ public class ChallengeCommentController implements ChallengeCommentControllerApi
                     @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC),
                     @SortDefault(sort = "id", direction = Sort.Direction.ASC)
             }) Pageable pageable
-    ){
+    ) {
         return challengeCommentService.getChallengeComments(challengeId, member.getId(), request, pageable);
     }
 
@@ -68,7 +70,17 @@ public class ChallengeCommentController implements ChallengeCommentControllerApi
             @LoginMember Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
             @Valid @RequestBody ChallengeCommentRequest request
-    ){
+    ) {
         challengeCommentService.createChallengeComment(member.getId(), challengeId, request);
+    }
+
+    @Override
+    @GetMapping("/comments/articles/{articleId}/highlights")
+    public Page<ChallengeCommentHighlightResponse> getChallengeArticleHighlights(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Direction.DESC) Pageable pageable
+    ) {
+        return challengeCommentService.getChallengeArticleHighlights(member.getId(), articleId, pageable);
     }
 }

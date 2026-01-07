@@ -17,6 +17,10 @@ import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
+import me.bombom.api.v1.highlight.domain.Color;
+import me.bombom.api.v1.highlight.domain.Highlight;
+import me.bombom.api.v1.highlight.domain.HighlightLocation;
+import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
@@ -66,6 +70,9 @@ class ChallengeCommentControllerTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private HighlightRepository highlightRepository;
+
     private Member member;
     private List<Newsletter> newsletters;
     private Article article;
@@ -80,6 +87,7 @@ class ChallengeCommentControllerTest {
         newsletterDetailRepository.deleteAllInBatch();
         categoryRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+        highlightRepository.deleteAllInBatch();
 
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
@@ -215,5 +223,45 @@ class ChallengeCommentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 하이라이트가_8퍼센트를_넘으면_잘라서_응답한다() throws Exception {
+        // given
+        String contentsText = "b".repeat(100);
+        Article longArticle = articleRepository.save(
+                Article.builder()
+                        .title("하이라이트 아티클")
+                        .contents("<p>본문</p>")
+                        .contentsText(contentsText)
+                        .thumbnailUrl("https://example.com/thumb.png")
+                        .expectedReadTime(4)
+                        .contentsSummary("요약")
+                        .isRead(true)
+                        .memberId(member.getId())
+                        .newsletterId(newsletters.getFirst().getId())
+                        .arrivedDateTime(LocalDateTime.now())
+                        .build()
+        );
+
+        highlightRepository.save(
+                Highlight.builder()
+                        .highlightLocation(new HighlightLocation(0, "div[0]/p[0]", 10, "div[0]/p[0]"))
+                        .memberId(member.getId())
+                        .newsletterId(longArticle.getNewsletterId())
+                        .articleId(longArticle.getId())
+                        .title(longArticle.getTitle())
+                        .color(Color.from("#00ff00"))
+                        .text("ABCDEFGHIJKL")
+                        .memo("memo")
+                        .build()
+        );
+
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges/comments/articles/{articleId}/highlights", longArticle.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].text").value("ABCDEFGH..."));
     }
 }

@@ -14,17 +14,15 @@ public interface HighlightRepository extends JpaRepository<Highlight, Long>, Cus
 
     int countByMemberId(Long memberId);
 
-    int countByArticleId(Long articleId);
-
     List<Highlight> findAllByArticleId(Long articleId);
 
     void deleteAllByMemberId(Long memberId);
 
     @Modifying(clearAutomatically = true)
     @Query("""
-        UPDATE Highlight h 
-        SET h.articleId = 0 
-        WHERE h.articleId IN :articleIds
-    """)
+                UPDATE Highlight h 
+                SET h.articleId = 0 
+                WHERE h.articleId IN :articleIds
+            """)
     void updateArticleDeleted(List<Long> articleIds);
 }

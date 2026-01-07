@@ -50,8 +50,9 @@ public class ChallengeCommentService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
                         .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                         .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndMemberId"));
-        return challengeCommentRepository.findAllByTeamInDuration(
-                participant.getChallengeTeamId(),
+
+        return challengeCommentRepository.findAllInDuration(
+                participant.getChallengeId(),
                 memberId,
                 request.start(),
                 request.end(),

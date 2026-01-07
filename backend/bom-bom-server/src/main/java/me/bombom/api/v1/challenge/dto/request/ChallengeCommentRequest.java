@@ -8,7 +8,6 @@ public record ChallengeCommentRequest(
         @NotNull
         Long articleId,
 
-        @Size(max = 400, message = "인용구는 400자 이하로 입력해야 합니다.")
         String quotation,
 
         @NotNull

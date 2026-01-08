@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ChallengeScheduler {
 
-    private static final String DAILY_CRON = "0 30 1 * * *";
+    private static final String DAILY_CRON = "0 0 0 * * *";
 
     private final ChallengeService challengeService;
     private final ChallengeProgressService challengeProgressService;
@@ -24,6 +24,7 @@ public class ChallengeScheduler {
     @Scheduled(cron = DAILY_CRON)
     @SchedulerLock(name = "check_survival", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void checkSurvival() {
+        log.info("탈락 및 쉴드 사용 처리 시작");
         LocalDate yesterday = LocalDate.now().minusDays(1);
         List<Challenge> challenges = challengeService.getOngoingChallenges(yesterday);
 

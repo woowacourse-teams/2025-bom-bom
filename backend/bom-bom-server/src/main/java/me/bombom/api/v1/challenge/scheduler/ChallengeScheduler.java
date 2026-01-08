@@ -16,13 +16,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ChallengeScheduler {
 
-    private static final String DAILY_CRON = "0 0 0 * * *";
+    private static final String DAILY_CRON = "0 30 1 * * *";
 
     private final ChallengeService challengeService;
     private final ChallengeProgressService challengeProgressService;
 
     @Scheduled(cron = DAILY_CRON)
-    @SchedulerLock(name = "cleanup_old_previous_articles", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
+    @SchedulerLock(name = "check_survival", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void checkSurvival() {
         LocalDate yesterday = LocalDate.now().minusDays(1);
         List<Challenge> challenges = challengeService.getOngoingChallenges(yesterday);

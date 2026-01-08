@@ -112,7 +112,7 @@ class ChallengeCommentServiceTest {
     }
 
     @Test
-    void 같은_팀_댓글만_기간_내_조회_성공() {
+    void 같은_챌린지_참여자들_댓글만_기간_내_조회_성공() {
         // given
         LocalDate start = LocalDate.now().minusDays(1);
         LocalDate end = LocalDate.now().plusDays(1);
@@ -122,7 +122,7 @@ class ChallengeCommentServiceTest {
 
         ChallengeParticipant otherTeamParticipant = challengeParticipantRepository.save(
                 TestFixture.createChallengeParticipantWithTeam(
-                        2L,
+                        1L,
                         otherMember.getId(),
                         20L,
                         0,
@@ -159,7 +159,7 @@ class ChallengeCommentServiceTest {
         );
 
         // then
-        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getTotalElements()).isEqualTo(2);
         assertThat(result.getContent().get(0).comment()).isEqualTo(otherTeamComment.getComment());
     }
 

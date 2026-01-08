@@ -11,15 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface ChallengeDailyGuideCommentRepository extends JpaRepository<ChallengeDailyGuideComment, Long> {
 
-    @Query("""
-                SELECT c FROM ChallengeDailyGuideComment c
-                WHERE c.guideId = :guideId
-                AND c.participantId = :participantId
-            """)
-    Optional<ChallengeDailyGuideComment> findByGuideIdAndParticipantId(
-            @Param("guideId") Long guideId,
-            @Param("participantId") Long participantId
-    );
+    Optional<ChallengeDailyGuideComment> findByGuideIdAndParticipantId(Long guideId, Long participantId);
 
     @Query("""
             SELECT new me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse(

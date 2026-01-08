@@ -80,19 +80,25 @@ public class ChallengeProgressService {
         return TeamChallengeProgressResponse.of(challenge, progressList);
     }
 
-    private void validateTeamBelongsToChallenge(Long challengeId, Long teamId) {
-        ChallengeTeam team = challengeTeamRepository.findById(teamId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeTeam")
-                        .addContext(ErrorContextKeys.OPERATION, "validateTeamBelongsToChallenge")
-                        .addContext(ErrorContextKeys.DETAIL, "팀을 찾을 수 없습니다: " + teamId));
+    private void saveShieldDailyResult(ChallengeParticipant participant, LocalDate date) {
+        ChallengeDailyResult result = ChallengeDailyResult.builder()
+                .participantId(participant.getId())
+                .date(date)
+                .status(ChallengeDailyStatus.SHIELD)
+                .build();
+        challengeDailyResultRepository.save(result);
+    }
 
-        if (!team.getChallengeId().equals(challengeId)) {
-            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeTeam")
-                    .addContext(ErrorContextKeys.OPERATION, "validateTeamBelongsToChallenge")
-                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
-                    .addContext(ErrorContextKeys.DETAIL, "해당 팀은 이 챌린지에 속하지 않습니다: " + teamId);
+    private void checkFailure(ChallengeParticipant participant, Challenge challenge, LocalDate yesterday) {
+        // 종료 일은 포함하지 않아서 +1
+        int totalDays = challenge.getTotalDays();
+        int requiredSuccessDays = (int) Math.ceil(totalDays * SUCCESS_REQUIRED_RATIO);
+        int maxAllowedAbsent = totalDays - requiredSuccessDays;
+
+        int daysSinceStart = (int) (ChronoUnit.DAYS.between(challenge.getStartDate(), yesterday) + 1);
+        int currentAbsent = daysSinceStart - participant.getCompletedDays();
+        if (currentAbsent > maxAllowedAbsent) {
+            participant.markAsFailed();
         }
     }
 
@@ -117,25 +123,19 @@ public class ChallengeProgressService {
         }
     }
 
-    private void saveShieldDailyResult(ChallengeParticipant participant, LocalDate date) {
-        ChallengeDailyResult result = ChallengeDailyResult.builder()
-                .participantId(participant.getId())
-                .date(date)
-                .status(ChallengeDailyStatus.SHIELD)
-                .build();
-        challengeDailyResultRepository.save(result);
-    }
+    private void validateTeamBelongsToChallenge(Long challengeId, Long teamId) {
+        ChallengeTeam team = challengeTeamRepository.findById(teamId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeTeam")
+                        .addContext(ErrorContextKeys.OPERATION, "validateTeamBelongsToChallenge")
+                        .addContext(ErrorContextKeys.DETAIL, "팀을 찾을 수 없습니다: " + teamId));
 
-    private void checkFailure(ChallengeParticipant participant, Challenge challenge, LocalDate yesterday) {
-        // 종료 일은 포함하지 않아서 +1
-        int totalDays = challenge.getTotalDays();
-        int requiredSuccessDays = (int) Math.ceil(totalDays * SUCCESS_REQUIRED_RATIO);
-        int maxAllowedAbsent = totalDays - requiredSuccessDays;
-
-        int daysSinceStart = (int) (ChronoUnit.DAYS.between(challenge.getStartDate(), yesterday) + 1);
-        int currentAbsent = daysSinceStart - participant.getCompletedDays();
-        if (currentAbsent > maxAllowedAbsent) {
-            participant.markAsFailed();
+        if (!team.getChallengeId().equals(challengeId)) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeTeam")
+                    .addContext(ErrorContextKeys.OPERATION, "validateTeamBelongsToChallenge")
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                    .addContext(ErrorContextKeys.DETAIL, "해당 팀은 이 챌린지에 속하지 않습니다: " + teamId);
         }
     }
 }

@@ -173,11 +173,11 @@ public class ChallengeService {
         List<ChallengeTeam> teams = challengeTeamRepository.findAllByChallengeIdOrderByIdAsc(challengeId);
 
         List<ChallengeTeamListResponse.TeamInfoResponse> teamInfos = new ArrayList<>(teams.size());
-        int displayOrder = 1;
+        int teamNumber = 1;
         for (ChallengeTeam team : teams) {
             teamInfos.add(new ChallengeTeamListResponse.TeamInfoResponse(
                     team.getId(),
-                    displayOrder++,
+                    teamNumber++,
                     Objects.equals(team.getId(), myTeamId)));
         }
 

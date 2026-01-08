@@ -648,13 +648,13 @@ class ChallengeServiceTest {
             softly.assertThat(result.myTeamId()).isEqualTo(team2.getId());
             softly.assertThat(result.teams()).hasSize(3);
             softly.assertThat(result.teams().get(0).teamId()).isEqualTo(team1.getId());
-            softly.assertThat(result.teams().get(0).displayOrder()).isEqualTo(1);
+            softly.assertThat(result.teams().get(0).teamNumber()).isEqualTo(1);
             softly.assertThat(result.teams().get(0).isMyTeam()).isFalse();
             softly.assertThat(result.teams().get(1).teamId()).isEqualTo(team2.getId());
-            softly.assertThat(result.teams().get(1).displayOrder()).isEqualTo(2);
+            softly.assertThat(result.teams().get(1).teamNumber()).isEqualTo(2);
             softly.assertThat(result.teams().get(1).isMyTeam()).isTrue();
             softly.assertThat(result.teams().get(2).teamId()).isEqualTo(team3.getId());
-            softly.assertThat(result.teams().get(2).displayOrder()).isEqualTo(3);
+            softly.assertThat(result.teams().get(2).teamNumber()).isEqualTo(3);
             softly.assertThat(result.teams().get(2).isMyTeam()).isFalse();
         });
     }
@@ -716,7 +716,7 @@ class ChallengeServiceTest {
     }
 
     @Test
-    void 팀_목록_조회_시_displayOrder가_올바르게_계산된다() {
+    void 팀_목록_조회_시_teamNumber가_올바르게_계산된다() {
         // given
         Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
         challengeRepository.save(challenge);
@@ -733,10 +733,10 @@ class ChallengeServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(result.teams()).hasSize(4);
-            softly.assertThat(result.teams().get(0).displayOrder()).isEqualTo(1);
-            softly.assertThat(result.teams().get(1).displayOrder()).isEqualTo(2);
-            softly.assertThat(result.teams().get(2).displayOrder()).isEqualTo(3);
-            softly.assertThat(result.teams().get(3).displayOrder()).isEqualTo(4);
+            softly.assertThat(result.teams().get(0).teamNumber()).isEqualTo(1);
+            softly.assertThat(result.teams().get(1).teamNumber()).isEqualTo(2);
+            softly.assertThat(result.teams().get(2).teamNumber()).isEqualTo(3);
+            softly.assertThat(result.teams().get(3).teamNumber()).isEqualTo(4);
         });
     }
 }

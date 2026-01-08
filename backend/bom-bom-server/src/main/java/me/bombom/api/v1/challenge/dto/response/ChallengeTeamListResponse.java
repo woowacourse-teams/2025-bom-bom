@@ -20,7 +20,7 @@ public record ChallengeTeamListResponse(
             Long teamId,
 
             @Schema(required = true)
-            int displayOrder,
+            int teamNumber,
 
             @Schema(required = true)
             boolean isMyTeam

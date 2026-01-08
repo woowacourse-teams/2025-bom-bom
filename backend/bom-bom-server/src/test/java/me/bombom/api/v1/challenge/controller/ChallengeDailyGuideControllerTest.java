@@ -308,5 +308,34 @@ class ChallengeDailyGuideControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void 데일리_가이드_코멘트_목록_조회_성공() throws Exception {
+        // given
+        challengeDailyGuideCommentRepository.save(
+                TestFixture.createChallengeDailyGuideComment(
+                        guide.getId(),
+                        participant.getId(),
+                        "테스트 코멘트"
+                )
+        );
+
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/comments",
+                        challenge.getId(), guide.getDayIndex()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content[0].nickname").exists())
+                .andExpect(jsonPath("$.content[0].comment").exists())
+                .andExpect(jsonPath("$.content[0].createdAt").exists());
+    }
+
+    @Test
+    void 존재하지_않는_챌린지로_코멘트_목록_조회시_404_응답() throws Exception {
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/comments",
+                        999L, guide.getDayIndex()))
+                .andExpect(status().isNotFound());
+    }
 }
 

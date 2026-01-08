@@ -9,6 +9,9 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuide;
@@ -587,6 +590,148 @@ class ChallengeDailyGuideServiceTest {
         boolean readTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
                 participant.getId(), today, readTodo.getId());
         assertThat(readTodoExists).isTrue();
+    }
+
+    @Test
+    void 데일리_가이드_코멘트_목록_조회_성공() {
+        // given
+        Member member2 = TestFixture.createUniqueMember("member2", "member2");
+        memberRepository.save(member2);
+        ChallengeParticipant participant2 = challengeParticipantRepository.save(
+                TestFixture.createChallengeParticipant(
+                        challenge.getId(),
+                        member2.getId(),
+                        0
+                )
+        );
+
+        challengeDailyGuideCommentRepository.save(
+                TestFixture.createChallengeDailyGuideComment(
+                        guide.getId(),
+                        participant.getId(),
+                        "첫 번째 코멘트"
+                )
+        );
+        challengeDailyGuideCommentRepository.save(
+                TestFixture.createChallengeDailyGuideComment(
+                        guide.getId(),
+                        participant2.getId(),
+                        "두 번째 코멘트"
+                )
+        );
+
+        Pageable pageable = PageRequest.of(0, 20);
+
+        // when
+        Page<me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse> response =
+                challengeDailyGuideService.getTotalComments(challenge.getId(), guide.getDayIndex(), pageable);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.getContent()).hasSize(2);
+            softly.assertThat(response.getTotalElements()).isEqualTo(2);
+            softly.assertThat(response.getTotalPages()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void 데일리_가이드_코멘트_목록_조회_페이징() {
+        // given
+        Member member2 = TestFixture.createUniqueMember("member2", "member2");
+        memberRepository.save(member2);
+        ChallengeParticipant participant2 = challengeParticipantRepository.save(
+                TestFixture.createChallengeParticipant(
+                        challenge.getId(),
+                        member2.getId(),
+                        0
+                )
+        );
+
+        challengeDailyGuideCommentRepository.save(
+                TestFixture.createChallengeDailyGuideComment(
+                        guide.getId(),
+                        participant.getId(),
+                        "첫 번째 코멘트"
+                )
+        );
+        challengeDailyGuideCommentRepository.save(
+                TestFixture.createChallengeDailyGuideComment(
+                        guide.getId(),
+                        participant2.getId(),
+                        "두 번째 코멘트"
+                )
+        );
+
+        Pageable pageable = PageRequest.of(0, 1);
+
+        // when
+        Page<me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse> response =
+                challengeDailyGuideService.getTotalComments(challenge.getId(), guide.getDayIndex(), pageable);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.getContent()).hasSize(1);
+            softly.assertThat(response.getTotalElements()).isEqualTo(2);
+            softly.assertThat(response.getTotalPages()).isEqualTo(2);
+        });
+    }
+
+    @Test
+    void 존재하지_않는_챌린지로_코멘트_목록_조회시_예외_발생() {
+        // given
+        Pageable pageable = PageRequest.of(0, 20);
+
+        // when & then
+        assertThatThrownBy(() -> challengeDailyGuideService.getTotalComments(
+                999L,
+                guide.getDayIndex(),
+                pageable
+        )).isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void 유효하지_않은_dayIndex로_코멘트_목록_조회시_예외_발생() {
+        // given
+        Pageable pageable = PageRequest.of(0, 20);
+        int invalidDayIndex = challenge.getTotalDays() + 1;
+
+        // when & then
+        assertThatThrownBy(() -> challengeDailyGuideService.getTotalComments(
+                challenge.getId(),
+                invalidDayIndex,
+                pageable
+        )).isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void 존재하지_않는_가이드로_코멘트_목록_조회시_예외_발생() {
+        // given
+        Pageable pageable = PageRequest.of(0, 20);
+        int nonExistentDayIndex = guide.getDayIndex() + 10;
+
+        // when & then
+        assertThatThrownBy(() -> challengeDailyGuideService.getTotalComments(
+                challenge.getId(),
+                nonExistentDayIndex,
+                pageable
+        )).isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void 코멘트가_없는_경우_빈_목록_반환() {
+        // given
+        Pageable pageable = PageRequest.of(0, 20);
+
+        // when
+        Page<me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse> response =
+                challengeDailyGuideService.getTotalComments(challenge.getId(), guide.getDayIndex(), pageable);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.getContent()).isEmpty();
+            softly.assertThat(response.getTotalElements()).isEqualTo(0);
+            softly.assertThat(response.getTotalPages()).isEqualTo(0);
+        });
     }
 }
 

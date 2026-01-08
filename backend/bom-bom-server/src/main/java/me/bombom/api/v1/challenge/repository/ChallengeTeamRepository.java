@@ -12,7 +12,7 @@ public interface ChallengeTeamRepository extends JpaRepository<ChallengeTeam, Lo
         SELECT ct
         FROM ChallengeTeam ct
         WHERE ct.challengeId = :challengeId
-        ORDER BY ct.id ASC
+        ORDER BY ct.id
     """)
     List<ChallengeTeam> findAllByChallengeIdOrderByIdAsc(@Param("challengeId") Long challengeId);
 }

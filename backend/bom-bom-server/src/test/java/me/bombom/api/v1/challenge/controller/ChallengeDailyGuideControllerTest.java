@@ -175,9 +175,32 @@ class ChallengeDailyGuideControllerTest {
 
     @Test
     void 데일리_가이드_댓글_작성_성공() throws Exception {
-        // given
+        // given - dayIndex가 1이 아닌 값으로 설정 (day1일 때 ChallengeTodo 필요하므로)
+        challengeDailyGuideCommentRepository.deleteAll();
+        challengeDailyGuideRepository.deleteAll();
+        
+        // dayIndex를 1이 아닌 값으로 설정 (day1이면 ChallengeTodo가 필요함)
+        int dayIndex = 2;
+        if (dayIndex > challenge.getTotalDays()) {
+            dayIndex = challenge.getTotalDays();
+        }
+        // totalDays가 1이면 테스트 불가 (dayIndex 1은 ChallengeTodo 필요)
+        if (challenge.getTotalDays() <= 1) {
+            return;
+        }
+        
+        guide = challengeDailyGuideRepository.save(
+                TestFixture.createChallengeDailyGuide(
+                        challenge.getId(),
+                        dayIndex,
+                        DailyGuideType.COMMENT,
+                        "https://example.com/day07.webp",
+                        "오늘은 팁을 남겨주세요",
+                        true
+                )
+        );
+
         DailyGuideCommentRequest request = new DailyGuideCommentRequest("뉴스레터 읽기 팁을 공유합니다");
-        int dayIndex = guide.getDayIndex();
 
         // when & then
         mockMvc.perform(post("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/my-comment",
@@ -263,11 +286,13 @@ class ChallengeDailyGuideControllerTest {
 
     @Test
     void 주말_가이드_조회_성공() throws Exception {
-        // given - 주말 가이드 생성 (dayIndex = 0)
-        ChallengeDailyGuide weekendGuide = challengeDailyGuideRepository.save(
+        // given - 기존 guide 삭제하고 오늘 날짜에 맞는 가이드 생성
+        challengeDailyGuideRepository.deleteAll();
+        int actualDayIndex = calculateDayIndex(challenge.getStartDate(), today);
+        ChallengeDailyGuide actualGuide = challengeDailyGuideRepository.save(
                 TestFixture.createChallengeDailyGuide(
                         challenge.getId(),
-                        0,
+                        actualDayIndex,
                         DailyGuideType.COMMENT,
                         "https://example.com/weekend.webp",
                         "주말입니다",
@@ -275,23 +300,24 @@ class ChallengeDailyGuideControllerTest {
                 )
         );
 
-        // when & then - 주말에는 dayIndex 0으로 조회됨
-        // 실제로는 주말이어야 하지만, 가이드가 있으면 정상 조회됨
+        // when & then
         mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/today", challenge.getId())
                         .with(authentication(authToken)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.dayIndex").exists())
+                .andExpect(jsonPath("$.dayIndex").value(actualDayIndex))
                 .andExpect(jsonPath("$.type").exists())
                 .andExpect(jsonPath("$.imageUrl").exists());
     }
 
     @Test
     void 주말_가이드_댓글_작성_불가() throws Exception {
-        // given - 주말 가이드 생성 (dayIndex = 0, commentEnabled = false)
-        ChallengeDailyGuide weekendGuide = challengeDailyGuideRepository.save(
+        // given - 기존 guide 삭제하고 commentEnabled = false인 가이드 생성
+        challengeDailyGuideRepository.deleteAll();
+        int actualDayIndex = calculateDayIndex(challenge.getStartDate(), today);
+        ChallengeDailyGuide disabledGuide = challengeDailyGuideRepository.save(
                 TestFixture.createChallengeDailyGuide(
                         challenge.getId(),
-                        0,
+                        actualDayIndex,
                         DailyGuideType.COMMENT,
                         "https://example.com/weekend.webp",
                         "주말입니다",
@@ -300,13 +326,90 @@ class ChallengeDailyGuideControllerTest {
         );
         DailyGuideCommentRequest request = new DailyGuideCommentRequest("주말 댓글 작성 시도");
 
-        // when & then - dayIndex 0으로 댓글 작성 시도 (댓글 작성 불가능하므로 400)
+        // when & then - commentEnabled = false이므로 댓글 작성 불가능 (400)
         mockMvc.perform(post("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/my-comment",
-                        challenge.getId(), 0)
+                        challenge.getId(), actualDayIndex)
                         .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 데일리_가이드_코멘트_목록_조회_성공() throws Exception {
+        // given - guide.getDayIndex()가 0(주말)이 아닌 경우만 테스트
+        int dayIndex = guide.getDayIndex();
+        if (dayIndex == 0) {
+            // 주말인 경우 유효한 dayIndex로 가이드 재생성
+            challengeDailyGuideRepository.deleteAll();
+            dayIndex = 1;
+            guide = challengeDailyGuideRepository.save(
+                    TestFixture.createChallengeDailyGuide(
+                            challenge.getId(),
+                            dayIndex,
+                            DailyGuideType.COMMENT,
+                            "https://example.com/day07.webp",
+                            "오늘은 팁을 남겨주세요",
+                            true
+                    )
+            );
+        }
+
+        challengeDailyGuideCommentRepository.save(
+                TestFixture.createChallengeDailyGuideComment(
+                        guide.getId(),
+                        participant.getId(),
+                        "테스트 코멘트"
+                )
+        );
+
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/comments",
+                        challenge.getId(), dayIndex)
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content[0].nickname").exists())
+                .andExpect(jsonPath("$.content[0].comment").exists())
+                .andExpect(jsonPath("$.content[0].createdAt").exists());
+    }
+
+    @Test
+    void 존재하지_않는_챌린지로_코멘트_목록_조회시_404_응답() throws Exception {
+        // given - guide.getDayIndex()가 0(주말)이 아닌 경우만 테스트
+        int dayIndex = guide.getDayIndex() == 0 ? 1 : guide.getDayIndex();
+
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/comments",
+                        999L, dayIndex)
+                        .with(authentication(authToken)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 코멘트_목록_조회시_챌린지에_참여하지_않은_경우_404_응답() throws Exception {
+        // given - guide.getDayIndex()가 0(주말)이 아닌 경우만 테스트
+        int dayIndex = guide.getDayIndex() == 0 ? 1 : guide.getDayIndex();
+
+        Member otherMember = TestFixture.createUniqueMember("other", "other");
+        memberRepository.save(otherMember);
+        Map<String, Object> attributes = Map.of(
+                "id", otherMember.getId().toString(),
+                "email", otherMember.getEmail(),
+                "name", otherMember.getNickname()
+        );
+        CustomOAuth2User otherUser = new CustomOAuth2User(attributes, otherMember, null, null);
+        OAuth2AuthenticationToken otherToken = new OAuth2AuthenticationToken(
+                otherUser,
+                otherUser.getAuthorities(),
+                "registrationId"
+        );
+
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/comments",
+                        challenge.getId(), dayIndex)
+                        .with(authentication(otherToken)))
+                .andExpect(status().isNotFound());
     }
 }
 

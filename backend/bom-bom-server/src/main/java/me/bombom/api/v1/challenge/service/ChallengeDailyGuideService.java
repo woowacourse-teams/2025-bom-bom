@@ -82,13 +82,20 @@ public class ChallengeDailyGuideService {
         );
     }
 
-    public Page<DailyGuideCommentResponse> getTotalComments(Long challengeId, int dayIndex, Pageable pageable) {
+    public Page<DailyGuideCommentResponse> getTotalComments(Long challengeId, int dayIndex, Long memberId, Pageable pageable) {
         Challenge challenge = challengeRepository.findById(challengeId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
                         .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
 
-        if (dayIndex > challenge.getTotalDays()) {
+        if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId);
+        }
+
+        if (dayIndex != 0 && (dayIndex < 1 || dayIndex > challenge.getTotalDays())) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeDailyGuide")
                     .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)

@@ -60,10 +60,11 @@ public class ChallengeDailyGuideController implements ChallengeDailyGuideControl
     @Override
     @GetMapping("/{challengeId}/daily-guides/{dayIndex}/comments")
     public Page<DailyGuideCommentResponse> getDailyGuideComments(
+            @LoginMember Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
             @PathVariable @Positive(message = "index는 1 이상의 값이어야 합니다.") int dayIndex,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return challengeDailyGuideService.getTotalComments(challengeId, dayIndex, pageable);
+        return challengeDailyGuideService.getTotalComments(challengeId, dayIndex, member.getId(), pageable);
     }
 }

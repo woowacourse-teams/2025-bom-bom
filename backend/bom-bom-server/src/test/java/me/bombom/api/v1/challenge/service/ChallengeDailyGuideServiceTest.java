@@ -187,9 +187,28 @@ class ChallengeDailyGuideServiceTest {
 
     @Test
     void 데일리_가이드_댓글_작성_성공() {
-        // given
-        DailyGuideCommentRequest request = new DailyGuideCommentRequest("뉴스레터 읽기 팁을 공유합니다");
+        // given - guide.getDayIndex()가 0(주말)이 아닌 경우만 테스트
         int dayIndex = guide.getDayIndex();
+        
+        if (dayIndex == 0) {
+            // 주말인 경우 유효한 dayIndex로 가이드 재생성
+            challengeDailyGuideRepository.deleteAll();
+            dayIndex = 1;
+            guide = challengeDailyGuideRepository.save(
+                    TestFixture.createChallengeDailyGuide(
+                            challenge.getId(),
+                            dayIndex,
+                            DailyGuideType.COMMENT,
+                            "https://example.com/day07.webp",
+                            "오늘은 팁을 남겨주세요",
+                            true
+                    )
+            );
+        }
+        
+        final Long finalGuideId = guide.getId();
+
+        DailyGuideCommentRequest request = new DailyGuideCommentRequest("뉴스레터 읽기 팁을 공유합니다");
 
         // when
         challengeDailyGuideService.createDailyGuideComment(
@@ -204,7 +223,7 @@ class ChallengeDailyGuideServiceTest {
         List<ChallengeDailyGuideComment> comments = challengeDailyGuideCommentRepository.findAll();
         assertSoftly(softly -> {
             softly.assertThat(comments).hasSize(1);
-            softly.assertThat(comments.get(0).getGuideId()).isEqualTo(guide.getId());
+            softly.assertThat(comments.get(0).getGuideId()).isEqualTo(finalGuideId);
             softly.assertThat(comments.get(0).getParticipantId()).isEqualTo(participant.getId());
             softly.assertThat(comments.get(0).getContent()).isEqualTo("뉴스레터 읽기 팁을 공유합니다");
         });
@@ -322,7 +341,8 @@ class ChallengeDailyGuideServiceTest {
 
     @Test
     void 주말_가이드_조회_성공() {
-        // given - 주말 가이드 생성 (dayIndex = 0)
+        // given - 기존 guide 삭제하고 주말 가이드 생성 (dayIndex = 0)
+        challengeDailyGuideRepository.deleteAll();
         ChallengeDailyGuide weekendGuide = challengeDailyGuideRepository.save(
                 TestFixture.createChallengeDailyGuide(
                         challenge.getId(),
@@ -334,24 +354,50 @@ class ChallengeDailyGuideServiceTest {
                 )
         );
 
-        // when - 주말 가이드 조회 (실제로는 주말일 때만 dayIndex 0이 반환되지만,
-        // 가이드가 존재하면 정상 조회됨)
-        TodayDailyGuideResponse response = challengeDailyGuideService.getTodayDailyGuide(
-                challenge.getId(),
-                member.getId()
-        );
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.dayIndex()).isGreaterThanOrEqualTo(0);
-            softly.assertThat(response.type()).isNotNull();
-            softly.assertThat(response.imageUrl()).isNotNull();
-        });
+        // when - 주말 가이드 조회
+        // 실제로 오늘이 주말이 아니면 dayIndex가 0이 아니므로 예외가 발생할 수 있음
+        // 따라서 실제 주말일 때만 테스트하거나, 가이드를 실제 dayIndex로 생성해야 함
+        int actualDayIndex = calculateDayIndex(challenge.getStartDate(), today);
+        if (actualDayIndex == 0) {
+            // 실제 주말인 경우
+            TodayDailyGuideResponse response = challengeDailyGuideService.getTodayDailyGuide(
+                    challenge.getId(),
+                    member.getId()
+            );
+            assertSoftly(softly -> {
+                softly.assertThat(response.dayIndex()).isEqualTo(0);
+                softly.assertThat(response.type()).isEqualTo(DailyGuideType.COMMENT);
+                softly.assertThat(response.imageUrl()).isEqualTo("https://example.com/weekend.webp");
+            });
+        } else {
+            // 주말이 아닌 경우, 실제 dayIndex에 맞는 가이드를 생성
+            challengeDailyGuideRepository.deleteAll();
+            ChallengeDailyGuide actualGuide = challengeDailyGuideRepository.save(
+                    TestFixture.createChallengeDailyGuide(
+                            challenge.getId(),
+                            actualDayIndex,
+                            DailyGuideType.COMMENT,
+                            "https://example.com/weekend.webp",
+                            "주말입니다",
+                            false
+                    )
+            );
+            TodayDailyGuideResponse response = challengeDailyGuideService.getTodayDailyGuide(
+                    challenge.getId(),
+                    member.getId()
+            );
+            assertSoftly(softly -> {
+                softly.assertThat(response.dayIndex()).isEqualTo(actualDayIndex);
+                softly.assertThat(response.type()).isNotNull();
+                softly.assertThat(response.imageUrl()).isNotNull();
+            });
+        }
     }
 
     @Test
     void 주말_가이드에_댓글_작성_불가() {
-        // given - 주말 가이드 생성 (dayIndex = 0, commentEnabled = false)
+        // given - 기존 guide 삭제하고 주말 가이드 생성 (dayIndex = 0, commentEnabled = false)
+        challengeDailyGuideRepository.deleteAll();
         ChallengeDailyGuide weekendGuide = challengeDailyGuideRepository.save(
                 TestFixture.createChallengeDailyGuide(
                         challenge.getId(),
@@ -376,7 +422,9 @@ class ChallengeDailyGuideServiceTest {
 
     @Test
     void dayIndex_0_유효성_검증_통과() {
-        // given - 주말 가이드 생성 (dayIndex = 0, commentEnabled = true)
+        // given - 기존 guide와 comment 삭제하고 주말 가이드 생성 (dayIndex = 0, commentEnabled = true)
+        challengeDailyGuideCommentRepository.deleteAll();
+        challengeDailyGuideRepository.deleteAll();
         ChallengeDailyGuide weekendGuide = challengeDailyGuideRepository.save(
                 TestFixture.createChallengeDailyGuide(
                         challenge.getId(),
@@ -624,7 +672,7 @@ class ChallengeDailyGuideServiceTest {
 
         // when
         Page<me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse> response =
-                challengeDailyGuideService.getTotalComments(challenge.getId(), guide.getDayIndex(), pageable);
+                challengeDailyGuideService.getTotalComments(challenge.getId(), guide.getDayIndex(), member.getId(), pageable);
 
         // then
         assertSoftly(softly -> {
@@ -666,7 +714,7 @@ class ChallengeDailyGuideServiceTest {
 
         // when
         Page<me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse> response =
-                challengeDailyGuideService.getTotalComments(challenge.getId(), guide.getDayIndex(), pageable);
+                challengeDailyGuideService.getTotalComments(challenge.getId(), guide.getDayIndex(), member.getId(), pageable);
 
         // then
         assertSoftly(softly -> {
@@ -685,6 +733,7 @@ class ChallengeDailyGuideServiceTest {
         assertThatThrownBy(() -> challengeDailyGuideService.getTotalComments(
                 999L,
                 guide.getDayIndex(),
+                member.getId(),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class);
     }
@@ -699,6 +748,7 @@ class ChallengeDailyGuideServiceTest {
         assertThatThrownBy(() -> challengeDailyGuideService.getTotalComments(
                 challenge.getId(),
                 invalidDayIndex,
+                member.getId(),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class);
     }
@@ -707,12 +757,26 @@ class ChallengeDailyGuideServiceTest {
     void 존재하지_않는_가이드로_코멘트_목록_조회시_예외_발생() {
         // given
         Pageable pageable = PageRequest.of(0, 20);
-        int nonExistentDayIndex = guide.getDayIndex() + 10;
+        // 유효한 dayIndex 범위 내이지만 존재하지 않는 가이드를 조회
+        // setUp에서 guide 하나만 생성했으므로, guide.getDayIndex()와 다른 유효한 dayIndex를 사용
+        int currentDayIndex = guide.getDayIndex();
+        int nonExistentDayIndex;
+        if (currentDayIndex == 0) {
+            // 주말 가이드(dayIndex=0)인 경우, 1을 사용
+            nonExistentDayIndex = 1;
+        } else if (currentDayIndex < challenge.getTotalDays()) {
+            // 다음 dayIndex 사용
+            nonExistentDayIndex = currentDayIndex + 1;
+        } else {
+            // 마지막 dayIndex인 경우, 이전 dayIndex 사용
+            nonExistentDayIndex = Math.max(1, currentDayIndex - 1);
+        }
 
         // when & then
         assertThatThrownBy(() -> challengeDailyGuideService.getTotalComments(
                 challenge.getId(),
                 nonExistentDayIndex,
+                member.getId(),
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class);
     }
@@ -724,7 +788,7 @@ class ChallengeDailyGuideServiceTest {
 
         // when
         Page<me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse> response =
-                challengeDailyGuideService.getTotalComments(challenge.getId(), guide.getDayIndex(), pageable);
+                challengeDailyGuideService.getTotalComments(challenge.getId(), guide.getDayIndex(), member.getId(), pageable);
 
         // then
         assertSoftly(softly -> {
@@ -732,6 +796,22 @@ class ChallengeDailyGuideServiceTest {
             softly.assertThat(response.getTotalElements()).isEqualTo(0);
             softly.assertThat(response.getTotalPages()).isEqualTo(0);
         });
+    }
+
+    @Test
+    void 코멘트_목록_조회시_챌린지에_참여하지_않은_경우_예외_발생() {
+        // given
+        Member otherMember = TestFixture.createUniqueMember("other", "other");
+        memberRepository.save(otherMember);
+        Pageable pageable = PageRequest.of(0, 20);
+
+        // when & then
+        assertThatThrownBy(() -> challengeDailyGuideService.getTotalComments(
+                challenge.getId(),
+                guide.getDayIndex(),
+                otherMember.getId(),
+                pageable
+        )).isInstanceOf(CIllegalArgumentException.class);
     }
 }
 

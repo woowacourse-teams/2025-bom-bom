@@ -48,6 +48,7 @@ public interface ChallengeDailyGuideControllerApi {
             @ApiResponse(responseCode = "404", description = "챌린지 또는 데일리 가이드를 찾을 수 없음", content = @Content)
     })
     Page<DailyGuideCommentResponse> getDailyGuideComments(
+            @Parameter(hidden = true) @LoginMember Member member,
             @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
             @Parameter(description = "일차 인덱스 (1부터 시작)") @PathVariable @Positive(message = "index는 1 이상의 값이어야 합니다.") int dayIndex,
             @Parameter(description = "페이징 관련 요청 (예: ?page=0&size=20&sort=createdAt,desc)") Pageable pageable

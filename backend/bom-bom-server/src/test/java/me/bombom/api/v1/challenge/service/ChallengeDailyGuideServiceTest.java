@@ -9,9 +9,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuide;
@@ -37,6 +34,9 @@ import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @IntegrationTest
 class ChallengeDailyGuideServiceTest {
@@ -132,7 +132,7 @@ class ChallengeDailyGuideServiceTest {
     private int calculateDayIndex(LocalDate startDate, LocalDate today) {
         DayOfWeek dayOfWeek = today.getDayOfWeek();
         boolean isWeekend = dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
-        
+
         if (isWeekend) {
             return 0;
         }
@@ -189,7 +189,7 @@ class ChallengeDailyGuideServiceTest {
     void 데일리_가이드_댓글_작성_성공() {
         // given - guide.getDayIndex()가 0(주말)이 아닌 경우만 테스트
         int dayIndex = guide.getDayIndex();
-        
+
         if (dayIndex == 0) {
             // 주말인 경우 유효한 dayIndex로 가이드 재생성
             challengeDailyGuideRepository.deleteAll();
@@ -205,7 +205,7 @@ class ChallengeDailyGuideServiceTest {
                     )
             );
         }
-        
+
         final Long finalGuideId = guide.getId();
 
         DailyGuideCommentRequest request = new DailyGuideCommentRequest("뉴스레터 읽기 팁을 공유합니다");
@@ -472,13 +472,20 @@ class ChallengeDailyGuideServiceTest {
         );
         DailyGuideCommentRequest request = new DailyGuideCommentRequest("첫날 코멘트");
 
+        // 평일 날짜 사용 (주말에는 updateChallengeDailyTodo가 동작하지 않음)
+        LocalDate tempWeekday = today;
+        while (tempWeekday.getDayOfWeek() == DayOfWeek.SATURDAY || tempWeekday.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            tempWeekday = tempWeekday.plusDays(1);
+        }
+        final LocalDate weekday = tempWeekday;
+
         // when
         challengeDailyGuideService.createDailyGuideComment(
                 challenge.getId(),
                 1,
                 member.getId(),
                 request,
-                today
+                weekday
         );
 
         // then - 코멘트 생성 확인
@@ -487,17 +494,17 @@ class ChallengeDailyGuideServiceTest {
 
         // then - READ todo 생성 확인
         boolean readTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
-                participant.getId(), today, readTodo.getId());
+                participant.getId(), weekday, readTodo.getId());
         assertThat(readTodoExists).isTrue();
 
         // then - COMMENT todo 생성 확인
         boolean commentTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
-                participant.getId(), today, commentTodo.getId());
+                participant.getId(), weekday, commentTodo.getId());
         assertThat(commentTodoExists).isTrue();
 
         // then - progress 처리 확인: ChallengeDailyResult 생성 확인
         boolean dailyResultExists = challengeDailyResultRepository.existsByParticipantIdAndDate(
-                participant.getId(), today);
+                participant.getId(), weekday);
         assertThat(dailyResultExists).isTrue();
 
         // then - progress 처리 확인: completedDays 증가 확인
@@ -558,11 +565,18 @@ class ChallengeDailyGuideServiceTest {
                 )
         );
 
+        // 평일 날짜 사용 (주말에는 updateChallengeDailyTodo가 동작하지 않음)
+        LocalDate tempWeekday = today;
+        while (tempWeekday.getDayOfWeek() == DayOfWeek.SATURDAY || tempWeekday.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            tempWeekday = tempWeekday.plusDays(1);
+        }
+        final LocalDate weekday = tempWeekday;
+
         // 이미 READ todo 생성
         challengeDailyTodoRepository.save(
                 TestFixture.createChallengeDailyTodo(
                         participant.getId(),
-                        today,
+                        weekday,
                         readTodo.getId()
                 )
         );
@@ -575,20 +589,20 @@ class ChallengeDailyGuideServiceTest {
                 1,
                 member.getId(),
                 request,
-                today
+                weekday
         );
 
         // then - READ todo는 1개만 존재 (중복 생성 안 됨)
         List<ChallengeDailyTodo> readTodos = challengeDailyTodoRepository.findAll().stream()
                 .filter(todo -> todo.getParticipantId().equals(participant.getId()))
                 .filter(todo -> todo.getChallengeTodoId().equals(readTodo.getId()))
-                .filter(todo -> todo.getTodoDate().equals(today))
+                .filter(todo -> todo.getTodoDate().equals(weekday))
                 .toList();
         assertThat(readTodos).hasSize(1);
 
         // then - COMMENT todo 생성 확인
         boolean commentTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
-                participant.getId(), today, commentTodo.getId());
+                participant.getId(), weekday, commentTodo.getId());
         assertThat(commentTodoExists).isTrue();
     }
 
@@ -606,11 +620,18 @@ class ChallengeDailyGuideServiceTest {
                 )
         );
 
+        // 평일 날짜 사용 (주말에는 updateChallengeDailyTodo가 동작하지 않음)
+        LocalDate tempWeekday = today;
+        while (tempWeekday.getDayOfWeek() == DayOfWeek.SATURDAY || tempWeekday.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            tempWeekday = tempWeekday.plusDays(1);
+        }
+        final LocalDate weekday = tempWeekday;
+
         // 이미 COMMENT todo 생성
         challengeDailyTodoRepository.save(
                 TestFixture.createChallengeDailyTodo(
                         participant.getId(),
-                        today,
+                        weekday,
                         commentTodo.getId()
                 )
         );
@@ -623,20 +644,20 @@ class ChallengeDailyGuideServiceTest {
                 1,
                 member.getId(),
                 request,
-                today
+                weekday
         );
 
         // then - COMMENT todo는 1개만 존재 (중복 생성 안 됨)
         List<ChallengeDailyTodo> commentTodos = challengeDailyTodoRepository.findAll().stream()
                 .filter(todo -> todo.getParticipantId().equals(participant.getId()))
                 .filter(todo -> todo.getChallengeTodoId().equals(commentTodo.getId()))
-                .filter(todo -> todo.getTodoDate().equals(today))
+                .filter(todo -> todo.getTodoDate().equals(weekday))
                 .toList();
         assertThat(commentTodos).hasSize(1);
 
         // then - READ todo 생성 확인
         boolean readTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
-                participant.getId(), today, readTodo.getId());
+                participant.getId(), weekday, readTodo.getId());
         assertThat(readTodoExists).isTrue();
     }
 

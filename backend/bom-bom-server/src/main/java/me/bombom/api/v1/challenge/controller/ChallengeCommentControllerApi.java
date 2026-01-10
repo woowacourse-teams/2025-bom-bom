@@ -16,6 +16,7 @@ import me.bombom.api.v1.challenge.dto.request.UpdateChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
+import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -100,9 +101,9 @@ public interface ChallengeCommentControllerApi {
             @ApiResponse(responseCode = "404", description = "챌린지 코멘트를 찾을 수 없음", content = @Content)
     })
     void updateChallengeComment(
-            @Parameter(hidden = true) Member member,
-            @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
-            @Parameter(description = "챌린지 코멘트 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long commentId,
+            @Parameter(hidden = true) @LoginMember Member member,
+            @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "챌린지 id는 1 이상의 값이어야 합니다.") Long challengeId,
+            @Parameter(description = "챌린지 코멘트 ID") @PathVariable @Positive(message = "코멘트 id는 1 이상의 값이어야 합니다.") Long commentId,
             @Valid @RequestBody UpdateChallengeCommentRequest request
     );
 }

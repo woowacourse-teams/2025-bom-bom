@@ -144,7 +144,7 @@ class ChallengeCommentControllerTest {
                 )
         );
 
-        setToday(LocalDate.of(2026, 1, 9)); // weekday default
+        setToday(LocalDate.of(2026, 1, 9)); // 평일 default
     }
 
     @Test
@@ -210,7 +210,7 @@ class ChallengeCommentControllerTest {
                 "quote",
                 "챌린지 한 줄 코멘트로 20자 이상의 댓글을 작성했습니다."
         );
-        setToday(LocalDate.of(2026, 1, 9)); // Friday
+        setToday(LocalDate.of(2026, 1, 9)); // 금요일
 
         // when & then
         mockMvc.perform(post("/api/v1/challenges/{challengeId}/comments", 1L)

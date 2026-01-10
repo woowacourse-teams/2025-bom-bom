@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
+import me.bombom.api.v1.challenge.dto.request.UpdateChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
@@ -86,5 +87,22 @@ public interface ChallengeCommentControllerApi {
             @Parameter(hidden = true) Member member,
             @Parameter(description = "챌린지 아티클 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId,
             @Parameter(description = "페이징 및 정렬 (예: ?page=0&size=20&sort=createdAt,desc)") Pageable pageable
+    );
+
+    @Operation(
+            summary = "챌린지 코멘트 수정",
+            description = "챌린지 코멘트를 수정합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "챌린지 코멘트 수정 성공", content = @Content),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 값", content = @Content),
+            @ApiResponse(responseCode = "403", description = "챌린지 코멘트 수정 권한 없음", content = @Content),
+            @ApiResponse(responseCode = "404", description = "챌린지 코멘트를 찾을 수 없음", content = @Content)
+    })
+    void updateChallengeComment(
+            @Parameter(hidden = true) Member member,
+            @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
+            @Parameter(description = "챌린지 코멘트 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long commentId,
+            @Valid @RequestBody UpdateChallengeCommentRequest request
     );
 }

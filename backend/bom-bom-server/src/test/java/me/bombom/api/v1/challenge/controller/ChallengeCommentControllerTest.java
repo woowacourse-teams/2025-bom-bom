@@ -1,6 +1,8 @@
 package me.bombom.api.v1.challenge.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -13,8 +15,10 @@ import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
+import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
+import me.bombom.api.v1.challenge.dto.request.UpdateChallengeCommentRequest;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.highlight.domain.Color;
@@ -76,6 +80,7 @@ class ChallengeCommentControllerTest {
     private Member member;
     private List<Newsletter> newsletters;
     private Article article;
+    private ChallengeComment challengeComment;
     private OAuth2AuthenticationToken authToken;
 
     @BeforeEach
@@ -125,7 +130,7 @@ class ChallengeCommentControllerTest {
                 )
         );
 
-        challengeCommentRepository.save(
+        challengeComment = challengeCommentRepository.save(
                 TestFixture.createChallengeComment(
                         article.getNewsletterId(),
                         participant.getId(),
@@ -263,5 +268,38 @@ class ChallengeCommentControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].text").value("ABCDEFGH..."));
+    }
+
+    @Test
+    void 챌린지_코멘트를_수정한다() throws Exception {
+        // given
+        UpdateChallengeCommentRequest request = new UpdateChallengeCommentRequest(
+                "수정된 챌린지 한 줄 코멘트를 20자 이상 작성합니다."
+        );
+
+        // when & then
+        mockMvc.perform(patch("/api/v1/challenges/{challengeId}/comments/{commentId}", 1L, challengeComment.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+
+        assertThat(challengeCommentRepository.findById(challengeComment.getId()))
+                .get()
+                .extracting(ChallengeComment::getComment)
+                .isEqualTo(request.comment());
+    }
+
+    @Test
+    void 챌린지_코멘트가_20자_미만이면_수정에_실패한다() throws Exception {
+        // given
+        UpdateChallengeCommentRequest request = new UpdateChallengeCommentRequest("짧은 코멘트");
+
+        // when & then
+        mockMvc.perform(patch("/api/v1/challenges/{challengeId}/comments/{commentId}", 1L, challengeComment.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 }

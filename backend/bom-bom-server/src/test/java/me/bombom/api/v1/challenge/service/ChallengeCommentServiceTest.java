@@ -14,6 +14,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
+import me.bombom.api.v1.challenge.dto.request.UpdateChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
@@ -283,6 +284,85 @@ class ChallengeCommentServiceTest {
         // when & then
         assertThatThrownBy(() -> challengeCommentService.createChallengeComment(
                 member.getId(),
+                999L,
+                request
+        )).isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void 챌린지_코멘트를_수정한다() {
+        // given
+        ChallengeComment comment = challengeCommentRepository.save(
+                TestFixture.createChallengeComment(
+                        article.getNewsletterId(),
+                        participant.getId(),
+                        article.getTitle(),
+                        "quote",
+                        "챌린지 한 줄 코멘트로 20자 이상의 댓글을 작성했습니다."
+                )
+        );
+        UpdateChallengeCommentRequest request = new UpdateChallengeCommentRequest(
+                "수정된 챌린지 한 줄 코멘트를 20자 이상 작성합니다."
+        );
+
+        // when
+        challengeCommentService.updateChallengeComment(
+                member.getId(),
+                participant.getChallengeId(),
+                comment.getId(),
+                request
+        );
+
+        // then
+        ChallengeComment updated = challengeCommentRepository.findById(comment.getId()).orElseThrow();
+        assertThat(updated.getComment()).isEqualTo(request.comment());
+    }
+
+    @Test
+    void 챌린지_코멘트_수정시_다른_참여자면_예외가_발생한다() {
+        // given
+        Member otherMember = memberRepository.save(
+                TestFixture.createMemberFixture("another@bombom.news", "another")
+        );
+        ChallengeParticipant otherParticipant = challengeParticipantRepository.save(
+                TestFixture.createChallengeParticipantWithTeam(
+                        participant.getChallengeId(),
+                        otherMember.getId(),
+                        20L,
+                        0,
+                        0
+                )
+        );
+        ChallengeComment otherComment = challengeCommentRepository.save(
+                TestFixture.createChallengeComment(
+                        article.getNewsletterId(),
+                        otherParticipant.getId(),
+                        article.getTitle(),
+                        "quote",
+                        "다른 참여자의 챌린지 코멘트입니다. 길이를 채웁니다."
+                )
+        );
+
+        // when & then
+        assertThatThrownBy(() -> challengeCommentService.updateChallengeComment(
+                member.getId(),
+                participant.getChallengeId(),
+                otherComment.getId(),
+                new UpdateChallengeCommentRequest("수정 요청입니다만 실패해야 합니다.")
+        )).isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void 챌린지_코멘트가_존재하지_않으면_예외가_발생한다() {
+        // given
+        UpdateChallengeCommentRequest request = new UpdateChallengeCommentRequest(
+                "수정된 챌린지 한 줄 코멘트를 20자 이상 작성합니다."
+        );
+
+        // when & then
+        assertThatThrownBy(() -> challengeCommentService.updateChallengeComment(
+                member.getId(),
+                participant.getChallengeId(),
                 999L,
                 request
         )).isInstanceOf(CIllegalArgumentException.class);

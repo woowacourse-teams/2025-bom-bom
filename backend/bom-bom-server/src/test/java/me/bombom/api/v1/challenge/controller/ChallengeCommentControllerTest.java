@@ -1,13 +1,16 @@
 package me.bombom.api.v1.challenge.controller;
 
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
@@ -37,11 +40,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @IntegrationTest
 @AutoConfigureMockMvc
 class ChallengeCommentControllerTest {
+
+    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
 
     @Autowired
     private MockMvc mockMvc;
@@ -72,6 +78,9 @@ class ChallengeCommentControllerTest {
 
     @Autowired
     private HighlightRepository highlightRepository;
+
+    @MockitoBean
+    private Clock clock;
 
     private Member member;
     private List<Newsletter> newsletters;
@@ -134,6 +143,8 @@ class ChallengeCommentControllerTest {
                         "comment"
                 )
         );
+
+        setToday(LocalDate.of(2026, 1, 9)); // weekday default
     }
 
     @Test
@@ -199,6 +210,7 @@ class ChallengeCommentControllerTest {
                 "quote",
                 "챌린지 한 줄 코멘트로 20자 이상의 댓글을 작성했습니다."
         );
+        setToday(LocalDate.of(2026, 1, 9)); // Friday
 
         // when & then
         mockMvc.perform(post("/api/v1/challenges/{challengeId}/comments", 1L)
@@ -263,5 +275,10 @@ class ChallengeCommentControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].text").value("ABCDEFGH..."));
+    }
+
+    private void setToday(LocalDate date) {
+        given(clock.instant()).willReturn(date.atStartOfDay(SEOUL_ZONE).toInstant());
+        given(clock.getZone()).willReturn(SEOUL_ZONE);
     }
 }

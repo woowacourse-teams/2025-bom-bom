@@ -14,7 +14,7 @@ public record ChallengeCommentResponse(
         @NotNull
         String newsletterName,
 
-        @Schema(requiredMode = RequiredMode.NOT_REQUIRED)
+        @Schema(requiredMode = RequiredMode.REQUIRED)
         boolean isSubscribed,
 
         @NotNull
@@ -28,7 +28,7 @@ public record ChallengeCommentResponse(
         @NotNull
         LocalDateTime createdAt,
 
-        @Schema(requiredMode = RequiredMode.NOT_REQUIRED)
+        @Schema(requiredMode = RequiredMode.REQUIRED)
         boolean isMyComment
 ) {
 }

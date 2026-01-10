@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -70,5 +71,22 @@ public class Challenge extends BaseEntity {
 
     public boolean hasStarted(LocalDate now) {
         return !now.isBefore(this.startDate);
+    }
+
+    public int calculatePassedDays(LocalDate targetDate) {
+        int passedDays = 0;
+        LocalDate currentDate = this.startDate;
+        while (!currentDate.isAfter(targetDate)) {
+            if (isWeekend(currentDate)) {
+                passedDays++;
+            }
+            currentDate = currentDate.plusDays(1);
+        }
+        return passedDays;
+    }
+
+    private boolean isWeekend(LocalDate currentDate) {
+        DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
+        return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
     }
 }

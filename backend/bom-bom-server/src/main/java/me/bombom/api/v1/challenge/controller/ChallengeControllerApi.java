@@ -6,19 +6,15 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
-import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
-import me.bombom.api.v1.common.resolver.LoginMember;
-import me.bombom.api.v1.member.domain.Member;
-import org.springframework.web.bind.annotation.GetMapping;
 import jakarta.validation.constraints.Positive;
-import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import java.util.List;
 import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeTeamListResponse;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @Tag(name = "Challenge", description = "챌린지 관련 API")
@@ -85,6 +81,21 @@ public interface ChallengeControllerApi {
             @ApiResponse(responseCode = "404", description = "챌린지 또는 신청 내역을 찾을 수 없음", content = @Content)
     })
     void cancelChallenge(
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
+            @Parameter(hidden = true) @LoginMember Member member
+    );
+
+    @Operation(
+            summary = "챌린지 팀 목록 조회",
+            description = "챌린지에 참여한 모든 팀 목록을 조회합니다. 각 팀의 ID, 순서, 내 팀 여부 정보가 포함됩니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "팀 목록 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content),
+            @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),
+            @ApiResponse(responseCode = "404", description = "챌린지를 찾을 수 없음", content = @Content)
+    })
+    ChallengeTeamListResponse getTeamList(
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
             @Parameter(hidden = true) @LoginMember Member member
     );

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeTeamListResponse;
 import me.bombom.api.v1.challenge.service.ChallengeService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
@@ -66,5 +67,14 @@ public class ChallengeController implements ChallengeControllerApi {
             @LoginMember Member member
     ) {
         challengeService.cancelChallenge(id, member);
+    }
+
+    @Override
+    @GetMapping("/{id}/teams")
+    public ChallengeTeamListResponse getTeamList(
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
+            @LoginMember Member member
+    ) {
+        return challengeService.getTeamList(id, member);
     }
 }

@@ -8,6 +8,7 @@ import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyResult;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
+import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.response.MemberChallengeProgressResponse;
@@ -15,10 +16,12 @@ import me.bombom.api.v1.challenge.dto.response.TeamChallengeProgressResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +38,7 @@ public class ChallengeProgressService {
     private final ChallengeRepository challengeRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ChallengeDailyResultRepository challengeDailyResultRepository;
+    private final ChallengeTeamRepository challengeTeamRepository;
 
     @Transactional
     public void proceedDailySurvivalCheck(Challenge challenge, LocalDate yesterday) {
@@ -61,44 +65,18 @@ public class ChallengeProgressService {
         return MemberChallengeProgressResponse.of(member, progressList);
     }
 
-    public TeamChallengeProgressResponse getTeamProgress(Long challengeId, Member member) {
+    public TeamChallengeProgressResponse getTeamProgressByTeamId(Long challengeId, Long teamId, Member member) {
         Challenge challenge = challengeRepository.findById(challengeId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
-                        .addContext(ErrorContextKeys.OPERATION, "getTeamProgress"));
+                        .addContext(ErrorContextKeys.OPERATION, "getTeamProgressByTeamId"));
 
-        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId,
-                        member.getId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
-                        .addContext(ErrorContextKeys.OPERATION, "getTeamProgress"));
+        validateParticipation(challengeId, member);
+        validateTeamBelongsToChallenge(challengeId, teamId);
 
-        List<TeamChallengeProgressFlat> progressList = challengeParticipantRepository.findTeamProgress(
-                participant.getChallengeTeamId());
+        List<TeamChallengeProgressFlat> progressList = challengeParticipantRepository.findTeamProgress(teamId);
 
         return TeamChallengeProgressResponse.of(challenge, progressList);
-    }
-
-    private void validateParticipation(Long id, Member member) {
-        boolean isParticipant = challengeParticipantRepository.existsByChallengeIdAndMemberId(id, member.getId());
-        if (!isParticipant) {
-            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
-                    .addContext(ErrorContextKeys.OPERATION, "getMemberProgress")
-                    .addContext(ErrorContextKeys.CHALLENGE_ID, id)
-                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId());
-        }
-    }
-
-    private void validateMemberProgressDataIntegrity(Long id, Member member, List<ChallengeProgressFlat> progressList) {
-        if (progressList.isEmpty()) {
-            throw new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
-                    .addContext(ErrorContextKeys.OPERATION, "getMemberProgress")
-                    .addContext(ErrorContextKeys.DETAIL, "참가자 정보는 존재하나 일일 진행 상황 데이터가 조회되지 않습니다")
-                    .addContext(ErrorContextKeys.CHALLENGE_ID, id)
-                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId());
-        }
     }
 
     private void saveShieldDailyResult(ChallengeParticipant participant, LocalDate date) {
@@ -119,6 +97,43 @@ public class ChallengeProgressService {
         int currentAbsent = daysSinceStart - participant.getCompletedDays();
         if (currentAbsent > maxAllowedAbsent) {
             participant.markAsFailed();
+        }
+    }
+
+    private void validateParticipation(Long id, Member member) {
+        boolean isParticipant = challengeParticipantRepository.existsByChallengeIdAndMemberId(id, member.getId());
+        if (!isParticipant) {
+            throw new UnauthorizedException(ErrorDetail.FORBIDDEN_RESOURCE)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, id)
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId());
+        }
+    }
+
+    private void validateMemberProgressDataIntegrity(Long id, Member member, List<ChallengeProgressFlat> progressList) {
+        if (progressList.isEmpty()) {
+            throw new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
+                    .addContext(ErrorContextKeys.OPERATION, "getMemberProgress")
+                    .addContext(ErrorContextKeys.DETAIL, "참가자 정보는 존재하나 일일 진행 상황 데이터가 조회되지 않습니다")
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, id)
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId());
+        }
+    }
+
+    private void validateTeamBelongsToChallenge(Long challengeId, Long teamId) {
+        ChallengeTeam team = challengeTeamRepository.findById(teamId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeTeam")
+                        .addContext(ErrorContextKeys.OPERATION, "validateTeamBelongsToChallenge")
+                        .addContext(ErrorContextKeys.DETAIL, "팀을 찾을 수 없습니다: " + teamId));
+
+        if (!team.getChallengeId().equals(challengeId)) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeTeam")
+                    .addContext(ErrorContextKeys.OPERATION, "validateTeamBelongsToChallenge")
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                    .addContext(ErrorContextKeys.DETAIL, "해당 팀은 이 챌린지에 속하지 않습니다: " + teamId);
         }
     }
 }

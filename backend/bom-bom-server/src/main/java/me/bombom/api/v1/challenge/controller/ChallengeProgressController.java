@@ -31,11 +31,12 @@ public class ChallengeProgressController implements ChallengeProgressControllerA
     }
 
     @Override
-    @GetMapping("/{id}/progress/team")
-    public TeamChallengeProgressResponse getTeamProgress(
+    @GetMapping("/{id}/progress/teams/{teamId}")
+    public TeamChallengeProgressResponse getTeamProgressByTeamId(
             @LoginMember Member member,
-            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
+            @PathVariable @Positive(message = "teamId는 1 이상의 값이어야 합니다.") Long teamId
     ) {
-        return challengeProgressService.getTeamProgress(id, member);
+        return challengeProgressService.getTeamProgressByTeamId(id, teamId, member);
     }
 }

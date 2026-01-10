@@ -90,44 +90,6 @@ class ChallengeProgressControllerTest {
                                 "google");
         }
 
-        @Test
-        void 팀_챌린지_진행상황을_조회한다() throws Exception {
-                // given
-                Member memberB = memberRepository.save(TestFixture.createUniqueMember("userB", "B"));
-                ChallengeTeam team = challengeTeamRepository.save(createChallengeTeam(challenge.getId(), 77));
-
-                // Member A: Completed 2 days
-                challengeParticipantRepository.save(
-                                createTeamParticipant(challenge.getId(), memberA.getId(), team.getId(), 2, false));
-
-                // Member B: Completed 3 days
-                ChallengeParticipant participantB = challengeParticipantRepository.save(
-                                createTeamParticipant(challenge.getId(), memberB.getId(), team.getId(), 3, true));
-
-                // Daily Results for Member B
-                ChallengeDailyResult resultB1 = createChallengeDailyResult(participantB.getId(), LocalDate.now(),
-                                ChallengeDailyStatus.COMPLETE);
-                ChallengeDailyResult resultB2 = createChallengeDailyResult(participantB.getId(),
-                                LocalDate.now().plusDays(1),
-                                ChallengeDailyStatus.SHIELD);
-                challengeDailyResultRepository.saveAll(List.of(resultB1, resultB2));
-
-                // when & then
-                mockMvc.perform(get("/api/v1/challenges/{id}/progress/team", challenge.getId())
-                                .with(authentication(authToken)))
-                                .andExpect(status().isOk())
-                                .andDo(print())
-                                .andExpect(jsonPath("$.teamSummary.achievementAverage").value(team.getProgress()))
-                                .andExpect(jsonPath("$.members").isArray())
-                                .andExpect(jsonPath("$.members[0].nickname").value(memberB.getNickname())) // Sorted by completedDays
-                                .andExpect(jsonPath("$.members[0].dailyProgresses").isArray())
-                                .andExpect(jsonPath("$.members[0].dailyProgresses[0].status").value("COMPLETE"))
-                                .andExpect(jsonPath("$.members[0].dailyProgresses[1].status").value("SHIELD"))
-
-                                .andExpect(jsonPath("$.members[1].nickname").value(memberA.getNickname()))
-                                .andDo(print());
-        }
-
         private ChallengeParticipant createTeamParticipant(Long challengeId, Long memberId, Long teamId,
                         int completedDays, boolean isSurvived) {
                 return ChallengeParticipant.builder()
@@ -154,5 +116,42 @@ class ChallengeProgressControllerTest {
                                 .date(date)
                                 .status(status)
                                 .build();
+        }
+
+        @Test
+        void 특정_팀_진행상황을_조회한다() throws Exception {
+                // given
+                Member memberB = memberRepository.save(TestFixture.createUniqueMember("userB", "B"));
+                ChallengeTeam team = challengeTeamRepository.save(createChallengeTeam(challenge.getId(), 77));
+
+                // Member A: Completed 2 days
+                challengeParticipantRepository.save(
+                                createTeamParticipant(challenge.getId(), memberA.getId(), team.getId(), 2, false));
+
+                // Member B: Completed 3 days
+                ChallengeParticipant participantB = challengeParticipantRepository.save(
+                                createTeamParticipant(challenge.getId(), memberB.getId(), team.getId(), 3, true));
+
+                // Daily Results for Member B
+                ChallengeDailyResult resultB1 = createChallengeDailyResult(participantB.getId(), LocalDate.now(),
+                                ChallengeDailyStatus.COMPLETE);
+                ChallengeDailyResult resultB2 = createChallengeDailyResult(participantB.getId(),
+                                LocalDate.now().plusDays(1),
+                                ChallengeDailyStatus.SHIELD);
+                challengeDailyResultRepository.saveAll(List.of(resultB1, resultB2));
+
+                // when & then
+                mockMvc.perform(get("/api/v1/challenges/{id}/progress/teams/{teamId}", challenge.getId(), team.getId())
+                                .with(authentication(authToken)))
+                                .andExpect(status().isOk())
+                                .andDo(print())
+                                .andExpect(jsonPath("$.teamSummary.achievementAverage").value(team.getProgress()))
+                                .andExpect(jsonPath("$.members").isArray())
+                                .andExpect(jsonPath("$.members[0].nickname").value(memberB.getNickname())) // Sorted by completedDays
+                                .andExpect(jsonPath("$.members[0].dailyProgresses").isArray())
+                                .andExpect(jsonPath("$.members[0].dailyProgresses[0].status").value("COMPLETE"))
+                                .andExpect(jsonPath("$.members[0].dailyProgresses[1].status").value("SHIELD"))
+                                .andExpect(jsonPath("$.members[1].nickname").value(memberA.getNickname()))
+                                .andDo(print());
         }
 }

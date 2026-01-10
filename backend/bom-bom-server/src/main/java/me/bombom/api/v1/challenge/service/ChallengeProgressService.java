@@ -1,7 +1,6 @@
 package me.bombom.api.v1.challenge.service;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -90,12 +89,11 @@ public class ChallengeProgressService {
     }
 
     private void checkFailure(ChallengeParticipant participant, Challenge challenge, LocalDate yesterday) {
-        // 종료 일은 포함하지 않아서 +1
         int totalDays = challenge.getTotalDays();
         int requiredSuccessDays = (int) Math.ceil(totalDays * SUCCESS_REQUIRED_RATIO);
         int maxAllowedAbsent = totalDays - requiredSuccessDays;
 
-        int daysSinceStart = (int) (ChronoUnit.DAYS.between(challenge.getStartDate(), yesterday) + 1);
+        int daysSinceStart = challenge.calculatePassedDays(yesterday);
         int currentAbsent = daysSinceStart - participant.getCompletedDays();
         if (currentAbsent > maxAllowedAbsent) {
             participant.markAsFailed();

@@ -11,6 +11,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeDailyGuide;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.request.DailyGuideCommentRequest;
+import me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse.MyCommentResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyGuideCommentRepository;
@@ -21,6 +22,8 @@ import me.bombom.api.v1.challenge.repository.TodayDailyGuideRow;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +47,7 @@ public class ChallengeDailyGuideService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
                         .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
-        
+
         if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
@@ -78,6 +81,37 @@ public class ChallengeDailyGuideService {
                 myComment
         );
     }
+
+    public Page<DailyGuideCommentResponse> getTotalComments(Long challengeId, int dayIndex, Long memberId, Pageable pageable) {
+        Challenge challenge = challengeRepository.findById(challengeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
+
+        if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId);
+        }
+
+        if (dayIndex != 0 && (dayIndex < 1 || dayIndex > challenge.getTotalDays())) {
+            throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeDailyGuide")
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                    .addContext("dayIndex", dayIndex)
+                    .addContext("reason", "유효하지 않은 일차 인덱스입니다.");
+        }
+
+        ChallengeDailyGuide guide = challengeDailyGuideRepository.findByChallengeIdAndDayIndex(challengeId, dayIndex)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeDailyGuide")
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                        .addContext("dayIndex", dayIndex));
+
+        return challengeDailyGuideCommentRepository.findByGuideId(guide.getId(), pageable);
+    }
+
 
     @Transactional
     public void createDailyGuideComment(Long challengeId, int dayIndex, Long memberId,
@@ -141,12 +175,12 @@ public class ChallengeDailyGuideService {
             challengeDailyTodoService.updateChallengeDailyTodo(memberId, null, today);
             // COMMENT todo 생성 (한 줄 코멘트 작성)
             challengeTodoService.insertCommentDone(participant, today);
-            
+
             // 이미 완료되지 않았으면 progress 처리
             // day1에 두 todo(READ, COMMENT)가 모두 생성되므로 바로 완료 처리
             if (!challengeTodoService.isCompletedToday(participant.getId(), today)) {
                 challengeTodoService.completeDailyTodo(participant, today);
-                
+
                 // 팀 progress 업데이트
                 if (participant.getChallengeTeamId() != null) {
                     var challengeTeam = challengeTeamService.getChallengeTeamByParticipant(participant);
@@ -159,7 +193,7 @@ public class ChallengeDailyGuideService {
     private int calculateDayIndex(LocalDate startDate, LocalDate today) {
         DayOfWeek dayOfWeek = today.getDayOfWeek();
         boolean isWeekend = dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
-        
+
         if (isWeekend) {
             return 0;
         }

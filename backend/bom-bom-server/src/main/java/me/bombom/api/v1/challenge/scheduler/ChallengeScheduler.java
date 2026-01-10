@@ -22,8 +22,9 @@ public class ChallengeScheduler {
     private final ChallengeProgressService challengeProgressService;
 
     @Scheduled(cron = DAILY_CRON)
-    @SchedulerLock(name = "cleanup_old_previous_articles", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
+    @SchedulerLock(name = "check_survival", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void checkSurvival() {
+        log.info("탈락 및 쉴드 사용 처리 시작");
         LocalDate yesterday = LocalDate.now().minusDays(1);
         List<Challenge> challenges = challengeService.getOngoingChallenges(yesterday);
 

@@ -77,7 +77,7 @@ public class Challenge extends BaseEntity {
         int passedDays = 0;
         LocalDate currentDate = this.startDate;
         while (!currentDate.isAfter(targetDate)) {
-            if (isWeekend(currentDate)) {
+            if (isWeekday(currentDate)) {
                 passedDays++;
             }
             currentDate = currentDate.plusDays(1);
@@ -85,7 +85,7 @@ public class Challenge extends BaseEntity {
         return passedDays;
     }
 
-    private boolean isWeekend(LocalDate currentDate) {
+    private boolean isWeekday(LocalDate currentDate) {
         DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
         return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
     }

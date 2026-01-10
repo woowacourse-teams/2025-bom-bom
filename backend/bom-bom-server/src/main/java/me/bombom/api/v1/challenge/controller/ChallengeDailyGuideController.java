@@ -6,10 +6,15 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.dto.request.DailyGuideCommentRequest;
+import me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse;
 import me.bombom.api.v1.challenge.service.ChallengeDailyGuideService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,5 +55,16 @@ public class ChallengeDailyGuideController implements ChallengeDailyGuideControl
     ) {
         LocalDate today = LocalDate.now(SEOUL_ZONE);
         challengeDailyGuideService.createDailyGuideComment(challengeId, dayIndex, member.getId(), request, today);
+    }
+
+    @Override
+    @GetMapping("/{challengeId}/daily-guides/{dayIndex}/comments")
+    public Page<DailyGuideCommentResponse> getDailyGuideComments(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
+            @PathVariable @Positive(message = "index는 1 이상의 값이어야 합니다.") int dayIndex,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return challengeDailyGuideService.getTotalComments(challengeId, dayIndex, member.getId(), pageable);
     }
 }

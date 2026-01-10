@@ -2,15 +2,19 @@ package me.bombom.api.v1.highlight.repository;
 
 import static me.bombom.api.v1.article.domain.QArticle.article;
 import static me.bombom.api.v1.highlight.domain.QHighlight.highlight;
-import static me.bombom.api.v1.member.domain.QMember.member;
 import static me.bombom.api.v1.newsletter.domain.QNewsletter.newsletter;
 
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
+import me.bombom.api.v1.challenge.dto.response.QChallengeCommentHighlightResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightCountPerNewsletterResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
 import me.bombom.api.v1.highlight.dto.response.QHighlightCountPerNewsletterResponse;
@@ -34,6 +38,33 @@ public class HighlightRepositoryImpl implements CustomHighlightRepository {
     ) {
         JPAQuery<Long> totalQuery = getTotalQuery(memberId, articleId, newsletterId);
         List<HighlightResponse> content = getContent(memberId, articleId, newsletterId, pageable);
+        return PageableExecutionUtils.getPage(content, pageable, totalQuery::fetchOne);
+    }
+
+    @Override
+    public Page<ChallengeCommentHighlightResponse> findChallengeArticleHighlights(
+            Long memberId,
+            Long articleId,
+            double textTruncateRatio,
+            Pageable pageable
+    ) {
+        JPAQuery<Long> totalQuery = getTotalQuery(memberId, articleId, null);
+
+        List<ChallengeCommentHighlightResponse> content = jpaQueryFactory
+                .select(new QChallengeCommentHighlightResponse(
+                        highlight.id,
+                        truncatedHighlightText(textTruncateRatio),
+                        highlight.memo
+                ))
+                .from(highlight)
+                .join(article).on(article.id.eq(highlight.articleId))
+                .where(createMemberIdWhereClause(memberId))
+                .where(createArticleIdWhereClause(articleId))
+                .orderBy(highlight.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
         return PageableExecutionUtils.getPage(content, pageable, totalQuery::fetchOne);
     }
 
@@ -106,5 +137,19 @@ public class HighlightRepositoryImpl implements CustomHighlightRepository {
         return Optional.ofNullable(newsletterId)
                 .map(highlight.newsletterId::eq)
                 .orElse(null);
+    }
+
+    private Expression<String> truncatedHighlightText(double textTruncateRatio) {
+        NumberExpression<Integer> threshold =
+                article.contentsText.length()
+                        .doubleValue()
+                        .multiply(textTruncateRatio)
+                        .ceil()
+                        .intValue();
+
+        return new CaseBuilder()
+                .when(highlight.text.length().gt(threshold))
+                .then(highlight.text.substring(0, threshold).concat("..."))
+                .otherwise(highlight.text);
     }
 }

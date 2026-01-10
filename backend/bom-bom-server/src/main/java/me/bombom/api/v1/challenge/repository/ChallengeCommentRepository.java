@@ -12,28 +12,28 @@ import org.springframework.data.repository.query.Param;
 public interface ChallengeCommentRepository extends JpaRepository<ChallengeComment, Long> {
 
     @Query("""
-        SELECT new me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse(
-            m.nickname,
-            n.name,
-            CASE
-                WHEN s.id IS NULL THEN false
-                ELSE true
-            END,
-            cc.articleTitle,
-            cc.quotation,
-            cc.comment,
-            cc.createdAt
-        )
-        FROM ChallengeComment cc
-        JOIN ChallengeParticipant cp ON cc.participantId = cp.id
-        LEFT JOIN Member m ON cp.memberId = m.id
-        JOIN Newsletter n ON cc.newsletterId = n.id
-        LEFT JOIN Subscribe s ON s.newsletterId = cc.newsletterId AND s.memberId = :currentMemberId
-        WHERE cp.challengeTeamId = :teamId
-        AND FUNCTION('DATE', cc.createdAt) BETWEEN :startDate AND :endDate
-    """)
-    Page<ChallengeCommentResponse> findAllByTeamInDuration(
-            @Param("teamId") Long teamId,
+                SELECT new me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse(
+                    m.nickname,
+                    n.name,
+                    CASE
+                        WHEN s.id IS NULL THEN false
+                        ELSE true
+                    END,
+                    cc.articleTitle,
+                    cc.quotation,
+                    cc.comment,
+                    cc.createdAt
+                )
+                FROM ChallengeComment cc
+                JOIN ChallengeParticipant cp ON cc.participantId = cp.id
+                LEFT JOIN Member m ON cp.memberId = m.id
+                JOIN Newsletter n ON cc.newsletterId = n.id
+                LEFT JOIN Subscribe s ON s.newsletterId = cc.newsletterId AND s.memberId = :currentMemberId
+                WHERE cp.challengeId = :challengeId
+                AND FUNCTION('DATE', cc.createdAt) BETWEEN :startDate AND :endDate
+            """)
+    Page<ChallengeCommentResponse> findAllInDuration(
+            @Param("challengeId") Long challengeId,
             @Param("currentMemberId") Long currentMemberId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,

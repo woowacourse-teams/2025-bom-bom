@@ -6,11 +6,11 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
-import me.bombom.api.v1.challenge.domain.ChallengeComment.ChallengeCommentBuilder;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.challenge.event.CreateChallengeCommentEvent;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
@@ -18,6 +18,8 @@ import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.highlight.repository.HighlightRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,20 +34,26 @@ public class ChallengeCommentService {
     private final ChallengeCommentRepository challengeCommentRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ArticleRepository articleRepository;
+    private final HighlightRepository highlightRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+
+    @Value("${challenge.highlight.truncate-ratio}")
+    private double highlightTruncateRatio;
 
     public Page<ChallengeCommentResponse> getChallengeComments(
             Long challengeId,
             Long memberId,
             ChallengeCommentOptionsRequest request,
             Pageable pageable
-    ){
-        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+    ) {
+        if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
                     .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndMemberId"));
-        return challengeCommentRepository.findAllByTeamInDuration(
-                participant.getChallengeTeamId(),
+                    .addContext(ErrorContextKeys.OPERATION, "existsByChallengeIdAndMemberId");
+        }
+
+        return challengeCommentRepository.findAllInDuration(
+                challengeId,
                 memberId,
                 request.start(),
                 request.end(),
@@ -67,10 +75,7 @@ public class ChallengeCommentService {
             Long challengeId,
             ChallengeCommentRequest request
     ) {
-        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
-                        challengeId,
-                        memberId
-                )
+        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                         .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
@@ -93,5 +98,18 @@ public class ChallengeCommentService {
 
         challengeCommentRepository.save(comment);
         applicationEventPublisher.publishEvent(new CreateChallengeCommentEvent(participant.getId()));
+    }
+
+    public Page<ChallengeCommentHighlightResponse> getChallengeArticleHighlights(
+            Long memberId,
+            Long articleId,
+            Pageable pageable
+    ) {
+        return highlightRepository.findChallengeArticleHighlights(
+                memberId,
+                articleId,
+                highlightTruncateRatio,
+                pageable
+        );
     }
 }

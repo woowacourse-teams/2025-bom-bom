@@ -28,8 +28,8 @@ import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
-import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.support.IntegrationTest;
@@ -208,7 +208,7 @@ class ChallengeProgressServiceTest {
     @Test
     void 결석_허용일을_초과하면_생존에_실패한다() {
         // given
-        LocalDate yesterday = LocalDate.now().minusDays(1);
+        LocalDate yesterday = LocalDate.of(2026, 1, 10).minusDays(1);
 
         // Challenge: 총 10일. 80% = 8일. 최대 결석 = 2일
         Challenge survivalChallenge = challengeRepository.save(TestFixture.createChallenge(
@@ -230,10 +230,10 @@ class ChallengeProgressServiceTest {
         // when
         challengeProgressService.proceedDailySurvivalCheck(survivalChallenge, yesterday);
 
-            // then
-            ChallengeParticipant updatedParticipant = challengeParticipantRepository.findById(participant.getId())
-                            .orElseThrow();
-            assertThat(updatedParticipant.isSurvived()).isFalse();
+        // then
+        ChallengeParticipant updatedParticipant = challengeParticipantRepository.findById(participant.getId())
+                .orElseThrow();
+        assertThat(updatedParticipant.isSurvived()).isFalse();
     }
 
     @Test

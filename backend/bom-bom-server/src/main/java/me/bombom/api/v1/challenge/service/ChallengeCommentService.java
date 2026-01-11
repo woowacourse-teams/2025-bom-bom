@@ -1,5 +1,7 @@
 package me.bombom.api.v1.challenge.service;
 
+import java.time.Clock;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +39,7 @@ public class ChallengeCommentService {
     private final ArticleRepository articleRepository;
     private final HighlightRepository highlightRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final Clock clock;
 
     @Value("${challenge.highlight.truncate-ratio}")
     private double highlightTruncateRatio;
@@ -76,6 +79,8 @@ public class ChallengeCommentService {
             Long challengeId,
             ChallengeCommentRequest request
     ) {
+        validateCommentAvailableDay(memberId, challengeId);
+
         ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.MEMBER_ID, memberId)
@@ -143,5 +148,20 @@ public class ChallengeCommentService {
         }
 
         comment.updateComment(request.comment());
+    }
+
+    private void validateCommentAvailableDay(Long memberId, Long challengeId) {
+        if (isWeekend(LocalDate.now(clock))) {
+            throw new CIllegalArgumentException(ErrorDetail.PRECONDITION_FAILED)
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                    .addContext(ErrorContextKeys.OPERATION, "createChallengeComment")
+                    .addContext(ErrorContextKeys.DETAIL, "주말에는 챌린지 코멘트를 작성할 수 없습니다.");
+        }
+    }
+
+    private boolean isWeekend(LocalDate today) {
+        DayOfWeek dayOfWeek = today.getDayOfWeek();
+        return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
     }
 }

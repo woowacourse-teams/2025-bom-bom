@@ -72,4 +72,16 @@ public class SubscribeService {
         ));
         return UnsubscribeResponse.of(subscribe.getUnsubscribeUrl());
     }
+
+    @Transactional
+    public void handleUnsubscribeResult(Long subscribeId, boolean success) {
+        Subscribe subscribe = subscribeRepository.findById(subscribeId)
+                .orElseThrow(() -> new IllegalStateException("구독 정보를 찾을 수 없음: " + subscribeId));
+
+        if (success) {
+            subscribeRepository.delete(subscribe);
+        } else {
+            subscribe.changeStatus(SubscribeStatus.FAILED);
+        }
+    }
 }

@@ -46,4 +46,12 @@ public class Subscribe extends BaseEntity {
     public boolean isNotOwner(Long memberId) {
         return !this.memberId.equals(memberId);
     }
+
+    public boolean isFailed() {
+        return status == SubscribeStatus.FAILED;
+    }
+
+    public boolean isUnsubscribing() {
+        return status == SubscribeStatus.UNSUBSCRIBING;
+    }
 }

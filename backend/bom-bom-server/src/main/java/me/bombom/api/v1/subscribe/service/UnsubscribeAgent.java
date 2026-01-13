@@ -8,6 +8,8 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Page.GetByRoleOptions;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.AriaRole;
+import com.microsoft.playwright.options.LoadState;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
@@ -23,10 +25,14 @@ public class UnsubscribeAgent {
 
     private static final String ALL_URLS_PATTERN = "**/*";
     private static final Set<String> BLOCKED_RESOURCE_TYPES = Set.of("image", "font", "media");
-
     private static final Pattern UNSUBSCRIBE_PATTERN = Pattern.compile(
             "unsubscribe|구독.?취소|수신.?거부|cancel|confirm|yes",
-            Pattern.CASE_INSENSITIVE);
+            Pattern.CASE_INSENSITIVE
+    );
+    private static final Pattern SUCCESS_PATTERN = Pattern.compile(
+            "success|complete|done|unsubscribed|구독.?취소|완료|해지",
+            Pattern.CASE_INSENSITIVE
+    );
 
     @Async
     public void unsubscribe(String url) {
@@ -52,8 +58,8 @@ public class UnsubscribeAgent {
                 }
             }
 
-            // 결과 대기: URL 변경이나 성공 메시지("Success")를 기다리는 것이 더 정확함 (2초 대기는 임시 방편)
-            page.waitForTimeout(2000);
+            // 네트워크 연결이 유휴 상태가 될 때까지 대기 (최대 5초)
+            page.waitForLoadState(LoadState.NETWORKIDLE, new Page.WaitForLoadStateOptions().setTimeout(5000));
             log.info("구독 취소 프로세스 완료");
         } catch (Exception e) {
             log.error("구독 취소 실패: {}", e.getMessage(), e);
@@ -75,29 +81,16 @@ public class UnsubscribeAgent {
     }
 
     private Locator findUnsubscribeButton(Page page) {
-        // 1. Role 기반 탐색 (가장 정확함)
-        Locator buttonByRole = page.getByRole(AriaRole.BUTTON, new GetByRoleOptions().setName(UNSUBSCRIBE_PATTERN));
-
-        if (buttonByRole.isVisible()) {
-            return buttonByRole;
+        for (AriaRole role : List.of(AriaRole.BUTTON, AriaRole.LINK)) {
+            Locator button = page.getByRole(role, new GetByRoleOptions().setName(UNSUBSCRIBE_PATTERN));
+            if (button.isVisible()) {
+                return button;
+            }
         }
-
-        // 2. 텍스트 기반 탐색 (Role이 없는 경우 대비)
-        log.info("버튼 Role을 찾지 못해 텍스트 기반 탐색을 시도합니다.");
-        Locator buttonByText = page.getByText(UNSUBSCRIBE_PATTERN).first();
-
-        if (buttonByText.isVisible()) {
-            return buttonByText;
-        }
-
         return null;
     }
 
     private boolean isUnsubscribeSuccess(Page page) {
-        Pattern successPattern = Pattern.compile(
-                "success|complete|done|unsubscribed|구독.?취소|완료|해지",
-                Pattern.CASE_INSENSITIVE
-        );
-        return page.getByText(successPattern).isVisible();
+        return page.getByText(SUCCESS_PATTERN).isVisible();
     }
 }

@@ -90,6 +90,9 @@ dependencies {
 
     // for : webhook
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+
+    // Playwright (브라우저 자동화)
+    implementation("com.microsoft.playwright:playwright:1.57.0")
 }
 
 // Querydsl 생성된 파일 정리

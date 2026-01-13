@@ -1,0 +1,2 @@
+ALTER TABLE challenge MODIFY COLUMN start_date DATE NULL;
+ALTER TABLE challenge MODIFY COLUMN end_date DATE NULL;

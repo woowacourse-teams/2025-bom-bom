@@ -14,7 +14,12 @@ import java.util.Map;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
+import java.time.LocalDate;
+import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
+import me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.response.MemberChallengeProgressResponse;
+import me.bombom.api.v1.challenge.dto.response.TeamChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayTodoResponse;
 import me.bombom.api.v1.challenge.service.ChallengeProgressService;
 import me.bombom.api.v1.common.config.WebConfig;
@@ -106,6 +111,69 @@ class ChallengeProgressControllerUnitTest {
 
         // when & then
         mockMvc.perform(get("/api/v1/challenges/{id}/progress/me", invalidId)
+                        .with(authentication(authentication)))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @Test
+    void 특정_팀_진행도_조회_성공() throws Exception {
+        // given
+        Long challengeId = 1L;
+        Long teamId = 10L;
+        
+        Challenge challenge = Challenge.builder()
+                .id(challengeId)
+                .name("Test Challenge")
+                .generation(1)
+                .startDate(LocalDate.now().minusDays(5))
+                .endDate(LocalDate.now().plusDays(5))
+                .totalDays(10)
+                .build();
+        
+        TeamChallengeProgressFlat progressFlat = new TeamChallengeProgressFlat(
+                1L, "tester", true, 5, 10, 77, LocalDate.now(), ChallengeDailyStatus.COMPLETE);
+        
+        TeamChallengeProgressResponse response = TeamChallengeProgressResponse.of(
+                challenge,
+                List.of(progressFlat)
+        );
+
+        given(challengeProgressService.getTeamProgressByTeamId(eq(challengeId), eq(teamId), any(Member.class)))
+                .willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges/{id}/progress/teams/{teamId}", challengeId, teamId)
+                        .with(authentication(authentication)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.challenge").exists())
+                .andExpect(jsonPath("$.teamSummary").exists())
+                .andExpect(jsonPath("$.teamSummary.achievementAverage").value(77))
+                .andExpect(jsonPath("$.members").isArray())
+                .andDo(print());
+    }
+
+    @Test
+    void 특정_팀_진행도_조회_실패_챌린지_ID가_양수가_아님() throws Exception {
+        // given
+        Long invalidId = -1L;
+        Long teamId = 10L;
+
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges/{id}/progress/teams/{teamId}", invalidId, teamId)
+                        .with(authentication(authentication)))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @Test
+    void 특정_팀_진행도_조회_실패_팀_ID가_양수가_아님() throws Exception {
+        // given
+        Long challengeId = 1L;
+        Long invalidTeamId = -1L;
+
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges/{id}/progress/teams/{teamId}", challengeId, invalidTeamId)
                         .with(authentication(authentication)))
                 .andExpect(status().isBadRequest())
                 .andDo(print());

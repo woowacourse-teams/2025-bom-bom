@@ -12,13 +12,16 @@ import me.bombom.api.v1.challenge.domain.ChallengeNewsletter;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
 import me.bombom.api.v1.challenge.domain.EligibilityReason;
+import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.dto.response.ChallengeDetailResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeTeamListResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeNewsletterRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
@@ -66,6 +69,9 @@ class ChallengeServiceTest {
     @Autowired
     private SubscribeRepository subscribeRepository;
 
+    @Autowired
+    private ChallengeTeamRepository challengeTeamRepository;
+
     private Member member;
     private List<Category> categories;
     private List<Newsletter> newsletters;
@@ -74,6 +80,7 @@ class ChallengeServiceTest {
     @BeforeEach
     void setUp() {
         challengeParticipantRepository.deleteAllInBatch();
+        challengeTeamRepository.deleteAllInBatch();
         challengeNewsletterRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
         subscribeRepository.deleteAllInBatch();
@@ -610,5 +617,126 @@ class ChallengeServiceTest {
         assertThatThrownBy(() -> challengeService.cancelChallenge(challenge.getId(), member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasMessage(ErrorDetail.ENTITY_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 팀_목록_조회_시_내_팀_포함() {
+        // given
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        challengeRepository.save(challenge);
+
+        ChallengeTeam team1 = TestFixture.createChallengeTeam(challenge.getId(), 50);
+        ChallengeTeam team2 = TestFixture.createChallengeTeam(challenge.getId(), 60);
+        ChallengeTeam team3 = TestFixture.createChallengeTeam(challenge.getId(), 70);
+        challengeTeamRepository.saveAll(List.of(team1, team2, team3));
+
+        ChallengeParticipant participant = TestFixture.createChallengeParticipantWithTeam(
+                challenge.getId(),
+                member.getId(),
+                team2.getId(),  // team2에 속함
+                5,
+                0
+        );
+        challengeParticipantRepository.save(participant);
+
+        // when
+        ChallengeTeamListResponse result = challengeService.getTeamList(challenge.getId(), member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalTeamCount()).isEqualTo(3);
+            softly.assertThat(result.myTeamId()).isEqualTo(team2.getId());
+            softly.assertThat(result.teams()).hasSize(3);
+            softly.assertThat(result.teams().get(0).teamId()).isEqualTo(team1.getId());
+            softly.assertThat(result.teams().get(0).teamNumber()).isEqualTo(1);
+            softly.assertThat(result.teams().get(0).isMyTeam()).isFalse();
+            softly.assertThat(result.teams().get(1).teamId()).isEqualTo(team2.getId());
+            softly.assertThat(result.teams().get(1).teamNumber()).isEqualTo(2);
+            softly.assertThat(result.teams().get(1).isMyTeam()).isTrue();
+            softly.assertThat(result.teams().get(2).teamId()).isEqualTo(team3.getId());
+            softly.assertThat(result.teams().get(2).teamNumber()).isEqualTo(3);
+            softly.assertThat(result.teams().get(2).isMyTeam()).isFalse();
+        });
+    }
+
+    @Test
+    void 팀_목록_조회_시_내_팀이_null인_경우() {
+        // given
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        challengeRepository.save(challenge);
+
+        ChallengeTeam team1 = TestFixture.createChallengeTeam(challenge.getId(), 50);
+        ChallengeTeam team2 = TestFixture.createChallengeTeam(challenge.getId(), 60);
+        challengeTeamRepository.saveAll(List.of(team1, team2));
+
+        // 참가는 했지만 팀에 배정되지 않은 경우
+        ChallengeParticipant participant = TestFixture.createChallengeParticipant(
+                challenge.getId(),
+                member.getId(),
+                5
+        );
+        challengeParticipantRepository.save(participant);
+
+        // when
+        ChallengeTeamListResponse result = challengeService.getTeamList(challenge.getId(), member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalTeamCount()).isEqualTo(2);
+            softly.assertThat(result.myTeamId()).isNull();
+            softly.assertThat(result.teams()).hasSize(2);
+            softly.assertThat(result.teams().get(0).isMyTeam()).isFalse();
+            softly.assertThat(result.teams().get(1).isMyTeam()).isFalse();
+        });
+    }
+
+    @Test
+    void 팀_목록_조회_시_팀이_없는_경우() {
+        // given
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        challengeRepository.save(challenge);
+
+        // when
+        ChallengeTeamListResponse result = challengeService.getTeamList(challenge.getId(), member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalTeamCount()).isEqualTo(0);
+            softly.assertThat(result.myTeamId()).isNull();
+            softly.assertThat(result.teams()).isEmpty();
+        });
+    }
+
+    @Test
+    void 존재하지_않는_챌린지_ID로_팀_목록_조회_시_예외가_발생한다() {
+        // when & then
+        assertThatThrownBy(() -> challengeService.getTeamList(0L, member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasMessage(ErrorDetail.ENTITY_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 팀_목록_조회_시_teamNumber가_올바르게_계산된다() {
+        // given
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        challengeRepository.save(challenge);
+
+        ChallengeTeam team1 = TestFixture.createChallengeTeam(challenge.getId(), 50);
+        ChallengeTeam team2 = TestFixture.createChallengeTeam(challenge.getId(), 60);
+        ChallengeTeam team3 = TestFixture.createChallengeTeam(challenge.getId(), 70);
+        ChallengeTeam team4 = TestFixture.createChallengeTeam(challenge.getId(), 80);
+        challengeTeamRepository.saveAll(List.of(team1, team2, team3, team4));
+
+        // when
+        ChallengeTeamListResponse result = challengeService.getTeamList(challenge.getId(), member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.teams()).hasSize(4);
+            softly.assertThat(result.teams().get(0).teamNumber()).isEqualTo(1);
+            softly.assertThat(result.teams().get(1).teamNumber()).isEqualTo(2);
+            softly.assertThat(result.teams().get(2).teamNumber()).isEqualTo(3);
+            softly.assertThat(result.teams().get(3).teamNumber()).isEqualTo(4);
+        });
     }
 }

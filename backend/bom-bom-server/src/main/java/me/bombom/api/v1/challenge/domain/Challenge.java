@@ -29,10 +29,8 @@ public class Challenge extends BaseEntity {
     @Column(nullable = false)
     private int generation;
 
-    @Column(nullable = false)
     private LocalDate startDate;
 
-    @Column(nullable = false)
     private LocalDate endDate;
 
     @Column(nullable = false)
@@ -43,8 +41,8 @@ public class Challenge extends BaseEntity {
             Long id,
             @NonNull String name,
             int generation,
-            @NonNull LocalDate startDate,
-            @NonNull LocalDate endDate,
+            LocalDate startDate,
+            LocalDate endDate,
             int totalDays
     ) {
         this.id = id;
@@ -56,6 +54,9 @@ public class Challenge extends BaseEntity {
     }
 
     public ChallengeStatus getStatus(LocalDate now) {
+        if (this.startDate == null) {
+            return ChallengeStatus.COMING_SOON;
+        }
         if (now.isBefore(this.startDate)) {
             return ChallengeStatus.BEFORE_START;
         }

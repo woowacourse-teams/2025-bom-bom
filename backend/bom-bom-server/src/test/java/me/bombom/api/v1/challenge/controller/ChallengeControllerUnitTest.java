@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeTeamListResponse;
 import me.bombom.api.v1.challenge.service.ChallengeService;
 import me.bombom.api.v1.common.exception.GlobalExceptionHandler;
 import me.bombom.api.v1.member.domain.Member;
@@ -132,6 +133,45 @@ class ChallengeControllerUnitTest {
     void 챌린지_취소시_음수_id면_400() throws Exception {
         //when & then
         mockMvc.perform(delete("/api/v1/challenges/{id}/application", -1L))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 팀_목록_조회_시_내_팀_포함() throws Exception {
+        // given
+        List<ChallengeTeamListResponse.TeamInfoResponse> teams = List.of(
+                new ChallengeTeamListResponse.TeamInfoResponse(1L, 1, false),
+                new ChallengeTeamListResponse.TeamInfoResponse(2L, 2, true),
+                new ChallengeTeamListResponse.TeamInfoResponse(3L, 3, false)
+        );
+        ChallengeTeamListResponse response = new ChallengeTeamListResponse(3, 2L, teams);
+
+        given(challengeService.getTeamList(1L, null))
+                .willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges/{id}/teams", 1L))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalTeamCount").value(3))
+                .andExpect(jsonPath("$.myTeamId").value(2))
+                .andExpect(jsonPath("$.teams").isArray())
+                .andExpect(jsonPath("$.teams[0].teamId").value(1))
+                .andExpect(jsonPath("$.teams[0].teamNumber").value(1))
+                .andExpect(jsonPath("$.teams[0].isMyTeam").value(false))
+                .andExpect(jsonPath("$.teams[1].teamId").value(2))
+                .andExpect(jsonPath("$.teams[1].teamNumber").value(2))
+                .andExpect(jsonPath("$.teams[1].isMyTeam").value(true))
+                .andExpect(jsonPath("$.teams[2].teamId").value(3))
+                .andExpect(jsonPath("$.teams[2].teamNumber").value(3))
+                .andExpect(jsonPath("$.teams[2].isMyTeam").value(false));
+    }
+
+    @Test
+    void 팀_목록_조회시_음수_id면_400() throws Exception {
+        //when & then
+        mockMvc.perform(get("/api/v1/challenges/{id}/teams", -1L))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }

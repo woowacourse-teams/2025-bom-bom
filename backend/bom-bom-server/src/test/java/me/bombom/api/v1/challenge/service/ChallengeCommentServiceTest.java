@@ -3,9 +3,12 @@ package me.bombom.api.v1.challenge.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.BDDMockito.given;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
@@ -20,6 +23,8 @@ import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorContextKeys;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.highlight.domain.Color;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
@@ -38,9 +43,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @IntegrationTest
 class ChallengeCommentServiceTest {
+
+    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
 
     @Autowired
     private ChallengeCommentService challengeCommentService;
@@ -68,6 +76,9 @@ class ChallengeCommentServiceTest {
 
     @Autowired
     private HighlightRepository highlightRepository;
+
+    @MockitoBean
+    private Clock clock;
 
     private Member member;
     private Article article;
@@ -109,6 +120,8 @@ class ChallengeCommentServiceTest {
                         0
                 )
         );
+
+        setToday(LocalDate.of(2026, 1, 9)); // default 평일
     }
 
     @Test
@@ -252,6 +265,7 @@ class ChallengeCommentServiceTest {
                 null, // 인용구 optional 테스트
                 "챌린지 한 줄 코멘트로 20자 이상의 댓글을 작성했습니다."
         );
+        setToday(LocalDate.of(2026, 1, 9)); // 금요일
 
         // when
         challengeCommentService.createChallengeComment(
@@ -279,6 +293,7 @@ class ChallengeCommentServiceTest {
                 "quote",
                 "챌린지 한 줄 코멘트로 20자 이상의 댓글을 작성했습니다."
         );
+        setToday(LocalDate.of(2026, 1, 9)); // 금요일
 
         // when & then
         assertThatThrownBy(() -> challengeCommentService.createChallengeComment(
@@ -286,6 +301,28 @@ class ChallengeCommentServiceTest {
                 999L,
                 request
         )).isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void 주말에는_챌린지_댓글_생성이_실패한다() {
+        // given
+        ChallengeCommentRequest request = new ChallengeCommentRequest(
+                article.getId(),
+                null,
+                "챌린지 한 줄 코멘트로 20자 이상의 댓글을 작성했습니다."
+        );
+        setToday(LocalDate.of(2026, 1, 10)); // 토요일
+
+        // when & then
+        assertThatThrownBy(() -> challengeCommentService.createChallengeComment(
+                member.getId(),
+                participant.getChallengeId(),
+                request
+        )).isInstanceOfSatisfying(CIllegalArgumentException.class, ex -> assertSoftly(softly -> {
+            softly.assertThat(ex.getErrorDetail()).isEqualTo(ErrorDetail.PRECONDITION_FAILED);
+            softly.assertThat(ex.getContext().get(ErrorContextKeys.DETAIL.getKey()))
+                    .isEqualTo("주말에는 챌린지 코멘트를 작성할 수 없습니다.");
+        }));
     }
 
     @Test
@@ -332,5 +369,10 @@ class ChallengeCommentServiceTest {
             softly.assertThat(result.getTotalElements()).isEqualTo(1);
             softly.assertThat(result.getContent().getFirst().text()).isEqualTo("01234567...");
         });
+    }
+
+    private void setToday(LocalDate date) {
+        given(clock.instant()).willReturn(date.atStartOfDay(SEOUL_ZONE).toInstant());
+        given(clock.getZone()).willReturn(SEOUL_ZONE);
     }
 }

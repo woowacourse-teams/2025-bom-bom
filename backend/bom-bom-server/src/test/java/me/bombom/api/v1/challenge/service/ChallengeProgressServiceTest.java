@@ -18,7 +18,6 @@ import me.bombom.api.v1.challenge.domain.ChallengeTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.dto.response.MemberChallengeProgressResponse;
-import me.bombom.api.v1.challenge.dto.response.MemberDailyResultResponse;
 import me.bombom.api.v1.challenge.dto.response.TeamChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayTodoResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
@@ -29,6 +28,8 @@ import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
+import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.support.IntegrationTest;
@@ -131,110 +132,6 @@ class ChallengeProgressServiceTest {
     }
 
     @Test
-    void 팀_챌린지_진행상황을_조회한다() {
-        // given
-        ChallengeTeam team = challengeTeamRepository.save(createChallengeTeam(challenge.getId(), 77));
-
-        Member memberA = memberRepository.save(TestFixture.createUniqueMember("userA", "A"));
-        Member memberB = memberRepository.save(TestFixture.createUniqueMember("userB", "B"));
-
-        ChallengeParticipant participant1 = challengeParticipantRepository.save(
-                createTeamParticipant(
-                        challenge.getId(),
-                        memberA.getId(),
-                        team.getId(),
-                        2,
-                        false));
-        ChallengeParticipant participant2 = challengeParticipantRepository.save(
-                createTeamParticipant(
-                        challenge.getId(),
-                        memberB.getId(),
-                        team.getId(),
-                        3,
-                        true));
-
-        ChallengeDailyResult result1 = createChallengeDailyResult(participant1.getId(), LocalDate.now(),
-                ChallengeDailyStatus.SHIELD);
-        ChallengeDailyResult result2 = createChallengeDailyResult(participant1.getId(),
-                LocalDate.now().plusDays(1),
-                ChallengeDailyStatus.COMPLETE);
-        ChallengeDailyResult result3 = createChallengeDailyResult(participant2.getId(), LocalDate.now(),
-                ChallengeDailyStatus.COMPLETE);
-        ChallengeDailyResult result4 = createChallengeDailyResult(participant2.getId(),
-                LocalDate.now().plusDays(1),
-                ChallengeDailyStatus.SHIELD);
-        ChallengeDailyResult result5 = createChallengeDailyResult(participant2.getId(),
-                LocalDate.now().plusDays(2),
-                ChallengeDailyStatus.COMPLETE);
-        challengeDailyResultRepository.saveAll(List.of(result1, result2, result3, result4, result5));
-
-        // when
-        TeamChallengeProgressResponse response = challengeProgressService.getTeamProgress(
-                challenge.getId(), memberA);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.teamSummary().achievementAverage()).isEqualTo(77);
-            softly.assertThat(response.members()).hasSize(2);
-
-            // 정렬 순서 검증
-            softly.assertThat(response.members())
-                    .extracting("nickname")
-                    .containsExactly(memberB.getNickname(), memberA.getNickname());
-
-            MemberDailyResultResponse responseB = response.members().stream()
-                    .filter(m -> memberB.getNickname().equals(m.nickname()))
-                    .findFirst()
-                    .orElseThrow();
-
-            softly.assertThat(responseB.dailyProgresses())
-                    .hasSize(3)
-                    .extracting("status")
-                    .containsExactlyInAnyOrder(ChallengeDailyStatus.COMPLETE,
-                            ChallengeDailyStatus.SHIELD,
-                            ChallengeDailyStatus.COMPLETE);
-
-            softly.assertThat(responseB.dailyProgresses())
-                    .extracting("date")
-                    .containsExactly(
-                            LocalDate.now(),
-                            LocalDate.now().plusDays(1),
-                            LocalDate.now().plusDays(2));
-        });
-    }
-
-    @Test
-    void 팀_챌린지_진행상황_조회_실패_참가정보_없음() {
-        // given
-        Long nonExistentChallengeId = 0L;
-
-        // when & then
-        assertThatThrownBy(
-                () -> challengeProgressService.getTeamProgress(nonExistentChallengeId, member))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .satisfies(e -> {
-                    CIllegalArgumentException exception = (CIllegalArgumentException) e;
-                    assertThat(exception.getContext().get(ErrorContextKeys.ENTITY_TYPE.getKey()))
-                            .isEqualTo("challenge");
-                });
-    }
-
-    @Test
-    void 팀_챌린지_진행상황_조회_실패_팀_없음() {
-        // given
-        Member newMember = memberRepository.save(TestFixture.createUniqueMember("new", "new"));
-
-        // when & then
-        assertThatThrownBy(() -> challengeProgressService.getTeamProgress(challenge.getId(), newMember))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .satisfies(e -> {
-                    CIllegalArgumentException exception = (CIllegalArgumentException) e;
-                    assertThat(exception.getContext().get(ErrorContextKeys.ENTITY_TYPE.getKey()))
-                            .isEqualTo("challengeParticipant");
-                });
-    }
-
-    @Test
     void 쉴드를_보유한_참가자는_결석_시_쉴드를_사용하여_생존한다() {
         // given
         LocalDate yesterday = LocalDate.now().minusDays(1);
@@ -311,7 +208,7 @@ class ChallengeProgressServiceTest {
     @Test
     void 결석_허용일을_초과하면_생존에_실패한다() {
         // given
-        LocalDate yesterday = LocalDate.now().minusDays(1);
+        LocalDate yesterday = LocalDate.of(2026, 1, 10).minusDays(1);
 
         // Challenge: 총 10일. 80% = 8일. 최대 결석 = 2일
         Challenge survivalChallenge = challengeRepository.save(TestFixture.createChallenge(
@@ -337,6 +234,117 @@ class ChallengeProgressServiceTest {
         ChallengeParticipant updatedParticipant = challengeParticipantRepository.findById(participant.getId())
                 .orElseThrow();
         assertThat(updatedParticipant.isSurvived()).isFalse();
+    }
+
+    @Test
+    void 특정_팀_진행상황을_조회한다() {
+        // given
+        ChallengeTeam team = challengeTeamRepository.save(createChallengeTeam(challenge.getId(), 77));
+
+        Member memberA = memberRepository.save(TestFixture.createUniqueMember("userA", "A"));
+        Member memberB = memberRepository.save(TestFixture.createUniqueMember("userB", "B"));
+
+        ChallengeParticipant participant1 = challengeParticipantRepository.save(
+                createTeamParticipant(challenge.getId(), memberA.getId(), team.getId(), 2, false));
+        ChallengeParticipant participant2 = challengeParticipantRepository.save(
+                createTeamParticipant(challenge.getId(), memberB.getId(), team.getId(), 3, true));
+
+        ChallengeDailyResult result1 = createChallengeDailyResult(participant1.getId(), LocalDate.now(),
+                ChallengeDailyStatus.SHIELD);
+        ChallengeDailyResult result2 = createChallengeDailyResult(participant1.getId(), LocalDate.now().plusDays(1),
+                ChallengeDailyStatus.COMPLETE);
+        ChallengeDailyResult result3 = createChallengeDailyResult(participant2.getId(), LocalDate.now(),
+                ChallengeDailyStatus.COMPLETE);
+        ChallengeDailyResult result4 = createChallengeDailyResult(participant2.getId(), LocalDate.now().plusDays(1),
+                ChallengeDailyStatus.SHIELD);
+        ChallengeDailyResult result5 = createChallengeDailyResult(participant2.getId(), LocalDate.now().plusDays(2),
+                ChallengeDailyStatus.COMPLETE);
+        challengeDailyResultRepository.saveAll(List.of(result1, result2, result3, result4, result5));
+
+        // when
+        TeamChallengeProgressResponse response = challengeProgressService.getTeamProgressByTeamId(
+                challenge.getId(), team.getId(), memberA);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.teamSummary().achievementAverage()).isEqualTo(77);
+            softly.assertThat(response.members()).hasSize(2);
+
+            // 정렬 순서 검증 (completedDays DESC)
+            softly.assertThat(response.members())
+                    .extracting("nickname")
+                    .containsExactly(memberB.getNickname(), memberA.getNickname());
+        });
+    }
+
+    @Test
+    void 특정_팀_진행상황_조회_실패_참가하지_않음() {
+        // given
+        ChallengeTeam team = challengeTeamRepository.save(createChallengeTeam(challenge.getId(), 77));
+        Member nonParticipant = memberRepository.save(TestFixture.createUniqueMember("nonParticipant", "NP"));
+
+        // when & then
+        assertThatThrownBy(() -> challengeProgressService.getTeamProgressByTeamId(
+                challenge.getId(), team.getId(), nonParticipant))
+                .isInstanceOf(UnauthorizedException.class)
+                .satisfies(e -> {
+                    UnauthorizedException exception = (UnauthorizedException) e;
+                    assertThat(exception.getErrorDetail()).isEqualTo(ErrorDetail.FORBIDDEN_RESOURCE);
+                });
+    }
+
+    @Test
+    void 특정_팀_진행상황_조회_실패_챌린지_없음() {
+        // given
+        ChallengeTeam team = challengeTeamRepository.save(createChallengeTeam(challenge.getId(), 77));
+        Long nonExistentChallengeId = 0L;
+
+        // when & then
+        assertThatThrownBy(() -> challengeProgressService.getTeamProgressByTeamId(
+                nonExistentChallengeId, team.getId(), member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .satisfies(e -> {
+                    CIllegalArgumentException exception = (CIllegalArgumentException) e;
+                    assertThat(exception.getContext().get(ErrorContextKeys.ENTITY_TYPE.getKey()))
+                            .isEqualTo("challenge");
+                });
+    }
+
+    @Test
+    void 특정_팀_진행상황_조회_실패_팀_없음() {
+        // given
+        Long nonExistentTeamId = 0L;
+
+        // when & then
+        assertThatThrownBy(() -> challengeProgressService.getTeamProgressByTeamId(
+                challenge.getId(), nonExistentTeamId, member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .satisfies(e -> {
+                    CIllegalArgumentException exception = (CIllegalArgumentException) e;
+                    assertThat(exception.getContext().get(ErrorContextKeys.ENTITY_TYPE.getKey()))
+                            .isEqualTo("challengeTeam");
+                });
+    }
+
+    @Test
+    void 특정_팀_진행상황_조회_실패_팀이_챌린지에_속하지_않음() {
+        // given
+        Challenge otherChallenge = challengeRepository.save(TestFixture.createChallenge(
+                "Other Challenge",
+                LocalDate.now().minusDays(5),
+                LocalDate.now().plusDays(5),
+                10));
+        ChallengeTeam otherTeam = challengeTeamRepository.save(createChallengeTeam(otherChallenge.getId(), 50));
+
+        // when & then
+        assertThatThrownBy(() -> challengeProgressService.getTeamProgressByTeamId(
+                challenge.getId(), otherTeam.getId(), member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .satisfies(e -> {
+                    CIllegalArgumentException exception = (CIllegalArgumentException) e;
+                    assertThat(exception.getContext().get(ErrorContextKeys.ENTITY_TYPE.getKey()))
+                            .isEqualTo("challengeTeam");
+                });
     }
 
     private ChallengeParticipant createTeamParticipant(Long challengeId, Long memberId, Long teamId,

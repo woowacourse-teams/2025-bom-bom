@@ -71,7 +71,7 @@ public class ChallengeService {
                 .filter(challenge -> {
                     ChallengeStatus status = challenge.getStatus(LocalDate.now());
                     boolean isJoined = myParticipation.containsKey(challenge.getId());
-                    return status == ChallengeStatus.BEFORE_START || isJoined;
+                    return status == ChallengeStatus.COMING_SOON || status == ChallengeStatus.BEFORE_START || isJoined;
                 })
                 .map(challenge -> toChallengeResponse(
                         challenge,

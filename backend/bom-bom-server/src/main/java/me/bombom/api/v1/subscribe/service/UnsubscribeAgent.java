@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,17 +33,16 @@ public class UnsubscribeAgent {
             Pattern.CASE_INSENSITIVE
     );
 
-    @Async
-    public void unsubscribe(String url) {
-        try (Playwright playwright = Playwright.create();
-                Browser browser = playwright.chromium().launch(new LaunchOptions().setHeadless(true))) {
+    public boolean unsubscribe(String url) {
+        try (Playwright playwright = Playwright.create()) {
+            Browser browser = playwright.chromium().launch(new LaunchOptions().setHeadless(true));
 
             BrowserContext context = getBrowserContext(browser);
             Page page = context.newPage();
             page.navigate(url);
             // 이미 구독 취소 | URL 클릭 만으로 취소 성공
             if (isUnsubscribeSuccess(page)) {
-                return;
+                return true;
             }
 
             // 취소/확인 버튼 찾기 및 클릭
@@ -53,10 +51,13 @@ public class UnsubscribeAgent {
                 confirmButton.click();
             } else {
                 log.warn("구독 취소 실패: 버튼을 찾지 못했고 성공 메시지도 없습니다.");
+                return false;
             }
             page.waitForLoadState(LoadState.DOMCONTENTLOADED, new Page.WaitForLoadStateOptions().setTimeout(5000));
+            return true;
         } catch (Exception e) {
-            log.error("구독 취소 실패: {}", e.getMessage(), e);
+            log.warn("구독 취소 중 오류 발생: {}", e.getMessage());
+            return false;
         }
     }
 

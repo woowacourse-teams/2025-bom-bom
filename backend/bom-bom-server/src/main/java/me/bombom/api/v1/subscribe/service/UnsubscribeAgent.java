@@ -30,7 +30,7 @@ public class UnsubscribeAgent {
             Pattern.CASE_INSENSITIVE
     );
     private static final Pattern SUCCESS_PATTERN = Pattern.compile(
-            "success|unsubscribed|canceled|cancelled|updated|구독.?취소.?완료|처리.?완료|해지.?완료|수신.?거부.?완료|취소.?되었습니다",
+            "success|unsubscribed|canceled|cancelled|취소.?완료|처리.?완료|해지.?완료|거부.?완료|취소.?되었습니다",
             Pattern.CASE_INSENSITIVE
     );
 

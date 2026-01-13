@@ -30,7 +30,7 @@ public class UnsubscribeAgent {
             Pattern.CASE_INSENSITIVE
     );
     private static final Pattern SUCCESS_PATTERN = Pattern.compile(
-            "success|complete|done|unsubscribed|구독.?취소|완료|해지",
+            "success|unsubscribed|canceled|cancelled|updated|구독.?취소.?완료|처리.?완료|해지.?완료|수신.?거부.?완료|취소.?되었습니다",
             Pattern.CASE_INSENSITIVE
     );
 
@@ -41,26 +41,20 @@ public class UnsubscribeAgent {
 
             BrowserContext context = getBrowserContext(browser);
             Page page = context.newPage();
-            log.info("페이지 연결 중: {}", url);
             page.navigate(url);
-
-            // 취소/확인 버튼 찾기
-            Locator confirmButton = findUnsubscribeButton(page);
-
-            if (confirmButton != null && confirmButton.isVisible()) {
-                log.info("구독 취소 버튼을 발견하여 클릭합니다.");
-                confirmButton.click();
-            } else {
-                if (isUnsubscribeSuccess(page)) {
-                    log.info("별도의 조작 없이 구독 취소가 완료된 것으로 판단됩니다.");
-                } else {
-                    log.warn("구독 취소 버튼을 찾지 못했고, 성공 메시지도 확인되지 않았습니다. 수동 확인이 필요할 수 있습니다.");
-                }
+            // 이미 구독 취소 | URL 클릭 만으로 취소 성공
+            if (isUnsubscribeSuccess(page)) {
+                return;
             }
 
-            // 네트워크 연결이 유휴 상태가 될 때까지 대기 (최대 5초)
-            page.waitForLoadState(LoadState.NETWORKIDLE, new Page.WaitForLoadStateOptions().setTimeout(5000));
-            log.info("구독 취소 프로세스 완료");
+            // 취소/확인 버튼 찾기 및 클릭
+            Locator confirmButton = findUnsubscribeButton(page);
+            if (confirmButton != null && confirmButton.isVisible()) {
+                confirmButton.click();
+            } else {
+                log.warn("구독 취소 실패: 버튼을 찾지 못했고 성공 메시지도 없습니다.");
+            }
+            page.waitForLoadState(LoadState.DOMCONTENTLOADED, new Page.WaitForLoadStateOptions().setTimeout(5000));
         } catch (Exception e) {
             log.error("구독 취소 실패: {}", e.getMessage(), e);
         }

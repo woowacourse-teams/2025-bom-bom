@@ -27,15 +27,10 @@ public class AutoUnsubscribeEventListener {
         String unsubscribeUrl = event.unsubscribeUrl();
 
         log.info("구독 자동 취소 시작 subscribeId: {}", subscribeId);
-        boolean success = unsubscribeAgent.unsubscribe(unsubscribeUrl);
+        boolean isSuccess = unsubscribeAgent.unsubscribe(unsubscribeUrl);
 
-        if (success) {
-            log.info("구독 자동 취소 성공 subscribeId: {}", subscribeId);
-            eventPublisher.publishEvent(AutoUnsubscribeCompletedEvent.success(subscribeId));
-        } else {
-            log.info("구독 자동 취소 실패 subscribeId: {}", subscribeId);
-            eventPublisher.publishEvent(AutoUnsubscribeCompletedEvent.failure(subscribeId, "구독 자동 취소 실패"));
-        }
+        eventPublisher.publishEvent(AutoUnsubscribeCompletedEvent.of(subscribeId, isSuccess));
+        log.info("구독 자동 취소 처리 완료 subscribeId: {}", subscribeId);
     }
 
     @Transactional
@@ -43,7 +38,7 @@ public class AutoUnsubscribeEventListener {
     public void handleUnsubscribeCompleted(AutoUnsubscribeCompletedEvent event) {
         Long subscribeId = event.subscribeId();
         log.info("구독 자동 취소 완료 처리 시작 subscribeId: {}", subscribeId);
-        subscribeService.handleUnsubscribeResult(subscribeId, event.success());
+        subscribeService.handleUnsubscribeResult(subscribeId, event.isSuccess());
         log.info("구독 자동 취소 완료 처리 종료 subscribeId: {}", subscribeId);
     }
 }

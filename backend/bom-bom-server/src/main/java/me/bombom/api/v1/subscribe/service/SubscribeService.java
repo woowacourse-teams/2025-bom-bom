@@ -53,7 +53,7 @@ public class SubscribeService {
                 .addContext("subscribeId", subscribeId);
         }
 
-        // 사용자가 직접 구독 취소 후 삭제 버튼 클릭
+        // 자동 취소가 불가능한 경우 사용자가 직접 구독 취소 유도 후 삭제 버튼 클릭
         if (subscribe.isFailed()) {
             log.info("구독 취소 실패 상태인 항목 강제 삭제 subscribeId: {}", subscribeId);
             subscribeRepository.delete(subscribe);
@@ -68,20 +68,21 @@ public class SubscribeService {
         subscribe.changeStatus(SubscribeStatus.UNSUBSCRIBING);
         applicationEventPublisher.publishEvent(new UnsubscribeRequestedEvent(
                 subscribe.getId(),
-                subscribe.getUnsubscribeUrl()
-        ));
+                subscribe.getUnsubscribeUrl()));
         return UnsubscribeResponse.of(subscribe.getUnsubscribeUrl());
     }
 
     @Transactional
-    public void handleUnsubscribeResult(Long subscribeId, boolean success) {
-        Subscribe subscribe = subscribeRepository.findById(subscribeId)
-                .orElseThrow(() -> new IllegalStateException("구독 정보를 찾을 수 없음: " + subscribeId));
-
-        if (success) {
-            subscribeRepository.delete(subscribe);
-        } else {
-            subscribe.changeStatus(SubscribeStatus.FAILED);
+    public void handleUnsubscribeResult(Long subscribeId, boolean isSuccess) {
+        if (isSuccess) {
+            subscribeRepository.deleteById(subscribeId);
+            return;
         }
+
+        Subscribe subscribe = subscribeRepository.findById(subscribeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "subscribe")
+                        .addContext("subscribeId", subscribeId));
+        subscribe.changeStatus(SubscribeStatus.FAILED);
     }
 }

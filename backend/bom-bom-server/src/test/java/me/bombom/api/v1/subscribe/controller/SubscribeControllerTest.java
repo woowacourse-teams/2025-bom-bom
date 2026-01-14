@@ -1,8 +1,9 @@
 package me.bombom.api.v1.subscribe.controller;
 
-import static org.mockito.BDDMockito.given;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,7 +16,6 @@ import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.common.resolver.LoginMemberArgumentResolver;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.enums.Gender;
-import me.bombom.api.v1.subscribe.dto.UnsubscribeResponse;
 import me.bombom.api.v1.subscribe.service.SubscribeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @AutoConfigureMockMvc
 @WebMvcTest(controllers = SubscribeController.class)
-@Import({SubscribeController.class, SubscribeControllerTest.TestConfig.class})
+@Import({ SubscribeController.class, SubscribeControllerTest.TestConfig.class })
 class SubscribeControllerTest {
 
     @Configuration
@@ -111,11 +111,10 @@ class SubscribeControllerTest {
 
     @Test
     void 인증된_사용자는_구독_취소를_요청할_수_있다() throws Exception {
-        given(subscribeService.unsubscribe(anyLong(), anyLong()))
-                .willReturn(UnsubscribeResponse.of(null));
+        doNothing().when(subscribeService).unsubscribe(anyLong(), anyLong());
 
         mockMvc.perform(post("/api/v1/members/me/subscriptions/{id}/unsubscribe", 1L)
                         .with(authentication(authToken)))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 }

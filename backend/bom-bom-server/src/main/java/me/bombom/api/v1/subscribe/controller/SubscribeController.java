@@ -5,14 +5,15 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.subscribe.dto.UnsubscribeResponse;
 import me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse;
 import me.bombom.api.v1.subscribe.service.SubscribeService;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @Validated
@@ -30,11 +31,12 @@ public class SubscribeController implements SubscribeControllerApi {
     }
 
     @Override
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PostMapping("/me/subscriptions/{subscriptionId}/unsubscribe")
-    public UnsubscribeResponse unsubscribe(
+    public void unsubscribe(
         @LoginMember Member member,
         @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long subscriptionId
     ) {
-        return subscribeService.unsubscribe(member.getId(), subscriptionId);
+        subscribeService.unsubscribe(member.getId(), subscriptionId);
     }
 }

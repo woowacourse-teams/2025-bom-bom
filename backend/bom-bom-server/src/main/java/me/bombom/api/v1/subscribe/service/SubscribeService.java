@@ -11,7 +11,6 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.domain.SubscribeStatus;
 import me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse;
-import me.bombom.api.v1.subscribe.dto.UnsubscribeResponse;
 import me.bombom.api.v1.subscribe.event.UnsubscribeRequestedEvent;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -38,7 +37,7 @@ public class SubscribeService {
     }
 
     @Transactional
-    public UnsubscribeResponse unsubscribe(Long memberId, Long subscribeId) {
+    public void unsubscribe(Long memberId, Long subscribeId) {
         Subscribe subscribe = subscribeRepository.findById(subscribeId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "subscribe")
@@ -57,19 +56,19 @@ public class SubscribeService {
         if (subscribe.isFailed()) {
             log.info("구독 취소 실패 상태인 항목 강제 삭제 subscribeId: {}", subscribeId);
             subscribeRepository.delete(subscribe);
-            return UnsubscribeResponse.of(subscribe.getUnsubscribeUrl());
+            return;
         }
 
         // 구독 취소 이미 진행 중
         if (subscribe.isUnsubscribing()) {
-            return UnsubscribeResponse.of(subscribe.getUnsubscribeUrl());
+            return;
         }
 
         subscribe.changeStatus(SubscribeStatus.UNSUBSCRIBING);
         applicationEventPublisher.publishEvent(new UnsubscribeRequestedEvent(
                 subscribe.getId(),
-                subscribe.getUnsubscribeUrl()));
-        return UnsubscribeResponse.of(subscribe.getUnsubscribeUrl());
+                subscribe.getUnsubscribeUrl()
+        ));
     }
 
     @Transactional

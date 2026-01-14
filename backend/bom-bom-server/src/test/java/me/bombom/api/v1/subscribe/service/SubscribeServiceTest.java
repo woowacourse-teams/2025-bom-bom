@@ -2,7 +2,6 @@ package me.bombom.api.v1.subscribe.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
@@ -19,7 +18,6 @@ import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.domain.SubscribeStatus;
 import me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse;
-import me.bombom.api.v1.subscribe.dto.UnsubscribeResponse;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.Test;
@@ -91,7 +89,7 @@ class SubscribeServiceTest {
             .build());
 
         // when
-        UnsubscribeResponse response = subscribeService.unsubscribe(member.getId(), subscribe.getId());
+        subscribeService.unsubscribe(member.getId(), subscribe.getId());
 
         // then
         Subscribe result = subscribeRepository.findById(subscribe.getId()).orElseThrow();
@@ -157,15 +155,11 @@ class SubscribeServiceTest {
         );
 
         // when
-        UnsubscribeResponse response = subscribeService.unsubscribe(member.getId(), subscribe.getId());
+        subscribeService.unsubscribe(member.getId(), subscribe.getId());
 
         // then
         Subscribe result = subscribeRepository.findById(subscribe.getId()).orElseThrow();
-
-        assertSoftly(softly -> {
-            softly.assertThat(result.getStatus()).isEqualTo(SubscribeStatus.UNSUBSCRIBING);
-            softly.assertThat(response.unsubscribeUrl()).isEqualTo(unsubscribeUrl);
-        });
+        assertThat(result.getStatus()).isEqualTo(SubscribeStatus.UNSUBSCRIBING);
     }
 
     @Test
@@ -231,13 +225,10 @@ class SubscribeServiceTest {
         subscribeRepository.save(subscribe);
 
         // when
-        UnsubscribeResponse response = subscribeService.unsubscribe(member.getId(), subscribe.getId());
+        subscribeService.unsubscribe(member.getId(), subscribe.getId());
 
         // then
-        assertSoftly(softly -> {
-            softly.assertThat(subscribeRepository.findById(subscribe.getId())).isPresent();
-            softly.assertThat(response.unsubscribeUrl()).isEqualTo(unsubscribeUrl);
-        });
+        assertThat(subscribeRepository.findById(subscribe.getId())).isPresent();
     }
 
     @Test

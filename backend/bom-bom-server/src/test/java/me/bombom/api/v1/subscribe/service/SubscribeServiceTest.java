@@ -2,6 +2,7 @@ package me.bombom.api.v1.subscribe.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
@@ -16,8 +17,9 @@ import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
-import me.bombom.api.v1.subscribe.dto.UnsubscribeResponse;
+import me.bombom.api.v1.subscribe.domain.SubscribeStatus;
 import me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse;
+import me.bombom.api.v1.subscribe.dto.UnsubscribeResponse;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.Test;
@@ -92,7 +94,8 @@ class SubscribeServiceTest {
         UnsubscribeResponse response = subscribeService.unsubscribe(member.getId(), subscribe.getId());
 
         // then
-        assertThat(subscribeRepository.findById(subscribe.getId())).isEmpty();
+        Subscribe result = subscribeRepository.findById(subscribe.getId()).orElseThrow();
+        assertThat(result.getStatus()).isEqualTo(me.bombom.api.v1.subscribe.domain.SubscribeStatus.UNSUBSCRIBING);
     }
 
     @Test
@@ -138,19 +141,192 @@ class SubscribeServiceTest {
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
         Newsletter newsletter = newsletterRepository.save(
-            TestFixture.createNewsletter("테스트 뉴스레터", "test@test.com", category.getId(), newsletterDetail.getId()));
-        String expectedUnsubscribeUrl = "https://example.com/unsubscribe";
+            TestFixture.createNewsletter(
+                    "테스트 뉴스레터",
+                    "test@test.com",
+                    category.getId(),
+                    newsletterDetail.getId()
+            )
+        );
+        String unsubscribeUrl = "https://example.com/unsubscribe";
         Subscribe subscribe = subscribeRepository.save(Subscribe.builder()
             .memberId(member.getId())
             .newsletterId(newsletter.getId())
-            .unsubscribeUrl(expectedUnsubscribeUrl)
-            .build());
+            .unsubscribeUrl(unsubscribeUrl)
+            .build()
+        );
 
         // when
         UnsubscribeResponse response = subscribeService.unsubscribe(member.getId(), subscribe.getId());
 
         // then
+        Subscribe result = subscribeRepository.findById(subscribe.getId()).orElseThrow();
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.getStatus()).isEqualTo(SubscribeStatus.UNSUBSCRIBING);
+            softly.assertThat(response.unsubscribeUrl()).isEqualTo(unsubscribeUrl);
+        });
+    }
+
+    @Test
+    void FAILED_상태의_구독을_취소하면_강제_삭제된다() {
+        // given
+        Member member = TestFixture.normalMemberFixture();
+        memberRepository.save(member);
+
+        Category category = categoryRepository.save(TestFixture.createCategory());
+        NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
+        Newsletter newsletter = newsletterRepository.save(
+                TestFixture.createNewsletter(
+                        "테스트 뉴스레터",
+                        "test@test.com",
+                        category.getId(),
+                        newsletterDetail.getId()
+                )
+        );
+
+        Subscribe subscribe = subscribeRepository.save(Subscribe.builder()
+                .memberId(member.getId())
+                .newsletterId(newsletter.getId())
+                .build()
+        );
+
+        // FAILED 상태로 변경
+        subscribe.changeStatus(me.bombom.api.v1.subscribe.domain.SubscribeStatus.FAILED);
+        subscribeRepository.save(subscribe);
+
+        // when
+        subscribeService.unsubscribe(member.getId(), subscribe.getId());
+
+        // then
         assertThat(subscribeRepository.findById(subscribe.getId())).isEmpty();
-        assertThat(response.unsubscribeUrl()).isEqualTo(expectedUnsubscribeUrl);
+    }
+
+    @Test
+    void UNSUBSCRIBING_상태의_구독을_취소하면_중복_방지로_응답만_반환한다() {
+        // given
+        Member member = TestFixture.normalMemberFixture();
+        memberRepository.save(member);
+
+        Category category = categoryRepository.save(TestFixture.createCategory());
+        NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
+        Newsletter newsletter = newsletterRepository.save(
+                TestFixture.createNewsletter(
+                        "테스트 뉴스레터",
+                        "test@test.com",
+                        category.getId(),
+                        newsletterDetail.getId())
+        );
+
+        String unsubscribeUrl = "https://example.com/unsubscribe";
+        Subscribe subscribe = subscribeRepository.save(Subscribe.builder()
+                .memberId(member.getId())
+                .newsletterId(newsletter.getId())
+                .unsubscribeUrl(unsubscribeUrl)
+                .build()
+        );
+
+        // UNSUBSCRIBING 상태로 변경
+        subscribe.changeStatus(SubscribeStatus.UNSUBSCRIBING);
+        subscribeRepository.save(subscribe);
+
+        // when
+        UnsubscribeResponse response = subscribeService.unsubscribe(member.getId(), subscribe.getId());
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(subscribeRepository.findById(subscribe.getId())).isPresent();
+            softly.assertThat(response.unsubscribeUrl()).isEqualTo(unsubscribeUrl);
+        });
+    }
+
+    @Test
+    void SUBSCRIBED_상태의_구독을_취소하면_UNSUBSCRIBING_상태로_변경된다() {
+        // given
+        Member member = TestFixture.normalMemberFixture();
+        memberRepository.save(member);
+
+        Category category = categoryRepository.save(TestFixture.createCategory());
+        NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
+        Newsletter newsletter = newsletterRepository.save(
+                TestFixture.createNewsletter(
+                        "테스트 뉴스레터",
+                        "test@test.com",
+                        category.getId(),
+                        newsletterDetail.getId())
+        );
+
+        Subscribe subscribe = subscribeRepository.save(Subscribe.builder()
+                .memberId(member.getId())
+                .newsletterId(newsletter.getId())
+                .build()
+        );
+
+        // when
+        subscribeService.unsubscribe(member.getId(), subscribe.getId());
+
+        // then
+        Subscribe result = subscribeRepository.findById(subscribe.getId()).orElseThrow();
+        assertThat(result.getStatus()).isEqualTo(SubscribeStatus.UNSUBSCRIBING);
+    }
+
+    @Test
+    void handleUnsubscribeResult_성공시_구독을_삭제한다() {
+        // given
+        Member member = TestFixture.normalMemberFixture();
+        memberRepository.save(member);
+
+        Category category = categoryRepository.save(TestFixture.createCategory());
+        NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
+        Newsletter newsletter = newsletterRepository.save(
+                TestFixture.createNewsletter(
+                        "테스트 뉴스레터",
+                        "test@test.com",
+                        category.getId(),
+                        newsletterDetail.getId()
+                )
+        );
+
+        Subscribe subscribe = subscribeRepository.save(Subscribe.builder()
+                .memberId(member.getId())
+                .newsletterId(newsletter.getId())
+                .build()
+        );
+
+        // when
+        subscribeService.handleUnsubscribeResult(subscribe.getId(), true);
+
+        // then
+        assertThat(subscribeRepository.findById(subscribe.getId())).isEmpty();
+    }
+
+    @Test
+    void handleUnsubscribeResult_실패시_FAILED_상태로_변경한다() {
+        // given
+        Member member = TestFixture.normalMemberFixture();
+        memberRepository.save(member);
+
+        Category category = categoryRepository.save(TestFixture.createCategory());
+        NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
+        Newsletter newsletter = newsletterRepository.save(
+                TestFixture.createNewsletter(
+                        "테스트 뉴스레터",
+                        "test@test.com",
+                        category.getId(),
+                        newsletterDetail.getId())
+        );
+
+        Subscribe subscribe = subscribeRepository.save(Subscribe.builder()
+                .memberId(member.getId())
+                .newsletterId(newsletter.getId())
+                .build()
+        );
+
+        // when
+        subscribeService.handleUnsubscribeResult(subscribe.getId(), false);
+
+        // then
+        Subscribe result = subscribeRepository.findById(subscribe.getId()).orElseThrow();
+        assertThat(result.getStatus()).isEqualTo(me.bombom.api.v1.subscribe.domain.SubscribeStatus.FAILED);
     }
 }

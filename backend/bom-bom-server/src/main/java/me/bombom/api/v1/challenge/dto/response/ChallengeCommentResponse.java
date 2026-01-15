@@ -9,7 +9,7 @@ public record ChallengeCommentResponse(
 
         String nickname,
 
-        String profileImage,
+        String profileImageUrl,
 
         @NotNull
         String newsletterName,

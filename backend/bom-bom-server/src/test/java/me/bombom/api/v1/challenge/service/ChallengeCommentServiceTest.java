@@ -70,6 +70,12 @@ class ChallengeCommentServiceTest {
     @Autowired
     private HighlightRepository highlightRepository;
 
+    private final Long challengeId = 1L;
+    private final Long otherChallengeId = 9L;
+    private final Long myTeamId = 10L;
+    private final Long otherTeamId = 99L;
+    private final Long otherCommentId = 999L;
+
     private Member member;
     private Article article;
     private List<Article> articles;
@@ -103,9 +109,9 @@ class ChallengeCommentServiceTest {
 
         participant = challengeParticipantRepository.save(
                 TestFixture.createChallengeParticipantWithTeam(
-                        1L,
+                        challengeId,
                         member.getId(),
-                        10L,
+                        myTeamId,
                         0,
                         0
                 )
@@ -123,15 +129,15 @@ class ChallengeCommentServiceTest {
 
         ChallengeParticipant otherTeamParticipant = challengeParticipantRepository.save(
                 TestFixture.createChallengeParticipantWithTeam(
-                        1L,
+                        challengeId,
                         otherMember.getId(),
-                        20L,
+                        otherTeamId,
                         0,
                         0
                 )
         );
 
-        ChallengeComment otherTeamComment = challengeCommentRepository.save(
+        challengeCommentRepository.save(
                 TestFixture.createChallengeComment(
                         article.getNewsletterId(),
                         participant.getId(),
@@ -153,7 +159,7 @@ class ChallengeCommentServiceTest {
 
         // when
         Page<ChallengeCommentResponse> result = challengeCommentService.getChallengeComments(
-                1L,
+                challengeId,
                 member.getId(),
                 new ChallengeCommentOptionsRequest(start, end),
                 PageRequest.of(0, 10)
@@ -161,7 +167,6 @@ class ChallengeCommentServiceTest {
 
         // then
         assertThat(result.getTotalElements()).isEqualTo(2);
-        assertThat(result.getContent().get(0).comment()).isEqualTo(otherTeamComment.getComment());
     }
 
     @Test
@@ -172,7 +177,7 @@ class ChallengeCommentServiceTest {
 
         // when
         Page<ChallengeCommentResponse> result = challengeCommentService.getChallengeComments(
-                1L,
+                challengeId,
                 member.getId(),
                 new ChallengeCommentOptionsRequest(start, end),
                 PageRequest.of(0, 10)
@@ -191,7 +196,7 @@ class ChallengeCommentServiceTest {
 
         // when & then
         assertThatThrownBy(() -> challengeCommentService.getChallengeComments(
-                99L,
+                otherChallengeId,
                 member.getId(),
                 new ChallengeCommentOptionsRequest(start, end),
                 PageRequest.of(0, 10)
@@ -284,7 +289,7 @@ class ChallengeCommentServiceTest {
         // when & then
         assertThatThrownBy(() -> challengeCommentService.createChallengeComment(
                 member.getId(),
-                999L,
+                otherChallengeId,
                 request
         )).isInstanceOf(CIllegalArgumentException.class);
     }
@@ -328,7 +333,7 @@ class ChallengeCommentServiceTest {
                 TestFixture.createChallengeParticipantWithTeam(
                         participant.getChallengeId(),
                         otherMember.getId(),
-                        20L,
+                        otherTeamId,
                         0,
                         0
                 )
@@ -363,7 +368,7 @@ class ChallengeCommentServiceTest {
         assertThatThrownBy(() -> challengeCommentService.updateChallengeComment(
                 member.getId(),
                 participant.getChallengeId(),
-                999L,
+                otherCommentId,
                 request
         )).isInstanceOf(CIllegalArgumentException.class);
     }

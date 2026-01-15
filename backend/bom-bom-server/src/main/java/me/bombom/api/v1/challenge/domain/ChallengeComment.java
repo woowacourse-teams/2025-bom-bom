@@ -53,4 +53,8 @@ public class ChallengeComment extends BaseEntity {
         this.quotation = quotation;
         this.comment = comment;
     }
+
+    public void updateComment(String comment) {
+        this.comment = comment;
+    }
 }

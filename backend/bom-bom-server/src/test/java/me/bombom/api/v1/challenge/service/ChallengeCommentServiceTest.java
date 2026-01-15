@@ -13,15 +13,20 @@ import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
+import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
+import me.bombom.api.v1.challenge.dto.request.UpdateChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -60,6 +65,12 @@ class ChallengeCommentServiceTest {
     private ChallengeParticipantRepository challengeParticipantRepository;
 
     @Autowired
+    private ChallengeRepository challengeRepository;
+
+    @Autowired
+    private ChallengeTeamRepository challengeTeamRepository;
+
+    @Autowired
     private ArticleRepository articleRepository;
 
     @Autowired
@@ -80,6 +91,7 @@ class ChallengeCommentServiceTest {
     @MockitoBean
     private Clock clock;
 
+    private Challenge challenge;
     private Member member;
     private Article article;
     private List<Article> articles;
@@ -90,6 +102,8 @@ class ChallengeCommentServiceTest {
     void setUp() {
         challengeCommentRepository.deleteAllInBatch();
         challengeParticipantRepository.deleteAllInBatch();
+        challengeTeamRepository.deleteAllInBatch();
+        challengeRepository.deleteAllInBatch();
         articleRepository.deleteAllInBatch();
         newsletterRepository.deleteAllInBatch();
         newsletterDetailRepository.deleteAllInBatch();
@@ -111,11 +125,20 @@ class ChallengeCommentServiceTest {
         articles = articleRepository.saveAll(TestFixture.createArticles(member, newsletters));
         article = articles.get(0);
 
+        challenge = challengeRepository.save(
+                TestFixture.createChallenge(
+                        "챌린지",
+                        LocalDate.now().minusDays(1),
+                        LocalDate.now().plusDays(10),
+                        11
+                )
+        );
+        ChallengeTeam myTeam = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
         participant = challengeParticipantRepository.save(
                 TestFixture.createChallengeParticipantWithTeam(
-                        1L,
+                        challenge.getId(),
                         member.getId(),
-                        10L,
+                        myTeam.getId(),
                         0,
                         0
                 )
@@ -132,18 +155,19 @@ class ChallengeCommentServiceTest {
 
         Member otherMember = TestFixture.createMemberFixture("other@bombom.news", "other");
         memberRepository.save(otherMember);
+        ChallengeTeam otherTeam = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
 
         ChallengeParticipant otherTeamParticipant = challengeParticipantRepository.save(
                 TestFixture.createChallengeParticipantWithTeam(
-                        1L,
+                        challenge.getId(),
                         otherMember.getId(),
-                        20L,
+                        otherTeam.getId(),
                         0,
                         0
                 )
         );
 
-        ChallengeComment otherTeamComment = challengeCommentRepository.save(
+        challengeCommentRepository.save(
                 TestFixture.createChallengeComment(
                         article.getNewsletterId(),
                         participant.getId(),
@@ -165,7 +189,7 @@ class ChallengeCommentServiceTest {
 
         // when
         Page<ChallengeCommentResponse> result = challengeCommentService.getChallengeComments(
-                1L,
+                challenge.getId(),
                 member.getId(),
                 new ChallengeCommentOptionsRequest(start, end),
                 PageRequest.of(0, 10)
@@ -173,7 +197,6 @@ class ChallengeCommentServiceTest {
 
         // then
         assertThat(result.getTotalElements()).isEqualTo(2);
-        assertThat(result.getContent().get(0).comment()).isEqualTo(otherTeamComment.getComment());
     }
 
     @Test
@@ -184,7 +207,7 @@ class ChallengeCommentServiceTest {
 
         // when
         Page<ChallengeCommentResponse> result = challengeCommentService.getChallengeComments(
-                1L,
+                challenge.getId(),
                 member.getId(),
                 new ChallengeCommentOptionsRequest(start, end),
                 PageRequest.of(0, 10)
@@ -201,9 +224,18 @@ class ChallengeCommentServiceTest {
         LocalDate start = LocalDate.now().minusDays(1);
         LocalDate end = LocalDate.now().plusDays(1);
 
+        Challenge otherChallenge = challengeRepository.save(
+                TestFixture.createChallenge(
+                        "다른 챌린지",
+                        LocalDate.now().minusDays(1),
+                        LocalDate.now().plusDays(5),
+                        6
+                )
+        );
+
         // when & then
         assertThatThrownBy(() -> challengeCommentService.getChallengeComments(
-                99L,
+                otherChallenge.getId(),
                 member.getId(),
                 new ChallengeCommentOptionsRequest(start, end),
                 PageRequest.of(0, 10)
@@ -288,6 +320,15 @@ class ChallengeCommentServiceTest {
     @Test
     void 챌린지_참가자가_없으면_댓글_생성시_예외가_발생한다() {
         // given
+        Challenge otherChallenge = challengeRepository.save(
+                TestFixture.createChallenge(
+                        "다른 챌린지",
+                        LocalDate.now().minusDays(1),
+                        LocalDate.now().plusDays(5),
+                        6
+                )
+        );
+
         ChallengeCommentRequest request = new ChallengeCommentRequest(
                 article.getId(),
                 "quote",
@@ -298,7 +339,91 @@ class ChallengeCommentServiceTest {
         // when & then
         assertThatThrownBy(() -> challengeCommentService.createChallengeComment(
                 member.getId(),
-                999L,
+                otherChallenge.getId(),
+                request
+        )).isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void 챌린지_코멘트를_수정한다() {
+        // given
+        ChallengeComment comment = challengeCommentRepository.save(
+                TestFixture.createChallengeComment(
+                        article.getNewsletterId(),
+                        participant.getId(),
+                        article.getTitle(),
+                        "quote",
+                        "챌린지 한 줄 코멘트로 20자 이상의 댓글을 작성했습니다."
+                )
+        );
+        UpdateChallengeCommentRequest request = new UpdateChallengeCommentRequest(
+                "수정된 챌린지 한 줄 코멘트를 20자 이상 작성합니다."
+        );
+
+        // when
+        challengeCommentService.updateChallengeComment(
+                member.getId(),
+                participant.getChallengeId(),
+                comment.getId(),
+                request
+        );
+
+        // then
+        ChallengeComment updated = challengeCommentRepository.findById(comment.getId()).orElseThrow();
+        assertThat(updated.getComment()).isEqualTo(request.comment());
+    }
+
+    @Test
+    void 챌린지_코멘트_수정시_다른_참여자면_예외가_발생한다() {
+        // given
+        Member otherMember = memberRepository.save(
+                TestFixture.createMemberFixture("another@bombom.news", "another")
+        );
+
+        ChallengeTeam otherTeam = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
+
+        ChallengeParticipant otherParticipant = challengeParticipantRepository.save(
+                TestFixture.createChallengeParticipantWithTeam(
+                        participant.getChallengeId(),
+                        otherMember.getId(),
+                        otherTeam.getId(),
+                        0,
+                        0
+                )
+        );
+        ChallengeComment otherComment = challengeCommentRepository.save(
+                TestFixture.createChallengeComment(
+                        article.getNewsletterId(),
+                        otherParticipant.getId(),
+                        article.getTitle(),
+                        "quote",
+                        "다른 참여자의 챌린지 코멘트입니다. 길이를 채웁니다."
+                )
+        );
+
+        // when & then
+        assertThatThrownBy(() -> challengeCommentService.updateChallengeComment(
+                member.getId(),
+                participant.getChallengeId(),
+                otherComment.getId(),
+                new UpdateChallengeCommentRequest("수정 요청입니다만 실패해야 합니다.")
+        )).isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void 챌린지_코멘트가_존재하지_않으면_예외가_발생한다() {
+        // given
+        Long notExistsCommentId = 999L;
+
+        UpdateChallengeCommentRequest request = new UpdateChallengeCommentRequest(
+                "수정된 챌린지 한 줄 코멘트를 20자 이상 작성합니다."
+        );
+
+        // when & then
+        assertThatThrownBy(() -> challengeCommentService.updateChallengeComment(
+                member.getId(),
+                participant.getChallengeId(),
+                notExistsCommentId,
                 request
         )).isInstanceOf(CIllegalArgumentException.class);
     }

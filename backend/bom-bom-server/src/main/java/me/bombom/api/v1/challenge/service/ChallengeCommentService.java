@@ -11,6 +11,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
+import me.bombom.api.v1.challenge.dto.request.UpdateChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
@@ -116,6 +117,37 @@ public class ChallengeCommentService {
                 highlightTruncateRatio,
                 pageable
         );
+    }
+
+    @Transactional
+    public void updateChallengeComment(
+            Long memberId,
+            Long challengeId,
+            Long commentId,
+            UpdateChallengeCommentRequest request
+    ) {
+        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                        .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndMemberId"));
+
+        ChallengeComment comment = challengeCommentRepository.findById(commentId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeComment")
+                        .addContext(ErrorContextKeys.OPERATION, "findById"));
+
+        if (!comment.getParticipantId().equals(participant.getId())) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                    .addContext(ErrorContextKeys.ACTUAL_OWNER_ID, comment.getParticipantId())
+                    .addContext(ErrorContextKeys.OPERATION, "updateChallengeComment");
+        }
+
+        comment.updateComment(request.comment());
     }
 
     private void validateCommentAvailableDay(Long memberId, Long challengeId) {

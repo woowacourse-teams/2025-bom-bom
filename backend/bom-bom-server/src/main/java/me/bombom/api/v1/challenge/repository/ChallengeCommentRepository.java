@@ -14,6 +14,7 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
     @Query("""
                 SELECT new me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse(
                     m.nickname,
+                    m.profileImageUrl,
                     n.name,
                     CASE
                         WHEN s.id IS NULL THEN false
@@ -22,7 +23,11 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
                     cc.articleTitle,
                     cc.quotation,
                     cc.comment,
-                    cc.createdAt
+                    cc.createdAt,
+                    CASE
+                        WHEN cp.memberId = :currentMemberId THEN true
+                        ELSE false
+                    END
                 )
                 FROM ChallengeComment cc
                 JOIN ChallengeParticipant cp ON cc.participantId = cp.id

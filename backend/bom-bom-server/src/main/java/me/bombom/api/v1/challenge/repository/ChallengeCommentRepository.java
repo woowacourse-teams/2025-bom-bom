@@ -14,6 +14,7 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
 
     @Query("""
                 SELECT new me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse(
+                    cc.id,
                     m.nickname,
                     m.profileImageUrl,
                     n.name,

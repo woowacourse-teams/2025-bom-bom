@@ -7,6 +7,9 @@ import java.time.LocalDateTime;
 
 public record ChallengeCommentResponse(
 
+        @NotNull
+        Long commentId,
+
         String nickname,
 
         String profileImageUrl,

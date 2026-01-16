@@ -16,6 +16,7 @@ import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleR
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.challenge.event.CreateChallengeCommentEvent;
+import me.bombom.api.v1.challenge.repository.ChallengeCommentLikeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -36,6 +37,7 @@ public class ChallengeCommentService {
 
     private final ChallengeCommentRepository challengeCommentRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
+    private final ChallengeCommentLikeRepository challengeCommentLikeRepository;
     private final ArticleRepository articleRepository;
     private final HighlightRepository highlightRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -50,11 +52,7 @@ public class ChallengeCommentService {
             ChallengeCommentOptionsRequest request,
             Pageable pageable
     ) {
-        if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
-            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.OPERATION, "existsByChallengeIdAndMemberId");
-        }
+        validateParticipant(challengeId, memberId);
 
         return challengeCommentRepository.findAllInDuration(
                 challengeId,
@@ -63,6 +61,14 @@ public class ChallengeCommentService {
                 request.end(),
                 pageable
         );
+    }
+
+    private void validateParticipant(Long challengeId, Long memberId) {
+        if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext(ErrorContextKeys.OPERATION, "existsByChallengeIdAndMemberId");
+        }
     }
 
     public List<ChallengeCommentCandidateArticleResponse> getChallengeCommentCandidateArticles(Long memberId, LocalDate date) {
@@ -148,6 +154,15 @@ public class ChallengeCommentService {
         }
 
         comment.updateComment(request.comment());
+    }
+
+    @Transactional
+    public void updateChallengeCommentLike(Long memberId, Long challengeId, Long commentId) {
+        // 해당 챌린지에 참여하고 있는지 검증만 먼저
+        validateParticipant(challengeId, memberId);
+
+        // 조회 확인 후 생성하기
+        
     }
 
     private void validateCommentAvailableDay(Long memberId, Long challengeId) {

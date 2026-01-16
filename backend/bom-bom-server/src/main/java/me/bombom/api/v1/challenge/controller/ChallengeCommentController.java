@@ -97,4 +97,14 @@ public class ChallengeCommentController implements ChallengeCommentControllerApi
     ) {
         challengeCommentService.updateChallengeComment(member.getId(), challengeId, commentId, request);
     }
+
+    @Override
+    @PatchMapping("/{challengeId}/comments/{commentId}/like")
+    public void updateChallengeCommentLike(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "챌린지 id는 1 이상의 값이어야 합니다.") Long challengeId,
+            @PathVariable @Positive(message = "코멘트 id는 1 이상의 값이어야 합니다.") Long commentId
+    ) {
+        challengeCommentService.updateChallengeCommentLike(member.getId(), challengeId, commentId);
+    }
 }

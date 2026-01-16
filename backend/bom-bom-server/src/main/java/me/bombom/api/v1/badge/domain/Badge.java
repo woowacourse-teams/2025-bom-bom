@@ -34,7 +34,7 @@ public abstract class Badge extends BaseEntity {
     private Long memberId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20, insertable = false, updatable = false)
+    @Column(name = "badge_category", nullable = false, length = 20, insertable = false, updatable = false)
     private BadgeCategory badgeCategory;
 
     @Enumerated(EnumType.STRING)

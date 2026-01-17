@@ -6,6 +6,7 @@ import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -44,4 +45,13 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
             @Param("endDate") LocalDate endDate,
             Pageable pageable
     );
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+                UPDATE ChallengeComment c
+                   SET c.likeCount = c.likeCount + :amount
+                 WHERE c.id = :commentId
+                   AND ( :amount >= 0 OR c.likeCount > 0 )
+            """)
+    void incrementLikeCountNotBelowZero(Long commentId, int amount);
 }

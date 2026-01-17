@@ -142,49 +142,35 @@ public class ChallengeCommentService {
     @Transactional
     public ChallengeCommentLikeResponse addChallengeCommentLike(Long memberId, Long challengeId, Long commentId) {
         ChallengeParticipant participant = getChallengeParticipant(memberId, challengeId);
-        ChallengeComment comment = challengeCommentRepository.findById(commentId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeComment")
-                        .addContext(ErrorContextKeys.OPERATION, "findById"));
-
-        if (challengeCommentLikeRepository.existsByParticipantIdAndCommentId(participant.getId(), comment.getId())) {
-            return ChallengeCommentLikeResponse.of(comment);
-        }
+        validateComment(commentId);
 
         int insertCount = challengeCommentLikeRepository.insertIgnoreByParticipantIdAndCommentId(
                 participant.getId(),
-                comment.getId()
+                commentId
         );
 
         if (insertCount == 1) {
-            comment.updateLikeCount(+1);
+            challengeCommentRepository.incrementLikeCountNotBelowZero(commentId, 1);
         }
 
-        return ChallengeCommentLikeResponse.of(comment);
+        return ChallengeCommentLikeResponse.of(challengeCommentRepository.findById(commentId).get());
     }
 
     @Transactional
     public ChallengeCommentLikeResponse deleteChallengeCommentLike(Long memberId, Long challengeId, Long commentId) {
         ChallengeParticipant participant = getChallengeParticipant(memberId, challengeId);
-        ChallengeComment comment = challengeCommentRepository.findById(commentId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeComment")
-                        .addContext(ErrorContextKeys.OPERATION, "findById"));
+        validateComment(commentId);
 
         int deleteCount = challengeCommentLikeRepository.deleteByParticipantIdAndCommentId(
                 participant.getId(),
-                comment.getId()
+                commentId
         );
 
         if (deleteCount == 1) {
-            comment.updateLikeCount(-1);
+            challengeCommentRepository.incrementLikeCountNotBelowZero(commentId, -1);
         }
 
-        return ChallengeCommentLikeResponse.of(comment);
+        return ChallengeCommentLikeResponse.of(challengeCommentRepository.findById(commentId).get());
     }
 
     private void validateParticipant(Long challengeId, Long memberId) {
@@ -211,6 +197,14 @@ public class ChallengeCommentService {
                     .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
                     .addContext(ErrorContextKeys.OPERATION, "createChallengeComment")
                     .addContext(ErrorContextKeys.DETAIL, "주말에는 챌린지 코멘트를 작성할 수 없습니다.");
+        }
+    }
+
+    private void validateComment(Long commentId) {
+        if (!challengeCommentRepository.existsById(commentId)) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                    .addContext(ErrorContextKeys.COMMENT_ID, commentId)
+                    .addContext(ErrorContextKeys.OPERATION, "existsByChallengeIdAndMemberId");
         }
     }
 

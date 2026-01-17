@@ -13,4 +13,8 @@ public interface ChallengeCommentLikeRepository extends JpaRepository<ChallengeC
                     VALUES (:participantId, :commentId)
             """, nativeQuery = true)
     int insertIgnoreByParticipantIdAndCommentId(Long participantId, Long commentId);
+
+    boolean existsByParticipantIdAndCommentId(Long participantId, Long commentId);
+
+    int deleteByParticipantIdAndCommentId(Long participantId, Long commentId);
 }

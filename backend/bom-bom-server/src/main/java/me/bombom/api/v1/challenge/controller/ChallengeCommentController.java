@@ -23,6 +23,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -108,5 +109,15 @@ public class ChallengeCommentController implements ChallengeCommentControllerApi
             @PathVariable @Positive(message = "코멘트 id는 1 이상의 값이어야 합니다.") Long commentId
     ) {
         return challengeCommentService.addChallengeCommentLike(member.getId(), challengeId, commentId);
+    }
+
+    @Override
+    @DeleteMapping("/{challengeId}/comments/{commentId}/like")
+    public ChallengeCommentLikeResponse deleteChallengeCommentLike(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "챌린지 id는 1 이상의 값이어야 합니다.") Long challengeId,
+            @PathVariable @Positive(message = "코멘트 id는 1 이상의 값이어야 합니다.") Long commentId
+    ) {
+        return challengeCommentService.deleteChallengeCommentLike(member.getId(), challengeId, commentId);
     }
 }

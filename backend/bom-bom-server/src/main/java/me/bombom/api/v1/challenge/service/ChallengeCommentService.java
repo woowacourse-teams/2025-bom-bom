@@ -149,6 +149,10 @@ public class ChallengeCommentService {
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeComment")
                         .addContext(ErrorContextKeys.OPERATION, "findById"));
 
+        if (challengeCommentLikeRepository.existsByParticipantIdAndCommentId(participant.getId(), comment.getId())) {
+            return ChallengeCommentLikeResponse.of(comment);
+        }
+
         int insertCount = challengeCommentLikeRepository.insertIgnoreByParticipantIdAndCommentId(
                 participant.getId(),
                 comment.getId()
@@ -156,6 +160,28 @@ public class ChallengeCommentService {
 
         if (insertCount == 1) {
             comment.updateLikeCount(+1);
+        }
+
+        return ChallengeCommentLikeResponse.of(comment);
+    }
+
+    @Transactional
+    public ChallengeCommentLikeResponse deleteChallengeCommentLike(Long memberId, Long challengeId, Long commentId) {
+        ChallengeParticipant participant = getChallengeParticipant(memberId, challengeId);
+        ChallengeComment comment = challengeCommentRepository.findById(commentId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeComment")
+                        .addContext(ErrorContextKeys.OPERATION, "findById"));
+
+        int deleteCount = challengeCommentLikeRepository.deleteByParticipantIdAndCommentId(
+                participant.getId(),
+                comment.getId()
+        );
+
+        if (deleteCount == 1) {
+            comment.updateLikeCount(-1);
         }
 
         return ChallengeCommentLikeResponse.of(comment);

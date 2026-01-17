@@ -22,7 +22,9 @@ import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.request.UpdateChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentLikeResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
+import me.bombom.api.v1.challenge.repository.ChallengeCommentLikeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
@@ -60,6 +62,9 @@ class ChallengeCommentServiceTest {
 
     @Autowired
     private ChallengeCommentRepository challengeCommentRepository;
+
+    @Autowired
+    private ChallengeCommentLikeRepository challengeCommentLikeRepository;
 
     @Autowired
     private ChallengeParticipantRepository challengeParticipantRepository;
@@ -101,6 +106,7 @@ class ChallengeCommentServiceTest {
     @BeforeEach
     void setUp() {
         challengeCommentRepository.deleteAllInBatch();
+        challengeCommentLikeRepository.deleteAllInBatch();
         challengeParticipantRepository.deleteAllInBatch();
         challengeTeamRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
@@ -494,6 +500,94 @@ class ChallengeCommentServiceTest {
             softly.assertThat(result.getTotalElements()).isEqualTo(1);
             softly.assertThat(result.getContent().getFirst().text()).isEqualTo("01234567...");
         });
+    }
+
+    @Test
+    void 챌린지_코멘트에_좋아요를_추가하면_집계된다() {
+        // given
+        ChallengeComment comment = challengeCommentRepository.save(
+                TestFixture.createChallengeComment(
+                        article.getNewsletterId(),
+                        participant.getId(),
+                        article.getTitle(),
+                        "quote",
+                        "챌린지 한 줄 코멘트"
+                )
+        );
+
+        // when
+        ChallengeCommentLikeResponse response = challengeCommentService.addChallengeCommentLike(
+                member.getId(),
+                challenge.getId(),
+                comment.getId()
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.likeCount()).isEqualTo(1);
+            softly.assertThat(challengeCommentRepository.findById(comment.getId()))
+                    .get()
+                    .extracting(ChallengeComment::getLikeCount)
+                    .isEqualTo(1);
+            softly.assertThat(challengeCommentLikeRepository.count()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void 같은_참가자가_중복으로_좋아요를_누르면_한번만_집계된다() {
+        // given
+        ChallengeComment comment = challengeCommentRepository.save(
+                TestFixture.createChallengeComment(
+                        article.getNewsletterId(),
+                        participant.getId(),
+                        article.getTitle(),
+                        "quote",
+                        "챌린지 한 줄 코멘트"
+                )
+        );
+
+        challengeCommentService.addChallengeCommentLike(member.getId(), challenge.getId(), comment.getId());
+
+        // when
+        ChallengeCommentLikeResponse response = challengeCommentService.addChallengeCommentLike(
+                member.getId(),
+                challenge.getId(),
+                comment.getId()
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.likeCount()).isEqualTo(1);
+            softly.assertThat(challengeCommentRepository.findById(comment.getId()))
+                    .get()
+                    .extracting(ChallengeComment::getLikeCount)
+                    .isEqualTo(1);
+            softly.assertThat(challengeCommentLikeRepository.count()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void 챌린지에_참여하지_않으면_좋아요_추가가_실패한다() {
+        // given
+        ChallengeComment comment = challengeCommentRepository.save(
+                TestFixture.createChallengeComment(
+                        article.getNewsletterId(),
+                        participant.getId(),
+                        article.getTitle(),
+                        "quote",
+                        "챌린지 한 줄 코멘트"
+                )
+        );
+        Member otherMember = memberRepository.save(TestFixture.createMemberFixture("other@bombom.news", "other"));
+
+        // when & then
+        assertThatThrownBy(() -> challengeCommentService.addChallengeCommentLike(
+                otherMember.getId(),
+                challenge.getId(),
+                comment.getId()
+        )).isInstanceOfSatisfying(CIllegalArgumentException.class, ex ->
+                assertThat(ex.getErrorDetail()).isEqualTo(ErrorDetail.FORBIDDEN_RESOURCE)
+        );
     }
 
     private void setToday(LocalDate date) {

@@ -2,6 +2,7 @@ package me.bombom.api.v1.challenge.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -333,6 +334,20 @@ class ChallengeCommentControllerTest {
     void 코멘트_ID가_1_미만이면_좋아요_추가에_실패한다() throws Exception {
         // when & then
         mockMvc.perform(put("/api/v1/challenges/{challengeId}/comments/{commentId}/like", 1L, 0L)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 챌린지_ID가_1_미만이면_좋아요_삭제에_실패한다() throws Exception {
+        mockMvc.perform(delete("/api/v1/challenges/{challengeId}/comments/{commentId}/like", 0L, challengeComment.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 코멘트_ID가_1_미만이면_좋아요_삭제에_실패한다() throws Exception {
+        mockMvc.perform(delete("/api/v1/challenges/{challengeId}/comments/{commentId}/like", 1L, 0L)
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
                 .andExpect(status().isBadRequest());
     }

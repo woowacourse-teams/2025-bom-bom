@@ -590,6 +590,93 @@ class ChallengeCommentServiceTest {
         );
     }
 
+    @Test
+    void 챌린지_코멘트_좋아요를_삭제하면_집계가_감소한다() {
+        // given
+        ChallengeComment comment = challengeCommentRepository.save(
+                TestFixture.createChallengeComment(
+                        article.getNewsletterId(),
+                        participant.getId(),
+                        article.getTitle(),
+                        "quote",
+                        "챌린지 한 줄 코멘트"
+                )
+        );
+        challengeCommentService.addChallengeCommentLike(member.getId(), challenge.getId(), comment.getId());
+
+        // when
+        ChallengeCommentLikeResponse response = challengeCommentService.deleteChallengeCommentLike(
+                member.getId(),
+                challenge.getId(),
+                comment.getId()
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.likeCount()).isEqualTo(0);
+            softly.assertThat(challengeCommentRepository.findById(comment.getId()))
+                    .get()
+                    .extracting(ChallengeComment::getLikeCount)
+                    .isEqualTo(0);
+            softly.assertThat(challengeCommentLikeRepository.count()).isEqualTo(0);
+        });
+    }
+
+    @Test
+    void 좋아요가_없을_때_삭제해도_집계는_변하지_않는다() {
+        // given
+        ChallengeComment comment = challengeCommentRepository.save(
+                TestFixture.createChallengeComment(
+                        article.getNewsletterId(),
+                        participant.getId(),
+                        article.getTitle(),
+                        "quote",
+                        "챌린지 한 줄 코멘트"
+                )
+        );
+
+        // when
+        ChallengeCommentLikeResponse response = challengeCommentService.deleteChallengeCommentLike(
+                member.getId(),
+                challenge.getId(),
+                comment.getId()
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.likeCount()).isEqualTo(0);
+            softly.assertThat(challengeCommentRepository.findById(comment.getId()))
+                    .get()
+                    .extracting(ChallengeComment::getLikeCount)
+                    .isEqualTo(0);
+            softly.assertThat(challengeCommentLikeRepository.count()).isEqualTo(0);
+        });
+    }
+
+    @Test
+    void 챌린지에_참여하지_않으면_좋아요_삭제가_실패한다() {
+        // given
+        ChallengeComment comment = challengeCommentRepository.save(
+                TestFixture.createChallengeComment(
+                        article.getNewsletterId(),
+                        participant.getId(),
+                        article.getTitle(),
+                        "quote",
+                        "챌린지 한 줄 코멘트"
+                )
+        );
+        Member otherMember = memberRepository.save(TestFixture.createMemberFixture("other2@bombom.news", "other2"));
+
+        // when & then
+        assertThatThrownBy(() -> challengeCommentService.deleteChallengeCommentLike(
+                otherMember.getId(),
+                challenge.getId(),
+                comment.getId()
+        )).isInstanceOfSatisfying(CIllegalArgumentException.class, ex ->
+                assertThat(ex.getErrorDetail()).isEqualTo(ErrorDetail.FORBIDDEN_RESOURCE)
+        );
+    }
+
     private void setToday(LocalDate date) {
         given(clock.instant()).willReturn(date.atStartOfDay(SEOUL_ZONE).toInstant());
         given(clock.getZone()).willReturn(SEOUL_ZONE);

@@ -28,10 +28,19 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
                     CASE
                         WHEN cp.memberId = :currentMemberId THEN true
                         ELSE false
+                    END,
+                    cc.likeCount,
+                    CASE
+                        WHEN ccl.id IS NOT NULL THEN true
+                        ELSE false
                     END
                 )
                 FROM ChallengeComment cc
                 JOIN ChallengeParticipant cp ON cc.participantId = cp.id
+                LEFT JOIN ChallengeParticipant myCp
+                    ON myCp.challengeId = cp.challengeId AND myCp.memberId = :currentMemberId
+                LEFT JOIN ChallengeCommentLike ccl
+                    ON ccl.commentId = cc.id AND ccl.participantId = myCp.id
                 LEFT JOIN Member m ON cp.memberId = m.id
                 JOIN Newsletter n ON cc.newsletterId = n.id
                 LEFT JOIN Subscribe s ON s.newsletterId = cc.newsletterId AND s.memberId = :currentMemberId

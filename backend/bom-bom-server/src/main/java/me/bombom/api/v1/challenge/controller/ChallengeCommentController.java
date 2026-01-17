@@ -10,6 +10,7 @@ import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.request.UpdateChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentLikeResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.challenge.service.ChallengeCommentService;
 import me.bombom.api.v1.common.resolver.LoginMember;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -99,12 +101,12 @@ public class ChallengeCommentController implements ChallengeCommentControllerApi
     }
 
     @Override
-    @PatchMapping("/{challengeId}/comments/{commentId}/like")
-    public void updateChallengeCommentLike(
+    @PutMapping("/{challengeId}/comments/{commentId}/like")
+    public ChallengeCommentLikeResponse addChallengeCommentLike(
             @LoginMember Member member,
             @PathVariable @Positive(message = "챌린지 id는 1 이상의 값이어야 합니다.") Long challengeId,
             @PathVariable @Positive(message = "코멘트 id는 1 이상의 값이어야 합니다.") Long commentId
     ) {
-        challengeCommentService.updateChallengeCommentLike(member.getId(), challengeId, commentId);
+        return challengeCommentService.addChallengeCommentLike(member.getId(), challengeId, commentId);
     }
 }

@@ -14,6 +14,7 @@ import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.request.UpdateChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentLikeResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.challenge.event.CreateChallengeCommentEvent;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentLikeRepository;
@@ -63,14 +64,6 @@ public class ChallengeCommentService {
         );
     }
 
-    private void validateParticipant(Long challengeId, Long memberId) {
-        if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
-            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.OPERATION, "existsByChallengeIdAndMemberId");
-        }
-    }
-
     public List<ChallengeCommentCandidateArticleResponse> getChallengeCommentCandidateArticles(Long memberId, LocalDate date) {
         return articleRepository.findChallengeCommentCandidateArticles(
                 memberId,
@@ -86,13 +79,7 @@ public class ChallengeCommentService {
             ChallengeCommentRequest request
     ) {
         validateCommentAvailableDay(memberId, challengeId);
-
-        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
-                        .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndMemberId"));
+        ChallengeParticipant participant = getChallengeParticipant(memberId, challengeId);
 
         Article article = articleRepository.findById(request.articleId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
@@ -132,11 +119,7 @@ public class ChallengeCommentService {
             Long commentId,
             UpdateChallengeCommentRequest request
     ) {
-        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
-                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
-                        .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndMemberId"));
+        ChallengeParticipant participant = getChallengeParticipant(memberId, challengeId);
 
         ChallengeComment comment = challengeCommentRepository.findById(commentId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
@@ -157,12 +140,42 @@ public class ChallengeCommentService {
     }
 
     @Transactional
-    public void updateChallengeCommentLike(Long memberId, Long challengeId, Long commentId) {
-        // 해당 챌린지에 참여하고 있는지 검증만 먼저
-        validateParticipant(challengeId, memberId);
+    public ChallengeCommentLikeResponse addChallengeCommentLike(Long memberId, Long challengeId, Long commentId) {
+        ChallengeParticipant participant = getChallengeParticipant(memberId, challengeId);
+        ChallengeComment comment = challengeCommentRepository.findById(commentId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeComment")
+                        .addContext(ErrorContextKeys.OPERATION, "findById"));
 
-        // 조회 확인 후 생성하기
-        
+        int insertCount = challengeCommentLikeRepository.insertIgnoreByParticipantIdAndCommentId(
+                participant.getId(),
+                comment.getId()
+        );
+
+        if (insertCount == 1) {
+            comment.updateLikeCount(+1);
+        }
+
+        return ChallengeCommentLikeResponse.of(comment);
+    }
+
+    private void validateParticipant(Long challengeId, Long memberId) {
+        if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext(ErrorContextKeys.OPERATION, "existsByChallengeIdAndMemberId");
+        }
+    }
+
+    private ChallengeParticipant getChallengeParticipant(Long memberId, Long challengeId) {
+        return challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
+                        .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndMemberId"));
     }
 
     private void validateCommentAvailableDay(Long memberId, Long challengeId) {

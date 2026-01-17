@@ -15,6 +15,7 @@ import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.request.UpdateChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentLikeResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
@@ -105,5 +106,21 @@ public interface ChallengeCommentControllerApi {
             @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "챌린지 id는 1 이상의 값이어야 합니다.") Long challengeId,
             @Parameter(description = "챌린지 코멘트 ID") @PathVariable @Positive(message = "코멘트 id는 1 이상의 값이어야 합니다.") Long commentId,
             @Valid @RequestBody UpdateChallengeCommentRequest request
+    );
+
+    @Operation(
+            summary = "챌린지 코멘트 좋아요 추가",
+            description = "특정 챌린지의 팀 코멘트에 좋아요를 추가하고 반영된 좋아요 개수를 반환합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "챌린지 코멘트 좋아요 추가 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 값", content = @Content),
+            @ApiResponse(responseCode = "403", description = "챌린지 코멘트 좋아요 추가 권한 없음", content = @Content),
+            @ApiResponse(responseCode = "404", description = "챌린지 코멘트를 찾을 수 없음", content = @Content)
+    })
+    ChallengeCommentLikeResponse addChallengeCommentLike(
+            @Parameter(hidden = true) @LoginMember Member member,
+            @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "챌린지 id는 1 이상의 값이어야 합니다.") Long challengeId,
+            @Parameter(description = "챌린지 코멘트 ID") @PathVariable @Positive(message = "코멘트 id는 1 이상의 값이어야 합니다.") Long commentId
     );
 }

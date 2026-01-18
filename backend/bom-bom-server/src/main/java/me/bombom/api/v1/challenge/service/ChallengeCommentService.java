@@ -153,7 +153,7 @@ public class ChallengeCommentService {
             challengeCommentRepository.incrementLikeCountNotBelowZero(commentId, 1);
         }
 
-        return ChallengeCommentLikeResponse.of(challengeCommentRepository.findById(commentId).get());
+        return ChallengeCommentLikeResponse.from(challengeCommentRepository.findById(commentId).get());
     }
 
     @Transactional
@@ -170,7 +170,7 @@ public class ChallengeCommentService {
             challengeCommentRepository.incrementLikeCountNotBelowZero(commentId, -1);
         }
 
-        return ChallengeCommentLikeResponse.of(challengeCommentRepository.findById(commentId).get());
+        return ChallengeCommentLikeResponse.from(challengeCommentRepository.findById(commentId).get());
     }
 
     private void validateParticipant(Long challengeId, Long memberId) {

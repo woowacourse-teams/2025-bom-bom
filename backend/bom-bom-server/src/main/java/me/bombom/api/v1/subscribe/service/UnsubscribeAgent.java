@@ -33,14 +33,13 @@ public class UnsubscribeAgent {
             Pattern.CASE_INSENSITIVE);
 
     public boolean unsubscribe(String url, Long newsletterId) {
-        try (Playwright playwright = Playwright.create()) {
-            Browser browser = playwright.chromium().launch(new LaunchOptions().setHeadless(false));
+        try (Playwright playwright = Playwright.create();
+            Browser browser = playwright.chromium().launch(new LaunchOptions().setHeadless(false))) {
 
             BrowserContext context = getBrowserContext(browser);
             Page page = context.newPage();
 
             // Alert/Confirm 다이얼로그 자동 처리
-            // 확인 클릭
             page.onDialog(Dialog::accept);
 
             page.navigate(url);

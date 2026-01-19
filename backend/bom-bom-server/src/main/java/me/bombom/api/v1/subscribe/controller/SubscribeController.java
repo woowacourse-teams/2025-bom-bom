@@ -5,7 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse;
+import me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse;
 import me.bombom.api.v1.subscribe.service.SubscribeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;

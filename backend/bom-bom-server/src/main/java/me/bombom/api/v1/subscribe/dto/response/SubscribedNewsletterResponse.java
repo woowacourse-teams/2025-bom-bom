@@ -1,4 +1,4 @@
-package me.bombom.api.v1.subscribe.dto;
+package me.bombom.api.v1.subscribe.dto.response;
 
 import jakarta.validation.constraints.NotNull;
 import me.bombom.api.v1.subscribe.domain.SubscribeStatus;

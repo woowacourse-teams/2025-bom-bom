@@ -10,7 +10,7 @@ import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.domain.SubscribeStatus;
-import me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse;
+import me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse;
 import me.bombom.api.v1.subscribe.event.UnsubscribeRequestedEvent;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import org.springframework.context.ApplicationEventPublisher;

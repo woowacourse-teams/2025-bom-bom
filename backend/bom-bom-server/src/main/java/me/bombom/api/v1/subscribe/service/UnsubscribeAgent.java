@@ -3,6 +3,7 @@ package me.bombom.api.v1.subscribe.service;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType.LaunchOptions;
+import com.microsoft.playwright.Dialog;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Page.GetByRoleOptions;
@@ -26,19 +27,22 @@ public class UnsubscribeAgent {
     private static final Set<String> BLOCKED_RESOURCE_TYPES = Set.of("image", "font", "media");
     private static final Pattern UNSUBSCRIBE_PATTERN = Pattern.compile(
             "unsubscribe|구독.?취소|수신.?거부|cancel|confirm|yes",
-            Pattern.CASE_INSENSITIVE
-    );
+            Pattern.CASE_INSENSITIVE);
     private static final Pattern SUCCESS_PATTERN = Pattern.compile(
             "success|unsubscribed|canceled|cancelled|취소.?완료|처리.?완료|해지.?완료|거부.?완료|취소.?되었습니다",
-            Pattern.CASE_INSENSITIVE
-    );
+            Pattern.CASE_INSENSITIVE);
 
     public boolean unsubscribe(String url, Long newsletterId) {
         try (Playwright playwright = Playwright.create()) {
-            Browser browser = playwright.chromium().launch(new LaunchOptions().setHeadless(true));
+            Browser browser = playwright.chromium().launch(new LaunchOptions().setHeadless(false));
 
             BrowserContext context = getBrowserContext(browser);
             Page page = context.newPage();
+
+            // Alert/Confirm 다이얼로그 자동 처리
+            // 확인 클릭
+            page.onDialog(Dialog::accept);
+
             page.navigate(url);
             // 이미 구독 취소 | URL 클릭 만으로 취소 성공
             if (isUnsubscribeSuccess(page)) {

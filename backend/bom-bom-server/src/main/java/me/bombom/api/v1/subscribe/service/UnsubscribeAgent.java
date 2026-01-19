@@ -33,7 +33,7 @@ public class UnsubscribeAgent {
             Pattern.CASE_INSENSITIVE
     );
 
-    public boolean unsubscribe(String url) {
+    public boolean unsubscribe(String url, Long newsletterId) {
         try (Playwright playwright = Playwright.create()) {
             Browser browser = playwright.chromium().launch(new LaunchOptions().setHeadless(true));
 
@@ -42,6 +42,7 @@ public class UnsubscribeAgent {
             page.navigate(url);
             // 이미 구독 취소 | URL 클릭 만으로 취소 성공
             if (isUnsubscribeSuccess(page)) {
+                log.info("구독 취소 성공 (즉시 성공) - newsletterId: {}", newsletterId);
                 return true;
             }
 
@@ -49,14 +50,15 @@ public class UnsubscribeAgent {
             Locator confirmButton = findUnsubscribeButton(page);
             if (confirmButton != null && confirmButton.isVisible()) {
                 confirmButton.click();
+                page.waitForLoadState(LoadState.DOMCONTENTLOADED, new Page.WaitForLoadStateOptions().setTimeout(5000));
+                log.info("구독 취소 성공 (버튼 클릭) - newsletterId: {}", newsletterId);
+                return true;
             } else {
-                log.warn("구독 취소 실패: 버튼을 찾지 못했고 성공 메시지도 없습니다.");
+                log.error("구독 취소 실패: 버튼을 찾지 못함 - newsletterId: {}, URL: {}", newsletterId, url);
                 return false;
             }
-            page.waitForLoadState(LoadState.DOMCONTENTLOADED, new Page.WaitForLoadStateOptions().setTimeout(5000));
-            return true;
         } catch (Exception e) {
-            log.warn("구독 취소 중 오류 발생: {}", e.getMessage());
+            log.error("구독 취소 중 오류 발생 - newsletterId: {}, URL: {}, 오류: {}", newsletterId, url, e.getMessage(), e);
             return false;
         }
     }

@@ -24,9 +24,10 @@ public class AutoUnsubscribeEventListener {
     public void handleUnsubscribeRequested(UnsubscribeRequestedEvent event) {
         Long subscribeId = event.subscribeId();
         String unsubscribeUrl = event.unsubscribeUrl();
+        Long newsletterId = event.newsletterId();
 
         log.info("구독 자동 취소 처리 시작 subscribeId: {}", subscribeId);
-        boolean isSuccess = unsubscribeAgent.unsubscribe(unsubscribeUrl);
+        boolean isSuccess = unsubscribeAgent.unsubscribe(unsubscribeUrl, newsletterId);
 
         eventPublisher.publishEvent(AutoUnsubscribeCompletedEvent.of(subscribeId, isSuccess));
         log.info("구독 자동 취소 처리 종료 subscribeId: {}", subscribeId);

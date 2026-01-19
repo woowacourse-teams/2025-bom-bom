@@ -13,6 +13,9 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 @ExtendWith(OutputCaptureExtension.class)
 class UnsubscribeAgentTest {
 
+    // newsletterId는 로그를 위한 것이라 무시해도 됨
+    private static final long MOCK_NEWSLETTER_ID = 1L;
+
     private final UnsubscribeAgent agent = new UnsubscribeAgent();
 
     private String createDataUrl(String html) {
@@ -33,7 +36,7 @@ class UnsubscribeAgentTest {
                 """;
 
         // when
-        agent.unsubscribe(createDataUrl(html));
+        agent.unsubscribe(createDataUrl(html), MOCK_NEWSLETTER_ID);
 
         // then
         assertSoftly(softly -> {
@@ -55,7 +58,7 @@ class UnsubscribeAgentTest {
                 """;
 
         // when
-        agent.unsubscribe(createDataUrl(html));
+        agent.unsubscribe(createDataUrl(html), MOCK_NEWSLETTER_ID);
 
         // then
         assertSoftly(softly -> {
@@ -76,7 +79,7 @@ class UnsubscribeAgentTest {
                 """;
 
         // when
-        agent.unsubscribe(createDataUrl(html));
+        agent.unsubscribe(createDataUrl(html), MOCK_NEWSLETTER_ID);
 
         // then
         assertSoftly(softly -> {
@@ -98,7 +101,7 @@ class UnsubscribeAgentTest {
                 """;
 
         // when
-        agent.unsubscribe(createDataUrl(html));
+        agent.unsubscribe(createDataUrl(html), MOCK_NEWSLETTER_ID);
 
         // then
         assertSoftly(softly -> {
@@ -121,7 +124,7 @@ class UnsubscribeAgentTest {
                 """;
 
         // when
-        agent.unsubscribe(createDataUrl(html));
+        agent.unsubscribe(createDataUrl(html), MOCK_NEWSLETTER_ID);
 
         // then
         assertSoftly(softly -> {

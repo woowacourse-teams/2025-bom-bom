@@ -65,9 +65,10 @@ public class SubscribeService {
         }
 
         subscribe.changeStatus(SubscribeStatus.UNSUBSCRIBING);
-        applicationEventPublisher.publishEvent(new UnsubscribeRequestedEvent(
+        applicationEventPublisher.publishEvent(UnsubscribeRequestedEvent.of(
                 subscribe.getId(),
-                subscribe.getUnsubscribeUrl()
+                subscribe.getUnsubscribeUrl(),
+                subscribe.getNewsletterId()
         ));
     }
 

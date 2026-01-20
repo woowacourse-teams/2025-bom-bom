@@ -6,8 +6,9 @@ CREATE TABLE badge
     badge_type     VARCHAR(50)  NOT NULL,
     period_year    INT          NULL,
     period_month   INT          NULL,
-    challenge_id   BIGINT       NULL,
-    challenge_name VARCHAR(255) NULL,
+    challenge_id          BIGINT       NULL,
+    challenge_name        VARCHAR(255) NULL,
+    challenge_generation  INT          NULL,
     created_at     DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at     DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     PRIMARY KEY (id)

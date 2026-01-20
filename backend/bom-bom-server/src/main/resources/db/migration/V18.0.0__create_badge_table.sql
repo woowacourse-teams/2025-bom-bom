@@ -3,7 +3,7 @@ CREATE TABLE badge
     id             BIGINT       NOT NULL AUTO_INCREMENT,
     member_id      BIGINT       NOT NULL,
     badge_category VARCHAR(20)  NOT NULL,
-    badge_type     VARCHAR(50)  NOT NULL,
+    badge_grade    VARCHAR(20)  NULL,
     period_year    INT          NULL,
     period_month   INT          NULL,
     challenge_id          BIGINT       NULL,

@@ -7,6 +7,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
+import me.bombom.api.v1.challenge.dto.request.UpdateChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
@@ -23,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -82,5 +84,17 @@ public class ChallengeCommentController implements ChallengeCommentControllerApi
             @PageableDefault(size = 20, sort = "createdAt", direction = Direction.DESC) Pageable pageable
     ) {
         return challengeCommentService.getChallengeArticleHighlights(member.getId(), articleId, pageable);
+    }
+
+    @Override
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PatchMapping("/{challengeId}/comments/{commentId}")
+    public void updateChallengeComment(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "챌린지 id는 1 이상의 값이어야 합니다.") Long challengeId,
+            @PathVariable @Positive(message = "코멘트 id는 1 이상의 값이어야 합니다.") Long commentId,
+            @Valid @RequestBody UpdateChallengeCommentRequest request
+    ) {
+        challengeCommentService.updateChallengeComment(member.getId(), challengeId, commentId, request);
     }
 }

@@ -7,6 +7,7 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Page.GetByRoleOptions;
 import com.microsoft.playwright.Playwright;
+import com.microsoft.playwright.TimeoutError;
 import com.microsoft.playwright.options.AriaRole;
 import java.util.List;
 import java.util.Set;
@@ -27,20 +28,20 @@ public class UnsubscribeAgent {
 
     private static final Pattern UNSUBSCRIBE_PATTERN = Pattern.compile(
             "unsubscribe|구독.?취소|수신.?거부|cancel|confirm|yes",
-            Pattern.CASE_INSENSITIVE
-    );
+            Pattern.CASE_INSENSITIVE);
     private static final Pattern SUCCESS_PATTERN = Pattern.compile(
-            "success|unsubscribed|canceled|cancelled|취소.?완료|처리.?완료|해지.?완료|거부.?완료|취소.?되었습니다",
-            Pattern.CASE_INSENSITIVE
-    );
+            "success|unsubscribed|canceled|cancelled|no.?longer.?be.?sent.?to|취소.?완료|처리.?완료|해지.?완료|거부.?완료|취소.?되었습니다",
+            Pattern.CASE_INSENSITIVE);
+
     private static final Pattern ALREADY_UNSUBSCRIBED_PATTERN = Pattern.compile(
             "구독.?중인.?이메일.?주소가.?아닙니다|이미.?구독.?취소|이미.?취소|already.?unsubscribed|not.?subscribed|구독.?취소.?되었습니다",
-            Pattern.CASE_INSENSITIVE
-    );
+            Pattern.CASE_INSENSITIVE);
     private static final Pattern ERROR_PATTERN = Pattern.compile(
             "error|오류|실패|failed|invalid|잘못|문제",
-            Pattern.CASE_INSENSITIVE
-    );
+            Pattern.CASE_INSENSITIVE);
+
+    private static final long UNSUBSCRIBE_TIMEOUT_MS = 10000;
+    private static final long POLLING_INTERVAL_MS = 500;
 
     public boolean unsubscribe(String url, Long newsletterId) {
         AtomicBoolean hasError = new AtomicBoolean(false);
@@ -54,8 +55,7 @@ public class UnsubscribeAgent {
                                 "--no-sandbox",
                                 "--disable-setuid-sandbox",
                                 "--disable-dev-shm-usage",
-                                "--disable-gpu")))
-        ) {
+                                "--disable-gpu")))) {
             BrowserContext context = getBrowserContext(browser);
             Page page = context.newPage();
 
@@ -64,6 +64,19 @@ public class UnsubscribeAgent {
             setupResponseHandler(page, hasError, isProcessed, isReady, newsletterId);
 
             page.navigate(url);
+
+            // 페이지 로딩 느릴 경우 대응
+            Locator successLocator = page.getByText(SUCCESS_PATTERN);
+            Locator buttonLocator = page.getByRole(AriaRole.BUTTON,
+                    new GetByRoleOptions().setName(UNSUBSCRIBE_PATTERN));
+            Locator linkLocator = page.getByRole(AriaRole.LINK, new GetByRoleOptions().setName(UNSUBSCRIBE_PATTERN));
+
+            try {
+                Locator combined = successLocator.or(buttonLocator).or(linkLocator);
+                combined.waitFor(new Locator.WaitForOptions().setTimeout(UNSUBSCRIBE_TIMEOUT_MS));
+            } catch (TimeoutError e) {
+                // 타임아웃 되더라도 확인 로직 진행
+            }
 
             // 이미 구독 취소 | URL 클릭 만으로 취소 성공
             if (isUnsubscribeSuccess(page)) {
@@ -79,13 +92,13 @@ public class UnsubscribeAgent {
                 String beforeUrl = page.url();
                 confirmButton.click();
 
-                // 최대 3초간 응답 대기 (빠르게 오면 즉시 종료)
-                long deadline = System.currentTimeMillis() + 3000;
+                // 최대 10초간 응답 대기 (빠르게 오면 즉시 종료)
+                long deadline = System.currentTimeMillis() + UNSUBSCRIBE_TIMEOUT_MS;
                 while (System.currentTimeMillis() < deadline) {
                     if (isProcessed.get() || hasError.get()) {
                         break;
                     }
-                    page.waitForTimeout(500); // 0.5초 간격 확인
+                    page.waitForTimeout(POLLING_INTERVAL_MS); // 0.5초 간격 확인
                 }
                 // 이미 구독 취소된 경우 종료
                 if (isProcessed.get()) {

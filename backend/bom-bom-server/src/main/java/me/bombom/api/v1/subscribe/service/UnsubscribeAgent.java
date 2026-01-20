@@ -28,17 +28,20 @@ public class UnsubscribeAgent {
 
     private static final Pattern UNSUBSCRIBE_PATTERN = Pattern.compile(
             "unsubscribe|구독.?취소|수신.?거부|cancel|confirm|yes",
-            Pattern.CASE_INSENSITIVE);
+            Pattern.CASE_INSENSITIVE
+    );
     private static final Pattern SUCCESS_PATTERN = Pattern.compile(
             "success|unsubscribed|canceled|cancelled|no.?longer.?be.?sent.?to|취소.?완료|처리.?완료|해지.?완료|거부.?완료|취소.?되었습니다",
-            Pattern.CASE_INSENSITIVE);
-
+            Pattern.CASE_INSENSITIVE
+    );
     private static final Pattern ALREADY_UNSUBSCRIBED_PATTERN = Pattern.compile(
             "구독.?중인.?이메일.?주소가.?아닙니다|이미.?구독.?취소|이미.?취소|already.?unsubscribed|not.?subscribed|구독.?취소.?되었습니다",
-            Pattern.CASE_INSENSITIVE);
+            Pattern.CASE_INSENSITIVE
+    );
     private static final Pattern ERROR_PATTERN = Pattern.compile(
             "error|오류|실패|failed|invalid|잘못|문제",
-            Pattern.CASE_INSENSITIVE);
+            Pattern.CASE_INSENSITIVE
+    );
 
     private static final long UNSUBSCRIBE_TIMEOUT_MS = 10000;
     private static final long POLLING_INTERVAL_MS = 500;
@@ -98,16 +101,15 @@ public class UnsubscribeAgent {
                     if (isProcessed.get() || hasError.get()) {
                         break;
                     }
+                    // 페이지 URL이 변경되었다면 성공으로 간주 (리다이렉트 발생)
+                    if (!page.url().equals(beforeUrl)) {
+                        log.info("구독 취소 성공 (페이지 이동 감지) - newsletterId: {}", newsletterId);
+                        return true;
+                    }
                     page.waitForTimeout(POLLING_INTERVAL_MS); // 0.5초 간격 확인
                 }
                 // 이미 구독 취소된 경우 종료
                 if (isProcessed.get()) {
-                    return true;
-                }
-
-                // 페이지 URL이 변경되었다면 성공으로 간주 (리다이렉트 발생)
-                if (!page.url().equals(beforeUrl)) {
-                    log.info("구독 취소 성공 (페이지 이동 감지) - newsletterId: {}", newsletterId);
                     return true;
                 }
 

@@ -25,6 +25,7 @@ public class UnsubscribeAgent {
 
     private static final String ALL_URLS_PATTERN = "**/*";
     private static final Set<String> BLOCKED_RESOURCE_TYPES = Set.of("image", "font", "media");
+    private static final List<String> AD_DOMAINS = List.of("google", "doubleclick", "adservice");
 
     private static final Pattern UNSUBSCRIBE_PATTERN = Pattern.compile(
             "unsubscribe|구독.?취소|수신.?거부|cancel|confirm|yes",
@@ -46,19 +47,15 @@ public class UnsubscribeAgent {
     private static final long UNSUBSCRIBE_TIMEOUT_MS = 10000;
     private static final long POLLING_INTERVAL_MS = 500;
 
+
     public boolean unsubscribe(String url, Long newsletterId) {
         AtomicBoolean hasError = new AtomicBoolean(false);
         AtomicBoolean isProcessed = new AtomicBoolean(false);
         AtomicBoolean isReady = new AtomicBoolean(false);
 
         try (Playwright playwright = Playwright.create();
-                Browser browser = playwright.chromium().launch(new LaunchOptions()
-                        .setHeadless(true)
-                        .setArgs(List.of(
-                                "--no-sandbox",
-                                "--disable-setuid-sandbox",
-                                "--disable-dev-shm-usage",
-                                "--disable-gpu")))) {
+                Browser browser = playwright.chromium().launch(createLaunchOptions())
+        ) {
             BrowserContext context = getBrowserContext(browser);
             Page page = context.newPage();
 
@@ -67,67 +64,37 @@ public class UnsubscribeAgent {
             setupResponseHandler(page, hasError, isProcessed, isReady, newsletterId);
 
             page.navigate(url);
+            // 페이지 로딩 느릴 경우 대응 (성공 메시지 or 버튼/링크 대기)
+            waitForContent(page);
 
-            // 페이지 로딩 느릴 경우 대응
-            Locator successLocator = page.getByText(SUCCESS_PATTERN);
-            Locator buttonLocator = page.getByRole(AriaRole.BUTTON,
-                    new GetByRoleOptions().setName(UNSUBSCRIBE_PATTERN));
-            Locator linkLocator = page.getByRole(AriaRole.LINK, new GetByRoleOptions().setName(UNSUBSCRIBE_PATTERN));
-
-            try {
-                Locator combined = successLocator.or(buttonLocator).or(linkLocator);
-                combined.waitFor(new Locator.WaitForOptions().setTimeout(UNSUBSCRIBE_TIMEOUT_MS));
-            } catch (TimeoutError e) {
-                // 타임아웃 되더라도 확인 로직 진행
-            }
-
-            // 이미 구독 취소 | URL 클릭 만으로 취소 성공
+            // 1. 즉시 성공 케이스 (URL 접속만으로 취소됨)
             if (isUnsubscribeSuccess(page)) {
                 log.info("구독 취소 성공 (즉시 성공) - newsletterId: {}", newsletterId);
                 return !hasError.get();
             }
-
-            // 취소/확인 버튼 찾기 및 클릭
-            Locator confirmButton = findUnsubscribeButton(page);
-            if (confirmButton != null && confirmButton.isVisible()) {
-                isProcessed.set(false);
-                isReady.set(true);
-                String beforeUrl = page.url();
-                confirmButton.click();
-
-                // 최대 10초간 응답 대기 (빠르게 오면 즉시 종료)
-                long deadline = System.currentTimeMillis() + UNSUBSCRIBE_TIMEOUT_MS;
-                while (System.currentTimeMillis() < deadline) {
-                    if (isProcessed.get() || hasError.get()) {
-                        break;
-                    }
-                    // 페이지 URL이 변경되었다면 성공으로 간주 (리다이렉트 발생)
-                    if (!page.url().equals(beforeUrl)) {
-                        log.info("구독 취소 성공 (페이지 이동 감지) - newsletterId: {}", newsletterId);
-                        return true;
-                    }
-                    page.waitForTimeout(POLLING_INTERVAL_MS); // 0.5초 간격 확인
-                }
-                // 이미 구독 취소된 경우 종료
-                if (isProcessed.get()) {
-                    return true;
-                }
-
-                // 에러가 없다면 성공으로 간주
-                if (!hasError.get()) {
-                    log.info("구독 취소 성공 (에러 없음) - newsletterId: {}", newsletterId);
-                    return true;
-                }
-
-                return false;
-            }
-
-            log.error("구독 취소 실패: 버튼을 찾지 못함 - newsletterId: {}, URL: {}", newsletterId, url);
-            return false;
+            // 2. 버튼 클릭 필요 케이스
+            return processUnsubscribeAction(page, isProcessed, isReady, hasError, newsletterId);
         } catch (Exception e) {
             log.error("구독 취소 중 오류 발생 - newsletterId: {}, URL: {}, 오류: {}", newsletterId, url, e.getMessage(), e);
             return false;
         }
+    }
+
+    private LaunchOptions createLaunchOptions() {
+        return new LaunchOptions()
+                .setHeadless(true)
+                .setArgs(List.of(
+                        "--no-sandbox",
+                        "--disable-setuid-sandbox",
+                        "--disable-dev-shm-usage",
+                        "--disable-gpu",
+                        "--disable-extensions",
+                        "--disable-popup-blocking",
+                        "--no-first-run",
+                        "--no-default-browser-check",
+                        "--disable-translate",
+                        "--disable-background-networking",
+                        "--disable-sync"));
     }
 
     private BrowserContext getBrowserContext(Browser browser) {
@@ -144,26 +111,6 @@ public class UnsubscribeAgent {
         return context;
     }
 
-    private Locator findUnsubscribeButton(Page page) {
-        for (AriaRole role : List.of(AriaRole.BUTTON, AriaRole.LINK)) {
-            Locator button = page.getByRole(role, new GetByRoleOptions().setName(UNSUBSCRIBE_PATTERN));
-            if (button.isVisible()) {
-                return button;
-            }
-        }
-        return null;
-    }
-
-    private boolean isUnsubscribeSuccess(Page page) {
-        try {
-            // 텍스트가 있는지 확인 (count > 0이면 존재)
-            return page.getByText(SUCCESS_PATTERN).count() > 0;
-        } catch (Exception e) {
-            // 예외 발생 시 false 반환
-            return false;
-        }
-    }
-
     private void setupDialogHandler(Page page, AtomicBoolean hasError, Long newsletterId) {
         page.onDialog(dialog -> {
             String message = dialog.message();
@@ -175,11 +122,14 @@ public class UnsubscribeAgent {
         });
     }
 
-    private void setupResponseHandler(Page page, AtomicBoolean hasError, AtomicBoolean isProcessed,
+    private void setupResponseHandler(
+            Page page,
+            AtomicBoolean hasError,
+            AtomicBoolean isProcessed,
             AtomicBoolean isReady,
-            Long newsletterId) {
+            Long newsletterId
+    ) {
         page.onResponse(response -> {
-            // 버튼 클릭 전에는 응답 처리하지 않음 (초기 페이지 로딩 로그 방지)
             if (!isReady.get()) {
                 return;
             }
@@ -190,7 +140,6 @@ public class UnsubscribeAgent {
                 return;
             }
 
-            // 200~300번대 응답도 성공으로 간주 (일반적인 성공 or 리다이렉트)
             if (status >= 200 && status < 400 && url.contains("unsubscribe")) {
                 log.info("구독 취소 성공 응답 감지 (HTTP {}) - newsletterId: {}", status, newsletterId);
                 isProcessed.set(true);
@@ -199,7 +148,6 @@ public class UnsubscribeAgent {
 
             if (status >= 400 && status < 500 && url.contains("unsubscribe")) {
                 String body = response.text();
-                // "이미 구독 취소"는 성공으로 처리
                 if (ALREADY_UNSUBSCRIBED_PATTERN.matcher(body).find()) {
                     log.info("이미 구독 취소됨 (HTTP {}) - newsletterId: {}", status, newsletterId);
                     isProcessed.set(true);
@@ -211,7 +159,92 @@ public class UnsubscribeAgent {
         });
     }
 
+    private void waitForContent(Page page) {
+        Locator successLocator = page.getByText(SUCCESS_PATTERN);
+        Locator buttonLocator = page.getByRole(AriaRole.BUTTON, new GetByRoleOptions().setName(UNSUBSCRIBE_PATTERN));
+        Locator linkLocator = page.getByRole(AriaRole.LINK, new GetByRoleOptions().setName(UNSUBSCRIBE_PATTERN));
+
+        try {
+            Locator combined = successLocator.or(buttonLocator).or(linkLocator);
+            combined.waitFor(new Locator.WaitForOptions().setTimeout(UNSUBSCRIBE_TIMEOUT_MS));
+        } catch (TimeoutError e) {
+            // 타임아웃 되더라도 확인 로직 진행
+        }
+    }
+
+    private boolean isUnsubscribeSuccess(Page page) {
+        try {
+            return page.getByText(SUCCESS_PATTERN).count() > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private boolean processUnsubscribeAction(
+            Page page,
+            AtomicBoolean isProcessed,
+            AtomicBoolean isReady,
+            AtomicBoolean hasError,
+            Long newsletterId
+    ) {
+        Locator confirmButton = findUnsubscribeButton(page);
+        if (confirmButton == null || !confirmButton.isVisible()) {
+            log.error("구독 취소 실패: 버튼을 찾지 못함 - newsletterId: {}, URL: {}", newsletterId, page.url());
+            return false;
+        }
+
+        isProcessed.set(false);
+        isReady.set(true);
+        String beforeUrl = page.url();
+
+        confirmButton.click();
+        return waitForResult(page, isProcessed, hasError, beforeUrl, newsletterId);
+    }
+
+    private Locator findUnsubscribeButton(Page page) {
+        for (AriaRole role : List.of(AriaRole.BUTTON, AriaRole.LINK)) {
+            Locator button = page.getByRole(role, new GetByRoleOptions().setName(UNSUBSCRIBE_PATTERN));
+            if (button.isVisible()) {
+                return button;
+            }
+        }
+        return null;
+    }
+
+    private boolean waitForResult(
+            Page page,
+            AtomicBoolean isProcessed,
+            AtomicBoolean hasError,
+            String beforeUrl,
+            Long newsletterId
+    ) {
+        long deadline = System.currentTimeMillis() + UNSUBSCRIBE_TIMEOUT_MS;
+        while (System.currentTimeMillis() < deadline) {
+            // setupResponseHandler에서 설정한 핸들러 처리를 대기
+            if (isProcessed.get() || hasError.get()) {
+                break;
+            }
+            // 페이지 URL이 변경되었다면 성공으로 간주 (리다이렉트 발생)
+            if (!page.url().equals(beforeUrl)) {
+                log.info("구독 취소 성공 (페이지 이동 감지) - newsletterId: {}", newsletterId);
+                return true;
+            }
+            page.waitForTimeout(POLLING_INTERVAL_MS);
+        }
+
+        if (isProcessed.get()) {
+            return true;
+        }
+
+        if (!hasError.get()) {
+            log.info("구독 취소 성공 (에러 없음) - newsletterId: {}", newsletterId);
+            return true;
+        }
+
+        return false;
+    }
+
     private boolean isAdUrl(String url) {
-        return url.contains("google") || url.contains("doubleclick") || url.contains("adservice");
+        return AD_DOMAINS.stream().anyMatch(url::contains);
     }
 }

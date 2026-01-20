@@ -83,6 +83,6 @@ public class SubscribeService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "subscribe")
                         .addContext("subscribeId", subscribeId));
-        subscribe.changeStatus(SubscribeStatus.FAILED);
+        subscribe.changeStatus(SubscribeStatus.UNSUBSCRIBE_FAILED);
     }
 }

@@ -186,7 +186,7 @@ class SubscribeServiceTest {
         );
 
         // FAILED 상태로 변경
-        subscribe.changeStatus(me.bombom.api.v1.subscribe.domain.SubscribeStatus.FAILED);
+        subscribe.changeStatus(me.bombom.api.v1.subscribe.domain.SubscribeStatus.UNSUBSCRIBE_FAILED);
         subscribeRepository.save(subscribe);
 
         // when
@@ -318,6 +318,6 @@ class SubscribeServiceTest {
 
         // then
         Subscribe result = subscribeRepository.findById(subscribe.getId()).orElseThrow();
-        assertThat(result.getStatus()).isEqualTo(me.bombom.api.v1.subscribe.domain.SubscribeStatus.FAILED);
+        assertThat(result.getStatus()).isEqualTo(me.bombom.api.v1.subscribe.domain.SubscribeStatus.UNSUBSCRIBE_FAILED);
     }
 }

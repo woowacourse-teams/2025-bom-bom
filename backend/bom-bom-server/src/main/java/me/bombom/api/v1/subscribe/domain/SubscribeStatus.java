@@ -4,5 +4,5 @@ public enum SubscribeStatus {
 
     SUBSCRIBED,
     UNSUBSCRIBING,
-    FAILED
+    UNSUBSCRIBE_FAILED
 }

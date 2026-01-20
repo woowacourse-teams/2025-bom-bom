@@ -53,7 +53,7 @@ public class UnsubscribeAgent {
 
         try (Playwright playwright = Playwright.create();
                 Browser browser = playwright.chromium().launch(new LaunchOptions()
-                        .setHeadless(false)
+                        .setHeadless(true)
                         .setArgs(List.of(
                                 "--no-sandbox",
                                 "--disable-setuid-sandbox",

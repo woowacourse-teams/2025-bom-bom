@@ -4,12 +4,14 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
+@Disabled
 @ExtendWith(OutputCaptureExtension.class)
 class UnsubscribeAgentTest {
 

@@ -37,7 +37,8 @@ public class ChallengeComment extends BaseEntity {
     @Column(nullable = false)
     private String comment;
 
-    private int likeCount = 0;
+    @Column(nullable = false)
+    private int likeCount;
 
     @Builder
     public ChallengeComment(

@@ -177,6 +177,7 @@ public class ChallengeCommentService {
         if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
             throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
                     .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
                     .addContext(ErrorContextKeys.OPERATION, "existsByChallengeIdAndMemberId");
         }
     }
@@ -202,9 +203,9 @@ public class ChallengeCommentService {
 
     private void validateComment(Long commentId) {
         if (!challengeCommentRepository.existsById(commentId)) {
-            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                     .addContext(ErrorContextKeys.COMMENT_ID, commentId)
-                    .addContext(ErrorContextKeys.OPERATION, "existsByChallengeIdAndMemberId");
+                    .addContext(ErrorContextKeys.OPERATION, "existsById");
         }
     }
 

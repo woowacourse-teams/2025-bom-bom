@@ -147,13 +147,13 @@ public class ChallengeDailyGuideService {
 
         // day1일 때만 체크리스트 자동 완료 처리
         if (dayIndex == 1) {
-            // READ todo 자동 생성 (뉴스레터 1개 읽기)
+            // READ 투두 자동 생성 (뉴스레터 1개 읽기)
             challengeDailyTodoService.updateChallengeDailyTodo(memberId, null, today);
-            // COMMENT todo 생성 (한 줄 코멘트 작성)
+            // COMMENT 투두 생성 (한 줄 코멘트 작성)
             challengeTodoService.insertCommentDone(participant, today);
 
             // 이미 완료되지 않았으면 progress 처리
-            // day1에 두 todo(READ, COMMENT)가 모두 생성되므로 바로 완료 처리
+            // day1에 두 투두(READ, COMMENT)가 모두 생성되므로 바로 완료 처리
             if (!challengeTodoService.isCompletedToday(participant.getId(), today)) {
                 challengeTodoService.completeDailyTodo(participant, today);
 

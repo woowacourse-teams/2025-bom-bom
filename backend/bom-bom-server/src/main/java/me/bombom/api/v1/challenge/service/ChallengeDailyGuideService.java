@@ -44,17 +44,9 @@ public class ChallengeDailyGuideService {
     private final ChallengeTeamService challengeTeamService;
 
     public TodayDailyGuideResponse getTodayDailyGuide(Long challengeId, Long memberId) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
-                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
+        Challenge challenge = getChallenge(challengeId);
 
-        if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
-            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId);
-        }
+        validateChallengeParticipant(challengeId, memberId);
 
         LocalDate today = LocalDate.now(SEOUL_ZONE);
         if (today.isBefore(challenge.getStartDate()) || today.isAfter(challenge.getEndDate())) {
@@ -84,17 +76,9 @@ public class ChallengeDailyGuideService {
     }
 
     public Page<DailyGuideCommentResponse> getTotalComments(Long challengeId, int dayIndex, Long memberId, Pageable pageable) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
-                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
+        Challenge challenge = getChallenge(challengeId);
 
-        if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
-            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId);
-        }
+        validateChallengeParticipant(challengeId, memberId);
 
         if (dayIndex != 0 && (dayIndex < 1 || dayIndex > challenge.getTotalDays())) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
@@ -117,10 +101,7 @@ public class ChallengeDailyGuideService {
     @Transactional
     public void createDailyGuideComment(Long challengeId, int dayIndex, Long memberId,
                                         DailyGuideCommentRequest request, LocalDate today) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
-                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
+        Challenge challenge = getChallenge(challengeId);
 
         ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
                         challengeId, memberId)
@@ -129,13 +110,7 @@ public class ChallengeDailyGuideService {
                         .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                         .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
 
-        if (dayIndex != 0 && (dayIndex < 1 || dayIndex > challenge.getTotalDays())) {
-            throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeDailyGuide")
-                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
-                    .addContext("dayIndex", dayIndex)
-                    .addContext("reason", "유효하지 않은 일차 인덱스입니다.");
-        }
+        validateDayIndex(challengeId, dayIndex, challenge);
 
         ChallengeDailyGuide guide = challengeDailyGuideRepository.findByChallengeIdAndDayIndex(challengeId, dayIndex)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
@@ -192,29 +167,42 @@ public class ChallengeDailyGuideService {
     }
 
     public MemberDailyCommentResponse getDailyGuideComment(Long challengeId, int dayIndex, Long memberId) {
-        Challenge challenge = challengeRepository.findById(challengeId)
+        Challenge challenge = getChallenge(challengeId);
+        validateChallengeParticipant(challengeId, memberId);
+        validateDayIndex(challengeId, dayIndex, challenge);
+
+        MemberDailyCommentResponse response = challengeDailyGuideCommentRepository.findMyComment(
+                challengeId,
+                dayIndex,
+                memberId
+        );
+        return response != null ? response : new MemberDailyCommentResponse(null);
+    }
+
+    private Challenge getChallenge(Long challengeId) {
+        return challengeRepository.findById(challengeId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
                         .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
+    }
 
+    private void validateChallengeParticipant(Long challengeId, Long memberId) {
         if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
                     .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                     .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId);
         }
+    }
 
-        if (dayIndex < 1 || dayIndex > calculateDayIndex(challenge.getStartDate(), LocalDate.now())) {
+    private void validateDayIndex(Long challengeId, int dayIndex, Challenge challenge) {
+        if (dayIndex != 0 && (dayIndex < 1 || dayIndex > calculateDayIndex(challenge.getStartDate(), LocalDate.now(SEOUL_ZONE)))) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeDailyGuide")
                     .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
                     .addContext("dayIndex", dayIndex)
                     .addContext("reason", "유효하지 않은 일차 인덱스입니다.");
         }
-
-        MemberDailyCommentResponse response = challengeDailyGuideCommentRepository
-                .findMyComment(challengeId, dayIndex, memberId);
-        return response != null ? response : new MemberDailyCommentResponse(null);
     }
 
     private int calculateDayIndex(LocalDate startDate, LocalDate today) {

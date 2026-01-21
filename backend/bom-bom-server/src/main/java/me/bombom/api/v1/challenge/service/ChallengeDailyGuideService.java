@@ -12,6 +12,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.request.DailyGuideCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse;
+import me.bombom.api.v1.challenge.dto.response.MemberDailyCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse.MyCommentResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyGuideCommentRepository;
@@ -188,6 +189,32 @@ public class ChallengeDailyGuideService {
                 }
             }
         }
+    }
+
+    public MemberDailyCommentResponse getDailyGuideComment(Long challengeId, int dayIndex, Long memberId) {
+        Challenge challenge = challengeRepository.findById(challengeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
+
+        if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId);
+        }
+
+        if (dayIndex < 1 || dayIndex > calculateDayIndex(challenge.getStartDate(), LocalDate.now())) {
+            throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeDailyGuide")
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                    .addContext("dayIndex", dayIndex)
+                    .addContext("reason", "유효하지 않은 일차 인덱스입니다.");
+        }
+
+        MemberDailyCommentResponse response = challengeDailyGuideCommentRepository
+                .findMyComment(challengeId, dayIndex, memberId);
+        return response != null ? response : new MemberDailyCommentResponse(null);
     }
 
     private int calculateDayIndex(LocalDate startDate, LocalDate today) {

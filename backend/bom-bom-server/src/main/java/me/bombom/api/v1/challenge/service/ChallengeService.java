@@ -36,6 +36,7 @@ import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.badge.service.BadgeService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +53,7 @@ public class ChallengeService {
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ChallengeNewsletterRepository challengeNewsletterRepository;
     private final ChallengeTeamRepository challengeTeamRepository;
+    private final BadgeService badgeService;
 
     public List<ChallengeResponse> getChallenges(Member member) {
         List<Challenge> challenges = challengeRepository.findAll();
@@ -157,6 +159,24 @@ public class ChallengeService {
 
     public List<Challenge> getOngoingChallenges(LocalDate date) {
         return challengeRepository.findOngoingChallenges(date);
+    }
+
+    @Transactional
+    public void processEndedChallenges(LocalDate date) {
+        List<Challenge> endedChallenges = challengeRepository.findEndedChallenges(date);
+        if (endedChallenges.isEmpty()) {
+            log.info("종료된 챌린지가 없습니다.");
+            return;
+        }
+
+        for (Challenge challenge : endedChallenges) {
+            try {
+                List<ChallengeParticipant> participants = challengeParticipantRepository.findAllByChallengeId(challenge.getId());
+                badgeService.issueChallengeBadges(challenge, participants);
+            } catch (Exception e) {
+                log.error("챌린지 종료 처리 중 오류 발생 - challengeId: {}", challenge.getId(), e);
+            }
+        }
     }
 
     public ChallengeTeamListResponse getTeamList(Long challengeId, Member member) {

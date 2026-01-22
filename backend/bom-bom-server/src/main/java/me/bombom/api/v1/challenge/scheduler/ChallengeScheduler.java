@@ -36,4 +36,17 @@ public class ChallengeScheduler {
             }
         }
     }
+
+    @Scheduled(cron = DAILY_CRON)
+    @SchedulerLock(name = "process_ended_challenges", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
+    public void processEndedChallenges() {
+        log.info("챌린지 종료 처리 및 뱃지 발급 시작");
+        LocalDate today = LocalDate.now();
+        try {
+            challengeService.processEndedChallenges(today);
+            log.info("챌린지 종료 처리 및 뱃지 발급 완료");
+        } catch (Exception e) {
+            log.error("챌린지 종료 처리 중 오류 발생", e);
+        }
+    }
 }

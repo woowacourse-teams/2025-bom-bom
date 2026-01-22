@@ -16,7 +16,13 @@ public class RecentArticleEventListener {
     @TransactionalEventListener
     public void onArticleArrived(ArticleArrivedEvent event) {
         try {
-            recentArticleService.save(event.message(), event.contents(), event.memberId(), event.newsletterId());
+            recentArticleService.save(
+                    event.articleId(),
+                    event.message(),
+                    event.contents(),
+                    event.memberId(),
+                    event.newsletterId()
+            );
 
             log.info("최신 아티클 저장 완료: 멤버 ID={}, 뉴스레터 ={}, 아티클 제목={}",
                     event.memberId(), event.newsletterName(), event.articleTitle());

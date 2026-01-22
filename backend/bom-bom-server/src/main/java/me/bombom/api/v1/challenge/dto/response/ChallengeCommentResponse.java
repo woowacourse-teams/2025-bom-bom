@@ -32,6 +32,12 @@ public record ChallengeCommentResponse(
         LocalDateTime createdAt,
 
         @Schema(requiredMode = RequiredMode.REQUIRED)
-        boolean isMyComment
+        boolean isMyComment,
+
+        @Schema(requiredMode = RequiredMode.REQUIRED)
+        int likeCount,
+
+        @Schema(requiredMode = RequiredMode.REQUIRED)
+        boolean isLiked
 ) {
 }

@@ -5,8 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -23,6 +21,9 @@ public class RecentArticle extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
+    private Long articleId;
 
     @Column(nullable = false)
     private String title;
@@ -57,6 +58,7 @@ public class RecentArticle extends BaseEntity {
     @Builder
     public RecentArticle(
             Long id,
+            @NonNull Long articleId,
             @NonNull String title,
             @NonNull String contents,
             @NonNull String contentsText,
@@ -69,6 +71,7 @@ public class RecentArticle extends BaseEntity {
             @NonNull LocalDateTime arrivedDateTime
     ) {
         this.id = id;
+        this.articleId = articleId;
         this.title = title;
         this.contents = contents;
         this.contentsText = contentsText;

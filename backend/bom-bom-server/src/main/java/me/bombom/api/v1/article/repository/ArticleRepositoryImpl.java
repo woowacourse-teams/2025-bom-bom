@@ -571,8 +571,11 @@ public class ArticleRepositoryImpl implements CustomArticleRepository {
                 .exists();
     }
 
-    private JPAQuery<Long> getOldTotalQueryForSearch(Long memberId, ArticleSearchOptionsRequest options,
-                                                     LocalDate fiveDaysAgoDate) {
+    private JPAQuery<Long> getOldTotalQueryForSearch(
+            Long memberId,
+            ArticleSearchOptionsRequest options,
+            LocalDate fiveDaysAgoDate
+    ) {
         return jpaQueryFactory.select(article.count())
                 .from(article)
                 .join(newsletter).on(article.newsletterId.eq(newsletter.id))

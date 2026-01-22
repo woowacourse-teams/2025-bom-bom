@@ -1,6 +1,6 @@
 package news.bombomemail.article.service;
 
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Properties;
 import news.bombomemail.article.domain.RecentArticle;
 import news.bombomemail.article.repository.RecentArticleRepository;
+import news.bombomemail.article.util.html.HtmlCleanerConfig;
 import news.bombomemail.email.extractor.EmailContentExtractor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import news.bombomemail.article.util.html.HtmlCleanerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -29,12 +29,14 @@ class RecentArticleServiceTest {
     RecentArticleRepository recentArticleRepository;
 
     private Session session;
+    private Long articleId;
     private Long memberId;
     private Long newsletterId;
 
     @BeforeEach
     void setup() {
         session = Session.getDefaultInstance(new Properties());
+        articleId = 1L;
         memberId = 1L;
         newsletterId = 1L;
         recentArticleRepository.deleteAll();
@@ -49,13 +51,14 @@ class RecentArticleServiceTest {
         String content = EmailContentExtractor.extractContents(msg);
 
         // when
-        recentArticleService.save(msg, content, memberId, newsletterId);
+        recentArticleService.save(articleId, msg, content, memberId, newsletterId);
 
         // then
         assertSoftly(softly -> {
             List<RecentArticle> all = recentArticleRepository.findAll();
             softly.assertThat(all).hasSize(1);
             RecentArticle recentArticle = all.get(0);
+            softly.assertThat(recentArticle.getArticleId()).isEqualTo(articleId);
             softly.assertThat(recentArticle.getTitle()).isEqualTo("테스트 이메일 제목");
             softly.assertThat(recentArticle.getContents()).contains("테스트용 이메일 본문입니다");
             softly.assertThat(recentArticle.getContentsText()).contains("테스트용 이메일 본문입니다");
@@ -76,11 +79,12 @@ class RecentArticleServiceTest {
         String content = EmailContentExtractor.extractContents(msg);
 
         // when
-        recentArticleService.save(msg, content, memberId, newsletterId);
+        recentArticleService.save(articleId, msg, content, memberId, newsletterId);
 
         // then
         assertSoftly(softly -> {
             RecentArticle recentArticle = recentArticleRepository.findAll().get(0);
+            softly.assertThat(recentArticle.getArticleId()).isEqualTo(articleId);
             softly.assertThat(recentArticle.getContents()).contains("<html>");
             softly.assertThat(recentArticle.getContentsText()).isEqualTo("이것은 HTML 본문입니다.");
             softly.assertThat(recentArticle.getContentsText()).doesNotContain("<html>", "<b>", "</b>");
@@ -96,11 +100,12 @@ class RecentArticleServiceTest {
         String content = EmailContentExtractor.extractContents(msg);
 
         // when
-        recentArticleService.save(msg, content, memberId, newsletterId);
+        recentArticleService.save(articleId, msg, content, memberId, newsletterId);
 
         // then
         assertSoftly(softly -> {
             RecentArticle recentArticle = recentArticleRepository.findAll().get(0);
+            softly.assertThat(recentArticle.getArticleId()).isEqualTo(articleId);
             softly.assertThat(recentArticle.getContents()).isEmpty();
             softly.assertThat(recentArticle.getContentsText()).isEmpty();
             softly.assertThat(recentArticle.getExpectedReadTime()).isZero();
@@ -123,11 +128,12 @@ class RecentArticleServiceTest {
         String content = EmailContentExtractor.extractContents(msg);
 
         // when
-        recentArticleService.save(msg, content, memberId, newsletterId);
+        recentArticleService.save(articleId, msg, content, memberId, newsletterId);
 
         // then
         assertSoftly(softly -> {
             RecentArticle recentArticle = recentArticleRepository.findAll().get(0);
+            softly.assertThat(recentArticle.getArticleId()).isEqualTo(articleId);
             softly.assertThat(recentArticle.getContentsSummary()).hasSize(103);
             softly.assertThat(recentArticle.getContentsSummary()).endsWith("...");
         });
@@ -147,8 +153,8 @@ class RecentArticleServiceTest {
         String content2 = EmailContentExtractor.extractContents(msg2);
 
         // when
-        recentArticleService.save(msg1, content1, memberId, newsletterId);
-        recentArticleService.save(msg2, content2, memberId, newsletterId);
+        recentArticleService.save(1L, msg1, content1, memberId, newsletterId);
+        recentArticleService.save(2L, msg2, content2, memberId, newsletterId);
 
         // then
         assertSoftly(softly -> {
@@ -156,6 +162,8 @@ class RecentArticleServiceTest {
             softly.assertThat(all).hasSize(2);
             softly.assertThat(all).extracting(RecentArticle::getTitle)
                     .containsExactly("첫 번째 제목", "두 번째 제목");
+            softly.assertThat(all).extracting(RecentArticle::getArticleId)
+                    .containsExactly(1L, 2L);
         });
     }
 }

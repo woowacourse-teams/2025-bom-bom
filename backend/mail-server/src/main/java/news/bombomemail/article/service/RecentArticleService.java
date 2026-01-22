@@ -25,18 +25,20 @@ public class RecentArticleService {
     private final RecentArticleRepository recentArticleRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void save(MimeMessage message, String contents, Long memberId, Long newsletterId)
+    public void save(Long articleId, MimeMessage message, String contents, Long memberId, Long newsletterId)
             throws MessagingException {
-        recentArticleRepository.save(buildRecentArticle(message, contents, memberId, newsletterId));
+        recentArticleRepository.save(buildRecentArticle(articleId, message, contents, memberId, newsletterId));
     }
 
     private RecentArticle buildRecentArticle(
+            Long articleId,
             MimeMessage message,
             String contents,
             Long memberId,
             Long newsletterId
     ) throws MessagingException {
         return RecentArticle.builder()
+                .articleId(articleId)
                 .title(message.getSubject())
                 .contents(contents)
                 .contentsText(htmlTagCleaner.clean(contents))

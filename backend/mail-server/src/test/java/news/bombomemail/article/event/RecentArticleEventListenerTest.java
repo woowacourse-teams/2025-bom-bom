@@ -62,6 +62,7 @@ class RecentArticleEventListenerTest {
             List<RecentArticle> all = recentArticleRepository.findAll();
             softly.assertThat(all).hasSize(1);
             RecentArticle recentArticle = all.get(0);
+            softly.assertThat(recentArticle.getArticleId()).isEqualTo(articleId);
             softly.assertThat(recentArticle.getTitle()).isEqualTo("테스트 이메일 제목");
             softly.assertThat(recentArticle.getContents()).isEqualTo(contents);
             softly.assertThat(recentArticle.getMemberId()).isEqualTo(memberId);
@@ -103,6 +104,8 @@ class RecentArticleEventListenerTest {
             softly.assertThat(all).hasSize(2);
             softly.assertThat(all).extracting(RecentArticle::getTitle)
                     .containsExactly("첫 번째 제목", "두 번째 제목");
+            softly.assertThat(all).extracting(RecentArticle::getArticleId)
+                    .containsExactly(1L, 2L);
         });
     }
 }

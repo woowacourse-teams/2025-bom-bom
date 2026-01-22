@@ -59,6 +59,15 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 	""", nativeQuery = true)
 	List<RankerInfo> findTopRankers(@Param("maxRank") long maxRank);
 
+	@Query(value = """
+		SELECT mr.member_id
+		FROM monthly_reading_snapshot mr
+		WHERE mr.rank_order IS NOT NULL
+		ORDER BY mr.rank_order ASC
+		LIMIT :limit
+	""", nativeQuery = true)
+	List<Long> findTopRankerMemberIds(@Param("limit") int limit);
+
   @Modifying(clearAutomatically = true, flushAutomatically = true)
   @Query(value = """
     UPDATE monthly_reading_snapshot mrs

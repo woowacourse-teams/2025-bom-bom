@@ -812,11 +812,14 @@ class ArticleServiceTest {
         // given
         Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
         LocalDateTime now = LocalDateTime.now();
+        Article article = TestFixture.createArticle("최근 아티클 검색 테스트", member.getId(), targetNewsletter.getId(), now);
+        articleRepository.save(article);
         RecentArticle recentArticle = TestFixture.createRecentArticle(
                 "최근 아티클 검색 테스트",
                 member.getId(),
                 targetNewsletter.getId(),
-                now
+                now,
+                article.getId()
         );
         recentArticleRepository.save(recentArticle);
 
@@ -840,19 +843,22 @@ class ArticleServiceTest {
         Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
         LocalDateTime now = LocalDateTime.now();
 
-        // recent_article 테이블에 최근 데이터 저장
-        RecentArticle recentArticle = TestFixture.createRecentArticle(
-                "통합 검색 테스트",
-                member.getId(),
-                targetNewsletter.getId(),
-                now
-        );
-        recentArticleRepository.save(recentArticle);
-
         // article 테이블에 5일 이전 데이터 저장
         LocalDateTime sixDaysAgo = now.minusDays(6);
         Article article = TestFixture.createArticle("통합 검색 테스트", member.getId(), targetNewsletter.getId(), sixDaysAgo);
         articleRepository.save(article);
+
+        // recent_article 테이블에 최근 데이터 저장
+        Article recentArticleSource = TestFixture.createArticle("통합 검색 테스트", member.getId(), targetNewsletter.getId(), now);
+        articleRepository.save(recentArticleSource);
+        RecentArticle recentArticle = TestFixture.createRecentArticle(
+                "통합 검색 테스트",
+                member.getId(),
+                targetNewsletter.getId(),
+                now,
+                recentArticleSource.getId()
+        );
+        recentArticleRepository.save(recentArticle);
 
         // when
         List<ArticleCountPerNewsletterResponse> result = articleRepository.countPerNewsletter(member.getId(), "통합");

@@ -264,7 +264,13 @@ public final class TestFixture {
      */
     public static RecentArticle createRecentArticle(String title, Long memberId, Long newsletterId,
                                                     LocalDateTime arrivedTime) {
+        return createRecentArticle(title, memberId, newsletterId, arrivedTime, memberId);
+    }
+
+    public static RecentArticle createRecentArticle(String title, Long memberId, Long newsletterId,
+                                                    LocalDateTime arrivedTime, Long articleId) {
         return RecentArticle.builder()
+                .articleId(articleId)
                 .title(title)
                 .contents("<h1>" + title + "</h1>")
                 .contentsText(title)

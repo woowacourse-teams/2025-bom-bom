@@ -27,6 +27,8 @@ import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
+import me.bombom.api.v1.badge.domain.BadgeGrade;
+import me.bombom.api.v1.badge.service.BadgeService;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
@@ -56,6 +58,7 @@ public class ReadingService {
     private final YearlyReadingRepository yearlyReadingRepository;
 
     private final MonthlyRankingScheduleProperties scheduleProps;
+    private final BadgeService badgeService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void initializeReadingInformation(Long memberId) {
@@ -102,7 +105,8 @@ public class ReadingService {
 
     @Transactional
     public void migrateMonthlyCountToYearlyAndReset() {
-        int targetYear = LocalDate.now().minusMonths(LAST_MONTH_OFFSET).getYear();
+        LocalDate lastMonth = LocalDate.now().minusMonths(LAST_MONTH_OFFSET);
+        int targetYear = lastMonth.getYear();
         try {
             // 1. 데이터가 없으면 바로 realtime 초기화
             long snapshotCount = monthlyReadingSnapshotRepository.count();
@@ -111,7 +115,11 @@ public class ReadingService {
                 return;
             }
 
-            // 2. Stream으로 메모리 효율적 처리
+            // 2. 초기화 전에 랭킹 뱃지 발급
+            List<Long> topRankers = monthlyReadingSnapshotRepository.findTopRankerMemberIds(BadgeGrade.MAX_RANKING_COUNT);
+            badgeService.issueRankingBadges(topRankers, lastMonth);
+
+            // 3. Stream으로 메모리 효율적 처리
             // forEach는 side effect가 있지만, 트랜잭션 내에서 DB 업데이트가 목적이므로 적절함
             monthlyReadingSnapshotRepository.findAll()
                 .stream()

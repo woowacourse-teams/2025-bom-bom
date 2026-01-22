@@ -25,7 +25,13 @@ public class RecentArticleService {
     private final RecentArticleRepository recentArticleRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void save(Long articleId, MimeMessage message, String contents, Long memberId, Long newsletterId)
+    public void save(
+            Long articleId,
+            MimeMessage message,
+            String contents,
+            Long memberId,
+            Long newsletterId
+    )
             throws MessagingException {
         recentArticleRepository.save(buildRecentArticle(articleId, message, contents, memberId, newsletterId));
     }

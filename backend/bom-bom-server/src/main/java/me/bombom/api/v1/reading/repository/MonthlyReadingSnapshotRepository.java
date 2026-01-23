@@ -3,8 +3,8 @@ package me.bombom.api.v1.reading.repository;
 import java.util.List;
 import java.util.Optional;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
+import me.bombom.api.v1.reading.dto.MonthlyReadingRankFlat;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
-import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,14 +18,36 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 		SELECT
 			m.nickname AS nickname,
 			mr.rank_order AS `rank`,
-			mr.current_count AS monthlyReadCount
+			mr.current_count AS monthlyReadCount,
+			rb.badge_grade AS rankingBadgeGrade,
+			rb.period_year AS rankingBadgeYear,
+			rb.period_month AS rankingBadgeMonth,
+			cb_latest.badge_grade AS challengeBadgeGrade,
+			cb_latest.challenge_name AS challengeBadgeName,
+			cb_latest.challenge_generation AS challengeBadgeGeneration
 		FROM monthly_reading_snapshot mr
 		JOIN member m ON mr.member_id = m.id
+		LEFT JOIN badge rb ON rb.member_id = mr.member_id
+			AND rb.badge_category = 'RANKING'
+			AND rb.period_year = :lastMonthYear
+			AND rb.period_month = :lastMonthValue
+		LEFT JOIN LATERAL (
+			SELECT cb.*
+			FROM badge cb
+			WHERE cb.member_id = mr.member_id
+				AND cb.badge_category = 'CHALLENGE'
+			ORDER BY cb.created_at DESC
+			LIMIT 1
+		) cb_latest ON true
 		WHERE mr.rank_order IS NOT NULL
 		ORDER BY mr.rank_order ASC, m.nickname ASC
 		LIMIT :limit
 	""", nativeQuery = true)
-	List<MonthlyReadingRankResponse> findMonthlyRanking(@Param("limit") int limit);
+	List<MonthlyReadingRankFlat> findMonthlyRanking(
+			@Param("limit") int limit,
+			@Param("lastMonthYear") Integer lastMonthYear,
+			@Param("lastMonthValue") Integer lastMonthValue
+	);
 
 	@Query(value = """
 		SELECT mr.member_id

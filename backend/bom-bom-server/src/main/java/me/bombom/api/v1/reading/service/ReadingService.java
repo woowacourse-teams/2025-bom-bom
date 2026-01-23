@@ -21,6 +21,7 @@ import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
+import me.bombom.api.v1.reading.dto.MonthlyReadingRankFlat;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingCountResponse;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
@@ -28,6 +29,7 @@ import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
+import me.bombom.api.v1.badge.dto.response.BadgesResponse;
 import me.bombom.api.v1.badge.service.BadgeService;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
@@ -215,7 +217,21 @@ public class ReadingService {
     }
 
     public MonthlyReadingRankingResponse getMonthlyReadingRank(int limit) {
-        List<MonthlyReadingRankResponse> monthlyRanking = monthlyReadingSnapshotRepository.findMonthlyRanking(limit);
+        LocalDate lastMonth = LocalDate.now().minusMonths(LAST_MONTH_OFFSET);
+        int lastMonthYear = lastMonth.getYear();
+        int lastMonthValue = lastMonth.getMonthValue();
+
+        List<MonthlyReadingRankFlat> flatResults = monthlyReadingSnapshotRepository.findMonthlyRanking(limit, lastMonthYear, lastMonthValue);
+
+        List<MonthlyReadingRankResponse> monthlyRanking = flatResults.stream()
+                .map(flat -> MonthlyReadingRankResponse.of(
+                        flat.nickname(),
+                        flat.rank(),
+                        flat.monthlyReadCount(),
+                        BadgesResponse.from(flat)
+                ))
+                .toList();
+
         LocalDateTime rankingUpdatedAt = monthlyReadingSnapshotMetaService.getSnapshotAt();
         ZonedDateTime serverNow = ZonedDateTime.now(scheduleProps.zoneId());
         ZonedDateTime nextRefreshAt = scheduleProps.cronExpression().next(serverNow);

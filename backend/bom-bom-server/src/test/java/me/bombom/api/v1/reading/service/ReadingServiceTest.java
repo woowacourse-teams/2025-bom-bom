@@ -11,6 +11,7 @@ import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.badge.domain.Badge;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
+import me.bombom.api.v1.badge.domain.ChallengeBadge;
 import me.bombom.api.v1.badge.domain.RankingBadge;
 import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.member.domain.Member;
@@ -374,6 +375,142 @@ class ReadingServiceTest {
 
         // then
         assertThat(badgeRepository.count()).isZero();
+    }
+
+    @Test
+    void 월간_랭킹_조회_시_이전달_랭킹_뱃지가_표시된다() {
+        // given
+        monthlyReadingSnapshotRepository.deleteAllInBatch();
+        
+        Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
+        Member member2 = memberRepository.save(TestFixture.createUniqueMember("member2", "provider2"));
+        
+        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
+                .memberId(member1.getId())
+                .currentCount(30)
+                .rankOrder(1)
+                .nextRankDifference(0)
+                .build());
+        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
+                .memberId(member2.getId())
+                .currentCount(20)
+                .rankOrder(2)
+                .nextRankDifference(10)
+                .build());
+        
+        LocalDate lastMonth = LocalDate.now().minusMonths(1);
+        RankingBadge rankingBadge = RankingBadge.create(member1.getId(), BadgeGrade.GOLD, lastMonth);
+        badgeRepository.save(rankingBadge);
+        
+        // when
+        MonthlyReadingRankingResponse result = readingService.getMonthlyReadingRank(10);
+        
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.data()).hasSize(2);
+            softly.assertThat(result.data().get(0).badges()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().ranking()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().ranking().grade()).isEqualTo(BadgeGrade.GOLD);
+            softly.assertThat(result.data().get(0).badges().ranking().year()).isEqualTo(lastMonth.getYear());
+            softly.assertThat(result.data().get(0).badges().ranking().month()).isEqualTo(lastMonth.getMonthValue());
+            softly.assertThat(result.data().get(1).badges()).isNull();
+        });
+    }
+
+    @Test
+    void 월간_랭킹_조회_시_가장_최근_챌린지_뱃지가_표시된다() {
+        // given
+        monthlyReadingSnapshotRepository.deleteAllInBatch();
+        
+        Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
+        
+        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
+                .memberId(member1.getId())
+                .currentCount(30)
+                .rankOrder(1)
+                .nextRankDifference(0)
+                .build());
+        
+        // 오래된 챌린지 뱃지
+        ChallengeBadge oldBadge = ChallengeBadge.create(member1.getId(), BadgeGrade.BRONZE, 1L, "오래된 챌린지", 1);
+        badgeRepository.save(oldBadge);
+        badgeRepository.flush();
+        
+        // 최근 챌린지 뱃지
+        ChallengeBadge recentBadge = ChallengeBadge.create(member1.getId(), BadgeGrade.GOLD, 2L, "최근 챌린지", 2);
+        badgeRepository.save(recentBadge);
+        
+        // when
+        MonthlyReadingRankingResponse result = readingService.getMonthlyReadingRank(10);
+        
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.data()).hasSize(1);
+            softly.assertThat(result.data().get(0).badges()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().challenge()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().challenge().grade()).isEqualTo(BadgeGrade.GOLD);
+            softly.assertThat(result.data().get(0).badges().challenge().name()).isEqualTo("최근 챌린지");
+            softly.assertThat(result.data().get(0).badges().challenge().generation()).isEqualTo(2);
+        });
+    }
+
+    @Test
+    void 월간_랭킹_조회_시_랭킹_뱃지와_챌린지_뱃지가_모두_표시된다() {
+        // given
+        monthlyReadingSnapshotRepository.deleteAllInBatch();
+        
+        Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
+        
+        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
+                .memberId(member1.getId())
+                .currentCount(30)
+                .rankOrder(1)
+                .nextRankDifference(0)
+                .build());
+        
+        LocalDate lastMonth = LocalDate.now().minusMonths(1);
+        RankingBadge rankingBadge = RankingBadge.create(member1.getId(), BadgeGrade.GOLD, lastMonth);
+        badgeRepository.save(rankingBadge);
+        
+        ChallengeBadge challengeBadge = ChallengeBadge.create(member1.getId(), BadgeGrade.SILVER, 1L, "테스트 챌린지", 1);
+        badgeRepository.save(challengeBadge);
+        
+        // when
+        MonthlyReadingRankingResponse result = readingService.getMonthlyReadingRank(10);
+        
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.data()).hasSize(1);
+            softly.assertThat(result.data().get(0).badges()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().ranking()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().challenge()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().ranking().grade()).isEqualTo(BadgeGrade.GOLD);
+            softly.assertThat(result.data().get(0).badges().challenge().grade()).isEqualTo(BadgeGrade.SILVER);
+        });
+    }
+
+    @Test
+    void 월간_랭킹_조회_시_뱃지가_없으면_null로_표시된다() {
+        // given
+        monthlyReadingSnapshotRepository.deleteAllInBatch();
+        
+        Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
+        
+        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
+                .memberId(member1.getId())
+                .currentCount(30)
+                .rankOrder(1)
+                .nextRankDifference(0)
+                .build());
+        
+        // when
+        MonthlyReadingRankingResponse result = readingService.getMonthlyReadingRank(10);
+        
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.data()).hasSize(1);
+            softly.assertThat(result.data().get(0).badges()).isNull();
+        });
     }
 
     private RankingBadge findRankingBadge(List<Badge> badges, Long memberId, BadgeGrade grade) {

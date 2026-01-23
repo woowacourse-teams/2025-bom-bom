@@ -4,21 +4,29 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import org.junit.jupiter.api.Disabled;
+import me.bombom.api.v1.subscribe.config.SubscribePatternProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@Disabled
-@ExtendWith(OutputCaptureExtension.class)
+@Import(UnsubscribeAgent.class)
+@TestPropertySource("classpath:unsubscribe-pattern.yml")
+@EnableConfigurationProperties(SubscribePatternProperties.class)
+@ExtendWith({OutputCaptureExtension.class, SpringExtension.class})
 class UnsubscribeAgentTest {
 
     // newsletterId는 로그를 위한 것이라 무시해도 됨
     private static final long MOCK_NEWSLETTER_ID = 1L;
 
-    private final UnsubscribeAgent agent = new UnsubscribeAgent();
+    @Autowired
+    private UnsubscribeAgent agent;
 
     private String createDataUrl(String html) {
         // charset=utf-8 명시가 중요함 (한글 깨짐 방지)

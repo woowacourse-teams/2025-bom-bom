@@ -2,9 +2,9 @@ package me.bombom.api.v1.challenge.service;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
+import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuide;
@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ChallengeDailyGuideService {
 
-    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
+    private final Clock clock;
 
     private final ChallengeRepository challengeRepository;
     private final ChallengeDailyGuideRepository challengeDailyGuideRepository;
@@ -48,7 +48,7 @@ public class ChallengeDailyGuideService {
 
         validateChallengeParticipant(challengeId, memberId);
 
-        LocalDate today = LocalDate.now(SEOUL_ZONE);
+        LocalDate today = LocalDate.now(clock);
         if (today.isBefore(challenge.getStartDate()) || today.isAfter(challenge.getEndDate())) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")

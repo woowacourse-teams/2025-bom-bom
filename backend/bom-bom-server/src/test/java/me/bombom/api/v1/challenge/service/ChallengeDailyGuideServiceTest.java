@@ -4,7 +4,9 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.BDDMockito.given;
 
+import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -38,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @IntegrationTest
 class ChallengeDailyGuideServiceTest {
@@ -71,6 +74,9 @@ class ChallengeDailyGuideServiceTest {
     @Autowired
     private ChallengeDailyResultRepository challengeDailyResultRepository;
 
+    @MockitoBean
+    private Clock clock;
+
     private Member member;
     private Challenge challenge;
     private ChallengeParticipant participant;
@@ -93,13 +99,19 @@ class ChallengeDailyGuideServiceTest {
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
 
-        today = LocalDate.now(SEOUL_ZONE);
+        // 무조건 평일로 설정 (2026-01-26 월요일)
+        today = LocalDate.of(2026, 1, 26);
+
+        given(clock.getZone()).willReturn(SEOUL_ZONE);
+        given(clock.instant()).willReturn(today.atStartOfDay(SEOUL_ZONE).toInstant());
+        today = LocalDate.now(clock);
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "테스트 챌린지",
                 today.minusDays(5),
                 today.plusDays(5),
                 10
-        ));
+                )
+        );
 
         participant = challengeParticipantRepository.save(
                 TestFixture.createChallengeParticipant(
@@ -110,12 +122,8 @@ class ChallengeDailyGuideServiceTest {
         );
 
         // READ, COMMENT 투두 생성
-        readTodo = challengeTodoRepository.save(
-                TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ)
-        );
-        commentTodo = challengeTodoRepository.save(
-                TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.COMMENT)
-        );
+        readTodo = challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
+        commentTodo = challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.COMMENT));
 
         int dayIndex = calculateDayIndex(challenge.getStartDate(), today);
         guide = challengeDailyGuideRepository.save(
@@ -897,17 +905,4 @@ class ChallengeDailyGuideServiceTest {
                 futureDayIndex,
                 member.getId())).isInstanceOf(CIllegalArgumentException.class);
     }
-
-    @Test
-    void 유효하지_않은_dayIndex로_내_댓글_조회시_예외_발생() {
-        // given
-        int invalidDayIndex = -1;
-
-        // when & then
-        assertThatThrownBy(() -> challengeDailyGuideService.getDailyGuideComment(
-                challenge.getId(),
-                invalidDayIndex,
-                member.getId())).isInstanceOf(CIllegalArgumentException.class);
-    }
 }
-

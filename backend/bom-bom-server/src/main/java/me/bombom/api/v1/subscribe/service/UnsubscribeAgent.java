@@ -12,41 +12,27 @@ import com.microsoft.playwright.options.AriaRole;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.subscribe.config.SubscribePatternProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 @Transactional(propagation = Propagation.NEVER)
 public class UnsubscribeAgent {
 
     private static final String ALL_URLS_PATTERN = "**/*";
     private static final Set<String> BLOCKED_RESOURCE_TYPES = Set.of("image", "font", "media");
-    private static final List<String> AD_DOMAINS = List.of("google", "doubleclick", "adservice");
 
-    private static final Pattern UNSUBSCRIBE_PATTERN = Pattern.compile(
-            "unsubscribe|구독.?취소|수신.?거부|cancel|confirm|yes",
-            Pattern.CASE_INSENSITIVE
-    );
-    private static final Pattern SUCCESS_PATTERN = Pattern.compile(
-            "success|unsubscribed|canceled|cancelled|no.?longer.?be.?sent.?to|취소.?완료|처리.?완료|해지.?완료|거부.?완료|취소.?되었습니다",
-            Pattern.CASE_INSENSITIVE
-    );
-    private static final Pattern ALREADY_UNSUBSCRIBED_PATTERN = Pattern.compile(
-            "구독.?중인.?이메일.?주소가.?아닙니다|이미.?구독.?취소|이미.?취소|already.?unsubscribed|not.?subscribed|구독.?취소.?되었습니다",
-            Pattern.CASE_INSENSITIVE
-    );
-    private static final Pattern ERROR_PATTERN = Pattern.compile(
-            "error|오류|실패|failed|invalid|잘못|문제",
-            Pattern.CASE_INSENSITIVE
-    );
+    private final SubscribePatternProperties properties;
 
     private static final long UNSUBSCRIBE_TIMEOUT_MS = 10000;
     private static final long POLLING_INTERVAL_MS = 500;
-
 
     public boolean unsubscribe(String url, Long newsletterId) {
         AtomicBoolean hasError = new AtomicBoolean(false);
@@ -54,8 +40,7 @@ public class UnsubscribeAgent {
         AtomicBoolean isReady = new AtomicBoolean(false);
 
         try (Playwright playwright = Playwright.create();
-                Browser browser = playwright.chromium().launch(createLaunchOptions())
-        ) {
+                Browser browser = playwright.chromium().launch(createLaunchOptions())) {
             BrowserContext context = getBrowserContext(browser);
             Page page = context.newPage();
 
@@ -114,7 +99,8 @@ public class UnsubscribeAgent {
     private void setupDialogHandler(Page page, AtomicBoolean hasError, Long newsletterId) {
         page.onDialog(dialog -> {
             String message = dialog.message();
-            if (ERROR_PATTERN.matcher(message).find()) {
+            Matcher matcher = properties.getErrorPattern().matcher(message);
+            if (matcher.find()) {
                 log.error("다이얼로그에서 에러 감지 - newsletterId: {}, 메시지: {}", newsletterId, message);
                 hasError.set(true);
             }
@@ -148,7 +134,7 @@ public class UnsubscribeAgent {
 
             if (status >= 400 && status < 500 && url.contains("unsubscribe")) {
                 String body = response.text();
-                if (ALREADY_UNSUBSCRIBED_PATTERN.matcher(body).find()) {
+                if (properties.getAlreadyUnsubscribedPattern().matcher(body).find()) {
                     log.info("이미 구독 취소됨 (HTTP {}) - newsletterId: {}", status, newsletterId);
                     isProcessed.set(true);
                 } else {
@@ -160,9 +146,9 @@ public class UnsubscribeAgent {
     }
 
     private void waitForContent(Page page) {
-        Locator successLocator = page.getByText(SUCCESS_PATTERN);
-        Locator buttonLocator = page.getByRole(AriaRole.BUTTON, new GetByRoleOptions().setName(UNSUBSCRIBE_PATTERN));
-        Locator linkLocator = page.getByRole(AriaRole.LINK, new GetByRoleOptions().setName(UNSUBSCRIBE_PATTERN));
+        Locator successLocator = page.getByText(properties.getSuccessPattern());
+        Locator buttonLocator = page.getByRole(AriaRole.BUTTON, new GetByRoleOptions().setName(properties.getUnsubscribePattern()));
+        Locator linkLocator = page.getByRole(AriaRole.LINK, new GetByRoleOptions().setName(properties.getUnsubscribePattern()));
 
         try {
             Locator combined = successLocator.or(buttonLocator).or(linkLocator);
@@ -174,7 +160,7 @@ public class UnsubscribeAgent {
 
     private boolean isUnsubscribeSuccess(Page page) {
         try {
-            return page.getByText(SUCCESS_PATTERN).count() > 0;
+            return page.getByText(properties.getSuccessPattern()).count() > 0;
         } catch (Exception e) {
             return false;
         }
@@ -203,7 +189,7 @@ public class UnsubscribeAgent {
 
     private Locator findUnsubscribeButton(Page page) {
         for (AriaRole role : List.of(AriaRole.BUTTON, AriaRole.LINK)) {
-            Locator button = page.getByRole(role, new GetByRoleOptions().setName(UNSUBSCRIBE_PATTERN));
+            Locator button = page.getByRole(role, new GetByRoleOptions().setName(properties.getUnsubscribePattern()));
             if (button.isVisible()) {
                 return button;
             }
@@ -245,6 +231,7 @@ public class UnsubscribeAgent {
     }
 
     private boolean isAdUrl(String url) {
-        return AD_DOMAINS.stream().anyMatch(url::contains);
+        return properties.getAdDomains().stream()
+                .anyMatch(url::contains);
     }
 }

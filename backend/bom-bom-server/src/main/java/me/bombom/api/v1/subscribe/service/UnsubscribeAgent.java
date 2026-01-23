@@ -16,12 +16,12 @@ import java.util.regex.Matcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.subscribe.config.SubscribePatternProperties;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
 @Transactional(propagation = Propagation.NEVER)
 public class UnsubscribeAgent {

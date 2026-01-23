@@ -97,7 +97,6 @@ public class ChallengeDailyGuideService {
         return challengeDailyGuideCommentRepository.findByGuideId(guide.getId(), pageable);
     }
 
-
     @Transactional
     public void createDailyGuideComment(Long challengeId, int dayIndex, Long memberId,
                                         DailyGuideCommentRequest request, LocalDate today) {
@@ -196,23 +195,36 @@ public class ChallengeDailyGuideService {
     }
 
     private void validateDayIndex(Long challengeId, int dayIndex, Challenge challenge) {
-        if (dayIndex != 0 && (dayIndex < 1 || dayIndex > calculateDayIndex(challenge.getStartDate(), LocalDate.now(SEOUL_ZONE)))) {
+        int maxAllowedDayIndex = calculateMaxAllowedDayIndex(challenge.getStartDate(), LocalDate.now(clock));
+        if (dayIndex > maxAllowedDayIndex) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeDailyGuide")
                     .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
                     .addContext("dayIndex", dayIndex)
+                    .addContext("maxAllowedDayIndex", maxAllowedDayIndex)
                     .addContext("reason", "유효하지 않은 일차 인덱스입니다.");
         }
     }
 
     private int calculateDayIndex(LocalDate startDate, LocalDate today) {
-        DayOfWeek dayOfWeek = today.getDayOfWeek();
-        boolean isWeekend = dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
-
-        if (isWeekend) {
+        if (isWeekend(today)) {
             return 0;
         }
         return (int) DAYS.between(startDate, today) + 1;
+    }
+
+    private int calculateMaxAllowedDayIndex(LocalDate startDate, LocalDate today) {
+        LocalDate targetDate = today;
+        // 오늘이 주말이면 직전 금요일까지의 컨텐츠는 볼 수 있어야 함
+        while (isWeekend(targetDate) && !targetDate.isBefore(startDate)) {
+            targetDate = targetDate.minusDays(1);
+        }
+        return (int) DAYS.between(startDate, targetDate) + 1;
+    }
+
+    private boolean isWeekend(LocalDate date) {
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
     }
 
     private MyCommentResponse createMyCommentResponse(TodayDailyGuideRow row) {
@@ -220,7 +232,6 @@ public class ChallengeDailyGuideService {
         return new MyCommentResponse(
                 exists,
                 exists ? row.getMyCommentContent() : null,
-                exists ? row.getMyCommentCreatedAt() : null
-        );
+                exists ? row.getMyCommentCreatedAt() : null);
     }
 }

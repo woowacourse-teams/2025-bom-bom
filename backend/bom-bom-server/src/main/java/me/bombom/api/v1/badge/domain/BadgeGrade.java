@@ -1,6 +1,7 @@
 package me.bombom.api.v1.badge.domain;
 
 import java.util.Arrays;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -16,10 +17,9 @@ public enum BadgeGrade {
 
     private final long rankOrder;
 
-    public static BadgeGrade fromRankOrder(long rankOrder) {
+    public static Optional<BadgeGrade> fromRankOrder(long rankOrder) {
         return Arrays.stream(values())
                 .filter(grade -> grade.rankOrder == rankOrder)
-                .findFirst()
-                .orElse(null);
+                .findFirst();
     }
 }

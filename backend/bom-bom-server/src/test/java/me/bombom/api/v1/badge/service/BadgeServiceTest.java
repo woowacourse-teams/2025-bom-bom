@@ -6,6 +6,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import me.bombom.api.v1.badge.domain.Badge;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.badge.domain.ChallengeBadge;
@@ -88,22 +89,22 @@ class BadgeServiceTest {
         List<Badge> badges = badgeRepository.findAll();
         assertThat(badges).hasSize(3);
 
-        RankingBadge goldBadge = findRankingBadge(badges, member1.getId(), BadgeGrade.GOLD);
-        RankingBadge silverBadge = findRankingBadge(badges, member2.getId(), BadgeGrade.SILVER);
-        RankingBadge bronzeBadge = findRankingBadge(badges, member3.getId(), BadgeGrade.BRONZE);
+        Optional<RankingBadge> goldBadge = findRankingBadge(badges, member1.getId(), BadgeGrade.GOLD);
+        Optional<RankingBadge> silverBadge = findRankingBadge(badges, member2.getId(), BadgeGrade.SILVER);
+        Optional<RankingBadge> bronzeBadge = findRankingBadge(badges, member3.getId(), BadgeGrade.BRONZE);
 
         assertSoftly(softly -> {
-            softly.assertThat(goldBadge).isNotNull();
-            softly.assertThat(goldBadge.getPeriodYear()).isEqualTo(testPeriod.getYear());
-            softly.assertThat(goldBadge.getPeriodMonth()).isEqualTo(testPeriod.getMonthValue());
+            softly.assertThat(goldBadge).isPresent();
+            softly.assertThat(goldBadge.get().getPeriodYear()).isEqualTo(testPeriod.getYear());
+            softly.assertThat(goldBadge.get().getPeriodMonth()).isEqualTo(testPeriod.getMonthValue());
 
-            softly.assertThat(silverBadge).isNotNull();
-            softly.assertThat(silverBadge.getPeriodYear()).isEqualTo(testPeriod.getYear());
-            softly.assertThat(silverBadge.getPeriodMonth()).isEqualTo(testPeriod.getMonthValue());
+            softly.assertThat(silverBadge).isPresent();
+            softly.assertThat(silverBadge.get().getPeriodYear()).isEqualTo(testPeriod.getYear());
+            softly.assertThat(silverBadge.get().getPeriodMonth()).isEqualTo(testPeriod.getMonthValue());
 
-            softly.assertThat(bronzeBadge).isNotNull();
-            softly.assertThat(bronzeBadge.getPeriodYear()).isEqualTo(testPeriod.getYear());
-            softly.assertThat(bronzeBadge.getPeriodMonth()).isEqualTo(testPeriod.getMonthValue());
+            softly.assertThat(bronzeBadge).isPresent();
+            softly.assertThat(bronzeBadge.get().getPeriodYear()).isEqualTo(testPeriod.getYear());
+            softly.assertThat(bronzeBadge.get().getPeriodMonth()).isEqualTo(testPeriod.getMonthValue());
         });
     }
 
@@ -111,8 +112,8 @@ class BadgeServiceTest {
     void 상위_2명만_있을_때_금_은_메달만_발급한다() {
         // given
         List<RankerInfo> topRankers = List.of(
-                new RankerInfo(member1.getId(), 1),
-                new RankerInfo(member2.getId(), 2)
+            new RankerInfo(member1.getId(), 1),
+            new RankerInfo(member2.getId(), 2)
         );
 
         // when
@@ -122,12 +123,12 @@ class BadgeServiceTest {
         List<Badge> badges = badgeRepository.findAll();
         assertThat(badges).hasSize(2);
 
-        RankingBadge goldBadge = findRankingBadge(badges, member1.getId(), BadgeGrade.GOLD);
-        RankingBadge silverBadge = findRankingBadge(badges, member2.getId(), BadgeGrade.SILVER);
+        Optional<RankingBadge> goldBadge = findRankingBadge(badges, member1.getId(), BadgeGrade.GOLD);
+        Optional<RankingBadge> silverBadge = findRankingBadge(badges, member2.getId(), BadgeGrade.SILVER);
 
         assertSoftly(softly -> {
-            softly.assertThat(goldBadge).isNotNull();
-            softly.assertThat(silverBadge).isNotNull();
+            softly.assertThat(goldBadge).isPresent();
+            softly.assertThat(silverBadge).isPresent();
             softly.assertThat(badges.stream()
                     .filter(b -> b instanceof RankingBadge)
                     .map(b -> (RankingBadge) b)
@@ -147,15 +148,16 @@ class BadgeServiceTest {
         List<Badge> badges = badgeRepository.findAll();
         assertThat(badges).hasSize(1);
 
-        RankingBadge goldBadge = findRankingBadge(badges, member1.getId(), BadgeGrade.GOLD);
+        Optional<RankingBadge> goldBadge = findRankingBadge(badges, member1.getId(), BadgeGrade.GOLD);
 
         assertSoftly(softly -> {
-            softly.assertThat(goldBadge).isNotNull();
-            softly.assertThat(goldBadge.getGrade()).isEqualTo(BadgeGrade.GOLD);
+            softly.assertThat(goldBadge).isPresent();
+            softly.assertThat(goldBadge.get().getGrade()).isEqualTo(BadgeGrade.GOLD);
             softly.assertThat(badges.stream()
                     .filter(b -> b instanceof RankingBadge)
                     .map(b -> (RankingBadge) b)
-                    .anyMatch(b -> b.getGrade() == BadgeGrade.SILVER || b.getGrade() == BadgeGrade.BRONZE))
+                    .anyMatch(
+                        b -> b.getGrade() == BadgeGrade.SILVER || b.getGrade() == BadgeGrade.BRONZE))
                     .isFalse();
         });
     }
@@ -165,10 +167,10 @@ class BadgeServiceTest {
         // given
         Member member4 = memberRepository.save(TestFixture.createUniqueMember("member4", "provider4"));
         List<RankerInfo> topRankers = List.of(
-                new RankerInfo(member1.getId(), 1),
-                new RankerInfo(member2.getId(), 1),
-                new RankerInfo(member3.getId(), 1),
-                new RankerInfo(member4.getId(), 2)
+            new RankerInfo(member1.getId(), 1),
+            new RankerInfo(member2.getId(), 1),
+            new RankerInfo(member3.getId(), 1),
+            new RankerInfo(member4.getId(), 2)
         );
 
         // when
@@ -179,30 +181,34 @@ class BadgeServiceTest {
         assertThat(badges).hasSize(4);
 
         assertSoftly(softly -> {
-            softly.assertThat(findRankingBadge(badges, member1.getId(), BadgeGrade.GOLD)).isNotNull();
-            softly.assertThat(findRankingBadge(badges, member2.getId(), BadgeGrade.GOLD)).isNotNull();
-            softly.assertThat(findRankingBadge(badges, member3.getId(), BadgeGrade.GOLD)).isNotNull();
-            softly.assertThat(findRankingBadge(badges, member4.getId(), BadgeGrade.SILVER)).isNotNull();
+            softly.assertThat(
+                    findRankingBadge(badges, member1.getId(), BadgeGrade.GOLD)).isPresent();
+            softly.assertThat(
+                    findRankingBadge(badges, member2.getId(), BadgeGrade.GOLD)).isPresent();
+            softly.assertThat(
+                    findRankingBadge(badges, member3.getId(), BadgeGrade.GOLD)).isPresent();
+            softly.assertThat(
+                    findRankingBadge(badges, member4.getId(), BadgeGrade.SILVER)).isPresent();
         });
     }
 
-    private RankingBadge findRankingBadge(List<Badge> badges, Long memberId, BadgeGrade grade) {
+    private Optional<RankingBadge> findRankingBadge(List<Badge> badges, Long memberId, BadgeGrade grade) {
         return badges.stream()
-                .filter(b -> b instanceof RankingBadge)
-                .map(b -> (RankingBadge) b)
-                .filter(b -> b.getMemberId().equals(memberId) && b.getGrade() == grade)
-                .findFirst()
-                .orElse(null);
+            .filter(b -> b instanceof RankingBadge)
+            .map(b -> (RankingBadge) b)
+            .filter(b -> b.getMemberId().equals(memberId) && b.getGrade() == grade)
+            .findFirst();
     }
 
     @Test
     void 챌린지_참가자_리스트가_비어있을_때_뱃지를_발급하지_않는다() {
         // given
         Challenge challenge = challengeRepository.save(TestFixture.createChallenge(
-                "Test Challenge",
-                LocalDate.now().minusDays(10),
-                LocalDate.now().minusDays(1),
-                10));
+            "Test Challenge",
+            LocalDate.now().minusDays(10),
+            LocalDate.now().minusDays(1),
+            10
+        ));
 
         // when
         badgeService.issueChallengeBadges(challenge, List.of());
@@ -215,16 +221,18 @@ class BadgeServiceTest {
     void 진행률_100퍼센트인_참가자에게_금메달을_발급한다() {
         // given
         Challenge challenge = challengeRepository.save(TestFixture.createChallenge(
-                "Test Challenge",
-                LocalDate.now().minusDays(10),
-                LocalDate.now().minusDays(1),
-                10));
+            "Test Challenge",
+            LocalDate.now().minusDays(10),
+            LocalDate.now().minusDays(1),
+            10
+        ));
         ChallengeParticipant participant = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(
-                        challenge.getId(),
-                        member1.getId(),
-                        10, // 10일 중 10일 완료 = 100%
-                        true));
+            TestFixture.createChallengeParticipant(
+                challenge.getId(),
+                member1.getId(),
+                10, // 10일 중 10일 완료 = 100%
+                true
+            ));
 
         // when
         badgeService.issueChallengeBadges(challenge, List.of(participant));
@@ -233,12 +241,14 @@ class BadgeServiceTest {
         List<Badge> badges = badgeRepository.findAll();
         assertThat(badges).hasSize(1);
 
-        ChallengeBadge badge = findChallengeBadge(badges, member1.getId(), BadgeGrade.GOLD);
+        Optional<ChallengeBadge> badge = findChallengeBadge(badges, member1.getId(),
+            BadgeGrade.GOLD);
         assertSoftly(softly -> {
-            softly.assertThat(badge).isNotNull();
-            softly.assertThat(badge.getChallengeId()).isEqualTo(challenge.getId());
-            softly.assertThat(badge.getChallengeName()).isEqualTo(challenge.getName());
-            softly.assertThat(badge.getChallengeGeneration()).isEqualTo(challenge.getGeneration());
+            softly.assertThat(badge).isPresent();
+            softly.assertThat(badge.get().getChallengeId()).isEqualTo(challenge.getId());
+            softly.assertThat(badge.get().getChallengeName()).isEqualTo(challenge.getName());
+            softly.assertThat(badge.get().getChallengeGeneration())
+                .isEqualTo(challenge.getGeneration());
         });
     }
 
@@ -246,16 +256,18 @@ class BadgeServiceTest {
     void 진행률_90퍼센트인_참가자에게_은메달을_발급한다() {
         // given
         Challenge challenge = challengeRepository.save(TestFixture.createChallenge(
-                "Test Challenge",
-                LocalDate.now().minusDays(10),
-                LocalDate.now().minusDays(1),
-                10));
+            "Test Challenge",
+            LocalDate.now().minusDays(10),
+            LocalDate.now().minusDays(1),
+            10
+        ));
         ChallengeParticipant participant = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(
-                        challenge.getId(),
-                        member1.getId(),
-                        9, // 10일 중 9일 완료 = 90%
-                        true));
+            TestFixture.createChallengeParticipant(
+                challenge.getId(),
+                member1.getId(),
+                9, // 10일 중 9일 완료 = 90%
+                true
+            ));
 
         // when
         badgeService.issueChallengeBadges(challenge, List.of(participant));
@@ -264,10 +276,11 @@ class BadgeServiceTest {
         List<Badge> badges = badgeRepository.findAll();
         assertThat(badges).hasSize(1);
 
-        ChallengeBadge badge = findChallengeBadge(badges, member1.getId(), BadgeGrade.SILVER);
+        Optional<ChallengeBadge> badge = findChallengeBadge(badges, member1.getId(),
+            BadgeGrade.SILVER);
         assertSoftly(softly -> {
-            softly.assertThat(badge).isNotNull();
-            softly.assertThat(badge.getGrade()).isEqualTo(BadgeGrade.SILVER);
+            softly.assertThat(badge).isPresent();
+            softly.assertThat(badge.get().getGrade()).isEqualTo(BadgeGrade.SILVER);
         });
     }
 
@@ -275,16 +288,18 @@ class BadgeServiceTest {
     void 진행률_80퍼센트인_참가자에게_동메달을_발급한다() {
         // given
         Challenge challenge = challengeRepository.save(TestFixture.createChallenge(
-                "Test Challenge",
-                LocalDate.now().minusDays(10),
-                LocalDate.now().minusDays(1),
-                10));
+            "Test Challenge",
+            LocalDate.now().minusDays(10),
+            LocalDate.now().minusDays(1),
+            10
+        ));
         ChallengeParticipant participant = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(
-                        challenge.getId(),
-                        member1.getId(),
-                        8, // 10일 중 8일 완료 = 80%
-                        true));
+            TestFixture.createChallengeParticipant(
+                challenge.getId(),
+                member1.getId(),
+                8, // 10일 중 8일 완료 = 80%
+                true
+            ));
 
         // when
         badgeService.issueChallengeBadges(challenge, List.of(participant));
@@ -293,10 +308,11 @@ class BadgeServiceTest {
         List<Badge> badges = badgeRepository.findAll();
         assertThat(badges).hasSize(1);
 
-        ChallengeBadge badge = findChallengeBadge(badges, member1.getId(), BadgeGrade.BRONZE);
+        Optional<ChallengeBadge> badge = findChallengeBadge(badges, member1.getId(),
+            BadgeGrade.BRONZE);
         assertSoftly(softly -> {
-            softly.assertThat(badge).isNotNull();
-            softly.assertThat(badge.getGrade()).isEqualTo(BadgeGrade.BRONZE);
+            softly.assertThat(badge).isPresent();
+            softly.assertThat(badge.get().getGrade()).isEqualTo(BadgeGrade.BRONZE);
         });
     }
 
@@ -304,16 +320,18 @@ class BadgeServiceTest {
     void 진행률_80퍼센트_미만인_참가자에게는_뱃지를_발급하지_않는다() {
         // given
         Challenge challenge = challengeRepository.save(TestFixture.createChallenge(
-                "Test Challenge",
-                LocalDate.now().minusDays(10),
-                LocalDate.now().minusDays(1),
-                10));
+            "Test Challenge",
+            LocalDate.now().minusDays(10),
+            LocalDate.now().minusDays(1),
+            10
+        ));
         ChallengeParticipant participant = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(
-                        challenge.getId(),
-                        member1.getId(),
-                        7, // 10일 중 7일 완료 = 70%
-                        true));
+            TestFixture.createChallengeParticipant(
+                challenge.getId(),
+                member1.getId(),
+                7, // 10일 중 7일 완료 = 70%
+                true
+            ));
 
         // when
         badgeService.issueChallengeBadges(challenge, List.of(participant));
@@ -326,16 +344,18 @@ class BadgeServiceTest {
     void 탈락한_참가자에게는_뱃지를_발급하지_않는다() {
         // given
         Challenge challenge = challengeRepository.save(TestFixture.createChallenge(
-                "Test Challenge",
-                LocalDate.now().minusDays(10),
-                LocalDate.now().minusDays(1),
-                10));
+            "Test Challenge",
+            LocalDate.now().minusDays(10),
+            LocalDate.now().minusDays(1),
+            10
+        ));
         ChallengeParticipant participant = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(
-                        challenge.getId(),
-                        member1.getId(),
-                        10, // 100% 완료했지만
-                        false)); // 탈락
+            TestFixture.createChallengeParticipant(
+                challenge.getId(),
+                member1.getId(),
+                10, // 100% 완료했지만
+                false
+            )); // 탈락
 
         // when
         badgeService.issueChallengeBadges(challenge, List.of(participant));
@@ -348,41 +368,48 @@ class BadgeServiceTest {
     void 여러_참가자가_각각_다른_등급의_뱃지를_받는다() {
         // given
         Challenge challenge = challengeRepository.save(TestFixture.createChallenge(
-                "Test Challenge",
-                LocalDate.now().minusDays(10),
-                LocalDate.now().minusDays(1),
-                10));
+            "Test Challenge",
+            LocalDate.now().minusDays(10),
+            LocalDate.now().minusDays(1),
+            10
+        ));
         ChallengeParticipant goldParticipant = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(
-                        challenge.getId(),
-                        member1.getId(),
-                        10, // 100% → 금메달
-                        true));
+            TestFixture.createChallengeParticipant(
+                challenge.getId(),
+                member1.getId(),
+                10, // 100% → 금메달
+                true
+            ));
         ChallengeParticipant silverParticipant = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(
-                        challenge.getId(),
-                        member2.getId(),
-                        9, // 90% → 은메달
-                        true));
+            TestFixture.createChallengeParticipant(
+                challenge.getId(),
+                member2.getId(),
+                9, // 90% → 은메달
+                true
+            ));
         ChallengeParticipant bronzeParticipant = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(
-                        challenge.getId(),
-                        member3.getId(),
-                        8, // 80% → 동메달
-                        true));
+            TestFixture.createChallengeParticipant(
+                challenge.getId(),
+                member3.getId(),
+                8, // 80% → 동메달
+                true
+            ));
 
         // when
         badgeService.issueChallengeBadges(challenge, List.of(
-                goldParticipant, silverParticipant, bronzeParticipant));
+            goldParticipant, silverParticipant, bronzeParticipant));
 
         // then
         List<Badge> badges = badgeRepository.findAll();
         assertThat(badges).hasSize(3);
 
         assertSoftly(softly -> {
-            softly.assertThat(findChallengeBadge(badges, member1.getId(), BadgeGrade.GOLD)).isNotNull();
-            softly.assertThat(findChallengeBadge(badges, member2.getId(), BadgeGrade.SILVER)).isNotNull();
-            softly.assertThat(findChallengeBadge(badges, member3.getId(), BadgeGrade.BRONZE)).isNotNull();
+            softly.assertThat(findChallengeBadge(badges, member1.getId(), BadgeGrade.GOLD))
+                    .isPresent();
+            softly.assertThat(findChallengeBadge(badges, member2.getId(), BadgeGrade.SILVER))
+                    .isPresent();
+            softly.assertThat(findChallengeBadge(badges, member3.getId(), BadgeGrade.BRONZE))
+                    .isPresent();
         });
     }
 
@@ -390,48 +417,48 @@ class BadgeServiceTest {
     void 진행률_경계값_테스트() {
         // given
         Challenge challenge = challengeRepository.save(TestFixture.createChallenge(
-                "Test Challenge",
-                LocalDate.now().minusDays(10),
-                LocalDate.now().minusDays(1),
-                10));
+            "Test Challenge",
+            LocalDate.now().minusDays(10),
+            LocalDate.now().minusDays(1),
+            10
+        ));
 
         // when & then: 100% (10/10) → 금메달
         ChallengeParticipant gold100 = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(challenge.getId(), member1.getId(), 10, true));
+            TestFixture.createChallengeParticipant(challenge.getId(), member1.getId(), 10, true));
         badgeService.issueChallengeBadges(challenge, List.of(gold100));
-        assertThat(findChallengeBadge(badgeRepository.findAll(), member1.getId(), BadgeGrade.GOLD)).isNotNull();
+        assertThat(findChallengeBadge(badgeRepository.findAll(), member1.getId(), BadgeGrade.GOLD)).isPresent();
         badgeRepository.deleteAllInBatch();
         challengeParticipantRepository.deleteAllInBatch();
 
         // when & then: 90% (9/10) → 은메달
         ChallengeParticipant silver90 = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(challenge.getId(), member1.getId(), 9, true));
+            TestFixture.createChallengeParticipant(challenge.getId(), member1.getId(), 9, true));
         badgeService.issueChallengeBadges(challenge, List.of(silver90));
-        assertThat(findChallengeBadge(badgeRepository.findAll(), member1.getId(), BadgeGrade.SILVER)).isNotNull();
+        assertThat(findChallengeBadge(badgeRepository.findAll(), member1.getId(), BadgeGrade.SILVER)).isPresent();
         badgeRepository.deleteAllInBatch();
         challengeParticipantRepository.deleteAllInBatch();
 
         // when & then: 80% (8/10) → 동메달
         ChallengeParticipant bronze80 = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(challenge.getId(), member1.getId(), 8, true));
+            TestFixture.createChallengeParticipant(challenge.getId(), member1.getId(), 8, true));
         badgeService.issueChallengeBadges(challenge, List.of(bronze80));
-        assertThat(findChallengeBadge(badgeRepository.findAll(), member1.getId(), BadgeGrade.BRONZE)).isNotNull();
+        assertThat(findChallengeBadge(badgeRepository.findAll(), member1.getId(), BadgeGrade.BRONZE)).isPresent();
         badgeRepository.deleteAllInBatch();
         challengeParticipantRepository.deleteAllInBatch();
 
         // when & then: 79% (7/10) → 뱃지 없음
         ChallengeParticipant noBadge = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(challenge.getId(), member1.getId(), 7, true));
+            TestFixture.createChallengeParticipant(challenge.getId(), member1.getId(), 7, true));
         badgeService.issueChallengeBadges(challenge, List.of(noBadge));
         assertThat(badgeRepository.count()).isZero();
     }
 
-    private ChallengeBadge findChallengeBadge(List<Badge> badges, Long memberId, BadgeGrade grade) {
+    private Optional<ChallengeBadge> findChallengeBadge(List<Badge> badges, Long memberId, BadgeGrade grade) {
         return badges.stream()
-                .filter(b -> b instanceof ChallengeBadge)
-                .map(b -> (ChallengeBadge) b)
-                .filter(b -> b.getMemberId().equals(memberId) && b.getGrade() == grade)
-                .findFirst()
-                .orElse(null);
+            .filter(b -> b instanceof ChallengeBadge)
+            .map(b -> (ChallengeBadge) b)
+            .filter(b -> b.getMemberId().equals(memberId) && b.getGrade() == grade)
+            .findFirst();
     }
 }

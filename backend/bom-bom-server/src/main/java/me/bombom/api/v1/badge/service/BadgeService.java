@@ -2,6 +2,7 @@ package me.bombom.api.v1.badge.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
@@ -35,10 +36,8 @@ public class BadgeService {
         }
 
         for (RankerInfo ranker : rankers) {
-            BadgeGrade grade = BadgeGrade.fromRankOrder(ranker.rankOrder());
-            if (grade != null) {
-                issueRankingBadge(ranker.memberId(), grade, period);
-            }
+            Optional<BadgeGrade> grade = BadgeGrade.fromRankOrder(ranker.rankOrder());
+            grade.ifPresent(badgeGrade -> issueRankingBadge(ranker.memberId(), badgeGrade, period));
         }
     }
 
@@ -54,22 +53,20 @@ public class BadgeService {
             int progress = participant.calculateProgress(totalDays);
             ChallengeGrade challengeGrade = ChallengeGrade.calculate(progress, participant.isSurvived());
 
-            BadgeGrade badgeGrade = challengeGrade.toBadge();
-            if (badgeGrade != null) {
-                issueChallengeBadge(participant.getMemberId(), badgeGrade, challenge);
-            }
+            Optional<BadgeGrade> badgeGrade = challengeGrade.toBadge();
+            badgeGrade.ifPresent(grade -> issueChallengeBadge(participant.getMemberId(), grade, challenge));
         }
     }
 
     private void issueRankingBadge(Long memberId, BadgeGrade grade, LocalDate period) {
         int year = period.getYear();
         int month = period.getMonthValue();
-        
+
         if (rankingBadgeRepository.existsByMemberIdAndPeriodYearAndPeriodMonth(memberId, year, month)) {
             log.info("이미 발급된 랭킹 뱃지입니다. - memberId: {}, period: {}-{}", memberId, year, month);
             return;
         }
-        
+
         RankingBadge badge = RankingBadge.builder()
                 .memberId(memberId)
                 .grade(grade)

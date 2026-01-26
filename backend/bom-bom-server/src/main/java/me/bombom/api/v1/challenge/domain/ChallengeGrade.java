@@ -1,5 +1,6 @@
 package me.bombom.api.v1.challenge.domain;
 
+import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
@@ -34,7 +35,7 @@ public enum ChallengeGrade {
         return FAIL;
     }
 
-    public BadgeGrade toBadge() {
-        return this.badgeGrade;
+    public Optional<BadgeGrade> toBadge() {
+        return Optional.ofNullable(this.badgeGrade);
     }
 }

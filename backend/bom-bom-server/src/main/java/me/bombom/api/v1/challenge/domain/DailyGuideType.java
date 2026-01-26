@@ -4,5 +4,6 @@ public enum DailyGuideType {
 
     READ,
     COMMENT,
-    SHARING
+    SHARING,
+    REMIND
 }

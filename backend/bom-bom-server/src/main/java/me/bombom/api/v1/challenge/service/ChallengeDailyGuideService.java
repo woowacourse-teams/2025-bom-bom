@@ -2,9 +2,9 @@ package me.bombom.api.v1.challenge.service;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
+import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuide;
@@ -12,6 +12,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.request.DailyGuideCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse;
+import me.bombom.api.v1.challenge.dto.response.MemberDailyCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse.MyCommentResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyGuideCommentRepository;
@@ -32,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ChallengeDailyGuideService {
 
-    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
+    private final Clock clock;
 
     private final ChallengeRepository challengeRepository;
     private final ChallengeDailyGuideRepository challengeDailyGuideRepository;
@@ -43,19 +44,11 @@ public class ChallengeDailyGuideService {
     private final ChallengeTeamService challengeTeamService;
 
     public TodayDailyGuideResponse getTodayDailyGuide(Long challengeId, Long memberId) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
-                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
+        Challenge challenge = getChallenge(challengeId);
 
-        if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
-            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId);
-        }
+        validateChallengeParticipant(challengeId, memberId);
 
-        LocalDate today = LocalDate.now(SEOUL_ZONE);
+        LocalDate today = LocalDate.now(clock);
         if (today.isBefore(challenge.getStartDate()) || today.isAfter(challenge.getEndDate())) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
@@ -83,17 +76,9 @@ public class ChallengeDailyGuideService {
     }
 
     public Page<DailyGuideCommentResponse> getTotalComments(Long challengeId, int dayIndex, Long memberId, Pageable pageable) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
-                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
+        Challenge challenge = getChallenge(challengeId);
 
-        if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
-            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId);
-        }
+        validateChallengeParticipant(challengeId, memberId);
 
         if (dayIndex != 0 && (dayIndex < 1 || dayIndex > challenge.getTotalDays())) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
@@ -112,14 +97,10 @@ public class ChallengeDailyGuideService {
         return challengeDailyGuideCommentRepository.findByGuideId(guide.getId(), pageable);
     }
 
-
     @Transactional
     public void createDailyGuideComment(Long challengeId, int dayIndex, Long memberId,
                                         DailyGuideCommentRequest request, LocalDate today) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
-                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
+        Challenge challenge = getChallenge(challengeId);
 
         ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
                         challengeId, memberId)
@@ -128,13 +109,7 @@ public class ChallengeDailyGuideService {
                         .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                         .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
 
-        if (dayIndex != 0 && (dayIndex < 1 || dayIndex > challenge.getTotalDays())) {
-            throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeDailyGuide")
-                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
-                    .addContext("dayIndex", dayIndex)
-                    .addContext("reason", "유효하지 않은 일차 인덱스입니다.");
-        }
+        validateDayIndex(challengeId, dayIndex, challenge);
 
         ChallengeDailyGuide guide = challengeDailyGuideRepository.findByChallengeIdAndDayIndex(challengeId, dayIndex)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
@@ -171,13 +146,13 @@ public class ChallengeDailyGuideService {
 
         // day1일 때만 체크리스트 자동 완료 처리
         if (dayIndex == 1) {
-            // READ todo 자동 생성 (뉴스레터 1개 읽기)
+            // READ 투두 자동 생성 (뉴스레터 1개 읽기)
             challengeDailyTodoService.updateChallengeDailyTodo(memberId, null, today);
-            // COMMENT todo 생성 (한 줄 코멘트 작성)
+            // COMMENT 투두 생성 (한 줄 코멘트 작성)
             challengeTodoService.insertCommentDone(participant, today);
 
             // 이미 완료되지 않았으면 progress 처리
-            // day1에 두 todo(READ, COMMENT)가 모두 생성되므로 바로 완료 처리
+            // day1에 두 투두(READ, COMMENT)가 모두 생성되므로 바로 완료 처리
             if (!challengeTodoService.isCompletedToday(participant.getId(), today)) {
                 challengeTodoService.completeDailyTodo(participant, today);
 
@@ -190,14 +165,66 @@ public class ChallengeDailyGuideService {
         }
     }
 
-    private int calculateDayIndex(LocalDate startDate, LocalDate today) {
-        DayOfWeek dayOfWeek = today.getDayOfWeek();
-        boolean isWeekend = dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
+    public MemberDailyCommentResponse getDailyGuideComment(Long challengeId, int dayIndex, Long memberId) {
+        Challenge challenge = getChallenge(challengeId);
+        validateChallengeParticipant(challengeId, memberId);
+        validateDayIndex(challengeId, dayIndex, challenge);
 
-        if (isWeekend) {
+        MemberDailyCommentResponse response = challengeDailyGuideCommentRepository.findMyComment(
+                challengeId,
+                dayIndex,
+                memberId
+        );
+        return response != null ? response : new MemberDailyCommentResponse(null);
+    }
+
+    private Challenge getChallenge(Long challengeId) {
+        return challengeRepository.findById(challengeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
+    }
+
+    private void validateChallengeParticipant(Long challengeId, Long memberId) {
+        if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId);
+        }
+    }
+
+    private void validateDayIndex(Long challengeId, int dayIndex, Challenge challenge) {
+        int maxAllowedDayIndex = calculateMaxAllowedDayIndex(challenge.getStartDate(), LocalDate.now(clock));
+        if (dayIndex > maxAllowedDayIndex) {
+            throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeDailyGuide")
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                    .addContext("dayIndex", dayIndex)
+                    .addContext("maxAllowedDayIndex", maxAllowedDayIndex)
+                    .addContext("reason", "유효하지 않은 일차 인덱스입니다.");
+        }
+    }
+
+    private int calculateDayIndex(LocalDate startDate, LocalDate today) {
+        if (isWeekend(today)) {
             return 0;
         }
         return (int) DAYS.between(startDate, today) + 1;
+    }
+
+    private int calculateMaxAllowedDayIndex(LocalDate startDate, LocalDate today) {
+        LocalDate targetDate = today;
+        // 오늘이 주말이면 직전 금요일까지의 컨텐츠는 볼 수 있어야 함
+        while (isWeekend(targetDate) && !targetDate.isBefore(startDate)) {
+            targetDate = targetDate.minusDays(1);
+        }
+        return (int) DAYS.between(startDate, targetDate) + 1;
+    }
+
+    private boolean isWeekend(LocalDate date) {
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
     }
 
     private MyCommentResponse createMyCommentResponse(TodayDailyGuideRow row) {
@@ -205,7 +232,6 @@ public class ChallengeDailyGuideService {
         return new MyCommentResponse(
                 exists,
                 exists ? row.getMyCommentContent() : null,
-                exists ? row.getMyCommentCreatedAt() : null
-        );
+                exists ? row.getMyCommentCreatedAt() : null);
     }
 }

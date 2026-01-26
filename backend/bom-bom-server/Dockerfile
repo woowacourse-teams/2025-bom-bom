@@ -1,19 +1,19 @@
-# 1. Amazon Corretto 21 기반
-FROM amazoncorretto:21
+# 1. Amazon Corretto 21 (Amazon Linux 2023 기반)
+FROM amazoncorretto:21-al2023
 
 # 2. 타임존 설정 (OS + JVM)
 ENV TZ=Asia/Seoul
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# 2-1. Playwright 실행을 위한 OS 의존성 설치 (Amazon Linux 2 기반)
-# Chromium 구동에 필요한 라이브러리 (AL2에서는 yum 사용)
-RUN yum install -y \
-    alsa-lib atk cups-libs gtk3 \
-    libXcomposite libXcursor libXdamage libXext libXi libXrandr libXScrnSaver libXtst \
-    pango nss libdrm mesa-libgbm libxkbcommon \
+# 2-1. Playwright 실행을 위한 OS 의존성 설치 (Amazon Linux 2023 호환)
+# Chromium 구동에 필요한 최소 런타임 라이브러리 (폰트 및 GUI 라이브러리 포함)
+RUN dnf install -y \
+    alsa-lib atk at-spi2-atk at-spi2-core cups-libs \
+    gtk3 pango nss libXcomposite libXcursor libXdamage libXext libXi libXrandr libXScrnSaver libXtst \
+    libdrm libgbm libxkbcommon mesa-libgbm \
     xorg-x11-fonts-100dpi xorg-x11-fonts-75dpi xorg-x11-fonts-cyrillic xorg-x11-fonts-misc xorg-x11-fonts-Type1 xorg-x11-utils \
     unzip \
-    && yum clean all
+    && dnf clean all
 
 # 3. 빌드 시 JAR 경로를 외부에서 주입 가능하게 설정
 ARG JAR_FILE=build/libs/*.jar

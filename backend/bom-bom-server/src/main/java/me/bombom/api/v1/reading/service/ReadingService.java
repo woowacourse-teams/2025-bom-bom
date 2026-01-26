@@ -30,7 +30,6 @@ import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
-import me.bombom.api.v1.badge.dto.response.BadgesResponse;
 import me.bombom.api.v1.badge.service.BadgeService;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
@@ -225,12 +224,7 @@ public class ReadingService {
         List<MonthlyReadingRankFlat> flatResults = monthlyReadingSnapshotRepository.findMonthlyRanking(limit, lastMonthYear, lastMonthValue);
 
         List<MonthlyReadingRankResponse> monthlyRanking = flatResults.stream()
-                .map(flat -> MonthlyReadingRankResponse.of(
-                        flat.nickname(),
-                        flat.rank(),
-                        flat.monthlyReadCount(),
-                        BadgesResponse.from(flat)
-                ))
+                .map(MonthlyReadingRankResponse::from)
                 .toList();
 
         LocalDateTime rankingUpdatedAt = monthlyReadingSnapshotMetaService.getSnapshotAt();

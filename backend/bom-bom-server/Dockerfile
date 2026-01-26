@@ -5,6 +5,12 @@ FROM amazoncorretto:21
 ENV TZ=Asia/Seoul
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+# 2-1. Playwright 실행을 위한 OS 의존성 설치 (Amazon Linux 2023)
+RUN dnf install -y alsa-lib atk cups-libs gtk3 iputils nss pango \
+    libXcomposite libXcursor libXdamage libXext libXi libXrandr libXScrnSaver libXtst \
+    xorg-x11-fonts-100dpi xorg-x11-fonts-75dpi xorg-x11-fonts-cyrillic xorg-x11-fonts-misc xorg-x11-fonts-Type1 xorg-x11-utils \
+    && dnf clean all
+
 # 3. 빌드 시 JAR 경로를 외부에서 주입 가능하게 설정
 ARG JAR_FILE=build/libs/*.jar
 

@@ -13,7 +13,7 @@ public enum BadgeGrade {
     BRONZE(3),
     ;
 
-    public static final int MAX_RANKING_COUNT = 3;
+    public static final int MAX_RANK_FOR_BADGE = 3;
 
     private final long rankOrder;
 

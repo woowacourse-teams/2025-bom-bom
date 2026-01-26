@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
 import me.bombom.api.v1.reading.dto.MonthlyReadingRankFlat;
+import me.bombom.api.v1.reading.dto.RankerInfo;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -50,13 +51,13 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 	);
 
 	@Query(value = """
-		SELECT mr.member_id
+		SELECT mr.member_id AS memberId, mr.rank_order AS rankOrder
 		FROM monthly_reading_snapshot mr
 		WHERE mr.rank_order IS NOT NULL
+			AND mr.rank_order <= :maxRank
 		ORDER BY mr.rank_order ASC
-		LIMIT :limit
 	""", nativeQuery = true)
-	List<Long> findTopRankerMemberIds(@Param("limit") int limit);
+	List<RankerInfo> findTopRankers(@Param("maxRank") long maxRank);
 
   @Modifying(clearAutomatically = true, flushAutomatically = true)
   @Query(value = """

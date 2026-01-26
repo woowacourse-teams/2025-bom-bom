@@ -22,6 +22,7 @@ import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
 import me.bombom.api.v1.reading.dto.MonthlyReadingRankFlat;
+import me.bombom.api.v1.reading.dto.RankerInfo;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingCountResponse;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
@@ -118,7 +119,7 @@ public class ReadingService {
             }
 
             // 2. 초기화 전에 랭킹 뱃지 발급
-            List<Long> topRankers = monthlyReadingSnapshotRepository.findTopRankerMemberIds(BadgeGrade.MAX_RANKING_COUNT);
+            List<RankerInfo> topRankers = monthlyReadingSnapshotRepository.findTopRankers(BadgeGrade.MAX_RANKING_COUNT);
             badgeService.issueRankingBadges(topRankers, lastMonth);
 
             // 3. Stream으로 메모리 효율적 처리

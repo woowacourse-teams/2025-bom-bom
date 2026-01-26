@@ -9,6 +9,7 @@ import me.bombom.api.v1.badge.domain.ChallengeBadge;
 import me.bombom.api.v1.badge.domain.RankingBadge;
 import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.reading.dto.RankerInfo;
 import me.bombom.api.v1.challenge.domain.ChallengeGrade;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import org.springframework.stereotype.Service;
@@ -20,20 +21,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class BadgeService {
 
-    private static final BadgeGrade[] RANKING_BADGE_GRADES = BadgeGrade.values();
-
     private final BadgeRepository badgeRepository;
 
     @Transactional
-    public void issueRankingBadges(List<Long> topRankers, LocalDate period) {
-        if (topRankers.isEmpty()) {
+    public void issueRankingBadges(List<RankerInfo> rankers, LocalDate period) {
+        if (rankers.isEmpty()) {
             log.info("랭킹 뱃지 발급 대상이 없습니다.");
             return;
         }
 
-        int issueCount = Math.min(topRankers.size(), BadgeGrade.MAX_RANKING_COUNT);
-        for (int rank = 0; rank < issueCount; rank++) {
-            issueRankingBadge(topRankers.get(rank), RANKING_BADGE_GRADES[rank], period);
+        for (RankerInfo ranker : rankers) {
+            BadgeGrade grade = BadgeGrade.fromRankOrder(ranker.rankOrder());
+            if (grade != null) {
+                issueRankingBadge(ranker.memberId(), grade, period);
+            }
         }
     }
 

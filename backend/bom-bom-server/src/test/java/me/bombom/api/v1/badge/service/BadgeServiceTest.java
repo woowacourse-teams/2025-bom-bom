@@ -12,6 +12,7 @@ import me.bombom.api.v1.badge.domain.ChallengeBadge;
 import me.bombom.api.v1.badge.domain.RankingBadge;
 import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.reading.dto.RankerInfo;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
@@ -62,7 +63,7 @@ class BadgeServiceTest {
     @Test
     void 빈_리스트일_때_뱃지를_발급하지_않는다() {
         // given
-        List<Long> emptyList = Collections.emptyList();
+        List<RankerInfo> emptyList = Collections.emptyList();
 
         // when
         badgeService.issueRankingBadges(emptyList, testPeriod);
@@ -74,7 +75,11 @@ class BadgeServiceTest {
     @Test
     void 상위_3명에게_금_은_동_메달을_발급한다() {
         // given
-        List<Long> topRankers = List.of(member1.getId(), member2.getId(), member3.getId());
+        List<RankerInfo> topRankers = List.of(
+                new RankerInfo(member1.getId(), 1),
+                new RankerInfo(member2.getId(), 2),
+                new RankerInfo(member3.getId(), 3)
+        );
 
         // when
         badgeService.issueRankingBadges(topRankers, testPeriod);
@@ -105,7 +110,10 @@ class BadgeServiceTest {
     @Test
     void 상위_2명만_있을_때_금_은_메달만_발급한다() {
         // given
-        List<Long> topRankers = List.of(member1.getId(), member2.getId());
+        List<RankerInfo> topRankers = List.of(
+                new RankerInfo(member1.getId(), 1),
+                new RankerInfo(member2.getId(), 2)
+        );
 
         // when
         badgeService.issueRankingBadges(topRankers, testPeriod);
@@ -130,7 +138,7 @@ class BadgeServiceTest {
     @Test
     void 상위_1명만_있을_때_금메달만_발급한다() {
         // given
-        List<Long> topRankers = List.of(member1.getId());
+        List<RankerInfo> topRankers = List.of(new RankerInfo(member1.getId(), 1));
 
         // when
         badgeService.issueRankingBadges(topRankers, testPeriod);
@@ -153,24 +161,28 @@ class BadgeServiceTest {
     }
 
     @Test
-    void 상위_3명_이상일_때도_최대_3명에게만_뱃지를_발급한다() {
+    void 공동_1등이면_모두_금메달을_받는다() {
         // given
         Member member4 = memberRepository.save(TestFixture.createUniqueMember("member4", "provider4"));
-        List<Long> topRankers = List.of(member1.getId(), member2.getId(), member3.getId(), member4.getId());
+        List<RankerInfo> topRankers = List.of(
+                new RankerInfo(member1.getId(), 1),
+                new RankerInfo(member2.getId(), 1),
+                new RankerInfo(member3.getId(), 1),
+                new RankerInfo(member4.getId(), 2)
+        );
 
         // when
         badgeService.issueRankingBadges(topRankers, testPeriod);
 
         // then
         List<Badge> badges = badgeRepository.findAll();
-        assertThat(badges).hasSize(3);
+        assertThat(badges).hasSize(4);
 
         assertSoftly(softly -> {
             softly.assertThat(findRankingBadge(badges, member1.getId(), BadgeGrade.GOLD)).isNotNull();
-            softly.assertThat(findRankingBadge(badges, member2.getId(), BadgeGrade.SILVER)).isNotNull();
-            softly.assertThat(findRankingBadge(badges, member3.getId(), BadgeGrade.BRONZE)).isNotNull();
-            softly.assertThat(badges.stream()
-                    .anyMatch(b -> b.getMemberId().equals(member4.getId()))).isFalse();
+            softly.assertThat(findRankingBadge(badges, member2.getId(), BadgeGrade.GOLD)).isNotNull();
+            softly.assertThat(findRankingBadge(badges, member3.getId(), BadgeGrade.GOLD)).isNotNull();
+            softly.assertThat(findRankingBadge(badges, member4.getId(), BadgeGrade.SILVER)).isNotNull();
         });
     }
 

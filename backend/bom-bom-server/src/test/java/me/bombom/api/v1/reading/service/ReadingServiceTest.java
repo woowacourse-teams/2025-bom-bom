@@ -399,7 +399,12 @@ class ReadingServiceTest {
                 .build());
         
         LocalDate lastMonth = LocalDate.now().minusMonths(1);
-        RankingBadge rankingBadge = RankingBadge.create(member1.getId(), BadgeGrade.GOLD, lastMonth);
+        RankingBadge rankingBadge = RankingBadge.builder()
+                .memberId(member1.getId())
+                .grade(BadgeGrade.GOLD)
+                .periodYear(lastMonth.getYear())
+                .periodMonth(lastMonth.getMonthValue())
+                .build();
         badgeRepository.save(rankingBadge);
         
         // when
@@ -432,12 +437,24 @@ class ReadingServiceTest {
                 .build());
         
         // 오래된 챌린지 뱃지
-        ChallengeBadge oldBadge = ChallengeBadge.create(member1.getId(), BadgeGrade.BRONZE, 1L, "오래된 챌린지", 1);
+        ChallengeBadge oldBadge = ChallengeBadge.builder()
+                .memberId(member1.getId())
+                .grade(BadgeGrade.BRONZE)
+                .challengeId(1L)
+                .challengeName("오래된 챌린지")
+                .challengeGeneration(1)
+                .build();
         badgeRepository.save(oldBadge);
         badgeRepository.flush();
         
         // 최근 챌린지 뱃지
-        ChallengeBadge recentBadge = ChallengeBadge.create(member1.getId(), BadgeGrade.GOLD, 2L, "최근 챌린지", 2);
+        ChallengeBadge recentBadge = ChallengeBadge.builder()
+                .memberId(member1.getId())
+                .grade(BadgeGrade.GOLD)
+                .challengeId(2L)
+                .challengeName("최근 챌린지")
+                .challengeGeneration(2)
+                .build();
         badgeRepository.save(recentBadge);
         
         // when
@@ -469,10 +486,21 @@ class ReadingServiceTest {
                 .build());
         
         LocalDate lastMonth = LocalDate.now().minusMonths(1);
-        RankingBadge rankingBadge = RankingBadge.create(member1.getId(), BadgeGrade.GOLD, lastMonth);
+        RankingBadge rankingBadge = RankingBadge.builder()
+                .memberId(member1.getId())
+                .grade(BadgeGrade.GOLD)
+                .periodYear(lastMonth.getYear())
+                .periodMonth(lastMonth.getMonthValue())
+                .build();
         badgeRepository.save(rankingBadge);
         
-        ChallengeBadge challengeBadge = ChallengeBadge.create(member1.getId(), BadgeGrade.SILVER, 1L, "테스트 챌린지", 1);
+        ChallengeBadge challengeBadge = ChallengeBadge.builder()
+                .memberId(member1.getId())
+                .grade(BadgeGrade.SILVER)
+                .challengeId(1L)
+                .challengeName("테스트 챌린지")
+                .challengeGeneration(1)
+                .build();
         badgeRepository.save(challengeBadge);
         
         // when

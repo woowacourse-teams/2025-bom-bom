@@ -5,7 +5,6 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,14 +37,5 @@ public class RankingBadge extends Badge {
         this.grade = grade;
         this.periodYear = periodYear;
         this.periodMonth = periodMonth;
-    }
-
-    public static RankingBadge create(Long memberId, BadgeGrade grade, LocalDate period) {
-        return RankingBadge.builder()
-                .memberId(memberId)
-                .grade(grade)
-                .periodYear(period.getYear())
-                .periodMonth(period.getMonthValue())
-                .build();
     }
 }

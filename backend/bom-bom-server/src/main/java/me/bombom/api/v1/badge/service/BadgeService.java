@@ -58,19 +58,24 @@ public class BadgeService {
     }
 
     private void issueRankingBadge(Long memberId, BadgeGrade grade, LocalDate period) {
-        RankingBadge badge = RankingBadge.create(memberId, grade, period);
+        RankingBadge badge = RankingBadge.builder()
+                .memberId(memberId)
+                .grade(grade)
+                .periodYear(period.getYear())
+                .periodMonth(period.getMonthValue())
+                .build();
         badgeRepository.save(badge);
         log.info("랭킹 뱃지 발급 완료 - memberId: {}, grade: {}", memberId, grade);
     }
 
     private void issueChallengeBadge(Long memberId, BadgeGrade grade, Challenge challenge) {
-        ChallengeBadge badge = ChallengeBadge.create(
-                memberId,
-                grade,
-                challenge.getId(),
-                challenge.getName(),
-                challenge.getGeneration()
-        );
+        ChallengeBadge badge = ChallengeBadge.builder()
+                .memberId(memberId)
+                .grade(grade)
+                .challengeId(challenge.getId())
+                .challengeName(challenge.getName())
+                .challengeGeneration(challenge.getGeneration())
+                .build();
         badgeRepository.save(badge);
         log.info("챌린지 뱃지 발급 완료 - memberId: {}, challengeId: {}, grade: {}", memberId, challenge.getId(), grade);
     }

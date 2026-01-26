@@ -42,11 +42,21 @@ public class ChallengeScheduler {
     public void processEndedChallenges() {
         log.info("챌린지 종료 처리 및 뱃지 발급 시작");
         LocalDate today = LocalDate.now();
-        try {
-            challengeService.processEndedChallenges(today);
-            log.info("챌린지 종료 처리 및 뱃지 발급 완료");
-        } catch (Exception e) {
-            log.error("챌린지 종료 처리 중 오류 발생", e);
+        List<Challenge> endedChallenges = challengeService.getEndedChallenges(today);
+        
+        if (endedChallenges.isEmpty()) {
+            log.info("종료된 챌린지가 없습니다.");
+            return;
         }
+
+        for (Challenge challenge : endedChallenges) {
+            try {
+                challengeService.processEndedChallenge(challenge);
+            } catch (Exception e) {
+                log.error("챌린지 종료 처리 중 오류 발생 - challengeId: {}", challenge.getId(), e);
+            }
+        }
+        
+        log.info("챌린지 종료 처리 및 뱃지 발급 완료");
     }
 }

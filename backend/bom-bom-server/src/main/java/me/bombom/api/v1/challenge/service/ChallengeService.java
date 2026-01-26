@@ -161,22 +161,14 @@ public class ChallengeService {
         return challengeRepository.findOngoingChallenges(date);
     }
 
-    @Transactional
-    public void processEndedChallenges(LocalDate date) {
-        List<Challenge> endedChallenges = challengeRepository.findEndedChallenges(date);
-        if (endedChallenges.isEmpty()) {
-            log.info("종료된 챌린지가 없습니다.");
-            return;
-        }
+    public List<Challenge> getEndedChallenges(LocalDate date) {
+        return challengeRepository.findEndedChallenges(date);
+    }
 
-        for (Challenge challenge : endedChallenges) {
-            try {
-                List<ChallengeParticipant> participants = challengeParticipantRepository.findAllByChallengeId(challenge.getId());
-                badgeService.issueChallengeBadges(challenge, participants);
-            } catch (Exception e) {
-                log.error("챌린지 종료 처리 중 오류 발생 - challengeId: {}", challenge.getId(), e);
-            }
-        }
+    @Transactional
+    public void processEndedChallenge(Challenge challenge) {
+        List<ChallengeParticipant> participants = challengeParticipantRepository.findAllByChallengeId(challenge.getId());
+        badgeService.issueChallengeBadges(challenge, participants);
     }
 
     public ChallengeTeamListResponse getTeamList(Long challengeId, Member member) {

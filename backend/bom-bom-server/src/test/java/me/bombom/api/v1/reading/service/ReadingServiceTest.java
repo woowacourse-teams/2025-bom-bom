@@ -96,10 +96,7 @@ class ReadingServiceTest {
         continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
         weeklyReading = weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member));
         monthlyReadingSnapshot = monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingFixture(member));
-        monthlyReadingRealtimeRepository.save(MonthlyReadingRealtime.builder()
-                .memberId(member.getId())
-                .currentCount(0)
-                .build());
+        monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member, 0));
 
         memberRepository.flush();
         todayReadingRepository.flush();
@@ -173,14 +170,8 @@ class ReadingServiceTest {
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_r2", "pid_r2"));
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_r3", "pid_r3"));
 
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member2.getId())
-                .currentCount(30)
-                .build());
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member3.getId())
-                .currentCount(20)
-                .build());
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member2, 30));
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member3, 20));
 
         // when: 순위 저장 배치 실행 후, 저장된 순위 기반 조회
         readingService.updateMonthlyRanking();
@@ -221,18 +212,9 @@ class ReadingServiceTest {
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr3", "pid_mr3"));
         Member member4 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr4", "pid_mr4"));
 
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member2.getId())
-                .currentCount(30)
-                .build());
-        MonthlyReadingSnapshot member3Reading = monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member3.getId())
-                .currentCount(20)
-                .build());
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member4.getId())
-                .currentCount(20)
-                .build());
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member2, 30));
+        MonthlyReadingSnapshot member3Reading = monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member3, 20));
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member4, 20));
 
         // when: 순위 반영 후 내 순위를 조회
         readingService.updateMonthlyRanking();
@@ -253,14 +235,8 @@ class ReadingServiceTest {
         Member first = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr3", "pid_mr3"));
 
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(first.getId())
-                .currentCount(30)
-                .build());
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member3.getId())
-                .currentCount(20)
-                .build());
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(first, 30));
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member3, 20));
 
         // when: 순위 반영 후 내 순위를 조회
         readingService.updateMonthlyRanking();
@@ -276,14 +252,8 @@ class ReadingServiceTest {
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr3", "pid_mr3"));
 
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member2.getId())
-                .currentCount(20)
-                .build());
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member3.getId())
-                .currentCount(20)
-                .build());
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member2, 20));
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member3, 20));
 
         // when: 순위 반영 후 내 순위를 조회
         readingService.updateMonthlyRanking();
@@ -324,24 +294,9 @@ class ReadingServiceTest {
         Member member4 = memberRepository.save(TestFixture.createUniqueMember("member4", "provider4"));
 
         // 랭킹 설정: snapshot에 rankOrder 설정
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member2.getId())
-                .currentCount(30)
-                .rankOrder(1)
-                .nextRankDifference(0)
-                .build());
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member3.getId())
-                .currentCount(20)
-                .rankOrder(2)
-                .nextRankDifference(10)
-                .build());
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member4.getId())
-                .currentCount(10)
-                .rankOrder(3)
-                .nextRankDifference(10)
-                .build());
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member2, 30, 1, 0));
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member3, 20, 2, 10));
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member4, 10, 3, 10));
 
         // when
         readingService.migrateMonthlyCountToYearlyAndReset();
@@ -385,18 +340,8 @@ class ReadingServiceTest {
         Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("member2", "provider2"));
         
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member1.getId())
-                .currentCount(30)
-                .rankOrder(1)
-                .nextRankDifference(0)
-                .build());
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member2.getId())
-                .currentCount(20)
-                .rankOrder(2)
-                .nextRankDifference(10)
-                .build());
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member2, 20, 2, 10));
         
         LocalDate lastMonth = LocalDate.now().minusMonths(1);
         RankingBadge rankingBadge = RankingBadge.builder()
@@ -429,12 +374,7 @@ class ReadingServiceTest {
         
         Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
         
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member1.getId())
-                .currentCount(30)
-                .rankOrder(1)
-                .nextRankDifference(0)
-                .build());
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
         
         // 오래된 챌린지 뱃지
         ChallengeBadge oldBadge = ChallengeBadge.builder()
@@ -478,12 +418,7 @@ class ReadingServiceTest {
         
         Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
         
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member1.getId())
-                .currentCount(30)
-                .rankOrder(1)
-                .nextRankDifference(0)
-                .build());
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
         
         LocalDate lastMonth = LocalDate.now().minusMonths(1);
         RankingBadge rankingBadge = RankingBadge.builder()
@@ -524,12 +459,7 @@ class ReadingServiceTest {
         
         Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
         
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member1.getId())
-                .currentCount(30)
-                .rankOrder(1)
-                .nextRankDifference(0)
-                .build());
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
         
         // when
         MonthlyReadingRankingResponse result = readingService.getMonthlyReadingRank(10);

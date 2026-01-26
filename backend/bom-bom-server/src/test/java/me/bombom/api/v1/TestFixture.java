@@ -33,6 +33,7 @@ import me.bombom.api.v1.notice.domain.NoticeCategory;
 import me.bombom.api.v1.pet.domain.Pet;
 import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.MonthlyReadingRealtime;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
@@ -366,12 +367,43 @@ public final class TestFixture {
     }
 
     /**
+     * MonthlyReadingRealtime
+     */
+    public static MonthlyReadingRealtime monthlyReadingRealtimeFixture(Member member, int currentCount) {
+        return MonthlyReadingRealtime.builder()
+                .memberId(member.getId())
+                .currentCount(currentCount)
+                .build();
+    }
+
+    /**
      * MonthlyReadingSnapshot
      */
     public static MonthlyReadingSnapshot monthlyReadingFixture(Member member) {
         return MonthlyReadingSnapshot.builder()
                 .memberId(member.getId())
                 .currentCount(10)
+                .build();
+    }
+
+    public static MonthlyReadingSnapshot monthlyReadingSnapshot(Member member, int currentCount) {
+        return MonthlyReadingSnapshot.builder()
+                .memberId(member.getId())
+                .currentCount(currentCount)
+                .build();
+    }
+
+    public static MonthlyReadingSnapshot monthlyReadingSnapshotWithRank(
+            Member member,
+            int currentCount,
+            Integer rankOrder,
+            Integer nextRankDifference
+    ) {
+        return MonthlyReadingSnapshot.builder()
+                .memberId(member.getId())
+                .currentCount(currentCount)
+                .rankOrder(rankOrder)
+                .nextRankDifference(nextRankDifference)
                 .build();
     }
 

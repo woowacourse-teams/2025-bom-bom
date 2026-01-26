@@ -42,7 +42,7 @@ public class ChallengeScheduler {
     public void processEndedChallenges() {
         log.info("챌린지 종료 처리 및 뱃지 발급 시작");
         LocalDate today = LocalDate.now();
-        List<Challenge> endedChallenges = challengeService.getEndedChallenges(today);
+        List<Challenge> endedChallenges = challengeService.getEndedChallengesPendingBadge(today);
         
         if (endedChallenges.isEmpty()) {
             log.info("종료된 챌린지가 없습니다.");

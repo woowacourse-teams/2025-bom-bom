@@ -161,8 +161,8 @@ public class ChallengeService {
         return challengeRepository.findOngoingChallenges(date);
     }
 
-    public List<Challenge> getEndedChallenges(LocalDate date) {
-        return challengeRepository.findEndedChallenges(date);
+    public List<Challenge> getEndedChallengesPendingBadge(LocalDate date) {
+        return challengeRepository.findEndedChallengesPendingBadge(date);
     }
 
     @Transactional

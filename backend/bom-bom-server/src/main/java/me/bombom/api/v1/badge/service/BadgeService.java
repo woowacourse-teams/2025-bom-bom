@@ -8,6 +8,8 @@ import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.badge.domain.ChallengeBadge;
 import me.bombom.api.v1.badge.domain.RankingBadge;
 import me.bombom.api.v1.badge.repository.BadgeRepository;
+import me.bombom.api.v1.badge.repository.ChallengeBadgeRepository;
+import me.bombom.api.v1.badge.repository.RankingBadgeRepository;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.reading.dto.RankerInfo;
 import me.bombom.api.v1.challenge.domain.ChallengeGrade;
@@ -22,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class BadgeService {
 
     private final BadgeRepository badgeRepository;
+    private final ChallengeBadgeRepository challengeBadgeRepository;
+    private final RankingBadgeRepository rankingBadgeRepository;
 
     @Transactional
     public void issueRankingBadges(List<RankerInfo> rankers, LocalDate period) {
@@ -58,17 +62,30 @@ public class BadgeService {
     }
 
     private void issueRankingBadge(Long memberId, BadgeGrade grade, LocalDate period) {
+        int year = period.getYear();
+        int month = period.getMonthValue();
+        
+        if (rankingBadgeRepository.existsByMemberIdAndPeriodYearAndPeriodMonth(memberId, year, month)) {
+            log.info("이미 발급된 랭킹 뱃지입니다. - memberId: {}, period: {}-{}", memberId, year, month);
+            return;
+        }
+        
         RankingBadge badge = RankingBadge.builder()
                 .memberId(memberId)
                 .grade(grade)
-                .periodYear(period.getYear())
-                .periodMonth(period.getMonthValue())
+                .periodYear(year)
+                .periodMonth(month)
                 .build();
         badgeRepository.save(badge);
         log.info("랭킹 뱃지 발급 완료 - memberId: {}, grade: {}", memberId, grade);
     }
 
     private void issueChallengeBadge(Long memberId, BadgeGrade grade, Challenge challenge) {
+        if (challengeBadgeRepository.existsByMemberIdAndChallengeId(memberId, challenge.getId())) {
+            log.info("이미 발급된 챌린지 뱃지입니다. - memberId: {}, challengeId: {}", memberId, challenge.getId());
+            return;
+        }
+        
         ChallengeBadge badge = ChallengeBadge.builder()
                 .memberId(memberId)
                 .grade(grade)

@@ -169,6 +169,8 @@ public class ChallengeService {
     public void processEndedChallenge(Challenge challenge) {
         List<ChallengeParticipant> participants = challengeParticipantRepository.findAllByChallengeId(challenge.getId());
         badgeService.issueChallengeBadges(challenge, participants);
+        challenge.markBadgeAsIssued();
+        challengeRepository.save(challenge);
     }
 
     public ChallengeTeamListResponse getTeamList(Long challengeId, Member member) {

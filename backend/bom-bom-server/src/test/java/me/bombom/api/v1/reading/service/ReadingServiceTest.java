@@ -6,8 +6,14 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
+import me.bombom.api.v1.badge.domain.Badge;
+import me.bombom.api.v1.badge.domain.BadgeGrade;
+import me.bombom.api.v1.badge.domain.ChallengeBadge;
+import me.bombom.api.v1.badge.domain.RankingBadge;
+import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.reading.domain.ContinueReading;
@@ -62,6 +68,9 @@ class ReadingServiceTest {
     @Autowired
     private YearlyReadingRepository yearlyReadingRepository;
 
+    @Autowired
+    private BadgeRepository badgeRepository;
+
     private Member member;
     private TodayReading todayReading;
     private ContinueReading continueReading;
@@ -71,6 +80,7 @@ class ReadingServiceTest {
     @BeforeEach
     void setUp() {
         // 기존 데이터 삭제
+        badgeRepository.deleteAllInBatch();
         yearlyReadingRepository.deleteAllInBatch();
         monthlyReadingSnapshotRepository.deleteAllInBatch();
         weeklyReadingRepository.deleteAllInBatch();
@@ -86,10 +96,7 @@ class ReadingServiceTest {
         continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
         weeklyReading = weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member));
         monthlyReadingSnapshot = monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingFixture(member));
-        monthlyReadingRealtimeRepository.save(MonthlyReadingRealtime.builder()
-                .memberId(member.getId())
-                .currentCount(0)
-                .build());
+        monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member, 0));
 
         memberRepository.flush();
         todayReadingRepository.flush();
@@ -163,14 +170,8 @@ class ReadingServiceTest {
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_r2", "pid_r2"));
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_r3", "pid_r3"));
 
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member2.getId())
-                .currentCount(30)
-                .build());
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member3.getId())
-                .currentCount(20)
-                .build());
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member2, 30));
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member3, 20));
 
         // when: 순위 저장 배치 실행 후, 저장된 순위 기반 조회
         readingService.updateMonthlyRanking();
@@ -211,18 +212,9 @@ class ReadingServiceTest {
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr3", "pid_mr3"));
         Member member4 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr4", "pid_mr4"));
 
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member2.getId())
-                .currentCount(30)
-                .build());
-        MonthlyReadingSnapshot member3Reading = monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member3.getId())
-                .currentCount(20)
-                .build());
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member4.getId())
-                .currentCount(20)
-                .build());
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member2, 30));
+        MonthlyReadingSnapshot member3Reading = monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member3, 20));
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member4, 20));
 
         // when: 순위 반영 후 내 순위를 조회
         readingService.updateMonthlyRanking();
@@ -243,14 +235,8 @@ class ReadingServiceTest {
         Member first = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr3", "pid_mr3"));
 
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(first.getId())
-                .currentCount(30)
-                .build());
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member3.getId())
-                .currentCount(20)
-                .build());
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(first, 30));
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member3, 20));
 
         // when: 순위 반영 후 내 순위를 조회
         readingService.updateMonthlyRanking();
@@ -266,14 +252,8 @@ class ReadingServiceTest {
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr3", "pid_mr3"));
 
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member2.getId())
-                .currentCount(20)
-                .build());
-        monthlyReadingSnapshotRepository.save(MonthlyReadingSnapshot.builder()
-                .memberId(member3.getId())
-                .currentCount(20)
-                .build());
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member2, 20));
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member3, 20));
 
         // when: 순위 반영 후 내 순위를 조회
         readingService.updateMonthlyRanking();
@@ -301,5 +281,202 @@ class ReadingServiceTest {
             softly.assertThat(yearlyReading.getCurrentCount()).isEqualTo(monthlyCountBefore);
             softly.assertThat(monthlyReadingSnapshot.getCurrentCount()).isEqualTo(0);
         });
+    }
+
+    @Test
+    void 매월_초기화_시_상위_3명에게_랭킹_뱃지를_발급한다() {
+        // given
+        // setUp()에서 생성된 snapshot 삭제 (rankOrder가 없어서 제외)
+        monthlyReadingSnapshotRepository.deleteAllInBatch();
+        
+        Member member2 = memberRepository.save(TestFixture.createUniqueMember("member2", "provider2"));
+        Member member3 = memberRepository.save(TestFixture.createUniqueMember("member3", "provider3"));
+        Member member4 = memberRepository.save(TestFixture.createUniqueMember("member4", "provider4"));
+
+        // 랭킹 설정: snapshot에 rankOrder 설정
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member2, 30, 1, 0));
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member3, 20, 2, 10));
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member4, 10, 3, 10));
+
+        // when
+        readingService.migrateMonthlyCountToYearlyAndReset();
+
+        // then
+        List<Badge> badges = badgeRepository.findAll();
+        assertThat(badges).hasSize(3);
+
+        LocalDate lastMonth = LocalDate.now().minusMonths(1);
+        RankingBadge goldBadge = findRankingBadge(badges, member2.getId(), BadgeGrade.GOLD);
+        RankingBadge silverBadge = findRankingBadge(badges, member3.getId(), BadgeGrade.SILVER);
+        RankingBadge bronzeBadge = findRankingBadge(badges, member4.getId(), BadgeGrade.BRONZE);
+
+        assertSoftly(softly -> {
+            softly.assertThat(goldBadge).isNotNull();
+            softly.assertThat(silverBadge).isNotNull();
+            softly.assertThat(bronzeBadge).isNotNull();
+            
+            softly.assertThat(goldBadge.getPeriodYear()).isEqualTo(lastMonth.getYear());
+            softly.assertThat(goldBadge.getPeriodMonth()).isEqualTo(lastMonth.getMonthValue());
+        });
+    }
+
+    @Test
+    void 랭킹_대상이_없을_때는_뱃지를_발급하지_않는다() {
+        // given
+        monthlyReadingSnapshotRepository.deleteAllInBatch();
+
+        // when
+        readingService.migrateMonthlyCountToYearlyAndReset();
+
+        // then
+        assertThat(badgeRepository.count()).isZero();
+    }
+
+    @Test
+    void 월간_랭킹_조회_시_이전달_랭킹_뱃지가_표시된다() {
+        // given
+        monthlyReadingSnapshotRepository.deleteAllInBatch();
+        
+        Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
+        Member member2 = memberRepository.save(TestFixture.createUniqueMember("member2", "provider2"));
+        
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member2, 20, 2, 10));
+        
+        LocalDate lastMonth = LocalDate.now().minusMonths(1);
+        RankingBadge rankingBadge = RankingBadge.builder()
+                .memberId(member1.getId())
+                .grade(BadgeGrade.GOLD)
+                .periodYear(lastMonth.getYear())
+                .periodMonth(lastMonth.getMonthValue())
+                .build();
+        badgeRepository.save(rankingBadge);
+        
+        // when
+        MonthlyReadingRankingResponse result = readingService.getMonthlyReadingRank(10);
+        
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.data()).hasSize(2);
+            softly.assertThat(result.data().get(0).badges()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().ranking()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().ranking().grade()).isEqualTo(BadgeGrade.GOLD);
+            softly.assertThat(result.data().get(0).badges().ranking().year()).isEqualTo(lastMonth.getYear());
+            softly.assertThat(result.data().get(0).badges().ranking().month()).isEqualTo(lastMonth.getMonthValue());
+            softly.assertThat(result.data().get(1).badges()).isNull();
+        });
+    }
+
+    @Test
+    void 월간_랭킹_조회_시_가장_최근_챌린지_뱃지가_표시된다() {
+        // given
+        monthlyReadingSnapshotRepository.deleteAllInBatch();
+        
+        Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
+        
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
+        
+        // 오래된 챌린지 뱃지
+        ChallengeBadge oldBadge = ChallengeBadge.builder()
+                .memberId(member1.getId())
+                .grade(BadgeGrade.BRONZE)
+                .challengeId(1L)
+                .challengeName("오래된 챌린지")
+                .challengeGeneration(1)
+                .build();
+        badgeRepository.save(oldBadge);
+        badgeRepository.flush();
+        
+        // 최근 챌린지 뱃지
+        ChallengeBadge recentBadge = ChallengeBadge.builder()
+                .memberId(member1.getId())
+                .grade(BadgeGrade.GOLD)
+                .challengeId(2L)
+                .challengeName("최근 챌린지")
+                .challengeGeneration(2)
+                .build();
+        badgeRepository.save(recentBadge);
+        
+        // when
+        MonthlyReadingRankingResponse result = readingService.getMonthlyReadingRank(10);
+        
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.data()).hasSize(1);
+            softly.assertThat(result.data().get(0).badges()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().challenge()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().challenge().grade()).isEqualTo(BadgeGrade.GOLD);
+            softly.assertThat(result.data().get(0).badges().challenge().name()).isEqualTo("최근 챌린지");
+            softly.assertThat(result.data().get(0).badges().challenge().generation()).isEqualTo(2);
+        });
+    }
+
+    @Test
+    void 월간_랭킹_조회_시_랭킹_뱃지와_챌린지_뱃지가_모두_표시된다() {
+        // given
+        monthlyReadingSnapshotRepository.deleteAllInBatch();
+        
+        Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
+        
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
+        
+        LocalDate lastMonth = LocalDate.now().minusMonths(1);
+        RankingBadge rankingBadge = RankingBadge.builder()
+                .memberId(member1.getId())
+                .grade(BadgeGrade.GOLD)
+                .periodYear(lastMonth.getYear())
+                .periodMonth(lastMonth.getMonthValue())
+                .build();
+        badgeRepository.save(rankingBadge);
+        
+        ChallengeBadge challengeBadge = ChallengeBadge.builder()
+                .memberId(member1.getId())
+                .grade(BadgeGrade.SILVER)
+                .challengeId(1L)
+                .challengeName("테스트 챌린지")
+                .challengeGeneration(1)
+                .build();
+        badgeRepository.save(challengeBadge);
+        
+        // when
+        MonthlyReadingRankingResponse result = readingService.getMonthlyReadingRank(10);
+        
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.data()).hasSize(1);
+            softly.assertThat(result.data().get(0).badges()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().ranking()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().challenge()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().ranking().grade()).isEqualTo(BadgeGrade.GOLD);
+            softly.assertThat(result.data().get(0).badges().challenge().grade()).isEqualTo(BadgeGrade.SILVER);
+        });
+    }
+
+    @Test
+    void 월간_랭킹_조회_시_뱃지가_없으면_null로_표시된다() {
+        // given
+        monthlyReadingSnapshotRepository.deleteAllInBatch();
+        
+        Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
+        
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
+        
+        // when
+        MonthlyReadingRankingResponse result = readingService.getMonthlyReadingRank(10);
+        
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.data()).hasSize(1);
+            softly.assertThat(result.data().get(0).badges()).isNull();
+        });
+    }
+
+    private RankingBadge findRankingBadge(List<Badge> badges, Long memberId, BadgeGrade grade) {
+        return badges.stream()
+                .filter(b -> b instanceof RankingBadge)
+                .map(b -> (RankingBadge) b)
+                .filter(b -> b.getMemberId().equals(memberId) && b.getGrade() == grade)
+                .findFirst()
+                .orElse(null);
     }
 }

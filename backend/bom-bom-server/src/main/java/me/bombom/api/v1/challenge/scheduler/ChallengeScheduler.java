@@ -36,4 +36,27 @@ public class ChallengeScheduler {
             }
         }
     }
+
+    @Scheduled(cron = DAILY_CRON)
+    @SchedulerLock(name = "process_ended_challenges", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
+    public void processEndedChallenges() {
+        log.info("챌린지 종료 처리 및 뱃지 발급 시작");
+        LocalDate today = LocalDate.now();
+        List<Challenge> endedChallenges = challengeService.getEndedChallengesPendingBadge(today);
+        
+        if (endedChallenges.isEmpty()) {
+            log.info("종료된 챌린지가 없습니다.");
+            return;
+        }
+
+        for (Challenge challenge : endedChallenges) {
+            try {
+                challengeService.processEndedChallenge(challenge);
+            } catch (Exception e) {
+                log.error("챌린지 종료 처리 중 오류 발생 - challengeId: {}", challenge.getId(), e);
+            }
+        }
+        
+        log.info("챌린지 종료 처리 및 뱃지 발급 완료");
+    }
 }

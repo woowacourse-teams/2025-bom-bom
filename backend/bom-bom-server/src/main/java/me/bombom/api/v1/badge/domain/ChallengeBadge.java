@@ -42,20 +42,4 @@ public class ChallengeBadge extends Badge {
         this.challengeName = challengeName;
         this.challengeGeneration = challengeGeneration;
     }
-
-    public static ChallengeBadge create(
-            Long memberId,
-            BadgeGrade grade,
-            Long challengeId,
-            String challengeName,
-            Integer challengeGeneration
-    ) {
-        return ChallengeBadge.builder()
-                .memberId(memberId)
-                .grade(grade)
-                .challengeId(challengeId)
-                .challengeName(challengeName)
-                .challengeGeneration(challengeGeneration)
-                .build();
-    }
 }

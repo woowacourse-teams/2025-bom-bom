@@ -41,6 +41,7 @@ public class ChallengeProgressController implements ChallengeProgressControllerA
         return challengeProgressService.getTeamProgressByTeamId(id, teamId, member);
     }
 
+    @Override
     @GetMapping("/{id}/certification")
     public CertificationInfoResponse getCertificationInfo(
         @LoginMember Member member,

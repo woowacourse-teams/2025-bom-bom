@@ -68,10 +68,7 @@ public class ChallengeProgressService {
     }
 
     public TeamChallengeProgressResponse getTeamProgressByTeamId(Long challengeId, Long teamId, Member member) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
-                        .addContext(ErrorContextKeys.OPERATION, "getTeamProgressByTeamId"));
+        Challenge challenge = getChallenge(challengeId);
 
         validateParticipation(challengeId, member);
         validateTeamBelongsToChallenge(challengeId, teamId);
@@ -86,12 +83,9 @@ public class ChallengeProgressService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
                         .addContext(ErrorContextKeys.OPERATION, "getTeamProgressByTeamId"));
+        Challenge challenge = getChallenge(challengeId);
 
-        ChallengeParticipant challengeParticipant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId,
-                        member.getId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
-                        .addContext(ErrorContextKeys.OPERATION, "getTeamProgressByTeamId"));
+        ChallengeParticipant challengeParticipant = getChallengeParticipant(challengeId, member);
 
         int progress = challengeParticipant.calculateProgress(challenge.getTotalDays());
         ChallengeGrade challengeGrade = ChallengeGrade.calculate(progress, challengeParticipant.isSurvived());
@@ -117,6 +111,21 @@ public class ChallengeProgressService {
         if (currentAbsent > maxAllowedAbsent) {
             participant.markAsFailed();
         }
+    }
+
+    private Challenge getChallenge(Long challengeId) {
+        return challengeRepository.findById(challengeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.OPERATION, "getChallenge"));
+    }
+
+    private ChallengeParticipant getChallengeParticipant(Long challengeId, Member member) {
+        return challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId,
+                member.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
+                        .addContext(ErrorContextKeys.OPERATION, "getChallengeParticipant"));
     }
 
     private void validateParticipation(Long id, Member member) {

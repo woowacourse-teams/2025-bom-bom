@@ -79,11 +79,8 @@ public class ChallengeProgressService {
     }
 
     public CertificationInfoResponse getCertificationInfo(Long challengeId, Member member) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
-                        .addContext(ErrorContextKeys.OPERATION, "getTeamProgressByTeamId"));
         Challenge challenge = getChallenge(challengeId);
+        validateChallengeEnded(challenge);
 
         ChallengeParticipant challengeParticipant = getChallengeParticipant(challengeId, member);
 
@@ -162,6 +159,14 @@ public class ChallengeProgressService {
                     .addContext(ErrorContextKeys.OPERATION, "validateTeamBelongsToChallenge")
                     .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
                     .addContext(ErrorContextKeys.DETAIL, "해당 팀은 이 챌린지에 속하지 않습니다: " + teamId);
+        }
+    }
+
+    private static void validateChallengeEnded(Challenge challenge) {
+        if (!challenge.isEnded(LocalDate.now())) {
+            throw new CIllegalArgumentException(ErrorDetail.PRECONDITION_FAILED)
+                    .addContext(ErrorContextKeys.OPERATION, "getCertificationInfo")
+                    .addContext(ErrorContextKeys.DETAIL, "진행 중인 챌린지는 수료증을 조회할 수 없습니다");
         }
     }
 }

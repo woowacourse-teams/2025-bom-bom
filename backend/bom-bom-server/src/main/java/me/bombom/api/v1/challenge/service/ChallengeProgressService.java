@@ -7,10 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyResult;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
+import me.bombom.api.v1.challenge.domain.ChallengeGrade;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat;
+import me.bombom.api.v1.challenge.dto.response.CertificationInfoResponse;
 import me.bombom.api.v1.challenge.dto.response.MemberChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TeamChallengeProgressResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
@@ -77,6 +79,23 @@ public class ChallengeProgressService {
         List<TeamChallengeProgressFlat> progressList = challengeParticipantRepository.findTeamProgress(teamId);
 
         return TeamChallengeProgressResponse.of(challenge, progressList);
+    }
+
+    public CertificationInfoResponse getCertificationInfo(Long challengeId, Member member) {
+        Challenge challenge = challengeRepository.findById(challengeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.OPERATION, "getTeamProgressByTeamId"));
+
+        ChallengeParticipant challengeParticipant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId,
+                        member.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
+                        .addContext(ErrorContextKeys.OPERATION, "getTeamProgressByTeamId"));
+
+        int progress = challengeParticipant.calculateProgress(challenge.getTotalDays());
+        ChallengeGrade challengeGrade = ChallengeGrade.calculate(progress, challengeParticipant.isSurvived());
+        return CertificationInfoResponse.of(member, challenge, challengeGrade);
     }
 
     private void saveShieldDailyResult(ChallengeParticipant participant, LocalDate date) {

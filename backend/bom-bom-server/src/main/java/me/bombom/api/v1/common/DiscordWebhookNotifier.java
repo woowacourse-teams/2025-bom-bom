@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class DiscordWebhookNotifier {
 
     @Value("${discord.webhook.new_member.url}")
-    private String webhookUrl;
+    private String newMemberWebhookUrl;
 
     private final WebhookHttpClient webhookClient;
     private final MemberService memberService;
@@ -34,6 +34,6 @@ public class DiscordWebhookNotifier {
                 )
         ));
 
-        webhookClient.post(webhookUrl, body);
+        webhookClient.post(newMemberWebhookUrl, body);
     }
 }

@@ -3,15 +3,19 @@ package me.bombom.api.v1.subscribe.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.common.DiscordWebhookNotifier;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.common.exception.RetryableException;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.domain.SubscribeStatus;
 import me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse;
+import me.bombom.api.v1.subscribe.event.AutoUnsubscribeCompletedEvent;
 import me.bombom.api.v1.subscribe.event.UnsubscribeRequestedEvent;
+import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -26,6 +30,8 @@ public class SubscribeService {
 
     private final SubscribeRepository subscribeRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final UnsubscribeAgent unsubscribeAgent;
+    private final DiscordWebhookNotifier discordNotifier;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteAllByMemberId(Long memberId) {
@@ -68,8 +74,7 @@ public class SubscribeService {
         applicationEventPublisher.publishEvent(UnsubscribeRequestedEvent.of(
                 subscribe.getId(),
                 subscribe.getUnsubscribeUrl(),
-                subscribe.getNewsletterId()
-        ));
+                subscribe.getNewsletterId()));
     }
 
     @Transactional
@@ -84,5 +89,24 @@ public class SubscribeService {
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "subscribe")
                         .addContext("subscribeId", subscribeId));
         subscribe.changeStatus(SubscribeStatus.UNSUBSCRIBE_FAILED);
+    }
+
+    public void processUnsubscribe(Long subscribeId, Long newsletterId, String unsubscribeUrl) {
+        try {
+            boolean isSuccess = unsubscribeAgent.unsubscribe(unsubscribeUrl, newsletterId);
+            applicationEventPublisher.publishEvent(AutoUnsubscribeCompletedEvent.of(subscribeId, isSuccess));
+        } catch (RetryableException e) {
+            // 재시도
+
+        } catch (AutoUnsubscribeFailedException e) {
+            discordNotifier.sendUnsubscribeErrorNotification(
+                    e.getMessage(),
+                    e.getNewsletterId(),
+                    e.getUrl(),
+                    subscribeId
+            );
+        } catch (Exception e) {
+            log.error("예상치 못한 예외가 발생했습니다.", e);
+        }
     }
 }

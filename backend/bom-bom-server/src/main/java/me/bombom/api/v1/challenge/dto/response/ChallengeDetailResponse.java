@@ -20,13 +20,11 @@ public record ChallengeDetailResponse(
         return new ChallengeDetailResponse(false, 0, null, null);
     }
 
-    public static ChallengeDetailResponse ongoing(int progress) {
-        return new ChallengeDetailResponse(true, progress, null, null);
+    public static ChallengeDetailResponse ongoing(int progress, boolean isSurvived) {
+        return new ChallengeDetailResponse(true, progress, null, isSurvived);
     }
 
-    public static ChallengeDetailResponse ended(int progress, boolean isSurvived) {
-        ChallengeGrade grade = ChallengeGrade.calculate(progress, isSurvived);
-        boolean isSuccess = grade != ChallengeGrade.FAIL;
-        return new ChallengeDetailResponse(true, progress, grade, isSuccess);
+    public static ChallengeDetailResponse ended(int progress, boolean isSurvived, ChallengeGrade grade) {
+        return new ChallengeDetailResponse(true, progress, grade, isSurvived);
     }
 }

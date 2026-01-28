@@ -14,6 +14,7 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.ChallengeGrade;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
@@ -249,13 +250,15 @@ public class ChallengeService {
             return ChallengeDetailResponse.notJoined();
         }
 
-        int progress = myParticipant.calculateProgress(challenge.getTotalDays());
         boolean isEnded = challenge.isEnded(LocalDate.now());
+        boolean isSurvived = myParticipant.isSurvived();
+        int progress = myParticipant.calculateProgress(challenge.getTotalDays());
 
         if (isEnded) {
-            return ChallengeDetailResponse.ended(progress, myParticipant.isSurvived());
+            ChallengeGrade grade = ChallengeGrade.calculate(progress, isSurvived);
+            return ChallengeDetailResponse.ended(progress, isSurvived, grade);
         }
-        return ChallengeDetailResponse.ongoing(progress);
+        return ChallengeDetailResponse.ongoing(progress, isSurvived);
     }
 
     private RuntimeException createApplyException(Long challengeId, Member member, EligibilityReason reason) {

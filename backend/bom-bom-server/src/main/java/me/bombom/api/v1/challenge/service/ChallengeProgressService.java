@@ -83,6 +83,12 @@ public class ChallengeProgressService {
         validateChallengeEnded(challenge);
 
         ChallengeParticipant challengeParticipant = getChallengeParticipant(challengeId, member);
+        if (!challengeParticipant.isSurvived()) {
+            throw new CIllegalArgumentException(ErrorDetail.PRECONDITION_FAILED)
+                    .addContext(ErrorContextKeys.OPERATION, "getCertificationInfo")
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext(ErrorContextKeys.DETAIL, "탈락한 참가자는 수료증을 발급받을 수 없습니다.");
+        }
 
         int progress = challengeParticipant.calculateProgress(challenge.getTotalDays());
         ChallengeGrade challengeGrade = ChallengeGrade.calculate(progress, challengeParticipant.isSurvived());

@@ -1,0 +1,343 @@
+diff --git a/backend/fcm-server/build.gradle.kts b/backend/fcm-server/build.gradle.kts
+index 12046c2c..eac7d0a8 100644
+--- a/backend/fcm-server/build.gradle.kts
++++ b/backend/fcm-server/build.gradle.kts
+@@ -33,6 +33,9 @@ dependencies {
+     implementation("mysql:mysql-connector-java:8.0.33")
+     runtimeOnly("com.h2database:h2")
+ 
++    // logging
++    implementation(platform("org.springframework.cloud:spring-cloud-dependencies:2025.0.0"))
++    implementation("net.logstash.logback:logstash-logback-encoder:8.1")
+ 
+     // fcm
+     implementation("com.google.firebase:firebase-admin:9.2.0")
+diff --git a/backend/fcm-server/src/main/java/news/bombom/notification/domain/ArticleArrivalNotification.java b/backend/fcm-server/src/main/java/news/bombom/notification/domain/ArticleArrivalNotification.java
+index a144f4d3..c6b8f0cc 100644
+--- a/backend/fcm-server/src/main/java/news/bombom/notification/domain/ArticleArrivalNotification.java
++++ b/backend/fcm-server/src/main/java/news/bombom/notification/domain/ArticleArrivalNotification.java
+@@ -20,7 +20,8 @@ import news.bombom.notification.common.BaseEntity;
+ @NoArgsConstructor(access = AccessLevel.PROTECTED)
+ public class ArticleArrivalNotification extends BaseEntity {
+ 
+-    private static final int MAX_RETRY_ATTEMPTS = 3;
++    private static final int MAX_RETRY_ATTEMPTS = 6;
++    private static final int SHORT_RETRY_ATTEMPTS = 3;
+ 
+     @Id
+     @GeneratedValue(strategy = GenerationType.IDENTITY)
+@@ -91,25 +92,31 @@ public class ArticleArrivalNotification extends BaseEntity {
+         this.nextRetryAt = calculateNextRetryTime(this.attempts);
+     }
+ 
+-    public void resetForRetry() {
+-        this.status = NotificationStatus.PENDING;
+-        this.nextRetryAt = null;
+-        this.lastError = null;
+-    }
+-
+-    public void markAsRead() {
+-        this.isRead = true;
+-    }
+-
+     public boolean shouldRetry() {
+         return this.attempts < MAX_RETRY_ATTEMPTS;
+     }
+ 
+     private LocalDateTime calculateNextRetryTime(int attempts) {
+-        long delaySeconds = 30L * (long) Math.pow(2, attempts - 1); // 30s, 60s, 120s...
+-        if (delaySeconds > 1800) { // Max 30 minutes
+-            delaySeconds = 1800;
++        long delaySeconds;
++
++        if (attempts <= SHORT_RETRY_ATTEMPTS) {
++            delaySeconds = 30L * (long) Math.pow(2, attempts - 1);
++        } else {
++            switch (attempts) {
++                case 4:
++                    delaySeconds = 1800L;
++                    break;
++                case 5:
++                    delaySeconds = 3600L;
++                    break;
++                case MAX_RETRY_ATTEMPTS:
++                    delaySeconds = 10800L;
++                    break;
++                default:
++                    delaySeconds = 10800L;
++            }
+         }
++
+         return LocalDateTime.now().plusSeconds(delaySeconds);
+     }
+ }
+diff --git a/backend/fcm-server/src/main/java/news/bombom/notification/domain/ArticleArrivalNotificationFailed.java b/backend/fcm-server/src/main/java/news/bombom/notification/domain/ArticleArrivalNotificationFailed.java
+new file mode 100644
+index 00000000..9f2935a4
+--- /dev/null
++++ b/backend/fcm-server/src/main/java/news/bombom/notification/domain/ArticleArrivalNotificationFailed.java
+@@ -0,0 +1,78 @@
++package news.bombom.notification.domain;
++
++import jakarta.persistence.Column;
++import jakarta.persistence.Entity;
++import jakarta.persistence.GeneratedValue;
++import jakarta.persistence.GenerationType;
++import jakarta.persistence.Id;
++import java.time.LocalDateTime;
++import lombok.AccessLevel;
++import lombok.Builder;
++import lombok.Getter;
++import lombok.NoArgsConstructor;
++import lombok.NonNull;
++import news.bombom.notification.common.BaseEntity;
++
++@Entity
++@Getter
++@NoArgsConstructor(access = AccessLevel.PROTECTED)
++public class ArticleArrivalNotificationFailed extends BaseEntity {
++
++    @Id
++    @GeneratedValue(strategy = GenerationType.IDENTITY)
++    private Long id;
++
++    @Column(nullable = false)
++    private Long originalNotificationId;
++
++    @Column(nullable = false)
++    private Long memberId;
++
++    @Column(nullable = false)
++    private Long articleId;
++
++    @Column(nullable = false)
++    private String newsletterName;
++
++    @Column(nullable = false)
++    private String articleTitle;
++
++    private int finalAttempts;
++
++    @Column(length = 1024)
++    private String lastError;
++
++    private LocalDateTime failedAt;
++
++    @Builder
++    public ArticleArrivalNotificationFailed(
++            @NonNull Long originalNotificationId,
++            @NonNull Long memberId,
++            @NonNull Long articleId,
++            @NonNull String newsletterName,
++            @NonNull String articleTitle,
++            int finalAttempts,
++            String lastError
++    ) {
++        this.originalNotificationId = originalNotificationId;
++        this.memberId = memberId;
++        this.articleId = articleId;
++        this.newsletterName = newsletterName;
++        this.articleTitle = articleTitle;
++        this.finalAttempts = finalAttempts;
++        this.lastError = lastError;
++        this.failedAt = LocalDateTime.now();
++    }
++
++    public static ArticleArrivalNotificationFailed from(ArticleArrivalNotification notification) {
++        return ArticleArrivalNotificationFailed.builder()
++                .originalNotificationId(notification.getId())
++                .memberId(notification.getMemberId())
++                .articleId(notification.getArticleId())
++                .newsletterName(notification.getNewsletterName())
++                .articleTitle(notification.getArticleTitle())
++                .finalAttempts(notification.getAttempts())
++                .lastError(notification.getLastError())
++                .build();
++    }
++}
+diff --git a/backend/fcm-server/src/main/java/news/bombom/notification/repository/ArticleArrivalNotificationFailedRepository.java b/backend/fcm-server/src/main/java/news/bombom/notification/repository/ArticleArrivalNotificationFailedRepository.java
+new file mode 100644
+index 00000000..5f8f811a
+--- /dev/null
++++ b/backend/fcm-server/src/main/java/news/bombom/notification/repository/ArticleArrivalNotificationFailedRepository.java
+@@ -0,0 +1,7 @@
++package news.bombom.notification.repository;
++
++import news.bombom.notification.domain.ArticleArrivalNotificationFailed;
++import org.springframework.data.jpa.repository.JpaRepository;
++
++public interface ArticleArrivalNotificationFailedRepository extends JpaRepository<ArticleArrivalNotificationFailed, Long> {
++}
+diff --git a/backend/fcm-server/src/main/java/news/bombom/notification/scheduler/NotificationScheduler.java b/backend/fcm-server/src/main/java/news/bombom/notification/scheduler/NotificationScheduler.java
+index 6e22f1d6..f7402910 100644
+--- a/backend/fcm-server/src/main/java/news/bombom/notification/scheduler/NotificationScheduler.java
++++ b/backend/fcm-server/src/main/java/news/bombom/notification/scheduler/NotificationScheduler.java
+@@ -8,6 +8,7 @@ import news.bombom.notification.domain.ArticleArrivalNotification;
+ import news.bombom.notification.domain.NotificationStatus;
+ import news.bombom.notification.repository.ArticleArrivalNotificationRepository;
+ import news.bombom.notification.service.NotificationProcessingService;
++import news.bombom.notification.service.NotificationStatusService;
+ import org.springframework.scheduling.annotation.Scheduled;
+ import org.springframework.stereotype.Service;
+ 
+@@ -18,6 +19,7 @@ public class NotificationScheduler {
+ 
+     private final ArticleArrivalNotificationRepository notificationRepository;
+     private final NotificationProcessingService notificationProcessingService;
++    private final NotificationStatusService notificationStatusService;
+ 
+     @Scheduled(fixedDelay = 30000)
+     public void processPendingNotifications() {
+@@ -34,6 +36,7 @@ public class NotificationScheduler {
+                 if (!notification.shouldRetry()) {
+                     log.warn("최대 재시도 횟수 초과: notificationId={}, attempts={}",
+                             notification.getId(), notification.getAttempts());
++                    notificationStatusService.moveToFailedTableIfExceeded(notification);
+                     continue;
+                 }
+ 
+diff --git a/backend/fcm-server/src/main/java/news/bombom/notification/service/NotificationStatusService.java b/backend/fcm-server/src/main/java/news/bombom/notification/service/NotificationStatusService.java
+index 66f799f1..b272e04c 100644
+--- a/backend/fcm-server/src/main/java/news/bombom/notification/service/NotificationStatusService.java
++++ b/backend/fcm-server/src/main/java/news/bombom/notification/service/NotificationStatusService.java
+@@ -3,7 +3,9 @@ package news.bombom.notification.service;
+ import lombok.RequiredArgsConstructor;
+ import lombok.extern.slf4j.Slf4j;
+ import news.bombom.notification.domain.ArticleArrivalNotification;
++import news.bombom.notification.domain.ArticleArrivalNotificationFailed;
+ import news.bombom.notification.dto.response.NotificationResultResponse;
++import news.bombom.notification.repository.ArticleArrivalNotificationFailedRepository;
+ import news.bombom.notification.repository.ArticleArrivalNotificationRepository;
+ import org.springframework.stereotype.Service;
+ import org.springframework.transaction.annotation.Transactional;
+@@ -15,12 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
+ public class NotificationStatusService {
+ 
+     private final ArticleArrivalNotificationRepository notificationRepository;
++    private final ArticleArrivalNotificationFailedRepository articleArrivalNotificationFailedRepository;
+ 
+     @Transactional
+     public void updateStatus(ArticleArrivalNotification notification, NotificationResultResponse result) {
+         if (result.successCount() > 0) {
+             notification.markSent();
+-            notificationRepository.save(notification);
+             log.info("알림 발송 완료: notificationId={}, 성공={}, 실패={}, 스킵={}",
+                     notification.getId(), result.successCount(), result.failCount(), result.skippedCount());
+             return;
+@@ -28,15 +30,17 @@ public class NotificationStatusService {
+         if (result.skippedCount() == result.totalDevices()) {
+             // 모든 기기가 알림 설정이 꺼져있으면 SENT로 처리 (정상적인 상황)
+             notification.markSent();
+-            notificationRepository.save(notification);
+             log.info("모든 기기에서 알림 설정이 꺼져있음: notificationId={}, 스킵={}",
+                     notification.getId(), result.skippedCount());
+             return;
+         }
+         // 모든 기기에서 실패하면 FAILED로 처리
+         notification.markFailed(result.errorMessages());
+-        notificationRepository.save(notification);
+         log.error("모든 기기에서 알림 발송 실패: notificationId={}", notification.getId());
++
++        if (!notification.shouldRetry()) {
++            moveToFailedTable(notification);
++        }
+     }
+ 
+     @Transactional
+@@ -44,5 +48,23 @@ public class NotificationStatusService {
+         log.warn("FCM 토큰이 없습니다: memberId={}", notification.getMemberId());
+         notification.markFailed(reason);
+         notificationRepository.save(notification);
++        
++        if (!notification.shouldRetry()) {
++            moveToFailedTable(notification);
++        }
++    }
++
++    @Transactional
++    public void moveToFailedTableIfExceeded(ArticleArrivalNotification notification) {
++        if (!notification.shouldRetry()) {
++            moveToFailedTable(notification);
++        }
++    }
++
++    private void moveToFailedTable(ArticleArrivalNotification notification) {
++        ArticleArrivalNotificationFailed failed = ArticleArrivalNotificationFailed.from(notification);
++        articleArrivalNotificationFailedRepository.save(failed);
++        notificationRepository.delete(notification);
++        log.warn("최대 재시도 횟수 초과로 인한 데이터 격리: notificationId={}", notification.getId());
+     }
+ }
+diff --git a/backend/fcm-server/src/main/resources/logback.xml b/backend/fcm-server/src/main/resources/logback.xml
+new file mode 100644
+index 00000000..146e3c84
+--- /dev/null
++++ b/backend/fcm-server/src/main/resources/logback.xml
+@@ -0,0 +1,67 @@
++<configuration scan="true" scanPeriod="30 seconds">
++
++    <!-- 공통 프로퍼티 -->
++    <property name="LOG_PATH" value="${LOG_PATH:-./logs}"/>
++
++    <!-- 콘솔: DEBUG 이상 -->
++    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
++        <filter class="ch.qos.logback.classic.filter.LevelFilter">
++            <level>DEBUG</level>
++            <onMatch>ACCEPT</onMatch>
++            <onMismatch>NEUTRAL</onMismatch>
++        </filter>
++        <encoder>
++            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
++        </encoder>
++    </appender>
++
++    <!-- 파일(JSON): INFO 이상 -->
++    <appender name="ALL_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
++        <append>true</append>
++        <file>${LOG_PATH}/bombom-fcm.log</file>
++        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
++            <fileNamePattern>${LOG_PATH}/bombom-fcm.log.%d{yyyy-MM-dd}</fileNamePattern>
++            <maxHistory>15</maxHistory>
++            <totalSizeCap>1GB</totalSizeCap>
++        </rollingPolicy>
++
++        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
++            <level>INFO</level>
++        </filter>
++
++        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
++            <providers>
++                <timestamp fieldName="time" pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX"/>
++                <pattern>{"level":"%level","logger":"%logger","thread":"%thread"}</pattern>
++
++                <!-- trace/MDC 미사용: message + stackTrace만 -->
++                <message/>
++                <stackTrace>
++                    <fieldName>stackTrace</fieldName>
++                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
++                        <maxDepthPerThrowable>30</maxDepthPerThrowable>
++                        <maxLength>3000</maxLength>
++                        <shortenedClassNameLength>20</shortenedClassNameLength>
++                        <rootCauseFirst>true</rootCauseFirst>
++                        <exclude>sun\.reflect\..*</exclude>
++                        <exclude>java\.lang\.reflect\..*</exclude>
++                        <exclude>org\.springframework\.aop\..*</exclude>
++                        <exclude>org\.springframework\.cglib\..*</exclude>
++                    </throwableConverter>
++                </stackTrace>
++            </providers>
++        </encoder>
++    </appender>
++
++    <appender name="ASYNC_ALL_JSON" class="ch.qos.logback.classic.AsyncAppender">
++        <appender-ref ref="ALL_JSON"/>
++        <queueSize>5000</queueSize>
++        <discardingThreshold>0</discardingThreshold>
++    </appender>
++
++    <!-- Root는 DEBUG, Appender별 필터가 실제 출력 레벨을 조정 -->
++    <root level="DEBUG">
++        <appender-ref ref="STDOUT"/>
++        <appender-ref ref="ASYNC_ALL_JSON"/>
++    </root>
++</configuration>

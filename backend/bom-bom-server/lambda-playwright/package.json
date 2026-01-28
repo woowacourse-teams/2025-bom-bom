@@ -1,0 +1,9 @@
+{
+  "name": "lambda-playwright",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "@sparticuz/chromium": "^119.0.2",
+    "playwright-core": "^1.40.0"
+  }
+}

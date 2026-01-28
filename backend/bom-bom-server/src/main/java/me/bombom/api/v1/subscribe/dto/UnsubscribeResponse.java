@@ -1,4 +1,4 @@
-package me.bombom.api.v1.subscribe.dto.response;
+package me.bombom.api.v1.subscribe.dto;
 
 public record UnsubscribeResponse(
 

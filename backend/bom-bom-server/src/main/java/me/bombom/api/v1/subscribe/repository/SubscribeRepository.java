@@ -2,7 +2,7 @@ package me.bombom.api.v1.subscribe.repository;
 
 import java.util.List;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
-import me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse;
+import me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,9 +11,15 @@ import org.springframework.data.repository.query.Param;
 public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
 
     @Query("""
-        SELECT new me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse(
-            s.id, n.id, n.name, n.imageUrl, n.description, c.name,
-            CASE WHEN s.unsubscribeUrl IS NOT NULL AND s.unsubscribeUrl <> '' THEN true ELSE false END
+        SELECT new me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse(
+            s.id,
+            n.id,
+            n.name,
+            n.imageUrl,
+            n.description,
+            c.name,
+            s.unsubscribeUrl,
+            s.status
         )
         FROM Subscribe s
         JOIN Newsletter n ON s.newsletterId = n.id

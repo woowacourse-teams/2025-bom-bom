@@ -1,8 +1,7 @@
-package me.bombom.api.v1.subscribe.dto;
+package me.bombom.api.v1.subscribe.dto.response;
 
 import jakarta.validation.constraints.NotNull;
-
-import org.springframework.util.StringUtils;
+import me.bombom.api.v1.subscribe.domain.SubscribeStatus;
 
 public record SubscribedNewsletterResponse(
 
@@ -23,8 +22,10 @@ public record SubscribedNewsletterResponse(
         @NotNull
         String category,
 
+        String unsubscribeUrl,
+
         @NotNull
-        boolean hasUnsubscribeUrl
+        SubscribeStatus status
 ) {
 
     public static SubscribedNewsletterResponse of(
@@ -34,11 +35,18 @@ public record SubscribedNewsletterResponse(
             String imageUrl,
             String description,
             String category,
-            String unsubscribeUrl
+            String unsubscribeUrl,
+            SubscribeStatus status
     ) {
-        boolean hasUnsubscribeUrl = StringUtils.hasText(unsubscribeUrl);
         return new SubscribedNewsletterResponse(
-                subscriptionId, newsletterId, name, imageUrl, description, category, hasUnsubscribeUrl
+                subscriptionId,
+                newsletterId,
+                name,
+                imageUrl,
+                description,
+                category,
+                unsubscribeUrl,
+                status
         );
     }
 }

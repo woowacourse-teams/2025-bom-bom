@@ -118,7 +118,7 @@ public class ReadingService {
             }
 
             // 2. 초기화 전에 랭킹 뱃지 발급
-            List<RankerInfo> topRankers = monthlyReadingSnapshotRepository.findTopRankers(BadgeGrade.MAX_RANKING_COUNT);
+            List<RankerInfo> topRankers = monthlyReadingSnapshotRepository.findTopRankers(BadgeGrade.MAX_RANK_FOR_BADGE);
             badgeService.issueRankingBadges(topRankers, lastMonth);
 
             // 3. Stream으로 메모리 효율적 처리

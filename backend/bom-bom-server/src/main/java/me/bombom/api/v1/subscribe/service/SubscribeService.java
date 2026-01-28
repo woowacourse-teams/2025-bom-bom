@@ -9,9 +9,11 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
-import me.bombom.api.v1.subscribe.dto.UnsubscribeResponse;
-import me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse;
+import me.bombom.api.v1.subscribe.domain.SubscribeStatus;
+import me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse;
+import me.bombom.api.v1.subscribe.event.UnsubscribeRequestedEvent;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SubscribeService {
 
     private final SubscribeRepository subscribeRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteAllByMemberId(Long memberId) {
@@ -34,7 +37,7 @@ public class SubscribeService {
     }
 
     @Transactional
-    public UnsubscribeResponse unsubscribe(Long memberId, Long subscribeId) {
+    public void unsubscribe(Long memberId, Long subscribeId) {
         Subscribe subscribe = subscribeRepository.findById(subscribeId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "subscribe")
@@ -49,9 +52,37 @@ public class SubscribeService {
                 .addContext("subscribeId", subscribeId);
         }
 
-        String unsubscribeUrl = subscribe.getUnsubscribeUrl();
-        subscribeRepository.delete(subscribe);
+        // 자동 취소가 불가능한 경우 사용자가 직접 구독 취소 유도 후 삭제 버튼 클릭
+        if (subscribe.isFailed()) {
+            log.info("구독 취소 실패 상태인 항목 강제 삭제 subscribeId: {}", subscribeId);
+            subscribeRepository.delete(subscribe);
+            return;
+        }
 
-        return UnsubscribeResponse.of(unsubscribeUrl);
+        // 구독 취소 이미 진행 중
+        if (subscribe.isUnsubscribing()) {
+            return;
+        }
+
+        subscribe.changeStatus(SubscribeStatus.UNSUBSCRIBING);
+        applicationEventPublisher.publishEvent(UnsubscribeRequestedEvent.of(
+                subscribe.getId(),
+                subscribe.getUnsubscribeUrl(),
+                subscribe.getNewsletterId()
+        ));
+    }
+
+    @Transactional
+    public void handleUnsubscribeResult(Long subscribeId, boolean isSuccess) {
+        if (isSuccess) {
+            subscribeRepository.deleteById(subscribeId);
+            return;
+        }
+
+        Subscribe subscribe = subscribeRepository.findById(subscribeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "subscribe")
+                        .addContext("subscribeId", subscribeId));
+        subscribe.changeStatus(SubscribeStatus.UNSUBSCRIBE_FAILED);
     }
 }

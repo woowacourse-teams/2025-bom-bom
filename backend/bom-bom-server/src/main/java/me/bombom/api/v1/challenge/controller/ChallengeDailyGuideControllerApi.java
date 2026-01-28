@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import me.bombom.api.v1.challenge.dto.request.DailyGuideCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse;
+import me.bombom.api.v1.challenge.dto.response.MemberDailyCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
@@ -70,4 +71,19 @@ public interface ChallengeDailyGuideControllerApi {
             @Parameter(description = "일차 인덱스 (1부터 시작)") @PathVariable @Positive(message = "일차 인덱스는 1 이상의 값이어야 합니다.") int dayIndex,
             @Valid DailyGuideCommentRequest request
     );
+
+    @Operation(
+            summary = "데일리 가이드 내 댓글 조회",
+            description = "특정 챌린지의 특정 일차 데일리 가이드에 내가 작성한 댓글을 조회합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "댓글 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 (유효하지 않은 ID)", content = @Content),
+            @ApiResponse(responseCode = "403", description = "챌린지 참여 권한 없음", content = @Content),
+            @ApiResponse(responseCode = "404", description = "챌린지 또는 데일리 가이드를 찾을 수 없음", content = @Content)
+    })
+    MemberDailyCommentResponse getDailyGuideComment(
+            @Parameter(hidden = true) @LoginMember Member member,
+            @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
+            @Parameter(description = "일차 인덱스 (1부터 시작)") @PathVariable @Positive(message = "일차 인덱스는 1 이상의 값이어야 합니다.") int dayIndex);
 }

@@ -3,6 +3,7 @@ package me.bombom.api.v1.challenge.repository;
 import java.util.Optional;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
 import me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse;
+import me.bombom.api.v1.challenge.dto.response.MemberDailyCommentResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,5 +26,18 @@ public interface ChallengeDailyGuideCommentRepository extends JpaRepository<Chal
             WHERE c.guideId = :guideId
             """)
     Page<DailyGuideCommentResponse> findByGuideId(@Param("guideId") Long guideId, Pageable pageable);
-}
 
+    @Query("""
+            SELECT new me.bombom.api.v1.challenge.dto.response.MemberDailyCommentResponse(c.content)
+            FROM ChallengeParticipant p
+            JOIN ChallengeDailyGuide g ON g.challengeId = p.challengeId AND g.dayIndex = :dayIndex
+            LEFT JOIN ChallengeDailyGuideComment c ON c.participantId = p.id AND c.guideId = g.id
+            WHERE p.challengeId = :challengeId
+            AND p.memberId = :memberId
+    """)
+    MemberDailyCommentResponse findMyComment(
+            @Param("challengeId") Long challengeId,
+            @Param("dayIndex") int dayIndex,
+            @Param("memberId") Long memberId
+    );
+}

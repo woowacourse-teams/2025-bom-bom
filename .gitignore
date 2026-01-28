@@ -56,6 +56,9 @@ src/main/resources/log4j2.xml
 # .github 디렉토리 내의 .yml 파일 예외 처리
 !.github/**/*.yml
 
+# 구독 취소 관련 패턴 .yml 파일 예외 처리
+!**/unsubscribe-pattern.yml
+
 #Frontend
 node_modules
 dist

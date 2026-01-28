@@ -36,6 +36,7 @@ import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.badge.service.BadgeService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +53,7 @@ public class ChallengeService {
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ChallengeNewsletterRepository challengeNewsletterRepository;
     private final ChallengeTeamRepository challengeTeamRepository;
+    private final BadgeService badgeService;
 
     public List<ChallengeResponse> getChallenges(Member member) {
         List<Challenge> challenges = challengeRepository.findAll();
@@ -157,6 +159,18 @@ public class ChallengeService {
 
     public List<Challenge> getOngoingChallenges(LocalDate date) {
         return challengeRepository.findOngoingChallenges(date);
+    }
+
+    public List<Challenge> getEndedChallengesPendingBadge(LocalDate date) {
+        return challengeRepository.findEndedChallengesPendingBadge(date);
+    }
+
+    @Transactional
+    public void processEndedChallenge(Challenge challenge) {
+        List<ChallengeParticipant> participants = challengeParticipantRepository.findAllByChallengeId(challenge.getId());
+        badgeService.issueChallengeBadges(challenge, participants);
+        challenge.markBadgeAsIssued();
+        challengeRepository.save(challenge);
     }
 
     public ChallengeTeamListResponse getTeamList(Long challengeId, Member member) {

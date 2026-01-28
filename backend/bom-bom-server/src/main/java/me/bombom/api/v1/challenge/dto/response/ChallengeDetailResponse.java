@@ -26,7 +26,7 @@ public record ChallengeDetailResponse(
 
     public static ChallengeDetailResponse ended(int progress, boolean isSurvived) {
         ChallengeGrade grade = ChallengeGrade.calculate(progress, isSurvived);
-        boolean isSuccess = grade != ChallengeGrade.FAIL && grade != ChallengeGrade.COMPLETE;
+        boolean isSuccess = grade != ChallengeGrade.FAIL;
         return new ChallengeDetailResponse(true, progress, grade, isSuccess);
     }
 }

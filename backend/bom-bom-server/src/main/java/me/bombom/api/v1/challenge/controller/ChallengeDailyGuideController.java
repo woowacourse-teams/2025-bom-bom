@@ -7,6 +7,7 @@ import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.dto.request.DailyGuideCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse;
+import me.bombom.api.v1.challenge.dto.response.MemberDailyCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse;
 import me.bombom.api.v1.challenge.service.ChallengeDailyGuideService;
 import me.bombom.api.v1.common.resolver.LoginMember;
@@ -42,6 +43,16 @@ public class ChallengeDailyGuideController implements ChallengeDailyGuideControl
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId
     ) {
         return challengeDailyGuideService.getTodayDailyGuide(challengeId, member.getId());
+    }
+
+    @Override
+    @GetMapping("/{challengeId}/daily-guides/{dayIndex}/my-comment")
+    public MemberDailyCommentResponse getDailyGuideComment(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
+            @PathVariable @Positive(message = "일차 인덱스는 1 이상의 값이어야 합니다.") int dayIndex
+    ) {
+        return challengeDailyGuideService.getDailyGuideComment(challengeId, dayIndex, member.getId());
     }
 
     @Override

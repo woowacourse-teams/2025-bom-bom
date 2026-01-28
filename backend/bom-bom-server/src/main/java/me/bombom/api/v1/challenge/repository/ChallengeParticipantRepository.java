@@ -78,6 +78,8 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
 
     List<ChallengeParticipant> findByMemberIdAndChallengeIdIn(Long memberId, List<Long> challengeIds);
 
+    List<ChallengeParticipant> findAllByChallengeId(Long challengeId);
+
     @Query("""
         SELECT cp
         FROM ChallengeParticipant cp

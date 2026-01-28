@@ -4,7 +4,9 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.BDDMockito.given;
 
+import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -19,6 +21,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.domain.DailyGuideType;
 import me.bombom.api.v1.challenge.dto.request.DailyGuideCommentRequest;
+import me.bombom.api.v1.challenge.dto.response.MemberDailyCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyGuideCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyGuideRepository;
@@ -37,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @IntegrationTest
 class ChallengeDailyGuideServiceTest {
@@ -70,6 +74,9 @@ class ChallengeDailyGuideServiceTest {
     @Autowired
     private ChallengeDailyResultRepository challengeDailyResultRepository;
 
+    @MockitoBean
+    private Clock clock;
+
     private Member member;
     private Challenge challenge;
     private ChallengeParticipant participant;
@@ -92,13 +99,19 @@ class ChallengeDailyGuideServiceTest {
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
 
-        today = LocalDate.now(SEOUL_ZONE);
+        // 무조건 평일로 설정 (2026-01-26 월요일)
+        today = LocalDate.of(2026, 1, 26);
+
+        given(clock.getZone()).willReturn(SEOUL_ZONE);
+        given(clock.instant()).willReturn(today.atStartOfDay(SEOUL_ZONE).toInstant());
+        today = LocalDate.now(clock);
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "테스트 챌린지",
                 today.minusDays(5),
                 today.plusDays(5),
                 10
-        ));
+                )
+        );
 
         participant = challengeParticipantRepository.save(
                 TestFixture.createChallengeParticipant(
@@ -108,13 +121,9 @@ class ChallengeDailyGuideServiceTest {
                 )
         );
 
-        // READ, COMMENT todo 생성
-        readTodo = challengeTodoRepository.save(
-                TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ)
-        );
-        commentTodo = challengeTodoRepository.save(
-                TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.COMMENT)
-        );
+        // READ, COMMENT 투두 생성
+        readTodo = challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
+        commentTodo = challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.COMMENT));
 
         int dayIndex = calculateDayIndex(challenge.getStartDate(), today);
         guide = challengeDailyGuideRepository.save(
@@ -492,12 +501,12 @@ class ChallengeDailyGuideServiceTest {
         List<ChallengeDailyGuideComment> comments = challengeDailyGuideCommentRepository.findAll();
         assertThat(comments).hasSize(1);
 
-        // then - READ todo 생성 확인
+        // then - READ 투두 생성 확인
         boolean readTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
                 participant.getId(), weekday, readTodo.getId());
         assertThat(readTodoExists).isTrue();
 
-        // then - COMMENT todo 생성 확인
+        // then - COMMENT 투두 생성 확인
         boolean commentTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
                 participant.getId(), weekday, commentTodo.getId());
         assertThat(commentTodoExists).isTrue();
@@ -540,12 +549,12 @@ class ChallengeDailyGuideServiceTest {
         List<ChallengeDailyGuideComment> comments = challengeDailyGuideCommentRepository.findAll();
         assertThat(comments).hasSize(1);
 
-        // then - READ todo 생성 안 됨 (아직 아티클을 읽지 않았으므로)
+        // then - READ 투두 생성 안 됨 (아직 아티클을 읽지 않았으므로)
         boolean readTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
                 participant.getId(), today, readTodo.getId());
         assertThat(readTodoExists).isFalse();
 
-        // then - COMMENT todo 생성 안 됨 (day1이 아니므로)
+        // then - COMMENT 투두 생성 안 됨 (day1이 아니므로)
         boolean commentTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
                 participant.getId(), today, commentTodo.getId());
         assertThat(commentTodoExists).isFalse();
@@ -572,7 +581,7 @@ class ChallengeDailyGuideServiceTest {
         }
         final LocalDate weekday = tempWeekday;
 
-        // 이미 READ todo 생성
+        // 이미 READ 투두 생성
         challengeDailyTodoRepository.save(
                 TestFixture.createChallengeDailyTodo(
                         participant.getId(),
@@ -592,7 +601,7 @@ class ChallengeDailyGuideServiceTest {
                 weekday
         );
 
-        // then - READ todo는 1개만 존재 (중복 생성 안 됨)
+        // then - READ 투두는 1개만 존재 (중복 생성 안 됨)
         List<ChallengeDailyTodo> readTodos = challengeDailyTodoRepository.findAll().stream()
                 .filter(todo -> todo.getParticipantId().equals(participant.getId()))
                 .filter(todo -> todo.getChallengeTodoId().equals(readTodo.getId()))
@@ -600,7 +609,7 @@ class ChallengeDailyGuideServiceTest {
                 .toList();
         assertThat(readTodos).hasSize(1);
 
-        // then - COMMENT todo 생성 확인
+        // then - COMMENT 투두 생성 확인
         boolean commentTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
                 participant.getId(), weekday, commentTodo.getId());
         assertThat(commentTodoExists).isTrue();
@@ -627,7 +636,7 @@ class ChallengeDailyGuideServiceTest {
         }
         final LocalDate weekday = tempWeekday;
 
-        // 이미 COMMENT todo 생성
+        // 이미 COMMENT 투두 생성
         challengeDailyTodoRepository.save(
                 TestFixture.createChallengeDailyTodo(
                         participant.getId(),
@@ -647,7 +656,7 @@ class ChallengeDailyGuideServiceTest {
                 weekday
         );
 
-        // then - COMMENT todo는 1개만 존재 (중복 생성 안 됨)
+        // then - COMMENT 투두는 1개만 존재 (중복 생성 안 됨)
         List<ChallengeDailyTodo> commentTodos = challengeDailyTodoRepository.findAll().stream()
                 .filter(todo -> todo.getParticipantId().equals(participant.getId()))
                 .filter(todo -> todo.getChallengeTodoId().equals(commentTodo.getId()))
@@ -655,7 +664,7 @@ class ChallengeDailyGuideServiceTest {
                 .toList();
         assertThat(commentTodos).hasSize(1);
 
-        // then - READ todo 생성 확인
+        // then - READ 투두 생성 확인
         boolean readTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
                 participant.getId(), weekday, readTodo.getId());
         assertThat(readTodoExists).isTrue();
@@ -834,5 +843,66 @@ class ChallengeDailyGuideServiceTest {
                 pageable
         )).isInstanceOf(CIllegalArgumentException.class);
     }
-}
 
+    @Test
+    void 데일리_가이드_내_댓글_조회_성공() {
+        // given
+        String content = "내 댓글 내용입니다.";
+        challengeDailyGuideCommentRepository.save(
+                TestFixture.createChallengeDailyGuideComment(
+                        guide.getId(),
+                        participant.getId(),
+                        content));
+
+        // when
+        MemberDailyCommentResponse response = challengeDailyGuideService.getDailyGuideComment(challenge.getId(),
+                guide.getDayIndex(), member.getId());
+
+        // then
+        assertThat(response.comment()).isEqualTo(content);
+    }
+
+    @Test
+    void 데일리_가이드_내_댓글이_없는_경우_빈_내용_반환() {
+        // when
+        MemberDailyCommentResponse response = challengeDailyGuideService.getDailyGuideComment(challenge.getId(),
+                guide.getDayIndex(), member.getId());
+
+        // then
+        assertThat(response.comment()).isNull();
+    }
+
+    @Test
+    void 존재하지_않는_챌린지에서_내_댓글_조회시_예외_발생() {
+        // when & then
+        assertThatThrownBy(() -> challengeDailyGuideService.getDailyGuideComment(
+                0L,
+                guide.getDayIndex(),
+                member.getId())).isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void 참여하지_않은_챌린지에서_내_댓글_조회시_예외_발생() {
+        // given
+        Member otherMember = TestFixture.createUniqueMember("other", "other");
+        memberRepository.save(otherMember);
+
+        // when & then
+        assertThatThrownBy(() -> challengeDailyGuideService.getDailyGuideComment(
+                challenge.getId(),
+                guide.getDayIndex(),
+                otherMember.getId())).isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void 미래의_데일리_가이드_내_댓글_조회시_예외_발생() {
+        // given
+        int futureDayIndex = calculateDayIndex(challenge.getStartDate(), today) + 1;
+
+        // when & then
+        assertThatThrownBy(() -> challengeDailyGuideService.getDailyGuideComment(
+                challenge.getId(),
+                futureDayIndex,
+                member.getId())).isInstanceOf(CIllegalArgumentException.class);
+    }
+}

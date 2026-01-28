@@ -535,13 +535,12 @@ class ChallengeProgressServiceTest {
                 )
         );
 
-        // when
-        CertificationInfoResponse response = challengeProgressService.getCertificationInfo(completedChallenge.getId(), member);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.medal()).isEqualTo(ChallengeGrade.FAIL);
-            softly.assertThat(response.medalCondition()).isEqualTo(0);
+        // when & then
+        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(completedChallenge.getId(), member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .satisfies(e -> {
+                    CIllegalArgumentException exception = (CIllegalArgumentException) e;
+                    assertThat(exception.getErrorDetail()).isEqualTo(ErrorDetail.PRECONDITION_FAILED);
         });
     }
 

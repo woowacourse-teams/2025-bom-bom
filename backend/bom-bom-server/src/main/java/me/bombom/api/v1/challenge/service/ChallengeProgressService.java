@@ -7,10 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyResult;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
+import me.bombom.api.v1.challenge.domain.ChallengeGrade;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat;
+import me.bombom.api.v1.challenge.dto.response.CertificationInfoResponse;
 import me.bombom.api.v1.challenge.dto.response.MemberChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TeamChallengeProgressResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
@@ -66,10 +68,7 @@ public class ChallengeProgressService {
     }
 
     public TeamChallengeProgressResponse getTeamProgressByTeamId(Long challengeId, Long teamId, Member member) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
-                        .addContext(ErrorContextKeys.OPERATION, "getTeamProgressByTeamId"));
+        Challenge challenge = getChallenge(challengeId);
 
         validateParticipation(challengeId, member);
         validateTeamBelongsToChallenge(challengeId, teamId);
@@ -77,6 +76,23 @@ public class ChallengeProgressService {
         List<TeamChallengeProgressFlat> progressList = challengeParticipantRepository.findTeamProgress(teamId);
 
         return TeamChallengeProgressResponse.of(challenge, progressList);
+    }
+
+    public CertificationInfoResponse getCertificationInfo(Long challengeId, Member member) {
+        Challenge challenge = getChallenge(challengeId);
+        validateChallengeEnded(challenge);
+
+        ChallengeParticipant challengeParticipant = getChallengeParticipant(challengeId, member);
+        if (!challengeParticipant.isSurvived()) {
+            throw new CIllegalArgumentException(ErrorDetail.PRECONDITION_FAILED)
+                    .addContext(ErrorContextKeys.OPERATION, "getCertificationInfo")
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext(ErrorContextKeys.DETAIL, "탈락한 참가자는 수료증을 발급받을 수 없습니다.");
+        }
+
+        int progress = challengeParticipant.calculateProgress(challenge.getTotalDays());
+        ChallengeGrade challengeGrade = ChallengeGrade.calculate(progress, challengeParticipant.isSurvived());
+        return CertificationInfoResponse.of(member, challenge, challengeGrade);
     }
 
     private void saveShieldDailyResult(ChallengeParticipant participant, LocalDate date) {
@@ -98,6 +114,21 @@ public class ChallengeProgressService {
         if (currentAbsent > maxAllowedAbsent) {
             participant.markAsFailed();
         }
+    }
+
+    private Challenge getChallenge(Long challengeId) {
+        return challengeRepository.findById(challengeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.OPERATION, "getChallenge"));
+    }
+
+    private ChallengeParticipant getChallengeParticipant(Long challengeId, Member member) {
+        return challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId,
+                member.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
+                        .addContext(ErrorContextKeys.OPERATION, "getChallengeParticipant"));
     }
 
     private void validateParticipation(Long id, Member member) {
@@ -134,6 +165,14 @@ public class ChallengeProgressService {
                     .addContext(ErrorContextKeys.OPERATION, "validateTeamBelongsToChallenge")
                     .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
                     .addContext(ErrorContextKeys.DETAIL, "해당 팀은 이 챌린지에 속하지 않습니다: " + teamId);
+        }
+    }
+
+    private static void validateChallengeEnded(Challenge challenge) {
+        if (!challenge.isEnded(LocalDate.now())) {
+            throw new CIllegalArgumentException(ErrorDetail.PRECONDITION_FAILED)
+                    .addContext(ErrorContextKeys.OPERATION, "getCertificationInfo")
+                    .addContext(ErrorContextKeys.DETAIL, "진행 중인 챌린지는 수료증을 조회할 수 없습니다");
         }
     }
 }

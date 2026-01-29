@@ -27,8 +27,6 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
     """)
     List<ChallengeParticipantCount> countByChallengeIdInGroupByChallengeId(@Param("challengeIds") List<Long> challengeIds);
 
-    List<ChallengeParticipant> findAllByMemberId(Long memberId);
-
     @Query("""
         SELECT new me.bombom.api.v1.challenge.dto.ChallengeProgressFlat(
             c.totalDays,

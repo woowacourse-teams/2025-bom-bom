@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
+import me.bombom.api.v1.challenge.dto.response.CertificationInfoResponse;
 import me.bombom.api.v1.challenge.dto.response.MemberChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TeamChallengeProgressResponse;
 import me.bombom.api.v1.common.resolver.LoginMember;
@@ -40,5 +41,16 @@ public interface ChallengeProgressControllerApi {
             @Parameter(hidden = true) @LoginMember Member member,
             @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
             @Parameter(description = "팀 ID") @PathVariable @Positive(message = "teamId는 1 이상의 값이어야 합니다.") Long teamId
+    );
+
+    @Operation(summary = "수료증 정보 조회", description = "사용자의 챌린지 수료증 정보(닉네임, 챌린지명, 기수, 기간, 메달 등급)를 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "수료증 정보 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청, 챌린지/참가자를 찾을 수 없음, 또는 진행 중인 챌린지, 탈락한 참가자", content = @Content),
+            @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content)
+        })
+    CertificationInfoResponse getCertificationInfo(
+            @Parameter(hidden = true) @LoginMember Member member,
+            @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
     );
 }

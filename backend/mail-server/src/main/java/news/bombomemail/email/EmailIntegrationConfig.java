@@ -99,7 +99,7 @@ public class EmailIntegrationConfig {
         return IntegrationFlow
                 .from(newMailFileSource(),
                         c -> c.poller(Pollers.fixedDelay(5000).getObject()))
-                .handle(Files.outboundAdapter(inProgressDir)
+                .handle(Files.outboundGateway(inProgressDir)
                         .autoCreateDirectory(true)
                         .deleteSourceFiles(true))
                 .handle("emailService", "processEmailFile",

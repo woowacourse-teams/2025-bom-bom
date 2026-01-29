@@ -93,4 +93,13 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
           )
     """)
     List<ChallengeParticipant> findAbsentees(@Param("challengeId") Long challengeId, @Param("date") LocalDate date);
+
+    @Query("""
+        SELECT cp
+        FROM ChallengeParticipant cp
+        JOIN ChallengeComment cc
+        ON cc.participantId = cp.id
+        WHERE cc.id = :commentId
+    """)
+    Optional<ChallengeParticipant> findAuthorByCommentId(@Param("commentId") Long commentId);
 }

@@ -11,6 +11,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.domain.ChallengeCommentReply;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.request.CreateCommentReplyRequest;
+import me.bombom.api.v1.challenge.dto.response.CommentReplyResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentReplyRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
@@ -22,6 +23,8 @@ import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 @IntegrationTest
 class ChallengeCommentReplyServiceTest {
@@ -129,6 +132,50 @@ class ChallengeCommentReplyServiceTest {
                 challengeComment.getId(),
                 replyMember.getId(),
                 request))
+                .isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void 코멘트에_달린_답글을_조회한다() {
+        // given
+        ChallengeParticipant replyParticipant = challengeParticipantRepository.save(
+                TestFixture.createChallengeParticipant(
+                        challenge.getId(),
+                        replyMember.getId(),
+                        0));
+
+        challengeCommentReplyRepository.save(
+                ChallengeCommentReply.builder()
+                        .commentId(challengeComment.getId())
+                        .participantId(replyParticipant.getId())
+                        .reply("첫번째 답글")
+                        .build());
+
+        // when
+        Page<CommentReplyResponse> page = challengeCommentReplyService.getCommentReplies(
+                replyMember.getId(),
+                challengeComment.getId(),
+                PageRequest.of(0, 10));
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(page.getTotalElements()).isEqualTo(1);
+            softly.assertThat(page.getContent().get(0).reply()).isEqualTo("첫번째 답글");
+            softly.assertThat(page.getContent().get(0).isMyReply()).isTrue();
+        });
+    }
+
+    @Test
+    void 챌린지_참여자가_아니면_답글을_조회할_수_없다() {
+        // given
+        Member outsider = memberRepository.save(
+                TestFixture.createUniqueMember("챌린지 참여 안한 사람", java.util.UUID.randomUUID().toString()));
+
+        // when & then
+        assertThatThrownBy(() -> challengeCommentReplyService.getCommentReplies(
+                outsider.getId(),
+                challengeComment.getId(),
+                PageRequest.of(0, 10)))
                 .isInstanceOf(CIllegalArgumentException.class);
     }
 }

@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.domain.ChallengeCommentReply;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.request.CreateCommentReplyRequest;
+import me.bombom.api.v1.challenge.dto.response.CommentReplyResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentReplyRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +40,12 @@ public class ChallengeCommentReplyService {
         );
     }
 
+    public Page<CommentReplyResponse> getCommentReplies(Long memberId, Long commentId, Pageable pageable) {
+        validateComment(commentId);
+        validateReplyVisible(commentId, memberId);
+        return challengeCommentReplyRepository.findAllByCommentId(commentId, memberId, pageable);
+    }
+
     private void validateComment(Long commentId) {
         if (!challengeCommentRepository.existsById(commentId)) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
@@ -60,5 +69,15 @@ public class ChallengeCommentReplyService {
                         .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
                         .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndMemberId"));
+    }
+
+    private void validateReplyVisible(Long commentId, Long memberId) {
+        if (!challengeCommentRepository.existsVisibleToMember(commentId, memberId)) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                    .addContext(ErrorContextKeys.COMMENT_ID, commentId)
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext(ErrorContextKeys.OPERATION, "existsVisibleToMember");
+
+        }
     }
 }

@@ -80,9 +80,8 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
     @Modifying(flushAutomatically = true)
     @Query("""
                 UPDATE ChallengeComment c
-                   SET c.replyCount = c.replyCount + :amount
+                   SET c.replyCount = c.replyCount + 1
                  WHERE c.id = :commentId
-                   AND ( :amount >= 0 OR c.replyCount > 0 )
             """)
     void updateReplyCount(Long commentId);
 }

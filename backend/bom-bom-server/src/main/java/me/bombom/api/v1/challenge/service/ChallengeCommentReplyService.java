@@ -38,6 +38,7 @@ public class ChallengeCommentReplyService {
                         .reply(request.reply())
                         .build()
         );
+        challengeCommentRepository.updateReplyCount(commentId);
     }
 
     public Page<CommentReplyResponse> getCommentReplies(Long memberId, Long commentId, Pageable pageable) {

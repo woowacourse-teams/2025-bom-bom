@@ -34,7 +34,8 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
                     CASE
                         WHEN ccl.id IS NOT NULL THEN true
                         ELSE false
-                    END
+                    END,
+                    cc.replyCount
                 )
                 FROM ChallengeComment cc
                 JOIN ChallengeParticipant cp ON cc.participantId = cp.id
@@ -66,13 +67,22 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
     void incrementLikeCountNotBelowZero(Long commentId, int amount);
 
     @Query("""
-        SELECT CASE WHEN COUNT(ccParticipant) > 0 THEN true ELSE false END
-        FROM ChallengeComment cc
-        JOIN ChallengeParticipant ccAuthor ON ccAuthor.id = cc.participantId
-                JOIN ChallengeParticipant ccParticipant
-                    ON ccParticipant.challengeId = ccAuthor.challengeId
-                    AND ccParticipant.memberId = :memberId
-                WHERE cc.id = :commentId
+            SELECT CASE WHEN COUNT(ccParticipant) > 0 THEN true ELSE false END
+            FROM ChallengeComment cc
+            JOIN ChallengeParticipant ccAuthor ON ccAuthor.id = cc.participantId
+                    JOIN ChallengeParticipant ccParticipant
+                        ON ccParticipant.challengeId = ccAuthor.challengeId
+                        AND ccParticipant.memberId = :memberId
+                    WHERE cc.id = :commentId
             """)
     boolean existsVisibleToMember(@Param("commentId") Long commentId, @Param("memberId") Long memberId);
+
+    @Modifying(flushAutomatically = true)
+    @Query("""
+                UPDATE ChallengeComment c
+                   SET c.replyCount = c.replyCount + :amount
+                 WHERE c.id = :commentId
+                   AND ( :amount >= 0 OR c.replyCount > 0 )
+            """)
+    void updateReplyCount(Long commentId);
 }

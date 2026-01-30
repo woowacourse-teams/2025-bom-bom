@@ -78,7 +78,6 @@ public class ChallengeCommentReplyService {
                     .addContext(ErrorContextKeys.COMMENT_ID, commentId)
                     .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                     .addContext(ErrorContextKeys.OPERATION, "existsVisibleToMember");
-
         }
     }
 }

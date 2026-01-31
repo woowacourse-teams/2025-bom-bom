@@ -84,7 +84,6 @@ public class ReadingService {
         MonthlyReadingRealtime monthlyReadingRealtime = MonthlyReadingRealtime.create(memberId);
         monthlyReadingRealtimeRepository.save(monthlyReadingRealtime);
 
-
         YearlyReading newYearlyReading = YearlyReading.create(memberId, LocalDate.now().getYear());
         yearlyReadingRepository.save(newYearlyReading);
     }
@@ -248,7 +247,19 @@ public class ReadingService {
     }
 
     public MemberMonthlyReadingRankResponse getMemberMonthlyReadingRank(Member member) {
-        return monthlyReadingSnapshotRepository.findMemberRankAndGap(member.getId());
+        LocalDate lastMonth = LocalDate.now().minusMonths(LAST_MONTH_OFFSET);
+        int lastMonthYear = lastMonth.getYear();
+        int lastMonthValue = lastMonth.getMonthValue();
+
+        MonthlyReadingRankFlat flat = monthlyReadingSnapshotRepository.findMemberRanking(member.getId(), lastMonthYear, lastMonthValue);
+
+        if (flat == null) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReadingSnapshot");
+        }
+
+        return MemberMonthlyReadingRankResponse.from(flat);
     }
 
     @Transactional
@@ -284,7 +295,7 @@ public class ReadingService {
             monthlyReadingSnapshotRepository.deleteByMemberId(memberId);
             monthlyReadingRealtimeRepository.deleteByMemberId(memberId);
             yearlyReadingRepository.deleteByMemberId(memberId);
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("회원 읽기 정보 삭제 실패. memberId = {}", memberId, e.getStackTrace());
         }
     }

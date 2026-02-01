@@ -129,7 +129,7 @@ class ChallengeCommentReplyControllerTest {
         CreateCommentReplyRequest request = new CreateCommentReplyRequest("감사합니다!");
 
         // when & then
-        mockMvc.perform(post("/api/v1/challenges/comments/{commentId}/replies", 0L)
+        mockMvc.perform(post("/api/v1/challenges/{challengeId}/comments/{commentId}/replies", challenge.getId(), 0L)
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -142,7 +142,7 @@ class ChallengeCommentReplyControllerTest {
         CreateCommentReplyRequest request = new CreateCommentReplyRequest(null);
 
         // when & then
-        mockMvc.perform(post("/api/v1/challenges/comments/{commentId}/replies", 1L)
+        mockMvc.perform(post("/api/v1/challenges/{challengeId}/comments/{commentId}/replies", challenge.getId(), challengeComment.getId())
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -156,7 +156,7 @@ class ChallengeCommentReplyControllerTest {
         CreateCommentReplyRequest request = new CreateCommentReplyRequest(longReply);
 
         // when & then
-        mockMvc.perform(post("/api/v1/challenges/comments/{commentId}/replies", 1L)
+        mockMvc.perform(post("/api/v1/challenges/{challengeId}/comments/{commentId}/replies", challenge.getId(), challengeComment.getId())
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -166,7 +166,7 @@ class ChallengeCommentReplyControllerTest {
     @Test
     void 코멘트_답글_목록을_조회하면_200과_페이지정보를_반환한다() throws Exception {
         // when & then
-        mockMvc.perform(get("/api/v1/challenges/comments/{commentId}/replies", challengeComment.getId())
+        mockMvc.perform(get("/api/v1/challenges/{challengeId}/comments/{commentId}/replies", challenge.getId(), challengeComment.getId())
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .param("size", "10")
                         .accept(MediaType.APPLICATION_JSON))
@@ -179,7 +179,7 @@ class ChallengeCommentReplyControllerTest {
     @Test
     void 코멘트ID가_1미만이면_답글_조회시_400을_응답한다() throws Exception {
         // when & then
-        mockMvc.perform(get("/api/v1/challenges/comments/{commentId}/replies", 0L)
+        mockMvc.perform(get("/api/v1/challenges/{challengeId}/comments/{commentId}/replies", challenge.getId(), 0L)
                         .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());

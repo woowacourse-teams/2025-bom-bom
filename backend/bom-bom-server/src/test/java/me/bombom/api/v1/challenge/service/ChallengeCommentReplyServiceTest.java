@@ -99,7 +99,12 @@ class ChallengeCommentReplyServiceTest {
         CreateCommentReplyRequest request = new CreateCommentReplyRequest("감사합니다!");
 
         //when
-        challengeCommentReplyService.createCommentReply(challengeComment.getId(), replyMember.getId(), request);
+        challengeCommentReplyService.createCommentReply(
+                challenge.getId(),
+                challengeComment.getId(),
+                replyMember.getId(),
+                request
+        );
 
         // then
         List<ChallengeCommentReply> replies = challengeCommentReplyRepository.findAll();
@@ -118,7 +123,12 @@ class ChallengeCommentReplyServiceTest {
         CreateCommentReplyRequest request = new CreateCommentReplyRequest("reply");
 
         // when & then
-        assertThatThrownBy(() -> challengeCommentReplyService.createCommentReply(notExistCommentId, replyMember.getId(), request))
+        assertThatThrownBy(
+                () -> challengeCommentReplyService.createCommentReply(
+                        challenge.getId(),
+                        notExistCommentId,
+                        replyMember.getId(),
+                        request))
                 .isInstanceOf(CIllegalArgumentException.class);
     }
 
@@ -129,6 +139,7 @@ class ChallengeCommentReplyServiceTest {
 
         // when & then
         assertThatThrownBy(() -> challengeCommentReplyService.createCommentReply(
+                challenge.getId(),
                 challengeComment.getId(),
                 replyMember.getId(),
                 request))
@@ -154,6 +165,7 @@ class ChallengeCommentReplyServiceTest {
         // when
         Page<CommentReplyResponse> page = challengeCommentReplyService.getCommentReplies(
                 replyMember.getId(),
+                challenge.getId(),
                 challengeComment.getId(),
                 PageRequest.of(0, 10));
 
@@ -174,6 +186,7 @@ class ChallengeCommentReplyServiceTest {
         // when & then
         assertThatThrownBy(() -> challengeCommentReplyService.getCommentReplies(
                 outsider.getId(),
+                challenge.getId(),
                 challengeComment.getId(),
                 PageRequest.of(0, 10)))
                 .isInstanceOf(CIllegalArgumentException.class);

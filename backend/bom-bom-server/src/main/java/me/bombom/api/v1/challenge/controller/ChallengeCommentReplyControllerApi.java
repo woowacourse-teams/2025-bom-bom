@@ -8,8 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import me.bombom.api.v1.challenge.dto.response.CommentReplyResponse;
 import me.bombom.api.v1.challenge.dto.request.CreateCommentReplyRequest;
+import me.bombom.api.v1.challenge.dto.response.CommentReplyResponse;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
@@ -35,6 +35,7 @@ public interface ChallengeCommentReplyControllerApi {
     })
     void createCommentReply(
             @Parameter(hidden = true) @LoginMember Member member,
+            @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
             @Parameter(description = "코멘트 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long commentId,
             @Valid @RequestBody CreateCommentReplyRequest request
     );
@@ -51,6 +52,7 @@ public interface ChallengeCommentReplyControllerApi {
     })
     Page<CommentReplyResponse> getCommentReplies(
             @Parameter(hidden = true) @LoginMember Member member,
+            @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
             @Parameter(description = "코멘트 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long commentId,
             @Parameter(description = "페이지/정렬 정보 (page, size, sort)") Pageable pageable
     );

@@ -25,29 +25,31 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/challenges/comments")
+@RequestMapping("/api/v1/challenges")
 public class ChallengeCommentReplyController implements ChallengeCommentReplyControllerApi {
 
     private final ChallengeCommentReplyService challengeCommentReplyService;
 
     @Override
-    @PostMapping("/{commentId}/replies")
+    @PostMapping("{challengeId}/comments/{commentId}/replies")
     @ResponseStatus(HttpStatus.CREATED)
     public void createCommentReply(
             @LoginMember Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long commentId,
             @Valid @RequestBody CreateCommentReplyRequest request
     ) {
-        challengeCommentReplyService.createCommentReply(commentId, member.getId(), request);
+        challengeCommentReplyService.createCommentReply(challengeId, commentId, member.getId(), request);
     }
 
     @Override
-    @GetMapping("/{commentId}/replies")
+    @GetMapping("{challengeId}/comments/{commentId}/replies")
     public Page<CommentReplyResponse> getCommentReplies(
             @LoginMember Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long commentId,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        return challengeCommentReplyService.getCommentReplies(member.getId(), commentId, pageable);
+        return challengeCommentReplyService.getCommentReplies(member.getId(), challengeId, commentId, pageable);
     }
 }

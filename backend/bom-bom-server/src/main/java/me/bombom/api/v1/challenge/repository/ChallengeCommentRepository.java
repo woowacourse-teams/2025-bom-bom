@@ -66,17 +66,6 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
             """)
     void incrementLikeCountNotBelowZero(Long commentId, int amount);
 
-    @Query("""
-            SELECT CASE WHEN COUNT(ccParticipant) > 0 THEN true ELSE false END
-            FROM ChallengeComment cc
-            JOIN ChallengeParticipant ccAuthor ON ccAuthor.id = cc.participantId
-                    JOIN ChallengeParticipant ccParticipant
-                        ON ccParticipant.challengeId = ccAuthor.challengeId
-                        AND ccParticipant.memberId = :memberId
-                    WHERE cc.id = :commentId
-            """)
-    boolean existsVisibleToMember(@Param("commentId") Long commentId, @Param("memberId") Long memberId);
-
     @Modifying(flushAutomatically = true)
     @Query("""
                 UPDATE ChallengeComment c

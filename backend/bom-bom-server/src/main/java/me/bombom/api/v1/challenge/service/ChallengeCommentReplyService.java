@@ -26,10 +26,9 @@ public class ChallengeCommentReplyService {
     private final ChallengeParticipantRepository challengeParticipantRepository;
 
     @Transactional
-    public void createCommentReply(Long commentId, Long memberId, CreateCommentReplyRequest request) {
+    public void createCommentReply(Long challengeId, Long commentId, Long memberId, CreateCommentReplyRequest request) {
         validateComment(commentId);
-        ChallengeParticipant commentAuthor = getCommentAuthorByCommentId(commentId);
-        ChallengeParticipant replyAuthor = getParticipantWithChallengeId(memberId, commentAuthor.getChallengeId());
+        ChallengeParticipant replyAuthor = getParticipantWithChallengeId(memberId, challengeId);
 
         challengeCommentReplyRepository.save(
                 ChallengeCommentReply.builder()
@@ -41,9 +40,9 @@ public class ChallengeCommentReplyService {
         challengeCommentRepository.updateReplyCount(commentId);
     }
 
-    public Page<CommentReplyResponse> getCommentReplies(Long memberId, Long commentId, Pageable pageable) {
+    public Page<CommentReplyResponse> getCommentReplies(Long memberId, Long challengeId, Long commentId, Pageable pageable) {
         validateComment(commentId);
-        validateReplyVisible(commentId, memberId);
+        validateMemberInSameChallenge(challengeId, memberId);
         return challengeCommentReplyRepository.findAllByCommentId(commentId, memberId, pageable);
     }
 
@@ -55,12 +54,13 @@ public class ChallengeCommentReplyService {
         }
     }
 
-    private ChallengeParticipant getCommentAuthorByCommentId(Long commentId) {
-        return challengeParticipantRepository.findAuthorByCommentId(commentId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.COMMENT_ID, commentId)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
-                        .addContext(ErrorContextKeys.OPERATION, "findAuthorByCommentId"));
+    private void validateMemberInSameChallenge(Long challengeId, Long memberId) {
+        if (!challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext(ErrorContextKeys.OPERATION, "existsByChallengeIdAndMemberId");
+        }
     }
 
     private ChallengeParticipant getParticipantWithChallengeId(Long memberId, Long challengeId) {
@@ -70,14 +70,5 @@ public class ChallengeCommentReplyService {
                         .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
                         .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndMemberId"));
-    }
-
-    private void validateReplyVisible(Long commentId, Long memberId) {
-        if (!challengeCommentRepository.existsVisibleToMember(commentId, memberId)) {
-            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
-                    .addContext(ErrorContextKeys.COMMENT_ID, commentId)
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.OPERATION, "existsVisibleToMember");
-        }
     }
 }

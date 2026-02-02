@@ -93,11 +93,11 @@ public class SubscribeService {
 
     public void processUnsubscribe(Long subscribeId, Long newsletterId, String unsubscribeUrl) {
         try {
-            boolean isSuccess = unsubscribeAgent.unsubscribe(unsubscribeUrl, newsletterId);
-            applicationEventPublisher.publishEvent(AutoUnsubscribeCompletedEvent.of(subscribeId, isSuccess));
+            unsubscribeAgent.unsubscribe(unsubscribeUrl, newsletterId);
+            applicationEventPublisher.publishEvent(AutoUnsubscribeCompletedEvent.of(subscribeId, true));
         } catch (RetryableException e) {
-            // 재시도
-
+            log.warn("구독 취소 일시적 실패 (재시도 대상) - subscribeId: {}, error: {}", subscribeId, e.getMessage());
+            // 추후 재시도 로직 구현 시 활용
         } catch (AutoUnsubscribeFailedException e) {
             discordNotifier.sendUnsubscribeErrorNotification(
                     e.getMessage(),

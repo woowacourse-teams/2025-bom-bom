@@ -2,10 +2,7 @@ package me.bombom.api.v1.subscribe.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.common.DiscordWebhookNotifier;
 import me.bombom.api.v1.subscribe.service.SubscribeService;
-import me.bombom.api.v1.subscribe.service.UnsubscribeAgent;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -16,10 +13,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class AutoUnsubscribeEventListener {
 
-    private final UnsubscribeAgent unsubscribeAgent;
-    private final ApplicationEventPublisher eventPublisher;
     private final SubscribeService subscribeService;
-    private final DiscordWebhookNotifier discordWebhookNotifier;
 
     @Async
     @TransactionalEventListener

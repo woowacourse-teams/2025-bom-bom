@@ -32,6 +32,7 @@ public class SubscribeService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final UnsubscribeAgent unsubscribeAgent;
     private final DiscordWebhookNotifier discordNotifier;
+    private final SubscribeRetryService subscribeRetryService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteAllByMemberId(Long memberId) {
@@ -52,10 +53,10 @@ public class SubscribeService {
 
         if (subscribe.isNotOwner(memberId)) {
             throw new UnauthorizedException(ErrorDetail.FORBIDDEN_RESOURCE)
-                .addContext(ErrorContextKeys.ENTITY_TYPE, "subscribe")
-                .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                .addContext(ErrorContextKeys.ACTUAL_OWNER_ID, subscribe.getMemberId())
-                .addContext("subscribeId", subscribeId);
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "subscribe")
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext(ErrorContextKeys.ACTUAL_OWNER_ID, subscribe.getMemberId())
+                    .addContext("subscribeId", subscribeId);
         }
 
         // 자동 취소가 불가능한 경우 사용자가 직접 구독 취소 유도 후 삭제 버튼 클릭
@@ -91,22 +92,31 @@ public class SubscribeService {
         subscribe.changeStatus(SubscribeStatus.UNSUBSCRIBE_FAILED);
     }
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void processUnsubscribe(Long subscribeId, Long newsletterId, String unsubscribeUrl) {
         try {
             unsubscribeAgent.unsubscribe(unsubscribeUrl, newsletterId);
             applicationEventPublisher.publishEvent(AutoUnsubscribeCompletedEvent.of(subscribeId, true));
+            subscribeRetryService.deleteIfExists(subscribeId);
         } catch (RetryableException e) {
-            log.warn("구독 취소 일시적 실패 (재시도 대상) - subscribeId: {}, error: {}", subscribeId, e.getMessage());
-            // 추후 재시도 로직 구현 시 활용
+            handleRetryableFailure(subscribeId, newsletterId, unsubscribeUrl, e.getMessage());
         } catch (AutoUnsubscribeFailedException e) {
-            discordNotifier.sendUnsubscribeErrorNotification(
-                    e.getMessage(),
-                    e.getNewsletterId(),
-                    e.getUrl(),
-                    subscribeId
-            );
+            handlePermanentFailure(subscribeId, newsletterId, unsubscribeUrl, e.getMessage());
         } catch (Exception e) {
             log.error("예상치 못한 예외가 발생했습니다.", e);
         }
+    }
+
+    private void handleRetryableFailure(Long subscribeId, Long newsletterId, String url, String errorMsg) {
+        boolean scheduled = subscribeRetryService.scheduleRetry(subscribeId, errorMsg);
+        if (!scheduled) {
+            handlePermanentFailure(subscribeId, newsletterId, url, "최대 재시도 횟수에 도달했습니다 : " + errorMsg);
+        }
+    }
+
+    private void handlePermanentFailure(Long subscribeId, Long newsletterId, String url, String errorMsg) {
+        subscribeRetryService.deleteIfExists(subscribeId);
+        applicationEventPublisher.publishEvent(AutoUnsubscribeCompletedEvent.of(subscribeId, false));
+        discordNotifier.sendUnsubscribeErrorNotification(errorMsg, newsletterId, url, subscribeId);
     }
 }

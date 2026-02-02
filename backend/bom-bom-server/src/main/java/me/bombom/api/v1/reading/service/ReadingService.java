@@ -1,6 +1,7 @@
 
 package me.bombom.api.v1.reading.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -61,6 +62,7 @@ public class ReadingService {
 
     private final MonthlyRankingScheduleProperties scheduleProps;
     private final BadgeService badgeService;
+    private final Clock clock;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void initializeReadingInformation(Long memberId) {
@@ -245,7 +247,7 @@ public class ReadingService {
     }
 
     public MemberMonthlyReadingRankResponse getMemberMonthlyReadingRank(Member member) {
-        LocalDate lastMonth = LocalDate.now().minusMonths(LAST_MONTH_OFFSET);
+        LocalDate lastMonth = LocalDate.now(clock).minusMonths(LAST_MONTH_OFFSET);
         int lastMonthYear = lastMonth.getYear();
         int lastMonthValue = lastMonth.getMonthValue();
 

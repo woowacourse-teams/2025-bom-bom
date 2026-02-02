@@ -1,6 +1,7 @@
 
 package me.bombom.api.v1.reading.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -61,6 +62,7 @@ public class ReadingService {
 
     private final MonthlyRankingScheduleProperties scheduleProps;
     private final BadgeService badgeService;
+    private final Clock clock;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void initializeReadingInformation(Long memberId) {
@@ -83,7 +85,6 @@ public class ReadingService {
 
         MonthlyReadingRealtime monthlyReadingRealtime = MonthlyReadingRealtime.create(memberId);
         monthlyReadingRealtimeRepository.save(monthlyReadingRealtime);
-
 
         YearlyReading newYearlyReading = YearlyReading.create(memberId, LocalDate.now().getYear());
         yearlyReadingRepository.save(newYearlyReading);
@@ -223,9 +224,7 @@ public class ReadingService {
 
         List<MonthlyReadingRankFlat> flatResults = monthlyReadingSnapshotRepository.findMonthlyRanking(limit, lastMonthYear, lastMonthValue);
 
-        List<MonthlyReadingRankResponse> monthlyRanking = flatResults.stream()
-                .map(MonthlyReadingRankResponse::from)
-                .toList();
+        List<MonthlyReadingRankResponse> monthlyRanking = MonthlyReadingRankResponse.from(flatResults);
 
         LocalDateTime rankingUpdatedAt = monthlyReadingSnapshotMetaService.getSnapshotAt();
         ZonedDateTime serverNow = ZonedDateTime.now(scheduleProps.zoneId());
@@ -248,7 +247,19 @@ public class ReadingService {
     }
 
     public MemberMonthlyReadingRankResponse getMemberMonthlyReadingRank(Member member) {
-        return monthlyReadingSnapshotRepository.findMemberRankAndGap(member.getId());
+        LocalDate lastMonth = LocalDate.now(clock).minusMonths(LAST_MONTH_OFFSET);
+        int lastMonthYear = lastMonth.getYear();
+        int lastMonthValue = lastMonth.getMonthValue();
+
+        MonthlyReadingRankFlat flat = monthlyReadingSnapshotRepository.findMemberRanking(member.getId(), lastMonthYear, lastMonthValue);
+
+        if (flat == null) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReadingSnapshot");
+        }
+
+        return MemberMonthlyReadingRankResponse.from(flat);
     }
 
     @Transactional
@@ -284,7 +295,7 @@ public class ReadingService {
             monthlyReadingSnapshotRepository.deleteByMemberId(memberId);
             monthlyReadingRealtimeRepository.deleteByMemberId(memberId);
             yearlyReadingRepository.deleteByMemberId(memberId);
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("회원 읽기 정보 삭제 실패. memberId = {}", memberId, e.getStackTrace());
         }
     }

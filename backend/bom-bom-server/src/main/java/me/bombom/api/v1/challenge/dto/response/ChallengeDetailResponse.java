@@ -13,7 +13,7 @@ public record ChallengeDetailResponse(
 
         ChallengeGrade grade,
 
-        Boolean isSuccess
+        Boolean isSurvived
 ) {
 
     public static ChallengeDetailResponse notJoined() {

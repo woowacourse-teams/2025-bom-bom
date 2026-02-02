@@ -21,11 +21,6 @@ public interface ChallengeCommentReplyRepository extends JpaRepository<Challenge
                 FROM ChallengeCommentReply cr
                 JOIN ChallengeParticipant crAuthor ON cr.participantId = crAuthor.id
                 LEFT JOIN Member crMember ON crAuthor.memberId = crMember.id
-                JOIN ChallengeComment cc ON cr.commentId = cc.id
-                JOIN ChallengeParticipant ccAuthor ON cc.participantId = ccAuthor.id
-                JOIN ChallengeParticipant me
-                    ON me.memberId = :memberId
-                    AND me.challengeId = ccAuthor.challengeId
                 WHERE cr.commentId = :commentId
             """)
     Page<CommentReplyResponse> findAllByCommentId(

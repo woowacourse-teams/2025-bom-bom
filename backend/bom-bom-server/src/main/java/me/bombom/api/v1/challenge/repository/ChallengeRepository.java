@@ -21,6 +21,10 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
         FROM Challenge c
         WHERE c.endDate < :date
           AND c.isBadgeIssued = false
+          AND c.totalDays >= :minTotalDays
     """)
-    List<Challenge> findEndedChallengesPendingBadge(@Param("date") LocalDate date);
+    List<Challenge> findEndedChallengesPendingBadge(
+            @Param("date") LocalDate date,
+            @Param("minTotalDays") int minTotalDays
+    );
 }

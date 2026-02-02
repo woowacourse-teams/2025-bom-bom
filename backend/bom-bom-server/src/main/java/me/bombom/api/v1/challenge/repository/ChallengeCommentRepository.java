@@ -34,7 +34,8 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
                     CASE
                         WHEN ccl.id IS NOT NULL THEN true
                         ELSE false
-                    END
+                    END,
+                    cc.replyCount
                 )
                 FROM ChallengeComment cc
                 JOIN ChallengeParticipant cp ON cc.participantId = cp.id
@@ -64,4 +65,12 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
                    AND ( :amount >= 0 OR c.likeCount > 0 )
             """)
     void incrementLikeCountNotBelowZero(Long commentId, int amount);
+
+    @Modifying(flushAutomatically = true)
+    @Query("""
+                UPDATE ChallengeComment c
+                   SET c.replyCount = c.replyCount + 1
+                 WHERE c.id = :commentId
+            """)
+    void updateReplyCount(Long commentId);
 }

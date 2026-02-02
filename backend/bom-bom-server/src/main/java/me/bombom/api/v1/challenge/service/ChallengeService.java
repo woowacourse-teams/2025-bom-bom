@@ -13,7 +13,9 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.badge.service.BadgeService;
 import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.ChallengeGrade;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
@@ -36,7 +38,6 @@ import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.badge.service.BadgeService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +49,7 @@ public class ChallengeService {
 
     // TODO: 이후에 수료 처리 등 구현 시 관리 방법 고려
     private static final double SUCCESS_REQUIRED_RATIO = 0.8;
+    private static final int MIN_CHALLENGE_TOTAL_DAYS_FOR_BADGE = 15;
 
     private final ChallengeRepository challengeRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
@@ -162,7 +164,7 @@ public class ChallengeService {
     }
 
     public List<Challenge> getEndedChallengesPendingBadge(LocalDate date) {
-        return challengeRepository.findEndedChallengesPendingBadge(date);
+        return challengeRepository.findEndedChallengesPendingBadge(date, MIN_CHALLENGE_TOTAL_DAYS_FOR_BADGE);
     }
 
     @Transactional
@@ -249,13 +251,15 @@ public class ChallengeService {
             return ChallengeDetailResponse.notJoined();
         }
 
-        int progress = myParticipant.calculateProgress(challenge.getTotalDays());
         boolean isEnded = challenge.isEnded(LocalDate.now());
+        boolean isSurvived = myParticipant.isSurvived();
+        int progress = myParticipant.calculateProgress(challenge.getTotalDays());
 
         if (isEnded) {
-            return ChallengeDetailResponse.ended(progress, myParticipant.isSurvived());
+            ChallengeGrade grade = ChallengeGrade.calculate(progress, isSurvived);
+            return ChallengeDetailResponse.ended(progress, isSurvived, grade);
         }
-        return ChallengeDetailResponse.ongoing(progress);
+        return ChallengeDetailResponse.ongoing(progress, isSurvived);
     }
 
     private RuntimeException createApplyException(Long challengeId, Member member, EligibilityReason reason) {

@@ -4,6 +4,7 @@ public record MonthlyReadingRankFlat(
                 String nickname,
                 long rank,
                 int monthlyReadCount,
+                long nextRankDifference,
                 String rankingBadgeGrade,
                 Integer rankingBadgeYear,
                 Integer rankingBadgeMonth,

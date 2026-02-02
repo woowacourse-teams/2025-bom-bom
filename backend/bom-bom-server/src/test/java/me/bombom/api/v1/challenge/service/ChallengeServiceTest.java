@@ -312,7 +312,7 @@ class ChallengeServiceTest {
             softly.assertThat(detail.isJoined()).isTrue();
             softly.assertThat(detail.progress()).isGreaterThan(0);
             softly.assertThat(detail.grade()).isNotNull();
-            softly.assertThat(detail.isSuccess()).isNotNull();
+            softly.assertThat(detail.isSurvived()).isNotNull();
         });
     }
 

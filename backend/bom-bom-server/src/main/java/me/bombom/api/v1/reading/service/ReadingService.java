@@ -222,9 +222,7 @@ public class ReadingService {
 
         List<MonthlyReadingRankFlat> flatResults = monthlyReadingSnapshotRepository.findMonthlyRanking(limit, lastMonthYear, lastMonthValue);
 
-        List<MonthlyReadingRankResponse> monthlyRanking = flatResults.stream()
-                .map(MonthlyReadingRankResponse::from)
-                .toList();
+        List<MonthlyReadingRankResponse> monthlyRanking = MonthlyReadingRankResponse.from(flatResults);
 
         LocalDateTime rankingUpdatedAt = monthlyReadingSnapshotMetaService.getSnapshotAt();
         ZonedDateTime serverNow = ZonedDateTime.now(scheduleProps.zoneId());

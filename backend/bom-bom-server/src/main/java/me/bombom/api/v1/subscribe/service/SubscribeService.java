@@ -1,6 +1,7 @@
 package me.bombom.api.v1.subscribe.service;
 
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.common.DiscordWebhookNotifier;
@@ -105,6 +106,19 @@ public class SubscribeService {
         } catch (Exception e) {
             log.error("예상치 못한 예외가 발생했습니다.", e);
         }
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void retryUnsubscribe(Long subscribeId) {
+        Optional<Subscribe> subscribeOpt = subscribeRepository.findById(subscribeId);
+        if (subscribeOpt.isEmpty()) {
+            log.warn("구독 정보가 존재하지 않아 재시도 항목 삭제 - subscribeId: {}", subscribeId);
+            subscribeRetryService.deleteIfExists(subscribeId);
+            return;
+        }
+
+        Subscribe subscribe = subscribeOpt.get();
+        processUnsubscribe(subscribe.getId(), subscribe.getNewsletterId(), subscribe.getUnsubscribeUrl());
     }
 
     private void handleRetryableFailure(Long subscribeId, Long newsletterId, String url, String errorMsg) {

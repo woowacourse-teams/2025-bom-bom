@@ -2,6 +2,7 @@ package me.bombom.api.v1.subscribe.service;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,5 +54,14 @@ public class SubscribeRetryService {
     public void deleteIfExists(Long subscribeId) {
         subscribeRetryRepository.findBySubscribeId(subscribeId)
                 .ifPresent(subscribeRetryRepository::delete);
+    }
+
+    @Transactional
+    public void delete(SubscribeRetry retry) {
+        subscribeRetryRepository.delete(retry);
+    }
+
+    public List<SubscribeRetry> findPendingRetries() {
+        return subscribeRetryRepository.findByNextRetryAtBefore(LocalDateTime.now(clock));
     }
 }

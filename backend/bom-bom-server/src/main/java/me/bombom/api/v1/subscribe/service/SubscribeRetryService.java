@@ -61,7 +61,7 @@ public class SubscribeRetryService {
         subscribeRetryRepository.delete(retry);
     }
 
-    public List<SubscribeRetry> findPendingRetries() {
-        return subscribeRetryRepository.findByNextRetryAtBefore(LocalDateTime.now(clock));
+    public List<SubscribeRetry> findPendingRetries(int limit) {
+        return subscribeRetryRepository.findPendingRetries(LocalDateTime.now(clock), limit);
     }
 }

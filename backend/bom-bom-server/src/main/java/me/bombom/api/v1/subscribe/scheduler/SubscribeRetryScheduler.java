@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class SubscribeRetryScheduler {
 
     public static final int RETRY_INTERVAL_MS = 300000; // 5분
+    private static final int RETRY_BATCH_SIZE = 10;
 
     private final SubscribeService subscribeService;
     private final SubscribeRetryService subscribeRetryService;
@@ -23,7 +24,7 @@ public class SubscribeRetryScheduler {
     @Scheduled(fixedDelay = RETRY_INTERVAL_MS)
     @SchedulerLock(name = "retryUnsubscribe", lockAtLeastFor = "30s", lockAtMostFor = "4m")
     public void retryUnsubscribe() {
-        List<SubscribeRetry> retries = subscribeRetryService.findPendingRetries();
+        List<SubscribeRetry> retries = subscribeRetryService.findPendingRetries(RETRY_BATCH_SIZE);
         if (!retries.isEmpty()) {
             log.info("재시도 대상 {}건 발견. 처리를 시작합니다.", retries.size());
         }

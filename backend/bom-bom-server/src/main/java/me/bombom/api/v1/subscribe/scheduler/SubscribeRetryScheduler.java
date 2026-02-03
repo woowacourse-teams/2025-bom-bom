@@ -16,11 +16,12 @@ import org.springframework.stereotype.Component;
 public class SubscribeRetryScheduler {
 
     public static final int RETRY_INTERVAL_MS = 300000; // 5분
+
     private final SubscribeService subscribeService;
     private final SubscribeRetryService subscribeRetryService;
 
-    @Scheduled(fixedDelay = 60000) // 1분마다 실행
     @Scheduled(fixedDelay = RETRY_INTERVAL_MS)
+    @SchedulerLock(name = "retryUnsubscribe", lockAtLeastFor = "30s", lockAtMostFor = "4m")
     public void retryUnsubscribe() {
         List<SubscribeRetry> retries = subscribeRetryService.findPendingRetries();
         if (!retries.isEmpty()) {

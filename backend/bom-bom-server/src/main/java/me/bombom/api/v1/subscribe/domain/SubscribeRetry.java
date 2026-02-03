@@ -5,7 +5,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,7 +20,12 @@ import me.bombom.api.v1.common.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SubscribeRetry extends BaseEntity {
 
-    private static final int MAX_RETRY_COUNT = 3;
+    private static final List<Duration> BACKOFF_STRATEGY = List.of(
+            Duration.ofMinutes(10), //네트워크 문제
+            Duration.ofMinutes(30), //짧은 점검
+            Duration.ofHours(2) //점검
+    );
+    private static final int MAX_RETRY_COUNT = BACKOFF_STRATEGY.size();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,16 +63,8 @@ public class SubscribeRetry extends BaseEntity {
     }
 
     private LocalDateTime calculateNextRetryTime(LocalDateTime now) {
-        if (this.retryCount == 0) {
-            return now.plusMinutes(10);
-        }
-
-        long hoursToAdd = switch (this.retryCount) {
-            case 1 -> 1; // 1시간
-            case 2 -> 6; // 6시간
-            default -> 12; // 12시간
-        };
-        return now.plusHours(hoursToAdd);
+        int index = Math.min(this.retryCount, BACKOFF_STRATEGY.size() - 1);
+        return now.plus(BACKOFF_STRATEGY.get(index));
     }
 
     public boolean isMaxRetryReached() {

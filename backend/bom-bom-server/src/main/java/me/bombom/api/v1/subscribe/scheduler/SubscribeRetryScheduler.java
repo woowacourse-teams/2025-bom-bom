@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.subscribe.domain.SubscribeRetry;
 import me.bombom.api.v1.subscribe.service.SubscribeRetryService;
 import me.bombom.api.v1.subscribe.service.SubscribeService;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +15,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SubscribeRetryScheduler {
 
+    public static final int RETRY_INTERVAL_MS = 300000; // 5분
     private final SubscribeService subscribeService;
     private final SubscribeRetryService subscribeRetryService;
 
     @Scheduled(fixedDelay = 60000) // 1분마다 실행
+    @Scheduled(fixedDelay = RETRY_INTERVAL_MS)
     public void retryUnsubscribe() {
         List<SubscribeRetry> retries = subscribeRetryService.findPendingRetries();
         if (!retries.isEmpty()) {

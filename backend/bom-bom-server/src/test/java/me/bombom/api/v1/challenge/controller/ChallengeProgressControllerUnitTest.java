@@ -9,21 +9,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
-import me.bombom.api.v1.challenge.domain.ChallengeTodoStatus;
-import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
-import java.time.LocalDate;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
+import me.bombom.api.v1.challenge.domain.ChallengeTodoStatus;
+import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.response.MemberChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TeamChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayTodoResponse;
 import me.bombom.api.v1.challenge.service.ChallengeProgressService;
 import me.bombom.api.v1.common.config.WebConfig;
+import me.bombom.api.v1.common.resolver.LoginMemberArgumentResolver;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +40,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @AutoConfigureMockMvc
-@Import(WebConfig.class)
+@Import({ WebConfig.class, LoginMemberArgumentResolver.class })
 @WebMvcTest(ChallengeProgressController.class)
 class ChallengeProgressControllerUnitTest {
 
@@ -50,6 +52,9 @@ class ChallengeProgressControllerUnitTest {
 
     @MockitoBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
+
+    @MockitoBean
+    private MemberRepository memberRepository;
 
     private Authentication authentication;
 
@@ -65,17 +70,17 @@ class ChallengeProgressControllerUnitTest {
                 .roleId(1L)
                 .build();
 
+        given(memberRepository.findById(member.getId())).willReturn(java.util.Optional.of(member));
+
         Map<String, Object> attributes = Map.of(
                 "id", member.getId().toString(),
                 "email", member.getEmail(),
                 "name", member.getNickname());
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
-
         authentication = new OAuth2AuthenticationToken(
                 customOAuth2User,
                 List.of(new SimpleGrantedAuthority("ROLE_USER")),
-                "google"
-        );
+                "google");
     }
 
     @Test
@@ -121,7 +126,7 @@ class ChallengeProgressControllerUnitTest {
         // given
         Long challengeId = 1L;
         Long teamId = 10L;
-        
+
         Challenge challenge = Challenge.builder()
                 .id(challengeId)
                 .name("Test Challenge")
@@ -130,10 +135,10 @@ class ChallengeProgressControllerUnitTest {
                 .endDate(LocalDate.now().plusDays(5))
                 .totalDays(10)
                 .build();
-        
+
         TeamChallengeProgressFlat progressFlat = new TeamChallengeProgressFlat(
                 1L, "tester", true, 5, 10, 77, LocalDate.now(), ChallengeDailyStatus.COMPLETE);
-        
+
         TeamChallengeProgressResponse response = TeamChallengeProgressResponse.of(
                 challenge,
                 List.of(progressFlat)

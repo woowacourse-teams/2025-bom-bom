@@ -10,17 +10,20 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import news.bombom.notification.common.BaseEntity;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ArticleArrivalNotificationFailed {
+public class ArticleArrivalNotificationFailed extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long originalNotificationId; // 추적용
+    @Column(nullable = false)
+    private Long originalNotificationId;
 
     @Column(nullable = false)
     private Long memberId;
@@ -42,9 +45,15 @@ public class ArticleArrivalNotificationFailed {
     private LocalDateTime failedAt;
 
     @Builder
-    public ArticleArrivalNotificationFailed(Long originalNotificationId, Long memberId, Long articleId,
-                                            String newsletterName, String articleTitle, int finalAttempts,
-                                            String lastError) {
+    public ArticleArrivalNotificationFailed(
+            @NonNull Long originalNotificationId,
+            @NonNull Long memberId,
+            @NonNull Long articleId,
+            @NonNull String newsletterName,
+            @NonNull String articleTitle,
+            int finalAttempts,
+            String lastError
+    ) {
         this.originalNotificationId = originalNotificationId;
         this.memberId = memberId;
         this.articleId = articleId;

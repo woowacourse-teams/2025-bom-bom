@@ -1,5 +1,6 @@
 package me.bombom.api.v1.subscribe.controller;
 
+import static org.mockito.BDDMockito.given;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
@@ -39,7 +40,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @AutoConfigureMockMvc
 @WebMvcTest(controllers = SubscribeController.class)
-@Import({ SubscribeController.class, SubscribeControllerTest.TestConfig.class })
+@Import({SubscribeController.class, SubscribeControllerTest.TestConfig.class})
 class SubscribeControllerTest {
 
     @Configuration

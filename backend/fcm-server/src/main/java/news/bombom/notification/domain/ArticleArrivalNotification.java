@@ -21,6 +21,7 @@ import news.bombom.notification.common.BaseEntity;
 public class ArticleArrivalNotification extends BaseEntity {
 
     private static final int MAX_RETRY_ATTEMPTS = 6;
+    private static final int SHORT_RETRY_ATTEMPTS = 3;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -98,7 +99,7 @@ public class ArticleArrivalNotification extends BaseEntity {
     private LocalDateTime calculateNextRetryTime(int attempts) {
         long delaySeconds;
 
-        if (attempts <= 3) {
+        if (attempts <= SHORT_RETRY_ATTEMPTS) {
             delaySeconds = 30L * (long) Math.pow(2, attempts - 1);
         } else {
             switch (attempts) {
@@ -108,7 +109,7 @@ public class ArticleArrivalNotification extends BaseEntity {
                 case 5:
                     delaySeconds = 3600L;
                     break;
-                case 6:
+                case MAX_RETRY_ATTEMPTS:
                     delaySeconds = 10800L;
                     break;
                 default:

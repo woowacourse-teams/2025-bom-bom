@@ -93,7 +93,7 @@ public class ArticleArrivalNotification extends BaseEntity {
     }
 
     public boolean shouldRetry() {
-        return this.attempts < MAX_RETRY_ATTEMPTS;
+        return this.attempts <= MAX_RETRY_ATTEMPTS;
     }
 
     private LocalDateTime calculateNextRetryTime(int attempts) {

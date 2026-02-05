@@ -35,7 +35,8 @@ public class DiscordWebhookNotifier {
                         "color", 0x00C853,
                         "fields", List.of(
                                 Map.of("name", "🧑‍💻 닉네임 : ", "value", "**" + nickname + "**", "inline", true),
-                                Map.of("name", "🕒 가입 시각 : ", "value", "<t:" + (System.currentTimeMillis() / 1000) + ":F>", "inline", true),
+                                Map.of("name", "🕒 가입 시각 : ", "value", "<t:" + (System.currentTimeMillis() / 1000) + ":F>",
+                                        "inline", true),
                                 Map.of("name", "🌸 현재 총 회원 수 : ", "value", totalMemberCount + "명")
                         )
                 )
@@ -51,21 +52,18 @@ public class DiscordWebhookNotifier {
             Long subscribeId
     ) {
         Newsletter newsletter = newsletterService.getNewsletter(newsletterId);
-
         Map<String, Object> body = Map.of("embeds", List.of(
                 Map.of(
                         "title", "🚨 구독 자동 취소 실패",
                         "description", message,
                         "color", 0xE74C3C,
                         "fields", List.of(
-                                Map.of("name", "📰 뉴스레터", "value", newsletter.getName()),
-                                Map.of("name", "🔗 URL", "value", url),
-                                Map.of("name", "🆔 Newsletter ID", "value", String.valueOf(newsletterId), "inline", true),
-                                Map.of("name", "📋 Subscribe ID", "value", String.valueOf(subscribeId), "inline", true)
-                        ),
-                        "timestamp", Instant.now().toString()
-                )
-        ));
+                                Map.of("name", "📰 뉴스레터", "value", newsletter.getName() + " (" + newsletter.getEmail() + ")"),
+                                Map.of("name", "❌ 실패 사유", "value", "```" + message + "```"),
+                                Map.of("name", "🔗 해지 URL", "value", url),
+                                Map.of("name", "🆔 ID 정보", "value",
+                                        "Newsletter: " + newsletterId + " / Subscribe: " + subscribeId)),
+                        "timestamp", Instant.now().toString())));
 
         webhookClient.post(unsubscribeErrorWebhookUrl, body);
     }

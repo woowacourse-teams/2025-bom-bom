@@ -33,7 +33,7 @@ public class UnsubscribeAgent {
         PlaywrightResponse response = playwrightClient.executeUnsubscribe(url, patterns);
 
         if (response.success()) {
-            log.info("구독 취소 성공 - newsletterId: {}", newsletterId);
+            log.info("구독 취소 성공 - newsletterId: {}, method: {}", newsletterId, response.method());
         } else {
             String errorMsg = StringUtils.hasText(response.error()) ? response.error() : response.message();
             Integer statusCode = response.statusCode();

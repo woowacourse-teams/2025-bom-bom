@@ -42,7 +42,8 @@ public class PlaywrightClient {
                         HttpStatus.INTERNAL_SERVER_ERROR.value(),
                         false,
                         null,
-                        "Lambda 실행 오류: " + response.functionError()
+                        "Lambda 실행 오류: " + response.functionError(),
+                        null
                 );
             }
             String responsePayload = response.payload().asUtf8String();
@@ -53,7 +54,8 @@ public class PlaywrightClient {
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     false,
                     null,
-                    "내부 오류: " + e.getMessage()
+                    "내부 오류: " + e.getMessage(),
+                    null
             );
         }
     }

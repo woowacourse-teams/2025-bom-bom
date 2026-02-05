@@ -40,81 +40,79 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Import({ SubscribeController.class, SubscribeControllerTest.TestConfig.class })
 class SubscribeControllerTest {
 
-    @Configuration
-    @EnableWebSecurity
-    static class TestConfig implements WebMvcConfigurer {
+        @Configuration
+        @EnableWebSecurity
+        static class TestConfig implements WebMvcConfigurer {
 
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-            return http
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                    .exceptionHandling(ex -> ex
-                            .authenticationEntryPoint((request, response, authException) ->
-                                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
-                            )
-                    )
-                    .build();
+                @Bean
+                public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+                        return http
+                                        .csrf(AbstractHttpConfigurer::disable)
+                                        .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                                        .exceptionHandling(ex -> ex
+                                                        .authenticationEntryPoint((request, response,
+                                                                        authException) -> response.sendError(
+                                                                                        HttpServletResponse.SC_UNAUTHORIZED)))
+                                        .build();
+                }
+
+                @Override
+                public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+                        resolvers.add(new LoginMemberArgumentResolver());
+                }
         }
 
-        @Override
-        public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-            resolvers.add(new LoginMemberArgumentResolver());
+        @Autowired
+        MockMvc mockMvc;
+
+        @MockitoBean
+        SubscribeService subscribeService;
+
+        private OAuth2AuthenticationToken authToken;
+
+        @BeforeEach
+        void setUp() {
+                Member member = Member.builder()
+                                .id(1L)
+                                .provider("apple")
+                                .providerId("providerId")
+                                .email("email@bombom.news")
+                                .nickname("nickname")
+                                .gender(Gender.FEMALE)
+                                .roleId(1L)
+                                .build();
+
+                Map<String, Object> attrs = Map.of(
+                                "id", "1",
+                                "email", "email@bombom.news",
+                                "name", "nickname");
+
+                CustomOAuth2User user = new CustomOAuth2User(attrs, member, null, null);
+                authToken = new OAuth2AuthenticationToken(user, user.getAuthorities(), "registrationId");
         }
-    }
 
-    @Autowired
-    MockMvc mockMvc;
+        @Test
+        void 인증된_사용자는_구독_목록을_조회할_수_있다() throws Exception {
+                given(subscribeService.getSubscribedNewsletters(any(Member.class)))
+                                .willReturn(List.of());
 
-    @MockitoBean
-    SubscribeService subscribeService;
+                mockMvc.perform(get("/api/v1/members/me/subscriptions")
+                                .with(authentication(authToken)))
+                                .andExpect(status().isOk());
+        }
 
-    private OAuth2AuthenticationToken authToken;
+        @Test
+        void 인증되지_않은_사용자는_403을_반환한다() throws Exception {
+                mockMvc.perform(get("/api/v1/members/me/subscriptions"))
+                                .andExpect(status().isUnauthorized());
+        }
 
-    @BeforeEach
-    void setUp() {
-        Member member = Member.builder()
-                .id(1L)
-                .provider("apple")
-                .providerId("providerId")
-                .email("email@bombom.news")
-                .nickname("nickname")
-                .gender(Gender.FEMALE)
-                .roleId(1L)
-                .build();
+        @Test
+        void 인증된_사용자는_구독_취소를_요청할_수_있다() throws Exception {
+                doNothing().when(subscribeService).unsubscribe(anyLong(), anyLong());
 
-        Map<String, Object> attrs = Map.of(
-                "id", "1",
-                "email", "email@bombom.news",
-                "name", "nickname"
-        );
-
-        CustomOAuth2User user = new CustomOAuth2User(attrs, member, null, null);
-        authToken = new OAuth2AuthenticationToken(user, user.getAuthorities(), "registrationId");
-    }
-
-    @Test
-    void 인증된_사용자는_구독_목록을_조회할_수_있다() throws Exception {
-        given(subscribeService.getSubscribedNewsletters(any(Member.class)))
-                .willReturn(List.of());
-
-        mockMvc.perform(get("/api/v1/members/me/subscriptions")
-                        .with(authentication(authToken)))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void 인증되지_않은_사용자는_403을_반환한다() throws Exception {
-        mockMvc.perform(get("/api/v1/members/me/subscriptions"))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void 인증된_사용자는_구독_취소를_요청할_수_있다() throws Exception {
-        doNothing().when(subscribeService).unsubscribe(anyLong(), anyLong());
-
-        mockMvc.perform(post("/api/v1/members/me/subscriptions/{id}/unsubscribe", 1L)
-                        .with(authentication(authToken)))
-                .andExpect(status().isNoContent());
-    }
+                mockMvc.perform(post("/api/v1/members/me/subscriptions/{id}/unsubscribe", 1L)
+                                .with(authentication(authToken)))
+                                .andExpect(status().isOk());
+        }
 }

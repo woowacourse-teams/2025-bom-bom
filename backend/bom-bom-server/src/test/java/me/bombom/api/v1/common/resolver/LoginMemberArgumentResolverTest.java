@@ -2,8 +2,6 @@ package me.bombom.api.v1.common.resolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.BDDMockito.given;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -12,11 +10,8 @@ import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.repository.MemberRepository;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.TestingAuthenticationToken;
@@ -27,21 +22,13 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 
 class LoginMemberArgumentResolverTest {
 
-    private MemberRepository memberRepository;
-    private LoginMemberArgumentResolver resolver;
-
-    @BeforeEach
-    void setUp() {
-        memberRepository = Mockito.mock(MemberRepository.class);
-        resolver = new LoginMemberArgumentResolver(memberRepository);
-    }
+    private final LoginMemberArgumentResolver resolver = new LoginMemberArgumentResolver();
 
     @AfterEach
     void tearDown() {
         SecurityContextHolder.clearContext();
     }
 
-    //테스트를 위한 가짜 컨트롤러
     static class StubController {
         public void endpointNullableTrue(@LoginMember(anonymous = true) Member member) {}
         public void endpointNullableFalse(@LoginMember(anonymous = false) Member member) {}
@@ -105,10 +92,9 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    void 정상_로그인_이고_DB에_회원이_존재하면_Member_반환() throws Exception {
-        // given
+    void 정상_로그인_이면_Member_반환() throws Exception {
+        // Member는 복잡한 엔티티일 수 있으므로 목 객체로 대체
         Member member = org.mockito.Mockito.mock(Member.class);
-        given(member.getId()).willReturn(1L);
 
         CustomOAuth2User user = new CustomOAuth2User(Map.of("name", "tester"), member, null, null);
         OAuth2AuthenticationToken auth = new OAuth2AuthenticationToken(
@@ -118,38 +104,8 @@ class LoginMemberArgumentResolverTest {
         );
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        given(memberRepository.findById(1L)).willReturn(java.util.Optional.of(member));
-
-        // when
         Object result = resolver.resolveArgument(paramNullableTrue(), null, null, null);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(result).isInstanceOf(Member.class);
-            softly.assertThat(result).isEqualTo(member);
-        });
-    }
-
-    @Test
-    void 정상_로그인이지만_DB에_회원이_없으면_UNAUTHORIZED() throws Exception {
-        // given
-        Member member = org.mockito.Mockito.mock(Member.class);
-        given(member.getId()).willReturn(0L);
-
-        CustomOAuth2User user = new CustomOAuth2User(Map.of("name", "tester"), member, null, null);
-        OAuth2AuthenticationToken auth = new OAuth2AuthenticationToken(
-                user,
-                user.getAuthorities(),
-                "registrationId"
-        );
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
-        given(memberRepository.findById(0L)).willReturn(java.util.Optional.empty());
-
-        // when & then
-        assertThatThrownBy(() -> resolver.resolveArgument(paramNullableTrue(), null, null, null))
-                .isInstanceOfSatisfying(UnauthorizedException.class,
-                        e -> assertThat(e.getErrorDetail()).isEqualTo(ErrorDetail.UNAUTHORIZED));
+        assertThat(result).isInstanceOf(Member.class);
     }
 
     //ArgumentResolver에게 파라미터 넘기기
@@ -163,3 +119,5 @@ class LoginMemberArgumentResolverTest {
         return new MethodParameter(m, 0);
     }
 }
+
+

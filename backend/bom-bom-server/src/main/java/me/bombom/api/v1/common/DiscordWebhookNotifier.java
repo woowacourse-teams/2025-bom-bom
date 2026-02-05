@@ -1,10 +1,13 @@
 package me.bombom.api.v1.common;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.member.service.MemberService;
+import me.bombom.api.v1.newsletter.domain.Newsletter;
+import me.bombom.api.v1.newsletter.service.NewsletterService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +17,14 @@ import org.springframework.stereotype.Component;
 public class DiscordWebhookNotifier {
 
     @Value("${discord.webhook.new_member.url}")
-    private String webhookUrl;
+    private String newMemberWebhookUrl;
+
+    @Value("${discord.webhook.unsubscribeError.url}")
+    private String unsubscribeErrorWebhookUrl;
 
     private final WebhookHttpClient webhookClient;
     private final MemberService memberService;
+    private final NewsletterService newsletterService;
 
     public void sendNewMemberNotification(String nickname) {
         long totalMemberCount = memberService.countNormalMembers();
@@ -28,12 +35,36 @@ public class DiscordWebhookNotifier {
                         "color", 0x00C853,
                         "fields", List.of(
                                 Map.of("name", "🧑‍💻 닉네임 : ", "value", "**" + nickname + "**", "inline", true),
-                                Map.of("name", "🕒 가입 시각 : ", "value", "<t:" + (System.currentTimeMillis() / 1000) + ":F>", "inline", true),
+                                Map.of("name", "🕒 가입 시각 : ", "value", "<t:" + (System.currentTimeMillis() / 1000) + ":F>",
+                                        "inline", true),
                                 Map.of("name", "🌸 현재 총 회원 수 : ", "value", totalMemberCount + "명")
                         )
                 )
         ));
 
-        webhookClient.post(webhookUrl, body);
+        webhookClient.post(newMemberWebhookUrl, body);
+    }
+
+    public void sendUnsubscribeErrorNotification(
+            String message,
+            Long newsletterId,
+            String url,
+            Long subscribeId
+    ) {
+        Newsletter newsletter = newsletterService.getNewsletter(newsletterId);
+        Map<String, Object> body = Map.of("embeds", List.of(
+                Map.of(
+                        "title", "🚨 구독 자동 취소 실패",
+                        "description", message,
+                        "color", 0xE74C3C,
+                        "fields", List.of(
+                                Map.of("name", "📰 뉴스레터", "value", newsletter.getName() + " (" + newsletter.getEmail() + ")"),
+                                Map.of("name", "❌ 실패 사유", "value", "```" + message + "```"),
+                                Map.of("name", "🔗 해지 URL", "value", url),
+                                Map.of("name", "🆔 ID 정보", "value",
+                                        "Newsletter: " + newsletterId + " / Subscribe: " + subscribeId)),
+                        "timestamp", Instant.now().toString())));
+
+        webhookClient.post(unsubscribeErrorWebhookUrl, body);
     }
 }

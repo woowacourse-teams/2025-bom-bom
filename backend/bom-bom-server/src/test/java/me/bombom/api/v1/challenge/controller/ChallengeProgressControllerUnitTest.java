@@ -25,7 +25,9 @@ import me.bombom.api.v1.challenge.dto.response.TeamChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayTodoResponse;
 import me.bombom.api.v1.challenge.service.ChallengeProgressService;
 import me.bombom.api.v1.common.config.WebConfig;
+import me.bombom.api.v1.common.resolver.LoginMemberArgumentResolver;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +42,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @AutoConfigureMockMvc
-@Import(WebConfig.class)
+@Import({ WebConfig.class, LoginMemberArgumentResolver.class })
 @WebMvcTest(ChallengeProgressController.class)
 class ChallengeProgressControllerUnitTest {
 
@@ -52,6 +54,9 @@ class ChallengeProgressControllerUnitTest {
 
     @MockitoBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
+
+    @MockitoBean
+    private MemberRepository memberRepository;
 
     private Authentication authentication;
 
@@ -67,17 +72,17 @@ class ChallengeProgressControllerUnitTest {
                 .roleId(1L)
                 .build();
 
+        given(memberRepository.findById(member.getId())).willReturn(java.util.Optional.of(member));
+
         Map<String, Object> attributes = Map.of(
                 "id", member.getId().toString(),
                 "email", member.getEmail(),
                 "name", member.getNickname());
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
-
         authentication = new OAuth2AuthenticationToken(
                 customOAuth2User,
                 List.of(new SimpleGrantedAuthority("ROLE_USER")),
-                "google"
-        );
+                "google");
     }
 
     @Test

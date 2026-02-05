@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +11,11 @@ import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.repository.MemberRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.TestingAuthenticationToken;
@@ -24,13 +26,21 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 
 class LoginMemberArgumentResolverTest {
 
-    private final LoginMemberArgumentResolver resolver = new LoginMemberArgumentResolver();
+    private MemberRepository memberRepository;
+    private LoginMemberArgumentResolver resolver;
+
+    @BeforeEach
+    void setUp() {
+        memberRepository = Mockito.mock(MemberRepository.class);
+        resolver = new LoginMemberArgumentResolver(memberRepository);
+    }
 
     @AfterEach
     void tearDown() {
         SecurityContextHolder.clearContext();
     }
 
+    //테스트를 위한 가짜 컨트롤러
     static class StubController {
         public void endpointNullableTrue(@LoginMember(anonymous = true) Member member) {
         }
@@ -148,8 +158,38 @@ class LoginMemberArgumentResolverTest {
         );
         SecurityContextHolder.getContext().setAuthentication(auth);
 
+        given(memberRepository.findById(1L)).willReturn(java.util.Optional.of(member));
+
+        // when
         Object result = resolver.resolveArgument(paramNullableTrue(), null, null, null);
-        assertThat(result).isInstanceOf(Member.class);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).isInstanceOf(Member.class);
+            softly.assertThat(result).isEqualTo(member);
+        });
+    }
+
+    @Test
+    void 정상_로그인이지만_DB에_회원이_없으면_UNAUTHORIZED() throws Exception {
+        // given
+        Member member = org.mockito.Mockito.mock(Member.class);
+        given(member.getId()).willReturn(0L);
+
+        CustomOAuth2User user = new CustomOAuth2User(Map.of("name", "tester"), member, null, null);
+        OAuth2AuthenticationToken auth = new OAuth2AuthenticationToken(
+                user,
+                user.getAuthorities(),
+                "registrationId"
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        given(memberRepository.findById(0L)).willReturn(java.util.Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> resolver.resolveArgument(paramNullableTrue(), null, null, null))
+                .isInstanceOfSatisfying(UnauthorizedException.class,
+                        e -> assertThat(e.getErrorDetail()).isEqualTo(ErrorDetail.UNAUTHORIZED));
     }
 
     @Test

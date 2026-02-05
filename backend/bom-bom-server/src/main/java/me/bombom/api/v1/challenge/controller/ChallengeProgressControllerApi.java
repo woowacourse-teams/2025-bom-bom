@@ -48,9 +48,9 @@ public interface ChallengeProgressControllerApi {
             @ApiResponse(responseCode = "200", description = "수료증 정보 조회 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청, 챌린지/참가자를 찾을 수 없음, 또는 진행 중인 챌린지, 탈락한 참가자", content = @Content),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content)
-        })
+    })
     CertificationInfoResponse getCertificationInfo(
-            @Parameter(hidden = true) @LoginMember Member member,
+            @Parameter(hidden = true) @LoginMember Long memberId,
             @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
     );
 }

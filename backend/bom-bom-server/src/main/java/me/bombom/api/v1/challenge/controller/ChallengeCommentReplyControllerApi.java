@@ -25,7 +25,12 @@ public interface ChallengeCommentReplyControllerApi {
 
     @Operation(
             summary = "코멘트 답글 생성",
-            description = "특정 코멘트에 대해 답글을 작성합니다."
+            description = """
+                    특정 코멘트에 대해 답글을 작성합니다.
+                    
+                    - isPrivate=true: 비공개 답글 (코멘트 작성자 및 본인에게만 공개)
+                    - isPrivate=false: 공개 답글 (모든 챌린지 참여자에게 공개)
+                    """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "코멘트 답글 생성 성공"),

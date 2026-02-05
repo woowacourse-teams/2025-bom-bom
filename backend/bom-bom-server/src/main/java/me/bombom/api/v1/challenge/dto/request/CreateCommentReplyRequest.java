@@ -7,6 +7,8 @@ public record CreateCommentReplyRequest(
 
         @NotNull
         @Size(max = 500, message = "답글은 500자 이하로 작성 가능합니다.")
-        String reply
+        String reply,
+
+        boolean isPrivate
 ) {
 }

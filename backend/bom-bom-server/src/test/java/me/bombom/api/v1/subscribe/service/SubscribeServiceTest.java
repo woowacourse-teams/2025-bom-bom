@@ -2,10 +2,19 @@ package me.bombom.api.v1.subscribe.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
+import me.bombom.api.v1.common.DiscordWebhookNotifier;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.RetryableException;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -18,13 +27,14 @@ import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.domain.SubscribeStatus;
 import me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse;
+import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import me.bombom.support.IntegrationTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@Transactional
 @IntegrationTest
 class SubscribeServiceTest {
 
@@ -42,8 +52,27 @@ class SubscribeServiceTest {
 
     @Autowired
     private SubscribeRepository subscribeRepository;
+
     @Autowired
     private NewsletterDetailRepository newsletterDetailRepository;
+
+    @MockitoBean
+    private UnsubscribeAgent unsubscribeAgent;
+
+    @MockitoBean
+    private DiscordWebhookNotifier discordNotifier;
+
+    @MockitoBean
+    private SubscribeRetryService subscribeRetryService;
+
+    @AfterEach
+    void tearDown() {
+        subscribeRepository.deleteAllInBatch();
+        newsletterRepository.deleteAllInBatch();
+        newsletterDetailRepository.deleteAllInBatch();
+        categoryRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+    }
 
     @Test
     void 구독중인_뉴스레터를_조회한다() {
@@ -69,8 +98,8 @@ class SubscribeServiceTest {
 
         // then
         assertThat(result).hasSize(2)
-            .extracting("name")
-            .containsExactlyInAnyOrder(newsletters.getFirst().getName(), newsletters.getLast().getName());
+                .extracting("name")
+                .containsExactlyInAnyOrder(newsletters.getFirst().getName(), newsletters.getLast().getName());
     }
 
     @Test
@@ -82,11 +111,11 @@ class SubscribeServiceTest {
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
         Newsletter newsletter = newsletterRepository.save(
-            TestFixture.createNewsletter("테스트 뉴스레터", "test@test.com", category.getId(), newsletterDetail.getId()));
+                TestFixture.createNewsletter("테스트 뉴스레터", "test@test.com", category.getId(), newsletterDetail.getId()));
         Subscribe subscribe = subscribeRepository.save(Subscribe.builder()
-            .memberId(member.getId())
-            .newsletterId(newsletter.getId())
-            .build());
+                .memberId(member.getId())
+                .newsletterId(newsletter.getId())
+                .build());
 
         // when
         subscribeService.unsubscribe(member.getId(), subscribe.getId());
@@ -108,15 +137,15 @@ class SubscribeServiceTest {
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
         Newsletter newsletter = newsletterRepository.save(
-            TestFixture.createNewsletter("테스트 뉴스레터", "test@test.com", category.getId(), newsletterDetail.getId()));
+                TestFixture.createNewsletter("테스트 뉴스레터", "test@test.com", category.getId(), newsletterDetail.getId()));
         Subscribe subscribe = subscribeRepository.save(Subscribe.builder()
-            .memberId(otherMember.getId())
-            .newsletterId(newsletter.getId())
-            .build());
+                .memberId(otherMember.getId())
+                .newsletterId(newsletter.getId())
+                .build());
 
         // when & then
         assertThatThrownBy(() -> subscribeService.unsubscribe(member.getId(), subscribe.getId()))
-            .isInstanceOf(UnauthorizedException.class);
+                .isInstanceOf(UnauthorizedException.class);
     }
 
     @Test
@@ -127,7 +156,7 @@ class SubscribeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> subscribeService.unsubscribe(member.getId(), 999L))
-            .isInstanceOf(CIllegalArgumentException.class);
+                .isInstanceOf(CIllegalArgumentException.class);
     }
 
     @Test
@@ -139,19 +168,19 @@ class SubscribeServiceTest {
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
         Newsletter newsletter = newsletterRepository.save(
-            TestFixture.createNewsletter(
-                    "테스트 뉴스레터",
-                    "test@test.com",
-                    category.getId(),
-                    newsletterDetail.getId()
-            )
+                TestFixture.createNewsletter(
+                        "테스트 뉴스레터",
+                        "test@test.com",
+                        category.getId(),
+                        newsletterDetail.getId()
+                )
         );
         String unsubscribeUrl = "https://example.com/unsubscribe";
         Subscribe subscribe = subscribeRepository.save(Subscribe.builder()
-            .memberId(member.getId())
-            .newsletterId(newsletter.getId())
-            .unsubscribeUrl(unsubscribeUrl)
-            .build()
+                .memberId(member.getId())
+                .newsletterId(newsletter.getId())
+                .unsubscribeUrl(unsubscribeUrl)
+                .build()
         );
 
         // when
@@ -319,5 +348,96 @@ class SubscribeServiceTest {
         // then
         Subscribe result = subscribeRepository.findById(subscribe.getId()).orElseThrow();
         assertThat(result.getStatus()).isEqualTo(me.bombom.api.v1.subscribe.domain.SubscribeStatus.UNSUBSCRIBE_FAILED);
+    }
+
+    @Test
+    void 구독_해지_성공_시_람다를_호출하고_완료_처리한다() {
+        // given
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+        Category category = categoryRepository.save(TestFixture.createCategory());
+        NewsletterDetail newsletterDetail = newsletterDetailRepository
+                .save(TestFixture.createNewsletterDetail(true));
+        Newsletter newsletter = newsletterRepository.save(
+                TestFixture.createNewsletter("테스트 뉴스레터", "test@test.com", category.getId(),
+                        newsletterDetail.getId()));
+        Subscribe s = subscribeRepository.save(Subscribe.builder()
+                .memberId(member.getId())
+                .newsletterId(newsletter.getId())
+                .build());
+
+        Long subscribeId = s.getId();
+        Long newsletterId = newsletter.getId();
+        String unsubscribeUrl = "https://example.com/unsub";
+
+        // when
+        subscribeService.processUnsubscribe(subscribeId, newsletterId, unsubscribeUrl);
+
+        // then
+        verify(unsubscribeAgent, times(1)).unsubscribe(unsubscribeUrl, newsletterId);
+        verify(subscribeRetryService, times(1)).deleteIfExists(subscribeId);
+        assertThat(subscribeRepository.findById(subscribeId)).isEmpty();
+    }
+
+    @Test
+    void 재시도_가능_에러_발생_시_재시도를_스케줄링한다() {
+        // given
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+        Category category = categoryRepository.save(TestFixture.createCategory());
+        NewsletterDetail newsletterDetail = newsletterDetailRepository
+                .save(TestFixture.createNewsletterDetail(true));
+        Newsletter newsletter = newsletterRepository.save(
+                TestFixture.createNewsletter("테스트 뉴스레터", "test@test.com", category.getId(),
+                        newsletterDetail.getId()));
+        Subscribe s = subscribeRepository.save(Subscribe.builder()
+                .memberId(member.getId())
+                .newsletterId(newsletter.getId())
+                .build());
+
+        Long subscribeId = s.getId();
+        Long newsletterId = newsletter.getId();
+        String unsubscribeUrl = "https://example.com/unsub";
+        doThrow(new RetryableException("Server Error"))
+                .when(unsubscribeAgent).unsubscribe(anyString(), anyLong());
+        given(subscribeRetryService.scheduleRetry(anyLong(), anyString())).willReturn(true);
+
+        // when
+        subscribeService.processUnsubscribe(subscribeId, newsletterId, unsubscribeUrl);
+
+        // then
+        verify(subscribeRetryService, times(1)).scheduleRetry(eq(subscribeId), eq("Server Error"));
+    }
+
+    @Test
+    void 영구_실패_에러_발생_시_알림을_보낸다() {
+        // given
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+        Category category = categoryRepository.save(TestFixture.createCategory());
+        NewsletterDetail newsletterDetail = newsletterDetailRepository
+                .save(TestFixture.createNewsletterDetail(true));
+        Newsletter newsletter = newsletterRepository.save(
+                TestFixture.createNewsletter("테스트 뉴스레터", "test@test.com", category.getId(),
+                        newsletterDetail.getId()));
+        Subscribe s = subscribeRepository.save(Subscribe.builder()
+                .memberId(member.getId())
+                .newsletterId(newsletter.getId())
+                .build());
+
+        Long subscribeId = s.getId();
+        Long newsletterId = newsletter.getId();
+        String unsubscribeUrl = "https://example.com/unsub";
+        doThrow(new AutoUnsubscribeFailedException("Invalid URL", newsletterId, unsubscribeUrl))
+                .when(unsubscribeAgent).unsubscribe(anyString(), anyLong());
+
+        // when
+        subscribeService.processUnsubscribe(subscribeId, newsletterId, unsubscribeUrl);
+
+        // then
+        verify(discordNotifier, times(1))
+                .sendUnsubscribeErrorNotification(eq("Invalid URL"), eq(newsletterId),
+                        eq(unsubscribeUrl),
+                        eq(subscribeId));
+
+        Subscribe result = subscribeRepository.findById(subscribeId).orElseThrow();
+        assertThat(result.getStatus()).isEqualTo(SubscribeStatus.UNSUBSCRIBE_FAILED);
     }
 }

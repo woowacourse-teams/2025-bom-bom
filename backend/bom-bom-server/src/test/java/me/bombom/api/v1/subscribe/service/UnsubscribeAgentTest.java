@@ -1,144 +1,93 @@
 package me.bombom.api.v1.subscribe.service;
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
+import me.bombom.api.v1.common.exception.RetryableException;
+import me.bombom.api.v1.subscribe.client.PlaywrightClient;
 import me.bombom.api.v1.subscribe.config.SubscribePatternProperties;
+import me.bombom.api.v1.subscribe.dto.UnsubscribePatterns;
+import me.bombom.api.v1.subscribe.dto.response.PlaywrightResponse;
+import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@Import(UnsubscribeAgent.class)
-@TestPropertySource("classpath:unsubscribe-pattern.yml")
-@EnableConfigurationProperties(SubscribePatternProperties.class)
-@ExtendWith({OutputCaptureExtension.class, SpringExtension.class})
+@ExtendWith(MockitoExtension.class)
 class UnsubscribeAgentTest {
 
-    // newsletterId는 로그를 위한 것이라 무시해도 됨
     private static final long MOCK_NEWSLETTER_ID = 1L;
+    private static final String MOCK_URL = "https://example.com/unsubscribe";
 
-    @Autowired
+    @Mock
+    private PlaywrightClient playwrightClient;
+
+    @Mock
+    private SubscribePatternProperties properties;
+
+    @InjectMocks
     private UnsubscribeAgent agent;
 
-    private String createDataUrl(String html) {
-        // charset=utf-8 명시가 중요함 (한글 깨짐 방지)
-        return "data:text/html;charset=utf-8," + URLEncoder.encode(html, StandardCharsets.UTF_8).replace("+", "%20");
+    @BeforeEach
+    void setUp() {
+        given(properties.getUnsubscribePattern()).willReturn(Pattern.compile("unsub"));
+        given(properties.getSuccessPattern()).willReturn(Pattern.compile("success"));
+        given(properties.getAlreadyUnsubscribedPattern()).willReturn(Pattern.compile("already"));
+        given(properties.getErrorPattern()).willReturn(Pattern.compile("error"));
     }
 
     @Test
-    @DisplayName("Role이 Button이고 텍스트가 'Unsubscribe'인 요소를 찾아 클릭한다")
-    void 영어_구독취소_버튼_클릭(CapturedOutput output) {
+    @DisplayName("구독 취소 성공 시 예외가 발생하지 않는다")
+    void 구독_취소_성공() {
         // given
-        String html = """
-                <html>
-                    <body>
-                        <button>Unsubscribe</button>
-                    </body>
-                </html>
-                """;
+        given(playwrightClient.executeUnsubscribe(eq(MOCK_URL), any(UnsubscribePatterns.class)))
+                .willReturn(new PlaywrightResponse(200, true, "Success", null, "text_match"));
 
-        // when
-        agent.unsubscribe(createDataUrl(html), MOCK_NEWSLETTER_ID);
-
-        // then
-        assertSoftly(softly -> {
-            // 성공 시 로그가 없으므로 에러가 없는지로 검증
-            softly.assertThat(output).doesNotContain("구독 취소 실패");
-        });
+        // when & then
+        assertThatCode(() -> agent.unsubscribe(MOCK_URL, MOCK_NEWSLETTER_ID))
+                .doesNotThrowAnyException();
     }
 
     @Test
-    @DisplayName("한국어 '수신거부' 버튼도 정확히 인식한다")
-    void 한국어_수신거부_버튼_클릭(CapturedOutput output) {
+    @DisplayName("5xx 에러 발생 시 RetryableException을 발생시킨다")
+    void 구독_취소_재시도_가능한_에러() {
         // given
-        String html = """
-                <html>
-                    <body>
-                        <button type="button">수신거부</button>
-                    </body>
-                </html>
-                """;
+        given(playwrightClient.executeUnsubscribe(eq(MOCK_URL), any(UnsubscribePatterns.class)))
+                .willReturn(new PlaywrightResponse(500, false, "Server Error", "internal error", null));
 
-        // when
-        agent.unsubscribe(createDataUrl(html), MOCK_NEWSLETTER_ID);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(output).doesNotContain("구독 취소 실패");
-        });
+        // when & then
+        assertThatThrownBy(() -> agent.unsubscribe(MOCK_URL, MOCK_NEWSLETTER_ID))
+                .isInstanceOf(RetryableException.class);
     }
 
     @Test
-    @DisplayName("버튼 태그가 아닌 'Cancel' 텍스트 링크도 2차 시도(Role.LINK)로 찾아낸다")
-    void 텍스트_링크_클릭(CapturedOutput output) {
-        // given (Role: LINK)
-        String html = """
-                <html>
-                    <body>
-                        <div><a href="#">Cancel</a></div>
-                    </body>
-                </html>
-                """;
-
-        // when
-        agent.unsubscribe(createDataUrl(html), MOCK_NEWSLETTER_ID);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(output).doesNotContain("구독 취소 실패");
-        });
-    }
-
-    @Test
-    @DisplayName("이미 'Successfully unsubscribed' 텍스트가 있어도 버튼으로 오인하지 않고 성공으로 감지한다")
-    void 이미_완료된_페이지_감지(CapturedOutput output) {
+    @DisplayName("4xx 에러 발생 시 AutoUnsubscribeFailedException을 발생시킨다")
+    void 구독_취소_실패_에러() {
         // given
-        String html = """
-                <html>
-                    <body>
-                        <h1>Status: Successfully unsubscribed</h1>
-                        <p>You will no longer receive emails.</p>
-                    </body>
-                </html>
-                """;
+        given(playwrightClient.executeUnsubscribe(eq(MOCK_URL), any(UnsubscribePatterns.class)))
+                .willReturn(new PlaywrightResponse(404, false, "Not Found", "page missing", null));
 
-        // when
-        agent.unsubscribe(createDataUrl(html), MOCK_NEWSLETTER_ID);
-
-        // then
-        assertSoftly(softly -> {
-            // "이미 구독 취소된 페이지입니다" 로그는 debug 레벨이라 안 보일 수 있음.
-            // 핵심은 실패 로그가 없어야 함.
-            softly.assertThat(output).doesNotContain("구독 취소 실패");
-        });
+        // when & then
+        assertThatThrownBy(() -> agent.unsubscribe(MOCK_URL, MOCK_NEWSLETTER_ID))
+                .isInstanceOf(AutoUnsubscribeFailedException.class);
     }
 
     @Test
-    @DisplayName("성공 키워드가 긴 문장 속에 포함되어 있어도 감지한다")
-    void 긴_문장_속_성공_키워드_감지(CapturedOutput output) {
+    @Disabled("실제 Lambda를 호출하여 구독 취소를 수행한다 (실제 AWS 환경 변수 필요)")
+    void 실제_람다_연동_테스트() {
         // given
-        String html = """
-                <html>
-                    <body>
-                        <p>Your subscription cancellation process is unsubscribed now.</p>
-                    </body>
-                </html>
-                """;
+        String realUnsubscribeUrl = "...";
 
         // when
-        agent.unsubscribe(createDataUrl(html), MOCK_NEWSLETTER_ID);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(output).doesNotContain("구독 취소 실패");
-        });
+        agent.unsubscribe(realUnsubscribeUrl, MOCK_NEWSLETTER_ID);
     }
 }

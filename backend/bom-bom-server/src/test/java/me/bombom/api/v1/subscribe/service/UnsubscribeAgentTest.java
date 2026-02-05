@@ -11,7 +11,11 @@ import me.bombom.api.v1.common.exception.RetryableException;
 import me.bombom.api.v1.subscribe.client.PlaywrightClient;
 import me.bombom.api.v1.subscribe.config.SubscribePatternProperties;
 import me.bombom.api.v1.subscribe.dto.UnsubscribePatterns;
+<<<<<<< HEAD
 import me.bombom.api.v1.subscribe.dto.response.PlaywrightResponse;
+=======
+import me.bombom.api.v1.subscribe.dto.PlaywrightResponse;
+>>>>>>> 8158df0c (test: UnsubscribeAgentTest 작성)
 import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;

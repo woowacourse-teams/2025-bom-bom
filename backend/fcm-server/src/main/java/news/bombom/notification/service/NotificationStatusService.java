@@ -38,9 +38,7 @@ public class NotificationStatusService {
         notification.markFailed(result.errorMessages());
         log.error("모든 기기에서 알림 발송 실패: notificationId={}", notification.getId());
 
-        if (!notification.shouldRetry()) {
-            moveToFailedTable(notification);
-        }
+        moveToFailedTableIfExceeded(notification);
     }
 
     @Transactional
@@ -48,10 +46,7 @@ public class NotificationStatusService {
         log.warn("FCM 토큰이 없습니다: memberId={}", notification.getMemberId());
         notification.markFailed(reason);
         notificationRepository.save(notification);
-        
-        if (!notification.shouldRetry()) {
-            moveToFailedTable(notification);
-        }
+        moveToFailedTableIfExceeded(notification);
     }
 
     @Transactional

@@ -3,9 +3,9 @@ package me.bombom.api.v1.subscribe.scheduler;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.subscribe.domain.SubscribeRetry;
-import me.bombom.api.v1.subscribe.service.SubscribeRetryService;
+import me.bombom.api.v1.subscribe.domain.UnsubscribeRetry;
 import me.bombom.api.v1.subscribe.service.SubscribeService;
+import me.bombom.api.v1.subscribe.service.UnsubscribeRetryService;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -13,23 +13,23 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SubscribeRetryScheduler {
+public class UnsubscribeRetryScheduler {
 
     public static final int RETRY_INTERVAL_MS = 300000; // 5분
     private static final int RETRY_BATCH_SIZE = 10;
 
     private final SubscribeService subscribeService;
-    private final SubscribeRetryService subscribeRetryService;
+    private final UnsubscribeRetryService unsubscribeRetryService;
 
     @Scheduled(fixedDelay = RETRY_INTERVAL_MS)
     @SchedulerLock(name = "retryUnsubscribe", lockAtLeastFor = "30s", lockAtMostFor = "4m")
     public void retryUnsubscribe() {
-        List<SubscribeRetry> retries = subscribeRetryService.findPendingRetries(RETRY_BATCH_SIZE);
+        List<UnsubscribeRetry> retries = unsubscribeRetryService.findPendingRetries(RETRY_BATCH_SIZE);
         if (!retries.isEmpty()) {
             log.info("재시도 대상 {}건 발견. 처리를 시작합니다.", retries.size());
         }
 
-        for (SubscribeRetry retry : retries) {
+        for (UnsubscribeRetry retry : retries) {
             try {
                 processRetry(retry);
             } catch (Exception e) {
@@ -38,7 +38,7 @@ public class SubscribeRetryScheduler {
         }
     }
 
-    private void processRetry(SubscribeRetry retry) {
+    private void processRetry(UnsubscribeRetry retry) {
         log.info("구독 취소 재시도 실행 - subscribeId: {}, retryCount: {}", retry.getSubscribeId(), retry.getRetryCount());
         subscribeService.retryUnsubscribe(retry.getSubscribeId());
     }

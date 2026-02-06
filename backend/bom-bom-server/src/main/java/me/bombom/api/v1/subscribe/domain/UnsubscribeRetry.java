@@ -18,12 +18,12 @@ import me.bombom.api.v1.common.BaseEntity;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class SubscribeRetry extends BaseEntity {
+public class UnsubscribeRetry extends BaseEntity {
 
     private static final List<Duration> BACKOFF_STRATEGY = List.of(
-            Duration.ofMinutes(10), //네트워크 문제
-            Duration.ofMinutes(30), //짧은 점검
-            Duration.ofHours(2) //점검
+            Duration.ofMinutes(10), // 네트워크 문제
+            Duration.ofMinutes(30), // 짧은 점검
+            Duration.ofHours(2) // 점검
     );
     private static final int MAX_RETRY_COUNT = BACKOFF_STRATEGY.size();
 
@@ -43,12 +43,11 @@ public class SubscribeRetry extends BaseEntity {
     private String lastError;
 
     @Builder
-    public SubscribeRetry(
+    public UnsubscribeRetry(
             Long id,
             @NonNull Long subscribeId,
             @NonNull LocalDateTime nextRetryAt,
-            String lastError
-    ) {
+            String lastError) {
         this.id = id;
         this.subscribeId = subscribeId;
         this.nextRetryAt = nextRetryAt;

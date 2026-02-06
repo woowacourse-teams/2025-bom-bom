@@ -33,7 +33,7 @@ public class SubscribeService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final UnsubscribeAgent unsubscribeAgent;
     private final DiscordWebhookNotifier discordNotifier;
-    private final SubscribeRetryService subscribeRetryService;
+    private final UnsubscribeRetryService unsubscribeRetryService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteAllByMemberId(Long memberId) {
@@ -98,7 +98,7 @@ public class SubscribeService {
         try {
             unsubscribeAgent.unsubscribe(unsubscribeUrl, newsletterId);
             applicationEventPublisher.publishEvent(AutoUnsubscribeCompletedEvent.of(subscribeId, true));
-            subscribeRetryService.deleteIfExists(subscribeId);
+            unsubscribeRetryService.deleteIfExists(subscribeId);
         } catch (RetryableException e) {
             handleRetryableFailure(subscribeId, newsletterId, unsubscribeUrl, e.getMessage());
         } catch (AutoUnsubscribeFailedException e) {
@@ -113,7 +113,7 @@ public class SubscribeService {
         Optional<Subscribe> subscribeOpt = subscribeRepository.findById(subscribeId);
         if (subscribeOpt.isEmpty()) {
             log.warn("구독 정보가 존재하지 않아 재시도 항목 삭제 - subscribeId: {}", subscribeId);
-            subscribeRetryService.deleteIfExists(subscribeId);
+            unsubscribeRetryService.deleteIfExists(subscribeId);
             return;
         }
 
@@ -122,14 +122,14 @@ public class SubscribeService {
     }
 
     private void handleRetryableFailure(Long subscribeId, Long newsletterId, String url, String errorMsg) {
-        boolean scheduled = subscribeRetryService.scheduleRetry(subscribeId, errorMsg);
+        boolean scheduled = unsubscribeRetryService.scheduleRetry(subscribeId, errorMsg);
         if (!scheduled) {
             handlePermanentFailure(subscribeId, newsletterId, url, "최대 재시도 횟수에 도달했습니다 : " + errorMsg);
         }
     }
 
     private void handlePermanentFailure(Long subscribeId, Long newsletterId, String url, String errorMsg) {
-        subscribeRetryService.deleteIfExists(subscribeId);
+        unsubscribeRetryService.deleteIfExists(subscribeId);
         applicationEventPublisher.publishEvent(AutoUnsubscribeCompletedEvent.of(subscribeId, false));
         discordNotifier.sendUnsubscribeErrorNotification(errorMsg, newsletterId, url, subscribeId);
     }

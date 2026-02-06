@@ -63,7 +63,7 @@ class SubscribeServiceTest {
     private DiscordWebhookNotifier discordNotifier;
 
     @MockitoBean
-    private SubscribeRetryService subscribeRetryService;
+    private UnsubscribeRetryService unsubscribeRetryService;
 
     @AfterEach
     void tearDown() {
@@ -374,7 +374,7 @@ class SubscribeServiceTest {
 
         // then
         verify(unsubscribeAgent, times(1)).unsubscribe(unsubscribeUrl, newsletterId);
-        verify(subscribeRetryService, times(1)).deleteIfExists(subscribeId);
+        verify(unsubscribeRetryService, times(1)).deleteIfExists(subscribeId);
         assertThat(subscribeRepository.findById(subscribeId)).isEmpty();
     }
 
@@ -398,13 +398,13 @@ class SubscribeServiceTest {
         String unsubscribeUrl = "https://example.com/unsub";
         doThrow(new RetryableException("Server Error"))
                 .when(unsubscribeAgent).unsubscribe(anyString(), anyLong());
-        given(subscribeRetryService.scheduleRetry(anyLong(), anyString())).willReturn(true);
+        given(unsubscribeRetryService.scheduleRetry(anyLong(), anyString())).willReturn(true);
 
         // when
         subscribeService.processUnsubscribe(subscribeId, newsletterId, unsubscribeUrl);
 
         // then
-        verify(subscribeRetryService, times(1)).scheduleRetry(eq(subscribeId), eq("Server Error"));
+        verify(unsubscribeRetryService, times(1)).scheduleRetry(eq(subscribeId), eq("Server Error"));
     }
 
     @Test

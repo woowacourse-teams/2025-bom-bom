@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.subscribe.domain.SubscribeRetry;
-import me.bombom.api.v1.subscribe.repository.SubscribeRetryRepository;
+import me.bombom.api.v1.subscribe.domain.UnsubscribeRetry;
+import me.bombom.api.v1.subscribe.repository.UnsubscribeRetryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,33 +15,34 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class SubscribeRetryService {
+public class UnsubscribeRetryService {
 
-    private final SubscribeRetryRepository subscribeRetryRepository;
+    private final UnsubscribeRetryRepository unsubscribeRetryRepository;
     private final Clock clock;
 
     @Transactional
     public boolean scheduleRetry(Long subscribeId, String errorMsg) {
-        Optional<SubscribeRetry> existingRetry = subscribeRetryRepository.findBySubscribeId(subscribeId);
+        Optional<UnsubscribeRetry> existingRetry = unsubscribeRetryRepository.findBySubscribeId(subscribeId);
         LocalDateTime now = LocalDateTime.now(clock);
 
         if (existingRetry.isEmpty()) {
-            SubscribeRetry newRetry = SubscribeRetry.builder()
+            UnsubscribeRetry newRetry = UnsubscribeRetry.builder()
                     .subscribeId(subscribeId)
                     .nextRetryAt(now)
                     .lastError(errorMsg)
                     .build();
             newRetry.increaseRetryCount(now, errorMsg);
-            subscribeRetryRepository.save(newRetry);
+            unsubscribeRetryRepository.save(newRetry);
 
-            log.info("구독 취소 {}번째 재시도 예약 - subscribeId: {}, next: {}", newRetry.getRetryCount(), subscribeId, newRetry.getNextRetryAt());
+            log.info("구독 취소 {}번째 재시도 예약 - subscribeId: {}, next: {}", newRetry.getRetryCount(), subscribeId,
+                    newRetry.getNextRetryAt());
             return true;
         }
 
-        SubscribeRetry retry = existingRetry.get();
+        UnsubscribeRetry retry = existingRetry.get();
         if (retry.isMaxRetryReached()) {
             log.error("구독 취소 재시도 횟수 초과 - subscribeId: {}", subscribeId);
-            subscribeRetryRepository.delete(retry);
+            unsubscribeRetryRepository.delete(retry);
             return false;
         }
 
@@ -52,16 +53,16 @@ public class SubscribeRetryService {
 
     @Transactional
     public void deleteIfExists(Long subscribeId) {
-        subscribeRetryRepository.findBySubscribeId(subscribeId)
-                .ifPresent(subscribeRetryRepository::delete);
+        unsubscribeRetryRepository.findBySubscribeId(subscribeId)
+                .ifPresent(unsubscribeRetryRepository::delete);
     }
 
     @Transactional
-    public void delete(SubscribeRetry retry) {
-        subscribeRetryRepository.delete(retry);
+    public void delete(UnsubscribeRetry retry) {
+        unsubscribeRetryRepository.delete(retry);
     }
 
-    public List<SubscribeRetry> findPendingRetries(int limit) {
-        return subscribeRetryRepository.findPendingRetries(LocalDateTime.now(clock), limit);
+    public List<UnsubscribeRetry> findPendingRetries(int limit) {
+        return unsubscribeRetryRepository.findPendingRetries(LocalDateTime.now(clock), limit);
     }
 }

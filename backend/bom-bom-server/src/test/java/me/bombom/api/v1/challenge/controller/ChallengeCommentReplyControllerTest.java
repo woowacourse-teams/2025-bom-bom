@@ -22,6 +22,7 @@ import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,13 +81,15 @@ class ChallengeCommentReplyControllerTest {
         Member commentAuthor = memberRepository.save(
                 TestFixture.createUniqueMember("commentAuthor", java.util.UUID.randomUUID().toString()));
 
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
         challenge = challengeRepository.save(
                 TestFixture.createChallenge(
                         "comment-challenge",
                         java.time.LocalDate.now().minusDays(1),
                         java.time.LocalDate.now().plusDays(5),
                         7,
-                        newsletterGroupRepository));
+                        group.getId()));
 
         ChallengeParticipant commentAuthorParticipant = challengeParticipantRepository.save(
                 TestFixture.createChallengeParticipant(

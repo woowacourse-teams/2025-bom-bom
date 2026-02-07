@@ -27,7 +27,6 @@ import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroupItem;
-import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousPolicy;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy;
 import me.bombom.api.v1.notice.domain.Notice;
@@ -554,17 +553,15 @@ public final class TestFixture {
             LocalDate startDate,
             LocalDate endDate,
             int totalDays,
-            NewsletterGroupRepository newsletterGroupRepository
+            Long newsletterGroupId
     ) {
-        NewsletterGroup group = createNewsletterGroup("테스트 그룹");
-        NewsletterGroup savedGroup = newsletterGroupRepository.save(group);
         return Challenge.builder()
                 .name(name)
                 .generation(1)
                 .startDate(startDate)
                 .endDate(endDate)
                 .totalDays(totalDays)
-                .newsletterGroupId(savedGroup.getId())
+                .newsletterGroupId(newsletterGroupId)
                 .build();
     }
 
@@ -573,18 +570,16 @@ public final class TestFixture {
             int generation,
             LocalDate startDate,
             LocalDate endDate,
-            NewsletterGroupRepository newsletterGroupRepository
+            Long newsletterGroupId
     ) {
         int totalDays = (int) java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
-        NewsletterGroup group = createNewsletterGroup("테스트 그룹");
-        NewsletterGroup savedGroup = newsletterGroupRepository.save(group);
         return Challenge.builder()
                 .name(name)
                 .generation(generation)
                 .startDate(startDate)
                 .endDate(endDate)
                 .totalDays(totalDays)
-                .newsletterGroupId(savedGroup.getId())
+                .newsletterGroupId(newsletterGroupId)
                 .build();
     }
 

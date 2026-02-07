@@ -22,6 +22,7 @@ import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.AfterEach;
@@ -76,12 +77,14 @@ class ChallengeProgressControllerTest {
         void setUp() {
                 memberA = memberRepository.save(TestFixture.createUniqueMember("userA", "A"));
 
+                NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+                newsletterGroupRepository.save(group);
                 challenge = challengeRepository.save(TestFixture.createChallenge(
                                 "Test Challenge",
                                 LocalDate.now().minusDays(5),
                                 LocalDate.now().plusDays(5),
                                 10,
-                                newsletterGroupRepository));
+                                group.getId()));
 
                 Map<String, Object> attributes = Map.of(
                                 "id", memberA.getId().toString(),

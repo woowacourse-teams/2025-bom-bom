@@ -19,6 +19,7 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroupItem;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
@@ -116,7 +117,9 @@ class ChallengeControllerTest {
     @Test
     void 비로그인_상태로_챌린지_목록_조회() throws Exception {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), newsletterGroupRepository);
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
         NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
@@ -137,7 +140,9 @@ class ChallengeControllerTest {
     @Test
     void 로그인_상태로_챌린지_목록_조회() throws Exception {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(10), today.plusDays(10), newsletterGroupRepository);
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(10), today.plusDays(10), group.getId());
         challengeRepository.save(challenge);
 
         ChallengeParticipant participant = TestFixture.createChallengeParticipant(

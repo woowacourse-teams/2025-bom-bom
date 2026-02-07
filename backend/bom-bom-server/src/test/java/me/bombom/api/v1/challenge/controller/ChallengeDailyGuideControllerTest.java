@@ -28,6 +28,7 @@ import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -92,12 +93,14 @@ class ChallengeDailyGuideControllerTest {
         memberRepository.save(member);
 
         today = LocalDate.now(SEOUL_ZONE);
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "테스트 챌린지",
                 today.minusDays(5),
                 today.plusDays(5),
                 10,
-                newsletterGroupRepository
+                group.getId()
         ));
 
         participant = challengeParticipantRepository.save(

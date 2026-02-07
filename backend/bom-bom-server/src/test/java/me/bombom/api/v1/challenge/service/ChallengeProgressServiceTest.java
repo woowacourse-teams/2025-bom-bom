@@ -35,6 +35,7 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,12 +88,15 @@ class ChallengeProgressServiceTest {
         member = memberRepository.save(
                 TestFixture.createUniqueMember("tester", java.util.UUID.randomUUID().toString()));
 
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "Test Challenge",
                 LocalDate.now().minusDays(5),
                 LocalDate.now().plusDays(5),
                 10,
-                newsletterGroupRepository));
+                group.getId()));
 
         // 3일 완료한 참여자 생성
         ChallengeParticipant participant = challengeParticipantRepository
@@ -145,12 +149,14 @@ class ChallengeProgressServiceTest {
         LocalDate yesterday = LocalDate.now().minusDays(1);
 
         // Challenge: 총 10일. 80% = 8일. 최대 결석 = 2일
+        NewsletterGroup survivalGroup = TestFixture.createNewsletterGroup("생존 그룹");
+        newsletterGroupRepository.save(survivalGroup);
         Challenge survivalChallenge = challengeRepository.save(TestFixture.createChallenge(
                 "Survival Challenge",
                 yesterday.minusDays(4),
                 yesterday.plusDays(5),
                 10,
-                newsletterGroupRepository));
+                survivalGroup.getId()));
 
         ChallengeParticipant participant = challengeParticipantRepository.save(ChallengeParticipant.builder()
                 .challengeId(survivalChallenge.getId())
@@ -186,12 +192,14 @@ class ChallengeProgressServiceTest {
         LocalDate yesterday = LocalDate.now().minusDays(1);
 
         // Challenge: 총 10일. 80% = 8일. 최대 결석 = 2일
+        NewsletterGroup survivalGroup2 = TestFixture.createNewsletterGroup("생존 그룹2");
+        newsletterGroupRepository.save(survivalGroup2);
         Challenge survivalChallenge = challengeRepository.save(TestFixture.createChallenge(
                 "Survival Challenge 2",
                 yesterday.minusDays(4),
                 yesterday.plusDays(5),
                 10,
-                newsletterGroupRepository));
+                survivalGroup2.getId()));
 
         // Participant: 챌린지 3일 수행
         // 챌린지 시작한지 5일 지남, currentAbsent = 5 - 3 = 2, 2 >= 2 -> 생존.
@@ -221,12 +229,14 @@ class ChallengeProgressServiceTest {
         LocalDate yesterday = LocalDate.of(2026, 1, 10).minusDays(1);
 
         // Challenge: 총 10일. 80% = 8일. 최대 결석 = 2일
+        NewsletterGroup survivalGroup3 = TestFixture.createNewsletterGroup("생존 그룹3");
+        newsletterGroupRepository.save(survivalGroup3);
         Challenge survivalChallenge = challengeRepository.save(TestFixture.createChallenge(
                 "Survival Challenge 3",
                 yesterday.minusDays(4),
                 yesterday.plusDays(5),
                 10,
-                newsletterGroupRepository));
+                survivalGroup3.getId()));
 
         // Participant: 챌린지 2일 수행
         // 챌린지 시작한지 5일 지남, currentAbsent = 5 - 2 = 3, 3 > 2 -> 탈락.
@@ -344,12 +354,14 @@ class ChallengeProgressServiceTest {
     @Test
     void 특정_팀_진행상황_조회_실패_팀이_챌린지에_속하지_않음() {
         // given
+        NewsletterGroup otherGroup = TestFixture.createNewsletterGroup("다른 그룹");
+        newsletterGroupRepository.save(otherGroup);
         Challenge otherChallenge = challengeRepository.save(TestFixture.createChallenge(
                 "Other Challenge",
                 LocalDate.now().minusDays(5),
                 LocalDate.now().plusDays(5),
                 10,
-                newsletterGroupRepository));
+                otherGroup.getId()));
         ChallengeTeam otherTeam = challengeTeamRepository.save(createChallengeTeam(otherChallenge.getId(), 50));
 
         // when & then
@@ -400,12 +412,14 @@ class ChallengeProgressServiceTest {
         LocalDate monday = LocalDate.of(2024, 1, 8);
 
         // 총 10일 (영업일 기준). 2024-01-05 ~ 2024-01-18 (금요일~다음다음 목요일, 14일간, 주말 4일 제외 = 10일)
+        NewsletterGroup weekendGroup = TestFixture.createNewsletterGroup("주말 그룹");
+        newsletterGroupRepository.save(weekendGroup);
         Challenge weekendChallenge = challengeRepository.save(TestFixture.createChallenge(
                 "Weekend Challenge",
                 friday,
                 friday.plusDays(13), // 2 weeks
                 10, // total days (business only)
-                newsletterGroupRepository
+                weekendGroup.getId()
         ));
 
         // User completed 0 days.
@@ -433,13 +447,15 @@ class ChallengeProgressServiceTest {
     void 종료된_챌린지의_수료증_정보를_조회한다() {
         // given
         LocalDate yesterday = LocalDate.now().minusDays(1);
+        NewsletterGroup completedGroup = TestFixture.createNewsletterGroup("완료 그룹");
+        newsletterGroupRepository.save(completedGroup);
         Challenge completedChallenge = challengeRepository.save(
                 TestFixture.createChallenge(
                     "Completed Challenge",
                     yesterday.minusDays(10),
                     yesterday,
                     10,
-                    newsletterGroupRepository
+                    completedGroup.getId()
                 )
         );
 
@@ -497,13 +513,15 @@ class ChallengeProgressServiceTest {
     void 참가하지_않은_챌린지의_수료증_조회시_예외_발생() {
         // given
         LocalDate yesterday = LocalDate.now().minusDays(1);
+        NewsletterGroup otherCompletedGroup = TestFixture.createNewsletterGroup("다른 완료 그룹");
+        newsletterGroupRepository.save(otherCompletedGroup);
         Challenge completedChallenge = challengeRepository.save(
                 TestFixture.createChallenge(
                     "Other Challenge",
                     yesterday.minusDays(10),
                     yesterday,
                     10,
-                    newsletterGroupRepository
+                    otherCompletedGroup.getId()
                 )
         );
 
@@ -529,13 +547,15 @@ class ChallengeProgressServiceTest {
     void 생존하지_못한_참가자는_FAIL_등급을_받는다() {
         // given
         LocalDate yesterday = LocalDate.now().minusDays(1);
+        NewsletterGroup failedGroup = TestFixture.createNewsletterGroup("실패 그룹");
+        newsletterGroupRepository.save(failedGroup);
         Challenge completedChallenge = challengeRepository.save(
                 TestFixture.createChallenge(
                     "Failed Challenge",
                     yesterday.minusDays(10),
                     yesterday,
                     10,
-                    newsletterGroupRepository
+                    failedGroup.getId()
                 )
         );
 
@@ -561,13 +581,15 @@ class ChallengeProgressServiceTest {
     void 진행률에_따라_올바른_등급을_받는다() {
         // given
         LocalDate yesterday = LocalDate.now().minusDays(1);
+        NewsletterGroup gradeGroup = TestFixture.createNewsletterGroup("등급 그룹");
+        newsletterGroupRepository.save(gradeGroup);
         Challenge completedChallenge = challengeRepository.save(
                 TestFixture.createChallenge(
                     "Grade Challenge",
                     yesterday.minusDays(10),
                     yesterday,
                     10,
-                    newsletterGroupRepository
+                    gradeGroup.getId()
                 )
         );
 

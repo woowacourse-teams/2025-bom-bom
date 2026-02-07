@@ -33,6 +33,7 @@ import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -107,6 +108,9 @@ class ChallengeDailyGuideServiceTest {
         // 무조건 평일로 설정 (2026-01-26 월요일)
         today = LocalDate.of(2026, 1, 26);
 
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+
         given(clock.getZone()).willReturn(SEOUL_ZONE);
         given(clock.instant()).willReturn(today.atStartOfDay(SEOUL_ZONE).toInstant());
         today = LocalDate.now(clock);
@@ -115,7 +119,7 @@ class ChallengeDailyGuideServiceTest {
                 today.minusDays(5),
                 today.plusDays(5),
                 10,
-                newsletterGroupRepository
+                group.getId()
                 )
         );
 
@@ -292,12 +296,14 @@ class ChallengeDailyGuideServiceTest {
     @Test
     void 챌린지_기간이_아닌_경우_예외_발생() {
         // given
+        NewsletterGroup futureGroup = TestFixture.createNewsletterGroup("미래 그룹");
+        newsletterGroupRepository.save(futureGroup);
         Challenge futureChallenge = challengeRepository.save(TestFixture.createChallenge(
                 "미래 챌린지",
                 today.plusDays(10),
                 today.plusDays(20),
                 10,
-                newsletterGroupRepository
+                futureGroup.getId()
         ));
 
         challengeParticipantRepository.save(

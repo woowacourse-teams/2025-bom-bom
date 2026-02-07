@@ -11,9 +11,7 @@ import java.util.Map;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.challenge.domain.ChallengeNewsletter;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
-import me.bombom.api.v1.challenge.repository.ChallengeNewsletterRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.member.domain.Member;
@@ -21,8 +19,11 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroupItem;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupItemRepository;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +48,10 @@ class ChallengeControllerTest {
     private ChallengeParticipantRepository challengeParticipantRepository;
 
     @Autowired
-    private ChallengeNewsletterRepository challengeNewsletterRepository;
+    private NewsletterGroupRepository newsletterGroupRepository;
+
+    @Autowired
+    private NewsletterGroupItemRepository newsletterGroupItemRepository;
 
     @Autowired
     private NewsletterRepository newsletterRepository;
@@ -73,7 +77,8 @@ class ChallengeControllerTest {
     @BeforeEach
     void setUp() {
         challengeParticipantRepository.deleteAllInBatch();
-        challengeNewsletterRepository.deleteAllInBatch();
+        newsletterGroupItemRepository.deleteAllInBatch();
+        newsletterGroupRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
         newsletterRepository.deleteAllInBatch();
         newsletterDetailRepository.deleteAllInBatch();
@@ -111,14 +116,11 @@ class ChallengeControllerTest {
     @Test
     void 비로그인_상태로_챌린지_목록_조회() throws Exception {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), newsletterGroupRepository);
         challengeRepository.save(challenge);
 
-        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(
-                challenge.getId(),
-                newsletters.get(0).getId()
-        );
-        challengeNewsletterRepository.save(challengeNewsletter);
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
 
         // when & then - 시작전 챌린지이므로 반환되어야 함
         mockMvc.perform(get("/api/v1/challenges"))
@@ -135,7 +137,7 @@ class ChallengeControllerTest {
     @Test
     void 로그인_상태로_챌린지_목록_조회() throws Exception {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(10), today.plusDays(10));
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(10), today.plusDays(10), newsletterGroupRepository);
         challengeRepository.save(challenge);
 
         ChallengeParticipant participant = TestFixture.createChallengeParticipant(
@@ -146,11 +148,8 @@ class ChallengeControllerTest {
         );
         challengeParticipantRepository.save(participant);
 
-        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(
-                challenge.getId(),
-                newsletters.get(0).getId()
-        );
-        challengeNewsletterRepository.save(challengeNewsletter);
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
 
         // when & then
         mockMvc.perform(get("/api/v1/challenges")

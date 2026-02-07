@@ -33,6 +33,7 @@ import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,6 +75,9 @@ class ChallengeDailyGuideServiceTest {
     @Autowired
     private ChallengeDailyResultRepository challengeDailyResultRepository;
 
+    @Autowired
+    private NewsletterGroupRepository newsletterGroupRepository;
+
     @MockitoBean
     private Clock clock;
 
@@ -95,6 +99,7 @@ class ChallengeDailyGuideServiceTest {
         challengeParticipantRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+        newsletterGroupRepository.deleteAllInBatch();
 
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
@@ -109,7 +114,8 @@ class ChallengeDailyGuideServiceTest {
                 "테스트 챌린지",
                 today.minusDays(5),
                 today.plusDays(5),
-                10
+                10,
+                newsletterGroupRepository
                 )
         );
 
@@ -290,7 +296,8 @@ class ChallengeDailyGuideServiceTest {
                 "미래 챌린지",
                 today.plusDays(10),
                 today.plusDays(20),
-                10
+                10,
+                newsletterGroupRepository
         ));
 
         challengeParticipantRepository.save(

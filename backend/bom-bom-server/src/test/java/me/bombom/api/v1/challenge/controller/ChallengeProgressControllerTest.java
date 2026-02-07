@@ -22,6 +22,7 @@ import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,6 +55,9 @@ class ChallengeProgressControllerTest {
         @Autowired
         private ChallengeDailyResultRepository challengeDailyResultRepository;
 
+        @Autowired
+        private NewsletterGroupRepository newsletterGroupRepository;
+
         private Member memberA;
         private Challenge challenge;
         private OAuth2AuthenticationToken authToken;
@@ -65,6 +69,7 @@ class ChallengeProgressControllerTest {
                 challengeTeamRepository.deleteAllInBatch();
                 challengeRepository.deleteAllInBatch();
                 memberRepository.deleteAllInBatch();
+                newsletterGroupRepository.deleteAllInBatch();
         }
 
         @BeforeEach
@@ -75,7 +80,8 @@ class ChallengeProgressControllerTest {
                                 "Test Challenge",
                                 LocalDate.now().minusDays(5),
                                 LocalDate.now().plusDays(5),
-                                10));
+                                10,
+                                newsletterGroupRepository));
 
                 Map<String, Object> attributes = Map.of(
                                 "id", memberA.getId().toString(),

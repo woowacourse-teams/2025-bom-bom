@@ -23,6 +23,7 @@ import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,6 +61,9 @@ class ChallengeDailyTodoServiceTest {
     @Autowired
     private ChallengeDailyTodoService challengeDailyTodoService;
 
+    @Autowired
+    private NewsletterGroupRepository newsletterGroupRepository;
+
     private Member member;
     private Challenge challenge;
     private ChallengeTodo readTodo;
@@ -88,7 +92,8 @@ class ChallengeDailyTodoServiceTest {
                 "테스트 챌린지",
                 today.minusDays(5),
                 today.plusDays(5),
-                10
+                10,
+                newsletterGroupRepository
         ));
 
         challengeParticipantRepository.save(
@@ -131,7 +136,8 @@ class ChallengeDailyTodoServiceTest {
                 "테스트 챌린지",
                 actualToday.minusDays(5),
                 actualToday.plusDays(5),
-                10
+                10,
+                newsletterGroupRepository
         ));
         
         challengeParticipantRepository.save(
@@ -232,7 +238,8 @@ class ChallengeDailyTodoServiceTest {
                 "주말 테스트 챌린지",
                 saturday.minusDays(5),
                 saturday.plusDays(5),
-                10
+                10,
+                newsletterGroupRepository
         ));
         
         challengeParticipantRepository.save(
@@ -278,7 +285,8 @@ class ChallengeDailyTodoServiceTest {
                 "주말 테스트 챌린지",
                 sunday.minusDays(5),
                 sunday.plusDays(5),
-                10
+                10,
+                newsletterGroupRepository
         ));
         
         challengeParticipantRepository.save(
@@ -324,7 +332,8 @@ class ChallengeDailyTodoServiceTest {
                 "평일 테스트 챌린지",
                 weekday.minusDays(5),
                 weekday.plusDays(5),
-                10
+                10,
+                newsletterGroupRepository
         ));
         
         challengeParticipantRepository.save(

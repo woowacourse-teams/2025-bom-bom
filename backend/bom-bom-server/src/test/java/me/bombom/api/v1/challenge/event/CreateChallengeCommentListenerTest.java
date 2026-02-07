@@ -17,6 +17,7 @@ import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,9 @@ class CreateChallengeCommentListenerTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private NewsletterGroupRepository newsletterGroupRepository;
+
     private ChallengeParticipant participant;
     private ChallengeTodo commentTodo;
 
@@ -61,6 +65,7 @@ class CreateChallengeCommentListenerTest {
         challengeTeamRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+        newsletterGroupRepository.deleteAllInBatch();
 
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
 
@@ -69,7 +74,8 @@ class CreateChallengeCommentListenerTest {
                         "테스트 챌린지",
                         LocalDate.now().minusDays(1),
                         LocalDate.now().plusDays(8),
-                        10
+                        10,
+                        newsletterGroupRepository
                 )
         );
 

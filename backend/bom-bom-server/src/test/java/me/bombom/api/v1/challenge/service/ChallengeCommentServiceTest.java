@@ -43,6 +43,7 @@ import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,6 +84,9 @@ class ChallengeCommentServiceTest {
 
     @Autowired
     private NewsletterDetailRepository newsletterDetailRepository;
+
+    @Autowired
+    private NewsletterGroupRepository newsletterGroupRepository;
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -136,7 +140,8 @@ class ChallengeCommentServiceTest {
                         "챌린지",
                         LocalDate.now().minusDays(1),
                         LocalDate.now().plusDays(10),
-                        11
+                        11,
+                        newsletterGroupRepository
                 )
         );
         ChallengeTeam myTeam = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
@@ -235,7 +240,8 @@ class ChallengeCommentServiceTest {
                         "다른 챌린지",
                         LocalDate.now().minusDays(1),
                         LocalDate.now().plusDays(5),
-                        6
+                        6,
+                        newsletterGroupRepository
                 )
         );
 
@@ -331,7 +337,8 @@ class ChallengeCommentServiceTest {
                         "다른 챌린지",
                         LocalDate.now().minusDays(1),
                         LocalDate.now().plusDays(5),
-                        6
+                        6,
+                        newsletterGroupRepository
                 )
         );
 

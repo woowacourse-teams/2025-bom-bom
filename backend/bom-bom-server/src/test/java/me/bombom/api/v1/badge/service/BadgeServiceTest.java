@@ -7,19 +7,20 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.badge.domain.Badge;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.badge.domain.ChallengeBadge;
 import me.bombom.api.v1.badge.domain.RankingBadge;
 import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.reading.dto.RankerInfo;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.TestFixture;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
+import me.bombom.api.v1.reading.dto.RankerInfo;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,9 @@ class BadgeServiceTest {
     @Autowired
     private ChallengeParticipantRepository challengeParticipantRepository;
 
+    @Autowired
+    private NewsletterGroupRepository newsletterGroupRepository;
+
     private Member member1;
     private Member member2;
     private Member member3;
@@ -54,6 +58,7 @@ class BadgeServiceTest {
         challengeParticipantRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+        newsletterGroupRepository.deleteAllInBatch();
 
         member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
         member2 = memberRepository.save(TestFixture.createUniqueMember("member2", "provider2"));
@@ -207,7 +212,8 @@ class BadgeServiceTest {
             "Test Challenge",
             LocalDate.now().minusDays(10),
             LocalDate.now().minusDays(1),
-            10
+            10,
+            newsletterGroupRepository
         ));
 
         // when
@@ -224,7 +230,8 @@ class BadgeServiceTest {
             "Test Challenge",
             LocalDate.now().minusDays(10),
             LocalDate.now().minusDays(1),
-            10
+            10,
+            newsletterGroupRepository
         ));
         ChallengeParticipant participant = challengeParticipantRepository.save(
             TestFixture.createChallengeParticipant(
@@ -259,7 +266,8 @@ class BadgeServiceTest {
             "Test Challenge",
             LocalDate.now().minusDays(10),
             LocalDate.now().minusDays(1),
-            10
+            10,
+            newsletterGroupRepository
         ));
         ChallengeParticipant participant = challengeParticipantRepository.save(
             TestFixture.createChallengeParticipant(
@@ -291,7 +299,8 @@ class BadgeServiceTest {
             "Test Challenge",
             LocalDate.now().minusDays(10),
             LocalDate.now().minusDays(1),
-            10
+            10,
+            newsletterGroupRepository
         ));
         ChallengeParticipant participant = challengeParticipantRepository.save(
             TestFixture.createChallengeParticipant(
@@ -323,7 +332,8 @@ class BadgeServiceTest {
             "Test Challenge",
             LocalDate.now().minusDays(10),
             LocalDate.now().minusDays(1),
-            10
+            10,
+            newsletterGroupRepository
         ));
         ChallengeParticipant participant = challengeParticipantRepository.save(
             TestFixture.createChallengeParticipant(
@@ -347,7 +357,8 @@ class BadgeServiceTest {
             "Test Challenge",
             LocalDate.now().minusDays(10),
             LocalDate.now().minusDays(1),
-            10
+            10,
+            newsletterGroupRepository
         ));
         ChallengeParticipant participant = challengeParticipantRepository.save(
             TestFixture.createChallengeParticipant(
@@ -371,7 +382,8 @@ class BadgeServiceTest {
             "Test Challenge",
             LocalDate.now().minusDays(10),
             LocalDate.now().minusDays(1),
-            10
+            10,
+            newsletterGroupRepository
         ));
         ChallengeParticipant goldParticipant = challengeParticipantRepository.save(
             TestFixture.createChallengeParticipant(
@@ -420,7 +432,8 @@ class BadgeServiceTest {
             "Test Challenge",
             LocalDate.now().minusDays(10),
             LocalDate.now().minusDays(1),
-            10
+            10,
+            newsletterGroupRepository
         ));
 
         // when & then: 100% (10/10) → 금메달

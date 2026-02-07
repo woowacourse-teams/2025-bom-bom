@@ -22,6 +22,7 @@ import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,6 +58,9 @@ class ChallengeCommentReplyControllerTest {
     @Autowired
     private ChallengeCommentReplyRepository challengeCommentReplyRepository;
 
+    @Autowired
+    private NewsletterGroupRepository newsletterGroupRepository;
+
     private OAuth2AuthenticationToken authToken;
     private Member viewer;
     private Challenge challenge;
@@ -69,6 +73,7 @@ class ChallengeCommentReplyControllerTest {
         challengeParticipantRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+        newsletterGroupRepository.deleteAllInBatch();
 
         viewer = memberRepository.save(
                 TestFixture.createUniqueMember("replyUser", java.util.UUID.randomUUID().toString()));
@@ -80,7 +85,8 @@ class ChallengeCommentReplyControllerTest {
                         "comment-challenge",
                         java.time.LocalDate.now().minusDays(1),
                         java.time.LocalDate.now().plusDays(5),
-                        7));
+                        7,
+                        newsletterGroupRepository));
 
         ChallengeParticipant commentAuthorParticipant = challengeParticipantRepository.save(
                 TestFixture.createChallengeParticipant(

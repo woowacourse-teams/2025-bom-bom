@@ -134,6 +134,7 @@ class ChallengeProgressControllerUnitTest {
                 .startDate(LocalDate.now().minusDays(5))
                 .endDate(LocalDate.now().plusDays(5))
                 .totalDays(10)
+                .newsletterGroupId(1L)
                 .build();
 
         TeamChallengeProgressFlat progressFlat = new TeamChallengeProgressFlat(

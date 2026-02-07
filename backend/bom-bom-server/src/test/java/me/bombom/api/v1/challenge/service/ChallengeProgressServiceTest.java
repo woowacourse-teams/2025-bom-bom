@@ -35,6 +35,7 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,6 +68,9 @@ class ChallengeProgressServiceTest {
     @Autowired
     private ChallengeDailyResultRepository challengeDailyResultRepository;
 
+    @Autowired
+    private NewsletterGroupRepository newsletterGroupRepository;
+
     private Member member;
     private Challenge challenge;
 
@@ -87,7 +91,8 @@ class ChallengeProgressServiceTest {
                 "Test Challenge",
                 LocalDate.now().minusDays(5),
                 LocalDate.now().plusDays(5),
-                10));
+                10,
+                newsletterGroupRepository));
 
         // 3일 완료한 참여자 생성
         ChallengeParticipant participant = challengeParticipantRepository
@@ -144,7 +149,8 @@ class ChallengeProgressServiceTest {
                 "Survival Challenge",
                 yesterday.minusDays(4),
                 yesterday.plusDays(5),
-                10));
+                10,
+                newsletterGroupRepository));
 
         ChallengeParticipant participant = challengeParticipantRepository.save(ChallengeParticipant.builder()
                 .challengeId(survivalChallenge.getId())
@@ -184,7 +190,8 @@ class ChallengeProgressServiceTest {
                 "Survival Challenge 2",
                 yesterday.minusDays(4),
                 yesterday.plusDays(5),
-                10));
+                10,
+                newsletterGroupRepository));
 
         // Participant: 챌린지 3일 수행
         // 챌린지 시작한지 5일 지남, currentAbsent = 5 - 3 = 2, 2 >= 2 -> 생존.
@@ -218,7 +225,8 @@ class ChallengeProgressServiceTest {
                 "Survival Challenge 3",
                 yesterday.minusDays(4),
                 yesterday.plusDays(5),
-                10));
+                10,
+                newsletterGroupRepository));
 
         // Participant: 챌린지 2일 수행
         // 챌린지 시작한지 5일 지남, currentAbsent = 5 - 2 = 3, 3 > 2 -> 탈락.
@@ -340,7 +348,8 @@ class ChallengeProgressServiceTest {
                 "Other Challenge",
                 LocalDate.now().minusDays(5),
                 LocalDate.now().plusDays(5),
-                10));
+                10,
+                newsletterGroupRepository));
         ChallengeTeam otherTeam = challengeTeamRepository.save(createChallengeTeam(otherChallenge.getId(), 50));
 
         // when & then
@@ -395,7 +404,8 @@ class ChallengeProgressServiceTest {
                 "Weekend Challenge",
                 friday,
                 friday.plusDays(13), // 2 weeks
-                10 // total days (business only)
+                10, // total days (business only)
+                newsletterGroupRepository
         ));
 
         // User completed 0 days.
@@ -428,7 +438,8 @@ class ChallengeProgressServiceTest {
                     "Completed Challenge",
                     yesterday.minusDays(10),
                     yesterday,
-                    10
+                    10,
+                    newsletterGroupRepository
                 )
         );
 
@@ -491,7 +502,8 @@ class ChallengeProgressServiceTest {
                     "Other Challenge",
                     yesterday.minusDays(10),
                     yesterday,
-                    10
+                    10,
+                    newsletterGroupRepository
                 )
         );
 
@@ -522,7 +534,8 @@ class ChallengeProgressServiceTest {
                     "Failed Challenge",
                     yesterday.minusDays(10),
                     yesterday,
-                    10
+                    10,
+                    newsletterGroupRepository
                 )
         );
 
@@ -553,7 +566,8 @@ class ChallengeProgressServiceTest {
                     "Grade Challenge",
                     yesterday.minusDays(10),
                     yesterday,
-                    10
+                    10,
+                    newsletterGroupRepository
                 )
         );
 

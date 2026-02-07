@@ -39,6 +39,9 @@ public class Challenge extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean isBadgeIssued = false;
 
+    @Column(nullable = false)
+    private Long newsletterGroupId;
+
     @Builder
     public Challenge(
             Long id,
@@ -47,7 +50,8 @@ public class Challenge extends BaseEntity {
             LocalDate startDate,
             LocalDate endDate,
             int totalDays,
-            boolean isBadgeIssued
+            boolean isBadgeIssued,
+            @NonNull Long newsletterGroupId
     ) {
         this.id = id;
         this.name = name;
@@ -56,6 +60,7 @@ public class Challenge extends BaseEntity {
         this.endDate = endDate;
         this.totalDays = totalDays;
         this.isBadgeIssued = isBadgeIssued;
+        this.newsletterGroupId = newsletterGroupId;
     }
 
     public void markBadgeAsIssued() {

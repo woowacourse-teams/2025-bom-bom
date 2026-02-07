@@ -8,6 +8,7 @@ import news.bombom.notification.domain.ArticleArrivalNotification;
 import news.bombom.notification.domain.NotificationStatus;
 import news.bombom.notification.repository.ArticleArrivalNotificationRepository;
 import news.bombom.notification.service.NotificationProcessingService;
+import news.bombom.notification.service.NotificationStatusService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ public class NotificationScheduler {
 
     private final ArticleArrivalNotificationRepository notificationRepository;
     private final NotificationProcessingService notificationProcessingService;
+    private final NotificationStatusService notificationStatusService;
 
     @Scheduled(fixedDelay = 30000)
     public void processPendingNotifications() {
@@ -34,6 +36,7 @@ public class NotificationScheduler {
                 if (!notification.shouldRetry()) {
                     log.warn("최대 재시도 횟수 초과: notificationId={}, attempts={}",
                             notification.getId(), notification.getAttempts());
+                    notificationStatusService.moveToFailedTableIfExceeded(notification);
                     continue;
                 }
 

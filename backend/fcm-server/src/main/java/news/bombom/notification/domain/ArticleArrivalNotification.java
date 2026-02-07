@@ -20,7 +20,8 @@ import news.bombom.notification.common.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ArticleArrivalNotification extends BaseEntity {
 
-    private static final int MAX_RETRY_ATTEMPTS = 3;
+    private static final int MAX_RETRY_ATTEMPTS = 6;
+    private static final int SHORT_RETRY_ATTEMPTS = 3;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -91,25 +92,31 @@ public class ArticleArrivalNotification extends BaseEntity {
         this.nextRetryAt = calculateNextRetryTime(this.attempts);
     }
 
-    public void resetForRetry() {
-        this.status = NotificationStatus.PENDING;
-        this.nextRetryAt = null;
-        this.lastError = null;
-    }
-
-    public void markAsRead() {
-        this.isRead = true;
-    }
-
     public boolean shouldRetry() {
-        return this.attempts < MAX_RETRY_ATTEMPTS;
+        return this.attempts <= MAX_RETRY_ATTEMPTS;
     }
 
     private LocalDateTime calculateNextRetryTime(int attempts) {
-        long delaySeconds = 30L * (long) Math.pow(2, attempts - 1); // 30s, 60s, 120s...
-        if (delaySeconds > 1800) { // Max 30 minutes
-            delaySeconds = 1800;
+        long delaySeconds;
+
+        if (attempts <= SHORT_RETRY_ATTEMPTS) {
+            delaySeconds = 30L * (long) Math.pow(2, attempts - 1);
+        } else {
+            switch (attempts) {
+                case 4:
+                    delaySeconds = 1800L;
+                    break;
+                case 5:
+                    delaySeconds = 3600L;
+                    break;
+                case MAX_RETRY_ATTEMPTS:
+                    delaySeconds = 10800L;
+                    break;
+                default:
+                    delaySeconds = 10800L;
+            }
         }
+
         return LocalDateTime.now().plusSeconds(delaySeconds);
     }
 }

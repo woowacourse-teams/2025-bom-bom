@@ -425,10 +425,10 @@ class ChallengeProgressServiceTest {
         LocalDate yesterday = LocalDate.now().minusDays(1);
         Challenge completedChallenge = challengeRepository.save(
                 TestFixture.createChallenge(
-                    "Completed Challenge",
-                    yesterday.minusDays(10),
-                    yesterday,
-                    10
+                        "Completed Challenge",
+                        yesterday.minusDays(10),
+                        yesterday,
+                        10
                 )
         );
 
@@ -442,7 +442,8 @@ class ChallengeProgressServiceTest {
         );
 
         // when
-        CertificationInfoResponse response = challengeProgressService.getCertificationInfo(completedChallenge.getId(), member);
+        CertificationInfoResponse response = challengeProgressService.getCertificationInfo(completedChallenge.getId(),
+                member.getId());
 
         // then
         assertSoftly(softly -> {
@@ -459,7 +460,7 @@ class ChallengeProgressServiceTest {
     @Test
     void 진행_중인_챌린지의_수료증_조회시_예외_발생() {
         // when & then
-        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(challenge.getId(), member))
+        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(challenge.getId(), member.getId()))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .satisfies(e -> {
                     CIllegalArgumentException exception = (CIllegalArgumentException) e;
@@ -473,7 +474,7 @@ class ChallengeProgressServiceTest {
         Long nonExistentChallengeId = 0L;
 
         // when & then
-        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(nonExistentChallengeId, member))
+        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(nonExistentChallengeId, member.getId()))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .satisfies(e -> {
                     CIllegalArgumentException exception = (CIllegalArgumentException) e;
@@ -488,10 +489,10 @@ class ChallengeProgressServiceTest {
         LocalDate yesterday = LocalDate.now().minusDays(1);
         Challenge completedChallenge = challengeRepository.save(
                 TestFixture.createChallenge(
-                    "Other Challenge",
-                    yesterday.minusDays(10),
-                    yesterday,
-                    10
+                        "Other Challenge",
+                        yesterday.minusDays(10),
+                        yesterday,
+                        10
                 )
         );
 
@@ -503,7 +504,7 @@ class ChallengeProgressServiceTest {
         );
 
         // when & then
-        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(completedChallenge.getId(), otherMember))
+        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(completedChallenge.getId(), otherMember.getId()))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .satisfies(e -> {
                     CIllegalArgumentException exception = (CIllegalArgumentException) e;
@@ -519,10 +520,10 @@ class ChallengeProgressServiceTest {
         LocalDate yesterday = LocalDate.now().minusDays(1);
         Challenge completedChallenge = challengeRepository.save(
                 TestFixture.createChallenge(
-                    "Failed Challenge",
-                    yesterday.minusDays(10),
-                    yesterday,
-                    10
+                        "Failed Challenge",
+                        yesterday.minusDays(10),
+                        yesterday,
+                        10
                 )
         );
 
@@ -536,12 +537,12 @@ class ChallengeProgressServiceTest {
         );
 
         // when & then
-        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(completedChallenge.getId(), member))
+        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(completedChallenge.getId(), member.getId()))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .satisfies(e -> {
                     CIllegalArgumentException exception = (CIllegalArgumentException) e;
                     assertThat(exception.getErrorDetail()).isEqualTo(ErrorDetail.PRECONDITION_FAILED);
-        });
+                });
     }
 
     @Test
@@ -550,10 +551,10 @@ class ChallengeProgressServiceTest {
         LocalDate yesterday = LocalDate.now().minusDays(1);
         Challenge completedChallenge = challengeRepository.save(
                 TestFixture.createChallenge(
-                    "Grade Challenge",
-                    yesterday.minusDays(10),
-                    yesterday,
-                    10
+                        "Grade Challenge",
+                        yesterday.minusDays(10),
+                        yesterday,
+                        10
                 )
         );
 
@@ -568,7 +569,8 @@ class ChallengeProgressServiceTest {
         );
 
         // when
-        CertificationInfoResponse response = challengeProgressService.getCertificationInfo(completedChallenge.getId(), member);
+        CertificationInfoResponse response = challengeProgressService.getCertificationInfo(completedChallenge.getId(),
+                member.getId());
 
         // then
         assertSoftly(softly -> {

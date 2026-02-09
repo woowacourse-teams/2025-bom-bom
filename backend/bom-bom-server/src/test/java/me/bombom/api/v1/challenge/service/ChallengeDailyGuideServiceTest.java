@@ -21,6 +21,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.domain.DailyGuideType;
 import me.bombom.api.v1.challenge.dto.request.DailyGuideCommentRequest;
+import me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.MemberDailyCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyGuideCommentRepository;
@@ -84,6 +85,7 @@ class ChallengeDailyGuideServiceTest {
     private LocalDate today;
     private ChallengeTodo readTodo;
     private ChallengeTodo commentTodo;
+    private ChallengeTodo mindsetTodo;
 
     @BeforeEach
     void setUp() {
@@ -109,9 +111,7 @@ class ChallengeDailyGuideServiceTest {
                 "테스트 챌린지",
                 today.minusDays(5),
                 today.plusDays(5),
-                10
-                )
-        );
+                10));
 
         participant = challengeParticipantRepository.save(
                 TestFixture.createChallengeParticipant(
@@ -121,9 +121,10 @@ class ChallengeDailyGuideServiceTest {
                 )
         );
 
-        // READ, COMMENT 투두 생성
+        // READ, COMMENT, MINDSET 투두 생성
         readTodo = challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
         commentTodo = challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.COMMENT));
+        mindsetTodo = challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.MINDSET));
 
         int dayIndex = calculateDayIndex(challenge.getStartDate(), today);
         guide = challengeDailyGuideRepository.save(
@@ -467,7 +468,7 @@ class ChallengeDailyGuideServiceTest {
     }
 
     @Test
-    void day1에_코멘트_작성시_READ와_COMMENT_체크리스트_자동_완료() {
+    void day1에_코멘트_작성시_MINDSET_체크리스트_자동_완료() {
         // given - day1 가이드 생성
         ChallengeDailyGuide day1Guide = challengeDailyGuideRepository.save(
                 TestFixture.createChallengeDailyGuide(
@@ -501,15 +502,28 @@ class ChallengeDailyGuideServiceTest {
         List<ChallengeDailyGuideComment> comments = challengeDailyGuideCommentRepository.findAll();
         assertThat(comments).hasSize(1);
 
-        // then - READ 투두 생성 확인
+        // then - READ/COMMENT 투두는 생성되지 않음
         boolean readTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
-                participant.getId(), weekday, readTodo.getId());
-        assertThat(readTodoExists).isTrue();
+                participant.getId(),
+                weekday,
+                readTodo.getId()
+        );
+        assertThat(readTodoExists).isFalse();
 
-        // then - COMMENT 투두 생성 확인
         boolean commentTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
-                participant.getId(), weekday, commentTodo.getId());
-        assertThat(commentTodoExists).isTrue();
+                participant.getId(),
+                weekday,
+                commentTodo.getId()
+        );
+        assertThat(commentTodoExists).isFalse();
+
+        // then - MINDSET 투두 생성 확인
+        boolean mindsetTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                participant.getId(),
+                weekday,
+                mindsetTodo.getId()
+        );
+        assertThat(mindsetTodoExists).isTrue();
 
         // then - progress 처리 확인: ChallengeDailyResult 생성 확인
         boolean dailyResultExists = challengeDailyResultRepository.existsByParticipantIdAndDate(
@@ -551,17 +565,31 @@ class ChallengeDailyGuideServiceTest {
 
         // then - READ 투두 생성 안 됨 (아직 아티클을 읽지 않았으므로)
         boolean readTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
-                participant.getId(), today, readTodo.getId());
+                participant.getId(),
+                today,
+                readTodo.getId()
+        );
         assertThat(readTodoExists).isFalse();
 
         // then - COMMENT 투두 생성 안 됨 (day1이 아니므로)
         boolean commentTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
-                participant.getId(), today, commentTodo.getId());
+                participant.getId(),
+                today,
+                commentTodo.getId()
+        );
         assertThat(commentTodoExists).isFalse();
+
+        // then - MINDSET 투두 생성 안 됨 (day1이 아니므로)
+        boolean mindsetTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                participant.getId(),
+                today,
+                mindsetTodo.getId()
+        );
+        assertThat(mindsetTodoExists).isFalse();
     }
 
     @Test
-    void day1에_이미_READ_todo가_있어도_중복_생성_안함() {
+    void day1에_이미_MINDSET_todo가_있어도_중복_생성_안함() {
         // given - day1 가이드 생성
         ChallengeDailyGuide day1Guide = challengeDailyGuideRepository.save(
                 TestFixture.createChallengeDailyGuide(
@@ -581,12 +609,12 @@ class ChallengeDailyGuideServiceTest {
         }
         final LocalDate weekday = tempWeekday;
 
-        // 이미 READ 투두 생성
+        // 이미 MINDSET 투두 생성
         challengeDailyTodoRepository.save(
                 TestFixture.createChallengeDailyTodo(
                         participant.getId(),
                         weekday,
-                        readTodo.getId()
+                        mindsetTodo.getId()
                 )
         );
 
@@ -601,73 +629,13 @@ class ChallengeDailyGuideServiceTest {
                 weekday
         );
 
-        // then - READ 투두는 1개만 존재 (중복 생성 안 됨)
-        List<ChallengeDailyTodo> readTodos = challengeDailyTodoRepository.findAll().stream()
+        // then - MINDSET 투두는 1개만 존재 (중복 생성 안 됨)
+        List<ChallengeDailyTodo> mindsetTodos = challengeDailyTodoRepository.findAll().stream()
                 .filter(todo -> todo.getParticipantId().equals(participant.getId()))
-                .filter(todo -> todo.getChallengeTodoId().equals(readTodo.getId()))
+                .filter(todo -> todo.getChallengeTodoId().equals(mindsetTodo.getId()))
                 .filter(todo -> todo.getTodoDate().equals(weekday))
                 .toList();
-        assertThat(readTodos).hasSize(1);
-
-        // then - COMMENT 투두 생성 확인
-        boolean commentTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
-                participant.getId(), weekday, commentTodo.getId());
-        assertThat(commentTodoExists).isTrue();
-    }
-
-    @Test
-    void day1에_이미_COMMENT_todo가_있어도_중복_생성_안함() {
-        // given - day1 가이드 생성
-        ChallengeDailyGuide day1Guide = challengeDailyGuideRepository.save(
-                TestFixture.createChallengeDailyGuide(
-                        challenge.getId(),
-                        1,
-                        DailyGuideType.COMMENT,
-                        "https://example.com/day01.webp",
-                        "첫날 가이드",
-                        true
-                )
-        );
-
-        // 평일 날짜 사용 (주말에는 updateChallengeDailyTodo가 동작하지 않음)
-        LocalDate tempWeekday = today;
-        while (tempWeekday.getDayOfWeek() == DayOfWeek.SATURDAY || tempWeekday.getDayOfWeek() == DayOfWeek.SUNDAY) {
-            tempWeekday = tempWeekday.plusDays(1);
-        }
-        final LocalDate weekday = tempWeekday;
-
-        // 이미 COMMENT 투두 생성
-        challengeDailyTodoRepository.save(
-                TestFixture.createChallengeDailyTodo(
-                        participant.getId(),
-                        weekday,
-                        commentTodo.getId()
-                )
-        );
-
-        DailyGuideCommentRequest request = new DailyGuideCommentRequest("첫날 코멘트");
-
-        // when
-        challengeDailyGuideService.createDailyGuideComment(
-                challenge.getId(),
-                1,
-                member.getId(),
-                request,
-                weekday
-        );
-
-        // then - COMMENT 투두는 1개만 존재 (중복 생성 안 됨)
-        List<ChallengeDailyTodo> commentTodos = challengeDailyTodoRepository.findAll().stream()
-                .filter(todo -> todo.getParticipantId().equals(participant.getId()))
-                .filter(todo -> todo.getChallengeTodoId().equals(commentTodo.getId()))
-                .filter(todo -> todo.getTodoDate().equals(weekday))
-                .toList();
-        assertThat(commentTodos).hasSize(1);
-
-        // then - READ 투두 생성 확인
-        boolean readTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
-                participant.getId(), weekday, readTodo.getId());
-        assertThat(readTodoExists).isTrue();
+        assertThat(mindsetTodos).hasSize(1);
     }
 
     @Test
@@ -701,8 +669,12 @@ class ChallengeDailyGuideServiceTest {
         Pageable pageable = PageRequest.of(0, 20);
 
         // when
-        Page<me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse> response =
-                challengeDailyGuideService.getTotalComments(challenge.getId(), guide.getDayIndex(), member.getId(), pageable);
+        Page<DailyGuideCommentResponse> response = challengeDailyGuideService.getTotalComments(
+                challenge.getId(),
+                guide.getDayIndex(),
+                member.getId(),
+                pageable
+        );
 
         // then
         assertSoftly(softly -> {
@@ -743,8 +715,12 @@ class ChallengeDailyGuideServiceTest {
         Pageable pageable = PageRequest.of(0, 1);
 
         // when
-        Page<me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse> response =
-                challengeDailyGuideService.getTotalComments(challenge.getId(), guide.getDayIndex(), member.getId(), pageable);
+        Page<DailyGuideCommentResponse> response = challengeDailyGuideService.getTotalComments(
+                challenge.getId(),
+                guide.getDayIndex(),
+                member.getId(),
+                pageable
+        );
 
         // then
         assertSoftly(softly -> {
@@ -817,8 +793,12 @@ class ChallengeDailyGuideServiceTest {
         Pageable pageable = PageRequest.of(0, 20);
 
         // when
-        Page<me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse> response =
-                challengeDailyGuideService.getTotalComments(challenge.getId(), guide.getDayIndex(), member.getId(), pageable);
+        Page<DailyGuideCommentResponse> response = challengeDailyGuideService.getTotalComments(
+                challenge.getId(),
+                guide.getDayIndex(),
+                member.getId(),
+                pageable
+        );
 
         // then
         assertSoftly(softly -> {

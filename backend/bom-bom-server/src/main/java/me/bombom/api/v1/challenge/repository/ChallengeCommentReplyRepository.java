@@ -32,6 +32,11 @@ public interface ChallengeCommentReplyRepository extends JpaRepository<Challenge
                 JOIN ChallengeComment comment ON cr.commentId = comment.id
                 JOIN ChallengeParticipant commentAuthor ON comment.participantId = commentAuthor.id
                 WHERE cr.commentId = :commentId
+                  AND (
+                        cr.isPrivate = false
+                        OR crAuthor.memberId = :memberId
+                        OR commentAuthor.memberId = :memberId
+                  )
             """)
     Page<CommentReplyResponse> findAllByCommentId(
             @Param("commentId") Long commentId,

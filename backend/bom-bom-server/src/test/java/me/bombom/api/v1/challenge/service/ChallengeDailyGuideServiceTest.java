@@ -502,20 +502,21 @@ class ChallengeDailyGuideServiceTest {
         List<ChallengeDailyGuideComment> comments = challengeDailyGuideCommentRepository.findAll();
         assertThat(comments).hasSize(1);
 
-        // then - READ/COMMENT 투두는 생성되지 않음
+        // then - READ 투두 생성 및 완료 확인
         boolean readTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
                 participant.getId(),
                 weekday,
                 readTodo.getId()
         );
-        assertThat(readTodoExists).isFalse();
+        assertThat(readTodoExists).isTrue();
 
+        // then - COMMENT 투두 생성 및 완료 확인
         boolean commentTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
                 participant.getId(),
                 weekday,
                 commentTodo.getId()
         );
-        assertThat(commentTodoExists).isFalse();
+        assertThat(commentTodoExists).isTrue();
 
         // then - MINDSET 투두 생성 확인
         boolean mindsetTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
@@ -740,8 +741,7 @@ class ChallengeDailyGuideServiceTest {
                 999L,
                 guide.getDayIndex(),
                 member.getId(),
-                pageable
-        )).isInstanceOf(CIllegalArgumentException.class);
+                pageable)).isInstanceOf(CIllegalArgumentException.class);
     }
 
     @Test
@@ -755,8 +755,7 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 invalidDayIndex,
                 member.getId(),
-                pageable
-        )).isInstanceOf(CIllegalArgumentException.class);
+                pageable)).isInstanceOf(CIllegalArgumentException.class);
     }
 
     @Test

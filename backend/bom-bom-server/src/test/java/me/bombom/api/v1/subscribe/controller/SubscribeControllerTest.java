@@ -1,6 +1,5 @@
 package me.bombom.api.v1.subscribe.controller;
 
-import static org.mockito.BDDMockito.given;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
@@ -47,9 +46,6 @@ class SubscribeControllerTest {
     @EnableWebSecurity
     static class TestConfig implements WebMvcConfigurer {
 
-        @Autowired
-        private MemberRepository memberRepository;
-
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             return http
@@ -64,7 +60,7 @@ class SubscribeControllerTest {
 
         @Override
         public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-            resolvers.add(new LoginMemberArgumentResolver(memberRepository));
+            resolvers.add(new LoginMemberArgumentResolver());
         }
     }
 

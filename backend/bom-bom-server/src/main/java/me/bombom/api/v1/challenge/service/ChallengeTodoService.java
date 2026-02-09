@@ -58,6 +58,32 @@ public class ChallengeTodoService {
     }
 
     @Transactional
+    public void insertMindsetDone(ChallengeParticipant participant, LocalDate today) {
+        ChallengeTodo challengeTodo = challengeTodoRepository
+                .findByChallengeIdAndTodoType(participant.getChallengeId(), ChallengeTodoType.MINDSET)
+                .orElseThrow(() -> new CServerErrorException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, participant.getChallengeId())
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "ChallengeTodo")
+                        .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndTodoType"));
+
+        // 중복 체크
+        if (challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                participant.getId(), today, challengeTodo.getId())) {
+            log.debug("Mindset todo already exists for participantId={}, date={}, todoId={}",
+                    participant.getId(), today, challengeTodo.getId());
+            return;
+        }
+
+        ChallengeDailyTodo dailyTodo = ChallengeDailyTodo.builder()
+                .participantId(participant.getId())
+                .todoDate(today)
+                .challengeTodoId(challengeTodo.getId())
+                .build();
+
+        challengeDailyTodoRepository.save(dailyTodo);
+    }
+
+    @Transactional
     public void completeDailyTodo(ChallengeParticipant participant, LocalDate today){
         challengeDailyResultRepository.save(
                 ChallengeDailyResult.builder()

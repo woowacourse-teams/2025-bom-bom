@@ -1,0 +1,2 @@
+ALTER TABLE challenge_todo
+MODIFY COLUMN todo_type VARCHAR(20) NOT NULL;

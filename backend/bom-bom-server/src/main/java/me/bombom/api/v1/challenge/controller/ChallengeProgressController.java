@@ -44,9 +44,9 @@ public class ChallengeProgressController implements ChallengeProgressControllerA
     @Override
     @GetMapping("/{id}/certification")
     public CertificationInfoResponse getCertificationInfo(
-        @LoginMember Member member,
-        @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+            @LoginMember Long memberId,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
     ) {
-        return challengeProgressService.getCertificationInfo(id, member);
+        return challengeProgressService.getCertificationInfo(id, memberId);
     }
 }

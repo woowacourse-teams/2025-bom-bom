@@ -198,7 +198,7 @@ class ChallengeCommentReplyServiceTest {
     }
 
     @Test
-    void 공개_답글을_제3자가_조회하면_isVisible이_true이다() {
+    void 공개_답글을_제3자가_조회하면_조회된다() {
         // given
         challengeCommentReplyRepository.save(
                 TestFixture.createChallengeCommentReply(
@@ -220,13 +220,12 @@ class ChallengeCommentReplyServiceTest {
             softly.assertThat(page.getTotalElements()).isEqualTo(1);
             softly.assertThat(response.reply()).isEqualTo("공개 답글입니다.");
             softly.assertThat(response.isPrivate()).isFalse();
-            softly.assertThat(response.isVisible()).isTrue();
             softly.assertThat(response.isMyReply()).isFalse();
         });
     }
 
     @Test
-    void 비공개_답글을_답글_작성자가_조회하면_isVisible이_true이다() {
+    void 비공개_답글을_답글_작성자가_조회하면_조회된다() {
         // given
         challengeCommentReplyRepository.save(
                 TestFixture.createChallengeCommentReply(
@@ -248,13 +247,12 @@ class ChallengeCommentReplyServiceTest {
             softly.assertThat(page.getTotalElements()).isEqualTo(1);
             softly.assertThat(response.reply()).isEqualTo("비공개 답글입니다.");
             softly.assertThat(response.isPrivate()).isTrue();
-            softly.assertThat(response.isVisible()).isTrue();
             softly.assertThat(response.isMyReply()).isTrue();
         });
     }
 
     @Test
-    void 비공개_답글을_코멘트_작성자가_조회하면_isVisible이_true이다() {
+    void 비공개_답글을_코멘트_작성자가_조회하면_조회된다() {
         // given
         challengeCommentReplyRepository.save(
                 TestFixture.createChallengeCommentReply(
@@ -276,7 +274,6 @@ class ChallengeCommentReplyServiceTest {
             softly.assertThat(page.getTotalElements()).isEqualTo(1);
             softly.assertThat(response.reply()).isEqualTo("비공개 답글입니다.");
             softly.assertThat(response.isPrivate()).isTrue();
-            softly.assertThat(response.isVisible()).isTrue();
             softly.assertThat(response.isMyReply()).isFalse();
         });
     }

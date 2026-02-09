@@ -18,13 +18,7 @@ public interface ChallengeCommentReplyRepository extends JpaRepository<Challenge
                     cr.reply,
                     cr.createdAt,
                     CASE WHEN crAuthor.memberId = :memberId THEN true ELSE false END,
-                    cr.isPrivate,
-                    CASE
-                        WHEN cr.isPrivate = false THEN true
-                        WHEN crAuthor.memberId = :memberId THEN true
-                        WHEN commentAuthor.memberId = :memberId THEN true
-                        ELSE false
-                    END
+                    cr.isPrivate
                 )
                 FROM ChallengeCommentReply cr
                 JOIN ChallengeParticipant crAuthor ON cr.participantId = crAuthor.id

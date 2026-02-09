@@ -24,9 +24,6 @@ public record CommentReplyResponse(
         boolean isMyReply,
 
         @Schema(requiredMode = RequiredMode.REQUIRED)
-        boolean isPrivate,
-
-        @Schema(requiredMode = RequiredMode.REQUIRED)
-        boolean isVisible
+        boolean isPrivate
 ) {
 }

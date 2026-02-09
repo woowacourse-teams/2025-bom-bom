@@ -1,5 +1,6 @@
 package me.bombom.api.v1.challenge.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeGrade;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
+import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.response.CertificationInfoResponse;
@@ -43,6 +45,7 @@ public class ChallengeProgressService {
     private final ChallengeDailyResultRepository challengeDailyResultRepository;
     private final ChallengeTeamRepository challengeTeamRepository;
     private final MemberRepository memberRepository;
+    private final Clock clock;
 
     @Transactional
     public void proceedDailySurvivalCheck(Challenge challenge, LocalDate yesterday) {
@@ -57,13 +60,10 @@ public class ChallengeProgressService {
     }
 
     public MemberChallengeProgressResponse getMemberProgress(Long id, Member member) {
+        Challenge challenge = getChallenge(id);
         validateParticipation(id, member);
 
-        List<ChallengeProgressFlat> progressList = challengeParticipantRepository.findMemberProgress(
-                id,
-                member.getId(),
-                LocalDate.now()
-        );
+        List<ChallengeProgressFlat> progressList = getDailyProgress(challenge, member);
         validateMemberProgressDataIntegrity(id, member, progressList);
 
         return MemberChallengeProgressResponse.of(member, progressList);
@@ -148,6 +148,27 @@ public class ChallengeProgressService {
         }
     }
 
+    private List<ChallengeProgressFlat> getDailyProgress(Challenge challenge, Member member) {
+        List<ChallengeProgressFlat> progressList = challengeParticipantRepository.findMemberProgress(
+                challenge.getId(),
+                member.getId(),
+                LocalDate.now(clock)
+        );
+
+        if (isFirstDay(challenge)) {
+            return progressList.stream()
+                    .filter(progress -> progress.todoType() == ChallengeTodoType.MINDSET)
+                    .toList();
+        }
+        return progressList.stream()
+                .filter(progress -> progress.todoType() != ChallengeTodoType.MINDSET)
+                .toList();
+    }
+
+    private boolean isFirstDay(Challenge challenge) {
+        return challenge.getStartDate().isEqual(LocalDate.now(clock));
+    }
+
     private void validateMemberProgressDataIntegrity(Long id, Member member, List<ChallengeProgressFlat> progressList) {
         if (progressList.isEmpty()) {
             throw new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
@@ -175,8 +196,8 @@ public class ChallengeProgressService {
         }
     }
 
-    private static void validateChallengeEnded(Challenge challenge) {
-        if (!challenge.isEnded(LocalDate.now())) {
+    private void validateChallengeEnded(Challenge challenge) {
+        if (!challenge.isEnded(LocalDate.now(clock))) {
             throw new CIllegalArgumentException(ErrorDetail.PRECONDITION_FAILED)
                     .addContext(ErrorContextKeys.OPERATION, "getCertificationInfo")
                     .addContext(ErrorContextKeys.DETAIL, "진행 중인 챌린지는 수료증을 조회할 수 없습니다");

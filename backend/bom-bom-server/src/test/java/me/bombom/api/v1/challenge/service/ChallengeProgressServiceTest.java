@@ -39,6 +39,7 @@ import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @IntegrationTest
 class ChallengeProgressServiceTest {
@@ -66,6 +67,9 @@ class ChallengeProgressServiceTest {
 
     @Autowired
     private ChallengeDailyResultRepository challengeDailyResultRepository;
+
+    @MockitoBean
+    private java.time.Clock clock;
 
     private Member member;
     private Challenge challenge;
@@ -108,6 +112,13 @@ class ChallengeProgressServiceTest {
                 LocalDate.now(),
                 readTodo.getId());
         challengeDailyTodoRepository.save(dailyTodo);
+
+        // Mock Clock behavior
+        // Default: LocalDate.now(clock) returns today
+        java.time.Instant instant = java.time.Instant.now();
+        java.time.ZoneId zoneId = java.time.ZoneId.systemDefault();
+        org.mockito.BDDMockito.given(clock.instant()).willReturn(instant);
+        org.mockito.BDDMockito.given(clock.getZone()).willReturn(zoneId);
     }
 
     @Test
@@ -577,5 +588,83 @@ class ChallengeProgressServiceTest {
             softly.assertThat(response.medal()).isEqualTo(ChallengeGrade.SILVER);
             softly.assertThat(response.medalCondition()).isEqualTo(90);
         });
+    }
+
+    @Test
+    void 챌린지_1일차에는_MINDSET_투두만_조회된다() {
+        // given
+        LocalDate today = LocalDate.now();
+        Challenge day1Challenge = challengeRepository.save(TestFixture.createChallenge(
+                "Day 1 Challenge",
+                today,
+                today.plusDays(9),
+                10));
+
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipant(
+                day1Challenge.getId(),
+                member.getId(),
+                0));
+
+        // Todos: MINDSET, READ, COMMENT 모두 생성
+        challengeTodoRepository
+                .save(TestFixture.createChallengeTodo(day1Challenge.getId(),
+                        ChallengeTodoType.MINDSET));
+        challengeTodoRepository
+                .save(TestFixture.createChallengeTodo(day1Challenge.getId(), ChallengeTodoType.READ));
+        challengeTodoRepository
+                .save(TestFixture.createChallengeTodo(day1Challenge.getId(),
+                        ChallengeTodoType.COMMENT));
+
+        // when
+        MemberChallengeProgressResponse response = challengeProgressService
+                .getMemberProgress(day1Challenge.getId(), member);
+
+        // then
+        assertThat(response.todayTodos()).hasSize(1);
+        assertThat(response.todayTodos().getFirst().challengeTodoType()).isEqualTo(ChallengeTodoType.MINDSET);
+    }
+
+    @Test
+    void 챌린지_2일차_이후에는_READ_COMMENT_투두만_조회된다() {
+        // given
+        // LocalDate.now()가 주말일 경우를 대비하여, 시작일을 충분히 과거로 설정하여
+        // 현재 날짜가 챌린지 2일차 이후의 평일이 되도록 보장
+        LocalDate realToday = LocalDate.now();
+        // 시작일을 현재 날짜로부터 3일 전으로 설정.
+        // 이렇게 하면 realToday가 월요일이든, 화요일이든, 수요일이든, 목요일이든, 금요일이든
+        // 챌린지 시작일로부터 최소 2일 이상의 평일이 지났음을 보장할 수 있다.
+        // (예: realToday가 수요일이면 시작일은 일요일. 월, 화 2일 경과)
+        // (예: realToday가 월요일이면 시작일은 금요일. 금, 월 2일 경과)
+        LocalDate safeStartDate = realToday.minusDays(3);
+
+        Challenge day2ChallengeFixed = challengeRepository.save(TestFixture.createChallenge(
+                "Day 2 Challenge",
+                safeStartDate,
+                safeStartDate.plusDays(9),
+                10));
+
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipant(
+                day2ChallengeFixed.getId(),
+                member.getId(),
+                1)); // completedDays를 1로 설정하여 2일차로 가정
+
+        // Todos: MINDSET, READ, COMMENT 모두 생성
+        challengeTodoRepository.save(
+                TestFixture.createChallengeTodo(day2ChallengeFixed.getId(), ChallengeTodoType.MINDSET));
+        challengeTodoRepository.save(
+                TestFixture.createChallengeTodo(day2ChallengeFixed.getId(), ChallengeTodoType.READ));
+        challengeTodoRepository.save(
+                TestFixture.createChallengeTodo(day2ChallengeFixed.getId(), ChallengeTodoType.COMMENT));
+
+        // when
+        MemberChallengeProgressResponse response = challengeProgressService
+                .getMemberProgress(day2ChallengeFixed.getId(), member);
+
+        // then
+        assertThat(response.todayTodos()).hasSize(2);
+        assertThat(response.todayTodos()).extracting("challengeTodoType")
+                .containsExactlyInAnyOrder(ChallengeTodoType.READ, ChallengeTodoType.COMMENT);
+        assertThat(response.todayTodos()).extracting("challengeTodoType")
+                .doesNotContain(ChallengeTodoType.MINDSET);
     }
 }

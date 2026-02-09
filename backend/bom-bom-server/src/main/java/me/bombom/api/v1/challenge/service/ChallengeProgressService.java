@@ -1,5 +1,6 @@
 package me.bombom.api.v1.challenge.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeGrade;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
+import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.response.CertificationInfoResponse;
@@ -25,6 +27,7 @@ import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +44,8 @@ public class ChallengeProgressService {
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ChallengeDailyResultRepository challengeDailyResultRepository;
     private final ChallengeTeamRepository challengeTeamRepository;
+    private final MemberRepository memberRepository;
+    private final Clock clock;
 
     @Transactional
     public void proceedDailySurvivalCheck(Challenge challenge, LocalDate yesterday) {
@@ -55,13 +60,10 @@ public class ChallengeProgressService {
     }
 
     public MemberChallengeProgressResponse getMemberProgress(Long id, Member member) {
+        Challenge challenge = getChallenge(id);
         validateParticipation(id, member);
 
-        List<ChallengeProgressFlat> progressList = challengeParticipantRepository.findMemberProgress(
-                id,
-                member.getId(),
-                LocalDate.now()
-        );
+        List<ChallengeProgressFlat> progressList = getDailyProgress(challenge, member);
         validateMemberProgressDataIntegrity(id, member, progressList);
 
         return MemberChallengeProgressResponse.of(member, progressList);
@@ -78,15 +80,21 @@ public class ChallengeProgressService {
         return TeamChallengeProgressResponse.of(challenge, progressList);
     }
 
-    public CertificationInfoResponse getCertificationInfo(Long challengeId, Member member) {
+    public CertificationInfoResponse getCertificationInfo(Long challengeId, Long memberId) {
         Challenge challenge = getChallenge(challengeId);
         validateChallengeEnded(challenge);
 
-        ChallengeParticipant challengeParticipant = getChallengeParticipant(challengeId, member);
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new UnauthorizedException(ErrorDetail.INVALID_TOKEN)
+                        .addContext(ErrorContextKeys.OPERATION, "getCertificationInfo")
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.DETAIL, "유효하지 않은 인증 정보입니다."));
+
+        ChallengeParticipant challengeParticipant = getChallengeParticipant(challengeId, memberId);
         if (!challengeParticipant.isSurvived()) {
             throw new CIllegalArgumentException(ErrorDetail.PRECONDITION_FAILED)
                     .addContext(ErrorContextKeys.OPERATION, "getCertificationInfo")
-                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                     .addContext(ErrorContextKeys.DETAIL, "탈락한 참가자는 수료증을 발급받을 수 없습니다.");
         }
 
@@ -123,9 +131,8 @@ public class ChallengeProgressService {
                         .addContext(ErrorContextKeys.OPERATION, "getChallenge"));
     }
 
-    private ChallengeParticipant getChallengeParticipant(Long challengeId, Member member) {
-        return challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId,
-                member.getId())
+    private ChallengeParticipant getChallengeParticipant(Long challengeId, Long memberId) {
+        return challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
                         .addContext(ErrorContextKeys.OPERATION, "getChallengeParticipant"));
@@ -139,6 +146,27 @@ public class ChallengeProgressService {
                     .addContext(ErrorContextKeys.CHALLENGE_ID, id)
                     .addContext(ErrorContextKeys.MEMBER_ID, member.getId());
         }
+    }
+
+    private List<ChallengeProgressFlat> getDailyProgress(Challenge challenge, Member member) {
+        List<ChallengeProgressFlat> progressList = challengeParticipantRepository.findMemberProgress(
+                challenge.getId(),
+                member.getId(),
+                LocalDate.now(clock)
+        );
+
+        if (isFirstDay(challenge)) {
+            return progressList.stream()
+                    .filter(progress -> progress.todoType() == ChallengeTodoType.MINDSET)
+                    .toList();
+        }
+        return progressList.stream()
+                .filter(progress -> progress.todoType() != ChallengeTodoType.MINDSET)
+                .toList();
+    }
+
+    private boolean isFirstDay(Challenge challenge) {
+        return challenge.getStartDate().isEqual(LocalDate.now(clock));
     }
 
     private void validateMemberProgressDataIntegrity(Long id, Member member, List<ChallengeProgressFlat> progressList) {
@@ -168,8 +196,8 @@ public class ChallengeProgressService {
         }
     }
 
-    private static void validateChallengeEnded(Challenge challenge) {
-        if (!challenge.isEnded(LocalDate.now())) {
+    private void validateChallengeEnded(Challenge challenge) {
+        if (!challenge.isEnded(LocalDate.now(clock))) {
             throw new CIllegalArgumentException(ErrorDetail.PRECONDITION_FAILED)
                     .addContext(ErrorContextKeys.OPERATION, "getCertificationInfo")
                     .addContext(ErrorContextKeys.DETAIL, "진행 중인 챌린지는 수료증을 조회할 수 없습니다");

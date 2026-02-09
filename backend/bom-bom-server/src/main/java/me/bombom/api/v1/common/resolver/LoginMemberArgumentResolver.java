@@ -20,7 +20,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(LoginMember.class)
-                && parameter.getParameterType().equals(Member.class);
+                && (parameter.getParameterType().equals(Member.class) || parameter.getParameterType().equals(Long.class));
     }
 
     @Override
@@ -45,6 +45,9 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             Member member = ((CustomOAuth2User) principal).getMember();
             if (member == null) {
                 throw new UnauthorizedException(ErrorDetail.UNAUTHORIZED);
+            }
+            if (parameter.getParameterType().equals(Long.class)) {
+                return member.getId();
             }
             return member;
         }

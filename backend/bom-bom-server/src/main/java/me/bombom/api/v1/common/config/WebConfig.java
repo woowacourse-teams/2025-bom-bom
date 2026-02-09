@@ -2,6 +2,7 @@ package me.bombom.api.v1.common.config;
 
 import jakarta.servlet.DispatcherType;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import me.bombom.api.log.MDCLoggingFilter;
 import me.bombom.api.v1.common.resolver.LoginMemberArgumentResolver;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -12,6 +13,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
     @Bean

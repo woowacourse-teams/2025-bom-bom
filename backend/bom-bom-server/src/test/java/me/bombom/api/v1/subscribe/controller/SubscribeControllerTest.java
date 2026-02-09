@@ -1,8 +1,8 @@
 package me.bombom.api.v1.subscribe.controller;
 
-import static org.mockito.BDDMockito.given;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -11,10 +11,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.common.resolver.LoginMemberArgumentResolver;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.enums.Gender;
+import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.subscribe.dto.UnsubscribeResponse;
 import me.bombom.api.v1.subscribe.service.SubscribeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,10 +52,9 @@ class SubscribeControllerTest {
                     .csrf(AbstractHttpConfigurer::disable)
                     .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                     .exceptionHandling(ex -> ex
-                            .authenticationEntryPoint((request, response, authException) ->
-                                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
-                            )
-                    )
+                            .authenticationEntryPoint((request, response,
+                                                       authException) -> response.sendError(
+                                    HttpServletResponse.SC_UNAUTHORIZED)))
                     .build();
         }
 
@@ -69,6 +70,9 @@ class SubscribeControllerTest {
     @MockitoBean
     SubscribeService subscribeService;
 
+    @MockitoBean
+    MemberRepository memberRepository;
+
     private OAuth2AuthenticationToken authToken;
 
     @BeforeEach
@@ -82,6 +86,8 @@ class SubscribeControllerTest {
                 .gender(Gender.FEMALE)
                 .roleId(1L)
                 .build();
+
+        given(memberRepository.findById(member.getId())).willReturn(Optional.of(member));
 
         Map<String, Object> attrs = Map.of(
                 "id", "1",

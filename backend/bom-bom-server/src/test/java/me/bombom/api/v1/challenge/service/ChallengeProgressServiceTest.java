@@ -4,8 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.BDDMockito.given;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
@@ -69,7 +73,7 @@ class ChallengeProgressServiceTest {
     private ChallengeDailyResultRepository challengeDailyResultRepository;
 
     @MockitoBean
-    private java.time.Clock clock;
+    private Clock clock;
 
     private Member member;
     private Challenge challenge;
@@ -115,10 +119,10 @@ class ChallengeProgressServiceTest {
 
         // Mock Clock behavior
         // Default: LocalDate.now(clock) returns today
-        java.time.Instant instant = java.time.Instant.now();
-        java.time.ZoneId zoneId = java.time.ZoneId.systemDefault();
-        org.mockito.BDDMockito.given(clock.instant()).willReturn(instant);
-        org.mockito.BDDMockito.given(clock.getZone()).willReturn(zoneId);
+        Instant instant = java.time.Instant.now();
+        ZoneId zoneId = java.time.ZoneId.systemDefault();
+        given(clock.instant()).willReturn(instant);
+        given(clock.getZone()).willReturn(zoneId);
     }
 
     @Test

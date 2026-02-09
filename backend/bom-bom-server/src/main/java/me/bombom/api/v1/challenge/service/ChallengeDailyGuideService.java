@@ -40,7 +40,7 @@ public class ChallengeDailyGuideService {
     private final ChallengeDailyGuideRepository challengeDailyGuideRepository;
     private final ChallengeDailyGuideCommentRepository challengeDailyGuideCommentRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
-
+    private final ChallengeDailyTodoService challengeDailyTodoService;
     private final ChallengeTodoService challengeTodoService;
     private final ChallengeTeamService challengeTeamService;
 
@@ -149,12 +149,15 @@ public class ChallengeDailyGuideService {
         if (dayIndex == 1) {
             // MINDSET 투두 생성 (마인드셋 댓글 작성)
             challengeTodoService.insertMindsetDone(participant, today);
+            // TODO: 과도기라서 모두 완료 처리가 필요해 보임. 추후 삭제 필요
+            // READ 투두 자동 생성 (뉴스레터 1개 읽기)
+            challengeDailyTodoService.updateChallengeDailyTodo(memberId, null, today);
+            // COMMENT 투두 생성 (한 줄 코멘트 작성)
+            challengeTodoService.insertCommentDone(participant, today);
 
             // 이미 완료되지 않았으면 progress 처리
-            // day1은 MINDSET 투두 하나만 존재하므로 바로 완료 처리
             if (!challengeTodoService.isCompletedToday(participant.getId(), today)) {
                 challengeTodoService.completeDailyTodo(participant, today);
-
                 if (participant.getChallengeTeamId() != null) {
                     ChallengeTeam challengeTeam = challengeTeamService.getChallengeTeamByParticipant(participant);
                     challengeTeamService.updateTeamProgress(challengeTeam);

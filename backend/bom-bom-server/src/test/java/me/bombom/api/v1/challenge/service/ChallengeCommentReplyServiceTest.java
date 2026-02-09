@@ -282,7 +282,7 @@ class ChallengeCommentReplyServiceTest {
     }
 
     @Test
-    void 비공개_답글을_제3자가_조회하면_isVisible은_false이다() {
+    void 비공개_답글을_제3자가_조회하면_목록에_포함되지_않는다() {
         // given
         challengeCommentReplyRepository.save(
                 TestFixture.createChallengeCommentReply(
@@ -299,13 +299,9 @@ class ChallengeCommentReplyServiceTest {
                 PageRequest.of(0, 10));
 
         // then
-        CommentReplyResponse response = page.getContent().get(0);
         assertSoftly(softly -> {
-            softly.assertThat(page.getTotalElements()).isEqualTo(1);
-            softly.assertThat(response.reply()).isEqualTo("비공개 답글입니다.");
-            softly.assertThat(response.isPrivate()).isTrue();
-            softly.assertThat(response.isVisible()).isFalse();
-            softly.assertThat(response.isMyReply()).isFalse();
+            softly.assertThat(page.getTotalElements()).isZero();
+            softly.assertThat(page.getContent()).isEmpty();
         });
     }
 }

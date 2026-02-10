@@ -234,7 +234,7 @@ public class ChallengeService {
     }
 
     private Map<Long, List<ChallengeNewsletterResponse>> getNewslettersByChallengeId(List<Long> challengeIds) {
-        List<ChallengeNewsletterRow> rows = newsletterGroupItemRepository.findNewsletterResponsesByChallengeIds(challengeIds);
+        List<ChallengeNewsletterRow> rows = newsletterGroupItemRepository.findChallengeNewsletterRowsByChallengeIds(challengeIds);
 
         return rows.stream()
                 .collect(groupingBy(

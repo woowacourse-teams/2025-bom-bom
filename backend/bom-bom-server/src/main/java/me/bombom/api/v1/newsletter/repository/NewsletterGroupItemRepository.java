@@ -22,7 +22,7 @@ public interface NewsletterGroupItemRepository extends JpaRepository<NewsletterG
         WHERE c.id IN :challengeIds
         ORDER BY n.name ASC
     """)
-    List<ChallengeNewsletterRow> findNewsletterResponsesByChallengeIds(
+    List<ChallengeNewsletterRow> findChallengeNewsletterRowsByChallengeIds(
             @Param("challengeIds") List<Long> challengeIds
     );
 

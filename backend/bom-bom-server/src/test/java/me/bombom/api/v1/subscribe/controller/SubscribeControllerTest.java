@@ -53,8 +53,8 @@ class SubscribeControllerTest {
         }
 
         @Bean
-        public LoginMemberArgumentResolver loginMemberArgumentResolver(MemberRepository memberRepository) {
-            return new LoginMemberArgumentResolver(memberRepository);
+        public LoginMemberArgumentResolver loginMemberArgumentResolver() {
+            return new LoginMemberArgumentResolver();
         }
 
         @Bean

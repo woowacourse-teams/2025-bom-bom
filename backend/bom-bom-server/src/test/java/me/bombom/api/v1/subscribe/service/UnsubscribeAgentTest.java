@@ -50,7 +50,7 @@ class UnsubscribeAgentTest {
     void 구독_취소_성공() {
         // given
         given(playwrightClient.executeUnsubscribe(eq(MOCK_URL), any(UnsubscribePatterns.class)))
-                .willReturn(new PlaywrightResponse(200, true, "Success", null, "text_match"));
+                .willReturn(new PlaywrightResponse(200, true, "Success", "text_match"));
 
         // when & then
         assertThatCode(() -> agent.unsubscribe(MOCK_URL, MOCK_NEWSLETTER_ID))
@@ -62,7 +62,7 @@ class UnsubscribeAgentTest {
     void 구독_취소_재시도_가능한_에러() {
         // given
         given(playwrightClient.executeUnsubscribe(eq(MOCK_URL), any(UnsubscribePatterns.class)))
-                .willReturn(new PlaywrightResponse(500, false, "Server Error", "internal error", null));
+                .willReturn(new PlaywrightResponse(500, false, "Server Error", null));
 
         // when & then
         assertThatThrownBy(() -> agent.unsubscribe(MOCK_URL, MOCK_NEWSLETTER_ID))
@@ -74,7 +74,7 @@ class UnsubscribeAgentTest {
     void 구독_취소_실패_에러() {
         // given
         given(playwrightClient.executeUnsubscribe(eq(MOCK_URL), any(UnsubscribePatterns.class)))
-                .willReturn(new PlaywrightResponse(404, false, "Not Found", "page missing", null));
+                .willReturn(new PlaywrightResponse(404, false, "Not Found", null));
 
         // when & then
         assertThatThrownBy(() -> agent.unsubscribe(MOCK_URL, MOCK_NEWSLETTER_ID))

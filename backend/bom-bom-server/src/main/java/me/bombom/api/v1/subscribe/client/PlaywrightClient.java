@@ -41,7 +41,6 @@ public class PlaywrightClient {
                 return new PlaywrightResponse(
                         HttpStatus.INTERNAL_SERVER_ERROR.value(),
                         false,
-                        null,
                         "Lambda 실행 오류: " + response.functionError(),
                         null
                 );
@@ -53,7 +52,6 @@ public class PlaywrightClient {
             return new PlaywrightResponse(
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     false,
-                    null,
                     "내부 오류: " + e.getMessage(),
                     null
             );

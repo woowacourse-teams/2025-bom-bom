@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
@@ -433,9 +434,11 @@ class SubscribeServiceTest {
 
         // then
         verify(discordNotifier, times(1))
-                .sendUnsubscribeErrorNotification(eq("Invalid URL"), eq(newsletterId),
-                        eq(unsubscribeUrl),
-                        eq(subscribeId));
+                .sendUnsubscribeErrorNotification(
+                        eq("Invalid URL"),
+                        argThat(sub -> sub.getId().equals(s.getId())),
+                        eq(unsubscribeUrl)
+                );
 
         Subscribe result = subscribeRepository.findById(subscribeId).orElseThrow();
         assertThat(result.getStatus()).isEqualTo(SubscribeStatus.UNSUBSCRIBE_FAILED);

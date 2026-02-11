@@ -19,6 +19,8 @@ import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +49,9 @@ class ChallengeCommentReplyServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private NewsletterGroupRepository newsletterGroupRepository;
+
     private Member commentAuthorMember;
     private Member replyMember;
     private Member thirdPartyMember;
@@ -63,6 +68,7 @@ class ChallengeCommentReplyServiceTest {
         challengeParticipantRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+        newsletterGroupRepository.deleteAllInBatch();
 
         commentAuthorMember = memberRepository.save(
                 TestFixture.createUniqueMember("commentAuthor", java.util.UUID.randomUUID().toString()));
@@ -71,11 +77,14 @@ class ChallengeCommentReplyServiceTest {
         thirdPartyMember = memberRepository.save(
                 TestFixture.createUniqueMember("thirdParty", java.util.UUID.randomUUID().toString()));
 
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "reply-challenge",
                 LocalDate.now().minusDays(1),
                 LocalDate.now().plusDays(5),
-                7));
+                7,
+                group.getId()));
 
         commentAuthorParticipant = challengeParticipantRepository.save(
                 TestFixture.createChallengeParticipant(

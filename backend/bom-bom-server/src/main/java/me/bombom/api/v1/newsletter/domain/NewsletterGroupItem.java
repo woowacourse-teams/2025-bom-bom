@@ -1,4 +1,4 @@
-package me.bombom.api.v1.challenge.domain;
+package me.bombom.api.v1.newsletter.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,29 +16,29 @@ import lombok.NonNull;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "challenge_newsletter", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_challenge_newsletter", columnNames = { "challenge_id", "newsletter_id" })
+@Table(name = "newsletter_group_item", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_newsletter_group_item", columnNames = {"newsletter_group_id", "newsletter_id"})
 })
-public class ChallengeNewsletter {
+public class NewsletterGroupItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private Long challengeId;
+    private Long newsletterGroupId;
 
     @Column(nullable = false)
     private Long newsletterId;
 
     @Builder
-    public ChallengeNewsletter(
+    public NewsletterGroupItem(
             Long id,
-            @NonNull Long challengeId,
+            @NonNull Long newsletterGroupId,
             @NonNull Long newsletterId
     ) {
         this.id = id;
-        this.challengeId = challengeId;
+        this.newsletterGroupId = newsletterGroupId;
         this.newsletterId = newsletterId;
     }
 }

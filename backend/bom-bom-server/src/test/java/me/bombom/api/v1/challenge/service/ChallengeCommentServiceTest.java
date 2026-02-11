@@ -43,6 +43,8 @@ import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,6 +85,9 @@ class ChallengeCommentServiceTest {
 
     @Autowired
     private NewsletterDetailRepository newsletterDetailRepository;
+
+    @Autowired
+    private NewsletterGroupRepository newsletterGroupRepository;
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -131,12 +136,16 @@ class ChallengeCommentServiceTest {
         articles = articleRepository.saveAll(TestFixture.createArticles(member, newsletters));
         article = articles.get(0);
 
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+
         challenge = challengeRepository.save(
                 TestFixture.createChallenge(
                         "챌린지",
                         LocalDate.now().minusDays(1),
                         LocalDate.now().plusDays(10),
-                        11
+                        11,
+                        group.getId()
                 )
         );
         ChallengeTeam myTeam = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
@@ -230,12 +239,15 @@ class ChallengeCommentServiceTest {
         LocalDate start = LocalDate.now().minusDays(1);
         LocalDate end = LocalDate.now().plusDays(1);
 
+        NewsletterGroup otherGroup = TestFixture.createNewsletterGroup("다른 그룹");
+        newsletterGroupRepository.save(otherGroup);
         Challenge otherChallenge = challengeRepository.save(
                 TestFixture.createChallenge(
                         "다른 챌린지",
                         LocalDate.now().minusDays(1),
                         LocalDate.now().plusDays(5),
-                        6
+                        6,
+                        otherGroup.getId()
                 )
         );
 
@@ -326,12 +338,15 @@ class ChallengeCommentServiceTest {
     @Test
     void 챌린지_참가자가_없으면_댓글_생성시_예외가_발생한다() {
         // given
+        NewsletterGroup otherGroup = TestFixture.createNewsletterGroup("다른 그룹");
+        newsletterGroupRepository.save(otherGroup);
         Challenge otherChallenge = challengeRepository.save(
                 TestFixture.createChallenge(
                         "다른 챌린지",
                         LocalDate.now().minusDays(1),
                         LocalDate.now().plusDays(5),
-                        6
+                        6,
+                        otherGroup.getId()
                 )
         );
 

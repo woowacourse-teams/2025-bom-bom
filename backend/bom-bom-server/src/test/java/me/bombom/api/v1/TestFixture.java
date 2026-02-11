@@ -11,7 +11,6 @@ import me.bombom.api.v1.challenge.domain.ChallengeCommentReply;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuide;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyTodo;
-import me.bombom.api.v1.challenge.domain.ChallengeNewsletter;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.domain.ChallengeTodo;
@@ -27,6 +26,8 @@ import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroupItem;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousPolicy;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy;
 import me.bombom.api.v1.notice.domain.Notice;
@@ -548,13 +549,38 @@ public final class TestFixture {
     /**
      * Challenge
      */
-    public static Challenge createChallenge(String name, LocalDate startDate, LocalDate endDate, int totalDays) {
+    public static Challenge createChallenge(
+            String name,
+            LocalDate startDate,
+            LocalDate endDate,
+            int totalDays,
+            Long newsletterGroupId
+    ) {
         return Challenge.builder()
                 .name(name)
                 .generation(1)
                 .startDate(startDate)
                 .endDate(endDate)
                 .totalDays(totalDays)
+                .newsletterGroupId(newsletterGroupId)
+                .build();
+    }
+
+    public static Challenge createChallenge(
+            String name,
+            int generation,
+            LocalDate startDate,
+            LocalDate endDate,
+            Long newsletterGroupId
+    ) {
+        int totalDays = (int) java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        return Challenge.builder()
+                .name(name)
+                .generation(generation)
+                .startDate(startDate)
+                .endDate(endDate)
+                .totalDays(totalDays)
+                .newsletterGroupId(newsletterGroupId)
                 .build();
     }
 
@@ -581,25 +607,6 @@ public final class TestFixture {
                 .participantId(participantId)
                 .todoDate(todoDate)
                 .challengeTodoId(challengeTodoId)
-                .build();
-    }
-
-    /**
-     * Challenge
-     */
-    public static Challenge createChallenge(
-            String name,
-            int generation,
-            LocalDate startDate,
-            LocalDate endDate
-    ) {
-        int totalDays = (int) java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
-        return Challenge.builder()
-                .name(name)
-                .generation(generation)
-                .startDate(startDate)
-                .endDate(endDate)
-                .totalDays(totalDays)
                 .build();
     }
 
@@ -648,14 +655,23 @@ public final class TestFixture {
     }
 
     /**
-     * ChallengeNewsletter
+     * NewsletterGroup
      */
-    public static ChallengeNewsletter createChallengeNewsletter(
-            Long challengeId,
+    public static NewsletterGroup createNewsletterGroup(String name) {
+        return NewsletterGroup.builder()
+                .name(name)
+                .build();
+    }
+
+    /**
+     * NewsletterGroupItem
+     */
+    public static NewsletterGroupItem createNewsletterGroupItem(
+            Long newsletterGroupId,
             Long newsletterId
     ) {
-        return ChallengeNewsletter.builder()
-                .challengeId(challengeId)
+        return NewsletterGroupItem.builder()
+                .newsletterGroupId(newsletterGroupId)
                 .newsletterId(newsletterId)
                 .build();
     }

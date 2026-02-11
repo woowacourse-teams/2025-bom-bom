@@ -22,6 +22,8 @@ import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,6 +59,9 @@ class ChallengeCommentReplyControllerTest {
     @Autowired
     private ChallengeCommentReplyRepository challengeCommentReplyRepository;
 
+    @Autowired
+    private NewsletterGroupRepository newsletterGroupRepository;
+
     private OAuth2AuthenticationToken authToken;
     private Member viewer;
     private Challenge challenge;
@@ -69,18 +74,22 @@ class ChallengeCommentReplyControllerTest {
         challengeParticipantRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+        newsletterGroupRepository.deleteAllInBatch();
 
         viewer = memberRepository.save(
                 TestFixture.createUniqueMember("replyUser", java.util.UUID.randomUUID().toString()));
         Member commentAuthor = memberRepository.save(
                 TestFixture.createUniqueMember("commentAuthor", java.util.UUID.randomUUID().toString()));
 
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
         challenge = challengeRepository.save(
                 TestFixture.createChallenge(
                         "comment-challenge",
                         java.time.LocalDate.now().minusDays(1),
                         java.time.LocalDate.now().plusDays(5),
-                        7));
+                        7,
+                        group.getId()));
 
         ChallengeParticipant commentAuthorParticipant = challengeParticipantRepository.save(
                 TestFixture.createChallengeParticipant(

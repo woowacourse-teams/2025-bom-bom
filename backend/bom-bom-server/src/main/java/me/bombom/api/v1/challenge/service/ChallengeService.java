@@ -28,10 +28,10 @@ import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeNewsletterResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeTeamListResponse;
-import me.bombom.api.v1.challenge.repository.ChallengeNewsletterRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupItemRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -53,7 +53,7 @@ public class ChallengeService {
 
     private final ChallengeRepository challengeRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
-    private final ChallengeNewsletterRepository challengeNewsletterRepository;
+    private final NewsletterGroupItemRepository newsletterGroupItemRepository;
     private final ChallengeTeamRepository challengeTeamRepository;
     private final BadgeService badgeService;
 
@@ -234,7 +234,7 @@ public class ChallengeService {
     }
 
     private Map<Long, List<ChallengeNewsletterResponse>> getNewslettersByChallengeId(List<Long> challengeIds) {
-        List<ChallengeNewsletterRow> rows = challengeNewsletterRepository.findNewsletterResponsesByChallengeIds(challengeIds);
+        List<ChallengeNewsletterRow> rows = newsletterGroupItemRepository.findChallengeNewsletterRowsByChallengeIds(challengeIds);
 
         return rows.stream()
                 .collect(groupingBy(
@@ -295,7 +295,7 @@ public class ChallengeService {
             return EligibilityReason.ALREADY_APPLIED;
         }
 
-        boolean hasSubscribedNewsletter = challengeNewsletterRepository.existsSubscribedNewsletter(challengeId, memberId);
+        boolean hasSubscribedNewsletter = newsletterGroupItemRepository.existsSubscribedNewsletter(challengeId, memberId);
         if (!hasSubscribedNewsletter) {
             return EligibilityReason.NOT_SUBSCRIBED;
         }

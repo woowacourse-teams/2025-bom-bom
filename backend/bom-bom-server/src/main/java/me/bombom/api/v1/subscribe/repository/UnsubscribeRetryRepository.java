@@ -15,7 +15,7 @@ public interface UnsubscribeRetryRepository extends JpaRepository<UnsubscribeRet
     @Query(value = """
                     SELECT sr
                     FROM UnsubscribeRetry sr
-                    WHERE sr.nextRetryAt < :now
+                    WHERE sr.nextRetryAt <= :now
                     ORDER BY sr.nextRetryAt
                     LIMIT :limit
             """)

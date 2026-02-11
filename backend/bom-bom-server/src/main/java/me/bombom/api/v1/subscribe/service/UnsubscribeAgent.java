@@ -33,7 +33,7 @@ public class UnsubscribeAgent {
         if (response.success()) {
             log.info("구독 취소 성공 - newsletterId: {}, method: {}", newsletterId, response.method());
         } else {
-            String errorMsg = response.message();
+            String errorMsg = truncate(response.message());
             Integer statusCode = response.statusCode();
             log.warn("구독 취소 실패 - newsletterId: {}, status: {}, error: {}", newsletterId, statusCode, errorMsg);
 
@@ -42,6 +42,13 @@ public class UnsubscribeAgent {
             }
             throw new AutoUnsubscribeFailedException(errorMsg, newsletterId, url);
         }
+    }
+
+    private String truncate(String message) {
+        if (message == null) {
+            return "내용 없음"; // 5 chars
+        }
+        return message.length() > 255 ? message.substring(0, 252) + "..." : message;
     }
 
     private boolean isRetryableError(Integer statusCode) {

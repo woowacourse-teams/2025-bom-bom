@@ -22,7 +22,7 @@ public class UnsubscribeRetryScheduler {
     private final UnsubscribeRetryService unsubscribeRetryService;
 
     @Scheduled(fixedDelay = RETRY_INTERVAL_MS)
-    @SchedulerLock(name = "retryUnsubscribe", lockAtLeastFor = "30s", lockAtMostFor = "4m")
+    @SchedulerLock(name = "retry_unsubscribe", lockAtLeastFor = "30s", lockAtMostFor = "4m")
     public void retryUnsubscribe() {
         List<UnsubscribeRetry> retries = unsubscribeRetryService.findPendingRetries(RETRY_BATCH_SIZE);
         if (!retries.isEmpty()) {

@@ -47,7 +47,7 @@ public class Subscribe extends BaseEntity {
         return !this.memberId.equals(memberId);
     }
 
-    public boolean isFailed() {
+    public boolean isFailedToUnsubscribe() {
         return status == SubscribeStatus.UNSUBSCRIBE_FAILED;
     }
 

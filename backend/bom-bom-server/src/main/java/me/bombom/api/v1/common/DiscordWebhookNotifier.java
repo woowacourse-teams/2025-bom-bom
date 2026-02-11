@@ -59,7 +59,6 @@ public class DiscordWebhookNotifier {
                         "color", 0xE74C3C,
                         "fields", List.of(
                                 Map.of("name", "📰 뉴스레터", "value", newsletter.getName() + " (" + newsletter.getEmail() + ")"),
-                                Map.of("name", "❌ 실패 사유", "value", "```" + message + "```"),
                                 Map.of("name", "🔗 해지 URL", "value", url),
                                 Map.of("name", "🆔 ID 정보", "value",
                                         "Newsletter: " + newsletterId + " / Subscribe: " + subscribeId)),

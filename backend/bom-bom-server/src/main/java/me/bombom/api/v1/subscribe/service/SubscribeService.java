@@ -85,11 +85,13 @@ public class SubscribeService {
             subscribeRepository.deleteById(subscribeId);
             return;
         }
-
         Subscribe subscribe = subscribeRepository.findById(subscribeId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "subscribe")
-                        .addContext("subscribeId", subscribeId));
+                .orElse(null);
+        if (subscribe == null) {
+            log.warn("구독 정보가 존재하지 않아 상태 변경 실패 (이미 삭제되었을 수 있음) - subscribeId: {}", subscribeId);
+            return;
+        }
+
         subscribe.changeStatus(SubscribeStatus.UNSUBSCRIBE_FAILED);
     }
 

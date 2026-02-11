@@ -107,6 +107,7 @@ public class SubscribeService {
             handlePermanentFailure(subscribeId, newsletterId, unsubscribeUrl, e.getMessage());
         } catch (Exception e) {
             log.error("예상치 못한 예외가 발생했습니다.", e);
+            handlePermanentFailure(subscribeId, newsletterId, unsubscribeUrl, "예상치 못한 예외: " + e.getMessage());
         }
     }
 

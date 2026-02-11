@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.common.DiscordWebhookNotifier;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.RetryableException;
@@ -102,12 +103,12 @@ public class SubscribeService {
             applicationEventPublisher.publishEvent(AutoUnsubscribeCompletedEvent.of(subscribeId, true));
             unsubscribeRetryService.deleteIfExists(subscribeId);
         } catch (RetryableException e) {
-            handleRetryableFailure(subscribeId, newsletterId, unsubscribeUrl, e.getMessage());
+            handleRetryableFailure(subscribeId, unsubscribeUrl, e.getMessage());
         } catch (AutoUnsubscribeFailedException e) {
-            handlePermanentFailure(subscribeId, newsletterId, unsubscribeUrl, e.getMessage());
+            handlePermanentFailure(subscribeId, unsubscribeUrl, e.getMessage());
         } catch (Exception e) {
             log.error("예상치 못한 예외가 발생했습니다.", e);
-            handlePermanentFailure(subscribeId, newsletterId, unsubscribeUrl, "예상치 못한 예외: " + e.getMessage());
+            handlePermanentFailure(subscribeId, unsubscribeUrl, "예상치 못한 예외: " + e.getMessage());
         }
     }
 
@@ -124,16 +125,30 @@ public class SubscribeService {
         processUnsubscribe(subscribe.getId(), subscribe.getNewsletterId(), subscribe.getUnsubscribeUrl());
     }
 
-    private void handleRetryableFailure(Long subscribeId, Long newsletterId, String url, String errorMsg) {
+    private void handleRetryableFailure(Long subscribeId, String url, String errorMsg) {
         boolean scheduled = unsubscribeRetryService.scheduleRetry(subscribeId, errorMsg);
         if (!scheduled) {
-            handlePermanentFailure(subscribeId, newsletterId, url, "최대 재시도 횟수에 도달했습니다 : " + errorMsg);
+            handlePermanentFailure(subscribeId, url, "최대 재시도 횟수에 도달했습니다 : " + errorMsg);
         }
     }
 
-    private void handlePermanentFailure(Long subscribeId, Long newsletterId, String url, String errorMsg) {
+    private void handlePermanentFailure(Long subscribeId, String url, String errorMsg) {
         unsubscribeRetryService.deleteIfExists(subscribeId);
         applicationEventPublisher.publishEvent(AutoUnsubscribeCompletedEvent.of(subscribeId, false));
-        discordNotifier.sendUnsubscribeErrorNotification(errorMsg, newsletterId, url, subscribeId);
+        try {
+            Subscribe subscribe = subscribeRepository.findById(subscribeId)
+                    .orElseThrow(() -> new CServerErrorException(ErrorDetail.ENTITY_NOT_FOUND)
+                            .addContext(ErrorContextKeys.ENTITY_TYPE, "subscribe")
+                            .addContext("subscribeId", subscribeId)
+                            .addContext(ErrorContextKeys.OPERATION, "handlePermanentFailure"));
+
+            discordNotifier.sendUnsubscribeErrorNotification(
+                    errorMsg,
+                    subscribe,
+                    url
+            );
+        } catch (Exception e) {
+            log.error("Failed to send unsubscribe error notification (Subscribe ID: {})", subscribeId, e);
+        }
     }
 }

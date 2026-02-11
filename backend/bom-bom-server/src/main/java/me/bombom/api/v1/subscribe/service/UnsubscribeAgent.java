@@ -11,7 +11,6 @@ import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 @Slf4j
 @Component
@@ -31,18 +30,16 @@ public class UnsubscribeAgent {
         );
 
         PlaywrightResponse response = playwrightClient.executeUnsubscribe(url, patterns);
-
         if (response.success()) {
             log.info("구독 취소 성공 - newsletterId: {}, method: {}", newsletterId, response.method());
         } else {
-            String errorMsg = StringUtils.hasText(response.error()) ? response.error() : response.message();
+            String errorMsg = response.message();
             Integer statusCode = response.statusCode();
             log.warn("구독 취소 실패 - newsletterId: {}, status: {}, error: {}", newsletterId, statusCode, errorMsg);
 
             if (isRetryableError(statusCode)) {
                 throw new RetryableException(errorMsg);
             }
-
             throw new AutoUnsubscribeFailedException(errorMsg, newsletterId, url);
         }
     }

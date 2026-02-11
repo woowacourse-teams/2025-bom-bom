@@ -25,10 +25,10 @@ public class UnsubscribeRetryScheduler {
     @SchedulerLock(name = "retry_unsubscribe", lockAtLeastFor = "30s", lockAtMostFor = "4m")
     public void retryUnsubscribe() {
         List<UnsubscribeRetry> retries = unsubscribeRetryService.findPendingRetries(RETRY_BATCH_SIZE);
-        if (!retries.isEmpty()) {
-            log.info("재시도 대상 {}건 발견. 처리를 시작합니다.", retries.size());
+        if (retries.isEmpty()) {
+            return;
         }
-
+        log.info("재시도 대상 {}건 발견. 처리를 시작합니다.", retries.size());
         for (UnsubscribeRetry retry : retries) {
             try {
                 processRetry(retry);

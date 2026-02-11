@@ -86,14 +86,11 @@ public class SubscribeService {
             subscribeRepository.deleteById(subscribeId);
             return;
         }
-        Subscribe subscribe = subscribeRepository.findById(subscribeId)
-                .orElse(null);
-        if (subscribe == null) {
-            log.warn("구독 정보가 존재하지 않아 상태 변경 실패 (이미 삭제되었을 수 있음) - subscribeId: {}", subscribeId);
-            return;
-        }
-
-        subscribe.changeStatus(SubscribeStatus.UNSUBSCRIBE_FAILED);
+        subscribeRepository.findById(subscribeId)
+                .ifPresentOrElse(
+                        subscribe -> subscribe.changeStatus(SubscribeStatus.UNSUBSCRIBE_FAILED),
+                        () -> log.warn("구독 정보가 존재하지 않아 상태 변경 실패 (이미 삭제되었을 수 있음) - subscribeId: {}", subscribeId)
+                );
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)

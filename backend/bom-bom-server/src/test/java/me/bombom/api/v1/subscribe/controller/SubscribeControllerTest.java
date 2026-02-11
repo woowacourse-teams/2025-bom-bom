@@ -71,7 +71,8 @@ class SubscribeControllerTest {
 
         @Override
         public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-            resolvers.add(loginMemberArgumentResolver(memberRepository()));
+            resolvers.add(new LoginMemberArgumentResolver());
+
         }
     }
 

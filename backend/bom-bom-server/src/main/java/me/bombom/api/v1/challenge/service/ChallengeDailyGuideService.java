@@ -10,6 +10,7 @@ import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuide;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
+import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.dto.request.DailyGuideCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.MemberDailyCommentResponse;
@@ -58,7 +59,7 @@ public class ChallengeDailyGuideService {
 
         int dayIndex = calculateDayIndex(challenge.getStartDate(), today);
         TodayDailyGuideRow row = challengeDailyGuideRepository.findTodayGuide(
-                        challengeId, memberId, dayIndex)
+                challengeId, memberId, dayIndex)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeDailyGuide")
                         .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
@@ -71,11 +72,11 @@ public class ChallengeDailyGuideService {
                 row.getImageUrl(),
                 row.getNotice(),
                 row.isCommentEnabled(),
-                myComment
-        );
+                myComment);
     }
 
-    public Page<DailyGuideCommentResponse> getTotalComments(Long challengeId, int dayIndex, Long memberId, Pageable pageable) {
+    public Page<DailyGuideCommentResponse> getTotalComments(Long challengeId, int dayIndex, Long memberId,
+            Pageable pageable) {
         Challenge challenge = getChallenge(challengeId);
 
         validateChallengeParticipant(challengeId, memberId);
@@ -99,11 +100,11 @@ public class ChallengeDailyGuideService {
 
     @Transactional
     public void createDailyGuideComment(Long challengeId, int dayIndex, Long memberId,
-                                        DailyGuideCommentRequest request, LocalDate today) {
+            DailyGuideCommentRequest request, LocalDate today) {
         Challenge challenge = getChallenge(challengeId);
 
         ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
-                        challengeId, memberId)
+                challengeId, memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
                         .addContext(ErrorContextKeys.MEMBER_ID, memberId)
@@ -146,19 +147,19 @@ public class ChallengeDailyGuideService {
 
         // day1일 때만 체크리스트 자동 완료 처리
         if (dayIndex == 1) {
+            // MINDSET 투두 생성 (마인드셋 댓글 작성)
+            challengeTodoService.insertMindsetDone(participant, today);
+            // TODO: 과도기라서 모두 완료 처리가 필요해 보임. 추후 삭제 필요
             // READ 투두 자동 생성 (뉴스레터 1개 읽기)
             challengeDailyTodoService.updateChallengeDailyTodo(memberId, null, today);
             // COMMENT 투두 생성 (한 줄 코멘트 작성)
             challengeTodoService.insertCommentDone(participant, today);
 
             // 이미 완료되지 않았으면 progress 처리
-            // day1에 두 투두(READ, COMMENT)가 모두 생성되므로 바로 완료 처리
             if (!challengeTodoService.isCompletedToday(participant.getId(), today)) {
                 challengeTodoService.completeDailyTodo(participant, today);
-
-                // 팀 progress 업데이트
                 if (participant.getChallengeTeamId() != null) {
-                    var challengeTeam = challengeTeamService.getChallengeTeamByParticipant(participant);
+                    ChallengeTeam challengeTeam = challengeTeamService.getChallengeTeamByParticipant(participant);
                     challengeTeamService.updateTeamProgress(challengeTeam);
                 }
             }
@@ -173,8 +174,7 @@ public class ChallengeDailyGuideService {
         MemberDailyCommentResponse response = challengeDailyGuideCommentRepository.findMyComment(
                 challengeId,
                 dayIndex,
-                memberId
-        );
+                memberId);
         return response != null ? response : new MemberDailyCommentResponse(null);
     }
 

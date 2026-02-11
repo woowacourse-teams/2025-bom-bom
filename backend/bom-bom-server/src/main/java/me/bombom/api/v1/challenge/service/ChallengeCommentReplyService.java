@@ -35,6 +35,7 @@ public class ChallengeCommentReplyService {
                         .commentId(commentId)
                         .participantId(replyAuthor.getId())
                         .reply(request.reply())
+                        .isPrivate(request.isPrivate())
                         .build()
         );
         challengeCommentRepository.updateReplyCount(commentId);

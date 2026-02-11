@@ -15,9 +15,11 @@ import java.util.Map;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
+import me.bombom.api.v1.challenge.domain.ChallengeGrade;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat;
+import me.bombom.api.v1.challenge.dto.response.CertificationInfoResponse;
 import me.bombom.api.v1.challenge.dto.response.MemberChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TeamChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayTodoResponse;
@@ -181,6 +183,33 @@ class ChallengeProgressControllerUnitTest {
         mockMvc.perform(get("/api/v1/challenges/{id}/progress/teams/{teamId}", challengeId, invalidTeamId)
                         .with(authentication(authentication)))
                 .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @Test
+    void 수료증_정보_조회_성공() throws Exception {
+        // given
+        Long challengeId = 1L;
+        CertificationInfoResponse response = new CertificationInfoResponse(
+                "tester",
+                "Test Challenge",
+                1,
+                LocalDate.now().minusDays(10),
+                LocalDate.now().minusDays(1),
+                ChallengeGrade.GOLD,
+                100
+        );
+
+        given(challengeProgressService.getCertificationInfo(eq(challengeId), eq(1L)))
+                .willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges/{id}/certification", challengeId)
+                        .with(authentication(authentication)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nickname").value("tester"))
+                .andExpect(jsonPath("$.challengeName").value("Test Challenge"))
+                .andExpect(jsonPath("$.medal").value("GOLD"))
                 .andDo(print());
     }
 }

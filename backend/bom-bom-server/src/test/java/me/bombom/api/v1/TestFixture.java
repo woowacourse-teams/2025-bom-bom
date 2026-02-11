@@ -7,6 +7,7 @@ import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.RecentArticle;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
+import me.bombom.api.v1.challenge.domain.ChallengeCommentReply;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuide;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyTodo;
@@ -711,6 +712,23 @@ public final class TestFixture {
                 .guideId(guideId)
                 .participantId(participantId)
                 .content(content)
+                .build();
+    }
+
+    /**
+     * ChallengeCommentReply
+     */
+    public static ChallengeCommentReply createChallengeCommentReply(
+            Long commentId,
+            Long participantId,
+            String reply,
+            boolean isPrivate
+    ) {
+        return ChallengeCommentReply.builder()
+                .commentId(commentId)
+                .participantId(participantId)
+                .reply(reply)
+                .isPrivate(isPrivate)
                 .build();
     }
 }

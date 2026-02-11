@@ -4,8 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.BDDMockito.given;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
@@ -39,6 +43,7 @@ import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @IntegrationTest
 class ChallengeProgressServiceTest {
@@ -66,6 +71,9 @@ class ChallengeProgressServiceTest {
 
     @Autowired
     private ChallengeDailyResultRepository challengeDailyResultRepository;
+
+    @MockitoBean
+    private Clock clock;
 
     private Member member;
     private Challenge challenge;
@@ -108,6 +116,13 @@ class ChallengeProgressServiceTest {
                 LocalDate.now(),
                 readTodo.getId());
         challengeDailyTodoRepository.save(dailyTodo);
+
+        // Mock Clock behavior
+        // Default: LocalDate.now(clock) returns today
+        Instant instant = java.time.Instant.now();
+        ZoneId zoneId = java.time.ZoneId.systemDefault();
+        given(clock.instant()).willReturn(instant);
+        given(clock.getZone()).willReturn(zoneId);
     }
 
     @Test
@@ -425,10 +440,10 @@ class ChallengeProgressServiceTest {
         LocalDate yesterday = LocalDate.now().minusDays(1);
         Challenge completedChallenge = challengeRepository.save(
                 TestFixture.createChallenge(
-                    "Completed Challenge",
-                    yesterday.minusDays(10),
-                    yesterday,
-                    10
+                        "Completed Challenge",
+                        yesterday.minusDays(10),
+                        yesterday,
+                        10
                 )
         );
 
@@ -442,7 +457,8 @@ class ChallengeProgressServiceTest {
         );
 
         // when
-        CertificationInfoResponse response = challengeProgressService.getCertificationInfo(completedChallenge.getId(), member);
+        CertificationInfoResponse response = challengeProgressService.getCertificationInfo(completedChallenge.getId(),
+                member.getId());
 
         // then
         assertSoftly(softly -> {
@@ -459,7 +475,7 @@ class ChallengeProgressServiceTest {
     @Test
     void 진행_중인_챌린지의_수료증_조회시_예외_발생() {
         // when & then
-        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(challenge.getId(), member))
+        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(challenge.getId(), member.getId()))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .satisfies(e -> {
                     CIllegalArgumentException exception = (CIllegalArgumentException) e;
@@ -473,7 +489,7 @@ class ChallengeProgressServiceTest {
         Long nonExistentChallengeId = 0L;
 
         // when & then
-        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(nonExistentChallengeId, member))
+        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(nonExistentChallengeId, member.getId()))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .satisfies(e -> {
                     CIllegalArgumentException exception = (CIllegalArgumentException) e;
@@ -488,10 +504,10 @@ class ChallengeProgressServiceTest {
         LocalDate yesterday = LocalDate.now().minusDays(1);
         Challenge completedChallenge = challengeRepository.save(
                 TestFixture.createChallenge(
-                    "Other Challenge",
-                    yesterday.minusDays(10),
-                    yesterday,
-                    10
+                        "Other Challenge",
+                        yesterday.minusDays(10),
+                        yesterday,
+                        10
                 )
         );
 
@@ -503,7 +519,7 @@ class ChallengeProgressServiceTest {
         );
 
         // when & then
-        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(completedChallenge.getId(), otherMember))
+        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(completedChallenge.getId(), otherMember.getId()))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .satisfies(e -> {
                     CIllegalArgumentException exception = (CIllegalArgumentException) e;
@@ -519,10 +535,10 @@ class ChallengeProgressServiceTest {
         LocalDate yesterday = LocalDate.now().minusDays(1);
         Challenge completedChallenge = challengeRepository.save(
                 TestFixture.createChallenge(
-                    "Failed Challenge",
-                    yesterday.minusDays(10),
-                    yesterday,
-                    10
+                        "Failed Challenge",
+                        yesterday.minusDays(10),
+                        yesterday,
+                        10
                 )
         );
 
@@ -536,12 +552,12 @@ class ChallengeProgressServiceTest {
         );
 
         // when & then
-        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(completedChallenge.getId(), member))
+        assertThatThrownBy(() -> challengeProgressService.getCertificationInfo(completedChallenge.getId(), member.getId()))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .satisfies(e -> {
                     CIllegalArgumentException exception = (CIllegalArgumentException) e;
                     assertThat(exception.getErrorDetail()).isEqualTo(ErrorDetail.PRECONDITION_FAILED);
-        });
+                });
     }
 
     @Test
@@ -550,10 +566,10 @@ class ChallengeProgressServiceTest {
         LocalDate yesterday = LocalDate.now().minusDays(1);
         Challenge completedChallenge = challengeRepository.save(
                 TestFixture.createChallenge(
-                    "Grade Challenge",
-                    yesterday.minusDays(10),
-                    yesterday,
-                    10
+                        "Grade Challenge",
+                        yesterday.minusDays(10),
+                        yesterday,
+                        10
                 )
         );
 
@@ -568,12 +584,91 @@ class ChallengeProgressServiceTest {
         );
 
         // when
-        CertificationInfoResponse response = challengeProgressService.getCertificationInfo(completedChallenge.getId(), member);
+        CertificationInfoResponse response = challengeProgressService.getCertificationInfo(completedChallenge.getId(),
+                member.getId());
 
         // then
         assertSoftly(softly -> {
             softly.assertThat(response.medal()).isEqualTo(ChallengeGrade.SILVER);
             softly.assertThat(response.medalCondition()).isEqualTo(90);
         });
+    }
+
+    @Test
+    void 챌린지_1일차에는_MINDSET_투두만_조회된다() {
+        // given
+        LocalDate today = LocalDate.now();
+        Challenge day1Challenge = challengeRepository.save(TestFixture.createChallenge(
+                "Day 1 Challenge",
+                today,
+                today.plusDays(9),
+                10));
+
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipant(
+                day1Challenge.getId(),
+                member.getId(),
+                0));
+
+        // Todos: MINDSET, READ, COMMENT 모두 생성
+        challengeTodoRepository
+                .save(TestFixture.createChallengeTodo(day1Challenge.getId(),
+                        ChallengeTodoType.MINDSET));
+        challengeTodoRepository
+                .save(TestFixture.createChallengeTodo(day1Challenge.getId(), ChallengeTodoType.READ));
+        challengeTodoRepository
+                .save(TestFixture.createChallengeTodo(day1Challenge.getId(),
+                        ChallengeTodoType.COMMENT));
+
+        // when
+        MemberChallengeProgressResponse response = challengeProgressService
+                .getMemberProgress(day1Challenge.getId(), member);
+
+        // then
+        assertThat(response.todayTodos()).hasSize(1);
+        assertThat(response.todayTodos().getFirst().challengeTodoType()).isEqualTo(ChallengeTodoType.MINDSET);
+    }
+
+    @Test
+    void 챌린지_2일차_이후에는_READ_COMMENT_투두만_조회된다() {
+        // given
+        // LocalDate.now()가 주말일 경우를 대비하여, 시작일을 충분히 과거로 설정하여
+        // 현재 날짜가 챌린지 2일차 이후의 평일이 되도록 보장
+        LocalDate realToday = LocalDate.now();
+        // 시작일을 현재 날짜로부터 3일 전으로 설정.
+        // 이렇게 하면 realToday가 월요일이든, 화요일이든, 수요일이든, 목요일이든, 금요일이든
+        // 챌린지 시작일로부터 최소 2일 이상의 평일이 지났음을 보장할 수 있다.
+        // (예: realToday가 수요일이면 시작일은 일요일. 월, 화 2일 경과)
+        // (예: realToday가 월요일이면 시작일은 금요일. 금, 월 2일 경과)
+        LocalDate safeStartDate = realToday.minusDays(3);
+
+        Challenge day2ChallengeFixed = challengeRepository.save(TestFixture.createChallenge(
+                "Day 2 Challenge",
+                safeStartDate,
+                safeStartDate.plusDays(9),
+                10));
+
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipant(
+                day2ChallengeFixed.getId(),
+                member.getId(),
+                1)); // completedDays를 1로 설정하여 2일차로 가정
+
+        // Todos: MINDSET, READ, COMMENT 모두 생성
+        challengeTodoRepository.save(
+                TestFixture.createChallengeTodo(day2ChallengeFixed.getId(), ChallengeTodoType.MINDSET));
+        challengeTodoRepository.save(
+                TestFixture.createChallengeTodo(day2ChallengeFixed.getId(), ChallengeTodoType.READ));
+        challengeTodoRepository.save(
+                TestFixture.createChallengeTodo(day2ChallengeFixed.getId(), ChallengeTodoType.COMMENT));
+
+        // when
+        MemberChallengeProgressResponse response = challengeProgressService
+                .getMemberProgress(day2ChallengeFixed.getId(), member);
+
+        // then
+        assertThat(response.todayTodos()).hasSize(2);
+        assertThat(response.todayTodos()).extracting("challengeTodoType")
+                .containsExactlyInAnyOrder(ChallengeTodoType.READ, ChallengeTodoType.COMMENT);
+        assertThat(response.todayTodos()).extracting("challengeTodoType")
+                .doesNotContain(ChallengeTodoType.MINDSET);
     }
 }

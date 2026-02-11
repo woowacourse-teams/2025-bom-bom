@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -12,11 +13,10 @@ import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.repository.MemberRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.TestingAuthenticationToken;
@@ -27,13 +27,11 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 
 class LoginMemberArgumentResolverTest {
 
-    private MemberRepository memberRepository;
     private LoginMemberArgumentResolver resolver;
 
     @BeforeEach
     void setUp() {
-        memberRepository = Mockito.mock(MemberRepository.class);
-        resolver = new LoginMemberArgumentResolver(memberRepository);
+        resolver = new LoginMemberArgumentResolver();
     }
 
     @AfterEach
@@ -41,125 +39,130 @@ class LoginMemberArgumentResolverTest {
         SecurityContextHolder.clearContext();
     }
 
-    //테스트를 위한 가짜 컨트롤러
     static class StubController {
-        public void endpointNullableTrue(@LoginMember(anonymous = true) Member member) {}
-        public void endpointNullableFalse(@LoginMember(anonymous = false) Member member) {}
+        public void endpointMember(@LoginMember Member member) {
+        }
+
+        public void endpointMemberAnonymousTrue(@LoginMember(anonymous = true) Member member) {
+        }
+
+        public void endpointLong(@LoginMember Long memberId) {
+        }
+
+        public void endpointLongAnonymousTrue(@LoginMember(anonymous = true) Long memberId) {
+        }
     }
 
     @Test
-    void 익명_요청_anonymous_true이면_null_반환() throws Exception {
-        //익명 토큰 = 로그인하지 않은 유저
-        Authentication anonymous = new AnonymousAuthenticationToken(
-                "key",
-                "anonymousUser",
-                List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))
-        );
-        SecurityContextHolder.getContext().setAuthentication(anonymous);
-
-        Object result = resolver.resolveArgument(paramNullableTrue(), null, null, null);
-        assertThat(result).isNull();
-    }
-
-    @Test
-    void 익명_요청_anonymous_false이면_UNAUTHORIZED() {
-        Authentication anonymous = new AnonymousAuthenticationToken(
-                "key",
-                "anonymousUser",
-                List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))
-        );
-        SecurityContextHolder.getContext().setAuthentication(anonymous);
-
-        assertThatThrownBy(() -> resolver.resolveArgument(paramNullableFalse(), null, null, null))
-                .isInstanceOfSatisfying(UnauthorizedException.class, e ->
-                        assertThat(e.getErrorDetail()).isEqualTo(ErrorDetail.UNAUTHORIZED)
-                );
-    }
-
-    @Test
-    void principal_타입_불일치면_INVALID_TOKEN() {
-        TestingAuthenticationToken auth = new TestingAuthenticationToken("notCustomUser", null);
-        auth.setAuthenticated(true);
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
-        assertThatThrownBy(() -> resolver.resolveArgument(paramNullableTrue(), null, null, null))
-                .isInstanceOfSatisfying(UnauthorizedException.class, e ->
-                        assertThat(e.getErrorDetail()).isEqualTo(ErrorDetail.INVALID_TOKEN)
-                );
-    }
-
-    @Test
-    void principal은_CustomOAuth2User지만_member_null이면_UNAUTHORIZED() {
-        CustomOAuth2User user = new CustomOAuth2User(Map.of("name", "tester"), null, null, null);
-        OAuth2AuthenticationToken auth = new OAuth2AuthenticationToken(
-                user,
-                user.getAuthorities(),
-                "registrationId"
-        );
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
-        assertThatThrownBy(() -> resolver.resolveArgument(paramNullableTrue(), null, null, null))
-                .isInstanceOfSatisfying(UnauthorizedException.class, e ->
-                        assertThat(e.getErrorDetail()).isEqualTo(ErrorDetail.UNAUTHORIZED)
-                );
-    }
-
-    @Test
-    void 정상_로그인_이고_DB에_회원이_존재하면_Member_반환() throws Exception {
-        // given
-        Member member = org.mockito.Mockito.mock(Member.class);
-        given(member.getId()).willReturn(1L);
-
-        CustomOAuth2User user = new CustomOAuth2User(Map.of("name", "tester"), member, null, null);
-        OAuth2AuthenticationToken auth = new OAuth2AuthenticationToken(
-                user,
-                user.getAuthorities(),
-                "registrationId"
-        );
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
-        given(memberRepository.findById(1L)).willReturn(java.util.Optional.of(member));
-
-        // when
-        Object result = resolver.resolveArgument(paramNullableTrue(), null, null, null);
-
-        // then
+    @DisplayName("Member 타입과 Long 타입을 모두 지원한다")
+    void supportsParameter() throws Exception {
         assertSoftly(softly -> {
-            softly.assertThat(result).isInstanceOf(Member.class);
-            softly.assertThat(result).isEqualTo(member);
+            softly.assertThat(resolver.supportsParameter(paramMember())).isTrue();
+            softly.assertThat(resolver.supportsParameter(paramLong())).isTrue();
         });
     }
 
     @Test
-    void 정상_로그인이지만_DB에_회원이_없으면_UNAUTHORIZED() throws Exception {
-        // given
-        Member member = org.mockito.Mockito.mock(Member.class);
-        given(member.getId()).willReturn(0L);
+    @DisplayName("로그인하지 않은 유저가 익명 허용 엔드포인트에 접근하면 null을 반환한다")
+    void anonymousTrue_WhenNotLoggedIn_ReturnsNull() throws Exception {
+        setAnonymousAuthentication();
 
-        CustomOAuth2User user = new CustomOAuth2User(Map.of("name", "tester"), member, null, null);
-        OAuth2AuthenticationToken auth = new OAuth2AuthenticationToken(
-                user,
-                user.getAuthorities(),
-                "registrationId"
-        );
+        Object result = resolver.resolveArgument(paramMemberAnonymousTrue(), null, null, null);
+        assertThat(result).isNull();
+    }
+
+    @Test
+    @DisplayName("로그인하지 않은 유저가 익명 비허용 엔드포인트에 접근하면 UNAUTHORIZED 예외를 던진다")
+    void anonymousFalse_WhenNotLoggedIn_ThrowsException() throws Exception {
+        setAnonymousAuthentication();
+
+        assertThatThrownBy(() -> resolver.resolveArgument(paramMember(), null, null, null))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.UNAUTHORIZED);
+    }
+
+    @Test
+    @DisplayName("정상 로그인 유저에 대해 Member 객체를 반환한다")
+    void resolveMember_WhenLoggedIn() throws Exception {
+        Member member = mock(Member.class);
+        setLoggedInAuthentication(member);
+
+        Object result = resolver.resolveArgument(paramMember(), null, null, null);
+
+        assertThat(result).isEqualTo(member);
+    }
+
+    @Test
+    @DisplayName("정상 로그인 유저에 대해 Long memberId를 반환한다")
+    void resolveLong_WhenLoggedIn() throws Exception {
+        Member member = mock(Member.class);
+        given(member.getId()).willReturn(1L);
+        setLoggedInAuthentication(member);
+
+        Object result = resolver.resolveArgument(paramLong(), null, null, null);
+
+        assertThat(result).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("OAuth2 유저 정보가 비정상(Member null)이면 UNAUTHORIZED 예외를 던진다")
+    void resolve_WhenMemberIsNullInPrincipal_ThrowsException() throws Exception {
+        setLoggedInAuthentication(null);
+
+        assertThatThrownBy(() -> resolver.resolveArgument(paramMember(), null, null, null))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.UNAUTHORIZED);
+    }
+
+    @Test
+    @DisplayName("비정상적인 Principal 타입이면 INVALID_TOKEN 예외를 던진다")
+    void resolve_WhenInvalidPrincipal_ThrowsException() throws Exception {
+        TestingAuthenticationToken auth = new TestingAuthenticationToken("notCustomUser", null);
+        auth.setAuthenticated(true);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        given(memberRepository.findById(0L)).willReturn(java.util.Optional.empty());
-
-        // when & then
-        assertThatThrownBy(() -> resolver.resolveArgument(paramNullableTrue(), null, null, null))
-                .isInstanceOfSatisfying(UnauthorizedException.class,
-                        e -> assertThat(e.getErrorDetail()).isEqualTo(ErrorDetail.UNAUTHORIZED));
+        assertThatThrownBy(() -> resolver.resolveArgument(paramMember(), null, null, null))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_TOKEN);
     }
 
-    //ArgumentResolver에게 파라미터 넘기기
-    private MethodParameter paramNullableTrue() throws Exception {
-        Method m = StubController.class.getMethod("endpointNullableTrue", Member.class);
-        return new MethodParameter(m, 0);
+    private void setAnonymousAuthentication() {
+        Authentication anonymous = new AnonymousAuthenticationToken(
+                "key", "anonymousUser", List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS")));
+        SecurityContextHolder.getContext().setAuthentication(anonymous);
     }
 
-    private MethodParameter paramNullableFalse() throws Exception {
-        Method m = StubController.class.getMethod("endpointNullableFalse", Member.class);
-        return new MethodParameter(m, 0);
+    private void setLoggedInAuthentication(Member member) {
+        CustomOAuth2User user = new CustomOAuth2User(Map.of("name", "tester"), member, null, null);
+        OAuth2AuthenticationToken auth = new OAuth2AuthenticationToken(
+                user, user.getAuthorities(), "registrationId");
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    private MethodParameter paramMember() {
+        try {
+            Method m = StubController.class.getMethod("endpointMember", Member.class);
+            return new MethodParameter(m, 0);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private MethodParameter paramMemberAnonymousTrue() {
+        try {
+            Method m = StubController.class.getMethod("endpointMemberAnonymousTrue", Member.class);
+            return new MethodParameter(m, 0);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private MethodParameter paramLong() {
+        try {
+            Method m = StubController.class.getMethod("endpointLong", Long.class);
+            return new MethodParameter(m, 0);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

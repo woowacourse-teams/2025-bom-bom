@@ -4,5 +4,6 @@ public enum ChallengeTodoType {
 
     READ,
     COMMENT,
+    MINDSET
     ;
 }

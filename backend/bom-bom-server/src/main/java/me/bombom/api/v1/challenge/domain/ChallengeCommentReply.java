@@ -30,14 +30,19 @@ public class ChallengeCommentReply extends BaseEntity {
     @Column(nullable = false, length = 500)
     private String reply;
 
+    @Column(nullable = false)
+    private boolean isPrivate;
+
     @Builder
     public ChallengeCommentReply(
             @NonNull Long participantId,
             @NonNull Long commentId,
-            @NonNull String reply
+            @NonNull String reply,
+            boolean isPrivate
     ) {
         this.participantId = participantId;
         this.commentId = commentId;
         this.reply = reply;
+        this.isPrivate = isPrivate;
     }
 }

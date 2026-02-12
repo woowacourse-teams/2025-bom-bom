@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.challenge.domain.ChallengeNewsletter;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
 import me.bombom.api.v1.challenge.domain.EligibilityReason;
@@ -18,7 +17,6 @@ import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeTeamListResponse;
-import me.bombom.api.v1.challenge.repository.ChallengeNewsletterRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
@@ -29,8 +27,12 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroupItem;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupItemRepository;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
@@ -52,7 +54,10 @@ class ChallengeServiceTest {
     private ChallengeParticipantRepository challengeParticipantRepository;
 
     @Autowired
-    private ChallengeNewsletterRepository challengeNewsletterRepository;
+    private NewsletterGroupRepository newsletterGroupRepository;
+
+    @Autowired
+    private NewsletterGroupItemRepository newsletterGroupItemRepository;
 
     @Autowired
     private NewsletterRepository newsletterRepository;
@@ -81,7 +86,8 @@ class ChallengeServiceTest {
     void setUp() {
         challengeParticipantRepository.deleteAllInBatch();
         challengeTeamRepository.deleteAllInBatch();
-        challengeNewsletterRepository.deleteAllInBatch();
+        newsletterGroupItemRepository.deleteAllInBatch();
+        newsletterGroupRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
         subscribeRepository.deleteAllInBatch();
         newsletterRepository.deleteAllInBatch();
@@ -107,13 +113,17 @@ class ChallengeServiceTest {
     @Test
     void 비로그인_상태로_챌린지_목록_조회() {
         // given
-        Challenge challenge1 = TestFixture.createChallenge("첫 번째 챌린지", 1, today.minusDays(10), today.plusDays(10));
-        Challenge challenge2 = TestFixture.createChallenge("두 번째 챌린지", 2, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group1 = TestFixture.createNewsletterGroup("그룹1");
+        NewsletterGroup group2 = TestFixture.createNewsletterGroup("그룹2");
+        newsletterGroupRepository.saveAll(List.of(group1, group2));
+
+        Challenge challenge1 = TestFixture.createChallenge("첫 번째 챌린지", 1, today.minusDays(10), today.plusDays(10), group1.getId());
+        Challenge challenge2 = TestFixture.createChallenge("두 번째 챌린지", 2, today.plusDays(5), today.plusDays(15), group2.getId());
         challengeRepository.saveAll(List.of(challenge1, challenge2));
 
-        ChallengeNewsletter challengeNewsletter1 = TestFixture.createChallengeNewsletter(challenge1.getId(), newsletters.get(0).getId());
-        ChallengeNewsletter challengeNewsletter2 = TestFixture.createChallengeNewsletter(challenge2.getId(), newsletters.get(1).getId());
-        challengeNewsletterRepository.saveAll(List.of(challengeNewsletter1, challengeNewsletter2));
+        NewsletterGroupItem item1 = TestFixture.createNewsletterGroupItem(challenge1.getNewsletterGroupId(), newsletters.get(0).getId());
+        NewsletterGroupItem item2 = TestFixture.createNewsletterGroupItem(challenge2.getNewsletterGroupId(), newsletters.get(1).getId());
+        newsletterGroupItemRepository.saveAll(List.of(item1, item2));
 
         // when
         List<ChallengeResponse> result = challengeService.getChallenges(null);
@@ -130,8 +140,12 @@ class ChallengeServiceTest {
     @Test
     void 로그인_상태로_챌린지_목록_조회() {
         // given
-        Challenge challenge1 = TestFixture.createChallenge("첫 번째 챌린지", 1, today.minusDays(10), today.plusDays(10));
-        Challenge challenge2 = TestFixture.createChallenge("두 번째 챌린지", 2, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group1 = TestFixture.createNewsletterGroup("그룹1");
+        NewsletterGroup group2 = TestFixture.createNewsletterGroup("그룹2");
+        newsletterGroupRepository.saveAll(List.of(group1, group2));
+
+        Challenge challenge1 = TestFixture.createChallenge("첫 번째 챌린지", 1, today.minusDays(10), today.plusDays(10), group1.getId());
+        Challenge challenge2 = TestFixture.createChallenge("두 번째 챌린지", 2, today.plusDays(5), today.plusDays(15), group2.getId());
         challengeRepository.saveAll(List.of(challenge1, challenge2));
 
         ChallengeParticipant participant = TestFixture.createChallengeParticipant(
@@ -142,9 +156,9 @@ class ChallengeServiceTest {
         );
         challengeParticipantRepository.save(participant);
 
-        ChallengeNewsletter challengeNewsletter1 = TestFixture.createChallengeNewsletter(challenge1.getId(), newsletters.get(0).getId());
-        ChallengeNewsletter challengeNewsletter2 = TestFixture.createChallengeNewsletter(challenge2.getId(), newsletters.get(1).getId());
-        challengeNewsletterRepository.saveAll(List.of(challengeNewsletter1, challengeNewsletter2));
+        NewsletterGroupItem item1 = TestFixture.createNewsletterGroupItem(challenge1.getNewsletterGroupId(), newsletters.get(0).getId());
+        NewsletterGroupItem item2 = TestFixture.createNewsletterGroupItem(challenge2.getNewsletterGroupId(), newsletters.get(1).getId());
+        newsletterGroupItemRepository.saveAll(List.of(item1, item2));
 
         // when
         List<ChallengeResponse> result = challengeService.getChallenges(member);
@@ -180,7 +194,9 @@ class ChallengeServiceTest {
     @Test
     void 참가자_수_조회() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
         Member member1 = TestFixture.createUniqueMember("member1", "provider1");
@@ -204,12 +220,14 @@ class ChallengeServiceTest {
     @Test
     void 챌린지별_뉴스레터_조회() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
-        ChallengeNewsletter challengeNewsletter1 = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
-        ChallengeNewsletter challengeNewsletter2 = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(1).getId());
-        challengeNewsletterRepository.saveAll(List.of(challengeNewsletter1, challengeNewsletter2));
+        NewsletterGroupItem item1 = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        NewsletterGroupItem item2 = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(1).getId());
+        newsletterGroupItemRepository.saveAll(List.of(item1, item2));
 
         // when
         List<ChallengeResponse> result = challengeService.getChallenges(null);
@@ -227,7 +245,9 @@ class ChallengeServiceTest {
     @Test
     void 진행_중인_챌린지_상태_조회() {
         // given
-        Challenge challenge = TestFixture.createChallenge("진행 중 챌린지", 1, today.minusDays(5), today.plusDays(5));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("진행 중 챌린지", 1, today.minusDays(5), today.plusDays(5), group.getId());
         challengeRepository.save(challenge);
 
         ChallengeParticipant participant = TestFixture.createChallengeParticipant(
@@ -251,7 +271,9 @@ class ChallengeServiceTest {
     @Test
     void 종료된_챌린지_상태_조회() {
         // given
-        Challenge challenge = TestFixture.createChallenge("종료된 챌린지", 1, today.minusDays(20), today.minusDays(1));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("종료된 챌린지", 1, today.minusDays(20), today.minusDays(1), group.getId());
         challengeRepository.save(challenge);
 
         ChallengeParticipant participant = TestFixture.createChallengeParticipant(
@@ -275,7 +297,9 @@ class ChallengeServiceTest {
     @Test
     void 시작_전_챌린지_상태_조회() {
         // given
-        Challenge challenge = TestFixture.createChallenge("시작 전 챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("시작 전 챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
         // when
@@ -291,7 +315,9 @@ class ChallengeServiceTest {
     @Test
     void 종료된_챌린지_참여_결과_조회() {
         // given
-        Challenge challenge = TestFixture.createChallenge("종료된 챌린지", 1, today.minusDays(20), today.minusDays(1));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("종료된 챌린지", 1, today.minusDays(20), today.minusDays(1), group.getId());
         challengeRepository.save(challenge);
 
         ChallengeParticipant participant = TestFixture.createChallengeParticipant(
@@ -319,7 +345,9 @@ class ChallengeServiceTest {
     @Test
     void 참가하지_않은_챌린지_detail_조회() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
         // when
@@ -338,12 +366,16 @@ class ChallengeServiceTest {
     @Test
     void 챌린지_상세_정보를_조회할_수_있다() {
         // given
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+
         Challenge challenge = Challenge.builder()
                 .name("챌린지1")
                 .generation(1)
                 .startDate(LocalDate.of(2026, 1, 5))
                 .endDate(LocalDate.of(2026, 2, 4))
                 .totalDays(31)
+                .newsletterGroupId(group.getId())
                 .build();
         challengeRepository.save(challenge);
 
@@ -370,7 +402,9 @@ class ChallengeServiceTest {
     @Test
     void 비로그인_상태에서_챌린지_신청_가능_여부_조회() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
         // when
@@ -386,11 +420,13 @@ class ChallengeServiceTest {
     @Test
     void 이미_시작된_챌린지의_신청_가능_여부_조회() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(5), today.plusDays(10));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(5), today.plusDays(10), group.getId());
         challengeRepository.save(challenge);
 
-        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
-        challengeNewsletterRepository.save(challengeNewsletter);
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
 
         Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
         subscribeRepository.save(subscribe);
@@ -408,14 +444,16 @@ class ChallengeServiceTest {
     @Test
     void 이미_신청한_챌린지의_신청_가능_여부_조회() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
         ChallengeParticipant participant = TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 0, true);
         challengeParticipantRepository.save(participant);
 
-        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
-        challengeNewsletterRepository.save(challengeNewsletter);
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
 
         Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
         subscribeRepository.save(subscribe);
@@ -433,11 +471,13 @@ class ChallengeServiceTest {
     @Test
     void 구독하지_않은_뉴스레터를_가진_챌린지의_신청_가능_여부_조회() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
-        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
-        challengeNewsletterRepository.save(challengeNewsletter);
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
 
         // when
         ChallengeEligibilityResponse response = challengeService.checkEligibility(challenge.getId(), member);
@@ -452,11 +492,13 @@ class ChallengeServiceTest {
     @Test
     void 모든_조건을_만족하는_챌린지의_신청_가능_여부_조회() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
-        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
-        challengeNewsletterRepository.save(challengeNewsletter);
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
 
         Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
         subscribeRepository.save(subscribe);
@@ -482,11 +524,13 @@ class ChallengeServiceTest {
     @Test
     void 모든_조건을_만족하는_챌린지_신청() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
-        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
-        challengeNewsletterRepository.save(challengeNewsletter);
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
 
         Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
         subscribeRepository.save(subscribe);
@@ -511,11 +555,13 @@ class ChallengeServiceTest {
     @Test
     void 이미_시작된_챌린지_신청_시_예외가_발생한다() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(5), today.plusDays(10));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(5), today.plusDays(10), group.getId());
         challengeRepository.save(challenge);
 
-        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
-        challengeNewsletterRepository.save(challengeNewsletter);
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
 
         Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
         subscribeRepository.save(subscribe);
@@ -529,15 +575,17 @@ class ChallengeServiceTest {
     @Test
     void 이미_신청한_챌린지_신청_시_정상_반환한다() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
         ChallengeParticipant participant = TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 0, true);
         challengeParticipantRepository.save(participant);
         long countBefore = challengeParticipantRepository.count();
 
-        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
-        challengeNewsletterRepository.save(challengeNewsletter);
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
 
         Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
         subscribeRepository.save(subscribe);
@@ -554,11 +602,13 @@ class ChallengeServiceTest {
     @Test
     void 구독하지_않은_뉴스레터를_가진_챌린지_신청_시_예외가_발생한다() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
-        ChallengeNewsletter challengeNewsletter = TestFixture.createChallengeNewsletter(challenge.getId(), newsletters.get(0).getId());
-        challengeNewsletterRepository.save(challengeNewsletter);
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
 
         // when & then
         assertThatThrownBy(() -> challengeService.applyChallenge(challenge.getId(), member))
@@ -569,7 +619,9 @@ class ChallengeServiceTest {
     @Test
     void 신청한_챌린지_취소() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
         ChallengeParticipant participant = TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 0, true);
@@ -595,7 +647,9 @@ class ChallengeServiceTest {
     @Test
     void 이미_시작된_챌린지_취소_시_예외가_발생한다() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(5), today.plusDays(10));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(5), today.plusDays(10), group.getId());
         challengeRepository.save(challenge);
 
         ChallengeParticipant participant = TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 5, true);
@@ -610,7 +664,9 @@ class ChallengeServiceTest {
     @Test
     void 신청하지_않은_챌린지_취소_시_예외가_발생한다() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
         // when & then
@@ -622,7 +678,9 @@ class ChallengeServiceTest {
     @Test
     void 팀_목록_조회_시_내_팀_포함() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
         ChallengeTeam team1 = TestFixture.createChallengeTeam(challenge.getId(), 50);
@@ -662,7 +720,9 @@ class ChallengeServiceTest {
     @Test
     void 팀_목록_조회_시_내_팀이_null인_경우() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
         ChallengeTeam team1 = TestFixture.createChallengeTeam(challenge.getId(), 50);
@@ -693,7 +753,9 @@ class ChallengeServiceTest {
     @Test
     void 팀_목록_조회_시_팀이_없는_경우() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
         // when
@@ -718,7 +780,9 @@ class ChallengeServiceTest {
     @Test
     void 팀_목록_조회_시_teamNumber가_올바르게_계산된다() {
         // given
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15));
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
         challengeRepository.save(challenge);
 
         ChallengeTeam team1 = TestFixture.createChallengeTeam(challenge.getId(), 50);

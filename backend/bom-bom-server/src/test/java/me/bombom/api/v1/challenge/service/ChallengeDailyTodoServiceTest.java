@@ -23,6 +23,8 @@ import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,6 +62,9 @@ class ChallengeDailyTodoServiceTest {
     @Autowired
     private ChallengeDailyTodoService challengeDailyTodoService;
 
+    @Autowired
+    private NewsletterGroupRepository newsletterGroupRepository;
+
     private Member member;
     private Challenge challenge;
     private ChallengeTodo readTodo;
@@ -84,11 +89,15 @@ class ChallengeDailyTodoServiceTest {
         }
         today = now;
         
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "테스트 챌린지",
                 today.minusDays(5),
                 today.plusDays(5),
-                10
+                10,
+                group.getId()
         ));
 
         challengeParticipantRepository.save(
@@ -127,11 +136,15 @@ class ChallengeDailyTodoServiceTest {
         challengeDailyTodoRepository.deleteAllInBatch();
         articleRepository.deleteAllInBatch();
         
+        NewsletterGroup group2 = TestFixture.createNewsletterGroup("그룹2");
+        newsletterGroupRepository.save(group2);
+        
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "테스트 챌린지",
                 actualToday.minusDays(5),
                 actualToday.plusDays(5),
-                10
+                10,
+                group2.getId()
         ));
         
         challengeParticipantRepository.save(
@@ -228,11 +241,14 @@ class ChallengeDailyTodoServiceTest {
         final LocalDate saturday = tempSaturday;
         
         // 챌린지 기간에 포함되도록 조정
+        NewsletterGroup saturdayGroup = TestFixture.createNewsletterGroup("토요일 그룹");
+        newsletterGroupRepository.save(saturdayGroup);
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "주말 테스트 챌린지",
                 saturday.minusDays(5),
                 saturday.plusDays(5),
-                10
+                10,
+                saturdayGroup.getId()
         ));
         
         challengeParticipantRepository.save(
@@ -274,11 +290,14 @@ class ChallengeDailyTodoServiceTest {
         final LocalDate sunday = tempSunday;
         
         // 챌린지 기간에 포함되도록 조정
+        NewsletterGroup sundayGroup = TestFixture.createNewsletterGroup("일요일 그룹");
+        newsletterGroupRepository.save(sundayGroup);
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "주말 테스트 챌린지",
                 sunday.minusDays(5),
                 sunday.plusDays(5),
-                10
+                10,
+                sundayGroup.getId()
         ));
         
         challengeParticipantRepository.save(
@@ -320,11 +339,14 @@ class ChallengeDailyTodoServiceTest {
         final LocalDate weekday = tempWeekday;
         
         // 챌린지 기간에 포함되도록 조정
+        NewsletterGroup weekdayGroup = TestFixture.createNewsletterGroup("평일 그룹");
+        newsletterGroupRepository.save(weekdayGroup);
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "평일 테스트 챌린지",
                 weekday.minusDays(5),
                 weekday.plusDays(5),
-                10
+                10,
+                weekdayGroup.getId()
         ));
         
         challengeParticipantRepository.save(

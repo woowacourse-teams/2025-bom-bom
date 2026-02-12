@@ -34,6 +34,8 @@ import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,6 +77,9 @@ class ChallengeDailyGuideServiceTest {
     @Autowired
     private ChallengeDailyResultRepository challengeDailyResultRepository;
 
+    @Autowired
+    private NewsletterGroupRepository newsletterGroupRepository;
+
     @MockitoBean
     private Clock clock;
 
@@ -97,9 +102,13 @@ class ChallengeDailyGuideServiceTest {
         challengeParticipantRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+        newsletterGroupRepository.deleteAllInBatch();
 
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
+
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
 
         // 무조건 평일로 설정 (2026-01-26 월요일)
         today = LocalDate.of(2026, 1, 26);
@@ -111,7 +120,8 @@ class ChallengeDailyGuideServiceTest {
                 "테스트 챌린지",
                 today.minusDays(5),
                 today.plusDays(5),
-                10));
+                10,
+                group.getId()));
 
         participant = challengeParticipantRepository.save(
                 TestFixture.createChallengeParticipant(
@@ -287,11 +297,14 @@ class ChallengeDailyGuideServiceTest {
     @Test
     void 챌린지_기간이_아닌_경우_예외_발생() {
         // given
+        NewsletterGroup futureGroup = TestFixture.createNewsletterGroup("미래 그룹");
+        newsletterGroupRepository.save(futureGroup);
         Challenge futureChallenge = challengeRepository.save(TestFixture.createChallenge(
                 "미래 챌린지",
                 today.plusDays(10),
                 today.plusDays(20),
-                10
+                10,
+                futureGroup.getId()
         ));
 
         challengeParticipantRepository.save(

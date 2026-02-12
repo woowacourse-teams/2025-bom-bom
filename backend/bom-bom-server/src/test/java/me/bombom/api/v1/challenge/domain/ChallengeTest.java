@@ -21,6 +21,8 @@ class ChallengeTest {
                 .name("Test Challenge")
                 .startDate(startDate)
                 .endDate(startDate.plusDays(10))
+                .totalDays(11)
+                .newsletterGroupId(1L)
                 .build();
 
         // when
@@ -48,6 +50,8 @@ class ChallengeTest {
                 .name("Test Challenge")
                 .startDate(startDate)
                 .endDate(startDate.plusDays(10))
+                .totalDays(11)
+                .newsletterGroupId(1L)
                 .build();
 
         // when
@@ -67,6 +71,8 @@ class ChallengeTest {
                 .name("Test Challenge")
                 .startDate(startDate)
                 .endDate(startDate.plusDays(10))
+                .totalDays(11)
+                .newsletterGroupId(1L)
                 .build();
 
         // when

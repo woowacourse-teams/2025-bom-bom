@@ -21,6 +21,9 @@ public record CommentReplyResponse(
         LocalDateTime createdAt,
 
         @Schema(requiredMode = RequiredMode.REQUIRED)
-        boolean isMyReply
+        boolean isMyReply,
+
+        @Schema(requiredMode = RequiredMode.REQUIRED)
+        boolean isPrivate
 ) {
 }

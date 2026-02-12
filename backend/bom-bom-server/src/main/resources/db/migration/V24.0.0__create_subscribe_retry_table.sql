@@ -5,7 +5,7 @@ CREATE TABLE unsubscribe_retry (
     next_retry_at DATETIME(6) NOT NULL,
     last_error VARCHAR(255),
     created_at DATETIME(6) NOT NULL,
-    modified_at DATETIME(6) NOT NULL,
+    updated_at DATETIME(6) NOT NULL,
     CONSTRAINT uk_unsubscribe_retry_subscribe_id UNIQUE (subscribe_id)
 ) ENGINE=InnoDB
     DEFAULT CHARSET = utf8mb4

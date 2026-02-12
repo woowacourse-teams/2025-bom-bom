@@ -4,6 +4,7 @@ import java.util.Map;
 import news.bombom.notification.domain.ChallengeTodoReminderNotification;
 import news.bombom.notification.domain.MemberFcmToken;
 import news.bombom.notification.domain.Notification;
+import news.bombom.notification.domain.NotificationPayloadType;
 import news.bombom.notification.domain.NotificationType;
 import news.bombom.notification.dto.NotificationMessage;
 import org.springframework.stereotype.Component;
@@ -29,7 +30,7 @@ public class ChallengeTodoReminderMessageBuilder implements NotificationMessageB
                 .content(content)
                 .type(NotificationType.FCM)
                 .data(Map.of(
-                        "notificationType", "challengeTodoReminder"
+                        "notificationType", NotificationPayloadType.CHALLENGE_TODO_REMINDER.getCode()
                 ))
                 .build();
     }

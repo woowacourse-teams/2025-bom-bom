@@ -21,7 +21,7 @@ public class NotificationProcessingService {
     private final NotificationStatusService statusUpdater;
 
     @Transactional
-    public void processNotification(ArticleArrivalNotification notification) {
+    public void processArticleArrivedNotification(ArticleArrivalNotification notification) {
         List<MemberFcmToken> fcmTokens = notificationTokenService.resolveTokens(
                 notification.getMemberId(),
                 NotificationCategory.ARTICLE

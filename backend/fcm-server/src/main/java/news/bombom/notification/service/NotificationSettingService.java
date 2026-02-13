@@ -17,6 +17,12 @@ public class NotificationSettingService {
     private final MemberNotificationSettingRepository settingRepository;
 
     @Transactional
+    public MemberNotificationSetting ensureMemberNotificationSetting(Long memberId) {
+        return settingRepository.findByMemberId(memberId)
+                .orElseGet(() -> createAndSaveDefaultSetting(memberId));
+    }
+
+    @Transactional
     public void updateCategorySetting(Long memberId, NotificationCategory category, boolean enabled) {
         MemberNotificationSetting setting = settingRepository.findByMemberId(memberId)
                 .orElseGet(() -> createAndSaveDefaultSetting(memberId));

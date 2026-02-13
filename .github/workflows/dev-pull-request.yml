@@ -2,7 +2,7 @@ name: pull requset - dev
 
 on:
   pull_request:
-    types: [opened, edited, synchronize]
+    types: [ opened, edited, synchronize ]
     branches:
       - server-dev
 
@@ -39,8 +39,8 @@ jobs:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
-          ./gradlew clean build --no-daemon
-          
+          ./gradlew clean test --no-daemon
+
       - name: 테스트 리포트 생성
         uses: dorny/test-reporter@v1
         if: always()

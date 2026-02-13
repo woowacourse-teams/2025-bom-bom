@@ -44,9 +44,11 @@ jobs:
           SPRING_PROFILES_ACTIVE: test
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
           DOCKER_HOST: unix:///var/run/docker.sock
+          TESTCONTAINERS_CHECKS_DISABLE: true
+          TESTCONTAINERS_RYUK_DISABLED: true
         run: |
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
-          ./gradlew clean test --no-daemon -Dorg.gradle.jvmargs="-Xmx2g"
+          ./gradlew clean test --no-daemon -Dorg.gradle.jvmargs="-Xmx2g" -Ddocker.host=unix:///var/run/docker.sock
 
       - name: 테스트 리포트 생성
         uses: dorny/test-reporter@v1

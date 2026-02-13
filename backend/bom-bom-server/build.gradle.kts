@@ -25,7 +25,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("org.testcontainers:testcontainers-bom:1.19.7")
+        mavenBom("org.testcontainers:testcontainers-bom:2.0.3")
     }
 }
 
@@ -100,4 +100,5 @@ tasks.named<Delete>("clean") {
 
 tasks.test {
     useJUnitPlatform()
+    systemProperty("docker.host", "unix:///var/run/docker.sock")
 }

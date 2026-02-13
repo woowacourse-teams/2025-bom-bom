@@ -35,13 +35,15 @@ jobs:
       - name: Docker 권한 부여
         run: sudo chmod 666 /var/run/docker.sock # 도커 소켓 접근 권한 확보
 
+      - name: Docker 정보 확인 (진단용)
+        run: docker info
+
       - name: 빌드 및 테스트
         shell: bash
         env:
           SPRING_PROFILES_ACTIVE: test
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
-          TESTCONTAINERS_CHECKS_DISABLE: true  # 도커가 살아있는지 검사하는 보조 컨테이너 생략
-          TESTCONTAINERS_RYUK_DISABLED: true
+          DOCKER_HOST: unix:///var/run/docker.sock
         run: |
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
           ./gradlew clean test --no-daemon -Dorg.gradle.jvmargs="-Xmx2g"

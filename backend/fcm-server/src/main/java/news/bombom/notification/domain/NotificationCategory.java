@@ -1,9 +1,7 @@
 package news.bombom.notification.domain;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@Getter
 @RequiredArgsConstructor
 public enum NotificationCategory {
 
@@ -12,4 +10,8 @@ public enum NotificationCategory {
     ;
 
     private final boolean defaultSetting;
+
+    public boolean getDefaultSetting() {
+        return defaultSetting;
+    }
 }

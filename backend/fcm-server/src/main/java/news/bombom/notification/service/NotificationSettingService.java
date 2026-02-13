@@ -61,14 +61,14 @@ public class NotificationSettingService {
     public boolean isEnabled(Long memberId, NotificationCategory category) {
         return settingRepository.findByMemberIdAndCategory(memberId, category)
                 .map(MemberNotificationSetting::isEnabled)
-                .orElse(category.isDefaultSetting());
+                .orElse(category.getDefaultSetting());
     }
 
     private MemberNotificationSetting createDefaultSetting(Long memberId, NotificationCategory category) {
         return MemberNotificationSetting.builder()
                 .memberId(memberId)
                 .category(category)
-                .isEnabled(category.isDefaultSetting())
+                .isEnabled(category.getDefaultSetting())
                 .build();
     }
 

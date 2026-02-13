@@ -88,8 +88,8 @@ public class NotificationController {
         return notificationSettingService.getCategorySetting(memberId, category);
     }
 
-    @PatchMapping("/{memberId}/settings/{category}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PatchMapping("/{memberId}/settings/{category}")
     public void updateNotificationCategorySetting(
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long memberId,
             @PathVariable NotificationCategory category,

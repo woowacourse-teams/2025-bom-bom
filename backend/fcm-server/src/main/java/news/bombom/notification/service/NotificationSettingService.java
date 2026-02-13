@@ -20,7 +20,6 @@ public class NotificationSettingService {
     public void updateCategorySetting(Long memberId, NotificationCategory category, boolean enabled) {
         MemberNotificationSetting setting = settingRepository.findByMemberId(memberId)
                 .orElseGet(() -> createAndSaveDefaultSetting(memberId));
-
         setting.updateCategory(category, enabled);
     }
 

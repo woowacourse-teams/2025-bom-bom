@@ -54,8 +54,7 @@ public class NotificationService {
     /**
      * 여러 토큰으로 일괄 알림 전송 (비즈니스 로직 포함)
      */
-    public Map<String, NotificationResult> sendBulkNotification(List<String> tokens, String title, String body,
-                                                                String articleId) {
+    public Map<String, NotificationResult> sendBulkNotification(List<String> tokens, String title, String body, String articleId) {
         if (tokens == null || tokens.isEmpty()) {
             throw new IllegalArgumentException("전송할 토큰 목록이 비어있습니다.");
         }

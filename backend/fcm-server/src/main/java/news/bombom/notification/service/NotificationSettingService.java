@@ -27,17 +27,13 @@ public class NotificationSettingService {
     public List<NotificationCategorySettingResponse> getCategorySettings(Long memberId) {
         MemberNotificationSetting setting = settingRepository.findByMemberId(memberId)
                 .orElseGet(() -> createDefaultSetting(memberId));
-
-        return List.of(
-                new NotificationCategorySettingResponse(NotificationCategory.ARTICLE, setting.isArticleEnabled()),
-                new NotificationCategorySettingResponse(NotificationCategory.EVENT, setting.isEventEnabled()));
+        return NotificationCategorySettingResponse.from(setting);
     }
 
-    public boolean getCategorySetting(Long memberId, NotificationCategory category) {
+    public NotificationCategorySettingResponse getCategorySetting(Long memberId, NotificationCategory category) {
         MemberNotificationSetting setting = settingRepository.findByMemberId(memberId)
                 .orElseGet(() -> createDefaultSetting(memberId));
-
-        return setting.isEnabledFor(category);
+        return NotificationCategorySettingResponse.from(setting, category);
     }
 
     private MemberNotificationSetting createAndSaveDefaultSetting(Long memberId) {

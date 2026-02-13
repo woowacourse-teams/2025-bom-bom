@@ -81,7 +81,7 @@ public class NotificationController {
     }
 
     @GetMapping("/{memberId}/settings/{category}")
-    public boolean getCategorySetting(
+    public NotificationCategorySettingResponse getCategorySetting(
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long memberId,
             @PathVariable NotificationCategory category
     ) {

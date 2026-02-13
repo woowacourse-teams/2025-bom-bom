@@ -1,9 +1,7 @@
 package news.bombom.notification.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,18 +31,16 @@ class NotificationSettingServiceTest {
     private final Long TEST_MEMBER_ID = 1L;
 
     @Test
-    @DisplayName("회원 알림 설정 보장 - 모든 카테고리에 대해 행이 없으면 각각 생성한다")
+    @DisplayName("회원 알림 설정 보장 - 모든 카테고리에 대해 행이 없으면 한꺼번에 생성한다")
     void ensureMemberNotificationSetting_NoSettings_CreatesAll() {
         // given
-        when(settingRepository.existsByMemberIdAndCategory(eq(TEST_MEMBER_ID), any(NotificationCategory.class)))
-                .thenReturn(false);
+        when(settingRepository.findAllByMemberId(TEST_MEMBER_ID)).thenReturn(List.of());
 
         // when
         notificationSettingService.ensureMemberNotificationSetting(TEST_MEMBER_ID);
 
         // then
-        int categoryCount = NotificationCategory.values().length;
-        verify(settingRepository, times(categoryCount)).save(any(MemberNotificationSetting.class));
+        verify(settingRepository, times(1)).saveAll(anyList());
     }
 
     @Test
@@ -78,7 +74,7 @@ class NotificationSettingServiceTest {
 
         // Then
         assertThat(result).hasSize(2);
-        verify(settingRepository, atLeastOnce()).existsByMemberIdAndCategory(eq(TEST_MEMBER_ID), any());
+        verify(settingRepository, times(1)).findAllByMemberId(TEST_MEMBER_ID);
     }
 
     @Test
@@ -92,7 +88,7 @@ class NotificationSettingServiceTest {
         boolean result = notificationSettingService.isEnabled(TEST_MEMBER_ID, NotificationCategory.EVENT);
 
         // Then
-        assertThat(result).isEqualTo(NotificationCategory.EVENT.isDefaultSetting());
+        assertThat(result).isEqualTo(NotificationCategory.EVENT.getDefaultSetting());
     }
 
     private MemberNotificationSetting createSetting(NotificationCategory category, boolean isEnabled) {

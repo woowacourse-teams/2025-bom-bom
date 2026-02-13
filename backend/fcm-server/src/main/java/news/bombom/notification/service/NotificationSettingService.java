@@ -1,7 +1,9 @@
 package news.bombom.notification.service;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import news.bombom.notification.domain.MemberNotificationSetting;
 import news.bombom.notification.domain.NotificationCategory;
@@ -11,43 +13,48 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class NotificationSettingService {
 
     private final MemberNotificationSettingRepository settingRepository;
 
     @Transactional
-    public void ensureMemberNotificationSetting(Long memberId) {
-        Arrays.stream(NotificationCategory.values())
-                .forEach(category -> ensureCategorySetting(memberId, category));
+    public List<MemberNotificationSetting> ensureMemberNotificationSetting(Long memberId) {
+        List<MemberNotificationSetting> settings = new ArrayList<>(settingRepository.findAllByMemberId(memberId));
+        Set<NotificationCategory> missingCategories = getMissingCategories(settings);
+
+        if (missingCategories.isEmpty()) {
+            return settings;
+        }
+
+        List<MemberNotificationSetting> newSettings = missingCategories.stream()
+                .map(category -> createDefaultSetting(memberId, category))
+                .toList();
+
+        settings.addAll(settingRepository.saveAll(newSettings));
+        return settings;
     }
 
     @Transactional
     public void updateCategorySetting(Long memberId, NotificationCategory category, boolean enabled) {
         MemberNotificationSetting setting = settingRepository.findByMemberIdAndCategory(memberId, category)
-                .orElseGet(() -> MemberNotificationSetting.builder()
-                        .memberId(memberId)
-                        .category(category)
-                        .isEnabled(enabled)
-                        .build());
+                .orElseGet(() -> createDefaultSetting(memberId, category));
 
         setting.updateEnabled(enabled);
         settingRepository.save(setting);
     }
 
+    @Transactional
     public List<NotificationCategorySettingResponse> getCategorySettings(Long memberId) {
-        ensureMemberNotificationSetting(memberId);
-        List<MemberNotificationSetting> settings = settingRepository.findAllByMemberId(memberId);
+        List<MemberNotificationSetting> settings = ensureMemberNotificationSetting(memberId);
         return NotificationCategorySettingResponse.from(settings);
     }
 
+    @Transactional
     public NotificationCategorySettingResponse getCategorySetting(Long memberId, NotificationCategory category) {
         MemberNotificationSetting setting = settingRepository.findByMemberIdAndCategory(memberId, category)
-                .orElseGet(() -> {
-                    ensureCategorySetting(memberId, category);
-                    return settingRepository.findByMemberIdAndCategory(memberId, category).orElseThrow();
-                });
+                .orElseGet(() -> settingRepository.save(createDefaultSetting(memberId, category)));
         return NotificationCategorySettingResponse.from(setting);
     }
 
@@ -57,14 +64,17 @@ public class NotificationSettingService {
                 .orElse(category.isDefaultSetting());
     }
 
-    private void ensureCategorySetting(Long memberId, NotificationCategory category) {
-        if (!settingRepository.existsByMemberIdAndCategory(memberId, category)) {
-            MemberNotificationSetting setting = MemberNotificationSetting.builder()
-                    .memberId(memberId)
-                    .category(category)
-                    .isEnabled(category.isDefaultSetting())
-                    .build();
-            settingRepository.save(setting);
-        }
+    private MemberNotificationSetting createDefaultSetting(Long memberId, NotificationCategory category) {
+        return MemberNotificationSetting.builder()
+                .memberId(memberId)
+                .category(category)
+                .isEnabled(category.isDefaultSetting())
+                .build();
+    }
+
+    private Set<NotificationCategory> getMissingCategories(List<MemberNotificationSetting> existing) {
+        Set<NotificationCategory> missing = EnumSet.allOf(NotificationCategory.class);
+        existing.forEach(setting -> missing.remove(setting.getCategory()));
+        return missing;
     }
 }

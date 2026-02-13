@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,8 +13,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 import news.bombom.notification.domain.MemberFcmToken;
-import news.bombom.notification.domain.MemberNotificationSetting;
-import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.repository.MemberFcmTokenRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,9 +28,6 @@ class NotificationTokenServiceTest {
     @Mock
     private MemberFcmTokenRepository fcmTokenRepository;
 
-    @Mock
-    private NotificationSettingService notificationSettingService;
-
     @InjectMocks
     private NotificationTokenService notificationTokenService;
 
@@ -43,33 +37,30 @@ class NotificationTokenServiceTest {
     private final String NEW_FCM_TOKEN = "new-fcm-token-67890";
 
     @Test
-    @DisplayName("FCM 토큰 등록 성공")
-    void registerFcmToken_Success() {
+    @DisplayName("토큰 등록 성공")
+    void registerToken_Success() {
         // Given
         doNothing().when(fcmTokenRepository).deleteByDeviceUuid(anyString());
         when(fcmTokenRepository.save(any(MemberFcmToken.class))).thenReturn(createTestToken());
-        when(notificationSettingService.createDefaultSetting(anyLong()))
-                .thenReturn(mock(MemberNotificationSetting.class));
 
         // When
-        notificationTokenService.registerFcmToken(TEST_MEMBER_ID, TEST_DEVICE_UUID, TEST_FCM_TOKEN);
+        notificationTokenService.registerToken(TEST_MEMBER_ID, TEST_DEVICE_UUID, TEST_FCM_TOKEN);
 
         // Then
         verify(fcmTokenRepository, times(1)).deleteByDeviceUuid(TEST_DEVICE_UUID);
         verify(fcmTokenRepository, times(1)).save(any(MemberFcmToken.class));
-        verify(notificationSettingService, times(1)).createDefaultSetting(TEST_MEMBER_ID);
     }
 
     @Test
-    @DisplayName("FCM 토큰 업서트 성공 - 기존 토큰 존재")
-    void upsertFcmToken_Success_ExistingToken() {
+    @DisplayName("토큰 업데이트 성공 - 기존 토큰 존재")
+    void upsertToken_Success_ExistingToken() {
         // Given
         MemberFcmToken existingToken = mock(MemberFcmToken.class);
         when(fcmTokenRepository.findByMemberIdAndDeviceUuid(TEST_MEMBER_ID, TEST_DEVICE_UUID))
                 .thenReturn(Optional.of(existingToken));
 
         // When
-        notificationTokenService.upsertFcmToken(TEST_MEMBER_ID, TEST_DEVICE_UUID, NEW_FCM_TOKEN);
+        notificationTokenService.upsertToken(TEST_MEMBER_ID, TEST_DEVICE_UUID, NEW_FCM_TOKEN);
 
         // Then
         verify(fcmTokenRepository, times(1)).findByMemberIdAndDeviceUuid(TEST_MEMBER_ID, TEST_DEVICE_UUID);
@@ -77,8 +68,8 @@ class NotificationTokenServiceTest {
     }
 
     @Test
-    @DisplayName("FCM 토큰 업서트 성공 - 기존 토큰 없음")
-    void upsertFcmToken_Success_NoExistingToken() {
+    @DisplayName("토큰 업데이트 성공 - 기존 토큰 없음")
+    void upsertToken_Success_NoExistingToken() {
         // Given
         when(fcmTokenRepository.findByMemberIdAndDeviceUuid(TEST_MEMBER_ID, TEST_DEVICE_UUID))
                 .thenReturn(Optional.empty());
@@ -87,7 +78,7 @@ class NotificationTokenServiceTest {
                 .thenReturn(createTestToken());
 
         // When
-        notificationTokenService.upsertFcmToken(TEST_MEMBER_ID, TEST_DEVICE_UUID, TEST_FCM_TOKEN);
+        notificationTokenService.upsertToken(TEST_MEMBER_ID, TEST_DEVICE_UUID, TEST_FCM_TOKEN);
 
         // Then
         verify(fcmTokenRepository, times(1)).findByMemberIdAndDeviceUuid(TEST_MEMBER_ID, TEST_DEVICE_UUID);
@@ -140,117 +131,31 @@ class NotificationTokenServiceTest {
     }
 
     @Test
-    @DisplayName("아티클 알림 설정이 켜져있으면 토큰 리스트 반환")
-    void resolveTokens_ArticleEnabled_ReturnsTokens() {
+    @DisplayName("회원의 토큰 리스트 반환")
+    void resolveTokens_ReturnsTokens() {
         // Given
-        MemberNotificationSetting setting = createSetting(true, false);
-        when(notificationSettingService.ensureMemberNotificationSetting(TEST_MEMBER_ID)).thenReturn(setting);
         when(fcmTokenRepository.findByMemberId(TEST_MEMBER_ID)).thenReturn(List.of(createTestToken()));
 
         // When
-        List<MemberFcmToken> result = notificationTokenService.resolveTokens(TEST_MEMBER_ID, NotificationCategory.ARTICLE);
+        List<MemberFcmToken> result = notificationTokenService.resolveTokens(TEST_MEMBER_ID);
 
         // Then
         assertThat(result).hasSize(1);
-        verify(notificationSettingService, times(1)).ensureMemberNotificationSetting(TEST_MEMBER_ID);
-    }
-
-    @Test
-    @DisplayName("카테고리 알림이 비활성화되어 있으면 빈 목록 반환")
-    void resolveTokens_CategoryDisabled_ReturnsEmpty() {
-        // Given
-        MemberNotificationSetting setting = createSetting(false, false);
-        when(notificationSettingService.ensureMemberNotificationSetting(TEST_MEMBER_ID))
-                .thenReturn(setting);
-
-        // When
-        List<MemberFcmToken> result = notificationTokenService.resolveTokens(TEST_MEMBER_ID, NotificationCategory.ARTICLE);
-
-        // Then
-        assertThat(result).isEmpty();
-        verify(notificationSettingService, times(1)).ensureMemberNotificationSetting(TEST_MEMBER_ID);
-        verify(fcmTokenRepository, never()).findByMemberId(anyLong());
-    }
-
-    @Test
-    @DisplayName("이벤트 알림 활성화 시 토큰 목록 반환")
-    void resolveTokens_EventEnabled_ReturnsTokens() {
-        // Given
-        MemberNotificationSetting setting = createSetting(true, true);
-        MemberFcmToken token = createTestToken();
-
-        when(notificationSettingService.ensureMemberNotificationSetting(TEST_MEMBER_ID))
-                .thenReturn(setting);
-        when(fcmTokenRepository.findByMemberId(TEST_MEMBER_ID))
-                .thenReturn(List.of(token));
-
-        // When
-        List<MemberFcmToken> result = notificationTokenService.resolveTokens(TEST_MEMBER_ID, NotificationCategory.EVENT);
-
-        // Then
-        assertThat(result).hasSize(1);
-        verify(notificationSettingService, times(1)).ensureMemberNotificationSetting(TEST_MEMBER_ID);
         verify(fcmTokenRepository, times(1)).findByMemberId(TEST_MEMBER_ID);
     }
 
     @Test
-    @DisplayName("이벤트 알림 비활성화 시 빈 목록 반환")
-    void resolveTokens_EventDisabled_ReturnsEmpty() {
+    @DisplayName("토큰이 없으면 빈 목록 반환")
+    void resolveTokens_NoTokens_ReturnsEmpty() {
         // Given
-        MemberNotificationSetting setting = createSetting(true, false);
-
-        when(notificationSettingService.ensureMemberNotificationSetting(TEST_MEMBER_ID))
-                .thenReturn(setting);
+        when(fcmTokenRepository.findByMemberId(TEST_MEMBER_ID)).thenReturn(List.of());
 
         // When
-        List<MemberFcmToken> result = notificationTokenService.resolveTokens(TEST_MEMBER_ID, NotificationCategory.EVENT);
+        List<MemberFcmToken> result = notificationTokenService.resolveTokens(TEST_MEMBER_ID);
 
         // Then
         assertThat(result).isEmpty();
-        verify(notificationSettingService, times(1)).ensureMemberNotificationSetting(TEST_MEMBER_ID);
-        verify(fcmTokenRepository, never()).findByMemberId(anyLong());
-    }
-
-    @Test
-    @DisplayName("설정이 없는 경우 기본값 사용 - 기사 알림 활성화")
-    void resolveTokens_NoSetting_ArticleEnabledByDefault() {
-        // Given
-        MemberFcmToken token = createTestToken();
-        MemberNotificationSetting defaultSetting = createSetting(true, false);
-
-        when(notificationSettingService.ensureMemberNotificationSetting(TEST_MEMBER_ID))
-                .thenReturn(defaultSetting);
-        when(fcmTokenRepository.findByMemberId(TEST_MEMBER_ID))
-                .thenReturn(List.of(token));
-
-        // When
-        List<MemberFcmToken> result = notificationTokenService.resolveTokens(TEST_MEMBER_ID, NotificationCategory.ARTICLE);
-
-        // Then
-        assertThat(result).hasSize(1);
-    }
-
-    @Test
-    @DisplayName("설정이 없는 경우 기본값 사용 - 이벤트 알림 비활성화")
-    void resolveTokens_NoSetting_EventDisabledByDefault() {
-        // Given
-        MemberNotificationSetting defaultSetting = createSetting(true, false);
-        when(notificationSettingService.ensureMemberNotificationSetting(TEST_MEMBER_ID))
-                .thenReturn(defaultSetting);
-
-        // When
-        List<MemberFcmToken> result = notificationTokenService.resolveTokens(TEST_MEMBER_ID, NotificationCategory.EVENT);
-
-        // Then
-        assertThat(result).isEmpty();
-    }
-
-    private MemberNotificationSetting createSetting(boolean articleEnabled, boolean eventEnabled) {
-        return MemberNotificationSetting.builder()
-                .memberId(TEST_MEMBER_ID)
-                .articleEnabled(articleEnabled)
-                .eventEnabled(eventEnabled)
-                .build();
+        verify(fcmTokenRepository, times(1)).findByMemberId(TEST_MEMBER_ID);
     }
 
     private MemberFcmToken createTestToken() {

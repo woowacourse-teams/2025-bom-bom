@@ -1,8 +1,6 @@
 package news.bombom.notification.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,39 +11,37 @@ import news.bombom.notification.common.BaseEntity;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(uniqueConstraints = {
+        @UniqueConstraint(name = "uk_member_category", columnNames = {"memberId", "category"})
+})
 public class MemberNotificationSetting extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Column(nullable = false)
     private Long memberId;
 
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private boolean articleEnabled = true;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private NotificationCategory category;
 
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private boolean eventEnabled = false;
+    @Column(nullable = false)
+    private boolean isEnabled;
 
     @Builder
     public MemberNotificationSetting(
             @NonNull Long memberId,
-            boolean articleEnabled,
-            boolean eventEnabled) {
+            @NonNull NotificationCategory category,
+            boolean isEnabled
+    ) {
         this.memberId = memberId;
-        this.articleEnabled = articleEnabled;
-        this.eventEnabled = eventEnabled;
+        this.category = category;
+        this.isEnabled = isEnabled;
     }
 
-    public void updateCategory(NotificationCategory category, boolean enabled) {
-        switch (category) {
-            case ARTICLE -> this.articleEnabled = enabled;
-            case EVENT -> this.eventEnabled = enabled;
-        }
-    }
-
-    public boolean isEnabled(NotificationCategory category) {
-        return switch (category) {
-            case ARTICLE -> articleEnabled;
-            case EVENT -> eventEnabled;
-        };
+    public void updateEnabled(boolean isEnabled) {
+        this.isEnabled = isEnabled;
     }
 }

@@ -1,11 +1,15 @@
 package news.bombom.notification.domain;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
+@RequiredArgsConstructor
 public enum NotificationCategory {
 
-    ARTICLE,
-    EVENT,
+    ARTICLE(true),
+    EVENT(false),
     ;
+
+    private final boolean defaultSetting;
 }

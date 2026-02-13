@@ -1,5 +1,6 @@
 package news.bombom.notification.service;
 
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import news.bombom.notification.domain.MemberNotificationSetting;
@@ -17,43 +18,53 @@ public class NotificationSettingService {
     private final MemberNotificationSettingRepository settingRepository;
 
     @Transactional
-    public MemberNotificationSetting ensureMemberNotificationSetting(Long memberId) {
-        return settingRepository.findByMemberId(memberId)
-                .orElseGet(() -> createDefaultSetting(memberId));
-    }
-
-    @Transactional
-    public MemberNotificationSetting createDefaultSetting(Long memberId) {
-        MemberNotificationSetting memberNotificationSetting = MemberNotificationSetting.builder()
-                .memberId(memberId)
-                .articleEnabled(true)
-                .eventEnabled(false)
-                .build();
-        return settingRepository.save(memberNotificationSetting);
+    public void ensureMemberNotificationSetting(Long memberId) {
+        Arrays.stream(NotificationCategory.values())
+                .forEach(category -> ensureCategorySetting(memberId, category));
     }
 
     @Transactional
     public void updateCategorySetting(Long memberId, NotificationCategory category, boolean enabled) {
-        MemberNotificationSetting setting = settingRepository.findByMemberId(memberId)
-                .orElseGet(() -> createDefaultSetting(memberId));
-        setting.updateCategory(category, enabled);
+        MemberNotificationSetting setting = settingRepository.findByMemberIdAndCategory(memberId, category)
+                .orElseGet(() -> MemberNotificationSetting.builder()
+                        .memberId(memberId)
+                        .category(category)
+                        .isEnabled(enabled)
+                        .build());
+
+        setting.updateEnabled(enabled);
+        settingRepository.save(setting);
     }
 
     public List<NotificationCategorySettingResponse> getCategorySettings(Long memberId) {
-        MemberNotificationSetting setting = settingRepository.findByMemberId(memberId)
-                .orElseGet(() -> createDefaultSetting(memberId));
-        return NotificationCategorySettingResponse.from(setting);
+        ensureMemberNotificationSetting(memberId);
+        List<MemberNotificationSetting> settings = settingRepository.findAllByMemberId(memberId);
+        return NotificationCategorySettingResponse.from(settings);
     }
 
     public NotificationCategorySettingResponse getCategorySetting(Long memberId, NotificationCategory category) {
-        MemberNotificationSetting setting = settingRepository.findByMemberId(memberId)
-                .orElseGet(() -> createDefaultSetting(memberId));
-        return NotificationCategorySettingResponse.from(setting, category);
+        MemberNotificationSetting setting = settingRepository.findByMemberIdAndCategory(memberId, category)
+                .orElseGet(() -> {
+                    ensureCategorySetting(memberId, category);
+                    return settingRepository.findByMemberIdAndCategory(memberId, category).orElseThrow();
+                });
+        return NotificationCategorySettingResponse.from(setting);
     }
 
     public boolean isEnabled(Long memberId, NotificationCategory category) {
-        return settingRepository.findByMemberId(memberId)
-                .map(setting -> setting.isEnabled(category))
-                .orElse(true);
+        return settingRepository.findByMemberIdAndCategory(memberId, category)
+                .map(MemberNotificationSetting::isEnabled)
+                .orElse(category.isDefaultSetting());
+    }
+
+    private void ensureCategorySetting(Long memberId, NotificationCategory category) {
+        if (!settingRepository.existsByMemberIdAndCategory(memberId, category)) {
+            MemberNotificationSetting setting = MemberNotificationSetting.builder()
+                    .memberId(memberId)
+                    .category(category)
+                    .isEnabled(category.isDefaultSetting())
+                    .build();
+            settingRepository.save(setting);
+        }
     }
 }

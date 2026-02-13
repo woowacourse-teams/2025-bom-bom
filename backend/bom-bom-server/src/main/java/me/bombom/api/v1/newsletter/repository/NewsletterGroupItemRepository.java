@@ -2,6 +2,7 @@ package me.bombom.api.v1.newsletter.repository;
 
 import java.util.List;
 import me.bombom.api.v1.challenge.dto.ChallengeNewsletterRow;
+import me.bombom.api.v1.challenge.dto.ChallengeLandingNewsletterRow;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroupItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,10 +21,30 @@ public interface NewsletterGroupItemRepository extends JpaRepository<NewsletterG
         JOIN NewsletterGroupItem ngi ON ngi.newsletterGroupId = c.newsletterGroupId
         JOIN Newsletter n ON n.id = ngi.newsletterId
         WHERE c.id IN :challengeIds
-        ORDER BY n.name ASC
+        ORDER BY n.name
     """)
     List<ChallengeNewsletterRow> findChallengeNewsletterRowsByChallengeIds(
             @Param("challengeIds") List<Long> challengeIds
+    );
+
+    @Query("""
+        SELECT new me.bombom.api.v1.challenge.dto.ChallengeLandingNewsletterRow(
+            c.id,
+            n.id,
+            n.name,
+            n.imageUrl,
+            cat.name,
+            n.description
+        )
+        FROM Challenge c
+        JOIN NewsletterGroupItem ngi ON ngi.newsletterGroupId = c.newsletterGroupId
+        JOIN Newsletter n ON n.id = ngi.newsletterId
+        JOIN Category cat ON cat.id = n.categoryId
+        WHERE c.id = :challengeId
+        ORDER BY n.name
+    """)
+    List<ChallengeLandingNewsletterRow> findChallengeLandingNewsletterRowsByChallengeId(
+            @Param("challengeId") Long challengeId
     );
 
     @Query("""

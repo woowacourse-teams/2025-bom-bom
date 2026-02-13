@@ -1,10 +1,15 @@
 package news.bombom.notification.controller.v1;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import news.bombom.notification.domain.NotificationCategory;
+import news.bombom.notification.dto.request.NotificationCategorySettingRequest;
 import news.bombom.notification.dto.request.NotificationTokenRequest;
 import news.bombom.notification.dto.request.NotificationSettingRequest;
 import news.bombom.notification.dto.request.NotificationSendRequest;
 import news.bombom.notification.dto.NotificationResult;
+import news.bombom.notification.dto.response.NotificationCategorySettingResponse;
+import news.bombom.notification.service.NotificationSettingService;
 import news.bombom.notification.service.NotificationTokenService;
 import news.bombom.notification.service.NotificationService;
 import org.junit.jupiter.api.DisplayName;
@@ -33,6 +38,9 @@ class NotificationControllerTest {
     private NotificationTokenService notificationTokenService;
 
     @MockitoBean
+    private NotificationSettingService notificationSettingService;
+
+    @MockitoBean
     private JpaMetamodelMappingContext jpaMappingContext;
 
     @MockitoBean
@@ -53,7 +61,6 @@ class NotificationControllerTest {
     void registerNotificationToken_Success() throws Exception {
         // Given
         NotificationTokenRequest request = new NotificationTokenRequest(TEST_MEMBER_ID, TEST_DEVICE_UUID, TEST_FCM_TOKEN);
-        
         doNothing().when(notificationTokenService).registerFcmToken(anyLong(), anyString(), anyString());
 
         // When & Then
@@ -85,7 +92,7 @@ class NotificationControllerTest {
     void upsertNotificationToken_Success() throws Exception {
         // Given
         NotificationTokenRequest request = new NotificationTokenRequest(TEST_MEMBER_ID, TEST_DEVICE_UUID, TEST_FCM_TOKEN);
-        
+
         doNothing().when(notificationTokenService).upsertFcmToken(anyLong(), anyString(), anyString());
 
         // When & Then
@@ -117,7 +124,7 @@ class NotificationControllerTest {
     void updateNotificationSettings_Success() throws Exception {
         // Given
         NotificationSettingRequest request = new NotificationSettingRequest(true);
-        
+
         doNothing().when(notificationTokenService).updateNotificationSetting(anyLong(), anyString(), anyBoolean());
 
         // When & Then
@@ -149,12 +156,12 @@ class NotificationControllerTest {
     void sendNotification_Success() throws Exception {
         // Given
         NotificationSendRequest request = new NotificationSendRequest(
-                TEST_FCM_TOKEN, 
-                "테스트 제목", 
-                "테스트 내용", 
+                TEST_FCM_TOKEN,
+                "테스트 제목",
+                "테스트 내용",
                 "test-article-123"
         );
-        
+
         NotificationResult successResult = NotificationResult.success("test-message-id");
         when(notificationService.sendNotification(anyString(), anyString(), anyString(), anyString())).thenReturn(successResult);
 
@@ -180,5 +187,96 @@ class NotificationControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(notificationService, never()).sendNotification(anyString(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("카테고리 설정 업데이트 성공 - 소문자")
+    void updateNotificationCategorySetting_Success_Lowercase() throws Exception {
+        // Given
+        NotificationCategorySettingRequest request = new NotificationCategorySettingRequest(true);
+        doNothing().when(notificationSettingService).updateCategorySetting(
+                anyLong(),
+                any(NotificationCategory.class),
+                anyBoolean()
+        );
+
+        // When & Then
+        mockMvc.perform(patch("/api/v1/notifications/{memberId}/settings/{category}", TEST_MEMBER_ID, "event")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+
+        verify(notificationSettingService, times(1)).updateCategorySetting(
+                TEST_MEMBER_ID,
+                NotificationCategory.EVENT,
+                true
+        );
+    }
+
+    @Test
+    @DisplayName("카테고리 설정 업데이트 성공 - 대문자")
+    void updateNotificationCategorySetting_Success_Uppercase() throws Exception {
+        // Given
+        NotificationCategorySettingRequest request = new NotificationCategorySettingRequest(false);
+        doNothing().when(notificationSettingService).updateCategorySetting(
+                anyLong(),
+                any(NotificationCategory.class),
+                anyBoolean()
+        );
+
+        // When & Then
+        mockMvc.perform(patch("/api/v1/notifications/{memberId}/settings/{category}", TEST_MEMBER_ID, "ARTICLE")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+
+        verify(notificationSettingService, times(1)).updateCategorySetting(
+                TEST_MEMBER_ID,
+                NotificationCategory.ARTICLE,
+                false
+        );
+    }
+
+    @Test
+    @DisplayName("모든 카테고리 설정 조회 성공")
+    void getCategorySettings_Success() throws Exception {
+        // Given
+        List<NotificationCategorySettingResponse> responses = List.of(
+                new NotificationCategorySettingResponse(NotificationCategory.ARTICLE, true),
+                new NotificationCategorySettingResponse(NotificationCategory.EVENT, false)
+        );
+        when(notificationSettingService.getCategorySettings(anyLong())).thenReturn(responses);
+
+        // When & Then
+        mockMvc.perform(get("/api/v1/notifications/{memberId}/settings", TEST_MEMBER_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].category").value("ARTICLE"))
+                .andExpect(jsonPath("$[0].enabled").value(true))
+                .andExpect(jsonPath("$[1].category").value("EVENT"))
+                .andExpect(jsonPath("$[1].enabled").value(false));
+
+        verify(notificationSettingService, times(1)).getCategorySettings(TEST_MEMBER_ID);
+    }
+
+    @Test
+    @DisplayName("특정 카테고리 설정 조회 성공")
+    void getCategorySetting_Success() throws Exception {
+        // Given
+        NotificationCategorySettingResponse response = new NotificationCategorySettingResponse(NotificationCategory.EVENT, true);
+        when(notificationSettingService.getCategorySetting(anyLong(), any(NotificationCategory.class)))
+                .thenReturn(response);
+
+        // When & Then
+        mockMvc.perform(get("/api/v1/notifications/{memberId}/settings/{category}", TEST_MEMBER_ID, "event"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.category").value("EVENT"))
+                .andExpect(jsonPath("$.enabled").value(true));
+
+        verify(notificationSettingService, times(1)).getCategorySetting(
+                TEST_MEMBER_ID,
+                NotificationCategory.EVENT
+        );
     }
 }

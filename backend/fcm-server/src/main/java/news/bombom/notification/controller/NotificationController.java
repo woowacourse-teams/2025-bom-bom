@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import news.bombom.notification.dto.request.NotificationSendRequest;
 import news.bombom.notification.dto.request.NotificationSettingRequest;
 import news.bombom.notification.dto.request.NotificationTokenRequest;
+import news.bombom.notification.service.NotificationProcessingService;
 import news.bombom.notification.service.NotificationService;
 import news.bombom.notification.service.NotificationTokenService;
 import org.springframework.http.HttpStatus;
@@ -27,18 +28,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class NotificationController {
 
     private final NotificationTokenService notificationTokenService;
+    private final NotificationProcessingService notificationProcessingService;
     private final NotificationService notificationService;
 
     @PostMapping("/tokens")
     @ResponseStatus(HttpStatus.CREATED)
-    public void registerNotificationToken(@Valid @RequestBody NotificationTokenRequest request) {
-        notificationTokenService.registerFcmToken(request.memberId(), request.deviceUuid(), request.token());
+    public void registerToken(@Valid @RequestBody NotificationTokenRequest request) {
+        notificationProcessingService.registerToken(request.memberId(), request.deviceUuid(), request.token());
     }
 
     @PutMapping("/tokens")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void upsertNotificationToken(@Valid @RequestBody NotificationTokenRequest request) {
-        notificationTokenService.upsertFcmToken(request.memberId(), request.deviceUuid(), request.token());
+    public void updateToken(@Valid @RequestBody NotificationTokenRequest request) {
+        notificationProcessingService.upsertToken(request.memberId(), request.deviceUuid(), request.token());
     }
 
     @PutMapping("/tokens/{memberId}/{deviceUuid}/settings")
@@ -46,8 +48,7 @@ public class NotificationController {
     public void updateDeviceNotificationSettings(
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long memberId,
             @PathVariable @NotBlank String deviceUuid,
-            @Valid @RequestBody NotificationSettingRequest request
-    ) {
+            @Valid @RequestBody NotificationSettingRequest request) {
         notificationTokenService.updateNotificationSetting(memberId, deviceUuid, request.enabled());
     }
 

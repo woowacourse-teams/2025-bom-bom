@@ -6,7 +6,6 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import news.bombom.notification.domain.MemberFcmToken;
-import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.repository.MemberFcmTokenRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,13 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotificationTokenService {
 
     private final MemberFcmTokenRepository fcmTokenRepository;
-    private final NotificationSettingService notificationSettingService;
 
     /**
      * 알림 토큰 등록
      */
     @Transactional
-    public void registerFcmToken(Long memberId, String deviceUuid, String fcmToken) {
+    public void registerToken(Long memberId, String deviceUuid, String fcmToken) {
         fcmTokenRepository.deleteByDeviceUuid(deviceUuid);
 
         MemberFcmToken token = MemberFcmToken.builder()
@@ -34,7 +32,6 @@ public class NotificationTokenService {
                 .isNotificationEnabled(true)
                 .build();
         fcmTokenRepository.save(token);
-        notificationSettingService.createDefaultSetting(memberId);
         log.info("알림 토큰 등록 완료: memberId={}, deviceUuid={}", memberId, deviceUuid);
     }
 
@@ -42,9 +39,8 @@ public class NotificationTokenService {
      * 알림 토큰 업데이트 또는 등록
      */
     @Transactional
-    public void upsertFcmToken(Long memberId, String deviceUuid, String fcmToken) {
-        Optional<MemberFcmToken> fcmTokenOptional = fcmTokenRepository.findByMemberIdAndDeviceUuid(memberId,
-                deviceUuid);
+    public void upsertToken(Long memberId, String deviceUuid, String fcmToken) {
+        Optional<MemberFcmToken> fcmTokenOptional = fcmTokenRepository.findByMemberIdAndDeviceUuid(memberId, deviceUuid);
 
         if (fcmTokenOptional.isPresent()) {
             MemberFcmToken token = fcmTokenOptional.get();

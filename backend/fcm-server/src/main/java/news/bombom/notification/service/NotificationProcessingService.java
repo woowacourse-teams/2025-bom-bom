@@ -39,4 +39,16 @@ public class NotificationProcessingService {
         NotificationResultResponse result = notificationSender.sendToAllDevices(notification, fcmTokens);
         statusUpdater.updateStatus(notification, result);
     }
+
+    @Transactional
+    public void registerToken(Long memberId, String deviceUuid, String fcmToken) {
+        notificationTokenService.registerToken(memberId, deviceUuid, fcmToken);
+        notificationSettingService.ensureMemberNotificationSetting(memberId);
+    }
+
+    @Transactional
+    public void upsertToken(Long memberId, String deviceUuid, String fcmToken) {
+        notificationTokenService.upsertToken(memberId, deviceUuid, fcmToken);
+        notificationSettingService.ensureMemberNotificationSetting(memberId);
+    }
 }

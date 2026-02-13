@@ -69,11 +69,11 @@ dependencies {
     runtimeOnly("com.mysql:mysql-connector-j")
 
     // spring session jdbc
-    implementation ("org.springframework.session:spring-session-jdbc")
+    implementation("org.springframework.session:spring-session-jdbc")
 
     // flyway
-    implementation ("org.flywaydb:flyway-core")
-    implementation ("org.flywaydb:flyway-mysql")
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-mysql")
 
     // swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
@@ -100,5 +100,4 @@ tasks.named<Delete>("clean") {
 
 tasks.test {
     useJUnitPlatform()
-    systemProperty("docker.host", "unix:///var/run/docker.sock")
 }

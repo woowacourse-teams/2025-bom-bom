@@ -8,13 +8,12 @@ import news.bombom.notification.domain.NotificationCategory;
 
 public record NotificationCategorySettingResponse(
 
-        @NotNull
-        NotificationCategory category,
+        @NotNull NotificationCategory category,
         boolean enabled
 ) {
 
     public static NotificationCategorySettingResponse from(MemberNotificationSetting setting, NotificationCategory category) {
-        return new NotificationCategorySettingResponse(category, setting.isEnabledFor(category));
+        return new NotificationCategorySettingResponse(category, setting.isEnabled(category));
     }
 
     public static List<NotificationCategorySettingResponse> from(MemberNotificationSetting setting) {

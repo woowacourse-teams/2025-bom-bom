@@ -53,7 +53,7 @@ public class NotificationSettingService {
 
     public boolean isEnabled(Long memberId, NotificationCategory category) {
         return settingRepository.findByMemberId(memberId)
-                .map(setting -> setting.isEnabledFor(category))
+                .map(setting -> setting.isEnabled(category))
                 .orElse(true);
     }
 }

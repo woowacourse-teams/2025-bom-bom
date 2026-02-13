@@ -42,7 +42,7 @@ public class MemberNotificationSetting extends BaseEntity {
         }
     }
 
-    public boolean isEnabledFor(NotificationCategory category) {
+    public boolean isEnabled(NotificationCategory category) {
         return switch (category) {
             case ARTICLE -> articleEnabled;
             case EVENT -> eventEnabled;

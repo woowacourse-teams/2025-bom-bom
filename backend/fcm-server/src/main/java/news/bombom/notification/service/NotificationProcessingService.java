@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import news.bombom.notification.domain.ArticleArrivalNotification;
 import news.bombom.notification.domain.MemberFcmToken;
+import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.dto.response.NotificationResultResponse;
-import news.bombom.notification.service.NotificationTokenService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +22,10 @@ public class NotificationProcessingService {
 
     @Transactional
     public void processNotification(ArticleArrivalNotification notification) {
-        List<MemberFcmToken> fcmTokens = notificationTokenService.resolveTokens(notification.getMemberId());
-        
+        List<MemberFcmToken> fcmTokens = notificationTokenService.resolveTokens(
+                notification.getMemberId(),
+                NotificationCategory.ARTICLE
+        );
         if (fcmTokens.isEmpty()) {
             statusUpdater.markAsFailed(notification, "FCM 토큰 없음");
             return;

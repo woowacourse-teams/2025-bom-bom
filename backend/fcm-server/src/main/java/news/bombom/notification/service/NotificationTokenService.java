@@ -1,12 +1,16 @@
 package news.bombom.notification.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import news.bombom.notification.domain.MemberFcmToken;
+import news.bombom.notification.domain.MemberNotificationSetting;
+import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.repository.MemberFcmTokenRepository;
+import news.bombom.notification.repository.MemberNotificationSettingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotificationTokenService {
 
     private final MemberFcmTokenRepository fcmTokenRepository;
+    private final MemberNotificationSettingRepository notificationSettingRepository;
 
     /**
      * 알림 토큰 등록
@@ -86,9 +91,17 @@ public class NotificationTokenService {
     }
 
     /**
-     * 회원의 알림 토큰 조회
+     * 회원의 알림 토큰 조회 (카테고리별 필터링)
      */
-    public List<MemberFcmToken> resolveTokens(Long memberId) {
+    public List<MemberFcmToken> resolveTokens(Long memberId, NotificationCategory category) {
+        MemberNotificationSetting setting = notificationSettingRepository.findByMemberId(memberId)
+                .orElseGet(() -> createDefaultSetting(memberId));
+
+        if (!setting.isEnabledFor(category)) {
+            log.info("알림 수신 동의하지 않음: memberId={}, category={}", memberId, category);
+            return Collections.emptyList();
+        }
+
         List<MemberFcmToken> fcmTokens = fcmTokenRepository.findByMemberId(memberId);
 
         if (fcmTokens.isEmpty()) {
@@ -111,5 +124,13 @@ public class NotificationTokenService {
                     );
                 });
         return memberFcmToken.isNotificationEnabled();
+    }
+
+    private MemberNotificationSetting createDefaultSetting(Long memberId) {
+        return MemberNotificationSetting.builder()
+                .memberId(memberId)
+                .articleEnabled(true)
+                .eventEnabled(false)
+                .build();
     }
 }

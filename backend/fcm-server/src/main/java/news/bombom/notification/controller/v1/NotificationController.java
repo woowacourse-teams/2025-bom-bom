@@ -3,15 +3,21 @@ package news.bombom.notification.controller.v1;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import news.bombom.notification.domain.NotificationCategory;
+import news.bombom.notification.dto.request.NotificationCategorySettingRequest;
 import news.bombom.notification.dto.request.NotificationSendRequest;
 import news.bombom.notification.dto.request.NotificationSettingRequest;
 import news.bombom.notification.dto.request.NotificationTokenRequest;
+import news.bombom.notification.dto.response.NotificationCategorySettingResponse;
 import news.bombom.notification.service.NotificationService;
+import news.bombom.notification.service.NotificationSettingService;
 import news.bombom.notification.service.NotificationTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,6 +34,7 @@ public class NotificationController {
 
     private final NotificationTokenService notificationTokenService;
     private final NotificationService notificationService;
+    private final NotificationSettingService notificationSettingService;
 
     @PostMapping("/tokens")
     @ResponseStatus(HttpStatus.CREATED)
@@ -46,16 +53,14 @@ public class NotificationController {
     public void updateNotificationSettings(
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long memberId,
             @PathVariable @NotBlank String deviceUuid,
-            @Valid @RequestBody NotificationSettingRequest request
-    ) {
+            @Valid @RequestBody NotificationSettingRequest request) {
         notificationTokenService.updateNotificationSetting(memberId, deviceUuid, request.enabled());
     }
 
     @GetMapping("/tokens/{memberId}/{deviceUuid}/settings/status")
     public boolean getNotificationSettingsStatus(
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long memberId,
-            @PathVariable @NotBlank String deviceUuid
-    ) {
+            @PathVariable @NotBlank String deviceUuid) {
         return notificationTokenService.getNotificationEnabled(memberId, deviceUuid);
     }
 
@@ -66,5 +71,30 @@ public class NotificationController {
     @ResponseStatus(HttpStatus.OK)
     public void sendNotification(@Valid @RequestBody NotificationSendRequest request) {
         notificationService.sendNotification(request.token(), request.title(), request.body(), request.articleId());
+    }
+
+    @GetMapping("/{memberId}/settings")
+    public List<NotificationCategorySettingResponse> getCategorySettings(
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long memberId
+    ) {
+        return notificationSettingService.getCategorySettings(memberId);
+    }
+
+    @GetMapping("/{memberId}/settings/{category}")
+    public boolean getCategorySetting(
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long memberId,
+            @PathVariable NotificationCategory category
+    ) {
+        return notificationSettingService.getCategorySetting(memberId, category);
+    }
+
+    @PatchMapping("/{memberId}/settings/{category}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateNotificationCategorySetting(
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long memberId,
+            @PathVariable NotificationCategory category,
+            @Valid @RequestBody NotificationCategorySettingRequest request
+    ) {
+        notificationSettingService.updateCategorySetting(memberId, category, request.enabled());
     }
 }

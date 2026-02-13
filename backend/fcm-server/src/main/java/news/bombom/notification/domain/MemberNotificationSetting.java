@@ -29,8 +29,7 @@ public class MemberNotificationSetting extends BaseEntity {
     public MemberNotificationSetting(
             @NonNull Long memberId,
             boolean articleEnabled,
-            boolean eventEnabled
-    ) {
+            boolean eventEnabled) {
         this.memberId = memberId;
         this.articleEnabled = articleEnabled;
         this.eventEnabled = eventEnabled;
@@ -42,6 +41,13 @@ public class MemberNotificationSetting extends BaseEntity {
 
     public void updateEventEnabled(boolean enabled) {
         this.eventEnabled = enabled;
+    }
+
+    public void updateCategory(NotificationCategory category, boolean enabled) {
+        switch (category) {
+            case ARTICLE -> this.articleEnabled = enabled;
+            case EVENT -> this.eventEnabled = enabled;
+        }
     }
 
     public boolean isEnabledFor(NotificationCategory category) {

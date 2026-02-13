@@ -1,13 +1,11 @@
 package news.bombom.notification.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import news.bombom.notification.domain.MemberFcmToken;
-import news.bombom.notification.domain.MemberNotificationSetting;
 import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.repository.MemberFcmTokenRepository;
 import org.springframework.stereotype.Service;
@@ -91,15 +89,9 @@ public class NotificationTokenService {
     }
 
     /**
-     * 회원의 알림 토큰 조회 (카테고리별 필터링)
+     * 회원의 알림 토큰 조회
      */
-    public List<MemberFcmToken> resolveTokens(Long memberId, NotificationCategory category) {
-        MemberNotificationSetting setting = notificationSettingService.ensureMemberNotificationSetting(memberId);
-        if (!setting.isEnabledFor(category)) {
-            log.info("알림 수신 동의하지 않음: memberId={}, category={}", memberId, category);
-            return Collections.emptyList();
-        }
-
+    public List<MemberFcmToken> resolveTokens(Long memberId) {
         List<MemberFcmToken> fcmTokens = fcmTokenRepository.findByMemberId(memberId);
 
         if (fcmTokens.isEmpty()) {
@@ -117,9 +109,7 @@ public class NotificationTokenService {
                             String.format(
                                     "memberId=%d, deviceUuid=%s 에 해당하는 FCM 토큰이 존재하지 않습니다.",
                                     memberId,
-                                    deviceUuid
-                            )
-                    );
+                                    deviceUuid));
                 });
         return memberFcmToken.isNotificationEnabled();
     }

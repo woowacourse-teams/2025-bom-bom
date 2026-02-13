@@ -50,4 +50,10 @@ public class NotificationSettingService {
                 .orElseGet(() -> createDefaultSetting(memberId));
         return NotificationCategorySettingResponse.from(setting, category);
     }
+
+    public boolean isEnabled(Long memberId, NotificationCategory category) {
+        return settingRepository.findByMemberId(memberId)
+                .map(setting -> setting.isEnabledFor(category))
+                .orElse(true);
+    }
 }

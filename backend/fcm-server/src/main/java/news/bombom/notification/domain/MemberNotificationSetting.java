@@ -35,14 +35,6 @@ public class MemberNotificationSetting extends BaseEntity {
         this.eventEnabled = eventEnabled;
     }
 
-    public void updateArticleEnabled(boolean enabled) {
-        this.articleEnabled = enabled;
-    }
-
-    public void updateEventEnabled(boolean enabled) {
-        this.eventEnabled = enabled;
-    }
-
     public void updateCategory(NotificationCategory category, boolean enabled) {
         switch (category) {
             case ARTICLE -> this.articleEnabled = enabled;

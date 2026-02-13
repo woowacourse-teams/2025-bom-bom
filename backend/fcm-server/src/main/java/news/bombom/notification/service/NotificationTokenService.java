@@ -36,6 +36,7 @@ public class NotificationTokenService {
                 .isNotificationEnabled(true)
                 .build();
         fcmTokenRepository.save(token);
+        notificationSettingService.createDefaultSetting(memberId);
         log.info("알림 토큰 등록 완료: memberId={}, deviceUuid={}", memberId, deviceUuid);
     }
 

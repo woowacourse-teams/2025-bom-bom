@@ -19,13 +19,23 @@ public class NotificationSettingService {
     @Transactional
     public MemberNotificationSetting ensureMemberNotificationSetting(Long memberId) {
         return settingRepository.findByMemberId(memberId)
-                .orElseGet(() -> createAndSaveDefaultSetting(memberId));
+                .orElseGet(() -> createDefaultSetting(memberId));
+    }
+
+    @Transactional
+    public MemberNotificationSetting createDefaultSetting(Long memberId) {
+        MemberNotificationSetting memberNotificationSetting = MemberNotificationSetting.builder()
+                .memberId(memberId)
+                .articleEnabled(true)
+                .eventEnabled(false)
+                .build();
+        return settingRepository.save(memberNotificationSetting);
     }
 
     @Transactional
     public void updateCategorySetting(Long memberId, NotificationCategory category, boolean enabled) {
         MemberNotificationSetting setting = settingRepository.findByMemberId(memberId)
-                .orElseGet(() -> createAndSaveDefaultSetting(memberId));
+                .orElseGet(() -> createDefaultSetting(memberId));
         setting.updateCategory(category, enabled);
     }
 
@@ -39,18 +49,5 @@ public class NotificationSettingService {
         MemberNotificationSetting setting = settingRepository.findByMemberId(memberId)
                 .orElseGet(() -> createDefaultSetting(memberId));
         return NotificationCategorySettingResponse.from(setting, category);
-    }
-
-    private MemberNotificationSetting createAndSaveDefaultSetting(Long memberId) {
-        MemberNotificationSetting setting = createDefaultSetting(memberId);
-        return settingRepository.save(setting);
-    }
-
-    private MemberNotificationSetting createDefaultSetting(Long memberId) {
-        return MemberNotificationSetting.builder()
-                .memberId(memberId)
-                .articleEnabled(true)
-                .eventEnabled(false)
-                .build();
     }
 }

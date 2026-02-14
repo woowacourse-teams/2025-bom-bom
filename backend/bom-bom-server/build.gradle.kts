@@ -25,7 +25,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("org.testcontainers:testcontainers-bom:1.19.7")
+        mavenBom("org.testcontainers:testcontainers-bom:2.0.3")
     }
 }
 
@@ -63,16 +63,17 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:mysql")
     testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
 
     // db
     runtimeOnly("com.mysql:mysql-connector-j")
 
     // spring session jdbc
-    implementation ("org.springframework.session:spring-session-jdbc")
+    implementation("org.springframework.session:spring-session-jdbc")
 
     // flyway
-    implementation ("org.flywaydb:flyway-core")
-    implementation ("org.flywaydb:flyway-mysql")
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-mysql")
 
     // swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")

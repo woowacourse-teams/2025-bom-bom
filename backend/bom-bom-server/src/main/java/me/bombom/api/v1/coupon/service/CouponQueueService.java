@@ -89,7 +89,7 @@ public class CouponQueueService {
             );
         }
 
-        boolean added = couponQueueRepository.addIfAbsentQueue(couponName, memberId, clock.millis());
+        boolean added = couponQueueRepository.addIfAbsentQueue(couponName, memberId);
         if (added) {
             log.info("쿠폰 대기열 등록 성공 - couponName={}, memberId={}", couponName, memberId);
         }

@@ -2,6 +2,15 @@ package me.bombom.api.v1.coupon.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,6 +158,76 @@ class CouponQueueRepositoryTest {
         // then
         assertThat(first).isTrue();
         assertThat(second).isFalse();
+    }
+
+    @Test
+    void 대기열_자동등록은_중복요청시_점수키가_증가하지_않음() {
+        // given
+        String couponName = "dedupe-queue-atomic";
+
+        // when
+        boolean first = couponQueueRepository.addIfAbsentQueue(couponName, 1L);
+        boolean second = couponQueueRepository.addIfAbsentQueue(couponName, 1L);
+
+        // then
+        assertThat(first).isTrue();
+        assertThat(second).isFalse();
+        String scoreSequence = redisTemplate.opsForValue().get("coupon:queue:seq:" + couponName);
+        assertThat(scoreSequence).isEqualTo("1");
+    }
+
+    @Test
+    void 대기열_자동점수는_요청순으로_증가() {
+        // given
+        String couponName = "sequence-score";
+
+        // when
+        couponQueueRepository.addIfAbsentQueue(couponName, 1L);
+        couponQueueRepository.addIfAbsentQueue(couponName, 2L);
+        couponQueueRepository.addIfAbsentQueue(couponName, 3L);
+
+        // then
+        assertThat(couponQueueRepository.rankQueue(couponName, 1L)).isEqualTo(0L);
+        assertThat(couponQueueRepository.rankQueue(couponName, 2L)).isEqualTo(1L);
+        assertThat(couponQueueRepository.rankQueue(couponName, 3L)).isEqualTo(2L);
+    }
+
+    @Test
+    void 동시_대기열_등록_시_순위가_연속적으로_배정됨() throws Exception {
+        // given
+        String couponName = "concurrent-queue-sequence";
+        int threadCount = 30;
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch startGate = new CountDownLatch(1);
+        List<Future<Long>> futures = new ArrayList<>();
+
+        // when
+        for (long memberId = 1L; memberId <= threadCount; memberId++) {
+            long finalMemberId = memberId;
+            futures.add(executorService.submit(() -> {
+                startGate.await();
+                couponQueueRepository.addIfAbsentQueue(couponName, finalMemberId);
+                return couponQueueRepository.rankQueue(couponName, finalMemberId);
+            }));
+        }
+        startGate.countDown();
+        for (Future<Long> future : futures) {
+            Long rank = future.get(3, TimeUnit.SECONDS);
+            assertThat(rank).isNotNull();
+        }
+        executorService.shutdown();
+        executorService.awaitTermination(3, TimeUnit.SECONDS);
+
+        Set<Long> rankSet = new HashSet<>();
+        for (long memberId = 1L; memberId <= threadCount; memberId++) {
+            Long rank = couponQueueRepository.rankQueue(couponName, memberId);
+            assertThat(rank).isNotNull();
+            rankSet.add(rank);
+        }
+        assertThat(rankSet).hasSize(threadCount);
+        for (long expectedRank = 0L; expectedRank < threadCount; expectedRank++) {
+            assertThat(rankSet).contains(expectedRank);
+        }
     }
 
     @Test

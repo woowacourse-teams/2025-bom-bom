@@ -17,15 +17,21 @@ import org.springframework.stereotype.Repository;
 public class CouponQueueRepository {
 
     private static final String QUEUE_KEY_PREFIX = "coupon:queue:";
+    private static final String QUEUE_SEQUENCE_KEY_PREFIX = "coupon:queue:seq:";
     private static final String ISSUED_COUNT_KEY_PREFIX = "coupon:issuedCount:";
     private static final String ACTIVE_KEY_PREFIX = "coupon:active:";
     private static final String ISSUED_KEY_PREFIX = "coupon:issued:";
     private static final RedisScript<Long> PROMOTE_QUEUE_TO_ACTIVE_SCRIPT = buildPromoteQueueToActiveScript();
+    private static final RedisScript<Long> ADD_QUEUE_ATOMIC_SCRIPT = buildAddQueueAtomicScript();
 
     private final StringRedisTemplate redisTemplate;
 
     private String queueKey(String couponName) {
         return QUEUE_KEY_PREFIX + couponName;
+    }
+
+    private String queueSequenceKey(String couponName) {
+        return QUEUE_SEQUENCE_KEY_PREFIX + couponName;
     }
 
     private String issuedCountKey(String couponName) {
@@ -49,6 +55,22 @@ public class CouponQueueRepository {
         ZSetOperations<String, String> zSetOps = redisTemplate.opsForZSet();
         Boolean added = zSetOps.addIfAbsent(queueKey(couponName), memberId.toString(), score);
         return Boolean.TRUE.equals(added);
+    }
+
+    /**
+     * 대기열에 점수(score) 없이 등록합니다.
+     * 기존 addIfAbsentQueue(score)보다 경합에서 더 엄격한 멱등/공정성 보장을 위해
+     * 회원 존재 여부 + 순번 채번 + 큐 삽입을 Lua 스크립트로 원자적으로 처리합니다.
+     *
+     * @return true: 새로 추가됨, false: 이미 존재하여 추가되지 않음
+     */
+    public boolean addIfAbsentQueue(String couponName, Long memberId) {
+        Long result = redisTemplate.execute(
+                ADD_QUEUE_ATOMIC_SCRIPT,
+                List.of(queueKey(couponName), queueSequenceKey(couponName)),
+                memberId.toString()
+        );
+        return result != null && result == 1L;
     }
 
     /**
@@ -211,6 +233,7 @@ public class CouponQueueRepository {
         redisTemplate.delete(activeKey(couponName));
         redisTemplate.delete(issuedKey(couponName));
         redisTemplate.delete(issuedCountKey(couponName));
+        redisTemplate.delete(queueSequenceKey(couponName));
     }
 
     /**
@@ -250,6 +273,24 @@ public class CouponQueueRepository {
                 "return added"
         );
 
+        DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
+        redisScript.setResultType(Long.class);
+        redisScript.setScriptText(script);
+        return redisScript;
+    }
+
+    private static RedisScript<Long> buildAddQueueAtomicScript() {
+        String script = String.join("\n",
+                "local queueKey = KEYS[1]",
+                "local seqKey = KEYS[2]",
+                "local memberId = ARGV[1]",
+                "if redis.call('ZSCORE', queueKey, memberId) ~= false then",
+                "  return 0",
+                "end",
+                "local score = redis.call('INCR', seqKey)",
+                "redis.call('ZADD', queueKey, score, memberId)",
+                "return 1"
+        );
         DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
         redisScript.setResultType(Long.class);
         redisScript.setScriptText(script);

@@ -10,6 +10,7 @@ import me.bombom.api.v1.coupon.service.CouponQueueService;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,6 +43,16 @@ public class CouponQueueController implements CouponQueueControllerApi {
             @LoginMember Member member
     ) {
         return couponQueueService.getQueueStatus(couponName, member);
+    }
+
+    @Override
+    @DeleteMapping("/{couponName}/queue-entries/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void leaveQueue(
+            @PathVariable String couponName,
+            @LoginMember Member member
+    ) {
+        couponQueueService.leaveQueue(couponName, member);
     }
 
     @Override

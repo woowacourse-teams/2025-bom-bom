@@ -93,15 +93,72 @@ public class CouponQueueService {
         if (added) {
             log.info("쿠폰 대기열 등록 성공 - couponName={}, memberId={}", couponName, memberId);
         }
-        return getQueueStatus(couponName, member);
+        Long finalRank = couponQueueRepository.rankQueue(couponName, memberId);
+        if (finalRank != null) {
+            if (soldOut && finalRank == 0) {
+                return buildStatus(
+                        event,
+                        couponName,
+                        CouponQueueStatus.SOLD_OUT,
+                        null,
+                        activeCount,
+                        null,
+                        CouponQueueStatusReason.SOLD_OUT
+                );
+            }
+
+            CouponQueueStatusReason reason = soldOut
+                    ? CouponQueueStatusReason.SOLD_OUT
+                    : null;
+            return buildStatus(
+                    event,
+                    couponName,
+                    CouponQueueStatus.WAITING,
+                    finalRank + 1,
+                    activeCount,
+                    null,
+                    reason
+            );
+        }
+
+        return buildStatus(
+                event,
+                couponName,
+                soldOut ? CouponQueueStatus.SOLD_OUT : CouponQueueStatus.NOT_IN_QUEUE,
+                null,
+                activeCount,
+                null,
+                soldOut ? CouponQueueStatusReason.SOLD_OUT : null
+        );
     }
 
     public CouponQueueStatusResponse getQueueStatus(String couponName, Member member) {
         Event event = getEventOrThrow(couponName);
-        validateEventWindow(event, couponName, member.getId(), "getQueueStatus");
 
         Long memberId = member.getId();
         long nowMillis = clock.millis();
+        if (isBeforeStart(event, nowMillis)) {
+            return buildStatus(
+                    event,
+                    couponName,
+                    CouponQueueStatus.NOT_IN_QUEUE,
+                    null,
+                    0L,
+                    null,
+                    CouponQueueStatusReason.EVENT_NOT_STARTED
+            );
+        }
+        if (isAfterEnd(event, nowMillis)) {
+            return buildStatus(
+                    event,
+                    couponName,
+                    CouponQueueStatus.SOLD_OUT,
+                    null,
+                    0L,
+                    null,
+                    CouponQueueStatusReason.EVENT_ENDED
+            );
+        }
 
         boolean wasActive = couponQueueRepository.isActive(couponName, memberId);
         couponQueueRepository.removeExpiredActive(couponName, nowMillis);
@@ -144,6 +201,14 @@ public class CouponQueueService {
                 ? CouponQueueStatusReason.SOLD_OUT
                 : wasActive ? CouponQueueStatusReason.ACTIVE_EXPIRED : null;
         return buildStatus(event, couponName, status, null, activeCount, null, reason);
+    }
+
+    public void leaveQueue(String couponName, Member member) {
+        getEventOrThrow(couponName);
+        Long memberId = member.getId();
+        couponQueueRepository.removeQueue(couponName, memberId);
+        couponQueueRepository.removeActive(couponName, memberId);
+        log.info("쿠폰 대기열 나가기 - couponName={}, memberId={}", couponName, memberId);
     }
 
     @Transactional
@@ -254,19 +319,29 @@ public class CouponQueueService {
     private void validateEventWindow(Event event, String couponName, Long memberId, String operation) {
         LocalDateTime now = LocalDateTime.now(clock);
         if (event.getStartAt() != null && now.isBefore(event.getStartAt())) {
-            throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
+            throw new CIllegalArgumentException(ErrorDetail.EVENT_NOT_STARTED)
                     .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                     .addContext(ErrorContextKeys.OPERATION, operation)
                     .addContext("couponName", couponName)
                     .addContext(ErrorContextKeys.REASON, CouponErrorReason.EVENT_NOT_STARTED.name());
         }
         if (event.getEndAt() != null && now.isAfter(event.getEndAt())) {
-            throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
+            throw new CIllegalArgumentException(ErrorDetail.EVENT_ENDED)
                     .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                     .addContext(ErrorContextKeys.OPERATION, operation)
                     .addContext("couponName", couponName)
                     .addContext(ErrorContextKeys.REASON, CouponErrorReason.EVENT_ENDED.name());
         }
+    }
+
+    private boolean isBeforeStart(Event event, long nowMillis) {
+        LocalDateTime now = LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(nowMillis), clock.getZone());
+        return event.getStartAt() != null && now.isBefore(event.getStartAt());
+    }
+
+    private boolean isAfterEnd(Event event, long nowMillis) {
+        LocalDateTime now = LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(nowMillis), clock.getZone());
+        return event.getEndAt() != null && now.isAfter(event.getEndAt());
     }
 
     private boolean isIssued(String couponName, Long memberId) {
@@ -288,12 +363,11 @@ public class CouponQueueService {
         }
 
         long issuedCount = stockCount.getIssuedCount() != null ? stockCount.getIssuedCount() : 0L;
-        if (issuedCount >= event.getMaxCount()) {
-            return true;
-        }
-
         long availableCount = stockCount.getAvailableCount() != null ? stockCount.getAvailableCount() : 0L;
-        return availableCount == 0L;
+        long totalStock = Math.max(0L, issuedCount + availableCount);
+        long effectiveMax = Math.min(event.getMaxCount(), totalStock);
+
+        return issuedCount >= effectiveMax;
     }
 
     private CouponQueueStatusResponse buildStatus(

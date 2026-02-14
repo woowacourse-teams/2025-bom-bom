@@ -27,7 +27,7 @@ public class CouponIssueScheduler {
      * <p>
      * - 1초마다 실행되며, 설정된 각 쿠폰 이벤트에 대해 대기열을 확인합니다.
      * - 이벤트별 start-at ~ end-at 시간 구간에만 발급 로직이 동작합니다.
-     * - 발급 완료 수와 active 인원 수를 기준으로 남은 슬롯을 계산하고
+     * - DB의 쿠폰 풀 발급 수량(issued/available)과 설정 max-count, active 인원 수를 기준으로 남은 슬롯을 계산하고
      *   선착순으로 일정 수(batch-size, 기본 50명)만큼씩 입장 허용합니다.
      * - 입장 허용된 사용자는 active TTL이 지나면 자동 만료됩니다.
      */
@@ -61,17 +61,26 @@ public class CouponIssueScheduler {
 
             couponQueueRepository.removeExpiredActive(couponName, nowMillis);
 
-            long issuedCount = couponIssueRepository.countByCouponNameAndMemberIdIsNotNull(couponName);
+            var stockCount = couponIssueRepository.getStockCountByCouponName(couponName);
+            long issuedCount = stockCount != null && stockCount.getIssuedCount() != null
+                    ? stockCount.getIssuedCount()
+                    : 0L;
+            long availableCount = stockCount != null && stockCount.getAvailableCount() != null
+                    ? stockCount.getAvailableCount()
+                    : 0L;
+            long totalStock = Math.max(0L, issuedCount + availableCount);
+            long effectiveMax = Math.min(maxCount, totalStock);
+
             long cachedIssuedCount = couponQueueRepository.getIssuedCount(couponName);
             if (cachedIssuedCount != issuedCount) {
                 couponQueueRepository.increaseIssuedCount(couponName, issuedCount - cachedIssuedCount);
             }
             long activeCount = couponQueueRepository.getActiveCount(couponName);
             long queueCount = couponQueueRepository.getQueueCount(couponName);
-            long remainingSlots = maxCount - issuedCount - activeCount;
+            long remainingSlots = effectiveMax - issuedCount - activeCount;
             if (remainingSlots <= 0) {
-                log.info("쿠폰 대기열 처리 스킵(슬롯 없음) - couponName={}, queueCount={}, activeCount={}, issuedCount={}",
-                        couponName, queueCount, activeCount, issuedCount);
+                log.info("쿠폰 대기열 처리 스킵(슬롯 없음) - couponName={}, queueCount={}, activeCount={}, issuedCount={}, maxCount={}, totalStock={}",
+                        couponName, queueCount, activeCount, issuedCount, maxCount, totalStock);
                 continue;
             }
 
@@ -94,8 +103,8 @@ public class CouponIssueScheduler {
 
             long promotedCount = couponQueueRepository.promoteQueueToActive(couponName, batchSize, expireAt);
             if (promotedCount > 0) {
-                log.info("쿠폰 입장 허용 - couponName={}, promotedCount={}, queueCount={}, activeCount={}, issuedCount={}, expireAt={}",
-                        couponName, promotedCount, queueCount, activeCount, issuedCount, expireAt);
+                log.info("쿠폰 입장 허용 - couponName={}, promotedCount={}, queueCount={}, activeCount={}, issuedCount={}, maxCount={}, totalStock={}, expireAt={}",
+                        couponName, promotedCount, queueCount, activeCount, issuedCount, maxCount, totalStock, expireAt);
             }
         }
     }

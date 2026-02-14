@@ -51,7 +51,7 @@ class CaptchaControllerTest {
                 .thenReturn(CaptchaVerifyResponse.success());
 
         // when & then
-        mockMvc.perform(post("/api/v1/captcha")
+        mockMvc.perform(post("/api/v1/notifications/captcha")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -68,7 +68,7 @@ class CaptchaControllerTest {
                 .thenReturn(CaptchaVerifyResponse.fail("캡차 검증에 실패했습니다."));
 
         // when & then
-        mockMvc.perform(post("/api/v1/captcha")
+        mockMvc.perform(post("/api/v1/notifications/captcha")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -83,7 +83,7 @@ class CaptchaControllerTest {
         CaptchaVerifyRequest request = new CaptchaVerifyRequest("");
 
         // when & then
-        mockMvc.perform(post("/api/v1/captcha")
+        mockMvc.perform(post("/api/v1/notifications/captcha")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -93,7 +93,7 @@ class CaptchaControllerTest {
     @DisplayName("캡차 토큰 null - validation 실패")
     void verify_null_token() throws Exception {
         // when & then
-        mockMvc.perform(post("/api/v1/captcha")
+        mockMvc.perform(post("/api/v1/notifications/captcha")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"gRecaptchaResponse\": null}"))
                 .andExpect(status().isBadRequest());

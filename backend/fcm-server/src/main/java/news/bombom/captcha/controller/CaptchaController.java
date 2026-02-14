@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/captcha")
+@RequestMapping("/api/v1/notifications/captcha")
 public class CaptchaController implements CaptchaControllerApi {
 
     private final CaptchaService captchaService;

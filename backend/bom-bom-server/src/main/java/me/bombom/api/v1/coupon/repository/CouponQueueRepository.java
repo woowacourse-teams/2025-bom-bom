@@ -21,6 +21,7 @@ public class CouponQueueRepository {
     private static final String ISSUED_COUNT_KEY_PREFIX = "coupon:issuedCount:";
     private static final String ACTIVE_KEY_PREFIX = "coupon:active:";
     private static final String ISSUED_KEY_PREFIX = "coupon:issued:";
+    private static final String SOLD_OUT_KEY_PREFIX = "coupon:soldOut:";
     private static final RedisScript<Long> PROMOTE_QUEUE_TO_ACTIVE_SCRIPT = buildPromoteQueueToActiveScript();
     private static final RedisScript<Long> ADD_QUEUE_ATOMIC_SCRIPT = buildAddQueueAtomicScript();
 
@@ -44,6 +45,10 @@ public class CouponQueueRepository {
 
     private String issuedKey(String couponName) {
         return ISSUED_KEY_PREFIX + couponName;
+    }
+
+    private String soldOutKey(String couponName) {
+        return SOLD_OUT_KEY_PREFIX + couponName;
     }
 
     /**
@@ -228,12 +233,26 @@ public class CouponQueueRepository {
         }
     }
 
+    public boolean isSoldOut(String couponName) {
+        String value = redisTemplate.opsForValue().get(soldOutKey(couponName));
+        return "1".equals(value);
+    }
+
+    public void markSoldOut(String couponName) {
+        redisTemplate.opsForValue().set(soldOutKey(couponName), "1");
+    }
+
+    public void clearSoldOut(String couponName) {
+        redisTemplate.delete(soldOutKey(couponName));
+    }
+
     public void clearEventState(String couponName) {
         redisTemplate.delete(queueKey(couponName));
         redisTemplate.delete(activeKey(couponName));
         redisTemplate.delete(issuedKey(couponName));
         redisTemplate.delete(issuedCountKey(couponName));
         redisTemplate.delete(queueSequenceKey(couponName));
+        redisTemplate.delete(soldOutKey(couponName));
     }
 
     /**

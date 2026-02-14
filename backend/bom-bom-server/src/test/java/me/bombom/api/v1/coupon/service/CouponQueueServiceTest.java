@@ -20,6 +20,7 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.coupon.domain.CouponIssue;
 import me.bombom.api.v1.coupon.exception.CouponErrorReason;
 import me.bombom.api.v1.coupon.dto.response.CouponQueueStatus;
+import me.bombom.api.v1.coupon.dto.response.CouponQueueStatusReason;
 import me.bombom.api.v1.coupon.dto.response.CouponQueueStatusResponse;
 import me.bombom.api.v1.coupon.repository.CouponIssueRepository;
 import me.bombom.api.v1.coupon.repository.CouponQueueRepository;
@@ -139,8 +140,30 @@ class CouponQueueServiceTest {
     void 대기열_등록_이벤트시작전_예외() {
         // given
         // when, then
-        assertThatThrownBy(() -> couponQueueService.registerQueue("future-coupon", member))
-                .isInstanceOf(CIllegalArgumentException.class);
+        Throwable thrown = catchThrowable(() -> couponQueueService.registerQueue("future-coupon", member));
+        assertThat(thrown).isInstanceOf(CIllegalArgumentException.class);
+        assertThat(((CIllegalArgumentException) thrown).getContext())
+                .containsEntry("reason", CouponErrorReason.EVENT_NOT_STARTED.name());
+    }
+
+    @Test
+    void 대기열_조회_이벤트시작전_사유반환() {
+        // given
+        // when
+        CouponQueueStatusResponse response = couponQueueService.getQueueStatus("future-coupon", member);
+        // then
+        assertThat(response.status()).isEqualTo(CouponQueueStatus.NOT_IN_QUEUE);
+        assertThat(response.reason()).isEqualTo(CouponQueueStatusReason.EVENT_NOT_STARTED);
+    }
+
+    @Test
+    void 대기열_조회_이벤트종료후_사유반환() {
+        // given
+        // when
+        CouponQueueStatusResponse response = couponQueueService.getQueueStatus("ended-coupon", member);
+        // then
+        assertThat(response.status()).isEqualTo(CouponQueueStatus.SOLD_OUT);
+        assertThat(response.reason()).isEqualTo(CouponQueueStatusReason.EVENT_ENDED);
     }
 
     @Test
@@ -174,6 +197,47 @@ class CouponQueueServiceTest {
         // then
         assertThat(response.status()).isEqualTo(CouponQueueStatus.ACTIVE);
         assertThat(response.activeExpiresInSeconds()).isNotNull();
+    }
+
+    @Test
+    void 대기열_나가기_대기열에서_제외된다() {
+        // given
+        couponQueueService.registerQueue("day1-coupon", member);
+
+        // when
+        couponQueueService.leaveQueue("day1-coupon", member);
+
+        // then
+        assertThat(couponQueueRepository.rankQueue("day1-coupon", member.getId())).isNull();
+        assertThat(couponQueueRepository.isActive("day1-coupon", member.getId())).isFalse();
+        assertThat(couponQueueRepository.getQueueCount("day1-coupon")).isEqualTo(0L);
+    }
+
+    @Test
+    void 대기열_나가기_입장허용상태에서도_제외된다() {
+        // given
+        long expireAt = System.currentTimeMillis() + 30_000;
+        couponQueueRepository.addActive("day1-coupon", member.getId(), expireAt);
+
+        // when
+        couponQueueService.leaveQueue("day1-coupon", member);
+
+        // then
+        assertThat(couponQueueRepository.isActive("day1-coupon", member.getId())).isFalse();
+        assertThat(couponQueueRepository.rankQueue("day1-coupon", member.getId())).isNull();
+        assertThat(couponQueueRepository.getActiveCount("day1-coupon")).isEqualTo(0L);
+    }
+
+    @Test
+    void 대기열_나가기_멱등적처리() {
+        // given: 이미 큐/활성에 없는 사용자
+
+        // when
+        couponQueueService.leaveQueue("day1-coupon", member);
+
+        // then
+        assertThat(couponQueueRepository.rankQueue("day1-coupon", member.getId())).isNull();
+        assertThat(couponQueueRepository.isActive("day1-coupon", member.getId())).isFalse();
     }
 
     @Test
@@ -284,8 +348,10 @@ class CouponQueueServiceTest {
         long expireAt = System.currentTimeMillis() + 30_000;
         couponQueueRepository.addActive("ended-coupon", member.getId(), expireAt);
         // when, then
-        assertThatThrownBy(() -> couponQueueService.issueCoupon("ended-coupon", member))
-                .isInstanceOf(CIllegalArgumentException.class);
+        Throwable thrown = catchThrowable(() -> couponQueueService.issueCoupon("ended-coupon", member));
+        assertThat(thrown).isInstanceOf(CIllegalArgumentException.class);
+        assertThat(((CIllegalArgumentException) thrown).getContext())
+                .containsEntry("reason", CouponErrorReason.EVENT_ENDED.name());
     }
 
     @Test

@@ -1,6 +1,8 @@
 package me.bombom.api.v1.coupon.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -37,6 +39,22 @@ import org.springframework.test.web.servlet.MockMvc;
         "coupon.events[0].active-ttl-seconds=30",
         "coupon.events[0].polling-interval-seconds=3",
         "coupon.events[0].image-url=https://example.com/coupon.png",
+        "coupon.events[1].name=future-coupon",
+        "coupon.events[1].max-count=1",
+        "coupon.events[1].batch-size=50",
+        "coupon.events[1].active-limit=1",
+        "coupon.events[1].active-ttl-seconds=30",
+        "coupon.events[1].polling-interval-seconds=3",
+        "coupon.events[1].image-url=https://example.com/future.png",
+        "coupon.events[1].start-at=2999-01-01T00:00:00",
+        "coupon.events[2].name=ended-coupon",
+        "coupon.events[2].max-count=1",
+        "coupon.events[2].batch-size=50",
+        "coupon.events[2].active-limit=1",
+        "coupon.events[2].active-ttl-seconds=30",
+        "coupon.events[2].polling-interval-seconds=3",
+        "coupon.events[2].image-url=https://example.com/ended.png",
+        "coupon.events[2].end-at=2000-01-01T00:00:00",
         "spring.task.scheduling.enabled=false"
 })
 class CouponQueueControllerTest {
@@ -106,6 +124,97 @@ class CouponQueueControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.couponName").value("day1-coupon"))
                 .andExpect(jsonPath("$.status").value(Matchers.anyOf(Matchers.is("WAITING"), Matchers.is("ACTIVE"))));
+    }
+
+    @Test
+    void 대기열_조회_이벤트시작전_사유반환() throws Exception {
+        mockMvc.perform(get("/api/v1/coupons/future-coupon/queue-entries/me")
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("NOT_IN_QUEUE"))
+                .andExpect(jsonPath("$.reason").value("EVENT_NOT_STARTED"));
+    }
+
+    @Test
+    void 대기열_조회_이벤트종료후_사유반환() throws Exception {
+        mockMvc.perform(get("/api/v1/coupons/ended-coupon/queue-entries/me")
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("SOLD_OUT"))
+                .andExpect(jsonPath("$.reason").value("EVENT_ENDED"));
+    }
+
+    @Test
+    void 대기열_등록_이벤트시작전_에러반환() throws Exception {
+        mockMvc.perform(post("/api/v1/coupons/future-coupon/queue-entries")
+                        .with(authentication(authToken)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.code").value("C002"))
+                .andExpect(jsonPath("$.reason").value("EVENT_NOT_STARTED"));
+    }
+
+    @Test
+    void 대기열_등록_이벤트종료후_에러반환() throws Exception {
+        mockMvc.perform(post("/api/v1/coupons/ended-coupon/queue-entries")
+                        .with(authentication(authToken)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value("CONFLICT"))
+                .andExpect(jsonPath("$.code").value("C003"))
+                .andExpect(jsonPath("$.reason").value("EVENT_ENDED"));
+    }
+
+    @Test
+    void 대기열_나가기_성공() throws Exception {
+        // given
+        couponQueueRepository.addIfAbsentQueue("day1-coupon", member.getId(), System.currentTimeMillis());
+
+        // when
+        mockMvc.perform(delete("/api/v1/coupons/day1-coupon/queue-entries/me")
+                        .with(authentication(authToken)))
+                .andExpect(status().isNoContent());
+
+        // then
+        assertThat(couponQueueRepository.rankQueue("day1-coupon", member.getId())).isNull();
+        assertThat(couponQueueRepository.isActive("day1-coupon", member.getId())).isFalse();
+        mockMvc.perform(get("/api/v1/coupons/day1-coupon/queue-entries/me")
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("NOT_IN_QUEUE"));
+    }
+
+    @Test
+    void 대기열_입장허용_상태에서_나가기_성공() throws Exception {
+        // given
+        couponQueueRepository.addActive("day1-coupon", member.getId(), System.currentTimeMillis() + 30_000L);
+
+        // when
+        mockMvc.perform(delete("/api/v1/coupons/day1-coupon/queue-entries/me")
+                        .with(authentication(authToken)))
+                .andExpect(status().isNoContent());
+
+        // then
+        assertThat(couponQueueRepository.isActive("day1-coupon", member.getId())).isFalse();
+        assertThat(couponQueueRepository.rankQueue("day1-coupon", member.getId())).isNull();
+    }
+
+    @Test
+    void 대기열_나가기_멱등적처리() throws Exception {
+        // given: 이미 대기열에 없다
+
+        // when
+        mockMvc.perform(delete("/api/v1/coupons/day1-coupon/queue-entries/me")
+                        .with(authentication(authToken)))
+                .andExpect(status().isNoContent());
+
+        // then
+        mockMvc.perform(delete("/api/v1/coupons/day1-coupon/queue-entries/me")
+                        .with(authentication(authToken)))
+                .andExpect(status().isNoContent());
+        mockMvc.perform(get("/api/v1/coupons/day1-coupon/queue-entries/me")
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("NOT_IN_QUEUE"));
     }
 
     @Test

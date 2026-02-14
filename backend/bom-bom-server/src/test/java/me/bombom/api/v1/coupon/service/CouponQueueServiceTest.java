@@ -107,7 +107,14 @@ class CouponQueueServiceTest {
     void setUp() {
         couponIssueRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
-        redisTemplate.getConnectionFactory().getConnection().serverCommands().flushDb();
+        redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
+
+        couponQueueRepository.clearEventState("day1-coupon");
+        couponQueueRepository.clearEventState("future-coupon");
+        couponQueueRepository.clearEventState("ended-coupon");
+        couponQueueRepository.clearEventState("demo-coupon");
+        couponQueueRepository.clearEventState("scenario-coupon");
+        couponQueueRepository.clearEventState("limited-coupon");
 
         member = TestFixture.createUniqueMember("member-1", "provider-1");
         memberRepository.save(member);

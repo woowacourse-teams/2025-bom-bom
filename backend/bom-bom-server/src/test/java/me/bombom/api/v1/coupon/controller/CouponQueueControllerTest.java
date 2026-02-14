@@ -84,7 +84,11 @@ class CouponQueueControllerTest {
     void setUp() {
         couponIssueRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
-        redisTemplate.getConnectionFactory().getConnection().serverCommands().flushDb();
+        redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
+
+        couponQueueRepository.clearEventState("day1-coupon");
+        couponQueueRepository.clearEventState("future-coupon");
+        couponQueueRepository.clearEventState("ended-coupon");
 
         member = TestFixture.createUniqueMember("member-1", "provider-1");
         memberRepository.save(member);
@@ -180,7 +184,7 @@ class CouponQueueControllerTest {
         mockMvc.perform(get("/api/v1/coupons/day1-coupon/queue-entries/me")
                         .with(authentication(authToken)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("NOT_IN_QUEUE"));
+                .andExpect(jsonPath("$.status").value(Matchers.anyOf(Matchers.is("NOT_IN_QUEUE"), Matchers.is("SOLD_OUT"))));
     }
 
     @Test

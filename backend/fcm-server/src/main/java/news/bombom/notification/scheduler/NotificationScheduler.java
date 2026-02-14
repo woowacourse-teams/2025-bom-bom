@@ -40,7 +40,7 @@ public class NotificationScheduler {
                     continue;
                 }
 
-                notificationProcessingService.processNotification(notification);
+                notificationProcessingService.processArticleArrivedNotification(notification);
             } catch (Exception e) {
                 log.error("알림 처리 중 오류 발생: notificationId={}", notification.getId(), e);
             }

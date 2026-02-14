@@ -22,7 +22,7 @@ public class NotificationTokenService {
      * 알림 토큰 등록
      */
     @Transactional
-    public void registerFcmToken(Long memberId, String deviceUuid, String fcmToken) {
+    public void registerToken(Long memberId, String deviceUuid, String fcmToken) {
         fcmTokenRepository.deleteByDeviceUuid(deviceUuid);
 
         MemberFcmToken token = MemberFcmToken.builder()
@@ -39,9 +39,8 @@ public class NotificationTokenService {
      * 알림 토큰 업데이트 또는 등록
      */
     @Transactional
-    public void upsertFcmToken(Long memberId, String deviceUuid, String fcmToken) {
-        Optional<MemberFcmToken> fcmTokenOptional = fcmTokenRepository.findByMemberIdAndDeviceUuid(memberId,
-                deviceUuid);
+    public void upsertToken(Long memberId, String deviceUuid, String fcmToken) {
+        Optional<MemberFcmToken> fcmTokenOptional = fcmTokenRepository.findByMemberIdAndDeviceUuid(memberId, deviceUuid);
 
         if (fcmTokenOptional.isPresent()) {
             MemberFcmToken token = fcmTokenOptional.get();
@@ -106,9 +105,7 @@ public class NotificationTokenService {
                             String.format(
                                     "memberId=%d, deviceUuid=%s 에 해당하는 FCM 토큰이 존재하지 않습니다.",
                                     memberId,
-                                    deviceUuid
-                            )
-                    );
+                                    deviceUuid));
                 });
         return memberFcmToken.isNotificationEnabled();
     }

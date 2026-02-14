@@ -1,5 +1,6 @@
 package news.bombom.notification.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 import news.bombom.notification.domain.MemberFcmToken;
 import news.bombom.notification.repository.MemberFcmTokenRepository;
@@ -35,14 +37,14 @@ class NotificationTokenServiceTest {
     private final String NEW_FCM_TOKEN = "new-fcm-token-67890";
 
     @Test
-    @DisplayName("FCM 토큰 등록 성공")
-    void registerFcmToken_Success() {
+    @DisplayName("토큰 등록 성공")
+    void registerToken_Success() {
         // Given
         doNothing().when(fcmTokenRepository).deleteByDeviceUuid(anyString());
         when(fcmTokenRepository.save(any(MemberFcmToken.class))).thenReturn(createTestToken());
 
         // When
-        notificationTokenService.registerFcmToken(TEST_MEMBER_ID, TEST_DEVICE_UUID, TEST_FCM_TOKEN);
+        notificationTokenService.registerToken(TEST_MEMBER_ID, TEST_DEVICE_UUID, TEST_FCM_TOKEN);
 
         // Then
         verify(fcmTokenRepository, times(1)).deleteByDeviceUuid(TEST_DEVICE_UUID);
@@ -50,15 +52,15 @@ class NotificationTokenServiceTest {
     }
 
     @Test
-    @DisplayName("FCM 토큰 업서트 성공 - 기존 토큰 존재")
-    void upsertFcmToken_Success_ExistingToken() {
+    @DisplayName("토큰 업데이트 성공 - 기존 토큰 존재")
+    void upsertToken_Success_ExistingToken() {
         // Given
         MemberFcmToken existingToken = mock(MemberFcmToken.class);
         when(fcmTokenRepository.findByMemberIdAndDeviceUuid(TEST_MEMBER_ID, TEST_DEVICE_UUID))
                 .thenReturn(Optional.of(existingToken));
 
         // When
-        notificationTokenService.upsertFcmToken(TEST_MEMBER_ID, TEST_DEVICE_UUID, NEW_FCM_TOKEN);
+        notificationTokenService.upsertToken(TEST_MEMBER_ID, TEST_DEVICE_UUID, NEW_FCM_TOKEN);
 
         // Then
         verify(fcmTokenRepository, times(1)).findByMemberIdAndDeviceUuid(TEST_MEMBER_ID, TEST_DEVICE_UUID);
@@ -66,16 +68,17 @@ class NotificationTokenServiceTest {
     }
 
     @Test
-    @DisplayName("FCM 토큰 업서트 성공 - 기존 토큰 없음")
-    void upsertFcmToken_Success_NoExistingToken() {
+    @DisplayName("토큰 업데이트 성공 - 기존 토큰 없음")
+    void upsertToken_Success_NoExistingToken() {
         // Given
         when(fcmTokenRepository.findByMemberIdAndDeviceUuid(TEST_MEMBER_ID, TEST_DEVICE_UUID))
                 .thenReturn(Optional.empty());
         doNothing().when(fcmTokenRepository).deleteByDeviceUuid(anyString());
-        when(fcmTokenRepository.save(any(MemberFcmToken.class))).thenReturn(createTestToken());
+        when(fcmTokenRepository.save(any(MemberFcmToken.class)))
+                .thenReturn(createTestToken());
 
         // When
-        notificationTokenService.upsertFcmToken(TEST_MEMBER_ID, TEST_DEVICE_UUID, TEST_FCM_TOKEN);
+        notificationTokenService.upsertToken(TEST_MEMBER_ID, TEST_DEVICE_UUID, TEST_FCM_TOKEN);
 
         // Then
         verify(fcmTokenRepository, times(1)).findByMemberIdAndDeviceUuid(TEST_MEMBER_ID, TEST_DEVICE_UUID);
@@ -125,6 +128,34 @@ class NotificationTokenServiceTest {
 
         // Then
         verify(fcmTokenRepository, times(1)).deleteByMemberIdAndDeviceUuid(TEST_MEMBER_ID, TEST_DEVICE_UUID);
+    }
+
+    @Test
+    @DisplayName("회원의 토큰 리스트 반환")
+    void resolveTokens_ReturnsTokens() {
+        // Given
+        when(fcmTokenRepository.findByMemberId(TEST_MEMBER_ID)).thenReturn(List.of(createTestToken()));
+
+        // When
+        List<MemberFcmToken> result = notificationTokenService.resolveTokens(TEST_MEMBER_ID);
+
+        // Then
+        assertThat(result).hasSize(1);
+        verify(fcmTokenRepository, times(1)).findByMemberId(TEST_MEMBER_ID);
+    }
+
+    @Test
+    @DisplayName("토큰이 없으면 빈 목록 반환")
+    void resolveTokens_NoTokens_ReturnsEmpty() {
+        // Given
+        when(fcmTokenRepository.findByMemberId(TEST_MEMBER_ID)).thenReturn(List.of());
+
+        // When
+        List<MemberFcmToken> result = notificationTokenService.resolveTokens(TEST_MEMBER_ID);
+
+        // Then
+        assertThat(result).isEmpty();
+        verify(fcmTokenRepository, times(1)).findByMemberId(TEST_MEMBER_ID);
     }
 
     private MemberFcmToken createTestToken() {

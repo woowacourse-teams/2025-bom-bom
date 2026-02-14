@@ -174,4 +174,67 @@ class CaptchaServiceTest {
         assertThat(result.isSuccess()).isFalse();
         assertThat(result.message()).isEqualTo("캡차 검증 중 오류가 발생했습니다.");
     }
+
+    @Test
+    @DisplayName("reCAPTCHA 검증 실패 - 미래 시간 토큰 (비정상)")
+    void verify_fail_future_time() {
+        // given
+        // 1시간 후 시간 (비정상)
+        String futureTime = Instant.now().plusSeconds(3600).toString();
+        
+        GoogleRecaptchaResponse mockResponse = new GoogleRecaptchaResponse();
+        mockResponse.setSuccess(true);
+        mockResponse.setChallengeTs(futureTime);
+        mockResponse.setHostname("example.com");
+
+        when(googleRecaptchaClient.verify(anyString(), anyString()))
+                .thenReturn(mockResponse);
+
+        // when
+        var result = captchaService.verify(TEST_TOKEN, TEST_IP);
+
+        // then
+        assertThat(result.isSuccess()).isFalse();
+        assertThat(result.message()).isEqualTo("캡차 토큰이 만료되었습니다.");
+    }
+
+    @Test
+    @DisplayName("reCAPTCHA 검증 실패 - 빈 challenge_ts")
+    void verify_fail_empty_challenge_ts() {
+        // given
+        GoogleRecaptchaResponse mockResponse = new GoogleRecaptchaResponse();
+        mockResponse.setSuccess(true);
+        mockResponse.setChallengeTs("");
+        mockResponse.setHostname("example.com");
+
+        when(googleRecaptchaClient.verify(anyString(), anyString()))
+                .thenReturn(mockResponse);
+
+        // when
+        var result = captchaService.verify(TEST_TOKEN, TEST_IP);
+
+        // then
+        assertThat(result.isSuccess()).isFalse();
+        assertThat(result.message()).isEqualTo("캡차 토큰이 만료되었습니다.");
+    }
+
+    @Test
+    @DisplayName("reCAPTCHA 검증 실패 - 잘못된 형식의 challenge_ts")
+    void verify_fail_invalid_format_challenge_ts() {
+        // given
+        GoogleRecaptchaResponse mockResponse = new GoogleRecaptchaResponse();
+        mockResponse.setSuccess(true);
+        mockResponse.setChallengeTs("invalid-timestamp");
+        mockResponse.setHostname("example.com");
+
+        when(googleRecaptchaClient.verify(anyString(), anyString()))
+                .thenReturn(mockResponse);
+
+        // when
+        var result = captchaService.verify(TEST_TOKEN, TEST_IP);
+
+        // then
+        assertThat(result.isSuccess()).isFalse();
+        assertThat(result.message()).isEqualTo("캡차 토큰이 만료되었습니다.");
+    }
 }

@@ -58,20 +58,8 @@ public class CouponQueueService {
             return buildStatus(event, couponName, CouponQueueStatus.ACTIVE, null, activeCount, expiresIn, null);
         }
         Long rank = couponQueueRepository.rankQueue(couponName, memberId);
-        boolean soldOut = isSoldOut(couponName, event);
+        boolean soldOut = couponQueueRepository.isSoldOut(couponName);
         if (rank != null) {
-            if (soldOut && rank == 0) {
-                return buildStatus(
-                        event,
-                        couponName,
-                        CouponQueueStatus.SOLD_OUT,
-                        null,
-                        activeCount,
-                        null,
-                        CouponQueueStatusReason.SOLD_OUT
-                );
-            }
-
             CouponQueueStatusReason reason = soldOut
                     ? CouponQueueStatusReason.SOLD_OUT
                     : null;
@@ -93,20 +81,13 @@ public class CouponQueueService {
         if (added) {
             log.info("쿠폰 대기열 등록 성공 - couponName={}, memberId={}", couponName, memberId);
         }
+        if (couponQueueRepository.isActive(couponName, memberId)) {
+            Long expireAt = couponQueueRepository.getActiveExpireAtMillis(couponName, memberId);
+            Long expiresIn = expireAt != null ? Math.max(0L, (expireAt - nowMillis) / 1000) : null;
+            return buildStatus(event, couponName, CouponQueueStatus.ACTIVE, null, activeCount, expiresIn, null);
+        }
         Long finalRank = couponQueueRepository.rankQueue(couponName, memberId);
         if (finalRank != null) {
-            if (soldOut && finalRank == 0) {
-                return buildStatus(
-                        event,
-                        couponName,
-                        CouponQueueStatus.SOLD_OUT,
-                        null,
-                        activeCount,
-                        null,
-                        CouponQueueStatusReason.SOLD_OUT
-                );
-            }
-
             CouponQueueStatusReason reason = soldOut
                     ? CouponQueueStatusReason.SOLD_OUT
                     : null;
@@ -168,7 +149,7 @@ public class CouponQueueService {
             return buildStatus(event, couponName, CouponQueueStatus.ISSUED, null, activeCount, null, null);
         }
 
-        boolean soldOut = isSoldOut(couponName, event);
+        boolean soldOut = couponQueueRepository.isSoldOut(couponName);
 
         if (couponQueueRepository.isActive(couponName, memberId)) {
             Long expireAt = couponQueueRepository.getActiveExpireAtMillis(couponName, memberId);
@@ -178,18 +159,6 @@ public class CouponQueueService {
 
         Long rank = couponQueueRepository.rankQueue(couponName, memberId);
         if (rank != null) {
-            if (soldOut && rank == 0) {
-                return buildStatus(
-                        event,
-                        couponName,
-                        CouponQueueStatus.SOLD_OUT,
-                        null,
-                        activeCount,
-                        null,
-                        CouponQueueStatusReason.SOLD_OUT
-                );
-            }
-
             CouponQueueStatusReason reason = soldOut
                     ? CouponQueueStatusReason.SOLD_OUT
                     : null;
@@ -237,12 +206,12 @@ public class CouponQueueService {
                     .addContext(ErrorContextKeys.REASON, CouponErrorReason.DUPLICATED_REQUEST.name());
         }
 
-        if (isSoldOut(couponName, event)) {
+        if (couponQueueRepository.isSoldOut(couponName)) {
             couponQueueRepository.removeActive(couponName, memberId);
             couponQueueRepository.removeQueue(couponName, memberId);
             throw new CIllegalArgumentException(ErrorDetail.COUPON_SOLD_OUT)
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.OPERATION, "issueCoupon")
+                .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                .addContext(ErrorContextKeys.OPERATION, "issueCoupon")
                     .addContext("couponName", couponName)
                     .addContext(ErrorContextKeys.REASON, CouponErrorReason.SOLD_OUT.name());
         }
@@ -268,6 +237,14 @@ public class CouponQueueService {
             couponQueueRepository.removeActive(couponName, memberId);
             couponQueueRepository.removeQueue(couponName, memberId);
             log.info("쿠폰 발급 예약 실패(수량 초과) - couponName={}, memberId={}", couponName, memberId);
+            if (isSoldOutByPolicy(couponName, event)) {
+                couponQueueRepository.markSoldOut(couponName);
+                throw new CIllegalArgumentException(ErrorDetail.COUPON_SOLD_OUT)
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.OPERATION, "issueCoupon")
+                        .addContext("couponName", couponName)
+                        .addContext(ErrorContextKeys.REASON, CouponErrorReason.SOLD_OUT.name());
+            }
             throw new CIllegalArgumentException(ErrorDetail.PRECONDITION_FAILED)
                     .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                     .addContext(ErrorContextKeys.OPERATION, "issueCoupon")
@@ -279,6 +256,10 @@ public class CouponQueueService {
         couponQueueRepository.increaseIssuedCount(couponName, 1L);
         couponQueueRepository.removeActive(couponName, memberId);
         couponQueueRepository.removeQueue(couponName, memberId);
+
+        if (isSoldOutByPolicy(couponName, event)) {
+            couponQueueRepository.markSoldOut(couponName);
+        }
 
         log.info("쿠폰 발급 완료 - couponName={}, memberId={}, imageUrl={}", couponName, memberId, savedIssue.getImageUrl());
         return CouponIssueResponse.of(savedIssue.getImageUrl(), savedIssue.getUpdatedAt());
@@ -356,7 +337,7 @@ public class CouponQueueService {
         return exists;
     }
 
-    private boolean isSoldOut(String couponName, Event event) {
+    private boolean isSoldOutByPolicy(String couponName, Event event) {
         var stockCount = couponIssueRepository.getStockCountByCouponName(couponName);
         if (stockCount == null) {
             return true;

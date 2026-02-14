@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 @Slf4j
@@ -35,7 +36,9 @@ public class GoogleRecaptchaClient {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("secret", recaptchaProperties.getSecretKey());
         params.add("response", gRecaptchaResponse);
-        params.add("remoteip", remoteIp);
+        if (StringUtils.hasText(remoteIp)) {
+            params.add("remoteip", remoteIp);
+        }
         return params;
     }
 

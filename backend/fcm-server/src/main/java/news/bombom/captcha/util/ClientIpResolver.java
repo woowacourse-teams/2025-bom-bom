@@ -21,31 +21,26 @@ public final class ClientIpResolver {
     private static final String UNKNOWN = "unknown";
 
     public static String getClientIp(HttpServletRequest request) {
-        if (request == null) {
-            return "0.0.0.0";
-        }
-
-        String ip = null;
-
-        // 헤더에서 IP 추출 시도
+        // 헤더에서 IP 찾기
         for (String header : IP_HEADER_CANDIDATES) {
-            ip = request.getHeader(header);
+            String ip = request.getHeader(header);
             if (isValidIp(ip)) {
-                break;
+                return extractFirstIp(ip);
             }
         }
 
-        // 헤더에서 찾지 못한 경우 RemoteAddr 사용
-        if (!isValidIp(ip)) {
-            ip = request.getRemoteAddr();
-        }
+        // 헤더에 없으면 RemoteAddr 사용
+        return extractFirstIp(request.getRemoteAddr());
+    }
 
-        // X-Forwarded-For에 여러 IP가 있는 경우 첫 번째 IP 사용 (원본 클라이언트 IP)
-        if (ip != null && ip.contains(",")) {
-            ip = ip.split(",")[0].trim();
+    /**
+     * 여러 IP가 콤마로 구분된 경우 첫 번째 IP만 추출 (X-Forwarded-For: "client-ip, proxy1-ip, proxy2-ip")
+     */
+    private static String extractFirstIp(String ip) {
+        if (ip == null || !ip.contains(",")) {
+            return ip;
         }
-
-        return ip;
+        return ip.split(",")[0].trim();
     }
 
     private static boolean isValidIp(String ip) {

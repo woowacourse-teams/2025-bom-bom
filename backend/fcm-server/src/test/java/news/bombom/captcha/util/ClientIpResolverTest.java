@@ -79,16 +79,6 @@ class ClientIpResolverTest {
     }
 
     @Test
-    @DisplayName("request가 null인 경우 기본 IP 반환")
-    void getClientIp_null_request() {
-        // when
-        String actualIp = ClientIpResolver.getClientIp(null);
-
-        // then
-        assertThat(actualIp).isEqualTo("0.0.0.0");
-    }
-
-    @Test
     @DisplayName("빈 문자열은 무시하고 다음 헤더 확인")
     void getClientIp_skip_empty_string() {
         // given
@@ -152,5 +142,23 @@ class ClientIpResolverTest {
 
         // then
         assertThat(actualIp).isEqualTo(expectedIp);
+    }
+
+    @Test
+    @DisplayName("모든 헤더와 RemoteAddr이 null인 경우 null 반환")
+    void getClientIp_all_null_returns_null() {
+        // given
+        when(request.getHeader("X-Forwarded-For")).thenReturn(null);
+        when(request.getHeader("Proxy-Client-IP")).thenReturn(null);
+        when(request.getHeader("WL-Proxy-Client-IP")).thenReturn(null);
+        when(request.getHeader("HTTP_CLIENT_IP")).thenReturn(null);
+        when(request.getHeader("HTTP_X_FORWARDED_FOR")).thenReturn(null);
+        when(request.getRemoteAddr()).thenReturn(null);
+
+        // when
+        String actualIp = ClientIpResolver.getClientIp(request);
+
+        // then
+        assertThat(actualIp).isNull();
     }
 }

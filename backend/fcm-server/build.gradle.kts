@@ -40,6 +40,9 @@ dependencies {
     // fcm
     implementation("com.google.firebase:firebase-admin:9.2.0")
 
+    // swagger
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.15")
+
     // lombok
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

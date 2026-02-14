@@ -35,8 +35,7 @@ public class CaptchaService {
 
             // 2분 만료 검증
             if (!validateNotExpired(response.getChallengeTs())) {
-                log.warn("reCAPTCHA 검증 실패 - 토큰이 만료되었습니다. challenge_ts: {}", 
-                        response.getChallengeTs());
+                log.warn("reCAPTCHA 검증 실패 - 토큰이 만료되었습니다. challenge_ts: {}", response.getChallengeTs());
                 return CaptchaVerifyResponse.fail("캡차 토큰이 만료되었습니다.");
             }
 
@@ -63,10 +62,19 @@ public class CaptchaService {
             Instant now = Instant.now();
             long secondsDiff = Duration.between(challengeTime, now).getSeconds();
 
-            log.debug("challenge_ts: {}, 현재 시간: {}, 차이: {}초", 
-                    challengeTs, now, secondsDiff);
+            // 미래 시간 체크
+            if (secondsDiff < 0) {
+                log.warn("challenge_ts가 미래 시간입니다. challenge_ts: {}, 현재: {}", challengeTime, now);
+                return false;
+            }
 
-            return secondsDiff >= 0 && secondsDiff <= recaptchaProperties.getMaxAgeSeconds();
+            // 2분 이내인지 체크
+            if (secondsDiff > recaptchaProperties.getMaxAgeSeconds()) {
+                log.debug("토큰이 만료되었습니다. 경과 시간: {}초, 최대 허용: {}초", secondsDiff, recaptchaProperties.getMaxAgeSeconds());
+                return false;
+            }
+
+            return true;
         } catch (DateTimeParseException e) {
             log.error("challenge_ts 파싱 실패: {}", challengeTs, e);
             return false;

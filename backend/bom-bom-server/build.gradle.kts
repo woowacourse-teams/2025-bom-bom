@@ -90,6 +90,9 @@ dependencies {
 
     // for : webhook
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+
+    // redis
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
 }
 
 // Querydsl 생성된 파일 정리

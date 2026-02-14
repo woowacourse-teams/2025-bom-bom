@@ -1,6 +1,5 @@
 package me.bombom.api.v1.common.exception;
 
-import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -23,7 +22,7 @@ public class GlobalExceptionHandler {
             log.info("IllegalArgumentException: ", e);
         }
         return ResponseEntity.status(e.getHttpStatus())
-                .body(ErrorResponse.from(e.getErrorDetail()));
+                .body(ErrorResponse.from(e.getErrorDetail(), e.getContext()));
     }
 
     @ExceptionHandler(UnauthorizedException.class)

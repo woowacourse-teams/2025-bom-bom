@@ -3,6 +3,7 @@ package me.bombom.api.v1.coupon.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,6 +17,7 @@ import me.bombom.api.v1.coupon.dto.response.CouponQueueStatusResponse;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -29,7 +31,29 @@ public interface CouponQueueControllerApi {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "대기열 등록 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 (존재하지 않는 쿠폰, 중복 신청 등)", content = @Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "잘못된 요청 (존재하지 않는 쿠폰, 중복 신청 등) 혹은 이벤트 미개시",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorResponse.class),
+                            examples = {
+                                    @ExampleObject(name = "EVENT_NOT_STARTED", value = "{\"status\":\"BAD_REQUEST\",\"code\":\"C002\",\"message\":\"이벤트가 아직 시작되지 않았습니다.\",\"reason\":\"EVENT_NOT_STARTED\"}"),
+                                    @ExampleObject(name = "DUPLICATED_REQUEST", value = "{\"status\":\"BAD_REQUEST\",\"code\":\"M009\",\"message\":\"이미 존재하는 데이터입니다.\"}")
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "이벤트 종료",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorResponse.class),
+                            examples = {
+                                    @ExampleObject(name = "EVENT_ENDED", value = "{\"status\":\"CONFLICT\",\"code\":\"C003\",\"message\":\"이벤트가 종료되었습니다.\",\"reason\":\"EVENT_ENDED\"}")
+                            }
+                    )
+            ),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/{couponName}/queue-entries")
@@ -43,7 +67,7 @@ public interface CouponQueueControllerApi {
             description = "현재 사용자의 대기열 순번/상태 및 남은 수를 조회합니다."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "200", description = "조회 성공 (이벤트 미개시/종료 시에도 status/reason 으로 상태 응답)"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 (존재하지 않는 쿠폰)", content = @Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorResponse.class)))
     })
@@ -54,12 +78,49 @@ public interface CouponQueueControllerApi {
     );
 
     @Operation(
+            summary = "선착순 쿠폰 대기열 나가기",
+            description = "현재 사용자의 대기열/입장 허용 목록에서 즉시 제외합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "대기열 나가기 처리 완료"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 (존재하지 않는 쿠폰)", content = @Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorResponse.class)))
+    })
+    @DeleteMapping("/{couponName}/queue-entries/me")
+    void leaveQueue(
+            @PathVariable @NotBlank(message = "couponName은 비어 있을 수 없습니다.") String couponName,
+            @Parameter(hidden = true) @LoginMember Member member
+    );
+
+    @Operation(
             summary = "선착순 쿠폰 발급",
             description = "입장 허용 상태(active)인 사용자만 쿠폰을 발급합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "발급 확정 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 (입장 허용 상태 아님 등)", content = @Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "사전 조건 불일치 (입장 대기 중/만료, 이벤트 비활성, 중복 요청, ASSIGNMENT_RETRY_EXCEEDED)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorResponse.class),
+                            examples = {
+                                    @ExampleObject(name = "ASSIGNMENT_RETRY_EXCEEDED", value = "{\"status\":\"BAD_REQUEST\",\"code\":\"M012\",\"message\":\"사전 조건을 만족하지 않습니다.\",\"reason\":\"ASSIGNMENT_RETRY_EXCEEDED\"}"),
+                                    @ExampleObject(name = "DUPLICATED_REQUEST", value = "{\"status\":\"BAD_REQUEST\",\"code\":\"M009\",\"message\":\"이미 존재하는 데이터입니다.\"}")
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "쿠폰이 소진되어 더 이상 발급할 수 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorResponse.class),
+                            examples = {
+                                    @ExampleObject(name = "SOLD_OUT", value = "{\"status\":\"CONFLICT\",\"code\":\"C001\",\"message\":\"모든 쿠폰이 소진되었습니다.\"}")
+                            }
+                    )
+            ),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/{couponName}/issues")

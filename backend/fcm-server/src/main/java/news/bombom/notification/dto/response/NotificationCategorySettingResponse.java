@@ -8,7 +8,8 @@ import news.bombom.notification.domain.NotificationCategory;
 public record NotificationCategorySettingResponse(
 
         @NotNull NotificationCategory category,
-        boolean enabled) {
+        boolean enabled
+) {
 
     public static List<NotificationCategorySettingResponse> from(List<MemberNotificationSetting> settings) {
         return settings.stream()

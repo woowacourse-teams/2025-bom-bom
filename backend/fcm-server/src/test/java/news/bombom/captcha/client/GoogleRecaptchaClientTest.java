@@ -197,4 +197,50 @@ class GoogleRecaptchaClientTest {
         assertThat(result).isNotNull();
         assertThat(result.isSuccess()).isFalse();
     }
+
+    @Test
+    @DisplayName("remoteIp가 null인 경우 remoteip 파라미터 제외")
+    void verify_null_remote_ip() {
+        // given
+        GoogleRecaptchaResponse response = new GoogleRecaptchaResponse();
+        response.setSuccess(true);
+        response.setChallengeTs("2025-07-25T12:00:00Z");
+
+        when(restTemplate.postForObject(eq(VERIFY_URL), requestCaptor.capture(), eq(GoogleRecaptchaResponse.class)))
+                .thenReturn(response);
+
+        // when
+        googleRecaptchaClient.verify(TEST_TOKEN, null);
+
+        // then
+        HttpEntity<MultiValueMap<String, String>> capturedRequest = requestCaptor.getValue();
+        MultiValueMap<String, String> params = capturedRequest.getBody();
+
+        assertThat(params).isNotNull();
+        assertThat(params.getFirst("secret")).isEqualTo(TEST_SECRET_KEY);
+        assertThat(params.getFirst("response")).isEqualTo(TEST_TOKEN);
+        assertThat(params.getFirst("remoteip")).isNull(); // remoteip 파라미터가 없어야 함
+    }
+
+    @Test
+    @DisplayName("remoteIp가 빈 문자열인 경우 remoteip 파라미터 제외")
+    void verify_empty_remote_ip() {
+        // given
+        GoogleRecaptchaResponse response = new GoogleRecaptchaResponse();
+        response.setSuccess(true);
+        response.setChallengeTs("2025-07-25T12:00:00Z");
+
+        when(restTemplate.postForObject(eq(VERIFY_URL), requestCaptor.capture(), eq(GoogleRecaptchaResponse.class)))
+                .thenReturn(response);
+
+        // when
+        googleRecaptchaClient.verify(TEST_TOKEN, "");
+
+        // then
+        HttpEntity<MultiValueMap<String, String>> capturedRequest = requestCaptor.getValue();
+        MultiValueMap<String, String> params = capturedRequest.getBody();
+
+        assertThat(params).isNotNull();
+        assertThat(params.getFirst("remoteip")).isNull(); // remoteip 파라미터가 없어야 함
+    }
 }

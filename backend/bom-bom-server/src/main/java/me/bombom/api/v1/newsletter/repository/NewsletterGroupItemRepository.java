@@ -2,7 +2,7 @@ package me.bombom.api.v1.newsletter.repository;
 
 import java.util.List;
 import me.bombom.api.v1.challenge.dto.ChallengeNewsletterRow;
-import me.bombom.api.v1.challenge.dto.ChallengeLandingNewsletterRow;
+import me.bombom.api.v1.challenge.dto.response.ChallengeLandingNewsletterResponse;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroupItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,8 +28,7 @@ public interface NewsletterGroupItemRepository extends JpaRepository<NewsletterG
     );
 
     @Query("""
-        SELECT new me.bombom.api.v1.challenge.dto.ChallengeLandingNewsletterRow(
-            c.id,
+        SELECT new me.bombom.api.v1.challenge.dto.response.ChallengeLandingNewsletterResponse(
             n.id,
             n.name,
             n.imageUrl,
@@ -43,7 +42,7 @@ public interface NewsletterGroupItemRepository extends JpaRepository<NewsletterG
         WHERE c.id = :challengeId
         ORDER BY n.name
     """)
-    List<ChallengeLandingNewsletterRow> findChallengeLandingNewsletterRowsByChallengeId(
+    List<ChallengeLandingNewsletterResponse> findChallengeLandingNewslettersByChallengeId(
             @Param("challengeId") Long challengeId
     );
 

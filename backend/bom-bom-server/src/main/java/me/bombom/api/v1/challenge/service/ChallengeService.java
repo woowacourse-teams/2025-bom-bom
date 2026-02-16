@@ -20,7 +20,6 @@ import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.domain.EligibilityReason;
-import me.bombom.api.v1.challenge.dto.ChallengeLandingNewsletterRow;
 import me.bombom.api.v1.challenge.dto.ChallengeNewsletterRow;
 import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
 import me.bombom.api.v1.challenge.dto.response.ChallengeDetailResponse;
@@ -105,10 +104,7 @@ public class ChallengeService {
                         .addContext(ErrorContextKeys.OPERATION, "getChallengeLanding"));
 
         List<ChallengeLandingNewsletterResponse> newsletters =
-                newsletterGroupItemRepository.findChallengeLandingNewsletterRowsByChallengeId(id)
-                        .stream()
-                        .map(ChallengeLandingNewsletterRow::response)
-                        .toList();
+                newsletterGroupItemRepository.findChallengeLandingNewslettersByChallengeId(id);
 
         boolean grantsBadge = challenge.getTotalDays() >= MIN_CHALLENGE_TOTAL_DAYS_FOR_BADGE;
 

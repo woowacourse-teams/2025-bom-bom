@@ -3,8 +3,9 @@ package me.bombom.api.v1.challenge.controller;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeLandingResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeTeamListResponse;
 import me.bombom.api.v1.challenge.service.ChallengeService;
@@ -36,8 +37,18 @@ public class ChallengeController implements ChallengeControllerApi {
 
     @Override
     @GetMapping("/{id}")
-    public ChallengeInfoResponse getChallengeInfo(@PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id) {
+    public ChallengeInfoResponse getChallengeInfo(
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+    ) {
         return challengeService.getChallengeInfo(id);
+    }
+
+    @Override
+    @GetMapping("/{id}/landing")
+    public ChallengeLandingResponse getChallengeLanding(
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+    ) {
+        return challengeService.getChallengeLanding(id);
     }
 
     @Override

@@ -25,6 +25,8 @@ import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
 import me.bombom.api.v1.challenge.dto.response.ChallengeDetailResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeLandingNewsletterResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeLandingResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeNewsletterResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeTeamListResponse;
@@ -93,6 +95,20 @@ public class ChallengeService {
                         .addContext(ErrorContextKeys.OPERATION, "getChallengeInfo"));
 
         return ChallengeInfoResponse.of(challenge, SUCCESS_REQUIRED_RATIO);
+    }
+
+    public ChallengeLandingResponse getChallengeLanding(Long id) {
+        Challenge challenge = challengeRepository.findById(id)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.OPERATION, "getChallengeLanding"));
+
+        List<ChallengeLandingNewsletterResponse> newsletters =
+                newsletterGroupItemRepository.findChallengeLandingNewslettersByChallengeId(id);
+
+        boolean grantsBadge = challenge.getTotalDays() >= MIN_CHALLENGE_TOTAL_DAYS_FOR_BADGE;
+
+        return ChallengeLandingResponse.of(challenge, newsletters, grantsBadge);
     }
 
     public ChallengeEligibilityResponse checkEligibility(Long challengeId, Member member) {

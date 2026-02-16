@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Positive;
 import java.util.List;
 import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeLandingResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeTeamListResponse;
 import me.bombom.api.v1.common.resolver.LoginMember;
@@ -40,6 +41,19 @@ public interface ChallengeControllerApi {
             @ApiResponse(responseCode = "404", description = "챌린지를 찾을 수 없음", content = @Content)
     })
     ChallengeInfoResponse getChallengeInfo(@PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id);
+
+    @Operation(
+            summary = "챌린지 랜딩 페이지 조회",
+            description = "챌린지 랜딩 페이지에 필요한 정보(기수, 기간, 필수 뉴스레터, 뱃지 수여 여부)를 조회합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "챌린지 랜딩 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 (유효하지 않은 ID)", content = @Content),
+            @ApiResponse(responseCode = "404", description = "챌린지를 찾을 수 없음", content = @Content)
+    })
+    ChallengeLandingResponse getChallengeLanding(
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+    );
 
     @Operation(
             summary = "챌린지 신청 가능 여부 조회",

@@ -11,6 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeLandingNewsletterResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeLandingResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeTeamListResponse;
 import me.bombom.api.v1.challenge.service.ChallengeService;
 import me.bombom.api.v1.common.exception.GlobalExceptionHandler;
@@ -103,6 +105,39 @@ class ChallengeControllerUnitTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("챌린지1"));
+    }
+
+    @Test
+    void 챌린지_랜딩_정보를_요청할_수_있다() throws Exception {
+        //given
+        ChallengeLandingResponse response = new ChallengeLandingResponse(
+                "챌린지1",
+                1,
+                LocalDate.of(2026, 1, 5),
+                LocalDate.of(2026, 2, 4),
+                true,
+                List.of(
+                        new ChallengeLandingNewsletterResponse(
+                                1L,
+                                "뉴스레터1",
+                                "https://image.url",
+                                "카테고리",
+                                "설명"
+                        )
+                )
+        );
+
+        given(challengeService.getChallengeLanding(1L))
+                .willReturn(response);
+
+        //when & then
+        mockMvc.perform(get("/api/v1/challenges/{id}/landing", 1L))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("챌린지1"))
+                .andExpect(jsonPath("$.generation").value(1))
+                .andExpect(jsonPath("$.newsletters").isArray())
+                .andExpect(jsonPath("$.grantsBadge").value(true));
     }
 
     @Test

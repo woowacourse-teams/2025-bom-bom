@@ -27,8 +27,8 @@ public record ChallengeResponse(
         @Schema(type = "integer", format = "int64", description = "참가자 수", required = true)
         long participantCount,
 
-        @NotNull List<ChallengeNewsletterResponse>
-        newsletters,
+        @NotNull
+        List<ChallengeNewsletterResponse> newsletters,
 
         @NotNull
         ChallengeStatus status,

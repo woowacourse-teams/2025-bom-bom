@@ -97,6 +97,15 @@ public class NotificationTokenService {
         return fcmTokens;
     }
 
+    /**
+     * 회원의 FCM 토큰 문자열 리스트 조회
+     */
+    public List<String> getTokenStrings(Long memberId) {
+        return resolveTokens(memberId).stream()
+                .map(MemberFcmToken::getFcmToken)
+                .toList();
+    }
+
     public boolean getNotificationEnabled(Long memberId, String deviceUuid) {
         MemberFcmToken memberFcmToken = fcmTokenRepository.findByMemberIdAndDeviceUuid(memberId, deviceUuid)
                 .orElseThrow(() -> {

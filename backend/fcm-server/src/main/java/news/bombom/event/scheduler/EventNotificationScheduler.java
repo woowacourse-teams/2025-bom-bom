@@ -31,11 +31,7 @@ public class EventNotificationScheduler {
 
             log.info("발송 대상 알림 개수: {}", pendingSchedules.size());
             for (EventNotificationSchedule schedule : pendingSchedules) {
-                try {
-                    notificationService.sendEventNotification(schedule);
-                } catch (Exception e) {
-                    log.error("알림 발송 실패: scheduleId={}", schedule.getId(), e);
-                }
+                notificationService.sendEventNotification(schedule);
             }
         } catch (Exception e) {
             log.error("이벤트 알림 스케줄러 실행 중 오류 발생", e);

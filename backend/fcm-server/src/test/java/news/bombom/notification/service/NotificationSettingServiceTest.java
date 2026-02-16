@@ -1,7 +1,10 @@
 package news.bombom.notification.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,6 +27,9 @@ class NotificationSettingServiceTest {
 
     @Mock
     private MemberNotificationSettingRepository settingRepository;
+
+    @Mock
+    private NotificationTokenService tokenService;
 
     @Mock
     private FcmTopicService fcmTopicService;
@@ -60,6 +66,27 @@ class NotificationSettingServiceTest {
         // Then
         assertThat(setting.isEnabled()).isFalse();
         verify(settingRepository).save(setting);
+        // ARTICLE은 useTopic=false이므로 토큰 조회 및 FCM 호출 안 함
+    }
+
+    @Test
+    @DisplayName("카테고리 설정 업데이트 - 토픽 사용 카테고리인 경우 FCM 호출")
+    void updateCategorySetting_WithTopic_CallsFcmService() {
+        // Given
+        MemberNotificationSetting setting = createSetting(NotificationCategory.EVENT, false);
+        when(settingRepository.findByMemberIdAndCategory(TEST_MEMBER_ID, NotificationCategory.EVENT))
+                .thenReturn(Optional.of(setting));
+        
+        when(tokenService.getTokenStrings(TEST_MEMBER_ID)).thenReturn(List.of("fcm-token-1", "fcm-token-2"));
+
+        // When
+        notificationSettingService.updateCategorySetting(TEST_MEMBER_ID, NotificationCategory.EVENT, true);
+
+        // Then
+        assertThat(setting.isEnabled()).isTrue();
+        verify(settingRepository).save(setting);
+        verify(tokenService).getTokenStrings(TEST_MEMBER_ID);
+        verify(fcmTopicService).updateSubscription(anyLong(), any(NotificationCategory.class), anyBoolean(), anyList());
     }
 
     @Test
@@ -92,6 +119,25 @@ class NotificationSettingServiceTest {
 
         // Then
         assertThat(result).isEqualTo(NotificationCategory.EVENT.getDefaultSetting());
+    }
+
+    @Test
+    @DisplayName("단일 카테고리 설정 조회 - ensureMemberNotificationSetting 사용하여 일관성 유지")
+    void getCategorySetting_UsesEnsureMemberNotificationSetting() {
+        // Given
+        List<MemberNotificationSetting> settings = List.of(
+                createSetting(NotificationCategory.ARTICLE, true),
+                createSetting(NotificationCategory.EVENT, false));
+        when(settingRepository.findAllByMemberId(TEST_MEMBER_ID)).thenReturn(settings);
+
+        // When
+        NotificationCategorySettingResponse result = notificationSettingService
+                .getCategorySetting(TEST_MEMBER_ID, NotificationCategory.ARTICLE);
+
+        // Then
+        assertThat(result.category()).isEqualTo(NotificationCategory.ARTICLE);
+        assertThat(result.enabled()).isTrue();
+        verify(settingRepository, times(1)).findAllByMemberId(TEST_MEMBER_ID);
     }
 
     private MemberNotificationSetting createSetting(NotificationCategory category, boolean isEnabled) {

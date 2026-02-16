@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotificationSettingService {
 
     private final MemberNotificationSettingRepository settingRepository;
+    private final FcmTopicService fcmTopicService;
 
     @Transactional
     public List<MemberNotificationSetting> ensureMemberNotificationSetting(Long memberId) {
@@ -43,6 +44,7 @@ public class NotificationSettingService {
 
         setting.updateEnabled(enabled);
         settingRepository.save(setting);
+        fcmTopicService.updateSubscription(memberId, category, enabled);
     }
 
     @Transactional

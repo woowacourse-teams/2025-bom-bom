@@ -25,6 +25,9 @@ class NotificationSettingServiceTest {
     @Mock
     private MemberNotificationSettingRepository settingRepository;
 
+    @Mock
+    private FcmTopicService fcmTopicService;
+
     @InjectMocks
     private NotificationSettingService notificationSettingService;
 

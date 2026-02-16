@@ -25,7 +25,6 @@ public class EventNotificationScheduler {
     public void processPendingNotifications() {
         try {
             List<EventNotificationSchedule> pendingSchedules = eventService.getPendingSchedules();
-
             if (pendingSchedules.isEmpty()) {
                 return;
             }

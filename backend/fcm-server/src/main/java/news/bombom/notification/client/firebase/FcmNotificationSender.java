@@ -13,6 +13,8 @@ import news.bombom.notification.domain.NotificationType;
 import news.bombom.notification.dto.NotificationMessage;
 import news.bombom.notification.dto.NotificationResult;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -48,6 +50,7 @@ public class FcmNotificationSender implements NotificationSender {
     /**
      * 토픽으로 알림 전송 (FCM 특화 기능)
      */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public NotificationResult sendToTopic(String topic, String title, String content, Map<String, Object> data) {
         try {
             Message message = Message.builder()
@@ -55,7 +58,6 @@ public class FcmNotificationSender implements NotificationSender {
                     .setNotification(createNotification(title, content))
                     .putAllData(convertToStringMap(data))
                     .build();
-
             String response = firebaseMessaging.send(message);
             log.info("FCM 토픽 발송 성공: topic={}, response={}", topic, response);
             return NotificationResult.success(response);

@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  bombom-server-event:
+    image: bombomnewsletter/bom-bom:latest
+    container_name: event
+    ports:
+      - "80:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: ${DEV_SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${DEV_SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DEV_SPRING_DATASOURCE_PASSWORD}
+      LOGGING_FILE_NAME: /logs/bombom-event.log
+
+      # Apple p8 (ENV로 주입)
+      OAUTH2_APPLE_PRIVATE_KEY: ${OAUTH2_APPLE_PRIVATE_KEY}
+
+    restart: always
+    volumes:
+      - /home/ec2-user/bombom-event/logs:/logs

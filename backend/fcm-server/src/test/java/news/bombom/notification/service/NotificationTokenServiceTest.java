@@ -158,6 +158,34 @@ class NotificationTokenServiceTest {
         verify(fcmTokenRepository, times(1)).findByMemberId(TEST_MEMBER_ID);
     }
 
+    @Test
+    @DisplayName("getTokenStrings - 토큰 문자열 리스트 반환")
+    void getTokenStrings_ReturnsTokenStrings() {
+        // Given
+        when(fcmTokenRepository.findByMemberId(TEST_MEMBER_ID)).thenReturn(List.of(createTestToken()));
+
+        // When
+        List<String> result = notificationTokenService.getTokenStrings(TEST_MEMBER_ID);
+
+        // Then
+        assertThat(result).containsExactly(TEST_FCM_TOKEN);
+        verify(fcmTokenRepository, times(1)).findByMemberId(TEST_MEMBER_ID);
+    }
+
+    @Test
+    @DisplayName("getTokenStrings - 토큰 없으면 빈 리스트 반환")
+    void getTokenStrings_NoTokens_ReturnsEmptyList() {
+        // Given
+        when(fcmTokenRepository.findByMemberId(TEST_MEMBER_ID)).thenReturn(List.of());
+
+        // When
+        List<String> result = notificationTokenService.getTokenStrings(TEST_MEMBER_ID);
+
+        // Then
+        assertThat(result).isEmpty();
+        verify(fcmTokenRepository, times(1)).findByMemberId(TEST_MEMBER_ID);
+    }
+
     private MemberFcmToken createTestToken() {
         return MemberFcmToken.builder()
                 .id(1L)

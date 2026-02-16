@@ -1,5 +1,6 @@
 package news.bombom.notification.service;
 
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotificationSettingService {
 
     private final MemberNotificationSettingRepository settingRepository;
+    private final NotificationTokenService tokenService;
     private final FcmTopicService fcmTopicService;
 
     @Transactional
@@ -41,10 +43,13 @@ public class NotificationSettingService {
     public void updateCategorySetting(Long memberId, NotificationCategory category, boolean enabled) {
         MemberNotificationSetting setting = settingRepository.findByMemberIdAndCategory(memberId, category)
                 .orElseGet(() -> createDefaultSetting(memberId, category));
-
         setting.updateEnabled(enabled);
         settingRepository.save(setting);
-        fcmTopicService.updateSubscription(memberId, category, enabled);
+
+        if (category.isUseTopic()) {
+            List<String> tokens = tokenService.getTokenStrings(memberId);
+            fcmTopicService.updateSubscription(memberId, category, enabled, tokens);
+        }
     }
 
     @Transactional
@@ -55,9 +60,12 @@ public class NotificationSettingService {
 
     @Transactional
     public NotificationCategorySettingResponse getCategorySetting(Long memberId, NotificationCategory category) {
-        MemberNotificationSetting setting = settingRepository.findByMemberIdAndCategory(memberId, category)
-                .orElseGet(() -> settingRepository.save(createDefaultSetting(memberId, category)));
-        return NotificationCategorySettingResponse.from(setting);
+        List<MemberNotificationSetting> settings = ensureMemberNotificationSetting(memberId);
+        return settings.stream()
+                .filter(setting -> setting.getCategory() == category)
+                .findFirst()
+                .map(NotificationCategorySettingResponse::from)
+                .orElseThrow(() -> new IllegalStateException("카테고리 설정이 존재해야 합니다. memberId=" + memberId + ", category=" + category));
     }
 
     public boolean isEnabled(Long memberId, NotificationCategory category) {

@@ -23,17 +23,18 @@ public class FcmTopicService {
     private final FirebaseMessaging firebaseMessaging;
     private final MemberFcmTokenRepository tokenRepository;
 
+    /**
+     * 토큰을 미리 조회한 후 FCM 토픽 구독/해제 (트랜잭션 내에서 토큰 조회 후 호출용)
+     */
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void updateSubscription(Long memberId, NotificationCategory category, boolean enabled) {
+    public void updateSubscription(Long memberId, NotificationCategory category, boolean enabled, List<String> tokens) {
         if (!category.isUseTopic()) {
             return;
         }
-        
-        processTopicOperation(memberId, category, enabled);
+        processTopicOperation(memberId, category, enabled, tokens);
     }
 
-    private void processTopicOperation(Long memberId, NotificationCategory category, boolean isSubscribe) {
-        List<String> tokens = getUserTokens(memberId);
+    private void processTopicOperation(Long memberId, NotificationCategory category, boolean isSubscribe, List<String> tokens) {
         String operation = isSubscribe ? "구독" : "구독 해제";
         if (tokens.isEmpty()) {
             log.warn("토픽 {} 실패 - FCM 토큰이 없습니다. memberId={}, category={}", operation, memberId, category);
@@ -52,11 +53,5 @@ public class FcmTopicService {
             log.error("토픽 {} 실패: memberId={}, category={}, topic={}", operation, memberId, category, topic, e);
             // Best effort - 실패해도 예외 전파 안함
         }
-    }
-
-    private List<String> getUserTokens(Long memberId) {
-        return tokenRepository.findByMemberId(memberId).stream()
-                .map(MemberFcmToken::getFcmToken)
-                .toList();
     }
 }

@@ -1,6 +1,7 @@
 package news.bombom.event.service;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,7 @@ public class EventNotificationService {
     private final FcmNotificationSender fcmNotificationSender;
     
     private static final String EVENT_TOPIC = NotificationCategory.EVENT.getTopicName(); // "bombom_event"
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private static final DateTimeFormatter DISPLAY_TIME_FORMATTER = DateTimeFormatter.ofPattern("M월 d일 (E) HH:mm", Locale.KOREA);
 
     @Transactional
     public void sendEventNotification(EventNotificationSchedule schedule) {
@@ -53,12 +54,11 @@ public class EventNotificationService {
      * 알림 본문 생성
      */
     private String buildNotificationBody(Event event, EventNotificationSchedule schedule) {
-        String startTimeStr = event.getStartTime().format(TIME_FORMATTER);
         if (schedule.getType() == NotificationScheduleType.BEFORE_MINUTES) {
-            return String.format("이벤트가 %d분 후 시작됩니다. (%s)", 
-                    schedule.getMinutesBefore(), startTimeStr);
+            String startTimeStr = event.getStartTime().format(DISPLAY_TIME_FORMATTER);
+            return String.format("⏰ %d분 후 시작!\n시작 시각 %s", schedule.getMinutesBefore(), startTimeStr);
         } else {
-            return String.format("이벤트가 시작되었습니다! (%s)", startTimeStr);
+            return "🎉 지금 시작!";
         }
     }
 }

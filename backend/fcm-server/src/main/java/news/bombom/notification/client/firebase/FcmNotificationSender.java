@@ -59,7 +59,6 @@ public class FcmNotificationSender implements NotificationSender {
             String response = firebaseMessaging.send(message);
             log.info("FCM 토픽 발송 성공: topic={}, response={}", topic, response);
             return NotificationResult.success(response);
-
         } catch (FirebaseMessagingException e) {
             log.error("FCM 토픽 발송 실패: topic={}, error={}", topic, e.getMessage());
             return NotificationResult.failure("FCM 토픽 발송 실패: " + e.getMessage());

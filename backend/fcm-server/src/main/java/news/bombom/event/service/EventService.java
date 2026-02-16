@@ -1,6 +1,7 @@
 package news.bombom.event.service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,11 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class EventService {
 
+    private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
+
     private final EventNotificationScheduleRepository scheduleRepository;
     private final EventRepository eventRepository;
 
     public List<EventNotificationSchedule> getPendingSchedules() {
-        return scheduleRepository.findPendingSchedules(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now(SEOUL);
+        return scheduleRepository.findPendingSchedules(now);
     }
 
     @Transactional(readOnly = true)

@@ -23,6 +23,9 @@ public enum ErrorDetail {
     BLANK_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "M010", "공백은 허용하지 않습니다"),
     INVALID_REQUEST_BODY_VALIDATION(HttpStatus.BAD_REQUEST, "M011", "요청 바디 유효성이 맞지 않습니다."),
     PRECONDITION_FAILED(HttpStatus.BAD_REQUEST, "M012", "사전 조건을 만족하지 않습니다."),
+    COUPON_SOLD_OUT(HttpStatus.CONFLICT, "C001", "모든 쿠폰이 소진되었습니다."),
+    EVENT_NOT_STARTED(HttpStatus.BAD_REQUEST, "C002", "이벤트가 아직 시작되지 않았습니다."),
+    EVENT_ENDED(HttpStatus.CONFLICT, "C003", "이벤트가 종료되었습니다."),
 
     /*
      * J : 인증

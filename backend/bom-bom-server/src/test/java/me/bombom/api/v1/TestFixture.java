@@ -16,6 +16,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.domain.ChallengeTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.domain.DailyGuideType;
+import me.bombom.api.v1.coupon.domain.CouponIssue;
 import me.bombom.api.v1.highlight.domain.Color;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
@@ -84,6 +85,12 @@ public final class TestFixture {
                 .gender(Gender.FEMALE)
                 .roleId(1L)
                 .build();
+    }
+
+    public static List<CouponIssue> createCouponPool(String couponName, int count, String imageUrl) {
+        return java.util.stream.IntStream.range(0, count)
+                .mapToObj(i -> CouponIssue.preIssue(couponName, imageUrl))
+                .toList();
     }
 
     /**

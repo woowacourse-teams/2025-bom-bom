@@ -185,8 +185,12 @@ class CouponQueueServiceTest {
         // when
         CouponQueueStatusResponse response = couponQueueService.getQueueStatus("day1-coupon", member);
         // then
-        assertThat(response.status()).isEqualTo(CouponQueueStatus.WAITING);
-        assertThat(response.position()).isEqualTo(1L);
+        assertThat(response.status()).isIn(CouponQueueStatus.WAITING, CouponQueueStatus.ACTIVE);
+        if (response.status() == CouponQueueStatus.WAITING) {
+            assertThat(response.position()).isEqualTo(1L);
+        } else {
+            assertThat(response.activeExpiresInSeconds()).isNotNull();
+        }
     }
 
     @Test

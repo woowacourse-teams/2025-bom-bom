@@ -166,13 +166,18 @@ public class CouponQueueService {
         }
 
         if (couponQueueRepository.isSoldOut(couponName)) {
-            couponQueueRepository.removeActive(couponName, memberId);
-            couponQueueRepository.removeQueue(couponName, memberId);
-            throw new CIllegalArgumentException(ErrorDetail.COUPON_SOLD_OUT)
-                .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                .addContext(ErrorContextKeys.OPERATION, "issueCoupon")
-                    .addContext("couponName", couponName)
-                    .addContext(ErrorContextKeys.REASON, CouponErrorReason.SOLD_OUT.name());
+            // Redis sold-out 플래그가 정책/DB 상태보다 먼저 남을 수 있어 발급 시점에 한 번 보정한다.
+            if (!isSoldOutByPolicy(couponName, event)) {
+                couponQueueRepository.clearSoldOut(couponName);
+            } else {
+                couponQueueRepository.removeActive(couponName, memberId);
+                couponQueueRepository.removeQueue(couponName, memberId);
+                throw new CIllegalArgumentException(ErrorDetail.COUPON_SOLD_OUT)
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.OPERATION, "issueCoupon")
+                        .addContext("couponName", couponName)
+                        .addContext(ErrorContextKeys.REASON, CouponErrorReason.SOLD_OUT.name());
+            }
         }
 
         CouponIssue savedIssue;

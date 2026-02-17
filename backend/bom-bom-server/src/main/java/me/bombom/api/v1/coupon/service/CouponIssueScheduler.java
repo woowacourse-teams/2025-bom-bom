@@ -73,7 +73,7 @@ public class CouponIssueScheduler {
                 couponQueueRepository.increaseIssuedCount(couponName, issuedCount - cachedIssuedCount);
             }
 
-            if (couponQueueRepository.isSoldOut(couponName) && issuedCount >= effectiveMax) {
+            if (issuedCount >= effectiveMax) {
                 log.info("쿠폰 대기열 처리 스킵(소진) - couponName={}", couponName);
                 continue;
             }
@@ -82,7 +82,6 @@ public class CouponIssueScheduler {
             long queueCount = couponQueueRepository.getQueueCount(couponName);
             long remainingSlots = effectiveMax - issuedCount - activeCount;
             if (remainingSlots <= 0) {
-                couponQueueRepository.markSoldOut(couponName);
                 log.info("쿠폰 대기열 처리 스킵(슬롯 없음) - couponName={}, queueCount={}, activeCount={}, issuedCount={}, maxCount={}, totalStock={}",
                         couponName, queueCount, activeCount, issuedCount, maxCount, totalStock);
                 continue;

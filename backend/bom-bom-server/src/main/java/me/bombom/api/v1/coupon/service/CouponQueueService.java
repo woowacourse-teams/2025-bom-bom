@@ -17,12 +17,15 @@ import me.bombom.api.v1.coupon.dto.response.CouponIssueSummaryResponse;
 import me.bombom.api.v1.coupon.dto.response.CouponIssueResponse;
 import me.bombom.api.v1.coupon.dto.response.CouponQueueStatus;
 import me.bombom.api.v1.coupon.dto.response.CouponQueueStatusResponse;
+import me.bombom.api.v1.coupon.event.CouponIssueCommittedEvent;
+import me.bombom.api.v1.coupon.event.CouponSoldOutDetectedEvent;
 import me.bombom.api.v1.coupon.exception.CouponErrorReason;
 import me.bombom.api.v1.coupon.repository.CouponIssueRepository;
 import me.bombom.api.v1.coupon.repository.CouponQueueRepository;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -34,6 +37,7 @@ public class CouponQueueService {
     private final CouponIssueRepository couponIssueRepository;
     private final CouponQueueProperties couponQueueProperties;
     private final Clock clock;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 선착순 쿠폰 대기열에 현재 사용자를 등록합니다.
@@ -165,21 +169,6 @@ public class CouponQueueService {
                     .addContext(ErrorContextKeys.REASON, CouponErrorReason.DUPLICATED_REQUEST.name());
         }
 
-        if (couponQueueRepository.isSoldOut(couponName)) {
-            // Redis sold-out 플래그가 정책/DB 상태보다 먼저 남을 수 있어 발급 시점에 한 번 보정한다.
-            if (!isSoldOutByPolicy(couponName, event)) {
-                couponQueueRepository.clearSoldOut(couponName);
-            } else {
-                couponQueueRepository.removeActive(couponName, memberId);
-                couponQueueRepository.removeQueue(couponName, memberId);
-                throw new CIllegalArgumentException(ErrorDetail.COUPON_SOLD_OUT)
-                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                        .addContext(ErrorContextKeys.OPERATION, "issueCoupon")
-                        .addContext("couponName", couponName)
-                        .addContext(ErrorContextKeys.REASON, CouponErrorReason.SOLD_OUT.name());
-            }
-        }
-
         CouponIssue savedIssue;
         try {
             savedIssue = assignCouponFromPoolWithRetry(couponName, memberId);
@@ -202,7 +191,7 @@ public class CouponQueueService {
             couponQueueRepository.removeQueue(couponName, memberId);
             log.info("쿠폰 발급 예약 실패(수량 초과) - couponName={}, memberId={}", couponName, memberId);
             if (isSoldOutByPolicy(couponName, event)) {
-                couponQueueRepository.markSoldOut(couponName);
+                eventPublisher.publishEvent(new CouponSoldOutDetectedEvent(couponName));
                 throw new CIllegalArgumentException(ErrorDetail.COUPON_SOLD_OUT)
                         .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                         .addContext(ErrorContextKeys.OPERATION, "issueCoupon")
@@ -216,14 +205,11 @@ public class CouponQueueService {
                     .addContext(ErrorContextKeys.REASON, CouponErrorReason.ASSIGNMENT_RETRY_EXCEEDED.name());
         }
 
-        couponQueueRepository.addIssued(couponName, memberId);
-        couponQueueRepository.increaseIssuedCount(couponName, 1L);
         couponQueueRepository.removeActive(couponName, memberId);
         couponQueueRepository.removeQueue(couponName, memberId);
 
-        if (isSoldOutByPolicy(couponName, event)) {
-            couponQueueRepository.markSoldOut(couponName);
-        }
+        boolean soldOutAfterIssue = isSoldOutByPolicy(couponName, event);
+        eventPublisher.publishEvent(new CouponIssueCommittedEvent(couponName, memberId, soldOutAfterIssue));
 
         log.info("쿠폰 발급 완료 - couponName={}, memberId={}, imageUrl={}", couponName, memberId, savedIssue.getImageUrl());
         return CouponIssueResponse.of(savedIssue.getImageUrl(), savedIssue.getUpdatedAt());

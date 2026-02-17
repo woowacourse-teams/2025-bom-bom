@@ -43,6 +43,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -60,6 +61,12 @@ public class SecurityConfig {
 
     @Value("${server.servlet.session.cookie.max-age}")
     private Duration cookieMaxAge;
+
+    @Value("${server.servlet.session.cookie.name:JSESSIONID}")
+    private String cookieName;
+
+    @Value("${server.servlet.session.cookie.domain:}")
+    private String cookieDomain;
 
     @Bean
     public SecurityFilterChain apiSecurityFilterChain(
@@ -205,11 +212,14 @@ public class SecurityConfig {
     @Bean
     public CookieSerializer cookieSerializer() {
         DefaultCookieSerializer serializer = new DefaultCookieSerializer();
-        serializer.setCookieName("JSESSIONID");
+        serializer.setCookieName(cookieName);
         serializer.setUseHttpOnlyCookie(true);
         serializer.setUseSecureCookie(true);
         serializer.setSameSite("None");
         serializer.setCookiePath("/");
+        if (StringUtils.hasText(cookieDomain)) {
+            serializer.setDomainName(cookieDomain);
+        }
         serializer.setCookieMaxAge((int) cookieMaxAge.getSeconds());
         return serializer;
     }

@@ -57,12 +57,13 @@ public class CouponQueueService {
             return buildStatus(event, couponName, CouponQueueStatus.ACTIVE, null, activeCount, expiresIn, null);
         }
         Long rank = couponQueueRepository.rankQueue(couponName, memberId);
+        long queueCount = couponQueueRepository.getQueueCount(couponName);
         boolean soldOut = couponQueueRepository.isSoldOut(couponName);
         if (rank != null) {
-            return buildStatus(event, couponName, CouponQueueStatus.WAITING, rank + 1, activeCount, null);
+            return buildStatus(event, couponName, CouponQueueStatus.WAITING, rank + 1, activeCount, null, queueCount);
         }
         if (soldOut) {
-            return buildStatus(event, couponName, CouponQueueStatus.SOLD_OUT, null, activeCount, null);
+            return buildStatus(event, couponName, CouponQueueStatus.SOLD_OUT, null, activeCount, null, null);
         }
 
         boolean added = couponQueueRepository.addIfAbsentQueue(couponName, memberId);
@@ -76,10 +77,13 @@ public class CouponQueueService {
         }
         Long finalRank = couponQueueRepository.rankQueue(couponName, memberId);
         if (finalRank != null) {
-            return buildStatus(event, couponName, CouponQueueStatus.WAITING, finalRank + 1, activeCount, null);
+            if (queueCount == 0L) {
+                queueCount = couponQueueRepository.getQueueCount(couponName);
+            }
+            return buildStatus(event, couponName, CouponQueueStatus.WAITING, finalRank + 1, activeCount, null, queueCount);
         }
 
-        return buildStatus(event, couponName, soldOut ? CouponQueueStatus.SOLD_OUT : CouponQueueStatus.NOT_IN_QUEUE, null, activeCount, null);
+        return buildStatus(event, couponName, soldOut ? CouponQueueStatus.SOLD_OUT : CouponQueueStatus.NOT_IN_QUEUE, null, activeCount, null, null);
     }
 
     public CouponQueueStatusResponse getQueueStatus(String couponName, Member member) {
@@ -88,10 +92,10 @@ public class CouponQueueService {
         Long memberId = member.getId();
         long nowMillis = clock.millis();
         if (isBeforeStart(event, nowMillis)) {
-            return buildStatus(event, couponName, CouponQueueStatus.NOT_IN_QUEUE, null, 0L, null);
+            return buildStatus(event, couponName, CouponQueueStatus.NOT_IN_QUEUE, null, 0L, null, null);
         }
         if (isAfterEnd(event, nowMillis)) {
-            return buildStatus(event, couponName, CouponQueueStatus.SOLD_OUT, null, 0L, null);
+            return buildStatus(event, couponName, CouponQueueStatus.SOLD_OUT, null, 0L, null, null);
         }
 
         boolean wasActive = couponQueueRepository.isActive(couponName, memberId);
@@ -112,11 +116,12 @@ public class CouponQueueService {
 
         Long rank = couponQueueRepository.rankQueue(couponName, memberId);
         if (rank != null) {
-            return buildStatus(event, couponName, CouponQueueStatus.WAITING, rank + 1, activeCount, null);
+            long queueCount = couponQueueRepository.getQueueCount(couponName);
+            return buildStatus(event, couponName, CouponQueueStatus.WAITING, rank + 1, activeCount, null, queueCount);
         }
 
         CouponQueueStatus status = soldOut ? CouponQueueStatus.SOLD_OUT : CouponQueueStatus.NOT_IN_QUEUE;
-        return buildStatus(event, couponName, status, null, activeCount, null);
+        return buildStatus(event, couponName, status, null, activeCount, null, null);
     }
 
     public void leaveQueue(String couponName, Member member) {
@@ -304,15 +309,41 @@ public class CouponQueueService {
             CouponQueueStatus status,
             Long position,
             Long activeCount,
-            Long activeExpiresInSeconds
+            Long activeExpiresInSeconds,
+            Long queueCount
     ) {
+        int pollingTtlSeconds = resolvePollingTtlSeconds(status, event, position, queueCount);
         return CouponQueueStatusResponse.of(
                 couponName,
                 status,
                 position,
                 activeCount,
                 activeExpiresInSeconds,
-                event.getPollingIntervalSeconds()
+                pollingTtlSeconds
         );
+    }
+
+    private int resolvePollingTtlSeconds(CouponQueueStatus status, Event event, Long position, Long queueCount) {
+        if (status != CouponQueueStatus.WAITING) {
+            return event.getPollingIntervalSeconds();
+        }
+        if (position == null || position <= 0) {
+            return event.getPollingIntervalSeconds();
+        }
+        long totalInQueue = queueCount != null ? queueCount : 0L;
+        if (totalInQueue <= 1) {
+            return 2;
+        }
+        long fromSecondToLast = 23L;
+        long adjusted = position - 1;
+        long indexFromFirst = Math.min(adjusted, totalInQueue - 1);
+        long polling = 2L + (fromSecondToLast * indexFromFirst) / (totalInQueue - 1);
+        if (polling > 25L) {
+            return 25;
+        }
+        if (polling < 2L) {
+            return 2;
+        }
+        return (int) polling;
     }
 }

@@ -36,7 +36,7 @@ public class EventNotificationService {
 
         Map<String, Object> data = Map.of(
                 "eventId", event.getId().toString(),
-                "notificationType", "eventNotification",
+                "notificationType", NotificationCategory.EVENT,
                 "scheduleType", schedule.getType().name()
         );
         NotificationResult result = fcmNotificationSender.sendToTopic(EVENT_TOPIC, title, body, data);

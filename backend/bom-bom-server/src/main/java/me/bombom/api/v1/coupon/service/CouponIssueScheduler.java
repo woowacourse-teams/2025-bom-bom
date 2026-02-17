@@ -1,7 +1,9 @@
 package me.bombom.api.v1.coupon.service;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.coupon.config.CouponQueueProperties;
@@ -34,8 +36,8 @@ public class CouponIssueScheduler {
     @Scheduled(fixedDelay = 1000)
     @SchedulerLock(name = "couponIssueScheduler", lockAtMostFor = "PT5S")
     public void issue() {
-        LocalDateTime now = LocalDateTime.now(clock);
         long nowMillis = clock.millis();
+        LocalDateTime now = LocalDateTime.ofInstant(Instant.ofEpochMilli(nowMillis), resolveZone());
 
         for (Event event : couponQueueProperties.getEvents()) {
             String couponName = event.getName();
@@ -60,10 +62,6 @@ public class CouponIssueScheduler {
             }
 
             couponQueueRepository.removeExpiredActive(couponName, nowMillis);
-            if (couponQueueRepository.isSoldOut(couponName)) {
-                log.info("쿠폰 대기열 처리 스킵(소진) - couponName={}", couponName);
-                continue;
-            }
 
             long issuedCount = couponIssueRepository.countByCouponNameAndMemberIdIsNotNull(couponName);
             long availableCount = couponIssueRepository.countByCouponNameAndMemberIdIsNull(couponName);
@@ -74,6 +72,12 @@ public class CouponIssueScheduler {
             if (cachedIssuedCount != issuedCount) {
                 couponQueueRepository.increaseIssuedCount(couponName, issuedCount - cachedIssuedCount);
             }
+
+            if (couponQueueRepository.isSoldOut(couponName) && issuedCount >= effectiveMax) {
+                log.info("쿠폰 대기열 처리 스킵(소진) - couponName={}", couponName);
+                continue;
+            }
+
             long activeCount = couponQueueRepository.getActiveCount(couponName);
             long queueCount = couponQueueRepository.getQueueCount(couponName);
             long remainingSlots = effectiveMax - issuedCount - activeCount;
@@ -107,5 +111,10 @@ public class CouponIssueScheduler {
                         couponName, promotedCount, queueCount, activeCount, issuedCount, maxCount, totalStock, expireAt);
             }
         }
+    }
+
+    private ZoneId resolveZone() {
+        ZoneId zone = clock.getZone();
+        return zone != null ? zone : ZoneId.of("Asia/Seoul");
     }
 }

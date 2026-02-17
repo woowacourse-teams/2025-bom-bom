@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.TestPropertySource;
 
 @IntegrationTest
@@ -78,6 +79,9 @@ import org.springframework.test.context.TestPropertySource;
 })
 class CouponQueueServiceTest {
     private static final Logger log = LoggerFactory.getLogger(CouponQueueServiceTest.class);
+
+    @MockitoBean
+    private CouponIssueScheduler couponIssueScheduler;
 
     @Autowired
     private CouponQueueService couponQueueService;

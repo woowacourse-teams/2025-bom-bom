@@ -1,6 +1,7 @@
 package me.bombom.api.v1.coupon.service;
 
 import java.time.Clock;
+import java.time.ZoneId;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -81,6 +82,12 @@ public class CouponQueueService {
                 queueCount = couponQueueRepository.getQueueCount(couponName);
             }
             return buildStatus(event, couponName, CouponQueueStatus.WAITING, finalRank + 1, activeCount, null, queueCount);
+        }
+        if (couponQueueRepository.isActive(couponName, memberId)) {
+            Long expireAt = couponQueueRepository.getActiveExpireAtMillis(couponName, memberId);
+            Long expiresIn = expireAt != null ? Math.max(0L, (expireAt - nowMillis) / 1000) : null;
+            long refreshedActiveCount = couponQueueRepository.getActiveCount(couponName);
+            return buildStatus(event, couponName, CouponQueueStatus.ACTIVE, null, refreshedActiveCount, expiresIn, null);
         }
 
         return buildStatus(event, couponName, soldOut ? CouponQueueStatus.SOLD_OUT : CouponQueueStatus.NOT_IN_QUEUE, null, activeCount, null, null);
@@ -268,12 +275,12 @@ public class CouponQueueService {
     }
 
     private boolean isBeforeStart(Event event, long nowMillis) {
-        LocalDateTime now = LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(nowMillis), clock.getZone());
+        LocalDateTime now = LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(nowMillis), resolveZone());
         return event.getStartAt() != null && now.isBefore(event.getStartAt());
     }
 
     private boolean isAfterEnd(Event event, long nowMillis) {
-        LocalDateTime now = LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(nowMillis), clock.getZone());
+        LocalDateTime now = LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(nowMillis), resolveZone());
         return event.getEndAt() != null && now.isAfter(event.getEndAt());
     }
 
@@ -340,5 +347,10 @@ public class CouponQueueService {
             return 2;
         }
         return (int) polling;
+    }
+
+    private ZoneId resolveZone() {
+        ZoneId zone = clock.getZone();
+        return zone != null ? zone : ZoneId.of("Asia/Seoul");
     }
 }

@@ -20,7 +20,6 @@ import org.springframework.test.context.TestPropertySource;
         "coupon.events[0].active-limit=10",
         "coupon.events[0].active-ttl-seconds=30",
         "coupon.events[0].polling-interval-seconds=3",
-        "coupon.events[0].image-url=https://example.com/sync.png",
         "spring.task.scheduling.enabled=false"
 })
 class CouponIssueSchedulerTest {

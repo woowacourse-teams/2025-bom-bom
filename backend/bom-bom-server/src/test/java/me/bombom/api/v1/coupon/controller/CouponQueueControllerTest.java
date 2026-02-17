@@ -38,14 +38,12 @@ import org.springframework.test.web.servlet.MockMvc;
         "coupon.events[0].active-limit=2",
         "coupon.events[0].active-ttl-seconds=30",
         "coupon.events[0].polling-interval-seconds=3",
-        "coupon.events[0].image-url=https://example.com/coupon.png",
         "coupon.events[1].name=future-coupon",
         "coupon.events[1].max-count=1",
         "coupon.events[1].batch-size=50",
         "coupon.events[1].active-limit=1",
         "coupon.events[1].active-ttl-seconds=30",
         "coupon.events[1].polling-interval-seconds=3",
-        "coupon.events[1].image-url=https://example.com/future.png",
         "coupon.events[1].start-at=2999-01-01T00:00:00",
         "coupon.events[2].name=ended-coupon",
         "coupon.events[2].max-count=1",
@@ -53,7 +51,6 @@ import org.springframework.test.web.servlet.MockMvc;
         "coupon.events[2].active-limit=1",
         "coupon.events[2].active-ttl-seconds=30",
         "coupon.events[2].polling-interval-seconds=3",
-        "coupon.events[2].image-url=https://example.com/ended.png",
         "coupon.events[2].end-at=2000-01-01T00:00:00",
         "spring.task.scheduling.enabled=false"
 })

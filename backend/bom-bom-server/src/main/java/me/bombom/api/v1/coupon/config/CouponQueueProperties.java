@@ -61,11 +61,6 @@ public class CouponQueueProperties {
         private long batchSize = 50L;
 
         /**
-         * 쿠폰 이미지 URL.
-         */
-        private String imageUrl;
-
-        /**
          * 동시에 입장 허용 가능한 최대 인원 수 (기본값 50).
          */
         private long activeLimit = 50L;

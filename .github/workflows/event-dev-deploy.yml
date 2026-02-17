@@ -170,7 +170,7 @@ jobs:
         run: |
           set -euo pipefail
           {
-            echo "DEV_SPRING_DATASOURCE_URL=${{ secrets.DEV_SPRING_DATASOURCE_URL }}"
+            echo "DEV_SPRING_DATASOURCE_URL=${{ secrets.EVENT_DEV_SPRING_DATASOURCE_URL }}"
             echo "DEV_SPRING_DATASOURCE_USERNAME=${{ secrets.DEV_SPRING_DATASOURCE_USERNAME }}"
             echo "DEV_SPRING_DATASOURCE_PASSWORD=${{ secrets.DEV_SPRING_DATASOURCE_PASSWORD }}"
           } > .env

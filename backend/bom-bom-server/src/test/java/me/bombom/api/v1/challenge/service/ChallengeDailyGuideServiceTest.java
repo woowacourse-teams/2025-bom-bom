@@ -4,7 +4,7 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
 
 import java.time.Clock;
 import java.time.DayOfWeek;
@@ -113,8 +113,8 @@ class ChallengeDailyGuideServiceTest {
         // 무조건 평일로 설정 (2026-01-26 월요일)
         today = LocalDate.of(2026, 1, 26);
 
-        given(clock.getZone()).willReturn(SEOUL_ZONE);
-        given(clock.instant()).willReturn(today.atStartOfDay(SEOUL_ZONE).toInstant());
+        doReturn(SEOUL_ZONE).when(clock).getZone();
+        doReturn(today.atStartOfDay(SEOUL_ZONE).toInstant()).when(clock).instant();
         today = LocalDate.now(clock);
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "테스트 챌린지",

@@ -3,7 +3,7 @@ package me.bombom.api.v1.challenge.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -693,7 +693,7 @@ class ChallengeCommentServiceTest {
     }
 
     private void setToday(LocalDate date) {
-        given(clock.instant()).willReturn(date.atStartOfDay(SEOUL_ZONE).toInstant());
-        given(clock.getZone()).willReturn(SEOUL_ZONE);
+        doReturn(date.atStartOfDay(SEOUL_ZONE).toInstant()).when(clock).instant();
+        doReturn(SEOUL_ZONE).when(clock).getZone();
     }
 }

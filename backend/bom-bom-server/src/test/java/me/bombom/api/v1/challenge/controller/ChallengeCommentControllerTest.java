@@ -1,7 +1,8 @@
 package me.bombom.api.v1.challenge.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.reset;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -96,6 +97,7 @@ class ChallengeCommentControllerTest {
 
     @BeforeEach
     void setUp() {
+        reset(clock);
         challengeCommentRepository.deleteAllInBatch();
         challengeParticipantRepository.deleteAllInBatch();
         articleRepository.deleteAllInBatch();
@@ -318,8 +320,8 @@ class ChallengeCommentControllerTest {
     }
 
     private void setToday(LocalDate date) {
-        given(clock.instant()).willReturn(date.atStartOfDay(SEOUL_ZONE).toInstant());
-        given(clock.getZone()).willReturn(SEOUL_ZONE);
+        doReturn(SEOUL_ZONE).when(clock).getZone();
+        doReturn(date.atStartOfDay(SEOUL_ZONE).toInstant()).when(clock).instant();
     }
 
     @Test

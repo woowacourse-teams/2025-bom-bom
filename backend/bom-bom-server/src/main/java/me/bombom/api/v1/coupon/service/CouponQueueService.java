@@ -290,13 +290,8 @@ public class CouponQueueService {
     }
 
     private boolean isSoldOutByPolicy(String couponName, Event event) {
-        var stockCount = couponIssueRepository.getStockCountByCouponName(couponName);
-        if (stockCount == null) {
-            return true;
-        }
-
-        long issuedCount = stockCount.getIssuedCount() != null ? stockCount.getIssuedCount() : 0L;
-        long availableCount = stockCount.getAvailableCount() != null ? stockCount.getAvailableCount() : 0L;
+        long issuedCount = couponIssueRepository.countByCouponNameAndMemberIdIsNotNull(couponName);
+        long availableCount = couponIssueRepository.countByCouponNameAndMemberIdIsNull(couponName);
         long totalStock = Math.max(0L, issuedCount + availableCount);
         long effectiveMax = Math.min(event.getMaxCount(), totalStock);
 

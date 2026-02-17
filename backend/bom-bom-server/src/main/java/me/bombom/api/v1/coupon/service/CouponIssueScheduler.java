@@ -65,13 +65,8 @@ public class CouponIssueScheduler {
                 continue;
             }
 
-            var stockCount = couponIssueRepository.getStockCountByCouponName(couponName);
-            long issuedCount = stockCount != null && stockCount.getIssuedCount() != null
-                    ? stockCount.getIssuedCount()
-                    : 0L;
-            long availableCount = stockCount != null && stockCount.getAvailableCount() != null
-                    ? stockCount.getAvailableCount()
-                    : 0L;
+            long issuedCount = couponIssueRepository.countByCouponNameAndMemberIdIsNotNull(couponName);
+            long availableCount = couponIssueRepository.countByCouponNameAndMemberIdIsNull(couponName);
             long totalStock = Math.max(0L, issuedCount + availableCount);
             long effectiveMax = Math.min(maxCount, totalStock);
 

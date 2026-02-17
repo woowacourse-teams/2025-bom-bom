@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -131,8 +131,8 @@ class ChallengeProgressServiceTest {
         // Default: LocalDate.now(clock) returns today
         Instant instant = java.time.Instant.now();
         ZoneId zoneId = java.time.ZoneId.systemDefault();
-        given(clock.instant()).willReturn(instant);
-        given(clock.getZone()).willReturn(zoneId);
+        doReturn(instant).when(clock).instant();
+        doReturn(zoneId).when(clock).getZone();
     }
 
     @Test

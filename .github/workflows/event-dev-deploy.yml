@@ -116,7 +116,7 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: [ self-hosted, event-dev ]
+    runs-on: [ self-hosted, event-main ]
     timeout-minutes: 30
     defaults:
       run:

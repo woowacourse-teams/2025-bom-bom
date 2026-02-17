@@ -23,7 +23,7 @@ jobs:
       - name: 설정 파일 생성(메인/테스트)
         shell: bash
         env:
-          APPLICATION_MAIN_PROPERTIES: ${{ secrets.APPLICATION_MAIN_PROPERTIES }}
+          APPLICATION_MAIN_PROPERTIES: ${{ secrets.EVENT_APPLICATION_DEV_PROPERTIES }}
           APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICATION_TEST_PROPERTIES }}
         run: |
           mkdir -p src/main/resources src/test/resources

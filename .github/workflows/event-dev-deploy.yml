@@ -1,4 +1,4 @@
-name: Backend event-dev Server 
+name: Backend event-dev Server
 
 on:
   push:
@@ -57,6 +57,13 @@ jobs:
           export OAUTH2_APPLE_PRIVATE_KEY="$APPLE_P8_ESCAPED_RAW"
           ./gradlew test --no-daemon
 
+      - name: JAR 생성
+        run: ./gradlew bootJar -x test --no-daemon
+
+
+      - name: JAR 존재 확인
+        run: ls -al build/libs
+
       - name: 테스트 리포트 업로드
         if: always()
         uses: actions/upload-artifact@v4
@@ -97,7 +104,8 @@ jobs:
             --cache-from=type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:buildcache-event-dev \
             --cache-to=type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:buildcache-event-dev,mode=max \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:event-dev \
-            --push .
+            --push \
+            ./backend/bom-bom-server
 
   deploy:
     needs: build

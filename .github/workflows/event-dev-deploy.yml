@@ -60,9 +60,15 @@ jobs:
       - name: JAR 생성
         run: ./gradlew bootJar -x test --no-daemon
 
-
-      - name: JAR 존재 확인
-        run: ls -al build/libs
+      - name: 현재 위치/파일 + JAR 확인
+        run: |
+          set -euo pipefail
+          echo "[PWD]"
+          pwd
+          echo "[LS]"
+          ls -al
+          echo "[build/libs]"
+          ls -al build/libs
 
       - name: 테스트 리포트 업로드
         if: always()
@@ -99,13 +105,14 @@ jobs:
             docker buildx use ci-builder
           fi
 
+          # 현재 working-directory가 ./backend/bom-bom-server 이므로 컨텍스트는 '.' 가 맞음
           docker buildx build \
             --platform linux/arm64,linux/amd64 \
             --cache-from=type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:buildcache-event-dev \
             --cache-to=type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:buildcache-event-dev,mode=max \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:event-dev \
             --push \
-            ./backend/bom-bom-server
+            .
 
   deploy:
     needs: build

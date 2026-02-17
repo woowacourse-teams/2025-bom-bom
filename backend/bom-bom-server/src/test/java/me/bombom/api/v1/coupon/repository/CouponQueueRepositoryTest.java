@@ -172,7 +172,7 @@ class CouponQueueRepositoryTest {
         // then
         assertThat(first).isTrue();
         assertThat(second).isFalse();
-        String scoreSequence = redisTemplate.opsForValue().get("coupon:queue:seq:" + couponName);
+        String scoreSequence = redisTemplate.opsForValue().get("coupon:queue:seq:{" + couponName + "}");
         assertThat(scoreSequence).isEqualTo("1");
     }
 

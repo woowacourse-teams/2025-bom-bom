@@ -27,28 +27,32 @@ public class CouponQueueRepository {
 
     private final StringRedisTemplate redisTemplate;
 
+    private String slotTag(String couponName) {
+        return "{" + couponName + "}";
+    }
+
     private String queueKey(String couponName) {
-        return QUEUE_KEY_PREFIX + couponName;
+        return QUEUE_KEY_PREFIX + slotTag(couponName);
     }
 
     private String queueSequenceKey(String couponName) {
-        return QUEUE_SEQUENCE_KEY_PREFIX + couponName;
+        return QUEUE_SEQUENCE_KEY_PREFIX + slotTag(couponName);
     }
 
     private String issuedCountKey(String couponName) {
-        return ISSUED_COUNT_KEY_PREFIX + couponName;
+        return ISSUED_COUNT_KEY_PREFIX + slotTag(couponName);
     }
 
     private String activeKey(String couponName) {
-        return ACTIVE_KEY_PREFIX + couponName;
+        return ACTIVE_KEY_PREFIX + slotTag(couponName);
     }
 
     private String issuedKey(String couponName) {
-        return ISSUED_KEY_PREFIX + couponName;
+        return ISSUED_KEY_PREFIX + slotTag(couponName);
     }
 
     private String soldOutKey(String couponName) {
-        return SOLD_OUT_KEY_PREFIX + couponName;
+        return SOLD_OUT_KEY_PREFIX + slotTag(couponName);
     }
 
     /**

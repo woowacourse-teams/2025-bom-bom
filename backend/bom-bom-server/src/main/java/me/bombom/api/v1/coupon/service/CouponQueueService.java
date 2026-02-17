@@ -15,7 +15,6 @@ import me.bombom.api.v1.coupon.domain.CouponIssue;
 import me.bombom.api.v1.coupon.dto.response.CouponIssueSummaryResponse;
 import me.bombom.api.v1.coupon.dto.response.CouponIssueResponse;
 import me.bombom.api.v1.coupon.dto.response.CouponQueueStatus;
-import me.bombom.api.v1.coupon.dto.response.CouponQueueStatusReason;
 import me.bombom.api.v1.coupon.dto.response.CouponQueueStatusResponse;
 import me.bombom.api.v1.coupon.exception.CouponErrorReason;
 import me.bombom.api.v1.coupon.repository.CouponIssueRepository;
@@ -60,21 +59,10 @@ public class CouponQueueService {
         Long rank = couponQueueRepository.rankQueue(couponName, memberId);
         boolean soldOut = couponQueueRepository.isSoldOut(couponName);
         if (rank != null) {
-            CouponQueueStatusReason reason = soldOut
-                    ? CouponQueueStatusReason.SOLD_OUT
-                    : null;
-            return buildStatus(event, couponName, CouponQueueStatus.WAITING, rank + 1, activeCount, null, reason);
+            return buildStatus(event, couponName, CouponQueueStatus.WAITING, rank + 1, activeCount, null);
         }
         if (soldOut) {
-            return buildStatus(
-                    event,
-                    couponName,
-                    CouponQueueStatus.SOLD_OUT,
-                    null,
-                    activeCount,
-                    null,
-                    CouponQueueStatusReason.SOLD_OUT
-            );
+            return buildStatus(event, couponName, CouponQueueStatus.SOLD_OUT, null, activeCount, null);
         }
 
         boolean added = couponQueueRepository.addIfAbsentQueue(couponName, memberId);
@@ -88,29 +76,10 @@ public class CouponQueueService {
         }
         Long finalRank = couponQueueRepository.rankQueue(couponName, memberId);
         if (finalRank != null) {
-            CouponQueueStatusReason reason = soldOut
-                    ? CouponQueueStatusReason.SOLD_OUT
-                    : null;
-            return buildStatus(
-                    event,
-                    couponName,
-                    CouponQueueStatus.WAITING,
-                    finalRank + 1,
-                    activeCount,
-                    null,
-                    reason
-            );
+            return buildStatus(event, couponName, CouponQueueStatus.WAITING, finalRank + 1, activeCount, null);
         }
 
-        return buildStatus(
-                event,
-                couponName,
-                soldOut ? CouponQueueStatus.SOLD_OUT : CouponQueueStatus.NOT_IN_QUEUE,
-                null,
-                activeCount,
-                null,
-                soldOut ? CouponQueueStatusReason.SOLD_OUT : null
-        );
+        return buildStatus(event, couponName, soldOut ? CouponQueueStatus.SOLD_OUT : CouponQueueStatus.NOT_IN_QUEUE, null, activeCount, null);
     }
 
     public CouponQueueStatusResponse getQueueStatus(String couponName, Member member) {
@@ -119,26 +88,10 @@ public class CouponQueueService {
         Long memberId = member.getId();
         long nowMillis = clock.millis();
         if (isBeforeStart(event, nowMillis)) {
-            return buildStatus(
-                    event,
-                    couponName,
-                    CouponQueueStatus.NOT_IN_QUEUE,
-                    null,
-                    0L,
-                    null,
-                    CouponQueueStatusReason.EVENT_NOT_STARTED
-            );
+            return buildStatus(event, couponName, CouponQueueStatus.NOT_IN_QUEUE, null, 0L, null);
         }
         if (isAfterEnd(event, nowMillis)) {
-            return buildStatus(
-                    event,
-                    couponName,
-                    CouponQueueStatus.SOLD_OUT,
-                    null,
-                    0L,
-                    null,
-                    CouponQueueStatusReason.EVENT_ENDED
-            );
+            return buildStatus(event, couponName, CouponQueueStatus.SOLD_OUT, null, 0L, null);
         }
 
         boolean wasActive = couponQueueRepository.isActive(couponName, memberId);
@@ -159,17 +112,11 @@ public class CouponQueueService {
 
         Long rank = couponQueueRepository.rankQueue(couponName, memberId);
         if (rank != null) {
-            CouponQueueStatusReason reason = soldOut
-                    ? CouponQueueStatusReason.SOLD_OUT
-                    : null;
-            return buildStatus(event, couponName, CouponQueueStatus.WAITING, rank + 1, activeCount, null, reason);
+            return buildStatus(event, couponName, CouponQueueStatus.WAITING, rank + 1, activeCount, null);
         }
 
         CouponQueueStatus status = soldOut ? CouponQueueStatus.SOLD_OUT : CouponQueueStatus.NOT_IN_QUEUE;
-        CouponQueueStatusReason reason = soldOut
-                ? CouponQueueStatusReason.SOLD_OUT
-                : wasActive ? CouponQueueStatusReason.ACTIVE_EXPIRED : null;
-        return buildStatus(event, couponName, status, null, activeCount, null, reason);
+        return buildStatus(event, couponName, status, null, activeCount, null);
     }
 
     public void leaveQueue(String couponName, Member member) {
@@ -357,8 +304,7 @@ public class CouponQueueService {
             CouponQueueStatus status,
             Long position,
             Long activeCount,
-            Long activeExpiresInSeconds,
-            CouponQueueStatusReason reason
+            Long activeExpiresInSeconds
     ) {
         return CouponQueueStatusResponse.of(
                 couponName,
@@ -366,8 +312,7 @@ public class CouponQueueService {
                 position,
                 activeCount,
                 activeExpiresInSeconds,
-                event.getPollingIntervalSeconds(),
-                reason
+                event.getPollingIntervalSeconds()
         );
     }
 }

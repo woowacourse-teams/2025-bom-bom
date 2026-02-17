@@ -20,10 +20,7 @@ public record CouponQueueStatusResponse(
         Long activeExpiresInSeconds,
 
         @Schema(description = "권장 폴링 간격(초)")
-        Integer pollingTtlSeconds,
-
-        @Schema(description = "상태 상세 사유")
-        CouponQueueStatusReason reason
+        Integer pollingTtlSeconds
 ) {
 
     public static CouponQueueStatusResponse of(
@@ -32,8 +29,7 @@ public record CouponQueueStatusResponse(
             Long position,
             Long activeCount,
             Long activeExpiresInSeconds,
-            Integer pollingTtlSeconds,
-            CouponQueueStatusReason reason
+            Integer pollingTtlSeconds
 
     ) {
         return new CouponQueueStatusResponse(
@@ -42,8 +38,7 @@ public record CouponQueueStatusResponse(
                 position,
                 activeCount,
                 activeExpiresInSeconds,
-                pollingTtlSeconds,
-                reason
+                pollingTtlSeconds
         );
     }
 }

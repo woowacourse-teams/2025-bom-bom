@@ -67,7 +67,7 @@ public interface CouponQueueControllerApi {
             description = "현재 사용자의 대기열 순번/상태 및 남은 수를 조회합니다."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "조회 성공 (이벤트 미개시/종료 시에도 status/reason 으로 상태 응답)"),
+            @ApiResponse(responseCode = "200", description = "조회 성공 (이벤트 미개시/종료 시에도 상태 응답)"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 (존재하지 않는 쿠폰)", content = @Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorResponse.class)))
     })

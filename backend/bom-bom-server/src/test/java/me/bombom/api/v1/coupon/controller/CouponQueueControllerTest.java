@@ -135,8 +135,7 @@ class CouponQueueControllerTest {
         mockMvc.perform(get("/api/v1/coupons/future-coupon/queue-entries/me")
                         .with(authentication(authToken)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("NOT_IN_QUEUE"))
-                .andExpect(jsonPath("$.reason").value("EVENT_NOT_STARTED"));
+                .andExpect(jsonPath("$.status").value("NOT_IN_QUEUE"));
     }
 
     @Test
@@ -144,8 +143,7 @@ class CouponQueueControllerTest {
         mockMvc.perform(get("/api/v1/coupons/ended-coupon/queue-entries/me")
                         .with(authentication(authToken)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("SOLD_OUT"))
-                .andExpect(jsonPath("$.reason").value("EVENT_ENDED"));
+                .andExpect(jsonPath("$.status").value("SOLD_OUT"));
     }
 
     @Test

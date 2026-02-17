@@ -20,7 +20,6 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.coupon.domain.CouponIssue;
 import me.bombom.api.v1.coupon.exception.CouponErrorReason;
 import me.bombom.api.v1.coupon.dto.response.CouponQueueStatus;
-import me.bombom.api.v1.coupon.dto.response.CouponQueueStatusReason;
 import me.bombom.api.v1.coupon.dto.response.CouponQueueStatusResponse;
 import me.bombom.api.v1.coupon.repository.CouponIssueRepository;
 import me.bombom.api.v1.coupon.repository.CouponQueueRepository;
@@ -160,7 +159,6 @@ class CouponQueueServiceTest {
         CouponQueueStatusResponse response = couponQueueService.getQueueStatus("future-coupon", member);
         // then
         assertThat(response.status()).isEqualTo(CouponQueueStatus.NOT_IN_QUEUE);
-        assertThat(response.reason()).isEqualTo(CouponQueueStatusReason.EVENT_NOT_STARTED);
     }
 
     @Test
@@ -170,7 +168,6 @@ class CouponQueueServiceTest {
         CouponQueueStatusResponse response = couponQueueService.getQueueStatus("ended-coupon", member);
         // then
         assertThat(response.status()).isEqualTo(CouponQueueStatus.SOLD_OUT);
-        assertThat(response.reason()).isEqualTo(CouponQueueStatusReason.EVENT_ENDED);
     }
 
     @Test

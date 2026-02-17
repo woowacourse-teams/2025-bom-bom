@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   bombom-server-event:
-    image: bombomnewsletter/bom-bom:latest
+    image: bombomnewsletter/bom-bom:event-dev
     container_name: event
     ports:
       - "80:8080"

@@ -13,10 +13,18 @@ public interface CouponIssueRepository extends JpaRepository<CouponIssue, Long> 
 
     List<CouponIssue> findByMemberIdOrderByUpdatedAtDesc(Long memberId);
 
-    @Query("select count(ci) from CouponIssue ci where ci.couponName = :couponName and ci.memberId is not null")
+    @Query(
+            value = "SELECT COUNT(*) FROM coupon_issue ci "
+                    + "WHERE ci.coupon_name = :couponName AND ci.member_id IS NOT NULL",
+            nativeQuery = true
+    )
     long countByCouponNameAndMemberIdIsNotNull(@Param("couponName") String couponName);
 
-    @Query("select count(ci) from CouponIssue ci where ci.couponName = :couponName and ci.memberId is null")
+    @Query(
+            value = "SELECT COUNT(*) FROM coupon_issue ci "
+                    + "WHERE ci.coupon_name = :couponName AND ci.member_id IS NULL",
+            nativeQuery = true
+    )
     long countByCouponNameAndMemberIdIsNull(@Param("couponName") String couponName);
 
     @Modifying

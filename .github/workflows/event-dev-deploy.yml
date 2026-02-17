@@ -37,12 +37,12 @@ jobs:
       - name: application.yml(메인/테스트) 생성
         shell: bash
         env:
-          APPLICATION_MAIN_PROPERTIES: ${{ secrets.APPLICATION_PROD_PROPERTIES }}
+          APPLICATION_MAIN_PROPERTIES: ${{ secrets.EVENT_APPLICATION_DEV_PROPERTIES }}
           APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICATION_TEST_PROPERTIES }}
         run: |
           set -euo pipefail
           mkdir -p src/main/resources src/test/resources
-          printf '%s' "${APPLICATION_MAIN_PROPERTIES:?APPLICATION_PROD_PROPERTIES 시크릿이 없습니다}" > src/main/resources/application.yml
+          printf '%s' "${EVENT_APPLICATION_DEV_PROPERTIES:?EVENT_APPLICATION_DEV_PROPERTIES 시크릿이 없습니다}" > src/main/resources/application.yml
           printf '%s' "${APPLICATION_TEST_PROPERTIES:?APPLICATION_TEST_PROPERTIES 시크릿이 없습니다}" > src/test/resources/application.yml
 
       - name: 테스트 실행

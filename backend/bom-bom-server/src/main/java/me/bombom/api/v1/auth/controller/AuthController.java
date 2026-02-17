@@ -27,6 +27,7 @@ import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.service.MemberService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -51,6 +52,10 @@ public class AuthController implements AuthControllerApi{
     private final AppleOAuth2Service appleOAuth2Service;
     private final GoogleOAuth2LoginService googleOAuth2LoginService;
     private final UniqueUserInfoGenerator uniqueUserInfoGenerator;
+    @Value("${server.servlet.session.cookie.name:JSESSIONID}")
+    private String cookieName;
+    @Value("${server.servlet.session.cookie.domain:}")
+    private String cookieDomain;
 
     @Override
     @PostMapping("/signup")
@@ -204,14 +209,18 @@ public class AuthController implements AuthControllerApi{
     }
 
     private void expireSessionCookie(HttpServletResponse response) {
-        Cookie jsid = new Cookie("JSESSIONID", "");
+        Cookie jsid = new Cookie(cookieName, "");
         jsid.setMaxAge(0);
         jsid.setPath("/");
         jsid.setHttpOnly(true);
         jsid.setSecure(true);
+        if (StringUtils.hasText(cookieDomain)) {
+            jsid.setDomain(cookieDomain);
+        }
         response.addCookie(jsid);
         // Ensure SameSite=None for cross-site
-        response.addHeader("Set-Cookie", "JSESSIONID=; Max-Age=0; Path=/; Secure; HttpOnly; SameSite=None");
+        String domainAttribute = StringUtils.hasText(cookieDomain) ? "; Domain=" + cookieDomain : "";
+        response.addHeader("Set-Cookie", cookieName + "=; Max-Age=0; Path=/" + domainAttribute + "; Secure; HttpOnly; SameSite=None");
     }
 
     private OAuth2AuthenticationToken createAuthenticationToken(Member member) {

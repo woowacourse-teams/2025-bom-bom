@@ -514,6 +514,66 @@ class ChallengeServiceTest {
     }
 
     @Test
+    void 추가_신청_기간_내_시작된_챌린지_신청_가능_여부_조회() {
+        // given: 시작일이 오늘, totalDays 21일 → 허용 영업일 3일. 오늘은 1영업일차 이내이므로 신청 가능
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge(
+                "챌린지",
+                today,
+                today.plusDays(30),
+                21,
+                group.getId()
+        );
+        challengeRepository.save(challenge);
+
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
+
+        Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
+        subscribeRepository.save(subscribe);
+
+        // when
+        ChallengeEligibilityResponse response = challengeService.checkEligibility(challenge.getId(), member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.canApply()).isTrue();
+            softly.assertThat(response.reason()).isEqualTo(EligibilityReason.ELIGIBLE);
+        });
+    }
+
+    @Test
+    void 추가_신청_기간_지난_챌린지_신청_가능_여부_조회() {
+        // given: 시작일이 10일 전, totalDays 21일 → 허용 영업일 3일. 이미 지나서 신청 불가
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge(
+                "챌린지",
+                today.minusDays(10),
+                today.plusDays(20),
+                21,
+                group.getId()
+        );
+        challengeRepository.save(challenge);
+
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
+
+        Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
+        subscribeRepository.save(subscribe);
+
+        // when
+        ChallengeEligibilityResponse response = challengeService.checkEligibility(challenge.getId(), member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.canApply()).isFalse();
+            softly.assertThat(response.reason()).isEqualTo(EligibilityReason.ALREADY_STARTED);
+        });
+    }
+
+    @Test
     void 존재하지_않는_챌린지_ID로_신청_가능_여부_조회_시_예외가_발생한다() {
         // when & then
         assertThatThrownBy(() -> challengeService.checkEligibility(0L, member))

@@ -74,21 +74,24 @@ public class Challenge extends BaseEntity {
         if (now.isBefore(this.startDate)) {
             return ChallengeStatus.BEFORE_START;
         }
-        if (now.isAfter(this.endDate)) {
+        if (this.endDate != null && now.isAfter(this.endDate)) {
             return ChallengeStatus.COMPLETED;
         }
         return ChallengeStatus.ONGOING;
     }
 
     public boolean isEnded(LocalDate now) {
-        return now.isAfter(this.endDate);
+        return this.endDate != null && now.isAfter(this.endDate);
     }
 
     public boolean hasStarted(LocalDate now) {
-        return !now.isBefore(this.startDate);
+        return this.startDate != null && !now.isBefore(this.startDate);
     }
 
     public int calculatePassedDays(LocalDate targetDate) {
+        if (this.startDate == null) {
+            return 0;
+        }
         int passedDays = 0;
         LocalDate currentDate = this.startDate;
         while (!currentDate.isAfter(targetDate)) {

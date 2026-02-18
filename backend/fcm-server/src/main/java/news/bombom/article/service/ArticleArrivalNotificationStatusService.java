@@ -1,12 +1,13 @@
-package news.bombom.notification.service;
+package news.bombom.article.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import news.bombom.article.domain.ArticleArrivalNotification;
 import news.bombom.article.domain.ArticleArrivalNotificationFailed;
+import news.bombom.article.repository.ArticleArrivalNotificationFailedRepository;
+import news.bombom.article.repository.ArticleArrivalNotificationRepository;
 import news.bombom.notification.dto.response.NotificationResultResponse;
-import news.bombom.notification.repository.ArticleArrivalNotificationFailedRepository;
-import news.bombom.notification.repository.ArticleArrivalNotificationRepository;
+import news.bombom.notification.service.NotificationStatusHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,11 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class NotificationStatusService {
+public class ArticleArrivalNotificationStatusService implements NotificationStatusHandler<ArticleArrivalNotification> {
 
     private final ArticleArrivalNotificationRepository notificationRepository;
     private final ArticleArrivalNotificationFailedRepository articleArrivalNotificationFailedRepository;
 
+    @Override
     @Transactional
     public void updateStatus(ArticleArrivalNotification notification, NotificationResultResponse result) {
         if (result.successCount() > 0) {
@@ -29,21 +31,20 @@ public class NotificationStatusService {
             return;
         }
         if (result.skippedCount() == result.totalDevices()) {
-            // 모든 기기가 알림 설정이 꺼져있으면 SENT로 처리 (정상적인 상황)
             notification.markSent();
             notificationRepository.save(notification);
             log.info("모든 기기에서 알림 설정이 꺼져있음: notificationId={}, 스킵={}",
                     notification.getId(), result.skippedCount());
             return;
         }
-        // 모든 기기에서 실패하면 FAILED로 처리
+
         notification.markFailed(result.errorMessages());
         notificationRepository.save(notification);
         log.error("모든 기기에서 알림 발송 실패: notificationId={}", notification.getId());
-
         moveToFailedTableIfExceeded(notification);
     }
 
+    @Override
     @Transactional
     public void markAsFailed(ArticleArrivalNotification notification, String reason) {
         log.warn("FCM 토큰이 없습니다: memberId={}", notification.getMemberId());

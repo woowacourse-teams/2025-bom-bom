@@ -3,8 +3,8 @@ package news.bombom.notification.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import news.bombom.article.domain.ArticleArrivalNotification;
 import news.bombom.notification.domain.MemberFcmToken;
+import news.bombom.notification.domain.Notification;
 import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.dto.response.NotificationResultResponse;
 import org.springframework.stereotype.Service;
@@ -18,13 +18,13 @@ public class NotificationProcessingService {
 
     private final NotificationTokenService notificationTokenService;
     private final NotificationSenderService notificationSender;
-    private final NotificationStatusService statusUpdater;
     private final NotificationSettingService notificationSettingService;
 
     @Transactional
-    public void processArticleArrivedNotification(ArticleArrivalNotification notification) {
+    public <T extends Notification> void processNotification(T notification,
+                                                             NotificationCategory category,
+                                                             NotificationStatusHandler<T> statusHandler) {
         Long memberId = notification.getMemberId();
-        NotificationCategory category = NotificationCategory.ARTICLE;
         if (!notificationSettingService.isEnabled(memberId, category)) {
             log.info("알림 수신 동의하지 않음: memberId={}, category={}", memberId, category);
             return;
@@ -32,12 +32,12 @@ public class NotificationProcessingService {
 
         List<MemberFcmToken> fcmTokens = notificationTokenService.resolveTokens(memberId);
         if (fcmTokens.isEmpty()) {
-            statusUpdater.markAsFailed(notification, "FCM 토큰 없음");
+            statusHandler.markAsFailed(notification, "FCM 토큰 없음");
             return;
         }
 
         NotificationResultResponse result = notificationSender.sendToAllDevices(notification, fcmTokens);
-        statusUpdater.updateStatus(notification, result);
+        statusHandler.updateStatus(notification, result);
     }
 
     @Transactional

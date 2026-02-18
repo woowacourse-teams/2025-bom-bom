@@ -9,7 +9,6 @@ import news.bombom.notification.domain.SendResult;
 import news.bombom.notification.dto.NotificationMessage;
 import news.bombom.notification.dto.NotificationResult;
 import news.bombom.notification.dto.response.NotificationResultResponse;
-import news.bombom.notification.service.message.NotificationMessageBuilder;
 import org.springframework.stereotype.Service;
 
 @Slf4j

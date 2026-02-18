@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import news.bombom.notification.domain.ArticleArrivalNotification;
+import news.bombom.article.domain.ArticleArrivalNotification;
 import news.bombom.notification.domain.NotificationStatus;
 import news.bombom.notification.repository.ArticleArrivalNotificationRepository;
 import news.bombom.notification.service.NotificationProcessingService;

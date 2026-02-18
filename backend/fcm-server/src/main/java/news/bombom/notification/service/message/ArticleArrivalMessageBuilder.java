@@ -1,7 +1,7 @@
 package news.bombom.notification.service.message;
 
 import java.util.Map;
-import news.bombom.notification.domain.ArticleArrivalNotification;
+import news.bombom.article.domain.ArticleArrivalNotification;
 import news.bombom.notification.domain.MemberFcmToken;
 import news.bombom.notification.domain.Notification;
 import news.bombom.notification.domain.NotificationPayloadType;

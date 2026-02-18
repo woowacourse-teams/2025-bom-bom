@@ -3,7 +3,7 @@ package news.bombom.notification.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import news.bombom.notification.domain.ArticleArrivalNotification;
+import news.bombom.article.domain.ArticleArrivalNotification;
 import news.bombom.notification.domain.MemberFcmToken;
 import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.dto.response.NotificationResultResponse;

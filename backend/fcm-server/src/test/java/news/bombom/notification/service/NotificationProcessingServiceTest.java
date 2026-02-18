@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
-import news.bombom.notification.domain.ArticleArrivalNotification;
+import news.bombom.article.domain.ArticleArrivalNotification;
 import news.bombom.notification.domain.MemberFcmToken;
 import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.dto.response.NotificationResultResponse;

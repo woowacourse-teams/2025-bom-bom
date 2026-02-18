@@ -1,4 +1,4 @@
-package news.bombom.notification.domain;
+package news.bombom.article.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import news.bombom.notification.domain.Notification;
+import news.bombom.notification.domain.NotificationStatus;
 
 @Entity
 @Getter

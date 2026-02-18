@@ -2,8 +2,8 @@ package news.bombom.notification.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import news.bombom.notification.domain.ArticleArrivalNotification;
-import news.bombom.notification.domain.ArticleArrivalNotificationFailed;
+import news.bombom.article.domain.ArticleArrivalNotification;
+import news.bombom.article.domain.ArticleArrivalNotificationFailed;
 import news.bombom.notification.dto.response.NotificationResultResponse;
 import news.bombom.notification.repository.ArticleArrivalNotificationFailedRepository;
 import news.bombom.notification.repository.ArticleArrivalNotificationRepository;

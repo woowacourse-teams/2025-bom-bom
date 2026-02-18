@@ -65,6 +65,6 @@ public class NotificationController {
     @PostMapping("/send")
     @ResponseStatus(HttpStatus.OK)
     public void sendNotification(@Valid @RequestBody NotificationSendRequest request) {
-        notificationService.sendNotification(request.token(), request.title(), request.body(), request.articleId());
+        notificationService.sendNotification(request.token(), request.title(), request.body(), request.data());
     }
 }

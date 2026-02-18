@@ -1,7 +1,19 @@
 package news.bombom.notification.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Map;
 import news.bombom.notification.client.firebase.FcmNotificationSender;
-import news.bombom.notification.domain.NotificationType;
 import news.bombom.notification.dto.NotificationMessage;
 import news.bombom.notification.dto.NotificationResult;
 import org.junit.jupiter.api.DisplayName;
@@ -10,13 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("알림 서비스 테스트")
@@ -32,6 +37,7 @@ class NotificationServiceTest {
     private final String TEST_TITLE = "테스트 제목";
     private final String TEST_BODY = "테스트 내용";
     private final String TEST_ARTICLE_ID = "test-article-123";
+    private final Map<String, Object> TEST_DATA = Map.of("notificationType", "TEST_TYPE");
 
     @Test
     @DisplayName("개별 알림 전송 성공")
@@ -41,12 +47,12 @@ class NotificationServiceTest {
         when(fcmNotificationSender.send(any(NotificationMessage.class))).thenReturn(expectedResult);
 
         // When
-        NotificationResult result = notificationService.sendNotification(TEST_TOKEN, TEST_TITLE, TEST_BODY, TEST_ARTICLE_ID);
+        NotificationResult result = notificationService.sendNotification(TEST_TOKEN, TEST_TITLE, TEST_BODY, TEST_DATA);
 
         // Then
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getMessageId()).isEqualTo("test-message-id");
-        
+
         verify(fcmNotificationSender, times(1)).send(any(NotificationMessage.class));
     }
 
@@ -54,12 +60,12 @@ class NotificationServiceTest {
     @DisplayName("개별 알림 전송 실패 - 토큰이 null")
     void sendNotification_Failure_NullToken() {
         // When
-        NotificationResult result = notificationService.sendNotification(null, TEST_TITLE, TEST_BODY, TEST_ARTICLE_ID);
+        NotificationResult result = notificationService.sendNotification(null, TEST_TITLE, TEST_BODY, TEST_DATA);
 
         // Then
         assertThat(result.isSuccess()).isFalse();
         assertThat(result.getErrorMessage()).contains("FCM 토큰이 유효하지 않습니다");
-        
+
         verify(fcmNotificationSender, never()).send(any(NotificationMessage.class));
     }
 
@@ -67,12 +73,12 @@ class NotificationServiceTest {
     @DisplayName("개별 알림 전송 실패 - 토큰이 빈 문자열")
     void sendNotification_Failure_EmptyToken() {
         // When
-        NotificationResult result = notificationService.sendNotification("", TEST_TITLE, TEST_BODY, TEST_ARTICLE_ID);
+        NotificationResult result = notificationService.sendNotification("", TEST_TITLE, TEST_BODY, TEST_DATA);
 
         // Then
         assertThat(result.isSuccess()).isFalse();
         assertThat(result.getErrorMessage()).contains("FCM 토큰이 유효하지 않습니다");
-        
+
         verify(fcmNotificationSender, never()).send(any(NotificationMessage.class));
     }
 
@@ -80,12 +86,12 @@ class NotificationServiceTest {
     @DisplayName("개별 알림 전송 실패 - 제목이 null")
     void sendNotification_Failure_NullTitle() {
         // When
-        NotificationResult result = notificationService.sendNotification(TEST_TOKEN, null, TEST_BODY, TEST_ARTICLE_ID);
+        NotificationResult result = notificationService.sendNotification(TEST_TOKEN, null, TEST_BODY, TEST_DATA);
 
         // Then
         assertThat(result.isSuccess()).isFalse();
         assertThat(result.getErrorMessage()).contains("알림 제목이 필요합니다");
-        
+
         verify(fcmNotificationSender, never()).send(any(NotificationMessage.class));
     }
 
@@ -93,12 +99,12 @@ class NotificationServiceTest {
     @DisplayName("개별 알림 전송 실패 - 내용이 null")
     void sendNotification_Failure_NullBody() {
         // When
-        NotificationResult result = notificationService.sendNotification(TEST_TOKEN, TEST_TITLE, null, TEST_ARTICLE_ID);
+        NotificationResult result = notificationService.sendNotification(TEST_TOKEN, TEST_TITLE, null, TEST_DATA);
 
         // Then
         assertThat(result.isSuccess()).isFalse();
         assertThat(result.getErrorMessage()).contains("알림 내용이 필요합니다");
-        
+
         verify(fcmNotificationSender, never()).send(any(NotificationMessage.class));
     }
 
@@ -111,12 +117,13 @@ class NotificationServiceTest {
         when(fcmNotificationSender.send(any(NotificationMessage.class))).thenReturn(successResult);
 
         // When
-        Map<String, NotificationResult> results = notificationService.sendBulkNotification(tokens, TEST_TITLE, TEST_BODY, TEST_ARTICLE_ID);
+        Map<String, NotificationResult> results = notificationService.sendBulkNotification(tokens, TEST_TITLE, TEST_BODY,
+                TEST_ARTICLE_ID);
 
         // Then
         assertThat(results).hasSize(3);
         assertThat(results.values()).allMatch(NotificationResult::isSuccess);
-        
+
         verify(fcmNotificationSender, times(3)).send(any(NotificationMessage.class));
     }
 
@@ -152,7 +159,7 @@ class NotificationServiceTest {
         // Then
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getMessageId()).isEqualTo("test-message-id");
-        
+
         verify(fcmNotificationSender, times(1)).sendToTopic(eq(topic), eq(TEST_TITLE), eq(TEST_BODY), anyMap());
     }
 
@@ -165,7 +172,7 @@ class NotificationServiceTest {
         // Then
         assertThat(result.isSuccess()).isFalse();
         assertThat(result.getErrorMessage()).contains("토픽명이 유효하지 않습니다");
-        
+
         verify(fcmNotificationSender, never()).sendToTopic(anyString(), anyString(), anyString(), anyMap());
     }
 
@@ -183,7 +190,7 @@ class NotificationServiceTest {
         // Then
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getMessageId()).isEqualTo("test-message-id");
-        
+
         verify(fcmNotificationSender, times(1)).sendDataOnly(TEST_TOKEN, data);
     }
 
@@ -199,7 +206,7 @@ class NotificationServiceTest {
         // Then
         assertThat(result.isSuccess()).isFalse();
         assertThat(result.getErrorMessage()).contains("FCM 토큰이 유효하지 않습니다");
-        
+
         verify(fcmNotificationSender, never()).sendDataOnly(anyString(), anyMap());
     }
 
@@ -212,7 +219,7 @@ class NotificationServiceTest {
         // Then
         assertThat(result.isSuccess()).isFalse();
         assertThat(result.getErrorMessage()).contains("전송할 데이터가 비어있습니다");
-        
+
         verify(fcmNotificationSender, never()).sendDataOnly(anyString(), anyMap());
     }
 

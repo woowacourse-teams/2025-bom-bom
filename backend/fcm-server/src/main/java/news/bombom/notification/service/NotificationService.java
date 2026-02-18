@@ -37,18 +37,39 @@ public class NotificationService {
 
         log.info("FCM 알림 전송 시작: title={}, body={}, articleId={}", title, body, articleId);
 
+        Map<String, Object> data = Map.of(
+                "articleId", articleId,
+                "notificationType", "arrivedArticle"
+        );
+
+        return sendNotification(token, title, body, data);
+    }
+
+    /**
+     * 공통 알림 전송 (데이터 맵 자유롭게 전달)
+     */
+    public NotificationResult sendNotification(String token, String title, String body, Map<String, Object> data) {
+        if (!StringUtils.hasText(token)) {
+            return NotificationResult.failure("FCM 토큰이 유효하지 않습니다.");
+        }
+
+        if (!StringUtils.hasText(title)) {
+            return NotificationResult.failure("알림 제목이 필요합니다.");
+        }
+
+        if (!StringUtils.hasText(body)) {
+            return NotificationResult.failure("알림 내용이 필요합니다.");
+        }
+
         NotificationMessage message = NotificationMessage.builder()
                 .recipient(token)
                 .title(title)
                 .content(body)
                 .type(NotificationType.FCM)
-                .data(Map.of(
-                        "articleId", articleId,
-                        "notificationType", "arrivedArticle"
-                ))
+                .data(data)
                 .build();
 
-        return fcmNotificationSender.send(message);
+        return send(message);
     }
 
     /**
@@ -104,12 +125,28 @@ public class NotificationService {
         }
 
         if (data == null || data.isEmpty()) {
-            return NotificationResult.failure("전송할 데이터가 비어있습니다.");
+        return NotificationResult.failure("전송할 데이터가 비어있습니다.");
+    }
+
+    log.info("FCM 데이터 전송 시작: token={}, dataSize={}", token, data.size());
+
+    return fcmNotificationSender.sendDataOnly(token, data);
+}
+
+    /**
+     * NotificationMessage 단위 전송 (빌더 전략에서 생성된 메시지 사용)
+     */
+    public NotificationResult send(NotificationMessage message) {
+        if (!StringUtils.hasText(message.getRecipient())) {
+            return NotificationResult.failure("FCM 토큰이 유효하지 않습니다.");
         }
-
-        log.info("FCM 데이터 전송 시작: token={}, dataSize={}", token, data.size());
-
-        return fcmNotificationSender.sendDataOnly(token, data);
+        if (!StringUtils.hasText(message.getTitle())) {
+            return NotificationResult.failure("알림 제목이 필요합니다.");
+        }
+        if (!StringUtils.hasText(message.getContent())) {
+            return NotificationResult.failure("알림 내용이 필요합니다.");
+        }
+        return fcmNotificationSender.send(message);
     }
 
     /**

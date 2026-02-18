@@ -1,4 +1,4 @@
-package news.bombom.notification.domain;
+package news.bombom.article.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -12,7 +12,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
-import news.bombom.notification.domain.ArticleArrivalNotification;
+import news.bombom.article.domain.ArticleArrivalNotification;
+import news.bombom.article.service.ArticleArrivalNotificationStatusService;
+import news.bombom.challenge.domain.ChallengeTodoReminderNotification;
+import news.bombom.challenge.service.ChallengeTodoReminderNotificationStatusService;
 import news.bombom.notification.domain.MemberFcmToken;
 import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.dto.response.NotificationResultResponse;
@@ -34,7 +37,10 @@ class NotificationProcessingServiceTest {
     private NotificationSenderService notificationSender;
 
     @Mock
-    private NotificationStatusService statusUpdater;
+    private ArticleArrivalNotificationStatusService articleStatusService;
+
+    @Mock
+    private ChallengeTodoReminderNotificationStatusService challengeStatusService;
 
     @Mock
     private NotificationSettingService notificationSettingService;
@@ -46,25 +52,29 @@ class NotificationProcessingServiceTest {
 
     @Test
     @DisplayName("아티클 알림 설정이 비활성화되어 있으면 전송하지 않고 로그를 남긴다")
-    void processArticleArrivedNotification_SettingsDisabled_DoesNotSend() {
+    void processNotification_Article_SettingsDisabled_DoesNotSend() {
         // Given
         ArticleArrivalNotification notification = createNotification();
         when(notificationSettingService.isEnabled(TEST_MEMBER_ID, NotificationCategory.ARTICLE))
                 .thenReturn(false);
 
         // When
-        notificationProcessingService.processArticleArrivedNotification(notification);
+        notificationProcessingService.processNotification(
+                notification,
+                NotificationCategory.ARTICLE,
+                articleStatusService
+        );
 
         // Then
         verify(notificationSettingService, times(1)).isEnabled(TEST_MEMBER_ID, NotificationCategory.ARTICLE);
         verify(notificationTokenService, never()).resolveTokens(anyLong());
         verify(notificationSender, never()).sendToAllDevices(any(), anyList());
-        verify(statusUpdater, never()).updateStatus(any(), any());
+        verify(articleStatusService, never()).updateStatus(any(ArticleArrivalNotification.class), any());
     }
 
     @Test
     @DisplayName("아티클 알림 설정이 활성화되어 있고 토큰이 있으면 전송한다")
-    void processArticleArrivedNotification_SettingsEnabledAndTokensExist_SendsNotification() {
+    void processNotification_Article_SettingsEnabledAndTokensExist_SendsNotification() {
         // Given
         ArticleArrivalNotification notification = createNotification();
         List<MemberFcmToken> tokens = List.of(MemberFcmToken.builder()
@@ -82,18 +92,22 @@ class NotificationProcessingServiceTest {
                 .thenReturn(new NotificationResultResponse(1, 0, 0, ""));
 
         // When
-        notificationProcessingService.processArticleArrivedNotification(notification);
+        notificationProcessingService.processNotification(
+                notification,
+                NotificationCategory.ARTICLE,
+                articleStatusService
+        );
 
         // Then
         verify(notificationSettingService, times(1)).isEnabled(TEST_MEMBER_ID, NotificationCategory.ARTICLE);
         verify(notificationTokenService, times(1)).resolveTokens(TEST_MEMBER_ID);
         verify(notificationSender, times(1)).sendToAllDevices(eq(notification), anyList());
-        verify(statusUpdater, times(1)).updateStatus(eq(notification), any());
+        verify(articleStatusService, times(1)).updateStatus(eq(notification), any());
     }
 
     @Test
     @DisplayName("아티클 알림 설정은 활성화되어 있으나 토큰이 없으면 실패 처리한다")
-    void processArticleArrivedNotification_SettingsEnabledButNoTokens_MarksAsFailed() {
+    void processNotification_Article_SettingsEnabledButNoTokens_MarksAsFailed() {
         // Given
         ArticleArrivalNotification notification = createNotification();
 
@@ -103,11 +117,15 @@ class NotificationProcessingServiceTest {
                 .thenReturn(Collections.emptyList());
 
         // When
-        notificationProcessingService.processArticleArrivedNotification(notification);
+        notificationProcessingService.processNotification(
+                notification,
+                NotificationCategory.ARTICLE,
+                articleStatusService
+        );
 
         // Then
         verify(notificationSettingService, times(1)).isEnabled(TEST_MEMBER_ID, NotificationCategory.ARTICLE);
-        verify(statusUpdater, times(1)).markAsFailed(eq(notification), anyString());
+        verify(articleStatusService, times(1)).markAsFailed(eq(notification), anyString());
         verify(notificationSender, never()).sendToAllDevices(any(), anyList());
     }
 
@@ -141,12 +159,94 @@ class NotificationProcessingServiceTest {
         verify(notificationSettingService, times(1)).ensureMemberNotificationSetting(TEST_MEMBER_ID);
     }
 
+    @Test
+    @DisplayName("챌린지 TODO 리마인더 알림 설정이 비활성화되어 있으면 전송하지 않는다")
+    void processNotification_Challenge_SettingsDisabled_DoesNotSend() {
+        ChallengeTodoReminderNotification notification = createChallengeNotification();
+        when(notificationSettingService.isEnabled(TEST_MEMBER_ID, NotificationCategory.CHALLENGE_TODO_REMINDER))
+                .thenReturn(false);
+
+        notificationProcessingService.processNotification(
+                notification,
+                NotificationCategory.CHALLENGE_TODO_REMINDER,
+                challengeStatusService
+        );
+
+        verify(notificationSettingService, times(1))
+                .isEnabled(TEST_MEMBER_ID, NotificationCategory.CHALLENGE_TODO_REMINDER);
+        verify(notificationTokenService, never()).resolveTokens(anyLong());
+        verify(notificationSender, never()).sendToAllDevices(any(), anyList());
+        verify(challengeStatusService, never()).updateStatus(any(ChallengeTodoReminderNotification.class), any());
+    }
+
+    @Test
+    @DisplayName("챌린지 TODO 리마인더 알림 설정이 활성화되어 있고 토큰이 있으면 전송한다")
+    void processNotification_Challenge_SettingsEnabledAndTokensExist_SendsNotification() {
+        ChallengeTodoReminderNotification notification = createChallengeNotification();
+        List<MemberFcmToken> tokens = List.of(MemberFcmToken.builder()
+                .memberId(TEST_MEMBER_ID)
+                .deviceUuid("test-device")
+                .fcmToken("test-token")
+                .isNotificationEnabled(true)
+                .build());
+
+        when(notificationSettingService.isEnabled(TEST_MEMBER_ID, NotificationCategory.CHALLENGE_TODO_REMINDER))
+                .thenReturn(true);
+        when(notificationTokenService.resolveTokens(TEST_MEMBER_ID))
+                .thenReturn(tokens);
+        when(notificationSender.sendToAllDevices(eq(notification), anyList()))
+                .thenReturn(new NotificationResultResponse(1, 0, 0, ""));
+
+        notificationProcessingService.processNotification(
+                notification,
+                NotificationCategory.CHALLENGE_TODO_REMINDER,
+                challengeStatusService
+        );
+
+        verify(notificationSettingService, times(1))
+                .isEnabled(TEST_MEMBER_ID, NotificationCategory.CHALLENGE_TODO_REMINDER);
+        verify(notificationTokenService, times(1)).resolveTokens(TEST_MEMBER_ID);
+        verify(notificationSender, times(1)).sendToAllDevices(eq(notification), anyList());
+        verify(challengeStatusService, times(1)).updateStatus(eq(notification), any());
+    }
+
+    @Test
+    @DisplayName("챌린지 TODO 리마인더 알림 설정은 활성화되어 있으나 토큰이 없으면 실패 처리한다")
+    void processNotification_Challenge_SettingsEnabledButNoTokens_MarksAsFailed() {
+        ChallengeTodoReminderNotification notification = createChallengeNotification();
+
+        when(notificationSettingService.isEnabled(TEST_MEMBER_ID, NotificationCategory.CHALLENGE_TODO_REMINDER))
+                .thenReturn(true);
+        when(notificationTokenService.resolveTokens(TEST_MEMBER_ID))
+                .thenReturn(Collections.emptyList());
+
+        notificationProcessingService.processNotification(
+                notification,
+                NotificationCategory.CHALLENGE_TODO_REMINDER,
+                challengeStatusService
+        );
+
+        verify(notificationSettingService, times(1))
+                .isEnabled(TEST_MEMBER_ID, NotificationCategory.CHALLENGE_TODO_REMINDER);
+        verify(challengeStatusService, times(1)).markAsFailed(eq(notification), anyString());
+        verify(notificationSender, never()).sendToAllDevices(any(), anyList());
+    }
+
     private ArticleArrivalNotification createNotification() {
         return ArticleArrivalNotification.builder()
                 .memberId(TEST_MEMBER_ID)
                 .articleId(123L)
                 .articleTitle("테스트 제목")
                 .newsletterName("테스트 뉴스레터")
+                .build();
+    }
+
+    private ChallengeTodoReminderNotification createChallengeNotification() {
+        return ChallengeTodoReminderNotification.builder()
+                .memberId(TEST_MEMBER_ID)
+                .challengeName("테스트 챌린지")
+                .title("리마인더")
+                .content("할 일을 완료해 주세요")
                 .build();
     }
 }

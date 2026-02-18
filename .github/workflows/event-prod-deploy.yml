@@ -171,11 +171,11 @@ jobs:
           set -euo pipefail
           {
             echo "DEV_SPRING_DATASOURCE_URL=${{ secrets.EVENT_PROD_SPRING_DATASOURCE_URL }}"
-            echo "DEV_SPRING_DATASOURCE_USERNAME=${{ secrets.DEV_SPRING_DATASOURCE_USERNAME }}"
-            echo "DEV_SPRING_DATASOURCE_PASSWORD=${{ secrets.DEV_SPRING_DATASOURCE_PASSWORD }}"
+            echo "DEV_SPRING_DATASOURCE_USERNAME=${{ secrets.PROD_MYSQL_USER }}"
+            echo "DEV_SPRING_DATASOURCE_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}"
           } > .env
 
-          echo "::add-mask::${{ secrets.DEV_SPRING_DATASOURCE_PASSWORD }}"
+          echo "::add-mask::${{ secrets.PROD_MYSQL_PASSWORD }}"
 
       - name: 환경변수 검증
         run: |
@@ -259,9 +259,9 @@ jobs:
         run: |
           set -euo pipefail
           {
-            echo "DEV_SPRING_DATASOURCE_URL=${{ secrets.EVENT_DEV_SPRING_DATASOURCE_URL }}"
-            echo "DEV_SPRING_DATASOURCE_USERNAME=${{ secrets.DEV_SPRING_DATASOURCE_USERNAME }}"
-            echo "DEV_SPRING_DATASOURCE_PASSWORD=${{ secrets.DEV_SPRING_DATASOURCE_PASSWORD }}"
+            echo "DEV_SPRING_DATASOURCE_URL=${{ secrets.EVENT_PROD_SPRING_DATASOURCE_URL }}"
+            echo "DEV_SPRING_DATASOURCE_USERNAME=${{ secrets.PROD_MYSQL_USER }}"
+            echo "DEV_SPRING_DATASOURCE_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}"
           } > .env
 
           echo "::add-mask::${{ secrets.DEV_SPRING_DATASOURCE_PASSWORD }}"

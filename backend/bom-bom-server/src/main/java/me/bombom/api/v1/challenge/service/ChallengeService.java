@@ -52,6 +52,7 @@ public class ChallengeService {
     // TODO: 이후에 수료 처리 등 구현 시 관리 방법 고려
     private static final double SUCCESS_REQUIRED_RATIO = 0.8;
     private static final int MIN_CHALLENGE_TOTAL_DAYS_FOR_BADGE = 15;
+    private static final double ADDITIONAL_APPLICATION_ALLOWED_RATIO = 0.2;
 
     private final ChallengeRepository challengeRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
@@ -302,8 +303,14 @@ public class ChallengeService {
     }
 
     private EligibilityReason validateEligibility(Challenge challenge, Long challengeId, Long memberId) {
-        if (challenge.hasStarted(LocalDate.now())) {
-            return EligibilityReason.ALREADY_STARTED;
+        LocalDate today = LocalDate.now();
+
+        if (challenge.hasStarted(today)) {
+            int passedDays = challenge.calculatePassedDays(today);
+            int maxPassedDaysForApplication = (int) (challenge.getTotalDays() * ADDITIONAL_APPLICATION_ALLOWED_RATIO);
+            if (passedDays > maxPassedDaysForApplication) {
+                return EligibilityReason.ALREADY_STARTED;
+            }
         }
 
         boolean alreadyApplied = challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId);

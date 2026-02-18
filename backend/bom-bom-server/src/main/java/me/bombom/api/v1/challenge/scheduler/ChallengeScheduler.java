@@ -65,7 +65,7 @@ public class ChallengeScheduler {
         log.info("챌린지 종료 처리 및 뱃지 발급 완료");
     }
 
-    @Scheduled(cron = CHALLENGE_START_NOTIFICATION_CRON)
+    @Scheduled(cron = CHALLENGE_START_NOTIFICATION_CRON, zone = "Asia/Seoul")
     @SchedulerLock(name = "create_challenge_start_notifications", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void createChallengeStartNotifications() {
         LocalDate today = LocalDate.now(clock);

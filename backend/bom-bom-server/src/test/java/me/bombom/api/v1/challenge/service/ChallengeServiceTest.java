@@ -183,6 +183,34 @@ class ChallengeServiceTest {
     }
 
     @Test
+    void 추가_신청_기간_내_챌린지는_미참여_시에도_목록에_노출된다() {
+        // given: 시작일이 오늘, totalDays 21일 → 추가 신청 기간 내. 참여하지 않은 회원
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge(
+                "추가 신청 가능 챌린지",
+                today,
+                today.plusDays(30),
+                21,
+                group.getId()
+        );
+        challengeRepository.save(challenge);
+
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
+
+        // when: 참여하지 않은 member로 목록 조회
+        List<ChallengeResponse> result = challengeService.getChallenges(member);
+
+        // then: 추가 신청 기간 내이므로 목록에 포함되어야 함
+        assertSoftly(softly -> {
+            softly.assertThat(result).hasSize(1);
+            softly.assertThat(result.get(0).id()).isEqualTo(challenge.getId());
+            softly.assertThat(result.get(0).detail().isJoined()).isFalse();
+        });
+    }
+
+    @Test
     void 챌린지가_없을_때_빈_리스트_반환() {
         // when
         List<ChallengeResponse> result = challengeService.getChallenges(null);

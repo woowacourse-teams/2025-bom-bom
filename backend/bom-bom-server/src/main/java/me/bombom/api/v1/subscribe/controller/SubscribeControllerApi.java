@@ -9,8 +9,7 @@ import jakarta.validation.constraints.Positive;
 import java.util.List;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.subscribe.dto.UnsubscribeResponse;
-import me.bombom.api.v1.subscribe.dto.SubscribedNewsletterResponse;
+import me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @Tag(name = "Subscription", description = "구독 관련 API")
@@ -23,12 +22,13 @@ public interface SubscribeControllerApi {
     })
     List<SubscribedNewsletterResponse> getSubscribedNewsletters(@Parameter(hidden = true) @LoginMember Member member);
 
-    @Operation(summary = "뉴스레터 구독 취소", description = "뉴스레터 구독을 취소합니다. 구독 리스트에서 삭제하고 unsubscribeUrl이 존재하는 경우 반환됩니다.")
+    @Operation(summary = "뉴스레터 구독 취소", description = "뉴스레터 구독 취소를 요청합니다. 자동 취소가 비동기로 진행되며, 실패 시 구독 목록에서 수동 취소 링크를 확인할 수 있습니다.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "구독 취소 성공"),
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
-    UnsubscribeResponse unsubscribe(
+    void unsubscribe(
             @Parameter(hidden = true) @LoginMember Member member,
-            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long subscriptionId);
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long subscriptionId
+    );
 }

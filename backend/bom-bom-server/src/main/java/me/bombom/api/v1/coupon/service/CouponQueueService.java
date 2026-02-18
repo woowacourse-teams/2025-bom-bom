@@ -56,6 +56,12 @@ public class CouponQueueService {
         if (isIssued(couponName, memberId)) {
             return buildStatus(event, couponName, CouponQueueStatus.ISSUED, null, activeCount, null, null);
         }
+        boolean soldOut = isSoldOut(couponName, event);
+        if (soldOut) {
+            couponQueueRepository.removeQueue(couponName, memberId);
+            couponQueueRepository.removeActive(couponName, memberId);
+            return buildStatus(event, couponName, CouponQueueStatus.SOLD_OUT, null, activeCount, null, null);
+        }
         if (couponQueueRepository.isActive(couponName, memberId)) {
             Long expireAt = couponQueueRepository.getActiveExpireAtMillis(couponName, memberId);
             Long expiresIn = expireAt != null ? Math.max(0L, (expireAt - nowMillis) / 1000) : null;
@@ -63,7 +69,6 @@ public class CouponQueueService {
         }
         Long rank = couponQueueRepository.rankQueue(couponName, memberId);
         long queueCount = couponQueueRepository.getQueueCount(couponName);
-        boolean soldOut = couponQueueRepository.isSoldOut(couponName);
         if (rank != null) {
             return buildStatus(event, couponName, CouponQueueStatus.WAITING, rank + 1, activeCount, null, queueCount);
         }
@@ -109,7 +114,6 @@ public class CouponQueueService {
             return buildStatus(event, couponName, CouponQueueStatus.SOLD_OUT, null, 0L, null, null);
         }
 
-        boolean wasActive = couponQueueRepository.isActive(couponName, memberId);
         couponQueueRepository.removeExpiredActive(couponName, nowMillis);
         long activeCount = couponQueueRepository.getActiveCount(couponName);
 
@@ -117,7 +121,12 @@ public class CouponQueueService {
             return buildStatus(event, couponName, CouponQueueStatus.ISSUED, null, activeCount, null, null);
         }
 
-        boolean soldOut = couponQueueRepository.isSoldOut(couponName);
+        boolean soldOut = isSoldOut(couponName, event);
+        if (soldOut) {
+            couponQueueRepository.removeQueue(couponName, memberId);
+            couponQueueRepository.removeActive(couponName, memberId);
+            return buildStatus(event, couponName, CouponQueueStatus.SOLD_OUT, null, activeCount, null, null);
+        }
 
         if (couponQueueRepository.isActive(couponName, memberId)) {
             Long expireAt = couponQueueRepository.getActiveExpireAtMillis(couponName, memberId);
@@ -294,6 +303,17 @@ public class CouponQueueService {
         long effectiveMax = Math.min(event.getMaxCount(), totalStock);
 
         return issuedCount >= effectiveMax;
+    }
+
+    private boolean isSoldOut(String couponName, Event event) {
+        if (couponQueueRepository.isSoldOut(couponName)) {
+            return true;
+        }
+        boolean soldOutByPolicy = isSoldOutByPolicy(couponName, event);
+        if (soldOutByPolicy) {
+            couponQueueRepository.markSoldOut(couponName);
+        }
+        return soldOutByPolicy;
     }
 
     private CouponQueueStatusResponse buildStatus(

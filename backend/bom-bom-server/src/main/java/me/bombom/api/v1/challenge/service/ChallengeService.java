@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,6 +52,7 @@ public class ChallengeService {
 
     // TODO: 이후에 수료 처리 등 구현 시 관리 방법 고려
     private static final double SUCCESS_REQUIRED_RATIO = 0.8;
+    private static final double ADDITIONAL_APPLICATION_ALLOWED_RATIO = 0.2;
     private static final int MIN_CHALLENGE_TOTAL_DAYS_FOR_BADGE = 15;
 
     private final ChallengeRepository challengeRepository;
@@ -58,6 +60,7 @@ public class ChallengeService {
     private final NewsletterGroupItemRepository newsletterGroupItemRepository;
     private final ChallengeTeamRepository challengeTeamRepository;
     private final BadgeService badgeService;
+    private final Clock clock;
 
     public List<ChallengeResponse> getChallenges(Member member) {
         List<Challenge> challenges = challengeRepository.findAll();
@@ -73,17 +76,15 @@ public class ChallengeService {
         Map<Long, List<ChallengeNewsletterResponse>> newslettersByChallengeId = getNewslettersByChallengeId(challengeIds);
         Map<Long, ChallengeParticipant> myParticipation = findMyParticipation(member, challengeIds);
 
+        LocalDate today = LocalDate.now(clock);
         return challenges.stream()
-                .filter(challenge -> {
-                    ChallengeStatus status = challenge.getStatus(LocalDate.now());
-                    boolean isJoined = myParticipation.containsKey(challenge.getId());
-                    return status == ChallengeStatus.COMING_SOON || status == ChallengeStatus.BEFORE_START || isJoined;
-                })
+                .filter(challenge -> isVisibleInChallengeList(challenge, today, myParticipation.containsKey(challenge.getId())))
                 .map(challenge -> toChallengeResponse(
                         challenge,
                         participantCounts,
                         newslettersByChallengeId,
-                        myParticipation
+                        myParticipation,
+                        today
                 ))
                 .toList();
     }
@@ -159,7 +160,7 @@ public class ChallengeService {
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
                         .addContext(ErrorContextKeys.OPERATION, "cancelChallenge"));
 
-        if (challenge.hasStarted(LocalDate.now())) {
+        if (challenge.hasStarted(LocalDate.now(clock))) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
                     .addContext(ErrorContextKeys.OPERATION, "cancelChallenge")
@@ -216,20 +217,29 @@ public class ChallengeService {
         return new ChallengeTeamListResponse(teams.size(), myTeamId, teamInfos);
     }
 
+    private boolean isVisibleInChallengeList(Challenge challenge, LocalDate today, boolean isJoined) {
+        ChallengeStatus status = challenge.getStatus(today);
+        return status == ChallengeStatus.COMING_SOON
+                || status == ChallengeStatus.BEFORE_START
+                || isJoined
+                || isWithinAdditionalApplicationPeriod(challenge, today);
+    }
+
     private ChallengeResponse toChallengeResponse(
             Challenge challenge,
             Map<Long, Long> participantCounts,
             Map<Long, List<ChallengeNewsletterResponse>> newslettersByChallengeId,
-            Map<Long, ChallengeParticipant> myParticipation
+            Map<Long, ChallengeParticipant> myParticipation,
+            LocalDate today
     ) {
         long participantCount = participantCounts.getOrDefault(challenge.getId(), 0L);
         List<ChallengeNewsletterResponse> newsletterResponses = newslettersByChallengeId.getOrDefault(
                 challenge.getId(),
                 Collections.emptyList()
         );
-        ChallengeStatus status = challenge.getStatus(LocalDate.now());
+        ChallengeStatus status = challenge.getStatus(today);
         ChallengeParticipant myParticipant = myParticipation.get(challenge.getId());
-        ChallengeDetailResponse detailResponse = calculateDetailResponse(challenge, myParticipant);
+        ChallengeDetailResponse detailResponse = calculateDetailResponse(challenge, myParticipant, today);
 
         return ChallengeResponse.of(challenge, participantCount, newsletterResponses, status, detailResponse);
     }
@@ -261,13 +271,14 @@ public class ChallengeService {
 
     private ChallengeDetailResponse calculateDetailResponse(
             Challenge challenge,
-            ChallengeParticipant myParticipant
+            ChallengeParticipant myParticipant,
+            LocalDate today
     ) {
         if (myParticipant == null) {
             return ChallengeDetailResponse.notJoined();
         }
 
-        boolean isEnded = challenge.isEnded(LocalDate.now());
+        boolean isEnded = challenge.isEnded(today);
         boolean isSurvived = myParticipant.isSurvived();
         int progress = myParticipant.calculateProgress(challenge.getTotalDays());
 
@@ -301,8 +312,19 @@ public class ChallengeService {
                 .addContext("reason", "ELIGIBLE 상태에서는 예외를 생성할 수 없습니다.");
     }
 
+    private boolean isWithinAdditionalApplicationPeriod(Challenge challenge, LocalDate today) {
+        if (!challenge.hasStarted(today)) {
+            return false;
+        }
+        int passedDays = challenge.calculatePassedDays(today);
+        int maxPassedDaysForApplication = (int) (challenge.getTotalDays() * ADDITIONAL_APPLICATION_ALLOWED_RATIO);
+        return passedDays <= maxPassedDaysForApplication;
+    }
+
     private EligibilityReason validateEligibility(Challenge challenge, Long challengeId, Long memberId) {
-        if (challenge.hasStarted(LocalDate.now())) {
+        LocalDate today = LocalDate.now(clock);
+
+        if (challenge.hasStarted(today) && !isWithinAdditionalApplicationPeriod(challenge, today)) {
             return EligibilityReason.ALREADY_STARTED;
         }
 

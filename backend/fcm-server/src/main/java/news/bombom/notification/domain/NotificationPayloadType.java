@@ -9,7 +9,6 @@ import lombok.Getter;
 public enum NotificationPayloadType {
 
     ARTICLE,
-    CHALLENGE_TODO_REMINDER,
     EVENT,
     DEFAULT
 }

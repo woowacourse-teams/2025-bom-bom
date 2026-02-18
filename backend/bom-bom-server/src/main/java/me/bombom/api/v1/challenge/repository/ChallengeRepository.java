@@ -12,6 +12,13 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
     @Query("""
         SELECT c
         FROM Challenge c
+        WHERE c.startDate = :date
+    """)
+    List<Challenge> findChallengesStartingOn(@Param("date") LocalDate date);
+
+    @Query("""
+        SELECT c
+        FROM Challenge c
         WHERE :date BETWEEN c.startDate AND c.endDate
     """)
     List<Challenge> findOngoingChallenges(@Param("date") LocalDate date);

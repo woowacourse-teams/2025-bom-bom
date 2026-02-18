@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 public class ChallengeScheduler {
 
     private static final String DAILY_CRON = "0 0 0 * * *";
-    private static final String CHALLENGE_START_NOTIFICATION_CRON = "0 0 4 * * *";
+    private static final String CHALLENGE_START_NOTIFICATION_CRON = "0 10 3 * * *";
 
     private final Clock clock;
     private final ChallengeService challengeService;

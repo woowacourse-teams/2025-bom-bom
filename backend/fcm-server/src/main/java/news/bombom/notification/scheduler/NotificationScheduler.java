@@ -1,14 +1,10 @@
 package news.bombom.notification.scheduler;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import news.bombom.article.domain.ArticleArrivalNotification;
-import news.bombom.notification.domain.NotificationStatus;
-import news.bombom.notification.repository.ArticleArrivalNotificationRepository;
-import news.bombom.notification.service.NotificationProcessingService;
-import news.bombom.notification.service.NotificationStatusService;
+import news.bombom.article.service.ArticleArrivalNotificationProcessor;
+import news.bombom.challenge.service.ChallengeTodoReminderNotificationProcessor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -17,33 +13,30 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NotificationScheduler {
 
-    private final ArticleArrivalNotificationRepository notificationRepository;
-    private final NotificationProcessingService notificationProcessingService;
-    private final NotificationStatusService notificationStatusService;
+    private final ArticleArrivalNotificationProcessor articleProcessor;
+    private final ChallengeTodoReminderNotificationProcessor challengeProcessor;
 
     @Scheduled(fixedDelay = 30000)
     public void processPendingNotifications() {
-        List<ArticleArrivalNotification> pendingNotifications =
-                notificationRepository.findRetryCandidates(
-                        List.of(NotificationStatus.PENDING, NotificationStatus.FAILED),
-                        LocalDateTime.now()
-                );
+        LocalDateTime now = LocalDateTime.now();
+        log.info("아티클 재시도 Processor 실행");
 
-        log.info("처리할 알림 개수: {}", pendingNotifications.size());
+        try {
+            articleProcessor.processPendingNotifications(now);
+        } catch (Exception e) {
+            log.error("Processor 실행 중 오류 발생: type={}", articleProcessor.type(), e);
+        }
+    }
 
-        for (ArticleArrivalNotification notification : pendingNotifications) {
-            try {
-                if (!notification.shouldRetry()) {
-                    log.warn("최대 재시도 횟수 초과: notificationId={}, attempts={}",
-                            notification.getId(), notification.getAttempts());
-                    notificationStatusService.moveToFailedTableIfExceeded(notification);
-                    continue;
-                }
+    @Scheduled(cron = "0 0 21 * * MON-FRI", zone = "Asia/Seoul")
+    public void processChallengeTodoReminderNotifications() {
+        LocalDateTime now = LocalDateTime.now();
+        log.info("챌린지 TODO 리마인더 Processor 실행");
 
-                notificationProcessingService.processArticleArrivedNotification(notification);
-            } catch (Exception e) {
-                log.error("알림 처리 중 오류 발생: notificationId={}", notification.getId(), e);
-            }
+        try {
+            challengeProcessor.processPendingNotifications(now);
+        } catch (Exception e) {
+            log.error("Processor 실행 중 오류 발생: type={}", challengeProcessor.type(), e);
         }
     }
 }

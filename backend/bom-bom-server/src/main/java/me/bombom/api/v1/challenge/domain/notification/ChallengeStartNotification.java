@@ -28,8 +28,8 @@ public class ChallengeStartNotification extends BaseEntity {
     @Column(nullable = false)
     private Long memberId;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 32)
     private ChallengeStartNotificationStatus status;
 
     @Column(nullable = false)

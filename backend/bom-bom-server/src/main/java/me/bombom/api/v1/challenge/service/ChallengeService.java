@@ -76,17 +76,15 @@ public class ChallengeService {
         Map<Long, List<ChallengeNewsletterResponse>> newslettersByChallengeId = getNewslettersByChallengeId(challengeIds);
         Map<Long, ChallengeParticipant> myParticipation = findMyParticipation(member, challengeIds);
 
+        LocalDate today = LocalDate.now(clock);
         return challenges.stream()
-                .filter(challenge -> {
-                    ChallengeStatus status = challenge.getStatus(LocalDate.now(clock));
-                    boolean isJoined = myParticipation.containsKey(challenge.getId());
-                    return status == ChallengeStatus.COMING_SOON || status == ChallengeStatus.BEFORE_START || isJoined;
-                })
+                .filter(challenge -> isVisibleInChallengeList(challenge, today, myParticipation.containsKey(challenge.getId())))
                 .map(challenge -> toChallengeResponse(
                         challenge,
                         participantCounts,
                         newslettersByChallengeId,
-                        myParticipation
+                        myParticipation,
+                        today
                 ))
                 .toList();
     }
@@ -219,20 +217,29 @@ public class ChallengeService {
         return new ChallengeTeamListResponse(teams.size(), myTeamId, teamInfos);
     }
 
+    private boolean isVisibleInChallengeList(Challenge challenge, LocalDate today, boolean isJoined) {
+        ChallengeStatus status = challenge.getStatus(today);
+        return status == ChallengeStatus.COMING_SOON
+                || status == ChallengeStatus.BEFORE_START
+                || isJoined
+                || isWithinAdditionalApplicationPeriod(challenge, today);
+    }
+
     private ChallengeResponse toChallengeResponse(
             Challenge challenge,
             Map<Long, Long> participantCounts,
             Map<Long, List<ChallengeNewsletterResponse>> newslettersByChallengeId,
-            Map<Long, ChallengeParticipant> myParticipation
+            Map<Long, ChallengeParticipant> myParticipation,
+            LocalDate today
     ) {
         long participantCount = participantCounts.getOrDefault(challenge.getId(), 0L);
         List<ChallengeNewsletterResponse> newsletterResponses = newslettersByChallengeId.getOrDefault(
                 challenge.getId(),
                 Collections.emptyList()
         );
-        ChallengeStatus status = challenge.getStatus(LocalDate.now(clock));
+        ChallengeStatus status = challenge.getStatus(today);
         ChallengeParticipant myParticipant = myParticipation.get(challenge.getId());
-        ChallengeDetailResponse detailResponse = calculateDetailResponse(challenge, myParticipant);
+        ChallengeDetailResponse detailResponse = calculateDetailResponse(challenge, myParticipant, today);
 
         return ChallengeResponse.of(challenge, participantCount, newsletterResponses, status, detailResponse);
     }
@@ -264,13 +271,14 @@ public class ChallengeService {
 
     private ChallengeDetailResponse calculateDetailResponse(
             Challenge challenge,
-            ChallengeParticipant myParticipant
+            ChallengeParticipant myParticipant,
+            LocalDate today
     ) {
         if (myParticipant == null) {
             return ChallengeDetailResponse.notJoined();
         }
 
-        boolean isEnded = challenge.isEnded(LocalDate.now(clock));
+        boolean isEnded = challenge.isEnded(today);
         boolean isSurvived = myParticipant.isSurvived();
         int progress = myParticipant.calculateProgress(challenge.getTotalDays());
 
@@ -304,15 +312,20 @@ public class ChallengeService {
                 .addContext("reason", "ELIGIBLE 상태에서는 예외를 생성할 수 없습니다.");
     }
 
+    private boolean isWithinAdditionalApplicationPeriod(Challenge challenge, LocalDate today) {
+        if (!challenge.hasStarted(today)) {
+            return false;
+        }
+        int passedDays = challenge.calculatePassedDays(today);
+        int maxPassedDaysForApplication = (int) (challenge.getTotalDays() * ADDITIONAL_APPLICATION_ALLOWED_RATIO);
+        return passedDays <= maxPassedDaysForApplication;
+    }
+
     private EligibilityReason validateEligibility(Challenge challenge, Long challengeId, Long memberId) {
         LocalDate today = LocalDate.now(clock);
 
-        if (challenge.hasStarted(today)) {
-            int passedDays = challenge.calculatePassedDays(today);
-            int maxPassedDaysForApplication = (int) (challenge.getTotalDays() * ADDITIONAL_APPLICATION_ALLOWED_RATIO);
-            if (passedDays > maxPassedDaysForApplication) {
-                return EligibilityReason.ALREADY_STARTED;
-            }
+        if (challenge.hasStarted(today) && !isWithinAdditionalApplicationPeriod(challenge, today)) {
+            return EligibilityReason.ALREADY_STARTED;
         }
 
         boolean alreadyApplied = challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId);

@@ -10,5 +10,6 @@ public enum NotificationPayloadType {
 
     ARTICLE,
     EVENT,
+    CHALLENGE_START,
     DEFAULT
 }

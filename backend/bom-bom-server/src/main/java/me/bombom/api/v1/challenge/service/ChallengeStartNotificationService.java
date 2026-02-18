@@ -35,38 +35,43 @@ public class ChallengeStartNotificationService {
         }
 
         for (Challenge challenge : startingChallenges) {
-            List<ChallengeParticipant> participants = challengeParticipantRepository.findAllByChallengeId(challenge.getId());
+            try {
+                List<ChallengeParticipant> participants = challengeParticipantRepository.findAllByChallengeId(challenge.getId());
 
-            if (participants.isEmpty()) {
-                log.info("참여자가 없는 시작 챌린지입니다. challengeId={}", challenge.getId());
-                continue;
+                if (participants.isEmpty()) {
+                    log.info("참여자가 없는 시작 챌린지입니다. challengeId={}", challenge.getId());
+                    continue;
+                }
+
+                Set<Long> existingMemberIds = new HashSet<>(
+                        challengeStartNotificationRepository.findMemberIdsByChallengeId(challenge.getId()));
+
+                List<ChallengeStartNotification> notifications = participants.stream()
+                        .map(ChallengeParticipant::getMemberId)
+                        .filter(memberId -> !existingMemberIds.contains(memberId))
+                        .map(memberId -> ChallengeStartNotification.createPending(
+                                memberId,
+                                challenge.getId(),
+                                challenge.getName()
+                        ))
+                        .toList();
+
+                if (notifications.isEmpty()) {
+                    log.info("이미 시작 알림이 모두 적재된 챌린지입니다. challengeId={}", challenge.getId());
+                    continue;
+                }
+
+                challengeStartNotificationRepository.saveAll(notifications);
+                log.info(
+                        "챌린지 시작 알림 적재 완료. challengeId={}, challengeName={}, createdCount={}",
+                        challenge.getId(),
+                        challenge.getName(),
+                        notifications.size()
+                );
+            } catch (Exception e) {
+                log.error("챌린지 시작 알림 적재 실패. challengeId={}, challengeName={}",
+                        challenge.getId(), challenge.getName(), e);
             }
-
-            Set<Long> existingMemberIds = new HashSet<>(
-                    challengeStartNotificationRepository.findMemberIdsByChallengeId(challenge.getId()));
-
-            List<ChallengeStartNotification> notifications = participants.stream()
-                    .map(ChallengeParticipant::getMemberId)
-                    .filter(memberId -> !existingMemberIds.contains(memberId))
-                    .map(memberId -> ChallengeStartNotification.createPending(
-                            memberId,
-                            challenge.getId(),
-                            challenge.getName()
-                    ))
-                    .toList();
-
-            if (notifications.isEmpty()) {
-                log.info("이미 시작 알림이 모두 적재된 챌린지입니다. challengeId={}", challenge.getId());
-                continue;
-            }
-
-            challengeStartNotificationRepository.saveAll(notifications);
-            log.info(
-                    "챌린지 시작 알림 적재 완료. challengeId={}, challengeName={}, createdCount={}",
-                    challenge.getId(),
-                    challenge.getName(),
-                    notifications.size()
-            );
         }
     }
 }

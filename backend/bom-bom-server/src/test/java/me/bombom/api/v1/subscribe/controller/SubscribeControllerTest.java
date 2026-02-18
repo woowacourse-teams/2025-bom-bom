@@ -3,8 +3,6 @@ package me.bombom.api.v1.subscribe.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -19,6 +17,7 @@ import me.bombom.api.v1.common.resolver.LoginMemberArgumentResolver;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.subscribe.dto.UnsubscribeResponse;
 import me.bombom.api.v1.subscribe.service.SubscribeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,16 +47,6 @@ class SubscribeControllerTest {
     static class TestConfig implements WebMvcConfigurer {
 
         @Bean
-        public MemberRepository memberRepository() {
-            return mock(MemberRepository.class);
-        }
-
-        @Bean
-        public LoginMemberArgumentResolver loginMemberArgumentResolver() {
-            return new LoginMemberArgumentResolver();
-        }
-
-        @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             return http
                     .csrf(AbstractHttpConfigurer::disable)
@@ -72,7 +61,6 @@ class SubscribeControllerTest {
         @Override
         public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
             resolvers.add(new LoginMemberArgumentResolver());
-
         }
     }
 
@@ -82,7 +70,7 @@ class SubscribeControllerTest {
     @MockitoBean
     SubscribeService subscribeService;
 
-    @Autowired
+    @MockitoBean
     MemberRepository memberRepository;
 
     private OAuth2AuthenticationToken authToken;
@@ -99,12 +87,13 @@ class SubscribeControllerTest {
                 .roleId(1L)
                 .build();
 
-        given(memberRepository.findById(1L)).willReturn(Optional.of(member));
+        given(memberRepository.findById(member.getId())).willReturn(Optional.of(member));
 
         Map<String, Object> attrs = Map.of(
                 "id", "1",
                 "email", "email@bombom.news",
-                "name", "nickname");
+                "name", "nickname"
+        );
 
         CustomOAuth2User user = new CustomOAuth2User(attrs, member, null, null);
         authToken = new OAuth2AuthenticationToken(user, user.getAuthorities(), "registrationId");
@@ -128,7 +117,8 @@ class SubscribeControllerTest {
 
     @Test
     void 인증된_사용자는_구독_취소를_요청할_수_있다() throws Exception {
-        doNothing().when(subscribeService).unsubscribe(anyLong(), anyLong());
+        given(subscribeService.unsubscribe(anyLong(), anyLong()))
+                .willReturn(UnsubscribeResponse.of(null));
 
         mockMvc.perform(post("/api/v1/members/me/subscriptions/{id}/unsubscribe", 1L)
                         .with(authentication(authToken)))

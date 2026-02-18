@@ -14,6 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import news.bombom.article.domain.ArticleArrivalNotification;
 import news.bombom.article.service.ArticleArrivalNotificationStatusService;
+import news.bombom.challenge.domain.ChallengeStartNotification;
+import news.bombom.challenge.service.ChallengeStartNotificationStatusService;
 import news.bombom.challenge.domain.ChallengeTodoReminderNotification;
 import news.bombom.challenge.service.ChallengeTodoReminderNotificationStatusService;
 import news.bombom.notification.domain.MemberFcmToken;
@@ -41,6 +43,9 @@ class NotificationProcessingServiceTest {
 
     @Mock
     private ChallengeTodoReminderNotificationStatusService challengeStatusService;
+
+    @Mock
+    private ChallengeStartNotificationStatusService challengeStartStatusService;
 
     @Mock
     private NotificationSettingService notificationSettingService;
@@ -232,6 +237,37 @@ class NotificationProcessingServiceTest {
         verify(notificationSender, never()).sendToAllDevices(any(), anyList());
     }
 
+    @Test
+    @DisplayName("챌린지 시작 알림 설정이 활성화되어 있고 토큰이 있으면 전송한다")
+    void processNotification_ChallengeStart_SettingsEnabledAndTokensExist_SendsNotification() {
+        ChallengeStartNotification notification = createChallengeStartNotification();
+        List<MemberFcmToken> tokens = List.of(MemberFcmToken.builder()
+                .memberId(TEST_MEMBER_ID)
+                .deviceUuid("test-device")
+                .fcmToken("test-token")
+                .isNotificationEnabled(true)
+                .build());
+
+        when(notificationSettingService.isEnabled(TEST_MEMBER_ID, NotificationCategory.CHALLENGE_START))
+                .thenReturn(true);
+        when(notificationTokenService.resolveTokens(TEST_MEMBER_ID))
+                .thenReturn(tokens);
+        when(notificationSender.sendToAllDevices(eq(notification), anyList()))
+                .thenReturn(new NotificationResultResponse(1, 0, 0, ""));
+
+        notificationProcessingService.processNotification(
+                notification,
+                NotificationCategory.CHALLENGE_START,
+                challengeStartStatusService
+        );
+
+        verify(notificationSettingService, times(1))
+                .isEnabled(TEST_MEMBER_ID, NotificationCategory.CHALLENGE_START);
+        verify(notificationTokenService, times(1)).resolveTokens(TEST_MEMBER_ID);
+        verify(notificationSender, times(1)).sendToAllDevices(eq(notification), anyList());
+        verify(challengeStartStatusService, times(1)).updateStatus(eq(notification), any());
+    }
+
     private ArticleArrivalNotification createNotification() {
         return ArticleArrivalNotification.builder()
                 .memberId(TEST_MEMBER_ID)
@@ -247,6 +283,14 @@ class NotificationProcessingServiceTest {
                 .challengeName("테스트 챌린지")
                 .title("리마인더")
                 .content("할 일을 완료해 주세요")
+                .build();
+    }
+
+    private ChallengeStartNotification createChallengeStartNotification() {
+        return ChallengeStartNotification.builder()
+                .memberId(TEST_MEMBER_ID)
+                .challengeId(100L)
+                .challengeName("시작 챌린지")
                 .build();
     }
 }

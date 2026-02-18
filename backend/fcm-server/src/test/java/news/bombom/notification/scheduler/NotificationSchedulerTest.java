@@ -4,6 +4,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import news.bombom.article.service.ArticleArrivalNotificationProcessor;
+import news.bombom.challenge.service.ChallengeStartNotificationProcessor;
 import news.bombom.challenge.service.ChallengeTodoReminderNotificationProcessor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,9 @@ class NotificationSchedulerTest {
     @Mock
     private ChallengeTodoReminderNotificationProcessor challengeProcessor;
 
+    @Mock
+    private ChallengeStartNotificationProcessor challengeStartProcessor;
+
     @InjectMocks
     private NotificationScheduler notificationScheduler;
 
@@ -39,5 +43,13 @@ class NotificationSchedulerTest {
         notificationScheduler.processChallengeTodoReminderNotifications();
 
         verify(challengeProcessor, times(1)).processPendingNotifications(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    @DisplayName("챌린지 시작 알림 스케줄이 챌린지 시작 Processor를 호출한다")
+    void processChallengeStartNotifications_DelegatesToChallengeStartProcessor() {
+        notificationScheduler.processChallengeStartNotifications();
+
+        verify(challengeStartProcessor, times(1)).processPendingNotifications(org.mockito.ArgumentMatchers.any());
     }
 }

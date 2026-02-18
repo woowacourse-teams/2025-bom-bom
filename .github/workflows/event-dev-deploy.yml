@@ -3,7 +3,7 @@ name: Backend event-dev Server
 on:
   push:
     branches:
-      - server-event
+      - xxx
 
 permissions:
   contents: read

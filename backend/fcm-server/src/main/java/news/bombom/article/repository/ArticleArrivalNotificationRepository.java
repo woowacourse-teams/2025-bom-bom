@@ -1,4 +1,4 @@
-package news.bombom.notification.repository;
+package news.bombom.article.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;

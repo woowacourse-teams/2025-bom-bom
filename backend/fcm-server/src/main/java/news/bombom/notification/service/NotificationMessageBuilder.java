@@ -1,7 +1,7 @@
-package news.bombom.notification.service.message;
+package news.bombom.notification.service;
 
-import news.bombom.notification.domain.Notification;
 import news.bombom.notification.domain.MemberFcmToken;
+import news.bombom.notification.domain.Notification;
 import news.bombom.notification.dto.NotificationMessage;
 
 public interface NotificationMessageBuilder {

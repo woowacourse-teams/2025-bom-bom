@@ -1,4 +1,4 @@
-package news.bombom.notification.repository;
+package news.bombom.article.repository;
 
 import news.bombom.article.domain.ArticleArrivalNotificationFailed;
 import org.springframework.data.jpa.repository.JpaRepository;

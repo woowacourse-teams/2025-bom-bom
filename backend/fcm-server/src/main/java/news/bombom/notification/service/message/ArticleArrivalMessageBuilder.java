@@ -28,7 +28,7 @@ public class ArticleArrivalMessageBuilder implements NotificationMessageBuilder 
                 .type(NotificationType.FCM)
                 .data(Map.of(
                         "articleId", String.valueOf(article.getArticleId()),
-                        "notificationType", NotificationPayloadType.ARRIVED_ARTICLE.getCode()
+                        "notificationType", NotificationPayloadType.ARTICLE
                 ))
                 .build();
     }

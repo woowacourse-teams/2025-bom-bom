@@ -3,12 +3,16 @@ package news.bombom.notification.domain;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 회원 알림 설정 및 전송 정책(토픽/개별 발송)을 구분하는 카테고리
+ */
 @Getter
 @RequiredArgsConstructor
 public enum NotificationCategory {
 
-    ARTICLE(true, false, null),           // 개별 발송
-    EVENT(false, true, "bombom_event"),   // 토픽 발송
+    ARTICLE(true, false, null),
+    EVENT(false, true, "bombom_event"),
+    CHALLENGE_TODO_REMINDER(true, false, null),
     ;
 
     private final boolean defaultSetting;

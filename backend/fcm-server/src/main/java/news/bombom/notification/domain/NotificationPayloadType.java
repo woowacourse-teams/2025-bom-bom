@@ -7,15 +7,8 @@ import lombok.Getter;
  */
 @Getter
 public enum NotificationPayloadType {
-    ARRIVED_ARTICLE("arrivedArticle"),
-    TOPIC_NOTIFICATION("topicNotification"),
-    CHALLENGE_TODO_REMINDER("challengeTodoReminder"),
-    DEFAULT("default"),
-    ;
 
-    private final String code;
-
-    NotificationPayloadType(String code) {
-        this.code = code;
-    }
+    ARTICLE,
+    CHALLENGE_TODO_REMINDER,
+    DEFAULT
 }

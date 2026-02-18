@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,6 +60,7 @@ public class ChallengeService {
     private final NewsletterGroupItemRepository newsletterGroupItemRepository;
     private final ChallengeTeamRepository challengeTeamRepository;
     private final BadgeService badgeService;
+    private final Clock clock;
 
     public List<ChallengeResponse> getChallenges(Member member) {
         List<Challenge> challenges = challengeRepository.findAll();
@@ -76,7 +78,7 @@ public class ChallengeService {
 
         return challenges.stream()
                 .filter(challenge -> {
-                    ChallengeStatus status = challenge.getStatus(LocalDate.now());
+                    ChallengeStatus status = challenge.getStatus(LocalDate.now(clock));
                     boolean isJoined = myParticipation.containsKey(challenge.getId());
                     return status == ChallengeStatus.COMING_SOON || status == ChallengeStatus.BEFORE_START || isJoined;
                 })
@@ -160,7 +162,7 @@ public class ChallengeService {
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
                         .addContext(ErrorContextKeys.OPERATION, "cancelChallenge"));
 
-        if (challenge.hasStarted(LocalDate.now())) {
+        if (challenge.hasStarted(LocalDate.now(clock))) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
                     .addContext(ErrorContextKeys.OPERATION, "cancelChallenge")
@@ -228,7 +230,7 @@ public class ChallengeService {
                 challenge.getId(),
                 Collections.emptyList()
         );
-        ChallengeStatus status = challenge.getStatus(LocalDate.now());
+        ChallengeStatus status = challenge.getStatus(LocalDate.now(clock));
         ChallengeParticipant myParticipant = myParticipation.get(challenge.getId());
         ChallengeDetailResponse detailResponse = calculateDetailResponse(challenge, myParticipant);
 
@@ -268,7 +270,7 @@ public class ChallengeService {
             return ChallengeDetailResponse.notJoined();
         }
 
-        boolean isEnded = challenge.isEnded(LocalDate.now());
+        boolean isEnded = challenge.isEnded(LocalDate.now(clock));
         boolean isSurvived = myParticipant.isSurvived();
         int progress = myParticipant.calculateProgress(challenge.getTotalDays());
 
@@ -303,7 +305,7 @@ public class ChallengeService {
     }
 
     private EligibilityReason validateEligibility(Challenge challenge, Long challengeId, Long memberId) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
 
         if (challenge.hasStarted(today)) {
             int passedDays = challenge.calculatePassedDays(today);

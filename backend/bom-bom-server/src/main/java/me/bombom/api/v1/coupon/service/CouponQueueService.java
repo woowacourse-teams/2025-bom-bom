@@ -317,11 +317,8 @@ public class CouponQueueService {
     }
 
     private int resolvePollingTtlSeconds(CouponQueueStatus status, Event event, Long position, Long queueCount) {
-        if (status == CouponQueueStatus.ACTIVE) {
-            return 0;
-        }
         if (status != CouponQueueStatus.WAITING) {
-            return event.getPollingIntervalSeconds();
+            return 0;
         }
         if (position == null || position <= 0) {
             return event.getPollingIntervalSeconds();

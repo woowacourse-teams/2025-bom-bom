@@ -19,6 +19,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Map;
+
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -126,11 +128,11 @@ class NotificationControllerTest {
                 TEST_FCM_TOKEN,
                 "테스트 제목",
                 "테스트 내용",
-                "test-article-123"
+                Map.of("articleId", "test-article-123")
         );
 
         NotificationResult successResult = NotificationResult.success("test-message-id");
-        when(notificationService.sendNotification(anyString(), anyString(), anyString(), anyString()))
+        when(notificationService.sendNotification(anyString(), anyString(), anyString(), anyMap()))
                 .thenReturn(successResult);
 
         // When & Then
@@ -139,6 +141,11 @@ class NotificationControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        verify(notificationService, times(1)).sendNotification(TEST_FCM_TOKEN, "테스트 제목", "테스트 내용", "test-article-123");
+        verify(notificationService, times(1)).sendNotification(
+                eq(TEST_FCM_TOKEN),
+                eq("테스트 제목"),
+                eq("테스트 내용"),
+                eq(Map.of("articleId", "test-article-123"))
+        );
     }
 }

@@ -1,6 +1,7 @@
 package news.bombom.notification.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import java.util.Map;
 
 public record NotificationSendRequest(
 
@@ -13,5 +14,6 @@ public record NotificationSendRequest(
         @NotBlank(message = "알림 내용은 필수입니다.")
         String body,
 
-        String articleId
-) {}
+        Map<String, Object> data
+) {
+}

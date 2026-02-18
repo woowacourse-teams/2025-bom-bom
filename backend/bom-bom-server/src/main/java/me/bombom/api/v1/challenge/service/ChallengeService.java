@@ -51,8 +51,8 @@ public class ChallengeService {
 
     // TODO: 이후에 수료 처리 등 구현 시 관리 방법 고려
     private static final double SUCCESS_REQUIRED_RATIO = 0.8;
-    private static final int MIN_CHALLENGE_TOTAL_DAYS_FOR_BADGE = 15;
     private static final double ADDITIONAL_APPLICATION_ALLOWED_RATIO = 0.2;
+    private static final int MIN_CHALLENGE_TOTAL_DAYS_FOR_BADGE = 15;
 
     private final ChallengeRepository challengeRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;

@@ -6,10 +6,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
-import java.util.regex.Pattern;
+import java.util.List;
 import me.bombom.api.v1.common.exception.RetryableException;
 import me.bombom.api.v1.subscribe.client.PlaywrightClient;
-import me.bombom.api.v1.subscribe.config.SubscribePatternProperties;
 import me.bombom.api.v1.subscribe.dto.UnsubscribePatterns;
 import me.bombom.api.v1.subscribe.dto.response.PlaywrightResponse;
 import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
@@ -32,17 +31,19 @@ class UnsubscribeAgentTest {
     private PlaywrightClient playwrightClient;
 
     @Mock
-    private SubscribePatternProperties properties;
+    private UnsubscribePatternService patternService;
 
     @InjectMocks
     private UnsubscribeAgent agent;
 
     @BeforeEach
     void setUp() {
-        given(properties.getUnsubscribePattern()).willReturn(Pattern.compile("unsub"));
-        given(properties.getSuccessPattern()).willReturn(Pattern.compile("success"));
-        given(properties.getAlreadyUnsubscribedPattern()).willReturn(Pattern.compile("already"));
-        given(properties.getErrorPattern()).willReturn(Pattern.compile("error"));
+        given(patternService.getPatterns()).willReturn(new UnsubscribePatterns(
+                "unsub",
+                "success",
+                "already",
+                "error",
+                List.of("google.com")));
     }
 
     @Test

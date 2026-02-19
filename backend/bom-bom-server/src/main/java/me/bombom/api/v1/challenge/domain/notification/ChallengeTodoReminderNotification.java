@@ -18,7 +18,7 @@ import me.bombom.api.v1.common.BaseEntity;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ChallengeStartNotification extends BaseEntity {
+public class ChallengeTodoReminderNotification extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,8 +46,7 @@ public class ChallengeStartNotification extends BaseEntity {
     private String challengeName;
 
     @Builder
-    public ChallengeStartNotification(
-            Long id,
+    public ChallengeTodoReminderNotification(
             @NonNull Long memberId,
             @NonNull NotificationStatus status,
             int attempts,
@@ -56,7 +55,6 @@ public class ChallengeStartNotification extends BaseEntity {
             @NonNull Long challengeId,
             @NonNull String challengeName
     ) {
-        this.id = id;
         this.memberId = memberId;
         this.status = status;
         this.attempts = attempts;
@@ -66,12 +64,12 @@ public class ChallengeStartNotification extends BaseEntity {
         this.challengeName = challengeName;
     }
 
-    public static ChallengeStartNotification createPending(
+    public static ChallengeTodoReminderNotification createPending(
             Long memberId,
             Long challengeId,
             String challengeName
     ) {
-        return ChallengeStartNotification.builder()
+        return ChallengeTodoReminderNotification.builder()
                 .memberId(memberId)
                 .status(NotificationStatus.PENDING)
                 .attempts(0)

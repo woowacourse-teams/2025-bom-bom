@@ -9,6 +9,7 @@ import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.service.ChallengeProgressService;
 import me.bombom.api.v1.challenge.service.ChallengeService;
 import me.bombom.api.v1.challenge.service.ChallengeStartNotificationService;
+import me.bombom.api.v1.challenge.service.ChallengeTodoReminderNotificationService;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,7 @@ public class ChallengeScheduler {
     private final ChallengeService challengeService;
     private final ChallengeProgressService challengeProgressService;
     private final ChallengeStartNotificationService challengeStartNotificationService;
+    private final ChallengeTodoReminderNotificationService challengeTodoReminderNotificationService;
 
     @Scheduled(cron = DAILY_CRON)
     @SchedulerLock(name = "check_survival", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
@@ -75,6 +77,19 @@ public class ChallengeScheduler {
             challengeStartNotificationService.createPendingNotificationsForStartingChallenges(today);
         } catch (Exception e) {
             log.error("챌린지 시작 알림 적재 중 오류 발생 - date={}", today, e);
+        }
+    }
+
+    @Scheduled(cron = "${challenge.scheduler.todo-reminder-cron}", zone = "Asia/Seoul")
+    @SchedulerLock(name = "create_challenge_todo_reminder_notifications", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
+    public void createChallengeTodoReminderNotifications() {
+        LocalDate today = LocalDate.now(clock);
+        log.info("챌린지 TODO 리마인더 알림 추가 시작 - date={}", today);
+
+        try {
+            challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today);
+        } catch (Exception e) {
+            log.error("챌린지 TODO 리마인더 알림 적재 중 오류 발생 - date={}", today, e);
         }
     }
 }

@@ -19,11 +19,15 @@ public class ChallengeTodoReminderNotification extends Notification {
     private static final int MAX_RETRY_ATTEMPTS = 4;
 
     @Column(nullable = false)
+    private Long challengeId;
+
+    @Column(nullable = false)
     private String challengeName;
 
     @Builder
     public ChallengeTodoReminderNotification(
             @NonNull Long memberId,
+            @NonNull Long challengeId,
             @NonNull String challengeName,
             NotificationStatus status,
             int attempts,
@@ -31,6 +35,7 @@ public class ChallengeTodoReminderNotification extends Notification {
             String lastError
     ) {
         super(memberId, status, attempts, nextRetryAt, lastError);
+        this.challengeId = challengeId;
         this.challengeName = challengeName;
     }
 

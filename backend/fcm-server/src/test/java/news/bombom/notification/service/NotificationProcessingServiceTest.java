@@ -280,6 +280,7 @@ class NotificationProcessingServiceTest {
     private ChallengeTodoReminderNotification createChallengeNotification() {
         return ChallengeTodoReminderNotification.builder()
                 .memberId(TEST_MEMBER_ID)
+                .challengeId(100L)
                 .challengeName("테스트 챌린지")
                 .build();
     }

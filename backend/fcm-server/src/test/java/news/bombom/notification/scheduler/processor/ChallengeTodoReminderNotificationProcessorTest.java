@@ -67,6 +67,7 @@ class ChallengeTodoReminderNotificationProcessorTest {
 
         ChallengeTodoReminderNotification exceeded = ChallengeTodoReminderNotification.builder()
                 .memberId(1L)
+                .challengeId(99L)
                 .challengeName("챌린지")
                 .status(NotificationStatus.FAILED)
                 .attempts(4)
@@ -83,6 +84,7 @@ class ChallengeTodoReminderNotificationProcessorTest {
     private ChallengeTodoReminderNotification createNotification() {
         return ChallengeTodoReminderNotification.builder()
                 .memberId(1L)
+                .challengeId(99L)
                 .challengeName("챌린지")
                 .build();
     }

@@ -31,6 +31,7 @@ public class ChallengeTodoReminderMessageBuilder implements NotificationMessageB
                 .content(content)
                 .type(NotificationType.FCM)
                 .data(Map.of(
+                        "challengeId", String.valueOf(remind.getChallengeId()),
                         "notificationType", NotificationPayloadType.DEFAULT
                 ))
                 .build();

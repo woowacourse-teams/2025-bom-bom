@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.admin.lambda.domain.UnsubscribePattern;
-import me.bombom.api.v1.admin.lambda.repository.UnsubscribePatternRepository;
+import me.bombom.api.v1.subscribe.domain.UnsubscribePattern;
 import me.bombom.api.v1.subscribe.dto.UnsubscribePatterns;
+import me.bombom.api.v1.subscribe.repository.UnsubscribePatternRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

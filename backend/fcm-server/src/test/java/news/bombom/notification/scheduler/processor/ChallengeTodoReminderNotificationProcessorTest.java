@@ -68,8 +68,6 @@ class ChallengeTodoReminderNotificationProcessorTest {
         ChallengeTodoReminderNotification exceeded = ChallengeTodoReminderNotification.builder()
                 .memberId(1L)
                 .challengeName("챌린지")
-                .title("제목")
-                .content("내용")
                 .status(NotificationStatus.FAILED)
                 .attempts(4)
                 .build();
@@ -86,8 +84,6 @@ class ChallengeTodoReminderNotificationProcessorTest {
         return ChallengeTodoReminderNotification.builder()
                 .memberId(1L)
                 .challengeName("챌린지")
-                .title("제목")
-                .content("내용")
                 .build();
     }
 }

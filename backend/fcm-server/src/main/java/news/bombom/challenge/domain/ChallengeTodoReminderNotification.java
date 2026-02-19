@@ -21,29 +21,17 @@ public class ChallengeTodoReminderNotification extends Notification {
     @Column(nullable = false)
     private String challengeName;
 
-    @Column(nullable = false)
-    private String title;
-
-    @Column(nullable = false, length = 512)
-    private String content;
-
     @Builder
     public ChallengeTodoReminderNotification(
-            Long id,
             @NonNull Long memberId,
             @NonNull String challengeName,
-            @NonNull String title,
-            @NonNull String content,
             NotificationStatus status,
             int attempts,
             LocalDateTime nextRetryAt,
             String lastError
     ) {
         super(memberId, status, attempts, nextRetryAt, lastError);
-        this.id = id;
         this.challengeName = challengeName;
-        this.title = title;
-        this.content = content;
     }
 
     @Override

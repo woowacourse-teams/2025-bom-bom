@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.common.exception.RetryableException;
 import me.bombom.api.v1.subscribe.client.PlaywrightClient;
-import me.bombom.api.v1.subscribe.config.SubscribePatternProperties;
 import me.bombom.api.v1.subscribe.dto.UnsubscribePatterns;
 import me.bombom.api.v1.subscribe.dto.response.PlaywrightResponse;
 import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
@@ -19,15 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class UnsubscribeAgent {
 
     private final PlaywrightClient playwrightClient;
-    private final SubscribePatternProperties properties;
+    private final UnsubscribePatternService patternService;
 
     public void unsubscribe(String url, Long newsletterId) {
-        UnsubscribePatterns patterns = new UnsubscribePatterns(
-                properties.getUnsubscribePattern().pattern(),
-                properties.getSuccessPattern().pattern(),
-                properties.getAlreadyUnsubscribedPattern().pattern(),
-                properties.getErrorPattern().pattern()
-        );
+        UnsubscribePatterns patterns = patternService.getPatterns();
 
         PlaywrightResponse response = playwrightClient.executeUnsubscribe(url, patterns);
         if (response.success()) {

@@ -8,6 +8,7 @@ import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
+import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderPhase;
 import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderNotification;
 import me.bombom.api.v1.challenge.domain.notification.NotificationStatus;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
@@ -90,7 +91,7 @@ class ChallengeTodoReminderNotificationServiceTest {
         challengeDailyTodoRepository.save(TestFixture.createChallengeDailyTodo(participant3.getId(), today, readTodo.getId()));
 
         // when
-        challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today);
+        challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today, ChallengeTodoReminderPhase.FIRST);
 
         // then
         List<ChallengeTodoReminderNotification> notifications = challengeTodoReminderNotificationRepository.findAll();
@@ -99,6 +100,7 @@ class ChallengeTodoReminderNotificationServiceTest {
                         ChallengeTodoReminderNotification::getMemberId,
                         ChallengeTodoReminderNotification::getChallengeId,
                         ChallengeTodoReminderNotification::getChallengeName,
+                        ChallengeTodoReminderNotification::getPhase,
                         ChallengeTodoReminderNotification::getStatus,
                         ChallengeTodoReminderNotification::getAttempts
                 )
@@ -107,6 +109,7 @@ class ChallengeTodoReminderNotificationServiceTest {
                                 incompleteMember.getId(),
                                 challenge.getId(),
                                 challenge.getName(),
+                                ChallengeTodoReminderPhase.FIRST,
                                 NotificationStatus.PENDING,
                                 0
                         ),
@@ -114,6 +117,7 @@ class ChallengeTodoReminderNotificationServiceTest {
                                 anotherIncompleteMember.getId(),
                                 challenge.getId(),
                                 challenge.getName(),
+                                ChallengeTodoReminderPhase.FIRST,
                                 NotificationStatus.PENDING,
                                 0
                         )
@@ -136,10 +140,15 @@ class ChallengeTodoReminderNotificationServiceTest {
         challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
 
         challengeTodoReminderNotificationRepository.save(
-                ChallengeTodoReminderNotification.createPending(member1.getId(), challenge.getId(), challenge.getName()));
+                ChallengeTodoReminderNotification.createPending(
+                        member1.getId(),
+                        challenge.getId(),
+                        challenge.getName(),
+                        ChallengeTodoReminderPhase.FIRST
+                ));
 
         // when
-        challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today);
+        challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today, ChallengeTodoReminderPhase.FIRST);
 
         // then
         List<ChallengeTodoReminderNotification> notifications = challengeTodoReminderNotificationRepository.findAll();
@@ -147,5 +156,36 @@ class ChallengeTodoReminderNotificationServiceTest {
         assertThat(notifications)
                 .extracting(ChallengeTodoReminderNotification::getMemberId)
                 .containsExactlyInAnyOrder(member1.getId(), member2.getId());
+    }
+
+    @Test
+    void 같은_날짜라도_phase가_다르면_알림을_생성한다() {
+        // given
+        LocalDate today = LocalDate.now();
+        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
+        Challenge challenge = challengeRepository.save(
+                TestFixture.createChallenge("진행 중 챌린지", today.minusDays(1), today.plusDays(3), 5, group.getId()));
+
+        Member member = memberRepository.save(TestFixture.createUniqueMember("m1", "p1"));
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 0));
+        challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
+
+        challengeTodoReminderNotificationRepository.save(
+                ChallengeTodoReminderNotification.createPending(
+                        member.getId(),
+                        challenge.getId(),
+                        challenge.getName(),
+                        ChallengeTodoReminderPhase.FIRST
+                ));
+
+        // when
+        challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today, ChallengeTodoReminderPhase.SECOND);
+
+        // then
+        List<ChallengeTodoReminderNotification> notifications = challengeTodoReminderNotificationRepository.findAll();
+        assertThat(notifications).hasSize(2);
+        assertThat(notifications)
+                .extracting(ChallengeTodoReminderNotification::getPhase)
+                .containsExactlyInAnyOrder(ChallengeTodoReminderPhase.FIRST, ChallengeTodoReminderPhase.SECOND);
     }
 }

@@ -281,8 +281,6 @@ class NotificationProcessingServiceTest {
         return ChallengeTodoReminderNotification.builder()
                 .memberId(TEST_MEMBER_ID)
                 .challengeName("테스트 챌린지")
-                .title("리마인더")
-                .content("할 일을 완료해 주세요")
                 .build();
     }
 

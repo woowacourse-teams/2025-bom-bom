@@ -33,7 +33,6 @@ public class ArticleArrivalNotification extends Notification {
 
     @Builder
     public ArticleArrivalNotification(
-            Long id,
             @NonNull Long memberId,
             @NonNull Long articleId,
             @NonNull String newsletterName,
@@ -45,7 +44,6 @@ public class ArticleArrivalNotification extends Notification {
             boolean isRead
     ) {
         super(memberId, status, attempts, nextRetryAt, lastError);
-        this.id = id;
         this.articleId = articleId;
         this.newsletterName = newsletterName;
         this.articleTitle = articleTitle;

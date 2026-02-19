@@ -26,7 +26,6 @@ public class ChallengeStartNotification extends Notification {
 
     @Builder
     public ChallengeStartNotification(
-            Long id,
             @NonNull Long memberId,
             @NonNull Long challengeId,
             @NonNull String challengeName,
@@ -36,7 +35,6 @@ public class ChallengeStartNotification extends Notification {
             String lastError
     ) {
         super(memberId, status, attempts, nextRetryAt, lastError);
-        this.id = id;
         this.challengeId = challengeId;
         this.challengeName = challengeName;
     }

@@ -91,6 +91,13 @@ dependencies {
 
     // for : webhook
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+
+    // AWS SDK
+    implementation(platform("software.amazon.awssdk:bom:2.41.21"))
+    implementation("software.amazon.awssdk:lambda")
+
+    // Annotations
+    implementation("jakarta.annotation:jakarta.annotation-api")
 }
 
 // Querydsl 생성된 파일 정리

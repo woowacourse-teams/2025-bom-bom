@@ -6,6 +6,7 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
@@ -30,6 +31,14 @@ public class NewsletterService {
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletter")
                         .addContext(ErrorContextKeys.NEWSLETTER_ID, newsletterId));
+    }
+
+    public Newsletter getNewsletter(Long id) {
+        return newsletterRepository.findById(id)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletter")
+                        .addContext(ErrorContextKeys.OPERATION, "getNewsletter")
+                        .addContext(ErrorContextKeys.NEWSLETTER_ID, id));
     }
 
     private Long getMemberId(Member member) {

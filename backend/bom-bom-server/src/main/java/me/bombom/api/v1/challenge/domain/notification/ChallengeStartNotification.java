@@ -13,7 +13,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import me.bombom.api.v1.challenge.domain.NotificationStatus;
 import me.bombom.api.v1.common.BaseEntity;
 
 @Entity

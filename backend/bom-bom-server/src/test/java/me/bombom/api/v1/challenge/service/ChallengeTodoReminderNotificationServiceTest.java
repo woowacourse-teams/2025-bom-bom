@@ -7,9 +7,9 @@ import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.challenge.domain.NotificationStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderNotification;
+import me.bombom.api.v1.challenge.domain.notification.NotificationStatus;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
@@ -82,7 +82,8 @@ class ChallengeTodoReminderNotificationServiceTest {
                 TestFixture.createChallengeParticipant(challenge.getId(), anotherIncompleteMember.getId(), 0));
 
         var readTodo = challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
-        var commentTodo = challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.COMMENT));
+        var commentTodo = challengeTodoRepository.save(
+                TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.COMMENT));
 
         challengeDailyTodoRepository.save(TestFixture.createChallengeDailyTodo(participant2.getId(), today, readTodo.getId()));
         challengeDailyTodoRepository.save(TestFixture.createChallengeDailyTodo(participant2.getId(), today, commentTodo.getId()));

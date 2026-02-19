@@ -1,4 +1,4 @@
-package me.bombom.api.v1.challenge.domain;
+package me.bombom.api.v1.challenge.domain.notification;
 
 public enum NotificationStatus {
     PENDING,

@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderNotification;
+import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderPhase;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTodoReminderNotificationRepository;
@@ -27,11 +28,11 @@ public class ChallengeTodoReminderNotificationService {
     private final ChallengeTodoReminderNotificationRepository challengeTodoReminderNotificationRepository;
 
     @Transactional
-    public void createPendingNotificationsForIncompleteTodos(LocalDate reminderDate) {
+    public void createPendingNotificationsForIncompleteTodos(LocalDate reminderDate, ChallengeTodoReminderPhase phase) {
         List<Challenge> ongoingChallenges = challengeRepository.findOngoingChallenges(reminderDate);
 
         if (ongoingChallenges.isEmpty()) {
-            log.info("진행 중 챌린지가 없습니다. reminderDate={}", reminderDate);
+            log.info("진행 중 챌린지가 없습니다. reminderDate={}, phase={}", reminderDate, phase);
             return;
         }
 
@@ -48,8 +49,9 @@ public class ChallengeTodoReminderNotificationService {
 
                 Set<Long> existingMemberIds = new HashSet<>(
                         challengeTodoReminderNotificationRepository
-                                .findMemberIdsByChallengeIdAndCreatedAtBetween(
+                                .findMemberIdsByChallengeIdAndPhaseAndCreatedAtBetween(
                                         challenge.getId(),
+                                        phase,
                                         reminderDate.atStartOfDay(),
                                         endOfDay(reminderDate)
                                 )
@@ -61,22 +63,23 @@ public class ChallengeTodoReminderNotificationService {
                         .map(memberId -> ChallengeTodoReminderNotification.createPending(
                                 memberId,
                                 challenge.getId(),
-                                challenge.getName()
+                                challenge.getName(),
+                                phase
                         ))
                         .toList();
 
                 if (notifications.isEmpty()) {
-                    log.info("이미 TODO 리마인더 알림이 모두 적재된 챌린지입니다. challengeName={}, reminderDate={}",
-                            challenge.getName(), reminderDate);
+                    log.info("이미 TODO 리마인더 알림이 모두 적재된 챌린지입니다. challengeName={}, reminderDate={}, phase={}",
+                            challenge.getName(), reminderDate, phase);
                     continue;
                 }
 
                 challengeTodoReminderNotificationRepository.saveAll(notifications);
-                log.info("챌린지 TODO 리마인더 알림 적재 완료. challengeId={}, challengeName={}, reminderDate={}, createdCount={}",
-                        challenge.getId(), challenge.getName(), reminderDate, notifications.size());
+                log.info("챌린지 TODO 리마인더 알림 적재 완료. challengeId={}, challengeName={}, reminderDate={}, phase={}, createdCount={}",
+                        challenge.getId(), challenge.getName(), reminderDate, phase, notifications.size());
             } catch (Exception e) {
-                log.error("챌린지 TODO 리마인더 알림 적재 실패. challengeId={}, challengeName={}, reminderDate={}",
-                        challenge.getId(), challenge.getName(), reminderDate, e);
+                log.error("챌린지 TODO 리마인더 알림 적재 실패. challengeId={}, challengeName={}, reminderDate={}, phase={}",
+                        challenge.getId(), challenge.getName(), reminderDate, phase, e);
             }
         }
     }

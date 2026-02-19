@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.challenge.domain.ChallengeStartNotificationStatus;
+import me.bombom.api.v1.challenge.domain.NotificationStatus;
 import me.bombom.api.v1.challenge.domain.notification.ChallengeStartNotification;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
@@ -91,7 +91,7 @@ class ChallengeStartNotificationServiceTest {
                                 member1.getId(),
                                 todayChallenge.getId(),
                                 todayChallenge.getName(),
-                                ChallengeStartNotificationStatus.PENDING,
+                                NotificationStatus.PENDING,
                                 0,
                                 null,
                                 null
@@ -100,7 +100,7 @@ class ChallengeStartNotificationServiceTest {
                                 member2.getId(),
                                 todayChallenge.getId(),
                                 todayChallenge.getName(),
-                                ChallengeStartNotificationStatus.PENDING,
+                                NotificationStatus.PENDING,
                                 0,
                                 null,
                                 null

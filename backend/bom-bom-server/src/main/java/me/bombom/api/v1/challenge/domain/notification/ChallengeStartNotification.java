@@ -13,7 +13,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import me.bombom.api.v1.challenge.domain.ChallengeStartNotificationStatus;
+import me.bombom.api.v1.challenge.domain.NotificationStatus;
 import me.bombom.api.v1.common.BaseEntity;
 
 @Entity
@@ -30,7 +30,7 @@ public class ChallengeStartNotification extends BaseEntity {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private ChallengeStartNotificationStatus status;
+    private NotificationStatus status;
 
     @Column(nullable = false)
     private int attempts;
@@ -50,7 +50,7 @@ public class ChallengeStartNotification extends BaseEntity {
     public ChallengeStartNotification(
             Long id,
             @NonNull Long memberId,
-            @NonNull ChallengeStartNotificationStatus status,
+            @NonNull NotificationStatus status,
             int attempts,
             LocalDateTime nextRetryAt,
             String lastError,
@@ -74,7 +74,7 @@ public class ChallengeStartNotification extends BaseEntity {
     ) {
         return ChallengeStartNotification.builder()
                 .memberId(memberId)
-                .status(ChallengeStartNotificationStatus.PENDING)
+                .status(NotificationStatus.PENDING)
                 .attempts(0)
                 .challengeId(challengeId)
                 .challengeName(challengeName)

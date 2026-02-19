@@ -45,6 +45,10 @@ public class ChallengeTodoReminderNotification extends BaseEntity {
     @Column(nullable = false)
     private String challengeName;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ChallengeTodoReminderPhase phase;
+
     @Builder
     public ChallengeTodoReminderNotification(
             @NonNull Long memberId,
@@ -53,7 +57,8 @@ public class ChallengeTodoReminderNotification extends BaseEntity {
             LocalDateTime nextRetryAt,
             String lastError,
             @NonNull Long challengeId,
-            @NonNull String challengeName
+            @NonNull String challengeName,
+            @NonNull ChallengeTodoReminderPhase phase
     ) {
         this.memberId = memberId;
         this.status = status;
@@ -62,12 +67,14 @@ public class ChallengeTodoReminderNotification extends BaseEntity {
         this.lastError = lastError;
         this.challengeId = challengeId;
         this.challengeName = challengeName;
+        this.phase = phase;
     }
 
     public static ChallengeTodoReminderNotification createPending(
             Long memberId,
             Long challengeId,
-            String challengeName
+            String challengeName,
+            ChallengeTodoReminderPhase phase
     ) {
         return ChallengeTodoReminderNotification.builder()
                 .memberId(memberId)
@@ -75,6 +82,7 @@ public class ChallengeTodoReminderNotification extends BaseEntity {
                 .attempts(0)
                 .challengeId(challengeId)
                 .challengeName(challengeName)
+                .phase(phase)
                 .build();
     }
 }

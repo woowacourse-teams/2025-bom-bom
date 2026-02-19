@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderPhase;
 import me.bombom.api.v1.challenge.service.ChallengeProgressService;
 import me.bombom.api.v1.challenge.service.ChallengeService;
 import me.bombom.api.v1.challenge.service.ChallengeStartNotificationService;
@@ -80,16 +81,31 @@ public class ChallengeScheduler {
         }
     }
 
-    @Scheduled(cron = "${challenge.scheduler.todo-reminder-cron}", zone = "Asia/Seoul")
-    @SchedulerLock(name = "create_challenge_todo_reminder_notifications", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
-    public void createChallengeTodoReminderNotifications() {
+    @Scheduled(cron = "${challenge.scheduler.todo-reminder-first-cron}", zone = "Asia/Seoul")
+    @SchedulerLock(name = "create_challenge_todo_reminder_notifications_first", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
+    public void createChallengeTodoReminderNotificationsFirst() {
         LocalDate today = LocalDate.now(clock);
-        log.info("챌린지 TODO 리마인더 알림 추가 시작 - date={}", today);
+        log.info("챌린지 TODO 리마인더 알림 1차 추가 시작 - date={}, phase={}", today, ChallengeTodoReminderPhase.FIRST);
 
         try {
-            challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today);
+            challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today,
+                    ChallengeTodoReminderPhase.FIRST);
         } catch (Exception e) {
-            log.error("챌린지 TODO 리마인더 알림 적재 중 오류 발생 - date={}", today, e);
+            log.error("챌린지 TODO 리마인더 알림 1차 적재 중 오류 발생 - date={}, phase={}", today, ChallengeTodoReminderPhase.FIRST, e);
+        }
+    }
+
+    @Scheduled(cron = "${challenge.scheduler.todo-reminder-second-cron}", zone = "Asia/Seoul")
+    @SchedulerLock(name = "create_challenge_todo_reminder_notifications_second", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
+    public void createChallengeTodoReminderNotificationsSecond() {
+        LocalDate today = LocalDate.now(clock);
+        log.info("챌린지 TODO 리마인더 알림 2차 추가 시작 - date={}, phase={}", today, ChallengeTodoReminderPhase.SECOND);
+
+        try {
+            challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today,
+                    ChallengeTodoReminderPhase.SECOND);
+        } catch (Exception e) {
+            log.error("챌린지 TODO 리마인더 알림 2차 적재 중 오류 발생 - date={}, phase={}", today, ChallengeTodoReminderPhase.SECOND, e);
         }
     }
 }

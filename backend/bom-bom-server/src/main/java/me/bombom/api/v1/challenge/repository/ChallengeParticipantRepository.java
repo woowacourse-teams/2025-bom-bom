@@ -100,4 +100,27 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
         WHERE cc.id = :commentId
     """)
     Optional<ChallengeParticipant> findAuthorByCommentId(@Param("commentId") Long commentId);
+
+    @Query("""
+        SELECT cp
+        FROM ChallengeParticipant cp
+        WHERE cp.challengeId = :challengeId
+          AND cp.isSurvived = true
+          AND EXISTS (
+              SELECT ct
+              FROM ChallengeTodo ct
+              WHERE ct.challengeId = cp.challengeId
+                AND NOT EXISTS (
+                    SELECT cdt
+                    FROM ChallengeDailyTodo cdt
+                    WHERE cdt.participantId = cp.id
+                      AND cdt.challengeTodoId = ct.id
+                      AND cdt.todoDate = :date
+                )
+          )
+    """)
+    List<ChallengeParticipant> findSurvivedParticipantsWithIncompleteTodosByChallengeId(
+            @Param("challengeId") Long challengeId,
+            @Param("date") LocalDate date
+    );
 }

@@ -38,9 +38,17 @@ class NotificationSchedulerTest {
     }
 
     @Test
-    @DisplayName("챌린지 스케줄이 챌린지 Processor를 호출한다")
-    void processChallengeTodoReminderNotifications_DelegatesToChallengeProcessor() {
-        notificationScheduler.processChallengeTodoReminderNotifications();
+    @DisplayName("챌린지 1차 스케줄이 챌린지 Processor를 호출한다")
+    void processChallengeTodoReminderNotificationsFirst_DelegatesToChallengeProcessor() {
+        notificationScheduler.processChallengeTodoReminderNotificationsFirst();
+
+        verify(challengeProcessor, times(1)).processPendingNotifications(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    @DisplayName("챌린지 2차 스케줄이 챌린지 Processor를 호출한다")
+    void processChallengeTodoReminderNotificationsSecond_DelegatesToChallengeProcessor() {
+        notificationScheduler.processChallengeTodoReminderNotificationsSecond();
 
         verify(challengeProcessor, times(1)).processPendingNotifications(org.mockito.ArgumentMatchers.any());
     }

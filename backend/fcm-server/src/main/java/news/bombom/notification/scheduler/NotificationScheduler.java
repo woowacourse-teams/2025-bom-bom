@@ -30,10 +30,22 @@ public class NotificationScheduler {
         }
     }
 
-    @Scheduled(cron = "0 0 21 * * MON-FRI", zone = "Asia/Seoul")
-    public void processChallengeTodoReminderNotifications() {
+    @Scheduled(cron = "${notification.schedule.challenge-todo-reminder.first-cron}", zone = "Asia/Seoul")
+    public void processChallengeTodoReminderNotificationsFirst() {
         LocalDateTime now = LocalDateTime.now();
-        log.info("챌린지 TODO 리마인더 Processor 실행");
+        log.info("챌린지 TODO 리마인더 Processor 실행(1차)");
+
+        try {
+            challengeProcessor.processPendingNotifications(now);
+        } catch (Exception e) {
+            log.error("Processor 실행 중 오류 발생: type={}", challengeProcessor.type(), e);
+        }
+    }
+
+    @Scheduled(cron = "${notification.schedule.challenge-todo-reminder.second-cron}", zone = "Asia/Seoul")
+    public void processChallengeTodoReminderNotificationsSecond() {
+        LocalDateTime now = LocalDateTime.now();
+        log.info("챌린지 TODO 리마인더 Processor 실행(2차)");
 
         try {
             challengeProcessor.processPendingNotifications(now);

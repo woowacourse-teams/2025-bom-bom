@@ -2,6 +2,8 @@ package news.bombom.challenge.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -24,11 +26,16 @@ public class ChallengeTodoReminderNotification extends Notification {
     @Column(nullable = false)
     private String challengeName;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ChallengeTodoReminderPhase phase;
+
     @Builder
     public ChallengeTodoReminderNotification(
             @NonNull Long memberId,
             @NonNull Long challengeId,
             @NonNull String challengeName,
+            ChallengeTodoReminderPhase phase,
             NotificationStatus status,
             int attempts,
             LocalDateTime nextRetryAt,
@@ -37,6 +44,7 @@ public class ChallengeTodoReminderNotification extends Notification {
         super(memberId, status, attempts, nextRetryAt, lastError);
         this.challengeId = challengeId;
         this.challengeName = challengeName;
+        this.phase = phase != null ? phase : ChallengeTodoReminderPhase.FIRST;
     }
 
     @Override

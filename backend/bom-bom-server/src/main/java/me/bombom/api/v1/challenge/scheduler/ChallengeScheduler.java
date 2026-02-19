@@ -21,7 +21,6 @@ public class ChallengeScheduler {
 
     private static final String DAILY_CRON = "0 0 0 * * *";
     private static final String CHALLENGE_START_NOTIFICATION_CRON = "0 10 3 * * *";
-    private static final String CHALLENGE_TODO_REMINDER_CRON = "0 59 8 * * MON-FRI";
 
     private final Clock clock;
     private final ChallengeService challengeService;
@@ -81,7 +80,7 @@ public class ChallengeScheduler {
         }
     }
 
-    @Scheduled(cron = CHALLENGE_TODO_REMINDER_CRON, zone = "Asia/Seoul")
+    @Scheduled(cron = "${challenge.scheduler.todo-reminder-cron}", zone = "Asia/Seoul")
     @SchedulerLock(name = "create_challenge_todo_reminder_notifications", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void createChallengeTodoReminderNotifications() {
         LocalDate today = LocalDate.now(clock);

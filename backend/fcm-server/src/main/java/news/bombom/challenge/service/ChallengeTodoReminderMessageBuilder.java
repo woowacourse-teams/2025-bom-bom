@@ -26,7 +26,7 @@ public class ChallengeTodoReminderMessageBuilder implements NotificationMessageB
         String title;
         String content;
         if (remind.getPhase() == ChallengeTodoReminderPhase.SECOND) {
-            title = "[" + remind.getChallengeName() + "] 하루가 지나기 한 시간 전!";
+            title = "[" + remind.getChallengeName() + "] 마지막 리마인드 ⏰";
             content = "5분만 읽으면 오늘 출석이예요. 가볍게 완료해봐요!";
         } else {
             title = remind.getChallengeName() + " 아직 할 일이 남았어요!";

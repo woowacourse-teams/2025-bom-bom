@@ -44,7 +44,7 @@ class ChallengeTodoReminderMessageBuilderTest {
 
         NotificationMessage message = builder.build(notification, token);
 
-        assertThat(message.getTitle()).isEqualTo("[러닝] 하루가 지나기 한 시간 전!");
+        assertThat(message.getTitle()).isEqualTo("[러닝] 마지막 리마인드 ⏰");
         assertThat(message.getContent()).isEqualTo("5분만 읽으면 오늘 출석이예요. 가볍게 완료해봐요!");
     }
 

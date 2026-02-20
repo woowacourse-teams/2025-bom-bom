@@ -18,7 +18,7 @@ import news.bombom.notification.domain.NotificationStatus;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChallengeTodoReminderNotification extends Notification {
 
-    private static final int MAX_RETRY_ATTEMPTS = 4;
+    private static final int MAX_RETRY_ATTEMPTS = 1;
 
     @Column(nullable = false)
     private Long challengeId;

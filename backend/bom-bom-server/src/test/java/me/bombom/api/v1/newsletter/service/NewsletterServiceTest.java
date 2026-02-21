@@ -110,7 +110,7 @@ class NewsletterServiceTest {
         subscribeRepository.save(subscribe);
 
         //when
-        List<NewsletterResponse> result = newsletterService.getNewsletters(member, false);
+        List<NewsletterResponse> result = newsletterService.getNewsletters(member.getId(), false);
 
         //then
         assertSoftly(softly -> {
@@ -222,11 +222,11 @@ class NewsletterServiceTest {
         //when
         NewsletterWithDetailResponse subscribedResult = newsletterService.getNewsletterWithDetail(
                 newsletters.getFirst().getId(),
-                member
+                member.getId()
         );
         NewsletterWithDetailResponse notSubscribedResult = newsletterService.getNewsletterWithDetail(
                 newsletters.getLast().getId(),
-                member
+                member.getId()
         );
 
         //then

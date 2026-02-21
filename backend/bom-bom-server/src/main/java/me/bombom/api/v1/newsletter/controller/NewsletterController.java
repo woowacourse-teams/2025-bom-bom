@@ -11,6 +11,7 @@ import me.bombom.api.v1.newsletter.service.NewsletterService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -22,8 +23,11 @@ public class NewsletterController implements NewsletterControllerApi{
 
     @Override
     @GetMapping
-    public List<NewsletterResponse> getNewsletters(@LoginMember(anonymous = true) Member member) {
-        return newsletterService.getNewsletters(member);
+    public List<NewsletterResponse> getNewsletters(
+            @LoginMember(anonymous = true) Member member,
+            @RequestParam(required = false, defaultValue = "false") boolean includeSuspended
+    ) {
+        return newsletterService.getNewsletters(member, includeSuspended);
     }
 
     @Override

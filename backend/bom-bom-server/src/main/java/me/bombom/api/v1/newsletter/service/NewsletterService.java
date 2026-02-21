@@ -20,9 +20,9 @@ public class NewsletterService {
 
     private final NewsletterRepository newsletterRepository;
 
-    public List<NewsletterResponse> getNewsletters(Member member) {
+    public List<NewsletterResponse> getNewsletters(Member member, boolean includeSuspended) {
         Long memberId = getMemberId(member);
-        return newsletterRepository.findNewslettersInfo(memberId);
+        return newsletterRepository.findNewslettersInfo(memberId, includeSuspended);
     }
 
     public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Member member) {

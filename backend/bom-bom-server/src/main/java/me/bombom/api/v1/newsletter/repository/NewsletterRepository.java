@@ -31,9 +31,14 @@ public interface NewsletterRepository extends JpaRepository<Newsletter, Long> {
         LEFT JOIN NewsletterSubscriptionCount nsc ON nsc.newsletterId = n.id
         JOIN Category c ON c.id = n.categoryId
         LEFT JOIN Subscribe s ON s.newsletterId = n.id AND s.memberId = :memberId
+        WHERE n.status = me.bombom.api.v1.newsletter.domain.NewsletterStatus.ACTIVE
+            OR (:includeSuspended = true AND n.status = me.bombom.api.v1.newsletter.domain.NewsletterStatus.SUSPENDED)
         ORDER BY COALESCE(nsc.total, 0) DESC, n.name ASC
     """)
-    List<NewsletterResponse> findNewslettersInfo(@Param("memberId") Long memberId);
+    List<NewsletterResponse> findNewslettersInfo(
+            @Param("memberId") Long memberId,
+            @Param("includeSuspended") boolean includeSuspended
+    );
 
     @Query("""
         SELECT new me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse(

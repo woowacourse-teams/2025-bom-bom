@@ -140,6 +140,7 @@ class NewsletterServiceTest {
              softly.assertThat(result.name()).isEqualTo(newsletter.getName());
              softly.assertThat(result.imageUrl()).isEqualTo(newsletter.getImageUrl());
              softly.assertThat(result.category()).isEqualTo(category.getName());
+             softly.assertThat(result.status()).isEqualTo(newsletter.getStatus());
              softly.assertThat(result.mainPageUrl()).isEqualTo(expectedDetail.getMainPageUrl());
              softly.assertThat(result.subscribeUrl()).isEqualTo(expectedDetail.getSubscribeUrl());
              softly.assertThat(result.issueCycle()).isEqualTo(expectedDetail.getIssueCycle());
@@ -167,6 +168,7 @@ class NewsletterServiceTest {
             softly.assertThat(result.description()).isEqualTo(newsletter.getDescription());
             softly.assertThat(result.imageUrl()).isEqualTo(newsletter.getImageUrl());
             softly.assertThat(result.category()).isEqualTo(category.getName());
+            softly.assertThat(result.status()).isEqualTo(newsletter.getStatus());
             softly.assertThat(result.mainPageUrl()).isEqualTo(expectedDetail.getMainPageUrl());
             softly.assertThat(result.subscribeUrl()).isEqualTo(expectedDetail.getSubscribeUrl());
             softly.assertThat(result.issueCycle()).isEqualTo(expectedDetail.getIssueCycle());

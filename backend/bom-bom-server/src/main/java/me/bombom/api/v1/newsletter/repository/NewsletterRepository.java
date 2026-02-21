@@ -19,6 +19,7 @@ public interface NewsletterRepository extends JpaRepository<Newsletter, Long> {
             n.description,
             d.subscribeUrl,
             c.name,
+            n.status,
             CASE
                 WHEN :memberId IS NULL THEN false
                 WHEN s.id IS NULL THEN false
@@ -40,6 +41,7 @@ public interface NewsletterRepository extends JpaRepository<Newsletter, Long> {
             n.description,
             n.imageUrl,
             c.name,
+            n.status,
             d.mainPageUrl,
             d.subscribeUrl,
             d.issueCycle,

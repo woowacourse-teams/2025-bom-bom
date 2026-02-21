@@ -20,13 +20,11 @@ public class NewsletterService {
 
     private final NewsletterRepository newsletterRepository;
 
-    public List<NewsletterResponse> getNewsletters(Member member, boolean includeSuspended) {
-        Long memberId = getMemberId(member);
+    public List<NewsletterResponse> getNewsletters(Long memberId, boolean includeSuspended) {
         return newsletterRepository.findNewslettersInfo(memberId, includeSuspended);
     }
 
-    public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Member member) {
-        Long memberId = getMemberId(member);
+    public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Long memberId) {
         return newsletterRepository.findNewsletterWithDetailById(newsletterId, memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletter")

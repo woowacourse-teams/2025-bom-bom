@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
-import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,7 +23,7 @@ public interface NewsletterControllerApi {
             @ApiResponse(responseCode = "200", description = "뉴스레터 목록 조회 성공")
     })
     List<NewsletterResponse> getNewsletters(
-            @Parameter(hidden = true) Member member,
+            @Parameter(hidden = true) Long memberId,
             @Parameter(description = "휴재 뉴스레터 포함 여부") @RequestParam(required = false, defaultValue = "false") boolean includeSuspended
     );
 
@@ -38,7 +37,7 @@ public interface NewsletterControllerApi {
             @ApiResponse(responseCode = "404", description = "뉴스레터를 찾을 수 없음", content = @Content)
     })
     NewsletterWithDetailResponse getNewsletterWithDetail(
-            @Parameter(hidden = true) Member member,
+            @Parameter(hidden = true) Long memberId,
             @Positive(message = "id는 1 이상의 값이어야 합니다.")
             @Parameter(description = "뉴스레터 ID") Long id
     );

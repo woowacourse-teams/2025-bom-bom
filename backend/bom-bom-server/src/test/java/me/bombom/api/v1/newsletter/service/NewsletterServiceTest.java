@@ -13,6 +13,7 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
+import me.bombom.api.v1.newsletter.domain.NewsletterStatus;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
@@ -77,7 +78,7 @@ class NewsletterServiceTest {
     @Test
     void 비로그인_상태로_뉴스레터를_모두_조회할_수_있다_구독_여부는_모두_false() {
         //when
-        List<NewsletterResponse> result = newsletterService.getNewsletters(null);
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false);
 
         System.out.println("Expected size: " + newsletters.size());
         System.out.println("Actual size: " + result.size());
@@ -109,7 +110,7 @@ class NewsletterServiceTest {
         subscribeRepository.save(subscribe);
 
         //when
-        List<NewsletterResponse> result = newsletterService.getNewsletters(member);
+        List<NewsletterResponse> result = newsletterService.getNewsletters(member, false);
 
         //then
         assertSoftly(softly -> {
@@ -260,6 +261,81 @@ class NewsletterServiceTest {
     }
 
     @Test
+    void includeSuspended가_false일_때_휴재_폐간_뉴스레터는_목록에_보이지_않는다() {
+        //given - 휴재 뉴스레터 생성
+        NewsletterDetail suspendedDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        Newsletter suspendedNewsletter = newsletterRepository.save(
+                Newsletter.builder()
+                        .name("휴재 뉴스레터")
+                        .description("설명")
+                        .imageUrl("https://cdn.bombom.me/img.png")
+                        .email("suspended@test.com")
+                        .categoryId(categories.getFirst().getId())
+                        .detailId(suspendedDetail.getId())
+                        .status(NewsletterStatus.SUSPENDED)
+                        .build()
+        );
+
+        //when
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false);
+
+        //then
+        assertThat(result)
+                .extracting("newsletterId")
+                .doesNotContain(suspendedNewsletter.getId());
+    }
+
+    @Test
+    void includeSuspended가_true일_때_휴재_뉴스레터가_목록에_포함된다() {
+        //given - 휴재 뉴스레터 생성
+        NewsletterDetail suspendedDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        Newsletter suspendedNewsletter = newsletterRepository.save(
+                Newsletter.builder()
+                        .name("휴재 뉴스레터")
+                        .description("설명")
+                        .imageUrl("https://cdn.bombom.me/img.png")
+                        .email("suspended@test.com")
+                        .categoryId(categories.getFirst().getId())
+                        .detailId(suspendedDetail.getId())
+                        .status(NewsletterStatus.SUSPENDED)
+                        .build()
+        );
+
+        //when
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, true);
+
+        //then
+        assertThat(result)
+                .extracting("newsletterId")
+                .contains(suspendedNewsletter.getId());
+    }
+
+    @Test
+    void includeSuspended가_true여도_폐간_뉴스레터는_목록에_표시되지_않는다() {
+        //given - 폐간 뉴스레터 생성
+        NewsletterDetail discontinuedDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        Newsletter discontinuedNewsletter = newsletterRepository.save(
+                Newsletter.builder()
+                        .name("폐간 뉴스레터")
+                        .description("설명")
+                        .imageUrl("https://cdn.bombom.me/img.png")
+                        .email("discontinued@test.com")
+                        .categoryId(categories.getFirst().getId())
+                        .detailId(discontinuedDetail.getId())
+                        .status(NewsletterStatus.DISCONTINUED)
+                        .build()
+        );
+
+        //when
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, true);
+
+        //then
+        assertThat(result)
+                .extracting("newsletterId")
+                .doesNotContain(discontinuedNewsletter.getId());
+    }
+
+    @Test
     void NewsletterSubscriptionCount가_없는_뉴스레터도_조회된다() {
         //given - NewsletterSubscriptionCount가 없는 새로운 뉴스레터 생성
         NewsletterDetail newDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
@@ -273,7 +349,7 @@ class NewsletterServiceTest {
         );
 
         //when
-        List<NewsletterResponse> result = newsletterService.getNewsletters(null);
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false);
 
         //then
         assertSoftly(softly -> {

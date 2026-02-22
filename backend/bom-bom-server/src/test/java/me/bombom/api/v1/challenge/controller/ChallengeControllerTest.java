@@ -134,7 +134,7 @@ class ChallengeControllerTest {
                 .andExpect(jsonPath("$[0].participantCount").exists())
                 .andExpect(jsonPath("$[0].newsletters").isArray())
                 .andExpect(jsonPath("$[0].status").exists())
-                .andExpect(jsonPath("$[0].detail.isJoined").value(false));
+                .andExpect(jsonPath("$[0].participationInfo.isJoined").value(false));
     }
 
     @Test
@@ -162,8 +162,8 @@ class ChallengeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].id").value(challenge.getId()))
-                .andExpect(jsonPath("$[0].detail.isJoined").value(true))
-                .andExpect(jsonPath("$[0].detail.progress").exists());
+                .andExpect(jsonPath("$[0].participationInfo.isJoined").value(true))
+                .andExpect(jsonPath("$[0].participationInfo.progress").exists());
     }
 
     @Test

@@ -11,6 +11,7 @@ import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
 import me.bombom.api.v1.challenge.domain.EligibilityReason;
+import me.bombom.api.v1.challenge.domain.RegistrationPhase;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.dto.response.ChallengeDetailResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
@@ -132,8 +133,9 @@ class ChallengeServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(result).hasSize(1);
             softly.assertThat(result.get(0).id()).isEqualTo(challenge2.getId());
-            softly.assertThat(result.get(0).detail().isJoined()).isFalse();
-            softly.assertThat(result.get(0).detail().progress()).isEqualTo(0);
+            softly.assertThat(result.get(0).registrationPhase()).isEqualTo(RegistrationPhase.EARLY);
+            softly.assertThat(result.get(0).participationInfo().isJoined()).isFalse();
+            softly.assertThat(result.get(0).participationInfo().progress()).isEqualTo(0);
         });
     }
 
@@ -175,10 +177,12 @@ class ChallengeServiceTest {
                     .findFirst()
                     .orElseThrow();
 
-            softly.assertThat(challenge1Response.detail().isJoined()).isTrue();
-            softly.assertThat(challenge1Response.detail().progress()).isGreaterThan(0);
-            softly.assertThat(challenge2Response.detail().isJoined()).isFalse();
-            softly.assertThat(challenge2Response.detail().progress()).isEqualTo(0);
+            softly.assertThat(challenge1Response.participationInfo().isJoined()).isTrue();
+            softly.assertThat(challenge1Response.participationInfo().progress()).isGreaterThan(0);
+            softly.assertThat(challenge1Response.registrationPhase()).isEqualTo(RegistrationPhase.CLOSED);
+            softly.assertThat(challenge2Response.participationInfo().isJoined()).isFalse();
+            softly.assertThat(challenge2Response.participationInfo().progress()).isEqualTo(0);
+            softly.assertThat(challenge2Response.registrationPhase()).isEqualTo(RegistrationPhase.EARLY);
         });
     }
 
@@ -206,7 +210,8 @@ class ChallengeServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(result).hasSize(1);
             softly.assertThat(result.get(0).id()).isEqualTo(challenge.getId());
-            softly.assertThat(result.get(0).detail().isJoined()).isFalse();
+            softly.assertThat(result.get(0).registrationPhase()).isEqualTo(RegistrationPhase.LATE);
+            softly.assertThat(result.get(0).participationInfo().isJoined()).isFalse();
         });
     }
 
@@ -360,18 +365,18 @@ class ChallengeServiceTest {
         List<ChallengeResponse> result = challengeService.getChallenges(member);
 
         // then
-        ChallengeDetailResponse detail = result.get(0).detail();
+        ChallengeDetailResponse participationInfo = result.get(0).participationInfo();
         assertSoftly(softly -> {
             softly.assertThat(result).hasSize(1);
-            softly.assertThat(detail.isJoined()).isTrue();
-            softly.assertThat(detail.progress()).isGreaterThan(0);
-            softly.assertThat(detail.grade()).isNotNull();
-            softly.assertThat(detail.isSurvived()).isNotNull();
+            softly.assertThat(participationInfo.isJoined()).isTrue();
+            softly.assertThat(participationInfo.progress()).isGreaterThan(0);
+            softly.assertThat(participationInfo.grade()).isNotNull();
+            softly.assertThat(participationInfo.isSurvived()).isNotNull();
         });
     }
 
     @Test
-    void 참가하지_않은_챌린지_detail_조회() {
+    void 참가하지_않은_챌린지_participationInfo_조회() {
         // given
         NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
         newsletterGroupRepository.save(group);
@@ -382,12 +387,12 @@ class ChallengeServiceTest {
         List<ChallengeResponse> result = challengeService.getChallenges(member);
 
         // then - 시작전 챌린지이므로 반환되어야 함
-        ChallengeDetailResponse detail = result.get(0).detail();
+        ChallengeDetailResponse participationInfo = result.get(0).participationInfo();
         assertSoftly(softly -> {
             softly.assertThat(result).hasSize(1);
-            softly.assertThat(detail).isNotNull();
-            softly.assertThat(detail.isJoined()).isFalse();
-            softly.assertThat(detail.progress()).isEqualTo(0);
+            softly.assertThat(participationInfo).isNotNull();
+            softly.assertThat(participationInfo.isJoined()).isFalse();
+            softly.assertThat(participationInfo.progress()).isEqualTo(0);
         });
     }
 

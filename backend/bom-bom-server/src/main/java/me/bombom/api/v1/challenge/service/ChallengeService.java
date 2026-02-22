@@ -18,6 +18,7 @@ import me.bombom.api.v1.badge.service.BadgeService;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeGrade;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
+import me.bombom.api.v1.challenge.domain.RegistrationPhase;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.domain.EligibilityReason;
@@ -52,7 +53,6 @@ public class ChallengeService {
 
     // TODO: 이후에 수료 처리 등 구현 시 관리 방법 고려
     private static final double SUCCESS_REQUIRED_RATIO = 0.8;
-    private static final double ADDITIONAL_APPLICATION_ALLOWED_RATIO = 0.2;
     private static final int MIN_CHALLENGE_TOTAL_DAYS_FOR_BADGE = 15;
 
     private final ChallengeRepository challengeRepository;
@@ -222,7 +222,7 @@ public class ChallengeService {
         return status == ChallengeStatus.COMING_SOON
                 || status == ChallengeStatus.BEFORE_START
                 || isJoined
-                || isWithinAdditionalApplicationPeriod(challenge, today);
+                || challenge.isLatePhase(today);
     }
 
     private ChallengeResponse toChallengeResponse(
@@ -238,10 +238,18 @@ public class ChallengeService {
                 Collections.emptyList()
         );
         ChallengeStatus status = challenge.getStatus(today);
+        RegistrationPhase registrationPhase = challenge.getRegistrationPhase(today);
         ChallengeParticipant myParticipant = myParticipation.get(challenge.getId());
-        ChallengeDetailResponse detailResponse = calculateDetailResponse(challenge, myParticipant, today);
+        ChallengeDetailResponse participationInfo = calculateParticipationInfo(challenge, myParticipant, today);
 
-        return ChallengeResponse.of(challenge, participantCount, newsletterResponses, status, detailResponse);
+        return ChallengeResponse.of(
+                challenge,
+                participantCount,
+                newsletterResponses,
+                status,
+                registrationPhase,
+                participationInfo
+        );
     }
 
     private Map<Long, Long> getParticipantCounts(List<Long> challengeIds) {
@@ -269,7 +277,7 @@ public class ChallengeService {
                 ));
     }
 
-    private ChallengeDetailResponse calculateDetailResponse(
+    private ChallengeDetailResponse calculateParticipationInfo(
             Challenge challenge,
             ChallengeParticipant myParticipant,
             LocalDate today
@@ -312,19 +320,10 @@ public class ChallengeService {
                 .addContext("reason", "ELIGIBLE 상태에서는 예외를 생성할 수 없습니다.");
     }
 
-    private boolean isWithinAdditionalApplicationPeriod(Challenge challenge, LocalDate today) {
-        if (!challenge.hasStarted(today)) {
-            return false;
-        }
-        int passedDays = challenge.calculatePassedDays(today);
-        int maxPassedDaysForApplication = (int) (challenge.getTotalDays() * ADDITIONAL_APPLICATION_ALLOWED_RATIO);
-        return passedDays <= maxPassedDaysForApplication;
-    }
-
     private EligibilityReason validateEligibility(Challenge challenge, Long challengeId, Long memberId) {
         LocalDate today = LocalDate.now(clock);
 
-        if (challenge.hasStarted(today) && !isWithinAdditionalApplicationPeriod(challenge, today)) {
+        if (challenge.isRegistrationClosed(today)) {
             return EligibilityReason.ALREADY_STARTED;
         }
 

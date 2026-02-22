@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
+import me.bombom.api.v1.challenge.domain.RegistrationPhase;
 
 public record ChallengeResponse(
 
@@ -33,7 +34,10 @@ public record ChallengeResponse(
         @NotNull
         ChallengeStatus status,
 
-        ChallengeDetailResponse detail
+        @NotNull
+        RegistrationPhase registrationPhase,
+
+        ChallengeDetailResponse participationInfo
 ) {
 
     public static ChallengeResponse of(
@@ -41,7 +45,8 @@ public record ChallengeResponse(
             long participantCount,
             List<ChallengeNewsletterResponse> newsletters,
             ChallengeStatus status,
-            ChallengeDetailResponse detail
+            RegistrationPhase registrationPhase,
+            ChallengeDetailResponse participationInfo
     ) {
         return new ChallengeResponse(
                 challenge.getId(),
@@ -52,7 +57,8 @@ public record ChallengeResponse(
                 participantCount,
                 newsletters,
                 status,
-                detail
+                registrationPhase,
+                participationInfo
         );
     }
 }

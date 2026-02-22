@@ -19,6 +19,8 @@ import me.bombom.api.v1.common.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Challenge extends BaseEntity {
 
+    private static final double LATE_REGISTRATION_ALLOWED_RATIO = 0.2;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -88,6 +90,24 @@ public class Challenge extends BaseEntity {
         return this.startDate != null && !now.isBefore(this.startDate);
     }
 
+    public RegistrationPhase getRegistrationPhase(LocalDate now) {
+        if (!hasStarted(now)) {
+            return RegistrationPhase.EARLY;
+        }
+        if (isWithinLatePhase(now)) {
+            return RegistrationPhase.LATE;
+        }
+        return RegistrationPhase.CLOSED;
+    }
+
+    public boolean isRegistrationClosed(LocalDate now) {
+        return getRegistrationPhase(now) == RegistrationPhase.CLOSED;
+    }
+
+    public boolean isLatePhase(LocalDate now) {
+        return getRegistrationPhase(now) == RegistrationPhase.LATE;
+    }
+
     public int calculatePassedDays(LocalDate targetDate) {
         if (this.startDate == null) {
             return 0;
@@ -106,5 +126,11 @@ public class Challenge extends BaseEntity {
     private boolean isWeekday(LocalDate currentDate) {
         DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
         return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
+    }
+
+    private boolean isWithinLatePhase(LocalDate targetDate) {
+        int passedDays = calculatePassedDays(targetDate);
+        int maxPassedDaysForLateRegistration = (int) (this.totalDays * LATE_REGISTRATION_ALLOWED_RATIO);
+        return passedDays <= maxPassedDaysForLateRegistration;
     }
 }

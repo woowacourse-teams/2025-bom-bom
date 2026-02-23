@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
-import me.bombom.api.v1.newsletter.domain.NewsletterStatus;
+import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
 
 public record NewsletterWithDetailResponse(
 
@@ -21,7 +21,7 @@ public record NewsletterWithDetailResponse(
         String category,
 
         @NotNull
-        NewsletterStatus status,
+        NewsletterPublicationStatus status,
 
         @NotNull
         String mainPageUrl,

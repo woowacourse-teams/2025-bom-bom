@@ -1,7 +1,7 @@
 package me.bombom.api.v1.subscribe.dto.response;
 
 import jakarta.validation.constraints.NotNull;
-import me.bombom.api.v1.newsletter.domain.NewsletterStatus;
+import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
 import me.bombom.api.v1.subscribe.domain.SubscribeStatus;
 
 public record SubscribedNewsletterResponse(
@@ -29,7 +29,7 @@ public record SubscribedNewsletterResponse(
         SubscribeStatus status,
 
         @NotNull
-        NewsletterStatus newsletterStatus
+        NewsletterPublicationStatus newsletterPublicationStatus
 ) {
 
     public static SubscribedNewsletterResponse of(
@@ -41,7 +41,7 @@ public record SubscribedNewsletterResponse(
             String category,
             String unsubscribeUrl,
             SubscribeStatus status,
-            NewsletterStatus newsletterStatus
+            NewsletterPublicationStatus publicationStatus
     ) {
         return new SubscribedNewsletterResponse(
                 subscriptionId,
@@ -52,7 +52,7 @@ public record SubscribedNewsletterResponse(
                 category,
                 unsubscribeUrl,
                 status,
-                newsletterStatus
+                publicationStatus
         );
     }
 }

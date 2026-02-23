@@ -12,7 +12,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.newsletter.domain.NewsletterStatus;
+import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.QNewsletterResponse;
 
@@ -57,11 +57,11 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
     }
 
     private BooleanExpression createStatusCondition(boolean includeSuspended) {
-        BooleanExpression activeOnly = newsletter.status.eq(NewsletterStatus.ACTIVE);
+        BooleanExpression activeOnly = newsletter.status.eq(NewsletterPublicationStatus.ACTIVE);
         if (!includeSuspended) {
             return activeOnly;
         }
-        return activeOnly.or(newsletter.status.eq(NewsletterStatus.SUSPENDED));
+        return activeOnly.or(newsletter.status.eq(NewsletterPublicationStatus.SUSPENDED));
     }
 
     private BooleanExpression createIsSubscribedCondition(Long memberId) {

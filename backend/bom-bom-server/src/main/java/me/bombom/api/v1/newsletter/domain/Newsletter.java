@@ -48,7 +48,7 @@ public class Newsletter extends BaseEntity {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private NewsletterStatus status = NewsletterStatus.ACTIVE;
+    private NewsletterPublicationStatus status = NewsletterPublicationStatus.ACTIVE;
 
     @Builder
     public Newsletter(
@@ -59,7 +59,7 @@ public class Newsletter extends BaseEntity {
             @NonNull String email,
             @NonNull Long categoryId,
             @NonNull Long detailId,
-            NewsletterStatus status
+            NewsletterPublicationStatus status
     ) {
         this.id = id;
         this.name = name;
@@ -68,6 +68,6 @@ public class Newsletter extends BaseEntity {
         this.email = email;
         this.categoryId = categoryId;
         this.detailId = detailId;
-        this.status = status != null ? status : NewsletterStatus.ACTIVE;
+        this.status = status != null ? status : NewsletterPublicationStatus.ACTIVE;
     }
 }

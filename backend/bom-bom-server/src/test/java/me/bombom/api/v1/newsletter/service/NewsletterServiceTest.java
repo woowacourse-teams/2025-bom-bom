@@ -13,7 +13,7 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
-import me.bombom.api.v1.newsletter.domain.NewsletterStatus;
+import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
@@ -272,7 +272,7 @@ class NewsletterServiceTest {
                         .email("suspended@test.com")
                         .categoryId(categories.getFirst().getId())
                         .detailId(suspendedDetail.getId())
-                        .status(NewsletterStatus.SUSPENDED)
+                        .status(NewsletterPublicationStatus.SUSPENDED)
                         .build()
         );
 
@@ -297,7 +297,7 @@ class NewsletterServiceTest {
                         .email("suspended@test.com")
                         .categoryId(categories.getFirst().getId())
                         .detailId(suspendedDetail.getId())
-                        .status(NewsletterStatus.SUSPENDED)
+                        .status(NewsletterPublicationStatus.SUSPENDED)
                         .build()
         );
 
@@ -322,7 +322,7 @@ class NewsletterServiceTest {
                         .email("discontinued@test.com")
                         .categoryId(categories.getFirst().getId())
                         .detailId(discontinuedDetail.getId())
-                        .status(NewsletterStatus.DISCONTINUED)
+                        .status(NewsletterPublicationStatus.DISCONTINUED)
                         .build()
         );
 

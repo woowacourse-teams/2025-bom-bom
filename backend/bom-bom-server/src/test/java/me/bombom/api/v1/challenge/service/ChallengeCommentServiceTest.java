@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
@@ -245,10 +246,10 @@ class ChallengeCommentServiceTest {
         LocalDate end = LocalDate.now().plusDays(1);
 
         Member replyAuthorMember = memberRepository.save(
-                TestFixture.createMemberFixture("reply-author@bombom.news", "reply-author")
+                TestFixture.createUniqueMember("reply-author", UUID.randomUUID().toString())
         );
         Member thirdPartyMember = memberRepository.save(
-                TestFixture.createMemberFixture("third-party@bombom.news", "third-party")
+                TestFixture.createUniqueMember("third-party", UUID.randomUUID().toString())
         );
 
         ChallengeTeam replyAuthorTeam = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));

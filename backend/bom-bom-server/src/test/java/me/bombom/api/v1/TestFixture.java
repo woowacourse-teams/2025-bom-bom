@@ -30,6 +30,7 @@ import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroupItem;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousPolicy;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy;
+import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
 import me.bombom.api.v1.notice.domain.Notice;
 import me.bombom.api.v1.notice.domain.NoticeCategory;
 import me.bombom.api.v1.pet.domain.Pet;
@@ -128,6 +129,25 @@ public final class TestFixture {
                 .email(email)
                 .categoryId(categoryId)
                 .detailId(detailId)
+                .build();
+    }
+
+    public static Newsletter createSuspendedNewsletter(
+            String name,
+            String email,
+            Long categoryId,
+            Long detailId,
+            LocalDate suspendedAt
+    ) {
+        return Newsletter.builder()
+                .name(name)
+                .description("설명")
+                .imageUrl("https://cdn.bombom.me/img.png")
+                .email(email)
+                .categoryId(categoryId)
+                .detailId(detailId)
+                .status(NewsletterPublicationStatus.SUSPENDED)
+                .suspendedAt(suspendedAt)
                 .build();
     }
 

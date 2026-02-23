@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -51,6 +53,9 @@ class NewsletterServiceTest {
 
     @Autowired
     private SubscribeRepository subscribeRepository;
+
+    @Autowired
+    private Clock clock;
 
     private List<Newsletter> newsletters;
     private List<NewsletterDetail> newsletterDetails;
@@ -290,15 +295,13 @@ class NewsletterServiceTest {
         //given - 휴재 뉴스레터 생성
         NewsletterDetail suspendedDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
         Newsletter suspendedNewsletter = newsletterRepository.save(
-                Newsletter.builder()
-                        .name("휴재 뉴스레터")
-                        .description("설명")
-                        .imageUrl("https://cdn.bombom.me/img.png")
-                        .email("suspended@test.com")
-                        .categoryId(categories.getFirst().getId())
-                        .detailId(suspendedDetail.getId())
-                        .status(NewsletterPublicationStatus.SUSPENDED)
-                        .build()
+                TestFixture.createSuspendedNewsletter(
+                        "휴재 뉴스레터",
+                        "suspended@test.com",
+                        categories.getFirst().getId(),
+                        suspendedDetail.getId(),
+                        null
+                )
         );
 
         //when
@@ -308,6 +311,50 @@ class NewsletterServiceTest {
         assertThat(result)
                 .extracting("newsletterId")
                 .contains(suspendedNewsletter.getId());
+    }
+
+    @Test
+    void includeSuspended가_true일_때_최근_휴재는_포함되고_장기_휴재는_제외된다() {
+        // given
+        LocalDate today = LocalDate.now(clock);
+        LocalDate fiveMonthsAgo = today.minusMonths(5);
+        LocalDate sevenMonthsAgo = today.minusMonths(7);
+
+        NewsletterDetail recentSuspendedDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        Newsletter recentSuspendedNewsletter = newsletterRepository.save(
+                TestFixture.createSuspendedNewsletter(
+                        "최근 휴재 뉴스레터",
+                        "recent-suspended@test.com",
+                        categories.getFirst().getId(),
+                        recentSuspendedDetail.getId(),
+                        fiveMonthsAgo
+                )
+        );
+
+        NewsletterDetail longTermSuspendedDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        Newsletter longTermSuspendedNewsletter = newsletterRepository.save(
+                TestFixture.createSuspendedNewsletter(
+                        "장기 휴재 뉴스레터",
+                        "long-suspended@test.com",
+                        categories.getFirst().getId(),
+                        longTermSuspendedDetail.getId(),
+                        sevenMonthsAgo
+                )
+        );
+
+        // when
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, true);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result)
+                    .extracting("newsletterId")
+                    .contains(recentSuspendedNewsletter.getId());
+
+            softly.assertThat(result)
+                    .extracting("newsletterId")
+                    .doesNotContain(longTermSuspendedNewsletter.getId());
+        });
     }
 
     @Test

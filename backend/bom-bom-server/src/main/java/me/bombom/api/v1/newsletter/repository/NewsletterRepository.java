@@ -1,44 +1,13 @@
 package me.bombom.api.v1.newsletter.repository;
 
-import java.util.List;
 import java.util.Optional;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
-import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface NewsletterRepository extends JpaRepository<Newsletter, Long> {
-
-    @Query("""
-        SELECT new me.bombom.api.v1.newsletter.dto.NewsletterResponse(
-            n.id,
-            n.name,
-            n.imageUrl,
-            n.description,
-            d.subscribeUrl,
-            c.name,
-            n.status,
-            CASE
-                WHEN :memberId IS NULL THEN false
-                WHEN s.id IS NULL THEN false
-                ELSE true
-            END
-        )
-        FROM Newsletter n
-        JOIN NewsletterDetail d ON d.id = n.detailId
-        LEFT JOIN NewsletterSubscriptionCount nsc ON nsc.newsletterId = n.id
-        JOIN Category c ON c.id = n.categoryId
-        LEFT JOIN Subscribe s ON s.newsletterId = n.id AND s.memberId = :memberId
-        WHERE n.status = me.bombom.api.v1.newsletter.domain.NewsletterStatus.ACTIVE
-            OR (:includeSuspended = true AND n.status = me.bombom.api.v1.newsletter.domain.NewsletterStatus.SUSPENDED)
-        ORDER BY COALESCE(nsc.total, 0) DESC, n.name ASC
-    """)
-    List<NewsletterResponse> findNewslettersInfo(
-            @Param("memberId") Long memberId,
-            @Param("includeSuspended") boolean includeSuspended
-    );
+public interface NewsletterRepository extends JpaRepository<Newsletter, Long>, CustomNewsletterRepository {
 
     @Query("""
         SELECT new me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse(

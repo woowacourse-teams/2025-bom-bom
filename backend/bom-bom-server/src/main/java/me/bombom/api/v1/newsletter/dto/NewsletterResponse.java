@@ -1,5 +1,6 @@
 package me.bombom.api.v1.newsletter.dto;
 
+import com.querydsl.core.annotations.QueryProjection;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import me.bombom.api.v1.newsletter.domain.NewsletterStatus;
@@ -29,4 +30,8 @@ public record NewsletterResponse(
         @Schema(required = true)
         boolean isSubscribed
 ) {
+
+        @QueryProjection
+        public NewsletterResponse {
+        }
 }

@@ -35,7 +35,17 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
                         WHEN ccl.id IS NOT NULL THEN true
                         ELSE false
                     END,
-                    cc.replyCount
+                    (
+                        SELECT COUNT(cr.id)
+                        FROM ChallengeCommentReply cr
+                        JOIN ChallengeParticipant crAuthor ON cr.participantId = crAuthor.id
+                        WHERE cr.commentId = cc.id
+                          AND (
+                              cr.isPrivate = false
+                              OR crAuthor.memberId = :currentMemberId
+                              OR cp.memberId = :currentMemberId
+                          )
+                    )
                 )
                 FROM ChallengeComment cc
                 JOIN ChallengeParticipant cp ON cc.participantId = cp.id

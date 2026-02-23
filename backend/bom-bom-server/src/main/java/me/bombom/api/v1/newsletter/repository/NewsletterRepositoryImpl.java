@@ -10,6 +10,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
@@ -22,8 +23,12 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<NewsletterResponse> findNewslettersInfo(Long memberId, boolean includeSuspended) {
-        BooleanExpression publicationStatusCondition = createStatusCondition(includeSuspended);
+    public List<NewsletterResponse> findNewslettersInfo(
+            Long memberId,
+            boolean includeSuspended,
+            LocalDate suspendedHiddenThresholdDate
+    ) {
+        BooleanExpression publicationStatusCondition = createStatusCondition(includeSuspended, suspendedHiddenThresholdDate);
         BooleanExpression isSubscribedCondition = createIsSubscribedCondition(memberId);
 
         JPAQuery<NewsletterResponse> query = jpaQueryFactory
@@ -56,12 +61,19 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
         return query.fetch();
     }
 
-    private BooleanExpression createStatusCondition(boolean includeSuspended) {
+    private BooleanExpression createStatusCondition(
+            boolean includeSuspended,
+            LocalDate suspendedHiddenThresholdDate
+    ) {
         BooleanExpression activeOnly = newsletter.status.eq(NewsletterPublicationStatus.ACTIVE);
         if (!includeSuspended) {
             return activeOnly;
         }
-        return activeOnly.or(newsletter.status.eq(NewsletterPublicationStatus.SUSPENDED));
+
+        BooleanExpression suspendedVisibleCondition = newsletter.status.eq(NewsletterPublicationStatus.SUSPENDED)
+                .and(newsletter.suspendedAt.isNull()
+                        .or(newsletter.suspendedAt.goe(suspendedHiddenThresholdDate)));
+        return activeOnly.or(suspendedVisibleCondition);
     }
 
     private BooleanExpression createIsSubscribedCondition(Long memberId) {
@@ -71,4 +83,3 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
         return subscribe.id.isNotNull();
     }
 }
-

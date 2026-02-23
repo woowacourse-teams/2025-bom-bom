@@ -1,5 +1,7 @@
 package me.bombom.api.v1.newsletter.service;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -17,10 +19,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class NewsletterService {
 
+    private static final int SUSPENDED_HIDDEN_AFTER_MONTHS = 6;
+
     private final NewsletterRepository newsletterRepository;
+    private final Clock clock;
 
     public List<NewsletterResponse> getNewsletters(Long memberId, boolean includeSuspended) {
-        return newsletterRepository.findNewslettersInfo(memberId, includeSuspended);
+        LocalDate today = LocalDate.now(clock);
+        LocalDate suspendedHiddenThresholdDate = today.minusMonths(SUSPENDED_HIDDEN_AFTER_MONTHS);
+        return newsletterRepository.findNewslettersInfo(memberId, includeSuspended, suspendedHiddenThresholdDate);
     }
 
     public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Long memberId) {

@@ -41,6 +41,6 @@ public record ChallengeCommentResponse(
         boolean isLiked,
 
         @Schema(requiredMode = RequiredMode.REQUIRED)
-        int replyCount
+        long replyCount
 ) {
 }

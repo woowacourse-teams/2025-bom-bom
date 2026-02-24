@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
@@ -25,6 +26,7 @@ import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentLikeResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentLikeRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeCommentReplyRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
@@ -69,6 +71,9 @@ class ChallengeCommentServiceTest {
     private ChallengeCommentLikeRepository challengeCommentLikeRepository;
 
     @Autowired
+    private ChallengeCommentReplyRepository challengeCommentReplyRepository;
+
+    @Autowired
     private ChallengeParticipantRepository challengeParticipantRepository;
 
     @Autowired
@@ -110,6 +115,7 @@ class ChallengeCommentServiceTest {
 
     @BeforeEach
     void setUp() {
+        challengeCommentReplyRepository.deleteAllInBatch();
         challengeCommentRepository.deleteAllInBatch();
         challengeCommentLikeRepository.deleteAllInBatch();
         challengeParticipantRepository.deleteAllInBatch();
@@ -231,6 +237,90 @@ class ChallengeCommentServiceTest {
         // then
         assertThat(result.getTotalElements()).isZero();
         assertThat(result.getContent()).isEmpty();
+    }
+
+    @Test
+    void 답글_개수는_조회자_기준_가시성으로_집계된다() {
+        // given
+        LocalDate start = LocalDate.now().minusDays(1);
+        LocalDate end = LocalDate.now().plusDays(1);
+
+        Member replyAuthorMember = memberRepository.save(
+                TestFixture.createUniqueMember("reply-author", UUID.randomUUID().toString())
+        );
+        Member thirdPartyMember = memberRepository.save(
+                TestFixture.createUniqueMember("third-party", UUID.randomUUID().toString())
+        );
+
+        ChallengeTeam replyAuthorTeam = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
+        ChallengeTeam thirdPartyTeam = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
+
+        ChallengeParticipant replyAuthorParticipant = challengeParticipantRepository.save(
+                TestFixture.createChallengeParticipantWithTeam(
+                        challenge.getId(),
+                        replyAuthorMember.getId(),
+                        replyAuthorTeam.getId(),
+                        0,
+                        0
+                )
+        );
+        challengeParticipantRepository.save(
+                TestFixture.createChallengeParticipantWithTeam(
+                        challenge.getId(),
+                        thirdPartyMember.getId(),
+                        thirdPartyTeam.getId(),
+                        0,
+                        0
+                )
+        );
+
+        ChallengeComment comment = challengeCommentRepository.save(
+                TestFixture.createChallengeComment(
+                        article.getNewsletterId(),
+                        participant.getId(),
+                        article.getTitle(),
+                        "quote",
+                        "답글 수 가시성 테스트용 코멘트입니다."
+                )
+        );
+
+        challengeCommentReplyRepository.save(
+                TestFixture.createChallengeCommentReply(comment.getId(), replyAuthorParticipant.getId(), "비공개1", true)
+        );
+        challengeCommentReplyRepository.save(
+                TestFixture.createChallengeCommentReply(comment.getId(), replyAuthorParticipant.getId(), "비공개2", true)
+        );
+        challengeCommentReplyRepository.save(
+                TestFixture.createChallengeCommentReply(comment.getId(), replyAuthorParticipant.getId(), "비공개3", true)
+        );
+        challengeCommentReplyRepository.save(
+                TestFixture.createChallengeCommentReply(comment.getId(), replyAuthorParticipant.getId(), "공개1", false)
+        );
+        challengeCommentReplyRepository.save(
+                TestFixture.createChallengeCommentReply(comment.getId(), replyAuthorParticipant.getId(), "공개2", false)
+        );
+
+        // when
+        Page<ChallengeCommentResponse> commentAuthorView = challengeCommentService.getChallengeComments(
+                challenge.getId(),
+                member.getId(),
+                new ChallengeCommentOptionsRequest(start, end),
+                PageRequest.of(0, 10)
+        );
+        Page<ChallengeCommentResponse> thirdPartyView = challengeCommentService.getChallengeComments(
+                challenge.getId(),
+                thirdPartyMember.getId(),
+                new ChallengeCommentOptionsRequest(start, end),
+                PageRequest.of(0, 10)
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(commentAuthorView.getContent()).hasSize(1);
+            softly.assertThat(commentAuthorView.getContent().getFirst().replyCount()).isEqualTo(5L);
+            softly.assertThat(thirdPartyView.getContent()).hasSize(1);
+            softly.assertThat(thirdPartyView.getContent().getFirst().replyCount()).isEqualTo(2L);
+        });
     }
 
     @Test

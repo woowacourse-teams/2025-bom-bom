@@ -43,7 +43,7 @@ public interface ChallengeCommentControllerApi {
             @ApiResponse(responseCode = "403", description = "팀 또는 챌린지 접근 권한 없음", content = @Content)
     })
     Page<ChallengeCommentResponse> getChallengeComments(
-            @Parameter(hidden = true) Member member,
+            @Parameter(hidden = true) Long memberId,
             @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
             @Parameter(description = "필터링 관련 요청") @Valid @ModelAttribute ChallengeCommentOptionsRequest request,
             @Parameter(description = "페이징 및 정렬 (예: ?page=0&size=20&sort=createdAt,desc)") Pageable pageable

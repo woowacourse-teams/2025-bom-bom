@@ -11,11 +11,11 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class AsyncConfig {
 
     @Bean(name = "taskExecutor")
-    public Executor taskExecutor() {
+    public Executor taskExecutor(AsyncExecutorProperties props) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(1); // 기본 1개
-        executor.setMaxPoolSize(3); // 최대 3개
-        executor.setQueueCapacity(50); // 큐 50개
+        executor.setCorePoolSize(props.getCorePoolSize());
+        executor.setMaxPoolSize(props.getMaxPoolSize());
+        executor.setQueueCapacity(props.getQueueCapacity());
         executor.setThreadNamePrefix("async-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(60);

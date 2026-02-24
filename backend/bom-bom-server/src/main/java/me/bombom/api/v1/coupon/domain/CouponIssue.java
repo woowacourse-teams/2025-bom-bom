@@ -54,12 +54,4 @@ public class CouponIssue extends BaseEntity {
                 .imageUrl(imageUrl)
                 .build();
     }
-
-    public static CouponIssue preIssue(String couponName, String imageUrl) {
-        return CouponIssue.builder()
-                .memberId(null)
-                .couponName(couponName)
-                .imageUrl(imageUrl)
-                .build();
-    }
 }

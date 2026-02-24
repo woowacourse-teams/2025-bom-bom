@@ -22,3 +22,11 @@ services:
       options:
         max-size: "50m"
         max-file: "5"
+    networks:
+      - default
+      - ec2_user_default
+
+networks:
+  ec2_user_default:
+    external: true
+    name: ec2-user_default

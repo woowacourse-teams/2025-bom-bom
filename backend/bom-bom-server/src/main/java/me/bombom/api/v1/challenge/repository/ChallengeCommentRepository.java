@@ -19,8 +19,13 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
                     m.profileImageUrl,
                     n.name,
                     CASE
-                        WHEN s.id IS NULL THEN false
-                        ELSE true
+                        WHEN EXISTS (
+                            SELECT 1
+                            FROM Subscribe s
+                            WHERE s.newsletterId = cc.newsletterId
+                              AND s.memberId = :currentMemberId
+                        ) THEN true
+                        ELSE false
                     END,
                     cc.articleTitle,
                     cc.quotation,
@@ -55,7 +60,6 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
                     ON ccl.commentId = cc.id AND ccl.participantId = myCp.id
                 LEFT JOIN Member m ON cp.memberId = m.id
                 JOIN Newsletter n ON cc.newsletterId = n.id
-                LEFT JOIN Subscribe s ON s.newsletterId = cc.newsletterId AND s.memberId = :currentMemberId
                 WHERE cp.challengeId = :challengeId
                 AND FUNCTION('DATE', cc.createdAt) BETWEEN :startDate AND :endDate
             """)

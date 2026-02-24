@@ -15,13 +15,6 @@ public class CouponService {
     private final CouponIssueRepository couponIssueRepository;
 
     public List<CouponIssueSummaryResponse> getIssuedCoupons(Long memberId) {
-        return couponIssueRepository.findByMemberId(memberId)
-                .stream()
-                .map(issue -> CouponIssueSummaryResponse.of(
-                        issue.getCouponName(),
-                        issue.getImageUrl(),
-                        issue.getUpdatedAt())
-                )
-                .toList();
+        return CouponIssueSummaryResponse.of(couponIssueRepository.findByMemberId(memberId));
     }
 }

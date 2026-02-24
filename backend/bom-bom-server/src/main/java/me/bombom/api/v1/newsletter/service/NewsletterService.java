@@ -1,11 +1,12 @@
 package me.bombom.api.v1.newsletter.service;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
-import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
@@ -18,15 +19,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class NewsletterService {
 
-    private final NewsletterRepository newsletterRepository;
+    private static final int SUSPENDED_HIDDEN_AFTER_MONTHS = 6;
 
-    public List<NewsletterResponse> getNewsletters(Member member) {
-        Long memberId = getMemberId(member);
-        return newsletterRepository.findNewslettersInfo(memberId);
+    private final NewsletterRepository newsletterRepository;
+    private final Clock clock;
+
+    public List<NewsletterResponse> getNewsletters(Long memberId, boolean includeSuspended) {
+        LocalDate today = LocalDate.now(clock);
+        LocalDate suspendedHiddenThresholdDate = today.minusMonths(SUSPENDED_HIDDEN_AFTER_MONTHS);
+        return newsletterRepository.findNewslettersInfo(memberId, includeSuspended, suspendedHiddenThresholdDate);
     }
 
-    public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Member member) {
-        Long memberId = getMemberId(member);
+    public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Long memberId) {
         return newsletterRepository.findNewsletterWithDetailById(newsletterId, memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletter")
@@ -39,12 +43,5 @@ public class NewsletterService {
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletter")
                         .addContext(ErrorContextKeys.OPERATION, "getNewsletter")
                         .addContext(ErrorContextKeys.NEWSLETTER_ID, id));
-    }
-
-    private Long getMemberId(Member member) {
-        if (member == null) {
-            return null;
-        }
-        return member.getId();
     }
 }

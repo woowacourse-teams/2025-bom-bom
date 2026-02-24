@@ -11,7 +11,7 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /app/key/bombom-fcm.json
     volumes:
       - /srv/bombom/secrets/bombom-fcm.json:/app/key/bombom-fcm.json:ro
-      - /srv/bombom/logs:/logs
+      - /srv/bombom/logs:/app/logs
     ulimits:
       nofile: # 한 프로세스가 동시에 열어둘 수 있는 fd 최대 개수
         soft: 32768

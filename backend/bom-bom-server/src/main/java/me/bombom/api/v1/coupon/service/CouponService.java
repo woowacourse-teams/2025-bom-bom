@@ -4,7 +4,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.coupon.dto.CouponIssueSummaryResponse;
 import me.bombom.api.v1.coupon.repository.CouponIssueRepository;
-import me.bombom.api.v1.member.domain.Member;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,8 +14,8 @@ public class CouponService {
 
     private final CouponIssueRepository couponIssueRepository;
 
-    public List<CouponIssueSummaryResponse> getIssuedCoupons(Member member) {
-        return couponIssueRepository.findByMemberId(member.getId())
+    public List<CouponIssueSummaryResponse> getIssuedCoupons(Long memberId) {
+        return couponIssueRepository.findByMemberId(memberId)
                 .stream()
                 .map(issue -> CouponIssueSummaryResponse.of(
                         issue.getCouponName(),

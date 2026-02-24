@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.coupon.dto.CouponIssueSummaryResponse;
 import me.bombom.api.v1.coupon.service.CouponService;
-import me.bombom.api.v1.member.domain.Member;
-import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +18,7 @@ public class CouponController implements CouponControllerApi {
 
     @Override
     @GetMapping("issues/me")
-    public List<CouponIssueSummaryResponse> getIssuedCoupons(@LoginMember Member member) {
-        return couponService.getIssuedCoupons(member);
+    public List<CouponIssueSummaryResponse> getIssuedCoupons(@LoginMember Long memberId) {
+        return couponService.getIssuedCoupons(memberId);
     }
 }

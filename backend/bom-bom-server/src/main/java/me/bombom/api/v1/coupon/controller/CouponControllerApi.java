@@ -1,13 +1,12 @@
 package me.bombom.api.v1.coupon.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import me.bombom.api.v1.coupon.dto.CouponIssueSummaryResponse;
-import me.bombom.api.v1.member.domain.Member;
 
 @Tag(name = "Coupon", description = "쿠폰 관련 API")
 public interface CouponControllerApi {
@@ -21,6 +20,6 @@ public interface CouponControllerApi {
             @ApiResponse(responseCode = "401", description = "인증이 필요합니다.")
     })
     List<CouponIssueSummaryResponse> getIssuedCoupons(
-            @Parameter(hidden = true) Member member
+            @Parameter(hidden = true) Long memberId
     );
 }

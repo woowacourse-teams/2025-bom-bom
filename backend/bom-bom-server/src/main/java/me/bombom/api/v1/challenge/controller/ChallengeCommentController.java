@@ -47,7 +47,7 @@ public class ChallengeCommentController implements ChallengeCommentControllerApi
     @Override
     @GetMapping("/{challengeId}/comments")
     public Page<ChallengeCommentResponse> getChallengeComments(
-            @LoginMember Member member,
+            @LoginMember Long memberId,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
             @Valid @ModelAttribute ChallengeCommentOptionsRequest request,
             @PageableDefault(size = 20)
@@ -56,7 +56,7 @@ public class ChallengeCommentController implements ChallengeCommentControllerApi
                     @SortDefault(sort = "id", direction = Sort.Direction.ASC)
             }) Pageable pageable
     ) {
-        return challengeCommentService.getChallengeComments(challengeId, member.getId(), request, pageable);
+        return challengeCommentService.getChallengeComments(challengeId, memberId, request, pageable);
     }
 
     @Override

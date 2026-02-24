@@ -19,8 +19,13 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
                     m.profileImageUrl,
                     n.name,
                     CASE
-                        WHEN s.id IS NULL THEN false
-                        ELSE true
+                        WHEN EXISTS (
+                            SELECT 1
+                            FROM Subscribe s
+                            WHERE s.newsletterId = cc.newsletterId
+                              AND s.memberId = :currentMemberId
+                        ) THEN true
+                        ELSE false
                     END,
                     cc.articleTitle,
                     cc.quotation,
@@ -35,7 +40,17 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
                         WHEN ccl.id IS NOT NULL THEN true
                         ELSE false
                     END,
-                    cc.replyCount
+                    (
+                        SELECT COUNT(cr.id)
+                        FROM ChallengeCommentReply cr
+                        JOIN ChallengeParticipant crAuthor ON cr.participantId = crAuthor.id
+                        WHERE cr.commentId = cc.id
+                          AND (
+                              cr.isPrivate = false
+                              OR crAuthor.memberId = :currentMemberId
+                              OR cp.memberId = :currentMemberId
+                          )
+                    )
                 )
                 FROM ChallengeComment cc
                 JOIN ChallengeParticipant cp ON cc.participantId = cp.id
@@ -45,7 +60,6 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
                     ON ccl.commentId = cc.id AND ccl.participantId = myCp.id
                 LEFT JOIN Member m ON cp.memberId = m.id
                 JOIN Newsletter n ON cc.newsletterId = n.id
-                LEFT JOIN Subscribe s ON s.newsletterId = cc.newsletterId AND s.memberId = :currentMemberId
                 WHERE cp.challengeId = :challengeId
                 AND FUNCTION('DATE', cc.createdAt) BETWEEN :startDate AND :endDate
             """)

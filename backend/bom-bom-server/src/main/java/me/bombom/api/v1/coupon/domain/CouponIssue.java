@@ -35,7 +35,12 @@ public class CouponIssue extends BaseEntity {
     private String imageUrl;
 
     @Builder
-    public CouponIssue(Long id, Long memberId, @NonNull String couponName, @NonNull String imageUrl) {
+    public CouponIssue(
+            Long id,
+            Long memberId,
+            @NonNull String couponName,
+            @NonNull String imageUrl
+    ) {
         this.id = id;
         this.memberId = memberId;
         this.couponName = couponName;

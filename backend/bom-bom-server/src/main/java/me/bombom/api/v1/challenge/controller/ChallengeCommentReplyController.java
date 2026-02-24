@@ -7,7 +7,6 @@ import me.bombom.api.v1.challenge.dto.request.CreateCommentReplyRequest;
 import me.bombom.api.v1.challenge.dto.response.CommentReplyResponse;
 import me.bombom.api.v1.challenge.service.ChallengeCommentReplyService;
 import me.bombom.api.v1.common.resolver.LoginMember;
-import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -34,22 +33,22 @@ public class ChallengeCommentReplyController implements ChallengeCommentReplyCon
     @PostMapping("{challengeId}/comments/{commentId}/replies")
     @ResponseStatus(HttpStatus.CREATED)
     public void createCommentReply(
-            @LoginMember Member member,
+            @LoginMember Long memberId,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long commentId,
             @Valid @RequestBody CreateCommentReplyRequest request
     ) {
-        challengeCommentReplyService.createCommentReply(challengeId, commentId, member.getId(), request);
+        challengeCommentReplyService.createCommentReply(challengeId, commentId, memberId, request);
     }
 
     @Override
     @GetMapping("{challengeId}/comments/{commentId}/replies")
     public Page<CommentReplyResponse> getCommentReplies(
-            @LoginMember Member member,
+            @LoginMember Long memberId,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long commentId,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        return challengeCommentReplyService.getCommentReplies(member.getId(), challengeId, commentId, pageable);
+        return challengeCommentReplyService.getCommentReplies(memberId, challengeId, commentId, pageable);
     }
 }

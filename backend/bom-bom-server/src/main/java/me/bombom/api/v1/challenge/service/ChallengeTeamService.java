@@ -37,6 +37,7 @@ public class ChallengeTeamService {
 
         int averageProgress = calculateTodayAverageProgress(progressCount);
         challengeTeam.updateProgress(averageProgress);
+        challengeTeamRepository.save(challengeTeam);
     }
 
     public ChallengeTeam getChallengeTeamByParticipant(ChallengeParticipant participant){

@@ -19,7 +19,8 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
             n.description,
             c.name,
             s.unsubscribeUrl,
-            s.status
+            s.status,
+            n.status
         )
         FROM Subscribe s
         JOIN Newsletter n ON s.newsletterId = n.id

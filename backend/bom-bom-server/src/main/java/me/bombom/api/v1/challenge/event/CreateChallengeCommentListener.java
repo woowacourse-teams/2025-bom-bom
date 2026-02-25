@@ -10,7 +10,6 @@ import me.bombom.api.v1.challenge.service.ChallengeTeamService;
 import me.bombom.api.v1.challenge.service.ChallengeTodoService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +40,7 @@ public class CreateChallengeCommentListener {
         ChallengeParticipant participant = challengeParticipantService.getParticipant(event.participantId());
         completeDailyTodoWithComment(participant, today);
 
-        ChallengeTeam challengeTeam = challengeTeamService.getChallengeTeamByParticipant(participant);
+        ChallengeTeam challengeTeam = challengeTeamService.getByParticipant(participant);
         challengeTeamService.updateTeamProgress(challengeTeam);
 
         log.info("챌린지 코멘트 작성 후 출석 처리 완료");

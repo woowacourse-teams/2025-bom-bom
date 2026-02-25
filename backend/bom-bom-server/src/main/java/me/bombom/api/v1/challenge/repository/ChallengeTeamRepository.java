@@ -15,7 +15,7 @@ public interface ChallengeTeamRepository extends JpaRepository<ChallengeTeam, Lo
         WHERE ct.challengeId = :challengeId
         ORDER BY ct.id
     """)
-    List<ChallengeTeam> findAllByChallengeIdOrderByIdAsc(@Param("challengeId") Long challengeId);
+    List<ChallengeTeam> findAllByChallengeIdOrderById(@Param("challengeId") Long challengeId);
 
     @Modifying
     @Query("""

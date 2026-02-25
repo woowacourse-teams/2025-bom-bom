@@ -40,7 +40,7 @@ public class ChallengeTeamService {
         challengeTeamRepository.save(challengeTeam);
     }
 
-    public ChallengeTeam getChallengeTeamByParticipant(ChallengeParticipant participant){
+    public ChallengeTeam getByParticipant(ChallengeParticipant participant){
         return challengeTeamRepository.findById(participant.getChallengeTeamId())
                 .orElseThrow(() -> new CServerErrorException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.CHALLENGE_TEAM_ID, participant.getChallengeTeamId())

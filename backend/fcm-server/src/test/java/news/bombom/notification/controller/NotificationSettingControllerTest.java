@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -18,6 +19,8 @@ import news.bombom.notification.dto.response.NotificationCategorySettingResponse
 import news.bombom.notification.service.NotificationSettingService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.auditing.AuditingHandler;
@@ -62,6 +65,25 @@ class NotificationSettingControllerTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].category").value("ARTICLE"))
                 .andExpect(jsonPath("$[0].enabled").value(true));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "challenge-todo-reminder, CHALLENGE_TODO_REMINDER",
+            "challenge_todo_reminder, CHALLENGE_TODO_REMINDER",
+            "aRtIcLe, ARTICLE"
+    })
+    @DisplayName("특정 카테고리 알림 설정 조회 시 category path variable이 enum으로 변환된다")
+    void getCategorySetting_CategoryPathVariableConverted(String pathCategory, NotificationCategory expectedCategory) throws Exception {
+        // Given
+        NotificationCategorySettingResponse response = new NotificationCategorySettingResponse(expectedCategory, true);
+        when(notificationSettingService.getCategorySetting(eq(TEST_MEMBER_ID), eq(expectedCategory))).thenReturn(response);
+
+        // When & Then
+        mockMvc.perform(get("/api/v1/notifications/{memberId}/settings/{category}", TEST_MEMBER_ID, pathCategory))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.category").value(expectedCategory.name()))
+                .andExpect(jsonPath("$.enabled").value(true));
     }
 
     @Test

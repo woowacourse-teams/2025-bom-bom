@@ -3,10 +3,12 @@ package me.bombom.api.v1.challenge.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
 import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat;
+import me.bombom.api.v1.challenge.dto.TeamTodayProgressCount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,7 +19,23 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
     
     Optional<ChallengeParticipant> findByChallengeIdAndMemberId(Long challengeId, Long memberId);
 
-    List<ChallengeParticipant> findAllByChallengeTeamId(Long challengeTeamId);
+    @Query("""
+        SELECT new me.bombom.api.v1.challenge.dto.TeamTodayProgressCount(
+            COUNT(cp.id),
+            COUNT(cdr.id)
+        )
+        FROM ChallengeParticipant cp
+        LEFT JOIN ChallengeDailyResult cdr ON cdr.participantId = cp.id
+            AND cdr.date = :today
+            AND cdr.status = :status
+        WHERE cp.challengeTeamId = :teamId
+            AND cp.isSurvived = true
+    """)
+    TeamTodayProgressCount findTeamTodayProgressCount(
+            @Param("teamId") Long teamId,
+            @Param("today") LocalDate today,
+            @Param("status") ChallengeDailyStatus status
+    );
 
     @Query("""
         SELECT new me.bombom.api.v1.challenge.dto.ChallengeParticipantCount(p.challengeId, COUNT(p.id))

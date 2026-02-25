@@ -159,7 +159,7 @@ public class ChallengeDailyGuideService {
             if (!challengeTodoService.isCompletedToday(participant.getId(), today)) {
                 challengeTodoService.completeDailyTodo(participant, today);
                 if (participant.getChallengeTeamId() != null) {
-                    ChallengeTeam challengeTeam = challengeTeamService.getChallengeTeamByParticipant(participant);
+                    ChallengeTeam challengeTeam = challengeTeamService.getByParticipant(participant);
                     challengeTeamService.updateTeamProgress(challengeTeam);
                 }
             }

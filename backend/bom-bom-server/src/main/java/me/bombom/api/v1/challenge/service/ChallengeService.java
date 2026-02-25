@@ -18,10 +18,10 @@ import me.bombom.api.v1.badge.service.BadgeService;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeGrade;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
-import me.bombom.api.v1.challenge.domain.RegistrationPhase;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.domain.EligibilityReason;
+import me.bombom.api.v1.challenge.domain.RegistrationPhase;
 import me.bombom.api.v1.challenge.dto.ChallengeNewsletterRow;
 import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
 import me.bombom.api.v1.challenge.dto.response.ChallengeDetailResponse;
@@ -35,13 +35,13 @@ import me.bombom.api.v1.challenge.dto.response.ChallengeTeamListResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
-import me.bombom.api.v1.newsletter.repository.NewsletterGroupItemRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -203,7 +203,7 @@ public class ChallengeService {
                 .map(ChallengeParticipant::getChallengeTeamId)
                 .orElse(null);
 
-        List<ChallengeTeam> teams = challengeTeamRepository.findAllByChallengeIdOrderByIdAsc(challengeId);
+        List<ChallengeTeam> teams = challengeTeamRepository.findAllByChallengeIdOrderById(challengeId);
 
         List<ChallengeTeamListResponse.TeamInfoResponse> teamInfos = new ArrayList<>(teams.size());
         int teamNumber = 1;

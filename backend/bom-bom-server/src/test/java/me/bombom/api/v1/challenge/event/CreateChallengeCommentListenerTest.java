@@ -133,7 +133,7 @@ class CreateChallengeCommentListenerTest {
                     today
             )).isTrue();
             softly.assertThat(updated.getCompletedDays()).isEqualTo(1);
-            softly.assertThat(updatedTeam.getProgress()).isEqualTo(30); // (1/10*100 + 5/10*100) / 2 = 30
+            softly.assertThat(updatedTeam.getProgress()).isEqualTo(50); // 오늘 COMPLETE 1명 / 생존자 2명 * 100 = 50
         });
     }
 
@@ -162,7 +162,7 @@ class CreateChallengeCommentListenerTest {
                     today
             )).isTrue();
             softly.assertThat(updated.getCompletedDays()).isEqualTo(completedDays);
-            softly.assertThat(updatedTeam.getProgress()).isEqualTo(30);
+            softly.assertThat(updatedTeam.getProgress()).isEqualTo(50); // 두 번째 호출은 early return → 첫 번째 결과(50) 유지
         });
     }
 }

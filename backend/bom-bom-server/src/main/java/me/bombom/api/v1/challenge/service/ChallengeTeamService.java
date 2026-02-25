@@ -1,13 +1,16 @@
 package me.bombom.api.v1.challenge.service;
 
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
+import me.bombom.api.v1.challenge.dto.TeamTodayProgressCount;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
 import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -20,28 +23,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ChallengeTeamService {
 
-    private final ChallengeRepository challengeRepository;
     private final ChallengeTeamRepository challengeTeamRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
+    private final Clock clock;
 
     @Transactional
     public void updateTeamProgress(ChallengeTeam challengeTeam) {
-        Challenge challenge = challengeRepository.findById(challengeTeam.getChallengeId())
-                .orElseThrow(() -> new CServerErrorException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeTeam.getChallengeId()));
+        TeamTodayProgressCount progressCount = challengeParticipantRepository.findTeamTodayProgressCount(
+                challengeTeam.getId(),
+                LocalDate.now(clock),
+                ChallengeDailyStatus.COMPLETE
+        );
 
-        List<ChallengeParticipant> teamParticipants = challengeParticipantRepository.findAllByChallengeTeamId(challengeTeam.getId());
-        if (teamParticipants.isEmpty()) {
-            throw new CServerErrorException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.CHALLENGE_TEAM_ID, challengeTeam.getId())
-                    .addContext(ErrorContextKeys.OPERATION, "findAllByChallengeTeamId");
-        }
-
-        int averageProgress = calculateAverageProgress(teamParticipants, challenge.getTotalDays());
+        int averageProgress = calculateTodayAverageProgress(progressCount);
         challengeTeam.updateProgress(averageProgress);
+        challengeTeamRepository.save(challengeTeam);
     }
 
-    public ChallengeTeam getChallengeTeamByParticipant(ChallengeParticipant participant){
+    public ChallengeTeam getByParticipant(ChallengeParticipant participant){
         return challengeTeamRepository.findById(participant.getChallengeTeamId())
                 .orElseThrow(() -> new CServerErrorException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.CHALLENGE_TEAM_ID, participant.getChallengeTeamId())
@@ -49,10 +48,23 @@ public class ChallengeTeamService {
                         .addContext(ErrorContextKeys.OPERATION, "findById"));
     }
 
-    private int calculateAverageProgress(List<ChallengeParticipant> participants, int totalDays) {
-        int totalProgress = participants.stream()
-                .mapToInt(teamMember -> teamMember.calculateProgress(totalDays))
-                .sum();
-        return totalProgress / participants.size();
+    @Transactional
+    public void resetTeamsProgress(List<Challenge> ongoingChallenges) {
+        if (ongoingChallenges.isEmpty()) {
+            return;
+        }
+
+        List<Long> challengeIds = ongoingChallenges.stream()
+                .map(Challenge::getId)
+                .toList();
+        challengeTeamRepository.resetProgressByChallengeIdIn(challengeIds);
+    }
+
+    private int calculateTodayAverageProgress(TeamTodayProgressCount progressCount) {
+        if (progressCount.survivedCount() == 0) {
+            return 0;
+        }
+
+        return (int) (progressCount.completedTodayCount() * 100 / progressCount.survivedCount());
     }
 }

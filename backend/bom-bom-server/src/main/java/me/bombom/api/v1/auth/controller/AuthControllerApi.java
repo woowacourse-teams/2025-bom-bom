@@ -11,7 +11,9 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import me.bombom.api.v1.auth.dto.NativeLoginResponse;
+import me.bombom.api.v1.auth.dto.request.LoadTestTokenIssueRequest;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
+import me.bombom.api.v1.auth.dto.response.LoadTestTokenResponse;
 import me.bombom.api.v1.auth.dto.request.SignupValidateRequest;
 import me.bombom.api.v1.auth.enums.SignupValidateStatus;
 import me.bombom.api.v1.common.resolver.LoginMember;
@@ -20,6 +22,7 @@ import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "Auth", description = "인증 관련 API")
@@ -100,4 +103,18 @@ public interface AuthControllerApi {
         @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
     })
     void withdraw(@Parameter(hidden = true) @LoginMember Member member, HttpSession session, HttpServletResponse response) throws IOException;
+
+    @Operation(
+        summary = "부하테스트 토큰 발급",
+        description = "관리자 키 헤더를 포함한 요청만 허용되며, 지정한 memberId 목록을 기준으로 1:1 테스트 토큰을 발급합니다."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "토큰 발급 성공"),
+        @ApiResponse(responseCode = "403", description = "부하테스트 기능 비활성화"),
+        @ApiResponse(responseCode = "404", description = "요청한 회원이 존재하지 않음")
+    })
+    LoadTestTokenResponse issueLoadTestTokens(
+            @RequestHeader(name = "X-LoadTest-Admin-Token", required = false) String adminToken,
+            @Valid @RequestBody LoadTestTokenIssueRequest request
+    );
 } 

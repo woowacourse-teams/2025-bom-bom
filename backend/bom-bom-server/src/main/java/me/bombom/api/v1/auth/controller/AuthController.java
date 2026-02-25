@@ -14,10 +14,13 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.dto.NativeLoginResponse;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
+import me.bombom.api.v1.auth.dto.request.LoadTestTokenIssueRequest;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
+import me.bombom.api.v1.auth.dto.response.LoadTestTokenResponse;
 import me.bombom.api.v1.auth.dto.request.SignupValidateRequest;
 import me.bombom.api.v1.auth.enums.OAuth2Provider;
 import me.bombom.api.v1.auth.enums.SignupValidateStatus;
+import me.bombom.api.v1.auth.service.LoadTestTokenService;
 import me.bombom.api.v1.auth.service.AppleOAuth2Service;
 import me.bombom.api.v1.auth.service.GoogleOAuth2LoginService;
 import me.bombom.api.v1.auth.util.UniqueUserInfoGenerator;
@@ -36,6 +39,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,6 +56,7 @@ public class AuthController implements AuthControllerApi{
     private final AppleOAuth2Service appleOAuth2Service;
     private final GoogleOAuth2LoginService googleOAuth2LoginService;
     private final UniqueUserInfoGenerator uniqueUserInfoGenerator;
+    private final LoadTestTokenService loadTestTokenService;
     @Value("${server.servlet.session.cookie.name:JSESSIONID}")
     private String cookieName;
     @Value("${server.servlet.session.cookie.domain:}")
@@ -237,5 +242,13 @@ public class AuthController implements AuthControllerApi{
                 customOAuth2User.getAuthorities(),
                 member.getProvider().toLowerCase()
         );
+    }
+
+    @PostMapping("/load-test/tokens")
+    public LoadTestTokenResponse issueLoadTestTokens(
+            @RequestHeader(name = "X-LoadTest-Admin-Token", required = false) String adminToken,
+            @Valid @RequestBody LoadTestTokenIssueRequest request
+    ) {
+        return loadTestTokenService.issueTokens(request.memberIds(), adminToken);
     }
 }

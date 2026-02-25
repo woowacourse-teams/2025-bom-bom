@@ -51,6 +51,7 @@ dependencies {
     // spring security
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("com.nimbusds:nimbus-jose-jwt:10.4.2")
 
     // prometheus

@@ -10,6 +10,8 @@ import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.domain.ChallengeCommentReply;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuide;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
+import me.bombom.api.v1.challenge.domain.ChallengeDailyResult;
+import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
@@ -661,6 +663,39 @@ public final class TestFixture {
                 .challengeTeamId(challengeTeamId)
                 .completedDays(completedDays)
                 .shield(shield)
+                .build();
+    }
+
+    public static ChallengeParticipant createChallengeParticipantWithTeam(
+            Long challengeId,
+            Long memberId,
+            Long challengeTeamId,
+            int completedDays,
+            int shield,
+            boolean isSurvived
+    ) {
+        return ChallengeParticipant.builder()
+                .challengeId(challengeId)
+                .memberId(memberId)
+                .challengeTeamId(challengeTeamId)
+                .completedDays(completedDays)
+                .shield(shield)
+                .isSurvived(isSurvived)
+                .build();
+    }
+
+    /**
+     * ChallengeDailyResult
+     */
+    public static ChallengeDailyResult createChallengeDailyResult(
+            Long participantId,
+            LocalDate date,
+            ChallengeDailyStatus status
+    ) {
+        return ChallengeDailyResult.builder()
+                .participantId(participantId)
+                .date(date)
+                .status(status)
                 .build();
     }
 

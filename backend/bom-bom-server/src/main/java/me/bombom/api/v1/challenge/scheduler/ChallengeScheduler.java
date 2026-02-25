@@ -10,6 +10,7 @@ import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderPhase
 import me.bombom.api.v1.challenge.service.ChallengeProgressService;
 import me.bombom.api.v1.challenge.service.ChallengeService;
 import me.bombom.api.v1.challenge.service.ChallengeStartNotificationService;
+import me.bombom.api.v1.challenge.service.ChallengeTeamService;
 import me.bombom.api.v1.challenge.service.ChallengeTodoReminderNotificationService;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,6 +27,7 @@ public class ChallengeScheduler {
     private final Clock clock;
     private final ChallengeService challengeService;
     private final ChallengeProgressService challengeProgressService;
+    private final ChallengeTeamService challengeTeamService;
     private final ChallengeStartNotificationService challengeStartNotificationService;
     private final ChallengeTodoReminderNotificationService challengeTodoReminderNotificationService;
 
@@ -66,6 +68,20 @@ public class ChallengeScheduler {
         }
 
         log.info("챌린지 종료 처리 및 뱃지 발급 완료");
+    }
+
+    @Scheduled(cron = DAILY_CRON, zone = "Asia/Seoul")
+    @SchedulerLock(name = "reset_team_progress", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
+    public void resetTeamProgress() {
+        LocalDate today = LocalDate.now(clock);
+        log.info("팀 평균 달성률 초기화 시작 - date={}", today);
+        List<Challenge> ongoingChallenges = challengeService.getOngoingChallenges(today);
+
+        try {
+            challengeTeamService.resetTeamsProgress(ongoingChallenges);
+        } catch (Exception e) {
+            log.error("팀 평균 달성률 초기화 중 오류 발생 - date={}", today, e);
+        }
     }
 
     @Scheduled(cron = CHALLENGE_START_NOTIFICATION_CRON, zone = "Asia/Seoul")

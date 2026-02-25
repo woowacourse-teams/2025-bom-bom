@@ -3,7 +3,9 @@ package me.bombom.api.v1.challenge.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
@@ -43,6 +45,14 @@ public class ChallengeTeamService {
                         .addContext(ErrorContextKeys.CHALLENGE_TEAM_ID, participant.getChallengeTeamId())
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeTeam")
                         .addContext(ErrorContextKeys.OPERATION, "findById"));
+    }
+
+    @Transactional
+    public void resetTeamsProgress(List<Challenge> ongoingChallenges) {
+        List<Long> challengeIds = ongoingChallenges.stream()
+                .map(Challenge::getId)
+                .toList();
+        challengeTeamRepository.resetProgressByChallengeIdIn(challengeIds);
     }
 
     private int calculateTodayAverageProgress(TeamTodayProgressCount progressCount) {

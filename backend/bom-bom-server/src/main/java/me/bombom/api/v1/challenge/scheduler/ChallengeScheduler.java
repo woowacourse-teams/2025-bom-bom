@@ -23,6 +23,7 @@ public class ChallengeScheduler {
 
     private static final String DAILY_CRON = "0 0 0 * * *";
     private static final String CHALLENGE_START_NOTIFICATION_CRON = "0 10 3 * * *";
+    private static final String SEOUL_TIMEZONE = "Asia/Seoul";
 
     private final Clock clock;
     private final ChallengeService challengeService;
@@ -31,7 +32,7 @@ public class ChallengeScheduler {
     private final ChallengeStartNotificationService challengeStartNotificationService;
     private final ChallengeTodoReminderNotificationService challengeTodoReminderNotificationService;
 
-    @Scheduled(cron = DAILY_CRON)
+    @Scheduled(cron = DAILY_CRON, zone = SEOUL_TIMEZONE)
     @SchedulerLock(name = "check_survival", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void checkSurvival() {
         log.info("탈락 및 쉴드 사용 처리 시작");
@@ -47,7 +48,7 @@ public class ChallengeScheduler {
         }
     }
 
-    @Scheduled(cron = DAILY_CRON)
+    @Scheduled(cron = DAILY_CRON, zone = SEOUL_TIMEZONE)
     @SchedulerLock(name = "process_ended_challenges", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void processEndedChallenges() {
         log.info("챌린지 종료 처리 및 뱃지 발급 시작");
@@ -70,7 +71,7 @@ public class ChallengeScheduler {
         log.info("챌린지 종료 처리 및 뱃지 발급 완료");
     }
 
-    @Scheduled(cron = DAILY_CRON, zone = "Asia/Seoul")
+    @Scheduled(cron = DAILY_CRON, zone = SEOUL_TIMEZONE)
     @SchedulerLock(name = "reset_team_progress", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void resetTeamProgress() {
         LocalDate today = LocalDate.now(clock);
@@ -84,7 +85,7 @@ public class ChallengeScheduler {
         }
     }
 
-    @Scheduled(cron = CHALLENGE_START_NOTIFICATION_CRON, zone = "Asia/Seoul")
+    @Scheduled(cron = CHALLENGE_START_NOTIFICATION_CRON, zone = SEOUL_TIMEZONE)
     @SchedulerLock(name = "create_challenge_start_notifications", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void createChallengeStartNotifications() {
         LocalDate today = LocalDate.now(clock);
@@ -97,7 +98,7 @@ public class ChallengeScheduler {
         }
     }
 
-    @Scheduled(cron = "${challenge.scheduler.todo-reminder-first-cron}", zone = "Asia/Seoul")
+    @Scheduled(cron = "${challenge.scheduler.todo-reminder-first-cron}", zone = SEOUL_TIMEZONE)
     @SchedulerLock(name = "create_challenge_todo_reminder_notifications_first", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void createChallengeTodoReminderNotificationsFirst() {
         LocalDate today = LocalDate.now(clock);
@@ -111,7 +112,7 @@ public class ChallengeScheduler {
         }
     }
 
-    @Scheduled(cron = "${challenge.scheduler.todo-reminder-second-cron}", zone = "Asia/Seoul")
+    @Scheduled(cron = "${challenge.scheduler.todo-reminder-second-cron}", zone = SEOUL_TIMEZONE)
     @SchedulerLock(name = "create_challenge_todo_reminder_notifications_second", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void createChallengeTodoReminderNotificationsSecond() {
         LocalDate today = LocalDate.now(clock);

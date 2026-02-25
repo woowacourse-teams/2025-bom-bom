@@ -49,6 +49,10 @@ public class ChallengeTeamService {
 
     @Transactional
     public void resetTeamsProgress(List<Challenge> ongoingChallenges) {
+        if (ongoingChallenges.isEmpty()) {
+            return;
+        }
+
         List<Long> challengeIds = ongoingChallenges.stream()
                 .map(Challenge::getId)
                 .toList();

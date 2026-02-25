@@ -663,6 +663,7 @@ public final class TestFixture {
                 .challengeTeamId(challengeTeamId)
                 .completedDays(completedDays)
                 .shield(shield)
+                .isSurvived(true)
                 .build();
     }
 

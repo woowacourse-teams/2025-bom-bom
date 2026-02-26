@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.newsletter.dto.CategoryResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
 import me.bombom.api.v1.newsletter.service.NewsletterService;
@@ -19,6 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class NewsletterController implements NewsletterControllerApi{
 
     private final NewsletterService newsletterService;
+
+    @Override
+    @GetMapping("/categories")
+    public List<CategoryResponse> getCategories(
+            @RequestParam(required = false, defaultValue = "false") boolean includeSuspended
+    ) {
+        return newsletterService.getCategories(includeSuspended);
+    }
 
     @Override
     @GetMapping

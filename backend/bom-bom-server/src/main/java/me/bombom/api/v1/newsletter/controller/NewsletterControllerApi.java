@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
+import me.bombom.api.v1.newsletter.dto.CategoryResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +25,17 @@ public interface NewsletterControllerApi {
     })
     List<NewsletterResponse> getNewsletters(
             @Parameter(hidden = true) Long memberId,
+            @Parameter(description = "휴재 뉴스레터 포함 여부") @RequestParam(required = false, defaultValue = "false") boolean includeSuspended
+    );
+
+    @Operation(
+            summary = "뉴스레터 카테고리 목록 조회",
+            description = "뉴스레터 목록 조회와 동일한 필터링 기준으로 카테고리를 반환합니다. 폐간(DISCONTINUED)만 있는 카테고리는 항상 제외됩니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "카테고리 목록 조회 성공")
+    })
+    List<CategoryResponse> getCategories(
             @Parameter(description = "휴재 뉴스레터 포함 여부") @RequestParam(required = false, defaultValue = "false") boolean includeSuspended
     );
 

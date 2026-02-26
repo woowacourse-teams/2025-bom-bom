@@ -95,6 +95,7 @@ dependencies {
 
     // redis
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.apache.commons:commons-pool2")
 }
 
 // Querydsl 생성된 파일 정리

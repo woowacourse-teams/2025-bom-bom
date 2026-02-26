@@ -16,6 +16,7 @@ import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
+import me.bombom.api.v1.newsletter.dto.CategoryResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
@@ -380,6 +381,112 @@ class NewsletterServiceTest {
         assertThat(result)
                 .extracting("newsletterId")
                 .doesNotContain(discontinuedNewsletter.getId());
+    }
+
+    @Test
+    void ACTIVE_뉴스레터가_있는_카테고리만_반환된다() {
+        // given - ACTIVE 뉴스레터 없이 DISCONTINUED만 있는 카테고리 추가
+        Category discontinuedOnlyCategory = categoryRepository.save(
+                Category.builder().name("폐간전용").build()
+        );
+        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        newsletterRepository.save(
+                Newsletter.builder()
+                        .name("폐간 뉴스레터")
+                        .description("설명")
+                        .imageUrl("https://cdn.bombom.me/img.png")
+                        .email("disc@test.com")
+                        .categoryId(discontinuedOnlyCategory.getId())
+                        .detailId(detail.getId())
+                        .status(NewsletterPublicationStatus.DISCONTINUED)
+                        .build()
+        );
+
+        // when
+        List<CategoryResponse> result = newsletterService.getCategories(false);
+
+        // then
+        assertThat(result).extracting("id").doesNotContain(discontinuedOnlyCategory.getId());
+    }
+
+    @Test
+    void includeSuspended가_false일_때_SUSPENDED만_있는_카테고리는_제외된다() {
+        // given - SUSPENDED만 있는 카테고리 추가
+        Category suspendedOnlyCategory = categoryRepository.save(
+                Category.builder().name("휴재전용").build()
+        );
+        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        newsletterRepository.save(
+                TestFixture.createSuspendedNewsletter(
+                        "휴재 뉴스레터",
+                        "sus@test.com",
+                        suspendedOnlyCategory.getId(),
+                        detail.getId(),
+                        null
+                )
+        );
+
+        // when
+        List<CategoryResponse> result = newsletterService.getCategories(false);
+
+        // then
+        assertThat(result).extracting("id").doesNotContain(suspendedOnlyCategory.getId());
+    }
+
+    @Test
+    void includeSuspended가_true일_때_최근_휴재_뉴스레터가_있는_카테고리가_포함된다() {
+        // given - 최근 휴재 뉴스레터만 있는 카테고리
+        Category recentSuspendedCategory = categoryRepository.save(
+                Category.builder().name("최근휴재").build()
+        );
+        LocalDate today = LocalDate.now(clock);
+        LocalDate fiveMonthsAgo = today.minusMonths(5);
+        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        newsletterRepository.save(
+                TestFixture.createSuspendedNewsletter(
+                        "최근 휴재 뉴스레터",
+                        "recent@test.com",
+                        recentSuspendedCategory.getId(),
+                        detail.getId(),
+                        fiveMonthsAgo
+                )
+        );
+
+        // when
+        List<CategoryResponse> result = newsletterService.getCategories(true);
+
+        // then
+        assertThat(result).extracting("id").contains(recentSuspendedCategory.getId());
+    }
+
+    @Test
+    void 폐간만_있는_카테고리는_includeSuspended와_무관하게_항상_제외된다() {
+        // given
+        Category discontinuedOnlyCategory = categoryRepository.save(
+                Category.builder().name("폐간전용").build()
+        );
+        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        newsletterRepository.save(
+                Newsletter.builder()
+                        .name("폐간 뉴스레터")
+                        .description("설명")
+                        .imageUrl("https://cdn.bombom.me/img.png")
+                        .email("disc2@test.com")
+                        .categoryId(discontinuedOnlyCategory.getId())
+                        .detailId(detail.getId())
+                        .status(NewsletterPublicationStatus.DISCONTINUED)
+                        .build()
+        );
+
+        // when
+        List<CategoryResponse> resultWithSuspended = newsletterService.getCategories(true);
+        List<CategoryResponse> resultWithoutSuspended = newsletterService.getCategories(false);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(resultWithSuspended).extracting("id").doesNotContain(discontinuedOnlyCategory.getId());
+            softly.assertThat(resultWithoutSuspended).extracting("id").doesNotContain(discontinuedOnlyCategory.getId());
+        });
     }
 
     @Test

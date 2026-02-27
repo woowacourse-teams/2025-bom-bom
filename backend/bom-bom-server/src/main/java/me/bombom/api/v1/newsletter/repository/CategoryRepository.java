@@ -9,8 +9,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    boolean existsByName(String category);
-
     @Query("""
             SELECT new me.bombom.api.v1.newsletter.dto.CategoryResponse(c.id, c.name)
             FROM Category c

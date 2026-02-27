@@ -27,14 +27,15 @@ public class NewsletterService {
     private final CategoryRepository categoryRepository;
     private final Clock clock;
 
+    public List<CategoryResponse> getCategories(boolean includeSuspended) {
+        LocalDate suspendedHiddenThresholdDate = getSuspendedHiddenThresholdDate();
+        List<Long> categoryIds = newsletterRepository.findVisibleCategoryIds(includeSuspended, suspendedHiddenThresholdDate);
+        return categoryRepository.findCategoryInfoByIds(categoryIds);
+    }
+
     public List<NewsletterResponse> getNewsletters(Long memberId, boolean includeSuspended) {
         LocalDate suspendedHiddenThresholdDate = getSuspendedHiddenThresholdDate();
         return newsletterRepository.findNewslettersInfo(memberId, includeSuspended, suspendedHiddenThresholdDate);
-    }
-
-    public List<CategoryResponse> getCategories(boolean includeSuspended) {
-        LocalDate suspendedHiddenThresholdDate = getSuspendedHiddenThresholdDate();
-        return categoryRepository.findCategories(includeSuspended, suspendedHiddenThresholdDate);
     }
 
     public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Long memberId) {

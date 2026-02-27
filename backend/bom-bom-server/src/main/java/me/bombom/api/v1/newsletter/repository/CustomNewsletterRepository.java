@@ -11,4 +11,6 @@ public interface CustomNewsletterRepository {
             boolean includeSuspended,
             LocalDate suspendedHiddenThresholdDate
     );
+
+    List<Long> findVisibleCategoryIds(boolean includeSuspended, LocalDate thresholdDate);
 }

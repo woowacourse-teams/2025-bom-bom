@@ -61,6 +61,16 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
         return query.fetch();
     }
 
+    @Override
+    public List<Long> findVisibleCategoryIds(boolean includeSuspended, LocalDate thresholdDate) {
+        return jpaQueryFactory
+                .select(newsletter.categoryId)
+                .distinct()
+                .from(newsletter)
+                .where(createStatusCondition(includeSuspended, thresholdDate))
+                .fetch();
+    }
+
     private BooleanExpression createStatusCondition(
             boolean includeSuspended,
             LocalDate suspendedHiddenThresholdDate

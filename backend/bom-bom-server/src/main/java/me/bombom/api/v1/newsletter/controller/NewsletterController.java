@@ -33,9 +33,10 @@ public class NewsletterController implements NewsletterControllerApi{
     @GetMapping
     public List<NewsletterResponse> getNewsletters(
             @LoginMember(anonymous = true) Long memberId,
-            @RequestParam(required = false, defaultValue = "false") boolean includeSuspended
+            @RequestParam(required = false, defaultValue = "false") boolean includeSuspended,
+            @RequestParam(required = false) Long categoryId
     ) {
-        return newsletterService.getNewsletters(memberId, includeSuspended);
+        return newsletterService.getNewsletters(memberId, includeSuspended, categoryId);
     }
 
     @Override

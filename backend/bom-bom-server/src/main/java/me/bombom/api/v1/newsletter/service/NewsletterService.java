@@ -33,9 +33,14 @@ public class NewsletterService {
         return categoryRepository.findCategoryInfoByIds(categoryIds);
     }
 
-    public List<NewsletterResponse> getNewsletters(Long memberId, boolean includeSuspended) {
+    public List<NewsletterResponse> getNewsletters(Long memberId, boolean includeSuspended, Long categoryId) {
         LocalDate suspendedHiddenThresholdDate = getSuspendedHiddenThresholdDate();
-        return newsletterRepository.findNewslettersInfo(memberId, includeSuspended, suspendedHiddenThresholdDate);
+        return newsletterRepository.findNewslettersInfo(
+                memberId,
+                includeSuspended,
+                suspendedHiddenThresholdDate,
+                categoryId
+        );
     }
 
     public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Long memberId) {

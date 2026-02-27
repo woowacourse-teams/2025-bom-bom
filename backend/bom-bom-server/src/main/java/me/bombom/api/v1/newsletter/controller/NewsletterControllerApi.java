@@ -18,14 +18,21 @@ public interface NewsletterControllerApi {
 
     @Operation(
             summary = "뉴스레터 목록 조회",
-            description = "뉴스레터 목록을 조회합니다. 기본값은 발행중(ACTIVE)만 반환하며, includeSuspended=true 시 휴재(SUSPENDED)도 포함합니다. 폐간(DISCONTINUED)은 항상 제외됩니다."
+            description = """
+                    뉴스레터 목록을 조회합니다.
+                    - categoryId: 특정 카테고리로 필터링합니다. 미입력 시 전체 카테고리를 반환합니다.
+                    - includeSuspended=false: 발행중(ACTIVE) 뉴스레터만 반환합니다.
+                    - includeSuspended=true: 발행중(ACTIVE) 및 6개월 이내 휴재(SUSPENDED) 뉴스레터를 포함합니다.
+                    - 6개월 초과 휴재(SUSPENDED)와 폐간(DISCONTINUED)은 항상 제외됩니다.
+            """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "뉴스레터 목록 조회 성공")
     })
     List<NewsletterResponse> getNewsletters(
             @Parameter(hidden = true) Long memberId,
-            @Parameter(description = "휴재 뉴스레터 포함 여부") @RequestParam(required = false, defaultValue = "false") boolean includeSuspended
+            @Parameter(description = "휴재 뉴스레터 포함 여부") @RequestParam(required = false, defaultValue = "false") boolean includeSuspended,
+            @Parameter(description = "카테고리 ID (미입력 시 전체)") @RequestParam(required = false) Long categoryId
     );
 
     @Operation(

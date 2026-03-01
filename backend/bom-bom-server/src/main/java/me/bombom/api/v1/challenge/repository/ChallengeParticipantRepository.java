@@ -124,20 +124,15 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
         FROM ChallengeParticipant cp
         WHERE cp.challengeId = :challengeId
           AND cp.isSurvived = true
-          AND EXISTS (
-              SELECT ct
-              FROM ChallengeTodo ct
-              WHERE ct.challengeId = cp.challengeId
-                AND NOT EXISTS (
-                    SELECT cdt
-                    FROM ChallengeDailyTodo cdt
-                    WHERE cdt.participantId = cp.id
-                      AND cdt.challengeTodoId = ct.id
-                      AND cdt.todoDate = :date
-                )
+          AND NOT EXISTS (
+              SELECT cdr
+              FROM ChallengeDailyResult cdr
+              WHERE cdr.participantId = cp.id
+                AND cdr.date = :date
+                AND cdr.status = 'COMPLETE'
           )
     """)
-    List<ChallengeParticipant> findSurvivedParticipantsWithIncompleteTodosByChallengeId(
+    List<ChallengeParticipant> findSurvivedParticipantsWithoutCompleteDailyResultByChallengeId(
             @Param("challengeId") Long challengeId,
             @Param("date") LocalDate date
     );

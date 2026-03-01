@@ -7,10 +7,12 @@ import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderPhase;
 import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderNotification;
 import me.bombom.api.v1.challenge.domain.notification.NotificationStatus;
+import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
@@ -38,6 +40,9 @@ class ChallengeTodoReminderNotificationServiceTest {
     private ChallengeDailyTodoRepository challengeDailyTodoRepository;
 
     @Autowired
+    private ChallengeDailyResultRepository challengeDailyResultRepository;
+
+    @Autowired
     private ChallengeTodoRepository challengeTodoRepository;
 
     @Autowired
@@ -55,6 +60,7 @@ class ChallengeTodoReminderNotificationServiceTest {
     @BeforeEach
     void setUp() {
         challengeTodoReminderNotificationRepository.deleteAllInBatch();
+        challengeDailyResultRepository.deleteAllInBatch();
         challengeDailyTodoRepository.deleteAllInBatch();
         challengeParticipantRepository.deleteAllInBatch();
         challengeTodoRepository.deleteAllInBatch();
@@ -64,7 +70,7 @@ class ChallengeTodoReminderNotificationServiceTest {
     }
 
     @Test
-    void 오늘_TODO가_미완료인_참여자에게만_PENDING_알림을_생성한다() {
+    void 오늘_COMPLETE_DailyResult가_없는_참여자에게만_PENDING_알림을_생성한다() {
         // given
         LocalDate today = LocalDate.now();
         NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
@@ -82,13 +88,13 @@ class ChallengeTodoReminderNotificationServiceTest {
         var participant3 = challengeParticipantRepository.save(
                 TestFixture.createChallengeParticipant(challenge.getId(), anotherIncompleteMember.getId(), 0));
 
-        var readTodo = challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
-        var commentTodo = challengeTodoRepository.save(
-                TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.COMMENT));
+        challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
 
-        challengeDailyTodoRepository.save(TestFixture.createChallengeDailyTodo(participant2.getId(), today, readTodo.getId()));
-        challengeDailyTodoRepository.save(TestFixture.createChallengeDailyTodo(participant2.getId(), today, commentTodo.getId()));
-        challengeDailyTodoRepository.save(TestFixture.createChallengeDailyTodo(participant3.getId(), today, readTodo.getId()));
+        challengeDailyResultRepository.save(TestFixture.createChallengeDailyResult(
+                participant2.getId(),
+                today,
+                ChallengeDailyStatus.COMPLETE
+        ));
 
         // when
         challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today, ChallengeTodoReminderPhase.FIRST);

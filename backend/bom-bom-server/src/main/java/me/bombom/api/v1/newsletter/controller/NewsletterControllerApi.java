@@ -29,7 +29,7 @@ public interface NewsletterControllerApi {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "뉴스레터 목록 조회 성공")
     })
-    NewslettersResponse getNewsletterList(
+    NewslettersResponse getNewsletters(
             @Parameter(hidden = true) Long memberId,
             @Parameter(description = "휴재 뉴스레터 포함 여부") @RequestParam(required = false, defaultValue = "false") boolean includeSuspended,
             @Parameter(description = "카테고리 ID (미입력 시 전체)") @RequestParam(required = false) Long categoryId

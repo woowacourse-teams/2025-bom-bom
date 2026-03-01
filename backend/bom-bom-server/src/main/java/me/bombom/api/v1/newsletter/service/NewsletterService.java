@@ -9,9 +9,9 @@ import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.dto.CategoryResponse;
-import me.bombom.api.v1.newsletter.dto.NewsletterListResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
+import me.bombom.api.v1.newsletter.dto.NewslettersResponse;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +26,7 @@ public class NewsletterService {
     private final NewsletterRepository newsletterRepository;
     private final Clock clock;
 
-    public NewsletterListResponse getNewsletterList(Long memberId, boolean includeSuspended, Long categoryId) {
+    public NewslettersResponse getNewsletters(Long memberId, boolean includeSuspended, Long categoryId) {
         LocalDate suspendedHiddenThresholdDate = getSuspendedHiddenThresholdDate();
         List<NewsletterResponse> allNewsletters = newsletterRepository.findNewslettersInfo(
                 memberId,
@@ -35,7 +35,6 @@ public class NewsletterService {
         );
 
         List<CategoryResponse> categories = CategoryResponse.from(allNewsletters);
-
         List<NewsletterResponse> newsletters;
         if (categoryId == null) {
             newsletters = allNewsletters;
@@ -45,7 +44,7 @@ public class NewsletterService {
                     .toList();
         }
 
-        return NewsletterListResponse.of(categories, newsletters);
+        return NewslettersResponse.of(categories, newsletters);
     }
 
     public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Long memberId) {

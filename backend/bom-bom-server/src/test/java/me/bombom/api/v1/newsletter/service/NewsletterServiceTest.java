@@ -84,7 +84,7 @@ class NewsletterServiceTest {
     @Test
     void 비로그인_상태로_뉴스레터를_모두_조회할_수_있다_구독_여부는_모두_false() {
         //when
-        List<NewsletterResponse> result = newsletterService.getNewsletterList(null, false, null).newsletters();
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false, null).newsletters();
 
         System.out.println("Expected size: " + newsletters.size());
         System.out.println("Actual size: " + result.size());
@@ -116,7 +116,7 @@ class NewsletterServiceTest {
         subscribeRepository.save(subscribe);
 
         //when
-        List<NewsletterResponse> result = newsletterService.getNewsletterList(member.getId(), false, null).newsletters();
+        List<NewsletterResponse> result = newsletterService.getNewsletters(member.getId(), false, null).newsletters();
 
         //then
         assertSoftly(softly -> {
@@ -283,7 +283,7 @@ class NewsletterServiceTest {
         );
 
         //when
-        List<NewsletterResponse> result = newsletterService.getNewsletterList(null, false, null).newsletters();
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false, null).newsletters();
 
         //then
         assertThat(result)
@@ -306,7 +306,7 @@ class NewsletterServiceTest {
         );
 
         //when
-        List<NewsletterResponse> result = newsletterService.getNewsletterList(null, true, null).newsletters();
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, true, null).newsletters();
 
         //then
         assertThat(result)
@@ -344,7 +344,7 @@ class NewsletterServiceTest {
         );
 
         // when
-        List<NewsletterResponse> result = newsletterService.getNewsletterList(null, true, null).newsletters();
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, true, null).newsletters();
 
         // then
         assertSoftly(softly -> {
@@ -375,7 +375,7 @@ class NewsletterServiceTest {
         );
 
         //when
-        List<NewsletterResponse> result = newsletterService.getNewsletterList(null, true, null).newsletters();
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, true, null).newsletters();
 
         //then
         assertThat(result)
@@ -403,7 +403,7 @@ class NewsletterServiceTest {
         );
 
         // when
-        List<CategoryResponse> result = newsletterService.getNewsletterList(null, false, null).categories();
+        List<CategoryResponse> result = newsletterService.getNewsletters(null, false, null).categories();
 
         // then
         assertThat(result).extracting("id").doesNotContain(discontinuedOnlyCategory.getId());
@@ -427,7 +427,7 @@ class NewsletterServiceTest {
         );
 
         // when
-        List<CategoryResponse> result = newsletterService.getNewsletterList(null, false, null).categories();
+        List<CategoryResponse> result = newsletterService.getNewsletters(null, false, null).categories();
 
         // then
         assertThat(result).extracting("id").doesNotContain(suspendedOnlyCategory.getId());
@@ -453,7 +453,7 @@ class NewsletterServiceTest {
         );
 
         // when
-        List<CategoryResponse> result = newsletterService.getNewsletterList(null, true, null).categories();
+        List<CategoryResponse> result = newsletterService.getNewsletters(null, true, null).categories();
 
         // then
         assertThat(result).extracting("id").contains(recentSuspendedCategory.getId());
@@ -479,8 +479,8 @@ class NewsletterServiceTest {
         );
 
         // when
-        List<CategoryResponse> resultWithSuspended = newsletterService.getNewsletterList(null, true, null).categories();
-        List<CategoryResponse> resultWithoutSuspended = newsletterService.getNewsletterList(null, false, null).categories();
+        List<CategoryResponse> resultWithSuspended = newsletterService.getNewsletters(null, true, null).categories();
+        List<CategoryResponse> resultWithoutSuspended = newsletterService.getNewsletters(null, false, null).categories();
 
         // then
         assertSoftly(softly -> {
@@ -495,7 +495,7 @@ class NewsletterServiceTest {
         Long categoryId = categories.get(2).getId();
 
         // when
-        List<NewsletterResponse> result = newsletterService.getNewsletterList(null, false, categoryId).newsletters();
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false, categoryId).newsletters();
 
         // then
         assertSoftly(softly -> {
@@ -521,7 +521,7 @@ class NewsletterServiceTest {
         Long categoryId = categories.get(2).getId();
 
         // when
-        List<NewsletterResponse> result = newsletterService.getNewsletterList(null, false, categoryId).newsletters();
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false, categoryId).newsletters();
 
         // then
         assertSoftly(softly -> {
@@ -548,7 +548,7 @@ class NewsletterServiceTest {
         Long categoryId = categories.get(2).getId();
 
         // when
-        List<NewsletterResponse> result = newsletterService.getNewsletterList(null, true, categoryId).newsletters();
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, true, categoryId).newsletters();
 
         // then
         assertSoftly(softly -> {
@@ -576,7 +576,7 @@ class NewsletterServiceTest {
         );
 
         // when
-        List<CategoryResponse> result = newsletterService.getNewsletterList(null, true, null).categories();
+        List<CategoryResponse> result = newsletterService.getNewsletters(null, true, null).categories();
 
         // then
         assertThat(result).extracting("id").doesNotContain(longSuspendedCategory.getId());
@@ -588,7 +588,7 @@ class NewsletterServiceTest {
         Long nonExistentCategoryId = 0L;
 
         // when
-        List<NewsletterResponse> result = newsletterService.getNewsletterList(null, false, nonExistentCategoryId).newsletters();
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false, nonExistentCategoryId).newsletters();
 
         // then
         assertThat(result).isEmpty();
@@ -608,7 +608,7 @@ class NewsletterServiceTest {
         );
 
         //when
-        List<NewsletterResponse> result = newsletterService.getNewsletterList(null, false, null).newsletters();
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false, null).newsletters();
 
         //then
         assertSoftly(softly -> {

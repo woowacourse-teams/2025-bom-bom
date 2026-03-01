@@ -39,7 +39,7 @@ public class ChallengeTodoReminderNotificationService {
         for (Challenge challenge : ongoingChallenges) {
             try {
                 List<ChallengeParticipant> incompleteParticipants = challengeParticipantRepository
-                        .findSurvivedParticipantsWithIncompleteTodosByChallengeId(challenge.getId(), reminderDate);
+                        .findSurvivedParticipantsWithoutCompleteDailyResultByChallengeId(challenge.getId(), reminderDate);
 
                 if (incompleteParticipants.isEmpty()) {
                     log.info("미완료 참여자가 없는 챌린지입니다. challengeId={}, reminderDate={}",

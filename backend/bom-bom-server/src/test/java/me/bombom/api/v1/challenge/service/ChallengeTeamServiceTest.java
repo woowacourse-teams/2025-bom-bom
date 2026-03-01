@@ -3,6 +3,7 @@ package me.bombom.api.v1.challenge.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -47,6 +48,9 @@ class ChallengeTeamServiceTest {
     @Autowired
     private NewsletterGroupRepository newsletterGroupRepository;
 
+    @Autowired
+    private Clock clock;
+
     private Challenge challenge;
     private ChallengeTeam team;
 
@@ -73,7 +77,7 @@ class ChallengeTeamServiceTest {
     @Test
     void 오늘_COMPLETE_인증자_비율로_팀_평균_달성률을_계산한다() {
         // given: 생존자 3명 중 2명이 오늘 COMPLETE
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         ChallengeParticipant p1 = challengeParticipantRepository.save(createSurvivedParticipant());
         ChallengeParticipant p2 = challengeParticipantRepository.save(createSurvivedParticipant());
         ChallengeParticipant p3 = challengeParticipantRepository.save(createSurvivedParticipant());
@@ -94,7 +98,7 @@ class ChallengeTeamServiceTest {
     @Test
     void 탈락자는_팀_평균_달성률_계산에서_제외된다() {
         // given: 생존자 2명 + 탈락자 1명, 생존자 중 1명만 오늘 COMPLETE
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         ChallengeParticipant survived1 = challengeParticipantRepository.save(createSurvivedParticipant());
         ChallengeParticipant survived2 = challengeParticipantRepository.save(createSurvivedParticipant());
         challengeParticipantRepository.save(createEliminatedParticipant());
@@ -112,7 +116,7 @@ class ChallengeTeamServiceTest {
     @Test
     void SHIELD_인증은_팀_평균_달성률에_포함되지_않는다() {
         // given: 생존자 2명, 1명 COMPLETE, 1명 SHIELD
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         ChallengeParticipant p1 = challengeParticipantRepository.save(createSurvivedParticipant());
         ChallengeParticipant p2 = challengeParticipantRepository.save(createSurvivedParticipant());
 

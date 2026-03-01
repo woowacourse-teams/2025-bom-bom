@@ -2,6 +2,7 @@ package me.bombom.api.v1.challenge.event;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
@@ -53,6 +54,9 @@ class CreateChallengeCommentListenerTest {
 
     @Autowired
     private NewsletterGroupRepository newsletterGroupRepository;
+
+    @Autowired
+    private Clock clock;
 
     private ChallengeParticipant participant;
     private ChallengeTodo commentTodo;
@@ -114,7 +118,7 @@ class CreateChallengeCommentListenerTest {
     @Test
     void 코멘트_작성_이벤트로_일일_TODO와_결과를_저장하고_완료일수와_팀_평균을_갱신한다() {
         // given
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
 
         // when
         listener.on(new CreateChallengeCommentEvent(participant.getId()));
@@ -133,14 +137,14 @@ class CreateChallengeCommentListenerTest {
                     today
             )).isTrue();
             softly.assertThat(updated.getCompletedDays()).isEqualTo(1);
-            softly.assertThat(updatedTeam.getProgress()).isEqualTo(30); // (1/10*100 + 5/10*100) / 2 = 30
+            softly.assertThat(updatedTeam.getProgress()).isEqualTo(50); // 오늘 COMPLETE 1명 / 생존자 2명 * 100 = 50
         });
     }
 
     @Test
     void 이미_출석한_날은_중복_처리하지_않는다() {
         // given
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         listener.on(new CreateChallengeCommentEvent(participant.getId()));
         long dailyTodoCount = challengeDailyTodoRepository.count();
         long dailyResultCount = challengeDailyResultRepository.count();
@@ -162,7 +166,7 @@ class CreateChallengeCommentListenerTest {
                     today
             )).isTrue();
             softly.assertThat(updated.getCompletedDays()).isEqualTo(completedDays);
-            softly.assertThat(updatedTeam.getProgress()).isEqualTo(30);
+            softly.assertThat(updatedTeam.getProgress()).isEqualTo(50); // 두 번째 호출은 early return → 첫 번째 결과(50) 유지
         });
     }
 }

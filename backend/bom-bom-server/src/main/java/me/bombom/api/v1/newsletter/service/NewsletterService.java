@@ -45,7 +45,7 @@ public class NewsletterService {
                     .toList();
         }
 
-        return new NewsletterListResponse(categories, newsletters);
+        return NewsletterListResponse.of(categories, newsletters);
     }
 
     public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Long memberId) {

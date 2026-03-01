@@ -12,7 +12,6 @@ import me.bombom.api.v1.newsletter.dto.CategoryResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterListResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
-import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,19 +24,27 @@ public class NewsletterService {
     private static final int SUSPENDED_HIDDEN_AFTER_MONTHS = 6;
 
     private final NewsletterRepository newsletterRepository;
-    private final CategoryRepository categoryRepository;
     private final Clock clock;
 
     public NewsletterListResponse getNewsletterList(Long memberId, boolean includeSuspended, Long categoryId) {
         LocalDate suspendedHiddenThresholdDate = getSuspendedHiddenThresholdDate();
-        List<Long> categoryIds = newsletterRepository.findVisibleCategoryIds(includeSuspended, suspendedHiddenThresholdDate);
-        List<CategoryResponse> categories = categoryRepository.findCategoryInfoByIds(categoryIds);
-        List<NewsletterResponse> newsletters = newsletterRepository.findNewslettersInfo(
+        List<NewsletterResponse> allNewsletters = newsletterRepository.findNewslettersInfo(
                 memberId,
                 includeSuspended,
-                suspendedHiddenThresholdDate,
-                categoryId
+                suspendedHiddenThresholdDate
         );
+
+        List<CategoryResponse> categories = CategoryResponse.from(allNewsletters);
+
+        List<NewsletterResponse> newsletters;
+        if (categoryId == null) {
+            newsletters = allNewsletters;
+        } else {
+            newsletters = allNewsletters.stream()
+                    .filter(n -> n.categoryId().equals(categoryId))
+                    .toList();
+        }
+
         return new NewsletterListResponse(categories, newsletters);
     }
 

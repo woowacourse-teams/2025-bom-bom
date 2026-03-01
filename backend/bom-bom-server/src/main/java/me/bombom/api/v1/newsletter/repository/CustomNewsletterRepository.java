@@ -9,9 +9,6 @@ public interface CustomNewsletterRepository {
     List<NewsletterResponse> findNewslettersInfo(
             Long memberId,
             boolean includeSuspended,
-            LocalDate suspendedHiddenThresholdDate,
-            Long categoryId
+            LocalDate suspendedHiddenThresholdDate
     );
-
-    List<Long> findVisibleCategoryIds(boolean includeSuspended, LocalDate thresholdDate);
 }

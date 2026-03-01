@@ -26,8 +26,7 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
     public List<NewsletterResponse> findNewslettersInfo(
             Long memberId,
             boolean includeSuspended,
-            LocalDate suspendedHiddenThresholdDate,
-            Long categoryId
+            LocalDate suspendedHiddenThresholdDate
     ) {
         BooleanExpression publicationStatusCondition = createStatusCondition(includeSuspended, suspendedHiddenThresholdDate);
         BooleanExpression isSubscribedCondition = createIsSubscribedCondition(memberId);
@@ -39,6 +38,7 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
                         newsletter.imageUrl,
                         newsletter.description,
                         newsletterDetail.subscribeUrl,
+                        category.id,
                         category.name,
                         newsletter.status,
                         isSubscribedCondition
@@ -47,7 +47,7 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
                 .join(newsletterDetail).on(newsletterDetail.id.eq(newsletter.detailId))
                 .leftJoin(newsletterSubscriptionCount).on(newsletterSubscriptionCount.newsletterId.eq(newsletter.id))
                 .join(category).on(category.id.eq(newsletter.categoryId))
-                .where(publicationStatusCondition, categoryCondition(categoryId))
+                .where(publicationStatusCondition)
                 .orderBy(
                         newsletterSubscriptionCount.total.coalesce(0).desc(),
                         newsletter.name.asc()
@@ -60,16 +60,6 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
         }
 
         return query.fetch();
-    }
-
-    @Override
-    public List<Long> findVisibleCategoryIds(boolean includeSuspended, LocalDate thresholdDate) {
-        return jpaQueryFactory
-                .select(newsletter.categoryId)
-                .distinct()
-                .from(newsletter)
-                .where(createStatusCondition(includeSuspended, thresholdDate))
-                .fetch();
     }
 
     private BooleanExpression createStatusCondition(
@@ -85,10 +75,6 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
                 .and(newsletter.suspendedAt.isNull()
                         .or(newsletter.suspendedAt.goe(suspendedHiddenThresholdDate)));
         return activeOnly.or(suspendedVisibleCondition);
-    }
-
-    private BooleanExpression categoryCondition(Long categoryId) {
-        return categoryId != null ? newsletter.categoryId.eq(categoryId) : null;
     }
 
     private BooleanExpression createIsSubscribedCondition(Long memberId) {

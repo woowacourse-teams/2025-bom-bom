@@ -23,6 +23,9 @@ public record NewsletterResponse(
         String subscribeUrl,
 
         @NotNull
+        Long categoryId,
+
+        @NotNull
         String category,
 
         @NotNull

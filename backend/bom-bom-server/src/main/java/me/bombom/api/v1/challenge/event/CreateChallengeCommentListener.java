@@ -1,5 +1,6 @@
 package me.bombom.api.v1.challenge.event;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,13 +26,14 @@ public class CreateChallengeCommentListener {
     private final ChallengeTodoService challengeTodoService;
     private final ChallengeParticipantService challengeParticipantService;
     private final ChallengeTeamService challengeTeamService;
+    private final Clock clock;
 
     @TransactionalEventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void on(CreateChallengeCommentEvent event){
         log.info("챌린지 코멘트 작성 후 출석 처리 시작");
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         if(challengeTodoService.isCompletedToday(event.participantId(), today)){
             log.info("이미 출석 처리 완료된 참여자입니다. participantId:{}", event.participantId());
             return;

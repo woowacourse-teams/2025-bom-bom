@@ -9,6 +9,7 @@ import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.dto.CategoryResponse;
+import me.bombom.api.v1.newsletter.dto.NewsletterListResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
@@ -27,20 +28,17 @@ public class NewsletterService {
     private final CategoryRepository categoryRepository;
     private final Clock clock;
 
-    public List<CategoryResponse> getCategories(boolean includeSuspended) {
+    public NewsletterListResponse getNewsletterList(Long memberId, boolean includeSuspended, Long categoryId) {
         LocalDate suspendedHiddenThresholdDate = getSuspendedHiddenThresholdDate();
         List<Long> categoryIds = newsletterRepository.findVisibleCategoryIds(includeSuspended, suspendedHiddenThresholdDate);
-        return categoryRepository.findCategoryInfoByIds(categoryIds);
-    }
-
-    public List<NewsletterResponse> getNewsletters(Long memberId, boolean includeSuspended, Long categoryId) {
-        LocalDate suspendedHiddenThresholdDate = getSuspendedHiddenThresholdDate();
-        return newsletterRepository.findNewslettersInfo(
+        List<CategoryResponse> categories = categoryRepository.findCategoryInfoByIds(categoryIds);
+        List<NewsletterResponse> newsletters = newsletterRepository.findNewslettersInfo(
                 memberId,
                 includeSuspended,
                 suspendedHiddenThresholdDate,
                 categoryId
         );
+        return new NewsletterListResponse(categories, newsletters);
     }
 
     public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Long memberId) {

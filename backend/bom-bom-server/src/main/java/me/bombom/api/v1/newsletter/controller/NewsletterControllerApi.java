@@ -7,9 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
-import java.util.List;
-import me.bombom.api.v1.newsletter.dto.CategoryResponse;
-import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
+import me.bombom.api.v1.newsletter.dto.NewsletterListResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -19,7 +17,9 @@ public interface NewsletterControllerApi {
     @Operation(
             summary = "뉴스레터 목록 조회",
             description = """
-                    뉴스레터 목록을 조회합니다.
+                    카테고리 목록과 뉴스레터 목록을 함께 반환합니다.
+                    - categories: 조회 조건에 부합하는 뉴스레터가 존재하는 카테고리 목록
+                    - newsletters: 필터링된 뉴스레터 목록
                     - categoryId: 특정 카테고리로 필터링합니다. 미입력 시 전체 카테고리를 반환합니다.
                     - includeSuspended=false: 발행중(ACTIVE) 뉴스레터만 반환합니다.
                     - includeSuspended=true: 발행중(ACTIVE) 및 6개월 이내 휴재(SUSPENDED) 뉴스레터를 포함합니다.
@@ -29,21 +29,10 @@ public interface NewsletterControllerApi {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "뉴스레터 목록 조회 성공")
     })
-    List<NewsletterResponse> getNewsletters(
+    NewsletterListResponse getNewsletterList(
             @Parameter(hidden = true) Long memberId,
             @Parameter(description = "휴재 뉴스레터 포함 여부") @RequestParam(required = false, defaultValue = "false") boolean includeSuspended,
             @Parameter(description = "카테고리 ID (미입력 시 전체)") @RequestParam(required = false) Long categoryId
-    );
-
-    @Operation(
-            summary = "뉴스레터 카테고리 목록 조회",
-            description = "뉴스레터 목록 조회와 동일한 필터링 기준으로 카테고리를 반환합니다. 폐간(DISCONTINUED)만 있는 카테고리는 항상 제외됩니다."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "카테고리 목록 조회 성공")
-    })
-    List<CategoryResponse> getCategories(
-            @Parameter(description = "휴재 뉴스레터 포함 여부") @RequestParam(required = false, defaultValue = "false") boolean includeSuspended
     );
 
     @Operation(
@@ -60,4 +49,4 @@ public interface NewsletterControllerApi {
             @Positive(message = "id는 1 이상의 값이어야 합니다.")
             @Parameter(description = "뉴스레터 ID") Long id
     );
-} 
+}

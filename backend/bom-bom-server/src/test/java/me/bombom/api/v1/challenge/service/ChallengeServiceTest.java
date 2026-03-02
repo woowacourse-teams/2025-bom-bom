@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.ChallengeFilter;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
 import me.bombom.api.v1.challenge.domain.EligibilityReason;
@@ -127,7 +128,7 @@ class ChallengeServiceTest {
         newsletterGroupItemRepository.saveAll(List.of(item1, item2));
 
         // when
-        List<ChallengeResponse> result = challengeService.getChallenges(null);
+        List<ChallengeResponse> result = challengeService.getChallenges(null, ChallengeFilter.DEFAULT);
 
         // then - 시작전 챌린지만 반환되어야 함 (challenge2만)
         assertSoftly(softly -> {
@@ -163,7 +164,7 @@ class ChallengeServiceTest {
         newsletterGroupItemRepository.saveAll(List.of(item1, item2));
 
         // when
-        List<ChallengeResponse> result = challengeService.getChallenges(member);
+        List<ChallengeResponse> result = challengeService.getChallenges(member, ChallengeFilter.DEFAULT);
 
         // then
         assertSoftly(softly -> {
@@ -204,7 +205,7 @@ class ChallengeServiceTest {
         newsletterGroupItemRepository.save(item);
 
         // when: 참여하지 않은 member로 목록 조회
-        List<ChallengeResponse> result = challengeService.getChallenges(member);
+        List<ChallengeResponse> result = challengeService.getChallenges(member, ChallengeFilter.DEFAULT);
 
         // then: 추가 신청 기간 내이므로 목록에 포함되어야 함
         assertSoftly(softly -> {
@@ -218,10 +219,62 @@ class ChallengeServiceTest {
     @Test
     void 챌린지가_없을_때_빈_리스트_반환() {
         // when
-        List<ChallengeResponse> result = challengeService.getChallenges(null);
+        List<ChallengeResponse> result = challengeService.getChallenges(null, ChallengeFilter.DEFAULT);
 
         // then
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void view_summary_일_때_참여_중인_ONGOING_EARLY_LATE_챌린지만_조회된다() {
+        // given: EARLY(시작 전), LATE(진행 중 추가신청), ONGOING+참여, ONGOING+미참여(CLOSED)
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+
+        Challenge early = TestFixture.createChallenge("EARLY", 1, today.plusDays(5), today.plusDays(25), group.getId());
+        Challenge late = TestFixture.createChallenge(
+                "LATE",
+                today.minusDays(5),
+                today.plusDays(20),
+                21,
+                group.getId()
+        );
+        Challenge ongoingJoined = TestFixture.createChallenge(
+                "ONGOING_JOINED",
+                today.minusDays(10),
+                today.plusDays(10),
+                20,
+                group.getId()
+        );
+        Challenge ongoingNotJoined = TestFixture.createChallenge(
+                "ONGOING_NOT_JOINED",
+                today.minusDays(10),
+                today.plusDays(10),
+                20,
+                group.getId()
+        );
+        challengeRepository.saveAll(List.of(early, late, ongoingJoined, ongoingNotJoined));
+
+        challengeParticipantRepository.save(
+                TestFixture.createChallengeParticipant(ongoingJoined.getId(), member.getId(), 5, true)
+        );
+
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(group.getId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
+
+        // when
+        List<ChallengeResponse> result = challengeService.getChallenges(member, ChallengeFilter.SUMMARY);
+
+        // then: EARLY, LATE, ONGOING+참여 3건만 포함. ONGOING+미참여(CLOSED) 제외
+        assertSoftly(softly -> {
+            softly.assertThat(result).hasSize(3);
+            softly.assertThat(result)
+                    .extracting(ChallengeResponse::id)
+                    .containsExactlyInAnyOrder(early.getId(), late.getId(), ongoingJoined.getId());
+            softly.assertThat(result)
+                    .extracting(ChallengeResponse::id)
+                    .doesNotContain(ongoingNotJoined.getId());
+        });
     }
 
     @Test
@@ -241,7 +294,7 @@ class ChallengeServiceTest {
         challengeParticipantRepository.saveAll(List.of(participant1, participant2));
 
         // when
-        List<ChallengeResponse> result = challengeService.getChallenges(null);
+        List<ChallengeResponse> result = challengeService.getChallenges(null, ChallengeFilter.DEFAULT);
 
         // then - 시작전 챌린지이므로 반환되어야 함
         assertSoftly(softly -> {
@@ -263,7 +316,7 @@ class ChallengeServiceTest {
         newsletterGroupItemRepository.saveAll(List.of(item1, item2));
 
         // when
-        List<ChallengeResponse> result = challengeService.getChallenges(null);
+        List<ChallengeResponse> result = challengeService.getChallenges(null, ChallengeFilter.DEFAULT);
 
         // then - 시작전 챌린지이므로 반환되어야 함
         assertSoftly(softly -> {
@@ -292,7 +345,7 @@ class ChallengeServiceTest {
         challengeParticipantRepository.save(participant);
 
         // when
-        List<ChallengeResponse> result = challengeService.getChallenges(member);
+        List<ChallengeResponse> result = challengeService.getChallenges(member, ChallengeFilter.DEFAULT);
 
         // then - 참여한 진행중 챌린지이므로 반환되어야 함
         assertSoftly(softly -> {
@@ -318,7 +371,7 @@ class ChallengeServiceTest {
         challengeParticipantRepository.save(participant);
 
         // when
-        List<ChallengeResponse> result = challengeService.getChallenges(member);
+        List<ChallengeResponse> result = challengeService.getChallenges(member, ChallengeFilter.DEFAULT);
 
         // then - 참여한 종료된 챌린지이므로 반환되어야 함
         assertSoftly(softly -> {
@@ -336,7 +389,7 @@ class ChallengeServiceTest {
         challengeRepository.save(challenge);
 
         // when
-        List<ChallengeResponse> result = challengeService.getChallenges(null);
+        List<ChallengeResponse> result = challengeService.getChallenges(null, ChallengeFilter.DEFAULT);
 
         // then
         assertSoftly(softly -> {
@@ -362,7 +415,7 @@ class ChallengeServiceTest {
         challengeParticipantRepository.save(participant);
 
         // when
-        List<ChallengeResponse> result = challengeService.getChallenges(member);
+        List<ChallengeResponse> result = challengeService.getChallenges(member, ChallengeFilter.DEFAULT);
 
         // then
         ChallengeDetailResponse participationInfo = result.get(0).participationInfo();
@@ -384,7 +437,7 @@ class ChallengeServiceTest {
         challengeRepository.save(challenge);
 
         // when
-        List<ChallengeResponse> result = challengeService.getChallenges(member);
+        List<ChallengeResponse> result = challengeService.getChallenges(member, ChallengeFilter.DEFAULT);
 
         // then - 시작전 챌린지이므로 반환되어야 함
         ChallengeDetailResponse participationInfo = result.get(0).participationInfo();

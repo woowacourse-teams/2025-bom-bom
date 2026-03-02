@@ -51,7 +51,7 @@ public interface ChallengeCommentControllerApi {
 
     @Operation(
             summary = "챌린지 코멘트 후보 아티클 조회",
-            description = "지정한 날짜에 도착한 아티클들 중 읽은 아티클들을 조회합니다."
+            description = "지정한 날짜에 읽은 아티클들을 조회합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "챌린지 코멘트 후보 아티클 조회 성공")

@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.badge.service.BadgeService;
 import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.ChallengeFilter;
 import me.bombom.api.v1.challenge.domain.ChallengeGrade;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
@@ -62,7 +63,7 @@ public class ChallengeService {
     private final BadgeService badgeService;
     private final Clock clock;
 
-    public List<ChallengeResponse> getChallenges(Member member) {
+    public List<ChallengeResponse> getChallenges(Member member, ChallengeFilter view) {
         List<Challenge> challenges = challengeRepository.findAll();
         if (challenges.isEmpty()) {
             return Collections.emptyList();
@@ -72,13 +73,17 @@ public class ChallengeService {
                 .map(Challenge::getId)
                 .toList();
 
+        LocalDate today = LocalDate.now(clock);
         Map<Long, Long> participantCounts = getParticipantCounts(challengeIds);
-        Map<Long, List<ChallengeNewsletterResponse>> newslettersByChallengeId = getNewslettersByChallengeId(challengeIds);
+        Map<Long, List<ChallengeNewsletterResponse>> newslettersByChallengeId =
+                getNewslettersByChallengeId(challengeIds);
         Map<Long, ChallengeParticipant> myParticipation = findMyParticipation(member, challengeIds);
 
-        LocalDate today = LocalDate.now(clock);
         return challenges.stream()
-                .filter(challenge -> isVisibleInChallengeList(challenge, today, myParticipation.containsKey(challenge.getId())))
+                .filter(challenge -> {
+                    boolean isJoined = myParticipation.containsKey(challenge.getId());
+                    return view.isVisible(challenge, today, isJoined);
+                })
                 .map(challenge -> toChallengeResponse(
                         challenge,
                         participantCounts,
@@ -215,14 +220,6 @@ public class ChallengeService {
         }
 
         return new ChallengeTeamListResponse(teams.size(), myTeamId, teamInfos);
-    }
-
-    private boolean isVisibleInChallengeList(Challenge challenge, LocalDate today, boolean isJoined) {
-        ChallengeStatus status = challenge.getStatus(today);
-        return status == ChallengeStatus.COMING_SOON
-                || status == ChallengeStatus.BEFORE_START
-                || isJoined
-                || challenge.isLatePhase(today);
     }
 
     private ChallengeResponse toChallengeResponse(

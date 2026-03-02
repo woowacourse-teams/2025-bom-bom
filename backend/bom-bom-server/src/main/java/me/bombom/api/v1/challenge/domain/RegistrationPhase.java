@@ -6,4 +6,8 @@ public enum RegistrationPhase {
     LATE,
     CLOSED,
     ;
+
+    public boolean isRecruiting() {
+        return this == EARLY || this == LATE;
+    }
 }

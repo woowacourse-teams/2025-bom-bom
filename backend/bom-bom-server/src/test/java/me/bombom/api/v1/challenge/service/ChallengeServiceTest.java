@@ -3,8 +3,12 @@ package me.bombom.api.v1.challenge.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.BDDMockito.given;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
@@ -42,6 +46,7 @@ import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @IntegrationTest
 class ChallengeServiceTest {
@@ -79,6 +84,9 @@ class ChallengeServiceTest {
     @Autowired
     private ChallengeTeamRepository challengeTeamRepository;
 
+    @MockitoBean
+    private Clock clock;
+
     private Member member;
     private List<Category> categories;
     private List<Newsletter> newsletters;
@@ -109,7 +117,11 @@ class ChallengeServiceTest {
         newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
         newsletterRepository.saveAll(newsletters);
 
-        today = LocalDate.now();
+        ZoneId seoul = ZoneId.of("Asia/Seoul");
+        Instant fixedInstant = LocalDate.of(2025, 3, 15).atStartOfDay(seoul).toInstant();
+        given(clock.instant()).willReturn(fixedInstant);
+        given(clock.getZone()).willReturn(seoul);
+        today = LocalDate.now(clock);
     }
 
     @Test
@@ -234,7 +246,7 @@ class ChallengeServiceTest {
         Challenge early = TestFixture.createChallenge("EARLY", 1, today.plusDays(5), today.plusDays(25), group.getId());
         Challenge late = TestFixture.createChallenge(
                 "LATE",
-                today.minusDays(5),
+                today.minusDays(1),
                 today.plusDays(20),
                 21,
                 group.getId()

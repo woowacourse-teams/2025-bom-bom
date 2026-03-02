@@ -1,7 +1,7 @@
 package me.bombom.api.v1.coupon.controller;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -81,7 +81,7 @@ class CouponControllerTest {
     @Test
     void 내가_받은_쿠폰_목록_조회_성공() throws Exception {
         // when & then
-        mockMvc.perform(get("/api/v1/coupon/issues/me")
+        mockMvc.perform(get("/api/v1/coupons/issues/me")
                         .with(authentication(authToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
@@ -99,7 +99,7 @@ class CouponControllerTest {
         couponIssueRepository.deleteAllInBatch();
 
         // when & then
-        mockMvc.perform(get("/api/v1/coupon/issues/me")
+        mockMvc.perform(get("/api/v1/coupons/issues/me")
                         .with(authentication(authToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));

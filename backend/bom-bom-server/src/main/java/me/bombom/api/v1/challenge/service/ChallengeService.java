@@ -84,6 +84,7 @@ public class ChallengeService {
                     boolean isJoined = myParticipation.containsKey(challenge.getId());
                     return view.isVisible(challenge, today, isJoined);
                 })
+                .sorted(view.summaryOrderComparator(today, myParticipation.keySet()))
                 .map(challenge -> toChallengeResponse(
                         challenge,
                         participantCounts,

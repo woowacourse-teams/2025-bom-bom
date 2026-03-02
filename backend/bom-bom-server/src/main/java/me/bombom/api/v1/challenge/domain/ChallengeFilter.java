@@ -1,6 +1,8 @@
 package me.bombom.api.v1.challenge.domain;
 
 import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.Set;
 
 public enum ChallengeFilter {
 
@@ -12,6 +14,11 @@ public enum ChallengeFilter {
             return (status == ChallengeStatus.ONGOING && isJoined)
                     || phase.isRecruiting();
         }
+
+        @Override
+        public Comparator<Challenge> summaryOrderComparator(LocalDate today, Set<Long> joinedChallengeIds) {
+            return Comparator.comparingInt(challenge -> getSummaryOrder(challenge, today, joinedChallengeIds));
+        }
     },
     DEFAULT {
         @Override
@@ -22,7 +29,31 @@ public enum ChallengeFilter {
                     || isJoined
                     || challenge.isLatePhase(today);
         }
+
+        @Override
+        public Comparator<Challenge> summaryOrderComparator(LocalDate today, Set<Long> joinedChallengeIds) {
+            return (a, b) -> 0;
+        }
     };
 
     public abstract boolean isVisible(Challenge challenge, LocalDate today, boolean isJoined);
+
+    public abstract Comparator<Challenge> summaryOrderComparator(LocalDate today, Set<Long> joinedChallengeIds);
+
+    static int getSummaryOrder(Challenge challenge, LocalDate today, Set<Long> joinedChallengeIds) {
+        ChallengeStatus status = challenge.getStatus(today);
+        RegistrationPhase phase = challenge.getRegistrationPhase(today);
+        boolean isJoined = joinedChallengeIds.contains(challenge.getId());
+
+        if (status == ChallengeStatus.ONGOING && isJoined) {
+            return 0;
+        }
+        if (phase == RegistrationPhase.LATE) {
+            return 1;
+        }
+        if (phase == RegistrationPhase.EARLY) {
+            return 2;
+        }
+        return 3;
+    }
 }

@@ -43,9 +43,9 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
+import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
-import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.support.IntegrationTest;
@@ -373,7 +373,7 @@ class ChallengeCommentServiceTest {
         otherArticle.markAsRead();
         articleRepository.save(otherArticle);
 
-        LocalDate targetDate = articles.get(0).getArrivedDateTime().toLocalDate();
+        LocalDate targetDate = LocalDate.now();
 
         // when
         List<ChallengeCommentCandidateArticleResponse> result =

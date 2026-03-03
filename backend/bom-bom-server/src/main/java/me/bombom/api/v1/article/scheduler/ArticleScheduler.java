@@ -24,10 +24,10 @@ public class ArticleScheduler {
     private static final String DAILY_3AM_CRON = "0 0 3 * * *";
     private static final int MINIMUM_ARTICLE_LIMIT = 500;
 
-    @Value("${scheduler.remove-article.max-count.admin}")
+    @Value("${scheduler.remove-article.max-count.admin:500}")
     private int adminLimit;
 
-    @Value("${scheduler.remove-article.max-count.user}")
+    @Value("${scheduler.remove-article.max-count.user:500}")
     private int userLimit;
 
     private final PreviousArticleService previousArticleService;

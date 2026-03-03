@@ -37,45 +37,47 @@ import org.springframework.test.context.TestPropertySource;
 
 @IntegrationTest
 @TestPropertySource(properties = {
-        "coupon.events[0].name=day1-coupon",
-        "coupon.events[0].max-count=3",
-        "coupon.events[0].batch-size=50",
-        "coupon.events[0].active-limit=2",
-        "coupon.events[0].active-ttl-seconds=30",
-        "coupon.events[0].polling-interval-seconds=3",
-        "coupon.events[1].name=limited-coupon",
-        "coupon.events[1].max-count=1",
-        "coupon.events[1].batch-size=50",
-        "coupon.events[1].active-limit=1",
-        "coupon.events[1].active-ttl-seconds=30",
-        "coupon.events[1].polling-interval-seconds=3",
-        "coupon.events[2].name=ended-coupon",
-        "coupon.events[2].max-count=1",
-        "coupon.events[2].batch-size=50",
-        "coupon.events[2].active-limit=1",
-        "coupon.events[2].active-ttl-seconds=30",
-        "coupon.events[2].polling-interval-seconds=3",
-        "coupon.events[2].end-at=2000-01-01T00:00:00",
-        "coupon.events[3].name=demo-coupon",
-        "coupon.events[3].max-count=10",
-        "coupon.events[3].batch-size=50",
-        "coupon.events[3].active-limit=10",
-        "coupon.events[3].active-ttl-seconds=30",
-        "coupon.events[3].polling-interval-seconds=3",
-        "coupon.events[4].name=scenario-coupon",
-        "coupon.events[4].max-count=3",
-        "coupon.events[4].batch-size=50",
-        "coupon.events[4].active-limit=6",
-        "coupon.events[4].active-ttl-seconds=30",
-        "coupon.events[4].polling-interval-seconds=3",
-        "coupon.events[5].name=future-coupon",
-        "coupon.events[5].max-count=1",
-        "coupon.events[5].batch-size=50",
-        "coupon.events[5].active-limit=1",
-        "coupon.events[5].active-ttl-seconds=30",
-        "coupon.events[5].polling-interval-seconds=3",
-        "coupon.events[5].start-at=2999-01-01T00:00:00",
-        "spring.task.scheduling.enabled=false"
+    "ranking.reading.monthly.cron=0 0 0 1 * ?",
+    "ranking.reading.monthly.zone=Asia/Seoul",
+    "coupon.events[0].name=day1-coupon",
+    "coupon.events[0].max-count=3",
+    "coupon.events[0].batch-size=50",
+    "coupon.events[0].active-limit=2",
+    "coupon.events[0].active-ttl-seconds=30",
+    "coupon.events[0].polling-interval-seconds=3",
+    "coupon.events[1].name=limited-coupon",
+    "coupon.events[1].max-count=1",
+    "coupon.events[1].batch-size=50",
+    "coupon.events[1].active-limit=1",
+    "coupon.events[1].active-ttl-seconds=30",
+    "coupon.events[1].polling-interval-seconds=3",
+    "coupon.events[2].name=ended-coupon",
+    "coupon.events[2].max-count=1",
+    "coupon.events[2].batch-size=50",
+    "coupon.events[2].active-limit=1",
+    "coupon.events[2].active-ttl-seconds=30",
+    "coupon.events[2].polling-interval-seconds=3",
+    "coupon.events[2].end-at=2000-01-01T00:00:00",
+    "coupon.events[3].name=demo-coupon",
+    "coupon.events[3].max-count=10",
+    "coupon.events[3].batch-size=50",
+    "coupon.events[3].active-limit=10",
+    "coupon.events[3].active-ttl-seconds=30",
+    "coupon.events[3].polling-interval-seconds=3",
+    "coupon.events[4].name=scenario-coupon",
+    "coupon.events[4].max-count=3",
+    "coupon.events[4].batch-size=50",
+    "coupon.events[4].active-limit=6",
+    "coupon.events[4].active-ttl-seconds=30",
+    "coupon.events[4].polling-interval-seconds=3",
+    "coupon.events[5].name=future-coupon",
+    "coupon.events[5].max-count=1",
+    "coupon.events[5].batch-size=50",
+    "coupon.events[5].active-limit=1",
+    "coupon.events[5].active-ttl-seconds=30",
+    "coupon.events[5].polling-interval-seconds=3",
+    "coupon.events[5].start-at=2999-01-01T00:00:00",
+    "spring.task.scheduling.enabled=false"
 })
 class CouponQueueServiceTest {
     private static final Logger log = LoggerFactory.getLogger(CouponQueueServiceTest.class);
@@ -172,6 +174,7 @@ class CouponQueueServiceTest {
     void 대기열_등록_발급완료_사용자면_ISSUED() {
         // given
         couponIssueRepository.save(CouponIssue.of(member.getId(), "day1-coupon", "https://example.com/coupon.png"));
+        couponQueueRepository.addIssued("day1-coupon", member.getId());
         // when
         CouponQueueStatusResponse response = couponQueueService.registerQueue("day1-coupon", member);
         // then
@@ -250,6 +253,7 @@ class CouponQueueServiceTest {
     void 대기열_조회_발급완료면_ISSUED() {
         // given
         couponIssueRepository.save(CouponIssue.of(member.getId(), "day1-coupon", "https://example.com/coupon.png"));
+        couponQueueRepository.addIssued("day1-coupon", member.getId());
         // when
         CouponQueueStatusResponse response = couponQueueService.getQueueStatus("day1-coupon", member);
         // then

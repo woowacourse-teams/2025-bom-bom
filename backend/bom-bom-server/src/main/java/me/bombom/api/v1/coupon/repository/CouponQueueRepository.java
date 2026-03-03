@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Repository;
@@ -80,6 +82,110 @@ public class CouponQueueRepository {
                 memberId.toString()
         );
         return result != null && result == 1L;
+    }
+
+    public QueuePreState getQueuePreState(String couponName, Long memberId) {
+        List<Object> results = redisTemplate.executePipelined(
+                new SessionCallback<Object>() {
+                    @Override
+                    public Object execute(RedisOperations operations) {
+                        operations.opsForZSet().zCard(activeKey(couponName));
+                        operations.opsForSet().isMember(issuedKey(couponName), memberId.toString());
+                        operations.opsForValue().get(soldOutKey(couponName));
+                        operations.opsForZSet().score(activeKey(couponName), memberId.toString());
+                        operations.opsForZSet().rank(queueKey(couponName), memberId.toString());
+                        operations.opsForZSet().zCard(queueKey(couponName));
+                        return null;
+                    }
+                }
+        );
+
+        long activeCount = asLong(results.get(0));
+        boolean isIssued = asBoolean(results.get(1));
+        boolean isSoldOut = "1".equals(asText(results.get(2)));
+        Long activeExpireAt = asLong(results.get(3));
+        Long rank = asLong(results.get(4));
+        long queueCount = asLong(results.get(5));
+
+        return new QueuePreState(activeCount, isIssued, isSoldOut, activeExpireAt, rank, queueCount);
+    }
+
+    public QueuePostState getQueuePostState(String couponName, Long memberId) {
+        List<Object> results = redisTemplate.executePipelined(
+                new SessionCallback<Object>() {
+                    @Override
+                    public Object execute(RedisOperations operations) {
+                        operations.opsForZSet().score(activeKey(couponName), memberId.toString());
+                        operations.opsForZSet().rank(queueKey(couponName), memberId.toString());
+                        operations.opsForZSet().zCard(queueKey(couponName));
+                        operations.opsForZSet().zCard(activeKey(couponName));
+                        return null;
+                    }
+                }
+        );
+
+        Long activeExpireAt = asLong(results.get(0)) != null ? asLong(results.get(0)) : null;
+        Long rank = asLong(results.get(1));
+        long queueCount = asLong(results.get(2));
+        long activeCount = asLong(results.get(3));
+
+        return new QueuePostState(activeExpireAt, rank, queueCount, activeCount);
+    }
+
+    private Long asLong(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Long longValue) {
+            return longValue;
+        }
+        if (value instanceof Double doubleValue) {
+            return doubleValue.longValue();
+        }
+        if (value instanceof String stringValue) {
+            try {
+                return Double.valueOf(stringValue).longValue();
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        if (value instanceof byte[] bytes) {
+            try {
+                return Double.valueOf(new String(bytes)).longValue();
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private String asText(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof String stringValue) {
+            return stringValue;
+        }
+        if (value instanceof byte[] bytes) {
+            return new String(bytes);
+        }
+        return String.valueOf(value);
+    }
+
+    private boolean asBoolean(Object value) {
+        if (value == null) {
+            return false;
+        }
+        if (value instanceof Boolean bool) {
+            return bool;
+        }
+        if (value instanceof String stringValue) {
+            return Boolean.parseBoolean(stringValue);
+        }
+        if (value instanceof byte[] bytes) {
+            return Boolean.parseBoolean(new String(bytes));
+        }
+        return false;
     }
 
     /**
@@ -318,5 +424,23 @@ public class CouponQueueRepository {
         redisScript.setResultType(Long.class);
         redisScript.setScriptText(script);
         return redisScript;
+    }
+
+    public record QueuePreState(
+            long activeCount,
+            boolean issued,
+            boolean soldOut,
+            Long activeExpireAt,
+            Long queueRank,
+            long queueCount
+    ) {
+    }
+
+    public record QueuePostState(
+            Long activeExpireAt,
+            Long queueRank,
+            long queueCount,
+            long activeCount
+    ) {
     }
 }

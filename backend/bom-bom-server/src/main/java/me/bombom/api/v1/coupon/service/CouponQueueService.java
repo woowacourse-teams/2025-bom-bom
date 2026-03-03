@@ -53,7 +53,7 @@ public class CouponQueueService {
         couponQueueRepository.removeExpiredActive(couponName, nowMillis);
         long activeCount = couponQueueRepository.getActiveCount(couponName);
 
-        if (isIssued(couponName, memberId)) {
+        if (isIssuedInQueue(couponName, memberId)) {
             return buildStatus(event, couponName, CouponQueueStatus.ISSUED, null, activeCount, null, null);
         }
         boolean soldOut = isSoldOut(couponName);
@@ -117,7 +117,7 @@ public class CouponQueueService {
         couponQueueRepository.removeExpiredActive(couponName, nowMillis);
         long activeCount = couponQueueRepository.getActiveCount(couponName);
 
-        if (isIssued(couponName, memberId)) {
+        if (isIssuedInQueue(couponName, memberId)) {
             return buildStatus(event, couponName, CouponQueueStatus.ISSUED, null, activeCount, null, null);
         }
 
@@ -284,16 +284,8 @@ public class CouponQueueService {
         return event.getEndAt() != null && now.isAfter(event.getEndAt());
     }
 
-    private boolean isIssued(String couponName, Long memberId) {
-        if (couponQueueRepository.isIssued(couponName, memberId)) {
-            return true;
-        }
-
-        boolean exists = couponIssueRepository.existsByMemberIdAndCouponName(memberId, couponName);
-        if (exists) {
-            couponQueueRepository.addIssued(couponName, memberId);
-        }
-        return exists;
+    private boolean isIssuedInQueue(String couponName, Long memberId) {
+        return couponQueueRepository.isIssued(couponName, memberId);
     }
 
     private boolean isSoldOutByPolicy(String couponName, Event event) {

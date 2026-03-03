@@ -17,7 +17,6 @@ import me.bombom.api.v1.auth.service.AppleOAuth2Service;
 import me.bombom.api.v1.auth.service.CustomOAuth2UserService;
 import me.bombom.api.v1.auth.service.GoogleOAuth2LoginService;
 import me.bombom.api.v1.auth.service.OAuth2LoginService;
-import me.bombom.api.v1.member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -84,7 +83,6 @@ public class SecurityConfig {
             OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegatingAccessTokenClient,
             ClientRegistrationRepository clientRegistrationRepository,
             LoadTestTokenService loadTestTokenService,
-            MemberRepository memberRepository,
             @Value("${loadtest.auth.enabled:false}") boolean loadTestAuthEnabled,
             @Value("${loadtest.auth.header-name:X-LoadTest-Token}") String loadTestHeaderName,
             @Value("${loadtest.auth.allowed-paths:/api/v1/coupons/**}") String loadTestAllowedPaths
@@ -106,7 +104,6 @@ public class SecurityConfig {
                         new LoadTestAuthFilter(
                                 protectedMatchers,
                                 loadTestTokenService,
-                                memberRepository,
                                 loadTestHeaderName,
                                 loadTestAuthEnabled
                         ),

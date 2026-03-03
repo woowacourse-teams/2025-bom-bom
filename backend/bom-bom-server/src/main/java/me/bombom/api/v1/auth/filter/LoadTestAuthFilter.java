@@ -14,7 +14,7 @@ import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.service.LoadTestTokenService;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.member.enums.Gender;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -32,7 +32,6 @@ public class LoadTestAuthFilter extends OncePerRequestFilter {
     private final List<AntPathRequestMatcher> protectedPathMatchers;
 
     private final LoadTestTokenService loadTestTokenService;
-    private final MemberRepository memberRepository;
     private final String headerName;
     private final boolean enabled;
 
@@ -71,12 +70,15 @@ public class LoadTestAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        Member member = memberRepository.findById(memberId).orElse(null);
-        if (member == null) {
-            log.warn("Load test token authentication failed. path={}", request.getServletPath());
-            sendUnauthorized(response);
-            return;
-        }
+        Member member = Member.builder()
+                .id(memberId)
+                .provider("load-test")
+                .providerId(String.valueOf(memberId))
+                .email(memberId + "@load-test.local")
+                .nickname("load-test-" + memberId)
+                .gender(Gender.NONE)
+                .roleId(1L)
+                .build();
 
         var attributes = Collections.<String, Object>emptyMap();
         CustomOAuth2User principal = new CustomOAuth2User(attributes, member, null, null);

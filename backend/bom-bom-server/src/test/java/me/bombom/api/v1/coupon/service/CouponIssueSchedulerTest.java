@@ -1,25 +1,33 @@
 package me.bombom.api.v1.coupon.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.reset;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
 import me.bombom.api.v1.coupon.domain.CouponIssue;
 import me.bombom.api.v1.coupon.repository.CouponIssueRepository;
 import me.bombom.api.v1.coupon.repository.CouponQueueRepository;
+import me.bombom.api.v1.auth.service.AppleOAuth2Service;
+import me.bombom.api.v1.auth.service.GoogleOAuth2LoginService;
+import me.bombom.api.v1.auth.service.LoadTestTokenService;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.TestPropertySource;
 
 @IntegrationTest
 @TestPropertySource(properties = {
+        "swagger.admin.username=test",
+        "swagger.admin.password=test",
+        "server.servlet.session.cookie.max-age=3600",
+        "ranking.reading.monthly.cron=0 0 0 1 * ?",
+        "ranking.reading.monthly.zone=Asia/Seoul",
+        "frontend.base-url=http://localhost:8080",
         "coupon.events[0].name=sync-coupon",
         "coupon.events[0].max-count=3",
         "coupon.events[0].batch-size=50",
@@ -29,7 +37,23 @@ import org.springframework.test.context.TestPropertySource;
         "spring.task.scheduling.enabled=false"
 })
 class CouponIssueSchedulerTest {
-    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
+    @MockBean
+    private AppleOAuth2Service appleOAuth2Service;
+
+    @MockBean
+    private GoogleOAuth2LoginService googleOAuth2LoginService;
+
+    @MockBean
+    private ClientRegistrationRepository clientRegistrationRepository;
+
+    @MockBean(name = "delegatingAccessTokenClient")
+    private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegatingAccessTokenClient;
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
+
+    @MockBean
+    private LoadTestTokenService loadTestTokenService;
 
     @Autowired
     private CouponIssueScheduler couponIssueScheduler;
@@ -43,18 +67,8 @@ class CouponIssueSchedulerTest {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    @MockitoBean
-    private Clock clock;
-
     @BeforeEach
     void setUp() {
-        reset(clock);
-        Instant now = Instant.now();
-        Clock fixedClock = Clock.fixed(now, SEOUL_ZONE);
-        doReturn(SEOUL_ZONE).when(clock).getZone();
-        doReturn(fixedClock.instant()).when(clock).instant();
-        doReturn(fixedClock.millis()).when(clock).millis();
-
         // given
         couponIssueRepository.deleteAllInBatch();
         redisTemplate.getConnectionFactory().getConnection().serverCommands().flushDb();

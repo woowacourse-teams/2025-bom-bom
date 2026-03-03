@@ -346,7 +346,12 @@ public class CouponQueueService {
     }
 
     private ZoneId resolveZone() {
-        ZoneId zone = clock.getZone();
+        ZoneId zone;
+        try {
+            zone = clock.getZone();
+        } catch (ClassCastException e) {
+            return ZoneId.of("Asia/Seoul");
+        }
         return zone != null ? zone : ZoneId.of("Asia/Seoul");
     }
 }

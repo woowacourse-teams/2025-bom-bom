@@ -35,14 +35,8 @@ public class NewsletterService {
         );
 
         List<CategoryResponse> categories = CategoryResponse.from(allNewsletters);
-        List<NewsletterResponse> newsletters;
-        if (categoryId == null) {
-            newsletters = allNewsletters;
-        } else {
-            newsletters = allNewsletters.stream()
-                    .filter(n -> n.categoryId().equals(categoryId))
-                    .toList();
-        }
+        List<NewsletterResponse> newsletters = (categoryId == null)
+                ? allNewsletters : getCategoryFilteredNewsletters(categoryId, allNewsletters);
 
         return NewslettersResponse.of(categories, newsletters);
     }
@@ -64,5 +58,11 @@ public class NewsletterService {
 
     private LocalDate getSuspendedHiddenThresholdDate() {
         return LocalDate.now(clock).minusMonths(SUSPENDED_HIDDEN_AFTER_MONTHS);
+    }
+
+    private List<NewsletterResponse> getCategoryFilteredNewsletters(Long categoryId, List<NewsletterResponse> allNewsletters) {
+        return allNewsletters.stream()
+                .filter(n -> n.categoryId().equals(categoryId))
+                .toList();
     }
 }

@@ -16,6 +16,7 @@ import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
+import me.bombom.api.v1.newsletter.dto.CategoryResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
@@ -74,7 +75,7 @@ class NewsletterServiceTest {
         categoryRepository.saveAll(categories);
         newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
         newsletters = newsletterRepository.saveAll(newsletters);
-        
+
         // NewsletterSubscriptionCount 생성 및 저장
         List<NewsletterSubscriptionCount> subscriptionCounts = TestFixture.createNewsletterSubscriptionCounts(newsletters);
         newsletterSubscriptionCountRepository.saveAll(subscriptionCounts);
@@ -83,7 +84,7 @@ class NewsletterServiceTest {
     @Test
     void 비로그인_상태로_뉴스레터를_모두_조회할_수_있다_구독_여부는_모두_false() {
         //when
-        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false);
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false, null).newsletters();
 
         System.out.println("Expected size: " + newsletters.size());
         System.out.println("Actual size: " + result.size());
@@ -115,7 +116,7 @@ class NewsletterServiceTest {
         subscribeRepository.save(subscribe);
 
         //when
-        List<NewsletterResponse> result = newsletterService.getNewsletters(member.getId(), false);
+        List<NewsletterResponse> result = newsletterService.getNewsletters(member.getId(), false, null).newsletters();
 
         //then
         assertSoftly(softly -> {
@@ -282,7 +283,7 @@ class NewsletterServiceTest {
         );
 
         //when
-        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false);
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false, null).newsletters();
 
         //then
         assertThat(result)
@@ -305,7 +306,7 @@ class NewsletterServiceTest {
         );
 
         //when
-        List<NewsletterResponse> result = newsletterService.getNewsletters(null, true);
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, true, null).newsletters();
 
         //then
         assertThat(result)
@@ -343,7 +344,7 @@ class NewsletterServiceTest {
         );
 
         // when
-        List<NewsletterResponse> result = newsletterService.getNewsletters(null, true);
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, true, null).newsletters();
 
         // then
         assertSoftly(softly -> {
@@ -374,12 +375,223 @@ class NewsletterServiceTest {
         );
 
         //when
-        List<NewsletterResponse> result = newsletterService.getNewsletters(null, true);
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, true, null).newsletters();
 
         //then
         assertThat(result)
                 .extracting("newsletterId")
                 .doesNotContain(discontinuedNewsletter.getId());
+    }
+
+    @Test
+    void ACTIVE_뉴스레터가_있는_카테고리만_반환된다() {
+        // given - ACTIVE 뉴스레터 없이 DISCONTINUED만 있는 카테고리 추가
+        Category discontinuedOnlyCategory = categoryRepository.save(
+                Category.builder().name("폐간전용").build()
+        );
+        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        newsletterRepository.save(
+                Newsletter.builder()
+                        .name("폐간 뉴스레터")
+                        .description("설명")
+                        .imageUrl("https://cdn.bombom.me/img.png")
+                        .email("disc@test.com")
+                        .categoryId(discontinuedOnlyCategory.getId())
+                        .detailId(detail.getId())
+                        .status(NewsletterPublicationStatus.DISCONTINUED)
+                        .build()
+        );
+
+        // when
+        List<CategoryResponse> result = newsletterService.getNewsletters(null, false, null).categories();
+
+        // then
+        assertThat(result).extracting("id").doesNotContain(discontinuedOnlyCategory.getId());
+    }
+
+    @Test
+    void includeSuspended가_false일_때_SUSPENDED만_있는_카테고리는_제외된다() {
+        // given - SUSPENDED만 있는 카테고리 추가
+        Category suspendedOnlyCategory = categoryRepository.save(
+                Category.builder().name("휴재전용").build()
+        );
+        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        newsletterRepository.save(
+                TestFixture.createSuspendedNewsletter(
+                        "휴재 뉴스레터",
+                        "sus@test.com",
+                        suspendedOnlyCategory.getId(),
+                        detail.getId(),
+                        null
+                )
+        );
+
+        // when
+        List<CategoryResponse> result = newsletterService.getNewsletters(null, false, null).categories();
+
+        // then
+        assertThat(result).extracting("id").doesNotContain(suspendedOnlyCategory.getId());
+    }
+
+    @Test
+    void includeSuspended가_true일_때_최근_휴재_뉴스레터가_있는_카테고리가_포함된다() {
+        // given - 최근 휴재 뉴스레터만 있는 카테고리
+        Category recentSuspendedCategory = categoryRepository.save(
+                Category.builder().name("최근휴재").build()
+        );
+        LocalDate today = LocalDate.now(clock);
+        LocalDate fiveMonthsAgo = today.minusMonths(5);
+        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        newsletterRepository.save(
+                TestFixture.createSuspendedNewsletter(
+                        "최근 휴재 뉴스레터",
+                        "recent@test.com",
+                        recentSuspendedCategory.getId(),
+                        detail.getId(),
+                        fiveMonthsAgo
+                )
+        );
+
+        // when
+        List<CategoryResponse> result = newsletterService.getNewsletters(null, true, null).categories();
+
+        // then
+        assertThat(result).extracting("id").contains(recentSuspendedCategory.getId());
+    }
+
+    @Test
+    void 폐간만_있는_카테고리는_includeSuspended와_무관하게_항상_제외된다() {
+        // given
+        Category discontinuedOnlyCategory = categoryRepository.save(
+                Category.builder().name("폐간전용").build()
+        );
+        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        newsletterRepository.save(
+                Newsletter.builder()
+                        .name("폐간 뉴스레터")
+                        .description("설명")
+                        .imageUrl("https://cdn.bombom.me/img.png")
+                        .email("disc2@test.com")
+                        .categoryId(discontinuedOnlyCategory.getId())
+                        .detailId(detail.getId())
+                        .status(NewsletterPublicationStatus.DISCONTINUED)
+                        .build()
+        );
+
+        // when
+        List<CategoryResponse> resultWithSuspended = newsletterService.getNewsletters(null, true, null).categories();
+        List<CategoryResponse> resultWithoutSuspended = newsletterService.getNewsletters(null, false, null).categories();
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(resultWithSuspended).extracting("id").doesNotContain(discontinuedOnlyCategory.getId());
+            softly.assertThat(resultWithoutSuspended).extracting("id").doesNotContain(discontinuedOnlyCategory.getId());
+        });
+    }
+
+    @Test
+    void categoryId로_필터링하면_해당_카테고리_뉴스레터만_반환된다() {
+        // given - categories[2](푸드)에 뉴스레터 2개(비즈레터, 우테코)
+        Long categoryId = categories.get(2).getId();
+
+        // when
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false, categoryId).newsletters();
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).hasSize(2);
+            softly.assertThat(result).extracting("newsletterId")
+                    .containsExactlyInAnyOrder(newsletters.get(2).getId(), newsletters.get(3).getId());
+        });
+    }
+
+    @Test
+    void categoryId_필터링과_includeSuspended_false가_함께_적용된다() {
+        // given - 푸드 카테고리에 휴재 뉴스레터 추가
+        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        Newsletter suspendedNewsletter = newsletterRepository.save(
+                TestFixture.createSuspendedNewsletter(
+                        "휴재 푸드 뉴스레터",
+                        "suspended-food@test.com",
+                        categories.get(2).getId(),
+                        detail.getId(),
+                        null
+                )
+        );
+        Long categoryId = categories.get(2).getId();
+
+        // when
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false, categoryId).newsletters();
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).hasSize(2); // ACTIVE 2개만
+            softly.assertThat(result).extracting("newsletterId")
+                    .doesNotContain(suspendedNewsletter.getId());
+        });
+    }
+
+    @Test
+    void categoryId_필터링과_includeSuspended_true가_함께_적용된다() {
+        // given - 푸드 카테고리에 최근 휴재 뉴스레터 추가
+        LocalDate fiveMonthsAgo = LocalDate.now(clock).minusMonths(5);
+        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        Newsletter recentSuspended = newsletterRepository.save(
+                TestFixture.createSuspendedNewsletter(
+                        "최근 휴재 푸드 뉴스레터",
+                        "recent-food@test.com",
+                        categories.get(2).getId(),
+                        detail.getId(),
+                        fiveMonthsAgo
+                )
+        );
+        Long categoryId = categories.get(2).getId();
+
+        // when
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, true, categoryId).newsletters();
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).hasSize(3); // ACTIVE 2개 + 최근 휴재 1개
+            softly.assertThat(result).extracting("newsletterId").contains(recentSuspended.getId());
+        });
+    }
+
+    @Test
+    void includeSuspended가_true여도_장기_휴재만_있는_카테고리는_제외된다() {
+        // given - 장기 휴재(7개월)만 있는 카테고리
+        Category longSuspendedCategory = categoryRepository.save(
+                Category.builder().name("장기휴재전용").build()
+        );
+        LocalDate sevenMonthsAgo = LocalDate.now(clock).minusMonths(7);
+        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        newsletterRepository.save(
+                TestFixture.createSuspendedNewsletter(
+                        "장기 휴재 뉴스레터",
+                        "long@test.com",
+                        longSuspendedCategory.getId(),
+                        detail.getId(),
+                        sevenMonthsAgo
+                )
+        );
+
+        // when
+        List<CategoryResponse> result = newsletterService.getNewsletters(null, true, null).categories();
+
+        // then
+        assertThat(result).extracting("id").doesNotContain(longSuspendedCategory.getId());
+    }
+
+    @Test
+    void 존재하지_않는_categoryId로_필터링하면_빈_리스트가_반환된다() {
+        // given
+        Long nonExistentCategoryId = 0L;
+
+        // when
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false, nonExistentCategoryId).newsletters();
+
+        // then
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -396,7 +608,7 @@ class NewsletterServiceTest {
         );
 
         //when
-        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false);
+        List<NewsletterResponse> result = newsletterService.getNewsletters(null, false, null).newsletters();
 
         //then
         assertSoftly(softly -> {

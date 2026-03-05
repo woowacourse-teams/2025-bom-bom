@@ -2,7 +2,6 @@ package me.bombom.api.v1.newsletter.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 import jakarta.validation.constraints.NotNull;
 import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
 
@@ -23,19 +22,16 @@ public record NewsletterResponse(
         String subscribeUrl,
 
         @NotNull
-        Long categoryId,
-
-        @NotNull
         String category,
 
         @NotNull
         NewsletterPublicationStatus status,
 
-        @Schema(requiredMode = RequiredMode.REQUIRED)
+        @Schema(required = true)
         boolean isSubscribed
 ) {
 
-    @QueryProjection
-    public NewsletterResponse {
-    }
+        @QueryProjection
+        public NewsletterResponse {
+        }
 }

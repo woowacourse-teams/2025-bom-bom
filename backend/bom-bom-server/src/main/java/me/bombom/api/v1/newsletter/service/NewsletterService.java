@@ -8,10 +8,8 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
-import me.bombom.api.v1.newsletter.dto.CategoryResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
-import me.bombom.api.v1.newsletter.dto.NewslettersResponse;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,19 +24,10 @@ public class NewsletterService {
     private final NewsletterRepository newsletterRepository;
     private final Clock clock;
 
-    public NewslettersResponse getNewsletters(Long memberId, boolean includeSuspended, Long categoryId) {
-        LocalDate suspendedHiddenThresholdDate = getSuspendedHiddenThresholdDate();
-        List<NewsletterResponse> allNewsletters = newsletterRepository.findNewslettersInfo(
-                memberId,
-                includeSuspended,
-                suspendedHiddenThresholdDate
-        );
-
-        List<CategoryResponse> categories = CategoryResponse.from(allNewsletters);
-        List<NewsletterResponse> newsletters = (categoryId == null)
-                ? allNewsletters : getCategoryFilteredNewsletters(categoryId, allNewsletters);
-
-        return NewslettersResponse.of(categories, newsletters);
+    public List<NewsletterResponse> getNewsletters(Long memberId, boolean includeSuspended) {
+        LocalDate today = LocalDate.now(clock);
+        LocalDate suspendedHiddenThresholdDate = today.minusMonths(SUSPENDED_HIDDEN_AFTER_MONTHS);
+        return newsletterRepository.findNewslettersInfo(memberId, includeSuspended, suspendedHiddenThresholdDate);
     }
 
     public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Long memberId) {
@@ -54,15 +43,5 @@ public class NewsletterService {
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletter")
                         .addContext(ErrorContextKeys.OPERATION, "getNewsletter")
                         .addContext(ErrorContextKeys.NEWSLETTER_ID, id));
-    }
-
-    private LocalDate getSuspendedHiddenThresholdDate() {
-        return LocalDate.now(clock).minusMonths(SUSPENDED_HIDDEN_AFTER_MONTHS);
-    }
-
-    private List<NewsletterResponse> getCategoryFilteredNewsletters(Long categoryId, List<NewsletterResponse> allNewsletters) {
-        return allNewsletters.stream()
-                .filter(n -> n.categoryId().equals(categoryId))
-                .toList();
     }
 }

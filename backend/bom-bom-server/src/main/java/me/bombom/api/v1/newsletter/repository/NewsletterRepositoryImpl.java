@@ -38,7 +38,6 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
                         newsletter.imageUrl,
                         newsletter.description,
                         newsletterDetail.subscribeUrl,
-                        category.id,
                         category.name,
                         newsletter.status,
                         isSubscribedCondition

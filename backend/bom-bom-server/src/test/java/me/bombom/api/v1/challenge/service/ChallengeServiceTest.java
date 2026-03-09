@@ -282,7 +282,11 @@ class ChallengeServiceTest {
             softly.assertThat(result).hasSize(3);
             softly.assertThat(result)
                     .extracting(ChallengeResponse::id)
-                    .containsExactlyInAnyOrder(early.getId(), late.getId(), ongoingJoined.getId());
+                    .containsExactly(
+                            ongoingJoined.getId(), // ONGOING + 참여
+                            late.getId(),          // LATE
+                            early.getId()          // EARLY
+                    );
             softly.assertThat(result)
                     .extracting(ChallengeResponse::id)
                     .doesNotContain(ongoingNotJoined.getId());

@@ -94,6 +94,8 @@ class ChallengeProgressControllerUnitTest {
                 20,
                 true,
                 5,
+                3,
+                1,
                 List.of(new TodayTodoResponse(ChallengeTodoType.READ, ChallengeTodoStatus.COMPLETE)));
 
         given(challengeProgressService.getMemberProgress(eq(challengeId), any(Member.class)))

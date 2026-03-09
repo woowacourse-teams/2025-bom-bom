@@ -94,5 +94,6 @@ public class ChallengeTodoService {
         );
 
         participant.increaseCompletedDays();
+        participant.increaseStreak();
     }
 }

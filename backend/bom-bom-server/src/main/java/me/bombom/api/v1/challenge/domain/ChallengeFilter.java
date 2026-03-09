@@ -2,6 +2,7 @@ package me.bombom.api.v1.challenge.domain;
 
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.Set;
 
 public enum ChallengeFilter {
@@ -16,8 +17,10 @@ public enum ChallengeFilter {
         }
 
         @Override
-        public Comparator<Challenge> summaryOrderComparator(LocalDate today, Set<Long> joinedChallengeIds) {
-            return Comparator.comparingInt(challenge -> getSummaryOrder(challenge, today, joinedChallengeIds));
+        public Optional<Comparator<Challenge>> orderComparator(LocalDate today, Set<Long> joinedChallengeIds) {
+            return Optional.of(
+                    Comparator.comparingInt(challenge -> getSummaryOrder(challenge, today, joinedChallengeIds))
+            );
         }
     },
     DEFAULT {
@@ -31,14 +34,14 @@ public enum ChallengeFilter {
         }
 
         @Override
-        public Comparator<Challenge> summaryOrderComparator(LocalDate today, Set<Long> joinedChallengeIds) {
-            return (a, b) -> 0;
+        public Optional<Comparator<Challenge>> orderComparator(LocalDate today, Set<Long> joinedChallengeIds) {
+            return Optional.empty();
         }
     };
 
     public abstract boolean isVisible(Challenge challenge, LocalDate today, boolean isJoined);
 
-    public abstract Comparator<Challenge> summaryOrderComparator(LocalDate today, Set<Long> joinedChallengeIds);
+    public abstract Optional<Comparator<Challenge>> orderComparator(LocalDate today, Set<Long> joinedChallengeIds);
 
     static int getSummaryOrder(Challenge challenge, LocalDate today, Set<Long> joinedChallengeIds) {
         ChallengeStatus status = challenge.getStatus(today);

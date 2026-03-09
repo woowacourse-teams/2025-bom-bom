@@ -381,3 +381,180 @@ jobs:
           docker container prune -f --filter "until=24h"
           docker image prune -f --filter "until=24h"
 
+  deploy-sub3:
+    needs: build
+    runs-on: [ self-hosted, event-sub3]
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker 이미지 Pull
+        run: |
+          set -euo pipefail
+          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:event-dev
+          docker pull "$IMAGE"
+
+      - name: 이미지 변경 여부 확인
+        id: compare_digest
+        run: |
+          set -euo pipefail
+          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:event-dev
+
+          NEW=$(docker image inspect --format='{{.Id}}' "$IMAGE")
+
+          # ⚠️ 아래 컨테이너 이름은 docker-compose-event-dev.yml의 container_name과 반드시 동일해야 함
+          CONTAINER_NAME=bombom-server-event-dev
+
+          if docker inspect "$CONTAINER_NAME" &>/dev/null; then
+            CURRENT=$(docker inspect --format='{{.Image}}' "$CONTAINER_NAME")
+          else
+            CURRENT="not_found"
+          fi
+
+          echo "new_image_id=$NEW" >> $GITHUB_OUTPUT
+          echo "current_image_id=$CURRENT" >> $GITHUB_OUTPUT
+
+          if [ "$NEW" = "$CURRENT" ]; then
+            echo "skip_deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip_deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: .env 파일 생성 (redis 제외)
+        run: |
+          set -euo pipefail
+          {
+            echo "DEV_SPRING_DATASOURCE_URL=${{ secrets.EVENT_PROD_SPRING_DATASOURCE_URL }}"
+            echo "DEV_SPRING_DATASOURCE_USERNAME=${{ secrets.PROD_MYSQL_USER }}"
+            echo "DEV_SPRING_DATASOURCE_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}"
+          } > .env
+
+          echo "::add-mask::${{ secrets.DEV_SPRING_DATASOURCE_PASSWORD }}"
+
+      - name: 환경변수 검증
+        run: |
+          set -euo pipefail
+          docker compose -f docker-compose-event-dev.yml --env-file .env config | grep -E 'SPRING_|OTEL_' || true
+
+      - name: 컨테이너 재실행 (p8 ENV 주입)
+        if: steps.compare_digest.outputs.skip_deploy != 'true'
+        shell: bash
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          set -euo pipefail
+          OAUTH2_APPLE_PRIVATE_KEY_RAW="$(printf '%b' "${APPLE_P8_ESCAPED:?APPLE_P8_ESCAPED 시크릿이 없습니다}")"
+          echo "::add-mask::${OAUTH2_APPLE_PRIVATE_KEY_RAW}"
+
+          docker compose --env-file .env -f docker-compose-event-dev.yml down || true
+          OAUTH2_APPLE_PRIVATE_KEY="$OAUTH2_APPLE_PRIVATE_KEY_RAW" \
+          docker compose --env-file .env -f docker-compose-event-dev.yml up -d
+
+      - name: Docker 리소스 정리
+        if: steps.compare_digest.outputs.skip_deploy == 'false'
+        run: |
+          set -euo pipefail
+          docker container prune -f --filter "until=24h"
+          docker image prune -f --filter "until=24h"
+
+  deploy-sub4:
+    needs: build
+    runs-on: [ self-hosted, event-sub4]
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker 이미지 Pull
+        run: |
+          set -euo pipefail
+          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:event-dev
+          docker pull "$IMAGE"
+
+      - name: 이미지 변경 여부 확인
+        id: compare_digest
+        run: |
+          set -euo pipefail
+          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:event-dev
+
+          NEW=$(docker image inspect --format='{{.Id}}' "$IMAGE")
+
+          # ⚠️ 아래 컨테이너 이름은 docker-compose-event-dev.yml의 container_name과 반드시 동일해야 함
+          CONTAINER_NAME=bombom-server-event-dev
+
+          if docker inspect "$CONTAINER_NAME" &>/dev/null; then
+            CURRENT=$(docker inspect --format='{{.Image}}' "$CONTAINER_NAME")
+          else
+            CURRENT="not_found"
+          fi
+
+          echo "new_image_id=$NEW" >> $GITHUB_OUTPUT
+          echo "current_image_id=$CURRENT" >> $GITHUB_OUTPUT
+
+          if [ "$NEW" = "$CURRENT" ]; then
+            echo "skip_deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip_deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: .env 파일 생성 (redis 제외)
+        run: |
+          set -euo pipefail
+          {
+            echo "DEV_SPRING_DATASOURCE_URL=${{ secrets.EVENT_PROD_SPRING_DATASOURCE_URL }}"
+            echo "DEV_SPRING_DATASOURCE_USERNAME=${{ secrets.PROD_MYSQL_USER }}"
+            echo "DEV_SPRING_DATASOURCE_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}"
+          } > .env
+
+          echo "::add-mask::${{ secrets.DEV_SPRING_DATASOURCE_PASSWORD }}"
+
+      - name: 환경변수 검증
+        run: |
+          set -euo pipefail
+          docker compose -f docker-compose-event-dev.yml --env-file .env config | grep -E 'SPRING_|OTEL_' || true
+
+      - name: 컨테이너 재실행 (p8 ENV 주입)
+        if: steps.compare_digest.outputs.skip_deploy != 'true'
+        shell: bash
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          set -euo pipefail
+          OAUTH2_APPLE_PRIVATE_KEY_RAW="$(printf '%b' "${APPLE_P8_ESCAPED:?APPLE_P8_ESCAPED 시크릿이 없습니다}")"
+          echo "::add-mask::${OAUTH2_APPLE_PRIVATE_KEY_RAW}"
+
+          docker compose --env-file .env -f docker-compose-event-dev.yml down || true
+          OAUTH2_APPLE_PRIVATE_KEY="$OAUTH2_APPLE_PRIVATE_KEY_RAW" \
+          docker compose --env-file .env -f docker-compose-event-dev.yml up -d
+
+      - name: Docker 리소스 정리
+        if: steps.compare_digest.outputs.skip_deploy == 'false'
+        run: |
+          set -euo pipefail
+          docker container prune -f --filter "until=24h"
+          docker image prune -f --filter "until=24h"

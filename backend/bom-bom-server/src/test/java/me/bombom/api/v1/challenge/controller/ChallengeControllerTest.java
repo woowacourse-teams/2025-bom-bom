@@ -190,5 +190,11 @@ class ChallengeControllerTest {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].id").value(challenge.getId()));
     }
+
+    @Test
+    void view_허용되지_않은_값이면_400_반환() throws Exception {
+        mockMvc.perform(get("/api/v1/challenges").param("view", "invalid"))
+                .andExpect(status().isBadRequest());
+    }
 }
 

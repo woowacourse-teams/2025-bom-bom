@@ -147,6 +147,8 @@ class ChallengeProgressServiceTest {
             softly.assertThat(response.totalDays()).isEqualTo(10);
             softly.assertThat(response.isSurvived()).isEqualTo(true);
             softly.assertThat(response.completedDays()).isEqualTo(3);
+            softly.assertThat(response.streak()).isEqualTo(0);
+            softly.assertThat(response.shield()).isEqualTo(0);
             softly.assertThat(response.todayTodos()).hasSize(2);
 
             softly.assertThat(response.todayTodos())
@@ -179,6 +181,7 @@ class ChallengeProgressServiceTest {
                 .memberId(member.getId())
                 .completedDays(3)
                 .shield(1)
+                .streak(3)
                 .isSurvived(true)
                 .build());
 
@@ -194,6 +197,7 @@ class ChallengeProgressServiceTest {
             softly.assertThat(updatedParticipant.getCompletedDays())
                     .isEqualTo(participant.getCompletedDays() + 1);
             softly.assertThat(updatedParticipant.isSurvived()).isTrue();
+            softly.assertThat(updatedParticipant.getStreak()).isEqualTo(3); // 쉴드 사용 시 스트릭 유지
 
             List<ChallengeDailyResult> results = challengeDailyResultRepository.findAll();
             softly.assertThat(results).hasSize(1);
@@ -224,6 +228,7 @@ class ChallengeProgressServiceTest {
                 .memberId(member.getId())
                 .completedDays(3)
                 .shield(0)
+                .streak(3)
                 .isSurvived(true)
                 .build());
 
@@ -236,6 +241,7 @@ class ChallengeProgressServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(updatedParticipant.isSurvived()).isTrue();
             softly.assertThat(updatedParticipant.getCompletedDays()).isEqualTo(3);
+            softly.assertThat(updatedParticipant.getStreak()).isEqualTo(0); // 결석 시 스트릭 리셋
         });
     }
 
@@ -417,6 +423,39 @@ class ChallengeProgressServiceTest {
                 .date(date)
                 .status(status)
                 .build();
+    }
+
+    @Test
+    void 연속_참여_스트릭이_응답에_포함된다() {
+        // given
+        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("스트릭 그룹"));
+        Challenge streakChallenge = challengeRepository.save(TestFixture.createChallenge(
+                "Streak Challenge",
+                LocalDate.now().minusDays(5),
+                LocalDate.now().plusDays(5),
+                10,
+                group.getId()));
+
+        challengeParticipantRepository.save(ChallengeParticipant.builder()
+                .challengeId(streakChallenge.getId())
+                .memberId(member.getId())
+                .completedDays(3)
+                .isSurvived(true)
+                .shield(2)
+                .streak(5)
+                .build());
+
+        challengeTodoRepository.save(TestFixture.createChallengeTodo(streakChallenge.getId(), ChallengeTodoType.READ));
+        challengeTodoRepository.save(TestFixture.createChallengeTodo(streakChallenge.getId(), ChallengeTodoType.COMMENT));
+
+        // when
+        MemberChallengeProgressResponse response = challengeProgressService.getMemberProgress(streakChallenge.getId(), member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.streak()).isEqualTo(5);
+            softly.assertThat(response.shield()).isEqualTo(2);
+        });
     }
 
     @Test

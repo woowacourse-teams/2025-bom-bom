@@ -20,6 +20,12 @@ public record MemberChallengeProgressResponse(
         @Schema(required = true)
         int completedDays,
 
+        @Schema(requiredMode = RequiredMode.REQUIRED)
+        int streak,
+
+        @Schema(requiredMode = RequiredMode.REQUIRED)
+        int shield,
+
         @NotNull
         List<TodayTodoResponse> todayTodos
 ) {
@@ -36,6 +42,8 @@ public record MemberChallengeProgressResponse(
                 representative.totalDays(),
                 representative.isSurvived(),
                 representative.completedDays(),
+                representative.streak(),
+                representative.shield(),
                 todayTodos
         );
     }

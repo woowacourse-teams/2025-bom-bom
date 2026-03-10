@@ -6,6 +6,9 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -24,20 +27,27 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 class LoginMemberArgumentResolverTest {
+
+    private static final String SESSION_COOKIE_NAME = "JSESSIONID_TEST";
+    private static final String SESSION_COOKIE_DOMAIN = "example.com";
 
     private LoginMemberArgumentResolver resolver;
 
     @BeforeEach
     void setUp() {
-        resolver = new LoginMemberArgumentResolver();
+        resolver = new LoginMemberArgumentResolver(SESSION_COOKIE_NAME, SESSION_COOKIE_DOMAIN);
     }
 
     @AfterEach
     void tearDown() {
         SecurityContextHolder.clearContext();
     }
+
 
     static class StubController {
         public void endpointMember(@LoginMember Member member) {
@@ -126,6 +136,44 @@ class LoginMemberArgumentResolverTest {
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_TOKEN);
     }
 
+    @Test
+    @DisplayName("비로그인(anonymous) 요청에서 세션 쿠키가 있으면 세션/쿠키를 정리한다")
+    void resolve_WhenAnonymousWithSessionCookie_ClearsInvalidSession() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        request.setCookies(new Cookie(SESSION_COOKIE_NAME, "session-token"));
+        request.getSession();
+
+        setAnonymousAuthentication();
+        NativeWebRequest webRequest = createWebRequest(request, response);
+
+        Object result = resolver.resolveArgument(paramMemberAnonymousTrue(), null, webRequest, null);
+
+        assertThat(result).isNull();
+        verifyInvalidSessionCookie(response);
+        assertThat(request.getSession(false)).isNull();
+    }
+
+    @Test
+    @DisplayName("principal 타입이 비정상이고 세션 쿠키가 있으면 INVALID_TOKEN 예외와 함께 세션/쿠키를 정리한다")
+    void resolve_WhenInvalidPrincipalWithSessionCookie_ClearsInvalidSession() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        request.setCookies(new Cookie(SESSION_COOKIE_NAME, "session-token"));
+        request.getSession();
+        TestingAuthenticationToken auth = new TestingAuthenticationToken("notCustomUser", null);
+        auth.setAuthenticated(true);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        NativeWebRequest webRequest = createWebRequest(request, response);
+
+        assertThatThrownBy(() -> resolver.resolveArgument(paramMember(), null, webRequest, null))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_TOKEN);
+        verifyInvalidSessionCookie(response);
+        assertThat(request.getSession(false)).isNull();
+    }
+
     private void setAnonymousAuthentication() {
         Authentication anonymous = new AnonymousAuthenticationToken(
                 "key", "anonymousUser", List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS")));
@@ -164,5 +212,18 @@ class LoginMemberArgumentResolverTest {
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private NativeWebRequest createWebRequest(MockHttpServletRequest request, MockHttpServletResponse response) {
+        NativeWebRequest webRequest = mock(NativeWebRequest.class);
+        given(webRequest.getNativeRequest(HttpServletRequest.class)).willReturn(request);
+        given(webRequest.getNativeResponse(HttpServletResponse.class)).willReturn(response);
+        return webRequest;
+    }
+
+    private void verifyInvalidSessionCookie(MockHttpServletResponse response) {
+        assertThat(response.getCookie(SESSION_COOKIE_NAME)).isNotNull();
+        assertThat(response.getCookie(SESSION_COOKIE_NAME).getMaxAge()).isEqualTo(0);
+        assertThat(response.getCookie(SESSION_COOKIE_NAME).getPath()).isEqualTo("/");
     }
 }

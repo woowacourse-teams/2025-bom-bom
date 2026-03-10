@@ -54,7 +54,7 @@ class SubscribeControllerTest {
 
         @Bean
         public LoginMemberArgumentResolver loginMemberArgumentResolver() {
-            return new LoginMemberArgumentResolver();
+            return new LoginMemberArgumentResolver("JSESSIONID", "");
         }
 
         @Bean
@@ -71,7 +71,7 @@ class SubscribeControllerTest {
 
         @Override
         public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-            resolvers.add(new LoginMemberArgumentResolver());
+            resolvers.add(new LoginMemberArgumentResolver("JSESSIONID", ""));
 
         }
     }

@@ -100,8 +100,13 @@ public class ChallengeDailyGuideService {
     }
 
     @Transactional
-    public CreateCommentResponse createDailyGuideComment(Long challengeId, int dayIndex, Long memberId,
-            DailyGuideCommentRequest request, LocalDate today) {
+    public CreateCommentResponse createDailyGuideComment(
+            Long challengeId,
+            int dayIndex,
+            Long memberId,
+            DailyGuideCommentRequest request
+    ) {
+        LocalDate today = LocalDate.now(clock);
         Challenge challenge = getChallenge(challengeId);
 
         ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(

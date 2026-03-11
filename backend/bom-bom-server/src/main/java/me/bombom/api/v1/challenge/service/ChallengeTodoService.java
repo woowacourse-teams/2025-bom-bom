@@ -104,5 +104,6 @@ public class ChallengeTodoService {
 
         participant.increaseCompletedDays();
         participant.increaseStreak();
+        challengeParticipantRepository.save(participant);
     }
 }

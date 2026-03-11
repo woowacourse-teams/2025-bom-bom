@@ -43,7 +43,6 @@ public class ChallengeCommentService {
     private final ArticleRepository articleRepository;
     private final HighlightRepository highlightRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final ChallengeTodoService challengeTodoService;
     private final Clock clock;
 
     @Value("${challenge.highlight.truncate-ratio}")

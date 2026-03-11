@@ -11,6 +11,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
 import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -27,6 +28,7 @@ public class ChallengeTodoService {
     private final ChallengeTodoRepository challengeTodoRepository;
     private final ChallengeDailyTodoRepository challengeDailyTodoRepository;
     private final ChallengeDailyResultRepository challengeDailyResultRepository;
+    private final ChallengeParticipantRepository challengeParticipantRepository;
 
     public boolean isCompletedToday(Long participantId, LocalDate today) {
         return challengeDailyResultRepository.existsByParticipantIdAndDate(participantId, today);
@@ -95,5 +97,6 @@ public class ChallengeTodoService {
 
         participant.increaseCompletedDays();
         participant.increaseStreak();
+        challengeParticipantRepository.save(participant);
     }
 }

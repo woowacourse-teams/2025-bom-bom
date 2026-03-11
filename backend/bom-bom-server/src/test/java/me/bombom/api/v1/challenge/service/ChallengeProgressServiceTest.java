@@ -197,12 +197,46 @@ class ChallengeProgressServiceTest {
             softly.assertThat(updatedParticipant.getCompletedDays())
                     .isEqualTo(participant.getCompletedDays() + 1);
             softly.assertThat(updatedParticipant.isSurvived()).isTrue();
-            softly.assertThat(updatedParticipant.getStreak()).isEqualTo(3); // 쉴드 사용 시 스트릭 유지
+            softly.assertThat(updatedParticipant.getStreak()).isEqualTo(4); // 쉴드 사용 시 스트릭 증가
 
             List<ChallengeDailyResult> results = challengeDailyResultRepository.findAll();
             softly.assertThat(results).hasSize(1);
             softly.assertThat(results.getFirst().getStatus()).isEqualTo(ChallengeDailyStatus.SHIELD);
             softly.assertThat(results.getFirst().getDate()).isEqualTo(yesterday);
+        });
+    }
+
+    @Test
+    void 쉴드_사용_시_스트릭이_증가한다() {
+        // given
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+
+        NewsletterGroup group = TestFixture.createNewsletterGroup("쉴드 스트릭 그룹");
+        newsletterGroupRepository.save(group);
+        Challenge streakChallenge = challengeRepository.save(TestFixture.createChallenge(
+                "Shield Streak Challenge",
+                yesterday.minusDays(4),
+                yesterday.plusDays(5),
+                10,
+                group.getId()));
+
+        ChallengeParticipant participant = challengeParticipantRepository.save(ChallengeParticipant.builder()
+                .challengeId(streakChallenge.getId())
+                .memberId(member.getId())
+                .completedDays(3)
+                .shield(1)
+                .streak(5)
+                .isSurvived(true)
+                .build());
+
+        // when
+        challengeProgressService.proceedDailySurvivalCheck(streakChallenge, yesterday);
+
+        // then
+        ChallengeParticipant updated = challengeParticipantRepository.findById(participant.getId()).orElseThrow();
+        assertSoftly(softly -> {
+            softly.assertThat(updated.getShield()).isEqualTo(0);
+            softly.assertThat(updated.getStreak()).isEqualTo(6);
         });
     }
 

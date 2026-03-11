@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import me.bombom.api.v1.challenge.dto.request.DailyGuideCommentRequest;
+import me.bombom.api.v1.challenge.dto.response.CreateCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.MemberDailyCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse;
@@ -65,7 +66,7 @@ public interface ChallengeDailyGuideControllerApi {
             @ApiResponse(responseCode = "403", description = "챌린지 참여 권한 없음 또는 댓글 작성 불가", content = @Content),
             @ApiResponse(responseCode = "404", description = "챌린지 또는 데일리 가이드를 찾을 수 없음", content = @Content)
     })
-    void createDailyGuideComment(
+    CreateCommentResponse createDailyGuideComment(
             @Parameter(hidden = true) @LoginMember Member member,
             @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
             @Parameter(description = "일차 인덱스 (1부터 시작)") @PathVariable @Positive(message = "일차 인덱스는 1 이상의 값이어야 합니다.") int dayIndex,

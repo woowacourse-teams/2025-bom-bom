@@ -12,6 +12,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.dto.request.DailyGuideCommentRequest;
+import me.bombom.api.v1.challenge.dto.response.CreateCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.MemberDailyCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse;
@@ -99,7 +100,7 @@ public class ChallengeDailyGuideService {
     }
 
     @Transactional
-    public void createDailyGuideComment(Long challengeId, int dayIndex, Long memberId,
+    public CreateCommentResponse createDailyGuideComment(Long challengeId, int dayIndex, Long memberId,
             DailyGuideCommentRequest request, LocalDate today) {
         Challenge challenge = getChallenge(challengeId);
 
@@ -145,25 +146,24 @@ public class ChallengeDailyGuideService {
                 .build();
         challengeDailyGuideCommentRepository.save(comment);
 
+        boolean firstCompletion = false;
+
         // day1일 때만 체크리스트 자동 완료 처리
         if (dayIndex == 1) {
             // MINDSET 투두 생성 (마인드셋 댓글 작성)
             challengeTodoService.insertMindsetDone(participant, today);
-            // TODO: 과도기라서 모두 완료 처리가 필요해 보임. 추후 삭제 필요
-            // READ 투두 자동 생성 (뉴스레터 1개 읽기)
-            challengeDailyTodoService.updateChallengeDailyTodo(memberId, null, today);
-            // COMMENT 투두 생성 (한 줄 코멘트 작성)
-            challengeTodoService.insertCommentDone(participant, today);
 
             // 이미 완료되지 않았으면 progress 처리
             if (!challengeTodoService.isCompletedToday(participant.getId(), today)) {
                 challengeTodoService.completeDailyTodo(participant, today);
+                firstCompletion = true;
                 if (participant.getChallengeTeamId() != null) {
                     ChallengeTeam challengeTeam = challengeTeamService.getByParticipant(participant);
                     challengeTeamService.updateTeamProgress(challengeTeam);
                 }
             }
         }
+        return new CreateCommentResponse(firstCompletion);
     }
 
     public MemberDailyCommentResponse getDailyGuideComment(Long challengeId, int dayIndex, Long memberId) {

@@ -53,6 +53,9 @@ public class ChallengeProgressService {
         for (ChallengeParticipant absentee : absentees) {
             if (absentee.useShieldIfAvailable()) {
                 saveShieldDailyResult(absentee, yesterday);
+                // TODO: [결정 필요] 쉴드 사용 시 스트릭 정책 미정
+                //  현재: 스트릭 유지 (increaseStreak 없음, resetStreak 없음)
+                //  쉴드는 결석을 커버하는 것이지 증가 아님 vs 쉴드 = 투두 완료로 보고 증가 시켜야 한다.
                 continue;
             }
             absentee.resetStreak();

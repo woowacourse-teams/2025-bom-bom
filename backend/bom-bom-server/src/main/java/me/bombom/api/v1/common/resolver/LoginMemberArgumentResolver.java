@@ -80,6 +80,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
         Member member = oauth2User.getMember();
         if (member == null) {
+            clearInvalidSessionIfPresent(webRequest);
             throw new UnauthorizedException(ErrorDetail.UNAUTHORIZED);
         }
 

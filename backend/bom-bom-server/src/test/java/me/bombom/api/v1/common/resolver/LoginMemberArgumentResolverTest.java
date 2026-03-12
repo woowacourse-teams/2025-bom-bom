@@ -125,6 +125,24 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
+    @DisplayName("principal 타입은 정상이지만 member가 null이고 세션 쿠키가 있으면 UNAUTHORIZED 예외와 함께 세션/쿠키를 정리한다")
+    void resolve_WhenMemberIsNullWithSessionCookie_ClearsInvalidSession() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        request.setCookies(new Cookie(SESSION_COOKIE_NAME, "session-token"));
+        request.getSession();
+        setLoggedInAuthentication(null);
+
+        NativeWebRequest webRequest = createWebRequest(request, response);
+
+        assertThatThrownBy(() -> resolver.resolveArgument(paramMember(), null, webRequest, null))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.UNAUTHORIZED);
+        verifyInvalidSessionCookie(response);
+        assertThat(request.getSession(false)).isNull();
+    }
+
+    @Test
     @DisplayName("비정상적인 Principal 타입이면 INVALID_TOKEN 예외를 던진다")
     void resolve_WhenInvalidPrincipal_ThrowsException() throws Exception {
         TestingAuthenticationToken auth = new TestingAuthenticationToken("notCustomUser", null);

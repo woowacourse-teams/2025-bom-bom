@@ -35,6 +35,7 @@ public interface ChallengeProgressControllerApi {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "스트릭 조회 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content),
+            @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),
             @ApiResponse(responseCode = "403", description = "챌린지에 참가하지 않음", content = @Content),
             @ApiResponse(responseCode = "404", description = "챌린지/참가자를 찾을 수 없음", content = @Content),
     })

@@ -84,7 +84,7 @@ public class ChallengeCommentService {
         ChallengeParticipant participant = getChallengeParticipant(memberId, challengeId);
 
         LocalDate today = LocalDate.now(clock);
-        boolean firstCompletion = !challengeTodoService.isCompletedToday(participant.getId(), today);
+        boolean isFirstCompletion = !challengeTodoService.isCompletedToday(participant.getId(), today);
 
         Article article = articleRepository.findById(request.articleId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
@@ -102,7 +102,7 @@ public class ChallengeCommentService {
 
         challengeCommentRepository.save(comment);
         applicationEventPublisher.publishEvent(new CreateChallengeCommentEvent(participant.getId()));
-        return new CreateCommentResponse(firstCompletion);
+        return new CreateCommentResponse(isFirstCompletion);
     }
 
     public Page<ChallengeCommentHighlightResponse> getChallengeArticleHighlights(

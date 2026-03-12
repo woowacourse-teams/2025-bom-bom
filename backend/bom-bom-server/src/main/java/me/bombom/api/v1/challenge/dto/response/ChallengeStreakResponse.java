@@ -20,9 +20,7 @@ public record ChallengeStreakResponse(
     }
 
     public static ChallengeStreakResponse of(int streak, List<ChallengeDailyResult> results) {
-        List<StreakDayResponse> days = results.reversed().stream()
-                .map(StreakDayResponse::from)
-                .toList();
+        List<StreakDayResponse> days = StreakDayResponse.from(results);
         return new ChallengeStreakResponse(streak, days);
     }
 }

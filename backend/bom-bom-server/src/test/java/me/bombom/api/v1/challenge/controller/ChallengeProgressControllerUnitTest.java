@@ -20,7 +20,9 @@ import me.bombom.api.v1.challenge.domain.ChallengeTodoStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.response.CertificationInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeStreakResponse;
 import me.bombom.api.v1.challenge.dto.response.MemberChallengeProgressResponse;
+import me.bombom.api.v1.challenge.dto.response.StreakDayResponse;
 import me.bombom.api.v1.challenge.dto.response.TeamChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayTodoResponse;
 import me.bombom.api.v1.challenge.service.ChallengeProgressService;
@@ -184,6 +186,79 @@ class ChallengeProgressControllerUnitTest {
 
         // when & then
         mockMvc.perform(get("/api/v1/challenges/{id}/progress/teams/{teamId}", challengeId, invalidTeamId)
+                        .with(authentication(authentication)))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @Test
+    void 챌린지_스트릭_조회_성공() throws Exception {
+        // given
+        Long challengeId = 1L;
+        LocalDate today = LocalDate.now();
+        ChallengeStreakResponse response = new ChallengeStreakResponse(
+                3,
+                List.of(
+                        new StreakDayResponse(today.minusDays(2), today.minusDays(2).getDayOfWeek(), false),
+                        new StreakDayResponse(today.minusDays(1), today.minusDays(1).getDayOfWeek(), true),
+                        new StreakDayResponse(today, today.getDayOfWeek(), false)
+                )
+        );
+
+        given(challengeProgressService.getMemberStreak(eq(challengeId), any(Member.class), eq(5)))
+                .willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges/{id}/progress/me/streak", challengeId)
+                        .with(authentication(authentication)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.streak").value(3))
+                .andExpect(jsonPath("$.streakDays").isArray())
+                .andExpect(jsonPath("$.streakDays.length()").value(3))
+                .andExpect(jsonPath("$.streakDays[0].date").value(today.minusDays(2).toString()))
+                .andExpect(jsonPath("$.streakDays[0].dayOfWeek").value(today.minusDays(2).getDayOfWeek().toString()))
+                .andExpect(jsonPath("$.streakDays[0].shieldApplied").value(false))
+                .andExpect(jsonPath("$.streakDays[1].shieldApplied").value(true))
+                .andDo(print());
+    }
+
+    @Test
+    void 챌린지_스트릭_조회_성공_limit_파라미터_적용() throws Exception {
+        // given
+        Long challengeId = 1L;
+        ChallengeStreakResponse response = new ChallengeStreakResponse(10, List.of());
+
+        given(challengeProgressService.getMemberStreak(eq(challengeId), any(Member.class), eq(3)))
+                .willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges/{id}/progress/me/streak", challengeId)
+                        .param("limit", "3")
+                        .with(authentication(authentication)))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    void 챌린지_스트릭_조회_실패_ID가_양수가_아님() throws Exception {
+        // given
+        Long invalidId = -1L;
+
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges/{id}/progress/me/streak", invalidId)
+                        .with(authentication(authentication)))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @Test
+    void 챌린지_스트릭_조회_실패_limit가_양수가_아님() throws Exception {
+        // given
+        Long challengeId = 1L;
+
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges/{id}/progress/me/streak", challengeId)
+                        .param("limit", "0")
                         .with(authentication(authentication)))
                 .andExpect(status().isBadRequest())
                 .andDo(print());

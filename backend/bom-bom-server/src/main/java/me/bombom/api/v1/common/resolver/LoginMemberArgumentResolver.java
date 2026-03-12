@@ -22,9 +22,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @Slf4j
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private static final int INVALID_SESSION_MAX_AGE_SECONDS = 0;
     private static final String SESSION_COOKIE_PATH = "/";
-    private static final String SESSION_COOKIE_EMPTY_VALUE = "";
     private static final String SESSION_DOMAIN_ATTRIBUTE_PREFIX = "; Domain=";
     private static final String SESSION_COOKIE_SECURE_FLAGS = "; Secure; HttpOnly; SameSite=None";
     private static final String SESSION_COOKIE_HEADER_FORMAT = "%s=; Max-Age=0; Path=%s%s" + SESSION_COOKIE_SECURE_FLAGS;
@@ -145,20 +143,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     }
 
     private void expireSessionCookie(HttpServletResponse response) {
-        response.addCookie(buildExpiredSessionCookie());
         response.addHeader("Set-Cookie", buildExpiredSessionCookieHeader());
-    }
-
-    private Cookie buildExpiredSessionCookie() {
-        Cookie expiredSessionCookie = new Cookie(sessionCookieName, SESSION_COOKIE_EMPTY_VALUE);
-        expiredSessionCookie.setMaxAge(INVALID_SESSION_MAX_AGE_SECONDS);
-        expiredSessionCookie.setPath(SESSION_COOKIE_PATH);
-        expiredSessionCookie.setHttpOnly(true);
-        expiredSessionCookie.setSecure(true);
-        if (StringUtils.hasText(sessionCookieDomain)) {
-            expiredSessionCookie.setDomain(sessionCookieDomain);
-        }
-        return expiredSessionCookie;
     }
 
     private String buildExpiredSessionCookieHeader() {

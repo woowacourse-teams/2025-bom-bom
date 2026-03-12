@@ -15,6 +15,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.response.CertificationInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeStreakResponse;
 import me.bombom.api.v1.challenge.dto.response.MemberChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TeamChallengeProgressResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
@@ -28,6 +29,7 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,6 +71,23 @@ public class ChallengeProgressService {
         validateMemberProgressDataIntegrity(id, member, progressList);
 
         return MemberChallengeProgressResponse.of(member, progressList);
+    }
+
+    public ChallengeStreakResponse getMemberStreak(Long challengeId, Member member, int limit) {
+        validateParticipation(challengeId, member);
+        ChallengeParticipant participant = getChallengeParticipant(challengeId, member.getId());
+
+        int streak = participant.getStreak();
+        int fetchCount = Math.min(limit, streak);
+        if (fetchCount == 0) {
+            return ChallengeStreakResponse.empty();
+        }
+
+        List<ChallengeDailyResult> recentDays = challengeDailyResultRepository.findByParticipantIdOrderByDateDesc(
+                participant.getId(),
+                PageRequest.of(0, fetchCount)
+        );
+        return ChallengeStreakResponse.of(streak, recentDays);
     }
 
     public TeamChallengeProgressResponse getTeamProgressByTeamId(Long challengeId, Long teamId, Member member) {

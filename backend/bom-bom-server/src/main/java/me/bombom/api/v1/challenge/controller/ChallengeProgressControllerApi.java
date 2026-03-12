@@ -8,11 +8,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
 import me.bombom.api.v1.challenge.dto.response.CertificationInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeStreakResponse;
 import me.bombom.api.v1.challenge.dto.response.MemberChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TeamChallengeProgressResponse;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "ChallengeProgress", description = "챌린지 진행도 관련 API")
 public interface ChallengeProgressControllerApi {
@@ -27,6 +29,19 @@ public interface ChallengeProgressControllerApi {
     MemberChallengeProgressResponse getMemberProgress(
             @Parameter(hidden = true) @LoginMember Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+    );
+
+    @Operation(summary = "챌린지 스트릭 조회", description = "사용자의 현재 스트릭 값과 스트릭을 구성하는 날짜 목록(날짜, 요일, 쉴드 적용 여부)을 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "스트릭 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content),
+            @ApiResponse(responseCode = "403", description = "챌린지에 참가하지 않음", content = @Content),
+            @ApiResponse(responseCode = "404", description = "챌린지/참가자를 찾을 수 없음", content = @Content),
+    })
+    ChallengeStreakResponse getMemberStreak(
+            @Parameter(hidden = true) @LoginMember Member member,
+            @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
+            @Parameter(description = "조회할 스트릭 날짜 수 (기본값: 5)") @RequestParam(defaultValue = "5") @Positive(message = "limit는 1 이상의 값이어야 합니다.") int limit
     );
 
     @Operation(summary = "특정 팀 진행도 조회", description = "특정 팀의 진행도 및 팀원들의 진행 상황을 조회합니다.")

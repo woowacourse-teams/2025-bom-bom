@@ -17,7 +17,7 @@ public record StreakDayResponse(
         DayOfWeek dayOfWeek,
 
         @Schema(requiredMode = RequiredMode.REQUIRED)
-        boolean shieldApplied
+        boolean isShieldApplied
 ) {
 
     public static StreakDayResponse from(ChallengeDailyResult result) {

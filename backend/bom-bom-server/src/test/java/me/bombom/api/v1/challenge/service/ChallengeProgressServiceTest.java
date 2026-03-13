@@ -542,7 +542,7 @@ class ChallengeProgressServiceTest {
     }
 
     @Test
-    void 쉴드_사용_날은_shieldApplied가_true다() {
+    void 쉴드_사용_날은_isShieldApplied가_true다() {
         // given
         Challenge streakChallenge = createStreakChallenge("쉴드 확인 챌린지");
         ChallengeParticipant participant = challengeParticipantRepository.save(ChallengeParticipant.builder()
@@ -565,8 +565,8 @@ class ChallengeProgressServiceTest {
 
         // then
         assertSoftly(softly -> {
-            softly.assertThat(response.streakDays().get(0).shieldApplied()).isTrue();   // yesterday: SHIELD
-            softly.assertThat(response.streakDays().get(1).shieldApplied()).isFalse();  // today: COMPLETE
+            softly.assertThat(response.streakDays().get(0).isShieldApplied()).isTrue();   // yesterday: SHIELD
+            softly.assertThat(response.streakDays().get(1).isShieldApplied()).isFalse();  // today: COMPLETE
         });
     }
 

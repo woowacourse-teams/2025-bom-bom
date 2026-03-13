@@ -217,8 +217,8 @@ class ChallengeProgressControllerUnitTest {
                 .andExpect(jsonPath("$.streakDays.length()").value(3))
                 .andExpect(jsonPath("$.streakDays[0].date").value(today.minusDays(2).toString()))
                 .andExpect(jsonPath("$.streakDays[0].dayOfWeek").value(today.minusDays(2).getDayOfWeek().toString()))
-                .andExpect(jsonPath("$.streakDays[0].shieldApplied").value(false))
-                .andExpect(jsonPath("$.streakDays[1].shieldApplied").value(true))
+                .andExpect(jsonPath("$.streakDays[0].isShieldApplied").value(false))
+                .andExpect(jsonPath("$.streakDays[1].isShieldApplied").value(true))
                 .andDo(print());
     }
 

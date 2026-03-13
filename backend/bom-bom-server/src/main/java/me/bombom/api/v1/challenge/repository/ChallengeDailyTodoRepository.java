@@ -31,7 +31,6 @@ public interface ChallengeDailyTodoRepository extends JpaRepository<ChallengeDai
                             FROM article a
                             WHERE a.id = :articleId
                               AND a.member_id = cp.member_id
-                              AND DATE(a.arrived_date_time) = :today
                         )
                   )
             """, nativeQuery = true)

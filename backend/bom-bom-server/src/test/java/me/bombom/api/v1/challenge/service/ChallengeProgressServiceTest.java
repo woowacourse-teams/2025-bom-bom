@@ -197,7 +197,7 @@ class ChallengeProgressServiceTest {
             softly.assertThat(updatedParticipant.getCompletedDays())
                     .isEqualTo(participant.getCompletedDays() + 1);
             softly.assertThat(updatedParticipant.isSurvived()).isTrue();
-            softly.assertThat(updatedParticipant.getStreak()).isEqualTo(4); // 쉴드 사용 시 스트릭 증가
+            softly.assertThat(updatedParticipant.getStreak()).isEqualTo(3); // 쉴드 사용 시 스트릭 유지
 
             List<ChallengeDailyResult> results = challengeDailyResultRepository.findAll();
             softly.assertThat(results).hasSize(1);
@@ -207,7 +207,7 @@ class ChallengeProgressServiceTest {
     }
 
     @Test
-    void 쉴드_사용_시_스트릭이_증가한다() {
+    void 쉴드_사용_시_스트릭을_유지한다() {
         // given
         LocalDate yesterday = LocalDate.now().minusDays(1);
 
@@ -236,7 +236,7 @@ class ChallengeProgressServiceTest {
         ChallengeParticipant updated = challengeParticipantRepository.findById(participant.getId()).orElseThrow();
         assertSoftly(softly -> {
             softly.assertThat(updated.getShield()).isEqualTo(0);
-            softly.assertThat(updated.getStreak()).isEqualTo(6);
+            softly.assertThat(updated.getStreak()).isEqualTo(5);
         });
     }
 

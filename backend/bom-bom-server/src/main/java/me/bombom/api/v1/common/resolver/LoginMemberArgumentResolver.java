@@ -55,7 +55,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             return resolveAnonymousRequest(loginMember, webRequest);
         }
 
-        return resolveAuthenticatedRequest(parameter, authentication, webRequest);
+        return resolveAuthenticatedRequest(parameter, loginMember, authentication, webRequest);
     }
 
     private Object resolveAnonymousRequest(LoginMember loginMember, NativeWebRequest webRequest) {
@@ -70,18 +70,17 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     private Object resolveAuthenticatedRequest(
             MethodParameter parameter,
+            LoginMember loginMember,
             Authentication authentication,
             NativeWebRequest webRequest
     ) {
         if (!(authentication.getPrincipal() instanceof CustomOAuth2User oauth2User)) {
-            clearInvalidSessionIfPresent(webRequest);
-            throw new UnauthorizedException(ErrorDetail.INVALID_TOKEN);
+            return handleInvalidAuthentication(loginMember, webRequest, ErrorDetail.INVALID_TOKEN);
         }
 
         Member member = oauth2User.getMember();
         if (member == null) {
-            clearInvalidSessionIfPresent(webRequest);
-            throw new UnauthorizedException(ErrorDetail.UNAUTHORIZED);
+            return handleInvalidAuthentication(loginMember, webRequest, ErrorDetail.UNAUTHORIZED);
         }
 
         if (parameter.getParameterType().equals(Long.class)) {
@@ -94,6 +93,22 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         return authentication == null
                 || !authentication.isAuthenticated()
                 || authentication instanceof AnonymousAuthenticationToken;
+    }
+
+    private Object handleInvalidAuthentication(
+            LoginMember loginMember,
+            NativeWebRequest webRequest,
+            ErrorDetail errorDetail
+    ) {
+        clearInvalidSessionIfPresent(webRequest);
+        if (isInvalidTokenAllowed(loginMember)) {
+            return null;
+        }
+        throw new UnauthorizedException(errorDetail);
+    }
+
+    private boolean isInvalidTokenAllowed(LoginMember loginMember) {
+        return loginMember != null && loginMember.allowInvalidToken();
     }
 
     private void clearInvalidSessionIfPresent(NativeWebRequest webRequest) {

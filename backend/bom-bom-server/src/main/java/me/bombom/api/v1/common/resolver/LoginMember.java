@@ -13,4 +13,6 @@ import java.lang.annotation.Target;
 public @interface LoginMember {
 
     boolean anonymous() default false;
+
+    boolean allowInvalidToken() default false;
 }

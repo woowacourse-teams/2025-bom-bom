@@ -25,6 +25,7 @@ public enum ErrorContextKeys {
     HIGHLIGHT_ID("highlightId"),
     CHALLENGE_ID("challengeId"),
     CHALLENGE_TEAM_ID("challengeTeamId"),
+    CHALLENGE_PARTICIPANT_ID("challengeParticipantId"),
     COMMENT_ID("commentId"),
     DETAIL("detail"),
     ;

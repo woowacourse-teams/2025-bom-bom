@@ -7,9 +7,9 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-import jakarta.validation.ConstraintViolationException;
 
 @Slf4j
 @RestControllerAdvice
@@ -24,6 +24,33 @@ public class GlobalExceptionHandler {
         }
         return ResponseEntity.status(e.getHttpStatus())
                 .body(ErrorResponse.from(e.getErrorDetail()));
+    }
+
+    @ExceptionHandler(ConversionFailedException.class)
+    public ResponseEntity<ErrorResponse> handleConversionFailedException(ConversionFailedException e) {
+        Throwable cause = e.getCause();
+        if (cause instanceof CIllegalArgumentException illegalArg) {
+            return handleIllegalArgumentException(illegalArg);
+        }
+        log.info("Conversion failed: ", e);
+        return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION.getStatus())
+                .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException e
+    ) {
+        Throwable cause = e.getCause();
+        if (cause instanceof ConversionFailedException conversionFailed) {
+            return handleConversionFailedException(conversionFailed);
+        }
+        if (cause instanceof CIllegalArgumentException illegalArg) {
+            return handleIllegalArgumentException(illegalArg);
+        }
+        log.info("Method argument type mismatch: ", e);
+        return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION.getStatus())
+                .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION));
     }
 
     @ExceptionHandler(UnauthorizedException.class)

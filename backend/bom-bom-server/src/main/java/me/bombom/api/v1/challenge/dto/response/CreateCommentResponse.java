@@ -4,4 +4,8 @@ public record CreateCommentResponse(
 
         boolean isFirstCompletion
 ) {
+
+    public static CreateCommentResponse from(boolean isFirstCompletion) {
+        return new CreateCommentResponse(isFirstCompletion);
+    }
 }

@@ -160,7 +160,7 @@ public class ChallengeDailyGuideService {
 
             // 이미 완료되지 않았으면 progress 처리
             if (!challengeTodoService.isCompletedToday(participant.getId(), today)) {
-                challengeTodoService.completeDailyTodo(participant, today);
+                challengeTodoService.completeDailyTodo(participant.getId(), today);
                 firstCompletion = true;
                 if (participant.getChallengeTeamId() != null) {
                     ChallengeTeam challengeTeam = challengeTeamService.getByParticipant(participant);

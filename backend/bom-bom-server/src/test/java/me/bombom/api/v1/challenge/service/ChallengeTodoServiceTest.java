@@ -80,7 +80,7 @@ class ChallengeTodoServiceTest {
     @Test
     void 일일_투두_완료_시_completedDays와_streak가_증가한다() {
         // when
-        challengeTodoService.completeDailyTodo(participant, LocalDate.now());
+        challengeTodoService.completeDailyTodo(participant.getId(), LocalDate.now());
 
         // then
         ChallengeParticipant updated = challengeParticipantRepository.findById(participant.getId()).orElseThrow();

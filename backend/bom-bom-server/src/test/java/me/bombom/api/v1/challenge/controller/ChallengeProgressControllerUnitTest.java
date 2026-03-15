@@ -26,7 +26,7 @@ import me.bombom.api.v1.challenge.dto.response.StreakDayResponse;
 import me.bombom.api.v1.challenge.dto.response.TeamChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayTodoResponse;
 import me.bombom.api.v1.challenge.service.ChallengeProgressService;
-import me.bombom.api.v1.common.config.WebConfig;
+import me.bombom.api.v1.common.exception.GlobalExceptionHandler;
 import me.bombom.api.v1.common.resolver.LoginMemberArgumentResolver;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -35,18 +35,53 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @AutoConfigureMockMvc
-@Import({ WebConfig.class, LoginMemberArgumentResolver.class })
-@WebMvcTest(ChallengeProgressController.class)
+@Import({
+        ChallengeProgressController.class,
+        GlobalExceptionHandler.class,
+        ChallengeProgressControllerUnitTest.TestConfig.class
+})
+@WebMvcTest(value = ChallengeProgressController.class, properties = "LOG_PATH=build/logs")
 class ChallengeProgressControllerUnitTest {
+
+    @Configuration
+    @EnableWebSecurity
+    static class TestConfig implements WebMvcConfigurer {
+
+        @Bean
+        LoginMemberArgumentResolver loginMemberArgumentResolver() {
+            return new LoginMemberArgumentResolver("JSESSIONID", "");
+        }
+
+        @Bean
+        SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+            return http
+                    .csrf(AbstractHttpConfigurer::disable)
+                    .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                    .build();
+        }
+
+        @Override
+        public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+            resolvers.add(loginMemberArgumentResolver());
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;

@@ -173,5 +173,28 @@ class ChallengeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
     }
+
+    @Test
+    void view_summary_파라미터로_요약_목록_조회() throws Exception {
+        // given: EARLY 챌린지 하나
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
+        challengeRepository.save(challenge);
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/challenges").param("view", "summary"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].id").value(challenge.getId()));
+    }
+
+    @Test
+    void view_허용되지_않은_값이면_400_반환() throws Exception {
+        mockMvc.perform(get("/api/v1/challenges").param("view", "invalid"))
+                .andExpect(status().isBadRequest());
+    }
 }
 

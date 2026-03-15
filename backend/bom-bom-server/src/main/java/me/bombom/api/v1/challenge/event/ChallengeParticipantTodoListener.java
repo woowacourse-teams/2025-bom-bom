@@ -1,7 +1,5 @@
 package me.bombom.api.v1.challenge.event;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.event.MarkAsReadEvent;
@@ -16,16 +14,13 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class ChallengeParticipantTodoListener {
 
-    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
-
     private final ChallengeDailyTodoService challengeDailyTodoService;
 
     @TransactionalEventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void on(MarkAsReadEvent event) {
         try {
-            LocalDate today = LocalDate.now(SEOUL_ZONE);
-            challengeDailyTodoService.updateChallengeDailyTodo(event.memberId(), event.articleId(), today);
+            challengeDailyTodoService.updateChallengeDailyTodo(event.memberId(), event.articleId());
         } catch (Exception e) {
             log.error("챌린지 데일리 투두 저장 중 오류가 발생했습니다. memberId={}", event.memberId(), e);
         }

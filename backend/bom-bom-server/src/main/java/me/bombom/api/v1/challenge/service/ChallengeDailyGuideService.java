@@ -168,7 +168,7 @@ public class ChallengeDailyGuideService {
                 }
             }
         }
-        return new CreateCommentResponse(firstCompletion);
+        return CreateCommentResponse.from(firstCompletion);
     }
 
     public MemberDailyCommentResponse getDailyGuideComment(Long challengeId, int dayIndex, Long memberId) {

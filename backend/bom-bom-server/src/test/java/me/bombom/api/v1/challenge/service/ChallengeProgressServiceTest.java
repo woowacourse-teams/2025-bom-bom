@@ -24,6 +24,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.dto.response.CertificationInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeStreakResponse;
 import me.bombom.api.v1.challenge.dto.response.MemberChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TeamChallengeProgressResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayTodoResponse;
@@ -431,32 +432,192 @@ class ChallengeProgressServiceTest {
                 });
     }
 
-    private ChallengeParticipant createTeamParticipant(Long challengeId, Long memberId, Long teamId,
-                                                       int completedDays, boolean isSurvived) {
-        return ChallengeParticipant.builder()
-                .challengeId(challengeId)
-                .memberId(memberId)
-                .challengeTeamId(teamId)
-                .completedDays(completedDays)
-                .isSurvived(isSurvived)
+    @Test
+    void 스트릭이_0이면_빈_배열을_반환한다() {
+        // given - streak=0인 참여자 (daily result 없음)
+        Challenge streakChallenge = createStreakChallenge("스트릭 0 챌린지");
+        challengeParticipantRepository.save(ChallengeParticipant.builder()
+                .challengeId(streakChallenge.getId())
+                .memberId(member.getId())
+                .completedDays(0)
+                .streak(0)
                 .shield(0)
-                .build();
+                .isSurvived(true)
+                .build());
+
+        // when
+        ChallengeStreakResponse response = challengeProgressService.getMemberStreak(streakChallenge.getId(), member, 5);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.streak()).isEqualTo(0);
+            softly.assertThat(response.streakDays()).isEmpty();
+        });
     }
 
-    private ChallengeTeam createChallengeTeam(Long challengeId, int progress) {
-        return ChallengeTeam.builder()
-                .challengeId(challengeId)
-                .progress(progress)
-                .build();
+    @Test
+    void limit보다_스트릭이_작으면_스트릭_수만큼만_반환한다() {
+        // given - streak=3, limit=5
+        Challenge streakChallenge = createStreakChallenge("스트릭 3 챌린지");
+        ChallengeParticipant participant = challengeParticipantRepository.save(ChallengeParticipant.builder()
+                .challengeId(streakChallenge.getId())
+                .memberId(member.getId())
+                .completedDays(3)
+                .streak(3)
+                .shield(0)
+                .isSurvived(true)
+                .build());
+
+        challengeDailyResultRepository.saveAll(List.of(
+                createChallengeDailyResult(participant.getId(), LocalDate.now().minusDays(2), ChallengeDailyStatus.COMPLETE),
+                createChallengeDailyResult(participant.getId(), LocalDate.now().minusDays(1), ChallengeDailyStatus.COMPLETE),
+                createChallengeDailyResult(participant.getId(), LocalDate.now(), ChallengeDailyStatus.COMPLETE)
+        ));
+
+        // when
+        ChallengeStreakResponse response = challengeProgressService.getMemberStreak(streakChallenge.getId(), member, 5);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.streak()).isEqualTo(3);
+            softly.assertThat(response.streakDays()).hasSize(3);
+        });
     }
 
-    private ChallengeDailyResult createChallengeDailyResult(Long participantId, LocalDate date,
-                                                            ChallengeDailyStatus status) {
-        return ChallengeDailyResult.builder()
-                .participantId(participantId)
-                .date(date)
-                .status(status)
-                .build();
+    @Test
+    void limit가_스트릭보다_작으면_limit만큼만_반환한다() {
+        // given - streak=7, limit=3
+        Challenge streakChallenge = createStreakChallenge("스트릭 7 챌린지");
+        ChallengeParticipant participant = challengeParticipantRepository.save(ChallengeParticipant.builder()
+                .challengeId(streakChallenge.getId())
+                .memberId(member.getId())
+                .completedDays(7)
+                .streak(7)
+                .shield(0)
+                .isSurvived(true)
+                .build());
+
+        for (int i = 6; i >= 0; i--) {
+            challengeDailyResultRepository.save(
+                    createChallengeDailyResult(participant.getId(), LocalDate.now().minusDays(i), ChallengeDailyStatus.COMPLETE));
+        }
+
+        // when
+        ChallengeStreakResponse response = challengeProgressService.getMemberStreak(streakChallenge.getId(), member, 3);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.streak()).isEqualTo(7);
+            softly.assertThat(response.streakDays()).hasSize(3);
+        });
+    }
+
+    @Test
+    void 스트릭_날짜는_오름차순으로_반환한다() {
+        // given
+        Challenge streakChallenge = createStreakChallenge("날짜 정렬 챌린지");
+        ChallengeParticipant participant = challengeParticipantRepository.save(ChallengeParticipant.builder()
+                .challengeId(streakChallenge.getId())
+                .memberId(member.getId())
+                .completedDays(3)
+                .streak(3)
+                .shield(0)
+                .isSurvived(true)
+                .build());
+
+        LocalDate today = LocalDate.now();
+        challengeDailyResultRepository.saveAll(List.of(
+                createChallengeDailyResult(participant.getId(), today.minusDays(2), ChallengeDailyStatus.COMPLETE),
+                createChallengeDailyResult(participant.getId(), today.minusDays(1), ChallengeDailyStatus.COMPLETE),
+                createChallengeDailyResult(participant.getId(), today, ChallengeDailyStatus.COMPLETE)
+        ));
+
+        // when
+        ChallengeStreakResponse response = challengeProgressService.getMemberStreak(streakChallenge.getId(), member, 5);
+
+        // then
+        assertThat(response.streakDays())
+                .extracting("date")
+                .containsExactly(today.minusDays(2), today.minusDays(1), today);
+    }
+
+    @Test
+    void 쉴드_사용_날은_isShieldApplied가_true다() {
+        // given
+        Challenge streakChallenge = createStreakChallenge("쉴드 확인 챌린지");
+        ChallengeParticipant participant = challengeParticipantRepository.save(ChallengeParticipant.builder()
+                .challengeId(streakChallenge.getId())
+                .memberId(member.getId())
+                .completedDays(2)
+                .streak(2)
+                .shield(0)
+                .isSurvived(true)
+                .build());
+
+        LocalDate today = LocalDate.now();
+        challengeDailyResultRepository.saveAll(List.of(
+                createChallengeDailyResult(participant.getId(), today.minusDays(1), ChallengeDailyStatus.SHIELD),
+                createChallengeDailyResult(participant.getId(), today, ChallengeDailyStatus.COMPLETE)
+        ));
+
+        // when
+        ChallengeStreakResponse response = challengeProgressService.getMemberStreak(streakChallenge.getId(), member, 5);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.streakDays().get(0).isShieldApplied()).isTrue();   // yesterday: SHIELD
+            softly.assertThat(response.streakDays().get(1).isShieldApplied()).isFalse();  // today: COMPLETE
+        });
+    }
+
+    @Test
+    void 주말을_사이에_둔_금요일과_월요일도_연속_스트릭으로_조회된다() {
+        // given
+        // 금→(토일)→월 구간이 포함된 스트릭 (gap 3일 이하 = 연속)
+        LocalDate monday = LocalDate.now().with(java.time.DayOfWeek.MONDAY);
+        LocalDate friday = monday.minusDays(3); // 직전 금요일
+
+        Challenge streakChallenge = createStreakChallenge("주말 낀 스트릭 챌린지");
+        ChallengeParticipant participant = challengeParticipantRepository.save(ChallengeParticipant.builder()
+                .challengeId(streakChallenge.getId())
+                .memberId(member.getId())
+                .completedDays(2)
+                .streak(2)
+                .shield(0)
+                .isSurvived(true)
+                .build());
+
+        challengeDailyResultRepository.saveAll(List.of(
+                createChallengeDailyResult(participant.getId(), friday, ChallengeDailyStatus.COMPLETE),
+                createChallengeDailyResult(participant.getId(), monday, ChallengeDailyStatus.COMPLETE)
+        ));
+
+        // when
+        ChallengeStreakResponse response = challengeProgressService.getMemberStreak(streakChallenge.getId(), member, 5);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.streak()).isEqualTo(2);
+            softly.assertThat(response.streakDays()).hasSize(2);
+            softly.assertThat(response.streakDays().get(0).date()).isEqualTo(friday);
+            softly.assertThat(response.streakDays().get(0).dayOfWeek()).isEqualTo(java.time.DayOfWeek.FRIDAY);
+            softly.assertThat(response.streakDays().get(1).date()).isEqualTo(monday);
+            softly.assertThat(response.streakDays().get(1).dayOfWeek()).isEqualTo(java.time.DayOfWeek.MONDAY);
+        });
+    }
+
+    @Test
+    void 참가하지_않은_챌린지_스트릭_조회시_예외_발생() {
+        // given
+        Member nonParticipant = memberRepository.save(TestFixture.createUniqueMember("nonParticipant", UUID.randomUUID().toString()));
+
+        // when & then
+        assertThatThrownBy(() -> challengeProgressService.getMemberStreak(challenge.getId(), nonParticipant, 5))
+                .isInstanceOf(UnauthorizedException.class)
+                .satisfies(e -> {
+                    UnauthorizedException exception = (UnauthorizedException) e;
+                    assertThat(exception.getErrorDetail()).isEqualTo(ErrorDetail.FORBIDDEN_RESOURCE);
+                });
     }
 
     @Test
@@ -786,5 +947,43 @@ class ChallengeProgressServiceTest {
                 .containsExactlyInAnyOrder(ChallengeTodoType.READ, ChallengeTodoType.COMMENT);
         assertThat(response.todayTodos()).extracting("challengeTodoType")
                 .doesNotContain(ChallengeTodoType.MINDSET);
+    }
+
+    private ChallengeParticipant createTeamParticipant(Long challengeId, Long memberId, Long teamId,
+                                                       int completedDays, boolean isSurvived) {
+        return ChallengeParticipant.builder()
+                .challengeId(challengeId)
+                .memberId(memberId)
+                .challengeTeamId(teamId)
+                .completedDays(completedDays)
+                .isSurvived(isSurvived)
+                .shield(0)
+                .build();
+    }
+
+    private ChallengeTeam createChallengeTeam(Long challengeId, int progress) {
+        return ChallengeTeam.builder()
+                .challengeId(challengeId)
+                .progress(progress)
+                .build();
+    }
+
+    private ChallengeDailyResult createChallengeDailyResult(Long participantId, LocalDate date,
+                                                            ChallengeDailyStatus status) {
+        return ChallengeDailyResult.builder()
+                .participantId(participantId)
+                .date(date)
+                .status(status)
+                .build();
+    }
+
+    private Challenge createStreakChallenge(String name) {
+        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup(name + " 그룹"));
+        return challengeRepository.save(TestFixture.createChallenge(
+                name,
+                LocalDate.now().minusDays(10),
+                LocalDate.now().plusDays(10),
+                10,
+                group.getId()));
     }
 }

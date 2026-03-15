@@ -40,6 +40,7 @@ public class ChallengeCommentService {
     private final ChallengeCommentRepository challengeCommentRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ChallengeCommentLikeRepository challengeCommentLikeRepository;
+    private final ChallengeTodoService challengeTodoService;
     private final ArticleRepository articleRepository;
     private final HighlightRepository highlightRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -101,7 +102,7 @@ public class ChallengeCommentService {
 
         challengeCommentRepository.save(comment);
         applicationEventPublisher.publishEvent(new CreateChallengeCommentEvent(participant.getId()));
-        return new CreateCommentResponse(isFirstCompletion);
+        return CreateCommentResponse.from(isFirstCompletion);
     }
 
     public Page<ChallengeCommentHighlightResponse> getChallengeArticleHighlights(

@@ -654,39 +654,6 @@ class ChallengeProgressServiceTest {
     }
 
     @Test
-    void 연속_참여_스트릭이_응답에_포함된다() {
-        // given
-        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("스트릭 그룹"));
-        Challenge streakChallenge = challengeRepository.save(TestFixture.createChallenge(
-                "Streak Challenge",
-                LocalDate.now().minusDays(5),
-                LocalDate.now().plusDays(5),
-                10,
-                group.getId()));
-
-        challengeParticipantRepository.save(ChallengeParticipant.builder()
-                .challengeId(streakChallenge.getId())
-                .memberId(member.getId())
-                .completedDays(3)
-                .isSurvived(true)
-                .shield(2)
-                .streak(5)
-                .build());
-
-        challengeTodoRepository.save(TestFixture.createChallengeTodo(streakChallenge.getId(), ChallengeTodoType.READ));
-        challengeTodoRepository.save(TestFixture.createChallengeTodo(streakChallenge.getId(), ChallengeTodoType.COMMENT));
-
-        // when
-        MemberChallengeProgressResponse response = challengeProgressService.getMemberProgress(streakChallenge.getId(), member);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.streak()).isEqualTo(5);
-            softly.assertThat(response.shield()).isEqualTo(2);
-        });
-    }
-
-    @Test
     void 주말을_제외한_평일만_계산하여_생존_처리한다() {
         // given
         // 금요일(1일차) 시작

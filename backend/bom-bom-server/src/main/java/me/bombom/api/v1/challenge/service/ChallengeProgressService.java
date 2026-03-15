@@ -55,7 +55,6 @@ public class ChallengeProgressService {
         for (ChallengeParticipant absentee : absentees) {
             if (absentee.useShieldIfAvailable()) {
                 saveShieldDailyResult(absentee, yesterday);
-                absentee.increaseStreak();
                 continue;
             }
             absentee.resetStreak();

@@ -55,6 +55,7 @@ public class ChallengeProgressService {
                 saveShieldDailyResult(absentee, yesterday);
                 continue;
             }
+            absentee.resetStreak();
             checkFailure(absentee, challenge, yesterday);
         }
     }

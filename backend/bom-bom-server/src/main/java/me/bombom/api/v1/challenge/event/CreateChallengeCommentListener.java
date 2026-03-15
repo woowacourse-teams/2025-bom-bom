@@ -51,7 +51,7 @@ public class CreateChallengeCommentListener {
     private void completeDailyTodoWithComment(ChallengeParticipant participant, LocalDate today) {
         try {
             challengeTodoService.insertCommentDone(participant, today);
-            challengeTodoService.completeDailyTodo(participant, today);
+            challengeTodoService.completeDailyTodo(participant.getId(), today);
         } catch (DataIntegrityViolationException e) {
             String violated = extractConstraintName(e);
 

@@ -11,7 +11,9 @@ import me.bombom.api.v1.challenge.domain.ChallengeTodo;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -27,6 +29,7 @@ public class ChallengeTodoService {
     private final ChallengeTodoRepository challengeTodoRepository;
     private final ChallengeDailyTodoRepository challengeDailyTodoRepository;
     private final ChallengeDailyResultRepository challengeDailyResultRepository;
+    private final ChallengeParticipantRepository challengeParticipantRepository;
 
     public boolean isCompletedToday(Long participantId, LocalDate today) {
         return challengeDailyResultRepository.existsByParticipantIdAndDate(participantId, today);
@@ -84,15 +87,22 @@ public class ChallengeTodoService {
     }
 
     @Transactional
-    public void completeDailyTodo(ChallengeParticipant participant, LocalDate today){
+    public void completeDailyTodo(Long participantId, LocalDate today){
+        ChallengeParticipant participant = challengeParticipantRepository.findById(participantId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.OPERATION, "completeDailyTodo")
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
+                        .addContext(ErrorContextKeys.CHALLENGE_PARTICIPANT_ID, participantId));
+
         challengeDailyResultRepository.save(
                 ChallengeDailyResult.builder()
-                        .participantId(participant.getId())
+                        .participantId(participantId)
                         .date(today)
                         .status(ChallengeDailyStatus.COMPLETE)
                         .build()
         );
 
         participant.increaseCompletedDays();
+        participant.increaseStreak();
     }
 }

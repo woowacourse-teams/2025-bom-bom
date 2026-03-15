@@ -16,6 +16,7 @@ import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleR
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentLikeResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
+import me.bombom.api.v1.challenge.dto.response.CreateCommentResponse;
 import me.bombom.api.v1.challenge.event.CreateChallengeCommentEvent;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentLikeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
@@ -42,6 +43,7 @@ public class ChallengeCommentService {
     private final ArticleRepository articleRepository;
     private final HighlightRepository highlightRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final ChallengeTodoService challengeTodoService;
     private final Clock clock;
 
     @Value("${challenge.highlight.truncate-ratio}")
@@ -73,13 +75,16 @@ public class ChallengeCommentService {
     }
 
     @Transactional
-    public void createChallengeComment(
+    public CreateCommentResponse createChallengeComment(
             Long memberId,
             Long challengeId,
             ChallengeCommentRequest request
     ) {
         validateCommentAvailableDay(memberId, challengeId);
         ChallengeParticipant participant = getChallengeParticipant(memberId, challengeId);
+
+        LocalDate today = LocalDate.now(clock);
+        boolean isFirstCompletion = !challengeTodoService.isCompletedToday(participant.getId(), today);
 
         Article article = articleRepository.findById(request.articleId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
@@ -97,6 +102,7 @@ public class ChallengeCommentService {
 
         challengeCommentRepository.save(comment);
         applicationEventPublisher.publishEvent(new CreateChallengeCommentEvent(participant.getId()));
+        return new CreateCommentResponse(isFirstCompletion);
     }
 
     public Page<ChallengeCommentHighlightResponse> getChallengeArticleHighlights(

@@ -12,6 +12,7 @@ import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleR
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentLikeResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
+import me.bombom.api.v1.challenge.dto.response.CreateCommentResponse;
 import me.bombom.api.v1.challenge.service.ChallengeCommentService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
@@ -71,12 +72,12 @@ public class ChallengeCommentController implements ChallengeCommentControllerApi
     @Override
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/{challengeId}/comments")
-    public void createChallengeComment(
+    public CreateCommentResponse createChallengeComment(
             @LoginMember Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
             @Valid @RequestBody ChallengeCommentRequest request
     ) {
-        challengeCommentService.createChallengeComment(member.getId(), challengeId, request);
+        return challengeCommentService.createChallengeComment(member.getId(), challengeId, request);
     }
 
     @Override

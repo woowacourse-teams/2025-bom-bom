@@ -60,8 +60,7 @@ public class ChallengeDailyGuideService {
         }
 
         int dayIndex = calculateDayIndex(challenge.getStartDate(), today);
-        TodayDailyGuideRow row = challengeDailyGuideRepository.findTodayGuide(
-                        challengeId, memberId, dayIndex)
+        TodayDailyGuideRow row = challengeDailyGuideRepository.findTodayGuide(challengeId, memberId, dayIndex)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeDailyGuide")
                         .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)

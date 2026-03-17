@@ -11,4 +11,13 @@ public record DailyGuideCommentContext(
         ChallengeParticipant participant,
         ChallengeDailyGuide guide
 ) {
+    public static DailyGuideCommentContext of(
+            Long challengeId,
+            int dayIndex,
+            Long memberId,
+            ChallengeParticipant participant,
+            ChallengeDailyGuide guide
+    ) {
+        return new DailyGuideCommentContext(challengeId, dayIndex, memberId, participant, guide);
+    }
 }

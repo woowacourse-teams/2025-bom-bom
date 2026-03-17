@@ -188,7 +188,7 @@ public class ChallengeDailyGuideService {
         ChallengeParticipant participant = getChallengeParticipant(challengeId, memberId);
         validateDayIndex(challengeId, dayIndex, challenge);
         ChallengeDailyGuide guide = getChallengeDailyGuide(challengeId, dayIndex);
-        return new DailyGuideCommentContext(challengeId, dayIndex, memberId, participant, guide);
+        return DailyGuideCommentContext.of(challengeId, dayIndex, memberId, participant, guide);
     }
 
     private ChallengeParticipant getChallengeParticipant(Long challengeId, Long memberId) {
@@ -228,11 +228,10 @@ public class ChallengeDailyGuideService {
             ChallengeDailyGuide guide,
             ChallengeParticipant participant
     ) {
-        ChallengeDailyGuideComment existingComment = challengeDailyGuideCommentRepository
-                .findByGuideIdAndParticipantId(guide.getId(), participant.getId())
-                .orElse(null);
+        boolean commentExists = challengeDailyGuideCommentRepository
+                .existsByGuideIdAndParticipantId(guide.getId(), participant.getId());
 
-        if (existingComment != null) {
+        if (commentExists) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeDailyGuideComment")
                     .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)

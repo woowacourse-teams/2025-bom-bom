@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
@@ -59,6 +60,9 @@ class LoginMemberArgumentResolverTest {
         public void endpointMemberAnonymousTrueAllowInvalidToken(
                 @LoginMember(anonymous = true, allowInvalidToken = true) Member member
         ) {
+        }
+
+        public void endpointMemberAllowInvalidTokenOnly(@LoginMember(allowInvalidToken = true) Member member) {
         }
 
         public void endpointLong(@LoginMember Long memberId) {
@@ -174,6 +178,16 @@ class LoginMemberArgumentResolverTest {
         Object result = resolver.resolveArgument(paramLongAnonymousTrueAllowInvalidToken(), null, null, null);
 
         assertThat(result).isNull();
+    }
+
+    @Test
+    @DisplayName("allowInvalidToken=true 는 anonymous=true 없이 사용할 수 없다")
+    void resolve_WhenAllowInvalidTokenWithoutAnonymous_ThrowsIllegalArgumentException() throws Exception {
+        setAnonymousAuthentication();
+
+        assertThatThrownBy(() -> resolver.resolveArgument(paramMemberAllowInvalidTokenOnly(), null, null, null))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.PRECONDITION_FAILED);
     }
 
     @Test
@@ -305,6 +319,15 @@ class LoginMemberArgumentResolverTest {
     private MethodParameter paramMemberAnonymousTrueAllowInvalidToken() {
         try {
             Method m = StubController.class.getMethod("endpointMemberAnonymousTrueAllowInvalidToken", Member.class);
+            return new MethodParameter(m, 0);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private MethodParameter paramMemberAllowInvalidTokenOnly() {
+        try {
+            Method m = StubController.class.getMethod("endpointMemberAllowInvalidTokenOnly", Member.class);
             return new MethodParameter(m, 0);
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);

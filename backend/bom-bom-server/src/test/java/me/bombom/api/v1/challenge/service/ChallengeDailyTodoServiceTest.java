@@ -2,8 +2,9 @@ package me.bombom.api.v1.challenge.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.BDDMockito.given;
 
-import java.time.DayOfWeek;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +39,15 @@ import org.springframework.transaction.annotation.Transactional;
 class ChallengeDailyTodoServiceTest {
 
     private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
+    // 테스트용 고정 평일 (2025-03-10 월요일)
+    private static final LocalDate FIXED_WEEKDAY = LocalDate.of(2025, 3, 10);
+    // 테스트용 고정 토요일 (2025-03-08)
+    private static final LocalDate FIXED_SATURDAY = LocalDate.of(2025, 3, 8);
+    // 테스트용 고정 일요일 (2025-03-09)
+    private static final LocalDate FIXED_SUNDAY = LocalDate.of(2025, 3, 9);
+
+    @MockitoBean
+    private Clock clock;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -68,11 +79,11 @@ class ChallengeDailyTodoServiceTest {
     private Member member;
     private Challenge challenge;
     private ChallengeTodo readTodo;
-    private Article todayArticle;
-    private LocalDate today;
 
     @BeforeEach
     void setUp() {
+        fixClockTo(FIXED_WEEKDAY);
+
         challengeDailyTodoRepository.deleteAllInBatch();
         articleRepository.deleteAllInBatch();
         challengeTodoRepository.deleteAllInBatch();
@@ -82,20 +93,13 @@ class ChallengeDailyTodoServiceTest {
 
         member = memberRepository.save(TestFixture.createUniqueMember("tester", "12345"));
 
-        // 평일로 고정 (주말 체크 로직 때문에)
-        LocalDate now = LocalDate.now(SEOUL_ZONE);
-        while (now.getDayOfWeek() == DayOfWeek.SATURDAY || now.getDayOfWeek() == DayOfWeek.SUNDAY) {
-            now = now.plusDays(1);
-        }
-        today = now;
-        
         NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
         newsletterGroupRepository.save(group);
-        
+
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "테스트 챌린지",
-                today.minusDays(5),
-                today.plusDays(5),
+                FIXED_WEEKDAY.minusDays(5),
+                FIXED_WEEKDAY.plusDays(5),
                 10,
                 group.getId()
         ));
@@ -111,60 +115,18 @@ class ChallengeDailyTodoServiceTest {
         readTodo = challengeTodoRepository.save(
                 TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ)
         );
-
-        todayArticle = articleRepository.save(
-                TestFixture.createArticle(
-                        "오늘 뉴스레터",
-                        member.getId(),
-                        1L,
-                        LocalDateTime.of(today, java.time.LocalTime.now(SEOUL_ZONE))
-                )
-        );
     }
 
     @Test
     @Transactional
-    void 아티클_읽기시_챌린지_투두_업데이트() {
-        // given - 실제 오늘이 주말이 아니어야 함 (ChallengeParticipantTodoListener가 실제 날짜 사용)
-        LocalDate actualToday = LocalDate.now(SEOUL_ZONE);
-        if (actualToday.getDayOfWeek() == DayOfWeek.SATURDAY || actualToday.getDayOfWeek() == DayOfWeek.SUNDAY) {
-            // 주말이면 todo가 생성되지 않으므로 테스트 스킵
-            return;
-        }
-
-        // 실제 오늘 날짜에 맞는 데이터 재생성
-        challengeDailyTodoRepository.deleteAllInBatch();
-        articleRepository.deleteAllInBatch();
-        
-        NewsletterGroup group2 = TestFixture.createNewsletterGroup("그룹2");
-        newsletterGroupRepository.save(group2);
-        
-        challenge = challengeRepository.save(TestFixture.createChallenge(
-                "테스트 챌린지",
-                actualToday.minusDays(5),
-                actualToday.plusDays(5),
-                10,
-                group2.getId()
-        ));
-        
-        challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(
-                        challenge.getId(),
-                        member.getId(),
-                        0
-                )
-        );
-
-        readTodo = challengeTodoRepository.save(
-                TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ)
-        );
-
-        todayArticle = articleRepository.save(
+    void 오늘_도착한_아티클_읽기시_챌린지_투두_업데이트() {
+        // given
+        Article todayArticle = articleRepository.save(
                 TestFixture.createArticle(
                         "오늘 뉴스레터",
                         member.getId(),
                         1L,
-                        LocalDateTime.of(actualToday, java.time.LocalTime.now(SEOUL_ZONE))
+                        LocalDateTime.of(FIXED_WEEKDAY, java.time.LocalTime.of(9, 0))
                 )
         );
 
@@ -176,18 +138,54 @@ class ChallengeDailyTodoServiceTest {
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
-        // then - 특정 멤버와 챌린지에 대한 todo만 확인
+        // then
         List<ChallengeDailyTodo> dailyTodos = challengeDailyTodoRepository.findAll().stream()
                 .filter(todo -> todo.getParticipantId().equals(participant.getId()))
                 .filter(todo -> todo.getChallengeTodoId().equals(readTodo.getId()))
-                .filter(todo -> todo.getTodoDate().equals(actualToday))
+                .filter(todo -> todo.getTodoDate().equals(FIXED_WEEKDAY))
                 .toList();
 
         assertSoftly(softly -> {
             softly.assertThat(dailyTodos).hasSize(1);
             softly.assertThat(dailyTodos.get(0).getParticipantId()).isEqualTo(participant.getId());
             softly.assertThat(dailyTodos.get(0).getChallengeTodoId()).isEqualTo(readTodo.getId());
-            softly.assertThat(dailyTodos.get(0).getTodoDate()).isEqualTo(actualToday);
+            softly.assertThat(dailyTodos.get(0).getTodoDate()).isEqualTo(FIXED_WEEKDAY);
+        });
+    }
+
+    @Test
+    @Transactional
+    void 과거_도착한_아티클_읽기시_챌린지_투두_업데이트() {
+        // given - 3일 전에 도착한 아티클
+        Article pastArticle = articleRepository.save(
+                TestFixture.createArticle(
+                        "과거 뉴스레터",
+                        member.getId(),
+                        1L,
+                        LocalDateTime.of(FIXED_WEEKDAY.minusDays(3), java.time.LocalTime.of(9, 0))
+                )
+        );
+
+        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
+                challenge.getId(), member.getId()).orElseThrow();
+
+        // when
+        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), pastArticle.getId()));
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+
+        // then - 과거 도착 아티클이어도 오늘 투두가 생성되어야 함
+        List<ChallengeDailyTodo> dailyTodos = challengeDailyTodoRepository.findAll().stream()
+                .filter(todo -> todo.getParticipantId().equals(participant.getId()))
+                .filter(todo -> todo.getChallengeTodoId().equals(readTodo.getId()))
+                .filter(todo -> todo.getTodoDate().equals(FIXED_WEEKDAY))
+                .toList();
+
+        assertSoftly(softly -> {
+            softly.assertThat(dailyTodos).hasSize(1);
+            softly.assertThat(dailyTodos.get(0).getParticipantId()).isEqualTo(participant.getId());
+            softly.assertThat(dailyTodos.get(0).getChallengeTodoId()).isEqualTo(readTodo.getId());
+            softly.assertThat(dailyTodos.get(0).getTodoDate()).isEqualTo(FIXED_WEEKDAY);
         });
     }
 
@@ -195,82 +193,58 @@ class ChallengeDailyTodoServiceTest {
     @Transactional
     void 이미_존재하는_챌린지_투두_중복_생성_안함() {
         // given
+        Article article = articleRepository.save(
+                TestFixture.createArticle(
+                        "뉴스레터",
+                        member.getId(),
+                        1L,
+                        LocalDateTime.of(FIXED_WEEKDAY, java.time.LocalTime.of(9, 0))
+                )
+        );
+
         ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
                 challenge.getId(), member.getId()).orElseThrow();
 
-        // 기존 todo 생성
         challengeDailyTodoRepository.save(
                 TestFixture.createChallengeDailyTodo(
                         participant.getId(),
-                        today,
+                        FIXED_WEEKDAY,
                         readTodo.getId()
                 )
         );
 
         // when
-        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), todayArticle.getId()));
+        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), article.getId()));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
-        // then - 특정 멤버와 챌린지에 대한 todo만 확인
+        // then
         List<ChallengeDailyTodo> dailyTodos = challengeDailyTodoRepository.findAll().stream()
                 .filter(todo -> todo.getParticipantId().equals(participant.getId()))
                 .filter(todo -> todo.getChallengeTodoId().equals(readTodo.getId()))
-                .filter(todo -> todo.getTodoDate().equals(today))
+                .filter(todo -> todo.getTodoDate().equals(FIXED_WEEKDAY))
                 .toList();
 
-        assertSoftly(softly -> {
-            softly.assertThat(dailyTodos).hasSize(1);
-            softly.assertThat(dailyTodos.get(0).getParticipantId()).isEqualTo(participant.getId());
-            softly.assertThat(dailyTodos.get(0).getChallengeTodoId()).isEqualTo(readTodo.getId());
-            softly.assertThat(dailyTodos.get(0).getTodoDate()).isEqualTo(today);
-        });
+        assertThat(dailyTodos).hasSize(1);
     }
 
     @Test
     @Transactional
-    void 주말_토요일에는_투두_생성되지_않음() {
+    void 토요일에는_투두_생성되지_않음() {
         // given
-        LocalDate today = LocalDate.now(SEOUL_ZONE);
-        LocalDate tempSaturday = today;
-        
-        // 토요일로 조정
-        while (tempSaturday.getDayOfWeek() != DayOfWeek.SATURDAY) {
-            tempSaturday = tempSaturday.plusDays(1);
-        }
-        final LocalDate saturday = tempSaturday;
-        
-        // 챌린지 기간에 포함되도록 조정
-        NewsletterGroup saturdayGroup = TestFixture.createNewsletterGroup("토요일 그룹");
-        newsletterGroupRepository.save(saturdayGroup);
-        challenge = challengeRepository.save(TestFixture.createChallenge(
-                "주말 테스트 챌린지",
-                saturday.minusDays(5),
-                saturday.plusDays(5),
-                10,
-                saturdayGroup.getId()
-        ));
-        
-        challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(
-                        challenge.getId(),
-                        member.getId(),
-                        0
-                )
-        );
+        fixClockTo(FIXED_SATURDAY);
 
         ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null, saturday);
+        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null);
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
-        // then - todo가 생성되지 않아야 함
+        // then
         List<ChallengeDailyTodo> dailyTodos = challengeDailyTodoRepository.findAll().stream()
                 .filter(todo -> todo.getParticipantId().equals(participant.getId()))
-                .filter(todo -> todo.getTodoDate().equals(saturday))
                 .toList();
 
         assertThat(dailyTodos).isEmpty();
@@ -278,48 +252,21 @@ class ChallengeDailyTodoServiceTest {
 
     @Test
     @Transactional
-    void 주말_일요일에는_투두_생성되지_않음() {
+    void 일요일에는_투두_생성되지_않음() {
         // given
-        LocalDate today = LocalDate.now(SEOUL_ZONE);
-        LocalDate tempSunday = today;
-        
-        // 일요일로 조정
-        while (tempSunday.getDayOfWeek() != DayOfWeek.SUNDAY) {
-            tempSunday = tempSunday.plusDays(1);
-        }
-        final LocalDate sunday = tempSunday;
-        
-        // 챌린지 기간에 포함되도록 조정
-        NewsletterGroup sundayGroup = TestFixture.createNewsletterGroup("일요일 그룹");
-        newsletterGroupRepository.save(sundayGroup);
-        challenge = challengeRepository.save(TestFixture.createChallenge(
-                "주말 테스트 챌린지",
-                sunday.minusDays(5),
-                sunday.plusDays(5),
-                10,
-                sundayGroup.getId()
-        ));
-        
-        challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(
-                        challenge.getId(),
-                        member.getId(),
-                        0
-                )
-        );
+        fixClockTo(FIXED_SUNDAY);
 
         ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null, sunday);
+        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null);
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
-        // then - todo가 생성되지 않아야 함
+        // then
         List<ChallengeDailyTodo> dailyTodos = challengeDailyTodoRepository.findAll().stream()
                 .filter(todo -> todo.getParticipantId().equals(participant.getId()))
-                .filter(todo -> todo.getTodoDate().equals(sunday))
                 .toList();
 
         assertThat(dailyTodos).isEmpty();
@@ -328,59 +275,32 @@ class ChallengeDailyTodoServiceTest {
     @Test
     @Transactional
     void 평일에는_정상적으로_투두_생성됨() {
-        // given
-        LocalDate today = LocalDate.now(SEOUL_ZONE);
-        LocalDate tempWeekday = today;
-        
-        // 평일로 조정 (월요일~금요일)
-        while (tempWeekday.getDayOfWeek() == DayOfWeek.SATURDAY || tempWeekday.getDayOfWeek() == DayOfWeek.SUNDAY) {
-            tempWeekday = tempWeekday.plusDays(1);
-        }
-        final LocalDate weekday = tempWeekday;
-        
-        // 챌린지 기간에 포함되도록 조정
-        NewsletterGroup weekdayGroup = TestFixture.createNewsletterGroup("평일 그룹");
-        newsletterGroupRepository.save(weekdayGroup);
-        challenge = challengeRepository.save(TestFixture.createChallenge(
-                "평일 테스트 챌린지",
-                weekday.minusDays(5),
-                weekday.plusDays(5),
-                10,
-                weekdayGroup.getId()
-        ));
-        
-        challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(
-                        challenge.getId(),
-                        member.getId(),
-                        0
-                )
-        );
-
-        readTodo = challengeTodoRepository.save(
-                TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ)
-        );
-
+        // given - clock은 setUp에서 이미 FIXED_WEEKDAY로 고정됨
         ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null, weekday);
+        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null);
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
-        // then - todo가 정상적으로 생성되어야 함
+        // then
         List<ChallengeDailyTodo> dailyTodos = challengeDailyTodoRepository.findAll().stream()
                 .filter(todo -> todo.getParticipantId().equals(participant.getId()))
                 .filter(todo -> todo.getChallengeTodoId().equals(readTodo.getId()))
-                .filter(todo -> todo.getTodoDate().equals(weekday))
+                .filter(todo -> todo.getTodoDate().equals(FIXED_WEEKDAY))
                 .toList();
 
         assertSoftly(softly -> {
             softly.assertThat(dailyTodos).hasSize(1);
             softly.assertThat(dailyTodos.get(0).getParticipantId()).isEqualTo(participant.getId());
             softly.assertThat(dailyTodos.get(0).getChallengeTodoId()).isEqualTo(readTodo.getId());
-            softly.assertThat(dailyTodos.get(0).getTodoDate()).isEqualTo(weekday);
+            softly.assertThat(dailyTodos.get(0).getTodoDate()).isEqualTo(FIXED_WEEKDAY);
         });
+    }
+
+    private void fixClockTo(LocalDate date) {
+        given(clock.instant()).willReturn(date.atStartOfDay(SEOUL_ZONE).toInstant());
+        given(clock.getZone()).willReturn(SEOUL_ZONE);
     }
 }

@@ -2,10 +2,9 @@ package me.bombom.api.v1.challenge.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.dto.request.DailyGuideCommentRequest;
+import me.bombom.api.v1.challenge.dto.response.CreateCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.MemberDailyCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse;
@@ -32,8 +31,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/challenges")
 public class ChallengeDailyGuideController implements ChallengeDailyGuideControllerApi {
 
-    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
-
     private final ChallengeDailyGuideService challengeDailyGuideService;
 
     @Override
@@ -58,14 +55,13 @@ public class ChallengeDailyGuideController implements ChallengeDailyGuideControl
     @Override
     @PostMapping("/{challengeId}/daily-guides/{dayIndex}/my-comment")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createDailyGuideComment(
+    public CreateCommentResponse createDailyGuideComment(
             @LoginMember Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
             @PathVariable @Positive(message = "일차 인덱스는 1 이상의 값이어야 합니다.") int dayIndex,
             @Valid @RequestBody DailyGuideCommentRequest request
     ) {
-        LocalDate today = LocalDate.now(SEOUL_ZONE);
-        challengeDailyGuideService.createDailyGuideComment(challengeId, dayIndex, member.getId(), request, today);
+        return challengeDailyGuideService.createDailyGuideComment(challengeId, dayIndex, member.getId(), request);
     }
 
     @Override

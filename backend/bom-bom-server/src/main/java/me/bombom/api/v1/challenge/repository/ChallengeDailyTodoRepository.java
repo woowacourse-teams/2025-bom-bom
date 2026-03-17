@@ -31,14 +31,15 @@ public interface ChallengeDailyTodoRepository extends JpaRepository<ChallengeDai
                             FROM article a
                             WHERE a.id = :articleId
                               AND a.member_id = cp.member_id
-                              AND DATE(a.arrived_date_time) = :today
                         )
                   )
             """, nativeQuery = true)
-    int insertTodayReadTodoIfMissing(@Param("memberId") Long memberId,
-                                     @Param("articleId") Long articleId,
-                                     @Param("today") LocalDate today,
-                                     @Param("todoType") String todoType);
+    int insertTodayReadTodoIfMissing(
+            @Param("memberId") Long memberId,
+            @Param("articleId") Long articleId,
+            @Param("today") LocalDate today,
+            @Param("todoType") String todoType
+    );
 
     boolean existsByParticipantIdAndTodoDateAndChallengeTodoId(Long participantId, LocalDate todoDate,
                                                                Long challengeTodoId);

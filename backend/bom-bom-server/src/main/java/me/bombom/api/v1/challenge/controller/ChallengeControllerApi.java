@@ -13,23 +13,29 @@ import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeLandingResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeTeamListResponse;
+import me.bombom.api.v1.challenge.domain.ChallengeFilter;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "Challenge", description = "챌린지 관련 API")
 public interface ChallengeControllerApi {
 
     @Operation(
             summary = "챌린지 전체 목록 조회",
-            description = "진행중이거나 예정된 챌린지 전체 목록을 조회합니다. 로그인 시 참여 여부 및 상세 정보가 함께 반환됩니다."
+            description = "진행중이거나 예정된 챌린지 전체 목록을 조회합니다. 로그인 시 참여 여부 및 상세 정보가 함께 반환됩니다. "
+                    + "view=summary 일 때는 ONGOING이면서 참여 중인 챌린지, EARLY/LATE 신청 단계 챌린지만 조회합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "챌린지 목록 조회 성공")
     })
     @GetMapping
-    List<ChallengeResponse> getChallenges(@Parameter(hidden = true) @LoginMember Member member);
+    List<ChallengeResponse> getChallenges(
+            @Parameter(description = "summary 시 요약 목록(참여 중인 ONGOING, EARLY/LATE 신청 단계만) 조회") @RequestParam(required = false, defaultValue = "DEFAULT") ChallengeFilter view,
+            @Parameter(hidden = true) @LoginMember(anonymous = true) Member member
+    );
 
     @Operation(
             summary = "챌린지 상세 조회",

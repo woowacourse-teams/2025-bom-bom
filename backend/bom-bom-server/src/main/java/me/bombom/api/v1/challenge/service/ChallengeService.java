@@ -6,16 +6,22 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import java.time.Clock;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.badge.service.BadgeService;
 import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.ChallengeFilter;
 import me.bombom.api.v1.challenge.domain.ChallengeGrade;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
@@ -62,7 +68,7 @@ public class ChallengeService {
     private final BadgeService badgeService;
     private final Clock clock;
 
-    public List<ChallengeResponse> getChallenges(Member member) {
+    public List<ChallengeResponse> getChallenges(Member member, ChallengeFilter view) {
         List<Challenge> challenges = challengeRepository.findAll();
         if (challenges.isEmpty()) {
             return Collections.emptyList();
@@ -72,13 +78,20 @@ public class ChallengeService {
                 .map(Challenge::getId)
                 .toList();
 
+        LocalDate today = LocalDate.now(clock);
         Map<Long, Long> participantCounts = getParticipantCounts(challengeIds);
-        Map<Long, List<ChallengeNewsletterResponse>> newslettersByChallengeId = getNewslettersByChallengeId(challengeIds);
+        Map<Long, List<ChallengeNewsletterResponse>> newslettersByChallengeId =
+                getNewslettersByChallengeId(challengeIds);
         Map<Long, ChallengeParticipant> myParticipation = findMyParticipation(member, challengeIds);
 
-        LocalDate today = LocalDate.now(clock);
-        return challenges.stream()
-                .filter(challenge -> isVisibleInChallengeList(challenge, today, myParticipation.containsKey(challenge.getId())))
+        Stream<Challenge> challengeStream = challenges.stream()
+                .filter(challenge -> view.isVisible(
+                        challenge,
+                        today,
+                        myParticipation.containsKey(challenge.getId())
+                ));
+
+        return applySorting(challengeStream, view, today, myParticipation.keySet())
                 .map(challenge -> toChallengeResponse(
                         challenge,
                         participantCounts,
@@ -177,6 +190,9 @@ public class ChallengeService {
     }
 
     public List<Challenge> getOngoingChallenges(LocalDate date) {
+        if (isWeekend(date)) {
+            return Collections.emptyList();
+        }
         return challengeRepository.findOngoingChallenges(date);
     }
 
@@ -217,12 +233,47 @@ public class ChallengeService {
         return new ChallengeTeamListResponse(teams.size(), myTeamId, teamInfos);
     }
 
-    private boolean isVisibleInChallengeList(Challenge challenge, LocalDate today, boolean isJoined) {
-        ChallengeStatus status = challenge.getStatus(today);
-        return status == ChallengeStatus.COMING_SOON
-                || status == ChallengeStatus.BEFORE_START
-                || isJoined
-                || challenge.isLatePhase(today);
+    private Map<Long, Long> getParticipantCounts(List<Long> challengeIds) {
+        return challengeParticipantRepository.countByChallengeIdInGroupByChallengeId(challengeIds)
+                .stream()
+                .collect(toMap(ChallengeParticipantCount::challengeId, ChallengeParticipantCount::count));
+    }
+
+    private boolean isWeekend(LocalDate date) {
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
+    }
+
+    private Map<Long, List<ChallengeNewsletterResponse>> getNewslettersByChallengeId(List<Long> challengeIds) {
+        List<ChallengeNewsletterRow> rows = newsletterGroupItemRepository.findChallengeNewsletterRowsByChallengeIds(challengeIds);
+
+        return rows.stream()
+                .collect(groupingBy(
+                        ChallengeNewsletterRow::challengeId,
+                        mapping(ChallengeNewsletterRow::response, toList())
+                ));
+    }
+
+    private Map<Long, ChallengeParticipant> findMyParticipation(Member member, List<Long> challengeIds) {
+        if (member == null) {
+            return Collections.emptyMap();
+        }
+        return challengeParticipantRepository.findByMemberIdAndChallengeIdIn(member.getId(), challengeIds)
+                .stream()
+                .collect(toMap(ChallengeParticipant::getChallengeId, p -> p));
+    }
+
+    private Stream<Challenge> applySorting(
+            Stream<Challenge> stream,
+            ChallengeFilter view,
+            LocalDate today,
+            Set<Long> joinedIds
+    ) {
+        Optional<Comparator<Challenge>> comparatorOpt = view.orderComparator(today, joinedIds);
+
+        return comparatorOpt.isPresent()
+                ? stream.sorted(comparatorOpt.get())
+                : stream;
     }
 
     private ChallengeResponse toChallengeResponse(
@@ -252,31 +303,6 @@ public class ChallengeService {
         );
     }
 
-    private Map<Long, Long> getParticipantCounts(List<Long> challengeIds) {
-        return challengeParticipantRepository.countByChallengeIdInGroupByChallengeId(challengeIds)
-                .stream()
-                .collect(toMap(ChallengeParticipantCount::challengeId, ChallengeParticipantCount::count));
-    }
-
-    private Map<Long, ChallengeParticipant> findMyParticipation(Member member, List<Long> challengeIds) {
-        if (member == null) {
-            return Collections.emptyMap();
-        }
-        return challengeParticipantRepository.findByMemberIdAndChallengeIdIn(member.getId(), challengeIds)
-                .stream()
-                .collect(toMap(ChallengeParticipant::getChallengeId, p -> p));
-    }
-
-    private Map<Long, List<ChallengeNewsletterResponse>> getNewslettersByChallengeId(List<Long> challengeIds) {
-        List<ChallengeNewsletterRow> rows = newsletterGroupItemRepository.findChallengeNewsletterRowsByChallengeIds(challengeIds);
-
-        return rows.stream()
-                .collect(groupingBy(
-                        ChallengeNewsletterRow::challengeId,
-                        mapping(ChallengeNewsletterRow::response, toList())
-                ));
-    }
-
     private ChallengeDetailResponse calculateParticipationInfo(
             Challenge challenge,
             ChallengeParticipant myParticipant,
@@ -295,6 +321,26 @@ public class ChallengeService {
             return ChallengeDetailResponse.ended(progress, isSurvived, grade);
         }
         return ChallengeDetailResponse.ongoing(progress, isSurvived);
+    }
+
+    private EligibilityReason validateEligibility(Challenge challenge, Long challengeId, Long memberId) {
+        LocalDate today = LocalDate.now(clock);
+
+        if (challenge.isRegistrationClosed(today)) {
+            return EligibilityReason.ALREADY_STARTED;
+        }
+
+        boolean alreadyApplied = challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId);
+        if (alreadyApplied) {
+            return EligibilityReason.ALREADY_APPLIED;
+        }
+
+        boolean hasSubscribedNewsletter = newsletterGroupItemRepository.existsSubscribedNewsletter(challengeId, memberId);
+        if (!hasSubscribedNewsletter) {
+            return EligibilityReason.NOT_SUBSCRIBED;
+        }
+
+        return EligibilityReason.ELIGIBLE;
     }
 
     private RuntimeException createApplyException(Long challengeId, Member member, EligibilityReason reason) {
@@ -318,25 +364,5 @@ public class ChallengeService {
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
                 .addContext(ErrorContextKeys.OPERATION, "applyChallenge")
                 .addContext("reason", "ELIGIBLE 상태에서는 예외를 생성할 수 없습니다.");
-    }
-
-    private EligibilityReason validateEligibility(Challenge challenge, Long challengeId, Long memberId) {
-        LocalDate today = LocalDate.now(clock);
-
-        if (challenge.isRegistrationClosed(today)) {
-            return EligibilityReason.ALREADY_STARTED;
-        }
-
-        boolean alreadyApplied = challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId);
-        if (alreadyApplied) {
-            return EligibilityReason.ALREADY_APPLIED;
-        }
-
-        boolean hasSubscribedNewsletter = newsletterGroupItemRepository.existsSubscribedNewsletter(challengeId, memberId);
-        if (!hasSubscribedNewsletter) {
-            return EligibilityReason.NOT_SUBSCRIBED;
-        }
-
-        return EligibilityReason.ELIGIBLE;
     }
 }

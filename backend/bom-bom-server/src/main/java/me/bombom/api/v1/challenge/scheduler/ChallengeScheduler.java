@@ -36,7 +36,7 @@ public class ChallengeScheduler {
     @SchedulerLock(name = "check_survival", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void checkSurvival() {
         log.info("탈락 및 쉴드 사용 처리 시작");
-        LocalDate yesterday = LocalDate.now().minusDays(1);
+        LocalDate yesterday = LocalDate.now(clock).minusDays(1);
         List<Challenge> challenges = challengeService.getOngoingChallenges(yesterday);
 
         for (Challenge challenge : challenges) {
@@ -52,7 +52,7 @@ public class ChallengeScheduler {
     @SchedulerLock(name = "process_ended_challenges", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void processEndedChallenges() {
         log.info("챌린지 종료 처리 및 뱃지 발급 시작");
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         List<Challenge> endedChallenges = challengeService.getEndedChallengesPendingBadge(today);
 
         if (endedChallenges.isEmpty()) {

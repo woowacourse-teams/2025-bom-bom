@@ -8,6 +8,7 @@ import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeLandingResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeTeamListResponse;
+import me.bombom.api.v1.challenge.domain.ChallengeFilter;
 import me.bombom.api.v1.challenge.service.ChallengeService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,8 +33,11 @@ public class ChallengeController implements ChallengeControllerApi {
 
     @Override
     @GetMapping
-    public List<ChallengeResponse> getChallenges(@LoginMember(anonymous = true) Member member) {
-        return challengeService.getChallenges(member);
+    public List<ChallengeResponse> getChallenges(
+            @RequestParam(required = false, defaultValue = "DEFAULT") ChallengeFilter view,
+            @LoginMember(anonymous = true) Member member
+    ) {
+        return challengeService.getChallenges(member, view);
     }
 
     @Override

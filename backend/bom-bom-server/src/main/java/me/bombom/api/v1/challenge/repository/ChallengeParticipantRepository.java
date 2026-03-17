@@ -54,7 +54,9 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
             CASE
                 WHEN cdt.id IS NOT NULL THEN true
                 ELSE false
-            END
+            END,
+            cp.streak,
+            cp.shield
         )
         FROM ChallengeParticipant cp
         JOIN Challenge c ON cp.challengeId = c.id

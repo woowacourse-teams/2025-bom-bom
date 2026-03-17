@@ -15,9 +15,9 @@ import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeFilter;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
+import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.domain.EligibilityReason;
 import me.bombom.api.v1.challenge.domain.RegistrationPhase;
-import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.dto.response.ChallengeDetailResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
@@ -937,6 +937,52 @@ class ChallengeServiceTest {
         assertThatThrownBy(() -> challengeService.getTeamList(0L, member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasMessage(ErrorDetail.ENTITY_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 토요일에_진행_중인_챌린지_조회_시_빈_리스트를_반환한다() {
+        // given
+        LocalDate saturday = LocalDate.of(2025, 3, 15);
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        challengeRepository.save(TestFixture.createChallenge("진행 중 챌린지", saturday.minusDays(5), saturday.plusDays(5), 10, group.getId()));
+
+        // when
+        List<Challenge> result = challengeService.getOngoingChallenges(saturday);
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void 일요일에_진행_중인_챌린지_조회_시_빈_리스트를_반환한다() {
+        // given
+        LocalDate sunday = LocalDate.of(2025, 3, 16);
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        challengeRepository.save(TestFixture.createChallenge("진행 중 챌린지", sunday.minusDays(5), sunday.plusDays(5), 10, group.getId()));
+
+        // when
+        List<Challenge> result = challengeService.getOngoingChallenges(sunday);
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void 평일에_진행_중인_챌린지를_조회한다() {
+        // given
+        LocalDate monday = LocalDate.of(2025, 3, 17);
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = challengeRepository.save(TestFixture.createChallenge("진행 중 챌린지", monday.minusDays(5), monday.plusDays(5), 10, group.getId()));
+
+        // when
+        List<Challenge> result = challengeService.getOngoingChallenges(monday);
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getId()).isEqualTo(challenge.getId());
     }
 
     @Test

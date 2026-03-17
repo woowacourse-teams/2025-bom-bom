@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
@@ -49,6 +50,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             WebDataBinderFactory binderFactory
     ) {
         LoginMember loginMember = parameter.getParameterAnnotation(LoginMember.class);
+        validateAnnotationOptions(loginMember);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (isAnonymous(authentication)) {
@@ -108,7 +110,15 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     }
 
     private boolean isInvalidTokenAllowed(LoginMember loginMember) {
-        return loginMember != null && loginMember.allowInvalidToken();
+        return loginMember != null && loginMember.anonymous() && loginMember.allowInvalidToken();
+    }
+
+    private void validateAnnotationOptions(LoginMember loginMember) {
+        if (loginMember != null && loginMember.allowInvalidToken() && !loginMember.anonymous()) {
+            throw new CIllegalArgumentException(ErrorDetail.PRECONDITION_FAILED)
+                    .addContext("reason", "allow_invalid_token_requires_anonymous")
+                    .addContext("annotation", "@LoginMember");
+        }
     }
 
     private void clearInvalidSessionIfPresent(NativeWebRequest webRequest) {

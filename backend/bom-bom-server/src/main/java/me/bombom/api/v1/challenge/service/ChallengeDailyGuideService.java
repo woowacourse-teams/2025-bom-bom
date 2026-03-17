@@ -13,6 +13,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.dto.DailyGuideCommentContext;
 import me.bombom.api.v1.challenge.dto.request.DailyGuideCommentRequest;
+import me.bombom.api.v1.challenge.dto.response.CreateCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.MemberDailyCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.TodayDailyGuideResponse;

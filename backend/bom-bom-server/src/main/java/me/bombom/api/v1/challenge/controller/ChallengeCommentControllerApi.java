@@ -17,6 +17,7 @@ import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleR
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentLikeResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
+import me.bombom.api.v1.challenge.dto.response.CreateCommentResponse;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
@@ -70,7 +71,7 @@ public interface ChallengeCommentControllerApi {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 값", content = @Content),
             @ApiResponse(responseCode = "404", description = "아티클을 찾을 수 없음", content = @Content)
     })
-    void createChallengeComment(
+    CreateCommentResponse createChallengeComment(
             @Parameter(hidden = true) Member member,
             @Parameter(description = "챌린지 ID") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
             @Valid @RequestBody ChallengeCommentRequest request

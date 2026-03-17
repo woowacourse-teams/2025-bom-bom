@@ -43,6 +43,9 @@ public class ChallengeParticipant extends BaseEntity {
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     private int shield = 0;
 
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    private int streak = 0;
+
     @Builder
     public ChallengeParticipant(
             Long id,
@@ -51,7 +54,8 @@ public class ChallengeParticipant extends BaseEntity {
             Long challengeTeamId,
             int completedDays,
             boolean isSurvived,
-            int shield
+            int shield,
+            int streak
     ) {
         this.id = id;
         this.challengeId = challengeId;
@@ -60,6 +64,7 @@ public class ChallengeParticipant extends BaseEntity {
         this.completedDays = completedDays;
         this.isSurvived = isSurvived;
         this.shield = shield;
+        this.streak = streak;
     }
 
     public int calculateProgress(int totalDays) {
@@ -85,5 +90,13 @@ public class ChallengeParticipant extends BaseEntity {
 
     public void increaseCompletedDays() {
         this.completedDays += 1;
+    }
+
+    public void increaseStreak() {
+        this.streak += 1;
+    }
+
+    public void resetStreak() {
+        this.streak = 0;
     }
 }

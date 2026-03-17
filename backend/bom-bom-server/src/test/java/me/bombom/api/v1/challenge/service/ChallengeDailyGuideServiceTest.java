@@ -235,8 +235,7 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 dayIndex,
                 member.getId(),
-                request,
-                today
+                request
         );
 
         // then
@@ -267,8 +266,7 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 dayIndex,
                 member.getId(),
-                request,
-                today
+                request
         )).isInstanceOf(CIllegalArgumentException.class);
     }
 
@@ -342,8 +340,7 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 disabledGuide.getDayIndex(),
                 member.getId(),
-                request,
-                today
+                request
         )).isInstanceOf(CIllegalArgumentException.class);
     }
 
@@ -357,8 +354,7 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 999, // 존재하지 않는 dayIndex
                 member.getId(),
-                request,
-                today
+                request
         )).isInstanceOf(CIllegalArgumentException.class);
     }
 
@@ -438,8 +434,7 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 0,
                 member.getId(),
-                request,
-                today
+                request
         )).isInstanceOf(CIllegalArgumentException.class);
     }
 
@@ -466,8 +461,7 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 0,
                 member.getId(),
-                request,
-                today
+                request
         );
 
         // then - 댓글이 생성되었는지 확인
@@ -507,29 +501,12 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 1,
                 member.getId(),
-                request,
-                weekday
+                request
         );
 
         // then - 코멘트 생성 확인
         List<ChallengeDailyGuideComment> comments = challengeDailyGuideCommentRepository.findAll();
         assertThat(comments).hasSize(1);
-
-        // then - READ 투두 생성 및 완료 확인
-        boolean readTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
-                participant.getId(),
-                weekday,
-                readTodo.getId()
-        );
-        assertThat(readTodoExists).isTrue();
-
-        // then - COMMENT 투두 생성 및 완료 확인
-        boolean commentTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
-                participant.getId(),
-                weekday,
-                commentTodo.getId()
-        );
-        assertThat(commentTodoExists).isTrue();
 
         // then - MINDSET 투두 생성 확인
         boolean mindsetTodoExists = challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
@@ -569,8 +546,7 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 2,
                 member.getId(),
-                request,
-                today
+                request
         );
 
         // then - 코멘트는 생성됨
@@ -639,8 +615,7 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 1,
                 member.getId(),
-                request,
-                weekday
+                request
         );
 
         // then - MINDSET 투두는 1개만 존재 (중복 생성 안 됨)

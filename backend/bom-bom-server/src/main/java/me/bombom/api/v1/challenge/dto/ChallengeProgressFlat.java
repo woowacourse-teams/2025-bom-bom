@@ -8,6 +8,8 @@ public record ChallengeProgressFlat(
         int completedDays,
         boolean isSurvived,
         ChallengeTodoType todoType,
-        boolean isDone
+        boolean isDone,
+        int streak,
+        int shield
 ) {
 }

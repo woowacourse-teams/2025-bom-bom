@@ -13,6 +13,8 @@ import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingCountResponse;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
+import me.bombom.api.v1.reading.dto.response.ContinueReadingRankingResponse;
+import me.bombom.api.v1.reading.dto.response.MemberContinueReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -50,12 +52,35 @@ public interface ReadingControllerApi {
     MonthlyReadingRankingResponse getMonthlyReadingRank(
             @Parameter(description = "최대 조회 개수 (예: ?limit=10)") @RequestParam @Positive(message = "limit는 1 이상의 값이어야 합니다.") int limit);
 
+    @Operation(
+            summary = "스트릭 랭킹 조회",
+            description = "연속 읽기 일수(continue_reading.day_count) 기준 내림차순 순위를 조회합니다. day_count가 0인 회원은 목록에 포함되지 않습니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "스트릭 랭킹 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 값 (limit는 1 이상의 값이어야 함)", content = @Content),
+    })
+    ContinueReadingRankingResponse getContinueReadingRank(
+            @Parameter(description = "최대 조회 개수 (예: ?limit=10)") @RequestParam @Positive(message = "limit는 1 이상의 값이어야 합니다.") int limit
+    );
+
     @Operation(summary = "나의 월간 순위 조회", description = "저장된 rank 기반으로 나의 순위와 총 랭킹 참여자 수를 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "나의 월간 순위 조회 성공"),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),
     })
     MemberMonthlyReadingRankResponse getMemberMonthlyRank(@Parameter(hidden = true) Member member);
+
+    @Operation(
+            summary = "나의 스트릭 순위 조회",
+            description = "실시간 연속 읽기 일수 기준 나의 순위를 반환합니다. day_count가 0이면 랭킹 대상이 아니므로 404입니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "나의 스트릭 순위 조회 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),
+            @ApiResponse(responseCode = "404", description = "랭킹 대상이 아님 (연속 읽기 일수 0 등)", content = @Content),
+    })
+    MemberContinueReadingRankResponse getMemberContinueReadingRank(@Parameter(hidden = true) Member member);
 
     @Operation(summary = "나의 월간 읽기 개수 조회", description = "현재 로그인한 사용자의 이번 달 아티클 읽기 개수를 조회합니다.")
     @ApiResponses({

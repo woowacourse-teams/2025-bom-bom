@@ -23,12 +23,16 @@ import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
 import me.bombom.api.v1.reading.dto.MonthlyReadingRankFlat;
+import me.bombom.api.v1.reading.dto.ContinueReadingRankFlat;
 import me.bombom.api.v1.reading.dto.RankerInfo;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingCountResponse;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
+import me.bombom.api.v1.reading.dto.response.ContinueReadingRankResponse;
+import me.bombom.api.v1.reading.dto.response.ContinueReadingRankingResponse;
+import me.bombom.api.v1.reading.dto.response.MemberContinueReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.badge.service.BadgeService;
@@ -244,6 +248,41 @@ public class ReadingService {
                 serverNow.toLocalDateTime(),
                 monthlyRanking
         );
+    }
+
+    public ContinueReadingRankingResponse getContinueReadingRank(int limit) {
+        LocalDate lastMonth = LocalDate.now(clock).minusMonths(LAST_MONTH_OFFSET);
+        int lastMonthYear = lastMonth.getYear();
+        int lastMonthValue = lastMonth.getMonthValue();
+
+        List<ContinueReadingRankFlat> flatResults = continueReadingRepository.findContinueReadingRanking(
+                limit,
+                lastMonthYear,
+                lastMonthValue
+        );
+        List<ContinueReadingRankResponse> ranking = ContinueReadingRankResponse.from(flatResults);
+
+        return ContinueReadingRankingResponse.of(ranking);
+    }
+
+    public MemberContinueReadingRankResponse getMemberContinueReadingRank(Member member) {
+        LocalDate lastMonth = LocalDate.now(clock).minusMonths(LAST_MONTH_OFFSET);
+        int lastMonthYear = lastMonth.getYear();
+        int lastMonthValue = lastMonth.getMonthValue();
+
+        ContinueReadingRankFlat flat = continueReadingRepository.findMemberContinueReadingRanking(
+                member.getId(),
+                lastMonthYear,
+                lastMonthValue
+        );
+
+        if (flat == null) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReading");
+        }
+
+        return MemberContinueReadingRankResponse.from(flat);
     }
 
     public MemberMonthlyReadingRankResponse getMemberMonthlyReadingRank(Member member) {

@@ -9,6 +9,8 @@ import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingCountResponse;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
+import me.bombom.api.v1.reading.dto.response.ContinueReadingRankingResponse;
+import me.bombom.api.v1.reading.dto.response.MemberContinueReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.reading.service.ReadingService;
 import org.springframework.validation.annotation.Validated;
@@ -47,9 +49,23 @@ public class ReadingController implements ReadingControllerApi{
     }
 
     @Override
+    @GetMapping("/streak/rank")
+    public ContinueReadingRankingResponse getContinueReadingRank(
+            @RequestParam @Positive(message = "limit는 1 이상의 값이어야 합니다.") int limit
+    ) {
+        return readingService.getContinueReadingRank(limit);
+    }
+
+    @Override
     @GetMapping("/month/rank/me")
     public MemberMonthlyReadingRankResponse getMemberMonthlyRank(@LoginMember Member member) {
         return readingService.getMemberMonthlyReadingRank(member);
+    }
+
+    @Override
+    @GetMapping("/streak/rank/me")
+    public MemberContinueReadingRankResponse getMemberContinueReadingRank(@LoginMember Member member) {
+        return readingService.getMemberContinueReadingRank(member);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package me.bombom.api.v1.reading.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDate;
@@ -9,6 +10,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.badge.domain.Badge;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.badge.domain.ChallengeBadge;
@@ -24,6 +26,8 @@ import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
+import me.bombom.api.v1.reading.dto.response.ContinueReadingRankingResponse;
+import me.bombom.api.v1.reading.dto.response.MemberContinueReadingRankResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotMetaRepository;
@@ -184,6 +188,74 @@ class ReadingServiceTest {
             softly.assertThat(result.data().get(0).monthlyReadCount())
                     .isGreaterThanOrEqualTo(result.data().get(1).monthlyReadCount());
         });
+    }
+
+    @Test
+    void 연속_읽기_일수_기준으로_상위_N명의_랭킹을_조회할_수_있다() {
+        Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_st2", "pid_st2"));
+        continueReadingRepository.save(
+                ContinueReading.builder()
+                        .memberId(member2.getId())
+                        .dayCount(30)
+                        .build()
+        );
+
+        Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_st3", "pid_st3"));
+        continueReadingRepository.save(
+                ContinueReading.builder()
+                        .memberId(member3.getId())
+                        .dayCount(20)
+                        .build()
+        );
+
+        int limit = 2;
+        ContinueReadingRankingResponse result = readingService.getContinueReadingRank(limit);
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.data()).hasSize(limit);
+            softly.assertThat(result.data().get(0).dayCount()).isEqualTo(30);
+            softly.assertThat(result.data().get(1).dayCount()).isEqualTo(20);
+            softly.assertThat(result.data().get(0).rank()).isEqualTo(1L);
+            softly.assertThat(result.data().get(1).rank()).isEqualTo(2L);
+        });
+    }
+
+    @Test
+    void 나의_연속_읽기_순위를_조회할_수_있다() {
+        Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_st_me2", "pid_st_me2"));
+        continueReadingRepository.save(
+                ContinueReading.builder()
+                        .memberId(member2.getId())
+                        .dayCount(30)
+                        .build()
+        );
+
+        Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_st_me3", "pid_st_me3"));
+        continueReadingRepository.save(
+                ContinueReading.builder()
+                        .memberId(member3.getId())
+                        .dayCount(20)
+                        .build()
+        );
+
+        MemberContinueReadingRankResponse result = readingService.getMemberContinueReadingRank(member);
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.rank()).isEqualTo(3L);
+            softly.assertThat(result.dayCount()).isEqualTo(10);
+            softly.assertThat(result.nickname()).isEqualTo(member.getNickname());
+        });
+    }
+
+    @Test
+    void 연속_읽기_일수가_0이면_나의_순위_조회시_예외() {
+        ContinueReading cr = continueReadingRepository.findByMemberId(member.getId()).get();
+        cr.resetDayCount();
+        continueReadingRepository.save(cr);
+        continueReadingRepository.flush();
+
+        assertThatThrownBy(() -> readingService.getMemberContinueReadingRank(member))
+                .isInstanceOf(CIllegalArgumentException.class);
     }
 
     @Test

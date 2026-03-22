@@ -628,6 +628,114 @@ class ChallengeDailyGuideServiceTest {
     }
 
     @Test
+    void day1에_이미_출석완료된_경우_dailyResult와_completedDays를_중복_반영하지_않음() {
+        // given
+        challengeDailyGuideRepository.save(
+                TestFixture.createChallengeDailyGuide(
+                        challenge.getId(),
+                        1,
+                        DailyGuideType.COMMENT,
+                        "https://example.com/day01.webp",
+                        "첫날 가이드",
+                        true
+                )
+        );
+        DailyGuideCommentRequest request = new DailyGuideCommentRequest("첫날 코멘트");
+        LocalDate weekday = today;
+
+        challengeDailyResultRepository.save(
+                TestFixture.createChallengeDailyResult(participant.getId(), weekday,
+                        me.bombom.api.v1.challenge.domain.ChallengeDailyStatus.COMPLETE)
+        );
+
+        // when
+        challengeDailyGuideService.createDailyGuideComment(
+                challenge.getId(),
+                1,
+                member.getId(),
+                request
+        );
+
+        // then
+        List<ChallengeDailyGuideComment> comments = challengeDailyGuideCommentRepository.findAll();
+        ChallengeParticipant updatedParticipant = challengeParticipantRepository.findById(participant.getId()).orElseThrow();
+        assertSoftly(softly -> {
+            softly.assertThat(comments).hasSize(1);
+            softly.assertThat(challengeDailyResultRepository.count()).isEqualTo(1);
+            softly.assertThat(updatedParticipant.getCompletedDays()).isEqualTo(0);
+            softly.assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                    participant.getId(), weekday, commentTodo.getId())).isTrue();
+            softly.assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                    participant.getId(), weekday, mindsetTodo.getId())).isTrue();
+        });
+    }
+
+    @Test
+    void day1에_주말_날짜로_코멘트_작성시_READ_todo만_생성되지_않는다() {
+        // given
+        challengeDailyGuideRepository.save(
+                TestFixture.createChallengeDailyGuide(
+                        challenge.getId(),
+                        1,
+                        DailyGuideType.COMMENT,
+                        "https://example.com/day01.webp",
+                        "첫날 가이드",
+                        true
+                )
+        );
+        DailyGuideCommentRequest request = new DailyGuideCommentRequest("주말 첫날 코멘트");
+        LocalDate saturday = LocalDate.of(2026, 1, 31);
+        given(clock.instant()).willReturn(saturday.atStartOfDay(SEOUL_ZONE).toInstant());
+
+        // when
+        challengeDailyGuideService.createDailyGuideComment(
+                challenge.getId(),
+                1,
+                member.getId(),
+                request
+        );
+
+        // then
+        ChallengeParticipant updatedParticipant = challengeParticipantRepository.findById(participant.getId()).orElseThrow();
+        assertSoftly(softly -> {
+            softly.assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                    participant.getId(), saturday, readTodo.getId())).isFalse();
+            softly.assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                    participant.getId(), saturday, commentTodo.getId())).isTrue();
+            softly.assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                    participant.getId(), saturday, mindsetTodo.getId())).isTrue();
+            softly.assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(
+                    participant.getId(), saturday)).isTrue();
+            softly.assertThat(updatedParticipant.getCompletedDays()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void 아직_열리지_않은_미래_dayIndex로_댓글_작성시_예외_발생() {
+        // given
+        int futureDayIndex = calculateDayIndex(challenge.getStartDate(), today) + 1;
+        challengeDailyGuideRepository.save(
+                TestFixture.createChallengeDailyGuide(
+                        challenge.getId(),
+                        futureDayIndex,
+                        DailyGuideType.COMMENT,
+                        "https://example.com/future.webp",
+                        "미래 가이드",
+                        true
+                )
+        );
+        DailyGuideCommentRequest request = new DailyGuideCommentRequest("미래 댓글 작성 시도");
+
+        // when & then
+        assertThatThrownBy(() -> challengeDailyGuideService.createDailyGuideComment(
+                challenge.getId(),
+                futureDayIndex,
+                member.getId(),
+                request
+        )).isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
     void 데일리_가이드_코멘트_목록_조회_성공() {
         // given
         Member member2 = TestFixture.createUniqueMember("member2", "member2");

@@ -653,8 +653,7 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 1,
                 member.getId(),
-                request,
-                weekday
+                request
         );
 
         // then
@@ -686,14 +685,14 @@ class ChallengeDailyGuideServiceTest {
         );
         DailyGuideCommentRequest request = new DailyGuideCommentRequest("주말 첫날 코멘트");
         LocalDate saturday = LocalDate.of(2026, 1, 31);
+        given(clock.instant()).willReturn(saturday.atStartOfDay(SEOUL_ZONE).toInstant());
 
         // when
         challengeDailyGuideService.createDailyGuideComment(
                 challenge.getId(),
                 1,
                 member.getId(),
-                request,
-                saturday
+                request
         );
 
         // then
@@ -732,8 +731,7 @@ class ChallengeDailyGuideServiceTest {
                 challenge.getId(),
                 futureDayIndex,
                 member.getId(),
-                request,
-                today
+                request
         )).isInstanceOf(CIllegalArgumentException.class);
     }
 

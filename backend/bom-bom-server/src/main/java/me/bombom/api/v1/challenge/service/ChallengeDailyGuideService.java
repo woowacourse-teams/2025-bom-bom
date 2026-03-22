@@ -101,17 +101,17 @@ public class ChallengeDailyGuideService {
     }
 
     @Transactional
-    public void createDailyGuideComment(
+    public CreateCommentResponse createDailyGuideComment(
             Long challengeId,
             int dayIndex,
             Long memberId,
-            DailyGuideCommentRequest request,
-            LocalDate today
+            DailyGuideCommentRequest request
     ) {
+        LocalDate today = LocalDate.now(clock);
         DailyGuideCommentContext context = loadCommentCreationContext(challengeId, dayIndex, memberId);
         validateCommentCreation(context);
         saveDailyGuideComment(context.participant(), context.guide(), request);
-        handleFirstDay(context.participant(), memberId, dayIndex, today);
+        return CreateCommentResponse.from(handleFirstDay(context.participant(), memberId, dayIndex, today));
     }
 
     public MemberDailyCommentResponse getDailyGuideComment(Long challengeId, int dayIndex, Long memberId) {
@@ -253,29 +253,32 @@ public class ChallengeDailyGuideService {
         challengeDailyGuideCommentRepository.save(comment);
     }
 
-    private void handleFirstDay(
+    private boolean handleFirstDay(
             ChallengeParticipant participant,
             Long memberId,
             int dayIndex,
             LocalDate today
     ) {
         if (dayIndex != FIRST_DAY_INDEX) {
-            return;
+            return false;
         }
 
         challengeTodoService.insertMindsetDone(participant, today);
         // READ 투두 자동 생성 (뉴스레터 1개 읽기)
-        challengeDailyTodoService.updateChallengeDailyTodo(memberId, null, today);
+        challengeDailyTodoService.updateChallengeDailyTodo(memberId, null);
         // COMMENT 투두 생성 (한 줄 코멘트 작성)
         challengeTodoService.insertCommentDone(participant, today);
 
         // 이미 완료되지 않았으면 progress 처리
-        if (!challengeTodoService.isCompletedToday(participant.getId(), today)) {
-            challengeTodoService.completeDailyTodo(participant, today);
-            if (participant.getChallengeTeamId() != null) {
-                ChallengeTeam challengeTeam = challengeTeamService.getByParticipant(participant);
-                challengeTeamService.updateTeamProgress(challengeTeam);
-            }
+        if (challengeTodoService.isCompletedToday(participant.getId(), today)) {
+            return false;
         }
+
+        challengeTodoService.completeDailyTodo(participant.getId(), today);
+        if (participant.getChallengeTeamId() != null) {
+            ChallengeTeam challengeTeam = challengeTeamService.getByParticipant(participant);
+            challengeTeamService.updateTeamProgress(challengeTeam);
+        }
+        return true;
     }
 }

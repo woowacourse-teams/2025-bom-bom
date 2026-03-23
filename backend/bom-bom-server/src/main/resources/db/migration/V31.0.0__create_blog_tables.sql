@@ -26,22 +26,22 @@ CREATE TABLE blog_category (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 블로그 해시태그
-CREATE TABLE blog_hash_tag (
+CREATE TABLE blog_hashtag (
                                id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
                                name VARCHAR(50) NOT NULL,
                                created_at DATETIME(6) NOT NULL,
                                updated_at DATETIME(6) NOT NULL,
-                               CONSTRAINT uk_blog_hash_tag_name UNIQUE (name)
+                               CONSTRAINT uk_blog_hashtag_name UNIQUE (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 블로그 해시태그 연관관계
 CREATE TABLE blog_post_tag (
                                id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
                                blog_post_id BIGINT NOT NULL,
-                               blog_hash_tag_id BIGINT NOT NULL,
+                               blog_hashtag_id BIGINT NOT NULL,
                                created_at DATETIME(6) NOT NULL,
                                updated_at DATETIME(6) NOT NULL,
-                               CONSTRAINT uk_blog_post_tag_post_tag UNIQUE (blog_post_id, blog_hash_tag_id)
+                               CONSTRAINT uk_blog_post_tag_post_tag UNIQUE (blog_post_id, blog_hashtag_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 블로그 이미지

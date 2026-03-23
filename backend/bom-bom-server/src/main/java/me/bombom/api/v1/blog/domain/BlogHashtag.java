@@ -15,7 +15,7 @@ import me.bombom.api.v1.common.BaseEntity;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class BlogHashTag extends BaseEntity {
+public class BlogHashtag extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +25,7 @@ public class BlogHashTag extends BaseEntity {
     private String name;
 
     @Builder
-    public BlogHashTag(
+    public BlogHashtag(
             Long id,
             @NonNull String name
     ) {

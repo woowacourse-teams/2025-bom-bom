@@ -451,7 +451,9 @@ class ChallengeProgressServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(response.streak()).isEqualTo(0);
-            softly.assertThat(response.streakDays()).isEmpty();
+            softly.assertThat(response.streakDays()).hasSize(1);
+            softly.assertThat(response.streakDays().getFirst().date()).isEqualTo(LocalDate.now());
+            softly.assertThat(response.streakDays().getFirst().isCompleted()).isFalse();
         });
     }
 

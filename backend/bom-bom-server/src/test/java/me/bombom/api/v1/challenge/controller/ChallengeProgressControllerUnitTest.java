@@ -46,10 +46,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @AutoConfigureMockMvc
 @Import({
@@ -234,9 +234,9 @@ class ChallengeProgressControllerUnitTest {
         ChallengeStreakResponse response = new ChallengeStreakResponse(
                 3,
                 List.of(
-                        new StreakDayResponse(today.minusDays(2), today.minusDays(2).getDayOfWeek(), false),
-                        new StreakDayResponse(today.minusDays(1), today.minusDays(1).getDayOfWeek(), true),
-                        new StreakDayResponse(today, today.getDayOfWeek(), false)
+                        new StreakDayResponse(today.minusDays(2), today.minusDays(2).getDayOfWeek(), true, false),
+                        new StreakDayResponse(today.minusDays(1), today.minusDays(1).getDayOfWeek(), true, true),
+                        new StreakDayResponse(today, today.getDayOfWeek(), true, false)
                 )
         );
 

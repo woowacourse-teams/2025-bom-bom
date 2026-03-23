@@ -77,16 +77,26 @@ public class ChallengeProgressService {
         ChallengeParticipant participant = getChallengeParticipant(challengeId, member.getId());
 
         int streak = participant.getStreak();
-        int fetchCount = Math.min(limit, streak);
-        if (fetchCount == 0) {
-            return ChallengeStreakResponse.empty();
+        LocalDate today = LocalDate.now(clock);
+        boolean completedToday = challengeDailyResultRepository.existsByParticipantIdAndDate(participant.getId(), today);
+
+        if (completedToday) {
+            int fetchCount = Math.min(limit, streak);
+            if (fetchCount == 0) {
+                return ChallengeStreakResponse.empty();
+            }
+            List<ChallengeDailyResult> recentDaysResult = challengeDailyResultRepository.findByParticipantIdOrderByDateDesc(
+                    participant.getId(),
+                    PageRequest.of(0, fetchCount)
+            );
+            return ChallengeStreakResponse.of(streak, recentDaysResult);
         }
 
-        List<ChallengeDailyResult> recentDays = challengeDailyResultRepository.findByParticipantIdOrderByDateDesc(
-                participant.getId(),
-                PageRequest.of(0, fetchCount)
-        );
-        return ChallengeStreakResponse.of(streak, recentDays);
+        int fetchCount = Math.min(limit - 1, streak);
+        List<ChallengeDailyResult> recentDays = fetchCount > 0
+                ? challengeDailyResultRepository.findByParticipantIdOrderByDateDesc(participant.getId(), PageRequest.of(0, fetchCount))
+                : List.of();
+        return ChallengeStreakResponse.withTodayAbsent(streak, recentDays, today);
     }
 
     public TeamChallengeProgressResponse getTeamProgressByTeamId(Long challengeId, Long teamId, Member member) {

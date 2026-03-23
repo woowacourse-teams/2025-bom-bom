@@ -7,8 +7,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -20,14 +18,6 @@ import me.bombom.api.v1.common.BaseEntity;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(
-        indexes = {
-                @Index(
-                        name = "idx_blog_image_asset_blog_post_status",
-                        columnList = "blog_post_id, status"
-                )
-        }
-)
 public class BlogImageAsset extends BaseEntity {
 
     @Id

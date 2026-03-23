@@ -11,9 +11,7 @@ CREATE TABLE blog_post (
                            expected_read_time INT NULL,
                            published_at DATETIME(6) NULL,
                            created_at DATETIME(6) NOT NULL,
-                           updated_at DATETIME(6) NOT NULL,
-                           KEY idx_blog_post_status_visibility_published_at (status, visibility, published_at),
-                           KEY idx_blog_post_category_id (category_id)
+                           updated_at DATETIME(6) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 블로그 카테고리

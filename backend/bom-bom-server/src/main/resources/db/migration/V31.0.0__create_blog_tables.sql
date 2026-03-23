@@ -3,7 +3,7 @@ CREATE TABLE blog_post (
                            id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
                            member_id BIGINT NOT NULL,
                            title VARCHAR(200) NULL,
-                           content LONGTEXT NULL,
+                           content MEDIUMTEXT NULL,
                            thumbnail_image_id BIGINT NULL,
                            status ENUM('DRAFT', 'PUBLISHED', 'DELETED') NOT NULL,
                            visibility ENUM('PRIVATE', 'PUBLIC') NOT NULL,

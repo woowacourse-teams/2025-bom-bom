@@ -41,7 +41,7 @@ public class BlogPost extends BaseEntity {
     @Column(length = 200)
     private String title;
 
-    @Column(columnDefinition = "longtext")
+    @Column(columnDefinition = "mediumtext")
     private String content;
 
     private Long thumbnailImageId;

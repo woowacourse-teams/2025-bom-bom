@@ -1,7 +1,6 @@
 package me.bombom.api.v1.reading.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDate;
@@ -10,7 +9,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.badge.domain.Badge;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.badge.domain.ChallengeBadge;
@@ -248,14 +246,27 @@ class ReadingServiceTest {
     }
 
     @Test
-    void 연속_읽기_일수가_0이면_나의_순위_조회시_예외() {
+    void 연속_읽기_일수가_0이어도_나의_순위는_최하위_공동_순위로_조회된다() {
         ContinueReading cr = continueReadingRepository.findByMemberId(member.getId()).get();
         cr.resetDayCount();
         continueReadingRepository.save(cr);
+
+        Member other = memberRepository.save(TestFixture.createUniqueMember("nickname_gt0", "pid_gt0"));
+        continueReadingRepository.save(
+                ContinueReading.builder()
+                        .memberId(other.getId())
+                        .dayCount(5)
+                        .build()
+        );
         continueReadingRepository.flush();
 
-        assertThatThrownBy(() -> readingService.getMemberContinueReadingRank(member))
-                .isInstanceOf(CIllegalArgumentException.class);
+        MemberContinueReadingRankResponse result = readingService.getMemberContinueReadingRank(member);
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.dayCount()).isEqualTo(0);
+            softly.assertThat(result.rank()).isEqualTo(2L);
+            softly.assertThat(result.nickname()).isEqualTo(member.getNickname());
+        });
     }
 
     @Test

@@ -70,7 +70,6 @@ public interface ContinueReadingRepository extends JpaRepository<ContinueReading
                     cr.day_count AS day_count,
                     RANK() OVER (ORDER BY cr.day_count DESC, cr.member_id ASC) AS calculated_rank
                 FROM continue_reading cr
-                WHERE cr.day_count > 0
             ) ranks
             JOIN member m ON ranks.member_id = m.id
             LEFT JOIN badge rb ON rb.member_id = ranks.member_id

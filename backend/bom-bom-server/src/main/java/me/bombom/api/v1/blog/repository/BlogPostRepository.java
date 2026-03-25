@@ -17,6 +17,7 @@ public interface BlogPostRepository extends JpaRepository<BlogPost, Long> {
                 bp.title,
                 bia.imageUrl,
                 bc.name,
+                bp.expectedReadTime,
                 bp.publishedAt
             )
             FROM BlogPost bp

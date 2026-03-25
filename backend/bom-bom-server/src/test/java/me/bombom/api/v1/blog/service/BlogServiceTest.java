@@ -151,6 +151,7 @@ class BlogServiceTest {
             softly.assertThat(result.getContent().getFirst().title()).isEqualTo("공개 글");
             softly.assertThat(result.getContent().getFirst().thumbnailImageUrl()).isEqualTo("https://cdn.bombom.me/public.png");
             softly.assertThat(result.getContent().getFirst().categoryName()).isEqualTo("테크");
+            softly.assertThat(result.getContent().getFirst().expectedReadTime()).isEqualTo(3);
         });
     }
 
@@ -167,6 +168,7 @@ class BlogServiceTest {
             softly.assertThat(result.getTotalElements()).isEqualTo(1);
             softly.assertThat(result.getContent()).hasSize(1);
             softly.assertThat(result.getContent().getFirst().title()).isEqualTo("공개 글");
+            softly.assertThat(result.getContent().getFirst().expectedReadTime()).isEqualTo(3);
         });
     }
 
@@ -184,6 +186,8 @@ class BlogServiceTest {
             softly.assertThat(result.getContent()).hasSize(2);
             softly.assertThat(result.getContent().get(0).title()).isEqualTo("공개 글");
             softly.assertThat(result.getContent().get(1).title()).isEqualTo("비공개 글");
+            softly.assertThat(result.getContent().get(0).expectedReadTime()).isEqualTo(3);
+            softly.assertThat(result.getContent().get(1).expectedReadTime()).isEqualTo(3);
         });
     }
 
@@ -213,6 +217,7 @@ class BlogServiceTest {
             softly.assertThat(result.getTotalPages()).isEqualTo(2);
             softly.assertThat(result.getContent()).hasSize(1);
             softly.assertThat(result.getContent().getFirst().title()).isEqualTo("공개 글");
+            softly.assertThat(result.getContent().getFirst().expectedReadTime()).isEqualTo(3);
             softly.assertThat(result.hasNext()).isTrue();
         });
     }
@@ -228,6 +233,7 @@ class BlogServiceTest {
             softly.assertThat(result.content()).isEqualTo("공개 글 본문");
             softly.assertThat(result.thumbnailImageUrl()).isEqualTo("https://cdn.bombom.me/public.png");
             softly.assertThat(result.categoryName()).isEqualTo("테크");
+            softly.assertThat(result.expectedReadTime()).isEqualTo(3);
             softly.assertThat(result.publishedAt()).isEqualTo(LocalDateTime.of(2026, 3, 25, 9, 0));
             softly.assertThat(result.hashTags()).containsExactlyInAnyOrder("스프링", "백엔드");
         });
@@ -252,6 +258,7 @@ class BlogServiceTest {
             softly.assertThat(result.content()).isEqualTo("비공개 글 본문");
             softly.assertThat(result.thumbnailImageUrl()).isNull();
             softly.assertThat(result.categoryName()).isEqualTo("테크");
+            softly.assertThat(result.expectedReadTime()).isEqualTo(3);
             softly.assertThat(result.hashTags()).isEmpty();
         });
     }

@@ -45,8 +45,6 @@ public class BlogPost extends BaseEntity {
 
     private Long categoryId;
 
-    private Integer expectedReadTime;
-
     private LocalDateTime publishedAt;
 
     @Builder
@@ -59,7 +57,6 @@ public class BlogPost extends BaseEntity {
             @NonNull BlogPostStatus status,
             @NonNull BlogPostVisibility visibility,
             Long categoryId,
-            Integer expectedReadTime,
             LocalDateTime publishedAt
     ) {
         this.id = id;
@@ -70,7 +67,6 @@ public class BlogPost extends BaseEntity {
         this.status = status;
         this.visibility = visibility;
         this.categoryId = categoryId;
-        this.expectedReadTime = expectedReadTime;
         this.publishedAt = publishedAt;
     }
 }

@@ -19,8 +19,6 @@ public record BlogPostDetailResponse(
         @NotNull
         String categoryName,
 
-        Integer expectedReadTime,
-
         @NotNull
         LocalDateTime publishedAt,
 
@@ -39,7 +37,6 @@ public record BlogPostDetailResponse(
                 blogPost.getContent(),
                 thumbnailImageUrl,
                 category.getName(),
-                blogPost.getExpectedReadTime(),
                 blogPost.getPublishedAt(),
                 hashTags
         );

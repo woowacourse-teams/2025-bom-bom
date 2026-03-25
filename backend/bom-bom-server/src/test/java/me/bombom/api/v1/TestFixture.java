@@ -853,7 +853,6 @@ public final class TestFixture {
                 .status(status)
                 .visibility(visibility)
                 .categoryId(categoryId)
-                .expectedReadTime(3)
                 .publishedAt(publishedAt)
                 .build();
     }

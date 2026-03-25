@@ -228,7 +228,6 @@ class BlogServiceTest {
             softly.assertThat(result.content()).isEqualTo("공개 글 본문");
             softly.assertThat(result.thumbnailImageUrl()).isEqualTo("https://cdn.bombom.me/public.png");
             softly.assertThat(result.categoryName()).isEqualTo("테크");
-            softly.assertThat(result.expectedReadTime()).isEqualTo(3);
             softly.assertThat(result.publishedAt()).isEqualTo(LocalDateTime.of(2026, 3, 25, 9, 0));
             softly.assertThat(result.hashTags()).containsExactlyInAnyOrder("스프링", "백엔드");
         });
@@ -253,7 +252,6 @@ class BlogServiceTest {
             softly.assertThat(result.content()).isEqualTo("비공개 글 본문");
             softly.assertThat(result.thumbnailImageUrl()).isNull();
             softly.assertThat(result.categoryName()).isEqualTo("테크");
-            softly.assertThat(result.expectedReadTime()).isEqualTo(3);
             softly.assertThat(result.hashTags()).isEmpty();
         });
     }

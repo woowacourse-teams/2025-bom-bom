@@ -86,7 +86,7 @@ public interface ContinueReadingRepository extends JpaRepository<ContinueReading
             ) cb_latest ON true
             WHERE ranks.member_id = :memberId
             """, nativeQuery = true)
-    ContinueReadingRankFlat findMemberContinueReadingRanking(
+    Optional<ContinueReadingRankFlat> findMemberContinueReadingRanking(
             @Param("memberId") Long memberId,
             @Param("lastMonthYear") int lastMonthYear,
             @Param("lastMonthValue") int lastMonthValue

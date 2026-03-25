@@ -270,19 +270,14 @@ public class ReadingService {
         int lastMonthYear = lastMonth.getYear();
         int lastMonthValue = lastMonth.getMonthValue();
 
-        ContinueReadingRankFlat flat = continueReadingRepository.findMemberContinueReadingRanking(
+        return continueReadingRepository.findMemberContinueReadingRanking(
                 member.getId(),
                 lastMonthYear,
                 lastMonthValue
-        );
-
-        if (flat == null) {
-            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReading");
-        }
-
-        return MemberContinueReadingRankResponse.from(flat);
+        ).map(MemberContinueReadingRankResponse::from)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReading"));
     }
 
     public MemberMonthlyReadingRankResponse getMemberMonthlyReadingRank(Member member) {

@@ -1,6 +1,7 @@
 package me.bombom.api.v1.reading.dto;
 
 public record ContinueReadingRankFlat(
+
         String nickname,
         long rank,
         int dayCount,

@@ -6,10 +6,12 @@ import java.util.List;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.RecentArticle;
 import me.bombom.api.v1.blog.domain.BlogCategory;
+import me.bombom.api.v1.blog.domain.BlogHashtag;
 import me.bombom.api.v1.blog.domain.BlogImageAsset;
 import me.bombom.api.v1.blog.domain.BlogImageAssetStatus;
 import me.bombom.api.v1.blog.domain.BlogPost;
 import me.bombom.api.v1.blog.domain.BlogPostStatus;
+import me.bombom.api.v1.blog.domain.BlogPostTag;
 import me.bombom.api.v1.blog.domain.BlogPostVisibility;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
@@ -836,6 +838,7 @@ public final class TestFixture {
     public static BlogPost createBlogPost(
             Long memberId,
             String title,
+            String content,
             Long thumbnailImageId,
             Long categoryId,
             BlogPostStatus status,
@@ -845,7 +848,7 @@ public final class TestFixture {
         return BlogPost.builder()
                 .memberId(memberId)
                 .title(title)
-                .content("본문")
+                .content(content)
                 .thumbnailImageId(thumbnailImageId)
                 .status(status)
                 .visibility(visibility)
@@ -864,6 +867,25 @@ public final class TestFixture {
                 .objectKey(objectKey)
                 .imageUrl(imageUrl)
                 .status(BlogImageAssetStatus.ATTACHED)
+                .build();
+    }
+
+    /**
+     * BlogHashtag
+     */
+    public static BlogHashtag createBlogHashtag(String name) {
+        return BlogHashtag.builder()
+                .name(name)
+                .build();
+    }
+
+    /**
+     * BlogPostTag
+     */
+    public static BlogPostTag createBlogPostTag(Long blogPostId, Long blogHashtagId) {
+        return BlogPostTag.builder()
+                .blogPostId(blogPostId)
+                .blogHashtagId(blogHashtagId)
                 .build();
     }
 }

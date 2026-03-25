@@ -1,19 +1,26 @@
 package me.bombom.api.v1.blog.service;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.blog.domain.BlogCategory;
+import me.bombom.api.v1.blog.domain.BlogHashtag;
 import me.bombom.api.v1.blog.domain.BlogImageAsset;
 import me.bombom.api.v1.blog.domain.BlogPost;
 import me.bombom.api.v1.blog.domain.BlogPostStatus;
 import me.bombom.api.v1.blog.domain.BlogPostVisibility;
+import me.bombom.api.v1.blog.dto.response.BlogPostDetailResponse;
 import me.bombom.api.v1.blog.dto.response.BlogPostResponse;
 import me.bombom.api.v1.blog.repository.BlogCategoryRepository;
+import me.bombom.api.v1.blog.repository.BlogHashtagRepository;
 import me.bombom.api.v1.blog.repository.BlogImageAssetRepository;
 import me.bombom.api.v1.blog.repository.BlogPostRepository;
+import me.bombom.api.v1.blog.repository.BlogPostTagRepository;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.domain.Role;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -44,6 +51,12 @@ class BlogServiceTest {
     private BlogImageAssetRepository blogImageAssetRepository;
 
     @Autowired
+    private BlogHashtagRepository blogHashtagRepository;
+
+    @Autowired
+    private BlogPostTagRepository blogPostTagRepository;
+
+    @Autowired
     private MemberRepository memberRepository;
 
     @Autowired
@@ -54,10 +67,15 @@ class BlogServiceTest {
 
     private Member userMember;
     private Member adminMember;
+    private BlogPost publicPost;
+    private BlogPost privatePost;
+    private BlogPost draftPost;
 
     @BeforeEach
     void setUp() {
         initializeRoles();
+        blogPostTagRepository.deleteAllInBatch();
+        blogHashtagRepository.deleteAllInBatch();
         blogImageAssetRepository.deleteAllInBatch();
         blogPostRepository.deleteAllInBatch();
         blogCategoryRepository.deleteAllInBatch();
@@ -71,9 +89,10 @@ class BlogServiceTest {
 
         BlogCategory category = blogCategoryRepository.save(TestFixture.createBlogCategory("테크"));
 
-        BlogPost publicPost = blogPostRepository.save(TestFixture.createBlogPost(
+        publicPost = blogPostRepository.save(TestFixture.createBlogPost(
                 userMember.getId(),
                 "공개 글",
+                "공개 글 본문",
                 null,
                 category.getId(),
                 BlogPostStatus.PUBLISHED,
@@ -87,9 +106,15 @@ class BlogServiceTest {
         ReflectionTestUtils.setField(publicPost, "thumbnailImageId", thumbnail.getId());
         blogPostRepository.save(publicPost);
 
-        blogPostRepository.save(TestFixture.createBlogPost(
+        BlogHashtag firstHashtag = blogHashtagRepository.save(TestFixture.createBlogHashtag("스프링"));
+        BlogHashtag secondHashtag = blogHashtagRepository.save(TestFixture.createBlogHashtag("백엔드"));
+        blogPostTagRepository.save(TestFixture.createBlogPostTag(publicPost.getId(), firstHashtag.getId()));
+        blogPostTagRepository.save(TestFixture.createBlogPostTag(publicPost.getId(), secondHashtag.getId()));
+
+        privatePost = blogPostRepository.save(TestFixture.createBlogPost(
                 adminMember.getId(),
                 "비공개 글",
+                "비공개 글 본문",
                 null,
                 category.getId(),
                 BlogPostStatus.PUBLISHED,
@@ -97,9 +122,10 @@ class BlogServiceTest {
                 LocalDateTime.of(2026, 3, 24, 9, 0)
         ));
 
-        blogPostRepository.save(TestFixture.createBlogPost(
+        draftPost = blogPostRepository.save(TestFixture.createBlogPost(
                 userMember.getId(),
                 "임시 글",
+                "임시 글 본문",
                 null,
                 category.getId(),
                 BlogPostStatus.DRAFT,
@@ -165,6 +191,7 @@ class BlogServiceTest {
         blogPostRepository.save(TestFixture.createBlogPost(
                 userMember.getId(),
                 "두번째 공개 글",
+                "두번째 공개 글 본문",
                 null,
                 null,
                 BlogPostStatus.PUBLISHED,
@@ -186,6 +213,53 @@ class BlogServiceTest {
             softly.assertThat(result.getContent().getFirst().title()).isEqualTo("공개 글");
             softly.assertThat(result.hasNext()).isTrue();
         });
+    }
+
+    @Test
+    void 익명_사용자가_공개_블로그_상세를_조회한다() {
+        // when
+        BlogPostDetailResponse result = blogService.getPublishedPostDetail(publicPost.getId(), null);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.title()).isEqualTo("공개 글");
+            softly.assertThat(result.content()).isEqualTo("공개 글 본문");
+            softly.assertThat(result.thumbnailImageUrl()).isEqualTo("https://cdn.bombom.me/public.png");
+            softly.assertThat(result.categoryName()).isEqualTo("테크");
+            softly.assertThat(result.publishedAt()).isEqualTo(LocalDateTime.of(2026, 3, 25, 9, 0));
+            softly.assertThat(result.hashTags()).containsExactlyInAnyOrder("스프링", "백엔드");
+        });
+    }
+
+    @Test
+    void 일반_사용자가_비공개_블로그_상세를_조회하면_예외가_발생한다() {
+        assertThatThrownBy(() -> blogService.getPublishedPostDetail(privatePost.getId(), userMember))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .extracting("errorDetail")
+                .isEqualTo(ErrorDetail.FORBIDDEN_RESOURCE);
+    }
+
+    @Test
+    void 관리자가_비공개_블로그_상세를_조회한다() {
+        // when
+        BlogPostDetailResponse result = blogService.getPublishedPostDetail(privatePost.getId(), adminMember);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.title()).isEqualTo("비공개 글");
+            softly.assertThat(result.content()).isEqualTo("비공개 글 본문");
+            softly.assertThat(result.thumbnailImageUrl()).isNull();
+            softly.assertThat(result.categoryName()).isEqualTo("테크");
+            softly.assertThat(result.hashTags()).isEmpty();
+        });
+    }
+
+    @Test
+    void 발행되지_않은_블로그_글은_상세_조회할_수_없다() {
+        assertThatThrownBy(() -> blogService.getPublishedPostDetail(draftPost.getId(), adminMember))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .extracting("errorDetail")
+                .isEqualTo(ErrorDetail.ENTITY_NOT_FOUND);
     }
 
     private void initializeRoles() {

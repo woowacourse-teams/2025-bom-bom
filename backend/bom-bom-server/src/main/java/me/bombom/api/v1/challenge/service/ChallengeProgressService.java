@@ -81,18 +81,17 @@ public class ChallengeProgressService {
         boolean completedToday = challengeDailyResultRepository.existsByParticipantIdAndDate(participant.getId(), today);
 
         if (completedToday) {
-            int fetchCount = Math.min(limit, streak);
-            if (fetchCount == 0) {
+            if (streak == 0) {
                 return ChallengeStreakResponse.empty();
             }
             List<ChallengeDailyResult> recentDaysResult = challengeDailyResultRepository.findByParticipantIdOrderByDateDesc(
                     participant.getId(),
-                    PageRequest.of(0, fetchCount)
+                    PageRequest.of(0, limit)
             );
             return ChallengeStreakResponse.of(streak, recentDaysResult);
         }
 
-        int fetchCount = Math.min(limit - 1, streak);
+        int fetchCount = streak > 0 ? limit - 1 : 0;
         List<ChallengeDailyResult> recentDays = fetchCount > 0
                 ? challengeDailyResultRepository.findByParticipantIdOrderByDateDesc(participant.getId(), PageRequest.of(0, fetchCount))
                 : List.of();

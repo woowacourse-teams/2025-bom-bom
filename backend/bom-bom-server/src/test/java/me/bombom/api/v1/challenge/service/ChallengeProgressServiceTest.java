@@ -578,6 +578,9 @@ class ChallengeProgressServiceTest {
         // 금→(토일)→월 구간이 포함된 스트릭 (gap 3일 이하 = 연속)
         LocalDate monday = LocalDate.now().with(java.time.DayOfWeek.MONDAY);
         LocalDate friday = monday.minusDays(3); // 직전 금요일
+        // 오늘을 월요일로 고정: monday에 완료 기록이 있으므로 completedToday=true → 오늘 미완료 데이터 미추가
+        given(clock.instant()).willReturn(monday.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        given(clock.getZone()).willReturn(java.time.ZoneId.systemDefault());
 
         Challenge streakChallenge = createStreakChallenge("주말 낀 스트릭 챌린지");
         ChallengeParticipant participant = challengeParticipantRepository.save(ChallengeParticipant.builder()

@@ -105,8 +105,10 @@ public class ChallengeScheduler {
         log.info("챌린지 TODO 리마인더 알림 1차 추가 시작 - date={}, phase={}", today, ChallengeTodoReminderPhase.FIRST);
 
         try {
-            challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today,
-                    ChallengeTodoReminderPhase.FIRST);
+            challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(
+                    today,
+                    ChallengeTodoReminderPhase.FIRST
+            );
         } catch (Exception e) {
             log.error("챌린지 TODO 리마인더 알림 1차 적재 중 오류 발생 - date={}, phase={}", today, ChallengeTodoReminderPhase.FIRST, e);
         }
@@ -119,8 +121,10 @@ public class ChallengeScheduler {
         log.info("챌린지 TODO 리마인더 알림 2차 추가 시작 - date={}, phase={}", today, ChallengeTodoReminderPhase.SECOND);
 
         try {
-            challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today,
-                    ChallengeTodoReminderPhase.SECOND);
+            challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(
+                    today,
+                    ChallengeTodoReminderPhase.SECOND
+            );
         } catch (Exception e) {
             log.error("챌린지 TODO 리마인더 알림 2차 적재 중 오류 발생 - date={}, phase={}", today, ChallengeTodoReminderPhase.SECOND, e);
         }

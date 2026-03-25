@@ -149,6 +149,7 @@ class BlogServiceTest {
             softly.assertThat(result.getTotalElements()).isEqualTo(1);
             softly.assertThat(result.getContent()).hasSize(1);
             softly.assertThat(result.getContent().getFirst().title()).isEqualTo("공개 글");
+            softly.assertThat(result.getContent().getFirst().description()).isEqualTo("공개 글 설명");
             softly.assertThat(result.getContent().getFirst().thumbnailImageUrl()).isEqualTo("https://cdn.bombom.me/public.png");
             softly.assertThat(result.getContent().getFirst().categoryName()).isEqualTo("테크");
         });
@@ -167,6 +168,7 @@ class BlogServiceTest {
             softly.assertThat(result.getTotalElements()).isEqualTo(1);
             softly.assertThat(result.getContent()).hasSize(1);
             softly.assertThat(result.getContent().getFirst().title()).isEqualTo("공개 글");
+            softly.assertThat(result.getContent().getFirst().description()).isEqualTo("공개 글 설명");
         });
     }
 
@@ -183,7 +185,9 @@ class BlogServiceTest {
             softly.assertThat(result.getTotalElements()).isEqualTo(2);
             softly.assertThat(result.getContent()).hasSize(2);
             softly.assertThat(result.getContent().get(0).title()).isEqualTo("공개 글");
+            softly.assertThat(result.getContent().get(0).description()).isEqualTo("공개 글 설명");
             softly.assertThat(result.getContent().get(1).title()).isEqualTo("비공개 글");
+            softly.assertThat(result.getContent().get(1).description()).isEqualTo("비공개 글 설명");
         });
     }
 
@@ -213,6 +217,7 @@ class BlogServiceTest {
             softly.assertThat(result.getTotalPages()).isEqualTo(2);
             softly.assertThat(result.getContent()).hasSize(1);
             softly.assertThat(result.getContent().getFirst().title()).isEqualTo("공개 글");
+            softly.assertThat(result.getContent().getFirst().description()).isEqualTo("공개 글 설명");
             softly.assertThat(result.hasNext()).isTrue();
         });
     }

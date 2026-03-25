@@ -849,6 +849,7 @@ public final class TestFixture {
                 .memberId(memberId)
                 .title(title)
                 .content(content)
+                .description(title + " 설명")
                 .thumbnailImageId(thumbnailImageId)
                 .status(status)
                 .visibility(visibility)

@@ -9,8 +9,8 @@ import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
-import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderPhase;
 import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderNotification;
+import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderPhase;
 import me.bombom.api.v1.challenge.domain.notification.NotificationStatus;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
@@ -150,7 +150,9 @@ class ChallengeTodoReminderNotificationServiceTest {
                         member1.getId(),
                         challenge.getId(),
                         challenge.getName(),
-                        ChallengeTodoReminderPhase.FIRST
+                        ChallengeTodoReminderPhase.FIRST,
+                        0,
+                        false
                 ));
 
         // when
@@ -181,7 +183,9 @@ class ChallengeTodoReminderNotificationServiceTest {
                         member.getId(),
                         challenge.getId(),
                         challenge.getName(),
-                        ChallengeTodoReminderPhase.FIRST
+                        ChallengeTodoReminderPhase.FIRST,
+                        0,
+                        false
                 ));
 
         // when
@@ -193,5 +197,45 @@ class ChallengeTodoReminderNotificationServiceTest {
         assertThat(notifications)
                 .extracting(ChallengeTodoReminderNotification::getPhase)
                 .containsExactlyInAnyOrder(ChallengeTodoReminderPhase.FIRST, ChallengeTodoReminderPhase.SECOND);
+    }
+
+    @Test
+    void 스트릭이_있는_참여자에게는_스트릭_값이_저장된_알림을_생성한다() {
+        // given
+        LocalDate today = LocalDate.now();
+        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
+        Challenge challenge = challengeRepository.save(
+                TestFixture.createChallenge("봄봄 챌린지", today.minusDays(7), today.plusDays(10), 20, group.getId()));
+        Member member = memberRepository.save(TestFixture.createUniqueMember("m1", "p1"));
+        challengeParticipantRepository.save(
+                TestFixture.createChallengeParticipantWithStreak(challenge.getId(), member.getId(), 7));
+        challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
+
+        // when
+        challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today, ChallengeTodoReminderPhase.FIRST);
+
+        // then
+        ChallengeTodoReminderNotification notification = challengeTodoReminderNotificationRepository.findAll().get(0);
+        assertThat(notification.getStreak()).isEqualTo(7);
+        assertThat(notification.isLastDay()).isFalse();
+    }
+
+    @Test
+    void 챌린지_마지막_날에는_isLastDay가_true인_알림을_생성한다() {
+        // given
+        LocalDate today = LocalDate.now();
+        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
+        Challenge challenge = challengeRepository.save(
+                TestFixture.createChallenge("봄봄 챌린지", today.minusDays(14), today, 15, group.getId()));
+        Member member = memberRepository.save(TestFixture.createUniqueMember("m1", "p1"));
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 0));
+        challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
+
+        // when
+        challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today, ChallengeTodoReminderPhase.FIRST);
+
+        // then
+        ChallengeTodoReminderNotification notification = challengeTodoReminderNotificationRepository.findAll().get(0);
+        assertThat(notification.isLastDay()).isTrue();
     }
 }

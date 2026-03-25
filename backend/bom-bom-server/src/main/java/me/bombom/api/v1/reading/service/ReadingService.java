@@ -1,4 +1,3 @@
-
 package me.bombom.api.v1.reading.service;
 
 import java.time.Clock;
@@ -16,26 +15,28 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.pet.ScorePolicyConstants;
 import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.ContinueReadingRankingSnapshot;
 import me.bombom.api.v1.reading.domain.LowestRankWithDifference;
 import me.bombom.api.v1.reading.domain.MonthlyReadingRealtime;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
-import me.bombom.api.v1.reading.dto.MonthlyReadingRankFlat;
 import me.bombom.api.v1.reading.dto.ContinueReadingRankFlat;
+import me.bombom.api.v1.reading.dto.MonthlyReadingRankFlat;
 import me.bombom.api.v1.reading.dto.RankerInfo;
+import me.bombom.api.v1.reading.dto.response.ContinueReadingRankResponse;
+import me.bombom.api.v1.reading.dto.response.ContinueReadingRankingResponse;
+import me.bombom.api.v1.reading.dto.response.MemberContinueReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingCountResponse;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
-import me.bombom.api.v1.reading.dto.response.ContinueReadingRankResponse;
-import me.bombom.api.v1.reading.dto.response.ContinueReadingRankingResponse;
-import me.bombom.api.v1.reading.dto.response.MemberContinueReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.badge.service.BadgeService;
+import me.bombom.api.v1.reading.repository.ContinueReadingRankingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
@@ -55,9 +56,11 @@ public class ReadingService {
     private static final int LAST_MONTH_OFFSET = 1;
 
     private final MonthlyReadingSnapshotMetaService monthlyReadingSnapshotMetaService;
+    private final ContinueReadingRankingSnapshotMetaService continueReadingRankingSnapshotMetaService;
 
     private final MemberRepository memberRepository;
     private final ContinueReadingRepository continueReadingRepository;
+    private final ContinueReadingRankingSnapshotRepository continueReadingRankingSnapshotRepository;
     private final TodayReadingRepository todayReadingRepository;
     private final WeeklyReadingRepository weeklyReadingRepository;
     private final MonthlyReadingSnapshotRepository monthlyReadingSnapshotRepository;
@@ -72,6 +75,14 @@ public class ReadingService {
     public void initializeReadingInformation(Long memberId) {
         ContinueReading newContinueReading = ContinueReading.create(memberId);
         continueReadingRepository.save(newContinueReading);
+
+        continueReadingRankingSnapshotRepository.save(
+                new ContinueReadingRankingSnapshot(
+                        memberId,
+                        0,
+                        computeLowestContinueReadingRankOrder()
+                )
+        );
 
         TodayReading newTodayReading = TodayReading.create(memberId);
         todayReadingRepository.save(newTodayReading);
@@ -222,78 +233,81 @@ public class ReadingService {
     }
 
     public MonthlyReadingRankingResponse getMonthlyReadingRank(int limit) {
-        LocalDate lastMonth = LocalDate.now().minusMonths(LAST_MONTH_OFFSET);
-        int lastMonthYear = lastMonth.getYear();
-        int lastMonthValue = lastMonth.getMonthValue();
-
-        List<MonthlyReadingRankFlat> flatResults = monthlyReadingSnapshotRepository.findMonthlyRanking(limit, lastMonthYear, lastMonthValue);
-
+        LocalDate lastMonth = lastMonthForRankingBadge();
+        List<MonthlyReadingRankFlat> flatResults = monthlyReadingSnapshotRepository.findMonthlyRanking(
+                limit,
+                lastMonth.getYear(),
+                lastMonth.getMonthValue()
+        );
         List<MonthlyReadingRankResponse> monthlyRanking = MonthlyReadingRankResponse.from(flatResults);
-
-        LocalDateTime rankingUpdatedAt = monthlyReadingSnapshotMetaService.getSnapshotAt();
-        ZonedDateTime serverNow = ZonedDateTime.now(scheduleProps.zoneId());
-        ZonedDateTime nextRefreshAt = scheduleProps.cronExpression().next(serverNow);
-
-        if (nextRefreshAt == null) {
-            log.error(
-                    "다음 랭킹 갱신 시간을 계산할 수 없습니다. application.yml의 ranking 스케줄 설정을 확인하세요. serverNow={}",
-                    serverNow
-            );
-            throw new IllegalStateException("nextRefreshAt : 다음 랭킹 갱신 시간이 존재하지 않습니다.");
-        }
-
+        LocalDateTime rankingUpdatedAt = rankingUpdatedAtForResponse(
+                monthlyReadingSnapshotMetaService.getSnapshotAt()
+        );
+        ZonedDateTime serverNow = serverZonedNowForRankingSchedule();
+        ZonedDateTime nextRefreshAt = requireNextRankingRefresh(serverNow);
         return MonthlyReadingRankingResponse.of(
-                rankingUpdatedAt.atZone(scheduleProps.zoneId()).toLocalDateTime(),
+                rankingUpdatedAt,
                 nextRefreshAt.toLocalDateTime(),
                 serverNow.toLocalDateTime(),
                 monthlyRanking
         );
     }
 
-    public ContinueReadingRankingResponse getContinueReadingRank(int limit) {
-        LocalDate lastMonth = LocalDate.now(clock).minusMonths(LAST_MONTH_OFFSET);
-        int lastMonthYear = lastMonth.getYear();
-        int lastMonthValue = lastMonth.getMonthValue();
-
-        List<ContinueReadingRankFlat> flatResults = continueReadingRepository.findContinueReadingRanking(
-                limit,
-                lastMonthYear,
-                lastMonthValue
-        );
-        List<ContinueReadingRankResponse> ranking = ContinueReadingRankResponse.from(flatResults);
-
-        return ContinueReadingRankingResponse.of(ranking);
-    }
-
-    public MemberContinueReadingRankResponse getMemberContinueReadingRank(Member member) {
-        LocalDate lastMonth = LocalDate.now(clock).minusMonths(LAST_MONTH_OFFSET);
-        int lastMonthYear = lastMonth.getYear();
-        int lastMonthValue = lastMonth.getMonthValue();
-
-        return continueReadingRepository.findMemberContinueReadingRanking(
-                member.getId(),
-                lastMonthYear,
-                lastMonthValue
-        ).map(MemberContinueReadingRankResponse::from)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReading"));
-    }
-
     public MemberMonthlyReadingRankResponse getMemberMonthlyReadingRank(Member member) {
-        LocalDate lastMonth = LocalDate.now(clock).minusMonths(LAST_MONTH_OFFSET);
-        int lastMonthYear = lastMonth.getYear();
-        int lastMonthValue = lastMonth.getMonthValue();
-
-        MonthlyReadingRankFlat flat = monthlyReadingSnapshotRepository.findMemberRanking(member.getId(), lastMonthYear, lastMonthValue);
-
+        LocalDate lastMonth = lastMonthForRankingBadge();
+        MonthlyReadingRankFlat flat = monthlyReadingSnapshotRepository.findMemberRanking(
+                member.getId(),
+                lastMonth.getYear(),
+                lastMonth.getMonthValue()
+        );
         if (flat == null) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                     .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReadingSnapshot");
         }
-
         return MemberMonthlyReadingRankResponse.from(flat);
+    }
+
+    public ContinueReadingRankingResponse getContinueReadingRank(int limit) {
+        LocalDate lastMonth = lastMonthForRankingBadge();
+        List<ContinueReadingRankFlat> flatResults = continueReadingRankingSnapshotRepository.findContinueReadingRanking(
+                limit,
+                lastMonth.getYear(),
+                lastMonth.getMonthValue()
+        );
+        List<ContinueReadingRankResponse> ranking = ContinueReadingRankResponse.from(flatResults);
+        LocalDateTime rankingUpdatedAt = rankingUpdatedAtForResponse(
+                continueReadingRankingSnapshotMetaService.getSnapshotAt()
+        );
+        ZonedDateTime serverNow = serverZonedNowForRankingSchedule();
+        ZonedDateTime nextRefreshAt = requireNextRankingRefresh(serverNow);
+        return ContinueReadingRankingResponse.of(
+                rankingUpdatedAt,
+                nextRefreshAt.toLocalDateTime(),
+                serverNow.toLocalDateTime(),
+                ranking
+        );
+    }
+
+    public MemberContinueReadingRankResponse getMemberContinueReadingRank(Member member) {
+        LocalDate lastMonth = lastMonthForRankingBadge();
+        return continueReadingRankingSnapshotRepository.findMemberContinueReadingRanking(
+                member.getId(),
+                lastMonth.getYear(),
+                lastMonth.getMonthValue()
+        ).map(MemberContinueReadingRankResponse::from)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingRankingSnapshot"));
+    }
+
+    public MemberMonthlyReadingCountResponse getMemberMonthlyReadingCount(Member member) {
+        MonthlyReadingRealtime monthlyReadingRealtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReadingRealtime")
+                        .addContext(ErrorContextKeys.OPERATION, "getMemberMonthlyReadingCount"));
+        return MemberMonthlyReadingCountResponse.from(monthlyReadingRealtime.getCurrentCount());
     }
 
     @Transactional
@@ -310,13 +324,17 @@ public class ReadingService {
         }
     }
 
-    public MemberMonthlyReadingCountResponse getMemberMonthlyReadingCount(Member member) {
-        MonthlyReadingRealtime monthlyReadingRealtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReadingRealtime")
-                        .addContext(ErrorContextKeys.OPERATION, "getMemberMonthlyReadingCount"));
-        return MemberMonthlyReadingCountResponse.from(monthlyReadingRealtime.getCurrentCount());
+    @Transactional
+    public void updateContinueReadingRankingSnapshot() {
+        try {
+            log.info("연속 읽기 랭킹 스냅샷 업데이트를 시작합니다.");
+            rebuildContinueReadingRankingSnapshot();
+            log.info("연속 읽기 랭킹 스냅샷 업데이트가 완료되었습니다.");
+        } catch (Exception e) {
+            log.error("연속 읽기 랭킹 스냅샷 업데이트에 실패했습니다. message={}", e.getMessage(), e);
+            throw new CIllegalArgumentException(ErrorDetail.INTERNAL_SERVER_ERROR)
+                    .addContext(ErrorContextKeys.OPERATION, "updateContinueReadingRankingSnapshot");
+        }
     }
 
     // TODO: 실패한 작업부터 재실행 로직 필요
@@ -324,6 +342,7 @@ public class ReadingService {
     public void deleteAllByMemberId(Long memberId) {
         try {
             continueReadingRepository.deleteByMemberId(memberId);
+            continueReadingRankingSnapshotRepository.deleteByMemberId(memberId);
             todayReadingRepository.deleteByMemberId(memberId);
             weeklyReadingRepository.deleteByMemberId(memberId);
             monthlyReadingSnapshotRepository.deleteByMemberId(memberId);
@@ -332,6 +351,37 @@ public class ReadingService {
         } catch (Exception e) {
             log.error("회원 읽기 정보 삭제 실패. memberId = {}", memberId, e.getStackTrace());
         }
+    }
+
+    private LocalDate lastMonthForRankingBadge() {
+        return LocalDate.now(clock).minusMonths(LAST_MONTH_OFFSET);
+    }
+
+    private LocalDateTime rankingUpdatedAtForResponse(LocalDateTime snapshotAt) {
+        return snapshotAt
+                .atZone(scheduleProps.zoneId())
+                .toLocalDateTime();
+    }
+
+    private ZonedDateTime serverZonedNowForRankingSchedule() {
+        return ZonedDateTime.now(scheduleProps.zoneId());
+    }
+
+    private ZonedDateTime requireNextRankingRefresh(ZonedDateTime serverNow) {
+        ZonedDateTime nextRefreshAt = scheduleProps.cronExpression().next(serverNow);
+        if (nextRefreshAt == null) {
+            log.error(
+                    "다음 랭킹 갱신 시간을 계산할 수 없습니다. application.yml의 ranking 스케줄 설정을 확인하세요. serverNow={}",
+                    serverNow
+            );
+            throw new IllegalStateException("nextRefreshAt : 다음 랭킹 갱신 시간이 존재하지 않습니다.");
+        }
+        return nextRefreshAt;
+    }
+
+    private void rebuildContinueReadingRankingSnapshot() {
+        continueReadingRankingSnapshotRepository.updateContinueReadingRankingSnapshot();
+        continueReadingRankingSnapshotMetaService.updateSnapshotAt();
     }
 
     private LowestRankWithDifference computeLowestRankWithDifference() {
@@ -346,6 +396,18 @@ public class ReadingService {
                 lowestRankMonthlyReadingSnapshot.getRankOrder() + 1,
                 lowestRankMonthlyReadingSnapshot.getCurrentCount()
         );
+    }
+
+    private long computeLowestContinueReadingRankOrder() {
+        if (continueReadingRankingSnapshotRepository.count() == 0) {
+            return 1L;
+        }
+        ContinueReadingRankingSnapshot lowestRankContinueReadingRankingSnapshot =
+                continueReadingRankingSnapshotRepository.findTopByOrderByRankOrderDesc();
+        if (lowestRankContinueReadingRankingSnapshot.getDayCount() == 0) {
+            return lowestRankContinueReadingRankingSnapshot.getRankOrder();
+        }
+        return lowestRankContinueReadingRankingSnapshot.getRankOrder() + 1;
     }
 
     private void applyResetContinueReadingCount(TodayReading todayReading) {

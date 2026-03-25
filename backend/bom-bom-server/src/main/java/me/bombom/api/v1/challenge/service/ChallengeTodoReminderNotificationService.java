@@ -38,51 +38,71 @@ public class ChallengeTodoReminderNotificationService {
 
         for (Challenge challenge : ongoingChallenges) {
             try {
-                List<ChallengeParticipant> incompleteParticipants = challengeParticipantRepository
-                        .findSurvivedParticipantsWithoutCompleteDailyResultByChallengeId(challenge.getId(), reminderDate);
-
-                if (incompleteParticipants.isEmpty()) {
-                    log.info("미완료 참여자가 없는 챌린지입니다. challengeId={}, reminderDate={}",
-                            challenge.getId(), reminderDate);
-                    continue;
-                }
-
-                Set<Long> existingMemberIds = new HashSet<>(
-                        challengeTodoReminderNotificationRepository
-                                .findMemberIdsByChallengeIdAndPhaseAndCreatedAtBetween(
-                                        challenge.getId(),
-                                        phase,
-                                        reminderDate.atStartOfDay(),
-                                        endOfDay(reminderDate)
-                                )
-                );
-
-                boolean isLastDay = reminderDate.equals(challenge.getEndDate());
-                List<ChallengeTodoReminderNotification> notifications = incompleteParticipants.stream()
-                        .filter(participant -> !existingMemberIds.contains(participant.getMemberId()))
-                        .map(participant -> ChallengeTodoReminderNotification.createPending(
-                                participant.getMemberId(),
-                                challenge.getId(),
-                                challenge.getName(),
-                                phase,
-                                participant.getStreak(),
-                                isLastDay
-                        ))
-                        .toList();
-                if (notifications.isEmpty()) {
-                    log.info("이미 TODO 리마인더 알림이 모두 적재된 챌린지입니다. challengeName={}, reminderDate={}, phase={}",
-                            challenge.getName(), reminderDate, phase);
-                    continue;
-                }
-
-                challengeTodoReminderNotificationRepository.saveAll(notifications);
-                log.info("챌린지 TODO 리마인더 알림 적재 완료. challengeId={}, challengeName={}, reminderDate={}, phase={}, createdCount={}",
-                        challenge.getId(), challenge.getName(), reminderDate, phase, notifications.size());
+                createPendingNotificationsForChallenge(challenge, reminderDate, phase);
             } catch (Exception e) {
                 log.error("챌린지 TODO 리마인더 알림 적재 실패. challengeId={}, challengeName={}, reminderDate={}, phase={}",
                         challenge.getId(), challenge.getName(), reminderDate, phase, e);
             }
         }
+    }
+
+    private void createPendingNotificationsForChallenge(Challenge challenge, LocalDate reminderDate, ChallengeTodoReminderPhase phase) {
+        List<ChallengeParticipant> incompleteParticipants = challengeParticipantRepository
+                .findSurvivedParticipantsWithoutCompleteDailyResultByChallengeId(challenge.getId(), reminderDate);
+        if (incompleteParticipants.isEmpty()) {
+            log.info("미완료 참여자가 없는 챌린지입니다. challengeId={}, reminderDate={}", challenge.getId(), reminderDate);
+            return;
+        }
+
+        Set<Long> alreadyNotifiedMemberIds = findAlreadyNotifiedMemberIds(challenge.getId(), phase, reminderDate);
+        List<ChallengeTodoReminderNotification> notifications = buildNotifications(
+                incompleteParticipants,
+                alreadyNotifiedMemberIds,
+                challenge,
+                phase,
+                reminderDate
+        );
+
+        if (notifications.isEmpty()) {
+            log.info("이미 TODO 리마인더 알림이 모두 적재된 챌린지입니다. challengeName={}, reminderDate={}, phase={}",
+                    challenge.getName(), reminderDate, phase);
+            return;
+        }
+
+        challengeTodoReminderNotificationRepository.saveAll(notifications);
+        log.info("챌린지 TODO 리마인더 알림 적재 완료. challengeId={}, challengeName={}, reminderDate={}, phase={}, createdCount={}",
+                challenge.getId(), challenge.getName(), reminderDate, phase, notifications.size());
+    }
+
+    private Set<Long> findAlreadyNotifiedMemberIds(Long challengeId, ChallengeTodoReminderPhase phase, LocalDate date) {
+        return new HashSet<>(challengeTodoReminderNotificationRepository.findMemberIdsByChallengeIdAndPhaseAndCreatedAtBetween(
+                challengeId,
+                phase,
+                date.atStartOfDay(),
+                endOfDay(date)
+            )
+        );
+    }
+
+    private List<ChallengeTodoReminderNotification> buildNotifications(
+            List<ChallengeParticipant> incompleteParticipants,
+            Set<Long> alreadyNotifiedMemberIds,
+            Challenge challenge,
+            ChallengeTodoReminderPhase phase,
+            LocalDate reminderDate
+    ) {
+        boolean isLastDay = reminderDate.equals(challenge.getEndDate());
+        return incompleteParticipants.stream()
+                .filter(participant -> !alreadyNotifiedMemberIds.contains(participant.getMemberId()))
+                .map(participant -> ChallengeTodoReminderNotification.createPending(
+                        participant.getMemberId(),
+                        challenge.getId(),
+                        challenge.getName(),
+                        phase,
+                        participant.getStreak(),
+                        isLastDay
+                ))
+                .toList();
     }
 
     private LocalDateTime endOfDay(LocalDate date) {

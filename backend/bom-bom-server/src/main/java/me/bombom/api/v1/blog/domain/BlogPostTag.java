@@ -21,7 +21,7 @@ import me.bombom.api.v1.common.BaseEntity;
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uk_blog_post_tag_post_tag",
-                        columnNames = {"blog_post_id", "blog_hash_tag_id"}
+                        columnNames = {"blog_post_id", "blog_hashtag_id"}
                 )
         }
 )
@@ -34,17 +34,17 @@ public class BlogPostTag extends BaseEntity {
     @Column(nullable = false)
     private Long blogPostId;
 
-    @Column(nullable = false)
-    private Long blogHashTagId;
+    @Column(name = "blog_hashtag_id", nullable = false)
+    private Long blogHashtagId;
 
     @Builder
     public BlogPostTag(
             Long id,
             @NonNull Long blogPostId,
-            @NonNull Long blogHashTagId
+            @NonNull Long blogHashtagId
     ) {
         this.id = id;
         this.blogPostId = blogPostId;
-        this.blogHashTagId = blogHashTagId;
+        this.blogHashtagId = blogHashtagId;
     }
 }

@@ -1,6 +1,8 @@
 package me.bombom.api.v1.blog.controller;
 
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.blog.dto.response.BlogPostDetailResponse;
 import me.bombom.api.v1.blog.dto.response.BlogPostResponse;
 import me.bombom.api.v1.blog.service.BlogService;
 import me.bombom.api.v1.common.resolver.LoginMember;
@@ -10,10 +12,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/blog/posts")
@@ -32,5 +37,14 @@ public class BlogPostController implements BlogPostControllerApi {
             }) Pageable pageable
     ) {
         return blogService.getPublishedPosts(member, pageable);
+    }
+
+    @Override
+    @GetMapping("/{postId}")
+    public BlogPostDetailResponse getPublishedPostDetail(
+            @LoginMember(anonymous = true, allowInvalidToken = true) Member member,
+            @PathVariable @Positive(message = "postId는 1 이상의 값이어야 합니다.") Long postId
+    ) {
+        return blogService.getPublishedPostDetail(postId, member);
     }
 }

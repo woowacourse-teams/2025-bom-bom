@@ -86,6 +86,10 @@ public class Challenge extends BaseEntity {
         return this.endDate != null && now.isAfter(this.endDate);
     }
 
+    public boolean isLastDay(LocalDate date) {
+        return date.equals(this.endDate);
+    }
+
     public boolean hasStarted(LocalDate now) {
         return this.startDate != null && !now.isBefore(this.startDate);
     }

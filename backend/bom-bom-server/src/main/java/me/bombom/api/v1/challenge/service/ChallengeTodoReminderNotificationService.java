@@ -60,7 +60,7 @@ public class ChallengeTodoReminderNotificationService {
                 alreadyNotifiedMemberIds,
                 challenge,
                 phase,
-                reminderDate
+                challenge.isLastDay(reminderDate)
         );
 
         if (notifications.isEmpty()) {
@@ -89,9 +89,8 @@ public class ChallengeTodoReminderNotificationService {
             Set<Long> alreadyNotifiedMemberIds,
             Challenge challenge,
             ChallengeTodoReminderPhase phase,
-            LocalDate reminderDate
+            boolean isLastDay
     ) {
-        boolean isLastDay = reminderDate.equals(challenge.getEndDate());
         return incompleteParticipants.stream()
                 .filter(participant -> !alreadyNotifiedMemberIds.contains(participant.getMemberId()))
                 .map(participant -> ChallengeTodoReminderNotification.createPending(

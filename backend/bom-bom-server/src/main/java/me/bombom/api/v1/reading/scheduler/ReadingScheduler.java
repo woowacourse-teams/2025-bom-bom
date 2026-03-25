@@ -67,7 +67,7 @@ public class ReadingScheduler {
         log.info("이달의 독서왕 순위 업데이트 완료");
     }
 
-    @Scheduled(cron = "${ranking.reading.monthly.cron}", zone = TIME_ZONE)
+    @Scheduled(cron = "${ranking.reading.continue.cron}", zone = TIME_ZONE)
     @SchedulerLock(name = "ten_minutely_calculate_continue_reading_ranking_snapshot", lockAtLeastFor = "PT6S", lockAtMostFor = "PT15S")
     public void tenMinutelyCalculateContinueReadingRankingSnapshot() {
         log.info("연속 읽기 랭킹 스냅샷 업데이트");

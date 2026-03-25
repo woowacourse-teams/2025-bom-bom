@@ -3,10 +3,12 @@ package me.bombom.api.v1.reading.service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.common.ContinueReadingRankingScheduleProperties;
 import me.bombom.api.v1.common.MonthlyRankingScheduleProperties;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -43,6 +45,7 @@ import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.reading.repository.YearlyReadingRepository;
+import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,6 +71,7 @@ public class ReadingService {
     private final YearlyReadingRepository yearlyReadingRepository;
 
     private final MonthlyRankingScheduleProperties scheduleProps;
+    private final ContinueReadingRankingScheduleProperties continueReadingRankingScheduleProperties;
     private final BadgeService badgeService;
     private final Clock clock;
 
@@ -240,11 +244,9 @@ public class ReadingService {
                 lastMonth.getMonthValue()
         );
         List<MonthlyReadingRankResponse> monthlyRanking = MonthlyReadingRankResponse.from(flatResults);
-        LocalDateTime rankingUpdatedAt = rankingUpdatedAtForResponse(
-                monthlyReadingSnapshotMetaService.getSnapshotAt()
-        );
-        ZonedDateTime serverNow = serverZonedNowForRankingSchedule();
-        ZonedDateTime nextRefreshAt = requireNextRankingRefresh(serverNow);
+        LocalDateTime rankingUpdatedAt = monthlyReadingSnapshotMetaService.getSnapshotAt();
+        ZonedDateTime serverNow = serverZonedNowForRankingSchedule(scheduleProps.zoneId());
+        ZonedDateTime nextRefreshAt = requireNextRankingRefresh(serverNow, scheduleProps.cronExpression());
         return MonthlyReadingRankingResponse.of(
                 rankingUpdatedAt,
                 nextRefreshAt.toLocalDateTime(),
@@ -276,11 +278,14 @@ public class ReadingService {
                 lastMonth.getMonthValue()
         );
         List<ContinueReadingRankResponse> ranking = ContinueReadingRankResponse.from(flatResults);
-        LocalDateTime rankingUpdatedAt = rankingUpdatedAtForResponse(
-                continueReadingRankingSnapshotMetaService.getSnapshotAt()
+        LocalDateTime rankingUpdatedAt = continueReadingRankingSnapshotMetaService.getSnapshotAt();
+        ZonedDateTime serverNow = serverZonedNowForRankingSchedule(
+                continueReadingRankingScheduleProperties.zoneId()
         );
-        ZonedDateTime serverNow = serverZonedNowForRankingSchedule();
-        ZonedDateTime nextRefreshAt = requireNextRankingRefresh(serverNow);
+        ZonedDateTime nextRefreshAt = requireNextRankingRefresh(
+                serverNow,
+                continueReadingRankingScheduleProperties.cronExpression()
+        );
         return ContinueReadingRankingResponse.of(
                 rankingUpdatedAt,
                 nextRefreshAt.toLocalDateTime(),
@@ -357,18 +362,12 @@ public class ReadingService {
         return LocalDate.now(clock).minusMonths(LAST_MONTH_OFFSET);
     }
 
-    private LocalDateTime rankingUpdatedAtForResponse(LocalDateTime snapshotAt) {
-        return snapshotAt
-                .atZone(scheduleProps.zoneId())
-                .toLocalDateTime();
+    private ZonedDateTime serverZonedNowForRankingSchedule(ZoneId zoneId) {
+        return ZonedDateTime.now(zoneId);
     }
 
-    private ZonedDateTime serverZonedNowForRankingSchedule() {
-        return ZonedDateTime.now(scheduleProps.zoneId());
-    }
-
-    private ZonedDateTime requireNextRankingRefresh(ZonedDateTime serverNow) {
-        ZonedDateTime nextRefreshAt = scheduleProps.cronExpression().next(serverNow);
+    private ZonedDateTime requireNextRankingRefresh(ZonedDateTime serverNow, CronExpression cronExpression) {
+        ZonedDateTime nextRefreshAt = cronExpression.next(serverNow);
         if (nextRefreshAt == null) {
             log.error(
                     "다음 랭킹 갱신 시간을 계산할 수 없습니다. application.yml의 ranking 스케줄 설정을 확인하세요. serverNow={}",

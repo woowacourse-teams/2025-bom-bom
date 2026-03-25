@@ -8,15 +8,28 @@ import me.bombom.api.v1.reading.domain.WeeklyReading;
 
 public record ReadingInformationResponse(
 
-        @Schema(type = "integer", format = "int32", description = "연속 읽기 일수", required = true)
+        @Schema(
+                type = "integer",
+                format = "int32",
+                description = "연속 읽기 일수",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
         int streakReadDay,
 
         @NotNull
-        @Schema(type = "object", description = "오늘 읽기 정보", required = true)
+        @Schema(
+                type = "object",
+                description = "오늘 읽기 정보",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
         TodayReadingResponse today,
 
         @NotNull
-        @Schema(type = "object", description = "주간 읽기 정보", required = true)
+        @Schema(
+                type = "object",
+                description = "주간 읽기 정보",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
         WeeklyReadingResponse weekly
 ) {
 

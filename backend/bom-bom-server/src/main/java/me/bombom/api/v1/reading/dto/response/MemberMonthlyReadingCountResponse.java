@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public record MemberMonthlyReadingCountResponse(
 
-        @Schema(required = true)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         int readCount
 ) {
 

@@ -5,10 +5,20 @@ import me.bombom.api.v1.reading.domain.WeeklyReading;
 
 public record WeeklyReadingResponse(
 
-        @Schema(type = "integer", format = "int32", description = "읽은 아티클 수", required = true)
+        @Schema(
+                type = "integer",
+                format = "int32",
+                description = "읽은 아티클 수",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
         int readCount,
-        
-        @Schema(type = "integer", format = "int32", description = "목표 읽기 수", required = true)
+
+        @Schema(
+                type = "integer",
+                format = "int32",
+                description = "목표 읽기 수",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
         int goalCount
 ) {
 

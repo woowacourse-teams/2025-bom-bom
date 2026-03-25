@@ -7,10 +7,20 @@ import me.bombom.api.v1.reading.domain.WeeklyReading;
 public record WeeklyGoalCountResponse(
 
         @NotNull
-        @Schema(type = "integer", format = "int64", description = "주간 읽기 ID", required = true)
+        @Schema(
+                type = "integer",
+                format = "int64",
+                description = "주간 읽기 ID",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
         Long weeklyReadingId,
-        
-        @Schema(type = "integer", format = "int32", description = "주간 목표 읽기 수", required = true)
+
+        @Schema(
+                type = "integer",
+                format = "int32",
+                description = "주간 목표 읽기 수",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
         int weeklyGoalCount
 ) {
 

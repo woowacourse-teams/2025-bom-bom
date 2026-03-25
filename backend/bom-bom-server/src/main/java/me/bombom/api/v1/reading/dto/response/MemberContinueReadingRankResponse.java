@@ -10,10 +10,10 @@ public record MemberContinueReadingRankResponse(
         @NotNull
         String nickname,
 
-        @Schema(required = true)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         long rank,
 
-        @Schema(required = true)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         int dayCount,
 
         BadgesResponse badges

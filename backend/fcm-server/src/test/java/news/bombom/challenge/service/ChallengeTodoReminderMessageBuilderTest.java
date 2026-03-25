@@ -15,37 +15,92 @@ class ChallengeTodoReminderMessageBuilderTest {
     private final ChallengeTodoReminderMessageBuilder builder = new ChallengeTodoReminderMessageBuilder();
 
     @Test
-    @DisplayName("1차 알림이면 기본 리마인드 메시지를 생성한다")
-    void build_FirstPhase() {
-        ChallengeTodoReminderNotification notification = ChallengeTodoReminderNotification.builder()
-                .memberId(1L)
-                .challengeId(100L)
-                .challengeName("러닝")
-                .phase(ChallengeTodoReminderPhase.FIRST)
-                .build();
-        MemberFcmToken token = token();
-
-        NotificationMessage message = builder.build(notification, token);
-
-        assertThat(message.getTitle()).isEqualTo("러닝 아직 할 일이 남았어요!");
-        assertThat(message.getContent()).isEqualTo("오늘도 기록을 채워볼까요? 지금 참여해서 꾸준하게 이어가요!");
+    @DisplayName("마지막 날 1차 알림 - 고정 메시지")
+    void build_lastDay_first() {
+        NotificationMessage msg = build(0, true, ChallengeTodoReminderPhase.FIRST);
+        assertThat(msg.getTitle()).isEqualTo("[봄봄] 오늘이 마지막 날이에요! 끝까지 함께해요!");
     }
 
     @Test
-    @DisplayName("2차 알림이면 미완료 안내 메시지를 생성한다")
-    void build_SecondPhase() {
+    @DisplayName("마지막 날 2차 알림 - 고정 메시지")
+    void build_lastDay_second() {
+        NotificationMessage msg = build(0, true, ChallengeTodoReminderPhase.SECOND);
+        assertThat(msg.getTitle()).isEqualTo("[봄봄] 마지막 날이에요. 오늘만 하면 완주예요 ⏰");
+    }
+
+    @Test
+    @DisplayName("스트릭 0일 1차 알림")
+    void build_streak0_first() {
+        NotificationMessage msg = build(0, false, ChallengeTodoReminderPhase.FIRST);
+        assertThat(msg.getTitle()).isEqualTo("봄봄 오늘부터 함께해요. 아직 할 일이 남았어요!");
+    }
+
+    @Test
+    @DisplayName("스트릭 0일 2차 알림")
+    void build_streak0_second() {
+        NotificationMessage msg = build(0, false, ChallengeTodoReminderPhase.SECOND);
+        assertThat(msg.getTitle()).isEqualTo("[봄봄] 오늘부터 함께 습관을 쌓아봐요!");
+    }
+
+    @Test
+    @DisplayName("스트릭 1일 1차 알림")
+    void build_streak1_first() {
+        NotificationMessage msg = build(1, false, ChallengeTodoReminderPhase.FIRST);
+        assertThat(msg.getTitle()).isEqualTo("봄봄 오늘부터 함께해요. 아직 할 일이 남았어요!");
+    }
+
+    @Test
+    @DisplayName("스트릭 3일 1차 알림")
+    void build_streak3_first() {
+        NotificationMessage msg = build(3, false, ChallengeTodoReminderPhase.FIRST);
+        assertThat(msg.getTitle()).isEqualTo("[봄봄] 3일 연속 기록! 오늘도 이어가요!");
+    }
+
+    @Test
+    @DisplayName("스트릭 7일 1차 알림")
+    void build_streak7_first() {
+        NotificationMessage msg = build(7, false, ChallengeTodoReminderPhase.FIRST);
+        assertThat(msg.getTitle()).isEqualTo("[봄봄] 벌써 7일 연속! 오늘도 같이 달려요 🏃");
+    }
+
+    @Test
+    @DisplayName("스트릭 14일 1차 알림")
+    void build_streak14_first() {
+        NotificationMessage msg = build(14, false, ChallengeTodoReminderPhase.FIRST);
+        assertThat(msg.getTitle()).isEqualTo("[봄봄] 14일 연속이라니! 정말 멋져요! 👍");
+    }
+
+    @Test
+    @DisplayName("스트릭 21일 1차 알림")
+    void build_streak21_first() {
+        NotificationMessage msg = build(21, false, ChallengeTodoReminderPhase.FIRST);
+        assertThat(msg.getTitle()).isEqualTo("[봄봄] 21일 연속! 완주가 코앞이에요. 정말 잘하고 있어요!");
+    }
+
+    @Test
+    @DisplayName("스트릭 7일 2차 알림")
+    void build_streak7_second() {
+        NotificationMessage msg = build(7, false, ChallengeTodoReminderPhase.SECOND);
+        assertThat(msg.getTitle()).isEqualTo("[봄봄] 7일 연속 기록, 오늘 놓치면 너무 아깝잖아요 🥲");
+    }
+
+    @Test
+    @DisplayName("스트릭 21일 2차 알림")
+    void build_streak21_second() {
+        NotificationMessage msg = build(21, false, ChallengeTodoReminderPhase.SECOND);
+        assertThat(msg.getTitle()).isEqualTo("[봄봄] 21일 연속, 완주까지 얼마 안 남았어요 ⏰");
+    }
+
+    private NotificationMessage build(int streak, boolean isLastDay, ChallengeTodoReminderPhase phase) {
         ChallengeTodoReminderNotification notification = ChallengeTodoReminderNotification.builder()
                 .memberId(1L)
                 .challengeId(100L)
-                .challengeName("러닝")
-                .phase(ChallengeTodoReminderPhase.SECOND)
+                .challengeName("봄봄")
+                .phase(phase)
+                .streak(streak)
+                .isLastDay(isLastDay)
                 .build();
-        MemberFcmToken token = token();
-
-        NotificationMessage message = builder.build(notification, token);
-
-        assertThat(message.getTitle()).isEqualTo("[러닝] 마지막 리마인드 ⏰");
-        assertThat(message.getContent()).isEqualTo("5분만 읽으면 오늘 출석이예요. 가볍게 완료해봐요!");
+        return builder.build(notification, token());
     }
 
     private MemberFcmToken token() {

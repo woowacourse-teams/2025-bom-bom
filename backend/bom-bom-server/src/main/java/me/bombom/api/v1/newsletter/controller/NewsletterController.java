@@ -22,7 +22,7 @@ public class NewsletterController implements NewsletterControllerApi{
     @Override
     @GetMapping
     public NewslettersResponse getNewsletters(
-            @LoginMember(anonymous = true) Long memberId,
+            @LoginMember(anonymous = true, allowInvalidToken = true) Long memberId,
             @RequestParam(required = false, defaultValue = "false") boolean includeSuspended,
             @RequestParam(required = false) Long categoryId
     ) {

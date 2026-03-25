@@ -17,6 +17,9 @@ public record StreakDayResponse(
         DayOfWeek dayOfWeek,
 
         @Schema(requiredMode = RequiredMode.REQUIRED)
+        boolean isCompleted,
+
+        @Schema(requiredMode = RequiredMode.REQUIRED)
         boolean isShieldApplied
 ) {
 
@@ -24,8 +27,13 @@ public record StreakDayResponse(
         return new StreakDayResponse(
                 result.getDate(),
                 result.getDate().getDayOfWeek(),
+                true,
                 result.getStatus() == ChallengeDailyStatus.SHIELD
         );
+    }
+
+    public static StreakDayResponse notParticipated(LocalDate date) {
+        return new StreakDayResponse(date, date.getDayOfWeek(), false, false);
     }
 
     public static List<StreakDayResponse> from(List<ChallengeDailyResult> results) {

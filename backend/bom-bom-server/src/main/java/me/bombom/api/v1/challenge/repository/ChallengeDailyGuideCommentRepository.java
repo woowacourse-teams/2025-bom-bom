@@ -1,6 +1,5 @@
 package me.bombom.api.v1.challenge.repository;
 
-import java.util.Optional;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
 import me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.MemberDailyCommentResponse;
@@ -12,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface ChallengeDailyGuideCommentRepository extends JpaRepository<ChallengeDailyGuideComment, Long> {
 
-    Optional<ChallengeDailyGuideComment> findByGuideIdAndParticipantId(Long guideId, Long participantId);
+    boolean existsByGuideIdAndParticipantId(Long guideId, Long participantId);
 
     @Query("""
             SELECT new me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse(

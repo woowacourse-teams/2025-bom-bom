@@ -157,9 +157,12 @@ public class ChallengeService {
             throw createApplyException(challengeId, member, reason);
         }
 
+        Long teamId = challenge.hasStarted(LocalDate.now(clock)) ? getFewestTeamId(challengeId) : null;
+
         ChallengeParticipant participant = ChallengeParticipant.builder()
                 .challengeId(challengeId)
                 .memberId(member.getId())
+                .challengeTeamId(teamId)
                 .isSurvived(true)
                 .build();
 
@@ -364,5 +367,11 @@ public class ChallengeService {
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
                 .addContext(ErrorContextKeys.OPERATION, "applyChallenge")
                 .addContext("reason", "ELIGIBLE 상태에서는 예외를 생성할 수 없습니다.");
+    }
+
+    private Long getFewestTeamId(Long challengeId) {
+        return challengeTeamRepository.findTeamWithFewestMembers(challengeId)
+                .map(ChallengeTeam::getId)
+                .orElse(null);
     }
 }

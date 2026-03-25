@@ -762,6 +762,62 @@ class ChallengeServiceTest {
     }
 
     @Test
+    void 챌린지_시작_후_참여_시_멤버_수_가장_적은_팀에_배정된다() {
+        // given
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", today.minusDays(1), today.plusDays(20), 20, group.getId());
+        challengeRepository.save(challenge);
+
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
+        subscribeRepository.save(TestFixture.createSubscribe(newsletters.get(0), member));
+
+        ChallengeTeam team1 = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
+        ChallengeTeam team2 = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
+
+        Member otherMember1 = memberRepository.save(TestFixture.createUniqueMember("other1", "other1@test.com"));
+        Member otherMember2 = memberRepository.save(TestFixture.createUniqueMember("other2", "other2@test.com"));
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipantWithTeam(challenge.getId(), otherMember1.getId(), team1.getId(), 0, 0));
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipantWithTeam(challenge.getId(), otherMember2.getId(), team1.getId(), 0, 0));
+
+        // when
+        challengeService.applyChallenge(challenge.getId(), member);
+
+        // then
+        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
+                challenge.getId(),
+                member.getId()
+        ).orElseThrow();
+        assertThat(participant.getChallengeTeamId()).isEqualTo(team2.getId());
+    }
+
+    @Test
+    void 챌린지_시작_전_참여_시_팀이_배정되지_않는다() {
+        // given
+        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
+        newsletterGroupRepository.save(group);
+        Challenge challenge = TestFixture.createChallenge("챌린지", today.plusDays(5), today.plusDays(25), 20, group.getId());
+        challengeRepository.save(challenge);
+
+        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
+        newsletterGroupItemRepository.save(item);
+        subscribeRepository.save(TestFixture.createSubscribe(newsletters.get(0), member));
+
+        challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
+
+        // when
+        challengeService.applyChallenge(challenge.getId(), member);
+
+        // then
+        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
+                challenge.getId(),
+                member.getId()
+        ).orElseThrow();
+        assertThat(participant.getChallengeTeamId()).isNull();
+    }
+
+    @Test
     void 구독하지_않은_뉴스레터를_가진_챌린지_신청_시_예외가_발생한다() {
         // given
         NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");

@@ -810,8 +810,10 @@ class ChallengeServiceTest {
         challengeService.applyChallenge(challenge.getId(), member);
 
         // then
-        ChallengeParticipant participant = challengeParticipantRepository
-                .findByChallengeIdAndMemberId(challenge.getId(), member.getId()).orElseThrow();
+        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
+                challenge.getId(),
+                member.getId()
+        ).orElseThrow();
         assertThat(participant.getChallengeTeamId()).isNull();
     }
 

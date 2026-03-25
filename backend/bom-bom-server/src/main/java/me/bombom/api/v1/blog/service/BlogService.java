@@ -1,11 +1,13 @@
 package me.bombom.api.v1.blog.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.blog.domain.BlogCategory;
 import me.bombom.api.v1.blog.domain.BlogImageAsset;
 import me.bombom.api.v1.blog.domain.BlogPost;
 import me.bombom.api.v1.blog.domain.BlogPostStatus;
 import me.bombom.api.v1.blog.domain.BlogPostVisibility;
+import me.bombom.api.v1.blog.dto.response.BlogCategoryResponse;
 import me.bombom.api.v1.blog.dto.response.BlogPostDetailResponse;
 import me.bombom.api.v1.blog.dto.response.BlogPostResponse;
 import me.bombom.api.v1.blog.repository.BlogCategoryRepository;
@@ -60,6 +62,12 @@ public class BlogService {
                 blogCategory,
                 blogPostTagRepository.findHashtagNamesByBlogPostId(postId)
         );
+    }
+
+    public List<BlogCategoryResponse> getBlogCategories() {
+        return blogCategoryRepository.findAllByOrderByIdAsc().stream()
+                .map(BlogCategoryResponse::from)
+                .toList();
     }
 
     private BlogPost findPublishedPostById(Long postId, Long memberId) {

@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
+import me.bombom.api.v1.blog.dto.response.BlogCategoryResponse;
 import me.bombom.api.v1.blog.dto.response.BlogPostDetailResponse;
 import me.bombom.api.v1.blog.dto.response.BlogPostResponse;
 import me.bombom.api.v1.common.resolver.LoginMember;
@@ -44,4 +46,13 @@ public interface BlogPostControllerApi {
             @Parameter(description = "블로그 글 ID")
             @PathVariable @Positive(message = "postId는 1 이상의 값이어야 합니다.") Long postId
     );
+
+    @Operation(
+            summary = "블로그 카테고리 목록 조회",
+            description = "블로그 카테고리 목록을 조회합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "블로그 카테고리 목록 조회 성공")
+    })
+    List<BlogCategoryResponse> getBlogCategories();
 }

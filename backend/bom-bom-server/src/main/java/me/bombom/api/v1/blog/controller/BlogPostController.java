@@ -1,7 +1,9 @@
 package me.bombom.api.v1.blog.controller;
 
 import jakarta.validation.constraints.Positive;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.blog.dto.response.BlogCategoryResponse;
 import me.bombom.api.v1.blog.dto.response.BlogPostDetailResponse;
 import me.bombom.api.v1.blog.dto.response.BlogPostResponse;
 import me.bombom.api.v1.blog.service.BlogService;
@@ -21,13 +23,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/blog/posts")
+@RequestMapping("/api/v1/blog")
 public class BlogPostController implements BlogPostControllerApi {
 
     private final BlogService blogService;
 
     @Override
-    @GetMapping
+    @GetMapping("/posts")
     public Page<BlogPostResponse> getPublishedPosts(
             @LoginMember(anonymous = true, allowInvalidToken = true) Member member,
             @PageableDefault(size = 20)
@@ -40,11 +42,17 @@ public class BlogPostController implements BlogPostControllerApi {
     }
 
     @Override
-    @GetMapping("/{postId}")
+    @GetMapping("/posts/{postId}")
     public BlogPostDetailResponse getPublishedPostDetail(
             @LoginMember(anonymous = true, allowInvalidToken = true) Member member,
             @PathVariable @Positive(message = "postId는 1 이상의 값이어야 합니다.") Long postId
     ) {
         return blogService.getPublishedPostDetail(postId, member);
+    }
+
+    @Override
+    @GetMapping("/categories")
+    public List<BlogCategoryResponse> getBlogCategories() {
+        return blogService.getBlogCategories();
     }
 }

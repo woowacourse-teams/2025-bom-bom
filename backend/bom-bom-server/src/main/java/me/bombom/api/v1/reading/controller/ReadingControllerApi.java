@@ -54,7 +54,7 @@ public interface ReadingControllerApi {
 
     @Operation(
             summary = "스트릭 랭킹 조회",
-            description = "연속 읽기 일수(continue_reading.day_count) 기준 내림차순 순위를 조회합니다. day_count가 0인 회원은 목록에 포함되지 않습니다."
+            description = "연속 읽기 일수(continue_reading.day_count) 기준 내림차순 순위를 조회합니다. day_count가 0인 회원도 목록에 포함됩니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "스트릭 랭킹 조회 성공"),
@@ -73,12 +73,12 @@ public interface ReadingControllerApi {
 
     @Operation(
             summary = "나의 스트릭 순위 조회",
-            description = "실시간 연속 읽기 일수 기준 나의 순위를 반환합니다. day_count가 0이면 월간 순위와 같이 최하위 구간의 공동 순위로 포함됩니다. continue_reading 행이 없으면 404입니다."
+            description = "실시간 연속 읽기 일수 기준 나의 순위를 반환합니다. day_count가 0이면 월간 순위와 같이 최하위 구간의 공동 순위로 포함됩니다. continue_reading_ranking_snapshot 행이 없으면 404입니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "나의 스트릭 순위 조회 성공"),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),
-            @ApiResponse(responseCode = "404", description = "continue_reading 정보 없음", content = @Content),
+            @ApiResponse(responseCode = "404", description = "연속 읽기 랭킹 스냅샷 정보 없음", content = @Content),
     })
     MemberContinueReadingRankResponse getMemberContinueReadingRank(@Parameter(hidden = true) Member member);
 

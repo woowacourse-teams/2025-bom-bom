@@ -57,17 +57,18 @@ public class ChallengeTodoReminderNotificationService {
                                 )
                 );
 
+                boolean isLastDay = reminderDate.equals(challenge.getEndDate());
                 List<ChallengeTodoReminderNotification> notifications = incompleteParticipants.stream()
-                        .map(ChallengeParticipant::getMemberId)
-                        .filter(memberId -> !existingMemberIds.contains(memberId))
-                        .map(memberId -> ChallengeTodoReminderNotification.createPending(
-                                memberId,
+                        .filter(participant -> !existingMemberIds.contains(participant.getMemberId()))
+                        .map(participant -> ChallengeTodoReminderNotification.createPending(
+                                participant.getMemberId(),
                                 challenge.getId(),
                                 challenge.getName(),
-                                phase
+                                phase,
+                                participant.getStreak(),
+                                isLastDay
                         ))
                         .toList();
-
                 if (notifications.isEmpty()) {
                     log.info("이미 TODO 리마인더 알림이 모두 적재된 챌린지입니다. challengeName={}, reminderDate={}, phase={}",
                             challenge.getName(), reminderDate, phase);

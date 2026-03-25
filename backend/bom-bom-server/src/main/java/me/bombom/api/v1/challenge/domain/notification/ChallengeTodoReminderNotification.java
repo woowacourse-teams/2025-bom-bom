@@ -49,6 +49,12 @@ public class ChallengeTodoReminderNotification extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ChallengeTodoReminderPhase phase;
 
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    private int streak;
+
+    @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    private boolean isLastDay;
+
     @Builder
     public ChallengeTodoReminderNotification(
             @NonNull Long memberId,
@@ -58,7 +64,9 @@ public class ChallengeTodoReminderNotification extends BaseEntity {
             String lastError,
             @NonNull Long challengeId,
             @NonNull String challengeName,
-            @NonNull ChallengeTodoReminderPhase phase
+            @NonNull ChallengeTodoReminderPhase phase,
+            int streak,
+            boolean isLastDay
     ) {
         this.memberId = memberId;
         this.status = status;
@@ -68,13 +76,17 @@ public class ChallengeTodoReminderNotification extends BaseEntity {
         this.challengeId = challengeId;
         this.challengeName = challengeName;
         this.phase = phase;
+        this.streak = streak;
+        this.isLastDay = isLastDay;
     }
 
     public static ChallengeTodoReminderNotification createPending(
             Long memberId,
             Long challengeId,
             String challengeName,
-            ChallengeTodoReminderPhase phase
+            ChallengeTodoReminderPhase phase,
+            int streak,
+            boolean isLastDay
     ) {
         return ChallengeTodoReminderNotification.builder()
                 .memberId(memberId)
@@ -83,6 +95,8 @@ public class ChallengeTodoReminderNotification extends BaseEntity {
                 .challengeId(challengeId)
                 .challengeName(challengeName)
                 .phase(phase)
+                .streak(streak)
+                .isLastDay(isLastDay)
                 .build();
     }
 }

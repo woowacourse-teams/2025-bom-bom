@@ -5,6 +5,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.RecentArticle;
+import me.bombom.api.v1.blog.domain.BlogCategory;
+import me.bombom.api.v1.blog.domain.BlogImageAsset;
+import me.bombom.api.v1.blog.domain.BlogImageAssetStatus;
+import me.bombom.api.v1.blog.domain.BlogPost;
+import me.bombom.api.v1.blog.domain.BlogPostStatus;
+import me.bombom.api.v1.blog.domain.BlogPostVisibility;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.domain.ChallengeCommentReply;
@@ -86,6 +92,17 @@ public final class TestFixture {
                 .nickname(nickname)
                 .gender(Gender.FEMALE)
                 .roleId(1L)
+                .build();
+    }
+
+    public static Member createMemberWithRole(String nickname, String providerId, Long roleId) {
+        return Member.builder()
+                .provider("provider")
+                .providerId(providerId)
+                .email(providerId + "@bombom.news")
+                .nickname(nickname)
+                .gender(Gender.FEMALE)
+                .roleId(roleId)
                 .build();
     }
 
@@ -801,6 +818,52 @@ public final class TestFixture {
                 .participantId(participantId)
                 .reply(reply)
                 .isPrivate(isPrivate)
+                .build();
+    }
+
+    /**
+     * BlogCategory
+     */
+    public static BlogCategory createBlogCategory(String name) {
+        return BlogCategory.builder()
+                .name(name)
+                .build();
+    }
+
+    /**
+     * BlogPost
+     */
+    public static BlogPost createBlogPost(
+            Long memberId,
+            String title,
+            Long thumbnailImageId,
+            Long categoryId,
+            BlogPostStatus status,
+            BlogPostVisibility visibility,
+            LocalDateTime publishedAt
+    ) {
+        return BlogPost.builder()
+                .memberId(memberId)
+                .title(title)
+                .content("본문")
+                .thumbnailImageId(thumbnailImageId)
+                .status(status)
+                .visibility(visibility)
+                .categoryId(categoryId)
+                .expectedReadTime(3)
+                .publishedAt(publishedAt)
+                .build();
+    }
+
+    /**
+     * BlogImageAsset
+     */
+    public static BlogImageAsset createBlogImageAsset(Long blogPostId, String objectKey, String imageUrl) {
+        return BlogImageAsset.builder()
+                .blogPostId(blogPostId)
+                .objectKey(objectKey)
+                .imageUrl(imageUrl)
+                .status(BlogImageAssetStatus.ATTACHED)
                 .build();
     }
 }

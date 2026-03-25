@@ -15,6 +15,7 @@ public interface BlogPostRepository extends JpaRepository<BlogPost, Long> {
             SELECT new me.bombom.api.v1.blog.dto.response.BlogPostResponse(
                 bp.id,
                 bp.title,
+                bp.description,
                 bia.imageUrl,
                 bc.name,
                 bp.publishedAt

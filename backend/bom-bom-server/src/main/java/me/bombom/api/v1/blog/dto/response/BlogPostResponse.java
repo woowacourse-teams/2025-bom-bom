@@ -11,6 +11,9 @@ public record BlogPostResponse(
         @NotNull
         String title,
 
+        @NotNull
+        String description,
+
         String thumbnailImageUrl,
 
         @NotNull

@@ -5,6 +5,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
+import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.blog.domain.BlogCategory;
 import me.bombom.api.v1.blog.domain.BlogHashtag;
@@ -12,6 +13,7 @@ import me.bombom.api.v1.blog.domain.BlogImageAsset;
 import me.bombom.api.v1.blog.domain.BlogPost;
 import me.bombom.api.v1.blog.domain.BlogPostStatus;
 import me.bombom.api.v1.blog.domain.BlogPostVisibility;
+import me.bombom.api.v1.blog.dto.response.BlogCategoryResponse;
 import me.bombom.api.v1.blog.dto.response.BlogPostDetailResponse;
 import me.bombom.api.v1.blog.dto.response.BlogPostResponse;
 import me.bombom.api.v1.blog.repository.BlogCategoryRepository;
@@ -260,6 +262,24 @@ class BlogServiceTest {
                 .isInstanceOf(CIllegalArgumentException.class)
                 .extracting("errorDetail")
                 .isEqualTo(ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 블로그_카테고리_목록을_조회한다() {
+        // given
+        BlogCategory secondCategory = blogCategoryRepository.save(TestFixture.createBlogCategory("라이프"));
+
+        // when
+        List<BlogCategoryResponse> result = blogService.getBlogCategories();
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).hasSize(2);
+            softly.assertThat(result.get(0).id()).isNotNull();
+            softly.assertThat(result.get(0).categoryName()).isEqualTo("테크");
+            softly.assertThat(result.get(1).id()).isEqualTo(secondCategory.getId());
+            softly.assertThat(result.get(1).categoryName()).isEqualTo("라이프");
+        });
     }
 
     private void initializeRoles() {

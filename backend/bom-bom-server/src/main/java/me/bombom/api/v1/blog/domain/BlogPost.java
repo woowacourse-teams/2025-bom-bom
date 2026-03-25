@@ -33,6 +33,9 @@ public class BlogPost extends BaseEntity {
     @Column(columnDefinition = "mediumtext")
     private String content;
 
+    @Column(length = 500)
+    private String description;
+
     private Long thumbnailImageId;
 
     @Column(nullable = false)
@@ -53,6 +56,7 @@ public class BlogPost extends BaseEntity {
             @NonNull Long memberId,
             String title,
             String content,
+            String description,
             Long thumbnailImageId,
             @NonNull BlogPostStatus status,
             @NonNull BlogPostVisibility visibility,
@@ -63,6 +67,7 @@ public class BlogPost extends BaseEntity {
         this.memberId = memberId;
         this.title = title;
         this.content = content;
+        this.description = description;
         this.thumbnailImageId = thumbnailImageId;
         this.status = status;
         this.visibility = visibility;

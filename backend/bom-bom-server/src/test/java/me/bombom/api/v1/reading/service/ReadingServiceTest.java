@@ -17,6 +17,7 @@ import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.ContinueReadingRankingSnapshot;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshotMeta;
 import me.bombom.api.v1.reading.domain.TodayReading;
@@ -27,6 +28,7 @@ import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ContinueReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.MemberContinueReadingRankResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
+import me.bombom.api.v1.reading.repository.ContinueReadingRankingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotMetaRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
@@ -50,6 +52,9 @@ class ReadingServiceTest {
 
     @Autowired
     private ContinueReadingRepository continueReadingRepository;
+
+    @Autowired
+    private ContinueReadingRankingSnapshotRepository continueReadingRankingSnapshotRepository;
 
     @Autowired
     private TodayReadingRepository todayReadingRepository;
@@ -87,7 +92,10 @@ class ReadingServiceTest {
         weeklyReadingRepository.deleteAllInBatch();
         todayReadingRepository.deleteAllInBatch();
         continueReadingRepository.deleteAllInBatch();
+        continueReadingRankingSnapshotRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+
+        assertThat(continueReadingRankingSnapshotRepository.count()).isZero();
 
         String nickname = ("test_nickname_" + UUID.randomUUID()).substring(0, 20);
         String providerId = ("test_providerId_" + UUID.randomUUID()).substring(0, 20);
@@ -95,6 +103,9 @@ class ReadingServiceTest {
         member = memberRepository.save(TestFixture.createUniqueMember(nickname, providerId));
         todayReading = todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));
         continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
+        continueReadingRankingSnapshotRepository.save(
+                new ContinueReadingRankingSnapshot(member.getId(), continueReading.getDayCount(), 1L)
+        );
         weeklyReading = weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member));
         monthlyReadingSnapshot = monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingFixture(member));
         monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member, 0));
@@ -102,6 +113,7 @@ class ReadingServiceTest {
         memberRepository.flush();
         todayReadingRepository.flush();
         continueReadingRepository.flush();
+        continueReadingRankingSnapshotRepository.flush();
         weeklyReadingRepository.flush();
         monthlyReadingSnapshotRepository.flush();
         monthlyReadingRealtimeRepository.flush();
@@ -206,6 +218,8 @@ class ReadingServiceTest {
                         .build()
         );
 
+        readingService.updateContinueReadingRankingSnapshot();
+
         int limit = 2;
         ContinueReadingRankingResponse result = readingService.getContinueReadingRank(limit);
 
@@ -215,6 +229,33 @@ class ReadingServiceTest {
             softly.assertThat(result.data().get(1).dayCount()).isEqualTo(20);
             softly.assertThat(result.data().get(0).rank()).isEqualTo(1L);
             softly.assertThat(result.data().get(1).rank()).isEqualTo(2L);
+        });
+    }
+
+    @Test
+    void 가입_시_추가된_연속_읽기_스냅샷으로_신규_회원이_랭킹_최하위_공동_순위에_포함된다() {
+        // given: 기존 회원 스냅샷이 있는 상태
+        ContinueReadingRankingResponse initial = readingService.getContinueReadingRank(10);
+        assertThat(initial.data()).hasSize(1);
+        assertThat(initial.data().get(0).rank()).isEqualTo(1L);
+        assertThat(initial.data().get(0).dayCount()).isEqualTo(10);
+
+        // when: 가입 시 continue_reading(0) 및 스냅샷 row가 함께 생성됨 (월간과 동일 패턴)
+        Member newMember = memberRepository.save(TestFixture.createUniqueMember("nickname_st_new", "pid_st_new"));
+        readingService.initializeReadingInformation(newMember.getId());
+
+        // then: 신규 사용자는 dayCount=0의 최하위 공동 순위로 포함된다
+        ContinueReadingRankingResponse result = readingService.getContinueReadingRank(10);
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.data()).hasSize(2);
+            softly.assertThat(result.data().get(0).nickname()).isEqualTo(member.getNickname());
+            softly.assertThat(result.data().get(0).rank()).isEqualTo(1L);
+            softly.assertThat(result.data().get(0).dayCount()).isEqualTo(10);
+
+            softly.assertThat(result.data().get(1).nickname()).isEqualTo(newMember.getNickname());
+            softly.assertThat(result.data().get(1).rank()).isEqualTo(2L);
+            softly.assertThat(result.data().get(1).dayCount()).isEqualTo(0);
         });
     }
 
@@ -235,6 +276,8 @@ class ReadingServiceTest {
                         .dayCount(20)
                         .build()
         );
+
+        readingService.updateContinueReadingRankingSnapshot();
 
         MemberContinueReadingRankResponse result = readingService.getMemberContinueReadingRank(member);
 
@@ -259,6 +302,8 @@ class ReadingServiceTest {
                         .build()
         );
         continueReadingRepository.flush();
+
+        readingService.updateContinueReadingRankingSnapshot();
 
         MemberContinueReadingRankResponse result = readingService.getMemberContinueReadingRank(member);
 

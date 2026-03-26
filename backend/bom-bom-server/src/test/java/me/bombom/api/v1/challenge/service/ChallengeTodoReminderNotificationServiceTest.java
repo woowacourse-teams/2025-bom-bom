@@ -157,7 +157,7 @@ class ChallengeTodoReminderNotificationServiceTest {
                         ChallengeTodoReminderPhase.FIRST,
                         0,
                         null,
-                        null,
+                        0,
                         false
                 ));
 
@@ -192,7 +192,7 @@ class ChallengeTodoReminderNotificationServiceTest {
                         ChallengeTodoReminderPhase.FIRST,
                         0,
                         null,
-                        null,
+                        0,
                         false
                 ));
 
@@ -235,7 +235,7 @@ class ChallengeTodoReminderNotificationServiceTest {
         assertThat(notification.getStreak()).isEqualTo(7);
         assertThat(notification.getDaysSinceLastParticipation()).isEqualTo(0); // 어제 참여, 오늘 제외 → 결석일 0
         assertThat(notification.isLastDay()).isFalse();
-        assertThat(notification.getRemainingAbsences()).isNotNull();
+        assertThat(notification.getRemainingAbsences()).isNotNegative();
     }
 
     @Test

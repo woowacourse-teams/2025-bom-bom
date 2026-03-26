@@ -57,6 +57,8 @@ public class ChallengeTodoReminderNotificationService {
 
         Set<Long> alreadyNotifiedMemberIds = findAlreadyNotifiedMemberIds(challenge.getId(), phase, reminderDate);
         boolean isLastDay = challenge.isLastDay(reminderDate);
+        int maxAllowedAbsent = challenge.calculateMaxAllowedAbsences();
+        int passedDays = challenge.calculatePassedDays(reminderDate);
         List<ChallengeTodoReminderNotification> notifications = buildNotifications(
                 incompleteParticipants,
                 alreadyNotifiedMemberIds,

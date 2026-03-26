@@ -20,6 +20,7 @@ import me.bombom.api.v1.common.BaseEntity;
 public class Challenge extends BaseEntity {
 
     private static final double LATE_REGISTRATION_ALLOWED_RATIO = 0.2;
+    private static final double SUCCESS_REQUIRED_RATIO = 0.8;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -88,6 +89,10 @@ public class Challenge extends BaseEntity {
 
     public boolean isLastDay(LocalDate date) {
         return date.equals(this.endDate);
+    }
+
+    public int calculateMaxAllowedAbsences() {
+        return totalDays - (int) Math.ceil(totalDays * SUCCESS_REQUIRED_RATIO);
     }
 
     public boolean hasStarted(LocalDate now) {

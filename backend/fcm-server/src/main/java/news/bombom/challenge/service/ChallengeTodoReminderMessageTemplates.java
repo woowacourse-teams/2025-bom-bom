@@ -6,11 +6,15 @@ public class ChallengeTodoReminderMessageTemplates {
 
     private ChallengeTodoReminderMessageTemplates() {}
 
-    // 제목 템플릿: %1$s = 챌린지명, %2$d = 스트릭
+    /**
+     * 스트릭 구간별 제목 (remainingAbsences > 0 && !isLastDay && streak > 0 인 일반적인 경우)
+     * 조건: streak == 0 → TITLE_0, streak >= 2 → TITLE_2, streak >= 3 → TITLE_3, ...
+     * %1$s = 챌린지명, %2$d = 스트릭
+     */
     public static final String TITLE_0_FIRST    = "%1$s 오늘부터 함께해요. 아직 할 일이 남았어요!";
     public static final String TITLE_0_SECOND   = "[%1$s] 오늘부터 함께 습관을 쌓아봐요!";
-    public static final String TITLE_2_FIRST = "[%1$s] %2$d일 연속! 이제 막 시작됐네요! 오늘도 이어가요!";
-    public static final String TITLE_2_SECOND = "[%1$s] %2$d일 연속, 벌써 끊기면 아쉬워요! ⏰";
+    public static final String TITLE_2_FIRST    = "[%1$s] %2$d일 연속! 이제 막 시작됐네요! 오늘도 이어가요!";
+    public static final String TITLE_2_SECOND   = "[%1$s] %2$d일 연속, 벌써 끊기면 아쉬워요! ⏰";
     public static final String TITLE_3_FIRST    = "[%1$s] %2$d일 연속 기록! 오늘도 이어가요!";
     public static final String TITLE_3_SECOND   = "[%1$s] %2$d일 연속 기록, 오늘 하지 않으면 스트릭이 끊겨요 🥲";
     public static final String TITLE_7_FIRST    = "[%1$s] 벌써 %2$d일 연속! 오늘도 같이 달려요 🏃";
@@ -19,29 +23,42 @@ public class ChallengeTodoReminderMessageTemplates {
     public static final String TITLE_14_SECOND  = "[%1$s] %2$d일 연속인데, 오늘 놓치시는거 아니죠? ⏰";
     public static final String TITLE_21_FIRST   = "[%1$s] %2$d일 연속! 완주가 코앞이에요. 정말 잘하고 있어요!";
     public static final String TITLE_21_SECOND  = "[%1$s] %2$d일 연속, 완주까지 얼마 안 남았어요 ⏰";
-    public static final String TITLE_LAST_DAY_FIRST   = "[%1$s] 오늘이 마지막 날이에요! 끝까지 함께해요!";
-    public static final String TITLE_LAST_DAY_SECOND  = "[%1$s] 마지막 날이에요. 오늘만 하면 완주예요 ⏰";
 
-    // 탈락 위험 (remainingAbsences == 0): %1$s = 챌린지명
-    public static final String TITLE_ELIMINATION_RISK_FIRST  = "[%1$s] 오늘 빠지면 탈락이에요. 지금 참여해요!";
-    public static final String TITLE_ELIMINATION_RISK_SECOND = "[%1$s] 오늘 참여 안 하면 탈락이에요 ⚠️";
-    public static final String BODY_ELIMINATION_RISK_FIRST   = "지금 참여하지 않으면 탈락이에요. 딱 5분만요! 🚨";
-    public static final String BODY_ELIMINATION_RISK_SECOND  = "오늘 참여 안 하면 진짜 탈락이에요! 지금 바로 해요 ⚠️";
+    /**
+     * 마지막 날 제목/본문 (isLastDay == true, 단 remainingAbsences == 0이면 탈락 위험 메시지가 우선)
+     * %1$s = 챌린지명
+     */
+    public static final String TITLE_LAST_DAY_FIRST  = "[%1$s] 오늘이 마지막 날이에요! 끝까지 함께해요!";
+    public static final String TITLE_LAST_DAY_SECOND = "[%1$s] 마지막 날이에요. 오늘만 하면 완주예요 ⏰";
 
-    // 결석 중 (스트릭 없음): %1$s = 챌린지명, %2$d = 결석일수
-    public static final String TITLE_ABSENT_FIRST  = "[%1$s] %2$d일째 결석 중이에요. 오늘은 꼭 참여해요!";
-    public static final String TITLE_ABSENT_SECOND = "[%1$s] %2$d일째 결석 중이에요! 오늘부터 다시 시작하는거 어때요?";
-
-    // 결석 중 본문: %1$d = 탈락까지 남은 결석 횟수
-    public static final String BODY_ABSENT_FIRST  = "%1$d번만 더 빠지면 탈락이에요. 오늘 꼭 참여해요 😊";
-    public static final String BODY_ABSENT_SECOND = "%1$d번 더 빠지면 탈락이에요! 지금 당장 참여해요 ⚠️";
-
-    // 본문 템플릿: %1$d = 스트릭, %2$d = 스트릭+1
     public static final List<String> LAST_DAY_BODY = List.of(
             "마지막 하루 남았어요. 오늘 읽으면 챌린지 완주예요 🎉",
             "5분만 읽으면 챌린지 완주! 오늘만 놓치면 아쉬워요 🏆"
     );
 
+    /**
+     * 탈락 위험 제목/본문 (remainingAbsences == 0 — 오늘 빠지면 탈락, 최우선 적용)
+     * %1$s = 챌린지명
+     */
+    public static final String TITLE_ELIMINATION_RISK_FIRST  = "[%1$s] 오늘 빠지면 탈락이에요. 지금 참여해요!";
+    public static final String TITLE_ELIMINATION_RISK_SECOND = "[%1$s] 오늘 참여 안 하면 탈락이에요 ⚠️";
+    public static final String BODY_ELIMINATION_RISK_FIRST   = "지금 참여하지 않으면 탈락이에요. 딱 5분만요! 🚨";
+    public static final String BODY_ELIMINATION_RISK_SECOND  = "오늘 참여 안 하면 진짜 탈락이에요! 지금 바로 해요 ⚠️";
+
+    /**
+     * 결석 중 제목/본문 (streak == 0 && daysSinceLastParticipation > 0 — 스트릭 없이 결석 중인 경우)
+     * 제목: %1$s = 챌린지명, %2$d = 결석일수
+     * 본문: %1$d = 탈락까지 남은 결석 허용 횟수
+     */
+    public static final String TITLE_ABSENT_FIRST  = "[%1$s] %2$d일째 결석 중이에요. 오늘은 꼭 참여해요!";
+    public static final String TITLE_ABSENT_SECOND = "[%1$s] %2$d일째 결석 중이에요! 오늘부터 다시 시작하는거 어때요?";
+    public static final String BODY_ABSENT_FIRST   = "%1$d번만 더 빠지면 탈락이에요. 오늘 꼭 참여해요 😊";
+    public static final String BODY_ABSENT_SECOND  = "%1$d번 더 빠지면 탈락이에요! 지금 당장 참여해요 ⚠️";
+
+    /**
+     * 일반 본문 풀 (스트릭 구간 메시지에 랜덤 적용)
+     * %1$d = 스트릭, %2$d = 스트릭+1
+     */
     public static final List<String> BODY_POOL = List.of(
             "오늘 읽으면 %2$d일 연속이에요. 같이 이어가요! ✨",
             "5분만 읽으면 오늘 출석이에요. 같이 해볼까요? 😄",

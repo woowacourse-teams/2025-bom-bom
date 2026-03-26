@@ -58,14 +58,16 @@ public class ChallengeTodoReminderNotificationService {
         Set<Long> alreadyNotifiedMemberIds = findAlreadyNotifiedMemberIds(challenge.getId(), phase, reminderDate);
         boolean isLastDay = challenge.isLastDay(reminderDate);
         int maxAllowedAbsent = challenge.calculateMaxAllowedAbsences();
-        int passedDays = challenge.calculatePassedDays(reminderDate);
+        int passedDays = challenge.calculatePassedDays(reminderDate.minusDays(1)); // 오늘 제외. 어제 기준 결석을 계산하기 위해
         List<ChallengeTodoReminderNotification> notifications = buildNotifications(
                 incompleteParticipants,
                 alreadyNotifiedMemberIds,
                 reminderDate,
                 challenge,
                 phase,
-                isLastDay
+                isLastDay,
+                maxAllowedAbsent,
+                passedDays
         );
 
         if (notifications.isEmpty()) {
@@ -95,7 +97,9 @@ public class ChallengeTodoReminderNotificationService {
             LocalDate reminderDate,
             Challenge challenge,
             ChallengeTodoReminderPhase phase,
-            boolean isLastDay
+            boolean isLastDay,
+            int maxAllowedAbsent,
+            int passedDays
     ) {
         return incompleteParticipants.stream()
                 .filter(participant -> !alreadyNotifiedMemberIds.contains(participant.getMemberId()))
@@ -106,6 +110,7 @@ public class ChallengeTodoReminderNotificationService {
                         phase,
                         participant.getStreak(),
                         calculateDaysAbsent(participant.getLastParticipatedDate(), reminderDate),
+                        maxAllowedAbsent - (passedDays - participant.getCompletedDays()),
                         isLastDay
                 ))
                 .toList();

@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,6 +47,8 @@ public class ChallengeParticipant extends BaseEntity {
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     private int streak = 0;
 
+    private LocalDate lastParticipatedDate;
+
     @Builder
     public ChallengeParticipant(
             Long id,
@@ -55,7 +58,8 @@ public class ChallengeParticipant extends BaseEntity {
             int completedDays,
             boolean isSurvived,
             int shield,
-            int streak
+            int streak,
+            LocalDate lastParticipatedDate
     ) {
         this.id = id;
         this.challengeId = challengeId;
@@ -65,6 +69,7 @@ public class ChallengeParticipant extends BaseEntity {
         this.isSurvived = isSurvived;
         this.shield = shield;
         this.streak = streak;
+        this.lastParticipatedDate = lastParticipatedDate;
     }
 
     public int calculateProgress(int totalDays) {
@@ -94,6 +99,10 @@ public class ChallengeParticipant extends BaseEntity {
 
     public void increaseStreak() {
         this.streak += 1;
+    }
+
+    public void updateLastParticipatedDate(LocalDate date) {
+        this.lastParticipatedDate = date;
     }
 
     public void resetStreak() {

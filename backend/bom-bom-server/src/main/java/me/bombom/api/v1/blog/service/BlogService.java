@@ -2,6 +2,7 @@ package me.bombom.api.v1.blog.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.blog.domain.BlogCategory;
 import me.bombom.api.v1.blog.domain.BlogImageAsset;
 import me.bombom.api.v1.blog.domain.BlogPost;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -48,7 +50,11 @@ public class BlogService {
         String blogImageUrl = blogPost.getThumbnailImageId() == null ? null
                     : blogImageAssetRepository.findById(blogPost.getThumbnailImageId())
                             .map(BlogImageAsset::getImageUrl)
-                            .orElse(null);
+                            .orElseGet(() -> {
+                                log.warn("블로그 게시글 썸네일 이미지 정합성 불일치 - postId: {}, thumbnailImageId: {}",
+                                        blogPost.getId(), blogPost.getThumbnailImageId());
+                                return null;
+                            });
 
         BlogCategory blogCategory = blogCategoryRepository.findById(blogPost.getCategoryId())
                         .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)

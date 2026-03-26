@@ -65,9 +65,7 @@ public class BlogService {
     }
 
     public List<BlogCategoryResponse> getBlogCategories() {
-        return blogCategoryRepository.findAllByOrderByIdAsc().stream()
-                .map(BlogCategoryResponse::from)
-                .toList();
+        return BlogCategoryResponse.from(blogCategoryRepository.findAllByOrderByIdAsc());
     }
 
     private BlogPost findPublishedPostById(Long postId, Long memberId) {

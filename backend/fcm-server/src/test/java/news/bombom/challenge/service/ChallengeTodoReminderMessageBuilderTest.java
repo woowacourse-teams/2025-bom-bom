@@ -91,13 +91,56 @@ class ChallengeTodoReminderMessageBuilderTest {
         assertThat(msg.getTitle()).isEqualTo("[봄봄] 21일 연속, 완주까지 얼마 안 남았어요 ⏰");
     }
 
+    @Test
+    @DisplayName("탈락 위험 1차 알림 - remainingAbsences=0")
+    void build_eliminationRisk_first() {
+        NotificationMessage msg = build(7, false, null, 0, ChallengeTodoReminderPhase.FIRST);
+        assertThat(msg.getTitle()).isEqualTo("[봄봄] 오늘 빠지면 탈락이에요. 지금 참여해요!");
+        assertThat(msg.getContent()).isEqualTo("지금 참여하지 않으면 탈락이에요. 딱 5분만요! 🚨");
+    }
+
+    @Test
+    @DisplayName("탈락 위험 2차 알림 - remainingAbsences=0")
+    void build_eliminationRisk_second() {
+        NotificationMessage msg = build(7, false, null, 0, ChallengeTodoReminderPhase.SECOND);
+        assertThat(msg.getTitle()).isEqualTo("[봄봄] 오늘 참여 안 하면 탈락이에요 ⚠️");
+        assertThat(msg.getContent()).isEqualTo("오늘 참여 안 하면 진짜 탈락이에요! 지금 바로 해요 ⚠️");
+    }
+
+    @Test
+    @DisplayName("결석 중이어도 스트릭이 있으면 스트릭 메시지를 사용한다")
+    void build_absentWithStreak_usesStreakMessage() {
+        NotificationMessage msg = build(7, false, 3, 2, ChallengeTodoReminderPhase.FIRST);
+        assertThat(msg.getTitle()).isEqualTo("[봄봄] 벌써 7일 연속! 오늘도 같이 달려요 🏃");
+    }
+
+    @Test
+    @DisplayName("결석 중 + 스트릭 없음 1차 알림")
+    void build_absentNoStreak_first() {
+        NotificationMessage msg = build(0, false, 2, 3, ChallengeTodoReminderPhase.FIRST);
+        assertThat(msg.getTitle()).isEqualTo("[봄봄] 2일째 결석 중이에요. 오늘은 꼭 참여해요!");
+    }
+
+    @Test
+    @DisplayName("결석 중 + 스트릭 없음 2차 알림")
+    void build_absentNoStreak_second() {
+        NotificationMessage msg = build(0, false, 2, 3, ChallengeTodoReminderPhase.SECOND);
+        assertThat(msg.getTitle()).isEqualTo("[봄봄] 2일째 결석 중이에요! 오늘부터 다시 시작하는거 어때요?");
+    }
+
     private NotificationMessage build(int streak, boolean isLastDay, ChallengeTodoReminderPhase phase) {
+        return build(streak, isLastDay, null, 5, phase);
+    }
+
+    private NotificationMessage build(int streak, boolean isLastDay, Integer daysSince, int remaining, ChallengeTodoReminderPhase phase) {
         ChallengeTodoReminderNotification notification = ChallengeTodoReminderNotification.builder()
                 .memberId(1L)
                 .challengeId(100L)
                 .challengeName("봄봄")
                 .phase(phase)
                 .streak(streak)
+                .daysSinceLastParticipation(daysSince)
+                .remainingAbsences(remaining)
                 .isLastDay(isLastDay)
                 .build();
         return builder.build(notification, token());

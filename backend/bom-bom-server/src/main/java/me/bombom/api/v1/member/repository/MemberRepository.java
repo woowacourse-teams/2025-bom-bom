@@ -29,4 +29,13 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     """)
     Optional<Long> findArchiveAdminId();
 
+    @Query("""
+        SELECT COUNT(m) > 0
+        FROM Member m
+        JOIN Role r ON m.roleId = r.id
+        WHERE m.id = :memberId
+          AND r.authority = :authority
+    """)
+    boolean existsByIdAndRoleAuthority(@Param("memberId") Long memberId, @Param("authority") String authority);
+
 }

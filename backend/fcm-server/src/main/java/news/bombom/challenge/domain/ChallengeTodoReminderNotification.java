@@ -33,6 +33,11 @@ public class ChallengeTodoReminderNotification extends Notification {
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     private int streak;
 
+    private Integer daysSinceLastParticipation;
+
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    private int remainingAbsences;
+
     @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean isLastDay;
 
@@ -43,6 +48,8 @@ public class ChallengeTodoReminderNotification extends Notification {
             @NonNull String challengeName,
             ChallengeTodoReminderPhase phase,
             int streak,
+            Integer daysSinceLastParticipation,
+            int remainingAbsences,
             boolean isLastDay,
             NotificationStatus status,
             int attempts,
@@ -54,6 +61,8 @@ public class ChallengeTodoReminderNotification extends Notification {
         this.challengeName = challengeName;
         this.phase = phase != null ? phase : ChallengeTodoReminderPhase.FIRST;
         this.streak = streak;
+        this.daysSinceLastParticipation = daysSinceLastParticipation;
+        this.remainingAbsences = remainingAbsences;
         this.isLastDay = isLastDay;
     }
 

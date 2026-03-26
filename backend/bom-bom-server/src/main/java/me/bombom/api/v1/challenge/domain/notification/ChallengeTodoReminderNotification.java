@@ -52,7 +52,7 @@ public class ChallengeTodoReminderNotification extends BaseEntity {
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     private int streak;
 
-    private Integer daysAbsent;
+    private Integer daysSinceLastParticipation;
 
     private Integer remainingAbsences;
 
@@ -70,7 +70,7 @@ public class ChallengeTodoReminderNotification extends BaseEntity {
             @NonNull String challengeName,
             @NonNull ChallengeTodoReminderPhase phase,
             int streak,
-            Integer daysAbsent,
+            Integer daysSinceLastParticipation,
             Integer remainingAbsences,
             boolean isLastDay
     ) {
@@ -83,7 +83,7 @@ public class ChallengeTodoReminderNotification extends BaseEntity {
         this.challengeName = challengeName;
         this.phase = phase;
         this.streak = streak;
-        this.daysAbsent = daysAbsent;
+        this.daysSinceLastParticipation = daysSinceLastParticipation;
         this.remainingAbsences = remainingAbsences;
         this.isLastDay = isLastDay;
     }
@@ -94,7 +94,7 @@ public class ChallengeTodoReminderNotification extends BaseEntity {
             String challengeName,
             ChallengeTodoReminderPhase phase,
             int streak,
-            Integer daysAbsent,
+            Integer daysSinceLastParticipation,
             Integer remainingAbsences,
             boolean isLastDay
     ) {
@@ -106,7 +106,7 @@ public class ChallengeTodoReminderNotification extends BaseEntity {
                 .challengeName(challengeName)
                 .phase(phase)
                 .streak(streak)
-                .daysAbsent(daysAbsent)
+                .daysSinceLastParticipation(daysSinceLastParticipation)
                 .remainingAbsences(remainingAbsences)
                 .isLastDay(isLastDay)
                 .build();

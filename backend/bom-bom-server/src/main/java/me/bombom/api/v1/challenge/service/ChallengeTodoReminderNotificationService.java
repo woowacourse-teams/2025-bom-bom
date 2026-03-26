@@ -109,14 +109,14 @@ public class ChallengeTodoReminderNotificationService {
                         challenge.getName(),
                         phase,
                         participant.getStreak(),
-                        calculateDaysAbsent(participant.getLastParticipatedDate(), reminderDate),
+                        calculateDaysSinceLastParticipation(participant.getLastParticipatedDate(), reminderDate),
                         maxAllowedAbsent - (passedDays - participant.getCompletedDays()),
                         isLastDay
                 ))
                 .toList();
     }
 
-    private Integer calculateDaysAbsent(LocalDate lastParticipatedDate, LocalDate reminderDate) {
+    private Integer calculateDaysSinceLastParticipation(LocalDate lastParticipatedDate, LocalDate reminderDate) {
         if (lastParticipatedDate == null) {
             return null;
         }

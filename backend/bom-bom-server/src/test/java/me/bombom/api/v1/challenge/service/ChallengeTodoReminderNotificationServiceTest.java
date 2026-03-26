@@ -110,7 +110,7 @@ class ChallengeTodoReminderNotificationServiceTest {
                         ChallengeTodoReminderNotification::getPhase,
                         ChallengeTodoReminderNotification::getStatus,
                         ChallengeTodoReminderNotification::getAttempts,
-                        ChallengeTodoReminderNotification::getDaysAbsent
+                        ChallengeTodoReminderNotification::getDaysSinceLastParticipation
                 )
                 .containsExactlyInAnyOrder(
                         tuple(
@@ -233,7 +233,7 @@ class ChallengeTodoReminderNotificationServiceTest {
         // then
         ChallengeTodoReminderNotification notification = challengeTodoReminderNotificationRepository.findAll().get(0);
         assertThat(notification.getStreak()).isEqualTo(7);
-        assertThat(notification.getDaysAbsent()).isEqualTo(0); // 어제 참여, 오늘 제외 → 결석일 0
+        assertThat(notification.getDaysSinceLastParticipation()).isEqualTo(0); // 어제 참여, 오늘 제외 → 결석일 0
         assertThat(notification.isLastDay()).isFalse();
         assertThat(notification.getRemainingAbsences()).isNotNull();
     }
@@ -284,7 +284,7 @@ class ChallengeTodoReminderNotificationServiceTest {
         // then
         ChallengeTodoReminderNotification notification = challengeTodoReminderNotificationRepository.findAll().get(0);
         assertThat(notification.getStreak()).isZero();
-        assertThat(notification.getDaysAbsent()).isEqualTo(3); // 화/수/목 = 3 평일 (오늘 금요일 제외)
+        assertThat(notification.getDaysSinceLastParticipation()).isEqualTo(3); // 화/수/목 = 3 평일 (오늘 금요일 제외)
     }
 
     @Test

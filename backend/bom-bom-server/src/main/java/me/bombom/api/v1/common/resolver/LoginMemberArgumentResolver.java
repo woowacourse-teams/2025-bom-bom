@@ -145,7 +145,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     private void invalidateSessionIfPresent(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
-        if (session != null) {
+        if (session != null && session.getAttribute("pendingMember") == null) {
             session.invalidate();
         }
     }

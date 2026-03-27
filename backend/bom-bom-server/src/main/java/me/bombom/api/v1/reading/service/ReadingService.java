@@ -237,7 +237,7 @@ public class ReadingService {
     }
 
     public MonthlyReadingRankingResponse getMonthlyReadingRank(int limit) {
-        LocalDate lastMonth = lastMonthForRankingBadge();
+        LocalDate lastMonth = getLastMonth();
         List<MonthlyReadingRankFlat> flatResults = monthlyReadingSnapshotRepository.findMonthlyRanking(
                 limit,
                 lastMonth.getYear(),
@@ -245,7 +245,7 @@ public class ReadingService {
         );
         List<MonthlyReadingRankResponse> monthlyRanking = MonthlyReadingRankResponse.from(flatResults);
         LocalDateTime rankingUpdatedAt = monthlyReadingSnapshotMetaService.getSnapshotAt();
-        ZonedDateTime serverNow = serverZonedNowForRankingSchedule(scheduleProps.zoneId());
+        ZonedDateTime serverNow = getCurrentServerZoneDateTime(scheduleProps.zoneId());
         ZonedDateTime nextRefreshAt = requireNextRankingRefresh(serverNow, scheduleProps.cronExpression());
         return MonthlyReadingRankingResponse.of(
                 rankingUpdatedAt,
@@ -256,7 +256,7 @@ public class ReadingService {
     }
 
     public MemberMonthlyReadingRankResponse getMemberMonthlyReadingRank(Member member) {
-        LocalDate lastMonth = lastMonthForRankingBadge();
+        LocalDate lastMonth = getLastMonth();
         MonthlyReadingRankFlat flat = monthlyReadingSnapshotRepository.findMemberRanking(
                 member.getId(),
                 lastMonth.getYear(),
@@ -271,7 +271,7 @@ public class ReadingService {
     }
 
     public ContinueReadingRankingResponse getContinueReadingRank(int limit) {
-        LocalDate lastMonth = lastMonthForRankingBadge();
+        LocalDate lastMonth = getLastMonth();
         List<ContinueReadingRankFlat> flatResults = continueReadingRankingSnapshotRepository.findContinueReadingRanking(
                 limit,
                 lastMonth.getYear(),
@@ -279,7 +279,7 @@ public class ReadingService {
         );
         List<ContinueReadingRankResponse> ranking = ContinueReadingRankResponse.from(flatResults);
         LocalDateTime rankingUpdatedAt = continueReadingRankingSnapshotMetaService.getSnapshotAt();
-        ZonedDateTime serverNow = serverZonedNowForRankingSchedule(
+        ZonedDateTime serverNow = getCurrentServerZoneDateTime(
                 continueReadingRankingScheduleProperties.zoneId()
         );
         ZonedDateTime nextRefreshAt = requireNextRankingRefresh(
@@ -295,7 +295,7 @@ public class ReadingService {
     }
 
     public MemberContinueReadingRankResponse getMemberContinueReadingRank(Member member) {
-        LocalDate lastMonth = lastMonthForRankingBadge();
+        LocalDate lastMonth = getLastMonth();
         return continueReadingRankingSnapshotRepository.findMemberContinueReadingRanking(
                 member.getId(),
                 lastMonth.getYear(),
@@ -358,11 +358,11 @@ public class ReadingService {
         }
     }
 
-    private LocalDate lastMonthForRankingBadge() {
+    private LocalDate getLastMonth() {
         return LocalDate.now(clock).minusMonths(LAST_MONTH_OFFSET);
     }
 
-    private ZonedDateTime serverZonedNowForRankingSchedule(ZoneId zoneId) {
+    private ZonedDateTime getCurrentServerZoneDateTime(ZoneId zoneId) {
         return ZonedDateTime.now(zoneId);
     }
 

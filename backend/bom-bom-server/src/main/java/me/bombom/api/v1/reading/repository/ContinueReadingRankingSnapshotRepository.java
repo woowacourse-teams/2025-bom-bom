@@ -59,7 +59,7 @@ public interface ContinueReadingRankingSnapshotRepository extends JpaRepository<
                 ORDER BY cb.created_at DESC
                 LIMIT 1
             ) cb_latest ON true
-            ORDER BY rs.rank_order ASC, m.nickname ASC
+            ORDER BY rs.rank_order, m.nickname
             LIMIT :limit
             """, nativeQuery = true)
     List<ContinueReadingRankFlat> findContinueReadingRanking(

@@ -41,7 +41,7 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 			LIMIT 1
 		) cb_latest ON true
 		WHERE mr.rank_order IS NOT NULL
-		ORDER BY mr.rank_order ASC, m.nickname ASC
+		ORDER BY mr.rank_order, m.nickname
 		LIMIT :limit
 	""", nativeQuery = true)
 	List<MonthlyReadingRankFlat> findMonthlyRanking(
@@ -55,7 +55,7 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 		FROM monthly_reading_snapshot mr
 		WHERE mr.rank_order IS NOT NULL
 			AND mr.rank_order <= :maxRank
-		ORDER BY mr.rank_order ASC
+		ORDER BY mr.rank_order
 	""", nativeQuery = true)
 	List<RankerInfo> findTopRankers(@Param("maxRank") long maxRank);
 

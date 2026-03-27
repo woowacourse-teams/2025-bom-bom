@@ -73,7 +73,7 @@ public interface ReadingControllerApi {
 
     @Operation(
             summary = "나의 스트릭 순위 조회",
-            description = "실시간 연속 읽기 일수 기준 나의 순위를 반환합니다. day_count가 0이면 월간 순위와 같이 최하위 구간의 공동 순위로 포함됩니다. continue_reading_ranking_snapshot 행이 없으면 404입니다."
+            description = "실시간 연속 읽기 일수 기준 나의 순위를 반환합니다. day_count가 0이면 월간 순위와 같이 최하위 구간의 공동 순위로 포함됩니다. continue_reading_snapshot 행이 없으면 404입니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "나의 스트릭 순위 조회 성공"),

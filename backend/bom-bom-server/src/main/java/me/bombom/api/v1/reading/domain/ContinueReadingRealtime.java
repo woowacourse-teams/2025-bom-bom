@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +16,8 @@ import me.bombom.api.v1.common.BaseEntity;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ContinueReading extends BaseEntity {
+@Table(name = "continue_reading") // V1__init.sql 테이블명
+public class ContinueReadingRealtime extends BaseEntity {
 
     private static final int INITIAL_DAY_COUNT = 0;
     private static final int RESET_DAY_COUNT = 0;
@@ -32,7 +34,7 @@ public class ContinueReading extends BaseEntity {
     private int dayCount;
 
     @Builder
-    public ContinueReading(
+    public ContinueReadingRealtime(
             Long id,
             @NonNull Long memberId,
             int dayCount
@@ -42,8 +44,8 @@ public class ContinueReading extends BaseEntity {
         this.dayCount = dayCount;
     }
 
-    public static ContinueReading create(Long memberId) {
-        return ContinueReading.builder()
+    public static ContinueReadingRealtime create(Long memberId) {
+        return ContinueReadingRealtime.builder()
                 .memberId(memberId)
                 .dayCount(INITIAL_DAY_COUNT)
                 .build();

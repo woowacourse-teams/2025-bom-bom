@@ -68,7 +68,7 @@ public class ReadingScheduler {
     }
 
     @Scheduled(cron = "${ranking.reading.continue.cron}", zone = TIME_ZONE)
-    @SchedulerLock(name = "ten_minutely_calculate_continue_reading_ranking_snapshot", lockAtLeastFor = "PT6S", lockAtMostFor = "PT15S")
+    @SchedulerLock(name = "ten_minutely_calculate_continue_reading_snapshot", lockAtLeastFor = "PT6S", lockAtMostFor = "PT15S")
     public void tenMinutelyCalculateContinueReadingRankingSnapshot() {
         log.info("연속 읽기 랭킹 스냅샷 업데이트");
         readingService.updateContinueReadingRankingSnapshot();

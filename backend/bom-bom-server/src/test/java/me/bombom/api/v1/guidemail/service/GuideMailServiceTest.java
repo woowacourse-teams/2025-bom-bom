@@ -9,12 +9,12 @@ import me.bombom.api.v1.pet.domain.Pet;
 import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.pet.repository.PetRepository;
 import me.bombom.api.v1.pet.repository.StageRepository;
-import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.MonthlyReadingRealtime;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
-import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
+import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
@@ -46,7 +46,7 @@ class GuideMailServiceTest {
     private WeeklyReadingRepository weeklyReadingRepository;
 
     @Autowired
-    private ContinueReadingRepository continueReadingRepository;
+    private ContinueReadingRealtimeRepository continueReadingRepository;
 
     @Autowired
     private MonthlyReadingSnapshotRepository monthlyReadingSnapshotRepository;
@@ -58,7 +58,7 @@ class GuideMailServiceTest {
     private Pet pet;
     private TodayReading todayReading;
     private WeeklyReading weeklyReading;
-    private ContinueReading continueReading;
+    private ContinueReadingRealtime continueReading;
     private MonthlyReadingSnapshot monthlyReadingSnapshot;
 
     @BeforeEach
@@ -100,13 +100,13 @@ class GuideMailServiceTest {
         Pet updatedPet = petRepository.findByMemberId(member.getId()).get();
         TodayReading updatedTodayReading = todayReadingRepository.findByMemberId(member.getId()).get();
         WeeklyReading updatedWeeklyReading = weeklyReadingRepository.findByMemberId(member.getId()).get();
-        ContinueReading updatedContinueReading = continueReadingRepository.findByMemberId(member.getId()).get();
+        ContinueReadingRealtime updatedContinueReadingRealtime = continueReadingRepository.findByMemberId(member.getId()).get();
 
         assertSoftly(softly -> {
             softly.assertThat(updatedPet.getCurrentScore()).isGreaterThan(currentScore);
             softly.assertThat(updatedTodayReading.getCurrentCount()).isGreaterThan(currentTodayCount);
             softly.assertThat(updatedWeeklyReading.getCurrentCount()).isGreaterThan(currentWeeklyCount);
-            softly.assertThat(updatedContinueReading.getDayCount()).isGreaterThan(currentContinueDayCount);
+            softly.assertThat(updatedContinueReadingRealtime.getDayCount()).isGreaterThan(currentContinueDayCount);
         });
     }
 }

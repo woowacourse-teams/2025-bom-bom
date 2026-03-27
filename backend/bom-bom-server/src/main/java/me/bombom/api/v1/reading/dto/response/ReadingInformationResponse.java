@@ -2,7 +2,7 @@ package me.bombom.api.v1.reading.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 
@@ -34,7 +34,7 @@ public record ReadingInformationResponse(
 ) {
 
     public static ReadingInformationResponse of(
-            ContinueReading continueReading,
+            ContinueReadingRealtime continueReading,
             TodayReading todayReading,
             WeeklyReading weeklyReading
     ) {

@@ -37,7 +37,7 @@ import me.bombom.api.v1.notice.domain.Notice;
 import me.bombom.api.v1.notice.domain.NoticeCategory;
 import me.bombom.api.v1.pet.domain.Pet;
 import me.bombom.api.v1.pet.domain.Stage;
-import me.bombom.api.v1.reading.domain.ContinueReading;
+import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.MonthlyReadingRealtime;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
 import me.bombom.api.v1.reading.domain.TodayReading;
@@ -357,10 +357,10 @@ public final class TestFixture {
     }
 
     /**
-     * ContinueReading
+     * ContinueReadingRealtime
      */
-    public static ContinueReading continueReadingFixture(Member member) {
-        return ContinueReading.builder()
+    public static ContinueReadingRealtime continueReadingFixture(Member member) {
+        return ContinueReadingRealtime.builder()
                 .memberId(member.getId())
                 .dayCount(10)
                 .build();

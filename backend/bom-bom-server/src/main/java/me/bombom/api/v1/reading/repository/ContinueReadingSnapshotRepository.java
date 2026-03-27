@@ -2,18 +2,18 @@ package me.bombom.api.v1.reading.repository;
 
 import java.util.List;
 import java.util.Optional;
-import me.bombom.api.v1.reading.domain.ContinueReadingRankingSnapshot;
+import me.bombom.api.v1.reading.domain.ContinueReadingSnapshot;
 import me.bombom.api.v1.reading.dto.ContinueReadingRankFlat;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface ContinueReadingRankingSnapshotRepository extends JpaRepository<ContinueReadingRankingSnapshot, Long> {
+public interface ContinueReadingSnapshotRepository extends JpaRepository<ContinueReadingSnapshot, Long> {
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """
-            INSERT INTO continue_reading_ranking_snapshot (member_id, day_count, rank_order)
+            INSERT INTO continue_reading_snapshot (member_id, day_count, rank_order)
             SELECT
                 r.member_id,
                 r.day_count,
@@ -32,7 +32,7 @@ public interface ContinueReadingRankingSnapshotRepository extends JpaRepository<
             """, nativeQuery = true)
     void updateContinueReadingRankingSnapshot();
 
-    ContinueReadingRankingSnapshot findTopByOrderByRankOrderDesc();
+    ContinueReadingSnapshot findTopByOrderByRankOrderDesc();
 
     @Query(value = """
             SELECT
@@ -45,7 +45,7 @@ public interface ContinueReadingRankingSnapshotRepository extends JpaRepository<
                 cb_latest.badge_grade AS challengeBadgeGrade,
                 cb_latest.challenge_name AS challengeBadgeName,
                 cb_latest.challenge_generation AS challengeBadgeGeneration
-            FROM continue_reading_ranking_snapshot rs
+            FROM continue_reading_snapshot rs
             JOIN member m ON rs.member_id = m.id
             LEFT JOIN badge rb ON rb.member_id = rs.member_id
                 AND rb.badge_category = 'RANKING'
@@ -79,7 +79,7 @@ public interface ContinueReadingRankingSnapshotRepository extends JpaRepository<
                 cb_latest.badge_grade AS challengeBadgeGrade,
                 cb_latest.challenge_name AS challengeBadgeName,
                 cb_latest.challenge_generation AS challengeBadgeGeneration
-            FROM continue_reading_ranking_snapshot rs
+            FROM continue_reading_snapshot rs
             JOIN member m ON rs.member_id = m.id
             LEFT JOIN badge rb ON rb.member_id = rs.member_id
                 AND rb.badge_category = 'RANKING'

@@ -16,8 +16,8 @@ import me.bombom.api.v1.badge.domain.RankingBadge;
 import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.reading.domain.ContinueReading;
-import me.bombom.api.v1.reading.domain.ContinueReadingRankingSnapshot;
+import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
+import me.bombom.api.v1.reading.domain.ContinueReadingSnapshot;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshotMeta;
 import me.bombom.api.v1.reading.domain.TodayReading;
@@ -27,8 +27,8 @@ import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ContinueReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.MemberContinueReadingRankResponse;
-import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
-import me.bombom.api.v1.reading.repository.ContinueReadingRankingSnapshotRepository;
+import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
+import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotMetaRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
@@ -51,10 +51,10 @@ class ReadingServiceTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private ContinueReadingRepository continueReadingRepository;
+    private ContinueReadingRealtimeRepository continueReadingRepository;
 
     @Autowired
-    private ContinueReadingRankingSnapshotRepository continueReadingRankingSnapshotRepository;
+    private ContinueReadingSnapshotRepository continueReadingRankingSnapshotRepository;
 
     @Autowired
     private TodayReadingRepository todayReadingRepository;
@@ -79,7 +79,7 @@ class ReadingServiceTest {
 
     private Member member;
     private TodayReading todayReading;
-    private ContinueReading continueReading;
+    private ContinueReadingRealtime continueReading;
     private WeeklyReading weeklyReading;
     private MonthlyReadingSnapshot monthlyReadingSnapshot;
 
@@ -104,7 +104,7 @@ class ReadingServiceTest {
         todayReading = todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));
         continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
         continueReadingRankingSnapshotRepository.save(
-                new ContinueReadingRankingSnapshot(member.getId(), continueReading.getDayCount(), 1L)
+                new ContinueReadingSnapshot(member.getId(), continueReading.getDayCount(), 1L)
         );
         weeklyReading = weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member));
         monthlyReadingSnapshot = monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingFixture(member));
@@ -141,9 +141,9 @@ class ReadingServiceTest {
 
         readingService.updateReadingCount(member.getId(), true);
 
-        ContinueReading updatedContinueReading = continueReadingRepository.findByMemberId(member.getId()).get();
+        ContinueReadingRealtime updatedContinueReadingRealtime = continueReadingRepository.findByMemberId(member.getId()).get();
 
-        assertThat(updatedContinueReading.getDayCount()).isEqualTo(initialContinueCount + 1);
+        assertThat(updatedContinueReadingRealtime.getDayCount()).isEqualTo(initialContinueCount + 1);
     }
 
     @Test
@@ -153,9 +153,9 @@ class ReadingServiceTest {
         readingService.updateReadingCount(member.getId(), true);
         readingService.updateReadingCount(member.getId(), true);
 
-        ContinueReading updatedContinueReading = continueReadingRepository.findByMemberId(member.getId()).get();
+        ContinueReadingRealtime updatedContinueReadingRealtime = continueReadingRepository.findByMemberId(member.getId()).get();
 
-        assertThat(updatedContinueReading.getDayCount()).isEqualTo(initialContinueCount + 1);
+        assertThat(updatedContinueReadingRealtime.getDayCount()).isEqualTo(initialContinueCount + 1);
     }
 
     @Test
@@ -167,12 +167,12 @@ class ReadingServiceTest {
         readingService.updateReadingCount(member.getId(), false);
 
         TodayReading updatedTodayReading = todayReadingRepository.findByMemberId(member.getId()).get();
-        ContinueReading updatedContinueReading = continueReadingRepository.findByMemberId(member.getId()).get();
+        ContinueReadingRealtime updatedContinueReadingRealtime = continueReadingRepository.findByMemberId(member.getId()).get();
         WeeklyReading updatedWeeklyReading = weeklyReadingRepository.findByMemberId(member.getId()).get();
 
         assertSoftly(softly -> {
             softly.assertThat(updatedTodayReading.getCurrentCount()).isEqualTo(initialTodayCount);
-            softly.assertThat(updatedContinueReading.getDayCount()).isEqualTo(initialContinueCount);
+            softly.assertThat(updatedContinueReadingRealtime.getDayCount()).isEqualTo(initialContinueCount);
             softly.assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(initialWeeklyCount);
         });
     }
@@ -204,7 +204,7 @@ class ReadingServiceTest {
     void 연속_읽기_일수_기준으로_상위_N명의_랭킹을_조회할_수_있다() {
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_st2", "pid_st2"));
         continueReadingRepository.save(
-                ContinueReading.builder()
+                ContinueReadingRealtime.builder()
                         .memberId(member2.getId())
                         .dayCount(30)
                         .build()
@@ -212,7 +212,7 @@ class ReadingServiceTest {
 
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_st3", "pid_st3"));
         continueReadingRepository.save(
-                ContinueReading.builder()
+                ContinueReadingRealtime.builder()
                         .memberId(member3.getId())
                         .dayCount(20)
                         .build()
@@ -263,7 +263,7 @@ class ReadingServiceTest {
     void 나의_연속_읽기_순위를_조회할_수_있다() {
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_st_me2", "pid_st_me2"));
         continueReadingRepository.save(
-                ContinueReading.builder()
+                ContinueReadingRealtime.builder()
                         .memberId(member2.getId())
                         .dayCount(30)
                         .build()
@@ -271,7 +271,7 @@ class ReadingServiceTest {
 
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_st_me3", "pid_st_me3"));
         continueReadingRepository.save(
-                ContinueReading.builder()
+                ContinueReadingRealtime.builder()
                         .memberId(member3.getId())
                         .dayCount(20)
                         .build()
@@ -290,13 +290,13 @@ class ReadingServiceTest {
 
     @Test
     void 연속_읽기_일수가_0이어도_나의_순위는_최하위_공동_순위로_조회된다() {
-        ContinueReading cr = continueReadingRepository.findByMemberId(member.getId()).get();
+        ContinueReadingRealtime cr = continueReadingRepository.findByMemberId(member.getId()).get();
         cr.resetDayCount();
         continueReadingRepository.save(cr);
 
         Member other = memberRepository.save(TestFixture.createUniqueMember("nickname_gt0", "pid_gt0"));
         continueReadingRepository.save(
-                ContinueReading.builder()
+                ContinueReadingRealtime.builder()
                         .memberId(other.getId())
                         .dayCount(5)
                         .build()

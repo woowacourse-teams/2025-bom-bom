@@ -20,8 +20,8 @@ import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
-import me.bombom.api.v1.reading.domain.ContinueReading;
-import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
+import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
+import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.withdraw.domain.WithdrawnMember;
 import me.bombom.api.v1.withdraw.repository.WithdrawnMemberRepository;
 import me.bombom.support.IntegrationTest;
@@ -54,7 +54,7 @@ class WithdrawServiceTest {
     private NewsletterDetailRepository newsletterDetailRepository;
 
     @Autowired
-    private ContinueReadingRepository continueReadingRepository;
+    private ContinueReadingRealtimeRepository continueReadingRepository;
 
     @Autowired
     private BookmarkRepository bookmarkRepository;
@@ -95,7 +95,7 @@ class WithdrawServiceTest {
     @Test
     void 회원_탈퇴_시_탈퇴_회원_정보로_이전된다() {
         // given
-        continueReadingRepository.save(ContinueReading.builder()
+        continueReadingRepository.save(ContinueReadingRealtime.builder()
                 .memberId(member.getId())
                 .dayCount(10)
                 .build());

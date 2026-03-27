@@ -3,7 +3,6 @@ package me.bombom.api.v1.reading.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,8 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "continue_reading_ranking_snapshot")
-public class ContinueReadingRankingSnapshot {
+public class ContinueReadingSnapshot {
 
     @Id
     @Column(nullable = false)
@@ -24,7 +22,7 @@ public class ContinueReadingRankingSnapshot {
     @Column(nullable = false)
     private long rankOrder;
 
-    public ContinueReadingRankingSnapshot(
+    public ContinueReadingSnapshot(
             Long memberId,
             int dayCount,
             long rankOrder

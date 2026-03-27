@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ContinueReadingRankingSnapshotMeta {
+public class ContinueReadingSnapshotMeta {
 
     @Id
     @Column(nullable = false)
@@ -23,7 +23,7 @@ public class ContinueReadingRankingSnapshotMeta {
     private LocalDateTime snapshotAt;
 
     @Builder
-    public ContinueReadingRankingSnapshotMeta(
+    public ContinueReadingSnapshotMeta(
             @NotNull Long id,
             @NotNull LocalDateTime snapshotAt
     ) {

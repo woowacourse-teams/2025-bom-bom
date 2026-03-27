@@ -81,7 +81,7 @@ public class ReadingService {
         continueReadingRepository.save(newContinueReadingRealtime);
 
         continueReadingRankingSnapshotRepository.save(
-                new ContinueReadingSnapshot(
+                ContinueReadingSnapshot.create(
                         memberId,
                         0,
                         computeLowestContinueReadingRankOrder()

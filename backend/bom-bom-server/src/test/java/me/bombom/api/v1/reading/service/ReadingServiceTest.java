@@ -104,7 +104,7 @@ class ReadingServiceTest {
         todayReading = todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));
         continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
         continueReadingRankingSnapshotRepository.save(
-                new ContinueReadingSnapshot(member.getId(), continueReading.getDayCount(), 1L)
+                ContinueReadingSnapshot.create(member.getId(), continueReading.getDayCount(), 1L)
         );
         weeklyReading = weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member));
         monthlyReadingSnapshot = monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingFixture(member));

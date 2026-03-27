@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ContinueReadingSnapshotMetaService {
 
     private static final Long SINGLE_ID = 1L;

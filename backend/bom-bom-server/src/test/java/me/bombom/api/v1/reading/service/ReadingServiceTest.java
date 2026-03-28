@@ -240,7 +240,7 @@ class ReadingServiceTest {
         assertThat(initial.data().get(0).rank()).isEqualTo(1L);
         assertThat(initial.data().get(0).dayCount()).isEqualTo(10);
 
-        // when: 가입 시 continue_reading(0) 및 스냅샷 row가 함께 생성됨 (월간과 동일 패턴)
+        // when: 가입 시 continue_reading_realtime(0) 및 스냅샷 row가 함께 생성됨 (월간과 동일 패턴)
         Member newMember = memberRepository.save(TestFixture.createUniqueMember("nickname_st_new", "pid_st_new"));
         readingService.initializeReadingInformation(newMember.getId());
 

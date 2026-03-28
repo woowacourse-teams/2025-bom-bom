@@ -24,7 +24,7 @@ public interface ContinueReadingSnapshotRepository extends JpaRepository<Continu
                     cr.day_count AS day_count,
                     -- 공동 순위가 필요하므로 day_count만 기준으로 rank를 계산합니다.
                     RANK() OVER (ORDER BY cr.day_count DESC) AS calculated_rank
-                FROM continue_reading cr
+                FROM continue_reading_realtime cr
             ) r
             ON DUPLICATE KEY UPDATE
                 day_count = VALUES(day_count),

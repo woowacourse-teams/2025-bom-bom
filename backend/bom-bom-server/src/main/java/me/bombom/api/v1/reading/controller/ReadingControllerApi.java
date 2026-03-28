@@ -54,7 +54,7 @@ public interface ReadingControllerApi {
 
     @Operation(
             summary = "스트릭 랭킹 조회",
-            description = "연속 읽기 일수(continue_reading.day_count) 기준 내림차순 순위를 조회합니다. day_count가 0인 회원도 목록에 포함됩니다."
+            description = "연속 읽기 일수(continue_reading_realtime.day_count) 기준 내림차순 순위를 조회합니다. day_count가 0인 회원도 목록에 포함됩니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "스트릭 랭킹 조회 성공"),

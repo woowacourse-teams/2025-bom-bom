@@ -140,8 +140,8 @@ public class ChallengeProgressService {
 
     private void checkFailure(ChallengeParticipant participant, Challenge challenge, LocalDate yesterday) {
         int maxAllowedAbsent = challenge.calculateMaxAllowedAbsences();
-        int daysSinceStart = challenge.calculatePassedDays(yesterday);
-        int currentAbsent = daysSinceStart - participant.getCompletedDays();
+        int passedWeekDays = challenge.calculatePassedWeekDays(yesterday);
+        int currentAbsent = passedWeekDays - participant.getCompletedDays();
         if (currentAbsent > maxAllowedAbsent) {
             participant.markAsFailed();
         }

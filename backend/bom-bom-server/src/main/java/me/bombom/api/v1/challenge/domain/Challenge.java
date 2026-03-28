@@ -117,7 +117,7 @@ public class Challenge extends BaseEntity {
         return getRegistrationPhase(now) == RegistrationPhase.LATE;
     }
 
-    public int calculatePassedDays(LocalDate targetDate) {
+    public int calculatePassedWeekDays(LocalDate targetDate) {
         if (this.startDate == null) {
             return 0;
         }
@@ -138,8 +138,8 @@ public class Challenge extends BaseEntity {
     }
 
     private boolean isWithinLatePhase(LocalDate targetDate) {
-        int passedDays = calculatePassedDays(targetDate);
+        int passedWeekDays = calculatePassedWeekDays(targetDate);
         int maxPassedDaysForLateRegistration = (int) (this.totalDays * LATE_REGISTRATION_ALLOWED_RATIO);
-        return passedDays <= maxPassedDaysForLateRegistration;
+        return passedWeekDays <= maxPassedDaysForLateRegistration;
     }
 }

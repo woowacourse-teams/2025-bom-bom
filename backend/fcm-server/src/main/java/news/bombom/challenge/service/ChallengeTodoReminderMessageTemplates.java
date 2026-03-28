@@ -11,7 +11,7 @@ public class ChallengeTodoReminderMessageTemplates {
      * 조건: streak == 0 → TITLE_0, streak >= 2 → TITLE_2, streak >= 3 → TITLE_3, ...
      * %1$s = 챌린지명, %2$d = 스트릭
      */
-    public static final String TITLE_0_FIRST    = "%1$s 오늘부터 함께해요. 아직 할 일이 남았어요!";
+    public static final String TITLE_0_FIRST    = "[%1$s] 오늘부터 함께해요. 아직 할 일이 남았어요!";
     public static final String TITLE_0_SECOND   = "[%1$s] 오늘부터 함께 습관을 쌓아봐요!";
     public static final String TITLE_2_FIRST    = "[%1$s] %2$d일 연속! 이제 막 시작됐네요! 오늘도 이어가요!";
     public static final String TITLE_2_SECOND   = "[%1$s] %2$d일 연속, 벌써 끊기면 아쉬워요! ⏰";

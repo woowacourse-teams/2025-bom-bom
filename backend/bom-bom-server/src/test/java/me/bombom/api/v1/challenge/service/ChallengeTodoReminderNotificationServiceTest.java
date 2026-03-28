@@ -318,4 +318,36 @@ class ChallengeTodoReminderNotificationServiceTest {
         ChallengeTodoReminderNotification notification = challengeTodoReminderNotificationRepository.findAll().get(0);
         assertThat(notification.getRemainingAbsences()).isEqualTo(1);
     }
+
+    @Test
+    void 쉴드가_있는_경우_남은_결석_횟수에_쉴드_수를_더해서_저장한다() {
+        // given
+        // totalDays=10, maxAllowedAbsent = 10 - ceil(10 * 0.8) = 10 - 8 = 2
+        LocalDate today = LocalDate.of(2025, 4, 7); // 월요일
+        LocalDate startDate = LocalDate.of(2025, 3, 31); // 월요일 (오늘 기준 -7일)
+        // 어제 = 4/6(일요일) → passedDays = 월~금(5) = 5일
+        // completedDays=4 → currentAbsent = 5 - 4 = 1 → remainingAbsences = 2 - 1 + shield(2) = 3
+        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
+        Challenge challenge = challengeRepository.save(
+                TestFixture.createChallenge("봄봄 챌린지", startDate, today.plusDays(7), 10, group.getId()));
+        Member member = memberRepository.save(TestFixture.createUniqueMember("m1", "p1"));
+        challengeParticipantRepository.save(
+                ChallengeParticipant.builder()
+                        .challengeId(challenge.getId())
+                        .memberId(member.getId())
+                        .completedDays(4)
+                        .isSurvived(true)
+                        .shield(2)
+                        .streak(5)
+                        .lastParticipatedDate(today.minusDays(1))
+                        .build());
+        challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
+
+        // when
+        challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today, ChallengeTodoReminderPhase.FIRST);
+
+        // then
+        ChallengeTodoReminderNotification notification = challengeTodoReminderNotificationRepository.findAll().get(0);
+        assertThat(notification.getRemainingAbsences()).isEqualTo(3); // 2 - 1 + shield(2)
+    }
 }

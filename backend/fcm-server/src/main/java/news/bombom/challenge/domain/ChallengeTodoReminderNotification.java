@@ -66,6 +66,10 @@ public class ChallengeTodoReminderNotification extends Notification {
         this.isLastDay = isLastDay;
     }
 
+    public boolean isFirst() {
+        return this.phase == ChallengeTodoReminderPhase.FIRST;
+    }
+
     @Override
     public boolean shouldRetry() {
         return this.attempts < MAX_RETRY_ATTEMPTS;

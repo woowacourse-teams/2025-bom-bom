@@ -134,7 +134,7 @@ public class ReminderMessageProperties {
         private String first;
         private String second;
 
-        public String byPhase(boolean isFirst) {
+        public String resolve(boolean isFirst) {
             return isFirst ? first : second;
         }
     }

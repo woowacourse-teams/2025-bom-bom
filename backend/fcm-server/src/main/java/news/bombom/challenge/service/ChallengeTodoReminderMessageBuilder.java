@@ -47,17 +47,17 @@ public class ChallengeTodoReminderMessageBuilder implements NotificationMessageB
         String name = notification.getChallengeName();
 
         if (notification.getRemainingAbsences() == 0) {
-            return format(props.getEliminationRisk().getTitle().byPhase(isFirst), name);
+            return format(props.getEliminationRisk().getTitle().resolve(isFirst), name);
         }
         if (notification.isLastDay()) {
-            return format(props.getLastDay().getTitle().byPhase(isFirst), name);
+            return format(props.getLastDay().getTitle().resolve(isFirst), name);
         }
         if (streak == 0 && daysSince != null && daysSince > 0) {
-            return format(props.getAbsent().getTitle().byPhase(isFirst), name, daysSince);
+            return format(props.getAbsent().getTitle().resolve(isFirst), name, daysSince);
         }
 
         PhaseMessage streakTitle = resolveStreakTitle(streak);
-        return format(streakTitle.byPhase(isFirst), name, streak);
+        return format(streakTitle.resolve(isFirst), name, streak);
     }
 
     private String buildBody(ChallengeTodoReminderNotification notification) {
@@ -66,25 +66,25 @@ public class ChallengeTodoReminderMessageBuilder implements NotificationMessageB
         Integer daysSince = notification.getDaysSinceLastParticipation();
 
         if (notification.getRemainingAbsences() == 0) {
-            return props.getEliminationRisk().getBody().byPhase(isFirst);
+            return props.getEliminationRisk().getBody().resolve(isFirst);
         }
         if (notification.isLastDay()) {
             return pickRandom(props.getLastDay().getBodyPool());
         }
         if (streak == 0 && daysSince != null && daysSince > 0) {
-            return format(props.getAbsent().getBody().byPhase(isFirst), notification.getRemainingAbsences());
+            return format(props.getAbsent().getBody().resolve(isFirst), notification.getRemainingAbsences());
         }
         return format(pickRandom(props.getStreak().getBodyPool()), streak, streak + 1);
     }
 
     private PhaseMessage resolveStreakTitle(int streak) {
         ReminderMessageProperties.Streak.StreakTitle title = props.getStreak().getTitle();
-        if (streak >= 21) return title.getS21();
-        if (streak >= 14) return title.getS14();
-        if (streak >= 7)  return title.getS7();
-        if (streak >= 3)  return title.getS3();
-        if (streak >= 2)  return title.getS2();
-        return title.getS0();
+        if (streak >= 21) return title.getStreak21();
+        if (streak >= 14) return title.getStreak14();
+        if (streak >= 7)  return title.getStreak7();
+        if (streak >= 3)  return title.getStreak3();
+        if (streak >= 2)  return title.getStreak2();
+        return title.getStreak0();
     }
 
     private String format(String template, Object... args) {

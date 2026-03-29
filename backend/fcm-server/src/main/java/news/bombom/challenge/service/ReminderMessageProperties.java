@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 )
 public class ReminderMessageProperties {
 
-    private static final String DEFAULT_TITLE = "[%1$s] 오늘 할 일을 완료해주세요!";
+    private static final String DEFAULT_TITLE = "[{challengeName}] 오늘 할 일을 완료해주세요!";
     private static final String DEFAULT_BODY = "5분만 읽으면 오늘 출석이에요. 같이 해볼까요? 😄";
 
     private Streak streak;

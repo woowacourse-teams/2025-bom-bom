@@ -28,10 +28,11 @@ public class ChallengeTodoReminderMessageBuilder implements NotificationMessageB
     @Override
     public NotificationMessage build(Notification notification, MemberFcmToken token) {
         ChallengeTodoReminderNotification remind = (ChallengeTodoReminderNotification) notification;
+        ReminderMessageParams params = ReminderMessageParams.from(remind);
         return NotificationMessage.builder()
                 .recipient(token.getFcmToken())
-                .title(buildTitle(remind))
-                .content(buildBody(remind))
+                .title(buildTitle(remind, params))
+                .content(buildBody(remind, params))
                 .type(NotificationType.FCM)
                 .data(Map.of(
                         "challengeId", String.valueOf(remind.getChallengeId()),
@@ -40,27 +41,26 @@ public class ChallengeTodoReminderMessageBuilder implements NotificationMessageB
                 .build();
     }
 
-    private String buildTitle(ChallengeTodoReminderNotification notification) {
+    private String buildTitle(ChallengeTodoReminderNotification notification, ReminderMessageParams params) {
         boolean isFirst = notification.isFirst();
         int streak = notification.getStreak();
         Integer daysSince = notification.getDaysSinceLastParticipation();
-        String name = notification.getChallengeName();
 
         if (notification.getRemainingAbsences() == 0) {
-            return format(props.getEliminationRisk().getTitle().resolve(isFirst), name);
+            return format(props.getEliminationRisk().getTitle().resolve(isFirst), params);
         }
         if (notification.isLastDay()) {
-            return format(props.getLastDay().getTitle().resolve(isFirst), name);
+            return format(props.getLastDay().getTitle().resolve(isFirst), params);
         }
         if (streak == 0 && daysSince != null && daysSince > 0) {
-            return format(props.getAbsent().getTitle().resolve(isFirst), name, daysSince);
+            return format(props.getAbsent().getTitle().resolve(isFirst), params);
         }
 
         PhaseMessage streakTitle = resolveStreakTitle(streak);
-        return format(streakTitle.resolve(isFirst), name, streak);
+        return format(streakTitle.resolve(isFirst), params);
     }
 
-    private String buildBody(ChallengeTodoReminderNotification notification) {
+    private String buildBody(ChallengeTodoReminderNotification notification, ReminderMessageParams params) {
         boolean isFirst = notification.isFirst();
         int streak = notification.getStreak();
         Integer daysSince = notification.getDaysSinceLastParticipation();
@@ -72,23 +72,38 @@ public class ChallengeTodoReminderMessageBuilder implements NotificationMessageB
             return pickRandom(props.getLastDay().getBodyPool());
         }
         if (streak == 0 && daysSince != null && daysSince > 0) {
-            return format(props.getAbsent().getBody().resolve(isFirst), notification.getRemainingAbsences());
+            return format(props.getAbsent().getBody().resolve(isFirst), params);
         }
-        return format(pickRandom(props.getStreak().getBodyPool()), streak, streak + 1);
+        return format(pickRandom(props.getStreak().getBodyPool()), params);
     }
 
     private PhaseMessage resolveStreakTitle(int streak) {
         ReminderMessageProperties.Streak.StreakTitle title = props.getStreak().getTitle();
-        if (streak >= 21) return title.getStreak21();
-        if (streak >= 14) return title.getStreak14();
-        if (streak >= 7)  return title.getStreak7();
-        if (streak >= 3)  return title.getStreak3();
-        if (streak >= 2)  return title.getStreak2();
+        if (streak >= 21) {
+            return title.getStreak21();
+        }
+        if (streak >= 14) {
+            return title.getStreak14();
+        }
+        if (streak >= 7) {
+            return title.getStreak7();
+        }
+        if (streak >= 3) {
+            return title.getStreak3();
+        }
+        if (streak >= 2) {
+            return title.getStreak2();
+        }
         return title.getStreak0();
     }
 
-    private String format(String template, Object... args) {
-        return String.format(template, args);
+    private String format(String template, ReminderMessageParams params) {
+        String result = template;
+        Map<String, Object> reminderParams = params.getReminderParams();
+        for (Map.Entry<String, Object> entry : reminderParams.entrySet()) {
+            result = result.replace("{" + entry.getKey() + "}", String.valueOf(entry.getValue()));
+        }
+        return result;
     }
 
     private String pickRandom(List<String> options) {

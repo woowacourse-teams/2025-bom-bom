@@ -3,7 +3,9 @@ package news.bombom.challenge.service;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import lombok.RequiredArgsConstructor;
 import news.bombom.challenge.domain.ChallengeTodoReminderNotification;
+import news.bombom.challenge.service.ReminderMessageProperties.PhaseMessage;
 import news.bombom.notification.domain.MemberFcmToken;
 import news.bombom.notification.domain.Notification;
 import news.bombom.notification.domain.NotificationPayloadType;
@@ -12,10 +14,11 @@ import news.bombom.notification.dto.NotificationMessage;
 import news.bombom.notification.service.NotificationMessageBuilder;
 import org.springframework.stereotype.Component;
 
-import static news.bombom.challenge.service.ChallengeTodoReminderMessageTemplates.*;
-
 @Component
+@RequiredArgsConstructor
 public class ChallengeTodoReminderMessageBuilder implements NotificationMessageBuilder {
+
+    private final ReminderMessageProperties props;
 
     @Override
     public boolean supports(Notification notification) {
@@ -38,50 +41,54 @@ public class ChallengeTodoReminderMessageBuilder implements NotificationMessageB
     }
 
     private String buildTitle(ChallengeTodoReminderNotification notification) {
+        boolean isFirst = notification.isFirst();
         int streak = notification.getStreak();
         Integer daysSince = notification.getDaysSinceLastParticipation();
         String name = notification.getChallengeName();
 
-        // 남은 결석 허용 횟수가 0
         if (notification.getRemainingAbsences() == 0) {
-            return formatByPhase(notification, TITLE_ELIMINATION_RISK_FIRST, TITLE_ELIMINATION_RISK_SECOND, name);
+            return format(props.getEliminationRisk().getTitle().byPhase(isFirst), name);
         }
-        // 챌린지 마지막 날
         if (notification.isLastDay()) {
-            return formatByPhase(notification, TITLE_LAST_DAY_FIRST, TITLE_LAST_DAY_SECOND, name);
+            return format(props.getLastDay().getTitle().byPhase(isFirst), name);
         }
-        // 스트릭이 0이면서 참여 이력이 있는 사람. 남은 결석 허용 횟수 알려주며 다시 참여 유도
         if (streak == 0 && daysSince != null && daysSince > 0) {
-            return formatByPhase(notification, TITLE_ABSENT_FIRST, TITLE_ABSENT_SECOND, name, daysSince);
+            return format(props.getAbsent().getTitle().byPhase(isFirst), name, daysSince);
         }
 
-        if (streak >= 21) return formatByPhase(notification, TITLE_21_FIRST, TITLE_21_SECOND, name, streak);
-        if (streak >= 14) return formatByPhase(notification, TITLE_14_FIRST, TITLE_14_SECOND, name, streak);
-        if (streak >= 7) return formatByPhase(notification, TITLE_7_FIRST,  TITLE_7_SECOND,  name, streak);
-        if (streak >= 3) return formatByPhase(notification, TITLE_3_FIRST,  TITLE_3_SECOND,  name, streak);
-        if (streak >= 2) return formatByPhase(notification, TITLE_2_FIRST,  TITLE_2_SECOND,  name, streak);
-        return formatByPhase(notification, TITLE_0_FIRST, TITLE_0_SECOND, name, streak); // 참여 이력 없는 사람
+        PhaseMessage streakTitle = resolveStreakTitle(streak);
+        return format(streakTitle.byPhase(isFirst), name, streak);
     }
 
     private String buildBody(ChallengeTodoReminderNotification notification) {
+        boolean isFirst = notification.isFirst();
         int streak = notification.getStreak();
         Integer daysSince = notification.getDaysSinceLastParticipation();
-        int remaining = notification.getRemainingAbsences();
 
-        if (remaining == 0) { // 남은 결석 허용 횟수가 0
-            return notification.isFirst() ? BODY_ELIMINATION_RISK_FIRST : BODY_ELIMINATION_RISK_SECOND;
+        if (notification.getRemainingAbsences() == 0) {
+            return props.getEliminationRisk().getBody().byPhase(isFirst);
         }
-        if (notification.isLastDay()) { // 챌린지 마지막 날
-            return pickRandom(LAST_DAY_BODY);
+        if (notification.isLastDay()) {
+            return pickRandom(props.getLastDay().getBodyPool());
         }
-        if (streak == 0 && daysSince != null && daysSince > 0) {//스트릭이 0이면서 참여 이력이 있는 사람.남은 결석 허용 횟수 알려주며 다시 참여 유도
-            return formatByPhase(notification, BODY_ABSENT_FIRST, BODY_ABSENT_SECOND, remaining);
+        if (streak == 0 && daysSince != null && daysSince > 0) {
+            return format(props.getAbsent().getBody().byPhase(isFirst), notification.getRemainingAbsences());
         }
-        return String.format(pickRandom(BODY_POOL), streak, streak + 1);
+        return format(pickRandom(props.getStreak().getBodyPool()), streak, streak + 1);
     }
 
-    private String formatByPhase(ChallengeTodoReminderNotification n, String first, String second, Object... args) {
-        return String.format(n.isFirst() ? first : second, args);
+    private PhaseMessage resolveStreakTitle(int streak) {
+        ReminderMessageProperties.Streak.StreakTitle title = props.getStreak().getTitle();
+        if (streak >= 21) return title.getS21();
+        if (streak >= 14) return title.getS14();
+        if (streak >= 7)  return title.getS7();
+        if (streak >= 3)  return title.getS3();
+        if (streak >= 2)  return title.getS2();
+        return title.getS0();
+    }
+
+    private String format(String template, Object... args) {
+        return String.format(template, args);
     }
 
     private String pickRandom(List<String> options) {

@@ -41,11 +41,16 @@ jobs:
           printf '%s\n' "${{ secrets.FCM_APPLICATION_TEST_YML }}" \
             > src/test/resources/application.yml
 
+      - name: fcm reminder-messages.yml 생성
+        run: |
+          printf '%s\n' "${{ secrets.FCM_CHALLENGE_REMINDER_MESSAGES_YML }}" \
+            > src/main/resources/reminder-messages.yml
+
       - name: Debug - check allowed-origins line
         run: |
           echo "===== allowed-origins in application.yml ====="
           grep -n "allowed-origins" src/main/resources/application.yml || echo "not found"
-      
+
       - name: Build JAR
         run: ./gradlew clean build
 
@@ -93,7 +98,7 @@ jobs:
             | base64 -d \
             | sudo tee /srv/bombom/secrets/bombom-fcm.json > /dev/null
           sudo chmod 644 /srv/bombom/secrets/bombom-fcm.json
-      
+
       - name: Pull image & retag
         run: |
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/bombom-fcm:latest

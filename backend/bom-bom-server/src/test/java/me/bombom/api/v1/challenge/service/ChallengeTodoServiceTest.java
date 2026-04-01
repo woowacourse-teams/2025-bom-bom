@@ -89,6 +89,7 @@ class ChallengeTodoServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(updated.getCompletedDays()).isEqualTo(3);
             softly.assertThat(updated.getStreak()).isEqualTo(3);
+            softly.assertThat(updated.getLastParticipatedDate()).isEqualTo(LocalDate.now());
             softly.assertThat(results).hasSize(1);
             softly.assertThat(results.getFirst().getStatus()).isEqualTo(ChallengeDailyStatus.COMPLETE);
         });

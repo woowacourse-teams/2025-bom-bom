@@ -20,6 +20,7 @@ import me.bombom.api.v1.common.BaseEntity;
 public class Challenge extends BaseEntity {
 
     private static final double LATE_REGISTRATION_ALLOWED_RATIO = 0.2;
+    private static final double SUCCESS_REQUIRED_RATIO = 0.8;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -86,6 +87,14 @@ public class Challenge extends BaseEntity {
         return this.endDate != null && now.isAfter(this.endDate);
     }
 
+    public boolean isLastDay(LocalDate date) {
+        return date.equals(this.endDate);
+    }
+
+    public int calculateMaxAllowedAbsences() {
+        return totalDays - (int) Math.ceil(totalDays * SUCCESS_REQUIRED_RATIO);
+    }
+
     public boolean hasStarted(LocalDate now) {
         return this.startDate != null && !now.isBefore(this.startDate);
     }
@@ -108,7 +117,7 @@ public class Challenge extends BaseEntity {
         return getRegistrationPhase(now) == RegistrationPhase.LATE;
     }
 
-    public int calculatePassedDays(LocalDate targetDate) {
+    public int calculatePassedWeekDays(LocalDate targetDate) {
         if (this.startDate == null) {
             return 0;
         }
@@ -129,8 +138,8 @@ public class Challenge extends BaseEntity {
     }
 
     private boolean isWithinLatePhase(LocalDate targetDate) {
-        int passedDays = calculatePassedDays(targetDate);
+        int passedWeekDays = calculatePassedWeekDays(targetDate);
         int maxPassedDaysForLateRegistration = (int) (this.totalDays * LATE_REGISTRATION_ALLOWED_RATIO);
-        return passedDays <= maxPassedDaysForLateRegistration;
+        return passedWeekDays <= maxPassedDaysForLateRegistration;
     }
 }

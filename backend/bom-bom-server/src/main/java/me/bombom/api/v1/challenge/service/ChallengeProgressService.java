@@ -39,9 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ChallengeProgressService {
 
-    // TODO: 이후에 수료 처리 등 구현 시 관리 방법 고려
-    private static final double SUCCESS_REQUIRED_RATIO = 0.8;
-
     private final ChallengeRepository challengeRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ChallengeDailyResultRepository challengeDailyResultRepository;
@@ -142,12 +139,9 @@ public class ChallengeProgressService {
     }
 
     private void checkFailure(ChallengeParticipant participant, Challenge challenge, LocalDate yesterday) {
-        int totalDays = challenge.getTotalDays();
-        int requiredSuccessDays = (int) Math.ceil(totalDays * SUCCESS_REQUIRED_RATIO);
-        int maxAllowedAbsent = totalDays - requiredSuccessDays;
-
-        int daysSinceStart = challenge.calculatePassedDays(yesterday);
-        int currentAbsent = daysSinceStart - participant.getCompletedDays();
+        int maxAllowedAbsent = challenge.calculateMaxAllowedAbsences();
+        int passedWeekDays = challenge.calculatePassedWeekDays(yesterday);
+        int currentAbsent = passedWeekDays - participant.getCompletedDays();
         if (currentAbsent > maxAllowedAbsent) {
             participant.markAsFailed();
         }

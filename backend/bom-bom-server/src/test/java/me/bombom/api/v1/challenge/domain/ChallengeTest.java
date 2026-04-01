@@ -26,15 +26,15 @@ class ChallengeTest {
                 .build();
 
         // when
-        int passedDays = challenge.calculatePassedDays(targetDate);
+        int passedWeekDays = challenge.calculatePassedWeekDays(targetDate);
 
         // then
         // 금(1) + 월(1) = 2일
         assertSoftly(softly -> {
-            softly.assertThat(passedDays).isEqualTo(2);
+            softly.assertThat(passedWeekDays).isEqualTo(2);
 
             int passedDaysWithWeekend = (int) (ChronoUnit.DAYS.between(challenge.getStartDate(), targetDate) + 1);
-            softly.assertThat(passedDays).isNotEqualTo(passedDaysWithWeekend);
+            softly.assertThat(passedWeekDays).isNotEqualTo(passedDaysWithWeekend);
         });
     }
 
@@ -55,10 +55,10 @@ class ChallengeTest {
                 .build();
 
         // when
-        int passedDays = challenge.calculatePassedDays(targetDate);
+        int passedWeekDays = challenge.calculatePassedWeekDays(targetDate);
 
         // then
-        assertThat(passedDays).isEqualTo(3);
+        assertThat(passedWeekDays).isEqualTo(3);
     }
 
     @Test
@@ -76,9 +76,9 @@ class ChallengeTest {
                 .build();
 
         // when
-        int passedDays = challenge.calculatePassedDays(targetDate);
+        int passedWeekDays = challenge.calculatePassedWeekDays(targetDate);
 
         // then
-        assertThat(passedDays).isEqualTo(0);
+        assertThat(passedWeekDays).isEqualTo(0);
     }
 }

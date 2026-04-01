@@ -48,11 +48,6 @@ jobs:
         run: |
           echo "$REMINDER_MESSAGES" > src/main/resources/reminder-messages.yml
 
-      - name: fcm reminder-messages.yml 생성
-        run: |
-          printf '%s\n' "${{ secrets.FCM_CHALLENGE_REMINDER_MESSAGES_YML }}" \
-            > src/main/resources/reminder-messages.yml
-
       - name: Debug - check allowed-origins line
         run: |
           echo "===== allowed-origins in application.yml ====="

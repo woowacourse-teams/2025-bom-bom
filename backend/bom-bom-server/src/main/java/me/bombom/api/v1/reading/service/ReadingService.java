@@ -21,6 +21,7 @@ import me.bombom.api.v1.reading.domain.ContinueReadingSnapshot;
 import me.bombom.api.v1.reading.domain.LowestRankWithDifference;
 import me.bombom.api.v1.reading.domain.MonthlyReadingRealtime;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
+import me.bombom.api.v1.reading.domain.ReadingSnapshotType;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
@@ -58,8 +59,7 @@ public class ReadingService {
 
     private static final int LAST_MONTH_OFFSET = 1;
 
-    private final MonthlyReadingSnapshotMetaService monthlyReadingSnapshotMetaService;
-    private final ContinueReadingSnapshotMetaService continueReadingRankingSnapshotMetaService;
+    private final ReadingSnapshotMetaService readingSnapshotMetaService;
 
     private final MemberRepository memberRepository;
     private final ContinueReadingRealtimeRepository continueReadingRepository;
@@ -244,7 +244,7 @@ public class ReadingService {
                 lastMonth.getMonthValue()
         );
         List<MonthlyReadingRankResponse> monthlyRanking = MonthlyReadingRankResponse.from(flatResults);
-        LocalDateTime rankingUpdatedAt = monthlyReadingSnapshotMetaService.getSnapshotAt();
+        LocalDateTime rankingUpdatedAt = readingSnapshotMetaService.getSnapshotAt(ReadingSnapshotType.MONTHLY);
         ZonedDateTime serverNow = getCurrentServerZoneDateTime(scheduleProps.zoneId());
         ZonedDateTime nextRefreshAt = requireNextRankingRefresh(serverNow, scheduleProps.cronExpression());
         return MonthlyReadingRankingResponse.of(
@@ -278,7 +278,7 @@ public class ReadingService {
                 lastMonth.getMonthValue()
         );
         List<ContinueReadingRankResponse> ranking = ContinueReadingRankResponse.from(flatResults);
-        LocalDateTime rankingUpdatedAt = continueReadingRankingSnapshotMetaService.getSnapshotAt();
+        LocalDateTime rankingUpdatedAt = readingSnapshotMetaService.getSnapshotAt(ReadingSnapshotType.CONTINUE);
         ZonedDateTime serverNow = getCurrentServerZoneDateTime(
                 continueReadingRankingScheduleProperties.zoneId()
         );
@@ -320,7 +320,7 @@ public class ReadingService {
         try {
             log.info("Starting monthly ranking update");
             monthlyReadingSnapshotRepository.updateMonthlyRanking();
-            monthlyReadingSnapshotMetaService.updateSnapshotAt();
+            readingSnapshotMetaService.updateSnapshotAt(ReadingSnapshotType.MONTHLY);
             log.info("Monthly ranking update completed successfully");
         } catch (Exception e) {
             log.error("Failed to update monthly ranking: {}", e.getMessage(), e);
@@ -380,7 +380,7 @@ public class ReadingService {
 
     private void rebuildContinueReadingRankingSnapshot() {
         continueReadingRankingSnapshotRepository.updateContinueReadingRankingSnapshot();
-        continueReadingRankingSnapshotMetaService.updateSnapshotAt();
+        readingSnapshotMetaService.updateSnapshotAt(ReadingSnapshotType.CONTINUE);
     }
 
     private LowestRankWithDifference computeLowestRankWithDifference() {

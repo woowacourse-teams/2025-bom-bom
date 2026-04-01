@@ -19,7 +19,8 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.ContinueReadingSnapshot;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
-import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshotMeta;
+import me.bombom.api.v1.reading.domain.ReadingSnapshotMeta;
+import me.bombom.api.v1.reading.domain.ReadingSnapshotType;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
@@ -30,8 +31,8 @@ import me.bombom.api.v1.reading.dto.response.MemberContinueReadingRankResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
-import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotMetaRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
+import me.bombom.api.v1.reading.repository.ReadingSnapshotMetaRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.reading.repository.YearlyReadingRepository;
@@ -69,7 +70,7 @@ class ReadingServiceTest {
     private MonthlyReadingRealtimeRepository monthlyReadingRealtimeRepository;
 
     @Autowired
-    private MonthlyReadingSnapshotMetaRepository monthlyReadingSnapshotMetaRepository;
+    private ReadingSnapshotMetaRepository readingSnapshotMetaRepository;
 
     @Autowired
     private YearlyReadingRepository yearlyReadingRepository;
@@ -321,8 +322,8 @@ class ReadingServiceTest {
         int limit = 2;
 
         // when
-        monthlyReadingSnapshotMetaRepository.save(MonthlyReadingSnapshotMeta.builder()
-                .id(1L)
+        readingSnapshotMetaRepository.save(ReadingSnapshotMeta.builder()
+                .snapshotType(ReadingSnapshotType.MONTHLY)
                 .snapshotAt(dateTime)
                 .build());
         MonthlyReadingRankingResponse monthlyReadingRank = readingService.getMonthlyReadingRank(limit);

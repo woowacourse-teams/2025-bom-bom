@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.reading.dto.MonthlyReadingRankFlat;
+import me.bombom.api.v1.reading.dto.ContinueReadingRankFlat;
 
 public record ChallengeBadgeResponse(
 
@@ -18,6 +19,17 @@ public record ChallengeBadgeResponse(
 ) {
 
     public static ChallengeBadgeResponse from(MonthlyReadingRankFlat flat) {
+        if (flat.hasChallengeBadge()) {
+            return new ChallengeBadgeResponse(
+                    BadgeGrade.valueOf(flat.challengeBadgeGrade()),
+                    flat.challengeBadgeName(),
+                    flat.challengeBadgeGeneration()
+            );
+        }
+        return null;
+    }
+
+    public static ChallengeBadgeResponse from(ContinueReadingRankFlat flat) {
         if (flat.hasChallengeBadge()) {
             return new ChallengeBadgeResponse(
                     BadgeGrade.valueOf(flat.challengeBadgeGrade()),

@@ -5,10 +5,10 @@ import me.bombom.api.v1.reading.domain.TodayReading;
 
 public record TodayReadingResponse(
 
-        @Schema(type = "integer", format = "int32", description = "읽은 아티클 수", required = true)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         int readCount,
-        
-        @Schema(type = "integer", format = "int32", description = "전체 아티클 수", required = true)
+
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         int totalCount
 ) {
 

@@ -1,0 +1,1 @@
+RENAME TABLE continue_reading TO continue_reading_realtime;

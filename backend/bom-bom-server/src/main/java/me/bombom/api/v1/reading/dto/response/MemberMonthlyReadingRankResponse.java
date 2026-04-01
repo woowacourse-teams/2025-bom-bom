@@ -10,13 +10,13 @@ public record MemberMonthlyReadingRankResponse(
         @NotNull
         String nickname,
 
-        @Schema(required = true)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         long rank,
 
-        @Schema(required = true)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         int monthlyReadCount,
 
-        @Schema(required = true)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         long nextRankDifference,
 
         BadgesResponse badges

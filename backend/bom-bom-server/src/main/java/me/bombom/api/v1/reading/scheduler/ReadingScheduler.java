@@ -22,7 +22,7 @@ public class ReadingScheduler {
 
     @Scheduled(cron = DAILY_CRON, zone = TIME_ZONE)
     @SchedulerLock(name = "daily_reset_reading_count", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
-        public void dailyResetReadingCount() {
+    public void dailyResetReadingCount() {
         log.info("오늘 읽기 초기화 실행");
         readingService.resetContinueReadingCount();
         readingService.resetTodayReadingCount();
@@ -65,6 +65,14 @@ public class ReadingScheduler {
 
         readingService.updateMonthlyRanking();
         log.info("이달의 독서왕 순위 업데이트 완료");
+    }
+
+    @Scheduled(cron = "${ranking.reading.continue.cron}", zone = TIME_ZONE)
+    @SchedulerLock(name = "ten_minutely_calculate_continue_reading_snapshot", lockAtLeastFor = "PT6S", lockAtMostFor = "PT15S")
+    public void tenMinutelyCalculateContinueReadingRankingSnapshot() {
+        log.info("연속 읽기 랭킹 스냅샷 업데이트");
+        readingService.updateContinueReadingRankingSnapshot();
+        log.info("연속 읽기 랭킹 스냅샷 업데이트 완료");
     }
 
     /**

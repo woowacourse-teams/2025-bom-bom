@@ -30,12 +30,27 @@ public class ChallengeTodoReminderNotification extends Notification {
     @Enumerated(EnumType.STRING)
     private ChallengeTodoReminderPhase phase;
 
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    private int streak;
+
+    private Integer daysSinceLastParticipation;
+
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    private int remainingAbsences;
+
+    @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    private boolean isLastDay;
+
     @Builder
     public ChallengeTodoReminderNotification(
             @NonNull Long memberId,
             @NonNull Long challengeId,
             @NonNull String challengeName,
             ChallengeTodoReminderPhase phase,
+            int streak,
+            Integer daysSinceLastParticipation,
+            int remainingAbsences,
+            boolean isLastDay,
             NotificationStatus status,
             int attempts,
             LocalDateTime nextRetryAt,
@@ -45,6 +60,14 @@ public class ChallengeTodoReminderNotification extends Notification {
         this.challengeId = challengeId;
         this.challengeName = challengeName;
         this.phase = phase != null ? phase : ChallengeTodoReminderPhase.FIRST;
+        this.streak = streak;
+        this.daysSinceLastParticipation = daysSinceLastParticipation;
+        this.remainingAbsences = remainingAbsences;
+        this.isLastDay = isLastDay;
+    }
+
+    public boolean isFirst() {
+        return this.phase == ChallengeTodoReminderPhase.FIRST;
     }
 
     @Override
@@ -54,7 +77,6 @@ public class ChallengeTodoReminderNotification extends Notification {
 
     @Override
     public LocalDateTime calculateNextRetryTime(int attempts) {
-        // 간단한 지수 백오프 (30s, 60s, 120s, 240s)
         long delaySeconds = 30L * (long) Math.pow(2, Math.max(0, attempts - 1));
         return LocalDateTime.now().plusSeconds(delaySeconds);
     }

@@ -632,6 +632,18 @@ public final class TestFixture {
                 .completedDays(completedDays)
                 .isSurvived(true)
                 .shield(0)
+                .streak(0)
+                .build();
+    }
+
+    public static ChallengeParticipant createChallengeParticipantWithStreak(Long challengeId, Long memberId, int streak) {
+        return ChallengeParticipant.builder()
+                .challengeId(challengeId)
+                .memberId(memberId)
+                .completedDays(streak)
+                .isSurvived(true)
+                .shield(0)
+                .streak(streak)
                 .build();
     }
 

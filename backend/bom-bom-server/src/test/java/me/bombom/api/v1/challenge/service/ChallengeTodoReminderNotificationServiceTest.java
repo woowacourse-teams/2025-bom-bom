@@ -8,9 +8,10 @@ import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
+import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
-import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderPhase;
 import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderNotification;
+import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderPhase;
 import me.bombom.api.v1.challenge.domain.notification.NotificationStatus;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
@@ -108,7 +109,8 @@ class ChallengeTodoReminderNotificationServiceTest {
                         ChallengeTodoReminderNotification::getChallengeName,
                         ChallengeTodoReminderNotification::getPhase,
                         ChallengeTodoReminderNotification::getStatus,
-                        ChallengeTodoReminderNotification::getAttempts
+                        ChallengeTodoReminderNotification::getAttempts,
+                        ChallengeTodoReminderNotification::getDaysSinceLastParticipation
                 )
                 .containsExactlyInAnyOrder(
                         tuple(
@@ -117,7 +119,8 @@ class ChallengeTodoReminderNotificationServiceTest {
                                 challenge.getName(),
                                 ChallengeTodoReminderPhase.FIRST,
                                 NotificationStatus.PENDING,
-                                0
+                                0,
+                                null
                         ),
                         tuple(
                                 anotherIncompleteMember.getId(),
@@ -125,7 +128,8 @@ class ChallengeTodoReminderNotificationServiceTest {
                                 challenge.getName(),
                                 ChallengeTodoReminderPhase.FIRST,
                                 NotificationStatus.PENDING,
-                                0
+                                0,
+                                null
                         )
                 );
     }
@@ -150,7 +154,11 @@ class ChallengeTodoReminderNotificationServiceTest {
                         member1.getId(),
                         challenge.getId(),
                         challenge.getName(),
-                        ChallengeTodoReminderPhase.FIRST
+                        ChallengeTodoReminderPhase.FIRST,
+                        0,
+                        null,
+                        0,
+                        false
                 ));
 
         // when
@@ -181,7 +189,11 @@ class ChallengeTodoReminderNotificationServiceTest {
                         member.getId(),
                         challenge.getId(),
                         challenge.getName(),
-                        ChallengeTodoReminderPhase.FIRST
+                        ChallengeTodoReminderPhase.FIRST,
+                        0,
+                        null,
+                        0,
+                        false
                 ));
 
         // when
@@ -193,5 +205,149 @@ class ChallengeTodoReminderNotificationServiceTest {
         assertThat(notifications)
                 .extracting(ChallengeTodoReminderNotification::getPhase)
                 .containsExactlyInAnyOrder(ChallengeTodoReminderPhase.FIRST, ChallengeTodoReminderPhase.SECOND);
+    }
+
+    @Test
+    void 스트릭이_있는_참여자에게는_스트릭_값이_저장된_알림을_생성한다() {
+        // given
+        LocalDate today = LocalDate.now();
+        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
+        Challenge challenge = challengeRepository.save(
+                TestFixture.createChallenge("봄봄 챌린지", today.minusDays(7), today.plusDays(10), 20, group.getId()));
+        Member member = memberRepository.save(TestFixture.createUniqueMember("m1", "p1"));
+        challengeParticipantRepository.save(
+                ChallengeParticipant.builder()
+                        .challengeId(challenge.getId())
+                        .memberId(member.getId())
+                        .completedDays(7)
+                        .isSurvived(true)
+                        .shield(0)
+                        .streak(7)
+                        .lastParticipatedDate(today.minusDays(1))
+                        .build());
+        challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
+
+        // when
+        challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today, ChallengeTodoReminderPhase.FIRST);
+
+        // then
+        ChallengeTodoReminderNotification notification = challengeTodoReminderNotificationRepository.findAll().get(0);
+        assertThat(notification.getStreak()).isEqualTo(7);
+        assertThat(notification.getDaysSinceLastParticipation()).isEqualTo(0); // 어제 참여, 오늘 제외 → 결석일 0
+        assertThat(notification.isLastDay()).isFalse();
+        assertThat(notification.getRemainingAbsences()).isNotNegative();
+    }
+
+    @Test
+    void 챌린지_마지막_날에는_isLastDay가_true인_알림을_생성한다() {
+        // given
+        LocalDate today = LocalDate.now();
+        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
+        Challenge challenge = challengeRepository.save(
+                TestFixture.createChallenge("봄봄 챌린지", today.minusDays(14), today, 15, group.getId()));
+        Member member = memberRepository.save(TestFixture.createUniqueMember("m1", "p1"));
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 0));
+        challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
+
+        // when
+        challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today, ChallengeTodoReminderPhase.FIRST);
+
+        // then
+        ChallengeTodoReminderNotification notification = challengeTodoReminderNotificationRepository.findAll().get(0);
+        assertThat(notification.isLastDay()).isTrue();
+    }
+
+    @Test
+    void 스트릭이_0이어도_마지막_COMPLETE_기준_며칠_전_참여인지_저장한다() {
+        // given
+        // today = 금요일, lastParticipatedDate = 월요일(-4일) → 화/수/목 = 3 평일 결석 (오늘 제외)
+        LocalDate today = LocalDate.of(2025, 4, 4); // 금요일
+        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
+        Challenge challenge = challengeRepository.save(
+                TestFixture.createChallenge("봄봄 챌린지", today.minusDays(14), today.plusDays(7), 22, group.getId()));
+        Member member = memberRepository.save(TestFixture.createUniqueMember("m1", "p1"));
+        var participant = challengeParticipantRepository.save(
+                ChallengeParticipant.builder()
+                        .challengeId(challenge.getId())
+                        .memberId(member.getId())
+                        .completedDays(3)
+                        .isSurvived(true)
+                        .shield(0)
+                        .streak(0)
+                        .lastParticipatedDate(today.minusDays(4)) // 월요일
+                        .build());
+        challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
+
+        // when
+        challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today, ChallengeTodoReminderPhase.FIRST);
+
+        // then
+        ChallengeTodoReminderNotification notification = challengeTodoReminderNotificationRepository.findAll().get(0);
+        assertThat(notification.getStreak()).isZero();
+        assertThat(notification.getDaysSinceLastParticipation()).isEqualTo(3); // 화/수/목 = 3 평일 (오늘 금요일 제외)
+    }
+
+    @Test
+    void 탈락까지_남은_결석_횟수를_저장한다() {
+        // given
+        // totalDays=10, maxAllowedAbsent = 10 - ceil(10 * 0.8) = 10 - 8 = 2
+        LocalDate today = LocalDate.of(2025, 4, 7); // 월요일
+        LocalDate startDate = LocalDate.of(2025, 3, 31); // 월요일 (오늘 기준 -7일)
+        // 어제 = 4/6(일요일) → passedDays = 월~금(5) = 5일
+        // completedDays=4 → currentAbsent = 5 - 4 = 1 → remainingAbsences = 2 - 1 = 1
+        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
+        Challenge challenge = challengeRepository.save(
+                TestFixture.createChallenge("봄봄 챌린지", startDate, today.plusDays(7), 10, group.getId()));
+        Member member = memberRepository.save(TestFixture.createUniqueMember("m1", "p1"));
+        challengeParticipantRepository.save(
+                ChallengeParticipant.builder()
+                        .challengeId(challenge.getId())
+                        .memberId(member.getId())
+                        .completedDays(4) // passedDays=5, completedDays=4 → currentAbsent=1 → remainingAbsences=2-1=1
+                        .isSurvived(true)
+                        .shield(0)
+                        .streak(5)
+                        .lastParticipatedDate(today.minusDays(1))
+                        .build());
+        challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
+
+        // when
+        challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today, ChallengeTodoReminderPhase.FIRST);
+
+        // then
+        ChallengeTodoReminderNotification notification = challengeTodoReminderNotificationRepository.findAll().get(0);
+        assertThat(notification.getRemainingAbsences()).isEqualTo(1);
+    }
+
+    @Test
+    void 쉴드가_있는_경우_남은_결석_횟수에_쉴드_수를_더해서_저장한다() {
+        // given
+        // totalDays=10, maxAllowedAbsent = 10 - ceil(10 * 0.8) = 10 - 8 = 2
+        LocalDate today = LocalDate.of(2025, 4, 7); // 월요일
+        LocalDate startDate = LocalDate.of(2025, 3, 31); // 월요일 (오늘 기준 -7일)
+        // 어제 = 4/6(일요일) → passedDays = 월~금(5) = 5일
+        // completedDays=4 → currentAbsent = 5 - 4 = 1 → remainingAbsences = 2 - 1 + shield(2) = 3
+        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
+        Challenge challenge = challengeRepository.save(
+                TestFixture.createChallenge("봄봄 챌린지", startDate, today.plusDays(7), 10, group.getId()));
+        Member member = memberRepository.save(TestFixture.createUniqueMember("m1", "p1"));
+        challengeParticipantRepository.save(
+                ChallengeParticipant.builder()
+                        .challengeId(challenge.getId())
+                        .memberId(member.getId())
+                        .completedDays(4)
+                        .isSurvived(true)
+                        .shield(2)
+                        .streak(5)
+                        .lastParticipatedDate(today.minusDays(1))
+                        .build());
+        challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
+
+        // when
+        challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(today, ChallengeTodoReminderPhase.FIRST);
+
+        // then
+        ChallengeTodoReminderNotification notification = challengeTodoReminderNotificationRepository.findAll().get(0);
+        assertThat(notification.getRemainingAbsences()).isEqualTo(3); // 2 - 1 + shield(2)
     }
 }

@@ -33,13 +33,20 @@ jobs:
           distribution: temurin
 
       - name: fcm application.yml 생성 (prod, test)
+        env:
+          PROD_YML: ${{ secrets.FCM_APPLICATION_PROD_YML }}
+          TEST_YML: ${{ secrets.FCM_APPLICATION_TEST_YML }}
         run: |
           mkdir -p src/main/resources
-          printf '%s\n' "${{ secrets.FCM_APPLICATION_PROD_YML }}" \
-            > src/main/resources/application.yml
+          echo "$PROD_YML" > src/main/resources/application.yml
           mkdir -p src/test/resources
-          printf '%s\n' "${{ secrets.FCM_APPLICATION_TEST_YML }}" \
-            > src/test/resources/application.yml
+          echo "$TEST_YML" > src/test/resources/application.yml
+
+      - name: fcm reminder-messages.yml 생성
+        env:
+          REMINDER_MESSAGES: ${{ secrets.FCM_CHALLENGE_REMINDER_MESSAGES_YML }}
+        run: |
+          echo "$REMINDER_MESSAGES" > src/main/resources/reminder-messages.yml
 
       - name: fcm reminder-messages.yml 생성
         run: |

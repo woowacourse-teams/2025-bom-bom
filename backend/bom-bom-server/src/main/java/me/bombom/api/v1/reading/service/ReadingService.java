@@ -432,6 +432,7 @@ public class ReadingService {
                     .addContext(ErrorContextKeys.OPERATION, "updateContinueReadingCount"));
         if (canIncreaseContinueReadingCount(todayReading)) {
             continueReading.increaseDayCount();
+            badgeService.issueStreakBadge(memberId, continueReading.getDayCount());
         }
     }
 

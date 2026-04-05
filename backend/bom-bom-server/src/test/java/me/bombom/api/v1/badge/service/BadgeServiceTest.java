@@ -12,6 +12,7 @@ import me.bombom.api.v1.badge.domain.Badge;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.badge.domain.ChallengeBadge;
 import me.bombom.api.v1.badge.domain.RankingBadge;
+import me.bombom.api.v1.badge.domain.StreakBadge;
 import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
@@ -490,5 +491,33 @@ class BadgeServiceTest {
             .map(b -> (ChallengeBadge) b)
             .filter(b -> b.getMemberId().equals(memberId) && b.getGrade() == grade)
             .findFirst();
+    }
+
+    @Test
+    void 연속_읽기_일수가_마일스톤에_도달하면_스트릭_뱃지를_발급한다() {
+        badgeService.issueStreakBadge(member1.getId(), 7);
+
+        List<Badge> badges = badgeRepository.findAll();
+        assertThat(badges).hasSize(1);
+        assertThat(badges.get(0)).isInstanceOf(StreakBadge.class);
+        StreakBadge streakBadge = (StreakBadge) badges.get(0);
+        assertThat(streakBadge.getStreakDayCount()).isEqualTo(7);
+    }
+
+    @Test
+    void 마일스톤이_아니면_스트릭_뱃지를_발급하지_않는다() {
+        badgeService.issueStreakBadge(member1.getId(), 6);
+
+        assertThat(badgeRepository.count()).isZero();
+    }
+
+    @Test
+    void 동일_마일스톤도_여러_번_발급할_수_있다() {
+        badgeService.issueStreakBadge(member1.getId(), 100);
+        badgeService.issueStreakBadge(member1.getId(), 100);
+
+        List<Badge> badges = badgeRepository.findAll();
+        assertThat(badges).hasSize(2);
+        assertThat(badges.stream().filter(b -> b instanceof StreakBadge).count()).isEqualTo(2);
     }
 }

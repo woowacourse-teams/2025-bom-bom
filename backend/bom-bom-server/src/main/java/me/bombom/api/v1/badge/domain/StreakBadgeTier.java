@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum StreakBadgeTier {
+
     SEVEN(7),
     FIFTEEN(15),
     THIRTY(30),

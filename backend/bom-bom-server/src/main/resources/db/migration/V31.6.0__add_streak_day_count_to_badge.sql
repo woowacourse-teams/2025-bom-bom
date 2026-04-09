@@ -1,2 +1,2 @@
 ALTER TABLE badge
-    ADD COLUMN streak_day_count SMALLINT NULL;
+    ADD COLUMN streak_badge_tier VARCHAR(20) NULL;

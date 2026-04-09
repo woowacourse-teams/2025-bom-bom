@@ -13,6 +13,7 @@ import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.badge.domain.ChallengeBadge;
 import me.bombom.api.v1.badge.domain.RankingBadge;
 import me.bombom.api.v1.badge.domain.StreakBadge;
+import me.bombom.api.v1.badge.domain.StreakBadgeTier;
 import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
@@ -501,7 +502,7 @@ class BadgeServiceTest {
         assertThat(badges).hasSize(1);
         assertThat(badges.get(0)).isInstanceOf(StreakBadge.class);
         StreakBadge streakBadge = (StreakBadge) badges.get(0);
-        assertThat(streakBadge.getStreakDayCount()).isEqualTo(7);
+        assertThat(streakBadge.getStreakBadgeTier()).isEqualTo(StreakBadgeTier.SEVEN);
     }
 
     @Test

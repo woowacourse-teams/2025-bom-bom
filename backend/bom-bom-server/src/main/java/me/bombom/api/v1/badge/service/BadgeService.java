@@ -62,7 +62,7 @@ public class BadgeService {
 
     @Transactional
     public void issueStreakBadge(Long memberId, int streakDayCount) {
-        StreakBadgeTier.fromStreakDayCount(streakDayCount)
+        StreakBadgeTier.from(streakDayCount)
                 .ifPresent(tier -> {
                     StreakBadge badge = StreakBadge.builder()
                             .memberId(memberId)

@@ -21,7 +21,7 @@ public enum StreakBadgeTier {
 
     private final int dayCount;
 
-    public static Optional<StreakBadgeTier> fromStreakDayCount(int streakDayCount) {
+    public static Optional<StreakBadgeTier> from(int streakDayCount) {
         return Arrays.stream(values())
                 .filter(tier -> tier.dayCount == streakDayCount)
                 .findFirst();

@@ -521,4 +521,15 @@ class BadgeServiceTest {
         assertThat(badges).hasSize(2);
         assertThat(badges.stream().filter(b -> b instanceof StreakBadge).count()).isEqualTo(2);
     }
+
+    @Test
+    void 신규_마일스톤에_도달하면_스트릭_뱃지를_발급한다() {
+        badgeService.issueStreakBadge(member1.getId(), 500);
+
+        List<Badge> badges = badgeRepository.findAll();
+        assertThat(badges).hasSize(1);
+        assertThat(badges.get(0)).isInstanceOf(StreakBadge.class);
+        StreakBadge streakBadge = (StreakBadge) badges.get(0);
+        assertThat(streakBadge.getStreakBadgeTier()).isEqualTo(StreakBadgeTier.FIVE_HUNDRED);
+    }
 }

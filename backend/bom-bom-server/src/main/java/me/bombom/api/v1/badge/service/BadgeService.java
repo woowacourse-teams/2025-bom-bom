@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.badge.domain.ChallengeBadge;
 import me.bombom.api.v1.badge.domain.RankingBadge;
+import me.bombom.api.v1.badge.domain.StreakBadge;
+import me.bombom.api.v1.badge.domain.StreakBadgeTier;
 import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.badge.repository.ChallengeBadgeRepository;
 import me.bombom.api.v1.badge.repository.RankingBadgeRepository;
@@ -56,6 +58,19 @@ public class BadgeService {
             Optional<BadgeGrade> badgeGrade = challengeGrade.toBadge();
             badgeGrade.ifPresent(grade -> issueChallengeBadge(participant.getMemberId(), grade, challenge));
         }
+    }
+
+    @Transactional
+    public void issueStreakBadge(Long memberId, int streakDayCount) {
+        StreakBadgeTier.from(streakDayCount)
+                .ifPresent(tier -> {
+                    StreakBadge badge = StreakBadge.builder()
+                            .memberId(memberId)
+                            .streakBadgeTier(tier)
+                            .build();
+                    badgeRepository.save(badge);
+                    log.info("스트릭 뱃지 발급 완료 - memberId: {}, streakDayCount: {}", memberId, tier.getDayCount());
+                });
     }
 
     private void issueRankingBadge(Long memberId, BadgeGrade grade, LocalDate period) {

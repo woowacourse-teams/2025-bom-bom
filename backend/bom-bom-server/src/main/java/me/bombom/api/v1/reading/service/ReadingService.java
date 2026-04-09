@@ -39,6 +39,7 @@ import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.badge.service.BadgeService;
+import me.bombom.api.v1.reading.event.ContinueReadingIncreasedEvent;
 import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
@@ -46,6 +47,7 @@ import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.reading.repository.YearlyReadingRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -73,6 +75,7 @@ public class ReadingService {
     private final MonthlyRankingScheduleProperties scheduleProps;
     private final ContinueReadingRankingScheduleProperties continueReadingRankingScheduleProperties;
     private final BadgeService badgeService;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final Clock clock;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -432,7 +435,9 @@ public class ReadingService {
                     .addContext(ErrorContextKeys.OPERATION, "updateContinueReadingCount"));
         if (canIncreaseContinueReadingCount(todayReading)) {
             continueReading.increaseDayCount();
-            badgeService.issueStreakBadge(memberId, continueReading.getDayCount());
+            applicationEventPublisher.publishEvent(
+                    new ContinueReadingIncreasedEvent(memberId, continueReading.getDayCount())
+            );
         }
     }
 

@@ -28,7 +28,8 @@ services:
       OTEL_TRACES_SAMPLER: traceidratio
       OTEL_TRACES_SAMPLER_ARG: "0.2"
       OTEL_METRICS_EXPORTER: none
-      OTEL_LOGS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: otlp
+      OTEL_RESOURCE_ATTRIBUTES: "service.name=bombom-server-prod,service.instance.id=bombom-prod-1"
       OTEL_PROPAGATORS: tracecontext,baggage
       OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDE_URLS: /actuator/.*
 

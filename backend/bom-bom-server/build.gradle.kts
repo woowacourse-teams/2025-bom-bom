@@ -87,7 +87,9 @@ dependencies {
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.9.2")
 
     //otel
-    implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.7.0")
+    implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.26.1-alpha"))
+    implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0")
 
     // for : webhook
     implementation("org.springframework.boot:spring-boot-starter-webflux")

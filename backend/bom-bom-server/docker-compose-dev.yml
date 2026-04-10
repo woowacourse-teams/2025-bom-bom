@@ -4,6 +4,9 @@ services:
   bombom-server-dev:
     image: bombomnewsletter/bom-bom:latest
     container_name: bombom-server-dev
+    pull_policy: always
+    restart: unless-stopped
+    init: true
     ports:
       - "8080:8080"
     environment:
@@ -33,10 +36,15 @@ services:
       # Micrometer trace off
       OTEL_JAVAAGENT_DISABLED_INSTRUMENTATIONS: micrometer
 
-    restart: always
     volumes:
       - /home/ec2-user/bombom-dev/logs:/logs
       - /home/ec2-user/bombom-dev/opentelemetry/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
 
 networks:
   default:

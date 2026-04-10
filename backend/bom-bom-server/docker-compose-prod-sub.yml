@@ -1,7 +1,9 @@
-version: "3.8"
 services:
   bombom-server-prod:
     image: bombomnewsletter/bom-bom:prod
+    pull_policy: always
+    restart: unless-stopped
+    init: true
     container_name: bombom-server-prod-sub
     ports:
       - 80:8080
@@ -29,11 +31,16 @@ services:
       OTEL_LOGS_EXPORTER: none
       OTEL_PROPAGATORS: tracecontext,baggage
       OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDE_URLS: /actuator/.*
-      OTEL_JAVAAGENT_DEBUG: "true"
 
     volumes:
       - /home/ec2-user/bombom-prod/logs:/logs
       - /home/ec2-user/bombom-prod/opentelemetry/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
 
     # 컨테이너 graceful shutdown 대기 시간
     stop_grace_period: 40s

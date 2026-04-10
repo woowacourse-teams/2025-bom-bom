@@ -1,12 +1,10 @@
 <configuration>
     <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
 
-    <!-- 콘솔: DEBUG 이상 -->
+    <!-- 콘솔: INFO 이상 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>DEBUG</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>NEUTRAL</onMismatch>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
         </filter>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>

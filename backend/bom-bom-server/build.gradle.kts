@@ -91,9 +91,6 @@ dependencies {
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations")
     implementation("io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0")
 
-    // for : webhook
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
-
     // AWS SDK
     implementation(platform("software.amazon.awssdk:bom:2.41.21"))
     implementation("software.amazon.awssdk:lambda")

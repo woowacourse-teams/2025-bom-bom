@@ -62,7 +62,6 @@
         <neverBlock>false</neverBlock>
     </appender>
 
-    <!-- Root는 DEBUG, Appender별 필터가 실제 출력 레벨을 조정 -->
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ASYNC_ALL_JSON"/>

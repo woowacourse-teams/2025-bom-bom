@@ -8,8 +8,8 @@ import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.reading.domain.ContinueReading;
-import me.bombom.api.v1.reading.repository.ContinueReadingRepository;
+import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
+import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.withdraw.domain.WithdrawnMember;
 import me.bombom.api.v1.withdraw.repository.WithdrawnMemberRepository;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class WithdrawService {
     private final MemberRepository memberRepository;
     private final WithdrawnMemberRepository withdrawnMemberRepository;
     private final HighlightRepository highlightRepository;
-    private final ContinueReadingRepository continueReadingRepository;
+    private final ContinueReadingRealtimeRepository continueReadingRepository;
     private final BookmarkRepository bookmarkRepository;
 
     @Transactional
@@ -50,14 +50,14 @@ public class WithdrawService {
                 .joinedDate(member.getCreatedAt().toLocalDate())
                 .deletedDate(LocalDate.now())
                 .expireDate(LocalDate.now().plusDays(EXPIRATION_DAYS))
-                .continueReading(getContinueReading(member.getId()))
+                .continueReading(getContinueReadingRealtime(member.getId()))
                 .bookmarkedCount(getBookmarkedCount(member.getId()))
                 .highlightCount(getHighlightCount(member.getId()))
                 .build();
     }
 
-    private int getContinueReading(Long memberId){
-        Optional<ContinueReading> continueReading = continueReadingRepository.findByMemberId(memberId);
+    private int getContinueReadingRealtime(Long memberId){
+        Optional<ContinueReadingRealtime> continueReading = continueReadingRepository.findByMemberId(memberId);
         if(continueReading.isEmpty()){
             log.warn("탈퇴한 회원의 연속 읽기 정보를 찾을 수 없습니다. memberId:{}", memberId);
             return 0;

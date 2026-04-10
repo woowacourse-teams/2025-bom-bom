@@ -1,11 +1,10 @@
-<configuration scan="true" scanPeriod="30 seconds">
+<configuration>
+    <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
 
-    <!-- 콘솔: DEBUG 이상 -->
+    <!-- 콘솔: INFO 이상 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>DEBUG</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>NEUTRAL</onMismatch>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
         </filter>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
@@ -56,12 +55,15 @@
 
     <appender name="ASYNC_ALL_JSON" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="ALL_JSON"/>
-        <queueSize>5000</queueSize>
+        <queueSize>2000</queueSize>
         <discardingThreshold>0</discardingThreshold>
+        <neverBlock>false</neverBlock>
     </appender>
 
-    <!-- Root는 DEBUG, Appender별 필터가 실제 출력 레벨을 조정 -->
-    <root level="DEBUG">
+    <logger name="org.hibernate.SQL" level="WARN"/>
+    <logger name="org.hibernate.orm.jdbc.bind" level="WARN"/>
+
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ASYNC_ALL_JSON"/>
     </root>

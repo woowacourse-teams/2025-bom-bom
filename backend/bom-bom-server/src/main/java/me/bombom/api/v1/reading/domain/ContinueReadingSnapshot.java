@@ -15,11 +15,7 @@ import me.bombom.api.v1.common.BaseEntity;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ContinueReading extends BaseEntity {
-
-    private static final int INITIAL_DAY_COUNT = 0;
-    private static final int RESET_DAY_COUNT = 0;
-    private static final int INCREASE_DAY_COUNT = 1;
+public class ContinueReadingSnapshot extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,29 +27,27 @@ public class ContinueReading extends BaseEntity {
     @Column(nullable = false, columnDefinition = "SMALLINT")
     private int dayCount;
 
+    @Column(nullable = false)
+    private long rankOrder;
+
     @Builder
-    public ContinueReading(
+    public ContinueReadingSnapshot(
             Long id,
             @NonNull Long memberId,
-            int dayCount
+            int dayCount,
+            long rankOrder
     ) {
         this.id = id;
         this.memberId = memberId;
         this.dayCount = dayCount;
+        this.rankOrder = rankOrder;
     }
 
-    public static ContinueReading create(Long memberId) {
-        return ContinueReading.builder()
+    public static ContinueReadingSnapshot create(Long memberId, int dayCount, long rankOrder) {
+        return ContinueReadingSnapshot.builder()
                 .memberId(memberId)
-                .dayCount(INITIAL_DAY_COUNT)
+                .dayCount(dayCount)
+                .rankOrder(rankOrder)
                 .build();
-    }
-
-    public void resetDayCount() {
-        dayCount = RESET_DAY_COUNT;
-    }
-
-    public void increaseDayCount() {
-        dayCount += INCREASE_DAY_COUNT;
     }
 }

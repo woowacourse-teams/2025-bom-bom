@@ -1,18 +1,19 @@
 package me.bombom.api.v1.reading.repository;
 
-import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshotMeta;
+import me.bombom.api.v1.reading.domain.ReadingSnapshotMeta;
+import me.bombom.api.v1.reading.domain.ReadingSnapshotType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface MonthlyReadingSnapshotMetaRepository extends JpaRepository<MonthlyReadingSnapshotMeta, Long> {
+public interface ReadingSnapshotMetaRepository extends JpaRepository<ReadingSnapshotMeta, ReadingSnapshotType> {
 
     @Modifying(clearAutomatically = true)
     @Query(value = """
-        UPDATE monthly_reading_snapshot_meta
+        UPDATE reading_snapshot_meta
         SET snapshot_at = CONVERT_TZ(NOW(6), 'UTC', 'Asia/Seoul')
-        WHERE id = :id
+        WHERE snapshot_type = :snapshotType
         """, nativeQuery = true)
-    int updateSnapshotAt(@Param("id") long id);
+    int updateSnapshotAt(@Param("snapshotType") String snapshotType);
 }

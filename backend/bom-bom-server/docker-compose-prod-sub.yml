@@ -8,6 +8,7 @@ services:
     ports:
       - 80:8080
       - 8081:8081
+    mem_limit: 660m
     environment:
       SPRING_PROFILES_ACTIVE: prod
       SPRING_DATASOURCE_URL: jdbc:mysql://${RDS_ENDPOINT}:3306/${DATABASE}?useSSL=false&serverTimezone=Asia/Seoul
@@ -20,7 +21,17 @@ services:
 
       #### --------------------------------------
       #### OpenTelemetry (전체 주석 처리)
-      JAVA_TOOL_OPTIONS: "-javaagent:/otel/opentelemetry-javaagent.jar"
+      JAVA_TOOL_OPTIONS: "
+          -javaagent:/otel/opentelemetry-javaagent.jar 
+          -Xms230m 
+          -Xmx230m 
+          -XX:MaxMetaspaceSize=200m 
+          -XX:+UseParallelGC
+          -XX:MaxDirectMemorySize=32m
+          -XX:NativeMemoryTracking=summary
+          -XX:+HeapDumpOnOutOfMemoryError
+          -XX:HeapDumpPath=/dumps/heapdump.hprof
+        "
       OTEL_SERVICE_NAME: bombom-server-prod
       OTEL_EXPORTER_OTLP_ENDPOINT: ${PROD_OTEL_ENDPOINT}
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
@@ -36,6 +47,7 @@ services:
     volumes:
       - /home/ec2-user/bombom-prod/logs:/logs
       - /home/ec2-user/bombom-prod/opentelemetry/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
+      - /home/ec2-user/bombom-prod/dumps:/dumps
 
     logging:
       driver: json-file

@@ -583,7 +583,7 @@ class ReadingServiceTest {
     }
 
     @Test
-    void 월간_랭킹_조회_시_가장_최근_스트릭_뱃지가_표시된다() {
+    void 월간_랭킹_조회_시_가장_높은_스트릭_뱃지가_표시된다() {
         // given
         monthlyReadingSnapshotRepository.deleteAllInBatch();
 
@@ -591,18 +591,18 @@ class ReadingServiceTest {
 
         monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
 
-        StreakBadge oldBadge = StreakBadge.builder()
-                .memberId(member1.getId())
-                .streakBadgeTier(StreakBadgeTier.SEVEN)
-                .build();
-        badgeRepository.save(oldBadge);
-        badgeRepository.flush();
-
-        StreakBadge recentBadge = StreakBadge.builder()
+        StreakBadge higherBadge = StreakBadge.builder()
                 .memberId(member1.getId())
                 .streakBadgeTier(StreakBadgeTier.FIFTEEN)
                 .build();
-        badgeRepository.save(recentBadge);
+        badgeRepository.save(higherBadge);
+        badgeRepository.flush();
+
+        StreakBadge recentLowerBadge = StreakBadge.builder()
+                .memberId(member1.getId())
+                .streakBadgeTier(StreakBadgeTier.SEVEN)
+                .build();
+        badgeRepository.save(recentLowerBadge);
 
         // when
         MonthlyReadingRankingResponse result = readingService.getMonthlyReadingRank(10);

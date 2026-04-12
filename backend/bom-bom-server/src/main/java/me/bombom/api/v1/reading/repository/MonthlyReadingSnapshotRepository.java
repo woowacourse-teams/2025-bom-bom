@@ -46,7 +46,8 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 			FROM badge sb
 			WHERE sb.member_id = mr.member_id
 				AND sb.badge_category = 'STREAK'
-			ORDER BY sb.created_at DESC
+			ORDER BY sb.streak_day_count DESC,
+			sb.created_at DESC
 			LIMIT 1
 		) sb_latest ON true
 		WHERE mr.rank_order IS NOT NULL
@@ -124,7 +125,8 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 			FROM badge sb
 			WHERE sb.member_id = mr.member_id
 				AND sb.badge_category = 'STREAK'
-			ORDER BY sb.created_at DESC
+			ORDER BY sb.streak_day_count DESC,
+			sb.created_at DESC
 			LIMIT 1
 		) sb_latest ON true
 		WHERE mr.member_id = :memberId

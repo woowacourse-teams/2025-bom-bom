@@ -65,7 +65,8 @@ public interface ContinueReadingSnapshotRepository extends JpaRepository<Continu
                 FROM badge sb
                 WHERE sb.member_id = rs.member_id
                     AND sb.badge_category = 'STREAK'
-                ORDER BY sb.created_at DESC
+                ORDER BY sb.streak_day_count DESC,
+                sb.created_at DESC
                 LIMIT 1
             ) sb_latest ON true
             ORDER BY rs.rank_order, m.nickname
@@ -108,7 +109,8 @@ public interface ContinueReadingSnapshotRepository extends JpaRepository<Continu
                 FROM badge sb
                 WHERE sb.member_id = rs.member_id
                     AND sb.badge_category = 'STREAK'
-                ORDER BY sb.created_at DESC
+                ORDER BY sb.streak_day_count DESC,
+                sb.created_at DESC
                 LIMIT 1
             ) sb_latest ON true
             WHERE rs.member_id = :memberId

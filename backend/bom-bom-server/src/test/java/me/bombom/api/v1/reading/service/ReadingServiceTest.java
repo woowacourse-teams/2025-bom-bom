@@ -13,6 +13,8 @@ import me.bombom.api.v1.badge.domain.Badge;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.badge.domain.ChallengeBadge;
 import me.bombom.api.v1.badge.domain.RankingBadge;
+import me.bombom.api.v1.badge.domain.StreakBadge;
+import me.bombom.api.v1.badge.domain.StreakBadgeTier;
 import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -487,10 +489,10 @@ class ReadingServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(result.data()).hasSize(2);
             softly.assertThat(result.data().get(0).badges()).isNotNull();
-            softly.assertThat(result.data().get(0).badges().ranking()).isNotNull();
-            softly.assertThat(result.data().get(0).badges().ranking().grade()).isEqualTo(BadgeGrade.GOLD);
-            softly.assertThat(result.data().get(0).badges().ranking().year()).isEqualTo(lastMonth.getYear());
-            softly.assertThat(result.data().get(0).badges().ranking().month()).isEqualTo(lastMonth.getMonthValue());
+            softly.assertThat(result.data().get(0).badges().monthlyRanking()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().monthlyRanking().grade()).isEqualTo(BadgeGrade.GOLD);
+            softly.assertThat(result.data().get(0).badges().monthlyRanking().year()).isEqualTo(lastMonth.getYear());
+            softly.assertThat(result.data().get(0).badges().monthlyRanking().month()).isEqualTo(lastMonth.getMonthValue());
             softly.assertThat(result.data().get(1).badges()).isNull();
         });
     }
@@ -573,10 +575,44 @@ class ReadingServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(result.data()).hasSize(1);
             softly.assertThat(result.data().get(0).badges()).isNotNull();
-            softly.assertThat(result.data().get(0).badges().ranking()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().monthlyRanking()).isNotNull();
             softly.assertThat(result.data().get(0).badges().challenge()).isNotNull();
-            softly.assertThat(result.data().get(0).badges().ranking().grade()).isEqualTo(BadgeGrade.GOLD);
+            softly.assertThat(result.data().get(0).badges().monthlyRanking().grade()).isEqualTo(BadgeGrade.GOLD);
             softly.assertThat(result.data().get(0).badges().challenge().grade()).isEqualTo(BadgeGrade.SILVER);
+        });
+    }
+
+    @Test
+    void 월간_랭킹_조회_시_가장_최근_스트릭_뱃지가_표시된다() {
+        // given
+        monthlyReadingSnapshotRepository.deleteAllInBatch();
+
+        Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
+
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
+
+        StreakBadge oldBadge = StreakBadge.builder()
+                .memberId(member1.getId())
+                .streakBadgeTier(StreakBadgeTier.SEVEN)
+                .build();
+        badgeRepository.save(oldBadge);
+        badgeRepository.flush();
+
+        StreakBadge recentBadge = StreakBadge.builder()
+                .memberId(member1.getId())
+                .streakBadgeTier(StreakBadgeTier.FIFTEEN)
+                .build();
+        badgeRepository.save(recentBadge);
+
+        // when
+        MonthlyReadingRankingResponse result = readingService.getMonthlyReadingRank(10);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.data()).hasSize(1);
+            softly.assertThat(result.data().get(0).badges()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().streak()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().streak().tier()).isEqualTo(StreakBadgeTier.FIFTEEN);
         });
     }
 
@@ -624,10 +660,10 @@ class ReadingServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(result.badges()).isNotNull();
-            softly.assertThat(result.badges().ranking()).isNotNull();
-            softly.assertThat(result.badges().ranking().grade()).isEqualTo(BadgeGrade.GOLD);
-            softly.assertThat(result.badges().ranking().year()).isEqualTo(lastMonth.getYear());
-            softly.assertThat(result.badges().ranking().month()).isEqualTo(lastMonth.getMonthValue());
+            softly.assertThat(result.badges().monthlyRanking()).isNotNull();
+            softly.assertThat(result.badges().monthlyRanking().grade()).isEqualTo(BadgeGrade.GOLD);
+            softly.assertThat(result.badges().monthlyRanking().year()).isEqualTo(lastMonth.getYear());
+            softly.assertThat(result.badges().monthlyRanking().month()).isEqualTo(lastMonth.getMonthValue());
         });
     }
 
@@ -709,9 +745,9 @@ class ReadingServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(result.badges()).isNotNull();
-            softly.assertThat(result.badges().ranking()).isNotNull();
+            softly.assertThat(result.badges().monthlyRanking()).isNotNull();
             softly.assertThat(result.badges().challenge()).isNotNull();
-            softly.assertThat(result.badges().ranking().grade()).isEqualTo(BadgeGrade.GOLD);
+            softly.assertThat(result.badges().monthlyRanking().grade()).isEqualTo(BadgeGrade.GOLD);
             softly.assertThat(result.badges().challenge().grade()).isEqualTo(BadgeGrade.SILVER);
         });
     }

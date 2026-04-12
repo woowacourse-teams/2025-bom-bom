@@ -21,13 +21,18 @@ public class StreakBadge extends Badge {
     @Column(name = "streak_badge_tier", length = 20)
     private StreakBadgeTier streakBadgeTier;
 
+    @Column(name = "streak_day_count")
+    private Integer streakDayCount;
+
     @Builder
     public StreakBadge(
             Long id,
             @NonNull Long memberId,
-            @NonNull StreakBadgeTier streakBadgeTier
+            @NonNull StreakBadgeTier streakBadgeTier,
+            Integer streakDayCount
     ) {
         super(id, memberId, BadgeCategory.STREAK);
         this.streakBadgeTier = streakBadgeTier;
+        this.streakDayCount = streakDayCount != null ? streakDayCount : streakBadgeTier.getDayCount();
     }
 }

@@ -44,7 +44,8 @@ public interface ContinueReadingSnapshotRepository extends JpaRepository<Continu
                 rb.period_month AS rankingBadgeMonth,
                 cb_latest.badge_grade AS challengeBadgeGrade,
                 cb_latest.challenge_name AS challengeBadgeName,
-                cb_latest.challenge_generation AS challengeBadgeGeneration
+                cb_latest.challenge_generation AS challengeBadgeGeneration,
+                sb_latest.streak_badge_tier AS streakBadgeTier
             FROM continue_reading_snapshot rs
             JOIN member m ON rs.member_id = m.id
             LEFT JOIN badge rb ON rb.member_id = rs.member_id
@@ -59,6 +60,14 @@ public interface ContinueReadingSnapshotRepository extends JpaRepository<Continu
                 ORDER BY cb.created_at DESC
                 LIMIT 1
             ) cb_latest ON true
+            LEFT JOIN LATERAL (
+                SELECT sb.*
+                FROM badge sb
+                WHERE sb.member_id = rs.member_id
+                    AND sb.badge_category = 'STREAK'
+                ORDER BY sb.created_at DESC
+                LIMIT 1
+            ) sb_latest ON true
             ORDER BY rs.rank_order, m.nickname
             LIMIT :limit
             """, nativeQuery = true)
@@ -78,7 +87,8 @@ public interface ContinueReadingSnapshotRepository extends JpaRepository<Continu
                 rb.period_month AS rankingBadgeMonth,
                 cb_latest.badge_grade AS challengeBadgeGrade,
                 cb_latest.challenge_name AS challengeBadgeName,
-                cb_latest.challenge_generation AS challengeBadgeGeneration
+                cb_latest.challenge_generation AS challengeBadgeGeneration,
+                sb_latest.streak_badge_tier AS streakBadgeTier
             FROM continue_reading_snapshot rs
             JOIN member m ON rs.member_id = m.id
             LEFT JOIN badge rb ON rb.member_id = rs.member_id
@@ -93,6 +103,14 @@ public interface ContinueReadingSnapshotRepository extends JpaRepository<Continu
                 ORDER BY cb.created_at DESC
                 LIMIT 1
             ) cb_latest ON true
+            LEFT JOIN LATERAL (
+                SELECT sb.*
+                FROM badge sb
+                WHERE sb.member_id = rs.member_id
+                    AND sb.badge_category = 'STREAK'
+                ORDER BY sb.created_at DESC
+                LIMIT 1
+            ) sb_latest ON true
             WHERE rs.member_id = :memberId
             """, nativeQuery = true)
     Optional<ContinueReadingRankFlat> findMemberContinueReadingRanking(

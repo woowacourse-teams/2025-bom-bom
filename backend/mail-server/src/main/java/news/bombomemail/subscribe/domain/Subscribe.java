@@ -33,6 +33,9 @@ public class Subscribe extends BaseEntity {
     private String unsubscribeUrl;
 
     public void updateUnsubscribeUrl(String unsubscribeUrl) {
+        if (unsubscribeUrl == null) {
+            return;
+        }
         this.unsubscribeUrl = unsubscribeUrl;
     }
 }

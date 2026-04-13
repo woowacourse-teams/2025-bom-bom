@@ -31,7 +31,7 @@ public final class UnsubscribeUrlExtractor {
     );
 
     public static String extract(String articleContents) {
-        if (StringUtils.hasText(articleContents)) {
+        if (!StringUtils.hasText(articleContents)) {
             return null;
         }
 

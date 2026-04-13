@@ -44,6 +44,9 @@ public final class UnsubscribeUrlExtractor {
         while (anchorMatcher.find()) {
             String href = anchorMatcher.group(1);
             String anchorBody = anchorMatcher.group(2);
+            if (href == null || anchorBody == null) {
+                continue;
+            }
             String text = INNER_TAG_PATTERN.matcher(anchorBody).replaceAll("").strip();
             if (UNSUBSCRIBE_TEXT_PATTERN.matcher(text).find()) {
                 return href;

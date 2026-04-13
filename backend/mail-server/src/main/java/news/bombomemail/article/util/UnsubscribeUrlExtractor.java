@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.util.StringUtils;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UnsubscribeUrlExtractor {
@@ -30,7 +31,7 @@ public final class UnsubscribeUrlExtractor {
     );
 
     public static String extract(String articleContents) {
-        if (articleContents == null) {
+        if (StringUtils.hasText(articleContents)) {
             return null;
         }
 
@@ -43,7 +44,7 @@ public final class UnsubscribeUrlExtractor {
         while (anchorMatcher.find()) {
             String href = anchorMatcher.group(1);
             String anchorBody = anchorMatcher.group(2);
-            String text = INNER_TAG_PATTERN.matcher(anchorBody).replaceAll("").trim();
+            String text = INNER_TAG_PATTERN.matcher(anchorBody).replaceAll("").strip();
             if (UNSUBSCRIBE_TEXT_PATTERN.matcher(text).find()) {
                 return href;
             }

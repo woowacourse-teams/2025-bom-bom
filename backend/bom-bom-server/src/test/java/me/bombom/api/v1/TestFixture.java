@@ -41,6 +41,7 @@ import me.bombom.api.v1.newsletter.domain.NewsletterGroupItem;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousPolicy;
 import me.bombom.api.v1.newsletter.domain.NewsletterPreviousStrategy;
 import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
+import me.bombom.api.v1.newsletter.domain.NewsletterSource;
 import me.bombom.api.v1.notice.domain.Notice;
 import me.bombom.api.v1.notice.domain.NoticeCategory;
 import me.bombom.api.v1.pet.domain.Pet;
@@ -143,6 +144,16 @@ public final class TestFixture {
     }
 
     public static Newsletter createNewsletter(String name, String email, Long categoryId, Long detailId) {
+        return createNewsletter(name, email, categoryId, detailId, NewsletterSource.EXTERNAL);
+    }
+
+    public static Newsletter createNewsletter(
+            String name,
+            String email,
+            Long categoryId,
+            Long detailId,
+            NewsletterSource source
+    ) {
         return Newsletter.builder()
                 .name(name)
                 .description("설명")
@@ -150,6 +161,7 @@ public final class TestFixture {
                 .email(email)
                 .categoryId(categoryId)
                 .detailId(detailId)
+                .source(source)
                 .build();
     }
 

@@ -27,7 +27,7 @@ import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -58,8 +58,8 @@ class MaeilMailSubscribeServiceTest {
     @Autowired
     private MaeilMailSubscriptionTrackRepository maeilMailSubscriptionTrackRepository;
 
-    @AfterEach
-    void tearDown() {
+    @BeforeEach
+    void setup() {
         maeilMailSubscriptionTrackRepository.deleteAllInBatch();
         maeilMailSubscriptionRepository.deleteAllInBatch();
         subscribeRepository.deleteAllInBatch();

@@ -41,6 +41,7 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
                         category.id,
                         category.name,
                         newsletter.status,
+                        newsletter.source,
                         isSubscribedCondition
                 ))
                 .from(newsletter)

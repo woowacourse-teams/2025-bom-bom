@@ -32,14 +32,14 @@ public class MaeilMailSubscription extends BaseEntity {
     @Column(nullable = false)
     private Long memberId;
 
-    @Convert(converter = IssueCycleConverter.class)
+    @Convert(converter = WeeklyIssueCountConverter.class)
     @Column(nullable = false, columnDefinition = "TINYINT")
-    private IssueCycle issueCycle;
+    private WeeklyIssueCount weeklyIssueCount;
 
     @Builder
-    public MaeilMailSubscription(Long subscribeId, Long memberId, IssueCycle issueCycle) {
+    public MaeilMailSubscription(Long subscribeId, Long memberId, WeeklyIssueCount weeklyIssueCount) {
         this.subscribeId = subscribeId;
         this.memberId = memberId;
-        this.issueCycle = issueCycle;
+        this.weeklyIssueCount = weeklyIssueCount;
     }
 }

@@ -1,4 +1,4 @@
-package me.bombom.api.v1.nativenewsletter.domain;
+package me.bombom.api.v1.nativenewsletter.maeilmail.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -20,7 +20,7 @@ import me.bombom.api.v1.common.BaseEntity;
 @Table(uniqueConstraints = {
         @UniqueConstraint(name = "uk_native_newsletter_subscription_subscribe_id", columnNames = {"subscribe_id"})
 })
-public class NativeNewsletterSubscription extends BaseEntity {
+public class MaeilMailSubscription extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +37,7 @@ public class NativeNewsletterSubscription extends BaseEntity {
     private IssueCycle issueCycle;
 
     @Builder
-    public NativeNewsletterSubscription(Long subscribeId, Long memberId, IssueCycle issueCycle) {
+    public MaeilMailSubscription(Long subscribeId, Long memberId, IssueCycle issueCycle) {
         this.subscribeId = subscribeId;
         this.memberId = memberId;
         this.issueCycle = issueCycle;

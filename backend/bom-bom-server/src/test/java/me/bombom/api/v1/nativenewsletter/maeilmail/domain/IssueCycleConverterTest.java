@@ -1,4 +1,4 @@
-package me.bombom.api.v1.nativenewsletter.domain;
+package me.bombom.api.v1.nativenewsletter.maeilmail.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

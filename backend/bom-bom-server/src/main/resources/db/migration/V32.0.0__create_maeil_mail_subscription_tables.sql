@@ -14,5 +14,6 @@ CREATE TABLE maeil_mail_subscription_track
     id                         BIGINT     NOT NULL AUTO_INCREMENT PRIMARY KEY,
     maeil_mail_subscription_id BIGINT     NOT NULL,
     field                      VARCHAR(3) NOT NULL,
-    curriculum_index           INT        NOT NULL DEFAULT 0
+    curriculum_index           INT        NOT NULL DEFAULT 0,
+    CONSTRAINT uk_maeil_mail_subscription_track_subscription_id_field UNIQUE (maeil_mail_subscription_id, field)
 );

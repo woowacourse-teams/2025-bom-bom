@@ -1,4 +1,4 @@
-package me.bombom.api.v1.maeilmail.domain;
+package me.bombom.api.v1.nativenewsletter.domain;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;

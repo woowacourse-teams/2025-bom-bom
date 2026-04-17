@@ -83,7 +83,7 @@ public class Newsletter extends BaseEntity {
         this.source = source != null ? source : NewsletterSource.EXTERNAL;
     }
 
-    public boolean isNative() {
-        return source == NewsletterSource.NATIVE;
+    public boolean isMaeilMail() {
+        return source == NewsletterSource.MAEIL_MAIL;
     }
 }

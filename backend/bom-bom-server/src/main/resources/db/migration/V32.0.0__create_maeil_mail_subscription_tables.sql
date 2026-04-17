@@ -6,7 +6,7 @@ CREATE TABLE maeil_mail_subscription
     weekly_issue_count TINYINT NOT NULL,
     created_at  DATETIME(6),
     updated_at  DATETIME(6),
-    CONSTRAINT uk_native_newsletter_subscription_subscribe_id UNIQUE (subscribe_id)
+    CONSTRAINT uk_maeil_mail_subscription_subscribe_id UNIQUE (subscribe_id)
 );
 
 CREATE TABLE maeil_mail_subscription_track

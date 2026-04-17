@@ -18,7 +18,7 @@ import me.bombom.api.v1.common.BaseEntity;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(uniqueConstraints = {
-        @UniqueConstraint(name = "uk_native_newsletter_subscription_subscribe_id", columnNames = {"subscribe_id"})
+        @UniqueConstraint(name = "uk_maeil_mail_subscription_subscribe_id", columnNames = {"subscribe_id"})
 })
 public class MaeilMailSubscription extends BaseEntity {
 

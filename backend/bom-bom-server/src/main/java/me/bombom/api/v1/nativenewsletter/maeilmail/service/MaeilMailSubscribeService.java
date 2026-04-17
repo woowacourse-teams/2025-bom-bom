@@ -30,7 +30,7 @@ public class MaeilMailSubscribeService {
 
     @Transactional
     public void subscribe(Long memberId, MaeilMailSubscribeRequest request) {
-        Newsletter newsletter = getNativeNewsletter(request.newsletterId());
+        Newsletter newsletter = getMaeilMailNewsletter(request.newsletterId());
         validateNotSubscribed(memberId, request.newsletterId());
         validateTracks(request);
 
@@ -50,16 +50,16 @@ public class MaeilMailSubscribeService {
         maeilMailSubscriptionTrackRepository.saveAll(buildSubscriptionTracks(subscription.getId(), request.tracks()));
     }
 
-    private Newsletter getNativeNewsletter(Long newsletterId) {
+    private Newsletter getMaeilMailNewsletter(Long newsletterId) {
         Newsletter newsletter = newsletterRepository.findById(newsletterId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletter")
                         .addContext("newsletterId", newsletterId));
 
-        if (!newsletter.isNative()) {
+        if (!newsletter.isMaeilMail()) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
                     .addContext(ErrorContextKeys.NEWSLETTER_ID, newsletterId)
-                    .addContext(ErrorContextKeys.DETAIL, "봄봄 자체 뉴스레터만 해당 API를 통해 구독할 수 있습니다.");
+                    .addContext(ErrorContextKeys.DETAIL, "매일메일 뉴스레터만 해당 API를 통해 구독할 수 있습니다.");
         }
 
         return newsletter;

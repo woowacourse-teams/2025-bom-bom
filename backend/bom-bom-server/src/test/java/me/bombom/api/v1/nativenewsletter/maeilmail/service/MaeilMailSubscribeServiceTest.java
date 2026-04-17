@@ -72,7 +72,7 @@ class MaeilMailSubscribeServiceTest {
     @Test
     void 매일메일_구독에_성공한다() {
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
-        Newsletter newsletter = newsletterRepository.save(createNativeNewsletter());
+        Newsletter newsletter = newsletterRepository.save(createMaeilMailNewsletter());
 
         MaeilMailSubscribeRequest request = new MaeilMailSubscribeRequest(
                 newsletter.getId(),
@@ -132,7 +132,7 @@ class MaeilMailSubscribeServiceTest {
     @Test
     void 이미_구독중이면_예외가_발생한다() {
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
-        Newsletter newsletter = newsletterRepository.save(createNativeNewsletter());
+        Newsletter newsletter = newsletterRepository.save(createMaeilMailNewsletter());
         subscribeRepository.save(Subscribe.builder()
                 .memberId(member.getId())
                 .newsletterId(newsletter.getId())
@@ -157,7 +157,7 @@ class MaeilMailSubscribeServiceTest {
     @Test
     void 중복된_트랙이_들어오면_예외가_발생한다() {
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
-        Newsletter newsletter = newsletterRepository.save(createNativeNewsletter());
+        Newsletter newsletter = newsletterRepository.save(createMaeilMailNewsletter());
 
         MaeilMailSubscribeRequest request = new MaeilMailSubscribeRequest(
                 newsletter.getId(),
@@ -176,7 +176,7 @@ class MaeilMailSubscribeServiceTest {
         });
     }
 
-    private Newsletter createNativeNewsletter() {
+    private Newsletter createMaeilMailNewsletter() {
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
 
@@ -185,7 +185,7 @@ class MaeilMailSubscribeServiceTest {
                 "maeil@bombom.news",
                 category.getId(),
                 detail.getId(),
-                NewsletterSource.NATIVE
+                NewsletterSource.MAEIL_MAIL
         );
     }
 

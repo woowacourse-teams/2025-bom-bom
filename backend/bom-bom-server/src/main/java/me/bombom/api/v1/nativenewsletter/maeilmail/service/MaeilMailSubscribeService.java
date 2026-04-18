@@ -8,6 +8,7 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSubscription;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSubscriptionTrack;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailTrack;
+import me.bombom.api.v1.nativenewsletter.maeilmail.domain.WeeklyIssueCount;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscribeRequest;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSubscriptionRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSubscriptionTrackRepository;
@@ -43,7 +44,7 @@ public class MaeilMailSubscribeService {
                 MaeilMailSubscription.builder()
                         .subscribeId(subscribe.getId())
                         .memberId(memberId)
-                        .weeklyIssueCount(request.weeklyIssueCount())
+                        .weeklyIssueCount(WeeklyIssueCount.from(request.weeklyIssueCount()))
                         .build()
         );
 

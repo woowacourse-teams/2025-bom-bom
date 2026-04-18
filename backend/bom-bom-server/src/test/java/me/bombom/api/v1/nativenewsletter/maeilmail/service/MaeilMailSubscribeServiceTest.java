@@ -77,7 +77,7 @@ class MaeilMailSubscribeServiceTest {
         MaeilMailSubscribeRequest request = new MaeilMailSubscribeRequest(
                 newsletter.getId(),
                 List.of(MaeilMailTrack.BE, MaeilMailTrack.FE),
-                WeeklyIssueCount.FIVE
+                WeeklyIssueCount.FIVE.getValue()
         );
 
         maeilMailSubscribeService.subscribe(member.getId(), request);
@@ -116,7 +116,7 @@ class MaeilMailSubscribeServiceTest {
         MaeilMailSubscribeRequest request = new MaeilMailSubscribeRequest(
                 newsletter.getId(),
                 List.of(MaeilMailTrack.BE),
-                WeeklyIssueCount.ONE
+                WeeklyIssueCount.ONE.getValue()
         );
 
         assertThatThrownBy(() -> maeilMailSubscribeService.subscribe(member.getId(), request))
@@ -141,7 +141,7 @@ class MaeilMailSubscribeServiceTest {
         MaeilMailSubscribeRequest request = new MaeilMailSubscribeRequest(
                 newsletter.getId(),
                 List.of(MaeilMailTrack.BE),
-                WeeklyIssueCount.ONE
+                WeeklyIssueCount.ONE.getValue()
         );
 
         assertThatThrownBy(() -> maeilMailSubscribeService.subscribe(member.getId(), request))
@@ -162,7 +162,7 @@ class MaeilMailSubscribeServiceTest {
         MaeilMailSubscribeRequest request = new MaeilMailSubscribeRequest(
                 newsletter.getId(),
                 List.of(MaeilMailTrack.BE, MaeilMailTrack.BE),
-                WeeklyIssueCount.FIVE
+                WeeklyIssueCount.FIVE.getValue()
         );
 
         assertThatThrownBy(() -> maeilMailSubscribeService.subscribe(member.getId(), request))
@@ -173,6 +173,27 @@ class MaeilMailSubscribeServiceTest {
             softly.assertThat(subscribeRepository.findAll()).isEmpty();
             softly.assertThat(maeilMailSubscriptionRepository.findAll()).isEmpty();
             softly.assertThat(maeilMailSubscriptionTrackRepository.findAll()).isEmpty();
+        });
+    }
+
+    @Test
+    void 유효하지_않은_주간_발행_횟수가_들어오면_예외가_발생한다() {
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+        Newsletter newsletter = newsletterRepository.save(createMaeilMailNewsletter());
+
+        MaeilMailSubscribeRequest request = new MaeilMailSubscribeRequest(
+                newsletter.getId(),
+                List.of(MaeilMailTrack.BE),
+                0
+        );
+
+        assertThatThrownBy(() -> maeilMailSubscribeService.subscribe(member.getId(), request))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_INPUT_VALUE);
+
+        assertSoftly(softly -> {
+            softly.assertThat(subscribeRepository.findAll()).isEmpty();
+            softly.assertThat(maeilMailSubscriptionRepository.findAll()).isEmpty();
         });
     }
 

@@ -19,8 +19,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(uniqueConstraints = {
         @UniqueConstraint(
-                name = "uk_maeil_mail_subscription_track_subscription_id_field",
-                columnNames = {"maeil_mail_subscription_id", "field"}
+                name = "uk_maeil_mail_subscription_track_subscribe_id_field",
+                columnNames = {"subscribe_id", "field"}
         )
 })
 public class MaeilMailSubscriptionTrack {
@@ -30,7 +30,10 @@ public class MaeilMailSubscriptionTrack {
     private Long id;
 
     @Column(nullable = false)
-    private Long maeilMailSubscriptionId;
+    private Long subscribeId;
+
+    @Column(nullable = false)
+    private Long memberId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 3)
@@ -40,8 +43,9 @@ public class MaeilMailSubscriptionTrack {
     private int curriculumIndex = 0;
 
     @Builder
-    public MaeilMailSubscriptionTrack(Long maeilMailSubscriptionId, MaeilMailTrack field) {
-        this.maeilMailSubscriptionId = maeilMailSubscriptionId;
+    public MaeilMailSubscriptionTrack(Long subscribeId, Long memberId, MaeilMailTrack field) {
+        this.subscribeId = subscribeId;
+        this.memberId = memberId;
         this.field = field;
         this.curriculumIndex = 0;
     }

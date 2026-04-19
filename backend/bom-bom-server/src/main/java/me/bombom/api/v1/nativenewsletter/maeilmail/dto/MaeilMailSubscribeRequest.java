@@ -11,9 +11,6 @@ public record MaeilMailSubscribeRequest(
         Long newsletterId,
 
         @NotEmpty
-        List<MaeilMailTrack> tracks,
-
-        @NotNull
-        Integer weeklyIssueCount
+        List<MaeilMailTrack> tracks
 ) {
 }

@@ -5,12 +5,9 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
-import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSubscription;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSubscriptionTrack;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailTrack;
-import me.bombom.api.v1.nativenewsletter.maeilmail.domain.WeeklyIssueCount;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscribeRequest;
-import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSubscriptionRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSubscriptionTrackRepository;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
@@ -26,7 +23,6 @@ public class MaeilMailSubscribeService {
 
     private final SubscribeRepository subscribeRepository;
     private final NewsletterRepository newsletterRepository;
-    private final MaeilMailSubscriptionRepository maeilMailSubscriptionRepository;
     private final MaeilMailSubscriptionTrackRepository maeilMailSubscriptionTrackRepository;
 
     @Transactional
@@ -40,15 +36,7 @@ public class MaeilMailSubscribeService {
                 .newsletterId(newsletter.getId())
                 .build());
 
-        MaeilMailSubscription subscription = maeilMailSubscriptionRepository.save(
-                MaeilMailSubscription.builder()
-                        .subscribeId(subscribe.getId())
-                        .memberId(memberId)
-                        .weeklyIssueCount(WeeklyIssueCount.from(request.weeklyIssueCount()))
-                        .build()
-        );
-
-        maeilMailSubscriptionTrackRepository.saveAll(buildSubscriptionTracks(subscription.getId(), request.tracks()));
+        maeilMailSubscriptionTrackRepository.saveAll(buildSubscriptionTracks(subscribe.getId(), memberId, request.tracks()));
     }
 
     private Newsletter getMaeilMailNewsletter(Long newsletterId) {
@@ -88,12 +76,14 @@ public class MaeilMailSubscribeService {
     }
 
     private List<MaeilMailSubscriptionTrack> buildSubscriptionTracks(
-            Long maeilMailSubscriptionId,
+            Long subscribeId,
+            Long memberId,
             List<MaeilMailTrack> tracks
     ) {
         return tracks.stream()
                 .map(track -> MaeilMailSubscriptionTrack.builder()
-                        .maeilMailSubscriptionId(maeilMailSubscriptionId)
+                        .subscribeId(subscribeId)
+                        .memberId(memberId)
                         .field(track)
                         .build())
                 .toList();

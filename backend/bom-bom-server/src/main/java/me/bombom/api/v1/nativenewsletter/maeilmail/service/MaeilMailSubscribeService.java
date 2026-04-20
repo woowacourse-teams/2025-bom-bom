@@ -10,6 +10,7 @@ import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailTrack;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscribeRequest;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSubscriptionTrackRepository;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
+import me.bombom.api.v1.newsletter.domain.NewsletterSource;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
@@ -27,8 +28,8 @@ public class MaeilMailSubscribeService {
 
     @Transactional
     public void subscribe(Long memberId, MaeilMailSubscribeRequest request) {
-        Newsletter newsletter = getMaeilMailNewsletter(request.newsletterId());
-        validateNotSubscribed(memberId, request.newsletterId());
+        Newsletter newsletter = getMaeilMailNewsletter();
+        validateNotSubscribed(memberId, newsletter.getId());
         validateTracks(request);
 
         Subscribe subscribe = subscribeRepository.save(Subscribe.builder()
@@ -39,19 +40,11 @@ public class MaeilMailSubscribeService {
         maeilMailSubscriptionTrackRepository.saveAll(buildSubscriptionTracks(subscribe.getId(), memberId, request.tracks()));
     }
 
-    private Newsletter getMaeilMailNewsletter(Long newsletterId) {
-        Newsletter newsletter = newsletterRepository.findById(newsletterId)
+    private Newsletter getMaeilMailNewsletter() {
+        return newsletterRepository.findBySource(NewsletterSource.MAEIL_MAIL)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletter")
-                        .addContext("newsletterId", newsletterId));
-
-        if (!newsletter.isMaeilMail()) {
-            throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
-                    .addContext(ErrorContextKeys.NEWSLETTER_ID, newsletterId)
-                    .addContext(ErrorContextKeys.DETAIL, "매일메일 뉴스레터만 해당 API를 통해 구독할 수 있습니다.");
-        }
-
-        return newsletter;
+                        .addContext(ErrorContextKeys.DETAIL, "매일메일 뉴스레터가 존재하지 않습니다."));
     }
 
     private void validateNotSubscribed(Long memberId, Long newsletterId) {

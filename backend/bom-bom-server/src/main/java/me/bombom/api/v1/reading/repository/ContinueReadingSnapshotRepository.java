@@ -45,7 +45,7 @@ public interface ContinueReadingSnapshotRepository extends JpaRepository<Continu
                 cb_latest.badge_grade AS challengeBadgeGrade,
                 cb_latest.challenge_name AS challengeBadgeName,
                 cb_latest.challenge_generation AS challengeBadgeGeneration,
-                sb_latest.streak_badge_tier AS streakBadgeTier
+                sb_latest.streak_day_count AS streakDayCount
             FROM continue_reading_snapshot rs
             JOIN member m ON rs.member_id = m.id
             LEFT JOIN badge rb ON rb.member_id = rs.member_id
@@ -89,7 +89,7 @@ public interface ContinueReadingSnapshotRepository extends JpaRepository<Continu
                 cb_latest.badge_grade AS challengeBadgeGrade,
                 cb_latest.challenge_name AS challengeBadgeName,
                 cb_latest.challenge_generation AS challengeBadgeGeneration,
-                sb_latest.streak_badge_tier AS streakBadgeTier
+                sb_latest.streak_day_count AS streakDayCount
             FROM continue_reading_snapshot rs
             JOIN member m ON rs.member_id = m.id
             LEFT JOIN badge rb ON rb.member_id = rs.member_id

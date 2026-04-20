@@ -66,7 +66,6 @@ public class BadgeService {
                 .ifPresent(tier -> {
                     StreakBadge badge = StreakBadge.builder()
                             .memberId(memberId)
-                            .streakBadgeTier(tier)
                             .streakDayCount(tier.getDayCount())
                             .build();
                     badgeRepository.save(badge);

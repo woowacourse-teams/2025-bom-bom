@@ -11,7 +11,7 @@ public record ContinueReadingRankFlat(
         String challengeBadgeGrade,
         String challengeBadgeName,
         Integer challengeBadgeGeneration,
-        String streakBadgeTier
+        Integer streakDayCount
 ) {
 
     public boolean hasRankingBadge() {
@@ -23,6 +23,6 @@ public record ContinueReadingRankFlat(
     }
 
     public boolean hasStreakBadge() {
-        return streakBadgeTier != null;
+        return streakDayCount != null;
     }
 }

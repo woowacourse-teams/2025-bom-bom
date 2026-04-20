@@ -13,16 +13,18 @@ public record StreakBadgeResponse(
 
     public static StreakBadgeResponse from(MonthlyReadingRankFlat flat) {
         if (flat.hasStreakBadge()) {
-            StreakBadgeTier tier = StreakBadgeTier.valueOf(flat.streakBadgeTier());
-            return new StreakBadgeResponse(tier);
+            return StreakBadgeTier.from(flat.streakDayCount())
+                    .map(StreakBadgeResponse::new)
+                    .orElse(null);
         }
         return null;
     }
 
     public static StreakBadgeResponse from(ContinueReadingRankFlat flat) {
         if (flat.hasStreakBadge()) {
-            StreakBadgeTier tier = StreakBadgeTier.valueOf(flat.streakBadgeTier());
-            return new StreakBadgeResponse(tier);
+            return StreakBadgeTier.from(flat.streakDayCount())
+                    .map(StreakBadgeResponse::new)
+                    .orElse(null);
         }
         return null;
     }

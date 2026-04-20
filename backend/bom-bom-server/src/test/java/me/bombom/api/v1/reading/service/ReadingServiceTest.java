@@ -593,14 +593,14 @@ class ReadingServiceTest {
 
         StreakBadge higherBadge = StreakBadge.builder()
                 .memberId(member1.getId())
-                .streakBadgeTier(StreakBadgeTier.FIFTEEN)
+                .streakDayCount(StreakBadgeTier.FIFTEEN.getDayCount())
                 .build();
         badgeRepository.save(higherBadge);
         badgeRepository.flush();
 
         StreakBadge recentLowerBadge = StreakBadge.builder()
                 .memberId(member1.getId())
-                .streakBadgeTier(StreakBadgeTier.SEVEN)
+                .streakDayCount(StreakBadgeTier.SEVEN.getDayCount())
                 .build();
         badgeRepository.save(recentLowerBadge);
 

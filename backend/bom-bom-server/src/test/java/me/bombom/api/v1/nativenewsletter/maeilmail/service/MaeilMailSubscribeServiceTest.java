@@ -13,6 +13,7 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSubscriptionTrack;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailTrack;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscribeRequest;
+import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscriptionResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSubscriptionTrackRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
@@ -60,6 +61,39 @@ class MaeilMailSubscribeServiceTest {
         newsletterDetailRepository.deleteAllInBatch();
         categoryRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+    }
+
+    @Test
+    void 매일메일_구독_중이면_구독_정보를_반환한다() {
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+        Newsletter newsletter = newsletterRepository.save(createMaeilMailNewsletter());
+
+        maeilMailSubscribeService.subscribe(member.getId(), new MaeilMailSubscribeRequest(
+                newsletter.getId(),
+                List.of(MaeilMailTrack.BE, MaeilMailTrack.FE)
+        ));
+
+        MaeilMailSubscriptionResponse response = maeilMailSubscribeService.getSubscription(member.getId());
+
+        assertSoftly(softly -> {
+            softly.assertThat(response.subscribed()).isTrue();
+            softly.assertThat(response.tracks()).containsExactlyInAnyOrder(
+                    MaeilMailTrack.BE,
+                    MaeilMailTrack.FE
+            );
+        });
+    }
+
+    @Test
+    void 매일메일_미구독이면_미구독_상태를_반환한다() {
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+
+        MaeilMailSubscriptionResponse response = maeilMailSubscribeService.getSubscription(member.getId());
+
+        assertSoftly(softly -> {
+            softly.assertThat(response.subscribed()).isFalse();
+            softly.assertThat(response.tracks()).isEmpty();
+        });
     }
 
     @Test

@@ -141,24 +141,32 @@ class ReadingServiceTest {
     @Test
     void 오늘_도착한_아티클을_최초로_읽을_때_연속_읽기_횟수가_증가한다() {
         int initialContinueCount = continueReading.getDayCount();
+        int initialMaxContinueCount = continueReading.getMaxDayCount();
 
         readingService.updateReadingCount(member.getId(), true);
 
         ContinueReadingRealtime updatedContinueReadingRealtime = continueReadingRepository.findByMemberId(member.getId()).get();
 
-        assertThat(updatedContinueReadingRealtime.getDayCount()).isEqualTo(initialContinueCount + 1);
+        assertSoftly(softly -> {
+            softly.assertThat(updatedContinueReadingRealtime.getDayCount()).isEqualTo(initialContinueCount + 1);
+            softly.assertThat(updatedContinueReadingRealtime.getMaxDayCount()).isEqualTo(initialMaxContinueCount + 1);
+        });
     }
 
     @Test
     void 이미_연속_읽기_횟수가_증가하면_그날은_더이상_증가하지_않는다() {
         int initialContinueCount = continueReading.getDayCount();
+        int initialMaxContinueCount = continueReading.getMaxDayCount();
 
         readingService.updateReadingCount(member.getId(), true);
         readingService.updateReadingCount(member.getId(), true);
 
         ContinueReadingRealtime updatedContinueReadingRealtime = continueReadingRepository.findByMemberId(member.getId()).get();
 
-        assertThat(updatedContinueReadingRealtime.getDayCount()).isEqualTo(initialContinueCount + 1);
+        assertSoftly(softly -> {
+            softly.assertThat(updatedContinueReadingRealtime.getDayCount()).isEqualTo(initialContinueCount + 1);
+            softly.assertThat(updatedContinueReadingRealtime.getMaxDayCount()).isEqualTo(initialMaxContinueCount + 1);
+        });
     }
 
     @Test
@@ -314,6 +322,21 @@ class ReadingServiceTest {
             softly.assertThat(result.dayCount()).isEqualTo(0);
             softly.assertThat(result.rank()).isEqualTo(2L);
             softly.assertThat(result.nickname()).isEqualTo(member.getNickname());
+        });
+    }
+
+    @Test
+    void 연속_읽기_초기화_후에도_최대_스트릭_일수는_유지된다() {
+        ContinueReadingRealtime cr = continueReadingRepository.findByMemberId(member.getId()).get();
+        int initialMaxDayCount = cr.getMaxDayCount();
+
+        readingService.resetContinueReadingCount();
+
+        ContinueReadingRealtime updatedContinueReadingRealtime = continueReadingRepository.findByMemberId(member.getId()).get();
+
+        assertSoftly(softly -> {
+            softly.assertThat(updatedContinueReadingRealtime.getDayCount()).isZero();
+            softly.assertThat(updatedContinueReadingRealtime.getMaxDayCount()).isEqualTo(initialMaxDayCount);
         });
     }
 

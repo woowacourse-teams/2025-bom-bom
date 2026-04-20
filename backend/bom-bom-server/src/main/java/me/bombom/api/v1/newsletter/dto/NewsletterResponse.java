@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 import jakarta.validation.constraints.NotNull;
 import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
+import me.bombom.api.v1.newsletter.domain.NewsletterSource;
 
 public record NewsletterResponse(
 
@@ -30,6 +31,9 @@ public record NewsletterResponse(
 
         @NotNull
         NewsletterPublicationStatus status,
+
+        @NotNull
+        NewsletterSource source,
 
         @Schema(requiredMode = RequiredMode.REQUIRED)
         boolean isSubscribed

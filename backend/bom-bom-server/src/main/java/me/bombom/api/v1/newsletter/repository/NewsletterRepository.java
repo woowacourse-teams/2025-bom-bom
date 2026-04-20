@@ -16,6 +16,7 @@ public interface NewsletterRepository extends JpaRepository<Newsletter, Long>, C
             n.imageUrl,
             c.name,
             n.status,
+            n.source,
             d.mainPageUrl,
             d.subscribeUrl,
             d.issueCycle,

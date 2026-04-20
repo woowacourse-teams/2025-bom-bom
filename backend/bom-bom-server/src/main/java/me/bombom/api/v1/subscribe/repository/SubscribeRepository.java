@@ -29,6 +29,8 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
     """)
     List<SubscribedNewsletterResponse> findSubscribedByMemberId(@Param("memberId") Long memberId);
 
+    boolean existsByMemberIdAndNewsletterId(Long memberId, Long newsletterId);
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Subscribe sb WHERE sb.memberId = :memberId")
     void deleteAllByMemberId(Long memberId);

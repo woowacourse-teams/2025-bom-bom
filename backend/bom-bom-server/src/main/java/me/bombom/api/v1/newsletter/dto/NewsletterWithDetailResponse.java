@@ -5,6 +5,7 @@ import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
+import me.bombom.api.v1.newsletter.domain.NewsletterSource;
 
 public record NewsletterWithDetailResponse(
 
@@ -22,6 +23,9 @@ public record NewsletterWithDetailResponse(
 
         @NotNull
         NewsletterPublicationStatus status,
+
+        @NotNull
+        NewsletterSource source,
 
         @NotNull
         String mainPageUrl,
@@ -51,6 +55,7 @@ public record NewsletterWithDetailResponse(
                 newsletter.getImageUrl(),
                 category.getName(),
                 newsletter.getStatus(),
+                newsletter.getSource(),
                 newsletterDetail.getMainPageUrl(),
                 newsletterDetail.getSubscribeUrl(),
                 newsletterDetail.getIssueCycle(),

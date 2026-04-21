@@ -502,7 +502,8 @@ class BadgeServiceTest {
         assertThat(badges).hasSize(1);
         assertThat(badges.get(0)).isInstanceOf(StreakBadge.class);
         StreakBadge streakBadge = (StreakBadge) badges.get(0);
-        assertThat(streakBadge.getStreakBadgeTier()).isEqualTo(StreakBadgeTier.SEVEN);
+        assertThat(streakBadge.getTier()).isEqualTo(StreakBadgeTier.SEVEN);
+        assertThat(streakBadge.getStreakDayCount()).isEqualTo(7);
     }
 
     @Test
@@ -530,6 +531,7 @@ class BadgeServiceTest {
         assertThat(badges).hasSize(1);
         assertThat(badges.get(0)).isInstanceOf(StreakBadge.class);
         StreakBadge streakBadge = (StreakBadge) badges.get(0);
-        assertThat(streakBadge.getStreakBadgeTier()).isEqualTo(StreakBadgeTier.FIVE_HUNDRED);
+        assertThat(streakBadge.getTier()).isEqualTo(StreakBadgeTier.FIVE_HUNDRED);
+        assertThat(streakBadge.getStreakDayCount()).isEqualTo(500);
     }
 }

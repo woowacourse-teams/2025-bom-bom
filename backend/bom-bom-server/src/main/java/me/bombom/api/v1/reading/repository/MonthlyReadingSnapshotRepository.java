@@ -25,7 +25,8 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 			rb.period_month AS rankingBadgeMonth,
 			cb_latest.badge_grade AS challengeBadgeGrade,
 			cb_latest.challenge_name AS challengeBadgeName,
-			cb_latest.challenge_generation AS challengeBadgeGeneration
+			cb_latest.challenge_generation AS challengeBadgeGeneration,
+			sb_latest.streak_day_count AS streakDayCount
 		FROM monthly_reading_snapshot mr
 		JOIN member m ON mr.member_id = m.id
 		LEFT JOIN badge rb ON rb.member_id = mr.member_id
@@ -40,6 +41,15 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 			ORDER BY cb.created_at DESC
 			LIMIT 1
 		) cb_latest ON true
+		LEFT JOIN LATERAL (
+			SELECT sb.*
+			FROM badge sb
+			WHERE sb.member_id = mr.member_id
+				AND sb.badge_category = 'STREAK'
+			ORDER BY sb.streak_day_count DESC,
+			sb.created_at DESC
+			LIMIT 1
+		) sb_latest ON true
 		WHERE mr.rank_order IS NOT NULL
 		ORDER BY mr.rank_order, m.nickname
 		LIMIT :limit
@@ -94,7 +104,8 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 			rb.period_month AS rankingBadgeMonth,
 			cb_latest.badge_grade AS challengeBadgeGrade,
 			cb_latest.challenge_name AS challengeBadgeName,
-			cb_latest.challenge_generation AS challengeBadgeGeneration
+			cb_latest.challenge_generation AS challengeBadgeGeneration,
+			sb_latest.streak_day_count AS streakDayCount
 		FROM monthly_reading_snapshot mr
 		JOIN member m ON mr.member_id = m.id
 		LEFT JOIN badge rb ON rb.member_id = mr.member_id
@@ -109,6 +120,15 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 			ORDER BY cb.created_at DESC
 			LIMIT 1
 		) cb_latest ON true
+		LEFT JOIN LATERAL (
+			SELECT sb.*
+			FROM badge sb
+			WHERE sb.member_id = mr.member_id
+				AND sb.badge_category = 'STREAK'
+			ORDER BY sb.streak_day_count DESC,
+			sb.created_at DESC
+			LIMIT 1
+		) sb_latest ON true
 		WHERE mr.member_id = :memberId
 			AND mr.rank_order IS NOT NULL
 	""", nativeQuery = true)

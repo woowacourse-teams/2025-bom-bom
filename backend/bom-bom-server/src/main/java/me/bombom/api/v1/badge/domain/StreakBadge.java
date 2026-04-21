@@ -7,6 +7,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import me.bombom.api.v1.common.exception.CServerErrorException;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 
 @Entity
 @Getter
@@ -29,6 +31,7 @@ public class StreakBadge extends Badge {
 
     public StreakBadgeTier getTier() {
         return StreakBadgeTier.from(streakDayCount)
-                .orElseThrow(() -> new IllegalStateException("유효하지 않은 스트릭 뱃지 일수입니다. streakDayCount=" + streakDayCount));
+                .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
+                        .addContext("streakDayCount", streakDayCount));
     }
 }

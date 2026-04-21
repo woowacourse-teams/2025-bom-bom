@@ -28,11 +28,7 @@ public class MaeilMailSubscribeService {
 
     public MaeilMailSubscriptionResponse getSubscription(Long memberId) {
         List<MaeilMailSubscriptionTrack> tracks = maeilMailSubscriptionTrackRepository.findByMemberId(memberId);
-        if (tracks.isEmpty()) {
-            return MaeilMailSubscriptionResponse.notSubscribed();
-        }
-
-        return MaeilMailSubscriptionResponse.subscribed(tracks);
+        return MaeilMailSubscriptionResponse.from(tracks);
     }
 
     @Transactional

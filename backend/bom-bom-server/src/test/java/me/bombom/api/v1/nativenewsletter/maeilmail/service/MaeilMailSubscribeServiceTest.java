@@ -75,25 +75,16 @@ class MaeilMailSubscribeServiceTest {
 
         MaeilMailSubscriptionResponse response = maeilMailSubscribeService.getSubscription(member.getId());
 
-        assertSoftly(softly -> {
-            softly.assertThat(response.subscribed()).isTrue();
-            softly.assertThat(response.tracks()).containsExactlyInAnyOrder(
-                    MaeilMailTrack.BE,
-                    MaeilMailTrack.FE
-            );
-        });
+        assertThat(response.tracks()).containsExactlyInAnyOrder(MaeilMailTrack.BE, MaeilMailTrack.FE);
     }
 
     @Test
-    void 매일메일_미구독이면_미구독_상태를_반환한다() {
+    void 매일메일_미구독이면_빈_트랙_목록을_반환한다() {
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
 
         MaeilMailSubscriptionResponse response = maeilMailSubscribeService.getSubscription(member.getId());
 
-        assertSoftly(softly -> {
-            softly.assertThat(response.subscribed()).isFalse();
-            softly.assertThat(response.tracks()).isEmpty();
-        });
+        assertThat(response.tracks()).isEmpty();
     }
 
     @Test

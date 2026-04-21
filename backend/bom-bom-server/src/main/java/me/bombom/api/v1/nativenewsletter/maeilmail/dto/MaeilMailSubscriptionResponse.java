@@ -12,8 +12,9 @@ public record MaeilMailSubscriptionResponse(
 ) {
 
     public static MaeilMailSubscriptionResponse from(List<MaeilMailSubscriptionTrack> tracks) {
-        return new MaeilMailSubscriptionResponse(tracks.stream()
+        List<MaeilMailTrack> fields = tracks.stream()
                 .map(MaeilMailSubscriptionTrack::getField)
-                .toList());
+                .toList();
+        return new MaeilMailSubscriptionResponse(fields);
     }
 }

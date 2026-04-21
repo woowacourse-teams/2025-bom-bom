@@ -3,6 +3,8 @@ name: Notify Discord (PR-OPEN)
 on:
   pull_request:
     types: [opened, reopened, ready_for_review]
+    branches:
+      - server-dev
 
 jobs:
   notify-reviewers:

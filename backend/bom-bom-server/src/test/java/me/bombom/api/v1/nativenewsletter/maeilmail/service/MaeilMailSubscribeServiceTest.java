@@ -69,7 +69,6 @@ class MaeilMailSubscribeServiceTest {
         Newsletter newsletter = newsletterRepository.save(createMaeilMailNewsletter());
 
         maeilMailSubscribeService.subscribe(member.getId(), new MaeilMailSubscribeRequest(
-                newsletter.getId(),
                 List.of(MaeilMailTrack.BE, MaeilMailTrack.FE)
         ));
 

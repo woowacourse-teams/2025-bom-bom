@@ -84,7 +84,7 @@ jobs:
             const prNumber = context.payload.pull_request.number;
 
             // 1. 제목에서 키워드 추출 (예: "feat: 로그인 기능" -> "feat")
-            const match = title.match(/^(feat|fix|hotfix|chore|docs|refactor|test|style|perf|):/i);
+            const match = title.match(/(?:\]\s?|^)(feat|fix|hotfix|chore|docs|refactor|test|style|perf):/i);
 
             if (!match) {
               console.log("No convention keyword found in title.");

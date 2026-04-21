@@ -31,21 +31,27 @@ public class ContinueReadingRealtime extends BaseEntity {
     @Column(nullable = false, columnDefinition = "SMALLINT")
     private int dayCount;
 
+    @Column(nullable = false, columnDefinition = "SMALLINT")
+    private int maxDayCount;
+
     @Builder
     public ContinueReadingRealtime(
             Long id,
             @NonNull Long memberId,
-            int dayCount
+            int dayCount,
+            Integer maxDayCount
     ) {
         this.id = id;
         this.memberId = memberId;
         this.dayCount = dayCount;
+        this.maxDayCount = maxDayCount != null ? Math.max(dayCount, maxDayCount) : dayCount;
     }
 
     public static ContinueReadingRealtime create(Long memberId) {
         return ContinueReadingRealtime.builder()
                 .memberId(memberId)
                 .dayCount(INITIAL_DAY_COUNT)
+                .maxDayCount(INITIAL_DAY_COUNT)
                 .build();
     }
 
@@ -55,5 +61,6 @@ public class ContinueReadingRealtime extends BaseEntity {
 
     public void increaseDayCount() {
         dayCount += INCREASE_DAY_COUNT;
+        maxDayCount = Math.max(maxDayCount, dayCount);
     }
 }

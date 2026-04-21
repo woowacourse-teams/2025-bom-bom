@@ -10,7 +10,7 @@ INSERT INTO badge (
     challenge_id,
     challenge_name,
     challenge_generation,
-    streak_badge_tier,
+    streak_day_count,
     created_at,
     updated_at
 )
@@ -23,25 +23,25 @@ SELECT
     NULL,
     NULL,
     NULL,
-    m.tier,
+    m.milestone,
     CURRENT_TIMESTAMP(6),
     CURRENT_TIMESTAMP(6)
 FROM continue_reading_realtime cr
 JOIN (
-    SELECT 7 AS milestone, 'SEVEN' AS tier UNION ALL
-    SELECT 15, 'FIFTEEN' UNION ALL
-    SELECT 30, 'THIRTY' UNION ALL
-    SELECT 50, 'FIFTY' UNION ALL
-    SELECT 100, 'HUNDRED' UNION ALL
-    SELECT 200, 'TWO_HUNDRED' UNION ALL
-    SELECT 300, 'THREE_HUNDRED' UNION ALL
-    SELECT 400, 'FOUR_HUNDRED' UNION ALL
-    SELECT 500, 'FIVE_HUNDRED'
+    SELECT 7 AS milestone UNION ALL
+    SELECT 15 UNION ALL
+    SELECT 30 UNION ALL
+    SELECT 50 UNION ALL
+    SELECT 100 UNION ALL
+    SELECT 200 UNION ALL
+    SELECT 300 UNION ALL
+    SELECT 400 UNION ALL
+    SELECT 500
 ) m ON cr.day_count >= m.milestone
 WHERE NOT EXISTS (
     SELECT 1
     FROM badge b
     WHERE b.member_id = cr.member_id
       AND b.badge_category = 'STREAK'
-      AND b.streak_badge_tier = m.tier
+      AND b.streak_day_count = m.milestone
 );

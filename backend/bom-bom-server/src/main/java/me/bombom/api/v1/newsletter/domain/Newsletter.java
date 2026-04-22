@@ -54,6 +54,10 @@ public class Newsletter extends BaseEntity {
     @Column
     private LocalDate suspendedAt;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private NewsletterSource source = NewsletterSource.EXTERNAL;
+
     @Builder
     public Newsletter(
             Long id,
@@ -64,7 +68,8 @@ public class Newsletter extends BaseEntity {
             @NonNull Long categoryId,
             @NonNull Long detailId,
             NewsletterPublicationStatus status,
-            LocalDate suspendedAt
+            LocalDate suspendedAt,
+            NewsletterSource source
     ) {
         this.id = id;
         this.name = name;
@@ -75,5 +80,6 @@ public class Newsletter extends BaseEntity {
         this.detailId = detailId;
         this.status = status != null ? status : NewsletterPublicationStatus.ACTIVE;
         this.suspendedAt = suspendedAt;
+        this.source = source != null ? source : NewsletterSource.EXTERNAL;
     }
 }

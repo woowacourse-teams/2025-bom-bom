@@ -16,6 +16,7 @@ import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
+import me.bombom.api.v1.newsletter.domain.NewsletterSource;
 import me.bombom.api.v1.newsletter.dto.CategoryResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
@@ -104,6 +105,9 @@ class NewsletterServiceTest {
             softly.assertThat(result)
                             .extracting("isSubscribed")
                             .containsOnly(false);
+            softly.assertThat(result)
+                            .extracting("source")
+                            .containsOnly(NewsletterSource.EXTERNAL);
         });
     }
 
@@ -148,6 +152,7 @@ class NewsletterServiceTest {
              softly.assertThat(result.imageUrl()).isEqualTo(newsletter.getImageUrl());
              softly.assertThat(result.category()).isEqualTo(category.getName());
              softly.assertThat(result.status()).isEqualTo(newsletter.getStatus());
+             softly.assertThat(result.source()).isEqualTo(newsletter.getSource());
              softly.assertThat(result.mainPageUrl()).isEqualTo(expectedDetail.getMainPageUrl());
              softly.assertThat(result.subscribeUrl()).isEqualTo(expectedDetail.getSubscribeUrl());
              softly.assertThat(result.issueCycle()).isEqualTo(expectedDetail.getIssueCycle());
@@ -176,6 +181,7 @@ class NewsletterServiceTest {
             softly.assertThat(result.imageUrl()).isEqualTo(newsletter.getImageUrl());
             softly.assertThat(result.category()).isEqualTo(category.getName());
             softly.assertThat(result.status()).isEqualTo(newsletter.getStatus());
+            softly.assertThat(result.source()).isEqualTo(newsletter.getSource());
             softly.assertThat(result.mainPageUrl()).isEqualTo(expectedDetail.getMainPageUrl());
             softly.assertThat(result.subscribeUrl()).isEqualTo(expectedDetail.getSubscribeUrl());
             softly.assertThat(result.issueCycle()).isEqualTo(expectedDetail.getIssueCycle());

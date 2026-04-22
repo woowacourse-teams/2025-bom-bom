@@ -66,7 +66,7 @@ public class BadgeService {
                 .ifPresent(tier -> {
                     StreakBadge badge = StreakBadge.builder()
                             .memberId(memberId)
-                            .streakBadgeTier(tier)
+                            .streakDayCount(tier.getDayCount())
                             .build();
                     badgeRepository.save(badge);
                     log.info("스트릭 뱃지 발급 완료 - memberId: {}, streakDayCount: {}", memberId, tier.getDayCount());

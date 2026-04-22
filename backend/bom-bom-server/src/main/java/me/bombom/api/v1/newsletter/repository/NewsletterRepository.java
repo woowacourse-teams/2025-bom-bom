@@ -2,12 +2,15 @@ package me.bombom.api.v1.newsletter.repository;
 
 import java.util.Optional;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
+import me.bombom.api.v1.newsletter.domain.NewsletterSource;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface NewsletterRepository extends JpaRepository<Newsletter, Long>, CustomNewsletterRepository {
+
+    Optional<Newsletter> findBySource(NewsletterSource source);
 
     @Query("""
         SELECT new me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse(
@@ -16,6 +19,7 @@ public interface NewsletterRepository extends JpaRepository<Newsletter, Long>, C
             n.imageUrl,
             c.name,
             n.status,
+            n.source,
             d.mainPageUrl,
             d.subscribeUrl,
             d.issueCycle,

@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import me.bombom.api.v1.common.resolver.LoginMemberArgumentResolver;
 import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
+import me.bombom.api.v1.newsletter.domain.NewsletterSource;
 import me.bombom.api.v1.newsletter.dto.CategoryResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewslettersResponse;
@@ -26,8 +27,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -80,6 +81,7 @@ class NewsletterControllerTest {
                         10L,
                         "테크",
                         NewsletterPublicationStatus.ACTIVE,
+                        NewsletterSource.EXTERNAL,
                         false
                 ))
         );
@@ -94,6 +96,7 @@ class NewsletterControllerTest {
                 .andExpect(jsonPath("$.categories[0].id").value(10L))
                 .andExpect(jsonPath("$.categories[0].name").value("테크"))
                 .andExpect(jsonPath("$.newsletters[0].newsletterId").value(1L))
+                .andExpect(jsonPath("$.newsletters[0].source").value("EXTERNAL"))
                 .andExpect(jsonPath("$.newsletters[0].isSubscribed").value(false));
     }
 }

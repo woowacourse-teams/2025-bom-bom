@@ -1,7 +1,8 @@
 package me.bombom.api.v1.challenge.service;
 
+import static me.bombom.api.v1.common.util.DateUtils.isWeekend;
+
 import java.time.Clock;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.Locale;
@@ -37,8 +38,4 @@ public class ChallengeDailyTodoService {
         );
     }
 
-    private boolean isWeekend(LocalDate today) {
-        DayOfWeek dayOfWeek = today.getDayOfWeek();
-        return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
-    }
 }

@@ -1,7 +1,8 @@
 package me.bombom.api.v1.reading.service;
 
+import static me.bombom.api.v1.common.util.DateUtils.isWeekend;
+
 import java.time.Clock;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -482,8 +483,4 @@ public class ReadingService {
         return todayReading.getCurrentCount() == 0;
     }
 
-    private boolean isWeekend(LocalDate date) {
-        DayOfWeek dayOfWeek = date.getDayOfWeek();
-        return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
-    }
 }

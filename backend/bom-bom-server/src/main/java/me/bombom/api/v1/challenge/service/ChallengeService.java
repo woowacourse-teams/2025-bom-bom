@@ -4,9 +4,9 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static me.bombom.api.v1.common.util.DateUtils.isWeekend;
 
 import java.time.Clock;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -240,11 +240,6 @@ public class ChallengeService {
         return challengeParticipantRepository.countByChallengeIdInGroupByChallengeId(challengeIds)
                 .stream()
                 .collect(toMap(ChallengeParticipantCount::challengeId, ChallengeParticipantCount::count));
-    }
-
-    private boolean isWeekend(LocalDate date) {
-        DayOfWeek dayOfWeek = date.getDayOfWeek();
-        return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
     }
 
     private Map<Long, List<ChallengeNewsletterResponse>> getNewslettersByChallengeId(List<Long> challengeIds) {

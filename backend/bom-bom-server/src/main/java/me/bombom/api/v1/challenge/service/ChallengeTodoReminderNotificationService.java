@@ -1,6 +1,7 @@
 package me.bombom.api.v1.challenge.service;
 
-import java.time.DayOfWeek;
+import static me.bombom.api.v1.common.util.DateUtils.isWeekend;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -124,7 +125,7 @@ public class ChallengeTodoReminderNotificationService {
         int count = 0;
         LocalDate day = lastParticipatedDate.plusDays(1); // 참여한 날 제외
         while (day.isBefore(reminderDate)) { // 오늘(reminderDate)은 아직 참여 가능하므로 결석 카운트에서 제외
-            if (day.getDayOfWeek() != DayOfWeek.SATURDAY && day.getDayOfWeek() != DayOfWeek.SUNDAY) {
+            if (!isWeekend(day)) {
                 count++;
             }
             day = day.plusDays(1);

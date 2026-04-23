@@ -1,11 +1,12 @@
 package me.bombom.api.v1.challenge.domain;
 
+import static me.bombom.api.v1.common.util.DateUtils.isWeekend;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -133,8 +134,7 @@ public class Challenge extends BaseEntity {
     }
 
     private boolean isWeekday(LocalDate currentDate) {
-        DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
-        return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
+        return !isWeekend(currentDate);
     }
 
     private boolean isWithinLatePhase(LocalDate targetDate) {

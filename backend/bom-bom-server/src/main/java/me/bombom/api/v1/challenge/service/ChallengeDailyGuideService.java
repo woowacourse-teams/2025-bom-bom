@@ -1,9 +1,9 @@
 package me.bombom.api.v1.challenge.service;
 
 import static java.time.temporal.ChronoUnit.DAYS;
+import static me.bombom.api.v1.common.util.DateUtils.isWeekend;
 
 import java.time.Clock;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.domain.Challenge;
@@ -168,11 +168,6 @@ public class ChallengeDailyGuideService {
             targetDate = targetDate.minusDays(FIRST_DAY_INDEX);
         }
         return (int) DAYS.between(startDate, targetDate) + FIRST_DAY_INDEX;
-    }
-
-    private boolean isWeekend(LocalDate date) {
-        DayOfWeek dayOfWeek = date.getDayOfWeek();
-        return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
     }
 
     private MyCommentResponse createMyCommentResponse(TodayDailyGuideRow row) {

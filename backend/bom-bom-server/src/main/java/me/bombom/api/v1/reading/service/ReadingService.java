@@ -1,6 +1,7 @@
 package me.bombom.api.v1.reading.service;
 
 import java.time.Clock;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -124,6 +125,11 @@ public class ReadingService {
 
     @Transactional
     public void resetContinueReadingCount() {
+        LocalDate targetDate = LocalDate.now(clock).minusDays(1);
+        if (isWeekend(targetDate)) {
+            return;
+        }
+
         todayReadingRepository.findTotalNonZeroAndCurrentZero()
                 .forEach(this::applyResetContinueReadingCount);
     }
@@ -474,5 +480,10 @@ public class ReadingService {
 
     private boolean canIncreaseContinueReadingCount(TodayReading todayReading) {
         return todayReading.getCurrentCount() == 0;
+    }
+
+    private boolean isWeekend(LocalDate date) {
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
     }
 }

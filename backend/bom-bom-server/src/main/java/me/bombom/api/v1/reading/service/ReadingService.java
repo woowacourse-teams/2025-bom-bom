@@ -125,8 +125,8 @@ public class ReadingService {
 
     @Transactional
     public void resetContinueReadingCount() {
-        LocalDate targetDate = LocalDate.now(clock).minusDays(1);
-        if (isWeekend(targetDate)) {
+        LocalDate yesterday = LocalDate.now(clock).minusDays(1);
+        if (isWeekend(yesterday)) {
             return;
         }
 

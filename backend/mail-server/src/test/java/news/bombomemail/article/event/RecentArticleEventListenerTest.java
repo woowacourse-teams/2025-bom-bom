@@ -2,10 +2,7 @@ package news.bombomemail.article.event;
 
 import static org.assertj.core.api.SoftAssertions.*;
 
-import jakarta.mail.Session;
-import jakarta.mail.internet.MimeMessage;
 import java.util.List;
-import java.util.Properties;
 import news.bombomemail.article.domain.RecentArticle;
 import news.bombomemail.article.repository.RecentArticleRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,11 +24,8 @@ class RecentArticleEventListenerTest {
     @Autowired
     RecentArticleRepository recentArticleRepository;
 
-    private Session session;
-
     @BeforeEach
     void setup() {
-        session = Session.getDefaultInstance(new Properties());
         recentArticleRepository.deleteAll();
     }
 
@@ -45,14 +39,12 @@ class RecentArticleEventListenerTest {
         String articleTitle = "테스트 아티클";
         Long memberId = 1L;
         String unsubscribeUrl = "unsubscribeUrl";
-        MimeMessage message = new MimeMessage(session);
-        message.setSubject("테스트 이메일 제목");
-        message.setText("이것은 테스트용 이메일 본문입니다.");
         String contents = "이것은 테스트용 이메일 본문입니다.";
 
         // when
         eventPublisher.publishEvent(ArticleArrivedEvent.of(
-                newsletterId, newsletterName, articleId, articleTitle, memberId, unsubscribeUrl, message, contents));
+                newsletterId, newsletterName, articleId, articleTitle, memberId, unsubscribeUrl, contents,
+                ArticleSource.EMAIL_RECEIVED));
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -63,7 +55,39 @@ class RecentArticleEventListenerTest {
             softly.assertThat(all).hasSize(1);
             RecentArticle recentArticle = all.get(0);
             softly.assertThat(recentArticle.getArticleId()).isEqualTo(articleId);
-            softly.assertThat(recentArticle.getTitle()).isEqualTo("테스트 이메일 제목");
+            softly.assertThat(recentArticle.getTitle()).isEqualTo(articleTitle);
+            softly.assertThat(recentArticle.getContents()).isEqualTo(contents);
+            softly.assertThat(recentArticle.getMemberId()).isEqualTo(memberId);
+            softly.assertThat(recentArticle.getNewsletterId()).isEqualTo(newsletterId);
+        });
+    }
+
+    @Test
+    @Transactional
+    void 매일메일_발행_이벤트도_RecentArticle을_저장한다() {
+        // given
+        Long newsletterId = 1L;
+        String newsletterName = "매일메일";
+        Long articleId = 10L;
+        String articleTitle = "매일메일 발행 제목";
+        Long memberId = 2L;
+        String contents = "<p>매일메일 본문입니다.</p>";
+
+        // when
+        eventPublisher.publishEvent(ArticleArrivedEvent.of(
+                newsletterId, newsletterName, articleId, articleTitle, memberId, null, contents,
+                ArticleSource.MAEIL_MAIL_ISSUED));
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+
+        // then
+        assertSoftly(softly -> {
+            List<RecentArticle> all = recentArticleRepository.findAll();
+            softly.assertThat(all).hasSize(1);
+            RecentArticle recentArticle = all.get(0);
+            softly.assertThat(recentArticle.getArticleId()).isEqualTo(articleId);
+            softly.assertThat(recentArticle.getTitle()).isEqualTo(articleTitle);
             softly.assertThat(recentArticle.getContents()).isEqualTo(contents);
             softly.assertThat(recentArticle.getMemberId()).isEqualTo(memberId);
             softly.assertThat(recentArticle.getNewsletterId()).isEqualTo(newsletterId);
@@ -79,21 +103,17 @@ class RecentArticleEventListenerTest {
         Long memberId = 1L;
         String unsubscribeUrl = "unsubscribeUrl";
 
-        MimeMessage message1 = new MimeMessage(session);
-        message1.setSubject("첫 번째 제목");
-        message1.setText("첫 번째 본문");
         String contents1 = "첫 번째 본문";
 
-        MimeMessage message2 = new MimeMessage(session);
-        message2.setSubject("두 번째 제목");
-        message2.setText("두 번째 본문");
         String contents2 = "두 번째 본문";
 
         // when
         eventPublisher.publishEvent(ArticleArrivedEvent.of(
-                newsletterId, newsletterName, 1L, "첫 번째 제목", memberId, unsubscribeUrl, message1, contents1));
+                newsletterId, newsletterName, 1L, "첫 번째 제목", memberId, unsubscribeUrl, contents1,
+                ArticleSource.EMAIL_RECEIVED));
         eventPublisher.publishEvent(ArticleArrivedEvent.of(
-                newsletterId, newsletterName, 2L, "두 번째 제목", memberId, unsubscribeUrl, message2, contents2));
+                newsletterId, newsletterName, 2L, "두 번째 제목", memberId, unsubscribeUrl, contents2,
+                ArticleSource.EMAIL_RECEIVED));
 
         TestTransaction.flagForCommit();
         TestTransaction.end();

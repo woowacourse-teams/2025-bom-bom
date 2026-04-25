@@ -2,10 +2,8 @@ package news.bombomemail.subscribe.event;
 
 import static org.mockito.Mockito.verify;
 
-import jakarta.mail.Session;
-import jakarta.mail.internet.MimeMessage;
-import java.util.Properties;
 import news.bombomemail.article.event.ArticleArrivedEvent;
+import news.bombomemail.article.event.ArticleSource;
 import news.bombomemail.subscribe.service.SubscribeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,12 +32,12 @@ class SubscribeArticleArrivedListenerTest {
         String articleTitle = "테스트 아티클";
         Long memberId = 2L;
         String unsubscribeUrl = "unsubscribeUrl";
-        MimeMessage message = new MimeMessage(Session.getDefaultInstance(new Properties()));
         String contents = "테스트 본문";
         
         // when
         eventPublisher.publishEvent(ArticleArrivedEvent.of(
-                newsletterId, newsletterName, articleId, articleTitle, memberId, unsubscribeUrl, message, contents));
+                newsletterId, newsletterName, articleId, articleTitle, memberId, unsubscribeUrl, contents,
+                ArticleSource.EMAIL_RECEIVED));
 
         TestTransaction.flagForCommit();
         TestTransaction.end();

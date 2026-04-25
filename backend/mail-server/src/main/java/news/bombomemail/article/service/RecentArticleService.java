@@ -1,7 +1,5 @@
 package news.bombomemail.article.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
@@ -27,25 +25,24 @@ public class RecentArticleService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void save(
             Long articleId,
-            MimeMessage message,
+            String articleTitle,
             String contents,
             Long memberId,
             Long newsletterId
-    )
-            throws MessagingException {
-        recentArticleRepository.save(buildRecentArticle(articleId, message, contents, memberId, newsletterId));
+    ) {
+        recentArticleRepository.save(buildRecentArticle(articleId, articleTitle, contents, memberId, newsletterId));
     }
 
     private RecentArticle buildRecentArticle(
             Long articleId,
-            MimeMessage message,
+            String articleTitle,
             String contents,
             Long memberId,
             Long newsletterId
-    ) throws MessagingException {
+    ) {
         return RecentArticle.builder()
                 .articleId(articleId)
-                .title(message.getSubject())
+                .title(articleTitle)
                 .contents(contents)
                 .contentsText(htmlTagCleaner.clean(contents))
                 .expectedReadTime(ReadingTimeCalculator.calculate(contents))

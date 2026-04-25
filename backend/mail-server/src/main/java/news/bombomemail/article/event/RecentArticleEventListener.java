@@ -18,7 +18,7 @@ public class RecentArticleEventListener {
         try {
             recentArticleService.save(
                     event.articleId(),
-                    event.message(),
+                    event.articleTitle(),
                     event.contents(),
                     event.memberId(),
                     event.newsletterId()

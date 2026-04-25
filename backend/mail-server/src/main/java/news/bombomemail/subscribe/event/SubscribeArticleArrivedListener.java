@@ -3,6 +3,7 @@ package news.bombomemail.subscribe.event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import news.bombomemail.article.event.ArticleArrivedEvent;
+import news.bombomemail.article.event.ArticleSource;
 import news.bombomemail.subscribe.service.SubscribeService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -16,6 +17,10 @@ public class SubscribeArticleArrivedListener {
 
     @TransactionalEventListener
     public void on(ArticleArrivedEvent event) {
+        if (event.source() != ArticleSource.EMAIL_RECEIVED) {
+            return;
+        }
+
         try {
             subscribeService.upsertSubscribe(event.newsletterId(), event.memberId(), event.unsubscribeUrl());
         } catch (Exception e) {

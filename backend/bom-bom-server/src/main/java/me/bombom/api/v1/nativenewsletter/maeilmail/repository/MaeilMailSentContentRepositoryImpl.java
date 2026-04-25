@@ -2,10 +2,11 @@ package me.bombom.api.v1.nativenewsletter.maeilmail.repository;
 
 import static me.bombom.api.v1.nativenewsletter.maeilmail.domain.QMaeilMailSentContent.maeilMailSentContent;
 
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSentContent;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MemberTopicKey;
@@ -21,18 +22,32 @@ public class MaeilMailSentContentRepositoryImpl implements CustomMaeilMailSentCo
             return List.of();
         }
 
+        Set<MemberTopicKey> targetKeys = Set.copyOf(keys);
+        Set<Long> memberIds = extractMemberIds(targetKeys);
+        Set<Long> topicIds = extractTopicIds(targetKeys);
         return jpaQueryFactory
                 .selectFrom(maeilMailSentContent)
-                .where(memberTopicKeyCondition(keys))
-                .fetch();
+                .where(
+                        maeilMailSentContent.memberId.in(memberIds),
+                        maeilMailSentContent.topicId.in(topicIds)
+                )
+                .fetch()
+                .stream()
+                .filter(sentContent -> targetKeys.contains(
+                        new MemberTopicKey(sentContent.getMemberId(), sentContent.getTopicId())
+                ))
+                .toList();
     }
 
-    private BooleanBuilder memberTopicKeyCondition(Collection<MemberTopicKey> keys) {
-        BooleanBuilder builder = new BooleanBuilder();
-        keys.forEach(key -> builder.or(
-                maeilMailSentContent.memberId.eq(key.memberId())
-                        .and(maeilMailSentContent.topicId.eq(key.topicId()))
-        ));
-        return builder;
+    private Set<Long> extractMemberIds(Collection<MemberTopicKey> keys) {
+        return keys.stream()
+                .map(MemberTopicKey::memberId)
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    private Set<Long> extractTopicIds(Collection<MemberTopicKey> keys) {
+        return keys.stream()
+                .map(MemberTopicKey::topicId)
+                .collect(Collectors.toUnmodifiableSet());
     }
 }

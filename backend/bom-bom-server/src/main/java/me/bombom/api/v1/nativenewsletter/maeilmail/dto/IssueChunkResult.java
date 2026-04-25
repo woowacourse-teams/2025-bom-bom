@@ -2,14 +2,22 @@ package me.bombom.api.v1.nativenewsletter.maeilmail.dto;
 
 public record IssueChunkResult(
         boolean hasTracks,
-        Long lastTrackId
+        Long lastTrackId,
+        int trackCount,
+        int issuedArticleCount,
+        int previouslyIssuedTrackCount
 ) {
 
     public static IssueChunkResult empty() {
-        return new IssueChunkResult(false, null);
+        return new IssueChunkResult(false, null, 0, 0, 0);
     }
 
-    public static IssueChunkResult of(Long lastTrackId) {
-        return new IssueChunkResult(true, lastTrackId);
+    public static IssueChunkResult of(
+            Long lastTrackId,
+            int trackCount,
+            int issuedArticleCount,
+            int previouslyIssuedTrackCount
+    ) {
+        return new IssueChunkResult(true, lastTrackId, trackCount, issuedArticleCount, previouslyIssuedTrackCount);
     }
 }

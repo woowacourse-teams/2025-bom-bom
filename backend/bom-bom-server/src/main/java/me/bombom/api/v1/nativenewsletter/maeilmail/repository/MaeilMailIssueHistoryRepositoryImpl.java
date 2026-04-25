@@ -2,7 +2,6 @@ package me.bombom.api.v1.nativenewsletter.maeilmail.repository;
 
 import static me.bombom.api.v1.nativenewsletter.maeilmail.domain.QMaeilMailIssueHistory.maeilMailIssueHistory;
 
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -26,24 +25,31 @@ public class MaeilMailIssueHistoryRepositoryImpl implements CustomMaeilMailIssue
         }
 
         Set<MemberTopicKey> targetKeys = Set.copyOf(keys);
+        Set<Long> memberIds = extractMemberIds(targetKeys);
+        Set<Long> topicIds = extractTopicIds(targetKeys);
         return jpaQueryFactory
                 .selectFrom(maeilMailIssueHistory)
                 .where(
                         maeilMailIssueHistory.issueDate.eq(issueDate),
-                        memberTopicKeyCondition(targetKeys)
+                        maeilMailIssueHistory.memberId.in(memberIds),
+                        maeilMailIssueHistory.topicId.in(topicIds)
                 )
                 .fetch()
                 .stream()
                 .map(history -> new MemberTopicKey(history.getMemberId(), history.getTopicId()))
+                .filter(targetKeys::contains)
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    private BooleanBuilder memberTopicKeyCondition(Collection<MemberTopicKey> keys) {
-        BooleanBuilder builder = new BooleanBuilder();
-        keys.forEach(key -> builder.or(
-                maeilMailIssueHistory.memberId.eq(key.memberId())
-                        .and(maeilMailIssueHistory.topicId.eq(key.topicId()))
-        ));
-        return builder;
+    private Set<Long> extractMemberIds(Collection<MemberTopicKey> keys) {
+        return keys.stream()
+                .map(MemberTopicKey::memberId)
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    private Set<Long> extractTopicIds(Collection<MemberTopicKey> keys) {
+        return keys.stream()
+                .map(MemberTopicKey::topicId)
+                .collect(Collectors.toUnmodifiableSet());
     }
 }

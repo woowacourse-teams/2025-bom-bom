@@ -16,7 +16,7 @@ public class MaeilMailScheduler {
     private final MaeilMailIssueService maeilMailIssueService;
 
     @Scheduled(cron = ISSUE_CRON, zone = TIME_ZONE)
-    @SchedulerLock(name = "maeil_mail_issue", lockAtLeastFor = "PT5S", lockAtMostFor = "PT10M")
+    @SchedulerLock(name = "maeil_mail_issue", lockAtLeastFor = "PT5S", lockAtMostFor = "PT30M")
     public void issueMaeilMail() {
         maeilMailIssueService.issue();
     }

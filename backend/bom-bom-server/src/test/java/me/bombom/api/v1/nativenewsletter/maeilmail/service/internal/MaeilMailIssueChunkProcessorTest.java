@@ -18,6 +18,7 @@ import me.bombom.api.v1.nativenewsletter.maeilmail.dto.PreparedIssueEntries;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSubscriptionTrackRepository;
 import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
 import me.bombom.api.v1.newsletter.domain.NewsletterSource;
+import me.bombom.api.v1.subscribe.domain.SubscribeStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,8 +53,9 @@ class MaeilMailIssueChunkProcessorTest {
 
     @Test
     void 발행_대상_track이_없으면_empty_result를_반환한다() {
-        given(trackRepository.findSubscribedTracksByNewsletterSourceNotIssuedOnAfterId(
+        given(trackRepository.findIssueTargetsAfterId(
                 ISSUE_DATE,
+                SubscribeStatus.SUBSCRIBED,
                 NewsletterSource.MAEIL_MAIL,
                 NewsletterPublicationStatus.ACTIVE,
                 0L,
@@ -65,6 +67,9 @@ class MaeilMailIssueChunkProcessorTest {
         assertSoftly(softly -> {
             softly.assertThat(result.hasTracks()).isFalse();
             softly.assertThat(result.lastTrackId()).isNull();
+            softly.assertThat(result.trackCount()).isZero();
+            softly.assertThat(result.issuedArticleCount()).isZero();
+            softly.assertThat(result.previouslyIssuedTrackCount()).isZero();
         });
         verifyNoInteractions(issueDataLoader, entrySelector, entryAssembler, issueResultRecorder);
     }
@@ -74,10 +79,11 @@ class MaeilMailIssueChunkProcessorTest {
         MaeilMailSubscriptionTrack firstTrack = createTrack(1L);
         MaeilMailSubscriptionTrack secondTrack = createTrack(2L);
         IssueData issueData = new IssueData(Map.of(), Map.of(), Map.of(), Set.of(), 500L);
-        IssueEntrySelectionResult selection = new IssueEntrySelectionResult(List.of(), List.of());
-        PreparedIssueEntries preparedEntries = new PreparedIssueEntries(List.of(), List.of());
-        given(trackRepository.findSubscribedTracksByNewsletterSourceNotIssuedOnAfterId(
+        IssueEntrySelectionResult selection = new IssueEntrySelectionResult(List.of(), List.of(9L));
+        PreparedIssueEntries preparedEntries = new PreparedIssueEntries(List.of(), List.of(9L));
+        given(trackRepository.findIssueTargetsAfterId(
                 ISSUE_DATE,
+                SubscribeStatus.SUBSCRIBED,
                 NewsletterSource.MAEIL_MAIL,
                 NewsletterPublicationStatus.ACTIVE,
                 0L,
@@ -92,6 +98,9 @@ class MaeilMailIssueChunkProcessorTest {
         assertSoftly(softly -> {
             softly.assertThat(result.hasTracks()).isTrue();
             softly.assertThat(result.lastTrackId()).isEqualTo(2L);
+            softly.assertThat(result.trackCount()).isEqualTo(2);
+            softly.assertThat(result.issuedArticleCount()).isZero();
+            softly.assertThat(result.previouslyIssuedTrackCount()).isEqualTo(1);
         });
         verify(issueResultRecorder).record(preparedEntries, ISSUE_DATE);
     }

@@ -199,6 +199,31 @@ class MaeilMailIssueServiceTest {
     }
 
     @Test
+    void 다른_매일메일_row가_있어도_구독의_newsletter_id로_발행된다() {
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+        Newsletter activeNewsletter = saveMaeilMailNewsletter();
+        saveNewsletter(
+                "휴재 매일메일",
+                "suspended-maeil@bombom.news",
+                NewsletterSource.MAEIL_MAIL,
+                NewsletterPublicationStatus.SUSPENDED
+        );
+        MaeilMailTopic topic = topicRepository.save(createTopic(MaeilMailTrack.BE, "JPA", 0));
+        contentRepository.save(createContent(topic.getId(), "N+1 문제"));
+        Subscribe subscribe = subscribeRepository.save(createSubscribe(activeNewsletter, member, SubscribeStatus.SUBSCRIBED));
+        trackRepository.save(createTrack(subscribe.getId(), member.getId(), MaeilMailTrack.BE));
+
+        maeilMailIssueService.issue();
+
+        List<Article> articles = articleRepository.findAll();
+
+        assertSoftly(softly -> {
+            softly.assertThat(articles).hasSize(1);
+            softly.assertThat(articles.getFirst().getNewsletterId()).isEqualTo(activeNewsletter.getId());
+        });
+    }
+
+    @Test
     void 단일_매일메일_뉴스레터_id로_아티클이_발행된다() {
         Member firstMember = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
         Member secondMember = memberRepository.save(TestFixture.createUniqueMember("member2", "provider2"));

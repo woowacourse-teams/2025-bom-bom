@@ -22,9 +22,8 @@ import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailContentRe
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailIssueHistoryRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSentContentRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailTopicRepository;
-import me.bombom.api.v1.newsletter.domain.Newsletter;
-import me.bombom.api.v1.newsletter.domain.NewsletterSource;
-import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
+import me.bombom.api.v1.subscribe.domain.Subscribe;
+import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,10 +34,10 @@ public class MaeilMailIssueDataLoader {
     private final MaeilMailContentRepository contentRepository;
     private final MaeilMailSentContentRepository sentContentRepository;
     private final MaeilMailIssueHistoryRepository issueHistoryRepository;
-    private final NewsletterRepository newsletterRepository;
+    private final SubscribeRepository subscribeRepository;
 
     public IssueData load(LocalDate issueDate, List<MaeilMailSubscriptionTrack> tracks) {
-        Long newsletterId = loadMaeilMailNewsletterId();
+        Long newsletterId = loadNewsletterId(tracks);
         Map<MaeilMailTrack, List<MaeilMailTopic>> orderedTopicsByTrack = loadOrderedTopicsByTrack();
         Map<Long, MaeilMailTopic> issueTopicsByTrackId = resolveIssueTopicsByTrackId(tracks, orderedTopicsByTrack);
         Map<Long, List<Long>> contentIdsByTopicId = loadContentIdsByTopicId(issueTopicsByTrackId.values());
@@ -55,12 +54,33 @@ public class MaeilMailIssueDataLoader {
         );
     }
 
-    private Long loadMaeilMailNewsletterId() {
-        return newsletterRepository.findBySource(NewsletterSource.MAEIL_MAIL)
-                .map(Newsletter::getId)
-                .orElseThrow(() -> new CServerErrorException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "Newsletter")
-                        .addContext("source", NewsletterSource.MAEIL_MAIL.name()));
+    private Long loadNewsletterId(List<MaeilMailSubscriptionTrack> tracks) {
+        List<Long> subscribeIds = tracks.stream()
+                .map(MaeilMailSubscriptionTrack::getSubscribeId)
+                .distinct()
+                .toList();
+        if (subscribeIds.isEmpty()) {
+            throw new CServerErrorException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "Subscribe");
+        }
+
+        List<Subscribe> subscribes = subscribeRepository.findAllById(subscribeIds);
+        if (subscribes.size() != subscribeIds.size()) {
+            throw new CServerErrorException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "Subscribe")
+                    .addContext("subscribeIds", subscribeIds);
+        }
+
+        List<Long> newsletterIds = subscribes.stream()
+                .map(Subscribe::getNewsletterId)
+                .distinct()
+                .toList();
+        if (newsletterIds.size() != 1) {
+            throw new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "Newsletter")
+                    .addContext("newsletterIds", newsletterIds);
+        }
+        return newsletterIds.getFirst();
     }
 
     private Map<MaeilMailTrack, List<MaeilMailTopic>> loadOrderedTopicsByTrack() {

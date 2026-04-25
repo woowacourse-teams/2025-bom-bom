@@ -1,0 +1,117 @@
+package news.bombomemail.nativenewsletter.maeilmail.repository;
+
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailIssueHistory;
+import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailSentContent;
+import news.bombomemail.nativenewsletter.maeilmail.dto.MemberTopicKey;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+@DataJpaTest
+class MaeilMailMemberTopicRepositoryTest {
+
+    @Autowired
+    private MaeilMailSentContentRepository sentContentRepository;
+
+    @Autowired
+    private MaeilMailIssueHistoryRepository issueHistoryRepository;
+
+    @BeforeEach
+    void setup() {
+        sentContentRepository.deleteAll();
+        issueHistoryRepository.deleteAll();
+    }
+
+    @Test
+    void sent_content는_member_topic_pair를_정확히_조회한다() {
+        // given
+        MaeilMailSentContent target = createSentContent(1L, 10L, 100L);
+        MaeilMailSentContent crossProduct = createSentContent(1L, 20L, 200L);
+        MaeilMailSentContent other = createSentContent(2L, 10L, 300L);
+        sentContentRepository.saveAll(List.of(target, crossProduct, other));
+
+        // when
+        List<MaeilMailSentContent> sentContents = sentContentRepository.findAllByMemberTopicKeys(List.of(
+                new MemberTopicKey(1L, 10L),
+                new MemberTopicKey(2L, 20L)
+        ));
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(sentContents).hasSize(1);
+            softly.assertThat(sentContents.getFirst().getMemberId()).isEqualTo(1L);
+            softly.assertThat(sentContents.getFirst().getTopicId()).isEqualTo(10L);
+            softly.assertThat(sentContents.getFirst().getContentId()).isEqualTo(100L);
+        });
+    }
+
+    @Test
+    void issue_history는_issue_date와_member_topic_pair를_정확히_조회한다() {
+        // given
+        LocalDate issueDate = LocalDate.of(2026, 4, 26);
+        issueHistoryRepository.saveAll(List.of(
+                createIssueHistory(issueDate, 1L, 10L),
+                createIssueHistory(issueDate, 1L, 20L),
+                createIssueHistory(issueDate.minusDays(1), 2L, 20L)
+        ));
+
+        // when
+        Set<MemberTopicKey> issuedKeys = issueHistoryRepository.findIssuedMemberTopicKeys(issueDate, List.of(
+                new MemberTopicKey(1L, 10L),
+                new MemberTopicKey(2L, 20L)
+        ));
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(issuedKeys).hasSize(1);
+            softly.assertThat(issuedKeys).containsExactly(new MemberTopicKey(1L, 10L));
+        });
+    }
+
+    @Test
+    void issue_history는_100개_이상의_member_topic_key를_정확히_조회한다() {
+        // given
+        LocalDate issueDate = LocalDate.of(2026, 4, 26);
+        List<MemberTopicKey> keys = new ArrayList<>();
+        List<MaeilMailIssueHistory> histories = new ArrayList<>();
+        for (long i = 1; i <= 120; i++) {
+            keys.add(new MemberTopicKey(i, i + 1000));
+            if (i % 2 == 0) {
+                histories.add(createIssueHistory(issueDate, i, i + 1000));
+            }
+        }
+        issueHistoryRepository.saveAll(histories);
+
+        // when
+        Set<MemberTopicKey> issuedKeys = issueHistoryRepository.findIssuedMemberTopicKeys(issueDate, keys);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(issuedKeys).hasSize(60);
+            softly.assertThat(issuedKeys).allMatch(key -> key.memberId() % 2 == 0);
+        });
+    }
+
+    private MaeilMailSentContent createSentContent(Long memberId, Long topicId, Long contentId) {
+        return MaeilMailSentContent.builder()
+                .memberId(memberId)
+                .topicId(topicId)
+                .contentId(contentId)
+                .build();
+    }
+
+    private MaeilMailIssueHistory createIssueHistory(LocalDate issueDate, Long memberId, Long topicId) {
+        return MaeilMailIssueHistory.builder()
+                .issueDate(issueDate)
+                .memberId(memberId)
+                .topicId(topicId)
+                .build();
+    }
+}

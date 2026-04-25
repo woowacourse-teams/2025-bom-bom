@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
@@ -19,11 +20,13 @@ import me.bombom.api.v1.article.repository.RecentArticleRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailContent;
+import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailIssueHistory;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSentContent;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSubscriptionTrack;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailTopic;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailTrack;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailContentRepository;
+import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailIssueHistoryRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSentContentRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSubscriptionTrackRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailTopicRepository;
@@ -83,6 +86,9 @@ class MaeilMailIssueServiceTest {
     private MaeilMailSentContentRepository sentContentRepository;
 
     @Autowired
+    private MaeilMailIssueHistoryRepository issueHistoryRepository;
+
+    @Autowired
     private ArticleRepository articleRepository;
 
     @Autowired
@@ -95,6 +101,7 @@ class MaeilMailIssueServiceTest {
     void setup() {
         recentArticleRepository.deleteAllInBatch();
         articleRepository.deleteAllInBatch();
+        issueHistoryRepository.deleteAllInBatch();
         sentContentRepository.deleteAllInBatch();
         contentRepository.deleteAllInBatch();
         topicRepository.deleteAllInBatch();
@@ -121,6 +128,7 @@ class MaeilMailIssueServiceTest {
 
         List<Article> articles = articleRepository.findAll();
         List<RecentArticle> recentArticles = recentArticleRepository.findAll();
+        List<MaeilMailIssueHistory> issueHistories = issueHistoryRepository.findAll();
 
         assertSoftly(softly -> {
             softly.assertThat(articles).hasSize(1);
@@ -129,6 +137,10 @@ class MaeilMailIssueServiceTest {
             softly.assertThat(articles.getFirst().getNewsletterId()).isEqualTo(newsletter.getId());
             softly.assertThat(recentArticles).hasSize(1);
             softly.assertThat(recentArticles.getFirst().getArticleId()).isEqualTo(articles.getFirst().getId());
+            softly.assertThat(issueHistories).hasSize(1);
+            softly.assertThat(issueHistories.getFirst().getIssueDate()).isEqualTo(WEEKDAY);
+            softly.assertThat(issueHistories.getFirst().getMemberId()).isEqualTo(member.getId());
+            softly.assertThat(issueHistories.getFirst().getTopicId()).isEqualTo(topic.getId());
             softly.assertThat(trackRepository.findAll().getFirst().getLastIssuedDate()).isEqualTo(WEEKDAY);
         });
     }
@@ -231,6 +243,42 @@ class MaeilMailIssueServiceTest {
             softly.assertThat(articleRepository.findAll()).hasSize(1);
             softly.assertThat(recentArticleRepository.findAll()).hasSize(1);
             softly.assertThat(sentContentRepository.findAll()).hasSize(1);
+            softly.assertThat(issueHistoryRepository.findAll()).hasSize(1);
+            softly.assertThat(trackRepository.findAll())
+                    .allSatisfy(track -> {
+                        softly.assertThat(track.getLastIssuedDate()).isEqualTo(WEEKDAY);
+                        softly.assertThat(track.getCurriculumIndex()).isEqualTo(1);
+                    });
+        });
+    }
+
+    @Test
+    void 이미_오늘_다른_트랙으로_발행된_member_topic은_재시작해도_다시_발행하지_않는다() {
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+        Newsletter newsletter = saveMaeilMailNewsletter();
+        MaeilMailTopic topic = topicRepository.save(createTopic(MaeilMailTrack.BE, "JPA", 0));
+        contentRepository.save(createContent(topic.getId(), "N+1 문제"));
+        Subscribe firstSubscribe = subscribeRepository.save(
+                createSubscribe(newsletter, member, SubscribeStatus.SUBSCRIBED));
+        Subscribe secondSubscribe = subscribeRepository.save(
+                createSubscribe(newsletter, member, SubscribeStatus.SUBSCRIBED));
+        MaeilMailSubscriptionTrack firstTrack = trackRepository.save(
+                createTrack(firstSubscribe.getId(), member.getId(), MaeilMailTrack.BE));
+        trackRepository.save(createTrack(secondSubscribe.getId(), member.getId(), MaeilMailTrack.BE));
+        issueHistoryRepository.save(MaeilMailIssueHistory.builder()
+                .issueDate(WEEKDAY)
+                .memberId(member.getId())
+                .topicId(topic.getId())
+                .build());
+        trackRepository.markIssuedByIds(List.of(firstTrack.getId()), WEEKDAY);
+
+        maeilMailIssueService.issue();
+
+        assertSoftly(softly -> {
+            softly.assertThat(articleRepository.findAll()).isEmpty();
+            softly.assertThat(recentArticleRepository.findAll()).isEmpty();
+            softly.assertThat(sentContentRepository.findAll()).isEmpty();
+            softly.assertThat(issueHistoryRepository.findAll()).hasSize(1);
             softly.assertThat(trackRepository.findAll())
                     .allSatisfy(track -> {
                         softly.assertThat(track.getLastIssuedDate()).isEqualTo(WEEKDAY);
@@ -265,7 +313,7 @@ class MaeilMailIssueServiceTest {
         MaeilMailContent springContent = contentRepository.save(createContent(secondTopic.getId(), "Spring 컨텐츠"));
         Subscribe subscribe = subscribeRepository.save(createSubscribe(newsletter, member, SubscribeStatus.SUBSCRIBED));
         MaeilMailSubscriptionTrack track = trackRepository.save(createTrack(subscribe.getId(), member.getId(), MaeilMailTrack.BE));
-        trackRepository.incrementCurriculumIndexByIds(List.of(track.getId()));
+        trackRepository.markIssuedByIds(List.of(track.getId()), WEEKDAY.minusDays(1));
 
         maeilMailIssueService.issue();
 
@@ -300,6 +348,40 @@ class MaeilMailIssueServiceTest {
             softly.assertThat(sentContents).hasSize(1);
             softly.assertThat(sentContents.getFirst().getContentId()).isEqualTo(content.getId());
             softly.assertThat(articleRepository.findAll()).hasSize(1);
+            softly.assertThat(issueHistoryRepository.findAll()).hasSize(1);
+        });
+    }
+
+    @Test
+    void 컨텐츠_순환_초기화가_발생해도_같은날_중복_track은_history로_차단된다() {
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+        Newsletter newsletter = saveMaeilMailNewsletter();
+        MaeilMailTopic topic = topicRepository.save(createTopic(MaeilMailTrack.BE, "JPA", 0));
+        MaeilMailContent content = contentRepository.save(createContent(topic.getId(), "유일한 컨텐츠"));
+        Subscribe firstSubscribe = subscribeRepository.save(
+                createSubscribe(newsletter, member, SubscribeStatus.SUBSCRIBED));
+        Subscribe secondSubscribe = subscribeRepository.save(
+                createSubscribe(newsletter, member, SubscribeStatus.SUBSCRIBED));
+        trackRepository.save(createTrack(firstSubscribe.getId(), member.getId(), MaeilMailTrack.BE));
+        trackRepository.save(createTrack(secondSubscribe.getId(), member.getId(), MaeilMailTrack.BE));
+        sentContentRepository.save(MaeilMailSentContent.builder()
+                .memberId(member.getId())
+                .topicId(topic.getId())
+                .contentId(content.getId())
+                .build());
+
+        maeilMailIssueService.issue();
+
+        assertSoftly(softly -> {
+            softly.assertThat(articleRepository.findAll()).hasSize(1);
+            softly.assertThat(recentArticleRepository.findAll()).hasSize(1);
+            softly.assertThat(sentContentRepository.findAll()).hasSize(1);
+            softly.assertThat(issueHistoryRepository.findAll()).hasSize(1);
+            softly.assertThat(trackRepository.findAll())
+                    .allSatisfy(track -> {
+                        softly.assertThat(track.getLastIssuedDate()).isEqualTo(WEEKDAY);
+                        softly.assertThat(track.getCurriculumIndex()).isEqualTo(1);
+                    });
         });
     }
 
@@ -341,7 +423,37 @@ class MaeilMailIssueServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(articleRepository.findAll()).hasSize(1);
             softly.assertThat(recentArticleRepository.findAll()).hasSize(1);
+            softly.assertThat(sentContentRepository.findAll()).hasSize(1);
+            softly.assertThat(issueHistoryRepository.findAll()).hasSize(1);
             softly.assertThat(trackRepository.findAll().getFirst().getCurriculumIndex()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void 다음날에는_같은_member_topic을_다시_발행한다() {
+        LocalDate nextWeekday = LocalDate.of(2026, 4, 27);
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+        Newsletter newsletter = saveMaeilMailNewsletter();
+        MaeilMailTopic topic = topicRepository.save(createTopic(MaeilMailTrack.BE, "JPA", 0));
+        contentRepository.save(createContent(topic.getId(), "N+1 문제"));
+        Subscribe subscribe = subscribeRepository.save(createSubscribe(newsletter, member, SubscribeStatus.SUBSCRIBED));
+        trackRepository.save(createTrack(subscribe.getId(), member.getId(), MaeilMailTrack.BE));
+
+        maeilMailIssueService.issue();
+        setToday(nextWeekday);
+        maeilMailIssueService.issue();
+
+        Set<LocalDate> issueDates = issueHistoryRepository.findAll().stream()
+                .map(MaeilMailIssueHistory::getIssueDate)
+                .collect(Collectors.toSet());
+
+        assertSoftly(softly -> {
+            softly.assertThat(articleRepository.findAll()).hasSize(2);
+            softly.assertThat(recentArticleRepository.findAll()).hasSize(2);
+            softly.assertThat(issueHistoryRepository.findAll()).hasSize(2);
+            softly.assertThat(issueDates).containsExactlyInAnyOrder(WEEKDAY, nextWeekday);
+            softly.assertThat(trackRepository.findAll().getFirst().getLastIssuedDate()).isEqualTo(nextWeekday);
+            softly.assertThat(trackRepository.findAll().getFirst().getCurriculumIndex()).isEqualTo(2);
         });
     }
 

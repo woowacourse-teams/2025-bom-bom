@@ -5,8 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,10 +15,6 @@ import me.bombom.api.v1.common.BaseEntity;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(uniqueConstraints = @UniqueConstraint(
-        name = "uk_maeil_mail_content_topic_order",
-        columnNames = {"topic_id", "display_order"}
-))
 public class MaeilMailContent extends BaseEntity {
 
     @Id
@@ -29,9 +23,6 @@ public class MaeilMailContent extends BaseEntity {
 
     @Column(nullable = false)
     private Long topicId;
-
-    @Column(nullable = false)
-    private int displayOrder;
 
     @Column(nullable = false)
     private String title;
@@ -51,7 +42,6 @@ public class MaeilMailContent extends BaseEntity {
     @Builder
     public MaeilMailContent(
             @NonNull Long topicId,
-            int displayOrder,
             @NonNull String title,
             @NonNull String content,
             @NonNull String contentsText,
@@ -59,7 +49,6 @@ public class MaeilMailContent extends BaseEntity {
             int expectedReadTime
     ) {
         this.topicId = topicId;
-        this.displayOrder = displayOrder;
         this.title = title;
         this.content = content;
         this.contentsText = contentsText;

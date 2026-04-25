@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -41,6 +42,8 @@ public class MaeilMailSubscriptionTrack {
 
     @Column(nullable = false)
     private int curriculumIndex = 0;
+
+    private LocalDate lastIssuedDate;
 
     @Builder
     public MaeilMailSubscriptionTrack(Long subscribeId, Long memberId, MaeilMailTrack field) {

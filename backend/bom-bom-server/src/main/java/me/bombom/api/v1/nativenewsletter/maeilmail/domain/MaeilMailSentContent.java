@@ -7,7 +7,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,19 +36,14 @@ public class MaeilMailSentContent extends BaseEntity {
     @Column(nullable = false)
     private Long contentId;
 
-    @Column(nullable = false)
-    private LocalDateTime sentAt;
-
     @Builder
     public MaeilMailSentContent(
             @NonNull Long memberId,
             @NonNull Long topicId,
-            @NonNull Long contentId,
-            @NonNull LocalDateTime sentAt
+            @NonNull Long contentId
     ) {
         this.memberId = memberId;
         this.topicId = topicId;
         this.contentId = contentId;
-        this.sentAt = sentAt;
     }
 }

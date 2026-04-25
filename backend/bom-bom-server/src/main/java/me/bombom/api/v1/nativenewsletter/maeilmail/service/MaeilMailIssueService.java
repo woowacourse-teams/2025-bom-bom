@@ -3,11 +3,9 @@ package me.bombom.api.v1.nativenewsletter.maeilmail.service;
 import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.IssueChunkResult;
-import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MemberTopicKey;
+import me.bombom.api.v1.nativenewsletter.maeilmail.service.internal.MaeilMailIssueChunkProcessor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -16,7 +14,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MaeilMailIssueService {
 
-    private static final Long FIRST_TRACK_ID = 0L;
+    private static final Long START_TRACK_ID = 0L;
 
     private final Clock clock;
     private final MaeilMailIssueChunkProcessor chunkProcessor;
@@ -30,13 +28,11 @@ public class MaeilMailIssueService {
             return;
         }
 
-        Long lastTrackId = FIRST_TRACK_ID;
-        Set<MemberTopicKey> issuedMemberTopicKeys = new HashSet<>();
+        Long lastTrackId = START_TRACK_ID;
         while (true) {
             IssueChunkResult result = chunkProcessor.process(
                     today,
                     lastTrackId,
-                    issuedMemberTopicKeys,
                     issuePageRequest()
             );
             if (!result.hasTracks()) {
@@ -44,7 +40,6 @@ public class MaeilMailIssueService {
             }
 
             lastTrackId = result.lastTrackId();
-            issuedMemberTopicKeys.addAll(result.issuedMemberTopicKeys());
         }
     }
 

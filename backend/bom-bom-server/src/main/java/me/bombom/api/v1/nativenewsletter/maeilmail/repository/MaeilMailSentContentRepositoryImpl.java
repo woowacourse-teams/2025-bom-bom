@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSentContent;
+import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MemberTopicKey;
 
 @RequiredArgsConstructor
 public class MaeilMailSentContentRepositoryImpl implements CustomMaeilMailSentContentRepository {

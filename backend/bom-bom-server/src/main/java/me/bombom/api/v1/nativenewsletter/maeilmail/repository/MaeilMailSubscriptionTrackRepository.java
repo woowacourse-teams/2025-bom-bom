@@ -23,7 +23,7 @@ public interface MaeilMailSubscriptionTrackRepository extends JpaRepository<Maei
             AND n.source = :source
             AND n.status = :newsletterStatus
             AND (t.lastIssuedDate IS NULL OR t.lastIssuedDate <> :issueDate)
-            ORDER BY t.id ASC
+            ORDER BY t.id
             """)
     List<MaeilMailSubscriptionTrack> findSubscribedTracksByNewsletterSourceNotIssuedOnAfterId(
             @Param("issueDate") LocalDate issueDate,
@@ -32,15 +32,6 @@ public interface MaeilMailSubscriptionTrackRepository extends JpaRepository<Maei
             @Param("lastTrackId") Long lastTrackId,
             Pageable pageable
     );
-
-    @Transactional
-    @Modifying
-    @Query("""
-            UPDATE MaeilMailSubscriptionTrack t
-            SET t.curriculumIndex = t.curriculumIndex + 1
-            WHERE t.id IN :ids
-            """)
-    void incrementCurriculumIndexByIds(@Param("ids") List<Long> ids);
 
     @Transactional
     @Modifying

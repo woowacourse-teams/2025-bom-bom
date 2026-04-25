@@ -2,6 +2,8 @@ package news.bombomemail.subscribe.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,6 +33,11 @@ public class Subscribe extends BaseEntity {
 
     @Column(length = 512)
     private String unsubscribeUrl;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private SubscribeStatus status = SubscribeStatus.SUBSCRIBED;
 
     public void updateUnsubscribeUrl(String unsubscribeUrl) {
         this.unsubscribeUrl = unsubscribeUrl;

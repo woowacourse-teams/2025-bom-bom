@@ -2,6 +2,8 @@ package news.bombomemail.newsletter.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -39,6 +41,14 @@ public class Newsletter extends BaseEntity {
     @Column(nullable = false)
     private Long detailId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private NewsletterSource source = NewsletterSource.EXTERNAL;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private NewsletterPublicationStatus status = NewsletterPublicationStatus.ACTIVE;
+
     @Builder
     public Newsletter(
             Long id,
@@ -47,7 +57,9 @@ public class Newsletter extends BaseEntity {
             @NonNull String imageUrl,
             @NonNull String email,
             @NonNull Long categoryId,
-            @NonNull Long detailId
+            @NonNull Long detailId,
+            NewsletterSource source,
+            NewsletterPublicationStatus status
     ) {
         this.id = id;
         this.name = name;
@@ -56,5 +68,7 @@ public class Newsletter extends BaseEntity {
         this.email = email;
         this.categoryId = categoryId;
         this.detailId = detailId;
+        this.source = source == null ? NewsletterSource.EXTERNAL : source;
+        this.status = status == null ? NewsletterPublicationStatus.ACTIVE : status;
     }
 }

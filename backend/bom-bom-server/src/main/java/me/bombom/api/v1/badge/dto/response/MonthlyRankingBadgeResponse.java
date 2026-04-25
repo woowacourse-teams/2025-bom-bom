@@ -6,7 +6,7 @@ import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.reading.dto.MonthlyReadingRankFlat;
 import me.bombom.api.v1.reading.dto.ContinueReadingRankFlat;
 
-public record RankingBadgeResponse(
+public record MonthlyRankingBadgeResponse(
 
         @NotNull
         BadgeGrade grade,
@@ -18,9 +18,9 @@ public record RankingBadgeResponse(
         int month
 ) {
 
-    public static RankingBadgeResponse from(MonthlyReadingRankFlat flat) {
+    public static MonthlyRankingBadgeResponse from(MonthlyReadingRankFlat flat) {
         if (flat.hasRankingBadge()) {
-            return new RankingBadgeResponse(
+            return new MonthlyRankingBadgeResponse(
                     BadgeGrade.valueOf(flat.rankingBadgeGrade()),
                     flat.rankingBadgeYear(),
                     flat.rankingBadgeMonth()
@@ -29,9 +29,9 @@ public record RankingBadgeResponse(
         return null;
     }
 
-    public static RankingBadgeResponse from(ContinueReadingRankFlat flat) {
+    public static MonthlyRankingBadgeResponse from(ContinueReadingRankFlat flat) {
         if (flat.hasRankingBadge()) {
-            return new RankingBadgeResponse(
+            return new MonthlyRankingBadgeResponse(
                     BadgeGrade.valueOf(flat.rankingBadgeGrade()),
                     flat.rankingBadgeYear(),
                     flat.rankingBadgeMonth()

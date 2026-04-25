@@ -46,3 +46,66 @@ jobs:
             });
 
             console.log("Added BE label.");
+
+      # 3) D-n 라벨이 없으면 D-2 자동 추가
+      - name: Add default D-2 label
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = context.payload.pull_request.number;
+  
+            const labels = (context.payload.pull_request.labels || []).map(l => l.name);
+            const hasDLabel = labels.some(name => /^D-\d+$/.test(name));
+  
+            if (hasDLabel) {
+              console.log("D-label already exists. Skip.");
+              return;
+            }
+
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: prNumber,
+              labels: ["D-2"],
+            });
+    
+            console.log("Added default D-2 label.");
+            
+      # 4) PR 제목 파싱하여 컨벤션 라벨(chore, feat 등) 자동 추가
+      - name: Add convention label from title
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = context.payload.pull_request.number;
+
+            // 1. 제목에서 키워드 추출 (예: "feat: 로그인 기능" -> "feat")
+            const match = title.match(/(?:\]\s?|^)(feat|fix|hotfix|chore|docs|refactor|test|style|perf):/i);
+
+            if (!match) {
+              console.log("No convention keyword found in title.");
+              return;
+            }
+
+            const keyword = match[1].toLowerCase();
+
+            // 2. 이미 해당 라벨이 있는지 확인
+            const labels = (context.payload.pull_request.labels || []).map(l => l.name);
+            if (labels.includes(keyword)) {
+              console.log(`Label '${keyword}' already exists. Skip.`);
+              return;
+            }
+
+            // 3. 라벨 추가
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: prNumber,
+              labels: [keyword],
+            });
+
+            console.log(`Added '${keyword}' label based on PR title.`);

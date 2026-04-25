@@ -2,9 +2,13 @@ package me.bombom.api.v1.reading.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.BDDMockito.given;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
@@ -13,6 +17,8 @@ import me.bombom.api.v1.badge.domain.Badge;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.badge.domain.ChallengeBadge;
 import me.bombom.api.v1.badge.domain.RankingBadge;
+import me.bombom.api.v1.badge.domain.StreakBadge;
+import me.bombom.api.v1.badge.domain.StreakBadgeTier;
 import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -41,9 +47,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @IntegrationTest
 class ReadingServiceTest {
+
+    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
+    private static final LocalDate RESET_WEEKDAY = LocalDate.of(2026, 4, 28);
 
     @Autowired
     private ReadingService readingService;
@@ -78,6 +88,9 @@ class ReadingServiceTest {
     @Autowired
     private BadgeRepository badgeRepository;
 
+    @MockitoBean
+    private Clock clock;
+
     private Member member;
     private TodayReading todayReading;
     private ContinueReadingRealtime continueReading;
@@ -86,6 +99,8 @@ class ReadingServiceTest {
 
     @BeforeEach
     void setUp() {
+        fixClockTo(LocalDate.now(SEOUL_ZONE));
+
         // 기존 데이터 삭제
         badgeRepository.deleteAllInBatch();
         yearlyReadingRepository.deleteAllInBatch();
@@ -139,24 +154,32 @@ class ReadingServiceTest {
     @Test
     void 오늘_도착한_아티클을_최초로_읽을_때_연속_읽기_횟수가_증가한다() {
         int initialContinueCount = continueReading.getDayCount();
+        int initialMaxContinueCount = continueReading.getMaxDayCount();
 
         readingService.updateReadingCount(member.getId(), true);
 
         ContinueReadingRealtime updatedContinueReadingRealtime = continueReadingRepository.findByMemberId(member.getId()).get();
 
-        assertThat(updatedContinueReadingRealtime.getDayCount()).isEqualTo(initialContinueCount + 1);
+        assertSoftly(softly -> {
+            softly.assertThat(updatedContinueReadingRealtime.getDayCount()).isEqualTo(initialContinueCount + 1);
+            softly.assertThat(updatedContinueReadingRealtime.getMaxDayCount()).isEqualTo(initialMaxContinueCount + 1);
+        });
     }
 
     @Test
     void 이미_연속_읽기_횟수가_증가하면_그날은_더이상_증가하지_않는다() {
         int initialContinueCount = continueReading.getDayCount();
+        int initialMaxContinueCount = continueReading.getMaxDayCount();
 
         readingService.updateReadingCount(member.getId(), true);
         readingService.updateReadingCount(member.getId(), true);
 
         ContinueReadingRealtime updatedContinueReadingRealtime = continueReadingRepository.findByMemberId(member.getId()).get();
 
-        assertThat(updatedContinueReadingRealtime.getDayCount()).isEqualTo(initialContinueCount + 1);
+        assertSoftly(softly -> {
+            softly.assertThat(updatedContinueReadingRealtime.getDayCount()).isEqualTo(initialContinueCount + 1);
+            softly.assertThat(updatedContinueReadingRealtime.getMaxDayCount()).isEqualTo(initialMaxContinueCount + 1);
+        });
     }
 
     @Test
@@ -313,6 +336,28 @@ class ReadingServiceTest {
             softly.assertThat(result.rank()).isEqualTo(2L);
             softly.assertThat(result.nickname()).isEqualTo(member.getNickname());
         });
+    }
+
+    @Test
+    void 연속_읽기_초기화_후에도_최대_스트릭_일수는_유지된다() {
+        fixClockTo(RESET_WEEKDAY);
+        ContinueReadingRealtime cr = continueReadingRepository.findByMemberId(member.getId()).get();
+        int initialMaxDayCount = cr.getMaxDayCount();
+
+        readingService.resetContinueReadingCount();
+
+        ContinueReadingRealtime updatedContinueReadingRealtime = continueReadingRepository.findByMemberId(member.getId()).get();
+
+        assertSoftly(softly -> {
+            softly.assertThat(updatedContinueReadingRealtime.getDayCount()).isZero();
+            softly.assertThat(updatedContinueReadingRealtime.getMaxDayCount()).isEqualTo(initialMaxDayCount);
+        });
+    }
+
+    private void fixClockTo(LocalDate date) {
+        Instant instant = date.atStartOfDay(SEOUL_ZONE).toInstant();
+        given(clock.instant()).willReturn(instant);
+        given(clock.getZone()).willReturn(SEOUL_ZONE);
     }
 
     @Test
@@ -487,10 +532,10 @@ class ReadingServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(result.data()).hasSize(2);
             softly.assertThat(result.data().get(0).badges()).isNotNull();
-            softly.assertThat(result.data().get(0).badges().ranking()).isNotNull();
-            softly.assertThat(result.data().get(0).badges().ranking().grade()).isEqualTo(BadgeGrade.GOLD);
-            softly.assertThat(result.data().get(0).badges().ranking().year()).isEqualTo(lastMonth.getYear());
-            softly.assertThat(result.data().get(0).badges().ranking().month()).isEqualTo(lastMonth.getMonthValue());
+            softly.assertThat(result.data().get(0).badges().monthlyRanking()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().monthlyRanking().grade()).isEqualTo(BadgeGrade.GOLD);
+            softly.assertThat(result.data().get(0).badges().monthlyRanking().year()).isEqualTo(lastMonth.getYear());
+            softly.assertThat(result.data().get(0).badges().monthlyRanking().month()).isEqualTo(lastMonth.getMonthValue());
             softly.assertThat(result.data().get(1).badges()).isNull();
         });
     }
@@ -573,10 +618,44 @@ class ReadingServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(result.data()).hasSize(1);
             softly.assertThat(result.data().get(0).badges()).isNotNull();
-            softly.assertThat(result.data().get(0).badges().ranking()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().monthlyRanking()).isNotNull();
             softly.assertThat(result.data().get(0).badges().challenge()).isNotNull();
-            softly.assertThat(result.data().get(0).badges().ranking().grade()).isEqualTo(BadgeGrade.GOLD);
+            softly.assertThat(result.data().get(0).badges().monthlyRanking().grade()).isEqualTo(BadgeGrade.GOLD);
             softly.assertThat(result.data().get(0).badges().challenge().grade()).isEqualTo(BadgeGrade.SILVER);
+        });
+    }
+
+    @Test
+    void 월간_랭킹_조회_시_가장_높은_스트릭_뱃지가_표시된다() {
+        // given
+        monthlyReadingSnapshotRepository.deleteAllInBatch();
+
+        Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
+
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
+
+        StreakBadge higherBadge = StreakBadge.builder()
+                .memberId(member1.getId())
+                .streakDayCount(StreakBadgeTier.FIFTEEN.getDayCount())
+                .build();
+        badgeRepository.save(higherBadge);
+        badgeRepository.flush();
+
+        StreakBadge recentLowerBadge = StreakBadge.builder()
+                .memberId(member1.getId())
+                .streakDayCount(StreakBadgeTier.SEVEN.getDayCount())
+                .build();
+        badgeRepository.save(recentLowerBadge);
+
+        // when
+        MonthlyReadingRankingResponse result = readingService.getMonthlyReadingRank(10);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.data()).hasSize(1);
+            softly.assertThat(result.data().get(0).badges()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().streak()).isNotNull();
+            softly.assertThat(result.data().get(0).badges().streak().tier()).isEqualTo(StreakBadgeTier.FIFTEEN);
         });
     }
 
@@ -624,10 +703,10 @@ class ReadingServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(result.badges()).isNotNull();
-            softly.assertThat(result.badges().ranking()).isNotNull();
-            softly.assertThat(result.badges().ranking().grade()).isEqualTo(BadgeGrade.GOLD);
-            softly.assertThat(result.badges().ranking().year()).isEqualTo(lastMonth.getYear());
-            softly.assertThat(result.badges().ranking().month()).isEqualTo(lastMonth.getMonthValue());
+            softly.assertThat(result.badges().monthlyRanking()).isNotNull();
+            softly.assertThat(result.badges().monthlyRanking().grade()).isEqualTo(BadgeGrade.GOLD);
+            softly.assertThat(result.badges().monthlyRanking().year()).isEqualTo(lastMonth.getYear());
+            softly.assertThat(result.badges().monthlyRanking().month()).isEqualTo(lastMonth.getMonthValue());
         });
     }
 
@@ -709,9 +788,9 @@ class ReadingServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(result.badges()).isNotNull();
-            softly.assertThat(result.badges().ranking()).isNotNull();
+            softly.assertThat(result.badges().monthlyRanking()).isNotNull();
             softly.assertThat(result.badges().challenge()).isNotNull();
-            softly.assertThat(result.badges().ranking().grade()).isEqualTo(BadgeGrade.GOLD);
+            softly.assertThat(result.badges().monthlyRanking().grade()).isEqualTo(BadgeGrade.GOLD);
             softly.assertThat(result.badges().challenge().grade()).isEqualTo(BadgeGrade.SILVER);
         });
     }

@@ -47,4 +47,6 @@ public interface MaeilMailSubscriptionTrackRepository extends JpaRepository<Maei
             @Param("ids") List<Long> ids,
             @Param("issueDate") LocalDate issueDate
     );
+
+    List<MaeilMailSubscriptionTrack> findByMemberId(Long memberId);
 }

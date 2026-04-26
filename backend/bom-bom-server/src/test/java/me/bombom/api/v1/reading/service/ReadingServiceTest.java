@@ -26,10 +26,10 @@ import me.bombom.api.v1.reading.domain.ReadingSnapshotType;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
-import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
-import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ContinueReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.MemberContinueReadingRankResponse;
+import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
+import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
@@ -329,13 +329,14 @@ class ReadingServiceTest {
     void 연속_읽기_초기화_후에도_최대_스트릭_일수는_유지된다() {
         ContinueReadingRealtime cr = continueReadingRepository.findByMemberId(member.getId()).get();
         int initialMaxDayCount = cr.getMaxDayCount();
+        int initialDayCount = cr.getDayCount();
 
         readingService.resetContinueReadingCount();
 
         ContinueReadingRealtime updatedContinueReadingRealtime = continueReadingRepository.findByMemberId(member.getId()).get();
 
         assertSoftly(softly -> {
-            softly.assertThat(updatedContinueReadingRealtime.getDayCount()).isZero();
+            softly.assertThat(updatedContinueReadingRealtime.getDayCount()).isEqualTo(initialDayCount);
             softly.assertThat(updatedContinueReadingRealtime.getMaxDayCount()).isEqualTo(initialMaxDayCount);
         });
     }

@@ -5,16 +5,19 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSubscriptionTrack;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailTrack;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscribeRequest;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscriptionResponse;
+import me.bombom.api.v1.nativenewsletter.maeilmail.event.MaeilMailSubscribedEvent;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSubscriptionTrackRepository;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterSource;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,7 @@ public class MaeilMailSubscribeService {
     private final SubscribeRepository subscribeRepository;
     private final NewsletterRepository newsletterRepository;
     private final MaeilMailSubscriptionTrackRepository maeilMailSubscriptionTrackRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public MaeilMailSubscriptionResponse getSubscription(Long memberId) {
         List<MaeilMailSubscriptionTrack> tracks = maeilMailSubscriptionTrackRepository.findByMemberId(memberId);
@@ -33,17 +37,18 @@ public class MaeilMailSubscribeService {
     }
 
     @Transactional
-    public void subscribe(Long memberId, MaeilMailSubscribeRequest request) {
+    public void subscribe(Member member, MaeilMailSubscribeRequest request) {
         Newsletter newsletter = getMaeilMailNewsletter();
-        validateNotSubscribed(memberId, newsletter.getId());
+        validateNotSubscribed(member.getId(), newsletter.getId());
         validateTracks(request);
 
         Subscribe subscribe = subscribeRepository.save(Subscribe.builder()
-                .memberId(memberId)
+                .memberId(member.getId())
                 .newsletterId(newsletter.getId())
                 .build());
 
-        maeilMailSubscriptionTrackRepository.saveAll(buildSubscriptionTracks(subscribe.getId(), memberId, request.tracks()));
+        maeilMailSubscriptionTrackRepository.saveAll(buildSubscriptionTracks(subscribe.getId(), member.getId(), request.tracks()));
+        applicationEventPublisher.publishEvent(MaeilMailSubscribedEvent.of(newsletter.getId(), member.getBirthDate()));
     }
 
     private Newsletter getMaeilMailNewsletter() {

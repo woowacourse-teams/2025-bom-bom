@@ -68,7 +68,7 @@ class MaeilMailSubscribeServiceTest {
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
         Newsletter newsletter = newsletterRepository.save(createMaeilMailNewsletter());
 
-        maeilMailSubscribeService.subscribe(member.getId(), new MaeilMailSubscribeRequest(
+        maeilMailSubscribeService.subscribe(member, new MaeilMailSubscribeRequest(
                 List.of(MaeilMailTrack.BE, MaeilMailTrack.FE)
         ));
 
@@ -91,7 +91,7 @@ class MaeilMailSubscribeServiceTest {
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
         Newsletter newsletter = newsletterRepository.save(createMaeilMailNewsletter());
 
-        maeilMailSubscribeService.subscribe(member.getId(), new MaeilMailSubscribeRequest(
+        maeilMailSubscribeService.subscribe(member, new MaeilMailSubscribeRequest(
                 List.of(MaeilMailTrack.BE, MaeilMailTrack.FE)
         ));
 
@@ -127,7 +127,7 @@ class MaeilMailSubscribeServiceTest {
                 .newsletterId(newsletter.getId())
                 .build());
 
-        assertThatThrownBy(() -> maeilMailSubscribeService.subscribe(member.getId(), new MaeilMailSubscribeRequest(
+        assertThatThrownBy(() -> maeilMailSubscribeService.subscribe(member, new MaeilMailSubscribeRequest(
                 List.of(MaeilMailTrack.BE)
         )))
                 .isInstanceOf(CIllegalArgumentException.class)
@@ -141,7 +141,7 @@ class MaeilMailSubscribeServiceTest {
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
         newsletterRepository.save(createMaeilMailNewsletter());
 
-        assertThatThrownBy(() -> maeilMailSubscribeService.subscribe(member.getId(), new MaeilMailSubscribeRequest(
+        assertThatThrownBy(() -> maeilMailSubscribeService.subscribe(member, new MaeilMailSubscribeRequest(
                 List.of(MaeilMailTrack.BE, MaeilMailTrack.BE)
         )))
                 .isInstanceOf(CIllegalArgumentException.class)

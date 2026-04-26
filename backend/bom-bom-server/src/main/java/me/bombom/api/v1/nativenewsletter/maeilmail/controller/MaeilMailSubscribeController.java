@@ -34,6 +34,6 @@ public class MaeilMailSubscribeController implements MaeilMailSubscribeControlle
             @LoginMember Member member,
             @RequestBody @Valid MaeilMailSubscribeRequest request
     ) {
-        maeilMailSubscribeService.subscribe(member.getId(), request);
+        maeilMailSubscribeService.subscribe(member, request);
     }
 }

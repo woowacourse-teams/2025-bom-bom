@@ -44,10 +44,16 @@ class MaeilMailMemberTopicRepositoryTest {
     @Test
     void sent_content는_member_topic_pair를_정확히_조회한다() {
         // given
-        MaeilMailSentContent target = createSentContent(1L, 10L, 100L);
-        MaeilMailSentContent crossProduct = createSentContent(1L, 20L, 200L);
-        MaeilMailSentContent other = createSentContent(2L, 10L, 300L);
-        sentContentRepository.saveAll(List.of(target, crossProduct, other));
+        MaeilMailSentContent firstTarget = createSentContent(1L, 10L, 100L);
+        MaeilMailSentContent secondTarget = createSentContent(2L, 20L, 200L);
+        MaeilMailSentContent firstCrossProduct = createSentContent(1L, 20L, 300L);
+        MaeilMailSentContent secondCrossProduct = createSentContent(2L, 10L, 400L);
+        sentContentRepository.saveAll(List.of(
+                firstTarget,
+                secondTarget,
+                firstCrossProduct,
+                secondCrossProduct
+        ));
 
         // when
         List<MaeilMailSentContent> sentContents = sentContentRepository.findAllByMemberTopicKeys(List.of(
@@ -57,10 +63,10 @@ class MaeilMailMemberTopicRepositoryTest {
 
         // then
         assertSoftly(softly -> {
-            softly.assertThat(sentContents).hasSize(1);
-            softly.assertThat(sentContents.getFirst().getMemberId()).isEqualTo(1L);
-            softly.assertThat(sentContents.getFirst().getTopicId()).isEqualTo(10L);
-            softly.assertThat(sentContents.getFirst().getContentId()).isEqualTo(100L);
+            softly.assertThat(sentContents).hasSize(2);
+            softly.assertThat(sentContents)
+                    .extracting(MaeilMailSentContent::getContentId)
+                    .containsExactlyInAnyOrder(100L, 200L);
         });
     }
 
@@ -70,20 +76,26 @@ class MaeilMailMemberTopicRepositoryTest {
         LocalDate issueDate = LocalDate.of(2026, 4, 26);
         issueHistoryRepository.saveAll(List.of(
                 createIssueHistory(issueDate, 1L, 10L),
+                createIssueHistory(issueDate, 2L, 20L),
                 createIssueHistory(issueDate, 1L, 20L),
-                createIssueHistory(issueDate.minusDays(1), 2L, 20L)
+                createIssueHistory(issueDate, 2L, 10L),
+                createIssueHistory(issueDate.minusDays(1), 3L, 30L)
         ));
 
         // when
         Set<MemberTopicKey> issuedKeys = issueHistoryRepository.findIssuedMemberTopicKeys(issueDate, List.of(
                 new MemberTopicKey(1L, 10L),
-                new MemberTopicKey(2L, 20L)
+                new MemberTopicKey(2L, 20L),
+                new MemberTopicKey(3L, 30L)
         ));
 
         // then
         assertSoftly(softly -> {
-            softly.assertThat(issuedKeys).hasSize(1);
-            softly.assertThat(issuedKeys).containsExactly(new MemberTopicKey(1L, 10L));
+            softly.assertThat(issuedKeys).hasSize(2);
+            softly.assertThat(issuedKeys).containsExactlyInAnyOrder(
+                    new MemberTopicKey(1L, 10L),
+                    new MemberTopicKey(2L, 20L)
+            );
         });
     }
 

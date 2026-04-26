@@ -9,6 +9,7 @@ import java.util.Properties;
 import news.bombomemail.article.domain.RecentArticle;
 import news.bombomemail.article.repository.RecentArticleRepository;
 import news.bombomemail.article.util.html.HtmlCleanerConfig;
+import news.bombomemail.common.TimeConfig;
 import news.bombomemail.email.extractor.EmailContentExtractor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({RecentArticleService.class, HtmlCleanerConfig.class})
+@Import({RecentArticleService.class, HtmlCleanerConfig.class, TimeConfig.class})
 class RecentArticleServiceTest {
 
     @Autowired

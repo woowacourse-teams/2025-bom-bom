@@ -1,7 +1,7 @@
 package news.bombomemail.article.service;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import news.bombomemail.article.domain.RecentArticle;
@@ -21,6 +21,7 @@ public class RecentArticleService {
 
     private final HtmlTagCleaner htmlTagCleaner;
     private final RecentArticleRepository recentArticleRepository;
+    private final Clock clock;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void save(
@@ -49,7 +50,7 @@ public class RecentArticleService {
                 .contentsSummary(SummaryGenerator.summarize(contents))
                 .memberId(memberId)
                 .newsletterId(newsletterId)
-                .arrivedDateTime(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
+                .arrivedDateTime(LocalDateTime.now(clock))
                 .build();
     }
 }

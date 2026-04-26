@@ -22,7 +22,7 @@ public class MaeilMailIssueService {
     private final MaeilMailIssueChunkProcessor chunkProcessor;
 
     @Value("${maeil-mail.issue.chunk-size:200}")
-    private int issueChunkSize = 200;
+    private int issueChunkSize;
 
     public void issue() {
         long startedAt = System.currentTimeMillis();

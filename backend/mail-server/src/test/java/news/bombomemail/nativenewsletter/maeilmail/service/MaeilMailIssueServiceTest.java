@@ -31,6 +31,7 @@ class MaeilMailIssueServiceTest {
     @BeforeEach
     void setup() {
         issueService = new MaeilMailIssueService(clockAt(LocalDateTime.of(2026, 4, 27, 7, 0)), chunkProcessor);
+        ReflectionTestUtils.setField(issueService, "issueChunkSize", 200);
     }
 
     @Test

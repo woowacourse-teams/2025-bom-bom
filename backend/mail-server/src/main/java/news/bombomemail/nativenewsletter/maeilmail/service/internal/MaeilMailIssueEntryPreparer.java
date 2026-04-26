@@ -55,6 +55,7 @@ public class MaeilMailIssueEntryPreparer {
 
             MemberTopicKey memberTopicKey = new MemberTopicKey(track.getMemberId(), issueTopic.getId());
             if (issueData.issuedMemberTopicKeys().contains(memberTopicKey)) {
+                // 동일 member-topic이 같은 날 먼저 발행됐으면 Article은 만들지 않고 track 진행 상태만 맞춘다.
                 previouslyIssuedTrackIds.add(track.getId());
                 continue;
             }

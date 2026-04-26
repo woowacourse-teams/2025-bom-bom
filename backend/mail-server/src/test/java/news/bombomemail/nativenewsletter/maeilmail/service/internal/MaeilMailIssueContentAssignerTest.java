@@ -1,17 +1,19 @@
 package news.bombomemail.nativenewsletter.maeilmail.service.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import news.bombomemail.nativenewsletter.maeilmail.dto.MemberTopicKey;
 import news.bombomemail.nativenewsletter.maeilmail.repository.MaeilMailSentContentRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -21,8 +23,15 @@ class MaeilMailIssueContentAssignerTest {
     @Mock
     private MaeilMailSentContentRepository sentContentRepository;
 
-    @InjectMocks
+    @Mock
+    private Random random;
+
     private MaeilMailIssueContentAssigner contentAssigner;
+
+    @BeforeEach
+    void setup() {
+        contentAssigner = new MaeilMailIssueContentAssigner(sentContentRepository, random);
+    }
 
     @Test
     void topic_content가_없으면_선택하지_않는다() {
@@ -76,6 +85,7 @@ class MaeilMailIssueContentAssignerTest {
         );
 
         // when
+        given(random.nextInt(2)).willReturn(1);
         Optional<Long> result = contentAssigner.assignContentIdOrRecycle(
                 memberId,
                 topicId,
@@ -84,7 +94,7 @@ class MaeilMailIssueContentAssignerTest {
         );
 
         // then
-        assertThat(result).hasValueSatisfying(contentId -> assertThat(contentIds).contains(contentId));
+        assertThat(result).hasValue(200L);
         verify(sentContentRepository).deleteByMemberIdAndTopicId(memberId, topicId);
         verify(sentContentRepository).flush();
     }

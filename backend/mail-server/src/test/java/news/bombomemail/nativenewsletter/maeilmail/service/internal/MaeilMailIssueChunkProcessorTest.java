@@ -112,8 +112,7 @@ class MaeilMailIssueChunkProcessorTest {
                                 .memberId(100L)
                                 .topicId(1000L)
                                 .contentId(9000L)
-                                .build(),
-                        9000L
+                                .build()
                 )),
                 List.of(2L)
         );

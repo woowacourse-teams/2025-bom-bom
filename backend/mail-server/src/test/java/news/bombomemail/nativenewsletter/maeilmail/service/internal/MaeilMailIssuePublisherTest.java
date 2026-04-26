@@ -74,7 +74,7 @@ class MaeilMailIssuePublisherTest {
         LocalDate issueDate = LocalDate.of(2026, 4, 27);
         Article article = createArticle(100L, 50L, 1L, "매일메일 제목", "<p>본문</p>");
         MaeilMailSentContent sentContent = createSentContent(1L, 10L, 9000L);
-        IssueEntry entry = new IssueEntry(article, List.of(1L, 2L), sentContent, 9000L);
+        IssueEntry entry = new IssueEntry(article, List.of(1L, 2L), sentContent);
         PreparedIssueEntries preparedIssueEntries = new PreparedIssueEntries(List.of(entry), List.of(9L));
         Newsletter newsletter = createNewsletter(50L, "매일메일");
 
@@ -117,7 +117,7 @@ class MaeilMailIssuePublisherTest {
         LocalDate issueDate = LocalDate.of(2026, 4, 27);
         Article article = createArticle(null, 50L, 1L, "매일메일 제목", "<p>본문</p>");
         MaeilMailSentContent sentContent = createSentContent(1L, 10L, 9000L);
-        IssueEntry entry = new IssueEntry(article, List.of(1L), sentContent, 9000L);
+        IssueEntry entry = new IssueEntry(article, List.of(1L), sentContent);
         PreparedIssueEntries preparedIssueEntries = new PreparedIssueEntries(List.of(entry), List.of());
 
         given(articleRepository.saveAll(List.of(article))).willReturn(List.of());

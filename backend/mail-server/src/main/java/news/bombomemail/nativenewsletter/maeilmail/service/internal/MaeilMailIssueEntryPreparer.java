@@ -125,8 +125,7 @@ public class MaeilMailIssueEntryPreparer {
         return Optional.of(new IssueEntry(
                 buildArticle(content, pendingEntry.memberId(), pendingEntry.newsletterId(), arrivedAt),
                 pendingEntry.trackIds(),
-                buildSentContent(pendingEntry.memberId(), pendingEntry.topicId(), content.getId()),
-                content.getId()
+                buildSentContent(pendingEntry.memberId(), pendingEntry.topicId(), content.getId())
         ));
     }
 

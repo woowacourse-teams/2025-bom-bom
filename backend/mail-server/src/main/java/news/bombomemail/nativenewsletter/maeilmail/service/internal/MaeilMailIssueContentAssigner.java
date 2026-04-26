@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class MaeilMailIssueContentAssigner {
 
     private final MaeilMailSentContentRepository sentContentRepository;
-    private final Random random = new Random();
+    private final Random random;
 
     public Optional<Long> assignContentIdOrRecycle(
             Long memberId,

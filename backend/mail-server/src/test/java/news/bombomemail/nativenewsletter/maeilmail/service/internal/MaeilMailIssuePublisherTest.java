@@ -2,7 +2,9 @@ package news.bombomemail.nativenewsletter.maeilmail.service.internal;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -112,6 +114,44 @@ class MaeilMailIssuePublisherTest {
     }
 
     @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    void 여러_article을_저장하면_entry_순서대로_article_content_history를_기록한다() {
+        // given
+        LocalDate issueDate = LocalDate.of(2026, 4, 27);
+        Article firstArticle = createArticle(100L, 50L, 1L, "첫 번째 제목", "<p>첫 번째 본문</p>");
+        Article secondArticle = createArticle(101L, 50L, 2L, "두 번째 제목", "<p>두 번째 본문</p>");
+        MaeilMailSentContent firstSentContent = createSentContent(1L, 10L, 9000L);
+        MaeilMailSentContent secondSentContent = createSentContent(2L, 20L, 9001L);
+        IssueEntry firstEntry = new IssueEntry(firstArticle, List.of(1L), firstSentContent);
+        IssueEntry secondEntry = new IssueEntry(secondArticle, List.of(2L), secondSentContent);
+        PreparedIssueEntries preparedIssueEntries = new PreparedIssueEntries(List.of(firstEntry, secondEntry), List.of());
+        Newsletter newsletter = createNewsletter(50L, "매일메일");
+
+        given(articleRepository.saveAll(List.of(firstArticle, secondArticle)))
+                .willReturn(List.of(firstArticle, secondArticle));
+        given(newsletterRepository.findAllById(Set.of(50L))).willReturn(List.of(newsletter));
+
+        // when
+        issuePublisher.publish(preparedIssueEntries, issueDate);
+
+        // then
+        ArgumentCaptor<Iterable> historyCaptor = ArgumentCaptor.forClass(Iterable.class);
+        verify(issueHistoryRepository).saveAll(historyCaptor.capture());
+        verify(eventPublisher, times(2)).publishEvent(any(ArticleArrivedEvent.class));
+
+        List<MaeilMailIssueHistory> histories = StreamSupport.stream(historyCaptor.getValue().spliterator(), false)
+                .map(MaeilMailIssueHistory.class::cast)
+                .toList();
+        assertSoftly(softly -> {
+            softly.assertThat(histories).hasSize(2);
+            softly.assertThat(histories.get(0).getArticleId()).isEqualTo(100L);
+            softly.assertThat(histories.get(0).getContentId()).isEqualTo(9000L);
+            softly.assertThat(histories.get(1).getArticleId()).isEqualTo(101L);
+            softly.assertThat(histories.get(1).getContentId()).isEqualTo(9001L);
+        });
+    }
+
+    @Test
     void 저장된_article_수와_entry_수가_다르면_예외가_발생한다() {
         // given
         LocalDate issueDate = LocalDate.of(2026, 4, 27);
@@ -127,6 +167,28 @@ class MaeilMailIssuePublisherTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Article 저장 결과 수");
         verifyNoInteractions(newsletterRepository, sentContentRepository, issueHistoryRepository, trackRepository, eventPublisher);
+    }
+
+    @Test
+    void article의_newsletter를_찾지_못하면_이벤트를_발행하지_않고_예외가_발생한다() {
+        // given
+        LocalDate issueDate = LocalDate.of(2026, 4, 27);
+        Article article = createArticle(100L, 50L, 1L, "매일메일 제목", "<p>본문</p>");
+        MaeilMailSentContent sentContent = createSentContent(1L, 10L, 9000L);
+        IssueEntry entry = new IssueEntry(article, List.of(1L), sentContent);
+        PreparedIssueEntries preparedIssueEntries = new PreparedIssueEntries(List.of(entry), List.of());
+
+        given(articleRepository.saveAll(List.of(article))).willReturn(List.of(article));
+        given(newsletterRepository.findAllById(Set.of(50L))).willReturn(List.of());
+
+        // when & then
+        assertThatThrownBy(() -> issuePublisher.publish(preparedIssueEntries, issueDate))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Newsletter");
+        verify(sentContentRepository).saveAll(List.of(sentContent));
+        verify(issueHistoryRepository).saveAll(any());
+        verify(trackRepository).markIssuedByIds(List.of(1L), issueDate);
+        verifyNoInteractions(eventPublisher);
     }
 
     @Test

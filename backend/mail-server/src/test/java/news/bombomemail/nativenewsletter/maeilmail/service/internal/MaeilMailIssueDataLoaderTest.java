@@ -132,6 +132,42 @@ class MaeilMailIssueDataLoaderTest {
     }
 
     @Test
+    void 발행_topic이_없는_track은_로딩결과에서_제외한다() {
+        // given
+        LocalDate issueDate = LocalDate.of(2026, 4, 27);
+        MaeilMailSubscriptionTrack topicMissingTrack = createTrack(1L, 10L, 100L, MaeilMailTrack.BE, 0);
+        MaeilMailSubscriptionTrack targetTrack = createTrack(2L, 11L, 200L, MaeilMailTrack.FE, 0);
+        MaeilMailTopic feTopic = createTopic(2000L, MaeilMailTrack.FE, "react", 1);
+
+        given(subscribeRepository.findAllById(List.of(10L, 11L))).willReturn(List.of(
+                createSubscribe(10L, 50L, 100L),
+                createSubscribe(11L, 50L, 200L)
+        ));
+        given(topicRepository.findAllByOrderByDisplayOrderAsc()).willReturn(List.of(feTopic));
+        given(contentRepository.findContentIdsByTopicIdIn(anyCollection())).willReturn(List.of(
+                new TopicContentId(feTopic.getId(), 9200L)
+        ));
+        given(sentContentRepository.findAllByMemberTopicKeys(List.of(
+                new MemberTopicKey(200L, feTopic.getId())
+        ))).willReturn(List.of());
+        given(issueHistoryRepository.findIssuedMemberTopicKeys(issueDate, List.of(
+                new MemberTopicKey(200L, feTopic.getId())
+        ))).willReturn(Set.of());
+
+        // when
+        IssueData result = dataLoader.load(issueDate, List.of(topicMissingTrack, targetTrack));
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.issueTopicsByTrackId()).doesNotContainKey(topicMissingTrack.getId());
+            softly.assertThat(result.issueTopicsByTrackId()).containsEntry(targetTrack.getId(), feTopic);
+            softly.assertThat(result.contentIdsByTopicId()).containsOnlyKeys(feTopic.getId());
+            softly.assertThat(result.sentContentIdsByMemberTopic()).isEmpty();
+            softly.assertThat(result.issuedMemberTopicKeys()).isEmpty();
+        });
+    }
+
+    @Test
     void track의_subscribe를_찾지_못하면_예외가_발생한다() {
         // given
         MaeilMailSubscriptionTrack track = createTrack(1L, 10L, 100L, MaeilMailTrack.BE, 0);

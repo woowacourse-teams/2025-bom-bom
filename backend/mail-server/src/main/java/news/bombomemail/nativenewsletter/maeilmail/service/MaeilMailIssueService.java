@@ -27,23 +27,36 @@ public class MaeilMailIssueService {
     private int issueChunkSize;
 
     public void issue() {
-        long startedAt = System.currentTimeMillis();
         LocalDate today = LocalDate.now(clock);
         if (isWeekend(today)) {
             log.info("매일메일 발행 스킵 - issueDate={}, reason=weekend", today);
             return;
         }
 
-        PageRequest pageRequest = issuePageRequest();
         MaeilMailIssueJob issueJob = issueJobManager.startOrResume(today, LocalDateTime.now(clock));
+        runIssueJob(today, issueJob);
+    }
+
+    public void resumeIncompleteTodayJob() {
+        LocalDate today = LocalDate.now(clock);
+        issueJobManager.resumeIncomplete(today, LocalDateTime.now(clock))
+                .ifPresentOrElse(
+                        issueJob -> runIssueJob(today, issueJob),
+                        () -> log.info("매일메일 미완료 발행 job 없음 - issueDate={}", today)
+                );
+    }
+
+    private void runIssueJob(LocalDate issueDate, MaeilMailIssueJob issueJob) {
+        long startedAt = System.currentTimeMillis();
+        PageRequest pageRequest = issuePageRequest();
         if (issueJob.isCompleted()) {
-            log.info("매일메일 발행 스킵 - issueDate={}, issueJobId={}, reason=already_completed", today, issueJob.getId());
+            log.info("매일메일 발행 스킵 - issueDate={}, issueJobId={}, reason=already_completed", issueDate, issueJob.getId());
             return;
         }
 
         log.info(
                 "매일메일 발행 시작 - issueDate={}, issueJobId={}, chunkSize={}, lastProcessedTrackId={}",
-                today,
+                issueDate,
                 issueJob.getId(),
                 pageRequest.getPageSize(),
                 issueJob.getLastProcessedTrackId()
@@ -52,17 +65,17 @@ public class MaeilMailIssueService {
         while (true) {
             IssueChunkResult result;
             try {
-                result = chunkProcessor.process(issueJob.getId(), today, lastTrackId, pageRequest);
+                result = chunkProcessor.process(issueJob.getId(), issueDate, lastTrackId, pageRequest);
             } catch (RuntimeException e) {
                 issueJobManager.fail(issueJob.getId(), e, LocalDateTime.now(clock));
-                log.error("매일메일 발행 실패 - issueDate={}, issueJobId={}, lastTrackId={}", today, issueJob.getId(), lastTrackId, e);
+                log.error("매일메일 발행 실패 - issueDate={}, issueJobId={}, lastTrackId={}", issueDate, issueJob.getId(), lastTrackId, e);
                 throw e;
             }
             if (!result.hasTracks()) {
                 MaeilMailIssueJob completedJob = issueJobManager.complete(issueJob.getId(), LocalDateTime.now(clock));
                 log.info(
                         "매일메일 발행 완료 - issueDate={}, issueJobId={}, chunkCount={}, trackCount={}, issuedArticleCount={}, previouslyIssuedTrackCount={}, elapsedMs={}",
-                        today,
+                        issueDate,
                         completedJob.getId(),
                         completedJob.getChunkCount(),
                         completedJob.getProcessedTrackCount(),

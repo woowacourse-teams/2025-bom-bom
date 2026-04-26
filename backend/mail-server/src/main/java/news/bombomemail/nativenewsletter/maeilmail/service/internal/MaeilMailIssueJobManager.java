@@ -2,8 +2,11 @@ package news.bombomemail.nativenewsletter.maeilmail.service.internal;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailIssueJob;
+import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailIssueJobStatus;
 import news.bombomemail.nativenewsletter.maeilmail.dto.IssueChunkResult;
 import news.bombomemail.nativenewsletter.maeilmail.repository.MaeilMailIssueJobRepository;
 import org.springframework.stereotype.Component;
@@ -15,6 +18,10 @@ public class MaeilMailIssueJobManager {
 
     private static final Long START_TRACK_ID = 0L;
     private static final int MAX_FAILED_MESSAGE_LENGTH = 1000;
+    private static final List<MaeilMailIssueJobStatus> INCOMPLETE_STATUSES = List.of(
+            MaeilMailIssueJobStatus.RUNNING,
+            MaeilMailIssueJobStatus.FAILED
+    );
 
     private final MaeilMailIssueJobRepository issueJobRepository;
 
@@ -30,6 +37,15 @@ public class MaeilMailIssueJobManager {
                         START_TRACK_ID,
                         startedAt
                 )));
+    }
+
+    @Transactional
+    public Optional<MaeilMailIssueJob> resumeIncomplete(LocalDate issueDate, LocalDateTime startedAt) {
+        return issueJobRepository.findByIssueDateAndStatusIn(issueDate, INCOMPLETE_STATUSES)
+                .map(issueJob -> {
+                    issueJob.resume(startedAt);
+                    return issueJob;
+                });
     }
 
     @Transactional

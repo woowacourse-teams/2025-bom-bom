@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailIssueJob;
 import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailIssueJobStatus;
@@ -72,6 +73,49 @@ class MaeilMailIssueJobManagerTest {
             softly.assertThat(result.getFailedMessage()).isNull();
             softly.assertThat(result.getFailedAt()).isNull();
         });
+    }
+
+    @Test
+    void 미완료_job만_재개한다() {
+        // given
+        LocalDate issueDate = LocalDate.of(2026, 4, 27);
+        LocalDateTime startedAt = LocalDateTime.of(2026, 4, 27, 7, 0);
+        MaeilMailIssueJob issueJob = issueJob(1L, issueDate, startedAt);
+        issueJob.recordChunk(IssueChunkResult.of(10L, 2, 1, 0));
+        issueJob.fail("fail", startedAt.plusMinutes(10));
+        given(issueJobRepository.findByIssueDateAndStatusIn(issueDate, List.of(
+                MaeilMailIssueJobStatus.RUNNING,
+                MaeilMailIssueJobStatus.FAILED
+        ))).willReturn(Optional.of(issueJob));
+
+        // when
+        Optional<MaeilMailIssueJob> result = issueJobManager.resumeIncomplete(issueDate, startedAt.plusMinutes(20));
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).isPresent();
+            softly.assertThat(result.get().getStatus()).isEqualTo(MaeilMailIssueJobStatus.RUNNING);
+            softly.assertThat(result.get().getLastProcessedTrackId()).isEqualTo(10L);
+            softly.assertThat(result.get().getFailedMessage()).isNull();
+            softly.assertThat(result.get().getFailedAt()).isNull();
+        });
+    }
+
+    @Test
+    void 미완료_job이_없으면_재개하지_않는다() {
+        // given
+        LocalDate issueDate = LocalDate.of(2026, 4, 27);
+        LocalDateTime startedAt = LocalDateTime.of(2026, 4, 27, 7, 0);
+        given(issueJobRepository.findByIssueDateAndStatusIn(issueDate, List.of(
+                MaeilMailIssueJobStatus.RUNNING,
+                MaeilMailIssueJobStatus.FAILED
+        ))).willReturn(Optional.empty());
+
+        // when
+        Optional<MaeilMailIssueJob> result = issueJobManager.resumeIncomplete(issueDate, startedAt);
+
+        // then
+        assertSoftly(softly -> softly.assertThat(result).isEmpty());
     }
 
     @Test

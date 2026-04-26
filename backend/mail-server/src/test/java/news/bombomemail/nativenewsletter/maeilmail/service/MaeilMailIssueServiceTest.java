@@ -8,6 +8,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Optional;
 import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailIssueJob;
 import news.bombomemail.nativenewsletter.maeilmail.dto.IssueChunkResult;
 import news.bombomemail.nativenewsletter.maeilmail.service.internal.MaeilMailIssueChunkProcessor;
@@ -152,6 +153,40 @@ class MaeilMailIssueServiceTest {
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> issueService.issue())
                 .isSameAs(exception);
         verify(issueJobManager).fail(1L, exception, startedAt);
+    }
+
+    @Test
+    void 미완료_job이_있으면_cursor부터_재개한다() {
+        // given
+        LocalDate issueDate = LocalDate.of(2026, 4, 27);
+        LocalDateTime startedAt = LocalDateTime.of(2026, 4, 27, 7, 0);
+        MaeilMailIssueJob issueJob = issueJob(1L, issueDate, 10L, startedAt);
+        PageRequest pageRequest = PageRequest.of(0, 200);
+        given(issueJobManager.resumeIncomplete(issueDate, startedAt)).willReturn(Optional.of(issueJob));
+        given(chunkProcessor.process(1L, issueDate, 10L, pageRequest))
+                .willReturn(IssueChunkResult.empty());
+        given(issueJobManager.complete(1L, startedAt)).willReturn(issueJob);
+
+        // when
+        issueService.resumeIncompleteTodayJob();
+
+        // then
+        verify(chunkProcessor).process(1L, issueDate, 10L, pageRequest);
+        verify(issueJobManager).complete(1L, startedAt);
+    }
+
+    @Test
+    void 미완료_job이_없으면_재개하지_않는다() {
+        // given
+        LocalDate issueDate = LocalDate.of(2026, 4, 27);
+        LocalDateTime startedAt = LocalDateTime.of(2026, 4, 27, 7, 0);
+        given(issueJobManager.resumeIncomplete(issueDate, startedAt)).willReturn(Optional.empty());
+
+        // when
+        issueService.resumeIncompleteTodayJob();
+
+        // then
+        verifyNoInteractions(chunkProcessor);
     }
 
     private Clock clockAt(LocalDateTime localDateTime) {

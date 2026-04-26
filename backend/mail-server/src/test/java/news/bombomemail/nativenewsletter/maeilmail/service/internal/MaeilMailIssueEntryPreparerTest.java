@@ -102,6 +102,7 @@ class MaeilMailIssueEntryPreparerTest {
             softly.assertThat(sentContent.getMemberId()).isEqualTo(100L);
             softly.assertThat(sentContent.getTopicId()).isEqualTo(topic.getId());
             softly.assertThat(sentContent.getContentId()).isEqualTo(content.getId());
+            softly.assertThat(entry.contentId()).isEqualTo(content.getId());
         });
         verify(contentAssigner).assignContentIdOrRecycle(100L, topic.getId(), issueData.contentIdsByTopicId(),
                 issueData.sentContentIdsByMemberTopic());

@@ -1,5 +1,6 @@
 package news.bombomemail.nativenewsletter.maeilmail.service.internal;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -73,7 +74,7 @@ class MaeilMailIssuePublisherTest {
         LocalDate issueDate = LocalDate.of(2026, 4, 27);
         Article article = createArticle(100L, 50L, 1L, "매일메일 제목", "<p>본문</p>");
         MaeilMailSentContent sentContent = createSentContent(1L, 10L, 9000L);
-        IssueEntry entry = new IssueEntry(article, List.of(1L, 2L), sentContent);
+        IssueEntry entry = new IssueEntry(article, List.of(1L, 2L), sentContent, 9000L);
         PreparedIssueEntries preparedIssueEntries = new PreparedIssueEntries(List.of(entry), List.of(9L));
         Newsletter newsletter = createNewsletter(50L, "매일메일");
 
@@ -105,10 +106,27 @@ class MaeilMailIssuePublisherTest {
             softly.assertThat(event.contents()).isEqualTo("<p>본문</p>");
             softly.assertThat(event.source()).isEqualTo(ArticleSource.MAEIL_MAIL_ISSUED);
             softly.assertThat(histories).hasSize(1);
-            softly.assertThat(histories.getFirst().getIssueDate()).isEqualTo(issueDate);
-            softly.assertThat(histories.getFirst().getMemberId()).isEqualTo(1L);
-            softly.assertThat(histories.getFirst().getTopicId()).isEqualTo(10L);
+            softly.assertThat(histories.getFirst().getArticleId()).isEqualTo(100L);
+            softly.assertThat(histories.getFirst().getContentId()).isEqualTo(9000L);
         });
+    }
+
+    @Test
+    void 저장된_article_수와_entry_수가_다르면_예외가_발생한다() {
+        // given
+        LocalDate issueDate = LocalDate.of(2026, 4, 27);
+        Article article = createArticle(null, 50L, 1L, "매일메일 제목", "<p>본문</p>");
+        MaeilMailSentContent sentContent = createSentContent(1L, 10L, 9000L);
+        IssueEntry entry = new IssueEntry(article, List.of(1L), sentContent, 9000L);
+        PreparedIssueEntries preparedIssueEntries = new PreparedIssueEntries(List.of(entry), List.of());
+
+        given(articleRepository.saveAll(List.of(article))).willReturn(List.of());
+
+        // when & then
+        assertThatThrownBy(() -> issuePublisher.publish(preparedIssueEntries, issueDate))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Article 저장 결과 수");
+        verifyNoInteractions(newsletterRepository, sentContentRepository, issueHistoryRepository, trackRepository, eventPublisher);
     }
 
     @Test

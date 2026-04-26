@@ -3,9 +3,13 @@ package news.bombomemail.nativenewsletter.maeilmail.repository;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import news.bombomemail.article.domain.Article;
+import news.bombomemail.article.repository.ArticleRepository;
+import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailContent;
 import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailIssueHistory;
 import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailSentContent;
 import news.bombomemail.nativenewsletter.maeilmail.dto.MemberTopicKey;
@@ -23,10 +27,18 @@ class MaeilMailMemberTopicRepositoryTest {
     @Autowired
     private MaeilMailIssueHistoryRepository issueHistoryRepository;
 
+    @Autowired
+    private ArticleRepository articleRepository;
+
+    @Autowired
+    private MaeilMailContentRepository contentRepository;
+
     @BeforeEach
     void setup() {
-        sentContentRepository.deleteAll();
         issueHistoryRepository.deleteAll();
+        sentContentRepository.deleteAll();
+        contentRepository.deleteAll();
+        articleRepository.deleteAll();
     }
 
     @Test
@@ -53,7 +65,7 @@ class MaeilMailMemberTopicRepositoryTest {
     }
 
     @Test
-    void issue_history는_issue_date와_member_topic_pair를_정확히_조회한다() {
+    void issue_history는_article_arrivedDateTime과_content_topic으로_member_topic_pair를_조회한다() {
         // given
         LocalDate issueDate = LocalDate.of(2026, 4, 26);
         issueHistoryRepository.saveAll(List.of(
@@ -108,10 +120,35 @@ class MaeilMailMemberTopicRepositoryTest {
     }
 
     private MaeilMailIssueHistory createIssueHistory(LocalDate issueDate, Long memberId, Long topicId) {
+        Article article = articleRepository.save(createArticle(memberId, issueDate.atTime(7, 0)));
+        MaeilMailContent content = contentRepository.save(createContent(topicId));
         return MaeilMailIssueHistory.builder()
-                .issueDate(issueDate)
+                .articleId(article.getId())
+                .contentId(content.getId())
+                .build();
+    }
+
+    private Article createArticle(Long memberId, LocalDateTime arrivedDateTime) {
+        return Article.builder()
+                .title("매일메일 제목")
+                .contents("<p>본문</p>")
+                .contentsText("본문")
+                .contentsSummary("요약")
+                .expectedReadTime(1)
                 .memberId(memberId)
+                .newsletterId(1L)
+                .arrivedDateTime(arrivedDateTime)
+                .build();
+    }
+
+    private MaeilMailContent createContent(Long topicId) {
+        return MaeilMailContent.builder()
                 .topicId(topicId)
+                .title("매일메일 제목")
+                .content("<p>본문</p>")
+                .contentsText("본문")
+                .contentsSummary("요약")
+                .expectedReadTime(1)
                 .build();
     }
 }

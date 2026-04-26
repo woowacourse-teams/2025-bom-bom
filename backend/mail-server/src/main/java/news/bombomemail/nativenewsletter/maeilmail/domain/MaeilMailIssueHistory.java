@@ -7,7 +7,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,8 +17,8 @@ import lombok.NonNull;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(uniqueConstraints = @UniqueConstraint(
-        name = "uk_maeil_mail_issue_history_date_member_topic",
-        columnNames = {"issue_date", "member_id", "topic_id"}
+        name = "uk_maeil_mail_issue_history_article_id",
+        columnNames = "article_id"
 ))
 public class MaeilMailIssueHistory {
 
@@ -28,22 +27,17 @@ public class MaeilMailIssueHistory {
     private Long id;
 
     @Column(nullable = false)
-    private LocalDate issueDate;
+    private Long articleId;
 
     @Column(nullable = false)
-    private Long memberId;
-
-    @Column(nullable = false)
-    private Long topicId;
+    private Long contentId;
 
     @Builder
     public MaeilMailIssueHistory(
-            @NonNull LocalDate issueDate,
-            @NonNull Long memberId,
-            @NonNull Long topicId
+            @NonNull Long articleId,
+            @NonNull Long contentId
     ) {
-        this.issueDate = issueDate;
-        this.memberId = memberId;
-        this.topicId = topicId;
+        this.articleId = articleId;
+        this.contentId = contentId;
     }
 }

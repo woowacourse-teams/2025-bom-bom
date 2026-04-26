@@ -7,7 +7,8 @@ import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailSentContent;
 public record IssueEntry(
         Article article,
         List<Long> trackIds,
-        MaeilMailSentContent sentContent
+        MaeilMailSentContent sentContent,
+        Long contentId
 ) {
 
     public IssueEntry {

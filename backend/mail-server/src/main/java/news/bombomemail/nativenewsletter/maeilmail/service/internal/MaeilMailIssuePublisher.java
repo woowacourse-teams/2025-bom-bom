@@ -41,7 +41,7 @@ public class MaeilMailIssuePublisher {
 
         List<IssueEntry> entries = preparedIssueEntries.entries();
         List<Article> savedArticles = saveArticles(entries);
-        saveIssueProgress(entries, preparedIssueEntries.previouslyIssuedTrackIds(), issueDate);
+        saveIssueProgress(entries, savedArticles, preparedIssueEntries.previouslyIssuedTrackIds(), issueDate);
         publishArticleArrivedEvents(savedArticles);
     }
 
@@ -91,22 +91,28 @@ public class MaeilMailIssuePublisher {
 
     private void saveIssueProgress(
             List<IssueEntry> entries,
+            List<Article> savedArticles,
             List<Long> previouslyIssuedTrackIds,
             LocalDate issueDate
     ) {
-        saveMemberTopicIssueHistories(entries, issueDate);
+        saveMemberTopicIssueHistories(entries, savedArticles);
         updateIssuedTracks(entries, previouslyIssuedTrackIds, issueDate);
     }
 
-    private void saveMemberTopicIssueHistories(List<IssueEntry> entries, LocalDate issueDate) {
+    private void saveMemberTopicIssueHistories(List<IssueEntry> entries, List<Article> savedArticles) {
         if (entries.isEmpty()) {
             return;
+        }
+
+        if (entries.size() != savedArticles.size()) {
+            throw new IllegalStateException("매일메일 발행 Article 저장 결과 수가 일치하지 않습니다. entryCount="
+                    + entries.size() + ", savedArticleCount=" + savedArticles.size());
         }
 
         sentContentRepository.saveAll(entries.stream()
                 .map(IssueEntry::sentContent)
                 .toList());
-        issueHistoryRepository.saveAll(toIssueHistories(issueDate, entries));
+        issueHistoryRepository.saveAll(toIssueHistories(entries, savedArticles));
     }
 
     private void updateIssuedTracks(
@@ -126,15 +132,18 @@ public class MaeilMailIssuePublisher {
     }
 
     private List<MaeilMailIssueHistory> toIssueHistories(
-            LocalDate issueDate,
-            List<IssueEntry> entries
+            List<IssueEntry> entries,
+            List<Article> savedArticles
     ) {
-        return entries.stream()
-                .map(entry -> MaeilMailIssueHistory.builder()
-                        .issueDate(issueDate)
-                        .memberId(entry.sentContent().getMemberId())
-                        .topicId(entry.sentContent().getTopicId())
-                        .build())
-                .toList();
+        List<MaeilMailIssueHistory> histories = new ArrayList<>();
+        for (int i = 0; i < entries.size(); i++) {
+            IssueEntry entry = entries.get(i);
+            Article savedArticle = savedArticles.get(i);
+            histories.add(MaeilMailIssueHistory.builder()
+                    .articleId(savedArticle.getId())
+                    .contentId(entry.contentId())
+                    .build());
+        }
+        return histories;
     }
 }

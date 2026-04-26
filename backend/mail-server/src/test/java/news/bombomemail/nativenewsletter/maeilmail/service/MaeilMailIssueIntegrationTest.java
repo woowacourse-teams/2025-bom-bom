@@ -126,7 +126,7 @@ class MaeilMailIssueIntegrationTest {
                 .name("Spring")
                 .displayOrder(1)
                 .build());
-        contentRepository.save(MaeilMailContent.builder()
+        MaeilMailContent content = contentRepository.save(MaeilMailContent.builder()
                 .topicId(topic.getId())
                 .title("매일메일 제목")
                 .content("<p>매일메일 본문</p>")
@@ -176,11 +176,11 @@ class MaeilMailIssueIntegrationTest {
             softly.assertThat(sentContents).hasSize(1);
             softly.assertThat(sentContents.getFirst().getMemberId()).isEqualTo(memberId);
             softly.assertThat(sentContents.getFirst().getTopicId()).isEqualTo(topic.getId());
+            softly.assertThat(sentContents.getFirst().getContentId()).isEqualTo(content.getId());
 
             softly.assertThat(issueHistories).hasSize(1);
-            softly.assertThat(issueHistories.getFirst().getIssueDate()).isEqualTo(ISSUE_DATE);
-            softly.assertThat(issueHistories.getFirst().getMemberId()).isEqualTo(memberId);
-            softly.assertThat(issueHistories.getFirst().getTopicId()).isEqualTo(topic.getId());
+            softly.assertThat(issueHistories.getFirst().getArticleId()).isEqualTo(article.getId());
+            softly.assertThat(issueHistories.getFirst().getContentId()).isEqualTo(content.getId());
 
             softly.assertThat(tracks).hasSize(2);
             softly.assertThat(tracks).allSatisfy(track -> {

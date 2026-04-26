@@ -42,6 +42,9 @@ class MaeilMailIssueChunkProcessorTest {
     @Mock
     private MaeilMailIssuePublisher issuePublisher;
 
+    @Mock
+    private MaeilMailIssueJobManager issueJobManager;
+
     private MaeilMailIssueChunkProcessor chunkProcessor;
 
     @BeforeEach
@@ -50,7 +53,8 @@ class MaeilMailIssueChunkProcessorTest {
                 trackRepository,
                 issueDataLoader,
                 entryPreparer,
-                issuePublisher
+                issuePublisher,
+                issueJobManager
         );
     }
 
@@ -69,7 +73,7 @@ class MaeilMailIssueChunkProcessorTest {
         )).willReturn(List.of());
 
         // when
-        IssueChunkResult result = chunkProcessor.process(issueDate, 0L, pageRequest);
+        IssueChunkResult result = chunkProcessor.process(1L, issueDate, 0L, pageRequest);
 
         // then
         assertSoftly(softly -> {
@@ -78,7 +82,7 @@ class MaeilMailIssueChunkProcessorTest {
             softly.assertThat(result.issuedArticleCount()).isZero();
             softly.assertThat(result.previouslyIssuedTrackCount()).isZero();
         });
-        verifyNoInteractions(issueDataLoader, entryPreparer, issuePublisher);
+        verifyNoInteractions(issueDataLoader, entryPreparer, issuePublisher, issueJobManager);
     }
 
     @Test
@@ -129,7 +133,7 @@ class MaeilMailIssueChunkProcessorTest {
         given(entryPreparer.prepare(tracks, issueData)).willReturn(preparedEntries);
 
         // when
-        IssueChunkResult result = chunkProcessor.process(issueDate, 0L, pageRequest);
+        IssueChunkResult result = chunkProcessor.process(1L, issueDate, 0L, pageRequest);
 
         // then
         assertSoftly(softly -> {
@@ -140,6 +144,7 @@ class MaeilMailIssueChunkProcessorTest {
             softly.assertThat(result.previouslyIssuedTrackCount()).isEqualTo(1);
         });
         verify(issuePublisher).publish(preparedEntries, issueDate);
+        verify(issueJobManager).recordChunk(1L, result);
     }
 
     private MaeilMailSubscriptionTrack createTrack(Long id, Long subscribeId, Long memberId) {

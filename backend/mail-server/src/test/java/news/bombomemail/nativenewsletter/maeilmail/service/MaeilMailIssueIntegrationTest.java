@@ -14,12 +14,15 @@ import news.bombomemail.article.repository.ArticleRepository;
 import news.bombomemail.article.repository.RecentArticleRepository;
 import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailContent;
 import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailIssueHistory;
+import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailIssueJob;
+import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailIssueJobStatus;
 import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailSentContent;
 import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailSubscriptionTrack;
 import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailTopic;
 import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailTrack;
 import news.bombomemail.nativenewsletter.maeilmail.repository.MaeilMailContentRepository;
 import news.bombomemail.nativenewsletter.maeilmail.repository.MaeilMailIssueHistoryRepository;
+import news.bombomemail.nativenewsletter.maeilmail.repository.MaeilMailIssueJobRepository;
 import news.bombomemail.nativenewsletter.maeilmail.repository.MaeilMailSentContentRepository;
 import news.bombomemail.nativenewsletter.maeilmail.repository.MaeilMailSubscriptionTrackRepository;
 import news.bombomemail.nativenewsletter.maeilmail.repository.MaeilMailTopicRepository;
@@ -76,6 +79,9 @@ class MaeilMailIssueIntegrationTest {
     private MaeilMailIssueHistoryRepository issueHistoryRepository;
 
     @Autowired
+    private MaeilMailIssueJobRepository issueJobRepository;
+
+    @Autowired
     private ArticleRepository articleRepository;
 
     @Autowired
@@ -92,6 +98,7 @@ class MaeilMailIssueIntegrationTest {
 
     @BeforeEach
     void setup() {
+        issueJobRepository.deleteAll();
         issueHistoryRepository.deleteAll();
         sentContentRepository.deleteAll();
         trackRepository.deleteAll();
@@ -134,7 +141,7 @@ class MaeilMailIssueIntegrationTest {
                 .contentsSummary("매일메일 요약")
                 .expectedReadTime(3)
                 .build());
-        trackRepository.saveAll(List.of(
+        List<MaeilMailSubscriptionTrack> savedTracks = trackRepository.saveAll(List.of(
                 createTrack(firstSubscribe.getId(), memberId, MaeilMailTrack.BE),
                 createTrack(secondSubscribe.getId(), memberId, MaeilMailTrack.BE)
         ));
@@ -153,6 +160,7 @@ class MaeilMailIssueIntegrationTest {
         List<ArticleArrivalNotification> notifications = notificationRepository.findAll();
         List<MaeilMailSentContent> sentContents = sentContentRepository.findAll();
         List<MaeilMailIssueHistory> issueHistories = issueHistoryRepository.findAll();
+        List<MaeilMailIssueJob> issueJobs = issueJobRepository.findAll();
         List<MaeilMailSubscriptionTrack> tracks = trackRepository.findAll();
         TodayReading todayReading = todayReadingRepository.findByMemberId(memberId).orElseThrow();
 
@@ -187,6 +195,17 @@ class MaeilMailIssueIntegrationTest {
                 softly.assertThat(track.getCurriculumIndex()).isEqualTo(1);
                 softly.assertThat(track.getLastIssuedDate()).isEqualTo(ISSUE_DATE);
             });
+
+            softly.assertThat(issueJobs).hasSize(1);
+            softly.assertThat(issueJobs.getFirst().getIssueDate()).isEqualTo(ISSUE_DATE);
+            softly.assertThat(issueJobs.getFirst().getStatus()).isEqualTo(MaeilMailIssueJobStatus.COMPLETED);
+            softly.assertThat(issueJobs.getFirst().getLastProcessedTrackId())
+                    .isEqualTo(savedTracks.getLast().getId());
+            softly.assertThat(issueJobs.getFirst().getChunkCount()).isEqualTo(1);
+            softly.assertThat(issueJobs.getFirst().getProcessedTrackCount()).isEqualTo(2);
+            softly.assertThat(issueJobs.getFirst().getIssuedArticleCount()).isEqualTo(1);
+            softly.assertThat(issueJobs.getFirst().getPreviouslyIssuedTrackCount()).isZero();
+            softly.assertThat(issueJobs.getFirst().getCompletedAt()).isNotNull();
         });
         verifyNoInteractions(subscribeService);
     }
@@ -232,6 +251,7 @@ class MaeilMailIssueIntegrationTest {
 
         // then
         List<MaeilMailSubscriptionTrack> tracks = trackRepository.findAll();
+        List<MaeilMailIssueJob> issueJobs = issueJobRepository.findAll();
         TodayReading todayReading = todayReadingRepository.findByMemberId(memberId).orElseThrow();
         assertSoftly(softly -> {
             softly.assertThat(articleRepository.findAll()).hasSize(1);
@@ -243,6 +263,10 @@ class MaeilMailIssueIntegrationTest {
             softly.assertThat(tracks).hasSize(1);
             softly.assertThat(tracks.getFirst().getCurriculumIndex()).isEqualTo(1);
             softly.assertThat(tracks.getFirst().getLastIssuedDate()).isEqualTo(ISSUE_DATE);
+            softly.assertThat(issueJobs).hasSize(1);
+            softly.assertThat(issueJobs.getFirst().getStatus()).isEqualTo(MaeilMailIssueJobStatus.COMPLETED);
+            softly.assertThat(issueJobs.getFirst().getChunkCount()).isEqualTo(1);
+            softly.assertThat(issueJobs.getFirst().getIssuedArticleCount()).isEqualTo(1);
         });
         verifyNoInteractions(subscribeService);
     }

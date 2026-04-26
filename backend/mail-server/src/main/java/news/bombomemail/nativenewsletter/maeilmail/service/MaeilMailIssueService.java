@@ -3,10 +3,13 @@ package news.bombomemail.nativenewsletter.maeilmail.service;
 import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailIssueJob;
 import news.bombomemail.nativenewsletter.maeilmail.dto.IssueChunkResult;
 import news.bombomemail.nativenewsletter.maeilmail.service.internal.MaeilMailIssueChunkProcessor;
+import news.bombomemail.nativenewsletter.maeilmail.service.internal.MaeilMailIssueJobManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -16,10 +19,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MaeilMailIssueService {
 
-    private static final Long START_TRACK_ID = 0L;
-
     private final Clock clock;
     private final MaeilMailIssueChunkProcessor chunkProcessor;
+    private final MaeilMailIssueJobManager issueJobManager;
 
     @Value("${maeil-mail.issue.chunk-size:200}")
     private int issueChunkSize;
@@ -33,31 +35,44 @@ public class MaeilMailIssueService {
         }
 
         PageRequest pageRequest = issuePageRequest();
-        log.info("매일메일 발행 시작 - issueDate={}, chunkSize={}", today, pageRequest.getPageSize());
-        Long lastTrackId = START_TRACK_ID;
-        IssueProgress progress = IssueProgress.empty();
+        MaeilMailIssueJob issueJob = issueJobManager.startOrResume(today, LocalDateTime.now(clock));
+        if (issueJob.isCompleted()) {
+            log.info("매일메일 발행 스킵 - issueDate={}, issueJobId={}, reason=already_completed", today, issueJob.getId());
+            return;
+        }
+
+        log.info(
+                "매일메일 발행 시작 - issueDate={}, issueJobId={}, chunkSize={}, lastProcessedTrackId={}",
+                today,
+                issueJob.getId(),
+                pageRequest.getPageSize(),
+                issueJob.getLastProcessedTrackId()
+        );
+        Long lastTrackId = issueJob.getLastProcessedTrackId();
         while (true) {
             IssueChunkResult result;
             try {
-                result = chunkProcessor.process(today, lastTrackId, pageRequest);
+                result = chunkProcessor.process(issueJob.getId(), today, lastTrackId, pageRequest);
             } catch (RuntimeException e) {
-                log.error("매일메일 발행 실패 - issueDate={}, lastTrackId={}", today, lastTrackId, e);
+                issueJobManager.fail(issueJob.getId(), e, LocalDateTime.now(clock));
+                log.error("매일메일 발행 실패 - issueDate={}, issueJobId={}, lastTrackId={}", today, issueJob.getId(), lastTrackId, e);
                 throw e;
             }
             if (!result.hasTracks()) {
+                MaeilMailIssueJob completedJob = issueJobManager.complete(issueJob.getId(), LocalDateTime.now(clock));
                 log.info(
-                        "매일메일 발행 완료 - issueDate={}, chunkCount={}, trackCount={}, issuedArticleCount={}, previouslyIssuedTrackCount={}, elapsedMs={}",
+                        "매일메일 발행 완료 - issueDate={}, issueJobId={}, chunkCount={}, trackCount={}, issuedArticleCount={}, previouslyIssuedTrackCount={}, elapsedMs={}",
                         today,
-                        progress.chunkCount(),
-                        progress.trackCount(),
-                        progress.issuedArticleCount(),
-                        progress.previouslyIssuedTrackCount(),
+                        completedJob.getId(),
+                        completedJob.getChunkCount(),
+                        completedJob.getProcessedTrackCount(),
+                        completedJob.getIssuedArticleCount(),
+                        completedJob.getPreviouslyIssuedTrackCount(),
                         System.currentTimeMillis() - startedAt
                 );
                 return;
             }
 
-            progress = progress.add(result);
             lastTrackId = result.lastTrackId();
         }
     }
@@ -69,26 +84,5 @@ public class MaeilMailIssueService {
     private boolean isWeekend(LocalDate date) {
         DayOfWeek dayOfWeek = date.getDayOfWeek();
         return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
-    }
-
-    private record IssueProgress(
-            int chunkCount,
-            int trackCount,
-            int issuedArticleCount,
-            int previouslyIssuedTrackCount
-    ) {
-
-        private static IssueProgress empty() {
-            return new IssueProgress(0, 0, 0, 0);
-        }
-
-        private IssueProgress add(IssueChunkResult result) {
-            return new IssueProgress(
-                    chunkCount + 1,
-                    trackCount + result.trackCount(),
-                    issuedArticleCount + result.issuedArticleCount(),
-                    previouslyIssuedTrackCount + result.previouslyIssuedTrackCount()
-            );
-        }
     }
 }

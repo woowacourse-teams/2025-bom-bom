@@ -26,9 +26,11 @@ public class MaeilMailIssueChunkProcessor {
     private final MaeilMailIssueDataLoader issueDataLoader;
     private final MaeilMailIssueEntryPreparer entryPreparer;
     private final MaeilMailIssuePublisher issuePublisher;
+    private final MaeilMailIssueJobManager issueJobManager;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public IssueChunkResult process(
+            Long issueJobId,
             LocalDate issueDate,
             Long lastTrackId,
             Pageable pageable
@@ -49,9 +51,11 @@ public class MaeilMailIssueChunkProcessor {
                 preparedEntries.entries().size(),
                 preparedEntries.previouslyIssuedTrackIds().size()
         );
+        issueJobManager.recordChunk(issueJobId, result);
         log.info(
-                "매일메일 발행 chunk 처리 완료 - issueDate={}, lastTrackId={}, trackCount={}, issuedArticleCount={}, previouslyIssuedTrackCount={}, elapsedMs={}",
+                "매일메일 발행 chunk 처리 완료 - issueDate={}, issueJobId={}, lastTrackId={}, trackCount={}, issuedArticleCount={}, previouslyIssuedTrackCount={}, elapsedMs={}",
                 issueDate,
+                issueJobId,
                 chunkLastTrackId,
                 result.trackCount(),
                 result.issuedArticleCount(),

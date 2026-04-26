@@ -1,5 +1,6 @@
 package news.bombomemail.nativenewsletter.maeilmail.service.internal;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -177,7 +178,7 @@ class MaeilMailIssueEntryPreparerTest {
     }
 
     @Test
-    void 선택된_content가_조회되지_않으면_entry를_만들지_않고_previouslyIssuedTrackIds는_유지한다() {
+    void 선택된_content가_조회되지_않으면_예외를_던진다() {
         // given
         MaeilMailSubscriptionTrack pendingTrack = createTrack(1L, 10L, 100L, MaeilMailTrack.BE, 0);
         MaeilMailSubscriptionTrack issuedTrack = createTrack(2L, 11L, 200L, MaeilMailTrack.BE, 0);
@@ -195,14 +196,11 @@ class MaeilMailIssueEntryPreparerTest {
                 .willReturn(Optional.of(9000L));
         given(contentRepository.findAllById(List.of(9000L))).willReturn(List.of());
 
-        // when
-        PreparedIssueEntries result = entryPreparer.prepare(List.of(pendingTrack, issuedTrack), issueData);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(result.entries()).isEmpty();
-            softly.assertThat(result.previouslyIssuedTrackIds()).containsExactly(2L);
-        });
+        // when & then
+        assertThatThrownBy(() -> entryPreparer.prepare(List.of(pendingTrack, issuedTrack), issueData))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("매일메일 발행 content를 찾을 수 없습니다.")
+                .hasMessageContaining("9000");
     }
 
     private IssueData createIssueData(

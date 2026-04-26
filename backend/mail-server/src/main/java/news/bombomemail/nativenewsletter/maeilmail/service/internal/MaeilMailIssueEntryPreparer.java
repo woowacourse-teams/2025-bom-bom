@@ -106,28 +106,37 @@ public class MaeilMailIssueEntryPreparer {
                 .toList();
         Map<Long, MaeilMailContent> contentById = contentRepository.findAllById(contentIds).stream()
                 .collect(Collectors.toMap(MaeilMailContent::getId, content -> content));
+        validateAllContentsLoaded(contentIds, contentById);
 
         return pendingEntries.stream()
                 .map(pendingEntry -> toIssueEntry(pendingEntry, contentById, arrivedAt))
-                .flatMap(Optional::stream)
                 .toList();
     }
 
-    private Optional<IssueEntry> toIssueEntry(
+    private void validateAllContentsLoaded(
+            List<Long> contentIds,
+            Map<Long, MaeilMailContent> contentById
+    ) {
+        List<Long> missingContentIds = contentIds.stream()
+                .filter(contentId -> !contentById.containsKey(contentId))
+                .toList();
+        if (!missingContentIds.isEmpty()) {
+            throw new IllegalStateException("매일메일 발행 content를 찾을 수 없습니다. contentIds=" + missingContentIds);
+        }
+    }
+
+    private IssueEntry toIssueEntry(
             PendingEntry pendingEntry,
             Map<Long, MaeilMailContent> contentById,
             LocalDateTime arrivedAt
     ) {
         MaeilMailContent content = contentById.get(pendingEntry.contentId());
-        if (content == null) {
-            return Optional.empty();
-        }
 
-        return Optional.of(new IssueEntry(
+        return new IssueEntry(
                 buildArticle(content, pendingEntry.memberId(), pendingEntry.newsletterId(), arrivedAt),
                 pendingEntry.trackIds(),
                 buildSentContent(pendingEntry.memberId(), pendingEntry.topicId(), content.getId())
-        ));
+        );
     }
 
     private Article buildArticle(

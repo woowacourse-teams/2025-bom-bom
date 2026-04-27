@@ -1,7 +1,5 @@
 package me.bombom.api.v1.reading.service;
 
-import static me.bombom.api.v1.common.util.DateUtils.isWeekend;
-
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,6 +13,7 @@ import me.bombom.api.v1.common.MonthlyRankingScheduleProperties;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.common.util.DateUtils;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.pet.ScorePolicyConstants;
@@ -127,7 +126,7 @@ public class ReadingService {
     @Transactional
     public void resetContinueReadingCount() {
         LocalDate targetDate = LocalDate.now(clock).minusDays(1);
-        if (isWeekend(targetDate)) {
+        if (DateUtils.isWeekend(targetDate)) {
             return;
         }
 

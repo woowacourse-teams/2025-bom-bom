@@ -4,8 +4,6 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static me.bombom.api.v1.common.util.DateUtils.isWeekend;
-
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -46,6 +44,7 @@ import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
+import me.bombom.api.v1.common.util.DateUtils;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupItemRepository;
 import org.springframework.stereotype.Service;
@@ -193,7 +192,7 @@ public class ChallengeService {
     }
 
     public List<Challenge> getOngoingChallenges(LocalDate date) {
-        if (isWeekend(date)) {
+        if (DateUtils.isWeekend(date)) {
             return Collections.emptyList();
         }
         return challengeRepository.findOngoingChallenges(date);

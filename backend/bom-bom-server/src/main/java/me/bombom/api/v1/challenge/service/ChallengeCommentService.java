@@ -1,7 +1,5 @@
 package me.bombom.api.v1.challenge.service;
 
-import static me.bombom.api.v1.common.util.DateUtils.isWeekend;
-
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
@@ -25,6 +23,7 @@ import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.common.util.DateUtils;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -199,7 +198,7 @@ public class ChallengeCommentService {
     }
 
     private void validateCommentAvailableDay(Long memberId, Long challengeId) {
-        if (isWeekend(LocalDate.now(clock))) {
+        if (DateUtils.isWeekend(LocalDate.now(clock))) {
             throw new CIllegalArgumentException(ErrorDetail.PRECONDITION_FAILED)
                     .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                     .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)

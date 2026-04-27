@@ -1,7 +1,5 @@
 package me.bombom.api.v1.challenge.domain;
 
-import static me.bombom.api.v1.common.util.DateUtils.isWeekend;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import me.bombom.api.v1.common.BaseEntity;
+import me.bombom.api.v1.common.util.DateUtils;
 
 @Entity
 @Getter
@@ -134,7 +133,7 @@ public class Challenge extends BaseEntity {
     }
 
     private boolean isWeekday(LocalDate currentDate) {
-        return !isWeekend(currentDate);
+        return !DateUtils.isWeekend(currentDate);
     }
 
     private boolean isWithinLatePhase(LocalDate targetDate) {

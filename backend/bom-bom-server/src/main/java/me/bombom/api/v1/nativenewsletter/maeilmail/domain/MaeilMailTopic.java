@@ -9,47 +9,44 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import me.bombom.api.v1.common.BaseEntity;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(uniqueConstraints = {
-        @UniqueConstraint(
-                name = "uk_maeil_mail_subscription_track_subscribe_id_field",
-                columnNames = {"subscribe_id", "field"}
-        )
+        @UniqueConstraint(name = "uk_maeil_mail_topic_track_name", columnNames = {"track", "name"}),
+        @UniqueConstraint(name = "uk_maeil_mail_topic_track_order", columnNames = {"track", "display_order"})
 })
-public class MaeilMailSubscriptionTrack {
+public class MaeilMailTopic extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long subscribeId;
-
-    @Column(nullable = false)
-    private Long memberId;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 3)
-    private MaeilMailTrack field;
+    private MaeilMailTrack track;
+
+    @Column(nullable = false, length = 50)
+    private String name;
 
     @Column(nullable = false)
-    private int curriculumIndex = 0;
-
-    private LocalDate lastIssuedDate;
+    private int displayOrder;
 
     @Builder
-    public MaeilMailSubscriptionTrack(Long subscribeId, Long memberId, MaeilMailTrack field) {
-        this.subscribeId = subscribeId;
-        this.memberId = memberId;
-        this.field = field;
-        this.curriculumIndex = 0;
+    public MaeilMailTopic(
+            @NonNull MaeilMailTrack track,
+            @NonNull String name,
+            int displayOrder
+    ) {
+        this.track = track;
+        this.name = name;
+        this.displayOrder = displayOrder;
     }
 }

@@ -2,7 +2,6 @@ package me.bombom.api.v1.highlight.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;

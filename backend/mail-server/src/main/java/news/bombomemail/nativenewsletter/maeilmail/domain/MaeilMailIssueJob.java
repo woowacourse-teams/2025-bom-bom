@@ -27,6 +27,8 @@ import news.bombomemail.nativenewsletter.maeilmail.dto.IssueChunkResult;
 ))
 public class MaeilMailIssueJob extends BaseEntity {
 
+    private static final int MAX_FAILED_MESSAGE_LENGTH = 1000;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -128,7 +130,14 @@ public class MaeilMailIssueJob extends BaseEntity {
         }
 
         this.status = MaeilMailIssueJobStatus.FAILED;
-        this.failedMessage = failedMessage;
+        this.failedMessage = truncateFailedMessage(failedMessage);
         this.failedAt = failedAt;
+    }
+
+    private String truncateFailedMessage(String failedMessage) {
+        if (failedMessage == null || failedMessage.length() <= MAX_FAILED_MESSAGE_LENGTH) {
+            return failedMessage;
+        }
+        return failedMessage.substring(0, MAX_FAILED_MESSAGE_LENGTH);
     }
 }

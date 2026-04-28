@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class MaeilMailIssueJobManager {
 
     private static final Long START_TRACK_ID = 0L;
-    private static final int MAX_FAILED_MESSAGE_LENGTH = 1000;
     private static final List<MaeilMailIssueJobStatus> INCOMPLETE_STATUSES = List.of(
             MaeilMailIssueJobStatus.RUNNING,
             MaeilMailIssueJobStatus.FAILED
@@ -77,9 +76,6 @@ public class MaeilMailIssueJobManager {
         if (message == null || message.isBlank()) {
             message = exception.getClass().getName();
         }
-        if (message.length() <= MAX_FAILED_MESSAGE_LENGTH) {
-            return message;
-        }
-        return message.substring(0, MAX_FAILED_MESSAGE_LENGTH);
+        return message;
     }
 }

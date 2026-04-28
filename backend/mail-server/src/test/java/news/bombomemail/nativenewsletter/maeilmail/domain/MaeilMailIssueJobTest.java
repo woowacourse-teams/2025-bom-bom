@@ -57,6 +57,28 @@ class MaeilMailIssueJobTest {
     }
 
     @Test
+    void fail하면_실패메시지를_최대_1000자로_저장한다() {
+        // given
+        MaeilMailIssueJob issueJob = MaeilMailIssueJob.start(
+                LocalDate.of(2026, 4, 27),
+                0L,
+                LocalDateTime.of(2026, 4, 27, 7, 0)
+        );
+        String failedMessage = "a".repeat(1001);
+        LocalDateTime failedAt = LocalDateTime.of(2026, 4, 27, 7, 10);
+
+        // when
+        issueJob.fail(failedMessage, failedAt);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(issueJob.getStatus()).isEqualTo(MaeilMailIssueJobStatus.FAILED);
+            softly.assertThat(issueJob.getFailedMessage()).hasSize(1000);
+            softly.assertThat(issueJob.getFailedAt()).isEqualTo(failedAt);
+        });
+    }
+
+    @Test
     void complete하면_완료상태와_완료시각을_기록한다() {
         // given
         LocalDateTime completedAt = LocalDateTime.of(2026, 4, 27, 7, 30);

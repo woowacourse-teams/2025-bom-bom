@@ -10,10 +10,12 @@ import jakarta.validation.constraints.Positive;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailIdealAnswerResponse;
+import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailInformationResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubmitAnswerRequest;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubmittedAnswerResponse;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "MaeilMail", description = "매일메일 서비스 관련 API")
 public interface MaeilMailControllerApi {
@@ -49,5 +51,14 @@ public interface MaeilMailControllerApi {
     MaeilMailSubmittedAnswerResponse getSubmittedAnswer(
             @Parameter(hidden = true) @LoginMember Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long contentId
+    );
+
+    @Operation(summary = "매일메일 정보 조회", description = "아티클 id로 매일메일 컨텐츠 정보를 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 아티클"),
+    })
+    MaeilMailInformationResponse getInformationByArticle(
+            @RequestParam @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     );
 }

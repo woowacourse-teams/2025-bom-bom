@@ -118,6 +118,14 @@ public class MaeilMailIssueJob extends BaseEntity {
     }
 
     public void complete(LocalDateTime completedAt) {
+        if (isCompleted()) {
+            return;
+        }
+
+        if (status != MaeilMailIssueJobStatus.RUNNING) {
+            throw new IllegalStateException("실행 중인 매일메일 발행 job만 완료할 수 있습니다. jobId=" + id);
+        }
+
         this.status = MaeilMailIssueJobStatus.COMPLETED;
         this.completedAt = completedAt;
         this.failedMessage = null;

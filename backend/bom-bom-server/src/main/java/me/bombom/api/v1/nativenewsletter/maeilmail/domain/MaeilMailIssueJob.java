@@ -26,6 +26,8 @@ import me.bombom.api.v1.common.BaseEntity;
 ))
 public class MaeilMailIssueJob extends BaseEntity {
 
+    private static final int MAX_FAILED_MESSAGE_LENGTH = 1000;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -99,6 +101,14 @@ public class MaeilMailIssueJob extends BaseEntity {
     }
 
     public void complete(LocalDateTime completedAt) {
+        if (isCompleted()) {
+            return;
+        }
+
+        if (status != MaeilMailIssueJobStatus.RUNNING) {
+            throw new IllegalStateException("실행 중인 매일메일 발행 job만 완료할 수 있습니다. jobId=" + id);
+        }
+
         this.status = MaeilMailIssueJobStatus.COMPLETED;
         this.completedAt = completedAt;
         this.failedMessage = null;
@@ -111,7 +121,14 @@ public class MaeilMailIssueJob extends BaseEntity {
         }
 
         this.status = MaeilMailIssueJobStatus.FAILED;
-        this.failedMessage = failedMessage;
+        this.failedMessage = truncateFailedMessage(failedMessage);
         this.failedAt = failedAt;
+    }
+
+    private String truncateFailedMessage(String failedMessage) {
+        if (failedMessage == null || failedMessage.length() <= MAX_FAILED_MESSAGE_LENGTH) {
+            return failedMessage;
+        }
+        return failedMessage.substring(0, MAX_FAILED_MESSAGE_LENGTH);
     }
 }

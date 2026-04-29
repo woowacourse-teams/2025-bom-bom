@@ -1,6 +1,7 @@
 package me.bombom.api.v1.nativenewsletter.maeilmail.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
@@ -32,7 +33,7 @@ public class MaeilMailController implements MaeilMailControllerApi {
     @GetMapping("/{contentId}/answer")
     public MaeilMailIdealAnswerResponse getIdealAnswer(
             @LoginMember Member member,
-            @PathVariable Long contentId
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long contentId
     ) {
         return maeilMailService.getIdealAnswer(contentId);
     }
@@ -42,7 +43,7 @@ public class MaeilMailController implements MaeilMailControllerApi {
     @PostMapping("/articles/{articleId}/answer/me")
     public void submitAnswer(
             @LoginMember Member member,
-            @PathVariable Long articleId,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId,
             @RequestBody @Valid MaeilMailSubmitAnswerRequest request
     ) {
         maeilMailService.submitAnswer(member, articleId, request);
@@ -52,7 +53,7 @@ public class MaeilMailController implements MaeilMailControllerApi {
     @GetMapping("/articles/{articleId}/answer/me")
     public MaeilMailSubmittedAnswerResponse getSubmittedAnswer(
             @LoginMember Member member,
-            @PathVariable Long articleId
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     ) {
         return maeilMailService.getSubmittedAnswer(member, articleId);
     }
@@ -61,7 +62,7 @@ public class MaeilMailController implements MaeilMailControllerApi {
     @GetMapping("/content")
     public MaeilMailInformationResponse getInformationByArticle(
             @LoginMember Member member,
-            @RequestParam Long articleId
+            @RequestParam @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     ) {
         return maeilMailService.getContentInformationByArticle(articleId);
     }

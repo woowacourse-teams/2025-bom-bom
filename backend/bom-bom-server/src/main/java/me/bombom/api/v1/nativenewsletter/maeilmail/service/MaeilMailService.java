@@ -49,40 +49,44 @@ public class MaeilMailService {
     @Transactional
     public void submitAnswer(
             Member member,
-            Long contentId,
+            Long articleId,
             MaeilMailSubmitAnswerRequest request
     ) {
-        if (!contentRepository.existsById(contentId)) {
-            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "MaeilMailContent")
-                    .addContext(ErrorContextKeys.OPERATION, "existsById")
-                    .addContext(ErrorContextKeys.CONTENT_ID, contentId);
-        }
+        MaeilMailIssueHistory issueHistory = getIssueHistory(articleId);
 
         MaeilMailUserAnswer userAnswer = MaeilMailUserAnswer.builder()
-                .contentId(contentId)
+                .issueHistoryId(issueHistory.getId())
                 .memberId(member.getId())
                 .answer(request.answer())
                 .build();
         userAnswerRepository.save(userAnswer);
     }
 
-    public MaeilMailSubmittedAnswerResponse getSubmittedAnswer(Member member, Long contentId) {
-        MaeilMailUserAnswer userAnswer = userAnswerRepository.findByMemberIdAndContentId(member.getId(), contentId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MaeilMailUserAnswer")
-                        .addContext(ErrorContextKeys.OPERATION, "findByMemberIdAndContentId")
-                        .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
-                        .addContext(ErrorContextKeys.CONTENT_ID, contentId));
+    public MaeilMailSubmittedAnswerResponse getSubmittedAnswer(Member member, Long articleId) {
+        MaeilMailIssueHistory issueHistory = getIssueHistory(articleId);
+        MaeilMailUserAnswer userAnswer = getUserAnswer(member, articleId, issueHistory);
         return new MaeilMailSubmittedAnswerResponse(userAnswer.getAnswer());
     }
 
     public MaeilMailInformationResponse getContentInformationByArticle(Long articleId) {
-        MaeilMailIssueHistory issueHistory = issueHistoryRepository.findByArticleId(articleId)
+        MaeilMailIssueHistory issueHistory = getIssueHistory(articleId);
+        return MaeilMailInformationResponse.from(issueHistory);
+    }
+
+    private MaeilMailIssueHistory getIssueHistory(Long articleId) {
+        return issueHistoryRepository.findByArticleId(articleId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "MaeilMailIssueHistory")
                         .addContext(ErrorContextKeys.OPERATION, "findByArticleId")
                         .addContext(ErrorContextKeys.ARTICLE_ID, articleId));
-        return MaeilMailInformationResponse.from(issueHistory);
+    }
+
+    private MaeilMailUserAnswer getUserAnswer(Member member, Long articleId, MaeilMailIssueHistory issueHistory) {
+        return userAnswerRepository.findByMemberIdAndIssueHistoryId(member.getId(), issueHistory.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MaeilMailUserAnswer")
+                        .addContext(ErrorContextKeys.OPERATION, "findByMemberIdAndIssueHistoryId")
+                        .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                        .addContext(ErrorContextKeys.ARTICLE_ID, articleId));
     }
 }

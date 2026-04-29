@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface MaeilMailUserAnswerRepository extends JpaRepository<MaeilMailUserAnswer, Long> {
 
-    Optional<MaeilMailUserAnswer> findByMemberIdAndContentId(Long memberId, Long contentId);
+    Optional<MaeilMailUserAnswer> findByMemberIdAndIssueHistoryId(Long memberId, Long issueHistoryId);
 }

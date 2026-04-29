@@ -39,22 +39,22 @@ public class MaeilMailController implements MaeilMailControllerApi {
 
     @Override
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/{contentId}/answer/me")
+    @PostMapping("/articles/{articleId}/answer/me")
     public void submitAnswer(
             @LoginMember Member member,
-            @PathVariable Long contentId,
+            @PathVariable Long articleId,
             @RequestBody @Valid MaeilMailSubmitAnswerRequest request
     ) {
-        maeilMailService.submitAnswer(member, contentId, request);
+        maeilMailService.submitAnswer(member, articleId, request);
     }
 
     @Override
-    @GetMapping("/{contentId}/answer/me")
+    @GetMapping("/articles/{articleId}/answer/me")
     public MaeilMailSubmittedAnswerResponse getSubmittedAnswer(
             @LoginMember Member member,
-            @PathVariable Long contentId
+            @PathVariable Long articleId
     ) {
-        return maeilMailService.getSubmittedAnswer(member, contentId);
+        return maeilMailService.getSubmittedAnswer(member, articleId);
     }
 
     @Override

@@ -14,5 +14,6 @@ CREATE TABLE maeil_mail_content_answer
     created_at datetime(6)           NULL,
     updated_at datetime(6)           NULL,
     content_id BIGINT                NOT NULL,
-    answer     MEDIUMTEXT            NOT NULL
+    answer     MEDIUMTEXT            NOT NULL,
+    CONSTRAINT uk_maeil_mail_content_answer_content_id UNIQUE (content_id)
 );

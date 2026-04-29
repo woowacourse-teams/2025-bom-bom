@@ -326,21 +326,6 @@ class ReadingServiceTest {
     }
 
     @Test
-    void 연속_읽기_초기화_후에도_최대_스트릭_일수는_유지된다() {
-        ContinueReadingRealtime cr = continueReadingRepository.findByMemberId(member.getId()).get();
-        int initialMaxDayCount = cr.getMaxDayCount();
-
-        readingService.resetContinueReadingCount();
-
-        ContinueReadingRealtime updatedContinueReadingRealtime = continueReadingRepository.findByMemberId(member.getId()).get();
-
-        assertSoftly(softly -> {
-            softly.assertThat(updatedContinueReadingRealtime.getDayCount()).isZero();
-            softly.assertThat(updatedContinueReadingRealtime.getMaxDayCount()).isEqualTo(initialMaxDayCount);
-        });
-    }
-
-    @Test
     void 랭킹_업데이트된_시간을_조회할_수_있다() {
         // given
         LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);;

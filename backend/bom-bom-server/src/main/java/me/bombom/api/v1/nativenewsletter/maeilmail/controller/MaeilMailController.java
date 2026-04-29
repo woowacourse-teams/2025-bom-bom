@@ -28,7 +28,10 @@ public class MaeilMailController implements MaeilMailControllerApi {
 
     @Override
     @GetMapping("/{contentId}/answer")
-    public MaeilMailIdealAnswerResponse getIdealAnswer(@PathVariable Long contentId) {
+    public MaeilMailIdealAnswerResponse getIdealAnswer(
+            @LoginMember Member member,
+            @PathVariable Long contentId
+    ) {
         return maeilMailService.getIdealAnswer(contentId);
     }
 
@@ -53,7 +56,10 @@ public class MaeilMailController implements MaeilMailControllerApi {
 
     @Override
     @GetMapping("/content")
-    public MaeilMailInformationResponse getInformationByArticle(@RequestParam Long articleId) {
+    public MaeilMailInformationResponse getInformationByArticle(
+            @LoginMember Member member,
+            @RequestParam Long articleId
+    ) {
         return maeilMailService.getContentInformationByArticle(articleId);
     }
 }

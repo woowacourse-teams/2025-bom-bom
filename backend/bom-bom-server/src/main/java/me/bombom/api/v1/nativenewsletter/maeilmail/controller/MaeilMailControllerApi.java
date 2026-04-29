@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailIdealAnswerResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailInformationResponse;
@@ -27,6 +26,7 @@ public interface MaeilMailControllerApi {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 매일메일 컨텐츠"),
     })
     MaeilMailIdealAnswerResponse getIdealAnswer(
+            @Parameter(hidden = true) Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long contentId
     );
 
@@ -37,7 +37,7 @@ public interface MaeilMailControllerApi {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 매일메일 컨텐츠"),
     })
     void submitAnswer(
-            @Parameter(hidden = true) @LoginMember Member member,
+            @Parameter(hidden = true) Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long contentId,
             @RequestBody @Valid MaeilMailSubmitAnswerRequest request
     );
@@ -49,7 +49,7 @@ public interface MaeilMailControllerApi {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 답변"),
     })
     MaeilMailSubmittedAnswerResponse getSubmittedAnswer(
-            @Parameter(hidden = true) @LoginMember Member member,
+            @Parameter(hidden = true) Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long contentId
     );
 
@@ -59,6 +59,7 @@ public interface MaeilMailControllerApi {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 아티클"),
     })
     MaeilMailInformationResponse getInformationByArticle(
+            @Parameter(hidden = true) Member member,
             @RequestParam @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     );
 }

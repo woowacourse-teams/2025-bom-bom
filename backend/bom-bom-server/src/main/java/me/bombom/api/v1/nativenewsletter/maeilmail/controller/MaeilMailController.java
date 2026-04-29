@@ -8,6 +8,7 @@ import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailIdealAnswerRespo
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailInformationResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubmitAnswerRequest;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubmittedAnswerResponse;
+import me.bombom.api.v1.nativenewsletter.maeilmail.service.MaeilMailService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,10 +24,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/maeil-mail")
 public class MaeilMailController implements MaeilMailControllerApi {
 
+    private final MaeilMailService maeilMailService;
+
     @Override
     @GetMapping("/{contentId}/answer")
     public MaeilMailIdealAnswerResponse getIdealAnswer(@PathVariable Long contentId) {
-        return null;
+        return maeilMailService.getIdealAnswer(contentId);
     }
 
     @Override

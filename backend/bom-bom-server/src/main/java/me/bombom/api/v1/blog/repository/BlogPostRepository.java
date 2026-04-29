@@ -2,6 +2,8 @@ package me.bombom.api.v1.blog.repository;
 
 import me.bombom.api.v1.blog.domain.BlogPost;
 import me.bombom.api.v1.blog.dto.response.BlogPostResponse;
+import me.bombom.api.v1.blog.dto.response.BlogPostSummaryRow;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -58,4 +60,22 @@ public interface BlogPostRepository extends JpaRepository<BlogPost, Long> {
             """
     )
     Page<BlogPostResponse> findPublishedPosts(@Param("memberId") Long memberId, Pageable pageable);
+
+    @Query("""
+            SELECT new me.bombom.api.v1.blog.dto.response.BlogPostSummaryRow(
+                bp.id,
+                bp.title,
+                bp.description,
+                bia.imageUrl,
+                bc.name,
+                bp.publishedAt
+            )
+            FROM BlogPost bp
+            LEFT JOIN BlogImageAsset bia ON bia.id = bp.thumbnailImageId
+            LEFT JOIN BlogCategory bc ON bc.id = bp.categoryId
+            WHERE bp.status = me.bombom.api.v1.blog.domain.BlogPostStatus.PUBLISHED
+                AND bp.id = :postId
+            """)
+    Optional<BlogPostSummaryRow> findPublishedPostSummaryById(@Param("postId") Long postId);
+
 }

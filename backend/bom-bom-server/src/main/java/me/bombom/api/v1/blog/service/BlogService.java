@@ -11,6 +11,8 @@ import me.bombom.api.v1.blog.domain.BlogPostVisibility;
 import me.bombom.api.v1.blog.dto.response.BlogCategoryResponse;
 import me.bombom.api.v1.blog.dto.response.BlogPostDetailResponse;
 import me.bombom.api.v1.blog.dto.response.BlogPostResponse;
+import me.bombom.api.v1.blog.dto.response.BlogPostSummaryRow;
+import me.bombom.api.v1.blog.dto.response.BlogPostSummaryResponse;
 import me.bombom.api.v1.blog.repository.BlogCategoryRepository;
 import me.bombom.api.v1.blog.repository.BlogImageAssetRepository;
 import me.bombom.api.v1.blog.repository.BlogPostRepository;
@@ -40,6 +42,18 @@ public class BlogService {
     public Page<BlogPostResponse> getPublishedPosts(Member member, Pageable pageable) {
         Long memberId = member == null ? null : member.getId();
         return blogPostRepository.findPublishedPosts(memberId, pageable);
+    }
+
+    public BlogPostSummaryResponse getPublishedPostSummary(Long postId) {
+        BlogPostSummaryRow summary = blogPostRepository.findPublishedPostSummaryById(postId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "blogPost")
+                        .addContext("postId", postId));
+
+        return BlogPostSummaryResponse.of(
+                summary,
+                blogPostTagRepository.findHashtagNamesByBlogPostId(postId)
+        );
     }
 
     public BlogPostDetailResponse getPublishedPostDetail(Long postId, Member member) {

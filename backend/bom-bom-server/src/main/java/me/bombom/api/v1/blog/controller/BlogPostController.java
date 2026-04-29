@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.blog.dto.response.BlogCategoryResponse;
 import me.bombom.api.v1.blog.dto.response.BlogPostDetailResponse;
 import me.bombom.api.v1.blog.dto.response.BlogPostResponse;
+import me.bombom.api.v1.blog.dto.response.BlogPostSummaryResponse;
 import me.bombom.api.v1.blog.service.BlogService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
@@ -39,6 +40,15 @@ public class BlogPostController implements BlogPostControllerApi {
             }) Pageable pageable
     ) {
         return blogService.getPublishedPosts(member, pageable);
+    }
+
+    @Override
+    @GetMapping("/posts/{postId}/summary")
+    public BlogPostSummaryResponse getPublishedPostSummary(
+            @LoginMember(anonymous = true, allowInvalidToken = true) Member member,
+            @PathVariable @Positive(message = "postId는 1 이상의 값이어야 합니다.") Long postId
+    ) {
+        return blogService.getPublishedPostSummary(postId);
     }
 
     @Override

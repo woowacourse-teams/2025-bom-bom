@@ -16,6 +16,7 @@ import me.bombom.api.v1.blog.domain.BlogPostVisibility;
 import me.bombom.api.v1.blog.dto.response.BlogCategoryResponse;
 import me.bombom.api.v1.blog.dto.response.BlogPostDetailResponse;
 import me.bombom.api.v1.blog.dto.response.BlogPostResponse;
+import me.bombom.api.v1.blog.dto.response.BlogPostSummaryResponse;
 import me.bombom.api.v1.blog.repository.BlogCategoryRepository;
 import me.bombom.api.v1.blog.repository.BlogHashtagRepository;
 import me.bombom.api.v1.blog.repository.BlogImageAssetRepository;
@@ -219,6 +220,70 @@ class BlogServiceTest {
             softly.assertThat(result.getContent().getFirst().title()).isEqualTo("공개 글");
             softly.assertThat(result.getContent().getFirst().description()).isEqualTo("공개 글 설명");
             softly.assertThat(result.hasNext()).isTrue();
+        });
+    }
+
+    @Test
+    void 공개_발행_블로그_요약을_조회한다() {
+        // when
+        BlogPostSummaryResponse result = blogService.getPublishedPostSummary(publicPost.getId());
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.postId()).isEqualTo(publicPost.getId());
+            softly.assertThat(result.title()).isEqualTo("공개 글");
+            softly.assertThat(result.description()).isEqualTo("공개 글 설명");
+            softly.assertThat(result.thumbnailImageUrl()).isEqualTo("https://cdn.bombom.me/public.png");
+            softly.assertThat(result.categoryName()).isEqualTo("테크");
+            softly.assertThat(result.publishedAt()).isEqualTo(LocalDateTime.of(2026, 3, 25, 9, 0));
+            softly.assertThat(result.hashtags()).containsExactlyInAnyOrder("스프링", "백엔드");
+        });
+    }
+
+    @Test
+    void 비공개_블로그_요약은_조회할_수_없다() {
+        BlogPostSummaryResponse result = blogService.getPublishedPostSummary(privatePost.getId());
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.postId()).isEqualTo(privatePost.getId());
+            softly.assertThat(result.title()).isEqualTo("비공개 글");
+            softly.assertThat(result.description()).isEqualTo("비공개 글 설명");
+            softly.assertThat(result.thumbnailImageUrl()).isNull();
+            softly.assertThat(result.categoryName()).isEqualTo("테크");
+            softly.assertThat(result.hashtags()).isEmpty();
+        });
+    }
+
+    @Test
+    void 발행되지_않은_블로그_요약은_조회할_수_없다() {
+        assertThatThrownBy(() -> blogService.getPublishedPostSummary(draftPost.getId()))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .extracting("errorDetail")
+                .isEqualTo(ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 블로그_요약의_카테고리_썸네일이_없으면_null이고_해시태그가_없으면_빈_배열이다() {
+        // given
+        BlogPost noMetaPost = blogPostRepository.save(TestFixture.createBlogPost(
+                userMember.getId(),
+                "메타 없는 글",
+                "메타 없는 글 본문",
+                null,
+                null,
+                BlogPostStatus.PUBLISHED,
+                BlogPostVisibility.PUBLIC,
+                LocalDateTime.of(2026, 3, 26, 9, 0)
+        ));
+
+        // when
+        BlogPostSummaryResponse result = blogService.getPublishedPostSummary(noMetaPost.getId());
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.categoryName()).isNull();
+            softly.assertThat(result.thumbnailImageUrl()).isNull();
+            softly.assertThat(result.hashtags()).isEmpty();
         });
     }
 

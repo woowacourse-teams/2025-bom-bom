@@ -48,7 +48,7 @@ public class MaeilMailController implements MaeilMailControllerApi {
             @LoginMember Member member,
             @PathVariable Long contentId
     ) {
-        return null;
+        return maeilMailService.getSubmittedAnswer(member, contentId);
     }
 
     @Override

@@ -10,6 +10,7 @@ import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailContentAnswer
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailUserAnswer;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailIdealAnswerResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubmitAnswerRequest;
+import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubmittedAnswerResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailContentAnswerRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailContentRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailIssueHistoryRepository;
@@ -62,5 +63,15 @@ public class MaeilMailService {
                 .answer(request.answer())
                 .build();
         userAnswerRepository.save(userAnswer);
+    }
+
+    public MaeilMailSubmittedAnswerResponse getSubmittedAnswer(Member member, Long contentId) {
+        MaeilMailUserAnswer userAnswer = userAnswerRepository.findByMemberIdAndContentId(member.getId(), contentId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "maeilMailUserAnswer")
+                        .addContext(ErrorContextKeys.OPERATION, "findByMemberIdAndContentId")
+                        .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                        .addContext(ErrorContextKeys.CONTENT_ID, contentId));
+        return new MaeilMailSubmittedAnswerResponse(userAnswer.getAnswer());
     }
 }

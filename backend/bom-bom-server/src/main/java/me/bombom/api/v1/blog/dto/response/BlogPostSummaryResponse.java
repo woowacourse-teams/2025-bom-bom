@@ -26,26 +26,15 @@ public record BlogPostSummaryResponse(
         List<String> hashtags
 ) {
 
-    public BlogPostSummaryResponse(
-            Long postId,
-            String title,
-            String description,
-            String thumbnailImageUrl,
-            String categoryName,
-            LocalDateTime publishedAt
-    ) {
-        this(postId, title, description, thumbnailImageUrl, categoryName, publishedAt, List.of());
-    }
-
-    public BlogPostSummaryResponse withHashtags(List<String> hashtags) {
+    public static BlogPostSummaryResponse of(BlogPostSummaryRow summaryRow, List<String> hashtags) {
         return new BlogPostSummaryResponse(
-                postId,
-                title,
-                description,
-                thumbnailImageUrl,
-                categoryName,
-                publishedAt,
-                List.copyOf(hashtags)
+                summaryRow.postId(),
+                summaryRow.title(),
+                summaryRow.description(),
+                summaryRow.thumbnailImageUrl(),
+                summaryRow.categoryName(),
+                summaryRow.publishedAt(),
+                hashtags
         );
     }
 }

@@ -1,9 +1,9 @@
 package me.bombom.api.v1.blog.repository;
 
-import java.util.Optional;
 import me.bombom.api.v1.blog.domain.BlogPost;
 import me.bombom.api.v1.blog.dto.response.BlogPostResponse;
-import me.bombom.api.v1.blog.dto.response.BlogPostSummaryResponse;
+import me.bombom.api.v1.blog.dto.response.BlogPostSummaryRow;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -62,7 +62,7 @@ public interface BlogPostRepository extends JpaRepository<BlogPost, Long> {
     Page<BlogPostResponse> findPublishedPosts(@Param("memberId") Long memberId, Pageable pageable);
 
     @Query("""
-            SELECT new me.bombom.api.v1.blog.dto.response.BlogPostSummaryResponse(
+            SELECT new me.bombom.api.v1.blog.dto.response.BlogPostSummaryRow(
                 bp.id,
                 bp.title,
                 bp.description,
@@ -76,5 +76,6 @@ public interface BlogPostRepository extends JpaRepository<BlogPost, Long> {
             WHERE bp.status = me.bombom.api.v1.blog.domain.BlogPostStatus.PUBLISHED
                 AND bp.id = :postId
             """)
-    Optional<BlogPostSummaryResponse> findPublishedPostSummaryById(@Param("postId") Long postId);
+    Optional<BlogPostSummaryRow> findPublishedPostSummaryById(@Param("postId") Long postId);
+
 }

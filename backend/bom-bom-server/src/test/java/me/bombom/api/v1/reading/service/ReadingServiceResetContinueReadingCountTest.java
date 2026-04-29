@@ -1,6 +1,6 @@
 package me.bombom.api.v1.reading.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -10,25 +10,15 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
-import me.bombom.api.v1.badge.service.BadgeService;
-import me.bombom.api.v1.common.ContinueReadingRankingScheduleProperties;
-import me.bombom.api.v1.common.MonthlyRankingScheduleProperties;
-import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
-import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
-import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
-import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
-import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
-import me.bombom.api.v1.reading.repository.YearlyReadingRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class ReadingServiceResetContinueReadingCountTest {
@@ -39,43 +29,10 @@ class ReadingServiceResetContinueReadingCountTest {
     private ReadingService readingService;
 
     @Mock
-    private ReadingSnapshotMetaService readingSnapshotMetaService;
-
-    @Mock
-    private MemberRepository memberRepository;
-
-    @Mock
     private ContinueReadingRealtimeRepository continueReadingRepository;
 
     @Mock
-    private ContinueReadingSnapshotRepository continueReadingRankingSnapshotRepository;
-
-    @Mock
     private TodayReadingRepository todayReadingRepository;
-
-    @Mock
-    private WeeklyReadingRepository weeklyReadingRepository;
-
-    @Mock
-    private MonthlyReadingSnapshotRepository monthlyReadingSnapshotRepository;
-
-    @Mock
-    private MonthlyReadingRealtimeRepository monthlyReadingRealtimeRepository;
-
-    @Mock
-    private YearlyReadingRepository yearlyReadingRepository;
-
-    @Mock
-    private MonthlyRankingScheduleProperties scheduleProps;
-
-    @Mock
-    private ContinueReadingRankingScheduleProperties continueReadingRankingScheduleProperties;
-
-    @Mock
-    private BadgeService badgeService;
-
-    @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
 
     @Mock
     private Clock clock;
@@ -99,7 +56,7 @@ class ReadingServiceResetContinueReadingCountTest {
     }
 
     @Test
-    void 어제가_평일이면_기존_조건대로_연속_읽기_횟수를_초기화한다() {
+    void 어제가_평일이면_연속_읽기_횟수를_초기화하고_최대_스트릭은_유지한다() {
         fixClockTo(LocalDate.of(2026, 4, 28)); // Tuesday
         TodayReading todayReading = TodayReading.builder()
                 .memberId(1L)
@@ -109,13 +66,17 @@ class ReadingServiceResetContinueReadingCountTest {
         ContinueReadingRealtime continueReading = ContinueReadingRealtime.builder()
                 .memberId(1L)
                 .dayCount(10)
+                .maxDayCount(15)
                 .build();
         given(todayReadingRepository.findTotalNonZeroAndCurrentZero()).willReturn(List.of(todayReading));
         given(continueReadingRepository.findByMemberId(1L)).willReturn(Optional.of(continueReading));
 
         readingService.resetContinueReadingCount();
 
-        assertThat(continueReading.getDayCount()).isZero();
+        assertSoftly(softly -> {
+            softly.assertThat(continueReading.getDayCount()).isZero();
+            softly.assertThat(continueReading.getMaxDayCount()).isEqualTo(15);
+        });
     }
 
     private void fixClockTo(LocalDate date) {

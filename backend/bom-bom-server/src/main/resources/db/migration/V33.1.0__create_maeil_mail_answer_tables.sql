@@ -5,7 +5,7 @@ CREATE TABLE maeil_mail_user_answer
     updated_at datetime(6)           NULL,
     content_id BIGINT                NOT NULL,
     member_id  BIGINT                NOT NULL,
-    answer     TEXT                  NOT NULL,
+    answer     TEXT                  NOT NULL
 );
 
 CREATE TABLE maeil_mail_content_answer
@@ -14,5 +14,5 @@ CREATE TABLE maeil_mail_content_answer
     created_at datetime(6)           NULL,
     updated_at datetime(6)           NULL,
     content_id BIGINT                NOT NULL,
-    answer     MEDIUMTEXT            NOT NULL,
+    answer     MEDIUMTEXT            NOT NULL
 );

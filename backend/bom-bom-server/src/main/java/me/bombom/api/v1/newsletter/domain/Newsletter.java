@@ -82,8 +82,4 @@ public class Newsletter extends BaseEntity {
         this.suspendedAt = suspendedAt;
         this.source = source != null ? source : NewsletterSource.EXTERNAL;
     }
-
-    public boolean isMaeilMail() {
-        return source == NewsletterSource.MAEIL_MAIL;
-    }
 }

@@ -54,6 +54,6 @@ public class MaeilMailController implements MaeilMailControllerApi {
     @Override
     @GetMapping("/content")
     public MaeilMailInformationResponse getInformationByArticle(@RequestParam Long articleId) {
-        return null;
+        return maeilMailService.getContentInformationByArticle(articleId);
     }
 }

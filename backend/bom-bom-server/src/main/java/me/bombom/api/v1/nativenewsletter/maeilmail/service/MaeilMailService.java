@@ -7,8 +7,10 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailContent;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailContentAnswer;
+import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailIssueHistory;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailUserAnswer;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailIdealAnswerResponse;
+import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailInformationResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubmitAnswerRequest;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubmittedAnswerResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailContentAnswerRepository;
@@ -31,13 +33,13 @@ public class MaeilMailService {
     public MaeilMailIdealAnswerResponse getIdealAnswer(Long contentId) {
         MaeilMailContent content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "maeilMailContent")
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MaeilMailContent")
                         .addContext(ErrorContextKeys.OPERATION, "findById")
                         .addContext(ErrorContextKeys.CONTENT_ID, contentId));
 
         MaeilMailContentAnswer answer = contentAnswerRepository.findByContentId(contentId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "maeilMailContentAnswer")
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MaeilMailContentAnswer")
                         .addContext(ErrorContextKeys.OPERATION, "findByContentId")
                         .addContext(ErrorContextKeys.CONTENT_ID, contentId));
 
@@ -52,7 +54,7 @@ public class MaeilMailService {
     ) {
         if (!contentRepository.existsById(contentId)) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "maeilMailContent")
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "MaeilMailContent")
                     .addContext(ErrorContextKeys.OPERATION, "existsById")
                     .addContext(ErrorContextKeys.CONTENT_ID, contentId);
         }
@@ -68,10 +70,19 @@ public class MaeilMailService {
     public MaeilMailSubmittedAnswerResponse getSubmittedAnswer(Member member, Long contentId) {
         MaeilMailUserAnswer userAnswer = userAnswerRepository.findByMemberIdAndContentId(member.getId(), contentId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "maeilMailUserAnswer")
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MaeilMailUserAnswer")
                         .addContext(ErrorContextKeys.OPERATION, "findByMemberIdAndContentId")
                         .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
                         .addContext(ErrorContextKeys.CONTENT_ID, contentId));
         return new MaeilMailSubmittedAnswerResponse(userAnswer.getAnswer());
+    }
+
+    public MaeilMailInformationResponse getContentInformationByArticle(Long articleId) {
+        MaeilMailIssueHistory issueHistory = issueHistoryRepository.findByArticleId(articleId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MaeilMailIssueHistory")
+                        .addContext(ErrorContextKeys.OPERATION, "findByArticleId")
+                        .addContext(ErrorContextKeys.ARTICLE_ID, articleId));
+        return MaeilMailInformationResponse.from(issueHistory);
     }
 }

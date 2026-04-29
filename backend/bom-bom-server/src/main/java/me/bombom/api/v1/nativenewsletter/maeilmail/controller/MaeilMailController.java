@@ -39,7 +39,7 @@ public class MaeilMailController implements MaeilMailControllerApi {
             @PathVariable Long contentId,
             @RequestBody @Valid MaeilMailSubmitAnswerRequest request
     ) {
-
+        maeilMailService.submitAnswer(member, contentId, request);
     }
 
     @Override

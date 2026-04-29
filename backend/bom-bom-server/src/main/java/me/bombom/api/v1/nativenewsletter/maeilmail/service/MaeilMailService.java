@@ -31,18 +31,8 @@ public class MaeilMailService {
     private final MaeilMailIssueHistoryRepository issueHistoryRepository;
 
     public MaeilMailIdealAnswerResponse getIdealAnswer(Long contentId) {
-        MaeilMailContent content = contentRepository.findById(contentId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MaeilMailContent")
-                        .addContext(ErrorContextKeys.OPERATION, "findById")
-                        .addContext(ErrorContextKeys.CONTENT_ID, contentId));
-
-        MaeilMailContentAnswer answer = contentAnswerRepository.findByContentId(contentId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MaeilMailContentAnswer")
-                        .addContext(ErrorContextKeys.OPERATION, "findByContentId")
-                        .addContext(ErrorContextKeys.CONTENT_ID, contentId));
-
+        MaeilMailContent content = getContent(contentId);
+        MaeilMailContentAnswer answer = getContentAnswer(contentId);
         return new MaeilMailIdealAnswerResponse(content.getTitle(), answer.getAnswer());
     }
 
@@ -71,6 +61,22 @@ public class MaeilMailService {
     public MaeilMailInformationResponse getContentInformationByArticle(Long articleId) {
         MaeilMailIssueHistory issueHistory = getIssueHistory(articleId);
         return MaeilMailInformationResponse.from(issueHistory);
+    }
+
+    private MaeilMailContent getContent(Long contentId) {
+        return contentRepository.findById(contentId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MaeilMailContent")
+                        .addContext(ErrorContextKeys.OPERATION, "findById")
+                        .addContext(ErrorContextKeys.CONTENT_ID, contentId));
+    }
+
+    private MaeilMailContentAnswer getContentAnswer(Long contentId) {
+        return contentAnswerRepository.findByContentId(contentId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MaeilMailContentAnswer")
+                        .addContext(ErrorContextKeys.OPERATION, "findByContentId")
+                        .addContext(ErrorContextKeys.CONTENT_ID, contentId));
     }
 
     private MaeilMailIssueHistory getIssueHistory(Long articleId) {

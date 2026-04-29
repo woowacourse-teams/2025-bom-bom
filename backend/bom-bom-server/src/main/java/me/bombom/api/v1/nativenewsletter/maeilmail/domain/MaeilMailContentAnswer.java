@@ -30,7 +30,7 @@ public class MaeilMailContentAnswer extends BaseEntity {
     @Column(nullable = false)
     private Long contentId;
 
-    @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String answer;
 
     @Builder

@@ -33,7 +33,7 @@ public interface MaeilMailControllerApi {
 
     @Operation(summary = "매일메일 답변 제출", description = "회원이 매일메일 아티클에 대한 답변을 제출합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "400", description = "너무 긴 답변 제출 시 (최대 16,000자)", content = @Content),
+            @ApiResponse(responseCode = "400", description = "글자 수 제한 초과 (최대 1,500자)", content = @Content),
             @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 매일메일 아티클", content = @Content),
     })

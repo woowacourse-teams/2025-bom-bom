@@ -33,7 +33,7 @@ public class MaeilMailUserAnswer extends BaseEntity {
     @Column(nullable = false)
     private Long memberId;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false)
     private String answer;
 
     @Builder

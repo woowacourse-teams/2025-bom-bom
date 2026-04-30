@@ -3,6 +3,7 @@ package me.bombom.api.v1.reading.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -79,6 +80,9 @@ class ReadingServiceTest {
 
     @Autowired
     private BadgeRepository badgeRepository;
+
+    @Autowired
+    private Clock clock;
 
     private Member member;
     private TodayReading todayReading;
@@ -413,7 +417,7 @@ class ReadingServiceTest {
         // then
         MonthlyReadingSnapshot monthlyReadingSnapshot = monthlyReadingSnapshotRepository.findByMemberId(member.getId()).get();
         YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndReadingYear(member.getId(),
-                LocalDate.now().minusMonths(1).getYear()).get();
+                lastMonth().getYear()).get();
 
         assertSoftly(softly -> {
             softly.assertThat(yearlyReading.getCurrentCount()).isEqualTo(monthlyCountBefore);
@@ -443,7 +447,7 @@ class ReadingServiceTest {
         List<Badge> badges = badgeRepository.findAll();
         assertThat(badges).hasSize(3);
 
-        LocalDate lastMonth = LocalDate.now().minusMonths(1);
+        LocalDate lastMonth = lastMonth();
         RankingBadge goldBadge = findRankingBadge(badges, member2.getId(), BadgeGrade.GOLD);
         RankingBadge silverBadge = findRankingBadge(badges, member3.getId(), BadgeGrade.SILVER);
         RankingBadge bronzeBadge = findRankingBadge(badges, member4.getId(), BadgeGrade.BRONZE);
@@ -481,7 +485,7 @@ class ReadingServiceTest {
         monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
         monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member2, 20, 2, 10));
         
-        LocalDate lastMonth = LocalDate.now().minusMonths(1);
+        LocalDate lastMonth = lastMonth();
         RankingBadge rankingBadge = RankingBadge.builder()
                 .memberId(member1.getId())
                 .grade(BadgeGrade.GOLD)
@@ -558,7 +562,7 @@ class ReadingServiceTest {
         
         monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
         
-        LocalDate lastMonth = LocalDate.now().minusMonths(1);
+        LocalDate lastMonth = lastMonth();
         RankingBadge rankingBadge = RankingBadge.builder()
                 .memberId(member1.getId())
                 .grade(BadgeGrade.GOLD)
@@ -652,7 +656,7 @@ class ReadingServiceTest {
 
         monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
 
-        LocalDate lastMonth = LocalDate.now().minusMonths(1);
+        LocalDate lastMonth = lastMonth();
         RankingBadge rankingBadge = RankingBadge.builder()
                 .memberId(member1.getId())
                 .grade(BadgeGrade.GOLD)
@@ -728,7 +732,7 @@ class ReadingServiceTest {
 
         monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
 
-        LocalDate lastMonth = LocalDate.now().minusMonths(1);
+        LocalDate lastMonth = lastMonth();
         RankingBadge rankingBadge = RankingBadge.builder()
                 .memberId(member1.getId())
                 .grade(BadgeGrade.GOLD)
@@ -786,5 +790,9 @@ class ReadingServiceTest {
                 .filter(b -> b.getMemberId().equals(memberId) && b.getGrade() == grade)
                 .findFirst()
                 .orElse(null);
+    }
+
+    private LocalDate lastMonth() {
+        return LocalDate.now(clock).minusMonths(1);
     }
 }

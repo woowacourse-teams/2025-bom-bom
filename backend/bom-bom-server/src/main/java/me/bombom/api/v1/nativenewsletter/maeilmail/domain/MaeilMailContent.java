@@ -24,7 +24,7 @@ public class MaeilMailContent extends BaseEntity {
     @Column(nullable = false)
     private Long topicId;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 100)
     private String title;
 
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
@@ -33,7 +33,7 @@ public class MaeilMailContent extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String contentsText;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 50)
     private String contentsSummary;
 
     @Column(columnDefinition = "TINYINT", nullable = false)

@@ -28,6 +28,7 @@ public enum ErrorContextKeys {
     CHALLENGE_PARTICIPANT_ID("challengeParticipantId"),
     COMMENT_ID("commentId"),
     DETAIL("detail"),
+    CONTENT_ID("contentId"),
     ;
     
     private final String key;

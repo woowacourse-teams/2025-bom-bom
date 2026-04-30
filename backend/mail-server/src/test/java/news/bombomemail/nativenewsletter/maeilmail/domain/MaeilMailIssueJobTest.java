@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class MaeilMailIssueJobTest {
 
     @Test
-    void chunk_기록시_cursor와_발행_count를_누적한다() {
+    void 발행_chunk_기록시_cursor와_발행_count를_누적한다() {
         // given
         MaeilMailIssueJob issueJob = MaeilMailIssueJob.start(
                 LocalDate.of(2026, 4, 27),
@@ -20,8 +20,8 @@ class MaeilMailIssueJobTest {
         );
 
         // when
-        issueJob.recordChunk(IssueChunkResult.of(10L, 2, 1, 0));
-        issueJob.recordChunk(IssueChunkResult.of(20L, 3, 2, 1));
+        issueJob.recordPublishedChunk(IssueChunkResult.of(10L, 2, 1, 0));
+        issueJob.recordPublishedChunk(IssueChunkResult.of(20L, 3, 2, 1));
 
         // then
         assertSoftly(softly -> {
@@ -42,7 +42,7 @@ class MaeilMailIssueJobTest {
                 0L,
                 LocalDateTime.of(2026, 4, 27, 7, 0)
         );
-        issueJob.recordChunk(IssueChunkResult.of(10L, 2, 1, 0));
+        issueJob.recordPublishedChunk(IssueChunkResult.of(10L, 2, 1, 0));
         issueJob.fail("fail", LocalDateTime.of(2026, 4, 27, 7, 10));
 
         // when

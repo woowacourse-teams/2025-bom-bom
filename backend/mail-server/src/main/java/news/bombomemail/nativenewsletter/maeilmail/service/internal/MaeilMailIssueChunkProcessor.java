@@ -51,7 +51,7 @@ public class MaeilMailIssueChunkProcessor {
                 preparedEntries.entries().size(),
                 preparedEntries.previouslyIssuedTrackIds().size()
         );
-        issueJobManager.recordChunk(issueJobId, result);
+        issueJobManager.recordPublishedChunk(issueJobId, result);
         log.info(
                 "매일메일 발행 chunk 처리 완료 - issueDate={}, issueJobId={}, lastTrackId={}, trackCount={}, issuedArticleCount={}, previouslyIssuedTrackCount={}, elapsedMs={}",
                 issueDate,

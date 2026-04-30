@@ -59,7 +59,7 @@ class MaeilMailIssueJobManagerTest {
         LocalDate issueDate = LocalDate.of(2026, 4, 27);
         LocalDateTime startedAt = LocalDateTime.of(2026, 4, 27, 7, 0);
         MaeilMailIssueJob issueJob = issueJob(1L, issueDate, startedAt);
-        issueJob.recordChunk(IssueChunkResult.of(10L, 2, 1, 0));
+        issueJob.recordPublishedChunk(IssueChunkResult.of(10L, 2, 1, 0));
         issueJob.fail("fail", startedAt.plusMinutes(10));
         given(issueJobRepository.findByIssueDate(issueDate)).willReturn(Optional.of(issueJob));
 
@@ -81,7 +81,7 @@ class MaeilMailIssueJobManagerTest {
         LocalDate issueDate = LocalDate.of(2026, 4, 27);
         LocalDateTime startedAt = LocalDateTime.of(2026, 4, 27, 7, 0);
         MaeilMailIssueJob issueJob = issueJob(1L, issueDate, startedAt);
-        issueJob.recordChunk(IssueChunkResult.of(10L, 2, 1, 0));
+        issueJob.recordPublishedChunk(IssueChunkResult.of(10L, 2, 1, 0));
         issueJob.fail("fail", startedAt.plusMinutes(10));
         given(issueJobRepository.findByIssueDateAndStatusIn(issueDate, List.of(
                 MaeilMailIssueJobStatus.RUNNING,
@@ -128,7 +128,7 @@ class MaeilMailIssueJobManagerTest {
         given(issueJobRepository.findById(1L)).willReturn(Optional.of(issueJob));
 
         // when
-        issueJobManager.recordChunk(1L, chunkResult);
+        issueJobManager.recordPublishedChunk(1L, chunkResult);
 
         // then
         assertSoftly(softly -> {

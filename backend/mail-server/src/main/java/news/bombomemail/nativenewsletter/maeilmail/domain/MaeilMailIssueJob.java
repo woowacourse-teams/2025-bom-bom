@@ -101,13 +101,13 @@ public class MaeilMailIssueJob extends BaseEntity {
         }
     }
 
-    public void recordChunk(IssueChunkResult result) {
+    public void recordPublishedChunk(IssueChunkResult result) {
         if (!result.hasTracks()) {
             return;
         }
 
         if (status != MaeilMailIssueJobStatus.RUNNING) {
-            throw new IllegalStateException("실행 중인 매일메일 발행 job만 chunk 결과를 기록할 수 있습니다. jobId=" + id);
+            throw new IllegalStateException("실행 중인 매일메일 발행 job만 발행 chunk 결과를 기록할 수 있습니다. jobId=" + id);
         }
 
         this.lastProcessedTrackId = result.lastTrackId();

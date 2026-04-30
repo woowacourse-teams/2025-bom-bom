@@ -144,7 +144,7 @@ class MaeilMailIssueChunkProcessorTest {
             softly.assertThat(result.previouslyIssuedTrackCount()).isEqualTo(1);
         });
         verify(issuePublisher).publish(preparedEntries, issueDate);
-        verify(issueJobManager).recordChunk(1L, result);
+        verify(issueJobManager).recordPublishedChunk(1L, result);
     }
 
     private MaeilMailSubscriptionTrack createTrack(Long id, Long subscribeId, Long memberId) {

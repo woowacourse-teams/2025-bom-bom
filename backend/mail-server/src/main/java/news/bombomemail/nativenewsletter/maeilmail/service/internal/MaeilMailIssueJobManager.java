@@ -48,9 +48,9 @@ public class MaeilMailIssueJobManager {
     }
 
     @Transactional
-    public void recordChunk(Long issueJobId, IssueChunkResult result) {
+    public void recordPublishedChunk(Long issueJobId, IssueChunkResult result) {
         MaeilMailIssueJob issueJob = getIssueJob(issueJobId);
-        issueJob.recordChunk(result);
+        issueJob.recordPublishedChunk(result);
     }
 
     @Transactional

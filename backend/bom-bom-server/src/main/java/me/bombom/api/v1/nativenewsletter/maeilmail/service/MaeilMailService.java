@@ -39,10 +39,10 @@ public class MaeilMailService {
     @Transactional
     public void submitAnswer(
             Member member,
-            Long articleId,
+            Long contentId,
             MaeilMailSubmitAnswerRequest request
     ) {
-        MaeilMailIssueHistory issueHistory = getIssueHistory(articleId);
+        MaeilMailIssueHistory issueHistory = getIssueHistoryByContentId(contentId);
 
         MaeilMailUserAnswer userAnswer = MaeilMailUserAnswer.builder()
                 .issueHistoryId(issueHistory.getId())
@@ -52,14 +52,16 @@ public class MaeilMailService {
         userAnswerRepository.save(userAnswer);
     }
 
-    public MaeilMailSubmittedAnswerResponse getSubmittedAnswer(Member member, Long articleId) {
-        MaeilMailIssueHistory issueHistory = getIssueHistory(articleId);
-        MaeilMailUserAnswer userAnswer = getUserAnswer(member, articleId, issueHistory);
+    public MaeilMailSubmittedAnswerResponse getSubmittedAnswer(Member member, Long contentId) {
+        // TODO: List<MaeilMailIssueHistory> | List<Integer> 로 반환
+        MaeilMailIssueHistory issueHistory = getIssueHistoryByContentId(contentId);
+        // TODO: List<MaeilMailUserAnswer> 로 반환
+        MaeilMailUserAnswer userAnswer = getUserAnswer(member, contentId, issueHistory);
         return new MaeilMailSubmittedAnswerResponse(userAnswer.getAnswer());
     }
 
     public MaeilMailInformationResponse getContentInformationByArticle(Long articleId) {
-        MaeilMailIssueHistory issueHistory = getIssueHistory(articleId);
+        MaeilMailIssueHistory issueHistory = getIssueHistoryByArticleId(articleId);
         return MaeilMailInformationResponse.from(issueHistory);
     }
 
@@ -79,7 +81,7 @@ public class MaeilMailService {
                         .addContext(ErrorContextKeys.CONTENT_ID, contentId));
     }
 
-    private MaeilMailIssueHistory getIssueHistory(Long articleId) {
+    private MaeilMailIssueHistory getIssueHistoryByArticleId(Long articleId) {
         return issueHistoryRepository.findByArticleId(articleId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "MaeilMailIssueHistory")
@@ -87,12 +89,20 @@ public class MaeilMailService {
                         .addContext(ErrorContextKeys.ARTICLE_ID, articleId));
     }
 
-    private MaeilMailUserAnswer getUserAnswer(Member member, Long articleId, MaeilMailIssueHistory issueHistory) {
+    private MaeilMailIssueHistory getIssueHistoryByContentId(Long contentId) {
+        return issueHistoryRepository.findByContentId(contentId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "MaeilMailIssueHistory")
+                        .addContext(ErrorContextKeys.OPERATION, "findByContentId")
+                        .addContext(ErrorContextKeys.CONTENT_ID, contentId));
+    }
+
+    private MaeilMailUserAnswer getUserAnswer(Member member, Long contentId, MaeilMailIssueHistory issueHistory) {
         return userAnswerRepository.findByMemberIdAndIssueHistoryId(member.getId(), issueHistory.getId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "MaeilMailUserAnswer")
                         .addContext(ErrorContextKeys.OPERATION, "findByMemberIdAndIssueHistoryId")
                         .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
-                        .addContext(ErrorContextKeys.ARTICLE_ID, articleId));
+                        .addContext(ErrorContextKeys.ARTICLE_ID, contentId));
     }
 }

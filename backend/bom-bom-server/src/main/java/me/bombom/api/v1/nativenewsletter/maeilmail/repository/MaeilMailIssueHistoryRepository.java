@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface MaeilMailIssueHistoryRepository extends JpaRepository<MaeilMailIssueHistory, Long> {
 
     Optional<MaeilMailIssueHistory> findByArticleId(Long articleId);
+
+    Optional<MaeilMailIssueHistory> findByContentId(Long contentId);
 }

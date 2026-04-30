@@ -136,7 +136,7 @@ public class ReadingService {
 
     @Transactional
     public void migrateMonthlyCountToYearlyAndReset() {
-        LocalDate lastMonth = LocalDate.now().minusMonths(LAST_MONTH_OFFSET);
+        LocalDate lastMonth = getLastMonth();
         int targetYear = lastMonth.getYear();
         try {
             // 1. 데이터가 없으면 바로 realtime 초기화

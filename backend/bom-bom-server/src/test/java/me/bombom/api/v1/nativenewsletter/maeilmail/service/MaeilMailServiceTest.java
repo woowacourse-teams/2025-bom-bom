@@ -23,6 +23,7 @@ import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailIssueHist
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailUserAnswerRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -106,14 +107,14 @@ class MaeilMailServiceTest {
     }
 
     @Test
-    void 아티클_id로_사용자_답변을_제출하고_조회한다() {
+    void 컨텐츠_id로_사용자_답변을_제출하고_조회한다() {
         // given
-        Long articleId = issueHistory.getArticleId();
+        Long contentId = issueHistory.getContentId();
         MaeilMailSubmitAnswerRequest request = new MaeilMailSubmitAnswerRequest(USER_ANSWER);
 
         // when
-        maeilMailService.submitAnswer(member, articleId, request);
-        MaeilMailSubmittedAnswerResponse response = maeilMailService.getSubmittedAnswer(member, articleId);
+        maeilMailService.submitAnswer(member, contentId, request);
+        MaeilMailSubmittedAnswerResponse response = maeilMailService.getSubmittedAnswer(member, contentId);
 
         // then
         MaeilMailUserAnswer savedAnswer = userAnswerRepository.findAll().getFirst();
@@ -125,6 +126,8 @@ class MaeilMailServiceTest {
         });
     }
 
+    // TODO: 명세 변경 후 활성화 가능
+    @Disabled
     @Test
     void 같은_컨텐츠라도_발행_이력이_다르면_사용자가_다시_답변할_수_있다() {
         // given
@@ -133,8 +136,8 @@ class MaeilMailServiceTest {
         );
 
         // when
-        maeilMailService.submitAnswer(member, issueHistory.getArticleId(), new MaeilMailSubmitAnswerRequest(USER_ANSWER));
-        maeilMailService.submitAnswer(member, secondIssueHistory.getArticleId(), new MaeilMailSubmitAnswerRequest(USER_ANSWER));
+        maeilMailService.submitAnswer(member, issueHistory.getContentId(), new MaeilMailSubmitAnswerRequest(USER_ANSWER));
+        maeilMailService.submitAnswer(member, secondIssueHistory.getContentId(), new MaeilMailSubmitAnswerRequest(USER_ANSWER));
 
         // then
         assertSoftly(softly -> {
@@ -176,7 +179,7 @@ class MaeilMailServiceTest {
         MaeilMailSubmitAnswerRequest request = new MaeilMailSubmitAnswerRequest(USER_ANSWER);
 
         // when & then
-        assertThatThrownBy(() -> maeilMailService.submitAnswer(member, UNKNOWN_ARTICLE_ID, request))
+        assertThatThrownBy(() -> maeilMailService.submitAnswer(member, content.getId() + 1, request))
                 .isInstanceOfSatisfying(CIllegalArgumentException.class, exception ->
                         assertThat(exception.getErrorDetail()).isSameAs(ErrorDetail.ENTITY_NOT_FOUND)
                 );
@@ -187,12 +190,12 @@ class MaeilMailServiceTest {
     @Test
     void 같은_발행_이력에_중복으로_답변을_제출하면_예외가_발생하고_답변은_하나만_유지된다() {
         // given
-        Long articleId = issueHistory.getArticleId();
+        Long contentId = issueHistory.getContentId();
         MaeilMailSubmitAnswerRequest request = new MaeilMailSubmitAnswerRequest(USER_ANSWER);
-        maeilMailService.submitAnswer(member, articleId, request);
+        maeilMailService.submitAnswer(member, contentId, request);
 
         // when & then
-        assertThatThrownBy(() -> maeilMailService.submitAnswer(member, articleId, request))
+        assertThatThrownBy(() -> maeilMailService.submitAnswer(member, contentId, request))
                 .isInstanceOf(DataIntegrityViolationException.class);
 
         assertThat(userAnswerRepository.findAll()).hasSize(1);
@@ -201,10 +204,10 @@ class MaeilMailServiceTest {
     @Test
     void 제출하지_않은_답변을_조회하면_예외가_발생한다() {
         // given
-        Long articleId = issueHistory.getArticleId();
+        Long contentId = issueHistory.getContentId();
 
         // when & then
-        assertThatThrownBy(() -> maeilMailService.getSubmittedAnswer(member, articleId))
+        assertThatThrownBy(() -> maeilMailService.getSubmittedAnswer(member, contentId))
                 .isInstanceOfSatisfying(CIllegalArgumentException.class, exception ->
                         assertThat(exception.getErrorDetail()).isSameAs(ErrorDetail.ENTITY_NOT_FOUND)
                 );

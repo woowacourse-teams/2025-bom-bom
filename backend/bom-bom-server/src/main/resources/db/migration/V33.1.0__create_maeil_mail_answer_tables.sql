@@ -1,0 +1,20 @@
+CREATE TABLE maeil_mail_user_answer
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    created_at datetime(6)           NULL,
+    updated_at datetime(6)           NULL,
+    issue_history_id BIGINT          NOT NULL,
+    member_id  BIGINT                NOT NULL,
+    answer     VARCHAR(1500)         NOT NULL,
+    CONSTRAINT uk_maeil_mail_user_answer_member_issue_history UNIQUE (member_id, issue_history_id)
+);
+
+CREATE TABLE maeil_mail_content_answer
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    created_at datetime(6)           NULL,
+    updated_at datetime(6)           NULL,
+    content_id BIGINT                NOT NULL,
+    answer     TEXT                  NOT NULL,
+    CONSTRAINT uk_maeil_mail_content_answer_content_id UNIQUE (content_id)
+);

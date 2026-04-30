@@ -9,6 +9,7 @@ import java.util.Properties;
 import news.bombomemail.article.domain.RecentArticle;
 import news.bombomemail.article.repository.RecentArticleRepository;
 import news.bombomemail.article.util.html.HtmlCleanerConfig;
+import news.bombomemail.common.TimeConfig;
 import news.bombomemail.email.extractor.EmailContentExtractor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({RecentArticleService.class, HtmlCleanerConfig.class})
+@Import({RecentArticleService.class, HtmlCleanerConfig.class, TimeConfig.class})
 class RecentArticleServiceTest {
 
     @Autowired
@@ -51,7 +52,7 @@ class RecentArticleServiceTest {
         String content = EmailContentExtractor.extractContents(msg);
 
         // when
-        recentArticleService.save(articleId, msg, content, memberId, newsletterId);
+        recentArticleService.save(articleId, msg.getSubject(), content, memberId, newsletterId);
 
         // then
         assertSoftly(softly -> {
@@ -71,6 +72,26 @@ class RecentArticleServiceTest {
     }
 
     @Test
+    void MimeMessage_없이_전달받은_제목으로_RecentArticle을_저장한다() {
+        // given
+        String articleTitle = "매일메일 제목";
+        String content = "<p>매일메일 본문입니다.</p>";
+
+        // when
+        recentArticleService.save(articleId, articleTitle, content, memberId, newsletterId);
+
+        // then
+        assertSoftly(softly -> {
+            RecentArticle recentArticle = recentArticleRepository.findAll().get(0);
+            softly.assertThat(recentArticle.getTitle()).isEqualTo(articleTitle);
+            softly.assertThat(recentArticle.getContents()).isEqualTo(content);
+            softly.assertThat(recentArticle.getContentsText()).isEqualTo("매일메일 본문입니다.");
+            softly.assertThat(recentArticle.getMemberId()).isEqualTo(memberId);
+            softly.assertThat(recentArticle.getNewsletterId()).isEqualTo(newsletterId);
+        });
+    }
+
+    @Test
     void HTML_본문에서_텍스트가_제대로_추출되어_저장() throws Exception {
         // given
         MimeMessage msg = new MimeMessage(session);
@@ -79,7 +100,7 @@ class RecentArticleServiceTest {
         String content = EmailContentExtractor.extractContents(msg);
 
         // when
-        recentArticleService.save(articleId, msg, content, memberId, newsletterId);
+        recentArticleService.save(articleId, msg.getSubject(), content, memberId, newsletterId);
 
         // then
         assertSoftly(softly -> {
@@ -100,7 +121,7 @@ class RecentArticleServiceTest {
         String content = EmailContentExtractor.extractContents(msg);
 
         // when
-        recentArticleService.save(articleId, msg, content, memberId, newsletterId);
+        recentArticleService.save(articleId, msg.getSubject(), content, memberId, newsletterId);
 
         // then
         assertSoftly(softly -> {
@@ -128,7 +149,7 @@ class RecentArticleServiceTest {
         String content = EmailContentExtractor.extractContents(msg);
 
         // when
-        recentArticleService.save(articleId, msg, content, memberId, newsletterId);
+        recentArticleService.save(articleId, msg.getSubject(), content, memberId, newsletterId);
 
         // then
         assertSoftly(softly -> {
@@ -153,8 +174,8 @@ class RecentArticleServiceTest {
         String content2 = EmailContentExtractor.extractContents(msg2);
 
         // when
-        recentArticleService.save(1L, msg1, content1, memberId, newsletterId);
-        recentArticleService.save(2L, msg2, content2, memberId, newsletterId);
+        recentArticleService.save(1L, msg1.getSubject(), content1, memberId, newsletterId);
+        recentArticleService.save(2L, msg2.getSubject(), content2, memberId, newsletterId);
 
         // then
         assertSoftly(softly -> {

@@ -1,7 +1,5 @@
 package news.bombomemail.article.event;
 
-import jakarta.mail.internet.MimeMessage;
-
 public record ArticleArrivedEvent(
         Long newsletterId,
         String newsletterName,
@@ -9,8 +7,8 @@ public record ArticleArrivedEvent(
         String articleTitle,
         Long memberId,
         String unsubscribeUrl,
-        MimeMessage message,
-        String contents
+        String contents,
+        ArticleSource source
 ) {
     public static ArticleArrivedEvent of(
             Long newsletterId,
@@ -19,8 +17,8 @@ public record ArticleArrivedEvent(
             String articleTitle,
             Long memberId,
             String unsubscribeUrl,
-            MimeMessage message,
-            String contents
+            String contents,
+            ArticleSource source
     ) {
         return new ArticleArrivedEvent(
                 newsletterId,
@@ -29,8 +27,8 @@ public record ArticleArrivedEvent(
                 articleTitle,
                 memberId,
                 unsubscribeUrl,
-                message,
-                contents
+                contents,
+                source
         );
     }
 }

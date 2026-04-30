@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import news.bombomemail.article.event.ArticleSource;
 import news.bombomemail.article.domain.Article;
 import news.bombomemail.article.event.ArticleArrivedEvent;
 import news.bombomemail.article.repository.ArticleRepository;
@@ -64,8 +65,8 @@ public class ArticleService {
                         article.getTitle(),
                         member.getId(),
                         unsubscribeUrl,
-                        message,
-                        contents
+                        contents,
+                        ArticleSource.EMAIL_RECEIVED
                 )
         );
         return true;

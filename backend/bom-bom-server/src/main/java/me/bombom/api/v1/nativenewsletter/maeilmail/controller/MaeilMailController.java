@@ -40,7 +40,7 @@ public class MaeilMailController implements MaeilMailControllerApi {
 
     @Override
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/articles/{contentId}/answer/me")
+    @PostMapping("/{contentId}/answer/me")
     public void submitAnswer(
             @LoginMember Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long contentId,
@@ -50,7 +50,7 @@ public class MaeilMailController implements MaeilMailControllerApi {
     }
 
     @Override
-    @GetMapping("/articles/{contentId}/answer/me")
+    @GetMapping("/{contentId}/answer/me")
     public MaeilMailSubmittedAnswerResponse getSubmittedAnswer(
             @LoginMember Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long contentId

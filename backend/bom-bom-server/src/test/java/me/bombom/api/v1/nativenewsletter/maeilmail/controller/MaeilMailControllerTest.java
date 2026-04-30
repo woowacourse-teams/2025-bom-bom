@@ -137,7 +137,7 @@ class MaeilMailControllerTest {
         String answer = "GC Root에서 도달할 수 없는 객체를 수거한다.";
 
         // when
-        mockMvc.perform(post("/api/v1/maeil-mail/articles/{contentId}/answer/me", contentId)
+        mockMvc.perform(post("/api/v1/maeil-mail/{contentId}/answer/me", contentId)
                         .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(Map.of("answer", answer))))
@@ -151,7 +151,7 @@ class MaeilMailControllerTest {
             softly.assertThat(savedAnswer.getAnswer()).isEqualTo(answer);
         });
 
-        MvcResult result = mockMvc.perform(get("/api/v1/maeil-mail/articles/{contentId}/answer/me", contentId)
+        MvcResult result = mockMvc.perform(get("/api/v1/maeil-mail/{contentId}/answer/me", contentId)
                         .with(authentication(authToken)))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -167,7 +167,7 @@ class MaeilMailControllerTest {
         String answer = "존재하지 않는 아티클에는 저장되지 않는다.";
 
         // when & then
-        MvcResult result = mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answer/me", UNKNOWN_ARTICLE_ID)
+        MvcResult result = mockMvc.perform(post("/api/v1/maeil-mail/{articleId}/answer/me", UNKNOWN_ARTICLE_ID)
                         .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(Map.of("answer", answer))))
@@ -183,10 +183,10 @@ class MaeilMailControllerTest {
     @DisplayName("답변이 공백이면 제출할 수 없다")
     void submitAnswer_blankAnswer() throws Exception {
         // given
-        Long articleId = issueHistory.getArticleId();
+        Long contentId = issueHistory.getContentId();
 
         // when & then
-        MvcResult result = mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answer/me", articleId)
+        MvcResult result = mockMvc.perform(post("/api/v1/maeil-mail/{contentId}/answer/me", contentId)
                         .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(Map.of("answer", " "))))
@@ -202,11 +202,11 @@ class MaeilMailControllerTest {
     @DisplayName("답변이 16000자를 초과하면 제출할 수 없다")
     void submitAnswer_answerTooLong() throws Exception {
         // given
-        Long articleId = issueHistory.getArticleId();
+        Long contentId = issueHistory.getContentId();
         String answer = "가".repeat(16_001);
 
         // when & then
-        MvcResult result = mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answer/me", articleId)
+        MvcResult result = mockMvc.perform(post("/api/v1/maeil-mail/{contentId}/answer/me", contentId)
                         .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(Map.of("answer", answer))))
@@ -225,7 +225,7 @@ class MaeilMailControllerTest {
         Long contentId = issueHistory.getContentId();
 
         // when & then
-        MvcResult result = mockMvc.perform(get("/api/v1/maeil-mail/articles/{contentId}/answer/me", contentId)
+        MvcResult result = mockMvc.perform(get("/api/v1/maeil-mail/{contentId}/answer/me", contentId)
                         .with(authentication(authToken)))
                 .andExpect(status().isNotFound())
                 .andReturn();

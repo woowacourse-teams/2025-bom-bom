@@ -17,10 +17,10 @@ CREATE TABLE maeil_mail_content
 (
     id                 BIGINT       NOT NULL AUTO_INCREMENT PRIMARY KEY,
     topic_id           BIGINT       NOT NULL,
-    title              VARCHAR(255) NOT NULL,
+    title              VARCHAR(50)  NOT NULL,
     content            MEDIUMTEXT   NOT NULL,
     contents_text      TEXT         NOT NULL,
-    contents_summary   VARCHAR(255) NOT NULL,
+    contents_summary   VARCHAR(100) NOT NULL,
     expected_read_time TINYINT      NOT NULL,
     created_at         DATETIME(6)  NULL,
     updated_at         DATETIME(6)  NULL

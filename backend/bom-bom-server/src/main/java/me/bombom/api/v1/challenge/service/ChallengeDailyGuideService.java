@@ -3,7 +3,6 @@ package me.bombom.api.v1.challenge.service;
 import static java.time.temporal.ChronoUnit.DAYS;
 
 import java.time.Clock;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.domain.Challenge;
@@ -26,6 +25,7 @@ import me.bombom.api.v1.challenge.repository.TodayDailyGuideRow;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.common.util.DateUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -155,7 +155,7 @@ public class ChallengeDailyGuideService {
     }
 
     private int calculateDayIndex(LocalDate startDate, LocalDate today) {
-        if (isWeekend(today)) {
+        if (DateUtils.isWeekend(today)) {
             return 0;
         }
         return (int) DAYS.between(startDate, today) + FIRST_DAY_INDEX;
@@ -164,15 +164,10 @@ public class ChallengeDailyGuideService {
     private int calculateMaxAllowedDayIndex(LocalDate startDate, LocalDate today) {
         LocalDate targetDate = today;
         // 오늘이 주말이면 직전 금요일까지의 컨텐츠는 볼 수 있어야 함
-        while (isWeekend(targetDate) && !targetDate.isBefore(startDate)) {
+        while (DateUtils.isWeekend(targetDate) && !targetDate.isBefore(startDate)) {
             targetDate = targetDate.minusDays(FIRST_DAY_INDEX);
         }
         return (int) DAYS.between(startDate, targetDate) + FIRST_DAY_INDEX;
-    }
-
-    private boolean isWeekend(LocalDate date) {
-        DayOfWeek dayOfWeek = date.getDayOfWeek();
-        return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
     }
 
     private MyCommentResponse createMyCommentResponse(TodayDailyGuideRow row) {

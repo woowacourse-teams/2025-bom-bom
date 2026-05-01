@@ -44,6 +44,7 @@ import org.springframework.test.web.servlet.MvcResult;
 class MaeilMailControllerTest {
 
     private static final Long ARTICLE_ID = 10_001L;
+    private static final Long SECOND_ARTICLE_ID = 10_002L;
     private static final Long UNKNOWN_ARTICLE_ID = 99_999L;
 
     @Autowired
@@ -130,14 +131,14 @@ class MaeilMailControllerTest {
     }
 
     @Test
-    @DisplayName("컨텐츠 id로 사용자 답변을 제출하고 다시 조회한다")
+    @DisplayName("아티클 id로 사용자 답변을 제출하고 다시 조회한다")
     void submitAnswerAndGetSubmittedAnswer_success() throws Exception {
         // given
-        Long contentId = issueHistory.getContentId();
+        Long articleId = issueHistory.getArticleId();
         String answer = "GC Root에서 도달할 수 없는 객체를 수거한다.";
 
         // when
-        mockMvc.perform(post("/api/v1/maeil-mail/{contentId}/answer/me", contentId)
+        mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answers/me", articleId)
                         .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(Map.of("answer", answer))))
@@ -151,7 +152,7 @@ class MaeilMailControllerTest {
             softly.assertThat(savedAnswer.getAnswer()).isEqualTo(answer);
         });
 
-        MvcResult result = mockMvc.perform(get("/api/v1/maeil-mail/{contentId}/answer/me", contentId)
+        MvcResult result = mockMvc.perform(get("/api/v1/maeil-mail/articles/{articleId}/answers/me", articleId)
                         .with(authentication(authToken)))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -161,13 +162,89 @@ class MaeilMailControllerTest {
     }
 
     @Test
+    @DisplayName("같은 컨텐츠라도 발행 아티클이 다르면 각각 답변을 제출하고 조회한다")
+    void submitAnswer_sameContentDifferentArticles_success() throws Exception {
+        // given
+        MaeilMailIssueHistory secondIssueHistory = issueHistoryRepository.save(
+                createIssueHistory(SECOND_ARTICLE_ID, content.getId())
+        );
+        String firstAnswer = "첫 번째 발행 아티클에 대한 답변";
+        String secondAnswer = "두 번째 발행 아티클에 대한 답변";
+
+        // when
+        mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answers/me", issueHistory.getArticleId())
+                        .with(authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(Map.of("answer", firstAnswer))))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answers/me", secondIssueHistory.getArticleId())
+                        .with(authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(Map.of("answer", secondAnswer))))
+                .andExpect(status().isCreated());
+
+        MvcResult firstResult = mockMvc.perform(get("/api/v1/maeil-mail/articles/{articleId}/answers/me",
+                        issueHistory.getArticleId())
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        MvcResult secondResult = mockMvc.perform(get("/api/v1/maeil-mail/articles/{articleId}/answers/me",
+                        secondIssueHistory.getArticleId())
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // then
+        MaeilMailSubmittedAnswerResponse firstResponse = readResponse(firstResult, MaeilMailSubmittedAnswerResponse.class);
+        MaeilMailSubmittedAnswerResponse secondResponse = readResponse(secondResult, MaeilMailSubmittedAnswerResponse.class);
+        MaeilMailUserAnswer savedFirstAnswer = userAnswerRepository
+                .findByMemberIdAndIssueHistoryId(member.getId(), issueHistory.getId())
+                .orElseThrow();
+        MaeilMailUserAnswer savedSecondAnswer = userAnswerRepository
+                .findByMemberIdAndIssueHistoryId(member.getId(), secondIssueHistory.getId())
+                .orElseThrow();
+
+        assertSoftly(softly -> {
+            softly.assertThat(firstResponse.answer()).isEqualTo(firstAnswer);
+            softly.assertThat(secondResponse.answer()).isEqualTo(secondAnswer);
+            softly.assertThat(savedFirstAnswer.getAnswer()).isEqualTo(firstAnswer);
+            softly.assertThat(savedSecondAnswer.getAnswer()).isEqualTo(secondAnswer);
+            softly.assertThat(userAnswerRepository.findAll()).hasSize(2);
+        });
+    }
+
+    @Test
+    @DisplayName("답변이 1500자면 제출할 수 있다")
+    void submitAnswer_answerMaxLength_success() throws Exception {
+        // given
+        Long articleId = issueHistory.getArticleId();
+        String answer = "가".repeat(1_500);
+
+        // when
+        mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answers/me", articleId)
+                        .with(authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(Map.of("answer", answer))))
+                .andExpect(status().isCreated());
+
+        // then
+        MaeilMailUserAnswer savedAnswer = userAnswerRepository.findAll().getFirst();
+        assertSoftly(softly -> {
+            softly.assertThat(savedAnswer.getIssueHistoryId()).isEqualTo(issueHistory.getId());
+            softly.assertThat(savedAnswer.getAnswer()).isEqualTo(answer);
+        });
+    }
+
+    @Test
     @DisplayName("존재하지 않는 아티클에 답변을 제출하면 404를 반환한다")
     void submitAnswer_articleNotFound() throws Exception {
         // given
         String answer = "존재하지 않는 아티클에는 저장되지 않는다.";
 
         // when & then
-        MvcResult result = mockMvc.perform(post("/api/v1/maeil-mail/{articleId}/answer/me", UNKNOWN_ARTICLE_ID)
+        MvcResult result = mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answers/me", UNKNOWN_ARTICLE_ID)
                         .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(Map.of("answer", answer))))
@@ -180,13 +257,30 @@ class MaeilMailControllerTest {
     }
 
     @Test
+    @DisplayName("기존 컨텐츠 id 기반 답변 제출 URL은 더 이상 사용하지 않는다")
+    void submitAnswer_legacyContentIdPathNotFound() throws Exception {
+        // given
+        Long contentId = issueHistory.getContentId();
+        String answer = "기존 URL로는 저장되지 않는다.";
+
+        // when & then
+        mockMvc.perform(post("/api/v1/maeil-mail/{contentId}/answer/me", contentId)
+                        .with(authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(Map.of("answer", answer))))
+                .andExpect(status().isNotFound());
+
+        assertThat(userAnswerRepository.findAll()).isEmpty();
+    }
+
+    @Test
     @DisplayName("답변이 공백이면 제출할 수 없다")
     void submitAnswer_blankAnswer() throws Exception {
         // given
-        Long contentId = issueHistory.getContentId();
+        Long articleId = issueHistory.getArticleId();
 
         // when & then
-        MvcResult result = mockMvc.perform(post("/api/v1/maeil-mail/{contentId}/answer/me", contentId)
+        MvcResult result = mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answers/me", articleId)
                         .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(Map.of("answer", " "))))
@@ -199,14 +293,14 @@ class MaeilMailControllerTest {
     }
 
     @Test
-    @DisplayName("답변이 16000자를 초과하면 제출할 수 없다")
+    @DisplayName("답변이 1500자를 초과하면 제출할 수 없다")
     void submitAnswer_answerTooLong() throws Exception {
         // given
-        Long contentId = issueHistory.getContentId();
-        String answer = "가".repeat(16_001);
+        Long articleId = issueHistory.getArticleId();
+        String answer = "가".repeat(1_501);
 
         // when & then
-        MvcResult result = mockMvc.perform(post("/api/v1/maeil-mail/{contentId}/answer/me", contentId)
+        MvcResult result = mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answers/me", articleId)
                         .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(Map.of("answer", answer))))
@@ -222,10 +316,24 @@ class MaeilMailControllerTest {
     @DisplayName("아직 제출하지 않은 답변을 조회하면 404를 반환한다")
     void getSubmittedAnswer_notFound() throws Exception {
         // given
-        Long contentId = issueHistory.getContentId();
+        Long articleId = issueHistory.getArticleId();
 
         // when & then
-        MvcResult result = mockMvc.perform(get("/api/v1/maeil-mail/{contentId}/answer/me", contentId)
+        MvcResult result = mockMvc.perform(get("/api/v1/maeil-mail/articles/{articleId}/answers/me", articleId)
+                        .with(authentication(authToken)))
+                .andExpect(status().isNotFound())
+                .andReturn();
+
+        ErrorResponse response = readResponse(result, ErrorResponse.class);
+        assertThat(response.code()).isEqualTo(ErrorDetail.ENTITY_NOT_FOUND.getCode());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 아티클의 제출 답변을 조회하면 404를 반환한다")
+    void getSubmittedAnswer_articleNotFound() throws Exception {
+        // when & then
+        MvcResult result = mockMvc.perform(get("/api/v1/maeil-mail/articles/{articleId}/answers/me",
+                        UNKNOWN_ARTICLE_ID)
                         .with(authentication(authToken)))
                 .andExpect(status().isNotFound())
                 .andReturn();

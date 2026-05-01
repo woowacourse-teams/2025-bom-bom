@@ -39,7 +39,7 @@ public interface MaeilMailControllerApi {
     })
     void submitAnswer(
             @Parameter(hidden = true) Member member,
-            @Parameter(description = "매일메일 컨텐츠 id") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long contentId,
+            @Parameter(description = "매일메일 아티클 id") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId,
             @RequestBody @Valid MaeilMailSubmitAnswerRequest request
     );
 
@@ -51,7 +51,7 @@ public interface MaeilMailControllerApi {
     })
     MaeilMailSubmittedAnswerResponse getSubmittedAnswer(
             @Parameter(hidden = true) Member member,
-            @Parameter(description = "매일메일 컨텐츠 id") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long contentId
+            @Parameter(description = "매일메일 아티클 id") @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     );
 
     @Operation(summary = "매일메일 정보 조회", description = "아티클 id로 매일메일 컨텐츠 정보를 조회합니다.")

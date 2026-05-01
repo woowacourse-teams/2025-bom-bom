@@ -40,22 +40,22 @@ public class MaeilMailController implements MaeilMailControllerApi {
 
     @Override
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/{contentId}/answer/me")
+    @PostMapping("/articles/{articleId}/answers/me")
     public void submitAnswer(
             @LoginMember Member member,
-            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long contentId,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId,
             @RequestBody @Valid MaeilMailSubmitAnswerRequest request
     ) {
-        maeilMailService.submitAnswer(member, contentId, request);
+        maeilMailService.submitAnswer(member, articleId, request);
     }
 
     @Override
-    @GetMapping("/{contentId}/answer/me")
+    @GetMapping("/articles/{articleId}/answers/me")
     public MaeilMailSubmittedAnswerResponse getSubmittedAnswer(
             @LoginMember Member member,
-            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long contentId
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId
     ) {
-        return maeilMailService.getSubmittedAnswer(member, contentId);
+        return maeilMailService.getSubmittedAnswer(member, articleId);
     }
 
     @Override

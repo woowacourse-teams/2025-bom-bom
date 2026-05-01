@@ -23,7 +23,6 @@ import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailIssueHist
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailUserAnswerRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -42,6 +41,7 @@ class MaeilMailServiceTest {
     private static final int EXPECTED_READ_TIME = 3;
     private static final String IDEAL_ANSWER = "<p>GC는 더 이상 참조되지 않는 객체를 정리합니다.</p>";
     private static final String USER_ANSWER = "GC Root에서 도달할 수 없는 객체를 수거한다.";
+    private static final String SECOND_USER_ANSWER = "GC 대상 여부는 참조 가능성으로 판단한다.";
 
     @Autowired
     private MaeilMailService maeilMailService;
@@ -107,14 +107,14 @@ class MaeilMailServiceTest {
     }
 
     @Test
-    void 컨텐츠_id로_사용자_답변을_제출하고_조회한다() {
+    void 아티클_id로_사용자_답변을_제출하고_조회한다() {
         // given
-        Long contentId = issueHistory.getContentId();
+        Long articleId = issueHistory.getArticleId();
         MaeilMailSubmitAnswerRequest request = new MaeilMailSubmitAnswerRequest(USER_ANSWER);
 
         // when
-        maeilMailService.submitAnswer(member, contentId, request);
-        MaeilMailSubmittedAnswerResponse response = maeilMailService.getSubmittedAnswer(member, contentId);
+        maeilMailService.submitAnswer(member, articleId, request);
+        MaeilMailSubmittedAnswerResponse response = maeilMailService.getSubmittedAnswer(member, articleId);
 
         // then
         MaeilMailUserAnswer savedAnswer = userAnswerRepository.findAll().getFirst();
@@ -126,8 +126,6 @@ class MaeilMailServiceTest {
         });
     }
 
-    // TODO: 명세 변경 후 활성화 가능
-    @Disabled
     @Test
     void 같은_컨텐츠라도_발행_이력이_다르면_사용자가_다시_답변할_수_있다() {
         // given
@@ -136,16 +134,64 @@ class MaeilMailServiceTest {
         );
 
         // when
-        maeilMailService.submitAnswer(member, issueHistory.getContentId(), new MaeilMailSubmitAnswerRequest(USER_ANSWER));
-        maeilMailService.submitAnswer(member, secondIssueHistory.getContentId(), new MaeilMailSubmitAnswerRequest(USER_ANSWER));
+        maeilMailService.submitAnswer(member, issueHistory.getArticleId(), new MaeilMailSubmitAnswerRequest(USER_ANSWER));
+        maeilMailService.submitAnswer(
+                member,
+                secondIssueHistory.getArticleId(),
+                new MaeilMailSubmitAnswerRequest(SECOND_USER_ANSWER)
+        );
+        MaeilMailSubmittedAnswerResponse firstResponse = maeilMailService.getSubmittedAnswer(
+                member,
+                issueHistory.getArticleId()
+        );
+        MaeilMailSubmittedAnswerResponse secondResponse = maeilMailService.getSubmittedAnswer(
+                member,
+                secondIssueHistory.getArticleId()
+        );
 
         // then
+        MaeilMailUserAnswer firstAnswer = userAnswerRepository
+                .findByMemberIdAndIssueHistoryId(member.getId(), issueHistory.getId())
+                .orElseThrow();
+        MaeilMailUserAnswer secondAnswer = userAnswerRepository
+                .findByMemberIdAndIssueHistoryId(member.getId(), secondIssueHistory.getId())
+                .orElseThrow();
+
         assertSoftly(softly -> {
+            softly.assertThat(firstResponse.answer()).isEqualTo(USER_ANSWER);
+            softly.assertThat(secondResponse.answer()).isEqualTo(SECOND_USER_ANSWER);
             softly.assertThat(userAnswerRepository.findAll()).hasSize(2);
-            softly.assertThat(userAnswerRepository.findByMemberIdAndIssueHistoryId(member.getId(), issueHistory.getId()))
-                    .isPresent();
-            softly.assertThat(userAnswerRepository.findByMemberIdAndIssueHistoryId(member.getId(), secondIssueHistory.getId()))
-                    .isPresent();
+            softly.assertThat(firstAnswer.getAnswer()).isEqualTo(USER_ANSWER);
+            softly.assertThat(secondAnswer.getAnswer()).isEqualTo(SECOND_USER_ANSWER);
+        });
+    }
+
+    @Test
+    void 같은_아티클이라도_회원이_다르면_각자_답변할_수_있다() {
+        // given
+        Member secondMember = memberRepository.save(TestFixture.createMemberWithRole("second", "secondProvider", 1L));
+        Long articleId = issueHistory.getArticleId();
+
+        // when
+        maeilMailService.submitAnswer(member, articleId, new MaeilMailSubmitAnswerRequest(USER_ANSWER));
+        maeilMailService.submitAnswer(secondMember, articleId, new MaeilMailSubmitAnswerRequest(SECOND_USER_ANSWER));
+        MaeilMailSubmittedAnswerResponse firstResponse = maeilMailService.getSubmittedAnswer(member, articleId);
+        MaeilMailSubmittedAnswerResponse secondResponse = maeilMailService.getSubmittedAnswer(secondMember, articleId);
+
+        // then
+        MaeilMailUserAnswer firstAnswer = userAnswerRepository
+                .findByMemberIdAndIssueHistoryId(member.getId(), issueHistory.getId())
+                .orElseThrow();
+        MaeilMailUserAnswer secondAnswer = userAnswerRepository
+                .findByMemberIdAndIssueHistoryId(secondMember.getId(), issueHistory.getId())
+                .orElseThrow();
+
+        assertSoftly(softly -> {
+            softly.assertThat(firstResponse.answer()).isEqualTo(USER_ANSWER);
+            softly.assertThat(secondResponse.answer()).isEqualTo(SECOND_USER_ANSWER);
+            softly.assertThat(firstAnswer.getAnswer()).isEqualTo(USER_ANSWER);
+            softly.assertThat(secondAnswer.getAnswer()).isEqualTo(SECOND_USER_ANSWER);
+            softly.assertThat(userAnswerRepository.findAll()).hasSize(2);
         });
     }
 
@@ -179,7 +225,7 @@ class MaeilMailServiceTest {
         MaeilMailSubmitAnswerRequest request = new MaeilMailSubmitAnswerRequest(USER_ANSWER);
 
         // when & then
-        assertThatThrownBy(() -> maeilMailService.submitAnswer(member, content.getId() + 1, request))
+        assertThatThrownBy(() -> maeilMailService.submitAnswer(member, UNKNOWN_ARTICLE_ID, request))
                 .isInstanceOfSatisfying(CIllegalArgumentException.class, exception ->
                         assertThat(exception.getErrorDetail()).isSameAs(ErrorDetail.ENTITY_NOT_FOUND)
                 );
@@ -190,12 +236,12 @@ class MaeilMailServiceTest {
     @Test
     void 같은_발행_이력에_중복으로_답변을_제출하면_예외가_발생하고_답변은_하나만_유지된다() {
         // given
-        Long contentId = issueHistory.getContentId();
+        Long articleId = issueHistory.getArticleId();
         MaeilMailSubmitAnswerRequest request = new MaeilMailSubmitAnswerRequest(USER_ANSWER);
-        maeilMailService.submitAnswer(member, contentId, request);
+        maeilMailService.submitAnswer(member, articleId, request);
 
         // when & then
-        assertThatThrownBy(() -> maeilMailService.submitAnswer(member, contentId, request))
+        assertThatThrownBy(() -> maeilMailService.submitAnswer(member, articleId, request))
                 .isInstanceOf(DataIntegrityViolationException.class);
 
         assertThat(userAnswerRepository.findAll()).hasSize(1);
@@ -204,10 +250,19 @@ class MaeilMailServiceTest {
     @Test
     void 제출하지_않은_답변을_조회하면_예외가_발생한다() {
         // given
-        Long contentId = issueHistory.getContentId();
+        Long articleId = issueHistory.getArticleId();
 
         // when & then
-        assertThatThrownBy(() -> maeilMailService.getSubmittedAnswer(member, contentId))
+        assertThatThrownBy(() -> maeilMailService.getSubmittedAnswer(member, articleId))
+                .isInstanceOfSatisfying(CIllegalArgumentException.class, exception ->
+                        assertThat(exception.getErrorDetail()).isSameAs(ErrorDetail.ENTITY_NOT_FOUND)
+                );
+    }
+
+    @Test
+    void 존재하지_않는_아티클의_제출_답변을_조회하면_예외가_발생한다() {
+        // when & then
+        assertThatThrownBy(() -> maeilMailService.getSubmittedAnswer(member, UNKNOWN_ARTICLE_ID))
                 .isInstanceOfSatisfying(CIllegalArgumentException.class, exception ->
                         assertThat(exception.getErrorDetail()).isSameAs(ErrorDetail.ENTITY_NOT_FOUND)
                 );

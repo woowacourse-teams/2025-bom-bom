@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface MaeilMailSubscriptionTrackRepository extends JpaRepository<MaeilMailSubscriptionTrack, Long> {
 
     List<MaeilMailSubscriptionTrack> findByMemberId(Long memberId);
+
+    void deleteByMemberId(Long memberId);
 }

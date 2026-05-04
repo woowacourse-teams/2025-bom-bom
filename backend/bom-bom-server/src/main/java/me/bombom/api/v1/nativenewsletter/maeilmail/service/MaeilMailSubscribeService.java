@@ -10,6 +10,7 @@ import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSubscriptionT
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailTrack;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscribeRequest;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscriptionResponse;
+import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailUpdateSubscriptionRequest;
 import me.bombom.api.v1.nativenewsletter.maeilmail.event.MaeilMailSubscribedEvent;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSubscriptionTrackRepository;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
@@ -40,7 +41,7 @@ public class MaeilMailSubscribeService {
     public void subscribe(Member member, MaeilMailSubscribeRequest request) {
         Newsletter newsletter = getMaeilMailNewsletter();
         validateNotSubscribed(member.getId(), newsletter.getId());
-        validateTracks(request);
+        validateTracks(request.tracks());
 
         Subscribe subscribe = subscribeRepository.save(Subscribe.builder()
                 .memberId(member.getId())
@@ -49,6 +50,57 @@ public class MaeilMailSubscribeService {
 
         maeilMailSubscriptionTrackRepository.saveAll(buildSubscriptionTracks(subscribe.getId(), member.getId(), request.tracks()));
         applicationEventPublisher.publishEvent(MaeilMailSubscribedEvent.of(newsletter.getId(), member.getBirthDate()));
+    }
+
+    @Transactional
+    public void updateSubscription(Member member, MaeilMailUpdateSubscriptionRequest request) {
+        validateTracks(request.tracks());
+
+        Newsletter newsletter = getMaeilMailNewsletter();
+        Subscribe subscribe = getSubscribe(member.getId(), newsletter.getId());
+
+        if (request.tracks().isEmpty()) {
+            maeilMailSubscriptionTrackRepository.deleteByMemberId(member.getId());
+            subscribeRepository.delete(subscribe);
+            return;
+        }
+
+        List<MaeilMailSubscriptionTrack> currentTracks = maeilMailSubscriptionTrackRepository.findByMemberId(member.getId());
+
+        List<MaeilMailTrack> currentFields = currentTracks.stream()
+                .map(MaeilMailSubscriptionTrack::getField)
+                .toList();
+
+        List<MaeilMailSubscriptionTrack> toRemove = currentTracks.stream()
+                .filter(track -> !request.tracks().contains(track.getField()))
+                .toList();
+
+        List<MaeilMailTrack> toAdd = request.tracks().stream()
+                .filter(track -> !currentFields.contains(track))
+                .toList();
+
+        maeilMailSubscriptionTrackRepository.deleteAll(toRemove);
+        maeilMailSubscriptionTrackRepository.saveAll(buildSubscriptionTracks(subscribe.getId(), member.getId(), toAdd));
+    }
+
+    private void validateTracks(List<MaeilMailTrack> tracks) {
+        long distinctTrackCount = tracks.stream()
+                .distinct()
+                .count();
+
+        if (distinctTrackCount != tracks.size()) {
+            throw new CIllegalArgumentException(ErrorDetail.DUPLICATED_DATA)
+                    .addContext(ErrorContextKeys.OPERATION, "validateTracks")
+                    .addContext(ErrorContextKeys.DETAIL, "중복된 트랙은 선택할 수 없습니다.");
+        }
+    }
+
+    private Subscribe getSubscribe(Long memberId, Long newsletterId) {
+        return subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "subscribe")
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.NEWSLETTER_ID, newsletterId));
     }
 
     private Newsletter getMaeilMailNewsletter() {
@@ -64,18 +116,6 @@ public class MaeilMailSubscribeService {
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "subscribe")
                     .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                     .addContext(ErrorContextKeys.NEWSLETTER_ID, newsletterId);
-        }
-    }
-
-    private void validateTracks(MaeilMailSubscribeRequest request) {
-        long distinctTrackCount = request.tracks().stream()
-                .distinct()
-                .count();
-
-        if (distinctTrackCount != request.tracks().size()) {
-            throw new CIllegalArgumentException(ErrorDetail.DUPLICATED_DATA)
-                    .addContext(ErrorContextKeys.OPERATION, "validateTracks")
-                    .addContext(ErrorContextKeys.DETAIL, "중복된 트랙은 선택할 수 없습니다.");
         }
     }
 

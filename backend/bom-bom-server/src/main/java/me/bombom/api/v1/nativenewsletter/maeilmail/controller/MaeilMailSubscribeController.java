@@ -6,9 +6,11 @@ import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscribeRequest;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscriptionResponse;
+import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailUpdateSubscriptionRequest;
 import me.bombom.api.v1.nativenewsletter.maeilmail.service.MaeilMailSubscribeService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,5 +37,14 @@ public class MaeilMailSubscribeController implements MaeilMailSubscribeControlle
             @RequestBody @Valid MaeilMailSubscribeRequest request
     ) {
         maeilMailSubscribeService.subscribe(member, request);
+    }
+
+    @Override
+    @PatchMapping("/maeil-mail")
+    public void updateSubscription(
+            @LoginMember Member member,
+            @RequestBody @Valid MaeilMailUpdateSubscriptionRequest request
+    ) {
+        maeilMailSubscribeService.updateSubscription(member, request);
     }
 }

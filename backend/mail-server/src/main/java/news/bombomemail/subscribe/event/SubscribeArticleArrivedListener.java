@@ -22,7 +22,13 @@ public class SubscribeArticleArrivedListener {
         }
 
         try {
-            subscribeService.upsertSubscribe(event.newsletterId(), event.memberId(), event.unsubscribeUrl());
+            subscribeService.upsertSubscribe(
+                    event.newsletterId(),
+                    event.memberId(),
+                    event.unsubscribeUrl(),
+                    event.newsletterName(),
+                    event.articleTitle()
+            );
         } catch (Exception e) {
             // FIXME :: 로깅 시스템 구축후 추가될 예정
             log.error("구독 리스트 저장 실패");

@@ -3,6 +3,7 @@ package news.bombomemail.subscribe.service;
 import lombok.RequiredArgsConstructor;
 import news.bombomemail.subscribe.domain.Subscribe;
 import news.bombomemail.subscribe.event.NewsletterSubscribedEvent;
+import news.bombomemail.subscribe.event.UnsubscribeUrlMissingEvent;
 import news.bombomemail.subscribe.repository.SubscribeRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -18,24 +19,39 @@ public class SubscribeService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void upsertSubscribe(Long newsletterId, Long memberId, String unsubscribeUrl) {
-        subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId)
-                .ifPresentOrElse(
-                        subscribe -> subscribe.updateUnsubscribeUrl(unsubscribeUrl),
-                        () -> registerSubscribe(newsletterId, memberId, unsubscribeUrl)
-                );
+    public void upsertSubscribe(
+            Long newsletterId,
+            Long memberId,
+            String unsubscribeUrl,
+            String newsletterName,
+            String articleTitle
+    ) {
+        Subscribe subscribe = subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId)
+                .orElseGet(() -> registerSubscribe(newsletterId, memberId, unsubscribeUrl));
+        subscribe.updateUnsubscribeUrl(unsubscribeUrl);
+
+        if (subscribe.isUnsubscribeUrlMissing()) {
+            applicationEventPublisher.publishEvent(
+                    new UnsubscribeUrlMissingEvent(
+                            newsletterId,
+                            newsletterName,
+                            articleTitle,
+                            memberId
+                    )
+            );
+        }
     }
 
-    private void registerSubscribe(Long newsletterId, Long memberId, String unsubscribeUrl) {
+    private Subscribe registerSubscribe(Long newsletterId, Long memberId, String unsubscribeUrl) {
         Subscribe newSubscribe = Subscribe.builder()
                 .newsletterId(newsletterId)
                 .memberId(memberId)
                 .unsubscribeUrl(unsubscribeUrl)
                 .build();
-        subscribeRepository.save(newSubscribe);
 
         applicationEventPublisher.publishEvent(
                 NewsletterSubscribedEvent.of(newsletterId, memberId)
         );
+        return subscribeRepository.save(newSubscribe);
     }
 }

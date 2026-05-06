@@ -4,6 +4,5 @@ public record UnsubscribeUrlMissingEvent(
 
         Long newsletterId,
         String newsletterName,
-        String articleTitle,
-        Long memberId
+        String articleTitle
 ) {}

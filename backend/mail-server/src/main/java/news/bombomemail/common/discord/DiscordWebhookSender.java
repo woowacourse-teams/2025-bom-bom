@@ -33,7 +33,7 @@ public class DiscordWebhookSender {
         StringBuilder sb = new StringBuilder();
         sb.append("⚠️ **unsubscribeUrl 파싱 실패 (%d건)**\n".formatted(failures.size()));
         failures.forEach(f ->
-                sb.append("• %s | %s | memberId: %d\n".formatted(f.newsletterName(), f.articleTitle(), f.memberId()))
+                sb.append("• %s | %s\n".formatted(f.newsletterName(), f.articleTitle()))
         );
         return sb.toString();
     }

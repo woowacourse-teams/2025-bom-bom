@@ -5,10 +5,9 @@ import news.bombomemail.subscribe.event.UnsubscribeUrlMissingEvent;
 public record UnsubscribeUrlFailure(
 
         String newsletterName,
-        String articleTitle,
-        Long memberId
+        String articleTitle
 ) {
     public static UnsubscribeUrlFailure from(UnsubscribeUrlMissingEvent event) {
-        return new UnsubscribeUrlFailure(event.newsletterName(), event.articleTitle(), event.memberId());
+        return new UnsubscribeUrlFailure(event.newsletterName(), event.articleTitle());
     }
 }

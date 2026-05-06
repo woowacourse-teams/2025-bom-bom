@@ -35,8 +35,7 @@ public class SubscribeService {
                     new UnsubscribeUrlMissingEvent(
                             newsletterId,
                             newsletterName,
-                            articleTitle,
-                            memberId
+                            articleTitle
                     )
             );
         }

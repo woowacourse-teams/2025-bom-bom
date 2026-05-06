@@ -12,7 +12,9 @@ import news.bombomemail.article.event.ArticleArrivedEvent;
 import news.bombomemail.article.event.ArticleSource;
 import news.bombomemail.article.repository.ArticleRepository;
 import news.bombomemail.article.service.ArticleService;
+import news.bombomemail.article.util.UnsubscribeUrlExtractor;
 import news.bombomemail.article.util.html.HtmlCleanerConfig;
+import news.bombomemail.subscribe.service.UnsubscribePatternReloader;
 import news.bombomemail.email.extractor.EmailContentExtractor;
 import news.bombomemail.member.domain.Gender;
 import news.bombomemail.member.domain.Member;
@@ -30,7 +32,7 @@ import org.springframework.test.context.event.RecordApplicationEvents;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({ArticleService.class, HtmlCleanerConfig.class})
+@Import({ArticleService.class, HtmlCleanerConfig.class, UnsubscribeUrlExtractor.class, UnsubscribePatternReloader.class})
 @RecordApplicationEvents
 class ArticleServiceTest {
 

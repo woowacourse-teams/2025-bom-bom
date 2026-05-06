@@ -20,8 +20,9 @@ public class UnsubscribeUrlAlertService {
     public void sendPendingAlerts() {
         List<UnsubscribeUrlFailure> failures = pendingFailures.collectForAlert();
 
-        if (!failures.isEmpty()) {
-            discordWebhookNotifier.sendUnsubscribeUrlMissingAlert(failures);
+        if (failures.isEmpty()) {
+            return;
         }
+        discordWebhookNotifier.sendUnsubscribeUrlMissingAlert(failures);
     }
 }

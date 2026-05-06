@@ -1,6 +1,7 @@
 package news.bombomemail.common;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ import org.springframework.web.client.RestClient;
 public class DiscordWebhookNotifier {
 
     private static final int COLOR_RED = 0xE74C3C;
+    private static final int MAX_DISPLAY_COUNT = 50;
 
     private final RestClient restClient;
 
@@ -28,25 +30,35 @@ public class DiscordWebhookNotifier {
     }
 
     public void sendUnsubscribeUrlMissingAlert(List<UnsubscribeUrlFailure> failures) {
-        try {
-            restClient.post()
-                    .uri(webhookUrl)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(buildBody(failures))
-                    .retrieve()
-                    .toBodilessEntity();
-        } catch (Exception e) {
-            log.warn("Discord Webhook 전송 실패: {}", e.getMessage(), e);
+        for (List<UnsubscribeUrlFailure> chunk : partition(failures)) {
+            try {
+                restClient.post()
+                        .uri(webhookUrl)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(buildBody(failures.size(), chunk))
+                        .retrieve()
+                        .toBodilessEntity();
+            } catch (Exception e) {
+                log.warn("구독 취소 url 파싱 실패 알림 전송 실패: {}", e.getMessage(), e);
+            }
         }
     }
 
-    private Map<String, Object> buildBody(List<UnsubscribeUrlFailure> failures) {
-        String description = failures.stream()
+    private List<List<UnsubscribeUrlFailure>> partition(List<UnsubscribeUrlFailure> failures) {
+        List<List<UnsubscribeUrlFailure>> chunks = new ArrayList<>();
+        for (int i = 0; i < failures.size(); i += MAX_DISPLAY_COUNT) {
+            chunks.add(failures.subList(i, Math.min(i + MAX_DISPLAY_COUNT, failures.size())));
+        }
+        return chunks;
+    }
+
+    private Map<String, Object> buildBody(int totalCount, List<UnsubscribeUrlFailure> unsubscribeUrlFailures) {
+        String description = unsubscribeUrlFailures.stream()
                 .map(f -> "📰 **%s**\n└ %s".formatted(f.newsletterName(), f.articleTitle()))
                 .collect(Collectors.joining("\n\n"));
 
         Map<String, Object> embed = Map.of(
-                "title", "🚨 unsubscribeUrl 파싱 실패 (%d건)".formatted(failures.size()),
+                "title", "🚨 unsubscribeUrl 파싱 실패 (%d건)".formatted(totalCount),
                 "description", description,
                 "color", COLOR_RED,
                 "footer", Map.of("text", "매일 오후 1시 집계"),

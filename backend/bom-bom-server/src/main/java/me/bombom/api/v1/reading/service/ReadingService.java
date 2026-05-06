@@ -211,10 +211,11 @@ public class ReadingService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateReadingCount(Long memberId, boolean isTodayArticle) {
         if (isTodayArticle) {
-            updateContinueReadingCount(memberId);
             updateTodayReadingCount(memberId);
             updateWeeklyReadingCount(memberId);
         }
+        updateContinueReadingCount(memberId);
+        updateReadCount(memberId);
         updateMonthlyReadingCount(memberId);
     }
 
@@ -222,6 +223,7 @@ public class ReadingService {
     public void updateReadingCountForGuideMail(Long memberId, boolean isRegisterDay) {
         if (isRegisterDay) {
             updateContinueReadingCount(memberId);
+            updateReadCount(memberId);
             updateTodayReadingCount(memberId);
             updateWeeklyReadingCount(memberId);
         }
@@ -450,18 +452,27 @@ public class ReadingService {
     private void updateTodayReadingCount(Long memberId) {
         TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "TodayReading")
-                    .addContext(ErrorContextKeys.OPERATION, "updateTodayReadingCount"));
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "TodayReading")
+                        .addContext(ErrorContextKeys.OPERATION, "updateTodayReadingCount"));
         todayReading.increaseCurrentCount();
+    }
+
+    private void updateReadCount(Long memberId) {
+        TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "TodayReading")
+                        .addContext(ErrorContextKeys.OPERATION, "updateReadCount"));
+        todayReading.increaseReadCount();
     }
 
     private void updateWeeklyReadingCount(Long memberId) {
         WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "WeeklyReading")
-                    .addContext(ErrorContextKeys.OPERATION, "updateWeeklyReadingCount"));
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "WeeklyReading")
+                        .addContext(ErrorContextKeys.OPERATION, "updateWeeklyReadingCount"));
         weeklyReading.increaseCurrentCount();
     }
 
@@ -479,7 +490,7 @@ public class ReadingService {
     }
 
     private boolean canIncreaseContinueReadingCount(TodayReading todayReading) {
-        return todayReading.getCurrentCount() == 0;
+        return todayReading.getReadCount() == 0;
     }
 
 }

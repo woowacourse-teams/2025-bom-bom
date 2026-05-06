@@ -129,6 +129,7 @@ class ReadingServiceTest {
     @Test
     void 오늘_도착한_아티클을_읽으면_오늘_및_주간_읽기_횟수가_증가한다() {
         int initialTodayCount = todayReading.getCurrentCount();
+        int initialReadCount = todayReading.getReadCount();
         int initialWeeklyCount = weeklyReading.getCurrentCount();
 
         readingService.updateReadingCount(member.getId(), true);
@@ -138,6 +139,7 @@ class ReadingServiceTest {
 
         assertSoftly(softly -> {
             softly.assertThat(updatedTodayReading.getCurrentCount()).isEqualTo(initialTodayCount + 1);
+            softly.assertThat(updatedTodayReading.getReadCount()).isEqualTo(initialReadCount + 1);
             softly.assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(initialWeeklyCount + 1);
         });
     }
@@ -174,9 +176,11 @@ class ReadingServiceTest {
     }
 
     @Test
-    void 오늘_도착하지_않은_아티클을_읽으면_읽기_횟수가_증가하지_않는다() {
+    void 오늘_도착하지_않은_아티클을_읽으면_읽은_횟수와_연속_읽기만_증가한다() {
         int initialTodayCount = todayReading.getCurrentCount();
+        int initialReadCount = todayReading.getReadCount();
         int initialContinueCount = continueReading.getDayCount();
+        int initialMaxContinueCount = continueReading.getMaxDayCount();
         int initialWeeklyCount = weeklyReading.getCurrentCount();
 
         readingService.updateReadingCount(member.getId(), false);
@@ -187,7 +191,9 @@ class ReadingServiceTest {
 
         assertSoftly(softly -> {
             softly.assertThat(updatedTodayReading.getCurrentCount()).isEqualTo(initialTodayCount);
-            softly.assertThat(updatedContinueReadingRealtime.getDayCount()).isEqualTo(initialContinueCount);
+            softly.assertThat(updatedTodayReading.getReadCount()).isEqualTo(initialReadCount + 1);
+            softly.assertThat(updatedContinueReadingRealtime.getDayCount()).isEqualTo(initialContinueCount + 1);
+            softly.assertThat(updatedContinueReadingRealtime.getMaxDayCount()).isEqualTo(initialMaxContinueCount + 1);
             softly.assertThat(updatedWeeklyReading.getCurrentCount()).isEqualTo(initialWeeklyCount);
         });
     }

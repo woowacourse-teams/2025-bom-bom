@@ -1,7 +1,6 @@
 package news.bombomemail.subscribe.alert;
 
 import lombok.RequiredArgsConstructor;
-import news.bombomemail.subscribe.alert.service.UnsubscribeUrlAlertService;
 import news.bombomemail.subscribe.event.UnsubscribeUrlMissingEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;

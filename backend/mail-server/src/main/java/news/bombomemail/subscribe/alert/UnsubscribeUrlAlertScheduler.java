@@ -2,7 +2,6 @@ package news.bombomemail.subscribe.alert;
 
 import lombok.RequiredArgsConstructor;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import news.bombomemail.subscribe.alert.service.UnsubscribeUrlAlertService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 

@@ -1,12 +1,8 @@
-package news.bombomemail.subscribe.alert.service;
+package news.bombomemail.subscribe.alert;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import news.bombomemail.common.DiscordWebhookNotifier;
-import news.bombomemail.subscribe.alert.UnsubscribeUrlFailure;
 import news.bombomemail.subscribe.event.UnsubscribeUrlMissingEvent;
 import org.springframework.stereotype.Service;
 
@@ -14,16 +10,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UnsubscribeUrlAlertService {
 
-    private final Map<Long, UnsubscribeUrlFailure> pendingFailures = new ConcurrentHashMap<>();
+    private final PendingUnsubscribeFailures pendingFailures = new PendingUnsubscribeFailures();
     private final DiscordWebhookNotifier discordWebhookNotifier;
 
     public void record(UnsubscribeUrlMissingEvent event) {
-        pendingFailures.putIfAbsent(event.newsletterId(), UnsubscribeUrlFailure.from(event));
+        pendingFailures.record(event);
     }
 
     public void sendPendingAlerts() {
-        List<UnsubscribeUrlFailure> failures = new ArrayList<>(pendingFailures.values());
-        pendingFailures.clear();
+        List<UnsubscribeUrlFailure> failures = pendingFailures.collectForAlert();
 
         if (!failures.isEmpty()) {
             discordWebhookNotifier.sendUnsubscribeUrlMissingAlert(failures);

@@ -4,19 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import news.bombomemail.subscribe.event.UnsubscribeUrlMissingEvent;
 
 public class PendingUnsubscribeFailures {
 
-    private final Map<Long, UnsubscribeUrlFailure> failures = new ConcurrentHashMap<>();
+    private final AtomicReference<Map<Long, UnsubscribeUrlFailure>> failures = new AtomicReference<>(new ConcurrentHashMap<>());
 
     void record(UnsubscribeUrlMissingEvent event) {
-        failures.putIfAbsent(event.newsletterId(), UnsubscribeUrlFailure.from(event));
+        failures.get().putIfAbsent(event.newsletterId(), UnsubscribeUrlFailure.from(event));
     }
 
     List<UnsubscribeUrlFailure> collectForAlert() {
-        List<UnsubscribeUrlFailure> result = new ArrayList<>(failures.values());
-        failures.clear();
-        return result;
+        Map<Long, UnsubscribeUrlFailure> snapshot = failures.getAndSet(new ConcurrentHashMap<>());
+        return new ArrayList<>(snapshot.values());
     }
 }

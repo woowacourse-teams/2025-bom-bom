@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import news.bombomemail.common.BaseEntity;
@@ -26,4 +27,10 @@ public class UnsubscribePattern extends BaseEntity {
     @Lob
     @Column(nullable = false, columnDefinition = "TEXT")
     private String patternValue;
+
+    @Builder
+    public UnsubscribePattern(String patternKey, String patternValue) {
+        this.patternKey = patternKey;
+        this.patternValue = patternValue;
+    }
 }

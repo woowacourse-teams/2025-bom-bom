@@ -43,7 +43,7 @@ class ReadingServiceResetContinueReadingCountTest {
 
         readingService.resetContinueReadingCount();
 
-        verify(todayReadingRepository, never()).findTotalNonZeroAndCurrentZero();
+        verify(todayReadingRepository, never()).findTotalNonZeroAndReadZero();
     }
 
     @Test
@@ -52,7 +52,7 @@ class ReadingServiceResetContinueReadingCountTest {
 
         readingService.resetContinueReadingCount();
 
-        verify(todayReadingRepository, never()).findTotalNonZeroAndCurrentZero();
+        verify(todayReadingRepository, never()).findTotalNonZeroAndReadZero();
     }
 
     @Test
@@ -62,13 +62,14 @@ class ReadingServiceResetContinueReadingCountTest {
                 .memberId(1L)
                 .totalCount(3)
                 .currentCount(0)
+                .readCount(0)
                 .build();
         ContinueReadingRealtime continueReading = ContinueReadingRealtime.builder()
                 .memberId(1L)
                 .dayCount(10)
                 .maxDayCount(15)
                 .build();
-        given(todayReadingRepository.findTotalNonZeroAndCurrentZero()).willReturn(List.of(todayReading));
+        given(todayReadingRepository.findTotalNonZeroAndReadZero()).willReturn(List.of(todayReading));
         given(continueReadingRepository.findByMemberId(1L)).willReturn(Optional.of(continueReading));
 
         readingService.resetContinueReadingCount();
@@ -77,6 +78,16 @@ class ReadingServiceResetContinueReadingCountTest {
             softly.assertThat(continueReading.getDayCount()).isZero();
             softly.assertThat(continueReading.getMaxDayCount()).isEqualTo(15);
         });
+    }
+
+    @Test
+    void 어제가_평일이어도_오늘_읽은_아티클이_있으면_연속_읽기_횟수를_초기화하지_않는다() {
+        fixClockTo(LocalDate.of(2026, 4, 28)); // Tuesday
+        given(todayReadingRepository.findTotalNonZeroAndReadZero()).willReturn(List.of());
+
+        readingService.resetContinueReadingCount();
+
+        verify(continueReadingRepository, never()).findByMemberId(1L);
     }
 
     private void fixClockTo(LocalDate date) {

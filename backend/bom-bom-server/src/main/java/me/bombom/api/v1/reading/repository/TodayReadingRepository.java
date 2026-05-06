@@ -22,9 +22,9 @@ public interface TodayReadingRepository extends JpaRepository<TodayReading, Long
     @Query("""
         SELECT tr
         FROM TodayReading tr
-        WHERE tr.totalCount != 0 AND tr.currentCount = 0
+        WHERE tr.totalCount != 0 AND tr.readCount = 0
     """)
-    List<TodayReading> findTotalNonZeroAndCurrentZero();
+    List<TodayReading> findTotalNonZeroAndReadZero();
 
     void deleteByMemberId(Long memberId);
 }

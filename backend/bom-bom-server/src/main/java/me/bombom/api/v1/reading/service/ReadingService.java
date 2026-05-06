@@ -8,6 +8,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.badge.domain.BadgeGrade;
+import me.bombom.api.v1.badge.service.BadgeService;
 import me.bombom.api.v1.common.ContinueReadingRankingScheduleProperties;
 import me.bombom.api.v1.common.MonthlyRankingScheduleProperties;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -38,11 +40,9 @@ import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
-import me.bombom.api.v1.badge.domain.BadgeGrade;
-import me.bombom.api.v1.badge.service.BadgeService;
 import me.bombom.api.v1.reading.event.ContinueReadingIncreasedEvent;
-import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
+import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
@@ -130,7 +130,7 @@ public class ReadingService {
             return;
         }
 
-        todayReadingRepository.findTotalNonZeroAndCurrentZero()
+        todayReadingRepository.findTotalNonZeroAndReadZero()
                 .forEach(this::applyResetContinueReadingCount);
     }
 
@@ -153,27 +153,29 @@ public class ReadingService {
             // 3. Stream으로 메모리 효율적 처리
             // forEach는 side effect가 있지만, 트랜잭션 내에서 DB 업데이트가 목적이므로 적절함
             monthlyReadingSnapshotRepository.findAll()
-                .stream()
-                .peek(snapshot -> log.debug("Processing member {}", snapshot.getMemberId()))
-                .forEach(snapshot -> {
-                    Long memberId = snapshot.getMemberId();
-                    int monthlyCount = snapshot.getCurrentCount();
+                    .stream()
+                    .peek(snapshot -> log.debug("Processing member {}", snapshot.getMemberId()))
+                    .forEach(snapshot -> {
+                        Long memberId = snapshot.getMemberId();
+                        int monthlyCount = snapshot.getCurrentCount();
 
-                    try {
-                        int updatedRows = yearlyReadingRepository.increaseMonthlyCountToYearly(memberId, monthlyCount, targetYear);
-                        if (updatedRows == 0) {
-                            YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndReadingYear(memberId, targetYear)
-                                    .orElseGet(() -> {
-                                        YearlyReading newYearlyReading = YearlyReading.create(memberId, targetYear);
-                                        return yearlyReadingRepository.save(newYearlyReading);
-                                    });
-                            yearlyReading.increaseCurrentCount(monthlyCount);
+                        try {
+                            int updatedRows = yearlyReadingRepository.increaseMonthlyCountToYearly(memberId, monthlyCount,
+                                    targetYear);
+                            if (updatedRows == 0) {
+                                YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndReadingYear(memberId,
+                                                targetYear)
+                                        .orElseGet(() -> {
+                                            YearlyReading newYearlyReading = YearlyReading.create(memberId, targetYear);
+                                            return yearlyReadingRepository.save(newYearlyReading);
+                                        });
+                                yearlyReading.increaseCurrentCount(monthlyCount);
+                            }
+                        } catch (Exception e) {
+                            log.error("Failed to migrate monthly count for member {}: {}", memberId, e.getMessage(), e);
+                            throw new RuntimeException("Migration failed for member " + memberId, e);
                         }
-                    } catch (Exception e) {
-                        log.error("Failed to migrate monthly count for member {}: {}", memberId, e.getMessage(), e);
-                        throw new RuntimeException("Migration failed for member " + memberId, e);
-                    }
-                });
+                    });
             monthlyReadingSnapshotRepository.resetAllCurrentCount();
             monthlyReadingRealtimeRepository.resetAllCurrentCount();
         } catch (Exception e) {
@@ -187,11 +189,11 @@ public class ReadingService {
     public WeeklyGoalCountResponse updateWeeklyGoalCount(Long memberId, Integer weeklyGoalCount) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId));
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId));
         WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(member.getId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "WeeklyReading"));
+                        .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "WeeklyReading"));
         weeklyReading.updateGoalCount(weeklyGoalCount);
         return WeeklyGoalCountResponse.from(weeklyReading);
     }
@@ -200,8 +202,8 @@ public class ReadingService {
         int score = ScorePolicyConstants.ARTICLE_READING_SCORE;
         ContinueReadingRealtime continueReading = continueReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingRealtime"));
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingRealtime"));
         if (isBonusApplicable(continueReading)) {
             score += ScorePolicyConstants.CONTINUE_READING_BONUS_SCORE;
         }
@@ -234,16 +236,16 @@ public class ReadingService {
         Long memberId = member.getId();
         ContinueReadingRealtime continueReading = continueReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingRealtime"));
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingRealtime"));
         TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "TodayReading"));
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "TodayReading"));
         WeeklyReading weeklyReading = weeklyReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "WeeklyReading"));
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "WeeklyReading"));
         return ReadingInformationResponse.of(continueReading, todayReading, weeklyReading);
     }
 
@@ -308,10 +310,10 @@ public class ReadingService {
     public MemberContinueReadingRankResponse getMemberContinueReadingRank(Member member) {
         LocalDate lastMonth = getLastMonth();
         return continueReadingRankingSnapshotRepository.findMemberContinueReadingRanking(
-                member.getId(),
-                lastMonth.getYear(),
-                lastMonth.getMonthValue()
-        ).map(MemberContinueReadingRankResponse::from)
+                        member.getId(),
+                        lastMonth.getYear(),
+                        lastMonth.getMonthValue()
+                ).map(MemberContinueReadingRankResponse::from)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingSnapshot"));
@@ -424,23 +426,23 @@ public class ReadingService {
         Long memberId = todayReading.getMemberId();
         ContinueReadingRealtime continueReading = continueReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingRealtime")
-                    .addContext(ErrorContextKeys.OPERATION, "applyResetContinueReadingCount"));
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingRealtime")
+                        .addContext(ErrorContextKeys.OPERATION, "applyResetContinueReadingCount"));
         continueReading.resetDayCount();
     }
 
     private void updateContinueReadingCount(Long memberId) {
         TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "TodayReading")
-                    .addContext(ErrorContextKeys.OPERATION, "updateContinueReadingCount"));
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "TodayReading")
+                        .addContext(ErrorContextKeys.OPERATION, "updateContinueReadingCount"));
         ContinueReadingRealtime continueReading = continueReadingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingRealtime")
-                    .addContext(ErrorContextKeys.OPERATION, "updateContinueReadingCount"));
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingRealtime")
+                        .addContext(ErrorContextKeys.OPERATION, "updateContinueReadingCount"));
         if (canIncreaseContinueReadingCount(todayReading)) {
             continueReading.increaseDayCount();
             applicationEventPublisher.publishEvent(

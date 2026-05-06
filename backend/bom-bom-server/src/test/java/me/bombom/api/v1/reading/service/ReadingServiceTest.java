@@ -199,6 +199,60 @@ class ReadingServiceTest {
     }
 
     @Test
+    void 오늘_도착하지_않은_아티클을_여러_개_읽어도_연속_읽기는_하루_한_번만_증가한다() {
+        int initialContinueCount = continueReading.getDayCount();
+        int initialMaxContinueCount = continueReading.getMaxDayCount();
+
+        readingService.updateReadingCount(member.getId(), false);
+        readingService.updateReadingCount(member.getId(), false);
+
+        TodayReading updatedTodayReading = todayReadingRepository.findByMemberId(member.getId()).get();
+        ContinueReadingRealtime updatedContinueReadingRealtime = continueReadingRepository.findByMemberId(member.getId()).get();
+
+        assertSoftly(softly -> {
+            softly.assertThat(updatedTodayReading.getCurrentCount()).isZero();
+            softly.assertThat(updatedTodayReading.getReadCount()).isEqualTo(2);
+            softly.assertThat(updatedContinueReadingRealtime.getDayCount()).isEqualTo(initialContinueCount + 1);
+            softly.assertThat(updatedContinueReadingRealtime.getMaxDayCount()).isEqualTo(initialMaxContinueCount + 1);
+        });
+    }
+
+    @Test
+    void 오늘_읽기_횟수를_초기화하면_오늘_도착_읽기와_전체_읽기_횟수가_초기화된다() {
+        readingService.updateReadingCount(member.getId(), true);
+
+        readingService.resetTodayReadingCount();
+
+        TodayReading updatedTodayReading = todayReadingRepository.findByMemberId(member.getId()).get();
+        assertSoftly(softly -> {
+            softly.assertThat(updatedTodayReading.getCurrentCount()).isZero();
+            softly.assertThat(updatedTodayReading.getTotalCount()).isZero();
+            softly.assertThat(updatedTodayReading.getReadCount()).isZero();
+        });
+    }
+
+    @Test
+    void 연속_읽기_초기화_대상은_오늘_읽은_횟수로_판단한다() {
+        Member readMember = memberRepository.save(TestFixture.createUniqueMember("nickname_read", "pid_read"));
+        todayReadingRepository.save(TodayReading.builder()
+                .memberId(readMember.getId())
+                .totalCount(3)
+                .currentCount(0)
+                .readCount(1)
+                .build());
+
+        List<Long> resetTargetMemberIds = todayReadingRepository.findTotalNonZeroAndReadZero()
+                .stream()
+                .map(TodayReading::getMemberId)
+                .toList();
+
+        assertSoftly(softly -> {
+            softly.assertThat(resetTargetMemberIds).contains(member.getId());
+            softly.assertThat(resetTargetMemberIds).doesNotContain(readMember.getId());
+        });
+    }
+
+    @Test
     void 저장된_rank를_사용해_상위_N명의_랭킹을_조회할_수_있다() {
         // given: 기본 멤버는 currentCount 10
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_r2", "pid_r2"));

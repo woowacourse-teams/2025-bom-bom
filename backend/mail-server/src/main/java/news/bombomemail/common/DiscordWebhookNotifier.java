@@ -36,7 +36,7 @@ public class DiscordWebhookNotifier {
                     .retrieve()
                     .toBodilessEntity();
         } catch (Exception e) {
-            log.warn("[WARN] Discord Webhook 전송 실패: {}", e.getMessage(), e);
+            log.warn("Discord Webhook 전송 실패: {}", e.getMessage(), e);
         }
     }
 

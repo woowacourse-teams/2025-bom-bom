@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
-import news.bombomemail.common.discord.DiscordWebhookSender;
+import news.bombomemail.common.DiscordWebhookNotifier;
 import news.bombomemail.subscribe.alert.UnsubscribeUrlFailure;
 import news.bombomemail.subscribe.event.UnsubscribeUrlMissingEvent;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 public class UnsubscribeUrlAlertService {
 
     private final Map<Long, UnsubscribeUrlFailure> pendingFailures = new ConcurrentHashMap<>();
-    private final DiscordWebhookSender discordWebhookSender;
+    private final DiscordWebhookNotifier discordWebhookNotifier;
 
     public void record(UnsubscribeUrlMissingEvent event) {
         pendingFailures.putIfAbsent(event.newsletterId(), UnsubscribeUrlFailure.from(event));
@@ -26,7 +26,7 @@ public class UnsubscribeUrlAlertService {
         pendingFailures.clear();
 
         if (!failures.isEmpty()) {
-            discordWebhookSender.sendUnsubscribeUrlMissingAlert(failures);
+            discordWebhookNotifier.sendUnsubscribeUrlMissingAlert(failures);
         }
     }
 }

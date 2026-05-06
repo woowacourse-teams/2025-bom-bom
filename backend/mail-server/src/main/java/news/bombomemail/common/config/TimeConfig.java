@@ -1,4 +1,4 @@
-package news.bombomemail.common;
+package news.bombomemail.common.config;
 
 import java.time.Clock;
 import java.time.ZoneId;

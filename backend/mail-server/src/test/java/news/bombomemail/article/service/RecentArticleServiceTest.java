@@ -9,7 +9,7 @@ import java.util.Properties;
 import news.bombomemail.article.domain.RecentArticle;
 import news.bombomemail.article.repository.RecentArticleRepository;
 import news.bombomemail.article.util.html.HtmlCleanerConfig;
-import news.bombomemail.common.TimeConfig;
+import news.bombomemail.common.config.TimeConfig;
 import news.bombomemail.email.extractor.EmailContentExtractor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

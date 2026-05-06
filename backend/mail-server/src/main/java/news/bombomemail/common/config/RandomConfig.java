@@ -1,4 +1,4 @@
-package news.bombomemail.common;
+package news.bombomemail.common.config;
 
 import java.util.Random;
 import org.springframework.context.annotation.Bean;

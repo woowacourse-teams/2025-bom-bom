@@ -1,4 +1,4 @@
-package news.bombomemail.common.discord;
+package news.bombomemail.common;
 
 import java.util.List;
 import java.util.Map;
@@ -9,14 +9,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 @Component
-public class DiscordWebhookSender {
+public class DiscordWebhookNotifier {
 
     private final RestClient restClient;
 
     @Value("${discord.webhook.unsubscribe-alert.url}")
     private String webhookUrl;
 
-    public DiscordWebhookSender(RestClient.Builder builder) {
+    public DiscordWebhookNotifier(RestClient.Builder builder) {
         this.restClient = builder.build();
     }
 

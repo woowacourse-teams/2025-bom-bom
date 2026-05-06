@@ -18,6 +18,6 @@ public class UnsubscribeUrlAlertScheduler {
     @Scheduled(cron = DAILY_CRON, zone = TIME_ZONE)
     @SchedulerLock(name = "unsubscribe_url_alert", lockAtMostFor = "PT5M")
     public void sendAlert() {
-        unsubscribeUrlAlertService.drainAndSend();
+        unsubscribeUrlAlertService.sendPendingAlerts();
     }
 }

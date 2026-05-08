@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,4 +22,11 @@ public class MemberReadTokenBucket {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @Builder
+    private MemberReadTokenBucket(Long memberId, double tokens, LocalDateTime updatedAt) {
+        this.memberId = memberId;
+        this.tokens = tokens;
+        this.updatedAt = updatedAt;
+    }
 }

@@ -27,18 +27,15 @@ public class MarkAsReadListener {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void on(MarkAsReadEvent event) {
         log.info("MarkAsReadEvent received - memberId={}, articleId={}", event.memberId(), event.articleId());
-        try {
-            if (!readRateLimitService.checkAndConsume(event.memberId())) {
-                log.info("읽기 rate limit 초과로 카운트 갱신 skip - memberId={}", event.memberId());
-                return;
-            }
 
-            boolean isTodayArticle = articleService.isArrivedToday(event.articleId(), event.memberId());
-            updateReadingCount(event, isTodayArticle);
-            updatePetScore(event, isTodayArticle);
-        } catch (Exception e) {
-            log.error("MarkAsReadEvent 처리 실패 - memberId={}, articleId={}", event.memberId(), event.articleId(), e);
+        if (!readRateLimitService.checkAndConsume(event.memberId())) {
+            log.info("읽기 rate limit 초과로 카운트 갱신 skip - memberId={}", event.memberId());
+            return;
         }
+
+        boolean isTodayArticle = articleService.isArrivedToday(event.articleId(), event.memberId());
+        updateReadingCount(event, isTodayArticle);
+        updatePetScore(event, isTodayArticle);
     }
 
     private void updateReadingCount(MarkAsReadEvent event, boolean isTodayArticle) {
@@ -48,10 +45,16 @@ public class MarkAsReadListener {
     }
 
     private void updatePetScore(MarkAsReadEvent event, boolean isTodayArticle) {
-        if (isTodayArticle && articleService.canAddArticleScore(event.memberId())) {
+        if (!isTodayArticle || !articleService.canAddArticleScore(event.memberId())) {
+            return;
+        }
+        try {
             int score = readingService.calculateArticleScore(event.memberId());
             petService.increaseCurrentScore(event.memberId(), score);
             log.info("아티클 점수 추가 성공 - memberId={}", event.memberId());
+        } catch (Exception e) {
+            // 펫 경험치는 부가 기능이므로 실패해도 읽기 카운트/토큰 차감은 유지
+            log.error("아티클 점수 추가 실패 - memberId={}", event.memberId(), e);
         }
     }
 }

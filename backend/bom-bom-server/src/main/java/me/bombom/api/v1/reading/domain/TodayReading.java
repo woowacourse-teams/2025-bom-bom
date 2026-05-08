@@ -41,17 +41,17 @@ public class TodayReading extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TINYINT")
     private int currentCount;
 
-    // 안 읽은 뉴스레터 중 읽은 개수
+    // 안 읽은 뉴스레터 중 읽은 개수 (도착일 무관)
     @Column(nullable = false, columnDefinition = "TINYINT")
     private int readCount;
 
     @Builder
     public TodayReading(
-            Long id,
-            @NonNull Long memberId,
-            int totalCount,
-            int currentCount,
-            int readCount
+        Long id,
+        @NonNull Long memberId,
+        int totalCount,
+        int currentCount,
+        int readCount
     ) {
         this.id = id;
         this.memberId = memberId;
@@ -62,11 +62,11 @@ public class TodayReading extends BaseEntity {
 
     public static TodayReading create(Long memberId) {
         return TodayReading.builder()
-                .memberId(memberId)
-                .totalCount(INITIAL_TOTAL_COUNT)
-                .currentCount(INITIAL_CURRENT_COUNT)
-                .readCount(INITIAL_READ_COUNT)
-                .build();
+            .memberId(memberId)
+            .totalCount(INITIAL_TOTAL_COUNT)
+            .currentCount(INITIAL_CURRENT_COUNT)
+            .readCount(INITIAL_READ_COUNT)
+            .build();
     }
 
     public void resetCount() {

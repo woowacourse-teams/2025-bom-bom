@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.pet.service.PetService;
+import me.bombom.api.v1.reading.service.ReadRateLimitService;
 import me.bombom.api.v1.reading.service.ReadingService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -19,6 +20,7 @@ public class MarkAsReadListener {
     private final ArticleService articleService;
     private final ReadingService readingService;
     private final PetService petService;
+    private final ReadRateLimitService readRateLimitService;
 
     @WithSpan
     @TransactionalEventListener
@@ -26,6 +28,11 @@ public class MarkAsReadListener {
     public void on(MarkAsReadEvent event) {
         log.info("MarkAsReadEvent received - memberId={}, articleId={}", event.memberId(), event.articleId());
         try {
+            if (!readRateLimitService.checkAndConsume(event.memberId())) {
+                log.info("읽기 rate limit 초과로 카운트 갱신 skip - memberId={}", event.memberId());
+                return;
+            }
+
             boolean isTodayArticle = articleService.isArrivedToday(event.articleId(), event.memberId());
             updateReadingCount(event, isTodayArticle);
             updatePetScore(event, isTodayArticle);

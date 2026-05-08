@@ -48,6 +48,7 @@ import me.bombom.api.v1.notice.domain.NoticeCategory;
 import me.bombom.api.v1.pet.domain.Pet;
 import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
+import me.bombom.api.v1.reading.domain.MemberReadTokenBucket;
 import me.bombom.api.v1.reading.domain.MonthlyReadingRealtime;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
 import me.bombom.api.v1.reading.domain.TodayReading;
@@ -925,6 +926,17 @@ public final class TestFixture {
         return BlogPostTag.builder()
                 .blogPostId(blogPostId)
                 .blogHashtagId(blogHashtagId)
+                .build();
+    }
+
+    /**
+     * MemberReadTokenBucket
+     */
+    public static MemberReadTokenBucket createMemberReadTokenBucket(Long memberId, double tokens) {
+        return MemberReadTokenBucket.builder()
+                .memberId(memberId)
+                .tokens(tokens)
+                .updatedAt(LocalDateTime.now())
                 .build();
     }
 }

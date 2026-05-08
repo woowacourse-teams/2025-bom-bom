@@ -119,7 +119,7 @@ class MarkAsReadListenerIntegrationTest {
     @Test
     void 이벤트_정상_처리_토큰_차감_및_읽기_카운트_증가() {
         // when
-        markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId));
+        markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId, LocalDateTime.now()));
 
         // then
         MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
@@ -138,7 +138,7 @@ class MarkAsReadListenerIntegrationTest {
                 .when(readingService).updateReadingCount(anyLong(), any(Boolean.class));
 
         // when
-        assertThatThrownBy(() -> markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId)))
+        assertThatThrownBy(() -> markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId, LocalDateTime.now())))
                 .isInstanceOf(RuntimeException.class);
 
         // then
@@ -164,7 +164,7 @@ class MarkAsReadListenerIntegrationTest {
                 .when(petService).increaseCurrentScore(anyLong(), anyInt());
 
         // when
-        markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId));
+        markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId, LocalDateTime.now()));
 
         // then - 펫은 별개 트랜잭션이므로 토큰 차감과 읽기 카운트는 그대로 유지
         MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
@@ -179,14 +179,14 @@ class MarkAsReadListenerIntegrationTest {
     @Test
     void rate_limit_초과_시_읽기_카운트_증가_안함() {
         // given - 토큰 3개 소진
-        markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId));
-        markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId));
-        markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId));
+        markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId, LocalDateTime.now()));
+        markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId, LocalDateTime.now()));
+        markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId, LocalDateTime.now()));
         int countBefore = monthlyReadingRealtimeRepository.findByMemberId(member.getId())
                 .orElseThrow().getCurrentCount();
 
         // when - 4번째 이벤트 (rate limit 초과)
-        markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId));
+        markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId, LocalDateTime.now()));
 
         // then
         int countAfter = monthlyReadingRealtimeRepository.findByMemberId(member.getId())

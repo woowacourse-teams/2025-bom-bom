@@ -7,6 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.time.LocalDateTime;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.pet.service.PetService;
 import me.bombom.api.v1.reading.service.ReadingService;
@@ -38,7 +39,7 @@ class MarkAsReadListenerTest {
         // given
         Long memberId = 1L;
         Long articleId = 1L;
-        MarkAsReadEvent event = new MarkAsReadEvent(memberId, articleId);
+        MarkAsReadEvent event = new MarkAsReadEvent(memberId, articleId, LocalDateTime.now());
         given(articleService.isArrivedToday(articleId, memberId)).willReturn(true);
         given(articleService.canAddArticleScore(memberId)).willReturn(true);
         given(readingService.calculateArticleScore(memberId)).willReturn(10);
@@ -56,7 +57,7 @@ class MarkAsReadListenerTest {
         // given
         Long memberId = 1L;
         Long articleId = 1L;
-        MarkAsReadEvent event = new MarkAsReadEvent(memberId, articleId);
+        MarkAsReadEvent event = new MarkAsReadEvent(memberId, articleId, LocalDateTime.now());
         given(articleService.isArrivedToday(articleId, memberId)).willReturn(false);
 
         // when
@@ -73,7 +74,7 @@ class MarkAsReadListenerTest {
         // given
         Long memberId = 1L;
         Long articleId = 1L;
-        MarkAsReadEvent event = new MarkAsReadEvent(memberId, articleId);
+        MarkAsReadEvent event = new MarkAsReadEvent(memberId, articleId, LocalDateTime.now());
         given(articleService.isArrivedToday(articleId, memberId)).willReturn(true);
         given(articleService.canAddArticleScore(memberId)).willReturn(false);
 

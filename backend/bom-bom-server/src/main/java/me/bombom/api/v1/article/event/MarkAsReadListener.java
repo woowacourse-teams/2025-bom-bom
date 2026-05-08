@@ -28,7 +28,7 @@ public class MarkAsReadListener {
     public void on(MarkAsReadEvent event) {
         log.info("MarkAsReadEvent received - memberId={}, articleId={}", event.memberId(), event.articleId());
 
-        if (!readRateLimitService.checkAndConsume(event.memberId())) {
+        if (!readRateLimitService.checkAndConsume(event.memberId(), event.readAt())) {
             log.info("읽기 rate limit 초과로 카운트 갱신 skip - memberId={}", event.memberId());
             return;
         }

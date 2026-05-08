@@ -1,6 +1,5 @@
 package me.bombom.api.v1.reading.service;
 
-import java.time.Clock;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,12 +15,9 @@ public class ReadRateLimitService {
 
     private final MemberReadTokenBucketRepository memberReadTokenBucketRepository;
     private final ReadRateLimitProperties properties;
-    private final Clock clock;
 
     @Transactional
-    public boolean checkAndConsume(Long memberId) {
-        LocalDateTime now = LocalDateTime.now(clock);
-
+    public boolean checkAndConsume(Long memberId, LocalDateTime now) {
         memberReadTokenBucketRepository.insertIfAbsent(memberId, properties.getBucketCapacity(), now);
 
         int affected = memberReadTokenBucketRepository.tryConsume(

@@ -134,7 +134,7 @@ class ChallengeDailyTodoServiceTest {
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), todayArticle.getId()));
+        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), todayArticle.getId(), LocalDateTime.now()));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -170,7 +170,7 @@ class ChallengeDailyTodoServiceTest {
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), pastArticle.getId()));
+        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), pastArticle.getId(), LocalDateTime.now()));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -214,7 +214,7 @@ class ChallengeDailyTodoServiceTest {
         );
 
         // when
-        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), article.getId()));
+        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), article.getId(), LocalDateTime.now()));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 

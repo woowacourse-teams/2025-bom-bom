@@ -115,7 +115,9 @@ public class ArticleService {
         }
         article.markAsRead();
 
-        applicationEventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), articleId));
+        applicationEventPublisher.publishEvent(
+                new MarkAsReadEvent(member.getId(), articleId, LocalDateTime.now(clock))
+        );
         log.info("Published event: MarkAsReadEvent - memberId={}, articleId={}",
                 member.getId(), articleId);
     }

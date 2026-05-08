@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.common.ReadRateLimitProperties;
-import me.bombom.api.v1.reading.repository.MemberReadRateLimitRepository;
+import me.bombom.api.v1.reading.repository.MemberReadTokenBucketRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ReadRateLimitService {
 
-    private final MemberReadRateLimitRepository memberReadRateLimitRepository;
+    private final MemberReadTokenBucketRepository memberReadTokenBucketRepository;
     private final ReadRateLimitProperties properties;
     private final Clock clock;
 
@@ -22,9 +22,9 @@ public class ReadRateLimitService {
     public boolean checkAndConsume(Long memberId) {
         LocalDateTime now = LocalDateTime.now(clock);
 
-        memberReadRateLimitRepository.insertIfAbsent(memberId, properties.getBucketCapacity(), now);
+        memberReadTokenBucketRepository.insertIfAbsent(memberId, properties.getBucketCapacity(), now);
 
-        int affected = memberReadRateLimitRepository.tryConsume(
+        int affected = memberReadTokenBucketRepository.tryConsume(
                 memberId,
                 properties.getBucketCapacity(),
                 properties.getRefillSeconds(),

@@ -1,7 +1,7 @@
-CREATE TABLE member_read_rate_limit
+CREATE TABLE member_read_token_bucket
 (
     member_id   BIGINT         NOT NULL,
-    tokens      DECIMAL(5, 2)  NOT NULL DEFAULT 3.00,
+    tokens      DOUBLE         NOT NULL,
     updated_at  DATETIME       NOT NULL,
     PRIMARY KEY (member_id)
 );

@@ -1,17 +1,17 @@
 package me.bombom.api.v1.reading.repository;
 
 import java.time.LocalDateTime;
-import me.bombom.api.v1.reading.domain.MemberReadRateLimit;
+import me.bombom.api.v1.reading.domain.MemberReadTokenBucket;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface MemberReadRateLimitRepository extends JpaRepository<MemberReadRateLimit, Long> {
+public interface MemberReadTokenBucketRepository extends JpaRepository<MemberReadTokenBucket, Long> {
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(flushAutomatically = true)
     @Query(value = """
-            INSERT IGNORE INTO member_read_rate_limit (member_id, tokens, updated_at)
+            INSERT IGNORE INTO member_read_token_bucket (member_id, tokens, updated_at)
             VALUES (:memberId, :bucketCapacity, :now)
     """, nativeQuery = true)
     void insertIfAbsent(
@@ -20,9 +20,9 @@ public interface MemberReadRateLimitRepository extends JpaRepository<MemberReadR
             @Param("now") LocalDateTime now
     );
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(flushAutomatically = true)
     @Query(value = """
-            UPDATE member_read_rate_limit
+            UPDATE member_read_token_bucket
             SET tokens = LEAST(:bucketCapacity, tokens + TIMESTAMPDIFF(SECOND, updated_at, :now) / :refillSeconds) - 1,
                 updated_at = :now
             WHERE member_id = :memberId

@@ -227,7 +227,7 @@ public class ReadingService {
         return score;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void updateReadingCount(Long memberId, boolean isTodayArticle) {
         if (isTodayArticle) {
             updateTodayReadingCount(memberId);

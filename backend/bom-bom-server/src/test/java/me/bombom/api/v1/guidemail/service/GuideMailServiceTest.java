@@ -90,6 +90,7 @@ class GuideMailServiceTest {
         // given
         int currentScore = pet.getCurrentScore();
         int currentTodayCount = todayReading.getCurrentCount();
+        int currentReadCount = todayReading.getReadCount();
         int currentWeeklyCount = weeklyReading.getCurrentCount();
         int currentContinueDayCount = continueReading.getDayCount();
 
@@ -105,6 +106,7 @@ class GuideMailServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(updatedPet.getCurrentScore()).isGreaterThan(currentScore);
             softly.assertThat(updatedTodayReading.getCurrentCount()).isGreaterThan(currentTodayCount);
+            softly.assertThat(updatedTodayReading.getReadCount()).isGreaterThan(currentReadCount);
             softly.assertThat(updatedWeeklyReading.getCurrentCount()).isGreaterThan(currentWeeklyCount);
             softly.assertThat(updatedContinueReadingRealtime.getDayCount()).isGreaterThan(currentContinueDayCount);
         });

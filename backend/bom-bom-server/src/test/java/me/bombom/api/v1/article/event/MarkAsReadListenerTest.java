@@ -1,5 +1,6 @@
 package me.bombom.api.v1.article.event;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
@@ -10,7 +11,9 @@ import static org.mockito.Mockito.verify;
 import java.time.LocalDateTime;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.pet.service.PetService;
+import me.bombom.api.v1.reading.service.ReadRateLimitService;
 import me.bombom.api.v1.reading.service.ReadingService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,8 +34,18 @@ class MarkAsReadListenerTest {
     @Mock
     private PetService petService;
 
+    @Mock
+    private ReadRateLimitService readRateLimitService;
+
     @InjectMocks
     private MarkAsReadListener markAsReadListener;
+
+    @BeforeEach
+    void setUp() {
+        // rate limit은 기본적으로 통과되도록 설정 (개별 테스트에서 override 가능)
+        given(readRateLimitService.checkAndConsume(anyLong(), any(LocalDateTime.class)))
+                .willReturn(true);
+    }
 
     @Test
     void 스코어를_추가할_수_있는_경우_읽기_횟수와_스코어를_증가시킨다() {

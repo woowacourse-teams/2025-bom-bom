@@ -12,8 +12,8 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSubscriptionTrack;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailTrack;
-import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscribeRequest;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscriptionResponse;
+import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailUpdateSubscriptionRequest;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSubscriptionTrackRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
@@ -66,9 +66,9 @@ class MaeilMailSubscribeServiceTest {
     @Test
     void 매일메일_구독_중이면_구독_정보를_반환한다() {
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
-        Newsletter newsletter = newsletterRepository.save(createMaeilMailNewsletter());
+        newsletterRepository.save(createMaeilMailNewsletter());
 
-        maeilMailSubscribeService.subscribe(member, new MaeilMailSubscribeRequest(
+        maeilMailSubscribeService.putSubscription(member, new MaeilMailUpdateSubscriptionRequest(
                 List.of(MaeilMailTrack.BE, MaeilMailTrack.FE)
         ));
 
@@ -87,11 +87,11 @@ class MaeilMailSubscribeServiceTest {
     }
 
     @Test
-    void 매일메일_구독에_성공한다() {
+    void 미구독_상태에서_트랙을_보내면_신규_구독한다() {
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
         Newsletter newsletter = newsletterRepository.save(createMaeilMailNewsletter());
 
-        maeilMailSubscribeService.subscribe(member, new MaeilMailSubscribeRequest(
+        maeilMailSubscribeService.putSubscription(member, new MaeilMailUpdateSubscriptionRequest(
                 List.of(MaeilMailTrack.BE, MaeilMailTrack.FE)
         ));
 
@@ -119,21 +119,48 @@ class MaeilMailSubscribeServiceTest {
     }
 
     @Test
-    void 이미_구독중이면_예외가_발생한다() {
+    void 구독_중인_트랙을_변경하면_요청한_트랙으로_치환된다() {
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
-        Newsletter newsletter = newsletterRepository.save(createMaeilMailNewsletter());
-        subscribeRepository.save(Subscribe.builder()
-                .memberId(member.getId())
-                .newsletterId(newsletter.getId())
-                .build());
+        newsletterRepository.save(createMaeilMailNewsletter());
+        maeilMailSubscribeService.putSubscription(member, new MaeilMailUpdateSubscriptionRequest(
+                List.of(MaeilMailTrack.BE, MaeilMailTrack.FE)
+        ));
 
-        assertThatThrownBy(() -> maeilMailSubscribeService.subscribe(member, new MaeilMailSubscribeRequest(
+        maeilMailSubscribeService.putSubscription(member, new MaeilMailUpdateSubscriptionRequest(
                 List.of(MaeilMailTrack.BE)
-        )))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.DUPLICATED_DATA);
+        ));
 
-        assertThat(subscribeRepository.findAll()).hasSize(1);
+        MaeilMailSubscriptionResponse response = maeilMailSubscribeService.getSubscription(member.getId());
+        assertThat(response.tracks()).containsExactly(MaeilMailTrack.BE);
+    }
+
+    @Test
+    void 구독_중에_빈_트랙을_보내면_구독이_해지된다() {
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+        newsletterRepository.save(createMaeilMailNewsletter());
+        maeilMailSubscribeService.putSubscription(member, new MaeilMailUpdateSubscriptionRequest(
+                List.of(MaeilMailTrack.BE, MaeilMailTrack.FE)
+        ));
+
+        maeilMailSubscribeService.putSubscription(member, new MaeilMailUpdateSubscriptionRequest(List.of()));
+
+        assertSoftly(softly -> {
+            softly.assertThat(subscribeRepository.findAll()).isEmpty();
+            softly.assertThat(maeilMailSubscriptionTrackRepository.findAll()).isEmpty();
+        });
+    }
+
+    @Test
+    void 미구독_상태에서_빈_트랙을_보내면_아무_변화도_없다() {
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+        newsletterRepository.save(createMaeilMailNewsletter());
+
+        maeilMailSubscribeService.putSubscription(member, new MaeilMailUpdateSubscriptionRequest(List.of()));
+
+        assertSoftly(softly -> {
+            softly.assertThat(subscribeRepository.findAll()).isEmpty();
+            softly.assertThat(maeilMailSubscriptionTrackRepository.findAll()).isEmpty();
+        });
     }
 
     @Test
@@ -141,7 +168,7 @@ class MaeilMailSubscribeServiceTest {
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
         newsletterRepository.save(createMaeilMailNewsletter());
 
-        assertThatThrownBy(() -> maeilMailSubscribeService.subscribe(member, new MaeilMailSubscribeRequest(
+        assertThatThrownBy(() -> maeilMailSubscribeService.putSubscription(member, new MaeilMailUpdateSubscriptionRequest(
                 List.of(MaeilMailTrack.BE, MaeilMailTrack.BE)
         )))
                 .isInstanceOf(CIllegalArgumentException.class)

@@ -1,6 +1,10 @@
 package me.bombom.api.v1.nativenewsletter.maeilmail.service;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -8,7 +12,6 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSubscriptionTrack;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailTrack;
-import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscribeRequest;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscriptionResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailUpdateSubscriptionRequest;
 import me.bombom.api.v1.nativenewsletter.maeilmail.event.MaeilMailSubscribedEvent;
@@ -38,49 +41,58 @@ public class MaeilMailSubscribeService {
     }
 
     @Transactional
-    public void subscribe(Member member, MaeilMailSubscribeRequest request) {
-        Newsletter newsletter = getMaeilMailNewsletter();
-        validateNotSubscribed(member.getId(), newsletter.getId());
-        validateTracks(request.tracks());
+    public void putSubscription(Member member, MaeilMailUpdateSubscriptionRequest request) {
+        List<MaeilMailTrack> requestedTracks = request.tracks();
+        validateTracks(requestedTracks);
 
+        Long memberId = member.getId();
+        Newsletter newsletter = getMaeilMailNewsletter();
+        Optional<Subscribe> existing = subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletter.getId());
+
+        if (existing.isEmpty() && requestedTracks.isEmpty()) {
+            return;
+        }
+
+        if (requestedTracks.isEmpty()) {
+            removeSubscription(existing.get(), memberId);
+            return;
+        }
+
+        Subscribe subscribe = existing.orElseGet(() -> createSubscribe(member, newsletter));
+        replaceTracks(subscribe, memberId, requestedTracks);
+    }
+
+    private Subscribe createSubscribe(Member member, Newsletter newsletter) {
         Subscribe subscribe = subscribeRepository.save(Subscribe.builder()
                 .memberId(member.getId())
                 .newsletterId(newsletter.getId())
                 .build());
-
-        maeilMailSubscriptionTrackRepository.saveAll(buildSubscriptionTracks(subscribe.getId(), member.getId(), request.tracks()));
         applicationEventPublisher.publishEvent(MaeilMailSubscribedEvent.of(newsletter.getId(), member.getBirthDate()));
+        return subscribe;
     }
 
-    @Transactional
-    public void updateSubscription(Member member, MaeilMailUpdateSubscriptionRequest request) {
-        validateTracks(request.tracks());
+    private void removeSubscription(Subscribe subscribe, Long memberId) {
+        maeilMailSubscriptionTrackRepository.deleteByMemberId(memberId);
+        subscribeRepository.delete(subscribe);
+    }
 
-        Newsletter newsletter = getMaeilMailNewsletter();
-        Subscribe subscribe = getSubscribe(member.getId(), newsletter.getId());
-
-        if (request.tracks().isEmpty()) {
-            maeilMailSubscriptionTrackRepository.deleteByMemberId(member.getId());
-            subscribeRepository.delete(subscribe);
-            return;
-        }
-
-        List<MaeilMailSubscriptionTrack> currentTracks = maeilMailSubscriptionTrackRepository.findByMemberId(member.getId());
-
-        List<MaeilMailTrack> currentFields = currentTracks.stream()
+    private void replaceTracks(Subscribe subscribe, Long memberId, List<MaeilMailTrack> requestedTracks) {
+        List<MaeilMailSubscriptionTrack> currentTracks = maeilMailSubscriptionTrackRepository.findByMemberId(memberId);
+        Set<MaeilMailTrack> requestedTrackSet = new LinkedHashSet<>(requestedTracks);
+        Set<MaeilMailTrack> currentTrackSet = currentTracks.stream()
                 .map(MaeilMailSubscriptionTrack::getField)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        List<MaeilMailSubscriptionTrack> tracksToRemove = currentTracks.stream()
+                .filter(track -> !requestedTrackSet.contains(track.getField()))
                 .toList();
 
-        List<MaeilMailSubscriptionTrack> toRemove = currentTracks.stream()
-                .filter(track -> !request.tracks().contains(track.getField()))
+        List<MaeilMailTrack> tracksToAdd = requestedTrackSet.stream()
+                .filter(track -> !currentTrackSet.contains(track))
                 .toList();
 
-        List<MaeilMailTrack> toAdd = request.tracks().stream()
-                .filter(track -> !currentFields.contains(track))
-                .toList();
-
-        maeilMailSubscriptionTrackRepository.deleteAll(toRemove);
-        maeilMailSubscriptionTrackRepository.saveAll(buildSubscriptionTracks(subscribe.getId(), member.getId(), toAdd));
+        maeilMailSubscriptionTrackRepository.deleteAll(tracksToRemove);
+        maeilMailSubscriptionTrackRepository.saveAll(buildSubscriptionTracks(subscribe.getId(), memberId, tracksToAdd));
     }
 
     private void validateTracks(List<MaeilMailTrack> tracks) {
@@ -95,28 +107,11 @@ public class MaeilMailSubscribeService {
         }
     }
 
-    private Subscribe getSubscribe(Long memberId, Long newsletterId) {
-        return subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "subscribe")
-                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                        .addContext(ErrorContextKeys.NEWSLETTER_ID, newsletterId));
-    }
-
     private Newsletter getMaeilMailNewsletter() {
         return newsletterRepository.findBySource(NewsletterSource.MAEIL_MAIL)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletter")
                         .addContext(ErrorContextKeys.DETAIL, "매일메일 뉴스레터가 존재하지 않습니다."));
-    }
-
-    private void validateNotSubscribed(Long memberId, Long newsletterId) {
-        if (subscribeRepository.existsByMemberIdAndNewsletterId(memberId, newsletterId)) {
-            throw new CIllegalArgumentException(ErrorDetail.DUPLICATED_DATA)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "subscribe")
-                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                    .addContext(ErrorContextKeys.NEWSLETTER_ID, newsletterId);
-        }
     }
 
     private List<MaeilMailSubscriptionTrack> buildSubscriptionTracks(

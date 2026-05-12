@@ -2,6 +2,7 @@ package me.bombom.api.v1.article.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.dto.request.ArticleNewsletterStatisticOptionsRequest;
@@ -15,6 +16,9 @@ import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.openapi.api.ArticleApi;
+import me.bombom.openapi.common.ArticleResponseMapper;
+import me.bombom.openapi.model.PageArticleResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -35,22 +39,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/articles")
-public class ArticleController implements ArticleControllerApi{
+public class ArticleController implements ArticleControllerApi, ArticleApi {
 
     private final ArticleService articleService;
 
     @Override
-    @GetMapping
-    public Page<ArticleResponse> getArticles(
-            @LoginMember Member member,
-            @Valid @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
+    public PageArticleResponse getArticles(
+            Member member,
+            LocalDate date,
+            Long newsletterId,
             @PageableDefault(sort = "arrivedDateTime", direction = Direction.DESC) Pageable pageable
     ) {
-        return articleService.getArticles(
+        Page<ArticleResponse> page = articleService.getArticles(
                 member,
-                articlesOptionsRequest,
+                ArticlesOptionsRequest.of(date, newsletterId),
                 pageable
         );
+        return ArticleResponseMapper.toPage(page);
     }
 
     @Override

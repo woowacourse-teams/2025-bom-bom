@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import me.bombom.api.v1.article.dto.request.ArticleNewsletterStatisticOptionsRequest;
-import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.dto.request.ArticleSearchOptionsRequest;
 import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
@@ -26,22 +25,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Article", description = "아티클 관련 API")
 public interface ArticleControllerApi {
-
-    @Operation(
-        summary = "아티클 목록 조회",
-        description = "조건에 맞는 아티클 목록을 페이징하여 조회합니다. "
-                + "(정렬 기본값: ?page=0&size=10&sort=arrivedDateTime,desc)"
-
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "아티클 목록 조회 성공"),
-        @ApiResponse(responseCode = "400", description = "잘못된 정렬 파라미터 요청", content = @Content)
-    })
-    public Page<ArticleResponse> getArticles(
-        @Parameter(hidden = true) Member member,
-        @Parameter(description = "필터링 관련 요청") @Valid @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
-        @Parameter(description = "페이징 관련 요청 (예: ?page=0&size=10&sort=createdAt,desc)") Pageable pageable
-    );
 
     @Operation(
         summary = "아티클 검색",

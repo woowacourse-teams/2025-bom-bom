@@ -17,7 +17,7 @@ import news.bombomemail.article.service.ArticleService;
 import news.bombomemail.article.util.UnsubscribeUrlExtractor;
 import news.bombomemail.article.util.html.HtmlCleanerConfig;
 import news.bombomemail.email.EmailConfig;
-import news.bombomemail.subscribe.service.UnsubscribePatternReloader;
+import news.bombomemail.subscribe.service.UnsubscribePatternReloadService;
 import news.bombomemail.email.service.EmailService.BusinessProcessingException;
 import news.bombomemail.member.domain.Gender;
 import news.bombomemail.member.domain.Member;
@@ -34,7 +34,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({EmailService.class, EmailConfig.class, ArticleService.class, HtmlCleanerConfig.class, UnsubscribeUrlExtractor.class, UnsubscribePatternReloader.class})
+@Import({EmailService.class, EmailConfig.class, ArticleService.class, HtmlCleanerConfig.class, UnsubscribeUrlExtractor.class, UnsubscribePatternReloadService.class})
 class EmailServiceTest {
 
     @Autowired

@@ -13,14 +13,14 @@ import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({UnsubscribeUrlExtractor.class, UnsubscribePatternReloader.class})
+@Import({UnsubscribeUrlExtractor.class, UnsubscribePatternReloadService.class})
 class UnsubscribePatternReloaderTest {
 
     @Autowired
     UnsubscribePatternRepository repository;
 
     @Autowired
-    UnsubscribePatternReloader reloader;
+    UnsubscribePatternReloadService reloadService;
 
     @Autowired
     UnsubscribeUrlExtractor extractor;
@@ -38,7 +38,7 @@ class UnsubscribePatternReloaderTest {
                 .build());
 
         // when
-        reloader.reload();
+        reloadService.reload();
 
         // then
         assertSoftly(softly -> {
@@ -54,7 +54,7 @@ class UnsubscribePatternReloaderTest {
     @Test
     void DB가_비어있으면_기본값으로_추출한다() {
         // when
-        reloader.reload();
+        reloadService.reload();
 
         // then
         assertSoftly(softly -> {

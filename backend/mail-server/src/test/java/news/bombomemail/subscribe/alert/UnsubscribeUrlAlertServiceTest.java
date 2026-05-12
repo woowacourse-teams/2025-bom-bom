@@ -8,8 +8,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,5 +56,24 @@ class UnsubscribeUrlAlertServiceTest {
 
         // then
         verify(discordWebhookNotifier).sendUnsubscribeUrlMissingAlert(anyList()); // 정확히 1번만
+    }
+
+    @Test
+    void 알림_전송에_실패하면_다음_전송에서_재시도할_수_있다() {
+        // given
+        unsubscribeUrlAlertService.record(new UnsubscribeUrlMissingEvent(1L, "뉴스레터A", "아티클 1"));
+        doThrow(new IllegalStateException("discord send failed"))
+                .doNothing()
+                .when(discordWebhookNotifier)
+                .sendUnsubscribeUrlMissingAlert(anyList());
+
+        // when
+        assertThatThrownBy(() -> unsubscribeUrlAlertService.sendPendingAlerts())
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("discord send failed");
+        unsubscribeUrlAlertService.sendPendingAlerts();
+
+        // then
+        verify(discordWebhookNotifier, times(2)).sendUnsubscribeUrlMissingAlert(anyList());
     }
 }

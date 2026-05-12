@@ -23,6 +23,12 @@ public class UnsubscribeUrlAlertService {
         if (failures.isEmpty()) {
             return;
         }
-        discordWebhookNotifier.sendUnsubscribeUrlMissingAlert(failures);
+
+        try {
+            discordWebhookNotifier.sendUnsubscribeUrlMissingAlert(failures);
+        } catch (Exception e) {
+            pendingFailures.restore(failures);
+            throw e;
+        }
     }
 }

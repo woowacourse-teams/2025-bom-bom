@@ -40,6 +40,7 @@ public class DiscordWebhookNotifier {
                         .toBodilessEntity();
             } catch (Exception e) {
                 log.warn("구독 취소 url 파싱 실패 알림 전송 실패: {}", e.getMessage(), e);
+                throw new IllegalStateException("구독 취소 url 파싱 실패 알림 전송 실패", e);
             }
         }
     }

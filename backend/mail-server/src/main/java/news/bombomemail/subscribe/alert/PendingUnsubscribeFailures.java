@@ -23,4 +23,10 @@ public class PendingUnsubscribeFailures {
         }
         return collectedFailures;
     }
+
+    void restore(List<UnsubscribeUrlFailure> failuresToRestore) {
+        for (UnsubscribeUrlFailure failure : failuresToRestore) {
+            failures.putIfAbsent(failure.newsletterId(), failure);
+        }
+    }
 }

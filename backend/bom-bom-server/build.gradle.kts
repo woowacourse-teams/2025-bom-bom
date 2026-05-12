@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.5.14"
     id("io.spring.dependency-management") version "1.1.7"
+    id("org.openapi.generator") version "7.10.0"
 }
 
 group = "me.bombom"
@@ -79,6 +80,10 @@ dependencies {
     // swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 
+    // openapi generator 런타임 의존성 (generated 코드가 import)
+    implementation("io.swagger.core.v3:swagger-annotations:2.2.25")
+    implementation("org.openapitools:jackson-databind-nullable:0.2.6")
+
     // logging
     implementation(platform("org.springframework.cloud:spring-cloud-dependencies:2025.0.0"))
     implementation("net.logstash.logback:logstash-logback-encoder:8.1")
@@ -99,9 +104,53 @@ dependencies {
     implementation("jakarta.annotation:jakarta.annotation-api")
 }
 
-// Querydsl 생성된 파일 정리
+// Querydsl + OpenAPI 생성 파일 정리
 tasks.named<Delete>("clean") {
     delete("src/main/generated")
+}
+
+openApiGenerate {
+    generatorName.set("spring")
+    inputSpec.set("$projectDir/openapi-spec/openapi.yaml")
+    outputDir.set("$projectDir/src/main/generated/openapi")
+    apiPackage.set("me.bombom.openapi.api")
+    modelPackage.set("me.bombom.openapi.model")
+    templateDir.set("$projectDir/src/main/resources/openapi-templates")
+    configOptions.set(
+        mapOf(
+            "interfaceOnly" to "true",
+            "useTags" to "true",
+            "useSpringBoot3" to "true",
+            "useJakartaEe" to "true",
+            "useResponseEntity" to "false",
+            "useSpringController" to "false",
+            "openApiNullable" to "false",
+            "skipDefaultInterface" to "true",
+            "dateLibrary" to "java8",
+            "documentationProvider" to "springdoc",
+            "annotationLibrary" to "swagger2",
+        )
+    )
+    globalProperties.set(
+        mapOf(
+            "apiDocs" to "false",
+            "modelDocs" to "false",
+            "apiTests" to "false",
+            "modelTests" to "false",
+        )
+    )
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs("src/main/generated/openapi/src/main/java")
+        }
+    }
+}
+
+tasks.named("compileJava") {
+    dependsOn("openApiGenerate")
 }
 
 tasks.test {

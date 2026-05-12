@@ -27,7 +27,7 @@ public class UnsubscribePatternReloader {
             "unsubscribe", "unsubscription", "수신\\s*거부", "구독\\s*취소", "구독\\s*해지"
     );
 
-    private final UnsubscribePatternRepository repository;
+    private final UnsubscribePatternRepository unsubscribePatternRepository;
     private final UnsubscribeUrlExtractor extractor;
 
     @PostConstruct
@@ -37,7 +37,7 @@ public class UnsubscribePatternReloader {
 
     @Scheduled(fixedDelayString = "PT1H")
     public void reload() {
-        Map<String, String> patterns = repository.findAll().stream()
+        Map<String, String> patterns = unsubscribePatternRepository.findAll().stream()
                 .collect(Collectors.toMap(UnsubscribePattern::getPatternKey, UnsubscribePattern::getPatternValue));
 
         String urlKeyword = patterns.get(URL_KEY);

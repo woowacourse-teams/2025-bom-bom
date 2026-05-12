@@ -17,7 +17,7 @@ import jakarta.annotation.Generated;
  * NewsletterSummaryResponse
  */
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-12T21:53:07.877682+09:00[Asia/Seoul]", comments = "Generator version: 7.10.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-12T22:06:52.246236+09:00[Asia/Seoul]", comments = "Generator version: 7.10.0")
 public class NewsletterSummaryResponse {
 
   private String name;

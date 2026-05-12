@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-12T21:53:07.877682+09:00[Asia/Seoul]", comments = "Generator version: 7.10.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-12T22:06:52.246236+09:00[Asia/Seoul]", comments = "Generator version: 7.10.0")
 @Validated
 @Tag(name = "Article", description = "the Article API")
 public interface ArticleApi {
@@ -75,8 +75,9 @@ public interface ArticleApi {
     @ResponseStatus(HttpStatus.OK)
     
     PageArticleResponse getArticles(
+        @me.bombom.api.v1.common.resolver.LoginMember me.bombom.api.v1.member.domain.Member member,
         @Parameter(name = "date", description = "필터링할 도착 날짜 (yyyy-MM-dd)", in = ParameterIn.QUERY) @Valid @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-        @Min(1L) @Parameter(name = "newsletterId", description = "필터링할 뉴스레터 ID", in = ParameterIn.QUERY) @Valid @RequestParam(value = "newsletterId", required = false) Long newsletterId,
+        @Min(value = 1L, message = "id는 1 이상의 값이어야 합니다.") @Parameter(name = "newsletterId", description = "필터링할 뉴스레터 ID", in = ParameterIn.QUERY) @Valid @RequestParam(value = "newsletterId", required = false) Long newsletterId,
         @ParameterObject final Pageable pageable
     );
 

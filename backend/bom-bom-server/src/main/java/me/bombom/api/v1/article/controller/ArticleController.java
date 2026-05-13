@@ -35,34 +35,31 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * FIXME: 여기에 적힌 API 엔드포인트와 `ArticleApi` 인터페이스에서 설정한 API 엔드포인트가 중복되어서 들어감.
- * 그래서 `/api/v1/articles/api/v1/articles` 이렇게 요청해야함.
- *
- * 해결 방향은 둘 중 하나
- * 1. generated interface가 full path를 갖는다면, controller의 class-level @RequestMapping을 제거한다.
- * 2. controller class-level prefix를 유지하고 싶다면, generated interface가 method path만 갖도록 template/spec/generator 설정을 바꾼다.
- *
- * codex는 1번이 자연스럽다고 함.
- */
+// FIXME: 여기에 적힌 API 엔드포인트와 `ArticleApi` 인터페이스에서 설정한 API 엔드포인트가 중복되어서 들어감.
+//  그래서 `/api/v1/articles/api/v1/articles` 이렇게 요청해야함.
+//  해결 방향은 둘 중 하나
+//  1. generated interface가 full path를 갖는다면, controller의 class-level @RequestMapping을 제거한다.
+//  2. controller class-level prefix를 유지하고 싶다면, generated interface가 method path만 갖도록 template/spec/generator 설정을 바꾼다.
+//  codex는 1번이 자연스럽다고 함.
+//  결국 우리가 최대한 번거롭지 않으려면 mustache?를 잘쓰는게 중요한데,, AI가 잘해주는게 중요할듯.. 우리는 mustache를 모르니까
 @Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/articles")
-public class ArticleController implements ArticleControllerApi, ArticleApi {
+public class ArticleController implements ArticleControllerApi, ArticleApi { //FIXME: 아예 넘어가면 ArticleControllerApi는 implement할 필요없음.
 
     private final ArticleService articleService;
 
-    /**
-     * FIXME: 이후에는 generated model을 프로덕션 응답 타입으로 그대로 사용하는 방향이 나아 보임.
-     * generated model을 그대로 사용하면 기존 응답 DTO -> generated DTO 변환 mapper를 매번 만드는 부담을 줄일 수 있음.
-     * 다만 Page<T>처럼 서버 내부 표현과 OpenAPI schema 표현이 다른 경우에는 별도 변환이 필요할 수 있음. (Mapper를 사용하는 부담이 확실히 줄어들긴함)
-     * 클라이언트와의 계약이 직접 드러나는 타입은 generated model이므로, 이를 응답 경계에서 사용해야 계약을 더 잘 지킬 수 있음.
-     */
+     // FIXME: 이후에는 generated model을 프로덕션 응답 타입으로 그대로 사용하는 방향이 나아 보임.
+     //  generated model을 그대로 사용하면 기존 응답 DTO -> generated DTO 변환 mapper를 매번 만드는 부담을 줄일 수 있음.
+     //  다만 Page<T>처럼 서버 내부 표현과 OpenAPI schema 표현이 다른 경우에는 별도 변환이 필요할 수 있음. (Mapper를 사용하는 부담이 확실히 줄어들긴함)
+     //  클라이언트와의 계약이 직접 드러나는 타입은 generated model이므로, 이를 응답 경계에서 사용해야 계약을 더 잘 지킬 수 있음.
     @Override
     public PageArticleResponse getArticles(
             Member member, //FIXME: Long memberId로도 가능한 것도 확인함. 아래처럼 @LoginMember를 붙여도 상관없음.
-            //FIXME: 그런데, @LoginMember에 있는 두가지 옵션이 제대로 동작하는지 확인 필요
+            //FIXME: 그런데, @LoginMember에 있는 두가지 옵션(anonymous, allowInvalidToken)이 제대로 동작하는지 확인 필요.
+            // generated ArticleApi 인터페이스에만 @LoginMember가 있으면 anonymous/allowInvalidToken 옵션이 구현체에서 잘 보이지 않음.
+            // 팀이 인증 정책을 컨트롤러 구현부에서도 바로 파악할 수 있도록, mustache에서 구현체 메서드에 옵션이 드러나는 방식도 검토 필요.
             LocalDate date,
             Long newsletterId,
             @PageableDefault(sort = "arrivedDateTime", direction = Direction.DESC) Pageable pageable

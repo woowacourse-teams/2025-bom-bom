@@ -5,6 +5,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+// FIXME: 이건 뭔데 안쓰고 있지?
 public class ApiUtil {
     public static void setExampleResponse(NativeWebRequest req, String contentType, String example) {
         try {

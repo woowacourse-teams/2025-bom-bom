@@ -17,6 +17,8 @@ import jakarta.annotation.Generated;
  * PetResponse
  */
 
+// FIXME: 이거는 패키지 위치가 달라서 그대로 못쓰는거지 프로덕션에 그대로 올렸으면 사용 가능했음.
+//  근데 이거 record로 못만드나? => pojo.mustache 수정하면 된다고 하긴하네
 @Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-12T22:06:52.246236+09:00[Asia/Seoul]", comments = "Generator version: 7.10.0")
 public class PetResponse {
 

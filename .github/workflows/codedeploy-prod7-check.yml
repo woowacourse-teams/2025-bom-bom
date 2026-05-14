@@ -27,10 +27,16 @@ jobs:
 
       - name: CodeDeploy 번들 생성
         run: |
+          test -f appspec.yml
+          test -f docker-compose-prod-sub.yml
+          test -d scripts/deploy
+
           zip -r deploy.zip \
             appspec.yml \
             docker-compose-prod-sub.yml \
             scripts/deploy
+
+          unzip -l deploy.zip
 
       - name: S3 업로드
         run: |

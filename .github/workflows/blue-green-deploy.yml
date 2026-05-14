@@ -157,6 +157,8 @@ jobs:
     name: "🚀 Step 2: prod7 배포"
     needs: [prepare-release, shift-traffic-to-prod6]
     runs-on: ubuntu-latest
+    outputs:
+      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
     defaults:
       run:
         working-directory: ./backend/bom-bom-server
@@ -219,9 +221,9 @@ jobs:
   # ---------------------------------------------------
   # 4️⃣ prod7 배포 실패 시 rollback
   # ---------------------------------------------------
-  # X-1) 메인 롤백 시작: 트래픽 상태 정리 (prod6 활성, prod7 비활성 보장)
+  # X-1) prod7 배포 실패 시 트래픽 상태 정리 (prod6 활성, prod7 비활성 보장)
   rollback-prod7-prepare:
-    if: failure() && needs.deploy-prod7.result == 'failure'
+    if: ${{ always() && needs.deploy-prod7.result == 'failure' }}
     needs: deploy-prod7
     runs-on: [ self-hosted, lb ]
     steps:
@@ -230,6 +232,124 @@ jobs:
           echo "enable server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
           echo "disable server app_servers/prod7"   | sudo socat stdio /var/run/haproxy.sock
           echo "✅ 트래픽 상태 정리 완료"
+
+  # X-2) CodeDeploy 자동 rollback 완료 대기
+  rollback-prod7-wait:
+    if: ${{ always() && needs.deploy-prod7.result == 'failure' }}
+    needs: [deploy-prod7, rollback-prod7-prepare]
+    runs-on: ubuntu-latest
+    steps:
+      - name: AWS 인증
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: prod7 CodeDeploy rollback 완료 대기
+        env:
+          ORIGINAL_DEPLOYMENT_ID: ${{ needs.deploy-prod7.outputs.deployment_id }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${ORIGINAL_DEPLOYMENT_ID}" ] || [ "${ORIGINAL_DEPLOYMENT_ID}" = "None" ]; then
+            echo "❌ prod7 원본 deployment id가 없어 자동 rollback을 추적할 수 없습니다."
+            exit 1
+          fi
+
+          echo "원본 prod7 deployment: ${ORIGINAL_DEPLOYMENT_ID}"
+
+          ROLLBACK_DEPLOYMENT_ID=""
+          for i in {1..30}; do
+            ROLLBACK_DEPLOYMENT_ID="$(aws deploy get-deployment \
+              --deployment-id "${ORIGINAL_DEPLOYMENT_ID}" \
+              --query 'deploymentInfo.rollbackInfo.rollbackDeploymentId' \
+              --output text 2>/dev/null || true)"
+
+            if [ -n "${ROLLBACK_DEPLOYMENT_ID}" ] && [ "${ROLLBACK_DEPLOYMENT_ID}" != "None" ]; then
+              echo "rollback deployment 발견: ${ROLLBACK_DEPLOYMENT_ID}"
+              break
+            fi
+
+            STATUS="$(aws deploy get-deployment \
+              --deployment-id "${ORIGINAL_DEPLOYMENT_ID}" \
+              --query 'deploymentInfo.status' \
+              --output text 2>/dev/null || echo unknown)"
+            ROLLBACK_MESSAGE="$(aws deploy get-deployment \
+              --deployment-id "${ORIGINAL_DEPLOYMENT_ID}" \
+              --query 'deploymentInfo.rollbackInfo.rollbackMessage' \
+              --output text 2>/dev/null || echo unknown)"
+
+            echo "rollback deployment 대기 중... (${i}/30), original_status=${STATUS}, rollback_message=${ROLLBACK_MESSAGE}"
+            sleep 10
+          done
+
+          if [ -z "${ROLLBACK_DEPLOYMENT_ID}" ] || [ "${ROLLBACK_DEPLOYMENT_ID}" = "None" ]; then
+            echo "❌ CodeDeploy rollback deployment를 찾지 못했습니다. prod7은 disabled 상태로 유지합니다."
+            exit 1
+          fi
+
+          aws deploy wait deployment-successful \
+            --deployment-id "${ROLLBACK_DEPLOYMENT_ID}"
+
+          echo "✅ prod7 CodeDeploy rollback 완료: ${ROLLBACK_DEPLOYMENT_ID}"
+
+  # X-3) rollback된 prod7 로컬 health check
+  rollback-prod7-health:
+    if: ${{ always() && needs.rollback-prod7-wait.result == 'success' }}
+    needs: rollback-prod7-wait
+    runs-on: [self-hosted, prod7]
+    steps:
+      - name: prod7 rollback health check
+        run: |
+          set -euo pipefail
+
+          HEALTH_CHECK_URL="${HEALTH_CHECK_URL:-http://localhost:8081/actuator/health}"
+          INITIAL_DELAY_SECONDS=30
+          MAX_RETRIES=7
+          REQUIRED_SUCCESS=2
+          RETRY_INTERVAL_SECONDS=10
+
+          echo "prod7 rollback health check 시작: ${HEALTH_CHECK_URL}"
+          sleep "${INITIAL_DELAY_SECONDS}"
+
+          SUCCESS_COUNT=0
+          for ((i=1; i<=MAX_RETRIES; i++)); do
+            STATUS="$(curl -s -o /dev/null -w "%{http_code}" "${HEALTH_CHECK_URL}" || echo "000")"
+
+            if [ "${STATUS}" = "200" ]; then
+              SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+              echo "✅ prod7 rollback health success (${SUCCESS_COUNT}/${REQUIRED_SUCCESS}) attempt=${i}/${MAX_RETRIES}"
+
+              if [ "${SUCCESS_COUNT}" -ge "${REQUIRED_SUCCESS}" ]; then
+                echo "✅ prod7 rollback health check 통과"
+                exit 0
+              fi
+            else
+              if [ "${SUCCESS_COUNT}" -gt 0 ]; then
+                echo "⚠️ prod7 health 불안정, success count reset (${SUCCESS_COUNT} -> 0)"
+              fi
+              SUCCESS_COUNT=0
+              echo "⏳ prod7 health status=${STATUS} attempt=${i}/${MAX_RETRIES}"
+            fi
+
+            sleep "${RETRY_INTERVAL_SECONDS}"
+          done
+
+          echo "❌ prod7 rollback health check 실패. prod7은 disabled 상태로 유지합니다."
+          sudo docker logs prod --tail 80 || true
+          exit 1
+
+  # X-4) rollback health check 성공 시 prod7 트래픽 복구
+  restore-prod7-after-rollback:
+    if: ${{ always() && needs.rollback-prod7-health.result == 'success' }}
+    needs: rollback-prod7-health
+    runs-on: [self-hosted, lb]
+    steps:
+      - name: prod7 rollback 후 트래픽 복구
+        run: |
+          echo "enable server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
+          echo "enable server app_servers/prod7" | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ prod7 rollback health check 성공으로 prod7 트래픽을 복구했습니다."
 
   # ---------------------------------------------------
   # 4️⃣ 트래픽 전환: prod6 → prod7

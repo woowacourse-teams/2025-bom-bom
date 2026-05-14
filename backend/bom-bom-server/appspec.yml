@@ -1,0 +1,20 @@
+version: 0.0
+os: linux
+
+files:
+  - source: docker-compose-prod-sub.yml
+    destination: /opt/bom-bom/app
+
+hooks:
+  BeforeInstall:
+    - location: scripts/deploy/before_install.sh
+      timeout: 60
+      runas: root
+  ApplicationStart:
+    - location: scripts/deploy/start.sh
+      timeout: 300
+      runas: root
+  ValidateService:
+    - location: scripts/deploy/validate.sh
+      timeout: 180
+      runas: root

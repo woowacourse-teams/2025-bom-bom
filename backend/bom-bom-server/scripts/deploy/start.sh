@@ -6,6 +6,7 @@ PARAMETER_PATH="${PARAMETER_PATH:-/bom-bom/prod}"
 APP_DIR="/opt/bom-bom/app"
 ENV_FILE="/opt/bom-bom/deploy/.env"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose-prod-sub.yml}"
+SERVER_CONTAINER_NAME="${SERVER_CONTAINER_NAME:-bombom-server-prod-sub}"
 
 get_parameter() {
   local name="$1"
@@ -41,6 +42,11 @@ docker compose \
   -f "$COMPOSE_FILE" \
   --env-file "$ENV_FILE" \
   down || true
+
+if docker ps -a --format "{{.Names}}" | grep -Fxq "$SERVER_CONTAINER_NAME"; then
+  docker stop "$SERVER_CONTAINER_NAME" || true
+  docker rm "$SERVER_CONTAINER_NAME" || true
+fi
 
 docker compose \
   -f "$COMPOSE_FILE" \

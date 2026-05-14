@@ -118,19 +118,21 @@ jobs:
             // 팀 멤버 후보: notification_ids.json 기준
             const teamMembers = Object.keys(discordIdByLogin); // lowercased
 
-            const embeds = [];
-            
+            let content = "🌸 오늘 D-0 도착한 PR이에요! 지금 확인하면 딱 좋아요\n";
+
+            // 2) D-0 도달 PR별로 멘션/문구 구성
             for (const pr of becameD0) {
               const prNumber = pr.number;
               const authorLogin = String(pr.author).toLowerCase();
-            
+
               const { data: reviews } = await github.rest.pulls.listReviews({
                 owner,
                 repo,
                 pull_number: prNumber,
                 per_page: 100,
               });
-            
+
+              // 리뷰어별 마지막 상태
               const latestByUser = new Map();
               reviews
                 .filter(r => r.user && r.user.login && r.submitted_at)
@@ -138,41 +140,48 @@ jobs:
                 .forEach(r => {
                   latestByUser.set(String(r.user.login).toLowerCase(), String(r.state));
                 });
-            
+
               let approvedCount = 0;
               let hasChangesRequested = false;
-            
+
               for (const state of latestByUser.values()) {
                 if (state === "APPROVED") approvedCount += 1;
                 if (state === "CHANGES_REQUESTED") hasChangesRequested = true;
               }
-            
+
+              // 기본 후보: 팀원 - author
               const candidates = teamMembers.filter(m => m !== authorLogin);
-            
+
+              // "미승인자" = 아직 APPROVED 아닌 사람(리뷰 안했거나 COMMENTED 포함)
               const pendingReviewers = candidates.filter(login => {
                 const latestState = latestByUser.get(login);
                 return latestState !== "APPROVED";
               });
-            
+
+              // 멘션 대상 조합
               const mentionSet = new Set();
-            
+
+              // (A) 수정요청 있으면 작성자 호출은 항상 포함
               if (hasChangesRequested) {
                 const m = mentionOf(authorLogin);
                 if (m) mentionSet.add(m);
               }
-            
+
+              // (B) 승인 부족(<2)이면 미승인자들도 호출
               if (approvedCount < 2) {
                 for (const login of pendingReviewers) {
                   const m = mentionOf(login);
                   if (m) mentionSet.add(m);
                 }
               } else {
+                // (C) 승인 2명 이상이면 "머지" 유도 -> 작성자 호출(매핑 있으면)
                 const m = mentionOf(authorLogin);
                 if (m) mentionSet.add(m);
               }
-            
+
               const mentions = Array.from(mentionSet).join(" ");
-            
+
+              // 상태 텍스트 결정(우선순위: 수정요청 > 머지 가능 > 리뷰 필요)
               let statusText = "";
               if (hasChangesRequested && approvedCount < 2) {
                 statusText = `🛠️ 수정 요청 있음 + 👀 추가 리뷰 필요 (현재 승인 ${approvedCount}명)`;
@@ -183,34 +192,19 @@ jobs:
               } else {
                 statusText = `👀 리뷰 필요 (현재 승인 ${approvedCount}명)`;
               }
-            
-              // ✅ 카드(Embed)
-              embeds.push({
-                title: `D-0 | ${pr.title}`,
-                url: pr.url,
-                color: 0xF52606, // D-0 라벨 색(#f52606)
-                fields: [
-                  { name: "상태", value: statusText, inline: false },
-                  { name: "작성자", value: pr.author, inline: true },
-                  { name: "승인", value: `${approvedCount}명`, inline: true },
-                  { name: "호출", value: mentions ? mentions : "-", inline: false },
-                ],
-              });
+
+              const mentionPrefix = mentions ? `${mentions} ` : "";
+
+              content += `\n- ${mentionPrefix}**${statusText}**\n  ${pr.title}\n  ${pr.url}\n`;
             }
-            
-            // ✅ payload.json을 embeds 형태로 생성
-            const payload = {
-              content: "🌸 오늘 D-0 도착한 PR이에요! 지금 확인하면 딱 좋아요",
-              embeds,
-            };
-            
-            fs.writeFileSync("payload.json", JSON.stringify(payload, null, 2), "utf8");
+
+            fs.writeFileSync("payload.json", JSON.stringify({ content }, null, 2), "utf8");
             core.setOutput("should_notify", "true");
             core.setOutput("d0_count", String(becameD0.length));
 
       - name: Notify Discord (D-0 reached PRs)
         if: steps.build.outputs.should_notify == 'true'
         env:
-          DISCORD_WEBHOOK_PR: ${{ secrets.DISCORD_WEBHOOK_PR }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          curl -sS -H "Content-Type: application/json" -d @payload.json "$DISCORD_WEBHOOK_PR"
+          curl -sS -H "Content-Type: application/json" -d @payload.json "$DISCORD_WEBHOOK_URL"

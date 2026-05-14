@@ -1,0 +1,57 @@
+name: 'Discord Notification'
+description: 'Send Discord webhook'
+
+inputs:
+  webhook:
+    description: 'Discord Webhook URL'
+    required: true
+  content:
+    description: 'Notification content'
+    required: true
+  mentions:
+    description: 'Notification mentions'
+    required: false
+  title:
+    description: 'Embed title'
+    required: true
+  url:
+    description: 'Embed URL'
+    required: true
+  color:
+    description: 'Embed color'
+    required: false
+    default: '15158332'
+  fields:
+    description: 'Embed fields'
+    required: false
+    default: '[]'
+
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: |
+        # fields(JSON 배열)를 inline=true 포함 형태로 변환
+        RAW_FIELDS='${{ inputs.fields }}'
+
+        # JSON 변환을 위해 jq 설치 (ubuntu-latest 기본 포함)
+        FINAL_FIELDS=$(echo "$RAW_FIELDS" | jq '
+          map(. + {inline: true})
+        ')
+
+        curl -X POST \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"username\": \"BE Bot\",
+            \"content\": \"${{ inputs.content }}\n${{ inputs.mentions }}\",
+            \"embeds\": [
+              {
+                \"title\": \"${{ inputs.title }}\",
+                \"url\": \"${{ inputs.url }}\",
+                \"color\": ${{ inputs.color }},
+                \"fields\": $FINAL_FIELDS,
+                \"footer\": { \"text\": \"자동 알림 메시지입니다\" }
+              }
+            ]
+          }" \
+          "${{ inputs.webhook }}"

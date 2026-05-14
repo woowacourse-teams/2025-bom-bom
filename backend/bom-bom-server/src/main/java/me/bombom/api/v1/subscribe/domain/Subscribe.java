@@ -2,6 +2,8 @@ package me.bombom.api.v1.subscribe.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,4 +30,28 @@ public class Subscribe extends BaseEntity {
 
     @Column(nullable = false)
     private Long memberId;
+
+    @Column(length = 512)
+    private String unsubscribeUrl;
+
+    @Builder.Default
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private SubscribeStatus status = SubscribeStatus.SUBSCRIBED;
+
+    public void changeStatus(SubscribeStatus status) {
+        this.status = status;
+    }
+
+    public boolean isNotOwner(Long memberId) {
+        return !this.memberId.equals(memberId);
+    }
+
+    public boolean isFailedToUnsubscribe() {
+        return status == SubscribeStatus.UNSUBSCRIBE_FAILED;
+    }
+
+    public boolean isUnsubscribing() {
+        return status == SubscribeStatus.UNSUBSCRIBING;
+    }
 }

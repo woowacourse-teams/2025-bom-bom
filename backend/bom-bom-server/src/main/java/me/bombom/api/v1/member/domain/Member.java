@@ -9,7 +9,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.LocalDateTime;
+import java.io.Serializable;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,7 +26,9 @@ import me.bombom.api.v1.member.enums.Gender;
         name = "member",
         uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "providerId"})
 )
-public class Member extends BaseEntity {
+public class Member extends BaseEntity implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,23 +40,23 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private String providerId;
 
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false, length = 50)
     private String email;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 20)
     private String nickname;
 
-    @Column(length = 512)
+    @Column(length = 2048)
     private String profileImageUrl;
 
-    private LocalDateTime birthDate;
+    private LocalDate birthDate;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
-    private Long roleId = 0L;
+    @Column(nullable = false, columnDefinition = "BIGINT")
+    private Long roleId = 1L;
 
     @Builder
     public Member(
@@ -63,7 +66,7 @@ public class Member extends BaseEntity {
             @NonNull String email,
             @NonNull String nickname,
             String profileImageUrl,
-            LocalDateTime birthDate,
+            LocalDate birthDate,
             @NonNull Gender gender,
             @NonNull Long roleId
     ) {
@@ -77,5 +80,28 @@ public class Member extends BaseEntity {
         this.gender = gender;
         this.roleId = roleId;
     }
-}
 
+    public void updateProfile(
+        String nickname,
+        String profileImageUrl,
+        LocalDate birthDate,
+        Gender gender
+    ) {
+        if (nickname != null) {
+            this.nickname = nickname;
+        }
+        if (profileImageUrl != null) {
+            this.profileImageUrl = profileImageUrl;
+        }
+        if (birthDate != null) {
+            this.birthDate = birthDate;
+        }
+        if (gender != null) {
+            this.gender = gender;
+        }
+    }
+
+    public boolean isSameNickname(String nickname) {
+        return this.nickname.equals(nickname);
+    }
+}

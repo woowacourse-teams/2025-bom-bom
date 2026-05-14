@@ -1,11 +1,15 @@
 package me.bombom.api.v1.newsletter.controller;
 
-import java.util.List;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
+import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
+import me.bombom.api.v1.newsletter.dto.NewslettersResponse;
 import me.bombom.api.v1.newsletter.service.NewsletterService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -17,7 +21,20 @@ public class NewsletterController implements NewsletterControllerApi{
 
     @Override
     @GetMapping
-    public List<NewsletterResponse> getNewsletters() {
-        return newsletterService.getNewsletters();
+    public NewslettersResponse getNewsletters(
+            @LoginMember(anonymous = true, allowInvalidToken = true) Long memberId,
+            @RequestParam(required = false, defaultValue = "false") boolean includeSuspended,
+            @RequestParam(required = false) Long categoryId
+    ) {
+        return newsletterService.getNewsletters(memberId, includeSuspended, categoryId);
+    }
+
+    @Override
+    @GetMapping("/{id}")
+    public NewsletterWithDetailResponse getNewsletterWithDetail(
+            @LoginMember(anonymous = true) Long memberId,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+    ) {
+        return newsletterService.getNewsletterWithDetail(id, memberId);
     }
 }

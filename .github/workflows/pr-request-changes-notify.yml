@@ -1,0 +1,50 @@
+name: Notify Discord (PR-Request Changes)
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  notify-on-request-changes:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.review.state == 'changes_requested' }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # notification_ids.json 기반으로 리뷰어/작성자 mention 변환
+      - name: Load user mapping
+        id: load-users
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require("fs");
+            const mapping = JSON.parse(fs.readFileSync('.github/notification_ids.json', 'utf8'));
+
+            const review = context.payload.review;
+            const pr = context.payload.pull_request;
+
+            const reviewer = review.user.login;
+            const author = pr.user.login;
+            const authorMention   = mapping[author] ? `<@${mapping[author]}>` : author;
+
+            console.log(`Reviewer: ${reviewer}`);
+            console.log(`Author Mention: ${authorMention}`);
+            core.setOutput("reviewer", reviewer);
+            core.setOutput("authorMention", authorMention);
+
+      # Discord 알림 전송
+      - name: Send Request Changes Notification
+        uses: ./.github/actions/discord-notification
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_PR }}
+          content: "🚧 *수정 요청이 들어왔습니다!*"
+          mentions: ${{ steps.load-users.outputs.authorMention }}
+          title: ${{ github.event.pull_request.title }}
+          url: ${{ github.event.pull_request.html_url }}
+          color: 15158332
+          fields: |
+            [
+              { "name": "리뷰어", "value": "${{ steps.load-users.outputs.reviewer }}" },
+              { "name": "상태", "value": "${{ github.event.review.state }}" }
+            ]

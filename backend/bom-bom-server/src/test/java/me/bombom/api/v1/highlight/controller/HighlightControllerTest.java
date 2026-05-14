@@ -1,5 +1,6 @@
 package me.bombom.api.v1.highlight.controller;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -19,24 +20,22 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
+import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
+import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
+import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest
+@IntegrationTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
 class HighlightControllerTest {
 
     @Autowired
@@ -52,6 +51,9 @@ class HighlightControllerTest {
     private NewsletterRepository newsletterRepository;
 
     @Autowired
+    private NewsletterDetailRepository newsletterDetailRepository;
+
+    @Autowired
     private ArticleRepository articleRepository;
 
     @Autowired
@@ -65,6 +67,7 @@ class HighlightControllerTest {
 
     private List<Highlight> highlights;
     private CustomOAuth2User customOAuth2User;
+    private OAuth2AuthenticationToken authToken;
 
     @BeforeEach
     void setUp() {
@@ -77,7 +80,10 @@ class HighlightControllerTest {
         List<Category> categories = TestFixture.createCategories();
         categoryRepository.saveAll(categories);
 
-        List<Newsletter> newsletters = TestFixture.createNewsletters(categories);
+        List<NewsletterDetail> newsletterDetails = TestFixture.createNewsletterDetails();
+        newsletterDetailRepository.saveAll(newsletterDetails);
+
+        List<Newsletter> newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
         newsletterRepository.saveAll(newsletters);
 
         List<Article> articles = TestFixture.createArticles(member, newsletters);
@@ -92,28 +98,18 @@ class HighlightControllerTest {
                 "email", member.getEmail(),
                 "name", member.getNickname()
         );
-        customOAuth2User = new CustomOAuth2User(attributes, member);
-    }
-
-    private void setAuthentication() {
+        customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
+        
         // OAuth2AuthenticationToken 생성
-        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+        authToken = new OAuth2AuthenticationToken(
                 customOAuth2User,
                 customOAuth2User.getAuthorities(),
                 "registrationId"
         );
-
-        // SecurityContext에 인증 정보 설정
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authToken);
-        SecurityContextHolder.setContext(context);
     }
 
     @Test
     void 하이라이트_생성_성공() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then
         String content = String.format("""
         {
@@ -130,6 +126,7 @@ class HighlightControllerTest {
         }
         """, highlights.getFirst().getArticleId());
         mockMvc.perform(post("/api/v1/highlights")
+                        .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
                 .andExpect(status().isCreated());
@@ -137,11 +134,9 @@ class HighlightControllerTest {
 
     @Test
     void 하이라이트_수정_성공() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then
         mockMvc.perform(patch("/api/v1/highlights/{id}", highlights.getFirst().getId())
+                        .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                             {
@@ -154,11 +149,9 @@ class HighlightControllerTest {
 
     @Test
     void 하이라이트_수정_포맷에_맞지_않는_color_입력() throws Exception {
-        // given
-        setAuthentication();
-
         // when & then
         mockMvc.perform(patch("/api/v1/highlights/{id}", highlights.getFirst().getId())
+                        .with(authentication(authToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                             {

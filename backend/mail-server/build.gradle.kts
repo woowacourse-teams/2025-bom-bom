@@ -65,6 +65,10 @@ dependencies {
 
     // db
     runtimeOnly("com.mysql:mysql-connector-j")
+
+    // flyway
+    implementation ("org.flywaydb:flyway-core")
+    implementation ("org.flywaydb:flyway-mysql")
 }
 
 tasks.withType<Test> {

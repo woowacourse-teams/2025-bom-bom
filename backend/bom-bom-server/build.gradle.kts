@@ -1,6 +1,6 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.5.3"
+    id("org.springframework.boot") version "3.5.14"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -21,6 +21,13 @@ configurations {
 
 repositories {
     mavenCentral()
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.testcontainers:testcontainers-bom:2.0.3")
+        mavenBom("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.26.1-alpha")
+    }
 }
 
 dependencies {
@@ -45,6 +52,7 @@ dependencies {
     // spring security
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("com.nimbusds:nimbus-jose-jwt:10.4.2")
 
     // prometheus
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -53,20 +61,49 @@ dependencies {
     // test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.testcontainers:testcontainers")
+    testImplementation("org.testcontainers:testcontainers-mysql")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
 
     // db
     runtimeOnly("com.mysql:mysql-connector-j")
-    runtimeOnly("com.h2database:h2")
+
+    // spring session jdbc
+    implementation("org.springframework.session:spring-session-jdbc")
+
+    // flyway
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-mysql")
 
     // swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
-}
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+    // logging
+    implementation(platform("org.springframework.cloud:spring-cloud-dependencies:2025.0.0"))
+    implementation("net.logstash.logback:logstash-logback-encoder:8.1")
+
+    //ShedLock
+    implementation("net.javacrumbs.shedlock:shedlock-spring:6.9.2")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.9.2")
+
+    //otel
+    implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0")
+
+    // AWS SDK
+    implementation(platform("software.amazon.awssdk:bom:2.41.21"))
+    implementation("software.amazon.awssdk:lambda")
+
+    // Annotations
+    implementation("jakarta.annotation:jakarta.annotation-api")
 }
 
 // Querydsl 생성된 파일 정리
 tasks.named<Delete>("clean") {
     delete("src/main/generated")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

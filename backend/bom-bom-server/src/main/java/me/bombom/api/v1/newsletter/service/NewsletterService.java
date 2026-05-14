@@ -1,9 +1,17 @@
 package me.bombom.api.v1.newsletter.service;
 
-import java.util.Collections;
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorContextKeys;
+import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.newsletter.domain.Newsletter;
+import me.bombom.api.v1.newsletter.dto.CategoryResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
+import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
+import me.bombom.api.v1.newsletter.dto.NewslettersResponse;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,12 +21,48 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class NewsletterService {
 
-    private final NewsletterRepository newsletterRepository;
+    private static final int SUSPENDED_HIDDEN_AFTER_MONTHS = 6;
 
-    public List<NewsletterResponse> getNewsletters() {
-        //임시로 repository 메서드 내부에 Detail 정보 가져오는 것이 불필요
-        List<NewsletterResponse> newsletters = newsletterRepository.findNewslettersInfo();
-        Collections.shuffle(newsletters); //초기엔 셔플해서 랜덤 순서로 보여주기
-        return newsletters;
+    private final NewsletterRepository newsletterRepository;
+    private final Clock clock;
+
+    public NewslettersResponse getNewsletters(Long memberId, boolean includeSuspended, Long categoryId) {
+        LocalDate suspendedHiddenThresholdDate = getSuspendedHiddenThresholdDate();
+        List<NewsletterResponse> allNewsletters = newsletterRepository.findNewslettersInfo(
+                memberId,
+                includeSuspended,
+                suspendedHiddenThresholdDate
+        );
+
+        List<CategoryResponse> categories = CategoryResponse.from(allNewsletters);
+        List<NewsletterResponse> newsletters = (categoryId == null)
+                ? allNewsletters : getCategoryFilteredNewsletters(categoryId, allNewsletters);
+
+        return NewslettersResponse.of(categories, newsletters);
+    }
+
+    public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Long memberId) {
+        return newsletterRepository.findNewsletterWithDetailById(newsletterId, memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletter")
+                        .addContext(ErrorContextKeys.NEWSLETTER_ID, newsletterId));
+    }
+
+    public Newsletter getNewsletter(Long id) {
+        return newsletterRepository.findById(id)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletter")
+                        .addContext(ErrorContextKeys.OPERATION, "getNewsletter")
+                        .addContext(ErrorContextKeys.NEWSLETTER_ID, id));
+    }
+
+    private LocalDate getSuspendedHiddenThresholdDate() {
+        return LocalDate.now(clock).minusMonths(SUSPENDED_HIDDEN_AFTER_MONTHS);
+    }
+
+    private List<NewsletterResponse> getCategoryFilteredNewsletters(Long categoryId, List<NewsletterResponse> allNewsletters) {
+        return allNewsletters.stream()
+                .filter(n -> n.categoryId().equals(categoryId))
+                .toList();
     }
 }

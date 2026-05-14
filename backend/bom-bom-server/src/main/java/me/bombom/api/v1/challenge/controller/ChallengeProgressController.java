@@ -1,0 +1,64 @@
+package me.bombom.api.v1.challenge.controller;
+
+import jakarta.validation.constraints.Positive;
+import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.challenge.dto.response.CertificationInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeStreakResponse;
+import me.bombom.api.v1.challenge.dto.response.MemberChallengeProgressResponse;
+import me.bombom.api.v1.challenge.dto.response.TeamChallengeProgressResponse;
+import me.bombom.api.v1.challenge.service.ChallengeProgressService;
+import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.member.domain.Member;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@Validated
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/challenges")
+public class ChallengeProgressController implements ChallengeProgressControllerApi {
+
+    private final ChallengeProgressService challengeProgressService;
+
+    @Override
+    @GetMapping("/{id}/progress/me")
+    public MemberChallengeProgressResponse getMemberProgress(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+    ) {
+        return challengeProgressService.getMemberProgress(id, member);
+    }
+
+    @Override
+    @GetMapping("/{id}/progress/me/streak")
+    public ChallengeStreakResponse getMemberStreak(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
+            @RequestParam(defaultValue = "5") @Positive(message = "limit는 1 이상의 값이어야 합니다.") int limit
+    ) {
+        return challengeProgressService.getMemberStreak(id, member, limit);
+    }
+
+    @Override
+    @GetMapping("/{id}/progress/teams/{teamId}")
+    public TeamChallengeProgressResponse getTeamProgressByTeamId(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
+            @PathVariable @Positive(message = "teamId는 1 이상의 값이어야 합니다.") Long teamId
+    ) {
+        return challengeProgressService.getTeamProgressByTeamId(id, teamId, member);
+    }
+
+    @Override
+    @GetMapping("/{id}/certification")
+    public CertificationInfoResponse getCertificationInfo(
+            @LoginMember Long memberId,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+    ) {
+        return challengeProgressService.getCertificationInfo(id, memberId);
+    }
+}

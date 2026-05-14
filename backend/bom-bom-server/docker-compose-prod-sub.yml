@@ -11,7 +11,7 @@ services:
     mem_limit: 660m
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:mysql://${RDS_ENDPOINT}:3306/${DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+      SPRING_DATASOURCE_URL: jdbc:mysql://${RDS_ENDPOINT}:3306/${DATABASE}?useSSL=false&serverTimezone=Asia/Seoul
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
       LOGGING_FILE_NAME: /logs/bombom-prod.log
@@ -22,10 +22,10 @@ services:
       #### --------------------------------------
       #### OpenTelemetry (전체 주석 처리)
       JAVA_TOOL_OPTIONS: "
-          -javaagent:/otel/opentelemetry-javaagent.jar
-          -Xms230m
-          -Xmx230m
-          -XX:MaxMetaspaceSize=200m
+          -javaagent:/otel/opentelemetry-javaagent.jar 
+          -Xms230m 
+          -Xmx230m 
+          -XX:MaxMetaspaceSize=200m 
           -XX:+UseParallelGC
           -XX:MaxDirectMemorySize=32m
           -XX:NativeMemoryTracking=summary

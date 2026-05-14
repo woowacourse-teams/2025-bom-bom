@@ -1,0 +1,124 @@
+package me.bombom.api.v1.challenge.controller;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import java.time.LocalDate;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
+import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
+import me.bombom.api.v1.challenge.dto.request.UpdateChallengeCommentRequest;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentHighlightResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentLikeResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
+import me.bombom.api.v1.challenge.dto.response.CreateCommentResponse;
+import me.bombom.api.v1.challenge.service.ChallengeCommentService;
+import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.member.domain.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+@Validated
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/challenges")
+public class ChallengeCommentController implements ChallengeCommentControllerApi {
+
+    private final ChallengeCommentService challengeCommentService;
+
+    @Override
+    @GetMapping("/{challengeId}/comments")
+    public Page<ChallengeCommentResponse> getChallengeComments(
+            @LoginMember Long memberId,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
+            @Valid @ModelAttribute ChallengeCommentOptionsRequest request,
+            @PageableDefault(size = 20)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC),
+                    @SortDefault(sort = "id", direction = Sort.Direction.ASC)
+            }) Pageable pageable
+    ) {
+        return challengeCommentService.getChallengeComments(challengeId, memberId, request, pageable);
+    }
+
+    @Override
+    @GetMapping("/comments/articles/candidates")
+    public List<ChallengeCommentCandidateArticleResponse> getChallengeCommentCandidateArticles(
+            @LoginMember Member member,
+            @RequestParam LocalDate date
+    ) {
+        return challengeCommentService.getChallengeCommentCandidateArticles(member.getId(), date);
+    }
+
+    @Override
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/{challengeId}/comments")
+    public CreateCommentResponse createChallengeComment(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long challengeId,
+            @Valid @RequestBody ChallengeCommentRequest request
+    ) {
+        return challengeCommentService.createChallengeComment(member.getId(), challengeId, request);
+    }
+
+    @Override
+    @GetMapping("/comments/articles/{articleId}/highlights")
+    public Page<ChallengeCommentHighlightResponse> getChallengeArticleHighlights(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long articleId,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Direction.DESC) Pageable pageable
+    ) {
+        return challengeCommentService.getChallengeArticleHighlights(member.getId(), articleId, pageable);
+    }
+
+    @Override
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PatchMapping("/{challengeId}/comments/{commentId}")
+    public void updateChallengeComment(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "챌린지 id는 1 이상의 값이어야 합니다.") Long challengeId,
+            @PathVariable @Positive(message = "코멘트 id는 1 이상의 값이어야 합니다.") Long commentId,
+            @Valid @RequestBody UpdateChallengeCommentRequest request
+    ) {
+        challengeCommentService.updateChallengeComment(member.getId(), challengeId, commentId, request);
+    }
+
+    @Override
+    @PutMapping("/{challengeId}/comments/{commentId}/like")
+    public ChallengeCommentLikeResponse addChallengeCommentLike(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "챌린지 id는 1 이상의 값이어야 합니다.") Long challengeId,
+            @PathVariable @Positive(message = "코멘트 id는 1 이상의 값이어야 합니다.") Long commentId
+    ) {
+        return challengeCommentService.addChallengeCommentLike(member.getId(), challengeId, commentId);
+    }
+
+    @Override
+    @DeleteMapping("/{challengeId}/comments/{commentId}/like")
+    public ChallengeCommentLikeResponse deleteChallengeCommentLike(
+            @LoginMember Member member,
+            @PathVariable @Positive(message = "챌린지 id는 1 이상의 값이어야 합니다.") Long challengeId,
+            @PathVariable @Positive(message = "코멘트 id는 1 이상의 값이어야 합니다.") Long commentId
+    ) {
+        return challengeCommentService.deleteChallengeCommentLike(member.getId(), challengeId, commentId);
+    }
+}

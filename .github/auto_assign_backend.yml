@@ -5,7 +5,8 @@ reviewers:
   - rladmstn
   - kysub99
   - Choidongjun0830
-numberOfReviewers: 4
+  - minSsan
+numberOfReviewers: 5
 numberOfAssignees: 1
 skipKeywords:
   - wip

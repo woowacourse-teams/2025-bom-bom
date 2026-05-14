@@ -8,12 +8,19 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import java.io.IOException;
+import me.bombom.api.v1.auth.dto.NativeLoginResponse;
+import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
+import me.bombom.api.v1.auth.dto.request.SignupValidateRequest;
+import me.bombom.api.v1.auth.enums.SignupValidateStatus;
+import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.io.IOException;
 
 @Tag(name = "Auth", description = "인증 관련 API")
 public interface AuthControllerApi {
@@ -28,8 +35,20 @@ public interface AuthControllerApi {
         @ApiResponse(responseCode = "401", description = "OAuth2 인증 정보 없음")
     })
     void signup(
-        @Parameter(description = "회원가입 요청 데이터") @RequestBody MemberSignupRequest signupRequest,
+        @Parameter(description = "회원가입 요청 데이터") @Valid @RequestBody MemberSignupRequest signupRequest,
         HttpServletRequest request
+    );
+
+    @Operation(
+            summary = "회원가입 필드 중복 체크",
+            description = "회원가입에 사용되는 필드의 중복을 체크하여 true/false를 반환합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "중복 체크 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
+    })
+    SignupValidateStatus validateSignupField(
+            @Parameter(description = "중복 체크 요청 데이터") @Valid @ModelAttribute SignupValidateRequest request
     );
 
     @Operation(
@@ -48,11 +67,37 @@ public interface AuthControllerApi {
     ) throws IOException;
 
     @Operation(
+        summary = "네이티브 OAuth2 로그인",
+        description = "모바일 앱에서 받은 id_token과 authorization_code로 서버에서 토큰 교환 및 로그인 분기를 수행합니다. 기존 회원이면 '/'로, 신규면 '/signup'으로 리다이렉트합니다."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "302", description = "리다이렉트 수행 (기존: '/', 신규: '/signup')"),
+        @ApiResponse(responseCode = "400", description = "지원하지 않는 제공자"),
+        @ApiResponse(responseCode = "401", description = "토큰 검증 실패 또는 교환 실패")
+    })
+    NativeLoginResponse nativeLogin(
+        @PathVariable("provider") String provider,
+        @Valid @RequestBody NativeLoginRequest nativeLoginRequest,
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws IOException;
+
+    @Operation(
         summary = "로그아웃",
         description = "현재 세션을 무효화하여 로그아웃합니다."
     )
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "로그아웃 성공")
     })
-    void logout(HttpServletRequest request);
+    void logout(HttpServletRequest request, HttpServletResponse response);
+
+    @Operation(
+        summary = "회원 탈퇴",
+        description = "현재 로그인한 회원의 계정을 삭제합니다. Apple 로그인 사용자의 경우 Apple 토큰도 함께 철회됩니다."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "탈퇴 성공"),
+        @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+    })
+    void withdraw(@Parameter(hidden = true) @LoginMember Member member, HttpSession session, HttpServletResponse response) throws IOException;
 } 

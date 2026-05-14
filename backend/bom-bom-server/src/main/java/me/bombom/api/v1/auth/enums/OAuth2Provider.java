@@ -1,26 +1,20 @@
 package me.bombom.api.v1.auth.enums;
 
-import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import me.bombom.api.v1.common.exception.CIllegalArgumentException;
-import me.bombom.api.v1.common.exception.ErrorDetail;
 
 @Getter
 @AllArgsConstructor
 public enum OAuth2Provider {
 
-    GOOGLE("google","sub", "picture"),
+    GOOGLE("google"),
+    APPLE("apple"),
+    DEFAULT("default"),
     ;
 
-    private final String provider;
-    private final String idKey;
-    private final String profileImageKey;
+    private final String value;
 
-    public static OAuth2Provider from(String provider) {
-        return Arrays.stream(OAuth2Provider.values())
-                .filter(oAuth2Provider -> oAuth2Provider.getProvider().equals(provider))
-                .findFirst()
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.UNSUPPORTED_OAUTH2_PROVIDER));
+    public boolean isEqualProvider(String provider) {
+        return this.value.equalsIgnoreCase(provider);
     }
 }

@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import me.bombom.api.v1.common.BaseEntity;
 
 @Entity
@@ -36,8 +37,8 @@ public class Pet extends BaseEntity {
     @Builder
     public Pet(
             Long id,
-            @NotNull Long memberId,
-            @NotNull Long stageId,
+            @NonNull Long memberId,
+            @NonNull Long stageId,
             int currentScore,
             boolean isAttended
     ) {

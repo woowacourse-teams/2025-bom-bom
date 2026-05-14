@@ -1,0 +1,5 @@
+-- 탈퇴한 회원에 대해 created_at, updated_at 필드 추가
+ALTER TABLE withdrawn_member
+    ADD COLUMN created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    ADD COLUMN updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+        ON UPDATE CURRENT_TIMESTAMP(6);

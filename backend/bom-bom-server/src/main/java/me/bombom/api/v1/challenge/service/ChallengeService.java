@@ -1,0 +1,371 @@
+package me.bombom.api.v1.challenge.service;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.badge.service.BadgeService;
+import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.ChallengeFilter;
+import me.bombom.api.v1.challenge.domain.ChallengeGrade;
+import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
+import me.bombom.api.v1.challenge.domain.ChallengeStatus;
+import me.bombom.api.v1.challenge.domain.ChallengeTeam;
+import me.bombom.api.v1.challenge.domain.EligibilityReason;
+import me.bombom.api.v1.challenge.domain.RegistrationPhase;
+import me.bombom.api.v1.challenge.dto.ChallengeNewsletterRow;
+import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
+import me.bombom.api.v1.challenge.dto.response.ChallengeDetailResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeLandingNewsletterResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeLandingResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeNewsletterResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeTeamListResponse;
+import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.CServerErrorException;
+import me.bombom.api.v1.common.exception.ErrorContextKeys;
+import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.common.exception.UnauthorizedException;
+import me.bombom.api.v1.common.util.DateUtils;
+import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.newsletter.repository.NewsletterGroupItemRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class ChallengeService {
+
+    // TODO: 이후에 수료 처리 등 구현 시 관리 방법 고려
+    private static final double SUCCESS_REQUIRED_RATIO = 0.8;
+    private static final int MIN_CHALLENGE_TOTAL_DAYS_FOR_BADGE = 15;
+
+    private final ChallengeRepository challengeRepository;
+    private final ChallengeParticipantRepository challengeParticipantRepository;
+    private final NewsletterGroupItemRepository newsletterGroupItemRepository;
+    private final ChallengeTeamRepository challengeTeamRepository;
+    private final BadgeService badgeService;
+    private final Clock clock;
+
+    public List<ChallengeResponse> getChallenges(Member member, ChallengeFilter view) {
+        List<Challenge> challenges = challengeRepository.findAll();
+        if (challenges.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Long> challengeIds = challenges.stream()
+                .map(Challenge::getId)
+                .toList();
+
+        LocalDate today = LocalDate.now(clock);
+        Map<Long, Long> participantCounts = getParticipantCounts(challengeIds);
+        Map<Long, List<ChallengeNewsletterResponse>> newslettersByChallengeId =
+                getNewslettersByChallengeId(challengeIds);
+        Map<Long, ChallengeParticipant> myParticipation = findMyParticipation(member, challengeIds);
+
+        Stream<Challenge> challengeStream = challenges.stream()
+                .filter(challenge -> view.isVisible(
+                        challenge,
+                        today,
+                        myParticipation.containsKey(challenge.getId())
+                ));
+
+        return applySorting(challengeStream, view, today, myParticipation.keySet())
+                .map(challenge -> toChallengeResponse(
+                        challenge,
+                        participantCounts,
+                        newslettersByChallengeId,
+                        myParticipation,
+                        today
+                ))
+                .toList();
+    }
+
+    public ChallengeInfoResponse getChallengeInfo(Long id) {
+        Challenge challenge = challengeRepository.findById(id)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.OPERATION, "getChallengeInfo"));
+
+        return ChallengeInfoResponse.of(challenge, SUCCESS_REQUIRED_RATIO);
+    }
+
+    public ChallengeLandingResponse getChallengeLanding(Long id) {
+        Challenge challenge = challengeRepository.findById(id)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.OPERATION, "getChallengeLanding"));
+
+        List<ChallengeLandingNewsletterResponse> newsletters =
+                newsletterGroupItemRepository.findChallengeLandingNewslettersByChallengeId(id);
+
+        boolean grantsBadge = challenge.getTotalDays() >= MIN_CHALLENGE_TOTAL_DAYS_FOR_BADGE;
+
+        return ChallengeLandingResponse.of(challenge, newsletters, grantsBadge);
+    }
+
+    public ChallengeEligibilityResponse checkEligibility(Long challengeId, Member member) {
+        Challenge challenge = challengeRepository.findById(challengeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.OPERATION, "checkEligibility"));
+
+        if (member == null) {
+            return new ChallengeEligibilityResponse(false, EligibilityReason.NOT_LOGGED_IN);
+        }
+
+        EligibilityReason reason = validateEligibility(challenge, challengeId, member.getId());
+        return new ChallengeEligibilityResponse(reason == EligibilityReason.ELIGIBLE, reason);
+    }
+
+    @Transactional
+    public void applyChallenge(Long challengeId, Member member) {
+        Challenge challenge = challengeRepository.findById(challengeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.OPERATION, "applyChallenge"));
+
+        EligibilityReason reason = validateEligibility(challenge, challengeId, member.getId());
+
+        if (reason == EligibilityReason.ALREADY_APPLIED) {
+            log.debug("챌린지 신청 중복 요청 - challengeId={}, memberId={}", challengeId, member.getId());
+            return;
+        }
+        
+        if (reason != EligibilityReason.ELIGIBLE) {
+            throw createApplyException(challengeId, member, reason);
+        }
+
+        Long teamId = challenge.hasStarted(LocalDate.now(clock)) ? getFewestTeamId(challengeId) : null;
+
+        ChallengeParticipant participant = ChallengeParticipant.builder()
+                .challengeId(challengeId)
+                .memberId(member.getId())
+                .challengeTeamId(teamId)
+                .isSurvived(true)
+                .build();
+
+        challengeParticipantRepository.save(participant);
+    }
+
+    @Transactional
+    public void cancelChallenge(Long challengeId, Member member) {
+        Challenge challenge = challengeRepository.findById(challengeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.OPERATION, "cancelChallenge"));
+
+        if (challenge.hasStarted(LocalDate.now(clock))) {
+            throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                    .addContext(ErrorContextKeys.OPERATION, "cancelChallenge")
+                    .addContext("reason", "이미 시작된 챌린지는 취소할 수 없습니다.");
+        }
+
+        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, member.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
+                        .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
+
+        challengeParticipantRepository.delete(participant);
+    }
+
+    public List<Challenge> getOngoingChallenges(LocalDate date) {
+        if (DateUtils.isWeekend(date)) {
+            return Collections.emptyList();
+        }
+        return challengeRepository.findOngoingChallenges(date);
+    }
+
+    public List<Challenge> getEndedChallengesPendingBadge(LocalDate date) {
+        return challengeRepository.findEndedChallengesPendingBadge(date, MIN_CHALLENGE_TOTAL_DAYS_FOR_BADGE);
+    }
+
+    @Transactional
+    public void processEndedChallenge(Challenge challenge) {
+        List<ChallengeParticipant> participants = challengeParticipantRepository.findAllByChallengeId(challenge.getId());
+        badgeService.issueChallengeBadges(challenge, participants);
+        challenge.markBadgeAsIssued();
+        challengeRepository.save(challenge);
+    }
+
+    public ChallengeTeamListResponse getTeamList(Long challengeId, Member member) {
+        if (!challengeRepository.existsById(challengeId)) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                    .addContext(ErrorContextKeys.OPERATION, "getTeamList");
+        }
+
+        Long myTeamId = challengeParticipantRepository.findByChallengeIdAndMemberId(challengeId, member.getId())
+                .map(ChallengeParticipant::getChallengeTeamId)
+                .orElse(null);
+
+        List<ChallengeTeam> teams = challengeTeamRepository.findAllByChallengeIdOrderById(challengeId);
+
+        List<ChallengeTeamListResponse.TeamInfoResponse> teamInfos = new ArrayList<>(teams.size());
+        int teamNumber = 1;
+        for (ChallengeTeam team : teams) {
+            teamInfos.add(new ChallengeTeamListResponse.TeamInfoResponse(
+                    team.getId(),
+                    teamNumber++,
+                    Objects.equals(team.getId(), myTeamId)));
+        }
+
+        return new ChallengeTeamListResponse(teams.size(), myTeamId, teamInfos);
+    }
+
+    private Map<Long, Long> getParticipantCounts(List<Long> challengeIds) {
+        return challengeParticipantRepository.countByChallengeIdInGroupByChallengeId(challengeIds)
+                .stream()
+                .collect(toMap(ChallengeParticipantCount::challengeId, ChallengeParticipantCount::count));
+    }
+
+    private Map<Long, List<ChallengeNewsletterResponse>> getNewslettersByChallengeId(List<Long> challengeIds) {
+        List<ChallengeNewsletterRow> rows = newsletterGroupItemRepository.findChallengeNewsletterRowsByChallengeIds(challengeIds);
+
+        return rows.stream()
+                .collect(groupingBy(
+                        ChallengeNewsletterRow::challengeId,
+                        mapping(ChallengeNewsletterRow::response, toList())
+                ));
+    }
+
+    private Map<Long, ChallengeParticipant> findMyParticipation(Member member, List<Long> challengeIds) {
+        if (member == null) {
+            return Collections.emptyMap();
+        }
+        return challengeParticipantRepository.findByMemberIdAndChallengeIdIn(member.getId(), challengeIds)
+                .stream()
+                .collect(toMap(ChallengeParticipant::getChallengeId, p -> p));
+    }
+
+    private Stream<Challenge> applySorting(
+            Stream<Challenge> stream,
+            ChallengeFilter view,
+            LocalDate today,
+            Set<Long> joinedIds
+    ) {
+        Optional<Comparator<Challenge>> comparatorOpt = view.orderComparator(today, joinedIds);
+
+        return comparatorOpt.isPresent()
+                ? stream.sorted(comparatorOpt.get())
+                : stream;
+    }
+
+    private ChallengeResponse toChallengeResponse(
+            Challenge challenge,
+            Map<Long, Long> participantCounts,
+            Map<Long, List<ChallengeNewsletterResponse>> newslettersByChallengeId,
+            Map<Long, ChallengeParticipant> myParticipation,
+            LocalDate today
+    ) {
+        long participantCount = participantCounts.getOrDefault(challenge.getId(), 0L);
+        List<ChallengeNewsletterResponse> newsletterResponses = newslettersByChallengeId.getOrDefault(
+                challenge.getId(),
+                Collections.emptyList()
+        );
+        ChallengeStatus status = challenge.getStatus(today);
+        RegistrationPhase registrationPhase = challenge.getRegistrationPhase(today);
+        ChallengeParticipant myParticipant = myParticipation.get(challenge.getId());
+        ChallengeDetailResponse participationInfo = calculateParticipationInfo(challenge, myParticipant, today);
+
+        return ChallengeResponse.of(
+                challenge,
+                participantCount,
+                newsletterResponses,
+                status,
+                registrationPhase,
+                participationInfo
+        );
+    }
+
+    private ChallengeDetailResponse calculateParticipationInfo(
+            Challenge challenge,
+            ChallengeParticipant myParticipant,
+            LocalDate today
+    ) {
+        if (myParticipant == null) {
+            return ChallengeDetailResponse.notJoined();
+        }
+
+        boolean isEnded = challenge.isEnded(today);
+        boolean isSurvived = myParticipant.isSurvived();
+        int progress = myParticipant.calculateProgress(challenge.getTotalDays());
+
+        if (isEnded) {
+            ChallengeGrade grade = ChallengeGrade.calculate(progress, isSurvived);
+            return ChallengeDetailResponse.ended(progress, isSurvived, grade);
+        }
+        return ChallengeDetailResponse.ongoing(progress, isSurvived);
+    }
+
+    private EligibilityReason validateEligibility(Challenge challenge, Long challengeId, Long memberId) {
+        LocalDate today = LocalDate.now(clock);
+
+        if (challenge.isRegistrationClosed(today)) {
+            return EligibilityReason.ALREADY_STARTED;
+        }
+
+        boolean alreadyApplied = challengeParticipantRepository.existsByChallengeIdAndMemberId(challengeId, memberId);
+        if (alreadyApplied) {
+            return EligibilityReason.ALREADY_APPLIED;
+        }
+
+        boolean hasSubscribedNewsletter = newsletterGroupItemRepository.existsSubscribedNewsletter(challengeId, memberId);
+        if (!hasSubscribedNewsletter) {
+            return EligibilityReason.NOT_SUBSCRIBED;
+        }
+
+        return EligibilityReason.ELIGIBLE;
+    }
+
+    private RuntimeException createApplyException(Long challengeId, Member member, EligibilityReason reason) {
+        if (reason == EligibilityReason.NOT_LOGGED_IN) {
+            return new UnauthorizedException(ErrorDetail.UNAUTHORIZED)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                    .addContext(ErrorContextKeys.OPERATION, "applyChallenge");
+        }
+        if (reason == EligibilityReason.ALREADY_STARTED) {
+            return new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                    .addContext(ErrorContextKeys.OPERATION, "applyChallenge");
+        }
+        if (reason == EligibilityReason.NOT_SUBSCRIBED) {
+            return new CIllegalArgumentException(ErrorDetail.PRECONDITION_FAILED)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                    .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
+                    .addContext("challengeId", challengeId);
+        }
+        return new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
+                .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                .addContext(ErrorContextKeys.OPERATION, "applyChallenge")
+                .addContext("reason", "ELIGIBLE 상태에서는 예외를 생성할 수 없습니다.");
+    }
+
+    private Long getFewestTeamId(Long challengeId) {
+        return challengeTeamRepository.findTeamWithFewestMembers(challengeId)
+                .map(ChallengeTeam::getId)
+                .orElse(null);
+    }
+}

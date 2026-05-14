@@ -8,30 +8,37 @@ import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
-import me.bombom.api.v1.common.config.QuerydslConfig;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.highlight.domain.Color;
 import me.bombom.api.v1.highlight.domain.Highlight;
+import me.bombom.api.v1.highlight.domain.HighlightLocation;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
 import me.bombom.api.v1.highlight.dto.request.HighlightLocationRequest;
 import me.bombom.api.v1.highlight.dto.request.UpdateHighlightRequest;
+import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
 import me.bombom.api.v1.highlight.dto.response.HighlightResponse;
+import me.bombom.api.v1.highlight.dto.response.HighlightStatisticsResponse;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
+import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
+import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
+import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
-@DataJpaTest
-@Import({HighlightService.class, QuerydslConfig.class})
+@IntegrationTest
 class HighlightServiceTest {
 
     @Autowired
@@ -39,6 +46,9 @@ class HighlightServiceTest {
 
     @Autowired
     private NewsletterRepository newsletterRepository;
+
+    @Autowired
+    private NewsletterDetailRepository newsletterDetailRepository;
 
     @Autowired
     private ArticleRepository articleRepository;
@@ -60,11 +70,19 @@ class HighlightServiceTest {
 
     @BeforeEach
     public void setup() {
+        highlightRepository.deleteAllInBatch();
+        articleRepository.deleteAllInBatch();
+        newsletterRepository.deleteAllInBatch();
+        categoryRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
         categories = TestFixture.createCategories();
         categoryRepository.saveAll(categories);
-        newsletters = TestFixture.createNewsletters(categories);
+        List<NewsletterDetail> newsletterDetails = TestFixture.createNewsletterDetails();
+        newsletterDetailRepository.saveAll(newsletterDetails);
+        newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
         newsletterRepository.saveAll(newsletters);
         articles = TestFixture.createArticles(member, newsletters);
         articleRepository.saveAll(articles);
@@ -87,25 +105,62 @@ class HighlightServiceTest {
     void 아티클_id로_하이라이트를_조회할_수_있다() {
         // given
         Long firstArticleId = articles.getFirst().getId();
+        Pageable pageable = PageRequest.of(0, 2, Sort.by(Direction.DESC, "createdAt"));
 
         // when
-        List<HighlightResponse> responses = highlightService.getHighlights(member, firstArticleId);
+        Page<HighlightResponse> responses = highlightService.getHighlights(member, firstArticleId, null, pageable);
 
         // then
-        assertThat(responses).hasSize(2);
-        assertThat(responses.get(0).text()).isEqualTo("첫 번째 하이라이트");
-        assertThat(responses.get(1).text()).isEqualTo("두 번째 하이라이트");
-        assertThat(responses.get(0).color()).isEqualTo("#ffeb3b");
-        assertThat(responses.get(1).color()).isEqualTo("#4caf50");
+        assertSoftly(softly -> {
+                    softly.assertThat(responses.getTotalElements()).isEqualTo(2);
+                    softly.assertThat(responses.getContent().get(0).text()).isEqualTo("두 번째 하이라이트");
+                    softly.assertThat(responses.getContent().get(1).text()).isEqualTo("첫 번째 하이라이트");
+                    softly.assertThat(responses.getContent().get(0).color()).isEqualTo("#4caf50");
+                    softly.assertThat(responses.getContent().get(1).color()).isEqualTo("#ffeb3b");
+                }
+        );
+    }
+
+    @Test
+    void 뉴스레터_id로_하이라이트를_조회할_수_있다() {
+        // given
+        Long thirdNewsletterId = newsletters.get(2).getId();
+        Pageable pageable = PageRequest.of(0, 2, Sort.by(Direction.DESC, "createdAt"));
+
+        // when
+        Page<HighlightResponse> responses = highlightService.getHighlights(member, null, thirdNewsletterId, pageable);
+
+        // then
+        assertSoftly(softly -> {
+            assertThat(responses).hasSize(2);
+            assertThat(responses.getTotalElements()).isEqualTo(3);
+        });
     }
 
     @Test
     void 멤버로_하이라이트를_조회할_수_있다() {
+        // given
+        // 삭제된 아티클에 대한 하이라이트 추가 저장
+        highlightRepository.save(
+                Highlight.builder()
+                        .highlightLocation(new HighlightLocation(0, "div[0]/p[0]", 10, "div[0]/p[0]"))
+                        .memberId(member.getId())
+                        .newsletterId(newsletters.getFirst().getId())
+                        .articleId(0L)
+                        .title("삭제된 아티클의 제목")
+                        .color(Color.from("#ffeb3b"))
+                        .text("첫 번째 하이라이트")
+                        .memo("메모")
+                        .build()
+        );
+
+        Pageable pageable = PageRequest.of(0, 8, Sort.by(Direction.DESC, "createdAt"));
+
         // when
-        List<HighlightResponse> responses = highlightService.getHighlights(member, null);
+        Page<HighlightResponse> responses = highlightService.getHighlights(member, null, null, pageable);
 
         // then
-        assertThat(responses).hasSize(highlights.size());
+        assertThat(responses.getTotalElements()).isEqualTo(highlights.size() + 1);
     }
 
     @Test
@@ -170,11 +225,12 @@ class HighlightServiceTest {
         UpdateHighlightRequest request = new UpdateHighlightRequest(Color.from("#9c27b0"), null);
 
         // when
-        HighlightResponse updated = highlightService.update(highlightId, request, member);
+        ArticleHighlightResponse updated = highlightService.update(highlightId, request, member);
 
         // then
         assertThat(updated.color()).isEqualTo(request.color().getValue());
     }
+
     @Test
     void 하이라이트_메모를_변경할_수_있다() {
         // given
@@ -182,7 +238,7 @@ class HighlightServiceTest {
         UpdateHighlightRequest request = new UpdateHighlightRequest(null, "새로운 메모입니다.");
 
         // when
-        HighlightResponse updated = highlightService.update(highlightId, request, member);
+        ArticleHighlightResponse updated = highlightService.update(highlightId, request, member);
 
         // then
         assertThat(updated.memo()).isEqualTo(request.memo());
@@ -195,12 +251,12 @@ class HighlightServiceTest {
         UpdateHighlightRequest request = new UpdateHighlightRequest(Color.from("#9c27b0"), "새로운 메모입니다.");
 
         // when
-        HighlightResponse updated = highlightService.update(highlightId, request, member);
+        ArticleHighlightResponse updated = highlightService.update(highlightId, request, member);
 
         // then
         assertSoftly(softly -> {
-                assertThat(updated.color()).isEqualTo(request.color().getValue());
-                assertThat(updated.memo()).isEqualTo(request.memo());
+            assertThat(updated.color()).isEqualTo(request.color().getValue());
+            assertThat(updated.memo()).isEqualTo(request.memo());
         });
     }
 
@@ -211,9 +267,25 @@ class HighlightServiceTest {
         Long nonExistentHighlightId = 0L;
         UpdateHighlightRequest request = new UpdateHighlightRequest(Color.from("#9c27b0"), null);
 
-
         // when & then
         assertThatThrownBy(() -> highlightService.update(nonExistentHighlightId, request, member))
                 .isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void 전체_뉴스레터_별_하이라이트_개수를_조회한다() {
+        // when
+        HighlightStatisticsResponse result = highlightService.getHighlightNewsletterStatistics(member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(6);
+            softly.assertThat(result.newsletters().get(0).name()).isEqualTo("뉴스픽");
+            softly.assertThat(result.newsletters().get(0).highlightCount()).isEqualTo(2);
+            softly.assertThat(result.newsletters().get(1).name()).isEqualTo("IT타임즈");
+            softly.assertThat(result.newsletters().get(1).highlightCount()).isEqualTo(1);
+            softly.assertThat(result.newsletters().get(2).name()).isEqualTo("비즈레터");
+            softly.assertThat(result.newsletters().get(2).highlightCount()).isEqualTo(3);
+        });
     }
 }

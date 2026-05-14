@@ -29,11 +29,20 @@ public class NewsletterDetail {
     @Column(nullable = false)
     private String issueCycle;
 
-    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    @Column(nullable = false, columnDefinition = "BIGINT")
     private int subscribeCount;
 
     @Column(nullable = false, length = 100)
     private String sender;
+
+    @Column(length=512)
+    private String previousNewsletterUrl;
+
+    @Column(nullable = false)
+    private boolean previousAllowed;
+
+    @Column(length=512)
+    private String subscribeMethod;
 
     @Builder
     public NewsletterDetail(
@@ -42,7 +51,10 @@ public class NewsletterDetail {
             @NonNull String subscribeUrl,
             @NonNull String issueCycle,
             int subscribeCount,
-            @NonNull String sender
+            @NonNull String sender,
+            String previousNewsletterUrl,
+            boolean previousAllowed,
+            String subscribeMethod
     ) {
         this.id = id;
         this.mainPageUrl = mainPageUrl;
@@ -50,5 +62,8 @@ public class NewsletterDetail {
         this.issueCycle = issueCycle;
         this.subscribeCount = subscribeCount;
         this.sender = sender;
+        this.previousNewsletterUrl = previousNewsletterUrl;
+        this.previousAllowed = previousAllowed;
+        this.subscribeMethod = subscribeMethod;
     }
 }

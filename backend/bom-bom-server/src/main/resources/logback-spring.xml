@@ -1,0 +1,26 @@
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <!-- 1) 공통 설정 include -->
+    <include resource="logback-common.xml"/>
+
+    <!-- 2) 환경별 로드 -->
+    <springProfile name="dev">
+        <include resource="logback-dev.xml"/>
+    </springProfile>
+
+    <springProfile name="prod">
+        <include resource="logback-prod.xml"/>
+    </springProfile>
+
+    <springProfile name="!dev &amp; !prod">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+</configuration>

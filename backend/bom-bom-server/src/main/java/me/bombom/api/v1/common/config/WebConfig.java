@@ -1,30 +1,40 @@
 package me.bombom.api.v1.common.config;
 
+import jakarta.servlet.DispatcherType;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import me.bombom.api.log.MDCLoggingFilter;
 import me.bombom.api.v1.common.resolver.LoginMemberArgumentResolver;
-import me.bombom.api.v1.logging.LoggingInterceptor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    private final LoggingInterceptor loggingInterceptor;
+    @Value("${server.servlet.session.cookie.name:JSESSIONID_PROD}")
+    private String sessionCookieName;
 
-    public WebConfig(LoggingInterceptor loggingInterceptor) {
-        this.loggingInterceptor = loggingInterceptor;
-    }
+    @Value("${server.servlet.session.cookie.domain:}")
+    private String sessionCookieDomain;
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(loggingInterceptor)
-                .addPathPatterns("/**");
+    @Bean
+    public FilterRegistrationBean<MDCLoggingFilter> mdcLoggingFilterRegistration() {
+        FilterRegistrationBean<MDCLoggingFilter> reg = new FilterRegistrationBean<>();
+        reg.setFilter(new MDCLoggingFilter());
+        reg.setDispatcherTypes(DispatcherType.REQUEST, DispatcherType.ERROR);
+        reg.addUrlPatterns("/*");
+        reg.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return reg;
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new LoginMemberArgumentResolver());
+        resolvers.add(new LoginMemberArgumentResolver(sessionCookieName, sessionCookieDomain));
     }
 }

@@ -11,4 +11,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LoginMember {
+
+    boolean anonymous() default false;
+
+    boolean allowInvalidToken() default false;
 }

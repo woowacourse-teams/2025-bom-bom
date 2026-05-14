@@ -1,0 +1,111 @@
+package me.bombom.api.v1.challenge.domain;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import java.time.LocalDate;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import me.bombom.api.v1.common.BaseEntity;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "challenge_participant", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_challenge_participant", columnNames = { "challenge_id", "member_id" })
+})
+public class ChallengeParticipant extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private Long challengeId;
+
+    @Column(nullable = false)
+    private Long memberId;
+
+    private Long challengeTeamId;
+
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    private int completedDays = 0;
+
+    @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
+    private boolean isSurvived = true;
+
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    private int shield = 0;
+
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    private int streak = 0;
+
+    private LocalDate lastParticipatedDate;
+
+    @Builder
+    public ChallengeParticipant(
+            Long id,
+            @NonNull Long challengeId,
+            @NonNull Long memberId,
+            Long challengeTeamId,
+            int completedDays,
+            boolean isSurvived,
+            int shield,
+            int streak,
+            LocalDate lastParticipatedDate
+    ) {
+        this.id = id;
+        this.challengeId = challengeId;
+        this.memberId = memberId;
+        this.challengeTeamId = challengeTeamId;
+        this.completedDays = completedDays;
+        this.isSurvived = isSurvived;
+        this.shield = shield;
+        this.streak = streak;
+        this.lastParticipatedDate = lastParticipatedDate;
+    }
+
+    public int calculateProgress(int totalDays) {
+        if (totalDays <= 0) {
+            return 0;
+        }
+        int progress = (int) ((double) this.completedDays / totalDays * 100);
+        return Math.min(progress, 100);
+    }
+
+    public boolean useShieldIfAvailable() {
+        if (this.shield > 0) {
+            this.shield -= 1;
+            this.completedDays += 1;
+            return true;
+        }
+        return false;
+    }
+
+    public void markAsFailed() {
+        this.isSurvived = false;
+    }
+
+    public void increaseCompletedDays() {
+        this.completedDays += 1;
+    }
+
+    public void increaseStreak() {
+        this.streak += 1;
+    }
+
+    public void updateLastParticipatedDate(LocalDate date) {
+        this.lastParticipatedDate = date;
+    }
+
+    public void resetStreak() {
+        this.streak = 0;
+    }
+}

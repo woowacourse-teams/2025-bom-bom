@@ -1,0 +1,941 @@
+name: Backend Blue-Green Production Deploy
+
+on:
+  push:
+    branches:
+      - server-sub
+  workflow_dispatch:
+
+env:
+  WORKING_BRANCH: server-sub
+  HEALTH_CHECK_URL: http://localhost:8081/actuator/health
+  SERVER_CONTAINER_NAME: bombom-server-prod-sub
+  PROD_SUB_COMPOSE_YAML: docker-compose-prod-sub.yml
+  PROD_MAIN_COMPOSE_YAML: docker-compose-prod-sub.yml
+
+jobs:
+  # 0) Release ID 생성 (후보/안정판 폴더 공통 식별자)
+  prepare-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.mk.outputs.release_id }}
+    steps:
+      - id: mk
+        run: echo "release_id=$(date +%Y%m%d-%H%M%S)-${GITHUB_SHA::12}" >> $GITHUB_OUTPUT
+
+  # ---------------------------------------------------
+  # 1️⃣ Build & Test & Push
+  # ---------------------------------------------------
+  build:
+    runs-on: ubuntu-latest
+    needs: prepare-release
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
+      - name: JDK 21 설정
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: gradle
+
+      - name: application.yml 생성 (Prod 환경)
+        env:
+          APPLICATION_PROD_PROPERTIES: ${{ secrets.APPLICATION_PROD_PROPERTIES }}
+        run: |
+          mkdir -p src/main/resources
+          printf '%s' "${APPLICATION_PROD_PROPERTIES}" > src/main/resources/application.yml
+
+      - name: Gradle 빌드
+        run: ./gradlew clean assemble --no-daemon --stacktrace --info
+
+      - name: JAR 업로드
+        uses: actions/upload-artifact@v4
+        with:
+          name: bom-bom-jar
+          path: ./backend/bom-bom-server/build/libs/*.jar
+          if-no-files-found: error
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
+      - name: JDK 21 설정
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: gradle
+
+      - name: application.yml 생성 (Test)
+        env:
+          APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICATION_TEST_PROPERTIES }}
+        run: |
+          mkdir -p src/test/resources
+          printf '%s' "${APPLICATION_TEST_PROPERTIES}" > src/test/resources/application.yml
+
+      - name: 테스트 실행
+        env:
+          SPRING_PROFILES_ACTIVE: test
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          ./gradlew test --no-daemon --stacktrace --info
+
+  docker-image:
+    runs-on: ubuntu-latest
+    needs: [build, test]
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
+      - name: JAR 다운로드
+        uses: actions/download-artifact@v4
+        with:
+          name: bom-bom-jar
+          path: ./backend/bom-bom-server/build/libs
+
+      - name: Docker Buildx 설정
+        uses: docker/setup-buildx-action@v3
+
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker 이미지 빌드 및 푸시
+        run: |
+          docker buildx build \
+            --platform linux/arm64,linux/amd64 \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod \
+            --push .
+          echo "✅ Docker 이미지 푸시 완료"
+
+  # ---------------------------------------------------
+  # 2️⃣ prod6 배포 준비 (트래픽 전환)
+  # ---------------------------------------------------
+  shift-traffic-to-prod6:
+    name: "🔀 Step 1: 트래픽을 prod6로 이동"
+    needs: docker-image
+    runs-on: [self-hosted, lb]
+    steps:
+      - name: prod7 → prod6 트래픽 이동
+        run: |
+          echo "🔄 prod7 서버 비활성화"
+          echo "disable server app_servers/prod7" | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ 모든 트래픽이 prod6로 이동되었습니다."
+
+  # ---------------------------------------------------
+  # 3️⃣ prod-sub 배포
+  # ---------------------------------------------------
+  deploy-prod7:
+    name: "🚀 Step 2: prod7 배포"
+    needs: [prepare-release, shift-traffic-to-prod6]
+    runs-on: [self-hosted, prod7]
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 🧩 배포 전 현재 실행 중 컨테이너 이미지 백업
+      - name: 현재 실행 중 컨테이너 이미지 latest-stable로 백업
+        run: |
+          echo "🧩 현재 실행 중 ${{ env.SERVER_CONTAINER_NAME }} 이미지 백업 시작"
+          sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+          CURRENT_IMAGE=$(sudo docker inspect ${{ env.SERVER_CONTAINER_NAME }} --format='{{.Config.Image}}' 2>/dev/null || echo "none")
+          CURRENT_IMAGE=$(echo "$CURRENT_IMAGE" | tr -d '\r\n')
+          echo "현재 이미지: $CURRENT_IMAGE"
+          
+          if [ "$CURRENT_IMAGE" != "none" ]; then
+            echo "🔄 현재 이미지를 latest-stable로 태깅 및 푸시"
+            sudo docker pull "$CURRENT_IMAGE" || true
+            sudo docker tag "$CURRENT_IMAGE" bombomnewsletter/bom-bom:latest-stable
+            sudo docker push bombomnewsletter/bom-bom:latest-stable
+            echo "✅ 백업 완료: latest-stable"
+          else
+            echo "⚠️ 실행 중인 ${{ env.SERVER_CONTAINER_NAME }} 컨테이너가 없어 백업을 건너뜀"
+          fi
+
+      # 🆕 안정판 compose 파일 백업 (신규 추가)
+      - name: 안정판 compose 파일 백업
+        run: |
+          set -euo pipefail
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          BACKUP_DIR="/opt/bom-bom/releases/backup-${TIMESTAMP}"
+          STABLE_COMPOSE="/opt/bom-bom/releases/stable/${{ env.PROD_SUB_COMPOSE_YAML }}"
+          
+          if [ -f "$STABLE_COMPOSE" ]; then
+            echo "📦 안정판 compose 백업 시작"
+            sudo mkdir -p "$BACKUP_DIR"
+            sudo cp "$STABLE_COMPOSE" "$BACKUP_DIR/"
+            echo "✅ 안정판 compose 백업 완료: $BACKUP_DIR"
+          else
+            echo "⚠️ 기존 안정판 compose 파일이 없어 백업을 건너뜁니다."
+          fi
+
+      - name: .env file 생성
+        run: |
+          cat <<EOF > .env
+          RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
+          DATABASE=${{ secrets.PROD_DATABASE }}
+          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          SPRING_PROFILES_ACTIVE=prod
+          PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
+          EOF
+
+      - name: 기존 컨테이너 중지 및 삭제
+        run: |
+          if sudo docker ps --format "{{.Names}}" | grep -q "${{ env.SERVER_CONTAINER_NAME }}"; then
+            echo "🛑 기존 컨테이너 중지 및 삭제"
+            sudo docker stop ${{ env.SERVER_CONTAINER_NAME }} || true
+            sudo docker rm ${{ env.SERVER_CONTAINER_NAME }} || true
+          fi
+
+      - name: 컨테이너 재실행
+        shell: bash
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          set -euo pipefail
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f ${{ env.PROD_SUB_COMPOSE_YAML }} --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f ${{ env.PROD_SUB_COMPOSE_YAML }} --env-file .env down || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f ${{ env.PROD_SUB_COMPOSE_YAML }} --env-file .env \
+            up -d --remove-orphans --pull=always --force-recreate
+          
+          echo "✅ prod7 컨테이너 실행 완료"
+
+      - name: 컨테이너 헬스체크
+        run: |
+          echo "🏥 컨테이너 헬스체크 시작..."
+          
+          # 컨테이너가 완전히 기동될 시간을 약간 기다림
+          echo "⏳ 컨테이너 기동 대기 (20초)"
+          sleep 20
+          
+          SUCCESS_COUNT=0
+          MAX_RETRIES=10        # 총 40번(약 400초) 시도
+          REQUIRED_SUCCESS=5    # 연속 5회 성공해야 진짜 Healthy
+          
+          for ((i=1; i<=MAX_RETRIES; i++)); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
+          
+            if [ "$STATUS" = "200" ]; then
+              SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+              echo "✅ ($SUCCESS_COUNT/${REQUIRED_SUCCESS}) 성공 ($i/${MAX_RETRIES})"
+          
+              if [ "$SUCCESS_COUNT" -ge "$REQUIRED_SUCCESS" ]; then
+                echo "🎉 컨테이너가 연속 ${REQUIRED_SUCCESS}회 이상 Healthy 상태입니다."
+                exit 0
+              fi
+            else
+              # 실패 시 카운터 리셋
+              if [ "$SUCCESS_COUNT" -gt 0 ]; then
+                echo "⚠️ 상태 불안정, 카운터 리셋 (${SUCCESS_COUNT} → 0)"
+              fi
+              SUCCESS_COUNT=0
+              echo "⏳ 상태: $STATUS ($i/${MAX_RETRIES})"
+            fi
+          
+            sleep 10
+          done
+          
+          echo "❌ 헬스체크 실패 (연속 ${REQUIRED_SUCCESS}회 성공 조건 미충족)"
+          sudo docker logs ${{ env.SERVER_CONTAINER_NAME }} --tail 50 || true
+          exit 1
+
+      - name: 릴리스 번들 저장 (후보로 저장 - compose + 메타데이터)
+        if: ${{ success() }}
+        env:
+          RELEASE_ID: ${{ needs.prepare-release.outputs.release_id }}
+        run: |
+          set -euo pipefail
+          CAND_DIR="/opt/bom-bom/candidates/${RELEASE_ID}"
+          sudo mkdir -p "$CAND_DIR"
+          sudo cp ${{ env.PROD_SUB_COMPOSE_YAML }} "$CAND_DIR/"
+          IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod"
+          IMAGE_DIGEST="$(sudo docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" 2>/dev/null || echo unknown)"
+          TS="$(date -Iseconds)"
+          sudo bash -c "cat > '$CAND_DIR/release.json' <<EOF
+          {
+            \"commit\": \"${GITHUB_SHA}\",
+            \"image\": \"${IMAGE_NAME}\",
+            \"image_digest\": \"${IMAGE_DIGEST}\",
+            \"compose_file\": \"${{ env.PROD_SUB_COMPOSE_YAML }}\",
+            \"candidate_at\": \"${TS}\"
+          }
+          EOF"
+          sudo ln -sfn "$CAND_DIR" "/opt/bom-bom/candidates/latest"
+          echo "🗃 후보 저장 완료: $CAND_DIR"
+
+  # ---------------------------------------------------
+  # 4️⃣ prod7 배포 실패 시 rollback
+  # ---------------------------------------------------
+  # X-1) 메인 롤백 시작: 트래픽 상태 정리 (prod6 활성, prod7 비활성 보장)
+  rollback-prod7-prepare:
+    if: failure() && needs.deploy-prod7.result == 'failure'
+    needs: deploy-prod7
+    runs-on: [ self-hosted, lb ]
+    steps:
+      - name: 트래픽 상태 정리 (prod6 active / prod7 disabled)
+        run: |
+          echo "enable server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
+          echo "disable server app_servers/prod7"   | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ 트래픽 상태 정리 완료"
+
+  # X-4) sub도 이전 버전으로 복구 + readiness 헬스체크
+  rollback-prod7-deploy:
+    if: failure() && needs.deploy-prod7.result == 'failure'
+    needs: rollback-prod7-prepare
+    runs-on: [self-hosted, prod7]
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: .env file 생성
+        run: |
+          cat <<EOF > .env
+          RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
+          DATABASE=${{ secrets.PROD_DATABASE }}
+          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          SPRING_PROFILES_ACTIVE=prod
+          PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
+          EOF
+
+      - name: latest-stable 이미지 Pull
+        run: |
+          echo "📦 latest-stable 이미지 가져오기"
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+          echo "🏷  latest-stable → prod retag"
+          sudo docker tag  ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable \
+                           ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod
+
+      - name: 저장된 안정판 compose로 롤백 실행
+        shell: bash
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          set -euo pipefail
+          FALLBACK_COMPOSE="/opt/bom-bom/releases/stable/${{ env.PROD_SUB_COMPOSE_YAML }}"
+          if [ ! -f "$FALLBACK_COMPOSE" ]; then
+            echo "⚠️ 안정판 compose가 없어 레포의 compose를 사용합니다."
+            FALLBACK_COMPOSE="${{ env.PROD_SUB_COMPOSE_YAML }}"
+          fi
+
+          echo "🛑 기존 컨테이너 중지 및 삭제"
+          sudo docker stop ${{ env.SERVER_CONTAINER_NAME }} || true
+          sudo docker rm ${{ env.SERVER_CONTAINER_NAME }} || true
+
+          echo "🚀 안정 버전 compose로 재기동"
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f "$FALLBACK_COMPOSE" --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f "$FALLBACK_COMPOSE" --env-file .env down || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f "$FALLBACK_COMPOSE" --env-file .env \
+            up -d --remove-orphans --pull=always --force-recreate
+
+      - name: 컨테이너 헬스체크
+        run: |
+          echo "🏥 컨테이너 헬스체크 시작..."
+          
+          # 컨테이너가 완전히 기동될 시간을 약간 기다림
+          echo "⏳ 컨테이너 기동 대기 (20초)"
+          sleep 20
+          
+          SUCCESS_COUNT=0
+          MAX_RETRIES=10        # 총 40번(약 400초) 시도
+          REQUIRED_SUCCESS=5    # 연속 5회 성공해야 진짜 Healthy
+          
+          for ((i=1; i<=MAX_RETRIES; i++)); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
+          
+            if [ "$STATUS" = "200" ]; then
+              SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+              echo "✅ ($SUCCESS_COUNT/${REQUIRED_SUCCESS}) 성공 ($i/${MAX_RETRIES})"
+          
+              if [ "$SUCCESS_COUNT" -ge "$REQUIRED_SUCCESS" ]; then
+                echo "🎉 컨테이너가 연속 ${REQUIRED_SUCCESS}회 이상 Healthy 상태입니다."
+                exit 0
+              fi
+            else
+              # 실패 시 카운터 리셋
+              if [ "$SUCCESS_COUNT" -gt 0 ]; then
+                echo "⚠️ 상태 불안정, 카운터 리셋 (${SUCCESS_COUNT} → 0)"
+              fi
+              SUCCESS_COUNT=0
+              echo "⏳ 상태: $STATUS ($i/${MAX_RETRIES})"
+            fi
+          
+            sleep 10
+          done
+          
+          echo "❌ 헬스체크 실패 (연속 ${REQUIRED_SUCCESS}회 성공 조건 미충족)"
+          sudo docker logs ${{ env.SERVER_CONTAINER_NAME }} --tail 50 || true
+          exit 1
+
+  # X-5) 최종 트래픽 정상화(원래의 양쪽 활성/가중치로 복귀)
+  rollback-prod7-restore-final-traffic:
+    if: failure() && needs.deploy-prod7.result == 'failure'
+    needs: rollback-prod7-deploy
+    runs-on: [self-hosted, lb]
+    steps:
+      - name: 트래픽 정상화
+        run: |
+          echo "enable server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
+          echo "enable server app_servers/prod7"  | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ 전체 롤백 후 트래픽 정상화 완료"
+
+  # ---------------------------------------------------
+  # 4️⃣ 트래픽 전환: prod6 → prod7
+  # ---------------------------------------------------
+  shift-traffic-to-prod7:
+    name: "🔀 Step 3: 트래픽을 prod7로 전환"
+    needs: deploy-prod7
+    runs-on: [self-hosted, lb]
+    steps:
+      - name: prod6 → prod7 트래픽 이동
+        run: |
+          echo "🔄 prod6 비활성화"
+          echo "disable server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
+          echo "🔄 prod7 활성화"
+          echo "enable server app_servers/prod7" | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ 트래픽이 prod7으로 이동되었습니다."
+
+  # ---------------------------------------------------
+  # 5️⃣ prod6 배포
+  # ---------------------------------------------------
+  deploy-prod6:
+    name: "🚀 Step 4: prod6 배포"
+    needs: [prepare-release, shift-traffic-to-prod7]
+    runs-on: [self-hosted, prod6]
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 🧩 배포 전 현재 실행 중 컨테이너 이미지 백업
+      - name: 현재 실행 중 컨테이너 이미지 latest-stable로 백업
+        run: |
+          echo "🧩 현재 실행 중 ${{ env.SERVER_CONTAINER_NAME }} 이미지 백업 시작"
+          sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+          CURRENT_IMAGE=$(sudo docker inspect ${{ env.SERVER_CONTAINER_NAME }} --format='{{.Config.Image}}' 2>/dev/null || echo "none")
+          CURRENT_IMAGE=$(echo "$CURRENT_IMAGE" | tr -d '\r\n')
+          echo "현재 이미지: $CURRENT_IMAGE"
+          
+          if [ "$CURRENT_IMAGE" != "none" ]; then
+            echo "🔄 현재 이미지를 latest-stable로 태깅 및 푸시"
+            sudo docker pull "$CURRENT_IMAGE" || true
+            sudo docker tag "$CURRENT_IMAGE" bombomnewsletter/bom-bom:latest-stable
+            sudo docker push bombomnewsletter/bom-bom:latest-stable
+            echo "✅ 백업 완료: latest-stable"
+          else
+            echo "⚠️ 실행 중인 ${{ env.SERVER_CONTAINER_NAME }} 컨테이너가 없어 백업을 건너뜀"
+          fi
+
+      # 🆕 안정판 compose 파일 백업 (신규 추가)
+      - name: 안정판 compose 파일 백업
+        run: |
+          set -euo pipefail
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          BACKUP_DIR="/opt/bom-bom/releases/backup-${TIMESTAMP}"
+          STABLE_COMPOSE="/opt/bom-bom/releases/stable/${{ env.PROD_MAIN_COMPOSE_YAML }}"
+          
+          if [ -f "$STABLE_COMPOSE" ]; then
+            echo "📦 안정판 compose 백업 시작"
+            sudo mkdir -p "$BACKUP_DIR"
+            sudo cp "$STABLE_COMPOSE" "$BACKUP_DIR/"
+            echo "✅ 안정판 compose 백업 완료: $BACKUP_DIR"
+          else
+            echo "⚠️ 기존 안정판 compose 파일이 없어 백업을 건너뜁니다."
+          fi
+
+      - name: .env file 생성
+        run: |
+          cat <<EOF > .env
+          RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
+          DATABASE=${{ secrets.PROD_DATABASE }}
+          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          SPRING_PROFILES_ACTIVE=prod
+          PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
+          EOF
+
+      - name: 기존 컨테이너 중지 및 삭제
+        run: |
+          if sudo docker ps --format "{{.Names}}" | grep -q "${{ env.SERVER_CONTAINER_NAME }}"; then
+            echo "🛑 기존 컨테이너 중지 및 삭제"
+            sudo docker stop ${{ env.SERVER_CONTAINER_NAME }} || true
+            sudo docker rm ${{ env.SERVER_CONTAINER_NAME }} || true
+          fi
+
+      - name: 컨테이너 재실행
+        shell: bash
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          set -euo pipefail
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f ${{ env.PROD_MAIN_COMPOSE_YAML }} --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f ${{ env.PROD_MAIN_COMPOSE_YAML }} --env-file .env down || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f ${{ env.PROD_MAIN_COMPOSE_YAML }} --env-file .env \
+            up -d --remove-orphans --pull=always --force-recreate
+          
+          echo "✅ prod6 컨테이너 실행 완료"
+
+      - name: 컨테이너 헬스체크
+        run: |
+          echo "🏥 컨테이너 헬스체크 시작..."
+          echo "⏳ 컨테이너 기동 대기 (20초)"
+          sleep 20
+          
+          SUCCESS_COUNT=0
+          MAX_RETRIES=10
+          REQUIRED_SUCCESS=5
+          
+          for ((i=1; i<=MAX_RETRIES; i++)); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
+          
+            if [ "$STATUS" = "200" ]; then
+              SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+              echo "✅ ($SUCCESS_COUNT/${REQUIRED_SUCCESS}) 성공 ($i/${MAX_RETRIES})"
+          
+              if [ "$SUCCESS_COUNT" -ge "$REQUIRED_SUCCESS" ]; then
+                echo "🎉 컨테이너가 연속 ${REQUIRED_SUCCESS}회 이상 Healthy 상태입니다."
+                exit 0
+              fi
+            else
+              # 실패 시 카운터 리셋
+              if [ "$SUCCESS_COUNT" -gt 0 ]; then
+                echo "⚠️ 상태 불안정, 카운터 리셋 (${SUCCESS_COUNT} → 0)"
+              fi
+              SUCCESS_COUNT=0
+              echo "⏳ 상태: $STATUS ($i/${MAX_RETRIES})"
+            fi
+          
+            sleep 10
+          done
+          
+          echo "❌ 헬스체크 실패 (연속 ${REQUIRED_SUCCESS}회 성공 조건 미충족)"
+          sudo docker logs ${{ env.SERVER_CONTAINER_NAME }} --tail 50 || true
+          exit 1
+
+      - name: 릴리스 번들 저장 (후보로 저장 - compose + 메타데이터)
+        if: ${{ success() }}
+        env:
+          RELEASE_ID: ${{ needs.prepare-release.outputs.release_id }}
+        run: |
+          set -euo pipefail
+          CAND_DIR="/opt/bom-bom/candidates/${RELEASE_ID}"
+          sudo mkdir -p "$CAND_DIR"
+          sudo cp ${{ env.PROD_MAIN_COMPOSE_YAML }} "$CAND_DIR/"
+          IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod"
+          IMAGE_DIGEST="$(sudo docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" 2>/dev/null || echo unknown)"
+          TS="$(date -Iseconds)"
+          sudo bash -c "cat > '$CAND_DIR/release.json' <<EOF
+          {
+            \"commit\": \"${GITHUB_SHA}\",
+            \"image\": \"${IMAGE_NAME}\",
+            \"image_digest\": \"${IMAGE_DIGEST}\",
+            \"compose_file\": \"${{ env.PROD_MAIN_COMPOSE_YAML }}\",
+            \"candidate_at\": \"${TS}\"
+          }
+          EOF"
+          sudo ln -sfn "$CAND_DIR" "/opt/bom-bom/candidates/latest"
+          echo "🗃 후보 저장 완료: $CAND_DIR"
+
+  # ---------------------------------------------------
+  # 5️⃣ prod6 배포 실패 시 rollback
+  # ---------------------------------------------------
+  # X-1) 메인 롤백 시작: 트래픽 상태 정리 (prod7만 활성, prod6 비활성 보장)
+  rollback-prod6-prepare:
+    if: failure() && needs.deploy-prod6.result == 'failure'
+    needs: deploy-prod6
+    runs-on: [self-hosted, lb]
+    steps:
+      - name: 트래픽 상태 정리 (prod7 active / prod6 disabled)
+        run: |
+          echo "disable server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
+          echo "enable server app_servers/prod7"   | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ 트래픽 상태 정리 완료"
+
+  # X-2) prod6 이전 버전으로 복구 + readiness 헬스체크
+  rollback-prod6-redeploy:
+    if: failure() && needs.deploy-prod6.result == 'failure'
+    needs: rollback-prod6-prepare
+    runs-on: [self-hosted, prod6]
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: .env file 생성
+        run: |
+          cat <<EOF > .env
+          RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
+          DATABASE=${{ secrets.PROD_DATABASE }}
+          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          SPRING_PROFILES_ACTIVE=prod
+          PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
+          EOF
+
+      - name: latest-stable 이미지 Pull 및 prod로 retag
+        run: |
+          echo "📦 latest-stable 이미지 가져오기"
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+          echo "🏷  latest-stable → prod retag"
+          sudo docker tag  ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable \
+                           ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod
+
+      - name: 저장된 안정판 compose로 롤백 실행
+        shell: bash
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          set -euo pipefail
+          FALLBACK_COMPOSE="/opt/bom-bom/releases/stable/${{ env.PROD_MAIN_COMPOSE_YAML }}"
+          if [ ! -f "$FALLBACK_COMPOSE" ]; then
+            echo "⚠️ 안정판 compose가 없어 레포의 compose를 사용합니다."
+            FALLBACK_COMPOSE="${{ env.PROD_MAIN_COMPOSE_YAML }}"
+          fi
+
+          echo "🛑 기존 컨테이너 중지 및 삭제"
+          sudo docker stop ${{ env.SERVER_CONTAINER_NAME }} || true
+          sudo docker rm ${{ env.SERVER_CONTAINER_NAME }} || true
+
+          echo "🚀 안정 버전 compose로 재기동"
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f "$FALLBACK_COMPOSE" --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f "$FALLBACK_COMPOSE" --env-file .env down || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f "$FALLBACK_COMPOSE" --env-file .env \
+            up -d --remove-orphans --pull=always --force-recreate
+
+      - name: 컨테이너 헬스체크
+        run: |
+          echo "🏥 컨테이너 헬스체크 시작..."
+          
+          # 컨테이너가 완전히 기동될 시간을 약간 기다림
+          echo "⏳ 컨테이너 기동 대기 (20초)"
+          sleep 20
+          
+          SUCCESS_COUNT=0
+          MAX_RETRIES=10        # 총 40번(약 400초) 시도
+          REQUIRED_SUCCESS=5    # 연속 5회 성공해야 진짜 Healthy
+          
+          for ((i=1; i<=MAX_RETRIES; i++)); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
+          
+            if [ "$STATUS" = "200" ]; then
+              SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+              echo "✅ ($SUCCESS_COUNT/${REQUIRED_SUCCESS}) 성공 ($i/${MAX_RETRIES})"
+          
+              if [ "$SUCCESS_COUNT" -ge "$REQUIRED_SUCCESS" ]; then
+                echo "🎉 컨테이너가 연속 ${REQUIRED_SUCCESS}회 이상 Healthy 상태입니다."
+                exit 0
+              fi
+            else
+              # 실패 시 카운터 리셋
+              if [ "$SUCCESS_COUNT" -gt 0 ]; then
+                echo "⚠️ 상태 불안정, 카운터 리셋 (${SUCCESS_COUNT} → 0)"
+              fi
+              SUCCESS_COUNT=0
+              echo "⏳ 상태: $STATUS ($i/${MAX_RETRIES})"
+            fi
+          
+            sleep 10
+          done
+          
+          echo "❌ 헬스체크 실패 (연속 ${REQUIRED_SUCCESS}회 성공 조건 미충족)"
+          sudo docker logs ${{ env.SERVER_CONTAINER_NAME }} --tail 50 || true
+          exit 1
+
+  # X-3) main이 살아났으니 트래픽 전체를 prod6로 전환
+  rollback-shift-traffic-to-prod6:
+    if: failure() && needs.deploy-prod6.result == 'failure'
+    needs: rollback-prod6-redeploy
+    runs-on: [self-hosted, lb]
+    steps:
+      - name: 모든 트래픽을 prod6로 전환
+        run: |
+          echo "enable  server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
+          echo "disable server app_servers/prod7"  | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ prod6로 트래픽 전환 완료"
+
+  # X-4) sub도 이전 버전으로 복구 + readiness 헬스체크
+  rollback-prod7-redeploy:
+    if: failure() && needs.deploy-prod6.result == 'failure'
+    needs: rollback-shift-traffic-to-prod6
+    runs-on: [ self-hosted, prod7 ]
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: .env file 생성
+        run: |
+          cat <<EOF > .env
+          RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
+          DATABASE=${{ secrets.PROD_DATABASE }}
+          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          SPRING_PROFILES_ACTIVE=prod
+          PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
+          EOF
+
+      - name: latest-stable 이미지 Pull 및 prod로 retag
+        run: |
+          echo "📦 latest-stable 이미지 가져오기"
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable
+          echo "🏷  latest-stable → prod retag"
+          sudo docker tag  ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable \
+                           ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod
+
+      - name: 저장된 안정판 compose로 롤백 실행
+        shell: bash
+        env:
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          set -euo pipefail
+          FALLBACK_COMPOSE="/opt/bom-bom/releases/stable/${{ env.PROD_SUB_COMPOSE_YAML }}"
+          if [ ! -f "$FALLBACK_COMPOSE" ]; then
+            echo "⚠️ 안정판 compose가 없어 레포의 compose를 사용합니다."
+            FALLBACK_COMPOSE="${{ env.PROD_SUB_COMPOSE_YAML }}"
+          fi
+
+          echo "🛑 기존 컨테이너 중지 및 삭제"
+          sudo docker stop ${{ env.SERVER_CONTAINER_NAME }} || true
+          sudo docker rm ${{ env.SERVER_CONTAINER_NAME }} || true
+
+          echo "🚀 안정 버전 compose로 재기동"
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f "$FALLBACK_COMPOSE" --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f "$FALLBACK_COMPOSE" --env-file .env down || true
+
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
+            -f "$FALLBACK_COMPOSE" --env-file .env \
+            up -d --remove-orphans --pull=always --force-recreate
+
+      - name: 컨테이너 헬스체크
+        run: |
+          echo "🏥 컨테이너 헬스체크 시작..."
+          
+          # 컨테이너가 완전히 기동될 시간을 약간 기다림
+          echo "⏳ 컨테이너 기동 대기 (20초)"
+          sleep 20
+          
+          SUCCESS_COUNT=0
+          MAX_RETRIES=10        # 총 40번(약 400초) 시도
+          REQUIRED_SUCCESS=5    # 연속 5회 성공해야 진짜 Healthy
+          
+          for ((i=1; i<=MAX_RETRIES; i++)); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }} || echo "000")
+          
+            if [ "$STATUS" = "200" ]; then
+              SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+              echo "✅ ($SUCCESS_COUNT/${REQUIRED_SUCCESS}) 성공 ($i/${MAX_RETRIES})"
+          
+              if [ "$SUCCESS_COUNT" -ge "$REQUIRED_SUCCESS" ]; then
+                echo "🎉 컨테이너가 연속 ${REQUIRED_SUCCESS}회 이상 Healthy 상태입니다."
+                exit 0
+              fi
+            else
+              # 실패 시 카운터 리셋
+              if [ "$SUCCESS_COUNT" -gt 0 ]; then
+                echo "⚠️ 상태 불안정, 카운터 리셋 (${SUCCESS_COUNT} → 0)"
+              fi
+              SUCCESS_COUNT=0
+              echo "⏳ 상태: $STATUS ($i/${MAX_RETRIES})"
+            fi
+          
+            sleep 10
+          done
+          
+          echo "❌ 헬스체크 실패 (연속 ${REQUIRED_SUCCESS}회 성공 조건 미충족)"
+          sudo docker logs ${{ env.SERVER_CONTAINER_NAME }} --tail 50 || true
+          exit 1
+
+  # X-5) 최종 트래픽 정상화(원래의 양쪽 활성/가중치로 복귀)
+  rollback-prod-restore-final-traffic:
+    if: failure() && needs.deploy-prod6.result == 'failure'
+    needs: rollback-prod7-redeploy
+    runs-on: [self-hosted, lb]
+    steps:
+      - name: 트래픽 정상화
+        run: |
+          echo "enable server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
+          echo "enable server app_servers/prod7"  | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ 전체 롤백 후 트래픽 정상화 완료"
+
+  # ---------------------------------------------------
+  # 6️⃣ 성공 시 안정판 승격 (compose & 이미지)
+  # ---------------------------------------------------
+  promote-stable-sub:
+    needs: [prepare-release, deploy-prod7, deploy-prod6]
+    if: ${{ needs.deploy-prod7.result == 'success' && needs.deploy-prod6.result == 'success' }}
+    runs-on: [self-hosted, prod7]
+    env:
+      RELEASE_ID: ${{ needs.prepare-release.outputs.release_id }}
+    steps:
+      - name: 후보 → 안정판 승격 (prod7)
+        run: |
+          set -euo pipefail
+          CAND_DIR="/opt/bom-bom/candidates/${RELEASE_ID}"
+          REL_DIR="/opt/bom-bom/releases/${RELEASE_ID}"
+          sudo mkdir -p "$REL_DIR"
+          if [ -f "$CAND_DIR/${{ env.PROD_SUB_COMPOSE_YAML }}" ]; then
+            sudo cp "$CAND_DIR/${{ env.PROD_SUB_COMPOSE_YAML }}" "$REL_DIR/"
+          fi
+          sudo ln -sfn "$REL_DIR" "/opt/bom-bom/releases/stable"
+          echo "✅ prod7 안정판 승격: $REL_DIR → /opt/bom-bom/releases/stable"
+
+  promote-stable-main:
+    needs: [prepare-release, deploy-prod7, deploy-prod6]
+    if: ${{ needs.deploy-prod7.result == 'success' && needs.deploy-prod6.result == 'success' }}
+    runs-on: [self-hosted, prod6]
+    env:
+      RELEASE_ID: ${{ needs.prepare-release.outputs.release_id }}
+    steps:
+      - name: 후보 → 안정판 승격 (prod6)
+        run: |
+          set -euo pipefail
+          CAND_DIR="/opt/bom-bom/candidates/${RELEASE_ID}"
+          REL_DIR="/opt/bom-bom/releases/${RELEASE_ID}"
+          sudo mkdir -p "$REL_DIR"
+          if [ -f "$CAND_DIR/${{ env.PROD_MAIN_COMPOSE_YAML }}" ]; then
+            sudo cp "$CAND_DIR/${{ env.PROD_MAIN_COMPOSE_YAML }}" "$REL_DIR/"
+          fi
+          sudo ln -sfn "$REL_DIR" "/opt/bom-bom/releases/stable"
+          echo "✅ prod6 안정판 승격: $REL_DIR → /opt/bom-bom/releases/stable"
+
+  promote-stable-image:
+    needs: [deploy-prod7, deploy-prod6]
+    if: ${{ needs.deploy-prod7.result == 'success' && needs.deploy-prod6.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: latest-stable → 새 안정판으로 갱신
+        run: |
+          SRC="${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod"
+          docker pull "$SRC"
+          docker tag "$SRC" "${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable"
+          docker push "${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable"
+          echo "✅ latest-stable 갱신 완료"
+
+  # ---------------------------------------------------
+  # 7️⃣ 트래픽 복구
+  # ---------------------------------------------------
+  restore-final-traffic:
+    name: "🔁 Step 5: 트래픽 원상복구"
+    needs: deploy-prod6
+    runs-on: [self-hosted, lb]
+    steps:
+      - name: HAProxy 트래픽 비율 복귀
+        run: |
+          echo "🔄 모두 재활성화"
+          echo "enable server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
+          echo "enable server app_servers/prod7" | sudo socat stdio /var/run/haproxy.sock
+          echo "✅ 배포 완료 및 트래픽 정상화"

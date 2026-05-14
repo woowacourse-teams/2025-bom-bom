@@ -11,7 +11,7 @@ services:
     mem_limit: 660m
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:mysql://${RDS_ENDPOINT}:3306/${DATABASE}?useSSL=false&serverTimezone=Asia/Seoul
+      SPRING_DATASOURCE_URL: jdbc:mysql://${RDS_ENDPOINT}:3306/${DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
       LOGGING_FILE_NAME: /logs/bombom-prod.log

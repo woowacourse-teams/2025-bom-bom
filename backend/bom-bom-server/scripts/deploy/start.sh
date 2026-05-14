@@ -24,7 +24,7 @@ MYSQL_USER="$(get_parameter MYSQL_USER)"
 MYSQL_PASSWORD="$(get_parameter MYSQL_PASSWORD)"
 PROD_OTEL_ENDPOINT="$(get_parameter PROD_OTEL_ENDPOINT)"
 export OAUTH2_APPLE_PRIVATE_KEY
-OAUTH2_APPLE_PRIVATE_KEY="$(get_parameter OAUTH2_APPLE_PRIVATE_KEY)"
+OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$(get_parameter OAUTH2_APPLE_PRIVATE_KEY)")"
 
 install -m 600 /dev/null "$ENV_FILE"
 {

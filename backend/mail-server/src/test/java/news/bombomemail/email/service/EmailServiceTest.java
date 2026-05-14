@@ -1,16 +1,25 @@
 package news.bombomemail.email.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import news.bombomemail.article.domain.Article;
 import news.bombomemail.article.repository.ArticleRepository;
 import news.bombomemail.article.service.ArticleService;
+import news.bombomemail.article.util.html.HtmlCleanerConfig;
 import news.bombomemail.email.EmailConfig;
+import news.bombomemail.email.service.EmailService.BusinessProcessingException;
+import news.bombomemail.member.domain.Gender;
 import news.bombomemail.member.domain.Member;
 import news.bombomemail.member.repository.MemberRepository;
-import news.bombomemail.member.domain.Gender;
 import news.bombomemail.newsletter.domain.Newsletter;
 import news.bombomemail.newsletter.repository.NewsletterRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,18 +28,11 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-
-import java.io.File;
-import java.nio.file.StandardCopyOption;
 import org.springframework.test.context.ActiveProfiles;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.SoftAssertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({EmailService.class, EmailConfig.class, ArticleService.class})
+@Import({EmailService.class, EmailConfig.class, ArticleService.class, HtmlCleanerConfig.class})
 class EmailServiceTest {
 
     @Autowired
@@ -48,23 +50,23 @@ class EmailServiceTest {
     @BeforeEach
     void setup() {
         memberRepository.save(Member.builder()
-            .email("test-member@example.com")
-            .nickname("테스트멤버")
-            .providerId("test")
-            .provider("google")
-            .gender(Gender.MALE)
-            .roleId(1L)
-            .birthDate(java.time.LocalDate.of(1990, 1, 1)) // 생년월일 추가
-            .build());
+                .email("test-member@example.com")
+                .nickname("테스트멤버")
+                .providerId("test")
+                .provider("google")
+                .gender(Gender.MALE)
+                .roleId(1L)
+                .birthDate(java.time.LocalDate.of(1990, 1, 1)) // 생년월일 추가
+                .build());
 
         newsletterRepository.save(Newsletter.builder()
-            .name("테스트뉴스레터")
-            .description("설명")
-            .imageUrl("이미지")
-            .email("test-newsletter@example.com")
-            .categoryId(1L)
-            .detailId(1L)
-            .build());
+                .name("테스트뉴스레터")
+                .description("설명")
+                .imageUrl("이미지")
+                .email("test-newsletter@example.com")
+                .categoryId(1L)
+                .detailId(1L)
+                .build());
     }
 
     @TempDir
@@ -111,7 +113,8 @@ class EmailServiceTest {
         File emlFile = target.toFile();
 
         // when
-        emailService.processEmailFile(emlFile);
+        assertThatThrownBy(() -> emailService.processEmailFile(emlFile))
+                .isInstanceOf(NullPointerException.class);
 
         // then
         assertThat(articleRepository.findAll()).isEmpty();
@@ -124,7 +127,6 @@ class EmailServiceTest {
         Path target = tempDir.resolve("sample_no_body.eml");
         Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
         File emlFile = target.toFile();
-
 
         // when
         emailService.processEmailFile(emlFile);
@@ -148,7 +150,8 @@ class EmailServiceTest {
         File emlFile = target.toFile();
 
         // when
-        emailService.processEmailFile(emlFile);
+        assertThatThrownBy(() -> emailService.processEmailFile(emlFile))
+                .isInstanceOf(BusinessProcessingException.class);
 
         // then
         assertThat(articleRepository.findAll()).isEmpty();
@@ -192,7 +195,8 @@ class EmailServiceTest {
         Files.writeString(file, eml, StandardOpenOption.CREATE);
 
         // when
-        emailService.processEmailFile(file.toFile());
+        assertThatThrownBy(() -> emailService.processEmailFile(file.toFile()))
+                .isInstanceOf(BusinessProcessingException.class);
 
         // then
         assertThat(articleRepository.findAll()).isEmpty();
@@ -211,7 +215,8 @@ class EmailServiceTest {
         Files.writeString(file, eml, StandardOpenOption.CREATE);
 
         // when
-        emailService.processEmailFile(file.toFile());
+        assertThatThrownBy(() -> emailService.processEmailFile(file.toFile()))
+                .isInstanceOf(BusinessProcessingException.class);
 
         // then
         assertThat(articleRepository.findAll()).isEmpty();
@@ -224,8 +229,8 @@ class EmailServiceTest {
 
         // when & then
         assertSoftly(soft -> {
-            assertThatCode(() -> emailService.processEmailFile(dir))
-                    .doesNotThrowAnyException();
+            assertThatThrownBy(() -> emailService.processEmailFile(dir))
+                    .isInstanceOf(FileNotFoundException.class);
             assertThat(articleRepository.findAll()).isEmpty();
         });
     }

@@ -6,7 +6,9 @@ public record ArticleArrivedEvent(
         Long articleId,
         String articleTitle,
         Long memberId,
-        String unsubscribeUrl
+        String unsubscribeUrl,
+        String contents,
+        ArticleSource source
 ) {
     public static ArticleArrivedEvent of(
             Long newsletterId,
@@ -14,8 +16,19 @@ public record ArticleArrivedEvent(
             Long articleId,
             String articleTitle,
             Long memberId,
-            String unsubscribeUrl
+            String unsubscribeUrl,
+            String contents,
+            ArticleSource source
     ) {
-        return new ArticleArrivedEvent(newsletterId, newsletterName, articleId, articleTitle, memberId, unsubscribeUrl);
+        return new ArticleArrivedEvent(
+                newsletterId,
+                newsletterName,
+                articleId,
+                articleTitle,
+                memberId,
+                unsubscribeUrl,
+                contents,
+                source
+        );
     }
 }

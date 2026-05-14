@@ -30,6 +30,10 @@ dependencies {
 
     // jpa
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
+    annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
+    annotationProcessor("jakarta.annotation:jakarta.annotation-api")
+    annotationProcessor("jakarta.persistence:jakarta.persistence-api")
 
     // lombok
     compileOnly("org.projectlombok:lombok")
@@ -44,8 +48,13 @@ dependencies {
     // spring mail
     implementation("org.springframework.boot:spring-boot-starter-mail")
 
+    // shedlock
+    implementation("net.javacrumbs.shedlock:shedlock-spring:6.9.2")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.9.2")
+
     // html parser
-    implementation("org.jsoup:jsoup:1.21.1")
+    implementation("org.jsoup:jsoup:1.21.2")
+    implementation("ch.digitalfondue.jfiveparse:jfiveparse:1.1.4")
 
     // test
     testRuntimeOnly("com.h2database:h2")

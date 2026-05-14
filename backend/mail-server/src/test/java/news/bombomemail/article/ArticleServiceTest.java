@@ -8,8 +8,11 @@ import jakarta.mail.internet.MimeMessage;
 import java.util.List;
 import java.util.Properties;
 import news.bombomemail.article.domain.Article;
+import news.bombomemail.article.event.ArticleArrivedEvent;
+import news.bombomemail.article.event.ArticleSource;
 import news.bombomemail.article.repository.ArticleRepository;
 import news.bombomemail.article.service.ArticleService;
+import news.bombomemail.article.util.html.HtmlCleanerConfig;
 import news.bombomemail.email.extractor.EmailContentExtractor;
 import news.bombomemail.member.domain.Gender;
 import news.bombomemail.member.domain.Member;
@@ -22,10 +25,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({ArticleService.class})
+@Import({ArticleService.class, HtmlCleanerConfig.class})
+@RecordApplicationEvents
 class ArticleServiceTest {
 
     @Autowired
@@ -39,6 +45,9 @@ class ArticleServiceTest {
 
     @Autowired
     ArticleRepository articleRepository;
+
+    @Autowired
+    ApplicationEvents applicationEvents;
 
     private Session session;
 
@@ -107,6 +116,42 @@ class ArticleServiceTest {
             softly.assertThat(article.getContents()).contains("테스트용 이메일 본문입니다");
             softly.assertThat(article.getExpectedReadTime()).isOne();
             softly.assertThat(article.getContentsSummary()).isEqualTo("이것은 테스트용 이메일 본문입니다.");
+        });
+    }
+
+    @Test
+    void article_저장_후_EMAIL_RECEIVED_source와_제목_unsubscribeUrl을_이벤트로_발행한다() throws Exception {
+        // given
+        MimeMessage msg = new MimeMessage(session);
+        msg.addRecipient(MimeMessage.RecipientType.TO,
+                new InternetAddress("test-member@example.com"));
+        msg.setFrom(new InternetAddress("test-newsletter@example.com"));
+        msg.setSubject("테스트 이메일 제목");
+        String content = """
+                <p>이것은 테스트용 이메일 본문입니다.</p>
+                <a href="https://example.com/unsubscribe?id=123">구독 취소</a>
+                """;
+
+        // when
+        boolean result = articleService.save(msg, content);
+
+        // then
+        Article article = articleRepository.findAll().getFirst();
+        Member member = memberRepository.findByEmail("test-member@example.com").orElseThrow();
+        Newsletter newsletter = newsletterRepository.findByEmail("test-newsletter@example.com").orElseThrow();
+        ArticleArrivedEvent event = applicationEvents.stream(ArticleArrivedEvent.class)
+                .findFirst()
+                .orElseThrow();
+        assertSoftly(softly -> {
+            softly.assertThat(result).isTrue();
+            softly.assertThat(event.newsletterId()).isEqualTo(newsletter.getId());
+            softly.assertThat(event.newsletterName()).isEqualTo("테스트뉴스레터");
+            softly.assertThat(event.articleId()).isEqualTo(article.getId());
+            softly.assertThat(event.articleTitle()).isEqualTo("테스트 이메일 제목");
+            softly.assertThat(event.memberId()).isEqualTo(member.getId());
+            softly.assertThat(event.unsubscribeUrl()).isEqualTo("https://example.com/unsubscribe?id=123");
+            softly.assertThat(event.contents()).isEqualTo(content);
+            softly.assertThat(event.source()).isEqualTo(ArticleSource.EMAIL_RECEIVED);
         });
     }
 

@@ -1,5 +1,7 @@
 package news.bombomemail.subscribe.service;
 
+import news.bombomemail.subscribe.domain.Subscribe;
+import news.bombomemail.subscribe.domain.SubscribeStatus;
 import news.bombomemail.subscribe.repository.SubscribeRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,22 @@ class SubscribeServiceTest {
         // then
         boolean exists = subscribeRepository.existsByNewsletterIdAndMemberId(newsletterId, memberId);
         assertThat(exists).isTrue();
+    }
+
+    @Test
+    void 새로_저장된_구독은_SUBSCRIBED_상태를_기본값으로_가진다() {
+        // given
+        Long newsletterId = 1L;
+        Long memberId = 2L;
+        String unsubscribeUrl = "unsubscribeUrl";
+
+        // when
+        subscribeService.upsertSubscribe(newsletterId, memberId, unsubscribeUrl);
+
+        // then
+        Subscribe subscribe = subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId)
+                .orElseThrow();
+        assertThat(subscribe.getStatus()).isEqualTo(SubscribeStatus.SUBSCRIBED);
     }
 
     @Test

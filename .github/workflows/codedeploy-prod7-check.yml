@@ -28,12 +28,16 @@ jobs:
       - name: CodeDeploy 번들 생성
         run: |
           test -f appspec.yml
-          test -f docker-compose-prod-sub.yml
+          test -f docker-compose-prod.yml
           test -d scripts/deploy
+          printf 'DOCKER_IMAGE=%s/bom-bom:prod-%s\n' \
+            "${{ secrets.DOCKERHUB_USERNAME }}" \
+            "${{ github.sha }}" > release.env
 
           zip -r deploy.zip \
             appspec.yml \
-            docker-compose-prod-sub.yml \
+            docker-compose-prod.yml \
+            release.env \
             scripts/deploy
 
           unzip -l deploy.zip
@@ -50,6 +54,8 @@ jobs:
             --application-name "${{ secrets.CODEDEPLOY_APPLICATION_NAME }}" \
             --deployment-group-name "${{ secrets.CODEDEPLOY_DEPLOYMENT_GROUP_PROD_SUB }}" \
             --s3-location bucket=${{ secrets.CODEDEPLOY_S3_BUCKET }},key=bom-bom/prod7-check-${{ github.sha }}.zip,bundleType=zip \
+            --file-exists-behavior OVERWRITE \
+            --auto-rollback-configuration enabled=true,events=DEPLOYMENT_FAILURE \
             --query deploymentId \
             --output text)"
 

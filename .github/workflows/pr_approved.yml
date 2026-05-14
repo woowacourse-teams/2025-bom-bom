@@ -9,7 +9,15 @@ on:
 jobs:
   notify_assignee_on_approval:
     runs-on: ubuntu-latest
-    if: github.event.review.state == 'approved'
+    if: >-
+      ${{
+        github.event.review.state == 'approved' &&
+        (
+          github.event.pull_request.base.ref == 'server-dev' ||
+          github.event.pull_request.base.ref == 'email-server-dev' ||
+          github.event.pull_request.base.ref == 'fcm-server'
+        )
+      }}
     steps:
       - uses: actions/checkout@v3
 
@@ -78,9 +86,30 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'issue_comment' && github.event.issue.pull_request
     steps:
+      - name: Check PR target branch
+        id: pr-target
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prNumber = context.payload.issue.number;
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            const allowedBranches = ["server-dev", "email-server-dev", "fcm-server"];
+            const allowed = allowedBranches.includes(pullRequest.base.ref);
+
+            console.log(`PR target branch: ${pullRequest.base.ref}`);
+            console.log(`Allowed: ${allowed}`);
+            core.setOutput("allowed", String(allowed));
+
       - uses: actions/checkout@v3
+        if: steps.pr-target.outputs.allowed == 'true'
 
       - name: Get Comment Author
+        if: steps.pr-target.outputs.allowed == 'true'
         id: comment_author
         uses: actions/github-script@v6
         with:
@@ -93,6 +122,7 @@ jobs:
           result-encoding: string
 
       - name: Get PR Assignees for Comment
+        if: steps.pr-target.outputs.allowed == 'true'
         id: comment_assignees
         uses: actions/github-script@v6
         with:
@@ -110,6 +140,7 @@ jobs:
           result-encoding: string
 
       - name: Get PR Author for Comment
+        if: steps.pr-target.outputs.allowed == 'true'
         id: comment_pr_author
         uses: actions/github-script@v6
         with:
@@ -122,6 +153,7 @@ jobs:
           result-encoding: string
 
       - name: Send comment notification
+        if: steps.pr-target.outputs.allowed == 'true'
         uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: ${{ secrets.TEST_CHANNEL }}

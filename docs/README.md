@@ -1,5 +1,20 @@
-# 봄봄
+# 봄봄 🌸
+
+<p align="center">
+  <img width="599" height="287" alt="스크린샷" src="https://github.com/user-attachments/assets/2b661f18-5c04-4c46-8801-89196a118380" />
+</p>
+
 단순한 뉴스레터 리더를 넘어 읽는 습관을 만들고, 읽은 콘텐츠를 나만의 자산으로 바꾸는 **읽기의 라이프 로그**
+
+<div align="center">
+
+[![Website](https://img.shields.io/badge/Web-%23212121?style=for-the-badge&logo=google-chrome&logoColor=white)](https://www.bombom.news)
+[![App Store](https://img.shields.io/badge/App_Store-%230D96F6?style=for-the-badge&logo=apple&logoColor=white)](https://apps.apple.com/kr/app/%EB%B4%84%EB%B4%84/id6752014462)
+[![Google Play](https://img.shields.io/badge/Google_Play-%233DDC84?style=for-the-badge&logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.antarctica.bombom&pcampaignid=web_share)
+
+</div>
+
+
 
 ## 브랜드 스토리
 
@@ -53,6 +68,137 @@
 | --- | --- | --- |
 | 뉴스레터가 쌓여만 간다 | 읽기 기록 + 알림 + 목표 설정 | **읽는 습관 형성** |
 | 어디까지 읽었는지 기억 안 남 | 읽기 진행률 자동 기록 | 편의성 |
-| 혼자 읽으면 재미가 없다 | 팔로우/리더보드 비교 | **소셜 기반 동기 유발** |
-| 뉴스레터 내용이 흘러간다 | 메모 저장 | **지식 자산화** |
-| 각종 메일이 섞여있다 | 통합 수신 + 필터링 | **콘텐츠 정리 효율성** |
+
+
+<br/>
+
+## 🤠 How to use?
+
+<table>
+
+  <!-- Row 1 -->
+  <tr>
+    <td style="width: 50%; vertical-align: top; text-align: center;">
+      <img 
+        src="https://github.com/user-attachments/assets/fce87c25-69cb-4f4c-af74-7f4c3950e475"
+        height="300"
+      />
+    </td>
+    <td style="width: 50%; vertical-align: top;">
+
+### 간편하게 클릭 몇 번으로 구독하기
+
+- 구독할 뉴스레터 정보 페이지에 접속하여 **구독하기**를 눌러보세요.
+- 봄봄이 담아준 구독 이메일을 붙여넣기 하면 구독 완료!
+- 구독에 필요한 이메일은 저희 **봄봄을 통해 만들 수 있습니다.**
+
+    </td>
+  </tr>
+
+  <!-- Row 2 -->
+  <tr>
+    <td style="width: 50%; vertical-align: top; text-align: center;">
+      <img 
+        src="https://github.com/user-attachments/assets/48b6e101-3f7d-49f4-ac65-b6946ba01003"
+        height="300"
+      />
+    </td>
+    <td style="width: 50%; vertical-align: top;">
+
+### 🌱 봄이랑 함께하는 읽기 모험!
+
+- 매일 출석하고 아티클을 읽으면 귀여운 봄이가 쑥쑥 자라나요.
+- 봄이와 함께 새로운 지식으로 성장해 보세요!
+
+    </td>  
+  </tr>
+
+  <tr>
+
+    <td style="width: 50%; vertical-align: top; text-align: center;">
+      <img 
+        src="https://github.com/user-attachments/assets/7bb1b5dd-ac68-42fd-9e25-580d340ebad9" 
+        height="300"
+      />
+    </td>  
+    
+    <td style="width: 50%; vertical-align: top;">
+
+### 중요한 문장만 쏙! 하이라이트 & 메모
+
+- 중요한 구절을 **하이라이트**하고 메모를 남겨,  
+  지식을 체계적으로 정리해 보세요.
+
+- 원하는 문장을 드래그하여 선택하면  
+  **하이라이트와 메모를 사용할 수 있는 퀵 메뉴**가 나타나요.
+
+    </td>
+  </tr>
+
+    <!-- Row 4 -->
+  <tr>
+    <td style="width:50%; vertical-align:top; text-align:center;">
+      <img src="https://github.com/user-attachments/assets/e0871376-147f-4da2-af73-6dbef30e46fc" height="300"/>
+    </td>
+    <td style="width:50%; v1445ertical-align:top;">
+
+### 📚 내가 바로 이달의 독서왕
+- 매 달 갱신되는 **읽기 랭킹**에 도전해보세요!
+- 나의 **순위**를 확인하고 꾸준히 읽는 습관을 만들어보세요.
+
+    </td>
+  </tr>
+</table>
+
+<br/>
+<br/>
+
+## ⚒️ 아키텍처
+
+### 🎨 Client
+
+<img width="720" height="415" alt="image" src="https://github.com/user-attachments/assets/577c9ec8-e044-404c-9497-d07d550513d2" />
+
+### 🌐 Server
+
+<img width="900" height="703" alt="스크린샷 2025-11-24 오후 1 53 44" src="https://github.com/user-attachments/assets/00309847-6a5b-4397-9a0d-a5f6be6937af" />
+
+<br/>
+
+### 🎨 Frontend 
+
+**WEB**
+
+![Typescript](https://img.shields.io/badge/typescript-%233178C6.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/react-%23333333.svg?style=for-the-badge&logo=react&logoColor=#61DAFB)
+![Webpack](https://img.shields.io/badge/webpack-%238DD6F9.svg?style=for-the-badge&logo=webpack&logoColor=000)
+![Emotion CSS](https://img.shields.io/badge/Emotion-%23F786AD.svg?style=for-the-badge&logo=styledcomponents&logoColor=white)
+
+**App**
+
+![Expo](https://img.shields.io/badge/Expo-000000?style=for-the-badge&logo=Expo&logoColor=white)
+![React Native](https://img.shields.io/badge/React%20Native-61DAFB?style=for-the-badge&logo=React&logoColor=black)
+
+### 🌐 Backend
+
+![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white)
+![MySQL](https://img.shields.io/badge/mysql-4479A1.svg?style=for-the-badge&logo=mysql&logoColor=white)
+![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![AWS](https://img.shields.io/badge/amazonaws-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white)
+
+## 팀원
+## Backend 🔧
+
+| 모루 | 새로이 | 조로 | 피글렛 |
+|:-------:|:------:|:--------:|:--------:|
+| <img src="https://avatars.githubusercontent.com/u/58469870?v=4" alt="모루" style="width:100px;height:100px;object-fit:cover;" /> | <img src="https://avatars.githubusercontent.com/u/76567238?v=4" alt="새로이" style="width:100px;height:100px;object-fit:cover;" /> | <img src="https://avatars.githubusercontent.com/u/115832836?v=4" alt="조로" style="width:100px;height:100px;object-fit:cover;" /> | <img src="https://avatars.githubusercontent.com/u/88280787?v=4" alt="피글렛" style="width:100px;height:100px;object-fit:cover;" /> |
+| [@choidongjun0830](https://github.com/Choidongjun0830) | [@Ryan-Dia](https://github.com/Ryan-Dia) | [@kysub99](https://github.com/kysub99) | [@rladmstn](https://github.com/rladmstn) |
+
+## Frontend 🎨
+
+| 재오 | 제나 | 피터 |
+|:--------:|:------:|:------:|
+| <img src="https://avatars.githubusercontent.com/u/61729032?v=4" alt="재오" style="width:100px;height:100px;object-fit:cover;" /> | <img src="https://avatars.githubusercontent.com/u/106021313?v=4" alt="제나" style="width:100px;height:100px;object-fit:cover;" /> | <img src="https://avatars.githubusercontent.com/u/62178788?v=4" alt="피터" style="width:100px;height:100px;object-fit:cover;" /> |
+| [@jaeyoung-kwon](https://github.com/jaeyoung-kwon) | [@JeLee-river](https://github.com/JeLee-river) | [@guesung](https://github.com/guesung) |

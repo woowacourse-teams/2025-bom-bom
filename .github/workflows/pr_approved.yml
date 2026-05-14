@@ -1,0 +1,142 @@
+name: Pull Request Notifications
+
+on:
+  pull_request_review:
+    types: [submitted]
+  issue_comment:
+    types: [created]
+
+jobs:
+  notify_assignee_on_approval:
+    runs-on: ubuntu-latest
+    if: github.event.review.state == 'approved'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get Assignees List
+        id: assignees
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const workers = JSON.parse(fs.readFileSync('.github/reviewers.json')); 
+            const assignees = context.payload.pull_request.assignees || [];
+            const mention = assignees.map((user) => {
+              const login = user.login;
+              const mappedValue = workers[login];
+              return mappedValue ? `<@${mappedValue}>` : `No mapping found for ${login}`;
+            })
+            const assigneeText = mention.length > 0 ? `📋 담당자: ${mention.join(', ')}` : '';
+            return assigneeText;
+          result-encoding: string
+
+      - name: Get PR Author
+        id: author
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const workers = JSON.parse(fs.readFileSync('.github/reviewers.json')); 
+            const author = context.payload.pull_request.user.login;
+            const mappedValue = workers[author];
+            return mappedValue ? `<@${mappedValue}>` : `No mapping found for ${author}`;
+          result-encoding: string
+
+      - name: Get Reviewer
+        id: reviewer
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const workers = JSON.parse(fs.readFileSync('.github/reviewers.json')); 
+            const reviewer = context.payload.review.user.login;
+            const mappedValue = workers[reviewer];
+            return mappedValue ? `<@${mappedValue}>` : `No mapping found for ${reviewer}`;
+          result-encoding: string
+
+      - name: Send approval notification to assignees
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: ${{ secrets.TEST_CHANNEL }}
+          payload: |
+            {
+              "text": "PR approved notification",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "🎉 *PR이 승인되었습니다!*\n\n • 제목: ${{ github.event.pull_request.title }}\n • 작성자: ${{ steps.author.outputs.result }}\n • 승인자: ${{ steps.reviewer.outputs.result }}\n • 링크: <${{ github.event.pull_request.html_url }}|PR 보러 가기>\n\n${{ steps.assignees.outputs.result }}\n\n✅ 승인된 PR은 곧 머지될 예정입니다. 추가 작업이 필요하다면 빠르게 진행해주세요!"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.TEST_BOT_TOKEN }}
+
+  notify_on_comment:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issue_comment' && github.event.issue.pull_request
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get Comment Author
+        id: comment_author
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const workers = JSON.parse(fs.readFileSync('.github/reviewers.json')); 
+            const author = context.payload.comment.user.login;
+            const mappedValue = workers[author];
+            return mappedValue ? `<@${mappedValue}>` : `No mapping found for ${author}`;
+          result-encoding: string
+
+      - name: Get PR Assignees for Comment
+        id: comment_assignees
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const workers = JSON.parse(fs.readFileSync('.github/reviewers.json')); 
+            const assignees = context.payload.issue.assignees || [];
+            const mention = assignees.map((user) => {
+              const login = user.login;
+              const mappedValue = workers[login];
+              return mappedValue ? `<@${mappedValue}>` : `No mapping found for ${login}`;
+            })
+            const assigneeText = mention.length > 0 ? `📋 담당자: ${mention.join(', ')}` : '';
+            return assigneeText;
+          result-encoding: string
+
+      - name: Get PR Author for Comment
+        id: comment_pr_author
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const workers = JSON.parse(fs.readFileSync('.github/reviewers.json')); 
+            const author = context.payload.issue.user.login;
+            const mappedValue = workers[author];
+            return mappedValue ? `<@${mappedValue}>` : `No mapping found for ${author}`;
+          result-encoding: string
+
+      - name: Send comment notification
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: ${{ secrets.TEST_CHANNEL }}
+          payload: |
+            {
+              "text": "PR comment notification",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "💬 *PR에 댓글이 달렸습니다!*\n\n • 제목: ${{ github.event.issue.title }}\n • 작성자: ${{ steps.comment_pr_author.outputs.result }}\n • 댓글 작성자: ${{ steps.comment_author.outputs.result }}\n • 링크: <${{ github.event.issue.html_url }}|PR 보러 가기>\n\n${{ steps.comment_assignees.outputs.result }}\n\n💭 댓글 내용을 확인하고 필요한 조치를 취해주세요!"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.TEST_BOT_TOKEN }}

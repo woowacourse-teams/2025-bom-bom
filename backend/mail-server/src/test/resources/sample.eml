@@ -1,0 +1,7 @@
+From: test-newsletter@example.com
+To: test-member@example.com
+Subject: =?UTF-8?B?7YWM7Iqk7Yq4IOydtOuplOydvCDsoJzrqqk=?=
+Date: Fri, 28 Jun 2024 12:00:00 +0900
+Content-Type: text/plain; charset=UTF-8
+
+이것은 테스트용 이메일 본문입니다. 이메일 파싱 및 저장 기능을 검증합니다.

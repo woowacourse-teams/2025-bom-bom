@@ -33,9 +33,6 @@ out/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
-.vscode/
-
 #log
 /logs
 *.log
@@ -51,7 +48,8 @@ app_*.log.gz
 *.yml
 *.properties
 
-src/main/resources/log4j2.xml
+# frontend/buildspec.yml 파일만 예외 처리
+!frontend/buildspec.yml
 
 # .github 디렉토리 내의 .yml 파일 예외 처리
 !.github/**/*.yml
@@ -59,3 +57,6 @@ src/main/resources/log4j2.xml
 #Frontend
 node_modules
 dist
+
+*storybook.log
+storybook-static

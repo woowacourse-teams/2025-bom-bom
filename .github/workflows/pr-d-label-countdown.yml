@@ -2,8 +2,8 @@ name: Daily PR D-label Countdown (D-0 Discord Notify)
 
 on:
   schedule:
-    # 매일 오전 9시(Asia/Seoul) = 매일 00:00(UTC)
-    - cron: "0 0 * * *"
+    # 매일 오전 10시(Asia/Seoul) = 매일 01:00(UTC)
+    - cron: "0 1 * * *"
   workflow_dispatch: {}
 
 permissions:

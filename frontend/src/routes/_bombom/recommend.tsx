@@ -1,0 +1,58 @@
+import styled from '@emotion/styled';
+import { createFileRoute } from '@tanstack/react-router';
+import NewsletterHero from '../../pages/recommend/components/ReadingKingLeaderboard/NewsletterHero/NewsletterHero';
+import ReadingKingLeaderboard from '../../pages/recommend/components/ReadingKingLeaderboard/ReadingKingLeaderboard';
+import TrendySection from '../../pages/recommend/components/ReadingKingLeaderboard/TrendySection/TrendySection';
+
+export const Route = createFileRoute('/_bombom/recommend')({
+  component: Recommend,
+});
+
+function Recommend() {
+  return (
+    <Container>
+      <MainSection>
+        <NewsletterHero />
+        <TrendySection />
+      </MainSection>
+      <SideSection>
+        <ReadingKingLeaderboard />
+      </SideSection>
+    </Container>
+  );
+}
+
+const Container = styled.div`
+  width: 100%;
+  max-width: 1280px;
+  padding: 64px 20px 0;
+
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  justify-content: center;
+
+  @media (width <= 768px) {
+    flex-direction: column;
+    align-items: center;
+  }
+`;
+
+const MainSection = styled.section`
+  max-width: 840px;
+
+  display: flex;
+  gap: 24px;
+  flex: 1;
+  flex-direction: column;
+`;
+
+const SideSection = styled.div`
+  width: 400px;
+  flex-shrink: 0;
+
+  @media (width <= 768px) {
+    width: 100%;
+    max-width: 400px;
+  }
+`;

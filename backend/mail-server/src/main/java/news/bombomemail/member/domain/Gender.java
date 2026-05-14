@@ -1,0 +1,16 @@
+package news.bombomemail.member.domain;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public enum Gender {
+
+    MALE("남자"),
+    FEMALE("여자"),
+    NONE("미선택"),
+    ;
+
+    private final String name;
+}

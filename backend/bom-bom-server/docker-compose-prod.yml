@@ -1,7 +1,7 @@
 version: "3.8"
 services:
-  bombom-server-dev:
-    image: bombomnewsletter/bom-bom:prod
+  bombom-server-prod:
+    image: ${DOCKER_IMAGE}
     container_name: bombom-server-prod
     ports:
       - 80:8080

@@ -1,0 +1,80 @@
+import styled from '@emotion/styled';
+import { useNavigate } from '@tanstack/react-router';
+import Button from '../Button/Button';
+import LockIcon from '#/assets/lock.svg';
+
+const RequireLoginCard = () => {
+  const navigate = useNavigate();
+
+  return (
+    <Container>
+      <StyledLockIcon />
+      <Title>로그인이 필요해요</Title>
+      <DescriptionWrapper>
+        <Lead>현재 페이지를 이용하시려면 먼저 로그인해 주세요</Lead>
+        <Support>봄봄에서 더 많은 특별한 기능들을 만나보실 수 있어요!</Support>
+      </DescriptionWrapper>
+      <GoToLoginButton
+        text="봄봄 시작하기"
+        onClick={() => {
+          navigate({ to: '/login' });
+        }}
+      />
+    </Container>
+  );
+};
+
+export default RequireLoginCard;
+
+const Container = styled.section`
+  width: 380px;
+  height: 500px;
+  margin: auto 0;
+  padding: 28px;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+
+  display: flex;
+  gap: 24px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  background-color: ${({ theme }) => theme.colors.white};
+`;
+
+const StyledLockIcon = styled(LockIcon)`
+  width: 52px;
+  height: 52px;
+
+  color: ${({ theme }) => theme.colors.primary};
+`;
+
+const Title = styled.h1`
+  font: ${({ theme }) => theme.fonts.heading3};
+`;
+
+const DescriptionWrapper = styled.div`
+  display: flex;
+  gap: 4px;
+  flex-direction: column;
+`;
+
+const Lead = styled.p`
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font: ${({ theme }) => theme.fonts.body1};
+  text-align: center;
+`;
+
+const Support = styled.p`
+  color: ${({ theme }) => theme.colors.textTertiary};
+  font: ${({ theme }) => theme.fonts.body2};
+  text-align: center;
+`;
+
+const GoToLoginButton = styled(Button)`
+  width: 100%;
+
+  font: ${({ theme }) => theme.fonts.heading5};
+  font-weight: 600;
+`;

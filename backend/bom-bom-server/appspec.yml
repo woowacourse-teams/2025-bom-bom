@@ -2,7 +2,9 @@ version: 0.0
 os: linux
 
 files:
-  - source: docker-compose-prod-sub.yml
+  - source: docker-compose-prod.yml
+    destination: /opt/bom-bom/app
+  - source: release.env
     destination: /opt/bom-bom/app
 
 hooks:

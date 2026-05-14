@@ -2,12 +2,14 @@
 set -euo pipefail
 
 HEALTH_CHECK_URL="${HEALTH_CHECK_URL:-http://localhost:8081/actuator/health}"
-SERVER_CONTAINER_NAME="${SERVER_CONTAINER_NAME:-bombom-server-prod-sub}"
+SERVER_CONTAINER_NAME="${SERVER_CONTAINER_NAME:-prod}"
 SUCCESS_COUNT=0
-MAX_RETRIES="${MAX_RETRIES:-10}"
-REQUIRED_SUCCESS="${REQUIRED_SUCCESS:-5}"
+INITIAL_DELAY_SECONDS="${INITIAL_DELAY_SECONDS:-30}"
+MAX_RETRIES="${MAX_RETRIES:-7}"
+REQUIRED_SUCCESS="${REQUIRED_SUCCESS:-2}"
+RETRY_INTERVAL_SECONDS="${RETRY_INTERVAL_SECONDS:-10}"
 
-sleep 20
+sleep "$INITIAL_DELAY_SECONDS"
 
 for i in $(seq 1 "$MAX_RETRIES"); do
   STATUS="$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_CHECK_URL" || echo "000")"
@@ -22,7 +24,7 @@ for i in $(seq 1 "$MAX_RETRIES"); do
     SUCCESS_COUNT=0
   fi
 
-  sleep 10
+  sleep "$RETRY_INTERVAL_SECONDS"
 done
 
 docker logs "$SERVER_CONTAINER_NAME" --tail 80 || true

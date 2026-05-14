@@ -304,8 +304,8 @@ jobs:
           set -euo pipefail
 
           HEALTH_CHECK_URL="${HEALTH_CHECK_URL:-http://localhost:8081/actuator/health}"
-          INITIAL_DELAY_SECONDS=30
-          MAX_RETRIES=7
+          INITIAL_DELAY_SECONDS=90
+          MAX_RETRIES=10
           REQUIRED_SUCCESS=2
           RETRY_INTERVAL_SECONDS=10
 
@@ -325,10 +325,6 @@ jobs:
                 exit 0
               fi
             else
-              if [ "${SUCCESS_COUNT}" -gt 0 ]; then
-                echo "⚠️ prod7 health 불안정, success count reset (${SUCCESS_COUNT} -> 0)"
-              fi
-              SUCCESS_COUNT=0
               echo "⏳ prod7 health status=${STATUS} attempt=${i}/${MAX_RETRIES}"
             fi
 

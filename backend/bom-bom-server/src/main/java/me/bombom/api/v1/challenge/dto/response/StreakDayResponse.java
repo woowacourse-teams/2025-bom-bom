@@ -29,6 +29,7 @@ public record StreakDayResponse(
                 result.getDate().getDayOfWeek(),
                 true,
                 result.getStatus() == ChallengeDailyStatus.SHIELD
+                        || result.getStatus() == ChallengeDailyStatus.HOLIDAY_SHIELD
         );
     }
 

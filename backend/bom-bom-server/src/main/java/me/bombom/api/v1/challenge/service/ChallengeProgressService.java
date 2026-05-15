@@ -22,6 +22,7 @@ import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
+import me.bombom.api.v1.common.holiday.repository.HolidayRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -44,14 +45,20 @@ public class ChallengeProgressService {
     private final ChallengeDailyResultRepository challengeDailyResultRepository;
     private final ChallengeTeamRepository challengeTeamRepository;
     private final MemberRepository memberRepository;
+    private final HolidayRepository holidayRepository;
     private final Clock clock;
 
     @Transactional
     public void proceedDailySurvivalCheck(Challenge challenge, LocalDate yesterday) {
         List<ChallengeParticipant> absentees = challengeParticipantRepository.findAbsentees(challenge.getId(), yesterday);
         for (ChallengeParticipant absentee : absentees) {
+            if (holidayRepository.existsByDate(yesterday)) {
+                absentee.applyHolidayShield();
+                saveDailyResult(absentee, yesterday, ChallengeDailyStatus.HOLIDAY_SHIELD);
+                continue;
+            }
             if (absentee.useShieldIfAvailable()) {
-                saveShieldDailyResult(absentee, yesterday);
+                saveDailyResult(absentee, yesterday, ChallengeDailyStatus.SHIELD);
                 continue;
             }
             absentee.resetStreak();
@@ -129,11 +136,11 @@ public class ChallengeProgressService {
         return CertificationInfoResponse.of(member, challenge, challengeGrade);
     }
 
-    private void saveShieldDailyResult(ChallengeParticipant participant, LocalDate date) {
+    private void saveDailyResult(ChallengeParticipant participant, LocalDate date, ChallengeDailyStatus status) {
         ChallengeDailyResult result = ChallengeDailyResult.builder()
                 .participantId(participant.getId())
                 .date(date)
-                .status(ChallengeDailyStatus.SHIELD)
+                .status(status)
                 .build();
         challengeDailyResultRepository.save(result);
     }

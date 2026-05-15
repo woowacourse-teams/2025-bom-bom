@@ -5,6 +5,7 @@ services:
       INTEGRATION_MAILDIR: /maildir/new
       SPRING_PROFILES_ACTIVE: docker
       LOGGING_FILE_NAME: /logs/bombom-email.log
+      MAIL_SERVER_INTERNAL_API_KEY: ${MAIL_SERVER_INTERNAL_API_KEY:?MAIL_SERVER_INTERNAL_API_KEY is required}
     volumes:
       - /home/ec2-user/Maildir:/maildir
       - /home/ec2-user/bombom-email/logs:/logs 

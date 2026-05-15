@@ -59,6 +59,8 @@ jobs:
     runs-on:
       - self-hosted
       - email
+    env:
+      MAIL_SERVER_INTERNAL_API_KEY: ${{ secrets.MAIL_SERVER_INTERNAL_API_KEY }}
     defaults:
       run:
         working-directory: backend/mail-server

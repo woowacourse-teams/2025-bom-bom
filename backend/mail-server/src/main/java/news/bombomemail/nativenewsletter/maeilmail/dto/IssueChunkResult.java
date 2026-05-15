@@ -1,6 +1,7 @@
 package news.bombomemail.nativenewsletter.maeilmail.dto;
 
 public record IssueChunkResult(
+
         boolean hasTracks,
         Long lastTrackId,
         int trackCount,

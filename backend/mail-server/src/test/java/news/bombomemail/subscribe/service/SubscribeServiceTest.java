@@ -28,7 +28,7 @@ class SubscribeServiceTest {
         String unsubscribeUrl = "unsubscribeUrl";
 
         // when
-        subscribeService.upsertSubscribe(newsletterId, memberId, unsubscribeUrl);
+        subscribeService.upsertSubscribe(newsletterId, memberId, unsubscribeUrl, "뉴스레터", "아티클");
 
         // then
         boolean exists = subscribeRepository.existsByNewsletterIdAndMemberId(newsletterId, memberId);
@@ -43,7 +43,7 @@ class SubscribeServiceTest {
         String unsubscribeUrl = "unsubscribeUrl";
 
         // when
-        subscribeService.upsertSubscribe(newsletterId, memberId, unsubscribeUrl);
+        subscribeService.upsertSubscribe(newsletterId, memberId, unsubscribeUrl, "뉴스레터", "아티클");
 
         // then
         Subscribe subscribe = subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId)
@@ -59,8 +59,8 @@ class SubscribeServiceTest {
         String unsubscribeUrl = "unsubscribeUrl";
 
         // when
-        subscribeService.upsertSubscribe(newsletterId, memberId, unsubscribeUrl);
-        subscribeService.upsertSubscribe(newsletterId, memberId, unsubscribeUrl);
+        subscribeService.upsertSubscribe(newsletterId, memberId, unsubscribeUrl, "뉴스레터", "아티클");
+        subscribeService.upsertSubscribe(newsletterId, memberId, unsubscribeUrl, "뉴스레터", "아티클");
 
         // then
         long count = subscribeRepository.findAll().stream()
@@ -76,10 +76,10 @@ class SubscribeServiceTest {
         Long memberId = 2L;
         String oldUrl = "oldUnsubscribeUrl";
         String newUrl = "newUnsubscribeUrl";
-        subscribeService.upsertSubscribe(newsletterId, memberId, oldUrl);
+        subscribeService.upsertSubscribe(newsletterId, memberId, oldUrl, "뉴스레터", "아티클");
 
         // when
-        subscribeService.upsertSubscribe(newsletterId, memberId, newUrl);
+        subscribeService.upsertSubscribe(newsletterId, memberId, newUrl, "뉴스레터", "아티클");
 
         // then
         subscribeRepository.findByMemberIdAndNewsletterId(newsletterId, memberId)

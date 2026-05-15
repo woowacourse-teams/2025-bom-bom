@@ -6,6 +6,7 @@ import java.util.Set;
 import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailTopic;
 
 public record IssueData(
+
         Map<Long, MaeilMailTopic> issueTopicsByTrackId,
         Map<Long, List<Long>> contentIdsByTopicId,
         Map<MemberTopicKey, List<Long>> sentContentIdsByMemberTopic,

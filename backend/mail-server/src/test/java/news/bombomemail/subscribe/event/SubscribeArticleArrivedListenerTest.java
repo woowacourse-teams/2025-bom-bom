@@ -44,7 +44,7 @@ class SubscribeArticleArrivedListenerTest {
         TestTransaction.end();
 
         // then
-        verify(subscribeService).upsertSubscribe(newsletterId, memberId, unsubscribeUrl);
+        verify(subscribeService).upsertSubscribe(newsletterId, memberId, unsubscribeUrl, newsletterName, articleTitle);
     }
 
     @Test

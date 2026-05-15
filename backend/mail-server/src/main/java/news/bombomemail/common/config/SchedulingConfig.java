@@ -1,4 +1,4 @@
-package news.bombomemail.common;
+package news.bombomemail.common.config;
 
 import javax.sql.DataSource;
 import net.javacrumbs.shedlock.core.LockProvider;

@@ -13,6 +13,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import news.bombomemail.common.BaseEntity;
+import org.springframework.util.StringUtils;
 
 @Entity
 @Getter
@@ -39,8 +40,12 @@ public class Subscribe extends BaseEntity {
     @Column(nullable = false, length = 20)
     private SubscribeStatus status = SubscribeStatus.SUBSCRIBED;
 
+    public boolean isUnsubscribeUrlMissing() {
+        return !StringUtils.hasText(unsubscribeUrl);
+    }
+
     public void updateUnsubscribeUrl(String unsubscribeUrl) {
-        if (unsubscribeUrl == null) {
+        if (!StringUtils.hasText(unsubscribeUrl)) {
             return;
         }
         this.unsubscribeUrl = unsubscribeUrl;

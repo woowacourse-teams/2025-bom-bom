@@ -20,8 +20,8 @@ public class UnsubscribeUrlExtractor {
     private final AtomicReference<Pattern> urlPattern = new AtomicReference<>();
     private final AtomicReference<Pattern> textPattern = new AtomicReference<>();
 
-    public void reload(String urlKeyword, List<String> textKeywords) {
-        urlPattern.set(Pattern.compile(buildUrlRegex(urlKeyword), Pattern.CASE_INSENSITIVE));
+    public void reload(List<String> urlKeywords, List<String> textKeywords) {
+        urlPattern.set(Pattern.compile(buildUrlRegex(urlKeywords), Pattern.CASE_INSENSITIVE));
         textPattern.set(Pattern.compile(buildTextRegex(textKeywords), Pattern.CASE_INSENSITIVE));
     }
 
@@ -51,8 +51,12 @@ public class UnsubscribeUrlExtractor {
         return null;
     }
 
-    private static String buildUrlRegex(String urlKeyword) {
-        return "href=\"([^\"]*" + Pattern.quote(urlKeyword) + "[^\"]*)\"";
+    private static String buildUrlRegex(List<String> urlKeywords) {
+        String joinedKeywords = urlKeywords.stream()
+                .map(Pattern::quote)
+                .reduce((left, right) -> left + "|" + right)
+                .orElseThrow();
+        return "href=\"([^\"]*(?:" + joinedKeywords + ")[^\"]*)\"";
     }
 
     private static String buildTextRegex(List<String> textKeywords) {

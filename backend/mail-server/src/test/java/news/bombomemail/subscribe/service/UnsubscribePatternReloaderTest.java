@@ -29,8 +29,8 @@ class UnsubscribePatternReloaderTest {
     void DB_패턴으로_reload후에_새_패턴으로_추출한다() {
         // given
         repository.save(UnsubscribePattern.builder()
-                .patternKey("parse.url-keyword")
-                .patternValue("cancel")
+                .patternKey("parse.url-keywords")
+                .patternValue("cancel,optout")
                 .build());
         repository.save(UnsubscribePattern.builder()
                 .patternKey("parse.text-keywords")
@@ -44,6 +44,8 @@ class UnsubscribePatternReloaderTest {
         assertSoftly(softly -> {
             softly.assertThat(extractor.extract("<a href=\"https://example.com/cancel?id=123\">cancel</a>"))
                     .isEqualTo("https://example.com/cancel?id=123");
+            softly.assertThat(extractor.extract("<a href=\"https://example.com/optout?id=123\">manage</a>"))
+                    .isEqualTo("https://example.com/optout?id=123");
             softly.assertThat(extractor.extract("<a href=\"https://example.com/cancel\">취소</a>"))
                     .isEqualTo("https://example.com/cancel");
             softly.assertThat(extractor.extract("<a href=\"https://example.com/unsubscribe\">unsubscribe</a>"))

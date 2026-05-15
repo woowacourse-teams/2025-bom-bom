@@ -13,9 +13,20 @@ class UnsubscribeUrlExtractorTest {
     @BeforeEach
     void setUp() {
         extractor = new UnsubscribeUrlExtractor();
-        extractor.reload("unsubscribe", List.of(
+        extractor.reload(List.of("unsubscribe"), List.of(
                 "unsubscribe", "unsubscription", "수신\\s*거부", "구독\\s*취소", "구독\\s*해지"
         ));
+    }
+
+    @Test
+    void URL에_여러_키워드중_하나가_있으면_추출한다() {
+        extractor.reload(List.of("unsubscribe", "cancel", "optout"), List.of(
+                "unsubscribe", "unsubscription", "수신\\s*거부", "구독\\s*취소", "구독\\s*해지"
+        ));
+
+        String html = "<a href=\"https://example.com/cancel?id=123\">Manage</a>";
+        assertThat(extractor.extract(html))
+                .isEqualTo("https://example.com/cancel?id=123");
     }
 
     @Test

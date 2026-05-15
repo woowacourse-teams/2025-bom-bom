@@ -18,11 +18,11 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class UnsubscribePatternReloadService {
 
-    private static final String URL_KEY = "parse.url-keyword";
+    private static final String URL_KEYS = "parse.url-keywords";
     private static final String TEXT_KEY = "parse.text-keywords";
 
     private static final String PATTERN_REGEX = ",";
-    private static final String DEFAULT_URL_KEYWORD = "unsubscribe";
+    private static final List<String> DEFAULT_URL_KEYWORDS = List.of("unsubscribe");
     private static final List<String> DEFAULT_TEXT_KEYWORDS = List.of(
             "unsubscribe", "unsubscription", "수신\\s*거부", "구독\\s*취소", "구독\\s*해지"
     );
@@ -39,20 +39,20 @@ public class UnsubscribePatternReloadService {
         Map<String, String> patterns = unsubscribePatternRepository.findAll().stream()
                 .collect(Collectors.toMap(UnsubscribePattern::getPatternKey, UnsubscribePattern::getPatternValue));
 
-        String urlKeyword = patterns.get(URL_KEY);
-        List<String> textKeywords = parseTextKeywords(patterns.get(TEXT_KEY));
+        List<String> urlKeywords = parseKeywords(patterns.get(URL_KEYS));
+        List<String> textKeywords = parseKeywords(patterns.get(TEXT_KEY));
 
-        if (!StringUtils.hasText(urlKeyword) || textKeywords.isEmpty()) {
+        if (urlKeywords.isEmpty() || textKeywords.isEmpty()) {
             log.warn("[UnsubscribePattern] DB에 패턴이 없어 기본값을 사용합니다.");
-            unsubscribeUrlExtractor.reload(DEFAULT_URL_KEYWORD, DEFAULT_TEXT_KEYWORDS);
+            unsubscribeUrlExtractor.reload(DEFAULT_URL_KEYWORDS, DEFAULT_TEXT_KEYWORDS);
             return;
         }
 
-        unsubscribeUrlExtractor.reload(urlKeyword, textKeywords);
-        log.info("[UnsubscribePattern] 패턴 리로드 완료 - url: {}, text: {}", urlKeyword, textKeywords);
+        unsubscribeUrlExtractor.reload(urlKeywords, textKeywords);
+        log.info("[UnsubscribePattern] 패턴 리로드 완료 - url: {}, text: {}", urlKeywords, textKeywords);
     }
 
-    private List<String> parseTextKeywords(String value) {
+    private List<String> parseKeywords(String value) {
         if (!StringUtils.hasText(value)) {
             return List.of();
         }

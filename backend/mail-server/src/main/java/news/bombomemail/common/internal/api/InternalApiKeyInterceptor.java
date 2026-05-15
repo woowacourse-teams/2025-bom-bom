@@ -17,7 +17,7 @@ public class InternalApiKeyInterceptor implements HandlerInterceptor {
 
     public static final String INTERNAL_API_KEY_HEADER = "X-Internal-Api-Key";
 
-    @Value("${internal.api.key:}")
+    @Value("${MAIL_SERVER_INTERNAL_API_KEY:}")
     private String configuredApiKey;
 
     @Override

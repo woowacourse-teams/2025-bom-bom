@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(controllers = InternalUnsubscribePatternReloadController.class)
 @ContextConfiguration(classes = InternalUnsubscribePatternReloadControllerTest.TestApplication.class)
 @Import({InternalApiWebConfig.class, InternalApiKeyInterceptor.class})
-@TestPropertySource(properties = "internal.api.key=test-secret")
+@TestPropertySource(properties = "MAIL_SERVER_INTERNAL_API_KEY=test-secret")
 class InternalUnsubscribePatternReloadControllerTest {
 
     @Autowired

@@ -62,12 +62,6 @@ public class SubscribeService {
                 });
     }
 
-    private Subscribe create(Long memberId, Long newsletterId) {
-        return subscribeRepository.save(Subscribe.builder()
-                .memberId(memberId)
-                .newsletterId(newsletterId)
-                .build());
-    }
 
     @Transactional
     public void unsubscribe(Long memberId, Long subscribeId) {
@@ -144,6 +138,13 @@ public class SubscribeService {
 
         Subscribe subscribe = subscribeOpt.get();
         processUnsubscribe(subscribe.getId(), subscribe.getNewsletterId(), subscribe.getUnsubscribeUrl());
+    }
+
+    private Subscribe create(Long memberId, Long newsletterId) {
+        return subscribeRepository.save(Subscribe.builder()
+                .memberId(memberId)
+                .newsletterId(newsletterId)
+                .build());
     }
 
     private void handleRetryableFailure(Long subscribeId, String url, String errorMsg) {

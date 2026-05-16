@@ -135,14 +135,14 @@ class MaeilMailSubscribeServiceTest {
     }
 
     @Test
-    void 구독_중에_빈_트랙을_보내면_구독이_해지된다() {
+    void 구독_삭제를_요청하면_구독이_해지된다() {
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
         newsletterRepository.save(createMaeilMailNewsletter());
         maeilMailSubscribeService.putSubscription(member, new MaeilMailUpdateSubscriptionRequest(
                 List.of(MaeilMailTrack.BE, MaeilMailTrack.FE)
         ));
 
-        maeilMailSubscribeService.putSubscription(member, new MaeilMailUpdateSubscriptionRequest(List.of()));
+        maeilMailSubscribeService.deleteSubscription(member.getId());
 
         assertSoftly(softly -> {
             softly.assertThat(subscribeRepository.findAll()).isEmpty();
@@ -151,11 +151,29 @@ class MaeilMailSubscribeServiceTest {
     }
 
     @Test
-    void 미구독_상태에서_빈_트랙을_보내면_아무_변화도_없다() {
+    void 미구독_상태에서_구독_삭제를_요청하면_아무_변화도_없다() {
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
         newsletterRepository.save(createMaeilMailNewsletter());
 
-        maeilMailSubscribeService.putSubscription(member, new MaeilMailUpdateSubscriptionRequest(List.of()));
+        maeilMailSubscribeService.deleteSubscription(member.getId());
+
+        assertSoftly(softly -> {
+            softly.assertThat(subscribeRepository.findAll()).isEmpty();
+            softly.assertThat(maeilMailSubscriptionTrackRepository.findAll()).isEmpty();
+        });
+    }
+
+    @Test
+    void 빈_트랙으로_구독_생성_수정을_요청하면_예외가_발생한다() {
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+        newsletterRepository.save(createMaeilMailNewsletter());
+
+        assertThatThrownBy(() -> maeilMailSubscribeService.putSubscription(
+                member,
+                new MaeilMailUpdateSubscriptionRequest(List.of())
+        ))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_REQUEST_BODY_VALIDATION);
 
         assertSoftly(softly -> {
             softly.assertThat(subscribeRepository.findAll()).isEmpty();

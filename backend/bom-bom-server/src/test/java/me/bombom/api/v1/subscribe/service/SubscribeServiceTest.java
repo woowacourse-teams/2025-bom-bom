@@ -78,8 +78,7 @@ class SubscribeServiceTest {
     @Test
     void 구독중인_뉴스레터를_조회한다() {
         // given
-        Member member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
 
         List<Category> categories = TestFixture.createCategories();
         categoryRepository.saveAll(categories);
@@ -106,8 +105,7 @@ class SubscribeServiceTest {
     @Test
     void 구독을_취소한다() {
         // given
-        Member member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
 
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
@@ -129,8 +127,7 @@ class SubscribeServiceTest {
     @Test
     void 다른_사람의_구독을_취소하면_예외가_발생한다() {
         // given
-        Member member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
 
         Member otherMember = TestFixture.createUniqueMember("other", "otherProvider");
         memberRepository.save(otherMember);
@@ -152,8 +149,7 @@ class SubscribeServiceTest {
     @Test
     void 존재하지_않는_구독을_취소하면_예외가_발생한다() {
         // given
-        Member member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
 
         // when & then
         assertThatThrownBy(() -> subscribeService.unsubscribe(member.getId(), 999L))
@@ -163,8 +159,7 @@ class SubscribeServiceTest {
     @Test
     void unsubscribeUrl이_있는_구독을_취소하면_unsubscribeUrl을_반환한다() {
         // given
-        Member member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
 
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
@@ -195,8 +190,7 @@ class SubscribeServiceTest {
     @Test
     void FAILED_상태의_구독을_취소하면_강제_삭제된다() {
         // given
-        Member member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
 
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
@@ -229,8 +223,7 @@ class SubscribeServiceTest {
     @Test
     void UNSUBSCRIBING_상태의_구독을_취소하면_중복_방지로_응답만_반환한다() {
         // given
-        Member member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
 
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
@@ -264,8 +257,7 @@ class SubscribeServiceTest {
     @Test
     void SUBSCRIBED_상태의_구독을_취소하면_UNSUBSCRIBING_상태로_변경된다() {
         // given
-        Member member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
 
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
@@ -294,8 +286,7 @@ class SubscribeServiceTest {
     @Test
     void handleUnsubscribeResult_성공시_구독을_삭제한다() {
         // given
-        Member member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
 
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
@@ -324,8 +315,7 @@ class SubscribeServiceTest {
     @Test
     void handleUnsubscribeResult_실패시_FAILED_상태로_변경한다() {
         // given
-        Member member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
 
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
@@ -354,7 +344,7 @@ class SubscribeServiceTest {
     @Test
     void 구독_해지_성공_시_람다를_호출하고_완료_처리한다() {
         // given
-        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail newsletterDetail = newsletterDetailRepository
                 .save(TestFixture.createNewsletterDetail(true));
@@ -382,7 +372,7 @@ class SubscribeServiceTest {
     @Test
     void 재시도_가능_에러_발생_시_재시도를_스케줄링한다() {
         // given
-        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail newsletterDetail = newsletterDetailRepository
                 .save(TestFixture.createNewsletterDetail(true));
@@ -411,7 +401,7 @@ class SubscribeServiceTest {
     @Test
     void 영구_실패_에러_발생_시_알림을_보낸다() {
         // given
-        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail newsletterDetail = newsletterDetailRepository
                 .save(TestFixture.createNewsletterDetail(true));

@@ -3,6 +3,7 @@ package me.bombom.api.v1;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.RecentArticle;
 import me.bombom.api.v1.blog.domain.BlogCategory;
@@ -82,6 +83,18 @@ public final class TestFixture {
                 .providerId("providerId")
                 .email("email@bombom.news")
                 .nickname("nickname")
+                .gender(Gender.FEMALE)
+                .roleId(1L)
+                .build();
+    }
+
+    public static Member uniqueMemberFixture() {
+        String suffix = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+        return Member.builder()
+                .provider("apple")
+                .providerId("providerId" + suffix)
+                .email("email" + suffix + "@bombom.news")
+                .nickname("nickname" + suffix)
                 .gender(Gender.FEMALE)
                 .roleId(1L)
                 .build();

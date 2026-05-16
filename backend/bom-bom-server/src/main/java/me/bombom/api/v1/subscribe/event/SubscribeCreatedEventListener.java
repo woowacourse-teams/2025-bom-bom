@@ -1,4 +1,4 @@
-package me.bombom.api.v1.nativenewsletter.maeilmail.event;
+package me.bombom.api.v1.subscribe.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,13 +10,13 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class MaeilMailSubscribedEventListener {
+public class SubscribeCreatedEventListener {
 
     private final NewsletterSubscriptionCountService newsletterSubscriptionCountService;
 
     @Async
     @TransactionalEventListener
-    public void handle(MaeilMailSubscribedEvent event) {
+    public void handle(SubscribeCreatedEvent event) {
         newsletterSubscriptionCountService.updateNewsletterSubscriptionCount(event.newsletterId(), event.birthDate());
     }
 }

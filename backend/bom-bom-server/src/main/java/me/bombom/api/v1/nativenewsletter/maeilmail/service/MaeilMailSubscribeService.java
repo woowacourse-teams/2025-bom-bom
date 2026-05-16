@@ -2,7 +2,6 @@ package me.bombom.api.v1.nativenewsletter.maeilmail.service;
 
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -14,14 +13,12 @@ import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSubscriptionT
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailTrack;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscriptionResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailUpdateSubscriptionRequest;
-import me.bombom.api.v1.nativenewsletter.maeilmail.event.MaeilMailSubscribedEvent;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSubscriptionTrackRepository;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterSource;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.service.SubscribeService;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +30,6 @@ public class MaeilMailSubscribeService {
     private final SubscribeService subscribeService;
     private final NewsletterRepository newsletterRepository;
     private final MaeilMailSubscriptionTrackRepository maeilMailSubscriptionTrackRepository;
-    private final ApplicationEventPublisher applicationEventPublisher;
 
     public MaeilMailSubscriptionResponse getSubscription(Long memberId) {
         List<MaeilMailSubscriptionTrack> tracks = maeilMailSubscriptionTrackRepository.findByMemberId(memberId);
@@ -47,9 +43,8 @@ public class MaeilMailSubscribeService {
 
         Long memberId = member.getId();
         Newsletter newsletter = getMaeilMailNewsletter();
-        Optional<Subscribe> existing = subscribeService.findByMemberIdAndNewsletterId(memberId, newsletter.getId());
+        Subscribe subscribe = subscribeService.getOrCreate(member, newsletter.getId());
 
-        Subscribe subscribe = existing.orElseGet(() -> createSubscribe(member, newsletter));
         replaceTracks(subscribe, memberId, requestedTracks);
     }
 
@@ -58,12 +53,6 @@ public class MaeilMailSubscribeService {
         Newsletter newsletter = getMaeilMailNewsletter();
         maeilMailSubscriptionTrackRepository.deleteByMemberId(memberId);
         subscribeService.deleteByMemberIdAndNewsletterId(memberId, newsletter.getId());
-    }
-
-    private Subscribe createSubscribe(Member member, Newsletter newsletter) {
-        Subscribe subscribe = subscribeService.create(member.getId(), newsletter.getId());
-        applicationEventPublisher.publishEvent(MaeilMailSubscribedEvent.of(newsletter.getId(), member.getBirthDate()));
-        return subscribe;
     }
 
     private void replaceTracks(Subscribe subscribe, Long memberId, List<MaeilMailTrack> requestedTracks) {

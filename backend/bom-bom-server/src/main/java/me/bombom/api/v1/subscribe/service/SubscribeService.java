@@ -16,6 +16,7 @@ import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.domain.SubscribeStatus;
 import me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse;
 import me.bombom.api.v1.subscribe.event.AutoUnsubscribeCompletedEvent;
+import me.bombom.api.v1.subscribe.event.SubscribeCreatedEvent;
 import me.bombom.api.v1.subscribe.event.UnsubscribeRequestedEvent;
 import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
@@ -50,12 +51,18 @@ public class SubscribeService {
         return subscribeRepository.findSubscribedByMemberId(member.getId());
     }
 
-    public Optional<Subscribe> findByMemberIdAndNewsletterId(Long memberId, Long newsletterId) {
-        return subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId);
+    @Transactional
+    public Subscribe getOrCreate(Member member, Long newsletterId) {
+        Long memberId = member.getId();
+        return subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId)
+                .orElseGet(() -> {
+                    Subscribe subscribe = create(memberId, newsletterId);
+                    applicationEventPublisher.publishEvent(SubscribeCreatedEvent.of(newsletterId, member.getBirthDate()));
+                    return subscribe;
+                });
     }
 
-    @Transactional
-    public Subscribe create(Long memberId, Long newsletterId) {
+    private Subscribe create(Long memberId, Long newsletterId) {
         return subscribeRepository.save(Subscribe.builder()
                 .memberId(memberId)
                 .newsletterId(newsletterId)

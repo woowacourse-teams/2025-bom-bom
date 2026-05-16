@@ -20,7 +20,7 @@ import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterSource;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
-import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
+import me.bombom.api.v1.subscribe.service.SubscribeService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class MaeilMailSubscribeService {
 
-    private final SubscribeRepository subscribeRepository;
+    private final SubscribeService subscribeService;
     private final NewsletterRepository newsletterRepository;
     private final MaeilMailSubscriptionTrackRepository maeilMailSubscriptionTrackRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -47,33 +47,23 @@ public class MaeilMailSubscribeService {
 
         Long memberId = member.getId();
         Newsletter newsletter = getMaeilMailNewsletter();
-        Optional<Subscribe> existing = subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletter.getId());
-
-        if (existing.isEmpty() && requestedTracks.isEmpty()) {
-            return;
-        }
-
-        if (requestedTracks.isEmpty()) {
-            removeSubscription(existing.get(), memberId);
-            return;
-        }
+        Optional<Subscribe> existing = subscribeService.findByMemberIdAndNewsletterId(memberId, newsletter.getId());
 
         Subscribe subscribe = existing.orElseGet(() -> createSubscribe(member, newsletter));
         replaceTracks(subscribe, memberId, requestedTracks);
     }
 
-    private Subscribe createSubscribe(Member member, Newsletter newsletter) {
-        Subscribe subscribe = subscribeRepository.save(Subscribe.builder()
-                .memberId(member.getId())
-                .newsletterId(newsletter.getId())
-                .build());
-        applicationEventPublisher.publishEvent(MaeilMailSubscribedEvent.of(newsletter.getId(), member.getBirthDate()));
-        return subscribe;
+    @Transactional
+    public void deleteSubscription(Long memberId) {
+        Newsletter newsletter = getMaeilMailNewsletter();
+        maeilMailSubscriptionTrackRepository.deleteByMemberId(memberId);
+        subscribeService.deleteByMemberIdAndNewsletterId(memberId, newsletter.getId());
     }
 
-    private void removeSubscription(Subscribe subscribe, Long memberId) {
-        maeilMailSubscriptionTrackRepository.deleteByMemberId(memberId);
-        subscribeRepository.delete(subscribe);
+    private Subscribe createSubscribe(Member member, Newsletter newsletter) {
+        Subscribe subscribe = subscribeService.create(member.getId(), newsletter.getId());
+        applicationEventPublisher.publishEvent(MaeilMailSubscribedEvent.of(newsletter.getId(), member.getBirthDate()));
+        return subscribe;
     }
 
     private void replaceTracks(Subscribe subscribe, Long memberId, List<MaeilMailTrack> requestedTracks) {
@@ -96,6 +86,12 @@ public class MaeilMailSubscribeService {
     }
 
     private void validateTracks(List<MaeilMailTrack> tracks) {
+        if (tracks.isEmpty()) {
+            throw new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_BODY_VALIDATION)
+                    .addContext(ErrorContextKeys.OPERATION, "validateTracks")
+                    .addContext(ErrorContextKeys.DETAIL, "생성/수정할 트랙을 1개 이상 선택해야 합니다.");
+        }
+
         long distinctTrackCount = tracks.stream()
                 .distinct()
                 .count();

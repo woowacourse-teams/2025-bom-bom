@@ -41,8 +41,25 @@ public class SubscribeService {
         subscribeRepository.deleteAllByMemberId(memberId);
     }
 
+    @Transactional
+    public void deleteByMemberIdAndNewsletterId(Long memberId, Long newsletterId) {
+        subscribeRepository.deleteByMemberIdAndNewsletterId(memberId, newsletterId);
+    }
+
     public List<SubscribedNewsletterResponse> getSubscribedNewsletters(Member member) {
         return subscribeRepository.findSubscribedByMemberId(member.getId());
+    }
+
+    public Optional<Subscribe> findByMemberIdAndNewsletterId(Long memberId, Long newsletterId) {
+        return subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId);
+    }
+
+    @Transactional
+    public Subscribe create(Long memberId, Long newsletterId) {
+        return subscribeRepository.save(Subscribe.builder()
+                .memberId(memberId)
+                .newsletterId(newsletterId)
+                .build());
     }
 
     @Transactional

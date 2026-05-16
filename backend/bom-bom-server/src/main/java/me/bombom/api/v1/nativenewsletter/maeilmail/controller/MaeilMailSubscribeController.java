@@ -8,6 +8,7 @@ import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscriptionResp
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailUpdateSubscriptionRequest;
 import me.bombom.api.v1.nativenewsletter.maeilmail.service.MaeilMailSubscribeService;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,5 +36,11 @@ public class MaeilMailSubscribeController implements MaeilMailSubscribeControlle
             @RequestBody @Valid MaeilMailUpdateSubscriptionRequest request
     ) {
         maeilMailSubscribeService.putSubscription(member, request);
+    }
+
+    @Override
+    @DeleteMapping("/maeil-mail")
+    public void deleteSubscription(@LoginMember Member member) {
+        maeilMailSubscribeService.deleteSubscription(member.getId());
     }
 }

@@ -35,8 +35,17 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
     Optional<Subscribe> findByMemberIdAndNewsletterId(Long memberId, Long newsletterId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("DELETE FROM Subscribe sb WHERE sb.memberId = :memberId")
+    @Query("""
+            DELETE FROM Subscribe sb
+            WHERE sb.memberId = :memberId
+    """)
     void deleteAllByMemberId(Long memberId);
 
+    @Modifying
+    @Query("""
+            DELETE FROM Subscribe sb
+            WHERE sb.memberId = :memberId
+              AND sb.newsletterId = :newsletterId
+    """)
     void deleteByMemberIdAndNewsletterId(Long memberId, Long newsletterId);
 }

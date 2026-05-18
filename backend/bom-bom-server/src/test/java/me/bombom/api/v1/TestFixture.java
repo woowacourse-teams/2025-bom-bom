@@ -933,10 +933,14 @@ public final class TestFixture {
      * MemberReadTokenBucket
      */
     public static MemberReadTokenBucket createMemberReadTokenBucket(Long memberId, double tokens) {
+        return createMemberReadTokenBucket(memberId, tokens, LocalDateTime.now());
+    }
+
+    public static MemberReadTokenBucket createMemberReadTokenBucket(Long memberId, double tokens, LocalDateTime updatedAt) {
         return MemberReadTokenBucket.builder()
                 .memberId(memberId)
                 .tokens(tokens)
-                .updatedAt(LocalDateTime.now())
+                .updatedAt(updatedAt)
                 .build();
     }
 }

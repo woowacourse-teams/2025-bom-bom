@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 public interface MemberReadTokenBucketRepository extends JpaRepository<MemberReadTokenBucket, Long> {
 
     @Modifying(flushAutomatically = true)
+    // TODO: 현재는 PK(member_id) 충돌만 의도하지만, unique 제약 추가 시 INSERT IGNORE 재검토 필요
     @Query(value = """
             INSERT IGNORE INTO member_read_token_bucket (member_id, tokens, updated_at)
             VALUES (:memberId, :bucketCapacity, :now)

@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.reading.domain.MemberReadTokenBucket;
 import me.bombom.api.v1.reading.repository.MemberReadTokenBucketRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
 import me.bombom.support.IntegrationTest;
@@ -101,5 +102,32 @@ class ReadRateLimitServiceTest {
 
         // then
         assertThat(result).isTrue();
+    }
+
+    @Test
+    void 소수점_토큰_이월되어_짧은_대기_후_재허용() {
+        // given
+        LocalDateTime savedAt = LocalDateTime.now().withNano(0);
+        memberReadTokenBucketRepository.save(TestFixture.createMemberReadTokenBucket(member.getId(), 0.0, savedAt));
+
+        // when - 80초 뒤 소비 (80/50 = 1.6 충전 → 1.6 - 1 = 0.6 이월)
+        boolean firstResult = readRateLimitService.checkAndConsume(member.getId(), savedAt.plusSeconds(80));
+
+        // then - 0.6 이월 저장 확인
+        double carryOver = memberReadTokenBucketRepository.findById(member.getId())
+                .map(MemberReadTokenBucket::getTokens)
+                .orElseThrow();
+        System.out.println("1차 소비 후 이월 토큰: " + carryOver);
+
+        assertSoftly(softly -> {
+            softly.assertThat(firstResult).isTrue();
+            softly.assertThat(carryOver).isGreaterThan(0.0).isLessThan(1.0);
+        });
+
+        // when - 30초 뒤 재소비 (이월 0.6 + 30/50=0.6 → 합계 1.2)
+        boolean secondResult = readRateLimitService.checkAndConsume(member.getId(), savedAt.plusSeconds(110));
+
+        // then - 이월 덕분에 50초를 안 채워도 허용
+        assertThat(secondResult).isTrue();
     }
 }

@@ -34,6 +34,22 @@ public class ChallengeReviewMockStore {
         return saved;
     }
 
+    public boolean updateById(Long reviewId, String comment, boolean isPrivate) {
+        for (int i = 0; i < reviews.size(); i++) {
+            ChallengeReviewResponse current = reviews.get(i);
+            if (current.reviewId().equals(reviewId)) {
+                reviews.set(i, new ChallengeReviewResponse(
+                        current.reviewId(),
+                        current.nickname(),
+                        comment,
+                        isPrivate
+                ));
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void seed(String nickname, String comment, boolean isPrivate) {
         save(nickname, comment, isPrivate);
     }

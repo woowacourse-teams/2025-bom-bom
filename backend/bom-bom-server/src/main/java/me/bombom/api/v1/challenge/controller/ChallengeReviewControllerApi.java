@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import me.bombom.api.v1.challenge.dto.request.CreateChallengeReviewRequest;
+import me.bombom.api.v1.challenge.dto.request.UpdateChallengeReviewRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewResponse;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
@@ -46,6 +47,23 @@ public interface ChallengeReviewControllerApi {
     void createReview(
             @PathVariable @Positive(message = "challengeId는 1 이상의 값이어야 합니다.") Long challengeId,
             @Valid @RequestBody CreateChallengeReviewRequest request,
+            @Parameter(hidden = true) @LoginMember Member member
+    );
+
+    @Operation(
+            summary = "리뷰 수정",
+            description = "로그인한 사용자가 자신의 챌린지 리뷰를 수정합니다. 코멘트와 비공개 여부를 함께 수정할 수 있습니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "리뷰 수정 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 (유효성 검증 실패)", content = @Content),
+            @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),
+            @ApiResponse(responseCode = "404", description = "챌린지 또는 리뷰를 찾을 수 없음", content = @Content)
+    })
+    void updateReview(
+            @PathVariable @Positive(message = "challengeId는 1 이상의 값이어야 합니다.") Long challengeId,
+            @PathVariable @Positive(message = "reviewId는 1 이상의 값이어야 합니다.") Long reviewId,
+            @Valid @RequestBody UpdateChallengeReviewRequest request,
             @Parameter(hidden = true) @LoginMember Member member
     );
 }

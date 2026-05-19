@@ -6,7 +6,11 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.controller.mock.ChallengeReviewMockStore;
 import me.bombom.api.v1.challenge.dto.request.CreateChallengeReviewRequest;
+import me.bombom.api.v1.challenge.dto.request.UpdateChallengeReviewRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewResponse;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorContextKeys;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.http.HttpStatus;
@@ -14,6 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -46,5 +51,23 @@ public class ChallengeReviewController implements ChallengeReviewControllerApi {
             @LoginMember Member member
     ) {
         mockStore.save(member.getNickname(), request.comment(), request.isPrivate());
+    }
+
+    // TODO: Service 도입 시 작성자 본인 확인 로직 추가
+    @Override
+    @PutMapping("/{reviewId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateReview(
+            @PathVariable @Positive(message = "challengeId는 1 이상의 값이어야 합니다.") Long challengeId,
+            @PathVariable @Positive(message = "reviewId는 1 이상의 값이어야 합니다.") Long reviewId,
+            @Valid @RequestBody UpdateChallengeReviewRequest request,
+            @LoginMember Member member
+    ) {
+        boolean updated = mockStore.updateById(reviewId, request.comment(), request.isPrivate());
+        if (!updated) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeReview")
+                    .addContext(ErrorContextKeys.OPERATION, "updateReview");
+        }
     }
 }

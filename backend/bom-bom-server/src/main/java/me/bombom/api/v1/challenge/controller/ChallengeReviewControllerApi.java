@@ -6,10 +6,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
+import me.bombom.api.v1.challenge.dto.request.CreateChallengeReviewRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewResponse;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Challenge Review", description = "챌린지 리뷰 관련 API")
 public interface ChallengeReviewControllerApi {
@@ -23,6 +26,20 @@ public interface ChallengeReviewControllerApi {
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content)
     })
     List<ChallengeReviewResponse> getReviews(
+            @Parameter(hidden = true) @LoginMember Member member
+    );
+
+    @Operation(
+            summary = "리뷰 작성",
+            description = "로그인한 사용자가 챌린지 리뷰를 작성합니다. 비공개 여부를 함께 지정할 수 있습니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "리뷰 작성 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 (유효성 검증 실패)", content = @Content),
+            @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content)
+    })
+    void createReview(
+            @Valid @RequestBody CreateChallengeReviewRequest request,
             @Parameter(hidden = true) @LoginMember Member member
     );
 }

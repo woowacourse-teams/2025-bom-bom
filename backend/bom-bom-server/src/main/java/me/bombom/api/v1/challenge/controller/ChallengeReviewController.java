@@ -1,12 +1,19 @@
 package me.bombom.api.v1.challenge.controller;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.challenge.controller.mock.ChallengeReviewMockStore;
+import me.bombom.api.v1.challenge.dto.request.CreateChallengeReviewRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewResponse;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -14,16 +21,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/challenges/reviews")
 public class ChallengeReviewController implements ChallengeReviewControllerApi {
 
+    // TODO: Service 계층 도입 시 Mock 저장소 제거
+    private final ChallengeReviewMockStore mockStore;
+
     @Override
     @GetMapping
     public List<ChallengeReviewResponse> getReviews(
             @LoginMember Member member
     ) {
-        // TODO: 실제 조회 로직 구현
-        return List.of(
-                new ChallengeReviewResponse(1L, "나밍곰", "내가 쓴 비공개 리뷰입니다.", true),
-                new ChallengeReviewResponse(2L, "제나", "정말 유익한 챌린지였어요!", false),
-                new ChallengeReviewResponse(3L, "밍곰", "다음에도 또 참여하고 싶어요.", false)
-        );
+        return mockStore.findAll();
+    }
+
+    @Override
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createReview(
+            @Valid @RequestBody CreateChallengeReviewRequest request,
+            @LoginMember Member member
+    ) {
+        mockStore.save(member.getNickname(), request.comment(), request.isPrivate());
     }
 }

@@ -51,8 +51,10 @@ public class ChallengeProgressService {
     @Transactional
     public void proceedDailySurvivalCheck(Challenge challenge, LocalDate yesterday) {
         List<ChallengeParticipant> absentees = challengeParticipantRepository.findAbsentees(challenge.getId(), yesterday);
+        boolean isHoliday = holidayRepository.existsByDate(yesterday);
+
         for (ChallengeParticipant absentee : absentees) {
-            if (holidayRepository.existsByDate(yesterday)) {
+            if (isHoliday) {
                 absentee.applyHolidayShield();
                 saveDailyResult(absentee, yesterday, ChallengeDailyStatus.HOLIDAY_SHIELD);
                 continue;

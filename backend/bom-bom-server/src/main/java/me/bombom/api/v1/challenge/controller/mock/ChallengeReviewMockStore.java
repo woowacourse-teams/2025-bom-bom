@@ -1,6 +1,7 @@
 package me.bombom.api.v1.challenge.controller.mock;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewResponse;
@@ -32,6 +33,13 @@ public class ChallengeReviewMockStore {
         );
         reviews.add(saved);
         return saved;
+    }
+
+    // TODO: Service 계층 도입 시 challengeId + memberId 복합 조건 조회로 대체
+    public Optional<ChallengeReviewResponse> findByNickname(String nickname) {
+        return reviews.stream()
+                .filter(review -> review.nickname().equals(nickname))
+                .findFirst();
     }
 
     public boolean updateById(Long reviewId, String comment, boolean isPrivate) {

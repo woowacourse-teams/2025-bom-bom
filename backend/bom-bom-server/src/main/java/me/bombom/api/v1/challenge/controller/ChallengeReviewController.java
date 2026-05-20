@@ -42,6 +42,20 @@ public class ChallengeReviewController implements ChallengeReviewControllerApi {
         return mockStore.findAll();
     }
 
+    // TODO: Service 도입 시 challengeId + memberId 기준 조회로 보강
+    @Override
+    @GetMapping("/me")
+    public ChallengeReviewResponse getMyReview(
+            @PathVariable @Positive(message = "challengeId는 1 이상의 값이어야 합니다.") Long challengeId,
+            @LoginMember Member member
+    ) {
+        return mockStore.findByNickname(member.getNickname())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeReview")
+                        .addContext(ErrorContextKeys.OPERATION, "getMyReview"));
+    }
+
+    // TODO: Service 도입 시 challengeId + memberId 기준 중복 검사로 보강
     @Override
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -50,6 +64,11 @@ public class ChallengeReviewController implements ChallengeReviewControllerApi {
             @Valid @RequestBody CreateChallengeReviewRequest request,
             @LoginMember Member member
     ) {
+        if (mockStore.findByNickname(member.getNickname()).isPresent()) {
+            throw new CIllegalArgumentException(ErrorDetail.DUPLICATED_DATA)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeReview")
+                    .addContext(ErrorContextKeys.OPERATION, "createReview");
+        }
         mockStore.save(member.getNickname(), request.comment(), request.isPrivate());
     }
 

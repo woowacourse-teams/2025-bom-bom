@@ -35,12 +35,32 @@ public interface ChallengeReviewControllerApi {
     );
 
     @Operation(
+            summary = "내 리뷰 존재 확인",
+            description = "로그인한 사용자가 해당 챌린지에 이미 작성한 리뷰가 있는지 확인합니다. "
+                    + "리뷰가 존재하면 200과 함께 리뷰 본문을 반환하고, 없으면 404를 반환합니다. "
+                    + "프론트엔드는 이 응답으로 리뷰 작성 버튼 활성화 여부를 결정합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "내 리뷰가 존재함"),
+            @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),
+            @ApiResponse(responseCode = "404", description = "해당 챌린지에 작성한 리뷰가 없음", content = @Content)
+    })
+    ChallengeReviewResponse getMyReview(
+            @PathVariable @Positive(message = "challengeId는 1 이상의 값이어야 합니다.") Long challengeId,
+            @Parameter(hidden = true) @LoginMember Member member
+    );
+
+    @Operation(
             summary = "리뷰 작성",
             description = "로그인한 사용자가 챌린지 리뷰를 작성합니다. 비공개 여부를 함께 지정할 수 있습니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "리뷰 작성 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 (유효성 검증 실패)", content = @Content),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "잘못된 요청 (유효성 검증 실패, 또는 해당 챌린지에 이미 작성한 리뷰가 존재)",
+                    content = @Content
+            ),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),
             @ApiResponse(responseCode = "404", description = "챌린지를 찾을 수 없음", content = @Content)
     })

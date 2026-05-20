@@ -6,7 +6,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyResult;
-import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 
 public record StreakDayResponse(
 
@@ -28,8 +27,7 @@ public record StreakDayResponse(
                 result.getDate(),
                 result.getDate().getDayOfWeek(),
                 true,
-                result.getStatus() == ChallengeDailyStatus.SHIELD
-                        || result.getStatus() == ChallengeDailyStatus.HOLIDAY_SHIELD
+                result.isShieldApplied()
         );
     }
 

@@ -51,4 +51,9 @@ public class ChallengeDailyResult extends BaseEntity {
         this.date = date;
         this.status = status;
     }
+
+    public boolean isShieldApplied() {
+        return this.status == ChallengeDailyStatus.SHIELD
+                || this.status == ChallengeDailyStatus.HOLIDAY_SHIELD;
+    }
 }

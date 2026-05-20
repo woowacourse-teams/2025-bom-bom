@@ -72,7 +72,6 @@ public class ChallengeReviewController implements ChallengeReviewControllerApi {
         mockStore.save(member.getNickname(), request.comment(), request.isPrivate());
     }
 
-    // TODO: Service 도입 시 작성자 본인 확인 로직 추가
     @Override
     @PutMapping("/{reviewId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -82,11 +81,17 @@ public class ChallengeReviewController implements ChallengeReviewControllerApi {
             @Valid @RequestBody UpdateChallengeReviewRequest request,
             @LoginMember Member member
     ) {
-        boolean updated = mockStore.updateById(reviewId, request.comment(), request.isPrivate());
-        if (!updated) {
-            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+        ChallengeReviewResponse existing = mockStore.findById(reviewId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeReview")
+                        .addContext(ErrorContextKeys.OPERATION, "updateReview"));
+
+        if (!existing.nickname().equals(member.getNickname())) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeReview")
                     .addContext(ErrorContextKeys.OPERATION, "updateReview");
         }
+
+        mockStore.updateById(reviewId, request.comment(), request.isPrivate());
     }
 }

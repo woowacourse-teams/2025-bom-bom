@@ -42,6 +42,12 @@ public class ChallengeReviewMockStore {
                 .findFirst();
     }
 
+    public Optional<ChallengeReviewResponse> findById(Long reviewId) {
+        return reviews.stream()
+                .filter(review -> review.reviewId().equals(reviewId))
+                .findFirst();
+    }
+
     public boolean updateById(Long reviewId, String comment, boolean isPrivate) {
         for (int i = 0; i < reviews.size(); i++) {
             ChallengeReviewResponse current = reviews.get(i);

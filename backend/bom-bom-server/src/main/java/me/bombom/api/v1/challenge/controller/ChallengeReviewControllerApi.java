@@ -78,6 +78,7 @@ public interface ChallengeReviewControllerApi {
             @ApiResponse(responseCode = "204", description = "리뷰 수정 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 (유효성 검증 실패)", content = @Content),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),
+            @ApiResponse(responseCode = "403", description = "본인이 작성하지 않은 리뷰는 수정할 수 없음", content = @Content),
             @ApiResponse(responseCode = "404", description = "챌린지 또는 리뷰를 찾을 수 없음", content = @Content)
     })
     void updateReview(

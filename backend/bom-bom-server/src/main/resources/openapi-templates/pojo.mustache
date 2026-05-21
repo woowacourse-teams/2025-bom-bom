@@ -1,0 +1,24 @@
+/**
+ * {{#description}}{{description}}{{/description}}{{^description}}{{classname}}{{/description}}
+ */
+{{>generatedAnnotation}}
+public record {{classname}}(
+{{#vars}}
+{{#required}}    @jakarta.validation.constraints.NotNull
+{{/required}}
+{{#isModel}}    @jakarta.validation.Valid
+{{/isModel}}
+{{#isContainer}}{{#items.isModel}}    @jakarta.validation.Valid
+{{/items.isModel}}{{/isContainer}}
+{{#isDateTime}}    @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME)
+{{/isDateTime}}
+{{#isDate}}    @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
+{{/isDate}}
+    @io.swagger.v3.oas.annotations.media.Schema(name = "{{baseName}}"{{#description}}, description = "{{{description}}}"{{/description}}, requiredMode = io.swagger.v3.oas.annotations.media.Schema.RequiredMode.{{#required}}REQUIRED{{/required}}{{^required}}NOT_REQUIRED{{/required}})
+    @com.fasterxml.jackson.annotation.JsonProperty("{{baseName}}")
+    {{{dataType}}} {{name}}{{^-last}},
+{{/-last}}
+
+{{/vars}}
+) {
+}

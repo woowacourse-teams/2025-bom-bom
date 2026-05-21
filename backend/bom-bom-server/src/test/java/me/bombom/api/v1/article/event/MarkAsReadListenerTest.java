@@ -1,6 +1,7 @@
 package me.bombom.api.v1.article.event;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
@@ -8,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.pet.service.PetService;
@@ -53,7 +55,7 @@ class MarkAsReadListenerTest {
         Long memberId = 1L;
         Long articleId = 1L;
         MarkAsReadEvent event = new MarkAsReadEvent(memberId, articleId, LocalDateTime.now());
-        given(articleService.isArrivedToday(articleId, memberId)).willReturn(true);
+        given(articleService.isArrivedToday(eq(articleId), eq(memberId), any(LocalDate.class))).willReturn(true);
         given(articleService.canAddArticleScore(memberId)).willReturn(true);
         given(readingService.calculateArticleScore(memberId)).willReturn(10);
 
@@ -71,7 +73,7 @@ class MarkAsReadListenerTest {
         Long memberId = 1L;
         Long articleId = 1L;
         MarkAsReadEvent event = new MarkAsReadEvent(memberId, articleId, LocalDateTime.now());
-        given(articleService.isArrivedToday(articleId, memberId)).willReturn(false);
+        given(articleService.isArrivedToday(eq(articleId), eq(memberId), any(LocalDate.class))).willReturn(false);
 
         // when
         markAsReadListener.on(event);
@@ -88,7 +90,7 @@ class MarkAsReadListenerTest {
         Long memberId = 1L;
         Long articleId = 1L;
         MarkAsReadEvent event = new MarkAsReadEvent(memberId, articleId, LocalDateTime.now());
-        given(articleService.isArrivedToday(articleId, memberId)).willReturn(true);
+        given(articleService.isArrivedToday(eq(articleId), eq(memberId), any(LocalDate.class))).willReturn(true);
         given(articleService.canAddArticleScore(memberId)).willReturn(false);
 
         // when

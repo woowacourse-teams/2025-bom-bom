@@ -11,6 +11,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.repository.ArticleRepository;
@@ -157,7 +158,7 @@ class MarkAsReadListenerIntegrationTest {
     @Test
     void 펫_경험치_갱신_실패해도_토큰_차감과_읽기_카운트는_유지된다() {
         // given - 오늘 아티클로 처리되도록 + 펫 경험치 갱신만 실패하도록 설정
-        doReturn(true).when(articleService).isArrivedToday(anyLong(), anyLong());
+        doReturn(true).when(articleService).isArrivedToday(anyLong(), anyLong(), any(LocalDate.class));
         doReturn(true).when(articleService).canAddArticleScore(anyLong());
         doReturn(10).when(readingService).calculateArticleScore(anyLong());
         doThrow(new RuntimeException("펫 경험치 갱신 실패"))

@@ -1,6 +1,5 @@
 package me.bombom.api.v1.challenge.service;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.Locale;
@@ -18,12 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ChallengeDailyTodoService {
 
-    private final Clock clock;
     private final ChallengeDailyTodoRepository challengeDailyTodoRepository;
 
     @Transactional
-    public void updateChallengeDailyTodo(Long memberId, Long articleId) {
-        LocalDate today = LocalDate.now(clock);
+    public void updateChallengeDailyTodo(Long memberId, Long articleId, LocalDate today) {
         if (DateUtils.isWeekend(today)) {
             log.info("오늘은 {}입니다. 주말에는 챌린지를 진행하지 않습니다.", today.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.KOREAN));
             return;

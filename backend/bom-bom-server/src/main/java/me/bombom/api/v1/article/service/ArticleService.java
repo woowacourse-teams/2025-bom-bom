@@ -1,6 +1,7 @@
 package me.bombom.api.v1.article.service;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -140,9 +141,9 @@ public class ArticleService {
         return todayReading.getCurrentCount() <= ScorePolicyConstants.MAX_TODAY_READING_COUNT;
     }
 
-    public boolean isArrivedToday(Long articleId, Long memberId) {
+    public boolean isArrivedToday(Long articleId, Long memberId, LocalDate today) {
         Article article = findArticleById(articleId, memberId);
-        return article.isArrivedToday();
+        return article.isArrivedToday(today);
     }
 
     public List<ArticleHighlightResponse> getHighlights(Member member, Long articleId) {

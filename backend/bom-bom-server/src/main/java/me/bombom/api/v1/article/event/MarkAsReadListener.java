@@ -33,7 +33,7 @@ public class MarkAsReadListener {
             return;
         }
 
-        boolean isTodayArticle = articleService.isArrivedToday(event.articleId(), event.memberId());
+        boolean isTodayArticle = articleService.isArrivedToday(event.articleId(), event.memberId(), event.readAt().toLocalDate());
         updateReadingCount(event, isTodayArticle);
         updatePetScore(event, isTodayArticle);
     }

@@ -99,6 +99,18 @@ class UnsubscribeUrlExtractorTest {
     }
 
     @Test
+    void AI_Breakfast_실제_HTML에서_unsubscribe_url을_추출한다() {
+        String html = "<tbody><tr><td align=\"center\" valign=\"top\">"
+                + "<p style=\"font-family:'Arial',Helvetica,sans-serif;color:#222222!important;\">"
+                + " Update your email preferences or unsubscribe "
+                + "<a class=\"link\" href=\"https://link.mail.beehiiv.com/v1/c/fake%2Ftoken%0Aabc%3D%3D%0A/00000000\" "
+                + "style=\"text-decoration:underline;text-decoration-color:#222222!important;color:#222222!important;\">"
+                + "here</a></p></td></tr></tbody>";
+        assertThat(extractor.extract(html))
+                .isEqualTo("https://link.mail.beehiiv.com/v1/c/fake%2Ftoken%0Aabc%3D%3D%0A/00000000");
+    }
+
+    @Test
     void 앵커_직전_텍스트에_수신거부_키워드가_있으면_추출한다() {
         String html = "<p>수신거부 <a href=\"https://example.com/u/abc\">여기</a></p>";
         assertThat(extractor.extract(html))

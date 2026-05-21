@@ -14,6 +14,7 @@ import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderPhase
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTodoReminderNotificationRepository;
+import me.bombom.api.v1.common.holiday.repository.HolidayRepository;
 import me.bombom.api.v1.common.util.DateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,9 +28,15 @@ public class ChallengeTodoReminderNotificationService {
     private final ChallengeRepository challengeRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ChallengeTodoReminderNotificationRepository challengeTodoReminderNotificationRepository;
+    private final HolidayRepository holidayRepository;
 
     @Transactional
     public void createPendingNotificationsForIncompleteTodos(LocalDate reminderDate, ChallengeTodoReminderPhase phase) {
+        if (holidayRepository.existsByDate(reminderDate)) {
+            log.debug("공휴일에는 챌린지 TODO 리마인더를 적재하지 않습니다. reminderDate={}, phase={}", reminderDate, phase);
+            return;
+        }
+
         List<Challenge> ongoingChallenges = challengeRepository.findOngoingChallenges(reminderDate);
 
         if (ongoingChallenges.isEmpty()) {

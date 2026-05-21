@@ -1,6 +1,9 @@
+// submodule에서 관리하는 OpenAPI 원본 스펙 경로
 def openApiSpecFile = layout.projectDirectory.file("openapi-spec/openapi.yaml")
+// OpenAPI Generator가 Java 코드를 생성할 위치
 def generatedOpenApiDir = layout.buildDirectory.dir("generated/openapi")
 
+// 현재 서버 코드 스타일에 맞춘 OpenAPI Generator 옵션
 def openApiConfigOptions = [
     interfaceOnly        : "true",
     useTags              : "true",
@@ -15,6 +18,7 @@ def openApiConfigOptions = [
     annotationLibrary    : "swagger2",
 ]
 
+// API/Model만 생성하고 문서/테스트/보조 파일은 만들지 않는다.
 def openApiGlobalProperties = [
     apis           : "",
     models         : "",
@@ -25,6 +29,7 @@ def openApiGlobalProperties = [
     modelTests     : "false",
 ]
 
+// submodule이 초기화되지 않은 상태에서 빌드가 진행되지 않도록 막는다.
 tasks.register("verifyOpenApiSpec") {
     doLast {
         if (!openApiSpecFile.asFile.exists()) {
@@ -36,6 +41,7 @@ tasks.register("verifyOpenApiSpec") {
     }
 }
 
+// OpenAPI 스펙으로부터 Spring 인터페이스와 모델을 생성한다.
 tasks.named("openApiGenerate") {
     dependsOn("verifyOpenApiSpec")
     generatorName.set("spring")
@@ -46,6 +52,7 @@ tasks.named("openApiGenerate") {
     templateDir.set("$projectDir/src/main/resources/openapi-templates")
     configOptions.set(openApiConfigOptions)
     globalProperties.set(openApiGlobalProperties)
+    // 기존 응답 포맷을 유지하기 위해 date-time은 LocalDateTime으로 고정한다.
     typeMappings.set([
         DateTime: "LocalDateTime",
     ])
@@ -57,11 +64,8 @@ tasks.named("openApiGenerate") {
 sourceSets {
     main {
         java {
+            // 생성된 소스도 메인 컴파일 대상에 포함한다.
             srcDir(generatedOpenApiDir.map { it.dir("src/main/java") })
         }
     }
-}
-
-tasks.named("compileJava") {
-    dependsOn("openApiGenerate")
 }

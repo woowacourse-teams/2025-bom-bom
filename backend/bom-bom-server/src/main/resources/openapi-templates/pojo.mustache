@@ -1,19 +1,24 @@
 /**
  * {{#description}}{{description}}{{/description}}{{^description}}{{classname}}{{/description}}
  */
+{{! OpenAPI Generator가 pojo.mustache 이름으로 직접 찾는 record 본문 템플릿 }}
 {{>generatedAnnotation}}
 public record {{classname}}(
 {{#vars}}
+{{! 필수 필드는 NotNull 제약을 붙인다 }}
 {{#required}}    @jakarta.validation.constraints.NotNull
 {{/required}}
+{{! 중첩 모델은 @Valid로 cascade validation을 적용한다 }}
 {{#isModel}}    @jakarta.validation.Valid
 {{/isModel}}
 {{#isContainer}}{{#items.isModel}}    @jakarta.validation.Valid
 {{/items.isModel}}{{/isContainer}}
+{{! 날짜/일시 타입은 Spring 바인딩 포맷을 명시한다 }}
 {{#isDateTime}}    @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME)
 {{/isDateTime}}
 {{#isDate}}    @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
 {{/isDate}}
+{{! OpenAPI 스키마와 JSON 프로퍼티 이름을 record 컴포넌트에 그대로 매핑한다 }}
     @io.swagger.v3.oas.annotations.media.Schema(name = "{{baseName}}"{{#description}}, description = "{{{description}}}"{{/description}}, requiredMode = io.swagger.v3.oas.annotations.media.Schema.RequiredMode.{{#required}}REQUIRED{{/required}}{{^required}}NOT_REQUIRED{{/required}})
     @com.fasterxml.jackson.annotation.JsonProperty("{{baseName}}")
     {{{dataType}}} {{name}}{{^-last}},

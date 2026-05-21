@@ -1,0 +1,51 @@
+def generatedOpenApiJavaDir = layout.buildDirectory.dir("generated/openapi/src/main/java")
+def generatedOpenApiModelJavaDir = layout.buildDirectory.dir("generated/openapi/src/main/java/me/bombom/openapi/model")
+
+spotless {
+    java {
+        // 생성된 OpenAPI Java 전체에 공통 포맷을 적용한다.
+        target(
+            fileTree(generatedOpenApiJavaDir) {
+                include("**/*.java")
+            }
+        )
+        // record 템플릿 기준으로 남는 불필요 import를 먼저 제거한다.
+        replaceRegex("remove unused JsonCreator import", "(?m)^import com\\.fasterxml\\.jackson\\.annotation\\.JsonCreator;\\R", "")
+        replaceRegex("remove unused ArrayList import", "(?m)^import java\\.util\\.ArrayList;\\R", "")
+        replaceRegex("remove unused Arrays import", "(?m)^import java\\.util\\.Arrays;\\R", "")
+        removeUnusedImports()
+        googleJavaFormat()
+    }
+
+    format("openApiModels") {
+        // model 패키지 내부 참조는 import가 없어도 되므로 별도로 정리한다.
+        target(
+            fileTree(generatedOpenApiModelJavaDir) {
+                include("**/*.java")
+            }
+        )
+        replaceRegex("remove same-package model imports", "(?m)^import me\\.bombom\\.openapi\\.model\\.[A-Za-z0-9_]+;\\R", "")
+    }
+}
+
+// 코드 생성 이후에만 generated source 포맷 task가 돌도록 연결한다.
+tasks.named("spotlessJava") {
+    dependsOn("openApiGenerate")
+}
+
+tasks.named("spotlessOpenApiModels") {
+    dependsOn("openApiGenerate")
+}
+
+tasks.named("spotlessJavaApply") {
+    dependsOn("spotlessJava")
+}
+
+tasks.named("spotlessOpenApiModelsApply") {
+    dependsOn("spotlessOpenApiModels")
+}
+
+// 컴파일 전에는 생성 코드 포맷까지 끝난 상태를 보장한다.
+tasks.named("compileJava") {
+    dependsOn("spotlessJavaApply", "spotlessOpenApiModelsApply")
+}

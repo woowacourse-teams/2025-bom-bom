@@ -3,6 +3,7 @@ plugins {
     id("org.springframework.boot") version "3.5.14"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.openapi.generator") version "7.10.0"
+    id("com.diffplug.spotless") version "7.2.1"
 }
 
 group = "me.bombom"
@@ -112,4 +113,5 @@ tasks.test {
     useJUnitPlatform()
 }
 
-apply(from = "$projectDir/gradle/openapi-codegen.gradle")
+apply(from = "$projectDir/gradle/openapi-generator.gradle")
+apply(from = "$projectDir/gradle/openapi-generated-format.gradle")

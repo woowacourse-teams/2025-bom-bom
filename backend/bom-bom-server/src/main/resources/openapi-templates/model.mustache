@@ -1,0 +1,40 @@
+{{! OpenAPI Generator가 model.mustache 이름으로 직접 찾는 모델 래퍼 템플릿 }}
+package {{package}};
+
+{{! OpenAPI Generator가 계산한 기본 import }}
+{{#imports}}import {{import}};
+{{/imports}}
+{{! record 컴포넌트에 붙일 validation 관련 import }}
+{{#useBeanValidation}}
+import {{javaxPackage}}.validation.Valid;
+import {{javaxPackage}}.validation.constraints.*;
+{{/useBeanValidation}}
+{{^useBeanValidation}}
+import {{javaxPackage}}.validation.constraints.NotNull;
+{{/useBeanValidation}}
+{{! Hibernate Validator 확장 애노테이션이 필요한 경우만 사용 }}
+{{#performBeanValidation}}
+import org.hibernate.validator.constraints.*;
+{{/performBeanValidation}}
+{{! 생성 코드 표식을 위해 항상 Generated 애노테이션을 붙인다 }}
+import {{javaxPackage}}.annotation.Generated;
+
+{{#models}}
+{{#model}}
+{{! additionalProperties 모델은 Map/JsonAny 헬퍼가 필요하다 }}
+{{#additionalPropertiesType}}
+import java.util.Map;
+import java.util.HashMap;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+{{/additionalPropertiesType}}
+{{! enum은 기본 enum 템플릿을 그대로 사용한다 }}
+{{#isEnum}}
+{{>enumOuterClass}}
+{{/isEnum}}
+{{! 일반 모델은 oneOf 인터페이스 또는 record 기반 pojo 템플릿으로 생성한다 }}
+{{^isEnum}}
+{{#vendorExtensions.x-is-one-of-interface}}{{>oneof_interface}}{{/vendorExtensions.x-is-one-of-interface}}{{^vendorExtensions.x-is-one-of-interface}}{{>pojo}}{{/vendorExtensions.x-is-one-of-interface}}
+{{/isEnum}}
+{{/model}}
+{{/models}}

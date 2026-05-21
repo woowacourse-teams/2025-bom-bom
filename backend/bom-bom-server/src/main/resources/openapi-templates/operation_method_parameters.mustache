@@ -1,6 +1,6 @@
-{{! login member injection }}
+{{! 로그인 멤버 주입 }}
 {{#vendorExtensions.x-needs-login-member}}
-{{>loginMemberParam}}
+{{>login_member_parameter}}
 {{#hasParams}},
 {{/hasParams}}
 {{^hasParams}}
@@ -9,14 +9,14 @@
 {{/hasParams}}
 {{/vendorExtensions.x-needs-login-member}}
 
-{{! OpenAPI-declared params }}
+{{! OpenAPI에 선언된 일반 파라미터 }}
 {{#allParams}}
 {{>queryParams}}{{>pathParams}}{{>headerParams}}{{>bodyParams}}{{>formParams}}{{>cookieParams}}
 {{^-last}},
 {{/-last}}
 {{/allParams}}
 
-{{! reactive exchange }}
+{{! reactive 서버 전용 교환 객체 }}
 {{#reactive}}
 {{#hasParams}},
 {{/hasParams}}
@@ -25,7 +25,7 @@
 final ServerWebExchange exchange
 {{/reactive}}
 
-{{! Spring Pageable injection }}
+{{! Spring Pageable 주입 }}
 {{#vendorExtensions.x-spring-paginated}}
 {{#hasParams}},
 {{/hasParams}}
@@ -38,7 +38,7 @@ final ServerWebExchange exchange
 final Pageable pageable
 {{/vendorExtensions.x-spring-paginated}}
 
-{{! additional provided args }}
+{{! vendor extension으로 추가 주입하는 서버 전용 인자 }}
 {{#vendorExtensions.x-spring-provide-args}}
 {{#hasParams}},
 {{/hasParams}}

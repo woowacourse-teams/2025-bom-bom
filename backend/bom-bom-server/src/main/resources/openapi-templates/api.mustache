@@ -3,6 +3,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+{{! OpenAPI Generator가 api.mustache 이름으로 직접 찾는 엔트리 템플릿 }}
 package {{package}};
 
 {{#imports}}import {{import}};
@@ -248,7 +249,7 @@ public interface {{classname}} {
     {{/vendorExtensions.x-operation-extra-annotation}}
     {{#vendorExtensions.x-sse}}@ResponseBody{{/vendorExtensions.x-sse}}
     {{#jdk8-default-interface}}default {{/jdk8-default-interface}}{{>responseType}} {{#delegate-method}}_{{/delegate-method}}{{operationId}}(
-        {{>operationMethodParams}}
+        {{>operation_method_parameters}}
     ){{#unhandledException}} throws Exception{{/unhandledException}}{{^jdk8-default-interface}};{{/jdk8-default-interface}}{{#jdk8-default-interface}} {
         {{#delegate-method}}
         {{^isVoid}}return {{/isVoid}}{{#isVoid}}{{#useResponseEntity}}return {{/useResponseEntity}}{{^useResponseEntity}}{{#reactive}}return {{/reactive}}{{/useResponseEntity}}{{/isVoid}}{{operationId}}({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#reactive}}{{#hasParams}}, {{/hasParams}}exchange{{/reactive}}{{#vendorExtensions.x-spring-paginated}}{{#hasParams}}, {{/hasParams}}{{^hasParams}}{{#reactive}}, {{/reactive}}{{/hasParams}}pageable{{/vendorExtensions.x-spring-paginated}});

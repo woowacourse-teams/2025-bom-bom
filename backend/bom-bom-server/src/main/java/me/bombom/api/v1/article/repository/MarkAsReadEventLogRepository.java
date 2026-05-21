@@ -1,5 +1,6 @@
 package me.bombom.api.v1.article.repository;
 
+import java.time.LocalDateTime;
 import me.bombom.api.v1.article.domain.MarkAsReadEventLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -22,4 +23,8 @@ public interface MarkAsReadEventLogRepository extends JpaRepository<MarkAsReadEv
             @Param("memberId") Long memberId,
             @Param("articleId") Long articleId
     );
+
+    @Modifying
+    @Query("DELETE FROM MarkAsReadEventLog e WHERE e.createdAt < :threshold")
+    int deleteOlderThan(@Param("threshold") LocalDateTime threshold);
 }

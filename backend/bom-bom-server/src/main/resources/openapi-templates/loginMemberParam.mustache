@@ -1,0 +1,25 @@
+{{#vendorExtensions.x-needs-login-member}}
+{{! Custom argument resolver annotation }}
+@me.bombom.api.v1.common.resolver.LoginMember
+
+{{! Optional annotation attributes driven by vendor extensions }}
+{{#vendorExtensions.x-login-member-anonymous}}
+(anonymous = true{{#vendorExtensions.x-login-member-allow-invalid-token}}, allowInvalidToken = true{{/vendorExtensions.x-login-member-allow-invalid-token}})
+{{/vendorExtensions.x-login-member-anonymous}}
+
+{{^vendorExtensions.x-login-member-anonymous}}
+{{#vendorExtensions.x-login-member-allow-invalid-token}}
+(anonymous = true, allowInvalidToken = true)
+{{/vendorExtensions.x-login-member-allow-invalid-token}}
+{{/vendorExtensions.x-login-member-anonymous}}
+
+{{! memberId injection after build-time normalization of x-login-member-type }}
+{{#vendorExtensions.x-login-member-id}}
+java.lang.Long memberId
+{{/vendorExtensions.x-login-member-id}}
+
+{{! Default full Member injection }}
+{{^vendorExtensions.x-login-member-id}}
+me.bombom.api.v1.member.domain.Member member
+{{/vendorExtensions.x-login-member-id}}
+{{/vendorExtensions.x-needs-login-member}}

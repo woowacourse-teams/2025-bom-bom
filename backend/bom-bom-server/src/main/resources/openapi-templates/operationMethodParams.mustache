@@ -1,0 +1,57 @@
+{{! login member injection }}
+{{#vendorExtensions.x-needs-login-member}}
+{{>loginMemberParam}}
+{{#hasParams}},
+{{/hasParams}}
+{{^hasParams}}
+{{#vendorExtensions.x-spring-paginated}},
+{{/vendorExtensions.x-spring-paginated}}
+{{/hasParams}}
+{{/vendorExtensions.x-needs-login-member}}
+
+{{! OpenAPI-declared params }}
+{{#allParams}}
+{{>queryParams}}{{>pathParams}}{{>headerParams}}{{>bodyParams}}{{>formParams}}{{>cookieParams}}
+{{^-last}},
+{{/-last}}
+{{/allParams}}
+
+{{! reactive exchange }}
+{{#reactive}}
+{{#hasParams}},
+{{/hasParams}}
+{{#swagger2AnnotationLibrary}}@Parameter(hidden = true){{/swagger2AnnotationLibrary}}
+{{#springFoxDocumentationProvider}}@ApiIgnore{{/springFoxDocumentationProvider}}
+final ServerWebExchange exchange
+{{/reactive}}
+
+{{! Spring Pageable injection }}
+{{#vendorExtensions.x-spring-paginated}}
+{{#hasParams}},
+{{/hasParams}}
+{{^hasParams}}
+{{#reactive}},
+{{/reactive}}
+{{/hasParams}}
+{{#springFoxDocumentationProvider}}@ApiIgnore {{/springFoxDocumentationProvider}}
+{{#springDocDocumentationProvider}}@ParameterObject {{/springDocDocumentationProvider}}
+final Pageable pageable
+{{/vendorExtensions.x-spring-paginated}}
+
+{{! additional provided args }}
+{{#vendorExtensions.x-spring-provide-args}}
+{{#hasParams}},
+{{/hasParams}}
+{{^hasParams}}
+{{#reactive}},
+{{/reactive}}
+{{/hasParams}}
+{{#swagger2AnnotationLibrary}}@Parameter(hidden = true){{/swagger2AnnotationLibrary}}
+{{#springFoxDocumentationProvider}}@ApiIgnore{{/springFoxDocumentationProvider}}
+{{{.}}}
+{{^hasParams}}
+{{^-last}}
+{{^reactive}},{{/reactive}}
+{{/-last}}
+{{/hasParams}}
+{{/vendorExtensions.x-spring-provide-args}}

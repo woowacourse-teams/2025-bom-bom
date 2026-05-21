@@ -1,15 +1,12 @@
 package me.bombom.api.v1.common;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
-@Getter
-@Setter
 @ConfigurationProperties("bom-bom.rate-limit.read-count")
-public class ReadRateLimitProperties {
+public record ReadRateLimitProperties(
 
-    private int bucketCapacity = 3;
-
-    private int refillSeconds = 50;
+        @DefaultValue("3") int bucketCapacity,
+        @DefaultValue("50") int refillSeconds
+) {
 }

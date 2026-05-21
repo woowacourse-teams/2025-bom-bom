@@ -18,12 +18,12 @@ public class ReadRateLimitService {
 
     @Transactional
     public boolean checkAndConsume(Long memberId, LocalDateTime now) {
-        memberReadTokenBucketRepository.insertIfAbsent(memberId, properties.getBucketCapacity(), now);
+        memberReadTokenBucketRepository.insertIfAbsent(memberId, properties.bucketCapacity(), now);
 
         int affected = memberReadTokenBucketRepository.tryConsume(
                 memberId,
-                properties.getBucketCapacity(),
-                properties.getRefillSeconds(),
+                properties.bucketCapacity(),
+                properties.refillSeconds(),
                 now
         );
 

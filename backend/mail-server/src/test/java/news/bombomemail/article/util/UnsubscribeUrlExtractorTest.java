@@ -91,6 +91,27 @@ class UnsubscribeUrlExtractorTest {
     }
 
     @Test
+    void 앵커_직전_텍스트에_unsubscribe_키워드가_있으면_추출한다() {
+        // beehiiv: "Update your email preferences or unsubscribe <a href="...">here</a>"
+        String html = "<p>Update your email preferences or unsubscribe <a href=\"https://link.mail.beehiiv.com/v1/c/abc\">here</a></p>";
+        assertThat(extractor.extract(html))
+                .isEqualTo("https://link.mail.beehiiv.com/v1/c/abc");
+    }
+
+    @Test
+    void 앵커_직전_텍스트에_수신거부_키워드가_있으면_추출한다() {
+        String html = "<p>수신거부 <a href=\"https://example.com/u/abc\">여기</a></p>";
+        assertThat(extractor.extract(html))
+                .isEqualTo("https://example.com/u/abc");
+    }
+
+    @Test
+    void 앵커_직전에_unsubscribe가_있어도_단어_사이라면_추출하지_않는다() {
+        String html = "<p>unsubscribe rates matter</p><a href=\"https://blog.example.com/tips\">read more</a>";
+        assertThat(extractor.extract(html)).isNull();
+    }
+
+    @Test
     void 본문_링크에_unsubscribe가_포함되어도_오탐하지_않는다() {
         String html = "<a href=\"https://blog.example.com/email-tips\">Why unsubscribe rates matter for marketers</a>";
         assertThat(extractor.extract(html)).isNull();

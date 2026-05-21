@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.5.3"
     id("io.spring.dependency-management") version "1.1.7"
+    id("org.openapi.generator") version "7.10.0"
 }
 
 group = "me.bombom"
@@ -30,7 +31,6 @@ dependencyManagement {
 }
 
 dependencies {
-
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
@@ -99,11 +99,13 @@ dependencies {
     implementation("jakarta.annotation:jakarta.annotation-api")
 }
 
-// Querydsl 생성된 파일 정리
+// Querydsl/OpenAPI 생성된 파일 정리
 tasks.named<Delete>("clean") {
-    delete("src/main/generated")
+    delete(layout.buildDirectory.dir("generated"))
 }
 
 tasks.test {
     useJUnitPlatform()
 }
+
+apply(from = "$projectDir/gradle/openapi-codegen.gradle.kts")

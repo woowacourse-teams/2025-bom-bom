@@ -112,4 +112,4 @@ tasks.test {
     useJUnitPlatform()
 }
 
-apply(from = "$projectDir/gradle/openapi-codegen.gradle.kts")
+apply(from = "$projectDir/gradle/openapi-codegen.gradle")

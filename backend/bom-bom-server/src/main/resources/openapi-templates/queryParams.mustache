@@ -1,0 +1,12 @@
+{{! OpenAPI Generator가 queryParams.mustache 이름으로 직접 찾는 query 파라미터 템플릿 }}
+{{#isQueryParam}}
+{{#isModel}}
+{{! query model은 개별 RequestParam이 아니라 ModelAttribute로 묶어서 받는다 }}
+{{#springDocDocumentationProvider}}@ParameterObject {{/springDocDocumentationProvider}}
+{{#useBeanValidation}}@Valid {{/useBeanValidation}}@ModelAttribute {{>optionalDataType}} {{paramName}}
+{{/isModel}}
+{{^isModel}}
+{{! scalar query parameter는 기본 Spring RequestParam 방식으로 받는다 }}
+{{#vendorExtensions.x-field-extra-annotation}}{{{vendorExtensions.x-field-extra-annotation}}} {{/vendorExtensions.x-field-extra-annotation}}{{#useBeanValidation}}{{>beanValidationQueryParams}}{{/useBeanValidation}}{{>paramDoc}}{{#useBeanValidation}} @Valid{{/useBeanValidation}} @RequestParam(value = {{#isMap}}""{{/isMap}}{{^isMap}}"{{baseName}}"{{/isMap}}{{#required}}, required = true{{/required}}{{^required}}, required = false{{/required}}{{#defaultValue}}, defaultValue = "{{{.}}}"{{/defaultValue}}){{>dateTimeParam}}{{#isDeprecated}} @Deprecated{{/isDeprecated}} {{>optionalDataType}} {{paramName}}
+{{/isModel}}
+{{/isQueryParam}}

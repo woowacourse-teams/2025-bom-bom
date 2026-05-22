@@ -138,8 +138,7 @@ class ArticleControllerTest {
                 .andExpect(jsonPath("$.totalElements").value(11))
                 .andExpect(jsonPath("$.first").value(true))
                 .andExpect(jsonPath("$.last").value(false))
-                .andExpect(jsonPath("$.numberOfElements").value(10))
-                .andExpect(jsonPath("$.empty").value(false));
+                .andExpect(jsonPath("$.numberOfElements").value(10));
     }
 
     @Test

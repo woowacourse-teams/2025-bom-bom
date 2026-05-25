@@ -34,6 +34,8 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
 
     Optional<Subscribe> findByMemberIdAndNewsletterId(Long memberId, Long newsletterId);
 
+    List<Subscribe> findAllByMemberId(Long memberId);
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             DELETE FROM Subscribe sb

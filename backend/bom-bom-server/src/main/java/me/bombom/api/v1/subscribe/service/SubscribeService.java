@@ -43,11 +43,15 @@ public class SubscribeService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteAllByMemberId(Long memberId) {
+        subscribeRepository.findAllByMemberId(memberId)
+                .forEach(subscribe -> publishSubscribeDeletedEvent(memberId, subscribe.getNewsletterId()));
         subscribeRepository.deleteAllByMemberId(memberId);
     }
 
     @Transactional
     public void deleteByMemberIdAndNewsletterId(Long memberId, Long newsletterId) {
+        subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId)
+                .ifPresent(subscribe -> publishSubscribeDeletedEvent(memberId, subscribe.getNewsletterId()));
         subscribeRepository.deleteByMemberIdAndNewsletterId(memberId, newsletterId);
     }
 

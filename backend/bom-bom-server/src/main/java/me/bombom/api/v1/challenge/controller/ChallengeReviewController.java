@@ -2,17 +2,21 @@ package me.bombom.api.v1.challenge.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.controller.mock.ChallengeReviewMockStore;
+import me.bombom.api.v1.challenge.controller.mock.ChallengeReviewMockStore.MockReview;
 import me.bombom.api.v1.challenge.dto.request.CreateChallengeReviewRequest;
 import me.bombom.api.v1.challenge.dto.request.UpdateChallengeReviewRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewResponse;
+import me.bombom.api.v1.challenge.dto.response.MyChallengeReviewResponse;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,24 +39,27 @@ public class ChallengeReviewController implements ChallengeReviewControllerApi {
 
     @Override
     @GetMapping
-    public List<ChallengeReviewResponse> getReviews(
+    public Page<ChallengeReviewResponse> getReviews(
             @PathVariable @Positive(message = "challengeId는 1 이상의 값이어야 합니다.") Long challengeId,
-            @LoginMember Member member
+            @LoginMember Member member,
+            @PageableDefault(size = 20) Pageable pageable
     ) {
-        return mockStore.findAll();
+        return mockStore.findAllAsPage(pageable)
+                .map(mock -> ChallengeReviewMockStore.toResponse(mock, member.getNickname()));
     }
 
     // TODO: Service 도입 시 challengeId + memberId 기준 조회로 보강
     @Override
     @GetMapping("/me")
-    public ChallengeReviewResponse getMyReview(
+    public MyChallengeReviewResponse getMyReview(
             @PathVariable @Positive(message = "challengeId는 1 이상의 값이어야 합니다.") Long challengeId,
             @LoginMember Member member
     ) {
-        return mockStore.findByNickname(member.getNickname())
+        MockReview mine = mockStore.findByNickname(member.getNickname())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeReview")
                         .addContext(ErrorContextKeys.OPERATION, "getMyReview"));
+        return ChallengeReviewMockStore.toMyResponse(mine);
     }
 
     // TODO: Service 도입 시 challengeId + memberId 기준 중복 검사로 보강
@@ -81,7 +88,7 @@ public class ChallengeReviewController implements ChallengeReviewControllerApi {
             @Valid @RequestBody UpdateChallengeReviewRequest request,
             @LoginMember Member member
     ) {
-        ChallengeReviewResponse existing = mockStore.findById(reviewId)
+        MockReview existing = mockStore.findById(reviewId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeReview")
                         .addContext(ErrorContextKeys.OPERATION, "updateReview"));

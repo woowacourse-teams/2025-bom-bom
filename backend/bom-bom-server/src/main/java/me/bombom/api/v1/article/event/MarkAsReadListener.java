@@ -67,10 +67,16 @@ public class MarkAsReadListener {
     }
 
     private void updatePetScore(MarkAsReadEvent event, boolean isTodayArticle) {
-        if (!isTodayArticle || !articleService.canAddArticleScore(event.memberId())) {
+        if (!isTodayArticle) {
             return;
         }
+
         try {
+            boolean canRewardArticleRead = articleService.canAddArticleScore(event.memberId());
+            if (!canRewardArticleRead) {
+                return;
+            }
+
             int score = readingService.calculateArticleScore(event.memberId());
             petService.increaseCurrentScore(event.memberId(), score);
             log.info("아티클 점수 추가 성공 - memberId={}", event.memberId());

@@ -23,6 +23,7 @@ import me.bombom.api.v1.subscribe.event.UnsubscribeRequestedEvent;
 import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,11 +59,7 @@ public class SubscribeService {
     public Subscribe getOrCreate(Member member, Long newsletterId) {
         Long memberId = member.getId();
         return subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId)
-                .orElseGet(() -> {
-                    Subscribe subscribe = create(memberId, newsletterId);
-                    applicationEventPublisher.publishEvent(SubscribeCreatedEvent.of(newsletterId, member.getBirthDate()));
-                    return subscribe;
-                });
+                .orElseGet(() -> saveOrGetExisting(member, newsletterId));
     }
 
 
@@ -152,6 +149,19 @@ public class SubscribeService {
                 .memberId(memberId)
                 .newsletterId(newsletterId)
                 .build());
+    }
+
+    private Subscribe saveOrGetExisting(Member member, Long newsletterId) {
+        Long memberId = member.getId();
+        try {
+            Subscribe subscribe = create(memberId, newsletterId);
+            applicationEventPublisher.publishEvent(SubscribeCreatedEvent.of(newsletterId, member.getBirthDate()));
+            return subscribe;
+        } catch (DataIntegrityViolationException e) {
+            log.info("구독이 이미 생성되어 기존 구독 정보를 반환합니다. memberId: {}, newsletterId: {}", memberId, newsletterId);
+            return subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId)
+                    .orElseThrow(() -> e);
+        }
     }
 
     private void handleSuccessfulUnsubscribe(Subscribe subscribe) {

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.common.DiscordWebhookNotifier;
@@ -25,10 +26,12 @@ import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
+import me.bombom.api.v1.subscribe.domain.NewsletterSubscriptionCount;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.domain.SubscribeStatus;
 import me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse;
 import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
+import me.bombom.api.v1.subscribe.repository.NewsletterSubscriptionCountRepository;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.AfterEach;
@@ -57,6 +60,9 @@ class SubscribeServiceTest {
     @Autowired
     private NewsletterDetailRepository newsletterDetailRepository;
 
+    @Autowired
+    private NewsletterSubscriptionCountRepository newsletterSubscriptionCountRepository;
+
     @MockitoBean
     private UnsubscribeAgent unsubscribeAgent;
 
@@ -69,6 +75,7 @@ class SubscribeServiceTest {
     @AfterEach
     void tearDown() {
         subscribeRepository.deleteAllInBatch();
+        newsletterSubscriptionCountRepository.deleteAllInBatch();
         newsletterRepository.deleteAllInBatch();
         newsletterDetailRepository.deleteAllInBatch();
         categoryRepository.deleteAllInBatch();
@@ -190,7 +197,7 @@ class SubscribeServiceTest {
     @Test
     void FAILED_상태의_구독을_취소하면_강제_삭제된다() {
         // given
-        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
+        Member member = memberRepository.save(createMemberWithBirthDate(LocalDate.of(2001, 1, 1)));
 
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
@@ -208,6 +215,13 @@ class SubscribeServiceTest {
                 .newsletterId(newsletter.getId())
                 .build()
         );
+        newsletterSubscriptionCountRepository.save(
+                NewsletterSubscriptionCount.builder()
+                        .newsletterId(newsletter.getId())
+                        .total(1)
+                        .age20s(1)
+                        .build()
+        );
 
         // FAILED 상태로 변경
         subscribe.changeStatus(me.bombom.api.v1.subscribe.domain.SubscribeStatus.UNSUBSCRIBE_FAILED);
@@ -218,6 +232,9 @@ class SubscribeServiceTest {
 
         // then
         assertThat(subscribeRepository.findById(subscribe.getId())).isEmpty();
+        NewsletterSubscriptionCount count = newsletterSubscriptionCountRepository.findAll().getFirst();
+        assertThat(count.getTotal()).isZero();
+        assertThat(count.getAge20s()).isZero();
     }
 
     @Test
@@ -286,7 +303,7 @@ class SubscribeServiceTest {
     @Test
     void handleUnsubscribeResult_성공시_구독을_삭제한다() {
         // given
-        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
+        Member member = memberRepository.save(createMemberWithBirthDate(LocalDate.of(2001, 1, 1)));
 
         Category category = categoryRepository.save(TestFixture.createCategory());
         NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
@@ -304,12 +321,22 @@ class SubscribeServiceTest {
                 .newsletterId(newsletter.getId())
                 .build()
         );
+        newsletterSubscriptionCountRepository.save(
+                NewsletterSubscriptionCount.builder()
+                        .newsletterId(newsletter.getId())
+                        .total(1)
+                        .age20s(1)
+                        .build()
+        );
 
         // when
         subscribeService.handleUnsubscribeResult(subscribe.getId(), true);
 
         // then
         assertThat(subscribeRepository.findById(subscribe.getId())).isEmpty();
+        NewsletterSubscriptionCount count = newsletterSubscriptionCountRepository.findAll().getFirst();
+        assertThat(count.getTotal()).isZero();
+        assertThat(count.getAge20s()).isZero();
     }
 
     @Test
@@ -432,5 +459,19 @@ class SubscribeServiceTest {
 
         Subscribe result = subscribeRepository.findById(subscribeId).orElseThrow();
         assertThat(result.getStatus()).isEqualTo(SubscribeStatus.UNSUBSCRIBE_FAILED);
+    }
+
+    private Member createMemberWithBirthDate(LocalDate birthDate) {
+        Member member = TestFixture.uniqueMemberFixture();
+        return Member.builder()
+                .provider(member.getProvider())
+                .providerId(member.getProviderId())
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .profileImageUrl(member.getProfileImageUrl())
+                .birthDate(birthDate)
+                .gender(member.getGender())
+                .roleId(member.getRoleId())
+                .build();
     }
 }

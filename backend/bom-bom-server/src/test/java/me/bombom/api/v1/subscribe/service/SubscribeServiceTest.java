@@ -132,6 +132,65 @@ class SubscribeServiceTest {
     }
 
     @Test
+    void 회원과_뉴스레터로_구독을_삭제하면_구독자_수가_감소한다() {
+        Member member = memberRepository.save(createMemberWithBirthDate(LocalDate.of(2001, 1, 1)));
+
+        Category category = categoryRepository.save(TestFixture.createCategory());
+        NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
+        Newsletter newsletter = newsletterRepository.save(
+                TestFixture.createNewsletter("테스트 뉴스레터", "test@test.com", category.getId(), newsletterDetail.getId()));
+        subscribeRepository.save(Subscribe.builder()
+                .memberId(member.getId())
+                .newsletterId(newsletter.getId())
+                .build());
+        newsletterSubscriptionCountRepository.save(
+                NewsletterSubscriptionCount.builder()
+                        .newsletterId(newsletter.getId())
+                        .total(1)
+                        .age20s(1)
+                        .build()
+        );
+
+        subscribeService.deleteByMemberIdAndNewsletterId(member.getId(), newsletter.getId());
+
+        assertThat(subscribeRepository.findAll()).isEmpty();
+        NewsletterSubscriptionCount count = newsletterSubscriptionCountRepository.findAll().getFirst();
+        assertThat(count.getTotal()).isZero();
+        assertThat(count.getAge20s()).isZero();
+    }
+
+    @Test
+    void 회원의_모든_구독을_삭제하면_각_구독자_수가_감소한다() {
+        Member member = memberRepository.save(createMemberWithBirthDate(LocalDate.of(2001, 1, 1)));
+
+        Category category = categoryRepository.save(TestFixture.createCategory());
+        NewsletterDetail detail1 = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
+        NewsletterDetail detail2 = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        Newsletter newsletter1 = newsletterRepository.save(
+                TestFixture.createNewsletter("테스트 뉴스레터1", "test1@test.com", category.getId(), detail1.getId()));
+        Newsletter newsletter2 = newsletterRepository.save(
+                TestFixture.createNewsletter("테스트 뉴스레터2", "test2@test.com", category.getId(), detail2.getId()));
+
+        subscribeRepository.saveAll(List.of(
+                Subscribe.builder().memberId(member.getId()).newsletterId(newsletter1.getId()).build(),
+                Subscribe.builder().memberId(member.getId()).newsletterId(newsletter2.getId()).build()
+        ));
+        newsletterSubscriptionCountRepository.saveAll(List.of(
+                NewsletterSubscriptionCount.builder().newsletterId(newsletter1.getId()).total(1).age20s(1).build(),
+                NewsletterSubscriptionCount.builder().newsletterId(newsletter2.getId()).total(1).age20s(1).build()
+        ));
+
+        subscribeService.deleteAllByMemberId(member.getId());
+
+        assertThat(subscribeRepository.findAll()).isEmpty();
+        assertThat(newsletterSubscriptionCountRepository.findAll())
+                .allSatisfy(count -> {
+                    assertThat(count.getTotal()).isZero();
+                    assertThat(count.getAge20s()).isZero();
+                });
+    }
+
+    @Test
     void 다른_사람의_구독을_취소하면_예외가_발생한다() {
         // given
         Member member = memberRepository.save(TestFixture.uniqueMemberFixture());

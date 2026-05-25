@@ -30,4 +30,18 @@ public class NewsletterSubscriptionCountService {
                 group.getDbKey()
         );
     }
+
+    @Transactional
+    public void decreaseNewsletterSubscriptionCount(Long newsletterId, LocalDate birthDate) {
+        if (birthDate == null) {
+            log.debug("멤버의 생년월일이 없어 구독자 수가 감소되지 않습니다.");
+            return;
+        }
+
+        AgeGroup group = AgeGroup.fromBirthYear(LocalDate.now(clock).getYear(), birthDate.getYear());
+        newsletterSubscriptionCountRepository.decreaseSubscriptionCountByNewsletterIdAndAgeGroup(
+                newsletterId,
+                group.getDbKey()
+        );
+    }
 }

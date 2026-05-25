@@ -12,11 +12,13 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.RetryableException;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.domain.SubscribeStatus;
 import me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse;
 import me.bombom.api.v1.subscribe.event.AutoUnsubscribeCompletedEvent;
 import me.bombom.api.v1.subscribe.event.SubscribeCreatedEvent;
+import me.bombom.api.v1.subscribe.event.SubscribeDeletedEvent;
 import me.bombom.api.v1.subscribe.event.UnsubscribeRequestedEvent;
 import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
@@ -32,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SubscribeService {
 
     private final SubscribeRepository subscribeRepository;
+    private final MemberRepository memberRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final UnsubscribeAgent unsubscribeAgent;
     private final DiscordWebhookNotifier discordNotifier;
@@ -82,6 +85,7 @@ public class SubscribeService {
         // 자동 취소가 불가능한 경우 사용자가 직접 구독 취소 유도 후 삭제 버튼 클릭
         if (subscribe.isFailedToUnsubscribe()) {
             log.info("구독 취소 실패 상태인 항목 강제 삭제 subscribeId: {}", subscribeId);
+            publishSubscribeDeletedEvent(subscribe.getMemberId(), subscribe.getNewsletterId());
             subscribeRepository.delete(subscribe);
             return;
         }
@@ -100,15 +104,18 @@ public class SubscribeService {
 
     @Transactional
     public void handleUnsubscribeResult(Long subscribeId, boolean isSuccess) {
-        if (isSuccess) {
-            subscribeRepository.deleteById(subscribeId);
+        Optional<Subscribe> subscribe = subscribeRepository.findById(subscribeId);
+        if (subscribe.isEmpty()) {
+            log.warn("구독 정보가 존재하지 않아 해지 결과를 반영하지 않습니다. subscribeId: {}", subscribeId);
             return;
         }
-        subscribeRepository.findById(subscribeId)
-                .ifPresentOrElse(
-                        subscribe -> subscribe.changeStatus(SubscribeStatus.UNSUBSCRIBE_FAILED),
-                        () -> log.warn("구독 정보가 존재하지 않아 상태 변경 실패 (이미 삭제되었을 수 있음) - subscribeId: {}", subscribeId)
-                );
+
+        if (isSuccess) {
+            handleSuccessfulUnsubscribe(subscribe.get());
+            return;
+        }
+
+        handleFailedUnsubscribe(subscribe.get());
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -145,6 +152,27 @@ public class SubscribeService {
                 .memberId(memberId)
                 .newsletterId(newsletterId)
                 .build());
+    }
+
+    private void handleSuccessfulUnsubscribe(Subscribe subscribe) {
+        publishSubscribeDeletedEvent(subscribe.getMemberId(), subscribe.getNewsletterId());
+        subscribeRepository.delete(subscribe);
+    }
+
+    private void handleFailedUnsubscribe(Subscribe subscribe) {
+        subscribe.changeStatus(SubscribeStatus.UNSUBSCRIBE_FAILED);
+    }
+
+    private void publishSubscribeDeletedEvent(Long memberId, Long newsletterId) {
+        Optional<Member> member = memberRepository.findById(memberId);
+        if (member.isEmpty()) {
+            log.warn("멤버 정보가 존재하지 않아 구독자 수 감소 이벤트를 발행하지 않습니다. memberId: {}, newsletterId: {}", memberId, newsletterId);
+            return;
+        }
+
+        applicationEventPublisher.publishEvent(
+                SubscribeDeletedEvent.of(newsletterId, member.get().getBirthDate())
+        );
     }
 
     private void handleRetryableFailure(Long subscribeId, String url, String errorMsg) {

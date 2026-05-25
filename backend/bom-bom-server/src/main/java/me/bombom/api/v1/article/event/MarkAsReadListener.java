@@ -44,14 +44,15 @@ public class MarkAsReadListener {
             return;
         }
 
-        if (!readRateLimitService.checkAndConsume(event.memberId(), event.readAt())) {
-            log.info("읽기 rate limit 초과로 카운트 갱신 skip - memberId={}", event.memberId());
+        boolean isReadCountTokenConsumed = readRateLimitService.tryConsumeReadCountToken(event.memberId(), event.readAt());
+        if (isReadCountTokenConsumed) {
+            boolean isTodayArticle = articleService.isArrivedToday(event.articleId(), event.memberId(), event.readAt().toLocalDate());
+            updateReadingCount(event, isTodayArticle);
+            updatePetScore(event, isTodayArticle);
             return;
         }
 
-        boolean isTodayArticle = articleService.isArrivedToday(event.articleId(), event.memberId(), event.readAt().toLocalDate());
-        updateReadingCount(event, isTodayArticle);
-        updatePetScore(event, isTodayArticle);
+        log.info("읽기 rate limit 초과로 카운트 갱신 skip - memberId={}", event.memberId());
     }
 
     @Recover

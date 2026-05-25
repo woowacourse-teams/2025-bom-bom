@@ -48,7 +48,7 @@ class ReadRateLimitServiceTest {
         assertThat(memberReadTokenBucketRepository.findById(member.getId())).isEmpty();
 
         // when
-        boolean result = readRateLimitService.checkAndConsume(member.getId(), LocalDateTime.now());
+        boolean result = readRateLimitService.tryConsumeReadCountToken(member.getId(), LocalDateTime.now());
 
         // then
         assertSoftly(softly -> {
@@ -65,7 +65,7 @@ class ReadRateLimitServiceTest {
         memberReadTokenBucketRepository.save(TestFixture.createMemberReadTokenBucket(member.getId(), 3.0));
 
         // when
-        boolean result = readRateLimitService.checkAndConsume(member.getId(), LocalDateTime.now());
+        boolean result = readRateLimitService.tryConsumeReadCountToken(member.getId(), LocalDateTime.now());
 
         // then
         assertSoftly(softly -> {
@@ -81,7 +81,7 @@ class ReadRateLimitServiceTest {
         memberReadTokenBucketRepository.save(TestFixture.createMemberReadTokenBucket(member.getId(), 0.5));
 
         // when
-        boolean result = readRateLimitService.checkAndConsume(member.getId(), LocalDateTime.now());
+        boolean result = readRateLimitService.tryConsumeReadCountToken(member.getId(), LocalDateTime.now());
 
         // then
         assertSoftly(softly -> {
@@ -98,7 +98,7 @@ class ReadRateLimitServiceTest {
         memberReadTokenBucketRepository.save(TestFixture.createMemberReadTokenBucket(member.getId(), 0.5));
 
         // when - 55초 뒤
-        boolean result = readRateLimitService.checkAndConsume(member.getId(), savedAt.plusSeconds(55));
+        boolean result = readRateLimitService.tryConsumeReadCountToken(member.getId(), savedAt.plusSeconds(55));
 
         // then
         assertThat(result).isTrue();
@@ -111,7 +111,7 @@ class ReadRateLimitServiceTest {
         memberReadTokenBucketRepository.save(TestFixture.createMemberReadTokenBucket(member.getId(), 0.0, savedAt));
 
         // when - 80초 뒤 소비 (80/50 = 1.6 충전 → 1.6 - 1 = 0.6 이월)
-        boolean firstResult = readRateLimitService.checkAndConsume(member.getId(), savedAt.plusSeconds(80));
+        boolean firstResult = readRateLimitService.tryConsumeReadCountToken(member.getId(), savedAt.plusSeconds(80));
 
         // then - 0.6 이월 저장 확인
         double carryOver = memberReadTokenBucketRepository.findById(member.getId())
@@ -125,7 +125,7 @@ class ReadRateLimitServiceTest {
         });
 
         // when - 30초 뒤 재소비 (이월 0.6 + 30/50=0.6 → 합계 1.2)
-        boolean secondResult = readRateLimitService.checkAndConsume(member.getId(), savedAt.plusSeconds(110));
+        boolean secondResult = readRateLimitService.tryConsumeReadCountToken(member.getId(), savedAt.plusSeconds(110));
 
         // then - 이월 덕분에 50초를 안 채워도 허용
         assertThat(secondResult).isTrue();

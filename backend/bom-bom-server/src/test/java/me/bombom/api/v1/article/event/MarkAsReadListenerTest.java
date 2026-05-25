@@ -50,7 +50,7 @@ class MarkAsReadListenerTest {
     @BeforeEach
     void setUp() {
         // rate limit은 기본적으로 통과되도록 설정 (개별 테스트에서 override 가능)
-        lenient().when(readRateLimitService.checkAndConsume(anyLong(), any(LocalDateTime.class)))
+        lenient().when(readRateLimitService.tryConsumeReadCountToken(anyLong(), any(LocalDateTime.class)))
                 .thenReturn(true);
         // 멱등성 체크는 기본적으로 신규 처리로 통과
         lenient().when(markAsReadEventLogRepository.markIfAbsent(anyLong(), anyLong()))
@@ -105,7 +105,7 @@ class MarkAsReadListenerTest {
         markAsReadListener.on(event);
 
         // then
-        verify(readRateLimitService, never()).checkAndConsume(anyLong(), any(LocalDateTime.class));
+        verify(readRateLimitService, never()).tryConsumeReadCountToken(anyLong(), any(LocalDateTime.class));
         verify(readingService, never()).updateReadingCount(anyLong(), any(Boolean.class));
         verify(petService, never()).increaseCurrentScore(anyLong(), anyInt());
     }

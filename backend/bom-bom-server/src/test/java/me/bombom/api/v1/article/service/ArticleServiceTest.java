@@ -2,6 +2,11 @@ package me.bombom.api.v1.article.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 
 import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
@@ -20,6 +25,8 @@ import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
+import me.bombom.api.v1.article.dto.response.MarkAsReadResponse;
+import me.bombom.api.v1.article.event.MarkAsReadEvent;
 import me.bombom.api.v1.article.repository.ArticleReadHistoryRepository;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.article.repository.RecentArticleRepository;
@@ -39,13 +46,18 @@ import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
+import me.bombom.api.v1.reading.service.ReadRateLimitService;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -83,6 +95,12 @@ class ArticleServiceTest {
 
     @Autowired
     private HighlightRepository highlightRepository;
+
+    @MockitoBean
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    @MockitoBean
+    private ReadRateLimitService readRateLimitService;
 
     @Autowired
     private EntityManager entityManager;
@@ -126,6 +144,9 @@ class ArticleServiceTest {
         newsletterRepository.saveAll(newsletters);
         articles = TestFixture.createArticles(member, newsletters);
         articleRepository.saveAll(articles);
+
+        lenient().when(readRateLimitService.tryConsumeReadCountToken(eq(member.getId()), any(LocalDateTime.class)))
+                .thenReturn(true);
     }
 
     private void initializeRoles() {
@@ -472,6 +493,67 @@ class ArticleServiceTest {
 
         assertSoftly(softly -> {
             softly.assertThat(articleReadHistoryRepository.count()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void 다_읽음_갱신_시_카운트_가능한_읽음_이벤트를_발행한다() {
+        // given
+        Article article = articles.getFirst();
+
+        // when
+        MarkAsReadResponse result = articleService.markAsRead(article.getId(), member);
+
+        // then
+        ArgumentCaptor<MarkAsReadEvent> eventCaptor = ArgumentCaptor.forClass(MarkAsReadEvent.class);
+        verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
+        assertSoftly(softly -> {
+            softly.assertThat(result.readCountTokenConsumed()).isTrue();
+            softly.assertThat(eventCaptor.getValue().memberId()).isEqualTo(member.getId());
+            softly.assertThat(eventCaptor.getValue().articleId()).isEqualTo(article.getId());
+            softly.assertThat(eventCaptor.getValue().countable()).isTrue();
+        });
+    }
+
+    @Test
+    void 읽기_토큰_소비_중_일시적_DB_예외가_발생하면_카운트_가능한_읽음_이벤트를_발행한다() {
+        // given
+        Article article = articles.getFirst();
+        doThrow(new TransientDataAccessResourceException("DB 일시 장애"))
+                .when(readRateLimitService).tryConsumeReadCountToken(eq(member.getId()), any(LocalDateTime.class));
+
+        // when
+        MarkAsReadResponse result = articleService.markAsRead(article.getId(), member);
+
+        // then
+        ArgumentCaptor<MarkAsReadEvent> eventCaptor = ArgumentCaptor.forClass(MarkAsReadEvent.class);
+        verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
+        assertSoftly(softly -> {
+            softly.assertThat(result.readCountTokenConsumed()).isTrue();
+            softly.assertThat(eventCaptor.getValue().memberId()).isEqualTo(member.getId());
+            softly.assertThat(eventCaptor.getValue().articleId()).isEqualTo(article.getId());
+            softly.assertThat(eventCaptor.getValue().countable()).isTrue();
+        });
+    }
+
+    @Test
+    void 읽기_토큰을_소비하지_못하면_카운트_대상이_아닌_읽음_이벤트를_발행한다() {
+        // given
+        Article article = articles.getFirst();
+        lenient().when(readRateLimitService.tryConsumeReadCountToken(eq(member.getId()), any(LocalDateTime.class)))
+                .thenReturn(false);
+
+        // when
+        MarkAsReadResponse result = articleService.markAsRead(article.getId(), member);
+
+        // then
+        ArgumentCaptor<MarkAsReadEvent> eventCaptor = ArgumentCaptor.forClass(MarkAsReadEvent.class);
+        verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
+        assertSoftly(softly -> {
+            softly.assertThat(result.readCountTokenConsumed()).isFalse();
+            softly.assertThat(eventCaptor.getValue().memberId()).isEqualTo(member.getId());
+            softly.assertThat(eventCaptor.getValue().articleId()).isEqualTo(article.getId());
+            softly.assertThat(eventCaptor.getValue().countable()).isFalse();
         });
     }
 

@@ -134,7 +134,7 @@ class ChallengeDailyTodoServiceTest {
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), todayArticle.getId(), LocalDateTime.of(FIXED_WEEKDAY, java.time.LocalTime.of(10, 0))));
+        eventPublisher.publishEvent(MarkAsReadEvent.of(member.getId(), todayArticle.getId(), LocalDateTime.of(FIXED_WEEKDAY, java.time.LocalTime.of(10, 0)), true));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -170,7 +170,7 @@ class ChallengeDailyTodoServiceTest {
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), pastArticle.getId(), LocalDateTime.of(FIXED_WEEKDAY, java.time.LocalTime.of(10, 0))));
+        eventPublisher.publishEvent(MarkAsReadEvent.of(member.getId(), pastArticle.getId(), LocalDateTime.of(FIXED_WEEKDAY, java.time.LocalTime.of(10, 0)), true));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -214,7 +214,7 @@ class ChallengeDailyTodoServiceTest {
         );
 
         // when
-        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), article.getId(), LocalDateTime.of(FIXED_WEEKDAY, java.time.LocalTime.of(10, 0))));
+        eventPublisher.publishEvent(MarkAsReadEvent.of(member.getId(), article.getId(), LocalDateTime.of(FIXED_WEEKDAY, java.time.LocalTime.of(10, 0)), true));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 

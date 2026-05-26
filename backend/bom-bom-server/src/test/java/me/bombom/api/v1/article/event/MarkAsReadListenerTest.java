@@ -16,7 +16,6 @@ import me.bombom.api.v1.article.repository.MarkAsReadEventLogRepository;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.common.DiscordWebhookNotifier;
 import me.bombom.api.v1.pet.service.PetService;
-import me.bombom.api.v1.reading.service.ReadRateLimitService;
 import me.bombom.api.v1.reading.service.ReadingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
@@ -40,9 +40,6 @@ class MarkAsReadListenerTest {
     private PetService petService;
 
     @Mock
-    private ReadRateLimitService readRateLimitService;
-
-    @Mock
     private MarkAsReadEventLogRepository markAsReadEventLogRepository;
 
     @Mock
@@ -53,9 +50,6 @@ class MarkAsReadListenerTest {
 
     @BeforeEach
     void setUp() {
-        // rate limit은 기본적으로 통과되도록 설정 (개별 테스트에서 override 가능)
-        lenient().when(readRateLimitService.tryConsumeReadCountToken(anyLong(), any(LocalDateTime.class)))
-                .thenReturn(true);
         // 멱등성 체크는 기본적으로 신규 처리로 통과
         lenient().when(markAsReadEventLogRepository.markIfAbsent(anyLong(), anyLong()))
                 .thenReturn(true);
@@ -66,7 +60,7 @@ class MarkAsReadListenerTest {
         // given
         Long memberId = 1L;
         Long articleId = 1L;
-        MarkAsReadEvent event = new MarkAsReadEvent(memberId, articleId, LocalDateTime.now());
+        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, LocalDateTime.now(), true);
         given(articleService.isArrivedToday(eq(articleId), eq(memberId), any(LocalDate.class))).willReturn(true);
         given(articleService.canAddArticleScore(memberId)).willReturn(true);
         given(readingService.calculateArticleScore(memberId)).willReturn(10);
@@ -84,7 +78,7 @@ class MarkAsReadListenerTest {
         // given
         Long memberId = 1L;
         Long articleId = 1L;
-        MarkAsReadEvent event = new MarkAsReadEvent(memberId, articleId, LocalDateTime.now());
+        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, LocalDateTime.now(), true);
         given(articleService.isArrivedToday(eq(articleId), eq(memberId), any(LocalDate.class))).willReturn(false);
 
         // when
@@ -101,7 +95,7 @@ class MarkAsReadListenerTest {
         // given
         Long memberId = 1L;
         Long articleId = 1L;
-        MarkAsReadEvent event = new MarkAsReadEvent(memberId, articleId, LocalDateTime.now());
+        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, LocalDateTime.now(), true);
         given(markAsReadEventLogRepository.markIfAbsent(anyLong(), anyLong()))
                 .willReturn(false);
 
@@ -109,7 +103,6 @@ class MarkAsReadListenerTest {
         markAsReadListener.on(event);
 
         // then
-        verify(readRateLimitService, never()).tryConsumeReadCountToken(anyLong(), any(LocalDateTime.class));
         verify(readingService, never()).updateReadingCount(anyLong(), any(Boolean.class));
         verify(petService, never()).increaseCurrentScore(anyLong(), anyInt());
     }
@@ -119,7 +112,7 @@ class MarkAsReadListenerTest {
         // given
         Long memberId = 1L;
         Long articleId = 1L;
-        MarkAsReadEvent event = new MarkAsReadEvent(memberId, articleId, LocalDateTime.now());
+        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, LocalDateTime.now(), true);
         given(articleService.isArrivedToday(eq(articleId), eq(memberId), any(LocalDate.class))).willReturn(true);
         given(articleService.canAddArticleScore(memberId)).willReturn(false);
 
@@ -130,5 +123,36 @@ class MarkAsReadListenerTest {
         verify(readingService, times(1)).updateReadingCount(memberId, true);
         verify(petService, never()).increaseCurrentScore(anyLong(), anyInt());
         verify(articleService, times(1)).canAddArticleScore(memberId); // 호출되지만 false 반환
+    }
+
+    @Test
+    void 카운트_대상이_아닌_읽음_이벤트는_아무_작업도_수행하지_않는다() {
+        // given
+        Long memberId = 1L;
+        Long articleId = 1L;
+        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, LocalDateTime.now(), false);
+
+        // when
+        markAsReadListener.on(event);
+
+        // then
+        verify(markAsReadEventLogRepository, never()).markIfAbsent(anyLong(), anyLong());
+        verify(readingService, never()).updateReadingCount(anyLong(), any(Boolean.class));
+        verify(petService, never()).increaseCurrentScore(anyLong(), anyInt());
+    }
+
+    @Test
+    void 최종_재시도_실패_시_디스코드_알림을_보낸다() {
+        // given
+        Long memberId = 1L;
+        Long articleId = 1L;
+        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, LocalDateTime.now(), true);
+        TransientDataAccessResourceException exception = new TransientDataAccessResourceException("DB 일시 장애");
+
+        // when
+        markAsReadListener.recover(exception, event);
+
+        // then
+        verify(discordWebhookNotifier, times(1)).sendMarkAsReadErrorNotification(event, exception);
     }
 }

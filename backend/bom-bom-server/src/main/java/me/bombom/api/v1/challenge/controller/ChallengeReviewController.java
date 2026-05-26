@@ -49,18 +49,13 @@ public class ChallengeReviewController implements ChallengeReviewControllerApi {
         return challengeReviewService.getReviews(challengeId, member.getId(), pageable);
     }
 
-    // TODO: Service 도입 시 challengeId + memberId 기준 조회로 보강
     @Override
     @GetMapping("/me")
     public MyChallengeReviewResponse getMyReview(
             @PathVariable @Positive(message = "challengeId는 1 이상의 값이어야 합니다.") Long challengeId,
             @LoginMember Member member
     ) {
-        MockReview mine = mockStore.findByNickname(member.getNickname())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeReview")
-                        .addContext(ErrorContextKeys.OPERATION, "getMyReview"));
-        return ChallengeReviewMockStore.toMyResponse(mine);
+        return challengeReviewService.getMyReview(challengeId, member);
     }
 
     // TODO: Service 도입 시 challengeId + memberId 기준 중복 검사로 보강

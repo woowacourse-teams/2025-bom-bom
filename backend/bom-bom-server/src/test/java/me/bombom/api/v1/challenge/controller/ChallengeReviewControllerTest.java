@@ -83,10 +83,12 @@ class ChallengeReviewControllerTest {
     @Test
     void 로그인한_사용자는_가시성_정책에_맞는_리뷰_목록을_조회한다() throws Exception {
         // given
+        Member anotherMember = saveMember("익명", "another-provider");
+        Member hiddenMember = saveMember("숨김", "hidden-provider");
         save(challengeAId, viewer.getId(), "내 비공개", true);
-        save(challengeAId, viewer.getId(), "내 공개", false);
         save(challengeAId, otherMember.getId(), "타인 공개", false);
-        save(challengeAId, otherMember.getId(), "타인 비공개", true);
+        save(challengeAId, anotherMember.getId(), "또 다른 타인 공개", false);
+        save(challengeAId, hiddenMember.getId(), "타인 비공개", true);
         save(challengeBId, viewer.getId(), "다른 챌린지 본인 공개", false);
 
         // when // then
@@ -96,16 +98,18 @@ class ChallengeReviewControllerTest {
                 .andExpect(jsonPath("$.totalElements").value(3))
                 .andExpect(jsonPath("$.content[?(@.comment == '타인 비공개')]").isEmpty())
                 .andExpect(jsonPath("$.content[?(@.comment == '다른 챌린지 본인 공개')]").isEmpty())
-                .andExpect(jsonPath("$.content[?(@.isMyReview == true && @.comment == '내 공개')]").exists())
+                .andExpect(jsonPath("$.content[?(@.isMyReview == true && @.comment == '내 비공개')]").exists())
                 .andExpect(jsonPath("$.content[?(@.isMyReview == false && @.comment == '타인 공개')]").exists());
     }
 
     @Test
     void 페이징_파라미터가_적용된다() throws Exception {
         // given
+        Member pageMember = saveMember("페이지1", "page-provider-1");
+        Member anotherPageMember = saveMember("페이지2", "page-provider-2");
         save(challengeAId, viewer.getId(), "리뷰1", false);
-        save(challengeAId, viewer.getId(), "리뷰2", false);
-        save(challengeAId, viewer.getId(), "리뷰3", false);
+        save(challengeAId, pageMember.getId(), "리뷰2", false);
+        save(challengeAId, anotherPageMember.getId(), "리뷰3", false);
 
         // when // then
         mockMvc.perform(get("/api/v1/challenges/{challengeId}/reviews", challengeAId)
@@ -404,5 +408,9 @@ class ChallengeReviewControllerTest {
         );
         CustomOAuth2User principal = new CustomOAuth2User(attributes, member, null, null);
         return new OAuth2AuthenticationToken(principal, principal.getAuthorities(), "registrationId");
+    }
+
+    private Member saveMember(String nickname, String providerId) {
+        return memberRepository.save(TestFixture.createUniqueMember(nickname, providerId));
     }
 }

@@ -54,4 +54,13 @@ public class ChallengeReview extends BaseEntity {
         this.comment = comment;
         this.isPrivate = isPrivate;
     }
+
+    public boolean isOwnedBy(Long memberId) {
+        return this.memberId.equals(memberId);
+    }
+
+    public void update(String comment, boolean isPrivate) {
+        this.comment = comment;
+        this.isPrivate = isPrivate;
+    }
 }

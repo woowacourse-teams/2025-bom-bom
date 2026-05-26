@@ -7,7 +7,6 @@ import me.bombom.api.v1.common.DiscordWebhookNotifier;
 import me.bombom.api.v1.article.repository.MarkAsReadEventLogRepository;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.pet.service.PetService;
-import me.bombom.api.v1.reading.service.ReadRateLimitService;
 import me.bombom.api.v1.reading.service.ReadingService;
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.retry.annotation.Backoff;
@@ -27,7 +26,6 @@ public class MarkAsReadListener {
     private final ArticleService articleService;
     private final ReadingService readingService;
     private final PetService petService;
-    private final ReadRateLimitService readRateLimitService;
     private final MarkAsReadEventLogRepository markAsReadEventLogRepository;
     private final DiscordWebhookNotifier discordWebhookNotifier;
 
@@ -41,22 +39,22 @@ public class MarkAsReadListener {
             backoff = @Backoff(delay = 500, multiplier = 2, random = true) // 500ms, 1000ms 대기 후 실행 (jitter 포함)
     )
     public void on(MarkAsReadEvent event) {
-        log.info("MarkAsReadEvent received - memberId={}, articleId={}", event.memberId(), event.articleId());
+        log.info("MarkAsReadEvent received - memberId={}, articleId={}, countable={}",
+                event.memberId(), event.articleId(), event.countable());
+
+        if (!event.countable()) {
+            log.info("읽기 rate limit 초과로 카운트 갱신 skip - memberId={}", event.memberId());
+            return;
+        }
 
         if (!markAsReadEventLogRepository.markIfAbsent(event.memberId(), event.articleId())) {
             log.info("이미 처리된 이벤트 - skip - memberId={}, articleId={}", event.memberId(), event.articleId());
             return;
         }
 
-        boolean isReadCountTokenConsumed = readRateLimitService.tryConsumeReadCountToken(event.memberId(), event.readAt());
-        if (isReadCountTokenConsumed) {
-            boolean isTodayArticle = articleService.isArrivedToday(event.articleId(), event.memberId(), event.readAt().toLocalDate());
-            updateReadingCount(event, isTodayArticle);
-            updatePetScore(event, isTodayArticle);
-            return;
-        }
-
-        log.info("읽기 rate limit 초과로 카운트 갱신 skip - memberId={}", event.memberId());
+        boolean isTodayArticle = articleService.isArrivedToday(event.articleId(), event.memberId(), event.readAt().toLocalDate());
+        updateReadingCount(event, isTodayArticle);
+        updatePetScore(event, isTodayArticle);
     }
 
     @Recover

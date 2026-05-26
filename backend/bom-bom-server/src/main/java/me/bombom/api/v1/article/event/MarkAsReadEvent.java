@@ -6,6 +6,16 @@ public record MarkAsReadEvent(
 
         Long memberId,
         Long articleId,
-        LocalDateTime readAt
+        LocalDateTime readAt,
+        boolean countable
 ) {
+
+    public static MarkAsReadEvent of(
+            Long memberId,
+            Long articleId,
+            LocalDateTime readAt,
+            boolean countable
+    ) {
+        return new MarkAsReadEvent(memberId, articleId, readAt, countable);
+    }
 }

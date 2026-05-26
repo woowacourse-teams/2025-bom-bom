@@ -11,6 +11,7 @@ import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.dto.request.ArticleSearchOptionsRequest;
+import me.bombom.api.v1.article.dto.response.MarkAsReadResponse;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
@@ -78,12 +79,11 @@ public class ArticleController implements ArticleControllerApi{
 
     @Override
     @PatchMapping("/{id}/read")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateIsRead(
+    public MarkAsReadResponse updateIsRead(
             @LoginMember Member member,
             @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
     ) {
-        articleService.markAsRead(id, member);
+        return articleService.markAsRead(id, member);
     }
 
     @Override

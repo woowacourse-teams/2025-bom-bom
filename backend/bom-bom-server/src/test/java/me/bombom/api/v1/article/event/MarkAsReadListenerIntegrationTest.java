@@ -1,20 +1,20 @@
 package me.bombom.api.v1.article.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.article.repository.MarkAsReadEventLogRepository;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -49,6 +49,9 @@ class MarkAsReadListenerIntegrationTest {
 
     @Autowired
     private ArticleRepository articleRepository;
+
+    @Autowired
+    private MarkAsReadEventLogRepository markAsReadEventLogRepository;
 
     @Autowired
     private NewsletterRepository newsletterRepository;
@@ -88,6 +91,7 @@ class MarkAsReadListenerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        markAsReadEventLogRepository.deleteAllInBatch();
         memberReadTokenBucketRepository.deleteAllInBatch();
         articleRepository.deleteAllInBatch();
         newsletterRepository.deleteAllInBatch();
@@ -122,13 +126,13 @@ class MarkAsReadListenerIntegrationTest {
         // when
         markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId, LocalDateTime.now()));
 
-        // then
-        MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
-        assertSoftly(softly -> {
-            softly.assertThat(realtime.getCurrentCount()).isEqualTo(1);
-            softly.assertThat(memberReadTokenBucketRepository.findById(member.getId()))
+        verify(readingService, timeout(1_000)).updateReadingCount(member.getId(), false);
+        awaitUntilAsserted(() -> {
+            MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
+            assertThat(realtime.getCurrentCount()).isEqualTo(1);
+            assertThat(memberReadTokenBucketRepository.findById(member.getId()))
                     .isPresent()
-                    .hasValueSatisfying(bucket -> softly.assertThat(bucket.getTokens()).isLessThan(3.0));
+                    .hasValueSatisfying(bucket -> assertThat(bucket.getTokens()).isLessThan(3.0));
         });
     }
 
@@ -139,20 +143,16 @@ class MarkAsReadListenerIntegrationTest {
                 .when(readingService).updateReadingCount(anyLong(), any(Boolean.class));
 
         // when
-        assertThatThrownBy(() -> markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId, LocalDateTime.now())))
-                .isInstanceOf(RuntimeException.class);
+        markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId, LocalDateTime.now()));
 
-        // then
-        MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
-        assertSoftly(softly -> {
-            // 읽기 카운트 롤백
-            softly.assertThat(realtime.getCurrentCount()).isEqualTo(0);
-            // 토큰 차감도 롤백 - 버킷이 없거나 토큰이 그대로
-            memberReadTokenBucketRepository.findById(member.getId())
-                    .ifPresent(bucket -> softly.assertThat(bucket.getTokens()).isEqualTo(3.0));
+        verify(readingService, timeout(1_000)).updateReadingCount(member.getId(), false);
+        verify(petService, after(300).never()).increaseCurrentScore(anyLong(), anyInt());
+        awaitUntilAsserted(() -> {
+            MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
+            assertThat(realtime.getCurrentCount()).isEqualTo(0);
+            assertThat(memberReadTokenBucketRepository.findById(member.getId())).isEmpty();
+            assertThat(markAsReadEventLogRepository.count()).isZero();
         });
-        // 읽기 카운트 단계에서 예외가 발생하므로 펫 경험치 갱신은 호출되지 않음
-        verify(petService, never()).increaseCurrentScore(anyLong(), anyInt());
     }
 
     @Test
@@ -167,31 +167,86 @@ class MarkAsReadListenerIntegrationTest {
         // when
         markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId, LocalDateTime.now()));
 
-        // then - 펫은 별개 트랜잭션이므로 토큰 차감과 읽기 카운트는 그대로 유지
-        MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
-        assertSoftly(softly -> {
-            softly.assertThat(realtime.getCurrentCount()).isEqualTo(1);
-            softly.assertThat(memberReadTokenBucketRepository.findById(member.getId()))
+        verify(readingService, timeout(1_000)).updateReadingCount(member.getId(), true);
+        verify(petService, timeout(1_000)).increaseCurrentScore(member.getId(), 10);
+        awaitUntilAsserted(() -> {
+            MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
+            assertThat(realtime.getCurrentCount()).isEqualTo(1);
+            assertThat(memberReadTokenBucketRepository.findById(member.getId()))
                     .isPresent()
-                    .hasValueSatisfying(bucket -> softly.assertThat(bucket.getTokens()).isLessThan(3.0));
+                    .hasValueSatisfying(bucket -> assertThat(bucket.getTokens()).isLessThan(3.0));
         });
     }
 
     @Test
     void rate_limit_초과_시_읽기_카운트_증가_안함() {
-        // given - 토큰 3개 소진
+        // given - 서로 다른 아티클 3개로 토큰 3개 소진
+        Long secondArticleId = createArticle(LocalDateTime.now().minusDays(1));
+        Long thirdArticleId = createArticle(LocalDateTime.now().minusDays(1));
+        Long fourthArticleId = createArticle(LocalDateTime.now().minusDays(1));
+
         markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId, LocalDateTime.now()));
-        markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId, LocalDateTime.now()));
-        markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId, LocalDateTime.now()));
-        int countBefore = monthlyReadingRealtimeRepository.findByMemberId(member.getId())
-                .orElseThrow().getCurrentCount();
+        markAsReadListener.on(new MarkAsReadEvent(member.getId(), secondArticleId, LocalDateTime.now()));
+        markAsReadListener.on(new MarkAsReadEvent(member.getId(), thirdArticleId, LocalDateTime.now()));
+        verify(readingService, timeout(1_000).times(3)).updateReadingCount(member.getId(), false);
+
+        awaitUntilAsserted(() -> {
+            int countBefore = monthlyReadingRealtimeRepository.findByMemberId(member.getId())
+                    .orElseThrow().getCurrentCount();
+            assertThat(countBefore).isEqualTo(3);
+        });
 
         // when - 4번째 이벤트 (rate limit 초과)
-        markAsReadListener.on(new MarkAsReadEvent(member.getId(), articleId, LocalDateTime.now()));
+        markAsReadListener.on(new MarkAsReadEvent(member.getId(), fourthArticleId, LocalDateTime.now()));
 
         // then
-        int countAfter = monthlyReadingRealtimeRepository.findByMemberId(member.getId())
-                .orElseThrow().getCurrentCount();
-        assertThat(countAfter).isEqualTo(countBefore);
+        verify(readingService, after(300).times(3)).updateReadingCount(member.getId(), false);
+        awaitUntilAsserted(() -> {
+            int countAfter = monthlyReadingRealtimeRepository.findByMemberId(member.getId())
+                    .orElseThrow().getCurrentCount();
+            assertThat(countAfter).isEqualTo(3);
+        });
+    }
+
+    private Long createArticle(LocalDateTime arrivedAt) {
+        NewsletterDetail detail = newsletterDetailRepository.saveAll(TestFixture.createNewsletterDetails()).getFirst();
+        Category category = categoryRepository.saveAll(TestFixture.createCategories()).getFirst();
+        Newsletter newsletter = newsletterRepository.save(
+                TestFixture.createNewsletter("테스트레터", "test@letter.com", category.getId(), detail.getId())
+        );
+        return articleRepository.save(
+                TestFixture.createArticle("테스트 아티클", member.getId(), newsletter.getId(), arrivedAt)
+        ).getId();
+    }
+
+    private void awaitUntilAsserted(CheckedAssertion assertion) {
+        AssertionError lastAssertionError = null;
+        for (int i = 0; i < 20; i++) {
+            try {
+                assertion.run();
+                return;
+            } catch (AssertionError e) {
+                lastAssertionError = e;
+                sleepBriefly();
+            }
+        }
+
+        if (lastAssertionError != null) {
+            throw lastAssertionError;
+        }
+    }
+
+    private void sleepBriefly() {
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError("비동기 테스트 대기 중 인터럽트 발생", e);
+        }
+    }
+
+    @FunctionalInterface
+    private interface CheckedAssertion {
+        void run();
     }
 }

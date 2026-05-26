@@ -9,6 +9,7 @@ import me.bombom.api.v1.challenge.dto.request.CreateChallengeReviewRequest;
 import me.bombom.api.v1.challenge.dto.request.UpdateChallengeReviewRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewResponse;
 import me.bombom.api.v1.challenge.dto.response.MyChallengeReviewResponse;
+import me.bombom.api.v1.challenge.service.ChallengeReviewService;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -34,8 +35,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/challenges/{challengeId}/reviews")
 public class ChallengeReviewController implements ChallengeReviewControllerApi {
 
-    // TODO: Service 계층 도입 시 Mock 저장소 제거
+    // TODO: 구현 전체 전환 시 Mock 저장소 제거
     private final ChallengeReviewMockStore mockStore;
+    private final ChallengeReviewService challengeReviewService;
 
     @Override
     @GetMapping
@@ -44,8 +46,7 @@ public class ChallengeReviewController implements ChallengeReviewControllerApi {
             @LoginMember Member member,
             @PageableDefault(size = 20) Pageable pageable
     ) {
-        return mockStore.findAllAsPage(pageable)
-                .map(mock -> ChallengeReviewMockStore.toResponse(mock, member.getNickname()));
+        return challengeReviewService.getReviews(challengeId, member.getId(), pageable);
     }
 
     // TODO: Service 도입 시 challengeId + memberId 기준 조회로 보강

@@ -2,6 +2,7 @@ package me.bombom.api.v1.common.config;
 
 import java.util.Arrays;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,20 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setMaxPoolSize(props.getMaxPoolSize());
         executor.setQueueCapacity(props.getQueueCapacity());
         executor.setThreadNamePrefix("async-");
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(60);
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean(name = "markAsReadExecutor")
+    public Executor markAsReadExecutor(MarkAsReadAsyncExecutorProperties props) {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(props.getCorePoolSize());
+        executor.setMaxPoolSize(props.getMaxPoolSize());
+        executor.setQueueCapacity(props.getQueueCapacity());
+        executor.setThreadNamePrefix("mark-as-read-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(60);
         executor.initialize();

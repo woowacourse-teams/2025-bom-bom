@@ -13,6 +13,7 @@ import org.springframework.dao.TransientDataAccessException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,7 @@ public class MarkAsReadListener {
 
     @WithSpan
     @TransactionalEventListener
+    @Async("markAsReadExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Retryable(
             retryFor = TransientDataAccessException.class,

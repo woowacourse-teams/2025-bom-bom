@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import me.bombom.api.v1.article.repository.MarkAsReadEventLogRepository;
 import me.bombom.api.v1.article.service.ArticleService;
+import me.bombom.api.v1.common.DiscordWebhookNotifier;
 import me.bombom.api.v1.pet.service.PetService;
 import me.bombom.api.v1.reading.service.ReadRateLimitService;
 import me.bombom.api.v1.reading.service.ReadingService;
@@ -43,6 +44,9 @@ class MarkAsReadListenerTest {
 
     @Mock
     private MarkAsReadEventLogRepository markAsReadEventLogRepository;
+
+    @Mock
+    private DiscordWebhookNotifier discordWebhookNotifier;
 
     @InjectMocks
     private MarkAsReadListener markAsReadListener;

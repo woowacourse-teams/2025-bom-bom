@@ -3,6 +3,7 @@ package me.bombom.api.v1.article.event;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.common.DiscordWebhookNotifier;
 import me.bombom.api.v1.article.repository.MarkAsReadEventLogRepository;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.pet.service.PetService;
@@ -27,6 +28,7 @@ public class MarkAsReadListener {
     private final PetService petService;
     private final ReadRateLimitService readRateLimitService;
     private final MarkAsReadEventLogRepository markAsReadEventLogRepository;
+    private final DiscordWebhookNotifier discordWebhookNotifier;
 
     @WithSpan
     @TransactionalEventListener
@@ -57,7 +59,13 @@ public class MarkAsReadListener {
 
     @Recover
     void recover(TransientDataAccessException e, MarkAsReadEvent event) {
-        log.error("MarkAsRead 재시도 모두 실패 - memberId={}, articleId={}", event.memberId(), event.articleId(), e);
+        log.error("MarkAsRead 재시도 모두 실패 - memberId={}, articleId={}, readAt={}",
+                event.memberId(),
+                event.articleId(),
+                event.readAt(),
+                e
+        );
+        discordWebhookNotifier.sendMarkAsReadErrorNotification(event, e);
     }
 
     private void updateReadingCount(MarkAsReadEvent event, boolean isTodayArticle) {

@@ -13,7 +13,7 @@ public interface MarkAsReadEventLogRepository extends JpaRepository<MarkAsReadEv
         return insertIfAbsent(memberId, articleId) == 1;
     }
 
-    @Modifying(flushAutomatically = true)
+    @Modifying
     @Query(value = """
             INSERT INTO mark_as_read_event_log (member_id, article_id)
             VALUES (:memberId, :articleId)

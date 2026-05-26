@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import me.bombom.api.v1.challenge.domain.ChallengeReview;
 import me.bombom.api.v1.challenge.dto.request.CreateChallengeReviewRequest;
+import me.bombom.api.v1.challenge.dto.request.UpdateChallengeReviewRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewListItem;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewResponse;
 import me.bombom.api.v1.challenge.dto.response.MyChallengeReviewResponse;
@@ -38,6 +39,7 @@ class ChallengeReviewServiceTest {
     private static final Long CHALLENGE_ID = 100L;
     private static final Long VIEWER_MEMBER_ID = 1L;
     private static final Long OTHER_MEMBER_ID = 2L;
+    private static final Long REVIEW_ID = 42L;
 
     @Mock
     private ChallengeReviewRepository challengeReviewRepository;
@@ -202,8 +204,70 @@ class ChallengeReviewServiceTest {
                 .isInstanceOf(CIllegalArgumentException.class);
     }
 
+    @Test
+    void updateReview_리뷰가_존재하지_않으면_404_예외를_던진다() {
+        // given
+        given(challengeReviewRepository.findById(REVIEW_ID)).willReturn(Optional.empty());
+
+        // when // then
+        assertThatThrownBy(() -> challengeReviewService.updateReview(CHALLENGE_ID, REVIEW_ID, viewer(), updateRequest()))
+                .isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    @Test
+    void updateReview_path_challengeId와_review의_challengeId가_불일치하면_404_예외를_던진다() {
+        // given
+        ChallengeReview review = reviewOwnedBy(VIEWER_MEMBER_ID, 999L);
+        given(challengeReviewRepository.findById(REVIEW_ID)).willReturn(Optional.of(review));
+
+        // when // then
+        assertThatThrownBy(() -> challengeReviewService.updateReview(CHALLENGE_ID, REVIEW_ID, viewer(), updateRequest()))
+                .isInstanceOf(CIllegalArgumentException.class);
+        assertThat(review.getComment()).isEqualTo("원본 코멘트");
+    }
+
+    @Test
+    void updateReview_본인_리뷰가_아니면_404_예외를_던진다() {
+        // given
+        ChallengeReview review = reviewOwnedBy(OTHER_MEMBER_ID, CHALLENGE_ID);
+        given(challengeReviewRepository.findById(REVIEW_ID)).willReturn(Optional.of(review));
+
+        // when // then
+        assertThatThrownBy(() -> challengeReviewService.updateReview(CHALLENGE_ID, REVIEW_ID, viewer(), updateRequest()))
+                .isInstanceOf(CIllegalArgumentException.class);
+        assertThat(review.getComment()).isEqualTo("원본 코멘트");
+    }
+
+    @Test
+    void updateReview_정상_케이스에서_엔티티의_상태가_갱신된다() {
+        // given
+        ChallengeReview review = reviewOwnedBy(VIEWER_MEMBER_ID, CHALLENGE_ID);
+        given(challengeReviewRepository.findById(REVIEW_ID)).willReturn(Optional.of(review));
+
+        // when
+        challengeReviewService.updateReview(CHALLENGE_ID, REVIEW_ID, viewer(), new UpdateChallengeReviewRequest("수정된 코멘트", true));
+
+        // then — JPA dirty checking 가정. 도메인 인스턴스 상태 변경 검증으로 충분
+        assertThat(review.getComment()).isEqualTo("수정된 코멘트");
+        assertThat(review.isPrivate()).isTrue();
+    }
+
     private CreateChallengeReviewRequest createRequest() {
         return new CreateChallengeReviewRequest("리뷰 코멘트", false);
+    }
+
+    private UpdateChallengeReviewRequest updateRequest() {
+        return new UpdateChallengeReviewRequest("수정된 코멘트", true);
+    }
+
+    private ChallengeReview reviewOwnedBy(Long ownerMemberId, Long challengeId) {
+        return ChallengeReview.builder()
+                .id(REVIEW_ID)
+                .challengeId(challengeId)
+                .memberId(ownerMemberId)
+                .comment("원본 코멘트")
+                .isPrivate(false)
+                .build();
     }
 
     private void givenReviews(List<ChallengeReviewListItem> items) {

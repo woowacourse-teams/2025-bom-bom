@@ -58,7 +58,6 @@ public class ChallengeReviewController implements ChallengeReviewControllerApi {
         return challengeReviewService.getMyReview(challengeId, member);
     }
 
-    // TODO: Service 도입 시 challengeId + memberId 기준 중복 검사로 보강
     @Override
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -67,12 +66,7 @@ public class ChallengeReviewController implements ChallengeReviewControllerApi {
             @Valid @RequestBody CreateChallengeReviewRequest request,
             @LoginMember Member member
     ) {
-        if (mockStore.findByNickname(member.getNickname()).isPresent()) {
-            throw new CIllegalArgumentException(ErrorDetail.DUPLICATED_DATA)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeReview")
-                    .addContext(ErrorContextKeys.OPERATION, "createReview");
-        }
-        mockStore.save(member.getNickname(), request.comment(), request.isPrivate());
+        challengeReviewService.createReview(challengeId, member, request);
     }
 
     @Override

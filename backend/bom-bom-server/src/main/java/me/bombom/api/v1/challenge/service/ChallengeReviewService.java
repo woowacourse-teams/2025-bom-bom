@@ -2,6 +2,7 @@ package me.bombom.api.v1.challenge.service;
 
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.domain.ChallengeReview;
+import me.bombom.api.v1.challenge.dto.request.CreateChallengeReviewRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewResponse;
 import me.bombom.api.v1.challenge.dto.response.MyChallengeReviewResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
@@ -10,6 +11,7 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -53,6 +55,39 @@ public class ChallengeReviewService {
                         .addContext(ErrorContextKeys.MEMBER_ID, viewer.getId()));
 
         return MyChallengeReviewResponse.of(review, viewer.getNickname());
+    }
+
+    @Transactional
+    public void createReview(Long challengeId, Member viewer, CreateChallengeReviewRequest request) {
+        verifyChallengeExists(challengeId);
+        verifyNoDuplicateReview(challengeId, viewer.getId());
+
+        ChallengeReview review = ChallengeReview.builder()
+                .challengeId(challengeId)
+                .memberId(viewer.getId())
+                .comment(request.comment())
+                .isPrivate(request.isPrivate())
+                .build();
+
+        try {
+            challengeReviewRepository.save(review);
+        } catch (DataIntegrityViolationException e) {
+            throw new CIllegalArgumentException(ErrorDetail.DUPLICATED_DATA)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeReview")
+                    .addContext(ErrorContextKeys.OPERATION, "save")
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                    .addContext(ErrorContextKeys.MEMBER_ID, viewer.getId());
+        }
+    }
+
+    private void verifyNoDuplicateReview(Long challengeId, Long memberId) {
+        if (challengeReviewRepository.existsByChallengeIdAndMemberId(challengeId, memberId)) {
+            throw new CIllegalArgumentException(ErrorDetail.DUPLICATED_DATA)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeReview")
+                    .addContext(ErrorContextKeys.OPERATION, "existsByChallengeIdAndMemberId")
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId);
+        }
     }
 
     private void verifyChallengeExists(Long challengeId) {

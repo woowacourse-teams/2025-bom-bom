@@ -13,6 +13,8 @@ public interface ChallengeReviewRepository extends JpaRepository<ChallengeReview
 
     Optional<ChallengeReview> findByChallengeIdAndMemberId(Long challengeId, Long memberId);
 
+    boolean existsByChallengeIdAndMemberId(Long challengeId, Long memberId);
+
     @Query("""
         SELECT new me.bombom.api.v1.challenge.dto.response.ChallengeReviewListItem(
             cr.id,

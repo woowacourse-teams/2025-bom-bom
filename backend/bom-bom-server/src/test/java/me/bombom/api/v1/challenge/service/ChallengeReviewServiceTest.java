@@ -5,10 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 import java.util.Optional;
 import me.bombom.api.v1.challenge.domain.ChallengeReview;
+import me.bombom.api.v1.challenge.dto.request.CreateChallengeReviewRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewListItem;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewResponse;
 import me.bombom.api.v1.challenge.dto.response.MyChallengeReviewResponse;
@@ -19,9 +22,11 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.enums.Gender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -137,6 +142,68 @@ class ChallengeReviewServiceTest {
         assertThat(result.nickname()).isEqualTo("나밍곰");
         assertThat(result.comment()).isEqualTo("내 리뷰");
         assertThat(result.isPrivate()).isTrue();
+    }
+
+    @Test
+    void createReview_챌린지가_존재하지_않으면_404_예외를_던지고_저장되지_않는다() {
+        // given
+        given(challengeRepository.existsById(CHALLENGE_ID)).willReturn(false);
+
+        // when // then
+        assertThatThrownBy(() -> challengeReviewService.createReview(CHALLENGE_ID, viewer(), createRequest()))
+                .isInstanceOf(CIllegalArgumentException.class);
+        verify(challengeReviewRepository, never()).save(any());
+    }
+
+    @Test
+    void createReview_이미_본인이_작성한_리뷰가_있으면_400_예외를_던지고_저장되지_않는다() {
+        // given
+        given(challengeRepository.existsById(CHALLENGE_ID)).willReturn(true);
+        given(challengeReviewRepository.existsByChallengeIdAndMemberId(CHALLENGE_ID, VIEWER_MEMBER_ID))
+                .willReturn(true);
+
+        // when // then
+        assertThatThrownBy(() -> challengeReviewService.createReview(CHALLENGE_ID, viewer(), createRequest()))
+                .isInstanceOf(CIllegalArgumentException.class);
+        verify(challengeReviewRepository, never()).save(any());
+    }
+
+    @Test
+    void createReview_정상_케이스에서_요청값으로_ChallengeReview가_저장된다() {
+        // given
+        given(challengeRepository.existsById(CHALLENGE_ID)).willReturn(true);
+        given(challengeReviewRepository.existsByChallengeIdAndMemberId(CHALLENGE_ID, VIEWER_MEMBER_ID))
+                .willReturn(false);
+
+        // when
+        challengeReviewService.createReview(CHALLENGE_ID, viewer(), new CreateChallengeReviewRequest("좋았어요", true));
+
+        // then
+        ArgumentCaptor<ChallengeReview> captor = ArgumentCaptor.forClass(ChallengeReview.class);
+        verify(challengeReviewRepository).save(captor.capture());
+        ChallengeReview saved = captor.getValue();
+        assertThat(saved.getChallengeId()).isEqualTo(CHALLENGE_ID);
+        assertThat(saved.getMemberId()).isEqualTo(VIEWER_MEMBER_ID);
+        assertThat(saved.getComment()).isEqualTo("좋았어요");
+        assertThat(saved.isPrivate()).isTrue();
+    }
+
+    @Test
+    void createReview_save_시점에_unique_제약_위반이_발생하면_DUPLICATED_DATA로_변환된다() {
+        // given
+        given(challengeRepository.existsById(CHALLENGE_ID)).willReturn(true);
+        given(challengeReviewRepository.existsByChallengeIdAndMemberId(CHALLENGE_ID, VIEWER_MEMBER_ID))
+                .willReturn(false);
+        given(challengeReviewRepository.save(any(ChallengeReview.class)))
+                .willThrow(new DataIntegrityViolationException("unique constraint"));
+
+        // when // then
+        assertThatThrownBy(() -> challengeReviewService.createReview(CHALLENGE_ID, viewer(), createRequest()))
+                .isInstanceOf(CIllegalArgumentException.class);
+    }
+
+    private CreateChallengeReviewRequest createRequest() {
+        return new CreateChallengeReviewRequest("리뷰 코멘트", false);
     }
 
     private void givenReviews(List<ChallengeReviewListItem> items) {

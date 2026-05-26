@@ -2,7 +2,6 @@ package me.bombom.api.v1.challenge.service;
 
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.domain.ChallengeReview;
-import me.bombom.api.v1.challenge.dto.response.ChallengeReviewListItem;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewResponse;
 import me.bombom.api.v1.challenge.dto.response.MyChallengeReviewResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
@@ -39,20 +38,7 @@ public class ChallengeReviewService {
 
         return challengeReviewRepository
                 .findVisibleReviews(challengeId, viewerMemberId, enforcedPageable)
-                .map(item -> toResponse(item, viewerMemberId));
-    }
-
-    private ChallengeReviewResponse toResponse(ChallengeReviewListItem item, Long viewerMemberId) {
-        String nickname = item.nickname() != null
-                ? item.nickname()
-                : ChallengeReviewResponse.WITHDRAWN_MEMBER_NICKNAME;
-        return new ChallengeReviewResponse(
-                item.reviewId(),
-                nickname,
-                item.comment(),
-                item.isPrivate(),
-                item.memberId().equals(viewerMemberId)
-        );
+                .map(item -> ChallengeReviewResponse.from(item, viewerMemberId));
     }
 
     public MyChallengeReviewResponse getMyReview(Long challengeId, Member viewer) {
@@ -66,16 +52,7 @@ public class ChallengeReviewService {
                         .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
                         .addContext(ErrorContextKeys.MEMBER_ID, viewer.getId()));
 
-        return toMyResponse(review, viewer.getNickname());
-    }
-
-    private MyChallengeReviewResponse toMyResponse(ChallengeReview review, String viewerNickname) {
-        return new MyChallengeReviewResponse(
-                review.getId(),
-                viewerNickname,
-                review.getComment(),
-                review.isPrivate()
-        );
+        return MyChallengeReviewResponse.of(review, viewer.getNickname());
     }
 
     private void verifyChallengeExists(Long challengeId) {

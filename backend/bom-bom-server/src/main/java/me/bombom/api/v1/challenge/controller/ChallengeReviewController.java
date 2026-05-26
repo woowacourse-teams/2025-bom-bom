@@ -3,16 +3,11 @@ package me.bombom.api.v1.challenge.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.challenge.controller.mock.ChallengeReviewMockStore;
-import me.bombom.api.v1.challenge.controller.mock.ChallengeReviewMockStore.MockReview;
 import me.bombom.api.v1.challenge.dto.request.CreateChallengeReviewRequest;
 import me.bombom.api.v1.challenge.dto.request.UpdateChallengeReviewRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewResponse;
 import me.bombom.api.v1.challenge.dto.response.MyChallengeReviewResponse;
 import me.bombom.api.v1.challenge.service.ChallengeReviewService;
-import me.bombom.api.v1.common.exception.CIllegalArgumentException;
-import me.bombom.api.v1.common.exception.ErrorContextKeys;
-import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
@@ -35,8 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/challenges/{challengeId}/reviews")
 public class ChallengeReviewController implements ChallengeReviewControllerApi {
 
-    // TODO: 구현 전체 전환 시 Mock 저장소 제거
-    private final ChallengeReviewMockStore mockStore;
     private final ChallengeReviewService challengeReviewService;
 
     @Override
@@ -78,17 +71,6 @@ public class ChallengeReviewController implements ChallengeReviewControllerApi {
             @Valid @RequestBody UpdateChallengeReviewRequest request,
             @LoginMember Member member
     ) {
-        MockReview existing = mockStore.findById(reviewId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeReview")
-                        .addContext(ErrorContextKeys.OPERATION, "updateReview"));
-
-        if (!existing.nickname().equals(member.getNickname())) {
-            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
-                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeReview")
-                    .addContext(ErrorContextKeys.OPERATION, "updateReview");
-        }
-
-        mockStore.updateById(reviewId, request.comment(), request.isPrivate());
+        challengeReviewService.updateReview(challengeId, reviewId, member, request);
     }
 }

@@ -26,7 +26,7 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
         FROM Subscribe s
         JOIN Newsletter n ON s.newsletterId = n.id
         WHERE s.memberId = :memberId
-        ORDER BY s.createdAt
+        ORDER BY n.name
     """)
     List<SubscribedNewsletterResponse> findSubscribedByMemberId(@Param("memberId") Long memberId);
 

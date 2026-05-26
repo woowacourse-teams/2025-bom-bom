@@ -76,14 +76,14 @@ public interface ChallengeReviewControllerApi {
 
     @Operation(
             summary = "리뷰 수정",
-            description = "로그인한 사용자가 자신의 챌린지 리뷰를 수정합니다. 코멘트와 비공개 여부를 함께 수정할 수 있습니다."
+            description = "로그인한 사용자가 자신의 챌린지 리뷰를 수정합니다. 코멘트와 비공개 여부를 함께 수정할 수 있습니다. "
+                    + "본인 리뷰만 수정 가능하며, 타인 리뷰에 대한 요청은 정보 누설 방지를 위해 404 로 응답합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "리뷰 수정 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 (유효성 검증 실패)", content = @Content),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),
-            @ApiResponse(responseCode = "403", description = "본인이 작성하지 않은 리뷰는 수정할 수 없음", content = @Content),
-            @ApiResponse(responseCode = "404", description = "챌린지 또는 리뷰를 찾을 수 없음", content = @Content)
+            @ApiResponse(responseCode = "404", description = "리뷰를 찾을 수 없음 (미존재 / 경로의 챌린지 불일치 / 타인 리뷰 — IDOR 방어)", content = @Content)
     })
     void updateReview(
             @PathVariable @Positive(message = "challengeId는 1 이상의 값이어야 합니다.") Long challengeId,

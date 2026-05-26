@@ -3,6 +3,7 @@ package me.bombom.api.v1.challenge.service;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.domain.ChallengeReview;
 import me.bombom.api.v1.challenge.dto.request.CreateChallengeReviewRequest;
+import me.bombom.api.v1.challenge.dto.request.UpdateChallengeReviewRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewResponse;
 import me.bombom.api.v1.challenge.dto.response.MyChallengeReviewResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
@@ -78,6 +79,34 @@ public class ChallengeReviewService {
                     .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
                     .addContext(ErrorContextKeys.MEMBER_ID, viewer.getId());
         }
+    }
+
+    @Transactional
+    public void updateReview(Long challengeId, Long reviewId, Member viewer, UpdateChallengeReviewRequest request) {
+        ChallengeReview review = challengeReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeReview")
+                        .addContext(ErrorContextKeys.OPERATION, "findById")
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                        .addContext(ErrorContextKeys.MEMBER_ID, viewer.getId()));
+
+        if (!review.getChallengeId().equals(challengeId)) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeReview")
+                    .addContext(ErrorContextKeys.OPERATION, "verifyChallengeIdMatch")
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                    .addContext(ErrorContextKeys.MEMBER_ID, viewer.getId());
+        }
+
+        if (!review.isOwnedBy(viewer.getId())) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeReview")
+                    .addContext(ErrorContextKeys.OPERATION, "isOwnedBy")
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                    .addContext(ErrorContextKeys.MEMBER_ID, viewer.getId());
+        }
+
+        review.update(request.comment(), request.isPrivate());
     }
 
     private void verifyNoDuplicateReview(Long challengeId, Long memberId) {

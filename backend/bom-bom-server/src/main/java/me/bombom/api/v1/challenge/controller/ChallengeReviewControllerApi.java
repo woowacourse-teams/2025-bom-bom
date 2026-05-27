@@ -57,13 +57,14 @@ public interface ChallengeReviewControllerApi {
     @Operation(
             summary = "리뷰 작성",
             description = "로그인한 사용자가 챌린지 리뷰를 작성합니다. 비공개 여부를 함께 지정할 수 있습니다. "
-                    + "본인이 참여한 챌린지에 대해서만 작성 가능하며, 비참여자 요청은 정보 누설 방지를 위해 404 로 응답합니다."
+                    + "본인이 참여한 챌린지에 대해서만 작성 가능하며, 비참여자 요청은 정보 누설 방지를 위해 404 로 응답합니다. "
+                    + "리뷰는 챌린지 마지막 날(종료일) 부터 작성 가능합니다. 종료일 당일 작성 시 출석 인정, 종료 후 작성은 리뷰만 저장됩니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "리뷰 작성 성공"),
             @ApiResponse(
                     responseCode = "400",
-                    description = "잘못된 요청 (유효성 검증 실패 / 이미 작성한 리뷰 존재 / 챌린지 시작일 이전)",
+                    description = "잘못된 요청 (유효성 검증 실패 / 이미 작성한 리뷰 존재 / 챌린지 종료일 이전 — 리뷰는 마지막 날부터 작성 가능)",
                     content = @Content
             ),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),

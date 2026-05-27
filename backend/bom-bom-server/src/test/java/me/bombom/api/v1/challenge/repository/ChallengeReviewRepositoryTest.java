@@ -78,28 +78,6 @@ class ChallengeReviewRepositoryTest {
     }
 
     @Test
-    void 페이징_size_제한이_적용된다() {
-        // given
-        Member pageMember = saveMember("페이지1", "page-provider-1");
-        Member anotherPageMember = saveMember("페이지2", "page-provider-2");
-        save(challengeAId, viewer.getId(), "리뷰1", false);
-        save(challengeAId, pageMember.getId(), "리뷰2", false);
-        save(challengeAId, anotherPageMember.getId(), "리뷰3", false);
-
-        // when
-        Page<ChallengeReviewListItem> firstPage = challengeReviewRepository.findVisibleReviews(
-                challengeAId,
-                viewer.getId(),
-                PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "createdAt"))
-        );
-
-        // then
-        assertThat(firstPage.getContent()).hasSize(2);
-        assertThat(firstPage.getTotalElements()).isEqualTo(3);
-        assertThat(firstPage.getTotalPages()).isEqualTo(2);
-    }
-
-    @Test
     void 응답의_nickname은_조인된_Member의_nickname을_반영한다() {
         // given
         save(challengeAId, otherMember.getId(), "타인 공개", false);

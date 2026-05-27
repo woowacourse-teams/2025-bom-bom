@@ -25,10 +25,8 @@ public interface ChallengeReviewControllerApi {
     @Operation(
             summary = "열람 가능한 리뷰 목록 조회",
             description = "로그인한 사용자가 직접 작성한 리뷰(비공개 포함)와 다른 사용자가 작성한 공개 리뷰 목록을 함께 조회합니다. "
-                    + "응답은 `Page<ChallengeReviewResponse>` 형식이며, 정렬은 항상 최신순으로 서버가 강제합니다. "
-                    + "`page`, `size` 쿼리 파라미터만 사용 가능하며, `sort` 파라미터는 무시됩니다. "
+                    + "정렬은 항상 최신순으로 적용되며, `sort` 파라미터는 무시됩니다. "
                     + "각 항목의 `isMyReview` 필드로 로그인 회원 본인 작성 여부를 분기 처리할 수 있습니다. "
-                    + "(v2: 응답에 `isMyReview` 추가, 페이징 적용)"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "리뷰 목록 조회 성공"),
@@ -42,10 +40,9 @@ public interface ChallengeReviewControllerApi {
     );
 
     @Operation(
-            summary = "내 리뷰 존재 확인",
+            summary = "내가 작성한 리뷰 조회",
             description = "로그인한 사용자가 해당 챌린지에 이미 작성한 리뷰가 있는지 확인합니다. "
                     + "리뷰가 존재하면 200과 함께 리뷰 본문을 반환하고, 없으면 404를 반환합니다. "
-                    + "프론트엔드는 이 응답으로 리뷰 작성 버튼 활성화 여부를 결정합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "내 리뷰가 존재함"),
@@ -59,17 +56,19 @@ public interface ChallengeReviewControllerApi {
 
     @Operation(
             summary = "리뷰 작성",
-            description = "로그인한 사용자가 챌린지 리뷰를 작성합니다. 비공개 여부를 함께 지정할 수 있습니다."
+            description = "로그인한 사용자가 챌린지 리뷰를 작성합니다. 비공개 여부를 함께 지정할 수 있습니다. "
+                    + "본인이 참여한 챌린지에 대해서만 작성 가능하며, 비참여자 요청은 정보 누설 방지를 위해 404 로 응답합니다. "
+                    + "리뷰는 챌린지 마지막 날(종료일) 부터 작성 가능합니다. 종료일 당일 작성 시 출석 인정, 종료 후 작성은 리뷰만 저장됩니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "리뷰 작성 성공"),
             @ApiResponse(
                     responseCode = "400",
-                    description = "잘못된 요청 (유효성 검증 실패, 또는 해당 챌린지에 이미 작성한 리뷰가 존재)",
+                    description = "잘못된 요청 (유효성 검증 실패 / 이미 작성한 리뷰 존재 / 챌린지 종료일 이전 — 리뷰는 마지막 날부터 작성 가능)",
                     content = @Content
             ),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),
-            @ApiResponse(responseCode = "404", description = "챌린지를 찾을 수 없음", content = @Content)
+            @ApiResponse(responseCode = "404", description = "챌린지를 찾을 수 없음 또는 본인이 참여하지 않은 챌린지", content = @Content)
     })
     void createReview(
             @PathVariable @Positive(message = "challengeId는 1 이상의 값이어야 합니다.") Long challengeId,
@@ -79,14 +78,14 @@ public interface ChallengeReviewControllerApi {
 
     @Operation(
             summary = "리뷰 수정",
-            description = "로그인한 사용자가 자신의 챌린지 리뷰를 수정합니다. 코멘트와 비공개 여부를 함께 수정할 수 있습니다."
+            description = "로그인한 사용자가 자신의 챌린지 리뷰를 수정합니다. 코멘트와 비공개 여부를 함께 수정할 수 있습니다. "
+                    + "본인 리뷰만 수정 가능하며, 타인 리뷰에 대한 요청은 정보 누설 방지를 위해 404 로 응답합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "리뷰 수정 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 (유효성 검증 실패)", content = @Content),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content),
-            @ApiResponse(responseCode = "403", description = "본인이 작성하지 않은 리뷰는 수정할 수 없음", content = @Content),
-            @ApiResponse(responseCode = "404", description = "챌린지 또는 리뷰를 찾을 수 없음", content = @Content)
+            @ApiResponse(responseCode = "404", description = "리뷰를 찾을 수 없음 (미존재 / 경로의 챌린지 불일치 / 타인 리뷰 — IDOR 방어)", content = @Content)
     })
     void updateReview(
             @PathVariable @Positive(message = "challengeId는 1 이상의 값이어야 합니다.") Long challengeId,

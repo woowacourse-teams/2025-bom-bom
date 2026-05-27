@@ -32,4 +32,17 @@ public record ChallengeReviewResponse(
         )
         boolean isMyReview
 ) {
+
+    public static final String WITHDRAWN_MEMBER_NICKNAME = "탈퇴한 사용자";
+
+    public static ChallengeReviewResponse of(ChallengeReviewListItem item, Long viewerMemberId) {
+        String displayNickname = item.nickname() != null ? item.nickname() : WITHDRAWN_MEMBER_NICKNAME;
+        return new ChallengeReviewResponse(
+                item.reviewId(),
+                displayNickname,
+                item.comment(),
+                item.isPrivate(),
+                item.memberId().equals(viewerMemberId)
+        );
+    }
 }

@@ -3,6 +3,7 @@ package me.bombom.api.v1.challenge.dto.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 import jakarta.validation.constraints.NotNull;
+import me.bombom.api.v1.challenge.domain.ChallengeReview;
 
 public record MyChallengeReviewResponse(
 
@@ -25,4 +26,13 @@ public record MyChallengeReviewResponse(
         )
         boolean isPrivate
 ) {
+
+    public static MyChallengeReviewResponse of(ChallengeReview review, String viewerNickname) {
+        return new MyChallengeReviewResponse(
+                review.getId(),
+                viewerNickname,
+                review.getComment(),
+                review.isPrivate()
+        );
+    }
 }

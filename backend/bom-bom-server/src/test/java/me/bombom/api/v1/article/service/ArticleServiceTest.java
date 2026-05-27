@@ -1,14 +1,13 @@
 package me.bombom.api.v1.article.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
 
-import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -38,8 +37,8 @@ import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.domain.Role;
-import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.member.repository.RoleRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
@@ -50,18 +49,17 @@ import me.bombom.api.v1.reading.service.ReadRateLimitService;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 
 @IntegrationTest
+@RecordApplicationEvents
 class ArticleServiceTest {
 
     private static final LocalDateTime BASE_TIME = LocalDateTime.of(2025, 7, 15, 10, 0);
@@ -91,34 +89,30 @@ class ArticleServiceTest {
     private MemberRepository memberRepository;
 
     @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
     private BookmarkRepository bookmarkRepository;
 
     @Autowired
     private HighlightRepository highlightRepository;
 
     @MockitoBean
-    private ApplicationEventPublisher applicationEventPublisher;
-
-    @MockitoBean
     private ReadRateLimitService readRateLimitService;
 
     @Autowired
-    private EntityManager entityManager;
-
-    @Autowired
-    private PlatformTransactionManager transactionManager;
-
-    private Long userRoleId;
-    private Long adminRoleId;
+    private ApplicationEvents applicationEvents;
 
     List<Category> categories;
     List<Newsletter> newsletters;
     List<Article> articles;
     Member member;
+    private Long userRoleId;
+    private Long adminRoleId;
 
     @BeforeEach
     public void setup() {
-        initializeRoles();
+        ensureRoles();
         articleReadHistoryRepository.deleteAllInBatch();
         newsletterRepository.deleteAllInBatch();
         articleRepository.deleteAllInBatch();
@@ -127,15 +121,7 @@ class ArticleServiceTest {
         bookmarkRepository.deleteAllInBatch();
         highlightRepository.deleteAllInBatch();
 
-        member = Member.builder()
-                .provider("apple")
-                .providerId("providerId")
-                .email("email@bombom.news")
-                .nickname("nickname")
-                .gender(Gender.FEMALE)
-                .roleId(userRoleId)
-                .build();
-        memberRepository.save(member);
+        member = memberRepository.save(TestFixture.createMemberWithRole("nickname", "providerId", userRoleId));
         categories = TestFixture.createCategories();
         categoryRepository.saveAll(categories);
         List<NewsletterDetail> newsletterDetails = TestFixture.createNewsletterDetails();
@@ -149,18 +135,13 @@ class ArticleServiceTest {
                 .thenReturn(true);
     }
 
-    private void initializeRoles() {
-        TransactionTemplate tx = new TransactionTemplate(transactionManager);
-        tx.executeWithoutResult(status -> {
-            entityManager.createNativeQuery("TRUNCATE TABLE role").executeUpdate();
-            Role userRole = Role.builder().authority("USER").build();
-            Role adminRole = Role.builder().authority("ADMIN").build();
-            entityManager.persist(userRole);
-            entityManager.persist(adminRole);
-            entityManager.flush();
-            userRoleId = userRole.getId();
-            adminRoleId = adminRole.getId();
-        });
+    private void ensureRoles() {
+        userRoleId = roleRepository.findByAuthority("USER")
+                .map(Role::getId)
+                .orElseGet(() -> roleRepository.save(Role.builder().authority("USER").build()).getId());
+        adminRoleId = roleRepository.findByAuthority("ADMIN")
+                .map(Role::getId)
+                .orElseGet(() -> roleRepository.save(Role.builder().authority("ADMIN").build()).getId());
     }
 
     @Test
@@ -415,15 +396,7 @@ class ArticleServiceTest {
     @Test
     void 아티클_상세_조회_멤버가_이메일의_주인이_아니면_예외() {
         //given
-        Member member2 = Member.builder()
-                .provider("provider2")
-                .providerId("providerId2")
-                .email("email2")
-                .nickname("nickname2")
-                .gender(Gender.FEMALE)
-                .roleId(userRoleId)
-                .build();
-        memberRepository.save(member2);
+        Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname2", "providerId2"));
 
         // when & then
         assertThatThrownBy(() -> articleService.getArticleDetail(articles.getFirst().getId(), member2))
@@ -442,15 +415,7 @@ class ArticleServiceTest {
     @Test
     void 다_읽음_갱신_아티클_주인이_일치하지_않으면_예외() {
         // given
-        Member otherMember = Member.builder()
-                .provider("provider2")
-                .providerId("providerId2")
-                .email("email2")
-                .nickname("nickname2")
-                .gender(Gender.FEMALE)
-                .roleId(userRoleId)
-                .build();
-        memberRepository.save(otherMember);
+        Member otherMember = memberRepository.save(TestFixture.createUniqueMember("nickname2", "providerId2"));
 
         Article article = TestFixture.createArticle(
                 "제목",
@@ -469,15 +434,7 @@ class ArticleServiceTest {
     @Test
     void 다_읽음_갱신_이미_읽은_아티클이어도_주인이_일치하지_않으면_예외() {
         // given
-        Member otherMember = Member.builder()
-                .provider("provider2")
-                .providerId("providerId2")
-                .email("email2")
-                .nickname("nickname2")
-                .gender(Gender.FEMALE)
-                .roleId(userRoleId)
-                .build();
-        memberRepository.save(otherMember);
+        Member otherMember = memberRepository.save(TestFixture.createUniqueMember("nickname2", "providerId2"));
 
         Article article = TestFixture.createArticle(
                 "제목",
@@ -533,13 +490,14 @@ class ArticleServiceTest {
         MarkAsReadResponse result = articleService.markAsRead(article.getId(), member);
 
         // then
-        ArgumentCaptor<MarkAsReadEvent> eventCaptor = ArgumentCaptor.forClass(MarkAsReadEvent.class);
-        verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
+        List<MarkAsReadEvent> events = applicationEvents.stream(MarkAsReadEvent.class).toList();
+        assertThat(events).hasSize(1);
+        MarkAsReadEvent event = events.getFirst();
         assertSoftly(softly -> {
             softly.assertThat(result.readCountTokenConsumed()).isTrue();
-            softly.assertThat(eventCaptor.getValue().memberId()).isEqualTo(member.getId());
-            softly.assertThat(eventCaptor.getValue().articleId()).isEqualTo(article.getId());
-            softly.assertThat(eventCaptor.getValue().countable()).isTrue();
+            softly.assertThat(event.memberId()).isEqualTo(member.getId());
+            softly.assertThat(event.articleId()).isEqualTo(article.getId());
+            softly.assertThat(event.countable()).isTrue();
         });
     }
 
@@ -554,13 +512,14 @@ class ArticleServiceTest {
         MarkAsReadResponse result = articleService.markAsRead(article.getId(), member);
 
         // then
-        ArgumentCaptor<MarkAsReadEvent> eventCaptor = ArgumentCaptor.forClass(MarkAsReadEvent.class);
-        verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
+        List<MarkAsReadEvent> events = applicationEvents.stream(MarkAsReadEvent.class).toList();
+        assertThat(events).hasSize(1);
+        MarkAsReadEvent event = events.getFirst();
         assertSoftly(softly -> {
             softly.assertThat(result.readCountTokenConsumed()).isTrue();
-            softly.assertThat(eventCaptor.getValue().memberId()).isEqualTo(member.getId());
-            softly.assertThat(eventCaptor.getValue().articleId()).isEqualTo(article.getId());
-            softly.assertThat(eventCaptor.getValue().countable()).isTrue();
+            softly.assertThat(event.memberId()).isEqualTo(member.getId());
+            softly.assertThat(event.articleId()).isEqualTo(article.getId());
+            softly.assertThat(event.countable()).isTrue();
         });
     }
 
@@ -575,13 +534,14 @@ class ArticleServiceTest {
         MarkAsReadResponse result = articleService.markAsRead(article.getId(), member);
 
         // then
-        ArgumentCaptor<MarkAsReadEvent> eventCaptor = ArgumentCaptor.forClass(MarkAsReadEvent.class);
-        verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
+        List<MarkAsReadEvent> events = applicationEvents.stream(MarkAsReadEvent.class).toList();
+        assertThat(events).hasSize(1);
+        MarkAsReadEvent event = events.getFirst();
         assertSoftly(softly -> {
             softly.assertThat(result.readCountTokenConsumed()).isFalse();
-            softly.assertThat(eventCaptor.getValue().memberId()).isEqualTo(member.getId());
-            softly.assertThat(eventCaptor.getValue().articleId()).isEqualTo(article.getId());
-            softly.assertThat(eventCaptor.getValue().countable()).isFalse();
+            softly.assertThat(event.memberId()).isEqualTo(member.getId());
+            softly.assertThat(event.articleId()).isEqualTo(article.getId());
+            softly.assertThat(event.countable()).isFalse();
         });
     }
 
@@ -814,15 +774,7 @@ class ArticleServiceTest {
     @Test
     void 아티클_삭제_권한_없으면_예외_발생() {
         // given
-        Member other = Member.builder()
-                .provider("provider")
-                .providerId("providerId")
-                .email("email2")
-                .nickname("nickname2")
-                .gender(Gender.FEMALE)
-                .roleId(userRoleId)
-                .build();
-        memberRepository.save(other);
+        Member other = memberRepository.save(TestFixture.createUniqueMember("nickname2", "providerId2"));
 
         Long foreignArticleId = articleRepository.save(
                 TestFixture.createArticle("남의글", other.getId(), newsletters.get(0).getId(), BASE_TIME)

@@ -272,7 +272,7 @@ class ChallengeReviewControllerTest {
     }
 
     @Test
-    void createReview_비참여자_리뷰_작성_시도는_403_을_반환하고_출석도_인정되지_않는다() throws Exception {
+    void createReview_비참여자_리뷰_작성_시도는_404_를_반환하고_출석도_인정되지_않는다_IDOR_방어() throws Exception {
         // otherMember 는 challengeA 에 참여하지 않은 사용자
         OAuth2AuthenticationToken nonParticipantAuth = authOf(otherMember);
         String body = "{\"comment\":\"좋았어요\",\"isPrivate\":false}";
@@ -281,7 +281,7 @@ class ChallengeReviewControllerTest {
                         .with(authentication(nonParticipantAuth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound());
 
         assertThat(challengeReviewRepository.findAll()).isEmpty();
         assertThat(challengeDailyResultRepository.count()).isZero();

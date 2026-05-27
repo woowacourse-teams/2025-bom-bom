@@ -77,7 +77,7 @@ public class ChallengeReviewService {
 
         ChallengeParticipant participant = challengeParticipantRepository
                 .findByChallengeIdAndMemberId(challengeId, viewer.getId())
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
                         .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndMemberId")
                         .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)

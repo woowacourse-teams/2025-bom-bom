@@ -307,7 +307,7 @@ class ChallengeReviewServiceTest {
     }
 
     @Test
-    void createReview_비참여자이면_403_예외를_던지고_저장되지_않는다() {
+    void createReview_비참여자이면_404_예외를_던지고_저장되지_않는다_IDOR_방어() {
         // given
         given(challengeRepository.findById(CHALLENGE_ID)).willReturn(Optional.of(ongoingChallenge()));
         given(challengeReviewRepository.existsByChallengeIdAndMemberId(CHALLENGE_ID, VIEWER_MEMBER_ID))

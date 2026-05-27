@@ -37,6 +37,10 @@ class ChallengeReviewRepositoryTest {
 
     @BeforeEach
     void setUp() {
+        challengeReviewRepository.deleteAllInBatch();
+        challengeRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+
         viewer = memberRepository.save(TestFixture.createUniqueMember("나밍곰", "viewer-provider"));
         otherMember = memberRepository.save(TestFixture.createUniqueMember("제나", "other-provider"));
 
@@ -53,10 +57,12 @@ class ChallengeReviewRepositoryTest {
     @Test
     void 가시성_정책에_맞는_리뷰만_조회한다__본인의_리뷰와_타인의_공개_리뷰() {
         // given
+        Member anotherMember = saveMember("익명", "another-provider");
+        Member hiddenMember = saveMember("숨김", "hidden-provider");
         ChallengeReview mineHidden = save(challengeAId, viewer.getId(), "내 비공개", true);
-        ChallengeReview minePublic = save(challengeAId, viewer.getId(), "내 공개", false);
         ChallengeReview otherPublic = save(challengeAId, otherMember.getId(), "타인 공개", false);
-        save(challengeAId, otherMember.getId(), "타인 비공개", true);
+        ChallengeReview anotherPublic = save(challengeAId, anotherMember.getId(), "또 다른 타인 공개", false);
+        save(challengeAId, hiddenMember.getId(), "타인 비공개", true);
         save(challengeBId, viewer.getId(), "다른 챌린지 본인 공개", false);
 
         // when
@@ -69,15 +75,17 @@ class ChallengeReviewRepositoryTest {
         // then
         assertThat(result.getContent())
                 .extracting(ChallengeReviewListItem::reviewId)
-                .containsExactlyInAnyOrder(mineHidden.getId(), minePublic.getId(), otherPublic.getId());
+                .containsExactlyInAnyOrder(mineHidden.getId(), otherPublic.getId(), anotherPublic.getId());
     }
 
     @Test
     void 페이징_size_제한이_적용된다() {
         // given
+        Member pageMember = saveMember("페이지1", "page-provider-1");
+        Member anotherPageMember = saveMember("페이지2", "page-provider-2");
         save(challengeAId, viewer.getId(), "리뷰1", false);
-        save(challengeAId, viewer.getId(), "리뷰2", false);
-        save(challengeAId, viewer.getId(), "리뷰3", false);
+        save(challengeAId, pageMember.getId(), "리뷰2", false);
+        save(challengeAId, anotherPageMember.getId(), "리뷰3", false);
 
         // when
         Page<ChallengeReviewListItem> firstPage = challengeReviewRepository.findVisibleReviews(
@@ -119,6 +127,10 @@ class ChallengeReviewRepositoryTest {
                         .isPrivate(isPrivate)
                         .build()
         );
+    }
+
+    private Member saveMember(String nickname, String providerId) {
+        return memberRepository.save(TestFixture.createUniqueMember(nickname, providerId));
     }
 
 }

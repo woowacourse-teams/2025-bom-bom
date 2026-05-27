@@ -6,6 +6,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
 import me.bombom.api.v1.challenge.domain.ChallengeTodo;
@@ -167,6 +168,34 @@ class CreateChallengeReviewListenerTest {
             )).isTrue();
             softly.assertThat(updated.getCompletedDays()).isEqualTo(completedDays);
             softly.assertThat(updatedTeam.getProgress()).isEqualTo(50); // 두 번째 호출은 early return → 첫 번째 결과(50) 유지
+        });
+    }
+
+    @Test
+    void 이미_출석한_날이어도_REVIEW_일일_TODO는_저장한다() {
+        // given
+        LocalDate today = LocalDate.now(clock);
+        challengeDailyResultRepository.save(TestFixture.createChallengeDailyResult(
+                participant.getId(),
+                today,
+                ChallengeDailyStatus.COMPLETE
+        ));
+
+        // when
+        listener.on(new CreateChallengeReviewEvent(participant.getId(), today));
+
+        // then
+        ChallengeParticipant updated = challengeParticipantRepository.findById(participant.getId()).orElseThrow();
+        ChallengeTeam updatedTeam = challengeTeamRepository.findById(participant.getChallengeTeamId()).orElseThrow();
+        assertSoftly(softly -> {
+            softly.assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                    participant.getId(),
+                    today,
+                    reviewTodo.getId()
+            )).isTrue();
+            softly.assertThat(challengeDailyResultRepository.count()).isEqualTo(1);
+            softly.assertThat(updated.getCompletedDays()).isZero();
+            softly.assertThat(updatedTeam.getProgress()).isZero();
         });
     }
 

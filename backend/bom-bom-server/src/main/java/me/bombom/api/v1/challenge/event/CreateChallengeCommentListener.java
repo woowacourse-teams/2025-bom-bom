@@ -34,13 +34,16 @@ public class CreateChallengeCommentListener {
         log.info("챌린지 코멘트 작성 후 출석 처리 시작");
 
         LocalDate today = LocalDate.now(clock);
-        if(challengeTodoService.isCompletedToday(event.participantId(), today)){
+        ChallengeParticipant participant = challengeParticipantService.getParticipant(event.participantId());
+        boolean alreadyCompleted = challengeTodoService.isCompletedToday(event.participantId(), today);
+        insertCommentDone(participant, today);
+
+        if (alreadyCompleted) {
             log.info("이미 출석 처리 완료된 참여자입니다. participantId:{}", event.participantId());
             return;
         }
 
-        ChallengeParticipant participant = challengeParticipantService.getParticipant(event.participantId());
-        completeDailyTodoWithComment(participant, today);
+        challengeTodoService.completeDailyTodo(participant.getId(), today);
 
         ChallengeTeam challengeTeam = challengeTeamService.getByParticipant(participant);
         challengeTeamService.updateTeamProgress(challengeTeam);
@@ -48,10 +51,9 @@ public class CreateChallengeCommentListener {
         log.info("챌린지 코멘트 작성 후 출석 처리 완료");
     }
 
-    private void completeDailyTodoWithComment(ChallengeParticipant participant, LocalDate today) {
+    private void insertCommentDone(ChallengeParticipant participant, LocalDate today) {
         try {
             challengeTodoService.insertCommentDone(participant, today);
-            challengeTodoService.completeDailyTodo(participant.getId(), today);
         } catch (DataIntegrityViolationException e) {
             String violated = extractConstraintName(e);
 

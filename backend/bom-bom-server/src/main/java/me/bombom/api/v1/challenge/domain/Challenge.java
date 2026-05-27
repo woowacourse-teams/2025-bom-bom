@@ -91,6 +91,14 @@ public class Challenge extends BaseEntity {
         return date.equals(this.endDate);
     }
 
+    public boolean isWithinPeriod(LocalDate date) {
+        return hasStarted(date) && !isEnded(date);
+    }
+
+    public boolean hasReachedEnd(LocalDate date) {
+        return this.endDate != null && !date.isBefore(this.endDate);
+    }
+
     public int calculateMaxAllowedAbsences() {
         return totalDays - (int) Math.ceil(totalDays * SUCCESS_REQUIRED_RATIO);
     }

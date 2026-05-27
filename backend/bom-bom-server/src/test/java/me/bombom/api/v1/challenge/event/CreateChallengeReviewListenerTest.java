@@ -27,10 +27,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @IntegrationTest
-class CreateChallengeCommentListenerTest {
+class CreateChallengeReviewListenerTest {
 
     @Autowired
-    private CreateChallengeCommentListener listener;
+    private CreateChallengeReviewListener listener;
 
     @Autowired
     private ChallengeDailyTodoRepository challengeDailyTodoRepository;
@@ -60,7 +60,7 @@ class CreateChallengeCommentListenerTest {
     private Clock clock;
 
     private ChallengeParticipant participant;
-    private ChallengeTodo commentTodo;
+    private ChallengeTodo reviewTodo;
 
     @BeforeEach
     void setUp() {
@@ -90,8 +90,8 @@ class CreateChallengeCommentListenerTest {
         ChallengeTeam challengeTeam = challengeTeamRepository.save(
                 TestFixture.createChallengeTeam(challenge.getId(), 0));
 
-        commentTodo = challengeTodoRepository.save(
-                TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.COMMENT)
+        reviewTodo = challengeTodoRepository.save(
+                TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.REVIEW)
         );
 
         participant = challengeParticipantRepository.save(
@@ -117,12 +117,12 @@ class CreateChallengeCommentListenerTest {
     }
 
     @Test
-    void 코멘트_작성_이벤트로_일일_TODO와_결과를_저장하고_완료일수와_팀_평균을_갱신한다() {
+    void 리뷰_작성_이벤트로_REVIEW_일일_TODO와_결과를_저장하고_완료일수와_팀_평균을_갱신한다() {
         // given
         LocalDate today = LocalDate.now(clock);
 
         // when
-        listener.on(new CreateChallengeCommentEvent(participant.getId()));
+        listener.on(new CreateChallengeReviewEvent(participant.getId(), today));
 
         // then
         ChallengeParticipant updated = challengeParticipantRepository.findById(participant.getId()).orElseThrow();
@@ -131,7 +131,7 @@ class CreateChallengeCommentListenerTest {
             softly.assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
                     participant.getId(),
                     today,
-                    commentTodo.getId()
+                    reviewTodo.getId()
             )).isTrue();
             softly.assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(
                     participant.getId(),
@@ -146,7 +146,7 @@ class CreateChallengeCommentListenerTest {
     void 이미_출석한_날은_중복_처리하지_않는다() {
         // given
         LocalDate today = LocalDate.now(clock);
-        listener.on(new CreateChallengeCommentEvent(participant.getId()));
+        listener.on(new CreateChallengeReviewEvent(participant.getId(), today));
         long dailyTodoCount = challengeDailyTodoRepository.count();
         long dailyResultCount = challengeDailyResultRepository.count();
         int completedDays = challengeParticipantRepository.findById(participant.getId())
@@ -154,7 +154,7 @@ class CreateChallengeCommentListenerTest {
                 .getCompletedDays();
 
         // when
-        listener.on(new CreateChallengeCommentEvent(participant.getId()));
+        listener.on(new CreateChallengeReviewEvent(participant.getId(), today));
 
         // then
         ChallengeParticipant updated = challengeParticipantRepository.findById(participant.getId()).orElseThrow();
@@ -172,7 +172,7 @@ class CreateChallengeCommentListenerTest {
     }
 
     @Test
-    void 이미_출석한_날이어도_COMMENT_일일_TODO는_저장한다() {
+    void 이미_출석한_날이어도_REVIEW_일일_TODO는_저장한다() {
         // given
         LocalDate today = LocalDate.now(clock);
         challengeDailyResultRepository.save(TestFixture.createChallengeDailyResult(
@@ -182,7 +182,7 @@ class CreateChallengeCommentListenerTest {
         ));
 
         // when
-        listener.on(new CreateChallengeCommentEvent(participant.getId()));
+        listener.on(new CreateChallengeReviewEvent(participant.getId(), today));
 
         // then
         ChallengeParticipant updated = challengeParticipantRepository.findById(participant.getId()).orElseThrow();
@@ -191,11 +191,33 @@ class CreateChallengeCommentListenerTest {
             softly.assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
                     participant.getId(),
                     today,
-                    commentTodo.getId()
+                    reviewTodo.getId()
             )).isTrue();
             softly.assertThat(challengeDailyResultRepository.count()).isEqualTo(1);
             softly.assertThat(updated.getCompletedDays()).isZero();
             softly.assertThat(updatedTeam.getProgress()).isZero();
+        });
+    }
+
+    @Test
+    void 이벤트의_reviewDate_가_과거여도_그_날짜로_출석_처리된다() {
+        // given — Listener가 event.reviewDate() 를 사용함을 검증 (자정 경계/재시도 시나리오)
+        LocalDate yesterday = LocalDate.now(clock).minusDays(1);
+
+        // when
+        listener.on(new CreateChallengeReviewEvent(participant.getId(), yesterday));
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                    participant.getId(),
+                    yesterday,
+                    reviewTodo.getId()
+            )).isTrue();
+            softly.assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(
+                    participant.getId(),
+                    yesterday
+            )).isTrue();
         });
     }
 }

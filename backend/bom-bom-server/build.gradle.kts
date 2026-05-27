@@ -97,6 +97,10 @@ dependencies {
 
     // Annotations
     implementation("jakarta.annotation:jakarta.annotation-api")
+
+    // Retry
+    implementation("org.springframework.retry:spring-retry")
+    implementation("org.springframework:spring-aspects")
 }
 
 // Querydsl 생성된 파일 정리

@@ -66,8 +66,8 @@ class ChallengeTeamServiceTest {
         var group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("테스트 그룹"));
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "테스트 챌린지",
-                LocalDate.now().minusDays(5),
-                LocalDate.now().plusDays(5),
+                LocalDate.now(clock).minusDays(5),
+                LocalDate.now(clock).plusDays(5),
                 10,
                 group.getId()
         ));

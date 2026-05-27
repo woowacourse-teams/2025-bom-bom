@@ -10,7 +10,7 @@ public interface MaeilMailSubscriptionTrackRepository extends JpaRepository<Maei
 
     List<MaeilMailSubscriptionTrack> findByMemberId(Long memberId);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(clearAutomatically = true)
     @Query("""
             DELETE FROM MaeilMailSubscriptionTrack mt
             WHERE mt.memberId = :memberId

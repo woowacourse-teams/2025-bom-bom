@@ -467,6 +467,34 @@ class ArticleServiceTest {
     }
 
     @Test
+    void 다_읽음_갱신_이미_읽은_아티클이어도_주인이_일치하지_않으면_예외() {
+        // given
+        Member otherMember = Member.builder()
+                .provider("provider2")
+                .providerId("providerId2")
+                .email("email2")
+                .nickname("nickname2")
+                .gender(Gender.FEMALE)
+                .roleId(userRoleId)
+                .build();
+        memberRepository.save(otherMember);
+
+        Article article = TestFixture.createArticle(
+                "제목",
+                member.getId(),
+                newsletters.getFirst().getId(),
+                BASE_TIME
+        );
+        article.markAsRead();
+        articleRepository.save(article);
+
+        // when & then
+        assertThatThrownBy(() -> articleService.markAsRead(article.getId(), otherMember))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
+    }
+
+    @Test
     void 아티클을_처음_읽으면_읽음_이력에_카테고리를_함께_저장한다() {
         Article article = articles.getFirst();
         Newsletter newsletter = newsletters.getFirst();

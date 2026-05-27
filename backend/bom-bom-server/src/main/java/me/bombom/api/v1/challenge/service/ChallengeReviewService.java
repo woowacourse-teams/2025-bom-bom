@@ -171,5 +171,12 @@ public class ChallengeReviewService {
                     .addContext(ErrorContextKeys.CHALLENGE_ID, challenge.getId())
                     .addContext("reason", "챌린지 시작일 이전에는 리뷰를 작성할 수 없습니다.");
         }
+        if (!challenge.hasReachedEnd(today)) {
+            throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                    .addContext(ErrorContextKeys.OPERATION, "verifyReviewWritablePeriod")
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challenge.getId())
+                    .addContext("reason", "챌린지 종료일 이전에는 리뷰를 작성할 수 없습니다.");
+        }
     }
 }

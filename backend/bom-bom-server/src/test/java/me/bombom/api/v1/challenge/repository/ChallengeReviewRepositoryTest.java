@@ -51,8 +51,7 @@ class ChallengeReviewRepositoryTest {
     }
 
     @Test
-    @DisplayName("열람 가능한 리뷰만 반환: 본인의 비공개 & 공개 + 타인의 공개 (타인 비공개 or 다른 챌린지 제외)")
-    void 가시성_정책에_맞는_리뷰만_조회한다() {
+    void 가시성_정책에_맞는_리뷰만_조회한다__본인의_리뷰와_타인의_공개_리뷰() {
         // given
         ChallengeReview mineHidden = save(challengeAId, viewer.getId(), "내 비공개", true);
         ChallengeReview minePublic = save(challengeAId, viewer.getId(), "내 공개", false);

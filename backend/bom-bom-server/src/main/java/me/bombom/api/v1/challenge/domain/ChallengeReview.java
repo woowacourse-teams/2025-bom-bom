@@ -35,7 +35,7 @@ public class ChallengeReview extends BaseEntity {
     private Long memberId;
 
     @NotBlank
-    @Column(nullable = false, length = 2000)
+    @Column(nullable = false, length = 500)
     private String comment;
 
     private boolean isPrivate;

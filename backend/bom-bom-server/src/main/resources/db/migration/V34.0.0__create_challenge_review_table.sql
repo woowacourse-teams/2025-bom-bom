@@ -3,7 +3,7 @@ CREATE TABLE challenge_review
     id           BIGINT         NOT NULL AUTO_INCREMENT,
     challenge_id BIGINT         NOT NULL,
     member_id    BIGINT         NOT NULL,
-    comment      VARCHAR(2000)  NOT NULL,
+    comment      VARCHAR(500)   NOT NULL,
     is_private   TINYINT(1)     NOT NULL DEFAULT 0,
     created_at   DATETIME(6)    NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at   DATETIME(6)    NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),

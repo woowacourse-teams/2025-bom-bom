@@ -1,17 +1,24 @@
 package me.bombom.api.v1.challenge.service;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeReview;
 import me.bombom.api.v1.challenge.dto.request.CreateChallengeReviewRequest;
 import me.bombom.api.v1.challenge.dto.request.UpdateChallengeReviewRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewResponse;
 import me.bombom.api.v1.challenge.dto.response.MyChallengeReviewResponse;
+import me.bombom.api.v1.challenge.event.CreateChallengeReviewEvent;
+import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeReviewRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +36,9 @@ public class ChallengeReviewService {
 
     private final ChallengeReviewRepository challengeReviewRepository;
     private final ChallengeRepository challengeRepository;
+    private final ChallengeParticipantRepository challengeParticipantRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final Clock clock;
 
     public Page<ChallengeReviewResponse> getReviews(Long challengeId, Long viewerMemberId, Pageable pageable) {
         verifyChallengeExists(challengeId);
@@ -60,8 +70,18 @@ public class ChallengeReviewService {
 
     @Transactional
     public void createReview(Long challengeId, Member viewer, CreateChallengeReviewRequest request) {
-        verifyChallengeExists(challengeId);
+        Challenge challenge = getChallenge(challengeId);
+        LocalDate today = LocalDate.now(clock);
+        verifyReviewWritablePeriod(challenge, today);
         verifyNoDuplicateReview(challengeId, viewer.getId());
+
+        ChallengeParticipant participant = challengeParticipantRepository
+                .findByChallengeIdAndMemberId(challengeId, viewer.getId())
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
+                        .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndMemberId")
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                        .addContext(ErrorContextKeys.MEMBER_ID, viewer.getId()));
 
         ChallengeReview review = ChallengeReview.builder()
                 .challengeId(challengeId)
@@ -78,6 +98,13 @@ public class ChallengeReviewService {
                     .addContext(ErrorContextKeys.OPERATION, "save")
                     .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
                     .addContext(ErrorContextKeys.MEMBER_ID, viewer.getId());
+        }
+
+        // 챌린지 기간 내 작성한 경우에만 출석 인정 (종료 후 늦은 작성은 리뷰만 저장)
+        if (isWithinChallengePeriod(challenge, today)) {
+            applicationEventPublisher.publishEvent(
+                    new CreateChallengeReviewEvent(participant.getId(), today)
+            );
         }
     }
 
@@ -126,5 +153,27 @@ public class ChallengeReviewService {
                     .addContext(ErrorContextKeys.OPERATION, "existsById")
                     .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId);
         }
+    }
+
+    private Challenge getChallenge(Long challengeId) {
+        return challengeRepository.findById(challengeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.OPERATION, "findById")
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId));
+    }
+
+    private void verifyReviewWritablePeriod(Challenge challenge, LocalDate today) {
+        if (today.isBefore(challenge.getStartDate())) {
+            throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                    .addContext(ErrorContextKeys.OPERATION, "verifyReviewWritablePeriod")
+                    .addContext(ErrorContextKeys.CHALLENGE_ID, challenge.getId())
+                    .addContext("reason", "챌린지 시작일 이전에는 리뷰를 작성할 수 없습니다.");
+        }
+    }
+
+    private boolean isWithinChallengePeriod(Challenge challenge, LocalDate today) {
+        return !today.isAfter(challenge.getEndDate());
     }
 }

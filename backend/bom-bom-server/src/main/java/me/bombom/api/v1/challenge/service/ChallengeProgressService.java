@@ -192,13 +192,24 @@ public class ChallengeProgressService {
                     .filter(progress -> progress.todoType() == ChallengeTodoType.MINDSET)
                     .toList();
         }
+
+        if (isLastDay(challenge)) {
+            return progressList.stream()
+                    .filter(progress -> progress.todoType() != ChallengeTodoType.MINDSET)
+                    .toList();
+        }
         return progressList.stream()
-                .filter(progress -> progress.todoType() != ChallengeTodoType.MINDSET)
+                .filter(progress -> progress.todoType() != ChallengeTodoType.MINDSET
+                        && progress.todoType() != ChallengeTodoType.REVIEW)
                 .toList();
     }
 
     private boolean isFirstDay(Challenge challenge) {
         return challenge.getStartDate().isEqual(LocalDate.now(clock));
+    }
+
+    private boolean isLastDay(Challenge challenge) {
+        return challenge.getEndDate().isEqual(LocalDate.now(clock));
     }
 
     private void validateMemberProgressDataIntegrity(Long id, Member member, List<ChallengeProgressFlat> progressList) {

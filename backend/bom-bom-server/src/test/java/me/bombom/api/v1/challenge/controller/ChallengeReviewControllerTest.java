@@ -19,9 +19,19 @@ import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler;
 import me.bombom.api.v1.challenge.domain.Challenge;
+import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeReview;
+import me.bombom.api.v1.challenge.domain.ChallengeTeam;
+import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
+import me.bombom.api.v1.challenge.event.CreateChallengeCommentEvent;
+import me.bombom.api.v1.challenge.event.CreateChallengeCommentListener;
+import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeReviewRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.support.IntegrationTest;
@@ -50,6 +60,24 @@ class ChallengeReviewControllerTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private ChallengeParticipantRepository challengeParticipantRepository;
+
+    @Autowired
+    private ChallengeTodoRepository challengeTodoRepository;
+
+    @Autowired
+    private ChallengeDailyTodoRepository challengeDailyTodoRepository;
+
+    @Autowired
+    private ChallengeDailyResultRepository challengeDailyResultRepository;
+
+    @Autowired
+    private ChallengeTeamRepository challengeTeamRepository;
+
+    @Autowired
+    private CreateChallengeCommentListener createChallengeCommentListener;
+
     @MockitoBean
     private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
@@ -58,24 +86,45 @@ class ChallengeReviewControllerTest {
     private OAuth2AuthenticationToken viewerAuth;
     private Long challengeAId;
     private Long challengeBId;
+    private Long viewerParticipantId;
+    private Long viewerTeamId;
 
     @BeforeEach
     void setUp() {
+        challengeDailyResultRepository.deleteAllInBatch();
+        challengeDailyTodoRepository.deleteAllInBatch();
         challengeReviewRepository.deleteAllInBatch();
+        challengeParticipantRepository.deleteAllInBatch();
+        challengeTeamRepository.deleteAllInBatch();
+        challengeTodoRepository.deleteAllInBatch();
         challengeRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
 
         viewer = memberRepository.save(TestFixture.createUniqueMember("나밍곰", "viewer-provider"));
         otherMember = memberRepository.save(TestFixture.createUniqueMember("제나", "other-provider"));
 
+        // 챌린지A: 오늘이 마지막 날 (REVIEW 가 진행도 TODO 리스트에 노출되는 조건)
         Challenge challengeA = challengeRepository.save(
-                TestFixture.createChallenge("챌린지A", LocalDate.now(), LocalDate.now().plusDays(10), 11, 1L)
+                TestFixture.createChallenge("챌린지A", LocalDate.now().minusDays(2), LocalDate.now(), 3, 1L)
         );
         Challenge challengeB = challengeRepository.save(
                 TestFixture.createChallenge("챌린지B", LocalDate.now(), LocalDate.now().plusDays(10), 11, 2L)
         );
         challengeAId = challengeA.getId();
         challengeBId = challengeB.getId();
+
+        // TODO 타입 시드 — REVIEW + COMMENT (idempotency 검증용)
+        challengeTodoRepository.save(TestFixture.createChallengeTodo(challengeAId, ChallengeTodoType.REVIEW));
+        challengeTodoRepository.save(TestFixture.createChallengeTodo(challengeAId, ChallengeTodoType.COMMENT));
+        challengeTodoRepository.save(TestFixture.createChallengeTodo(challengeBId, ChallengeTodoType.REVIEW));
+
+        // 팀 + 참여자 (viewer 는 challengeA 참여자, team 포함)
+        ChallengeTeam viewerTeam = challengeTeamRepository.save(TestFixture.createChallengeTeam(challengeAId, 0));
+        viewerTeamId = viewerTeam.getId();
+        ChallengeParticipant savedParticipant = challengeParticipantRepository.save(
+                TestFixture.createChallengeParticipantWithTeam(challengeAId, viewer.getId(), viewerTeamId, 0, 0)
+        );
+        viewerParticipantId = savedParticipant.getId();
 
         viewerAuth = authOf(viewer);
     }
@@ -195,7 +244,7 @@ class ChallengeReviewControllerTest {
     }
 
     @Test
-    void createReview_정상_요청이면_201_과_함께_리뷰가_저장된다() throws Exception {
+    void createReview_정상_요청이면_201_과_함께_리뷰가_저장되고_당일_출석이_인정된다() throws Exception {
         String body = "{\"comment\":\"좋았어요\",\"isPrivate\":true}";
 
         mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
@@ -204,12 +253,39 @@ class ChallengeReviewControllerTest {
                         .content(body))
                 .andExpect(status().isCreated());
 
+        // 리뷰 저장 검증
         assertThat(challengeReviewRepository.findAll()).hasSize(1);
         ChallengeReview saved = challengeReviewRepository.findAll().get(0);
         assertThat(saved.getChallengeId()).isEqualTo(challengeAId);
         assertThat(saved.getMemberId()).isEqualTo(viewer.getId());
         assertThat(saved.getComment()).isEqualTo("좋았어요");
         assertThat(saved.isPrivate()).isTrue();
+
+        // 출석 인정 검증 (이벤트 리스너 트리거 결과)
+        Long participantId = challengeParticipantRepository
+                .findByChallengeIdAndMemberId(challengeAId, viewer.getId())
+                .orElseThrow()
+                .getId();
+        assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(participantId, LocalDate.now()))
+                .isTrue();
+        assertThat(challengeDailyTodoRepository.count()).isEqualTo(1); // REVIEW 타입 daily todo 1건
+    }
+
+    @Test
+    void createReview_비참여자_리뷰_작성_시도는_403_을_반환하고_출석도_인정되지_않는다() throws Exception {
+        // otherMember 는 challengeA 에 참여하지 않은 사용자
+        OAuth2AuthenticationToken nonParticipantAuth = authOf(otherMember);
+        String body = "{\"comment\":\"좋았어요\",\"isPrivate\":false}";
+
+        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
+                        .with(authentication(nonParticipantAuth))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isForbidden());
+
+        assertThat(challengeReviewRepository.findAll()).isEmpty();
+        assertThat(challengeDailyResultRepository.count()).isZero();
+        assertThat(challengeDailyTodoRepository.count()).isZero();
     }
 
     @Test
@@ -387,6 +463,81 @@ class ChallengeReviewControllerTest {
 
         ChallengeReview untouched = challengeReviewRepository.findById(mine.getId()).orElseThrow();
         assertThat(untouched.getComment()).isEqualTo("원본");
+    }
+
+    @Test
+    void 리뷰_작성_시_진행도의_REVIEW_TODO가_미완료에서_완료로_변경된다() throws Exception {
+        // given — 작성 전 진행도 조회
+        mockMvc.perform(get("/api/v1/challenges/{id}/progress/me", challengeAId)
+                        .with(authentication(viewerAuth)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.todayTodos[?(@.challengeTodoType == 'REVIEW' && @.challengeTodoStatus == 'INCOMPLETE')]").exists())
+                .andExpect(jsonPath("$.todayTodos[?(@.challengeTodoType == 'REVIEW' && @.challengeTodoStatus == 'COMPLETE')]").doesNotExist());
+
+        // when — 리뷰 작성
+        String body = "{\"comment\":\"잘 했어요\",\"isPrivate\":false}";
+        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
+                        .with(authentication(viewerAuth))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+
+        // then — 작성 후 진행도 조회: REVIEW 상태가 COMPLETE 로 변경
+        mockMvc.perform(get("/api/v1/challenges/{id}/progress/me", challengeAId)
+                        .with(authentication(viewerAuth)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.todayTodos[?(@.challengeTodoType == 'REVIEW' && @.challengeTodoStatus == 'COMPLETE')]").exists())
+                .andExpect(jsonPath("$.todayTodos[?(@.challengeTodoType == 'REVIEW' && @.challengeTodoStatus == 'INCOMPLETE')]").doesNotExist());
+    }
+
+    @Test
+    void 리뷰_작성만으로_출석이_인정된다() throws Exception {
+        // when
+        String body = "{\"comment\":\"리뷰만 작성\",\"isPrivate\":false}";
+        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
+                        .with(authentication(viewerAuth))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+
+        // then — 출석 인정
+        assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(viewerParticipantId, LocalDate.now()))
+                .isTrue();
+        assertThat(challengeParticipantRepository.findById(viewerParticipantId).orElseThrow().getCompletedDays())
+                .isEqualTo(1);
+    }
+
+    @Test
+    void 코멘트와_리뷰_둘_다_작성해도_출석은_단_1회만_인정된다() throws Exception {
+        // given — 코멘트 작성 이벤트 직접 발행 (코멘트 API 의존성 회피)
+        createChallengeCommentListener.on(new CreateChallengeCommentEvent(viewerParticipantId));
+        long dailyResultCountAfterComment = challengeDailyResultRepository.count();
+        int completedDaysAfterComment = challengeParticipantRepository.findById(viewerParticipantId)
+                .orElseThrow().getCompletedDays();
+        assertThat(dailyResultCountAfterComment).isEqualTo(1);
+        assertThat(completedDaysAfterComment).isEqualTo(1);
+
+        // when — 같은 날 리뷰 추가 작성
+        String body = "{\"comment\":\"리뷰도 작성\",\"isPrivate\":false}";
+        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
+                        .with(authentication(viewerAuth))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+
+        // then — 출석은 1회만 인정 (idempotent)
+        assertThat(challengeDailyResultRepository.count()).isEqualTo(1);
+        assertThat(challengeParticipantRepository.findById(viewerParticipantId).orElseThrow().getCompletedDays())
+                .isEqualTo(1);
+    }
+
+    @Test
+    void 리뷰도_코멘트도_미작성이면_출석이_인정되지_않는다() {
+        // when // then — 아무 행위도 하지 않음 → 출석 데이터 0건
+        assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(viewerParticipantId, LocalDate.now()))
+                .isFalse();
+        assertThat(challengeParticipantRepository.findById(viewerParticipantId).orElseThrow().getCompletedDays())
+                .isZero();
     }
 
     private ChallengeReview save(Long challengeId, Long memberId, String comment, boolean isPrivate) {

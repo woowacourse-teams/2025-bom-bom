@@ -101,7 +101,7 @@ public class ChallengeReviewService {
         }
 
         // 챌린지 기간 내 작성한 경우에만 출석 인정 (종료 후 늦은 작성은 리뷰만 저장)
-        if (isWithinChallengePeriod(challenge, today)) {
+        if (challenge.isWithinPeriod(today)) {
             applicationEventPublisher.publishEvent(
                     new CreateChallengeReviewEvent(participant.getId(), today)
             );
@@ -164,16 +164,12 @@ public class ChallengeReviewService {
     }
 
     private void verifyReviewWritablePeriod(Challenge challenge, LocalDate today) {
-        if (today.isBefore(challenge.getStartDate())) {
+        if (!challenge.hasStarted(today)) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
                     .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
                     .addContext(ErrorContextKeys.OPERATION, "verifyReviewWritablePeriod")
                     .addContext(ErrorContextKeys.CHALLENGE_ID, challenge.getId())
                     .addContext("reason", "챌린지 시작일 이전에는 리뷰를 작성할 수 없습니다.");
         }
-    }
-
-    private boolean isWithinChallengePeriod(Challenge challenge, LocalDate today) {
-        return !today.isAfter(challenge.getEndDate());
     }
 }

@@ -2,6 +2,7 @@ package me.bombom.api.v1.challenge.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
@@ -29,6 +30,9 @@ class ChallengeReviewRepositoryTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private Clock clock;
+
     private Member viewer;
     private Member otherMember;
     private Long challengeAId;
@@ -44,10 +48,10 @@ class ChallengeReviewRepositoryTest {
         otherMember = memberRepository.save(TestFixture.createUniqueMember("제나", "other-provider"));
 
         Challenge challengeA = challengeRepository.save(
-                TestFixture.createChallenge("챌린지A", LocalDate.now(), LocalDate.now().plusDays(10), 11, 1L)
+                TestFixture.createChallenge("챌린지A", LocalDate.now(clock), LocalDate.now(clock).plusDays(10), 11, 1L)
         );
         Challenge challengeB = challengeRepository.save(
-                TestFixture.createChallenge("챌린지B", LocalDate.now(), LocalDate.now().plusDays(10), 11, 2L)
+                TestFixture.createChallenge("챌린지B", LocalDate.now(clock), LocalDate.now(clock).plusDays(10), 11, 2L)
         );
         challengeAId = challengeA.getId();
         challengeBId = challengeB.getId();

@@ -79,8 +79,8 @@ class CreateChallengeCommentListenerTest {
         Challenge challenge = challengeRepository.save(
                 TestFixture.createChallenge(
                         "테스트 챌린지",
-                        LocalDate.now().minusDays(1),
-                        LocalDate.now().plusDays(8),
+                        LocalDate.now(clock).minusDays(1),
+                        LocalDate.now(clock).plusDays(8),
                         10,
                         group.getId()
                 )

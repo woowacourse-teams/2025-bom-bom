@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -78,6 +79,9 @@ class ChallengeReviewControllerTest {
     @Autowired
     private CreateChallengeCommentListener createChallengeCommentListener;
 
+    @Autowired
+    private Clock clock;
+
     @MockitoBean
     private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
@@ -103,12 +107,14 @@ class ChallengeReviewControllerTest {
         viewer = memberRepository.save(TestFixture.createUniqueMember("나밍곰", "viewer-provider"));
         otherMember = memberRepository.save(TestFixture.createUniqueMember("제나", "other-provider"));
 
+        // 프로덕션 Clock 빈(Asia/Seoul) 과 시간대 일치 보장 — CI(UTC) 환경에서 LocalDate.now() 와 차이 방지
+        LocalDate today = LocalDate.now(clock);
         // 챌린지A: 오늘이 마지막 날 (REVIEW 가 진행도 TODO 리스트에 노출되는 조건)
         Challenge challengeA = challengeRepository.save(
-                TestFixture.createChallenge("챌린지A", LocalDate.now().minusDays(2), LocalDate.now(), 3, 1L)
+                TestFixture.createChallenge("챌린지A", today.minusDays(2), today, 3, 1L)
         );
         Challenge challengeB = challengeRepository.save(
-                TestFixture.createChallenge("챌린지B", LocalDate.now(), LocalDate.now().plusDays(10), 11, 2L)
+                TestFixture.createChallenge("챌린지B", today, today.plusDays(10), 11, 2L)
         );
         challengeAId = challengeA.getId();
         challengeBId = challengeB.getId();
@@ -266,7 +272,7 @@ class ChallengeReviewControllerTest {
                 .findByChallengeIdAndMemberId(challengeAId, viewer.getId())
                 .orElseThrow()
                 .getId();
-        assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(participantId, LocalDate.now()))
+        assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(participantId, LocalDate.now(clock)))
                 .isTrue();
         assertThat(challengeDailyTodoRepository.count()).isEqualTo(1); // REVIEW 타입 daily todo 1건
     }
@@ -501,7 +507,7 @@ class ChallengeReviewControllerTest {
                 .andExpect(status().isCreated());
 
         // then — 출석 인정
-        assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(viewerParticipantId, LocalDate.now()))
+        assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(viewerParticipantId, LocalDate.now(clock)))
                 .isTrue();
         assertThat(challengeParticipantRepository.findById(viewerParticipantId).orElseThrow().getCompletedDays())
                 .isEqualTo(1);
@@ -534,7 +540,7 @@ class ChallengeReviewControllerTest {
     @Test
     void 리뷰도_코멘트도_미작성이면_출석이_인정되지_않는다() {
         // when // then — 아무 행위도 하지 않음 → 출석 데이터 0건
-        assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(viewerParticipantId, LocalDate.now()))
+        assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(viewerParticipantId, LocalDate.now(clock)))
                 .isFalse();
         assertThat(challengeParticipantRepository.findById(viewerParticipantId).orElseThrow().getCompletedDays())
                 .isZero();

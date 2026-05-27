@@ -189,6 +189,18 @@ class ChallengeReviewServiceTest {
     }
 
     @Test
+    void createReview_챌린지_진행_중_시작_후_종료_전_이면_400_예외를_던지고_저장되지_않으며_이벤트도_발행되지_않는다() {
+        // given
+        given(challengeRepository.findById(CHALLENGE_ID)).willReturn(Optional.of(ongoingChallenge()));
+
+        // when // then
+        assertThatThrownBy(() -> challengeReviewService.createReview(CHALLENGE_ID, viewer(), createRequest()))
+                .isInstanceOf(CIllegalArgumentException.class);
+        verify(challengeReviewRepository, never()).save(any());
+        verify(applicationEventPublisher, never()).publishEvent(any(CreateChallengeReviewEvent.class));
+    }
+
+    @Test
     void createReview_챌린지_종료_후에는_리뷰는_저장되지만_이벤트가_발행되지_않는다() {
         // given
         given(challengeRepository.findById(CHALLENGE_ID)).willReturn(Optional.of(endedChallenge()));
@@ -208,7 +220,7 @@ class ChallengeReviewServiceTest {
     @Test
     void createReview_이미_본인이_작성한_리뷰가_있으면_400_예외를_던지고_저장되지_않으며_이벤트도_발행되지_않는다() {
         // given
-        given(challengeRepository.findById(CHALLENGE_ID)).willReturn(Optional.of(ongoingChallenge()));
+        given(challengeRepository.findById(CHALLENGE_ID)).willReturn(Optional.of(lastDayChallenge()));
         given(challengeReviewRepository.existsByChallengeIdAndMemberId(CHALLENGE_ID, VIEWER_MEMBER_ID))
                 .willReturn(true);
 
@@ -222,7 +234,7 @@ class ChallengeReviewServiceTest {
     @Test
     void createReview_정상_케이스에서_요청값으로_ChallengeReview가_저장된다() {
         // given
-        given(challengeRepository.findById(CHALLENGE_ID)).willReturn(Optional.of(ongoingChallenge()));
+        given(challengeRepository.findById(CHALLENGE_ID)).willReturn(Optional.of(lastDayChallenge()));
         given(challengeReviewRepository.existsByChallengeIdAndMemberId(CHALLENGE_ID, VIEWER_MEMBER_ID))
                 .willReturn(false);
         given(challengeParticipantRepository.findByChallengeIdAndMemberId(CHALLENGE_ID, VIEWER_MEMBER_ID))
@@ -244,7 +256,7 @@ class ChallengeReviewServiceTest {
     @Test
     void createReview_save_시점에_unique_제약_위반이_발생하면_DUPLICATED_DATA로_변환되고_이벤트도_발행되지_않는다() {
         // given
-        given(challengeRepository.findById(CHALLENGE_ID)).willReturn(Optional.of(ongoingChallenge()));
+        given(challengeRepository.findById(CHALLENGE_ID)).willReturn(Optional.of(lastDayChallenge()));
         given(challengeReviewRepository.existsByChallengeIdAndMemberId(CHALLENGE_ID, VIEWER_MEMBER_ID))
                 .willReturn(false);
         given(challengeParticipantRepository.findByChallengeIdAndMemberId(CHALLENGE_ID, VIEWER_MEMBER_ID))
@@ -309,7 +321,7 @@ class ChallengeReviewServiceTest {
     @Test
     void createReview_비참여자이면_404_예외를_던지고_저장되지_않는다_IDOR_방어() {
         // given
-        given(challengeRepository.findById(CHALLENGE_ID)).willReturn(Optional.of(ongoingChallenge()));
+        given(challengeRepository.findById(CHALLENGE_ID)).willReturn(Optional.of(lastDayChallenge()));
         given(challengeReviewRepository.existsByChallengeIdAndMemberId(CHALLENGE_ID, VIEWER_MEMBER_ID))
                 .willReturn(false);
         given(challengeParticipantRepository.findByChallengeIdAndMemberId(CHALLENGE_ID, VIEWER_MEMBER_ID))
@@ -325,7 +337,7 @@ class ChallengeReviewServiceTest {
     @Test
     void createReview_정상_케이스에서_CreateChallengeReviewEvent_가_Clock_의_날짜로_발행된다() {
         // given
-        given(challengeRepository.findById(CHALLENGE_ID)).willReturn(Optional.of(ongoingChallenge()));
+        given(challengeRepository.findById(CHALLENGE_ID)).willReturn(Optional.of(lastDayChallenge()));
         given(challengeReviewRepository.existsByChallengeIdAndMemberId(CHALLENGE_ID, VIEWER_MEMBER_ID))
                 .willReturn(false);
         given(challengeParticipantRepository.findByChallengeIdAndMemberId(CHALLENGE_ID, VIEWER_MEMBER_ID))
@@ -342,9 +354,15 @@ class ChallengeReviewServiceTest {
         assertThat(captor.getValue().reviewDate()).isEqualTo(LocalDate.of(2026, 5, 27));
     }
 
-    // Clock 픽스처 기준
+    // Clock 픽스처 기준: 오늘 = 2026-05-27 (Asia/Seoul)
     private Challenge ongoingChallenge() {
+        // 진행 중 (시작 후 종료 전) — 새 정책상 리뷰 작성 차단 케이스
         return challengeWithPeriod(LocalDate.of(2026, 5, 20), LocalDate.of(2026, 6, 5));
+    }
+
+    private Challenge lastDayChallenge() {
+        // today == endDate — 리뷰 작성 + 출석 인정 정상 케이스
+        return challengeWithPeriod(LocalDate.of(2026, 5, 20), LocalDate.of(2026, 5, 27));
     }
 
     private Challenge notStartedChallenge() {

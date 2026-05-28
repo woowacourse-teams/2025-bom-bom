@@ -108,9 +108,7 @@ public class ArticleService {
                 article.getId(),
                 article.getNewsletterId(),
                 newsletter.getCategoryId(),
-                readAt,
-                readAt.getYear(),
-                readAt.getMonthValue()
+                readAt
         );
         if (insertedRows == 0) {
             return;

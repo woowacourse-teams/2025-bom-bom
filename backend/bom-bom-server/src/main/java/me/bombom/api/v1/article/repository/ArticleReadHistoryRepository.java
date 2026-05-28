@@ -20,8 +20,6 @@ public interface ArticleReadHistoryRepository extends JpaRepository<ArticleReadH
                 newsletter_id,
                 category_id,
                 read_at,
-                period_year,
-                period_month,
                 created_at,
                 updated_at
             )
@@ -31,8 +29,6 @@ public interface ArticleReadHistoryRepository extends JpaRepository<ArticleReadH
                 :newsletterId,
                 :categoryId,
                 :readAt,
-                :periodYear,
-                :periodMonth,
                 NOW(6),
                 NOW(6)
             )
@@ -42,8 +38,6 @@ public interface ArticleReadHistoryRepository extends JpaRepository<ArticleReadH
             @Param("articleId") Long articleId,
             @Param("newsletterId") Long newsletterId,
             @Param("categoryId") Long categoryId,
-            @Param("readAt") LocalDateTime readAt,
-            @Param("periodYear") int periodYear,
-            @Param("periodMonth") int periodMonth
+            @Param("readAt") LocalDateTime readAt
     );
 }

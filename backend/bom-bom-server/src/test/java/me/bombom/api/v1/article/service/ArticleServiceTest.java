@@ -459,8 +459,7 @@ class ArticleServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(history.getNewsletterId()).isEqualTo(newsletter.getId());
             softly.assertThat(history.getCategoryId()).isEqualTo(newsletter.getCategoryId());
-            softly.assertThat(history.getPeriodYear()).isEqualTo(history.getReadAt().getYear());
-            softly.assertThat(history.getPeriodMonth()).isEqualTo(history.getReadAt().getMonthValue());
+            softly.assertThat(history.getReadAt()).isNotNull();
         });
     }
 

@@ -46,12 +46,6 @@ public class ArticleReadHistory extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime readAt;
 
-    @Column(nullable = false)
-    private int periodYear;
-
-    @Column(nullable = false, columnDefinition = "TINYINT")
-    private int periodMonth;
-
     @Builder
     public ArticleReadHistory(
             Long id,
@@ -59,9 +53,7 @@ public class ArticleReadHistory extends BaseEntity {
             @NonNull Long articleId,
             @NonNull Long newsletterId,
             @NonNull Long categoryId,
-            @NonNull LocalDateTime readAt,
-            int periodYear,
-            int periodMonth
+            @NonNull LocalDateTime readAt
     ) {
         this.id = id;
         this.memberId = memberId;
@@ -69,7 +61,5 @@ public class ArticleReadHistory extends BaseEntity {
         this.newsletterId = newsletterId;
         this.categoryId = categoryId;
         this.readAt = readAt;
-        this.periodYear = periodYear;
-        this.periodMonth = periodMonth;
     }
 }

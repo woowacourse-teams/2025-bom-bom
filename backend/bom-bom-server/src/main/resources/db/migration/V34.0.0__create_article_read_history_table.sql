@@ -6,8 +6,6 @@ CREATE TABLE article_read_history
     newsletter_id BIGINT      NOT NULL,
     category_id   BIGINT      NOT NULL,
     read_at       DATETIME(6) NOT NULL,
-    period_year   INT         NOT NULL,
-    period_month  TINYINT     NOT NULL,
     created_at    DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at    DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     PRIMARY KEY (id),

@@ -142,6 +142,35 @@ class ArticleControllerTest {
     }
 
     @Test
+    @DisplayName("아티클 목록 조회 시 생성된 페이지 DTO 응답 구조를 따른다")
+    void 아티클_목록_조회_생성_DTO_응답_검증() throws Exception {
+        mockMvc.perform(get("/api/v1/articles")
+                        .with(authentication(authToken))
+                        .param("page", "0")
+                        .param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].articleId").exists())
+                .andExpect(jsonPath("$.content[0].title").value("뉴스"))
+                .andExpect(jsonPath("$.content[0].contentsSummary").value("요약"))
+                .andExpect(jsonPath("$.content[0].expectedReadTime").value(5))
+                .andExpect(jsonPath("$.content[0].isRead").value(false))
+                .andExpect(jsonPath("$.content[0].isBookmarked").value(false))
+                .andExpect(jsonPath("$.content[0].newsletter.name").value("뉴스픽"))
+                .andExpect(jsonPath("$.content[0].newsletter.category").value("경제"))
+                .andExpect(jsonPath("$.totalElements").value(11))
+                .andExpect(jsonPath("$.totalPages").value(11))
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.size").value(1))
+                .andExpect(jsonPath("$.numberOfElements").value(1))
+                .andExpect(jsonPath("$.first").value(true))
+                .andExpect(jsonPath("$.last").value(false))
+                .andExpect(jsonPath("$.empty").doesNotExist());
+    }
+
+    @Test
     void 뉴스레터_아티클_목록_조회() throws Exception {
         // given
         Newsletter newsletter = newsletters.get(2);

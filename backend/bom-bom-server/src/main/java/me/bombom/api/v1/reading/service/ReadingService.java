@@ -192,13 +192,12 @@ public class ReadingService {
     }
 
     private void saveMonthlyRankHistories(LocalDate period) {
+        LocalDate periodStartDate = period.withDayOfMonth(1);
         monthlyReadingRankHistoryRepository.saveCurrentMonthlyRanking(
-            period.getYear(),
-            period.getMonthValue()
+            periodStartDate
         );
         continueReadingRankHistoryRepository.saveCurrentContinueReadingRanking(
-            period.getYear(),
-            period.getMonthValue()
+            periodStartDate
         );
     }
 

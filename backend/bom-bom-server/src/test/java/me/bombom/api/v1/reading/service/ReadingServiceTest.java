@@ -561,25 +561,27 @@ class ReadingServiceTest {
 
         readingService.migrateMonthlyCountToYearlyAndReset();
 
-        LocalDate lastMonth = lastMonth();
+        LocalDate period = lastMonth().withDayOfMonth(1);
         MonthlyReadingRankHistory monthlyFirst = monthlyReadingRankHistoryRepository
-                .findByMemberIdAndPeriodYearAndPeriodMonth(member2.getId(), lastMonth.getYear(), lastMonth.getMonthValue())
+                .findByMemberIdAndPeriod(member2.getId(), period)
                 .orElseThrow();
         MonthlyReadingRankHistory monthlyThird = monthlyReadingRankHistoryRepository
-                .findByMemberIdAndPeriodYearAndPeriodMonth(member.getId(), lastMonth.getYear(), lastMonth.getMonthValue())
+                .findByMemberIdAndPeriod(member.getId(), period)
                 .orElseThrow();
         ContinueReadingRankHistory continueFirst = continueReadingRankHistoryRepository
-                .findByMemberIdAndPeriodYearAndPeriodMonth(member2.getId(), lastMonth.getYear(), lastMonth.getMonthValue())
+                .findByMemberIdAndPeriod(member2.getId(), period)
                 .orElseThrow();
 
         assertSoftly(softly -> {
             softly.assertThat(monthlyReadingRankHistoryRepository.count()).isEqualTo(3);
+            softly.assertThat(monthlyFirst.getPeriod()).isEqualTo(period);
             softly.assertThat(monthlyFirst.getReadCount()).isEqualTo(30);
             softly.assertThat(monthlyFirst.getRankOrder()).isEqualTo(1L);
             softly.assertThat(monthlyThird.getReadCount()).isEqualTo(10);
             softly.assertThat(monthlyThird.getRankOrder()).isEqualTo(3L);
 
             softly.assertThat(continueReadingRankHistoryRepository.count()).isEqualTo(3);
+            softly.assertThat(continueFirst.getPeriod()).isEqualTo(period);
             softly.assertThat(continueFirst.getDayCount()).isEqualTo(30);
             softly.assertThat(continueFirst.getRankOrder()).isEqualTo(1L);
         });
@@ -599,18 +601,20 @@ class ReadingServiceTest {
         readingService.migrateMonthlyCountToYearlyAndReset();
         readingService.migrateMonthlyCountToYearlyAndReset();
 
-        LocalDate lastMonth = lastMonth();
+        LocalDate period = lastMonth().withDayOfMonth(1);
         MonthlyReadingRankHistory monthlyHistory = monthlyReadingRankHistoryRepository
-                .findByMemberIdAndPeriodYearAndPeriodMonth(member.getId(), lastMonth.getYear(), lastMonth.getMonthValue())
+                .findByMemberIdAndPeriod(member.getId(), period)
                 .orElseThrow();
         ContinueReadingRankHistory continueHistory = continueReadingRankHistoryRepository
-                .findByMemberIdAndPeriodYearAndPeriodMonth(member.getId(), lastMonth.getYear(), lastMonth.getMonthValue())
+                .findByMemberIdAndPeriod(member.getId(), period)
                 .orElseThrow();
 
         assertSoftly(softly -> {
             softly.assertThat(monthlyReadingRankHistoryRepository.count()).isEqualTo(1);
+            softly.assertThat(monthlyHistory.getPeriod()).isEqualTo(period);
             softly.assertThat(monthlyHistory.getReadCount()).isEqualTo(12);
             softly.assertThat(continueReadingRankHistoryRepository.count()).isEqualTo(1);
+            softly.assertThat(continueHistory.getPeriod()).isEqualTo(period);
             softly.assertThat(continueHistory.getDayCount()).isEqualTo(7);
         });
     }

@@ -1,5 +1,6 @@
 package me.bombom.api.v1.reading.repository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import me.bombom.api.v1.reading.domain.ContinueReadingRankHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,18 +10,16 @@ import org.springframework.data.repository.query.Param;
 
 public interface ContinueReadingRankHistoryRepository extends JpaRepository<ContinueReadingRankHistory, Long> {
 
-    Optional<ContinueReadingRankHistory> findByMemberIdAndPeriodYearAndPeriodMonth(
+    Optional<ContinueReadingRankHistory> findByMemberIdAndPeriod(
             Long memberId,
-            int periodYear,
-            int periodMonth
+            LocalDate period
     );
 
     @Modifying
     @Query(value = """
             INSERT IGNORE INTO continue_reading_rank_history (
                 member_id,
-                period_year,
-                period_month,
+                period,
                 day_count,
                 rank_order,
                 created_at,
@@ -28,8 +27,7 @@ public interface ContinueReadingRankHistoryRepository extends JpaRepository<Cont
             )
             SELECT
                 cr.member_id,
-                :periodYear,
-                :periodMonth,
+                :period,
                 cr.day_count,
                 RANK() OVER (ORDER BY cr.day_count DESC),
                 NOW(6),
@@ -37,7 +35,6 @@ public interface ContinueReadingRankHistoryRepository extends JpaRepository<Cont
             FROM continue_reading_realtime cr
             """, nativeQuery = true)
     void saveCurrentContinueReadingRanking(
-            @Param("periodYear") int periodYear,
-            @Param("periodMonth") int periodMonth
+            @Param("period") LocalDate period
     );
 }

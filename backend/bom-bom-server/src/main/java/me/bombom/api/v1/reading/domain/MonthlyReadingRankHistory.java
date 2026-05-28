@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,7 +21,7 @@ import me.bombom.api.v1.common.BaseEntity;
 @Table(
         uniqueConstraints = @UniqueConstraint(
                 name = "uk_monthly_reading_rank_history_member_period",
-                columnNames = {"member_id", "period_year", "period_month"}
+                columnNames = {"member_id", "period"}
         )
 )
 public class MonthlyReadingRankHistory extends BaseEntity {
@@ -33,10 +34,7 @@ public class MonthlyReadingRankHistory extends BaseEntity {
     private Long memberId;
 
     @Column(nullable = false)
-    private int periodYear;
-
-    @Column(nullable = false, columnDefinition = "TINYINT")
-    private int periodMonth;
+    private LocalDate period;
 
     @Column(nullable = false)
     private int readCount;
@@ -48,15 +46,13 @@ public class MonthlyReadingRankHistory extends BaseEntity {
     public MonthlyReadingRankHistory(
             Long id,
             @NonNull Long memberId,
-            int periodYear,
-            int periodMonth,
+            @NonNull LocalDate period,
             int readCount,
             long rankOrder
     ) {
         this.id = id;
         this.memberId = memberId;
-        this.periodYear = periodYear;
-        this.periodMonth = periodMonth;
+        this.period = period;
         this.readCount = readCount;
         this.rankOrder = rankOrder;
     }

@@ -19,7 +19,6 @@ import me.bombom.api.v1.common.BaseEntity;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
-        name = "article_read_history",
         uniqueConstraints = @UniqueConstraint(
                 name = "uk_article_read_history_member_article",
                 columnNames = {"member_id", "article_id"}

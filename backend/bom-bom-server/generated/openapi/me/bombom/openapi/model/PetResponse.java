@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
  */
 @Generated(
     value = "org.openapitools.codegen.languages.SpringCodegen",
-    date = "2026-05-28T15:47:59.982157+09:00[Asia/Seoul]",
+    date = "2026-05-28T15:54:19.996007+09:00[Asia/Seoul]",
     comments = "Generator version: 7.10.0"
 )
 public record PetResponse(

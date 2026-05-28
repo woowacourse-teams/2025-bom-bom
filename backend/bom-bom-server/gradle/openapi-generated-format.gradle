@@ -1,5 +1,5 @@
-def generatedOpenApiJavaDir = layout.buildDirectory.dir("generated/openapi/src/main/java")
-def generatedOpenApiModelJavaDir = layout.buildDirectory.dir("generated/openapi/src/main/java/me/bombom/openapi/model")
+def generatedOpenApiJavaDir = layout.projectDirectory.dir("generated/openapi")
+def generatedOpenApiModelJavaDir = layout.projectDirectory.dir("generated/openapi/me/bombom/openapi/model")
 
 spotless {
     java {
@@ -7,12 +7,17 @@ spotless {
         target(
             fileTree(generatedOpenApiJavaDir) {
                 include("**/*.java")
+                exclude("me/bombom/openapi/model/**/*.java")
             }
         )
         // record 템플릿 기준으로 남는 불필요 import를 먼저 제거한다.
         replaceRegex("remove unused JsonCreator import", "(?m)^import com\\.fasterxml\\.jackson\\.annotation\\.JsonCreator;\\R", "")
+        replaceRegex("remove unused JsonProperty import", "(?m)^import com\\.fasterxml\\.jackson\\.annotation\\.JsonProperty;\\R", "")
         replaceRegex("remove unused ArrayList import", "(?m)^import java\\.util\\.ArrayList;\\R", "")
         replaceRegex("remove unused Arrays import", "(?m)^import java\\.util\\.Arrays;\\R", "")
+        replaceRegex("remove duplicate HttpStatus import", "(?m)^(import org\\.springframework\\.http\\.HttpStatus;\\R)(?=.*^import org\\.springframework\\.http\\.HttpStatus;\\R)", "")
+        replaceRegex("remove blank line after Generated annotation in api", "\\)\\R\\R@(Validated|Tag|Controller|RestController)", ''')
+@$1''')
         removeUnusedImports()
         googleJavaFormat()
     }
@@ -25,6 +30,9 @@ spotless {
             }
         )
         replaceRegex("remove same-package model imports", "(?m)^import me\\.bombom\\.openapi\\.model\\.[A-Za-z0-9_]+;\\R", "")
+        replaceRegex("remove duplicate DateTimeFormat import", "(?m)^(import org\\.springframework\\.format\\.annotation\\.DateTimeFormat;\\R)(?=.*^import org\\.springframework\\.format\\.annotation\\.DateTimeFormat;\\R)", "")
+        replaceRegex("remove blank line after Generated annotation", "\\)\\R\\Rpublic record", ''')
+public record''')
     }
 }
 

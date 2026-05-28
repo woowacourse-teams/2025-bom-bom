@@ -1,25 +1,9 @@
 {{#vendorExtensions.x-needs-login-member}}
-{{! 커스텀 로그인 멤버 argument resolver 애노테이션 }}
-@me.bombom.api.v1.common.resolver.LoginMember
-
-{{! vendor extension으로 제어하는 선택 속성 }}
-{{#vendorExtensions.x-login-member-anonymous}}
-(anonymous = true{{#vendorExtensions.x-login-member-allow-invalid-token}}, allowInvalidToken = true{{/vendorExtensions.x-login-member-allow-invalid-token}})
-{{/vendorExtensions.x-login-member-anonymous}}
-
-{{^vendorExtensions.x-login-member-anonymous}}
-{{#vendorExtensions.x-login-member-allow-invalid-token}}
-(anonymous = true, allowInvalidToken = true)
-{{/vendorExtensions.x-login-member-allow-invalid-token}}
-{{/vendorExtensions.x-login-member-anonymous}}
-
-{{! memberId만 필요한 경우 Long 파라미터로 주입 }}
+@LoginMember{{#vendorExtensions.x-login-member-anonymous}}(anonymous = true{{#vendorExtensions.x-login-member-allow-invalid-token}}, allowInvalidToken = true{{/vendorExtensions.x-login-member-allow-invalid-token}}){{/vendorExtensions.x-login-member-anonymous}}{{^vendorExtensions.x-login-member-anonymous}}{{#vendorExtensions.x-login-member-allow-invalid-token}}(anonymous = true, allowInvalidToken = true){{/vendorExtensions.x-login-member-allow-invalid-token}}{{/vendorExtensions.x-login-member-anonymous}}
 {{#vendorExtensions.x-login-member-id}}
-java.lang.Long memberId
+Long memberId
 {{/vendorExtensions.x-login-member-id}}
-
-{{! 기본값은 전체 Member 객체 주입 }}
 {{^vendorExtensions.x-login-member-id}}
-me.bombom.api.v1.member.domain.Member member
+Member member
 {{/vendorExtensions.x-login-member-id}}
 {{/vendorExtensions.x-needs-login-member}}

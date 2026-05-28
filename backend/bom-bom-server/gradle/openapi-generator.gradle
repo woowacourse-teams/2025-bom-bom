@@ -1,7 +1,7 @@
 // submodule에서 관리하는 OpenAPI 원본 스펙 경로
 def openApiSpecFile = layout.projectDirectory.file("openapi-spec/openapi.yaml")
 // OpenAPI Generator가 Java 코드를 생성할 위치
-def generatedOpenApiDir = layout.buildDirectory.dir("generated/openapi")
+def generatedOpenApiDir = layout.projectDirectory.dir("generated/openapi")
 
 // 현재 서버 코드 스타일에 맞춘 OpenAPI Generator 옵션
 def openApiConfigOptions = [
@@ -16,6 +16,7 @@ def openApiConfigOptions = [
     dateLibrary          : "java8",
     documentationProvider: "springdoc",
     annotationLibrary    : "swagger2",
+    sourceFolder         : "",
 ]
 
 // API/Model만 생성하고 문서/테스트/보조 파일은 만들지 않는다.
@@ -46,7 +47,7 @@ tasks.named("openApiGenerate") {
     dependsOn("verifyOpenApiSpec")
     generatorName.set("spring")
     inputSpec.set(openApiSpecFile.asFile.absolutePath)
-    outputDir.set(generatedOpenApiDir.map { it.asFile.absolutePath })
+    outputDir.set(generatedOpenApiDir.asFile.absolutePath)
     apiPackage.set("me.bombom.openapi.api")
     modelPackage.set("me.bombom.openapi.model")
     templateDir.set("$projectDir/src/main/resources/openapi-templates")
@@ -65,7 +66,7 @@ sourceSets {
     main {
         java {
             // 생성된 소스도 메인 컴파일 대상에 포함한다.
-            srcDir(generatedOpenApiDir.map { it.dir("src/main/java") })
+            srcDir(generatedOpenApiDir)
         }
     }
 }

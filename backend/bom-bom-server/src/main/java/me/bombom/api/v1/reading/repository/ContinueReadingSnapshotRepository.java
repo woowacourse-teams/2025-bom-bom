@@ -30,7 +30,7 @@ public interface ContinueReadingSnapshotRepository extends JpaRepository<Continu
                 day_count = VALUES(day_count),
                 rank_order = VALUES(rank_order)
             """, nativeQuery = true)
-    void updateContinueReadingRankingSnapshot();
+    void bulkUpdateContinueReadingRankingSnapshot();
 
     ContinueReadingSnapshot findTopByOrderByRankOrderDesc();
 

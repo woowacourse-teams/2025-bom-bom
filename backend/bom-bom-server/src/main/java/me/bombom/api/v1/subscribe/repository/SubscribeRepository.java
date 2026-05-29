@@ -41,7 +41,7 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
             DELETE FROM Subscribe sb
             WHERE sb.memberId = :memberId
     """)
-    void deleteAllByMemberId(Long memberId);
+    void bulkDeleteAllByMemberId(Long memberId);
 
     @Modifying
     @Query("""
@@ -49,5 +49,5 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
             WHERE sb.memberId = :memberId
               AND sb.newsletterId = :newsletterId
     """)
-    void deleteByMemberIdAndNewsletterId(Long memberId, Long newsletterId);
+    void bulkDeleteByMemberIdAndNewsletterId(Long memberId, Long newsletterId);
 }

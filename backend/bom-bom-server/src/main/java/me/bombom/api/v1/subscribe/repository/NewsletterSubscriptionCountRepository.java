@@ -33,7 +33,7 @@ public interface NewsletterSubscriptionCountRepository extends JpaRepository<New
                 age50s    = age50s    + IF(:ageGroup = 'age50s', 1, 0),
                 age60plus = age60plus + IF(:ageGroup = 'age60plus', 1, 0)
             """, nativeQuery = true)
-    void increaseSubscriptionCountByNewsletterIdAndAgeGroup(
+    void bulkIncreaseSubscriptionCountByNewsletterIdAndAgeGroup(
             @Param("newsletterId") Long newsletterId,
             @Param("ageGroup") String ageGroup
     );
@@ -51,7 +51,7 @@ public interface NewsletterSubscriptionCountRepository extends JpaRepository<New
                 age60plus = GREATEST(age60plus - IF(:ageGroup = 'age60plus', 1, 0), 0)
             WHERE newsletter_id = :newsletterId
             """, nativeQuery = true)
-    void decreaseSubscriptionCountByNewsletterIdAndAgeGroup(
+    void bulkDecreaseSubscriptionCountByNewsletterIdAndAgeGroup(
             @Param("newsletterId") Long newsletterId,
             @Param("ageGroup") String ageGroup
     );

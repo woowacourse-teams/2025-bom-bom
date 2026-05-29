@@ -45,7 +45,7 @@ public class SubscribeService {
                         subscribe.getNewsletterId(),
                         memberId
                 ));
-        subscribeRepository.deleteAllByMemberId(memberId);
+        subscribeRepository.bulkDeleteAllByMemberId(memberId);
     }
 
     @Transactional
@@ -55,7 +55,7 @@ public class SubscribeService {
                         subscribe.getNewsletterId(),
                         memberId
                 ));
-        subscribeRepository.deleteByMemberIdAndNewsletterId(memberId, newsletterId);
+        subscribeRepository.bulkDeleteByMemberIdAndNewsletterId(memberId, newsletterId);
     }
 
     public List<SubscribedNewsletterResponse> getSubscribedNewsletters(Member member) {

@@ -57,7 +57,7 @@ public class ChallengeTeamService {
         List<Long> challengeIds = ongoingChallenges.stream()
                 .map(Challenge::getId)
                 .toList();
-        challengeTeamRepository.resetProgressByChallengeIdIn(challengeIds);
+        challengeTeamRepository.bulkResetProgressByChallengeIdIn(challengeIds);
     }
 
     private int calculateTodayAverageProgress(TeamTodayProgressCount progressCount) {

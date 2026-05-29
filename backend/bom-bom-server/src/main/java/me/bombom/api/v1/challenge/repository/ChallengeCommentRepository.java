@@ -78,7 +78,7 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
                  WHERE c.id = :commentId
                    AND ( :amount >= 0 OR c.likeCount > 0 )
             """)
-    void incrementLikeCountNotBelowZero(Long commentId, int amount);
+    void bulkIncrementLikeCountNotBelowZero(Long commentId, int amount);
 
     @Modifying(flushAutomatically = true)
     @Query("""
@@ -86,5 +86,5 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
                    SET c.replyCount = c.replyCount + 1
                  WHERE c.id = :commentId
             """)
-    void updateReplyCount(Long commentId);
+    void bulkUpdateReplyCount(Long commentId);
 }

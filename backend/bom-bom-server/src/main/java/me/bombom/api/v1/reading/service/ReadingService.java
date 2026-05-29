@@ -8,6 +8,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.badge.domain.BadgeGrade;
+import me.bombom.api.v1.badge.service.BadgeService;
 import me.bombom.api.v1.common.ContinueReadingRankingScheduleProperties;
 import me.bombom.api.v1.common.MonthlyRankingScheduleProperties;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
@@ -38,11 +40,9 @@ import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
-import me.bombom.api.v1.badge.domain.BadgeGrade;
-import me.bombom.api.v1.badge.service.BadgeService;
 import me.bombom.api.v1.reading.event.ContinueReadingIncreasedEvent;
-import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
+import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
@@ -115,12 +115,12 @@ public class ReadingService {
 
     @Transactional
     public void resetTodayReadingCount() {
-        todayReadingRepository.resetCurrentCount();
+        todayReadingRepository.bulkResetCurrentCount();
     }
 
     @Transactional
     public void resetWeeklyReadingCount() {
-        weeklyReadingRepository.resetCurrentCount();
+        weeklyReadingRepository.bulkResetCurrentCount();
     }
 
     @Transactional
@@ -142,7 +142,7 @@ public class ReadingService {
             // 1. 데이터가 없으면 바로 realtime 초기화
             long snapshotCount = monthlyReadingSnapshotRepository.count();
             if (snapshotCount == 0) {
-                monthlyReadingRealtimeRepository.resetAllCurrentCount();
+                monthlyReadingRealtimeRepository.bulkResetAllCurrentCount();
                 return;
             }
 
@@ -160,7 +160,7 @@ public class ReadingService {
                     int monthlyCount = snapshot.getCurrentCount();
 
                     try {
-                        int updatedRows = yearlyReadingRepository.increaseMonthlyCountToYearly(memberId, monthlyCount, targetYear);
+                        int updatedRows = yearlyReadingRepository.bulkIncreaseMonthlyCountToYearly(memberId, monthlyCount, targetYear);
                         if (updatedRows == 0) {
                             YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndReadingYear(memberId, targetYear)
                                     .orElseGet(() -> {
@@ -174,8 +174,8 @@ public class ReadingService {
                         throw new RuntimeException("Migration failed for member " + memberId, e);
                     }
                 });
-            monthlyReadingSnapshotRepository.resetAllCurrentCount();
-            monthlyReadingRealtimeRepository.resetAllCurrentCount();
+            monthlyReadingSnapshotRepository.bulkResetAllCurrentCount();
+            monthlyReadingRealtimeRepository.bulkResetAllCurrentCount();
         } catch (Exception e) {
             log.error("Critical error in monthly migration: {}", e.getMessage(), e);
             throw new CIllegalArgumentException(ErrorDetail.INTERNAL_SERVER_ERROR)
@@ -328,7 +328,7 @@ public class ReadingService {
     public void updateMonthlyRanking() {
         try {
             log.info("Starting monthly ranking update");
-            monthlyReadingSnapshotRepository.updateMonthlyRanking();
+            monthlyReadingSnapshotRepository.bulkUpdateMonthlyRanking();
             readingSnapshotMetaService.updateSnapshotAt(ReadingSnapshotType.MONTHLY);
             log.info("Monthly ranking update completed successfully");
         } catch (Exception e) {
@@ -361,7 +361,7 @@ public class ReadingService {
             weeklyReadingRepository.deleteByMemberId(memberId);
             monthlyReadingSnapshotRepository.deleteByMemberId(memberId);
             monthlyReadingRealtimeRepository.deleteByMemberId(memberId);
-            yearlyReadingRepository.deleteByMemberId(memberId);
+            yearlyReadingRepository.bulkDeleteByMemberId(memberId);
         } catch (Exception e) {
             log.error("회원 읽기 정보 삭제 실패. memberId = {}", memberId, e.getStackTrace());
         }
@@ -388,7 +388,7 @@ public class ReadingService {
     }
 
     private void rebuildContinueReadingRankingSnapshot() {
-        continueReadingRankingSnapshotRepository.updateContinueReadingRankingSnapshot();
+        continueReadingRankingSnapshotRepository.bulkUpdateContinueReadingRankingSnapshot();
         readingSnapshotMetaService.updateSnapshotAt(ReadingSnapshotType.CONTINUE);
     }
 

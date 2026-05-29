@@ -16,13 +16,13 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Article a WHERE a.memberId = :memberId")
-    void deleteAllByMemberId(Long memberId);
+    void bulkDeleteAllByMemberId(Long memberId);
 
     long countByIdInAndMemberId(List<Long> ids, Long memberId);
 
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM Article a WHERE a.id IN :ids AND a.memberId = :memberId")
-    void deleteAllByIdsAndMemberId(@Param("ids") List<Long> ids, @Param("memberId") Long memberId);
+    void bulkDeleteAllByIdsAndMemberId(@Param("ids") List<Long> ids, @Param("memberId") Long memberId);
 
     /**
      * 관리자의 모든 article을 previous_article로 복사
@@ -52,7 +52,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
             AND pa.arrived_date_time = a.arrived_date_time
         )
     """, nativeQuery = true)
-    int safeCopyToArchive(@Param("adminId") Long adminId);
+    int bulkSafeCopyToArchive(@Param("adminId") Long adminId);
 
     /**
      * 뉴스레터별로 최신 N개만 남기고 나머지 삭제
@@ -80,7 +80,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
             AND pa.arrived_date_time = a.arrived_date_time
         )
     """, nativeQuery = true)
-    int safeDeleteArchived(
+    int bulkSafeDeleteArchived(
             @Param("adminId") Long adminId,
             @Param("keepCount") int keepCount
     );
@@ -114,7 +114,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, CustomA
             WHERE ranked.row_num > ranked.keep_limit
         ) target ON target.id = a.id
     """, nativeQuery = true)
-    int deleteExcessUnbookmarkedArticles(@Param("adminLimit") int adminLimit, @Param("userLimit") int userLimit);
+    int bulkDeleteExcessUnbookmarkedArticles(@Param("adminLimit") int adminLimit, @Param("userLimit") int userLimit);
 
     @Query("""
         SELECT new me.bombom.api.v1.challenge.dto.response.ChallengeCommentCandidateArticleResponse(

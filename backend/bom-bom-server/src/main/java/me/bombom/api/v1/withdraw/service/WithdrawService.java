@@ -37,7 +37,7 @@ public class WithdrawService {
 
     @Transactional
     public void deleteExpiredWithdrawnMembers() {
-        withdrawnMemberRepository.deleteAllByExpireDate(LocalDate.now());
+        withdrawnMemberRepository.bulkDeleteAllByExpireDate(LocalDate.now());
         log.info("만료된 회원 정보 삭제 성공");
     }
 

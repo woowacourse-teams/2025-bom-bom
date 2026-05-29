@@ -28,7 +28,7 @@ public class NewsletterSubscriptionCountService {
         }
 
         AgeGroup group = AgeGroup.fromBirthYear(LocalDate.now(clock).getYear(), birthDate.getYear());
-        newsletterSubscriptionCountRepository.increaseSubscriptionCountByNewsletterIdAndAgeGroup(
+        newsletterSubscriptionCountRepository.bulkIncreaseSubscriptionCountByNewsletterIdAndAgeGroup(
                 newsletterId,
                 group.getDbKey()
         );
@@ -42,7 +42,7 @@ public class NewsletterSubscriptionCountService {
         }
 
         AgeGroup group = AgeGroup.fromBirthYear(LocalDate.now(clock).getYear(), birthDate.getYear());
-        newsletterSubscriptionCountRepository.decreaseSubscriptionCountByNewsletterIdAndAgeGroup(
+        newsletterSubscriptionCountRepository.bulkDecreaseSubscriptionCountByNewsletterIdAndAgeGroup(
                 newsletterId,
                 group.getDbKey()
         );

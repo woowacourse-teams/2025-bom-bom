@@ -96,7 +96,7 @@ public class PetService {
 
     @Transactional
     public void resetAttendance() {
-        petRepository.resetAllAttendance();
+        petRepository.bulkResetAllAttendance();
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

@@ -71,7 +71,7 @@ public class PreviousArticleService {
 
     @Transactional
     public int cleanupOldPreviousArticles() {
-        int deleted = previousArticleRepository.cleanupOldPreviousArticles(PREVIOUS_ARTICLE_KEEP_COUNT);
+        int deleted = previousArticleRepository.bulkCleanupOldPreviousArticles(PREVIOUS_ARTICLE_KEEP_COUNT);
         log.info("previous_article 정리 완료: {}건 삭제 (isFixed=false)", deleted);
         return deleted;
     }
@@ -83,8 +83,8 @@ public class PreviousArticleService {
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "member")
                         .addContext(ErrorContextKeys.OPERATION, "moveAdminArticles"));
 
-        int copied = articleRepository.safeCopyToArchive(archiveAdminId);
-        int deleted = articleRepository.safeDeleteArchived(archiveAdminId, PREVIOUS_ARTICLE_KEEP_COUNT);
+        int copied = articleRepository.bulkSafeCopyToArchive(archiveAdminId);
+        int deleted = articleRepository.bulkSafeDeleteArchived(archiveAdminId, PREVIOUS_ARTICLE_KEEP_COUNT);
         log.info("아티클 이동 완료: {}건 복사, {}건 삭제 (adminId: {})", copied, deleted, archiveAdminId);
     }
 

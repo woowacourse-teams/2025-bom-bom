@@ -15,5 +15,5 @@ public interface ReadingSnapshotMetaRepository extends JpaRepository<ReadingSnap
         SET snapshot_at = CONVERT_TZ(NOW(6), 'UTC', 'Asia/Seoul')
         WHERE snapshot_type = :snapshotType
         """, nativeQuery = true)
-    int updateSnapshotAt(@Param("snapshotType") String snapshotType);
+    int bulkUpdateSnapshotAt(@Param("snapshotType") String snapshotType);
 }

@@ -15,5 +15,5 @@ public interface MaeilMailSubscriptionTrackRepository extends JpaRepository<Maei
             DELETE FROM MaeilMailSubscriptionTrack mt
             WHERE mt.memberId = :memberId
     """)
-    void deleteByMemberId(Long memberId);
+    void bulkDeleteByMemberId(Long memberId);
 }

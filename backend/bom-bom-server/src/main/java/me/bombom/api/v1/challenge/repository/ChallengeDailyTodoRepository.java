@@ -34,7 +34,7 @@ public interface ChallengeDailyTodoRepository extends JpaRepository<ChallengeDai
                         )
                   )
             """, nativeQuery = true)
-    int insertTodayReadTodoIfMissing(
+    int bulkInsertTodayReadTodoIfMissing(
             @Param("memberId") Long memberId,
             @Param("articleId") Long articleId,
             @Param("today") LocalDate today,

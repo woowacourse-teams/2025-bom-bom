@@ -51,7 +51,7 @@ public class MaeilMailSubscribeService {
     @Transactional
     public void deleteSubscription(Long memberId) {
         Newsletter newsletter = getMaeilMailNewsletter();
-        maeilMailSubscriptionTrackRepository.deleteByMemberId(memberId);
+        maeilMailSubscriptionTrackRepository.bulkDeleteByMemberId(memberId);
         subscribeService.deleteByMemberIdAndNewsletterId(memberId, newsletter.getId());
     }
 

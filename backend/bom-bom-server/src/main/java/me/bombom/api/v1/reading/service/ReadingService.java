@@ -161,7 +161,6 @@ public class ReadingService {
 
                     try {
                         int updatedRows = yearlyReadingRepository.bulkIncreaseMonthlyCountToYearly(memberId, monthlyCount, targetYear);
-                        int updatedRows = yearlyReadingRepository.increaseMonthlyCountToYearly(memberId, monthlyCount,targetYear);
                         if (updatedRows == 0) {
                             YearlyReading yearlyReading = yearlyReadingRepository.findByMemberIdAndReadingYear(memberId,
                                     targetYear)

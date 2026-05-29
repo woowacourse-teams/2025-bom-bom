@@ -10,6 +10,7 @@ import me.bombom.api.v1.nativenewsletter.maeilmail.service.MaeilMailSubscribeSer
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +33,14 @@ public class MaeilMailSubscribeController implements MaeilMailSubscribeControlle
     @Override
     @PutMapping("/maeil-mail")
     public void putSubscription(
+            @LoginMember Member member,
+            @RequestBody @Valid MaeilMailUpdateSubscriptionRequest request
+    ) {
+        maeilMailSubscribeService.putSubscription(member, request);
+    }
+
+    @PostMapping("/maeil-mail")
+    public void postSubscription(
             @LoginMember Member member,
             @RequestBody @Valid MaeilMailUpdateSubscriptionRequest request
     ) {

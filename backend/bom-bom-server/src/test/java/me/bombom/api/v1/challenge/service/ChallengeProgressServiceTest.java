@@ -38,6 +38,8 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
+import me.bombom.api.v1.common.holiday.domain.Holiday;
+import me.bombom.api.v1.common.holiday.repository.HolidayRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
@@ -78,6 +80,9 @@ class ChallengeProgressServiceTest {
     @Autowired
     private NewsletterGroupRepository newsletterGroupRepository;
 
+    @Autowired
+    private HolidayRepository holidayRepository;
+
     @MockitoBean
     private Clock clock;
 
@@ -94,6 +99,7 @@ class ChallengeProgressServiceTest {
         challengeRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
         newsletterGroupRepository.deleteAllInBatch();
+        holidayRepository.deleteAllInBatch();
 
         member = memberRepository.save(
                 TestFixture.createUniqueMember("tester", java.util.UUID.randomUUID().toString()));
@@ -242,6 +248,53 @@ class ChallengeProgressServiceTest {
     }
 
     @Test
+    void 공휴일_결석자는_일반_쉴드_대신_공휴일_쉴드로_처리한다() {
+        // given
+        LocalDate holidayDate = LocalDate.now().minusDays(1);
+        holidayRepository.save(Holiday.builder()
+                .date(holidayDate)
+                .name("어린이날")
+                .build());
+
+        NewsletterGroup group = TestFixture.createNewsletterGroup("공휴일 그룹");
+        newsletterGroupRepository.save(group);
+        Challenge holidayChallenge = challengeRepository.save(TestFixture.createChallenge(
+                "Holiday Challenge",
+                holidayDate.minusDays(4),
+                holidayDate.plusDays(5),
+                10,
+                group.getId()));
+
+        ChallengeParticipant participant = challengeParticipantRepository.save(ChallengeParticipant.builder()
+                .challengeId(holidayChallenge.getId())
+                .memberId(member.getId())
+                .completedDays(3)
+                .shield(1)
+                .streak(4)
+                .isSurvived(true)
+                .build());
+
+        // when
+        challengeProgressService.proceedDailySurvivalCheck(holidayChallenge, holidayDate);
+
+        // then
+        ChallengeParticipant updatedParticipant = challengeParticipantRepository.findById(participant.getId())
+                .orElseThrow();
+
+        assertSoftly(softly -> {
+            softly.assertThat(updatedParticipant.getShield()).isEqualTo(1);
+            softly.assertThat(updatedParticipant.getCompletedDays()).isEqualTo(4);
+            softly.assertThat(updatedParticipant.getStreak()).isEqualTo(4);
+            softly.assertThat(updatedParticipant.isSurvived()).isTrue();
+
+            List<ChallengeDailyResult> results = challengeDailyResultRepository.findAll();
+            softly.assertThat(results).hasSize(1);
+            softly.assertThat(results.getFirst().getStatus()).isEqualTo(ChallengeDailyStatus.HOLIDAY_SHIELD);
+            softly.assertThat(results.getFirst().getDate()).isEqualTo(holidayDate);
+        });
+    }
+
+    @Test
     void 쉴드가_없어도_결석_허용일_이내라면_생존한다() {
         // given
         LocalDate yesterday = LocalDate.now().minusDays(1);
@@ -336,7 +389,7 @@ class ChallengeProgressServiceTest {
                 ChallengeDailyStatus.COMPLETE);
         ChallengeDailyResult result4 = createChallengeDailyResult(participant2.getId(),
                 LocalDate.now().plusDays(1),
-                ChallengeDailyStatus.SHIELD);
+                ChallengeDailyStatus.HOLIDAY_SHIELD);
         ChallengeDailyResult result5 = createChallengeDailyResult(participant2.getId(),
                 LocalDate.now().plusDays(2),
                 ChallengeDailyStatus.COMPLETE);
@@ -355,6 +408,9 @@ class ChallengeProgressServiceTest {
             softly.assertThat(response.members())
                     .extracting("nickname")
                     .containsExactly(memberB.getNickname(), memberA.getNickname());
+            softly.assertThat(response.members().getFirst().dailyProgresses())
+                    .extracting("status")
+                    .contains(ChallengeDailyStatus.HOLIDAY_SHIELD);
         });
     }
 

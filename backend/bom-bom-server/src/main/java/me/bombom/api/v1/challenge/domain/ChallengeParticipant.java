@@ -89,6 +89,10 @@ public class ChallengeParticipant extends BaseEntity {
         return false;
     }
 
+    public void applyHolidayShield() {
+        this.completedDays += 1;
+    }
+
     public void markAsFailed() {
         this.isSurvived = false;
     }

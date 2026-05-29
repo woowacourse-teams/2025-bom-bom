@@ -1,6 +1,5 @@
 package me.bombom.api.v1.challenge.event;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +10,9 @@ import me.bombom.api.v1.challenge.service.ChallengeTeamService;
 import me.bombom.api.v1.challenge.service.ChallengeTodoService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,41 +21,45 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CreateChallengeCommentListener {
+public class CreateChallengeReviewListener {
 
     private static final String UK_DAILY_TODO = "uk_challenge_daily_todo";
 
     private final ChallengeTodoService challengeTodoService;
     private final ChallengeParticipantService challengeParticipantService;
     private final ChallengeTeamService challengeTeamService;
-    private final Clock clock;
 
     @TransactionalEventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void on(CreateChallengeCommentEvent event){
-        log.info("챌린지 코멘트 작성 후 출석 처리 시작");
+    @Retryable(
+            retryFor = Exception.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 500, multiplier = 2.0)
+    )
+    public void on(CreateChallengeReviewEvent event) {
+        log.info("챌린지 리뷰 작성 후 출석 처리 시작 participantId={}, reviewDate={}",
+                event.participantId(), event.reviewDate());
 
-        LocalDate today = LocalDate.now(clock);
         ChallengeParticipant participant = challengeParticipantService.getParticipant(event.participantId());
-        boolean alreadyCompleted = challengeTodoService.isCompletedToday(event.participantId(), today);
-        insertCommentDone(participant, today);
+        boolean alreadyCompleted = challengeTodoService.isCompletedToday(event.participantId(), event.reviewDate());
+        insertReviewDone(participant, event.reviewDate());
 
         if (alreadyCompleted) {
             log.info("이미 출석 처리 완료된 참여자입니다. participantId:{}", event.participantId());
             return;
         }
 
-        challengeTodoService.completeDailyTodo(participant.getId(), today);
+        challengeTodoService.completeDailyTodo(event.participantId(), event.reviewDate());
 
         ChallengeTeam challengeTeam = challengeTeamService.getByParticipant(participant);
         challengeTeamService.updateTeamProgress(challengeTeam);
 
-        log.info("챌린지 코멘트 작성 후 출석 처리 완료");
+        log.info("챌린지 리뷰 작성 후 출석 처리 완료 participantId={}", event.participantId());
     }
 
-    private void insertCommentDone(ChallengeParticipant participant, LocalDate today) {
+    private void insertReviewDone(ChallengeParticipant participant, LocalDate reviewDate) {
         try {
-            challengeTodoService.insertCommentDone(participant, today);
+            challengeTodoService.insertReviewDone(participant, reviewDate);
         } catch (DataIntegrityViolationException e) {
             String violated = extractConstraintName(e);
 
@@ -74,5 +80,16 @@ public class CreateChallengeCommentListener {
             cur = cur.getCause();
         }
         return null;
+    }
+
+    @Recover
+    public void recover(Exception e, CreateChallengeReviewEvent event) {
+        log.error(
+                "챌린지 리뷰 출석 처리 최종 실패. 수동 복구 필요. participantId={}, reviewDate={}, errMsg={}",
+                event.participantId(),
+                event.reviewDate(),
+                e.getMessage(),
+                e
+        );
     }
 }

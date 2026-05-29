@@ -418,6 +418,7 @@ public final class TestFixture {
                 .memberId(member.getId())
                 .currentCount(1)
                 .totalCount(3)
+                .readCount(1)
                 .build();
     }
 
@@ -426,6 +427,7 @@ public final class TestFixture {
                 .memberId(member.getId())
                 .currentCount(0)
                 .totalCount(3)
+                .readCount(0)
                 .build();
     }
 

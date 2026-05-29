@@ -1,0 +1,2 @@
+ALTER TABLE today_reading
+    ADD COLUMN read_count TINYINT NOT NULL DEFAULT 0;

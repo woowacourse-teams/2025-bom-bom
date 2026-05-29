@@ -87,6 +87,32 @@ public class ChallengeTodoService {
     }
 
     @Transactional
+    public void insertReviewDone(ChallengeParticipant participant, LocalDate today) {
+        ChallengeTodo challengeTodo = challengeTodoRepository
+                .findByChallengeIdAndTodoType(participant.getChallengeId(), ChallengeTodoType.REVIEW)
+                .orElseThrow(() -> new CServerErrorException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, participant.getChallengeId())
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "ChallengeTodo")
+                        .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndTodoType"));
+
+        // 중복 체크
+        if (challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                participant.getId(), today, challengeTodo.getId())) {
+            log.debug("Review todo already exists for participantId={}, date={}, todoId={}",
+                    participant.getId(), today, challengeTodo.getId());
+            return;
+        }
+
+        ChallengeDailyTodo dailyTodo = ChallengeDailyTodo.builder()
+                .participantId(participant.getId())
+                .todoDate(today)
+                .challengeTodoId(challengeTodo.getId())
+                .build();
+
+        challengeDailyTodoRepository.save(dailyTodo);
+    }
+
+    @Transactional
     public void completeDailyTodo(Long participantId, LocalDate today){
         ChallengeParticipant participant = challengeParticipantRepository.findById(participantId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)

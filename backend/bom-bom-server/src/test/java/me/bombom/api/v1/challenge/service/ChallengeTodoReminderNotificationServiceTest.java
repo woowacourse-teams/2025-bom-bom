@@ -19,6 +19,8 @@ import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTodoReminderNotificationRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
+import me.bombom.api.v1.common.holiday.domain.Holiday;
+import me.bombom.api.v1.common.holiday.repository.HolidayRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
@@ -58,6 +60,9 @@ class ChallengeTodoReminderNotificationServiceTest {
     @Autowired
     private NewsletterGroupRepository newsletterGroupRepository;
 
+    @Autowired
+    private HolidayRepository holidayRepository;
+
     @BeforeEach
     void setUp() {
         challengeTodoReminderNotificationRepository.deleteAllInBatch();
@@ -68,6 +73,7 @@ class ChallengeTodoReminderNotificationServiceTest {
         challengeRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
         newsletterGroupRepository.deleteAllInBatch();
+        holidayRepository.deleteAllInBatch();
     }
 
     @Test
@@ -205,6 +211,33 @@ class ChallengeTodoReminderNotificationServiceTest {
         assertThat(notifications)
                 .extracting(ChallengeTodoReminderNotification::getPhase)
                 .containsExactlyInAnyOrder(ChallengeTodoReminderPhase.FIRST, ChallengeTodoReminderPhase.SECOND);
+    }
+
+    @Test
+    void 공휴일에는_TODO_리마인더를_생성하지_않는다() {
+        // given
+        LocalDate holidayDate = LocalDate.of(2025, 5, 5);
+        holidayRepository.save(Holiday.builder()
+                .date(holidayDate)
+                .name("어린이날")
+                .build());
+
+        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
+        Challenge challenge = challengeRepository.save(
+                TestFixture.createChallenge("진행 중 챌린지", holidayDate.minusDays(1), holidayDate.plusDays(3), 5, group.getId()));
+
+        Member member = memberRepository.save(TestFixture.createUniqueMember("holiday-member", "p1"));
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 0));
+        challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
+
+        // when
+        challengeTodoReminderNotificationService.createPendingNotificationsForIncompleteTodos(
+                holidayDate,
+                ChallengeTodoReminderPhase.FIRST
+        );
+
+        // then
+        assertThat(challengeTodoReminderNotificationRepository.findAll()).isEmpty();
     }
 
     @Test

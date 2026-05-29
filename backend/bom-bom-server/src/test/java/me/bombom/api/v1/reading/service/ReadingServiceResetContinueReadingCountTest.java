@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
+import me.bombom.api.v1.common.holiday.repository.HolidayRepository;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
@@ -35,6 +36,9 @@ class ReadingServiceResetContinueReadingCountTest {
     private TodayReadingRepository todayReadingRepository;
 
     @Mock
+    private HolidayRepository holidayRepository;
+
+    @Mock
     private Clock clock;
 
     @Test
@@ -56,8 +60,20 @@ class ReadingServiceResetContinueReadingCountTest {
     }
 
     @Test
+    void 어제가_공휴일이면_연속_읽기_횟수를_초기화하지_않는다() {
+        LocalDate holiday = LocalDate.of(2026, 5, 5);
+        fixClockTo(holiday.plusDays(1));
+        given(holidayRepository.existsByDate(holiday)).willReturn(true);
+
+        readingService.resetContinueReadingCount();
+
+        verify(todayReadingRepository, never()).findTotalNonZeroAndReadZero();
+    }
+
+    @Test
     void 어제가_평일이면_연속_읽기_횟수를_초기화하고_최대_스트릭은_유지한다() {
         fixClockTo(LocalDate.of(2026, 4, 28)); // Tuesday
+        given(holidayRepository.existsByDate(LocalDate.of(2026, 4, 27))).willReturn(false);
         TodayReading todayReading = TodayReading.builder()
                 .memberId(1L)
                 .totalCount(3)
@@ -83,6 +99,7 @@ class ReadingServiceResetContinueReadingCountTest {
     @Test
     void 어제가_평일이어도_오늘_읽은_아티클이_있으면_연속_읽기_횟수를_초기화하지_않는다() {
         fixClockTo(LocalDate.of(2026, 4, 28)); // Tuesday
+        given(holidayRepository.existsByDate(LocalDate.of(2026, 4, 27))).willReturn(false);
         given(todayReadingRepository.findTotalNonZeroAndReadZero()).willReturn(List.of());
 
         readingService.resetContinueReadingCount();

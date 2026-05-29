@@ -15,6 +15,7 @@ import me.bombom.api.v1.common.MonthlyRankingScheduleProperties;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.common.holiday.repository.HolidayRepository;
 import me.bombom.api.v1.common.util.DateUtils;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -72,6 +73,7 @@ public class ReadingService {
     private final MonthlyReadingSnapshotRepository monthlyReadingSnapshotRepository;
     private final MonthlyReadingRealtimeRepository monthlyReadingRealtimeRepository;
     private final YearlyReadingRepository yearlyReadingRepository;
+    private final HolidayRepository holidayRepository;
 
     private final MonthlyRankingScheduleProperties scheduleProps;
     private final ContinueReadingRankingScheduleProperties continueReadingRankingScheduleProperties;
@@ -126,7 +128,7 @@ public class ReadingService {
     @Transactional
     public void resetContinueReadingCount() {
         LocalDate targetDate = LocalDate.now(clock).minusDays(1);
-        if (DateUtils.isWeekend(targetDate)) {
+        if (isNonWorkingDay(targetDate)) {
             return;
         }
 
@@ -430,6 +432,10 @@ public class ReadingService {
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingRealtime")
                 .addContext(ErrorContextKeys.OPERATION, "applyResetContinueReadingCount"));
         continueReading.resetDayCount();
+    }
+
+    private boolean isNonWorkingDay(LocalDate date) {
+        return DateUtils.isWeekend(date) || holidayRepository.existsByDate(date);
     }
 
     private void updateContinueReadingCount(Long memberId) {

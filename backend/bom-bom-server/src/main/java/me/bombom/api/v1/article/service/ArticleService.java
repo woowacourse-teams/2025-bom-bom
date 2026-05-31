@@ -1,5 +1,6 @@
 package me.bombom.api.v1.article.service;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -14,6 +15,7 @@ import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.event.MarkAsReadEvent;
+import me.bombom.api.v1.article.repository.ArticleReadHistoryRepository;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.article.repository.RecentArticleRepository;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
@@ -47,6 +49,7 @@ import org.springframework.util.StringUtils;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
+    private final ArticleReadHistoryRepository articleReadHistoryRepository;
     private final RecentArticleRepository recentArticleRepository;
     private final TodayReadingRepository todayReadingRepository;
     private final CategoryRepository categoryRepository;
@@ -54,6 +57,7 @@ public class ArticleService {
     private final HighlightRepository highlightRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final BookmarkRepository bookmarkRepository;
+    private final Clock clock;
 
     public Page<ArticleResponse> getArticles(
             Member member,
@@ -96,6 +100,19 @@ public class ArticleService {
             return;
         }
         validateArticleOwner(article, member.getId());
+        Newsletter newsletter = findNewsletterById(article.getNewsletterId(), member.getId());
+        LocalDateTime readAt = LocalDateTime.now(clock);
+
+        int insertedRows = articleReadHistoryRepository.insertIfAbsent(
+                member.getId(),
+                article.getId(),
+                article.getNewsletterId(),
+                newsletter.getCategoryId(),
+                readAt
+        );
+        if (insertedRows == 0) {
+            return;
+        }
         article.markAsRead();
 
         applicationEventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), articleId));
@@ -175,6 +192,14 @@ public class ArticleService {
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "article")
                         .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                         .addContext(ErrorContextKeys.ARTICLE_ID, articleId));
+    }
+
+    private Newsletter findNewsletterById(Long newsletterId, Long memberId) {
+        return newsletterRepository.findById(newsletterId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletter")
+                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                        .addContext(ErrorContextKeys.NEWSLETTER_ID, newsletterId));
     }
 
     private void validateNewsletterId(Long newsletterId) {

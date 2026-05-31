@@ -20,7 +20,9 @@ import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
+import me.bombom.api.v1.reading.domain.ContinueReadingRankHistory;
 import me.bombom.api.v1.reading.domain.ContinueReadingSnapshot;
+import me.bombom.api.v1.reading.domain.MonthlyReadingRankHistory;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
 import me.bombom.api.v1.reading.domain.ReadingSnapshotMeta;
 import me.bombom.api.v1.reading.domain.ReadingSnapshotType;
@@ -32,7 +34,9 @@ import me.bombom.api.v1.reading.dto.response.MemberContinueReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
+import me.bombom.api.v1.reading.repository.ContinueReadingRankHistoryRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
+import me.bombom.api.v1.reading.repository.MonthlyReadingRankHistoryRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.ReadingSnapshotMetaRepository;
@@ -61,6 +65,9 @@ class ReadingServiceTest {
     private ContinueReadingSnapshotRepository continueReadingRankingSnapshotRepository;
 
     @Autowired
+    private ContinueReadingRankHistoryRepository continueReadingRankHistoryRepository;
+
+    @Autowired
     private TodayReadingRepository todayReadingRepository;
 
     @Autowired
@@ -71,6 +78,9 @@ class ReadingServiceTest {
 
     @Autowired
     private MonthlyReadingRealtimeRepository monthlyReadingRealtimeRepository;
+
+    @Autowired
+    private MonthlyReadingRankHistoryRepository monthlyReadingRankHistoryRepository;
 
     @Autowired
     private ReadingSnapshotMetaRepository readingSnapshotMetaRepository;
@@ -94,6 +104,8 @@ class ReadingServiceTest {
     void setUp() {
         // 기존 데이터 삭제
         badgeRepository.deleteAllInBatch();
+        monthlyReadingRankHistoryRepository.deleteAllInBatch();
+        continueReadingRankHistoryRepository.deleteAllInBatch();
         yearlyReadingRepository.deleteAllInBatch();
         monthlyReadingSnapshotRepository.deleteAllInBatch();
         weeklyReadingRepository.deleteAllInBatch();
@@ -519,6 +531,91 @@ class ReadingServiceTest {
             
             softly.assertThat(goldBadge.getPeriodYear()).isEqualTo(lastMonth.getYear());
             softly.assertThat(goldBadge.getPeriodMonth()).isEqualTo(lastMonth.getMonthValue());
+        });
+    }
+
+    @Test
+    void 매월_초기화_전에_다독왕과_연속왕_확정_랭킹_이력을_저장한다() {
+        monthlyReadingRealtimeRepository.deleteAllInBatch();
+        continueReadingRepository.deleteAllInBatch();
+
+        Member member2 = memberRepository.save(TestFixture.createUniqueMember("hist_member2", "hist_provider2"));
+        Member member3 = memberRepository.save(TestFixture.createUniqueMember("hist_member3", "hist_provider3"));
+
+        monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member, 10));
+        monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member2, 30));
+        monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member3, 20));
+
+        continueReadingRepository.save(ContinueReadingRealtime.builder()
+                .memberId(member.getId())
+                .dayCount(10)
+                .build());
+        continueReadingRepository.save(ContinueReadingRealtime.builder()
+                .memberId(member2.getId())
+                .dayCount(30)
+                .build());
+        continueReadingRepository.save(ContinueReadingRealtime.builder()
+                .memberId(member3.getId())
+                .dayCount(20)
+                .build());
+
+        readingService.migrateMonthlyCountToYearlyAndReset();
+
+        LocalDate period = lastMonth().withDayOfMonth(1);
+        MonthlyReadingRankHistory monthlyFirst = monthlyReadingRankHistoryRepository
+                .findByMemberIdAndPeriod(member2.getId(), period)
+                .orElseThrow();
+        MonthlyReadingRankHistory monthlyThird = monthlyReadingRankHistoryRepository
+                .findByMemberIdAndPeriod(member.getId(), period)
+                .orElseThrow();
+        ContinueReadingRankHistory continueFirst = continueReadingRankHistoryRepository
+                .findByMemberIdAndPeriod(member2.getId(), period)
+                .orElseThrow();
+
+        assertSoftly(softly -> {
+            softly.assertThat(monthlyReadingRankHistoryRepository.count()).isEqualTo(3);
+            softly.assertThat(monthlyFirst.getPeriod()).isEqualTo(period);
+            softly.assertThat(monthlyFirst.getReadCount()).isEqualTo(30);
+            softly.assertThat(monthlyFirst.getRankOrder()).isEqualTo(1L);
+            softly.assertThat(monthlyThird.getReadCount()).isEqualTo(10);
+            softly.assertThat(monthlyThird.getRankOrder()).isEqualTo(3L);
+
+            softly.assertThat(continueReadingRankHistoryRepository.count()).isEqualTo(3);
+            softly.assertThat(continueFirst.getPeriod()).isEqualTo(period);
+            softly.assertThat(continueFirst.getDayCount()).isEqualTo(30);
+            softly.assertThat(continueFirst.getRankOrder()).isEqualTo(1L);
+        });
+    }
+
+    @Test
+    void 같은_월_확정_랭킹_이력은_월간_초기화가_재실행되어도_덮어쓰지_않는다() {
+        monthlyReadingRealtimeRepository.deleteAllInBatch();
+        continueReadingRepository.deleteAllInBatch();
+
+        monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member, 12));
+        continueReadingRepository.save(ContinueReadingRealtime.builder()
+                .memberId(member.getId())
+                .dayCount(7)
+                .build());
+
+        readingService.migrateMonthlyCountToYearlyAndReset();
+        readingService.migrateMonthlyCountToYearlyAndReset();
+
+        LocalDate period = lastMonth().withDayOfMonth(1);
+        MonthlyReadingRankHistory monthlyHistory = monthlyReadingRankHistoryRepository
+                .findByMemberIdAndPeriod(member.getId(), period)
+                .orElseThrow();
+        ContinueReadingRankHistory continueHistory = continueReadingRankHistoryRepository
+                .findByMemberIdAndPeriod(member.getId(), period)
+                .orElseThrow();
+
+        assertSoftly(softly -> {
+            softly.assertThat(monthlyReadingRankHistoryRepository.count()).isEqualTo(1);
+            softly.assertThat(monthlyHistory.getPeriod()).isEqualTo(period);
+            softly.assertThat(monthlyHistory.getReadCount()).isEqualTo(12);
+            softly.assertThat(continueReadingRankHistoryRepository.count()).isEqualTo(1);
+            softly.assertThat(continueHistory.getPeriod()).isEqualTo(period);
+            softly.assertThat(continueHistory.getDayCount()).isEqualTo(7);
         });
     }
 

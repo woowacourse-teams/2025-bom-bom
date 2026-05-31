@@ -15,6 +15,7 @@ import me.bombom.api.v1.common.MonthlyRankingScheduleProperties;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.common.holiday.repository.HolidayRepository;
 import me.bombom.api.v1.common.util.DateUtils;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -42,7 +43,9 @@ import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.reading.event.ContinueReadingIncreasedEvent;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
+import me.bombom.api.v1.reading.repository.ContinueReadingRankHistoryRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
+import me.bombom.api.v1.reading.repository.MonthlyReadingRankHistoryRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
@@ -67,11 +70,14 @@ public class ReadingService {
     private final MemberRepository memberRepository;
     private final ContinueReadingRealtimeRepository continueReadingRepository;
     private final ContinueReadingSnapshotRepository continueReadingRankingSnapshotRepository;
+    private final ContinueReadingRankHistoryRepository continueReadingRankHistoryRepository;
     private final TodayReadingRepository todayReadingRepository;
     private final WeeklyReadingRepository weeklyReadingRepository;
     private final MonthlyReadingSnapshotRepository monthlyReadingSnapshotRepository;
     private final MonthlyReadingRealtimeRepository monthlyReadingRealtimeRepository;
+    private final MonthlyReadingRankHistoryRepository monthlyReadingRankHistoryRepository;
     private final YearlyReadingRepository yearlyReadingRepository;
+    private final HolidayRepository holidayRepository;
 
     private final MonthlyRankingScheduleProperties scheduleProps;
     private final ContinueReadingRankingScheduleProperties continueReadingRankingScheduleProperties;
@@ -126,7 +132,7 @@ public class ReadingService {
     @Transactional
     public void resetContinueReadingCount() {
         LocalDate targetDate = LocalDate.now(clock).minusDays(1);
-        if (DateUtils.isWeekend(targetDate)) {
+        if (isNonWorkingDay(targetDate)) {
             return;
         }
 
@@ -139,6 +145,8 @@ public class ReadingService {
         LocalDate lastMonth = getLastMonth();
         int targetYear = lastMonth.getYear();
         try {
+            saveMonthlyRankHistories(lastMonth);
+
             // 1. 데이터가 없으면 바로 realtime 초기화
             long snapshotCount = monthlyReadingSnapshotRepository.count();
             if (snapshotCount == 0) {
@@ -183,6 +191,16 @@ public class ReadingService {
             throw new CIllegalArgumentException(ErrorDetail.INTERNAL_SERVER_ERROR)
                 .addContext(ErrorContextKeys.OPERATION, "migrateMonthlyCountToYearlyAndReset");
         }
+    }
+
+    private void saveMonthlyRankHistories(LocalDate period) {
+        LocalDate periodStartDate = period.withDayOfMonth(1);
+        monthlyReadingRankHistoryRepository.saveCurrentMonthlyRanking(
+            periodStartDate
+        );
+        continueReadingRankHistoryRepository.saveCurrentContinueReadingRanking(
+            periodStartDate
+        );
     }
 
     @Transactional
@@ -430,6 +448,10 @@ public class ReadingService {
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingRealtime")
                 .addContext(ErrorContextKeys.OPERATION, "applyResetContinueReadingCount"));
         continueReading.resetDayCount();
+    }
+
+    private boolean isNonWorkingDay(LocalDate date) {
+        return DateUtils.isWeekend(date) || holidayRepository.existsByDate(date);
     }
 
     private void updateContinueReadingCount(Long memberId) {

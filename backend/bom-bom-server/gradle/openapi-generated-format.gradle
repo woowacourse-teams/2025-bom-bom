@@ -20,6 +20,8 @@ spotless {
 @$1''')
         removeUnusedImports()
         googleJavaFormat()
+        replaceRegex("move closing paren to new line in api methods", '(?m)^(      .+)\\);$', '''$1
+  );''')
     }
 
     format("openApiModels") {

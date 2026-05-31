@@ -43,7 +43,9 @@ import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.reading.event.ContinueReadingIncreasedEvent;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
+import me.bombom.api.v1.reading.repository.ContinueReadingRankHistoryRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
+import me.bombom.api.v1.reading.repository.MonthlyReadingRankHistoryRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
@@ -68,10 +70,12 @@ public class ReadingService {
     private final MemberRepository memberRepository;
     private final ContinueReadingRealtimeRepository continueReadingRepository;
     private final ContinueReadingSnapshotRepository continueReadingRankingSnapshotRepository;
+    private final ContinueReadingRankHistoryRepository continueReadingRankHistoryRepository;
     private final TodayReadingRepository todayReadingRepository;
     private final WeeklyReadingRepository weeklyReadingRepository;
     private final MonthlyReadingSnapshotRepository monthlyReadingSnapshotRepository;
     private final MonthlyReadingRealtimeRepository monthlyReadingRealtimeRepository;
+    private final MonthlyReadingRankHistoryRepository monthlyReadingRankHistoryRepository;
     private final YearlyReadingRepository yearlyReadingRepository;
     private final HolidayRepository holidayRepository;
 
@@ -141,6 +145,8 @@ public class ReadingService {
         LocalDate lastMonth = getLastMonth();
         int targetYear = lastMonth.getYear();
         try {
+            saveMonthlyRankHistories(lastMonth);
+
             // 1. 데이터가 없으면 바로 realtime 초기화
             long snapshotCount = monthlyReadingSnapshotRepository.count();
             if (snapshotCount == 0) {
@@ -185,6 +191,16 @@ public class ReadingService {
             throw new CIllegalArgumentException(ErrorDetail.INTERNAL_SERVER_ERROR)
                 .addContext(ErrorContextKeys.OPERATION, "migrateMonthlyCountToYearlyAndReset");
         }
+    }
+
+    private void saveMonthlyRankHistories(LocalDate period) {
+        LocalDate periodStartDate = period.withDayOfMonth(1);
+        monthlyReadingRankHistoryRepository.saveCurrentMonthlyRanking(
+            periodStartDate
+        );
+        continueReadingRankHistoryRepository.saveCurrentContinueReadingRanking(
+            periodStartDate
+        );
     }
 
     @Transactional

@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
+import me.bombom.api.v1.article.domain.ArticleReadHistory;
 import me.bombom.api.v1.article.domain.RecentArticle;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
 import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
@@ -19,6 +20,7 @@ import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
+import me.bombom.api.v1.article.repository.ArticleReadHistoryRepository;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.article.repository.RecentArticleRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
@@ -65,6 +67,9 @@ class ArticleServiceTest {
     private ArticleRepository articleRepository;
 
     @Autowired
+    private ArticleReadHistoryRepository articleReadHistoryRepository;
+
+    @Autowired
     private RecentArticleRepository recentArticleRepository;
 
     @Autowired
@@ -96,6 +101,7 @@ class ArticleServiceTest {
     @BeforeEach
     public void setup() {
         initializeRoles();
+        articleReadHistoryRepository.deleteAllInBatch();
         newsletterRepository.deleteAllInBatch();
         articleRepository.deleteAllInBatch();
         categoryRepository.deleteAllInBatch();
@@ -437,6 +443,36 @@ class ArticleServiceTest {
         assertThatThrownBy(() -> articleService.markAsRead(article.getId(), otherMember))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
+    }
+
+    @Test
+    void 아티클을_처음_읽으면_읽음_이력에_카테고리를_함께_저장한다() {
+        Article article = articles.getFirst();
+        Newsletter newsletter = newsletters.getFirst();
+
+        articleService.markAsRead(article.getId(), member);
+
+        ArticleReadHistory history = articleReadHistoryRepository
+                .findByMemberIdAndArticleId(member.getId(), article.getId())
+                .orElseThrow();
+
+        assertSoftly(softly -> {
+            softly.assertThat(history.getNewsletterId()).isEqualTo(newsletter.getId());
+            softly.assertThat(history.getCategoryId()).isEqualTo(newsletter.getCategoryId());
+            softly.assertThat(history.getReadAt()).isNotNull();
+        });
+    }
+
+    @Test
+    void 이미_읽은_아티클은_읽음_이력을_중복_저장하지_않는다() {
+        Article article = articles.getFirst();
+
+        articleService.markAsRead(article.getId(), member);
+        articleService.markAsRead(article.getId(), member);
+
+        assertSoftly(softly -> {
+            softly.assertThat(articleReadHistoryRepository.count()).isEqualTo(1);
+        });
     }
 
     @Test

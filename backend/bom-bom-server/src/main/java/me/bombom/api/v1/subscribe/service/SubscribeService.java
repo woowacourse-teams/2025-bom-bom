@@ -20,6 +20,7 @@ import me.bombom.api.v1.subscribe.event.UnsubscribeRequestedEvent;
 import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SubscribeService {
 
     private final SubscribeRepository subscribeRepository;
+    private final NewsletterSubscriptionCountService newsletterSubscriptionCountService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final UnsubscribeAgent unsubscribeAgent;
     private final DiscordWebhookNotifier discordNotifier;
@@ -38,12 +40,35 @@ public class SubscribeService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteAllByMemberId(Long memberId) {
-        subscribeRepository.deleteAllByMemberId(memberId);
+        subscribeRepository.findAllByMemberId(memberId)
+                .forEach(subscribe -> newsletterSubscriptionCountService.decreaseNewsletterSubscriptionCountByMemberId(
+                        subscribe.getNewsletterId(),
+                        memberId
+                ));
+        subscribeRepository.bulkDeleteAllByMemberId(memberId);
+    }
+
+    @Transactional
+    public void deleteByMemberIdAndNewsletterId(Long memberId, Long newsletterId) {
+        subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId)
+                .ifPresent(subscribe -> newsletterSubscriptionCountService.decreaseNewsletterSubscriptionCountByMemberId(
+                        subscribe.getNewsletterId(),
+                        memberId
+                ));
+        subscribeRepository.bulkDeleteByMemberIdAndNewsletterId(memberId, newsletterId);
     }
 
     public List<SubscribedNewsletterResponse> getSubscribedNewsletters(Member member) {
         return subscribeRepository.findSubscribedByMemberId(member.getId());
     }
+
+    @Transactional
+    public Subscribe getOrCreate(Member member, Long newsletterId) {
+        Long memberId = member.getId();
+        return subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId)
+                .orElseGet(() -> saveOrGetExisting(member, newsletterId));
+    }
+
 
     @Transactional
     public void unsubscribe(Long memberId, Long subscribeId) {
@@ -64,6 +89,10 @@ public class SubscribeService {
         // 자동 취소가 불가능한 경우 사용자가 직접 구독 취소 유도 후 삭제 버튼 클릭
         if (subscribe.isFailedToUnsubscribe()) {
             log.info("구독 취소 실패 상태인 항목 강제 삭제 subscribeId: {}", subscribeId);
+            newsletterSubscriptionCountService.decreaseNewsletterSubscriptionCountByMemberId(
+                    subscribe.getNewsletterId(),
+                    subscribe.getMemberId()
+            );
             subscribeRepository.delete(subscribe);
             return;
         }
@@ -82,15 +111,18 @@ public class SubscribeService {
 
     @Transactional
     public void handleUnsubscribeResult(Long subscribeId, boolean isSuccess) {
-        if (isSuccess) {
-            subscribeRepository.deleteById(subscribeId);
+        Optional<Subscribe> subscribe = subscribeRepository.findById(subscribeId);
+        if (subscribe.isEmpty()) {
+            log.warn("구독 정보가 존재하지 않아 해지 결과를 반영하지 않습니다. subscribeId: {}", subscribeId);
             return;
         }
-        subscribeRepository.findById(subscribeId)
-                .ifPresentOrElse(
-                        subscribe -> subscribe.changeStatus(SubscribeStatus.UNSUBSCRIBE_FAILED),
-                        () -> log.warn("구독 정보가 존재하지 않아 상태 변경 실패 (이미 삭제되었을 수 있음) - subscribeId: {}", subscribeId)
-                );
+
+        if (isSuccess) {
+            handleSuccessfulUnsubscribe(subscribe.get());
+            return;
+        }
+
+        handleFailedUnsubscribe(subscribe.get());
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -120,6 +152,38 @@ public class SubscribeService {
 
         Subscribe subscribe = subscribeOpt.get();
         processUnsubscribe(subscribe.getId(), subscribe.getNewsletterId(), subscribe.getUnsubscribeUrl());
+    }
+
+    private Subscribe create(Long memberId, Long newsletterId) {
+        return subscribeRepository.save(Subscribe.builder()
+                .memberId(memberId)
+                .newsletterId(newsletterId)
+                .build());
+    }
+
+    private Subscribe saveOrGetExisting(Member member, Long newsletterId) {
+        Long memberId = member.getId();
+        try {
+            Subscribe subscribe = create(memberId, newsletterId);
+            newsletterSubscriptionCountService.updateNewsletterSubscriptionCount(newsletterId, member.getBirthDate());
+            return subscribe;
+        } catch (DataIntegrityViolationException e) {
+            log.info("구독이 이미 생성되어 기존 구독 정보를 반환합니다. memberId: {}, newsletterId: {}", memberId, newsletterId);
+            return subscribeRepository.findByMemberIdAndNewsletterId(memberId, newsletterId)
+                    .orElseThrow(() -> e);
+        }
+    }
+
+    private void handleSuccessfulUnsubscribe(Subscribe subscribe) {
+        newsletterSubscriptionCountService.decreaseNewsletterSubscriptionCountByMemberId(
+                subscribe.getNewsletterId(),
+                subscribe.getMemberId()
+        );
+        subscribeRepository.delete(subscribe);
+    }
+
+    private void handleFailedUnsubscribe(Subscribe subscribe) {
+        subscribe.changeStatus(SubscribeStatus.UNSUBSCRIBE_FAILED);
     }
 
     private void handleRetryableFailure(Long subscribeId, String url, String errorMsg) {

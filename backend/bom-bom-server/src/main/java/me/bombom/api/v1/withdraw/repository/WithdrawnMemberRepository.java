@@ -10,5 +10,5 @@ public interface WithdrawnMemberRepository extends JpaRepository<WithdrawnMember
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM WithdrawnMember wm WHERE wm.expireDate = :date")
-    void deleteAllByExpireDate(LocalDate date);
+    void bulkDeleteAllByExpireDate(LocalDate date);
 }

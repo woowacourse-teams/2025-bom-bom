@@ -1,6 +1,7 @@
 package me.bombom.api.v1.subscribe.repository;
 
 import java.util.List;
+import java.util.Optional;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,21 +18,36 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
             n.name,
             n.imageUrl,
             n.description,
-            c.name,
             s.unsubscribeUrl,
             s.status,
-            n.status
+            n.status,
+            n.source
         )
         FROM Subscribe s
         JOIN Newsletter n ON s.newsletterId = n.id
-        JOIN Category c ON n.categoryId = c.id
         WHERE s.memberId = :memberId
+        ORDER BY n.name
     """)
     List<SubscribedNewsletterResponse> findSubscribedByMemberId(@Param("memberId") Long memberId);
 
     boolean existsByMemberIdAndNewsletterId(Long memberId, Long newsletterId);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("DELETE FROM Subscribe sb WHERE sb.memberId = :memberId")
-    void deleteAllByMemberId(Long memberId);
+    Optional<Subscribe> findByMemberIdAndNewsletterId(Long memberId, Long newsletterId);
+
+    List<Subscribe> findAllByMemberId(Long memberId);
+
+    @Modifying(clearAutomatically = true)
+    @Query("""
+            DELETE FROM Subscribe sb
+            WHERE sb.memberId = :memberId
+    """)
+    void bulkDeleteAllByMemberId(Long memberId);
+
+    @Modifying
+    @Query("""
+            DELETE FROM Subscribe sb
+            WHERE sb.memberId = :memberId
+              AND sb.newsletterId = :newsletterId
+    """)
+    void bulkDeleteByMemberIdAndNewsletterId(Long memberId, Long newsletterId);
 }

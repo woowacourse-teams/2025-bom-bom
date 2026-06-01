@@ -156,13 +156,13 @@ public class ArticleService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteAllByMemberId(Long memberId) {
-        articleRepository.deleteAllByMemberId(memberId);
+        articleRepository.bulkDeleteAllByMemberId(memberId);
     }
 
     @Transactional
     public int cleanupOldRecentArticles() {
         LocalDateTime fiveDaysAgo = LocalDateTime.now().minusDays(5);
-        return recentArticleRepository.deleteAllByArrivedDateTimeBefore(fiveDaysAgo);
+        return recentArticleRepository.bulkDeleteAllByArrivedDateTimeBefore(fiveDaysAgo);
     }
 
     @Transactional
@@ -176,14 +176,14 @@ public class ArticleService {
                     .addContext(ErrorContextKeys.OPERATION, "deleteArticles")
                     .addContext(ErrorContextKeys.ARTICLE_ID, request.articleIds());
         }
-        bookmarkRepository.deleteAllByArticleIds(target);
-        highlightRepository.updateArticleDeleted(target);
-        articleRepository.deleteAllByIdsAndMemberId(target, member.getId());
+        bookmarkRepository.bulkDeleteAllByArticleIds(target);
+        highlightRepository.bulkUpdateArticleDeleted(target);
+        articleRepository.bulkDeleteAllByIdsAndMemberId(target, member.getId());
     }
 
     @Transactional
     public int cleanupExcessArticles(int adminRetainLimit, int userRetainLimit) {
-        return articleRepository.deleteExcessUnbookmarkedArticles(adminRetainLimit, userRetainLimit);
+        return articleRepository.bulkDeleteExcessUnbookmarkedArticles(adminRetainLimit, userRetainLimit);
     }
 
     private Article findArticleById(Long articleId, Long memberId) {

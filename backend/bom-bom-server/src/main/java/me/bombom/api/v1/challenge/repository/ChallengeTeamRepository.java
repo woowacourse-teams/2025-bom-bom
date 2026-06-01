@@ -35,5 +35,5 @@ public interface ChallengeTeamRepository extends JpaRepository<ChallengeTeam, Lo
         SET ct.progress = 0
         WHERE ct.challengeId IN :challengeIds
     """)
-    void resetProgressByChallengeIdIn(@Param("challengeIds") List<Long> challengeIds);
+    void bulkResetProgressByChallengeIdIn(@Param("challengeIds") List<Long> challengeIds);
 }

@@ -13,13 +13,19 @@ import org.springframework.stereotype.Component;
 public class ExecutorMetricsBinder implements MeterBinder {
 
     private final ThreadPoolTaskExecutor taskExecutor;
+    private final ThreadPoolTaskExecutor markAsReadExecutor;
 
-    public ExecutorMetricsBinder(@Qualifier("taskExecutor") Executor taskExecutor) {
+    public ExecutorMetricsBinder(
+            @Qualifier("taskExecutor") Executor taskExecutor,
+            @Qualifier("markAsReadExecutor") Executor markAsReadExecutor
+    ) {
         this.taskExecutor = (ThreadPoolTaskExecutor) taskExecutor;
+        this.markAsReadExecutor = (ThreadPoolTaskExecutor) markAsReadExecutor;
     }
 
     @Override
     public void bindTo(MeterRegistry registry) {
         ExecutorServiceMetrics.monitor(registry, taskExecutor.getThreadPoolExecutor(), "defaultAsync", Tags.empty());
+        ExecutorServiceMetrics.monitor(registry, markAsReadExecutor.getThreadPoolExecutor(), "markAsReadAsync", Tags.empty());
     }
 }

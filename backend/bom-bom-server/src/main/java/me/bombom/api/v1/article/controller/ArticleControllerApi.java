@@ -16,6 +16,7 @@ import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
+import me.bombom.api.v1.article.dto.response.MarkAsReadResponse;
 import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
@@ -78,11 +79,11 @@ public interface ArticleControllerApi {
         description = "특정 아티클을 읽음 처리합니다."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "읽음 처리 성공"),
+        @ApiResponse(responseCode = "200", description = "읽음 처리 성공"),
         @ApiResponse(responseCode = "403", description = "아티클에 대한 접근 권한 없음", content = @Content),
         @ApiResponse(responseCode = "404", description = "아티클을 찾을 수 없음", content = @Content)
     })
-    void updateIsRead(
+    MarkAsReadResponse updateIsRead(
         @Parameter(hidden = true) Member member,
         @Parameter(description = "아티클 ID", example = "1")
         @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id

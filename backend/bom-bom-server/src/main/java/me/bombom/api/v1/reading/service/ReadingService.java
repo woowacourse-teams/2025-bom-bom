@@ -19,7 +19,6 @@ import me.bombom.api.v1.common.holiday.repository.HolidayRepository;
 import me.bombom.api.v1.common.util.DateUtils;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.pet.ScorePolicyConstants;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.ContinueReadingSnapshot;
 import me.bombom.api.v1.reading.domain.LowestRankWithDifference;
@@ -42,8 +41,8 @@ import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.reading.event.ContinueReadingIncreasedEvent;
-import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingRankHistoryRepository;
+import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRankHistoryRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
@@ -213,18 +212,6 @@ public class ReadingService {
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "WeeklyReading"));
         weeklyReading.updateGoalCount(weeklyGoalCount);
         return WeeklyGoalCountResponse.from(weeklyReading);
-    }
-
-    public int calculateArticleScore(Long memberId) {
-        int score = ScorePolicyConstants.ARTICLE_READING_SCORE;
-        ContinueReadingRealtime continueReading = continueReadingRepository.findByMemberId(memberId)
-            .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingRealtime"));
-        if (isBonusApplicable(continueReading)) {
-            score += ScorePolicyConstants.CONTINUE_READING_BONUS_SCORE;
-        }
-        return score;
     }
 
     @Transactional
@@ -506,10 +493,6 @@ public class ReadingService {
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "MonthlyReadingRealtime")
                 .addContext(ErrorContextKeys.OPERATION, "updateMonthlyReadingCount"));
         monthlyReadingRealtime.increaseCurrentCount();
-    }
-
-    private boolean isBonusApplicable(ContinueReadingRealtime continueReading) {
-        return continueReading.getDayCount() >= ScorePolicyConstants.MIN_CONTINUE_READING_COUNT;
     }
 
     private boolean canIncreaseContinueReadingCount(TodayReading todayReading) {

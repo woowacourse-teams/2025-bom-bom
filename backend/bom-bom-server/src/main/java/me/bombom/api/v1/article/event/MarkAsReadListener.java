@@ -3,9 +3,9 @@ package me.bombom.api.v1.article.event;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bombom.api.v1.common.DiscordWebhookNotifier;
 import me.bombom.api.v1.article.repository.MarkAsReadEventLogRepository;
 import me.bombom.api.v1.article.service.ArticleService;
+import me.bombom.api.v1.common.DiscordWebhookNotifier;
 import me.bombom.api.v1.pet.service.PetService;
 import me.bombom.api.v1.reading.service.ReadingService;
 import org.springframework.dao.TransientDataAccessException;
@@ -80,14 +80,7 @@ public class MarkAsReadListener {
         }
 
         try {
-            boolean canRewardArticleRead = articleService.canAddArticleScore(event.memberId());
-            if (!canRewardArticleRead) {
-                return;
-            }
-
-            int score = readingService.calculateArticleScore(event.memberId());
-            petService.increaseCurrentScore(event.memberId(), score);
-            log.info("아티클 점수 추가 성공 - memberId={}", event.memberId());
+            petService.rewardArticleRead(event.memberId());
         } catch (Exception e) {
             // 펫 경험치는 부가 기능이므로 실패해도 읽기 카운트/토큰 차감은 유지
             log.error("아티클 점수 추가 실패 - memberId={}", event.memberId(), e);

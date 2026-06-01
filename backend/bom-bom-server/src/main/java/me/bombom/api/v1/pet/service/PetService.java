@@ -13,6 +13,10 @@ import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.pet.dto.PetResponse;
 import me.bombom.api.v1.pet.repository.PetRepository;
 import me.bombom.api.v1.pet.repository.StageRepository;
+import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
+import me.bombom.api.v1.reading.domain.TodayReading;
+import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
+import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +29,8 @@ public class PetService {
 
     private final PetRepository petRepository;
     private final StageRepository stageRepository;
+    private final TodayReadingRepository todayReadingRepository;
+    private final ContinueReadingRealtimeRepository continueReadingRealtimeRepository;
 
     public PetResponse getPet(Member member) {
         Pet pet = petRepository.findByMemberId(member.getId())
@@ -63,7 +69,18 @@ public class PetService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void increaseCurrentScore(Long memberId, int score){
+    public void rewardArticleRead(Long memberId) {
+        if (!canRewardArticleRead(memberId)) {
+            log.info("아티클 점수 추가 skip - memberId={}", memberId);
+            return;
+        }
+
+        int score = calculateArticleReadReward(memberId);
+        increaseCurrentScore(memberId, score);
+        log.info("아티클 점수 추가 성공 - memberId={}, score={}", memberId, score);
+    }
+
+    private void increaseCurrentScore(Long memberId, int score){
         Pet pet = petRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                     .addContext(ErrorContextKeys.MEMBER_ID, memberId)
@@ -111,5 +128,26 @@ public class PetService {
                     .addContext("currentScore", pet.getCurrentScore())
                     .addContext(ErrorContextKeys.OPERATION, "updatePetStage"));
         pet.updateStage(stageByScore);
+    }
+
+    private boolean canRewardArticleRead(Long memberId) {
+        TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "TodayReading"));
+
+        return todayReading.getCurrentCount() <= ScorePolicyConstants.MAX_TODAY_READING_COUNT;
+    }
+
+    private int calculateArticleReadReward(Long memberId) {
+        int score = ScorePolicyConstants.ARTICLE_READING_SCORE;
+        ContinueReadingRealtime continueReading = continueReadingRealtimeRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext(ErrorContextKeys.MEMBER_ID, memberId)
+                    .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingRealtime"));
+        if (continueReading.getDayCount() >= ScorePolicyConstants.MIN_CONTINUE_READING_COUNT) {
+            score += ScorePolicyConstants.CONTINUE_READING_BONUS_SCORE;
+        }
+        return score;
     }
 }

@@ -33,9 +33,6 @@ import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
-import me.bombom.api.v1.pet.ScorePolicyConstants;
-import me.bombom.api.v1.reading.domain.TodayReading;
-import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.service.ReadRateLimitService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.TransientDataAccessException;
@@ -55,7 +52,6 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
     private final ArticleReadHistoryRepository articleReadHistoryRepository;
     private final RecentArticleRepository recentArticleRepository;
-    private final TodayReadingRepository todayReadingRepository;
     private final CategoryRepository categoryRepository;
     private final NewsletterRepository newsletterRepository;
     private final HighlightRepository highlightRepository;
@@ -146,15 +142,6 @@ public class ArticleService {
                 .mapToInt(ArticleCountPerNewsletterResponse::articleCount)
                 .sum();
         return ArticleNewsletterStatisticsResponse.of(totalCount, countResponse);
-    }
-
-    public boolean canAddArticleScore(Long memberId) {
-        TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "TodayReading"));
-
-        return todayReading.getCurrentCount() <= ScorePolicyConstants.MAX_TODAY_READING_COUNT;
     }
 
     public boolean isArrivedToday(Long articleId, Long memberId, LocalDate today) {

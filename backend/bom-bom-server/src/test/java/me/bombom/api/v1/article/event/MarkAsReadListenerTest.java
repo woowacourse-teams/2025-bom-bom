@@ -3,7 +3,6 @@ package me.bombom.api.v1.article.event;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -62,15 +61,13 @@ class MarkAsReadListenerTest {
         Long articleId = 1L;
         MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, LocalDateTime.now(), true);
         given(articleService.isArrivedToday(eq(articleId), eq(memberId), any(LocalDate.class))).willReturn(true);
-        given(articleService.canAddArticleScore(memberId)).willReturn(true);
-        given(readingService.calculateArticleScore(memberId)).willReturn(10);
 
         // when
         markAsReadListener.on(event);
 
         // then
         verify(readingService, times(1)).updateReadingCount(memberId, true);
-        verify(petService, times(1)).increaseCurrentScore(memberId, 10);
+        verify(petService, times(1)).rewardArticleRead(memberId);
     }
 
     @Test
@@ -86,8 +83,7 @@ class MarkAsReadListenerTest {
 
         // then
         verify(readingService, times(1)).updateReadingCount(memberId, false);
-        verify(petService, never()).increaseCurrentScore(anyLong(), anyInt());
-        verify(articleService, never()).canAddArticleScore(anyLong()); // 호출되지 않음을 확인
+        verify(petService, never()).rewardArticleRead(anyLong());
     }
 
     @Test
@@ -104,7 +100,7 @@ class MarkAsReadListenerTest {
 
         // then
         verify(readingService, never()).updateReadingCount(anyLong(), any(Boolean.class));
-        verify(petService, never()).increaseCurrentScore(anyLong(), anyInt());
+        verify(petService, never()).rewardArticleRead(anyLong());
     }
 
     @Test
@@ -114,15 +110,13 @@ class MarkAsReadListenerTest {
         Long articleId = 1L;
         MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, LocalDateTime.now(), true);
         given(articleService.isArrivedToday(eq(articleId), eq(memberId), any(LocalDate.class))).willReturn(true);
-        given(articleService.canAddArticleScore(memberId)).willReturn(false);
 
         // when
         markAsReadListener.on(event);
 
         // then
         verify(readingService, times(1)).updateReadingCount(memberId, true);
-        verify(petService, never()).increaseCurrentScore(anyLong(), anyInt());
-        verify(articleService, times(1)).canAddArticleScore(memberId); // 호출되지만 false 반환
+        verify(petService, times(1)).rewardArticleRead(memberId);
     }
 
     @Test
@@ -138,7 +132,7 @@ class MarkAsReadListenerTest {
         // then
         verify(markAsReadEventLogRepository, never()).markIfAbsent(anyLong(), anyLong());
         verify(readingService, never()).updateReadingCount(anyLong(), any(Boolean.class));
-        verify(petService, never()).increaseCurrentScore(anyLong(), anyInt());
+        verify(petService, never()).rewardArticleRead(anyLong());
     }
 
     @Test

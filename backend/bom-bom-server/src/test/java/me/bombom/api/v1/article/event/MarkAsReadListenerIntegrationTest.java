@@ -2,7 +2,6 @@ package me.bombom.api.v1.article.event;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doReturn;
@@ -139,7 +138,7 @@ class MarkAsReadListenerIntegrationTest {
 
         // then
         verify(readingService, timeout(1_000)).updateReadingCount(member.getId(), false);
-        verify(petService, after(300).never()).increaseCurrentScore(anyLong(), anyInt());
+        verify(petService, after(300).never()).rewardArticleRead(anyLong());
         awaitUntilAsserted(() -> {
             MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
             assertSoftly(softly -> {
@@ -153,17 +152,15 @@ class MarkAsReadListenerIntegrationTest {
     void 펫_경험치_갱신_실패해도_읽기_카운트는_유지된다() {
         // given
         doReturn(true).when(articleService).isArrivedToday(anyLong(), anyLong(), any(LocalDate.class));
-        doReturn(true).when(articleService).canAddArticleScore(anyLong());
-        doReturn(10).when(readingService).calculateArticleScore(anyLong());
         doThrow(new RuntimeException("펫 경험치 갱신 실패"))
-                .when(petService).increaseCurrentScore(anyLong(), anyInt());
+                .when(petService).rewardArticleRead(anyLong());
 
         // when
         markAsReadListener.on(MarkAsReadEvent.of(member.getId(), articleId, LocalDateTime.now(), true));
 
         // then
         verify(readingService, timeout(1_000)).updateReadingCount(member.getId(), true);
-        verify(petService, timeout(1_000)).increaseCurrentScore(member.getId(), 10);
+        verify(petService, timeout(1_000)).rewardArticleRead(member.getId());
         awaitUntilAsserted(() -> {
             MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
             assertSoftly(softly -> softly.assertThat(realtime.getCurrentCount()).isEqualTo(1));
@@ -177,7 +174,7 @@ class MarkAsReadListenerIntegrationTest {
 
         // then
         verify(readingService, after(300).never()).updateReadingCount(anyLong(), any(Boolean.class));
-        verify(petService, after(300).never()).increaseCurrentScore(anyLong(), anyInt());
+        verify(petService, after(300).never()).rewardArticleRead(anyLong());
         awaitUntilAsserted(() -> {
             MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
             assertSoftly(softly -> {

@@ -79,12 +79,12 @@ class ChallengeReviewServiceTest {
     }
 
     @Test
-    void 본인_리뷰는_isMyReview가_true_타인_리뷰는_false로_매핑된다() {
+    void 조회된_리뷰는_nickname이_순서대로_매핑된다() {
         // given
         given(challengeRepository.existsById(CHALLENGE_ID)).willReturn(true);
         givenReviews(List.of(
-                item(10L, "나밍곰", VIEWER_MEMBER_ID),
-                item(20L, "제나", OTHER_MEMBER_ID)
+                item(10L, "제나"),
+                item(20L, "익명")
         ));
 
         // when
@@ -94,18 +94,15 @@ class ChallengeReviewServiceTest {
 
         // then
         assertThat(result.getContent())
-                .extracting(ChallengeReviewResponse::isMyReview)
-                .containsExactly(true, false);
-        assertThat(result.getContent())
                 .extracting(ChallengeReviewResponse::nickname)
-                .containsExactly("나밍곰", "제나");
+                .containsExactly("제나", "익명");
     }
 
     @Test
     void Member의_nickname이_null이면_탈퇴한_사용자로_표시된다() {
         // given
         given(challengeRepository.existsById(CHALLENGE_ID)).willReturn(true);
-        givenReviews(List.of(item(30L, null, OTHER_MEMBER_ID)));
+        givenReviews(List.of(item(30L, null)));
 
         // when
         Page<ChallengeReviewResponse> result = challengeReviewService.getReviews(
@@ -115,7 +112,6 @@ class ChallengeReviewServiceTest {
         // then
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).nickname()).isEqualTo("탈퇴한 사용자");
-        assertThat(result.getContent().get(0).isMyReview()).isFalse();
     }
 
     @Test
@@ -430,8 +426,8 @@ class ChallengeReviewServiceTest {
                 .willReturn(new PageImpl<>(items, PageRequest.of(0, 20), items.size()));
     }
 
-    private ChallengeReviewListItem item(Long reviewId, String nickname, Long memberId) {
-        return new ChallengeReviewListItem(reviewId, nickname, "리뷰 코멘트", false, memberId);
+    private ChallengeReviewListItem item(Long reviewId, String nickname) {
+        return new ChallengeReviewListItem(reviewId, nickname, "리뷰 코멘트", false);
     }
 
     private Member viewer() {

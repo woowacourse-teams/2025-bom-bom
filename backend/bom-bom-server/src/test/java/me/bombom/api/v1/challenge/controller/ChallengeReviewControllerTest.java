@@ -150,11 +150,12 @@ class ChallengeReviewControllerTest {
         mockMvc.perform(get("/api/v1/challenges/{challengeId}/reviews", challengeAId)
                         .with(authentication(viewerAuth)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.totalElements").value(2))
                 .andExpect(jsonPath("$.content[?(@.comment == '타인 비공개')]").isEmpty())
                 .andExpect(jsonPath("$.content[?(@.comment == '다른 챌린지 본인 공개')]").isEmpty())
-                .andExpect(jsonPath("$.content[?(@.isMyReview == true && @.comment == '내 비공개')]").exists())
-                .andExpect(jsonPath("$.content[?(@.isMyReview == false && @.comment == '타인 공개')]").exists());
+                .andExpect(jsonPath("$.content[?(@.comment == '내 비공개')]").isEmpty())
+                .andExpect(jsonPath("$.content[?(@.comment == '타인 공개')]").exists())
+                .andExpect(jsonPath("$.content[?(@.comment == '또 다른 타인 공개')]").exists());
     }
 
     @Test
@@ -206,8 +207,7 @@ class ChallengeReviewControllerTest {
                 .andExpect(jsonPath("$.reviewId").value(mine.getId()))
                 .andExpect(jsonPath("$.nickname").value(viewer.getNickname()))
                 .andExpect(jsonPath("$.comment").value("내 리뷰"))
-                .andExpect(jsonPath("$.isPrivate").value(true))
-                .andExpect(jsonPath("$.isMyReview").doesNotExist());
+                .andExpect(jsonPath("$.isPrivate").value(true));
     }
 
     @Test

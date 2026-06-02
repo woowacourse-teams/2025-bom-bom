@@ -4,7 +4,6 @@ public record ChallengeReviewListItem(
         Long reviewId,
         String nickname,
         String comment,
-        boolean isPrivate,
-        Long memberId
+        boolean isPrivate
 ) {
 }

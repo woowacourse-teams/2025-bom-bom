@@ -24,9 +24,9 @@ public interface ChallengeReviewControllerApi {
 
     @Operation(
             summary = "열람 가능한 리뷰 목록 조회",
-            description = "로그인한 사용자가 직접 작성한 리뷰(비공개 포함)와 다른 사용자가 작성한 공개 리뷰 목록을 함께 조회합니다. "
+            description = "다른 사용자가 작성한 공개 리뷰 목록을 조회합니다. "
+                    + "로그인 회원 본인이 작성한 리뷰는 목록에서 제외되며, 본인 리뷰는 `/me` API 로 조회합니다. "
                     + "정렬은 항상 최신순으로 적용되며, `sort` 파라미터는 무시됩니다. "
-                    + "각 항목의 `isMyReview` 필드로 로그인 회원 본인 작성 여부를 분기 처리할 수 있습니다. "
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "리뷰 목록 조회 성공"),

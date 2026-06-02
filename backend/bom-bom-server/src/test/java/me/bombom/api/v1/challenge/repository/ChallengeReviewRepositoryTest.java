@@ -58,11 +58,11 @@ class ChallengeReviewRepositoryTest {
     }
 
     @Test
-    void 가시성_정책에_맞는_리뷰만_조회한다__본인의_리뷰와_타인의_공개_리뷰() {
+    void 가시성_정책에_맞는_리뷰만_조회한다__본인_리뷰와_타인_비공개_리뷰는_제외() {
         // given
         Member anotherMember = saveMember("익명", "another-provider");
         Member hiddenMember = saveMember("숨김", "hidden-provider");
-        ChallengeReview mineHidden = save(challengeAId, viewer.getId(), "내 비공개", true);
+        save(challengeAId, viewer.getId(), "내 비공개", true);
         ChallengeReview otherPublic = save(challengeAId, otherMember.getId(), "타인 공개", false);
         ChallengeReview anotherPublic = save(challengeAId, anotherMember.getId(), "또 다른 타인 공개", false);
         save(challengeAId, hiddenMember.getId(), "타인 비공개", true);
@@ -78,7 +78,26 @@ class ChallengeReviewRepositoryTest {
         // then
         assertThat(result.getContent())
                 .extracting(ChallengeReviewListItem::reviewId)
-                .containsExactlyInAnyOrder(mineHidden.getId(), otherPublic.getId(), anotherPublic.getId());
+                .containsExactlyInAnyOrder(otherPublic.getId(), anotherPublic.getId());
+    }
+
+    @Test
+    void 본인이_작성한_공개_리뷰도_목록에서_제외된다() {
+        // given
+        save(challengeAId, viewer.getId(), "내 공개", false);
+        ChallengeReview otherPublic = save(challengeAId, otherMember.getId(), "타인 공개", false);
+
+        // when
+        Page<ChallengeReviewListItem> result = challengeReviewRepository.findVisibleReviews(
+                challengeAId,
+                viewer.getId(),
+                PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "createdAt"))
+        );
+
+        // then
+        assertThat(result.getContent())
+                .extracting(ChallengeReviewListItem::reviewId)
+                .containsExactly(otherPublic.getId());
     }
 
     @Test

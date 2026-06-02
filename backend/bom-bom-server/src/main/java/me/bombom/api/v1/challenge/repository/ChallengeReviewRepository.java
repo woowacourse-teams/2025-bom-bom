@@ -20,13 +20,13 @@ public interface ChallengeReviewRepository extends JpaRepository<ChallengeReview
             cr.id,
             m.nickname,
             cr.comment,
-            cr.isPrivate,
-            cr.memberId
+            cr.isPrivate
         )
         FROM ChallengeReview cr
         LEFT JOIN Member m ON m.id = cr.memberId
         WHERE cr.challengeId = :challengeId
-          AND (cr.isPrivate = false OR cr.memberId = :viewerMemberId)
+          AND cr.memberId <> :viewerMemberId
+          AND cr.isPrivate = false
     """)
     Page<ChallengeReviewListItem> findVisibleReviews(
             @Param("challengeId") Long challengeId,

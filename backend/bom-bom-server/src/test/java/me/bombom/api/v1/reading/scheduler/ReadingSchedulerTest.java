@@ -1,13 +1,16 @@
 package me.bombom.api.v1.reading.scheduler;
 
+import me.bombom.api.v1.reading.service.ContinueReadingShieldService;
 import me.bombom.api.v1.reading.service.ReadingService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -21,14 +24,19 @@ class ReadingSchedulerTest {
     @Mock
     private ReadingService readingService;
 
+    @Mock
+    private ContinueReadingShieldService continueReadingShieldService;
+
     @Test
     void daily_ResetReadingCount_스케줄러는_연속_및_읽기_정보를_초기화한다() {
         // when
         readingScheduler.dailyResetReadingCount();
 
         // then
-        verify(readingService, times(1)).resetContinueReadingCount();
-        verify(readingService, times(1)).resetTodayReadingCount();
+        InOrder inOrder = inOrder(readingService, continueReadingShieldService);
+        inOrder.verify(readingService, times(1)).resetContinueReadingCount();
+        inOrder.verify(continueReadingShieldService, times(1)).resetMonthlyShieldsIfFirstDay();
+        inOrder.verify(readingService, times(1)).resetTodayReadingCount();
     }
 
     @Test

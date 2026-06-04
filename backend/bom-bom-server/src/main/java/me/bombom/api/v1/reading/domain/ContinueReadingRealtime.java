@@ -59,6 +59,10 @@ public class ContinueReadingRealtime extends BaseEntity {
         dayCount = RESET_DAY_COUNT;
     }
 
+    public boolean hasDayCount() {
+        return dayCount > RESET_DAY_COUNT;
+    }
+
     public void increaseDayCount() {
         dayCount += INCREASE_DAY_COUNT;
         maxDayCount = Math.max(maxDayCount, dayCount);

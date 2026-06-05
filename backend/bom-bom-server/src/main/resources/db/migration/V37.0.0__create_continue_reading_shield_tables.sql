@@ -2,7 +2,7 @@ CREATE TABLE continue_reading_shield
 (
     id              BIGINT      NOT NULL AUTO_INCREMENT,
     member_id       BIGINT      NOT NULL,
-    remaining_count SMALLINT    NOT NULL DEFAULT 0,
+    remaining_count TINYINT     NOT NULL DEFAULT 0,
     created_at      DATETIME(6) DEFAULT NULL,
     updated_at      DATETIME(6) DEFAULT NULL,
     PRIMARY KEY (id),
@@ -15,7 +15,7 @@ CREATE TABLE continue_reading_shield_history
     member_id  BIGINT      NOT NULL,
     type       VARCHAR(20) NOT NULL,
     event_date DATE        NOT NULL,
-    quantity   SMALLINT    NOT NULL,
+    quantity   TINYINT     NOT NULL,
     created_at DATETIME(6) DEFAULT NULL,
     updated_at DATETIME(6) DEFAULT NULL,
     PRIMARY KEY (id),

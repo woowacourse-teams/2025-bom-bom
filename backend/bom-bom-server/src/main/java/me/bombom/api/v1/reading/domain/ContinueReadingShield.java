@@ -32,7 +32,7 @@ public class ContinueReadingShield extends BaseEntity {
     @Column(nullable = false)
     private Long memberId;
 
-    @Column(nullable = false, columnDefinition = "SMALLINT")
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private int remainingCount;
 
     @Builder

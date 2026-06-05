@@ -42,7 +42,7 @@ public class ContinueReadingShieldHistory extends BaseEntity {
     @Column(nullable = false)
     private LocalDate eventDate;
 
-    @Column(nullable = false, columnDefinition = "SMALLINT")
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private int quantity;
 
     @Builder

@@ -15,9 +15,16 @@ public interface ContinueReadingShieldRepository extends JpaRepository<ContinueR
     @Modifying
     @Query(value = """
         UPDATE continue_reading_shield shield
-        SET shield.remaining_count = shield.remaining_count - :quantity
+        SET shield.reward_remaining_count = CASE
+                WHEN shield.monthly_remaining_count >= :quantity THEN shield.reward_remaining_count
+                ELSE shield.reward_remaining_count - (:quantity - shield.monthly_remaining_count)
+            END,
+            shield.monthly_remaining_count = CASE
+                WHEN shield.monthly_remaining_count >= :quantity THEN shield.monthly_remaining_count - :quantity
+                ELSE 0
+            END
         WHERE shield.member_id = :memberId
-            AND shield.remaining_count >= :quantity
+            AND shield.monthly_remaining_count + shield.reward_remaining_count >= :quantity
             AND NOT EXISTS (
                 SELECT 1
                 FROM continue_reading_shield_history history
@@ -42,7 +49,7 @@ public interface ContinueReadingShieldRepository extends JpaRepository<ContinueR
             AND history.type = 'GRANT'
             AND history.reason = :reason
             AND history.event_date = :eventDate
-        SET shield.remaining_count = :remainingCount
+        SET shield.monthly_remaining_count = :remainingCount
         WHERE history.id IS NULL
     """, nativeQuery = true)
     int bulkResetMonthlyIfNotGranted(

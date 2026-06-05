@@ -74,6 +74,8 @@ class ContinueReadingShieldServiceTest {
 
         ContinueReadingShield shield = continueReadingShieldRepository.findByMemberId(member.getId()).orElseThrow();
         assertSoftly(softly -> {
+            softly.assertThat(shield.getMonthlyRemainingCount()).isEqualTo(1);
+            softly.assertThat(shield.getRewardRemainingCount()).isZero();
             softly.assertThat(shield.getRemainingCount()).isEqualTo(1);
             softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndReasonAndEventDate(
                     member.getId(),
@@ -97,6 +99,8 @@ class ContinueReadingShieldServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(firstResult).isTrue();
             softly.assertThat(secondResult).isFalse();
+            softly.assertThat(shield.getMonthlyRemainingCount()).isZero();
+            softly.assertThat(shield.getRewardRemainingCount()).isZero();
             softly.assertThat(shield.getRemainingCount()).isZero();
             softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndReasonAndEventDate(
                     member.getId(),
@@ -112,19 +116,26 @@ class ContinueReadingShieldServiceTest {
         Member member = createMember();
         continueReadingShieldRepository.save(ContinueReadingShield.builder()
                 .memberId(member.getId())
-                .remainingCount(0)
+                .monthlyRemainingCount(0)
+                .rewardRemainingCount(0)
                 .build());
 
         continueReadingShieldService.resetMonthlyShieldsIfFirstDay();
 
         ContinueReadingShield grantedShield = continueReadingShieldRepository.findByMemberId(member.getId()).orElseThrow();
-        assertThat(grantedShield.getRemainingCount()).isEqualTo(1);
+        assertSoftly(softly -> {
+            softly.assertThat(grantedShield.getMonthlyRemainingCount()).isEqualTo(1);
+            softly.assertThat(grantedShield.getRewardRemainingCount()).isZero();
+            softly.assertThat(grantedShield.getRemainingCount()).isEqualTo(1);
+        });
 
         continueReadingShieldService.useShield(member.getId(), LocalDate.of(2026, 5, 1));
         continueReadingShieldService.resetMonthlyShieldsIfFirstDay();
 
         ContinueReadingShield usedShield = continueReadingShieldRepository.findByMemberId(member.getId()).orElseThrow();
         assertSoftly(softly -> {
+            softly.assertThat(usedShield.getMonthlyRemainingCount()).isZero();
+            softly.assertThat(usedShield.getRewardRemainingCount()).isZero();
             softly.assertThat(usedShield.getRemainingCount()).isZero();
             softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndReasonAndEventDate(
                     member.getId(),
@@ -132,6 +143,51 @@ class ContinueReadingShieldServiceTest {
                     ContinueReadingShieldHistoryReason.MONTHLY_RESET,
                     MONTH_START_DATE
             )).isEqualTo(1L);
+        });
+    }
+
+    @Test
+    void 월초_보호막_리셋은_보상_보호막을_이월한다() {
+        Member member = createMember();
+        continueReadingShieldRepository.save(ContinueReadingShield.builder()
+                .memberId(member.getId())
+                .monthlyRemainingCount(0)
+                .rewardRemainingCount(2)
+                .build());
+
+        continueReadingShieldService.resetMonthlyShieldsIfFirstDay();
+
+        ContinueReadingShield shield = continueReadingShieldRepository.findByMemberId(member.getId()).orElseThrow();
+        assertSoftly(softly -> {
+            softly.assertThat(shield.getMonthlyRemainingCount()).isEqualTo(1);
+            softly.assertThat(shield.getRewardRemainingCount()).isEqualTo(2);
+            softly.assertThat(shield.getRemainingCount()).isEqualTo(3);
+            softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndReasonAndEventDate(
+                    member.getId(),
+                    ContinueReadingShieldHistoryType.GRANT,
+                    ContinueReadingShieldHistoryReason.MONTHLY_RESET,
+                    MONTH_START_DATE
+            )).isEqualTo(1L);
+        });
+    }
+
+    @Test
+    void 보호막_사용은_월_지급분을_먼저_차감한다() {
+        Member member = createMember();
+        continueReadingShieldRepository.save(ContinueReadingShield.builder()
+                .memberId(member.getId())
+                .monthlyRemainingCount(1)
+                .rewardRemainingCount(1)
+                .build());
+
+        boolean result = continueReadingShieldService.useShield(member.getId(), LocalDate.of(2026, 4, 30));
+
+        ContinueReadingShield shield = continueReadingShieldRepository.findByMemberId(member.getId()).orElseThrow();
+        assertSoftly(softly -> {
+            softly.assertThat(result).isTrue();
+            softly.assertThat(shield.getMonthlyRemainingCount()).isZero();
+            softly.assertThat(shield.getRewardRemainingCount()).isEqualTo(1);
+            softly.assertThat(shield.getRemainingCount()).isEqualTo(1);
         });
     }
 

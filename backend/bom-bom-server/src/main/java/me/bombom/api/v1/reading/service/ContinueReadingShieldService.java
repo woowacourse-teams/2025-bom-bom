@@ -33,7 +33,11 @@ public class ContinueReadingShieldService {
 
     @Transactional
     public boolean useShield(Long memberId, LocalDate targetDate) {
-        int updatedRows = continueReadingShieldRepository.bulkUseIfAvailable(memberId, targetDate, SHIELD_QUANTITY);
+        int updatedRows = continueReadingShieldRepository.bulkDecreaseRemainingCountIfUsable(
+                memberId,
+                targetDate,
+                SHIELD_QUANTITY
+        );
         if (updatedRows == 0) {
             return false;
         }

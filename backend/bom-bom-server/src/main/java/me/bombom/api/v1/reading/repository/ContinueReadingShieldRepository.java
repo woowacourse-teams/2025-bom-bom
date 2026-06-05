@@ -26,7 +26,7 @@ public interface ContinueReadingShieldRepository extends JpaRepository<ContinueR
                     AND history.event_date = :eventDate
             )
     """, nativeQuery = true)
-    int bulkUseIfAvailable(
+    int bulkDecreaseRemainingCountIfUsable(
             @Param("memberId") Long memberId,
             @Param("eventDate") LocalDate eventDate,
             @Param("quantity") int quantity

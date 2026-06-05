@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ContinueReadingShieldService {
 
     private static final int SHIELD_QUANTITY = 1;
+    private static final int MONTHLY_SHIELD_GRANT_EVENT_DAY = 1;
 
     private final ContinueReadingShieldRepository continueReadingShieldRepository;
     private final ContinueReadingShieldHistoryRepository continueReadingShieldHistoryRepository;
@@ -26,7 +27,7 @@ public class ContinueReadingShieldService {
         ContinueReadingShield shield = ContinueReadingShield.create(memberId);
         continueReadingShieldRepository.save(shield);
         continueReadingShieldHistoryRepository.save(
-                ContinueReadingShieldHistory.grant(memberId, currentMonthStartDate(), SHIELD_QUANTITY)
+                ContinueReadingShieldHistory.grant(memberId, currentMonthlyShieldGrantEventDate(), SHIELD_QUANTITY)
         );
     }
 
@@ -45,12 +46,15 @@ public class ContinueReadingShieldService {
     @Transactional
     public void resetMonthlyShieldsIfFirstDay() {
         LocalDate today = LocalDate.now(clock);
-        if (today.getDayOfMonth() != 1) {
+        if (today.getDayOfMonth() != MONTHLY_SHIELD_GRANT_EVENT_DAY) {
             return;
         }
-        LocalDate monthStartDate = today.withDayOfMonth(1);
-        continueReadingShieldRepository.bulkResetMonthlyIfNotGranted(monthStartDate, SHIELD_QUANTITY);
-        continueReadingShieldHistoryRepository.bulkInsertMonthlyGrantHistories(monthStartDate, SHIELD_QUANTITY);
+        LocalDate monthlyShieldGrantEventDate = today.withDayOfMonth(MONTHLY_SHIELD_GRANT_EVENT_DAY);
+        continueReadingShieldRepository.bulkResetMonthlyIfNotGranted(monthlyShieldGrantEventDate, SHIELD_QUANTITY);
+        continueReadingShieldHistoryRepository.bulkInsertMonthlyGrantHistories(
+                monthlyShieldGrantEventDate,
+                SHIELD_QUANTITY
+        );
     }
 
     @Transactional
@@ -59,7 +63,7 @@ public class ContinueReadingShieldService {
         continueReadingShieldRepository.deleteByMemberId(memberId);
     }
 
-    private LocalDate currentMonthStartDate() {
-        return LocalDate.now(clock).withDayOfMonth(1);
+    private LocalDate currentMonthlyShieldGrantEventDate() {
+        return LocalDate.now(clock).withDayOfMonth(MONTHLY_SHIELD_GRANT_EVENT_DAY);
     }
 }

@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Clock;
 import java.time.LocalDate;
+
+import jakarta.persistence.EntityManager;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeReview;
@@ -20,6 +22,9 @@ import org.springframework.data.domain.Sort;
 
 @IntegrationTest
 class ChallengeReviewRepositoryTest {
+
+    @Autowired
+    private EntityManager em;
 
     @Autowired
     private ChallengeReviewRepository challengeReviewRepository;
@@ -101,11 +106,20 @@ class ChallengeReviewRepositoryTest {
     }
 
     @Test
-    void 응답의_nickname은_조인된_Member의_nickname을_반영한다() {
+    void 응답의_nickname은_리뷰_작성_시점이_아니라_조회_시점의_현재_nickname을_반영한다() {
         // given
         save(challengeAId, otherMember.getId(), "타인 공개", false);
 
         // when
+        otherMember.updateProfile(
+                "변경 닉네임",
+                otherMember.getProfileImageUrl(),
+                LocalDate.now(),
+                otherMember.getGender()
+        );
+        memberRepository.saveAndFlush(otherMember);
+        em.clear();
+
         Page<ChallengeReviewListItem> result = challengeReviewRepository.findVisibleReviews(
                 challengeAId,
                 viewer.getId(),
@@ -115,7 +129,7 @@ class ChallengeReviewRepositoryTest {
         // then
         assertThat(result.getContent())
                 .extracting(ChallengeReviewListItem::nickname)
-                .containsExactly(otherMember.getNickname());
+                .containsExactly("변경 닉네임");
     }
 
     private ChallengeReview save(Long challengeId, Long memberId, String comment, boolean isPrivate) {

@@ -10,12 +10,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface ContinueReadingShieldHistoryRepository extends JpaRepository<ContinueReadingShieldHistory, Long> {
 
-    boolean existsByMemberIdAndTypeAndEventDate(
-            Long memberId,
-            ContinueReadingShieldHistoryType type,
-            LocalDate eventDate
-    );
-
     long countByMemberIdAndTypeAndEventDate(
             Long memberId,
             ContinueReadingShieldHistoryType type,

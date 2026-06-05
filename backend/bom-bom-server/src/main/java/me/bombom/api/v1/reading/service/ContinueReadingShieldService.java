@@ -3,16 +3,13 @@ package me.bombom.api.v1.reading.service;
 import java.time.Clock;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.reading.domain.ContinueReadingShield;
 import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistory;
-import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistoryType;
 import me.bombom.api.v1.reading.repository.ContinueReadingShieldHistoryRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingShieldRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -35,20 +32,8 @@ public class ContinueReadingShieldService {
 
     @Transactional
     public boolean useShield(Long memberId, LocalDate targetDate) {
-        ContinueReadingShield shield = continueReadingShieldRepository.findByMemberIdForUpdate(memberId)
-                .orElse(null);
-        if (shield == null) {
-            log.warn("연속 읽기 보호막 정보가 없어 보호막 사용을 건너뜁니다. memberId={}", memberId);
-            return false;
-        }
-        if (continueReadingShieldHistoryRepository.existsByMemberIdAndTypeAndEventDate(
-                memberId,
-                ContinueReadingShieldHistoryType.USE,
-                targetDate
-        )) {
-            return false;
-        }
-        if (!shield.useIfAvailable()) {
+        int updatedRows = continueReadingShieldRepository.useIfAvailable(memberId, targetDate, SHIELD_QUANTITY);
+        if (updatedRows == 0) {
             return false;
         }
         continueReadingShieldHistoryRepository.save(

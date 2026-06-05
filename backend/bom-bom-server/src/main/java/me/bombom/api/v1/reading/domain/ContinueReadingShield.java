@@ -23,7 +23,6 @@ import me.bombom.api.v1.common.BaseEntity;
 public class ContinueReadingShield extends BaseEntity {
 
     private static final int INITIAL_REMAINING_COUNT = 1;
-    private static final int USE_COUNT = 1;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,13 +50,5 @@ public class ContinueReadingShield extends BaseEntity {
                 .memberId(memberId)
                 .remainingCount(INITIAL_REMAINING_COUNT)
                 .build();
-    }
-
-    public boolean useIfAvailable() {
-        if (remainingCount <= 0) {
-            return false;
-        }
-        remainingCount -= USE_COUNT;
-        return true;
     }
 }

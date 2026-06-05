@@ -1,11 +1,9 @@
 package me.bombom.api.v1.reading.repository;
 
-import jakarta.persistence.LockModeType;
 import java.time.LocalDate;
 import java.util.Optional;
 import me.bombom.api.v1.reading.domain.ContinueReadingShield;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,13 +12,25 @@ public interface ContinueReadingShieldRepository extends JpaRepository<ContinueR
 
     Optional<ContinueReadingShield> findByMemberId(Long memberId);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("""
-        SELECT shield
-        FROM ContinueReadingShield shield
-        WHERE shield.memberId = :memberId
-    """)
-    Optional<ContinueReadingShield> findByMemberIdForUpdate(@Param("memberId") Long memberId);
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = """
+        UPDATE continue_reading_shield shield
+        SET shield.remaining_count = shield.remaining_count - :quantity
+        WHERE shield.member_id = :memberId
+            AND shield.remaining_count >= :quantity
+            AND NOT EXISTS (
+                SELECT 1
+                FROM continue_reading_shield_history history
+                WHERE history.member_id = :memberId
+                    AND history.type = 'USE'
+                    AND history.event_date = :eventDate
+            )
+    """, nativeQuery = true)
+    int useIfAvailable(
+            @Param("memberId") Long memberId,
+            @Param("eventDate") LocalDate eventDate,
+            @Param("quantity") int quantity
+    );
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """

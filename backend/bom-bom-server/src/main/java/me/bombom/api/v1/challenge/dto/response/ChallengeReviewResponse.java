@@ -20,29 +20,21 @@ public record ChallengeReviewResponse(
 
         @Schema(
                 requiredMode = RequiredMode.REQUIRED,
-                description = "비밀글 여부 (자신이 쓴 글이 비공개인지 표시할 때 사용)",
+                description = "비밀글 여부",
                 example = "false"
         )
-        boolean isPrivate,
-
-        @Schema(
-                requiredMode = RequiredMode.REQUIRED,
-                description = "로그인 회원 본인이 작성한 리뷰인지 여부 (클라이언트 분기용)",
-                example = "true"
-        )
-        boolean isMyReview
+        boolean isPrivate
 ) {
 
     public static final String WITHDRAWN_MEMBER_NICKNAME = "탈퇴한 사용자";
 
-    public static ChallengeReviewResponse of(ChallengeReviewListItem item, Long viewerMemberId) {
+    public static ChallengeReviewResponse of(ChallengeReviewListItem item) {
         String displayNickname = item.nickname() != null ? item.nickname() : WITHDRAWN_MEMBER_NICKNAME;
         return new ChallengeReviewResponse(
                 item.reviewId(),
                 displayNickname,
                 item.comment(),
-                item.isPrivate(),
-                item.memberId().equals(viewerMemberId)
+                item.isPrivate()
         );
     }
 }

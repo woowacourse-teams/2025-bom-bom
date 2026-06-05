@@ -51,7 +51,7 @@ public class ChallengeReviewService {
 
         return challengeReviewRepository
                 .findVisibleReviews(challengeId, viewerMemberId, enforcedPageable)
-                .map(item -> ChallengeReviewResponse.of(item, viewerMemberId));
+                .map(ChallengeReviewResponse::of);
     }
 
     public MyChallengeReviewResponse getMyReview(Long challengeId, Member viewer) {

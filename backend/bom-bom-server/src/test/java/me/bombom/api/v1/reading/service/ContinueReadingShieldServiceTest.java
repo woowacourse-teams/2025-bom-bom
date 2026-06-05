@@ -192,6 +192,26 @@ class ContinueReadingShieldServiceTest {
     }
 
     @Test
+    void 보호막_사용은_월_지급분이_없으면_보상_지급분을_차감한다() {
+        Member member = createMember();
+        continueReadingShieldRepository.save(ContinueReadingShield.builder()
+                .memberId(member.getId())
+                .monthlyRemainingCount(0)
+                .rewardRemainingCount(2)
+                .build());
+
+        boolean result = continueReadingShieldService.useShield(member.getId(), LocalDate.of(2026, 4, 30));
+
+        ContinueReadingShield shield = continueReadingShieldRepository.findByMemberId(member.getId()).orElseThrow();
+        assertSoftly(softly -> {
+            softly.assertThat(result).isTrue();
+            softly.assertThat(shield.getMonthlyRemainingCount()).isZero();
+            softly.assertThat(shield.getRewardRemainingCount()).isEqualTo(1);
+            softly.assertThat(shield.getRemainingCount()).isEqualTo(1);
+        });
+    }
+
+    @Test
     void 월경계에서는_전날_미독을_보호막으로_처리한_뒤_이번달_보호막을_1개로_리셋한다() {
         Member member = createMember();
         LocalDate targetDate = LocalDate.of(2026, 4, 30);

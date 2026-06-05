@@ -449,7 +449,7 @@ public class ReadingService {
                 .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingRealtime")
                 .addContext(ErrorContextKeys.OPERATION, "applyResetContinueReadingCount"));
-        if (!continueReading.hasDayCount()) {
+        if (!continueReading.hasActiveStreak()) {
             return;
         }
         if (continueReadingShieldService.useShield(memberId, targetDate)) {

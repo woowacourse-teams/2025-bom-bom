@@ -59,7 +59,7 @@ public class ContinueReadingRealtime extends BaseEntity {
         dayCount = RESET_DAY_COUNT;
     }
 
-    public boolean hasDayCount() {
+    public boolean hasActiveStreak() {
         return dayCount > RESET_DAY_COUNT;
     }
 

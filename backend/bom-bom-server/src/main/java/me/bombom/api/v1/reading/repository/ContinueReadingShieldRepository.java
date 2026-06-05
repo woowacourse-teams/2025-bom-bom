@@ -23,11 +23,13 @@ public interface ContinueReadingShieldRepository extends JpaRepository<ContinueR
                 FROM continue_reading_shield_history history
                 WHERE history.member_id = :memberId
                     AND history.type = 'USE'
+                    AND history.reason = :reason
                     AND history.event_date = :eventDate
             )
     """, nativeQuery = true)
     int bulkDecreaseRemainingCountIfUsable(
             @Param("memberId") Long memberId,
+            @Param("reason") String reason,
             @Param("eventDate") LocalDate eventDate,
             @Param("quantity") int quantity
     );
@@ -38,11 +40,13 @@ public interface ContinueReadingShieldRepository extends JpaRepository<ContinueR
         LEFT JOIN continue_reading_shield_history history
             ON history.member_id = shield.member_id
             AND history.type = 'GRANT'
+            AND history.reason = :reason
             AND history.event_date = :eventDate
         SET shield.remaining_count = :remainingCount
         WHERE history.id IS NULL
     """, nativeQuery = true)
     int bulkResetMonthlyIfNotGranted(
+            @Param("reason") String reason,
             @Param("eventDate") LocalDate eventDate,
             @Param("remainingCount") int remainingCount
     );

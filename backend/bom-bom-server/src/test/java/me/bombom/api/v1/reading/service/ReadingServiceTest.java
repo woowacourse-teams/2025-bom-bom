@@ -21,6 +21,7 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.ContinueReadingRankHistory;
+import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistoryReason;
 import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistoryType;
 import me.bombom.api.v1.reading.domain.ContinueReadingSnapshot;
 import me.bombom.api.v1.reading.domain.MonthlyReadingRankHistory;
@@ -356,9 +357,10 @@ class ReadingServiceTest {
             softly.assertThat(result.data().get(1).dayCount()).isEqualTo(0);
             softly.assertThat(continueReadingShieldRepository.findByMemberId(newMember.getId()).orElseThrow()
                     .getRemainingCount()).isEqualTo(1);
-            softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndEventDate(
+            softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndReasonAndEventDate(
                     newMember.getId(),
                     ContinueReadingShieldHistoryType.GRANT,
+                    ContinueReadingShieldHistoryReason.SIGNUP,
                     LocalDate.now(clock).withDayOfMonth(1)
             )).isEqualTo(1L);
         });

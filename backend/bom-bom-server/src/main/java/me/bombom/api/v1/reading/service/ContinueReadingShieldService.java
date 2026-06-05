@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.reading.domain.ContinueReadingShield;
 import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistory;
+import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistoryReason;
 import me.bombom.api.v1.reading.repository.ContinueReadingShieldHistoryRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingShieldRepository;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,12 @@ public class ContinueReadingShieldService {
         ContinueReadingShield shield = ContinueReadingShield.create(memberId);
         continueReadingShieldRepository.save(shield);
         continueReadingShieldHistoryRepository.save(
-                ContinueReadingShieldHistory.grant(memberId, currentMonthlyShieldGrantEventDate(), SHIELD_QUANTITY)
+                ContinueReadingShieldHistory.grant(
+                        memberId,
+                        ContinueReadingShieldHistoryReason.SIGNUP,
+                        currentMonthlyShieldGrantEventDate(),
+                        SHIELD_QUANTITY
+                )
         );
     }
 
@@ -35,6 +41,7 @@ public class ContinueReadingShieldService {
     public boolean useShield(Long memberId, LocalDate targetDate) {
         int updatedRows = continueReadingShieldRepository.bulkDecreaseRemainingCountIfUsable(
                 memberId,
+                ContinueReadingShieldHistoryReason.DAILY_RESET_PROTECT.name(),
                 targetDate,
                 SHIELD_QUANTITY
         );
@@ -42,7 +49,12 @@ public class ContinueReadingShieldService {
             return false;
         }
         continueReadingShieldHistoryRepository.save(
-                ContinueReadingShieldHistory.use(memberId, targetDate, SHIELD_QUANTITY)
+                ContinueReadingShieldHistory.use(
+                        memberId,
+                        ContinueReadingShieldHistoryReason.DAILY_RESET_PROTECT,
+                        targetDate,
+                        SHIELD_QUANTITY
+                )
         );
         return true;
     }
@@ -54,8 +66,13 @@ public class ContinueReadingShieldService {
             return;
         }
         LocalDate monthlyShieldGrantEventDate = today.withDayOfMonth(MONTHLY_SHIELD_GRANT_EVENT_DAY);
-        continueReadingShieldRepository.bulkResetMonthlyIfNotGranted(monthlyShieldGrantEventDate, SHIELD_QUANTITY);
+        continueReadingShieldRepository.bulkResetMonthlyIfNotGranted(
+                ContinueReadingShieldHistoryReason.MONTHLY_RESET.name(),
+                monthlyShieldGrantEventDate,
+                SHIELD_QUANTITY
+        );
         continueReadingShieldHistoryRepository.bulkInsertMonthlyGrantHistories(
+                ContinueReadingShieldHistoryReason.MONTHLY_RESET.name(),
                 monthlyShieldGrantEventDate,
                 SHIELD_QUANTITY
         );

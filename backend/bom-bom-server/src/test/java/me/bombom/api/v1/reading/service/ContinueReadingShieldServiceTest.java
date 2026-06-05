@@ -12,6 +12,7 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.ContinueReadingShield;
+import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistoryReason;
 import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistoryType;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
@@ -74,9 +75,10 @@ class ContinueReadingShieldServiceTest {
         ContinueReadingShield shield = continueReadingShieldRepository.findByMemberId(member.getId()).orElseThrow();
         assertSoftly(softly -> {
             softly.assertThat(shield.getRemainingCount()).isEqualTo(1);
-            softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndEventDate(
+            softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndReasonAndEventDate(
                     member.getId(),
                     ContinueReadingShieldHistoryType.GRANT,
+                    ContinueReadingShieldHistoryReason.SIGNUP,
                     MONTH_START_DATE
             )).isEqualTo(1L);
         });
@@ -96,9 +98,10 @@ class ContinueReadingShieldServiceTest {
             softly.assertThat(firstResult).isTrue();
             softly.assertThat(secondResult).isFalse();
             softly.assertThat(shield.getRemainingCount()).isZero();
-            softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndEventDate(
+            softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndReasonAndEventDate(
                     member.getId(),
                     ContinueReadingShieldHistoryType.USE,
+                    ContinueReadingShieldHistoryReason.DAILY_RESET_PROTECT,
                     targetDate
             )).isEqualTo(1L);
         });
@@ -123,9 +126,10 @@ class ContinueReadingShieldServiceTest {
         ContinueReadingShield usedShield = continueReadingShieldRepository.findByMemberId(member.getId()).orElseThrow();
         assertSoftly(softly -> {
             softly.assertThat(usedShield.getRemainingCount()).isZero();
-            softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndEventDate(
+            softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndReasonAndEventDate(
                     member.getId(),
                     ContinueReadingShieldHistoryType.GRANT,
+                    ContinueReadingShieldHistoryReason.MONTHLY_RESET,
                     MONTH_START_DATE
             )).isEqualTo(1L);
         });
@@ -157,14 +161,16 @@ class ContinueReadingShieldServiceTest {
             softly.assertThat(continueReading.getDayCount()).isEqualTo(10);
             softly.assertThat(continueReading.getMaxDayCount()).isEqualTo(15);
             softly.assertThat(shield.getRemainingCount()).isEqualTo(1);
-            softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndEventDate(
+            softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndReasonAndEventDate(
                     member.getId(),
                     ContinueReadingShieldHistoryType.USE,
+                    ContinueReadingShieldHistoryReason.DAILY_RESET_PROTECT,
                     targetDate
             )).isEqualTo(1L);
-            softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndEventDate(
+            softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndReasonAndEventDate(
                     member.getId(),
                     ContinueReadingShieldHistoryType.GRANT,
+                    ContinueReadingShieldHistoryReason.MONTHLY_RESET,
                     MONTH_START_DATE
             )).isEqualTo(1L);
         });

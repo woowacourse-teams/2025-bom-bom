@@ -28,17 +28,13 @@ public interface ContinueReadingShieldHistoryRepository extends JpaRepository<Co
             member_id,
             type,
             event_date,
-            quantity,
-            created_at,
-            updated_at
+            quantity
         )
         SELECT
             shield.member_id,
             'GRANT',
             :eventDate,
-            :quantity,
-            NOW(6),
-            NOW(6)
+            :quantity
         FROM continue_reading_shield shield
     """, nativeQuery = true)
     int insertMonthlyGrantHistories(

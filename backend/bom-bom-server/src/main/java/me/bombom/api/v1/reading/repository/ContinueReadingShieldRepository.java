@@ -29,8 +29,7 @@ public interface ContinueReadingShieldRepository extends JpaRepository<ContinueR
             ON history.member_id = shield.member_id
             AND history.type = 'GRANT'
             AND history.event_date = :eventDate
-        SET shield.remaining_count = :remainingCount,
-            shield.updated_at = NOW(6)
+        SET shield.remaining_count = :remainingCount
         WHERE history.id IS NULL
     """, nativeQuery = true)
     int resetMonthlyIfNotGranted(

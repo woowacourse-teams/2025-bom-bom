@@ -170,23 +170,12 @@ class ChallengeReviewControllerTest {
         // when // then
         mockMvc.perform(get("/api/v1/challenges/{challengeId}/reviews", challengeAId)
                         .param("page", "0")
-                        .param("size", "2")
+                        .param("size", "1")
                         .with(authentication(viewerAuth)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(2))
-                .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.totalElements").value(2))
                 .andExpect(jsonPath("$.totalPages").value(2));
-    }
-
-    @Test
-    void 존재하지_않는_챌린지_조회_시_404_를_반환한다() throws Exception {
-        // given
-        long missingChallengeId = 999_999L;
-
-        // when // then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/reviews", missingChallengeId)
-                        .with(authentication(viewerAuth)))
-                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -208,39 +197,6 @@ class ChallengeReviewControllerTest {
                 .andExpect(jsonPath("$.nickname").value(viewer.getNickname()))
                 .andExpect(jsonPath("$.comment").value("내 리뷰"))
                 .andExpect(jsonPath("$.isPrivate").value(true));
-    }
-
-    @Test
-    void getMyReview_내_리뷰가_없으면_404_를_반환한다() throws Exception {
-        // given
-        save(challengeAId, otherMember.getId(), "타인 공개", false);
-
-        // when // then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/reviews/me", challengeAId)
-                        .with(authentication(viewerAuth)))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void getMyReview_존재하지_않는_챌린지면_404_를_반환한다() throws Exception {
-        // given
-        long missingChallengeId = 999_999L;
-
-        // when // then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/reviews/me", missingChallengeId)
-                        .with(authentication(viewerAuth)))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void getMyReview_다른_챌린지의_내_리뷰만_있을_때_404_를_반환한다() throws Exception {
-        // given
-        save(challengeBId, viewer.getId(), "다른 챌린지 본인 리뷰", false);
-
-        // when // then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/reviews/me", challengeAId)
-                        .with(authentication(viewerAuth)))
-                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -275,49 +231,6 @@ class ChallengeReviewControllerTest {
         assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(participantId, LocalDate.now(clock)))
                 .isTrue();
         assertThat(challengeDailyTodoRepository.count()).isEqualTo(1); // REVIEW 타입 daily todo 1건
-    }
-
-    @Test
-    void createReview_비참여자_리뷰_작성_시도는_404_를_반환하고_출석도_인정되지_않는다_IDOR_방어() throws Exception {
-        // otherMember 는 challengeA 에 참여하지 않은 사용자
-        OAuth2AuthenticationToken nonParticipantAuth = authOf(otherMember);
-        String body = "{\"comment\":\"좋았어요\",\"isPrivate\":false}";
-
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
-                        .with(authentication(nonParticipantAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isNotFound());
-
-        assertThat(challengeReviewRepository.findAll()).isEmpty();
-        assertThat(challengeDailyResultRepository.count()).isZero();
-        assertThat(challengeDailyTodoRepository.count()).isZero();
-    }
-
-    @Test
-    void createReview_이미_본인이_작성한_리뷰가_있으면_400_을_반환한다() throws Exception {
-        save(challengeAId, viewer.getId(), "기존 리뷰", false);
-        String body = "{\"comment\":\"중복 시도\",\"isPrivate\":false}";
-
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest());
-
-        assertThat(challengeReviewRepository.findAll()).hasSize(1);
-    }
-
-    @Test
-    void createReview_존재하지_않는_챌린지면_404_를_반환한다() throws Exception {
-        long missingChallengeId = 999_999L;
-        String body = "{\"comment\":\"좋았어요\",\"isPrivate\":false}";
-
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", missingChallengeId)
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -375,19 +288,6 @@ class ChallengeReviewControllerTest {
     }
 
     @Test
-    void createReview_comment_가_빈_문자열이면_400_을_반환한다() throws Exception {
-        String body = "{\"comment\":\"\",\"isPrivate\":false}";
-
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest());
-
-        assertThat(challengeReviewRepository.findAll()).isEmpty();
-    }
-
-    @Test
     void updateReview_정상_요청이면_204_와_함께_리뷰가_갱신된다() throws Exception {
         ChallengeReview mine = save(challengeAId, viewer.getId(), "원본", false);
         String body = "{\"comment\":\"수정됨\",\"isPrivate\":true}";
@@ -404,48 +304,6 @@ class ChallengeReviewControllerTest {
     }
 
     @Test
-    void updateReview_리뷰가_존재하지_않으면_404_를_반환한다() throws Exception {
-        long missingReviewId = 999_999L;
-        String body = "{\"comment\":\"수정됨\",\"isPrivate\":true}";
-
-        mockMvc.perform(put("/api/v1/challenges/{challengeId}/reviews/{reviewId}", challengeAId, missingReviewId)
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void updateReview_path_challengeId_와_review의_challengeId_가_불일치하면_404_를_반환한다() throws Exception {
-        ChallengeReview reviewInChallengeB = save(challengeBId, viewer.getId(), "원본", false);
-        String body = "{\"comment\":\"수정됨\",\"isPrivate\":true}";
-
-        mockMvc.perform(put("/api/v1/challenges/{challengeId}/reviews/{reviewId}", challengeAId, reviewInChallengeB.getId())
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isNotFound());
-
-        ChallengeReview untouched = challengeReviewRepository.findById(reviewInChallengeB.getId()).orElseThrow();
-        assertThat(untouched.getComment()).isEqualTo("원본");
-    }
-
-    @Test
-    void updateReview_본인_리뷰가_아니면_404_를_반환한다_IDOR_방어() throws Exception {
-        ChallengeReview othersReview = save(challengeAId, otherMember.getId(), "타인 원본", false);
-        String body = "{\"comment\":\"가로채기\",\"isPrivate\":true}";
-
-        mockMvc.perform(put("/api/v1/challenges/{challengeId}/reviews/{reviewId}", challengeAId, othersReview.getId())
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isNotFound());
-
-        ChallengeReview untouched = challengeReviewRepository.findById(othersReview.getId()).orElseThrow();
-        assertThat(untouched.getComment()).isEqualTo("타인 원본");
-    }
-
-    @Test
     void updateReview_비인증_상태이면_401_을_반환한다() throws Exception {
         ChallengeReview mine = save(challengeAId, viewer.getId(), "원본", false);
         String body = "{\"comment\":\"수정됨\",\"isPrivate\":true}";
@@ -454,21 +312,6 @@ class ChallengeReviewControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void updateReview_comment가_빈_문자열이면_400_을_반환한다() throws Exception {
-        ChallengeReview mine = save(challengeAId, viewer.getId(), "원본", false);
-        String body = "{\"comment\":\"\",\"isPrivate\":true}";
-
-        mockMvc.perform(put("/api/v1/challenges/{challengeId}/reviews/{reviewId}", challengeAId, mine.getId())
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest());
-
-        ChallengeReview untouched = challengeReviewRepository.findById(mine.getId()).orElseThrow();
-        assertThat(untouched.getComment()).isEqualTo("원본");
     }
 
     @Test

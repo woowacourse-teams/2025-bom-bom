@@ -40,11 +40,6 @@ public interface ContinueReadingShieldHistoryRepository extends JpaRepository<Co
             NOW(6),
             NOW(6)
         FROM continue_reading_shield shield
-        LEFT JOIN continue_reading_shield_history history
-            ON history.member_id = shield.member_id
-            AND history.type = 'GRANT'
-            AND history.event_date = :eventDate
-        WHERE history.id IS NULL
     """, nativeQuery = true)
     int insertMonthlyGrantHistories(
             @Param("eventDate") LocalDate eventDate,

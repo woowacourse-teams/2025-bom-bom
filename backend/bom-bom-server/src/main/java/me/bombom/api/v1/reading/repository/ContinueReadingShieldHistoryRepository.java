@@ -31,7 +31,7 @@ public interface ContinueReadingShieldHistoryRepository extends JpaRepository<Co
             :quantity
         FROM continue_reading_shield shield
     """, nativeQuery = true)
-    int insertMonthlyGrantHistories(
+    int bulkInsertMonthlyGrantHistories(
             @Param("eventDate") LocalDate eventDate,
             @Param("quantity") int quantity
     );

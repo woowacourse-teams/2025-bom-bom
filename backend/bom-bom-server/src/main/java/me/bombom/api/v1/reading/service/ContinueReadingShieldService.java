@@ -32,7 +32,7 @@ public class ContinueReadingShieldService {
 
     @Transactional
     public boolean useShield(Long memberId, LocalDate targetDate) {
-        int updatedRows = continueReadingShieldRepository.useIfAvailable(memberId, targetDate, SHIELD_QUANTITY);
+        int updatedRows = continueReadingShieldRepository.bulkUseIfAvailable(memberId, targetDate, SHIELD_QUANTITY);
         if (updatedRows == 0) {
             return false;
         }
@@ -49,8 +49,8 @@ public class ContinueReadingShieldService {
             return;
         }
         LocalDate monthStartDate = today.withDayOfMonth(1);
-        continueReadingShieldRepository.resetMonthlyIfNotGranted(monthStartDate, SHIELD_QUANTITY);
-        continueReadingShieldHistoryRepository.insertMonthlyGrantHistories(monthStartDate, SHIELD_QUANTITY);
+        continueReadingShieldRepository.bulkResetMonthlyIfNotGranted(monthStartDate, SHIELD_QUANTITY);
+        continueReadingShieldHistoryRepository.bulkInsertMonthlyGrantHistories(monthStartDate, SHIELD_QUANTITY);
     }
 
     @Transactional

@@ -12,7 +12,7 @@ public interface ContinueReadingShieldRepository extends JpaRepository<ContinueR
 
     Optional<ContinueReadingShield> findByMemberId(Long memberId);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying
     @Query(value = """
         UPDATE continue_reading_shield shield
         SET shield.remaining_count = shield.remaining_count - :quantity
@@ -26,13 +26,13 @@ public interface ContinueReadingShieldRepository extends JpaRepository<ContinueR
                     AND history.event_date = :eventDate
             )
     """, nativeQuery = true)
-    int useIfAvailable(
+    int bulkUseIfAvailable(
             @Param("memberId") Long memberId,
             @Param("eventDate") LocalDate eventDate,
             @Param("quantity") int quantity
     );
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying
     @Query(value = """
         UPDATE continue_reading_shield shield
         LEFT JOIN continue_reading_shield_history history
@@ -42,7 +42,7 @@ public interface ContinueReadingShieldRepository extends JpaRepository<ContinueR
         SET shield.remaining_count = :remainingCount
         WHERE history.id IS NULL
     """, nativeQuery = true)
-    int resetMonthlyIfNotGranted(
+    int bulkResetMonthlyIfNotGranted(
             @Param("eventDate") LocalDate eventDate,
             @Param("remainingCount") int remainingCount
     );

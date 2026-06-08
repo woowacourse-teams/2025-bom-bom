@@ -5,12 +5,11 @@ import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.dto.request.ArticleNewsletterStatisticOptionsRequest;
+import me.bombom.api.v1.article.dto.request.ArticleSearchOptionsRequest;
 import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
-import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
-import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
-import me.bombom.api.v1.article.dto.request.ArticleSearchOptionsRequest;
+import me.bombom.api.v1.article.dto.response.ArticleResponse;
 import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.highlight.dto.response.ArticleHighlightResponse;
@@ -35,25 +34,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/articles")
-public class ArticleController implements ArticleControllerApi{
+public class ArticleController {
 
     private final ArticleService articleService;
 
-    @Override
-    @GetMapping
-    public Page<ArticleResponse> getArticles(
-            @LoginMember Member member,
-            @Valid @ModelAttribute ArticlesOptionsRequest articlesOptionsRequest,
-            @PageableDefault(sort = "arrivedDateTime", direction = Direction.DESC) Pageable pageable
-    ) {
-        return articleService.getArticles(
-                member,
-                articlesOptionsRequest,
-                pageable
-        );
-    }
-
-    @Override
     @GetMapping("/search")
     public Page<ArticleResponse> getArticlesBySearch(
             @LoginMember Member member,
@@ -67,7 +51,6 @@ public class ArticleController implements ArticleControllerApi{
         );
     }
 
-    @Override
     @GetMapping("/{id}")
     public ArticleDetailResponse getArticleDetail(
             @LoginMember Member member,
@@ -76,7 +59,6 @@ public class ArticleController implements ArticleControllerApi{
         return articleService.getArticleDetail(id, member);
     }
 
-    @Override
     @PatchMapping("/{id}/read")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateIsRead(
@@ -86,7 +68,6 @@ public class ArticleController implements ArticleControllerApi{
         articleService.markAsRead(id, member);
     }
 
-    @Override
     @GetMapping("/statistics/newsletters")
     public ArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(
             @LoginMember Member member,
@@ -95,7 +76,6 @@ public class ArticleController implements ArticleControllerApi{
         return articleService.getArticleNewsletterStatistics(member, request.keyword());
     }
 
-    @Override
     @GetMapping("/{articleId}/highlights")
     public List<ArticleHighlightResponse> getHighlights(
             @LoginMember Member member,
@@ -104,7 +84,6 @@ public class ArticleController implements ArticleControllerApi{
         return articleService.getHighlights(member, articleId);
     }
 
-    @Override
     @PostMapping("/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteArticles(

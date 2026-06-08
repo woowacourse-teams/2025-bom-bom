@@ -1,31 +1,29 @@
 package me.bombom.api.v1.pet.controller;
 
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.common.auth.CurrentMemberProvider;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.pet.dto.PetResponse;
 import me.bombom.api.v1.pet.service.PetService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import me.bombom.openapi.api.PetApi;
+import me.bombom.openapi.common.PetResponseMapper;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/members/me/pet")
-public class PetController implements PetControllerApi{
+public class PetController implements PetApi {
 
+    private final CurrentMemberProvider currentMemberProvider;
     private final PetService petService;
 
     @Override
-    @GetMapping
-    public PetResponse getPet(@LoginMember Member member){
-        return petService.getPet(member);
+    public me.bombom.openapi.model.PetResponse getPet() {
+        Member member = currentMemberProvider.getCurrentMember();
+        return PetResponseMapper.toApi(petService.getPet(member));
     }
 
     @Override
-    @PostMapping("/attendance")
-    public void attend(@LoginMember Member member){
+    public void attend() {
+        Member member = currentMemberProvider.getCurrentMember();
         petService.attend(member);
     }
 }

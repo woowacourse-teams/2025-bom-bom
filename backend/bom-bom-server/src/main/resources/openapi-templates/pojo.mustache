@@ -8,8 +8,21 @@ public record {{classname}}(
 {{#vars}}
 {{! 필수 검증과 바인딩에 필요한 애노테이션만 줄 단위로 둔다 }}
         {{#required}}{{^isInteger}}{{^isLong}}{{^isFloat}}{{^isDouble}}{{^isBoolean}}@NotNull
-        {{/isBoolean}}{{/isDouble}}{{/isFloat}}{{/isLong}}{{/isInteger}}{{/required}}{{#useBeanValidation}}{{>beanValidationCore}}
-        {{/useBeanValidation}}{{#isModel}}@Valid
+        {{/isBoolean}}{{/isDouble}}{{/isFloat}}{{/isLong}}{{/isInteger}}{{/required}}{{#useBeanValidation}}{{#pattern}}{{^isByteArray}}@Pattern(regexp = "{{{pattern}}}"{{#vendorExtensions.x-pattern-message}}, message="{{vendorExtensions.x-pattern-message}}"{{/vendorExtensions.x-pattern-message}})
+        {{/isByteArray}}{{/pattern}}{{#minLength}}{{#maxLength}}@Size(min = {{minLength}}, max = {{maxLength}})
+        {{/maxLength}}{{/minLength}}{{#minLength}}{{^maxLength}}@Size(min = {{minLength}})
+        {{/maxLength}}{{/minLength}}{{^minLength}}{{#maxLength}}@Size(max = {{.}})
+        {{/maxLength}}{{/minLength}}{{#minItems}}{{#maxItems}}@Size(min = {{minItems}}, max = {{maxItems}})
+        {{/maxItems}}{{/minItems}}{{#minItems}}{{^maxItems}}@Size(min = {{minItems}})
+        {{/maxItems}}{{/minItems}}{{^minItems}}{{#maxItems}}@Size(max = {{.}})
+        {{/maxItems}}{{/minItems}}{{#isEmail}}@{{javaxPackage}}.validation.constraints.Email
+        {{/isEmail}}{{#isInteger}}{{#minimum}}@Min({{.}})
+        {{/minimum}}{{#maximum}}@Max({{.}})
+        {{/maximum}}{{/isInteger}}{{#isLong}}{{#minimum}}@Min({{.}}L)
+        {{/minimum}}{{#maximum}}@Max({{.}}L)
+        {{/maximum}}{{/isLong}}{{^isInteger}}{{^isLong}}{{#minimum}}@DecimalMin({{#exclusiveMinimum}}value = {{/exclusiveMinimum}}"{{minimum}}"{{#exclusiveMinimum}}, inclusive = false{{/exclusiveMinimum}})
+        {{/minimum}}{{#maximum}}@DecimalMax({{#exclusiveMaximum}}value = {{/exclusiveMaximum}}"{{maximum}}"{{#exclusiveMaximum}}, inclusive = false{{/exclusiveMaximum}})
+        {{/maximum}}{{/isLong}}{{/isInteger}}{{/useBeanValidation}}{{#isModel}}@Valid
         {{/isModel}}{{#isContainer}}{{#items.isModel}}@Valid
         {{/items.isModel}}{{/isContainer}}{{#isDateTime}}@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
         {{/isDateTime}}{{#isDate}}@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)

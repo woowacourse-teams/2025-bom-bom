@@ -8,6 +8,12 @@ package {{package}};
 
 {{#imports}}import {{import}};
 {{/imports}}
+{{#operations}}
+{{#operation}}
+{{#vendorExtensions.x-spring-query-model}}import {{modelPackage}}.{{{vendorExtensions.x-spring-query-model}}};
+{{/vendorExtensions.x-spring-query-model}}
+{{/operation}}
+{{/operations}}
 {{#swagger2AnnotationLibrary}}
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;

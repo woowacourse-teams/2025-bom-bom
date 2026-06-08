@@ -9,12 +9,19 @@
 {{/hasParams}}
 {{/vendorExtensions.x-needs-login-member}}
 
+{{! 여러 query parameter를 백엔드 전용 ModelAttribute DTO로 묶는다. }}
+{{#vendorExtensions.x-spring-query-model}}
+{{#springDocDocumentationProvider}}@ParameterObject {{/springDocDocumentationProvider}}{{#useBeanValidation}}@Valid {{/useBeanValidation}}@ModelAttribute {{{vendorExtensions.x-spring-query-model}}} request
+{{/vendorExtensions.x-spring-query-model}}
+
 {{! OpenAPI에 선언된 일반 파라미터 }}
+{{^vendorExtensions.x-spring-query-model}}
 {{#allParams}}
 {{>queryParams}}{{>pathParams}}{{>headerParams}}{{>bodyParams}}{{>formParams}}{{>cookieParams}}
 {{^-last}},
 {{/-last}}
 {{/allParams}}
+{{/vendorExtensions.x-spring-query-model}}
 
 {{! reactive 서버 전용 교환 객체 }}
 {{#reactive}}

@@ -16,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ContinueReadingShieldService {
 
-    private static final int SHIELD_QUANTITY = 1;
+    private static final int INITIAL_GRANT_COUNT = 1;
+    private static final int SHIELD_DEDUCT_COUNT = 1;
+    private static final int MONTHLY_GRANT_COUNT = 1;
     private static final int MONTHLY_SHIELD_GRANT_EVENT_DAY = 1;
 
     private final ContinueReadingShieldRepository continueReadingShieldRepository;
@@ -32,7 +34,7 @@ public class ContinueReadingShieldService {
                         memberId,
                         ContinueReadingShieldHistoryReason.SIGNUP,
                         currentMonthlyShieldGrantEventDate(),
-                        SHIELD_QUANTITY
+                        INITIAL_GRANT_COUNT
                 )
         );
     }
@@ -43,7 +45,7 @@ public class ContinueReadingShieldService {
                 memberId,
                 ContinueReadingShieldHistoryReason.DAILY_RESET_PROTECTION_USE.name(),
                 targetDate,
-                SHIELD_QUANTITY
+                SHIELD_DEDUCT_COUNT
         );
         if (updatedRows == 0) {
             return false;
@@ -53,7 +55,7 @@ public class ContinueReadingShieldService {
                         memberId,
                         ContinueReadingShieldHistoryReason.DAILY_RESET_PROTECTION_USE,
                         targetDate,
-                        SHIELD_QUANTITY
+                        SHIELD_DEDUCT_COUNT
                 )
         );
         return true;
@@ -69,12 +71,12 @@ public class ContinueReadingShieldService {
         continueReadingShieldRepository.bulkResetMonthlyIfNotGranted(
                 ContinueReadingShieldHistoryReason.MONTHLY_RESET.name(),
                 monthlyShieldGrantEventDate,
-                SHIELD_QUANTITY
+                MONTHLY_GRANT_COUNT
         );
         continueReadingShieldHistoryRepository.bulkInsertMonthlyGrantHistories(
                 ContinueReadingShieldHistoryReason.MONTHLY_RESET.name(),
                 monthlyShieldGrantEventDate,
-                SHIELD_QUANTITY
+                MONTHLY_GRANT_COUNT
         );
     }
 

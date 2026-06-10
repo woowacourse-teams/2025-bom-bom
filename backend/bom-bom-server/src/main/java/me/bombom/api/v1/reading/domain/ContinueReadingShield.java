@@ -45,10 +45,11 @@ public class ContinueReadingShield extends BaseEntity {
             int monthlyRemainingCount,
             int rewardRemainingCount
     ) {
+        validateRemainingCount(monthlyRemainingCount, rewardRemainingCount);
         this.id = id;
         this.memberId = memberId;
-        this.monthlyRemainingCount = Math.max(monthlyRemainingCount, 0);
-        this.rewardRemainingCount = Math.max(rewardRemainingCount, 0);
+        this.monthlyRemainingCount = monthlyRemainingCount;
+        this.rewardRemainingCount = rewardRemainingCount;
     }
 
     public static ContinueReadingShield create(Long memberId) {
@@ -61,5 +62,11 @@ public class ContinueReadingShield extends BaseEntity {
 
     public int getRemainingCount() {
         return monthlyRemainingCount + rewardRemainingCount;
+    }
+
+    private static void validateRemainingCount(int monthlyRemainingCount, int rewardRemainingCount) {
+        if (monthlyRemainingCount < 0 || rewardRemainingCount < 0) {
+            throw new IllegalArgumentException("보호막 잔여 개수는 음수일 수 없습니다.");
+        }
     }
 }

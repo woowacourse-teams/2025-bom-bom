@@ -1,15 +1,19 @@
 {{! 로그인 멤버 주입 }}
 {{#vendorExtensions.x-needs-login-member}}
 {{>login_member_parameter}}
+{{#vendorExtensions.x-spring-query-model}},
+{{/vendorExtensions.x-spring-query-model}}
+{{^vendorExtensions.x-spring-query-model}}
 {{#hasParams}},
 {{/hasParams}}
 {{^hasParams}}
 {{#vendorExtensions.x-spring-paginated}},
 {{/vendorExtensions.x-spring-paginated}}
 {{/hasParams}}
+{{/vendorExtensions.x-spring-query-model}}
 {{/vendorExtensions.x-needs-login-member}}
 
-{{! 여러 query parameter를 백엔드 전용 ModelAttribute DTO로 묶는다. }}
+{{! 백엔드 query model 주입 }}
 {{#vendorExtensions.x-spring-query-model}}
 {{#springDocDocumentationProvider}}@ParameterObject {{/springDocDocumentationProvider}}{{#useBeanValidation}}@Valid {{/useBeanValidation}}@ModelAttribute {{{vendorExtensions.x-spring-query-model}}} request
 {{/vendorExtensions.x-spring-query-model}}

@@ -8,12 +8,6 @@ package {{package}};
 
 {{#imports}}import {{import}};
 {{/imports}}
-{{#operations}}
-{{#operation}}
-{{#vendorExtensions.x-spring-query-model}}import {{modelPackage}}.{{{vendorExtensions.x-spring-query-model}}};
-{{/vendorExtensions.x-spring-query-model}}
-{{/operation}}
-{{/operations}}
 {{#swagger2AnnotationLibrary}}
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
@@ -91,6 +85,12 @@ import java.util.concurrent.CompletableFuture;
 {{/async}}
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
+{{#operations}}
+{{#operation}}
+{{#vendorExtensions.x-spring-query-model}}import {{modelPackage}}.{{{vendorExtensions.x-spring-query-model}}};
+{{/vendorExtensions.x-spring-query-model}}
+{{/operation}}
+{{/operations}}
 import {{javaxPackage}}.annotation.Generated;
 
 {{>generatedAnnotation}}
@@ -145,9 +145,11 @@ public interface {{classname}} {
      * {{.}}
     {{/notes}}
      *
+    {{^vendorExtensions.x-spring-query-model}}
     {{#allParams}}
      * @param {{paramName}} {{description}}{{#required}} (required){{/required}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}
     {{/allParams}}
+    {{/vendorExtensions.x-spring-query-model}}
      * @return {{#responses}}{{message}} (status code {{code}}){{^-last}}
      *         or {{/-last}}{{/responses}}
     {{#isDeprecated}}

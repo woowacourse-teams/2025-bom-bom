@@ -33,8 +33,8 @@ spotless {
         )
         replaceRegex("remove same-package model imports", "(?m)^import me\\.bombom\\.openapi\\.model\\.[A-Za-z0-9_]+;\\R", "")
         replaceRegex("remove duplicate DateTimeFormat import", "(?m)^(import org\\.springframework\\.format\\.annotation\\.DateTimeFormat;\\R)(?=.*^import org\\.springframework\\.format\\.annotation\\.DateTimeFormat;\\R)", "")
-        replaceRegex("remove blank line after Generated annotation", "\\)\\R\\Rpublic record", ''')
-public record''')
+        replaceRegex("remove blank line after Generated annotation", "\\)\\R\\Rpublic record", ")" + System.lineSeparator() + "public record")
+        replaceRegex("remove trailing blank line in models", "\\}\\R\\R\\z", "}" + System.lineSeparator())
     }
 }
 

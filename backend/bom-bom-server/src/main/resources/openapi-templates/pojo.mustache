@@ -7,8 +7,8 @@ public record {{classname}}(
 
 {{#vars}}
 {{! 필수 검증과 바인딩에 필요한 애노테이션만 줄 단위로 둔다 }}
-        {{#required}}{{^isInteger}}{{^isLong}}{{^isFloat}}{{^isDouble}}{{^isBoolean}}@NotNull
-        {{/isBoolean}}{{/isDouble}}{{/isFloat}}{{/isLong}}{{/isInteger}}{{/required}}{{#useBeanValidation}}{{#pattern}}{{^isByteArray}}@Pattern(regexp = "{{{pattern}}}"{{#vendorExtensions.x-pattern-message}}, message="{{vendorExtensions.x-pattern-message}}"{{/vendorExtensions.x-pattern-message}})
+        {{#required}}{{^isInteger}}{{^isFloat}}{{^isDouble}}{{^isBoolean}}@NotNull
+        {{/isBoolean}}{{/isDouble}}{{/isFloat}}{{/isInteger}}{{/required}}{{#useBeanValidation}}{{#pattern}}{{^isByteArray}}@Pattern(regexp = "{{{pattern}}}"{{#vendorExtensions.x-pattern-message}}, message="{{vendorExtensions.x-pattern-message}}"{{/vendorExtensions.x-pattern-message}})
         {{/isByteArray}}{{/pattern}}{{#minLength}}{{#maxLength}}@Size(min = {{minLength}}, max = {{maxLength}})
         {{/maxLength}}{{/minLength}}{{#minLength}}{{^maxLength}}@Size(min = {{minLength}})
         {{/maxLength}}{{/minLength}}{{^minLength}}{{#maxLength}}@Size(max = {{.}})
@@ -26,8 +26,8 @@ public record {{classname}}(
         {{/isModel}}{{#isContainer}}{{#items.isModel}}@Valid
         {{/items.isModel}}{{/isContainer}}{{#isDateTime}}@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
         {{/isDateTime}}{{#isDate}}@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        {{/isDate}}{{#description}}@Schema(description = "{{{description}}}"{{#required}}{{#isInteger}}, requiredMode = Schema.RequiredMode.REQUIRED{{/isInteger}}{{#isLong}}, requiredMode = Schema.RequiredMode.REQUIRED{{/isLong}}{{#isFloat}}, requiredMode = Schema.RequiredMode.REQUIRED{{/isFloat}}{{#isDouble}}, requiredMode = Schema.RequiredMode.REQUIRED{{/isDouble}}{{#isBoolean}}, requiredMode = Schema.RequiredMode.REQUIRED{{/isBoolean}}{{/required}})
-        {{/description}}{{#required}}{{#isInteger}}int{{/isInteger}}{{#isLong}}long{{/isLong}}{{#isFloat}}float{{/isFloat}}{{#isDouble}}double{{/isDouble}}{{#isBoolean}}boolean{{/isBoolean}}{{^isInteger}}{{^isLong}}{{^isFloat}}{{^isDouble}}{{^isBoolean}}{{{dataType}}}{{/isBoolean}}{{/isDouble}}{{/isFloat}}{{/isLong}}{{/isInteger}}{{/required}}{{^required}}{{{dataType}}}{{/required}} {{name}}{{^-last}},
+        {{/isDate}}{{#description}}@Schema(description = "{{{description}}}"{{#required}}, requiredMode = REQUIRED{{/required}})
+        {{/description}}{{#required}}{{#isInteger}}int{{/isInteger}}{{#isLong}}{{{dataType}}}{{/isLong}}{{#isFloat}}float{{/isFloat}}{{#isDouble}}double{{/isDouble}}{{#isBoolean}}boolean{{/isBoolean}}{{^isInteger}}{{^isLong}}{{^isFloat}}{{^isDouble}}{{^isBoolean}}{{{dataType}}}{{/isBoolean}}{{/isDouble}}{{/isFloat}}{{/isLong}}{{/isInteger}}{{/required}}{{^required}}{{{dataType}}}{{/required}} {{name}}{{^-last}},
 {{/-last}}
 
 {{/vars}}

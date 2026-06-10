@@ -33,7 +33,7 @@ public class ContinueReadingShieldService {
                 ContinueReadingShieldHistory.grant(
                         memberId,
                         ContinueReadingShieldHistoryReason.SIGNUP,
-                        currentMonthlyShieldGrantEventDate(),
+                        currentDate(),
                         INITIAL_GRANT_COUNT
                 )
         );
@@ -63,7 +63,7 @@ public class ContinueReadingShieldService {
 
     @Transactional
     public void resetMonthlyShieldsIfFirstDay() {
-        LocalDate today = LocalDate.now(clock);
+        LocalDate today = currentDate();
         if (today.getDayOfMonth() != MONTHLY_SHIELD_GRANT_EVENT_DAY) {
             return;
         }
@@ -87,6 +87,10 @@ public class ContinueReadingShieldService {
     }
 
     private LocalDate currentMonthlyShieldGrantEventDate() {
-        return LocalDate.now(clock).withDayOfMonth(MONTHLY_SHIELD_GRANT_EVENT_DAY);
+        return currentDate().withDayOfMonth(MONTHLY_SHIELD_GRANT_EVENT_DAY);
+    }
+
+    private LocalDate currentDate() {
+        return LocalDate.now(clock);
     }
 }

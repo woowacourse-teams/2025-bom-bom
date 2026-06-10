@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.UUID;
@@ -33,7 +34,7 @@ import org.springframework.context.annotation.Primary;
 class ContinueReadingShieldServiceTest {
 
     private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
-    private static final LocalDate FIXED_DATE = LocalDate.of(2026, 5, 1);
+    private static final LocalDate SIGNUP_DATE = LocalDate.of(2026, 5, 15);
     private static final LocalDate MONTH_START_DATE = LocalDate.of(2026, 5, 1);
 
     @Autowired
@@ -57,8 +58,12 @@ class ContinueReadingShieldServiceTest {
     @Autowired
     private ContinueReadingShieldHistoryRepository continueReadingShieldHistoryRepository;
 
+    @Autowired
+    private Clock clock;
+
     @BeforeEach
     void setUp() {
+        fixClockTo(MONTH_START_DATE);
         continueReadingShieldHistoryRepository.deleteAllInBatch();
         continueReadingShieldRepository.deleteAllInBatch();
         continueReadingRealtimeRepository.deleteAllInBatch();
@@ -67,7 +72,8 @@ class ContinueReadingShieldServiceTest {
     }
 
     @Test
-    void 가입_초기화_시_보호막_1개와_월_지급_이력을_생성한다() {
+    void 가입_초기화_시_보호막_1개와_가입일_지급_이력을_생성한다() {
+        fixClockTo(SIGNUP_DATE);
         Member member = createMember();
 
         continueReadingShieldService.initializeShield(member.getId());
@@ -81,7 +87,7 @@ class ContinueReadingShieldServiceTest {
                     member.getId(),
                     ContinueReadingShieldHistoryType.GRANT,
                     ContinueReadingShieldHistoryReason.SIGNUP,
-                    MONTH_START_DATE
+                    SIGNUP_DATE
             )).isEqualTo(1L);
         });
     }
@@ -257,13 +263,47 @@ class ContinueReadingShieldServiceTest {
         return memberRepository.save(TestFixture.createUniqueMember("shield_" + suffix, "shield_pid_" + suffix));
     }
 
+    private void fixClockTo(LocalDate date) {
+        ((MutableClock) clock).setDate(date);
+    }
+
     @TestConfiguration
     static class FixedClockConfig {
 
         @Bean
         @Primary
         Clock fixedClock() {
-            return Clock.fixed(FIXED_DATE.atStartOfDay(SEOUL_ZONE).toInstant(), SEOUL_ZONE);
+            return new MutableClock(MONTH_START_DATE, SEOUL_ZONE);
+        }
+    }
+
+    private static class MutableClock extends Clock {
+
+        private final ZoneId zone;
+        private Instant instant;
+
+        private MutableClock(LocalDate date, ZoneId zone) {
+            this.zone = zone;
+            setDate(date);
+        }
+
+        private void setDate(LocalDate date) {
+            this.instant = date.atStartOfDay(zone).toInstant();
+        }
+
+        @Override
+        public ZoneId getZone() {
+            return zone;
+        }
+
+        @Override
+        public Clock withZone(ZoneId zone) {
+            return Clock.fixed(instant, zone);
+        }
+
+        @Override
+        public Instant instant() {
+            return instant;
         }
     }
 }

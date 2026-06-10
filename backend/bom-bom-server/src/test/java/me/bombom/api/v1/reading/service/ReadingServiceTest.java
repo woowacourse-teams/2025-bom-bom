@@ -361,7 +361,7 @@ class ReadingServiceTest {
                     newMember.getId(),
                     ContinueReadingShieldHistoryType.GRANT,
                     ContinueReadingShieldHistoryReason.SIGNUP,
-                    LocalDate.now(clock).withDayOfMonth(1)
+                    LocalDate.now(clock)
             )).isEqualTo(1L);
         });
     }

@@ -105,7 +105,7 @@ class ContinueReadingShieldServiceTest {
             softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndReasonAndEventDate(
                     member.getId(),
                     ContinueReadingShieldHistoryType.USE,
-                    ContinueReadingShieldHistoryReason.DAILY_RESET_PROTECT,
+                    ContinueReadingShieldHistoryReason.DAILY_RESET_PROTECTION_USE,
                     targetDate
             )).isEqualTo(1L);
         });
@@ -240,7 +240,7 @@ class ContinueReadingShieldServiceTest {
             softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndReasonAndEventDate(
                     member.getId(),
                     ContinueReadingShieldHistoryType.USE,
-                    ContinueReadingShieldHistoryReason.DAILY_RESET_PROTECT,
+                    ContinueReadingShieldHistoryReason.DAILY_RESET_PROTECTION_USE,
                     targetDate
             )).isEqualTo(1L);
             softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndReasonAndEventDate(

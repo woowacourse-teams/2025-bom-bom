@@ -5,5 +5,5 @@ public enum ContinueReadingShieldHistoryReason {
     SIGNUP,
     MONTHLY_RESET,
     MIGRATION_BACKFILL,
-    DAILY_RESET_PROTECT
+    DAILY_RESET_PROTECTION_USE
 }

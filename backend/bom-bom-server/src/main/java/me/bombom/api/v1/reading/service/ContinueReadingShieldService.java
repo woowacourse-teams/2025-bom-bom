@@ -41,7 +41,7 @@ public class ContinueReadingShieldService {
     public boolean useShield(Long memberId, LocalDate targetDate) {
         int updatedRows = continueReadingShieldRepository.bulkDecreaseRemainingCountIfUsable(
                 memberId,
-                ContinueReadingShieldHistoryReason.DAILY_RESET_PROTECT.name(),
+                ContinueReadingShieldHistoryReason.DAILY_RESET_PROTECTION_USE.name(),
                 targetDate,
                 SHIELD_QUANTITY
         );
@@ -51,7 +51,7 @@ public class ContinueReadingShieldService {
         continueReadingShieldHistoryRepository.save(
                 ContinueReadingShieldHistory.use(
                         memberId,
-                        ContinueReadingShieldHistoryReason.DAILY_RESET_PROTECT,
+                        ContinueReadingShieldHistoryReason.DAILY_RESET_PROTECTION_USE,
                         targetDate,
                         SHIELD_QUANTITY
                 )

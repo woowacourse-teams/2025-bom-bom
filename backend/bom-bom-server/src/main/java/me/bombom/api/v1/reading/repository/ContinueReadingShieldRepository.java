@@ -16,15 +16,15 @@ public interface ContinueReadingShieldRepository extends JpaRepository<ContinueR
     @Query(value = """
         UPDATE continue_reading_shield shield
         SET shield.reward_remaining_count = CASE
-                WHEN shield.monthly_remaining_count >= :quantity THEN shield.reward_remaining_count
-                ELSE shield.reward_remaining_count - (:quantity - shield.monthly_remaining_count)
+                WHEN shield.monthly_remaining_count >= :deductCount THEN shield.reward_remaining_count
+                ELSE shield.reward_remaining_count - (:deductCount - shield.monthly_remaining_count)
             END,
             shield.monthly_remaining_count = CASE
-                WHEN shield.monthly_remaining_count >= :quantity THEN shield.monthly_remaining_count - :quantity
+                WHEN shield.monthly_remaining_count >= :deductCount THEN shield.monthly_remaining_count - :deductCount
                 ELSE 0
             END
         WHERE shield.member_id = :memberId
-            AND shield.monthly_remaining_count + shield.reward_remaining_count >= :quantity
+            AND shield.monthly_remaining_count + shield.reward_remaining_count >= :deductCount
             AND NOT EXISTS (
                 SELECT 1
                 FROM continue_reading_shield_history history
@@ -38,7 +38,7 @@ public interface ContinueReadingShieldRepository extends JpaRepository<ContinueR
             @Param("memberId") Long memberId,
             @Param("reason") String reason,
             @Param("eventDate") LocalDate eventDate,
-            @Param("quantity") int quantity
+            @Param("deductCount") int deductCount
     );
 
     @Modifying

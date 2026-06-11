@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ContinueReadingShieldService {
 
     private static final int INITIAL_GRANT_COUNT = 1;
-    private static final int SHIELD_DEDUCT_COUNT = 1;
+    private static final int DEDUCT_COUNT = 1;
     private static final int MONTHLY_GRANT_COUNT = 1;
     private static final int MONTHLY_SHIELD_GRANT_EVENT_DAY = 1;
 
@@ -45,7 +45,7 @@ public class ContinueReadingShieldService {
                 memberId,
                 ContinueReadingShieldHistoryReason.DAILY_RESET_PROTECTION_USE.name(),
                 targetDate,
-                SHIELD_DEDUCT_COUNT
+                DEDUCT_COUNT
         );
         if (updatedRows == 0) {
             return false;
@@ -55,7 +55,7 @@ public class ContinueReadingShieldService {
                         memberId,
                         ContinueReadingShieldHistoryReason.DAILY_RESET_PROTECTION_USE,
                         targetDate,
-                        SHIELD_DEDUCT_COUNT
+                        DEDUCT_COUNT
                 )
         );
         return true;

@@ -15,7 +15,7 @@
 
 {{! 백엔드 query model 주입 }}
 {{#vendorExtensions.x-spring-query-model}}
-{{#springDocDocumentationProvider}}@ParameterObject {{/springDocDocumentationProvider}}{{#useBeanValidation}}@Valid {{/useBeanValidation}}@ModelAttribute {{{vendorExtensions.x-spring-query-model}}} request
+{{#useBeanValidation}}@Valid {{/useBeanValidation}}@ModelAttribute {{#springDocDocumentationProvider}}@ParameterObject {{/springDocDocumentationProvider}}{{{vendorExtensions.x-spring-query-model}}} request
 {{/vendorExtensions.x-spring-query-model}}
 
 {{! OpenAPI에 선언된 일반 파라미터 }}

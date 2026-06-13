@@ -2,8 +2,7 @@
 {{#isQueryParam}}
 {{#isModel}}
 {{! query model은 개별 RequestParam이 아니라 ModelAttribute로 묶어서 받는다 }}
-{{#springDocDocumentationProvider}}@ParameterObject {{/springDocDocumentationProvider}}
-{{#useBeanValidation}}@Valid {{/useBeanValidation}}@ModelAttribute {{>optionalDataType}} {{paramName}}
+{{#useBeanValidation}}@Valid {{/useBeanValidation}}@ModelAttribute {{#springDocDocumentationProvider}}@ParameterObject {{/springDocDocumentationProvider}}{{>optionalDataType}} {{paramName}}
 {{/isModel}}
 {{^isModel}}
 {{! scalar query parameter는 기본 Spring RequestParam 방식으로 받는다 }}

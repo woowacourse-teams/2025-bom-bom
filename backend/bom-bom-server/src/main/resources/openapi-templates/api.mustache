@@ -93,7 +93,6 @@ import me.bombom.api.v1.member.domain.Member;
 {{/operations}}
 import {{javaxPackage}}.annotation.Generated;
 
-{{>generatedAnnotation}}
 {{#useBeanValidation}}
 @Validated
 {{/useBeanValidation}}
@@ -120,6 +119,7 @@ import {{javaxPackage}}.annotation.Generated;
 @RequestMapping("${openapi.<%title%>.base-path:<%>defaultBasePath%>}")
 <%={{ }}=%>
 {{/useRequestMappingOnInterface}}
+{{>generatedAnnotation}}
 public interface {{classname}} {
 {{#jdk8-default-interface}}
     {{^isDelegate}}

@@ -20,6 +20,8 @@ spotless {
 @$1''')
         removeUnusedImports()
         googleJavaFormat()
+        replaceRegex("move Generated closing paren to new line", '(?m)^(    comments = "Generator version: [^"]+")\\)$', '''$1
+)''')
         replaceRegex("move closing paren to new line in api methods", '(?m)^(      .+)\\);$', '''$1
   );''')
     }
@@ -34,6 +36,10 @@ spotless {
         replaceRegex("remove same-package model imports", "(?m)^import me\\.bombom\\.openapi\\.model\\.[A-Za-z0-9_]+;\\R", "")
         replaceRegex("remove duplicate DateTimeFormat import", "(?m)^(import org\\.springframework\\.format\\.annotation\\.DateTimeFormat;\\R)(?=.*^import org\\.springframework\\.format\\.annotation\\.DateTimeFormat;\\R)", "")
         replaceRegex("remove blank line after Generated annotation", "\\)\\R\\Rpublic record", ")" + System.lineSeparator() + "public record")
+        replaceRegex("remove blank line before unannotated record component", "(,\\R)\\R(        (?!@))", "\$1\$2")
+        replaceRegex("remove blank line after Generated annotation in enums", "\\)\\R\\Rpublic enum", ")" + System.lineSeparator() + "public enum")
+        replaceRegex("remove blank lines between enum values", "(?m)^(  [A-Z0-9_]+\\([^\\r\\n]+\\),)\\R\\R(?=  [A-Z0-9_]+\\()", "\$1" + System.lineSeparator())
+        replaceRegex("collapse blank lines after final enum value", ";\\R\\R\\R  private final", ";" + System.lineSeparator() + System.lineSeparator() + "  private final")
         replaceRegex("remove trailing blank line in models", "\\}\\R\\R\\z", "}" + System.lineSeparator())
     }
 }

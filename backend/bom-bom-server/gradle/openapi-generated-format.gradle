@@ -1,5 +1,115 @@
 def generatedOpenApiJavaDir = layout.projectDirectory.dir("generated/openapi")
 def generatedOpenApiModelJavaDir = layout.projectDirectory.dir("generated/openapi/me/bombom/openapi/model")
+def lineSeparator = System.lineSeparator()
+def recordPattern = ~/(?s)public record (\w+)\(\R(.*?)\R\) \{\R/
+
+def parseRecord = { String text ->
+    def matcher = text =~ recordPattern
+    if (!matcher.find()) {
+        return null
+    }
+
+    return [
+        className: matcher.group(1),
+        body     : matcher.group(2),
+    ]
+}
+
+def parseRecordComponents = { String recordBody ->
+    return recordBody.readLines()
+        .collect { it.trim() }
+        .findAll { it && !it.startsWith("@") }
+        .collect { it.replaceFirst(/,$/, "") }
+        .collect { component ->
+            int nameStart = component.lastIndexOf(" ")
+            if (nameStart <= 0) {
+                return null
+            }
+
+            return [
+                type: component.substring(0, nameStart),
+                name: component.substring(nameStart + 1),
+            ]
+        }
+        .findAll { it != null }
+}
+
+def hasFactoryMethod = { String text, String className ->
+    return text.contains("public static ${className} of(") ||
+        text.contains("public static ${className} from(")
+}
+
+def joinFactoryComponents = { List<Map<String, String>> components, String indent, Closure<String> formatter ->
+    return components.withIndex().collect { component, index ->
+        String delimiter = index < components.size() - 1 ? "," : ""
+        return "${indent}${formatter(component)}${delimiter}"
+    }.join(lineSeparator)
+}
+
+def createResponseFactory = { String className, List<Map<String, String>> components ->
+    String factoryName = components.size() == 1 ? "from" : "of"
+    String parameters = joinFactoryComponents(components, "            ") { component ->
+        "${component.type} ${component.name}"
+    }
+    String arguments = joinFactoryComponents(components, "                ") { component ->
+        component.name
+    }
+
+    return [
+        "",
+        "",
+        "    public static ${className} ${factoryName}(",
+        parameters,
+        "    ) {",
+        "        return new ${className}(",
+        arguments,
+        "        );",
+        "    }",
+    ].join(lineSeparator)
+}
+
+def addResponseFactory = { File file ->
+    String text = file.getText("UTF-8")
+    def record = parseRecord(text)
+    if (record == null || hasFactoryMethod(text, record.className)) {
+        return
+    }
+
+    List<Map<String, String>> components = parseRecordComponents(record.body)
+    if (components.isEmpty()) {
+        return
+    }
+
+    int insertIndex = text.lastIndexOf("${lineSeparator}}")
+    if (insertIndex < 0) {
+        return
+    }
+
+    String factory = createResponseFactory(record.className, components)
+    file.setText(text.substring(0, insertIndex) + factory + text.substring(insertIndex), "UTF-8")
+}
+
+def removeResponseContainerElementValidation = { File file ->
+    String text = file.getText("UTF-8")
+    file.setText(text.replaceAll(/List<@Valid /, "List<"), "UTF-8")
+}
+
+def formatResponseModel = { File file ->
+    addResponseFactory(file)
+    removeResponseContainerElementValidation(file)
+}
+
+tasks.register("addOpenApiResponseFactories") {
+    dependsOn("openApiGenerate")
+    inputs.dir(generatedOpenApiModelJavaDir)
+    outputs.dir(generatedOpenApiModelJavaDir)
+
+    doLast {
+        fileTree(generatedOpenApiModelJavaDir) {
+            include("**/*Response.java")
+        }.each(formatResponseModel)
+    }
+}
 
 spotless {
     java {
@@ -44,11 +154,11 @@ spotless {
 
 // 코드 생성 이후에만 generated source 포맷 task가 돌도록 연결한다.
 tasks.named("spotlessJava") {
-    dependsOn("openApiGenerate")
+    dependsOn("addOpenApiResponseFactories")
 }
 
 tasks.named("spotlessOpenApiModels") {
-    dependsOn("openApiGenerate")
+    dependsOn("addOpenApiResponseFactories")
 }
 
 tasks.named("spotlessJavaApply") {

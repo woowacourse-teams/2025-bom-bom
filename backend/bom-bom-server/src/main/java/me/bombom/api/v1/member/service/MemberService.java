@@ -1,5 +1,8 @@
 package me.bombom.api.v1.member.service;
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
@@ -19,6 +22,7 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.member.util.UserInfoValidator;
 import me.bombom.api.v1.withdraw.event.WithdrawEvent;
 import me.bombom.api.v1.withdraw.service.WithdrawService;
+import me.bombom.openapi.model.MemberJoinDaysResponse;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +39,7 @@ public class MemberService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final WithdrawService withdrawService;
     private final UserInfoValidator userInfoValidator;
+    private final Clock clock;
 
     @Transactional
     public Member signup(PendingOAuth2Member pendingMember, MemberSignupRequest signupRequest) {
@@ -74,6 +79,13 @@ public class MemberService {
     public MemberProfileResponse getProfile(Long memberId) {
         Member member = findMemberById(memberId);
         return MemberProfileResponse.from(member);
+    }
+
+    public MemberJoinDaysResponse getJoinDays(Member member) {
+        LocalDate joinedAt = member.getCreatedAt().toLocalDate();
+        long daysBetween = ChronoUnit.DAYS.between(joinedAt, LocalDate.now(clock));
+        int daysSinceJoined = Math.toIntExact(daysBetween);
+        return MemberJoinDaysResponse.of(daysSinceJoined, joinedAt);
     }
 
     @Transactional

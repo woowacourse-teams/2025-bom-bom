@@ -28,4 +28,18 @@ public record FrequentReadNewsletterResponse(
         @Schema(description = "이번 달 읽은 아티클 수", requiredMode = REQUIRED)
         long readCount
 ) {
+
+    public static FrequentReadNewsletterResponse of(
+            int rank,
+            Long newsletterId,
+            String name,
+            long readCount
+    ) {
+        return new FrequentReadNewsletterResponse(
+                rank,
+                newsletterId,
+                name,
+                readCount
+        );
+    }
 }

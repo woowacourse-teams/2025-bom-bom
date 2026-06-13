@@ -33,6 +33,22 @@ public record ReadingDashboardResponse(
         @Valid
         @NotNull
         @Schema(description = "자주 읽은 뉴스레터 TOP", requiredMode = REQUIRED)
-        List<@Valid FrequentReadNewsletterResponse> frequentReadNewsletters
+        List<FrequentReadNewsletterResponse> frequentReadNewsletters
 ) {
+
+    public static ReadingDashboardResponse of(
+            long readArticleCount,
+            double readArticleChangeRate,
+            ChangeDirection readArticleChangeDirection,
+            long bookmarkCount,
+            List<FrequentReadNewsletterResponse> frequentReadNewsletters
+    ) {
+        return new ReadingDashboardResponse(
+                readArticleCount,
+                readArticleChangeRate,
+                readArticleChangeDirection,
+                bookmarkCount,
+                frequentReadNewsletters
+        );
+    }
 }

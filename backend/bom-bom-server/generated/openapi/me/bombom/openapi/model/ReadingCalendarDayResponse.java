@@ -27,4 +27,16 @@ public record ReadingCalendarDayResponse(
         @Schema(description = "해당 날짜에 읽은 아티클 수", requiredMode = REQUIRED)
         long readCount
 ) {
+
+    public static ReadingCalendarDayResponse of(
+            LocalDate date,
+            boolean read,
+            long readCount
+    ) {
+        return new ReadingCalendarDayResponse(
+                date,
+                read,
+                readCount
+        );
+    }
 }

@@ -24,4 +24,14 @@ public record MemberJoinDaysResponse(
         @Schema(description = "가입일 (yyyy-MM-dd)", requiredMode = REQUIRED)
         LocalDate joinedAt
 ) {
+
+    public static MemberJoinDaysResponse of(
+            int daysSinceJoined,
+            LocalDate joinedAt
+    ) {
+        return new MemberJoinDaysResponse(
+                daysSinceJoined,
+                joinedAt
+        );
+    }
 }

@@ -39,7 +39,7 @@ public class MonthlyReportResponseMapper {
             long bookmarkCount,
             List<FrequentReadNewsletter> frequentReadNewsletters
     ) {
-        return new ReadingDashboardResponse(
+        return ReadingDashboardResponse.of(
                 currentReadCount,
                 calculateChangeRate(currentReadCount, previousReadCount),
                 resolveChangeDirection(currentReadCount, previousReadCount),
@@ -53,12 +53,11 @@ public class MonthlyReportResponseMapper {
             Map<Integer, Long> readCountsByDay
     ) {
         long readCount = readCountsByDay.getOrDefault(date.getDayOfMonth(), 0L);
-        return new ReadingCalendarDayResponse(date, readCount > 0, readCount);
+        boolean isReadDay = readCount > 0;
+        return ReadingCalendarDayResponse.of(date, isReadDay, readCount);
     }
 
-    private List<FrequentReadNewsletterResponse> toFrequentReadNewsletterResponses(
-            List<FrequentReadNewsletter> newsletters
-    ) {
+    private List<FrequentReadNewsletterResponse> toFrequentReadNewsletterResponses(List<FrequentReadNewsletter> newsletters) {
         return IntStream.range(0, newsletters.size())
                 .mapToObj(index -> toFrequentReadNewsletterResponse(index, newsletters.get(index)))
                 .toList();
@@ -68,7 +67,7 @@ public class MonthlyReportResponseMapper {
             int index,
             FrequentReadNewsletter newsletter
     ) {
-        return new FrequentReadNewsletterResponse(
+        return FrequentReadNewsletterResponse.of(
                 index + 1,
                 newsletter.newsletterId(),
                 newsletter.name(),
@@ -90,8 +89,7 @@ public class MonthlyReportResponseMapper {
     private ChangeDirection resolveChangeDirection(long currentReadCount, long previousReadCount) {
         if (currentReadCount > previousReadCount) {
             return ChangeDirection.UP;
-        }
-        if (currentReadCount < previousReadCount) {
+        } else if (currentReadCount < previousReadCount) {
             return ChangeDirection.DOWN;
         }
         return ChangeDirection.SAME;

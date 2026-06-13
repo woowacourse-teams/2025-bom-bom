@@ -20,8 +20,6 @@ spotless {
 @$1''')
         removeUnusedImports()
         googleJavaFormat()
-        replaceRegex("move Generated closing paren to new line", '(?m)^(    comments = "Generator version: [^"]+")\\)$', '''$1
-)''')
         replaceRegex("move closing paren to new line in api methods", '(?m)^(      .+)\\);$', '''$1
   );''')
     }

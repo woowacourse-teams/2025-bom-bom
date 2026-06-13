@@ -11,16 +11,20 @@ import me.bombom.openapi.model.MonthlyReportDashboardRequest;
 import me.bombom.openapi.model.MonthlyReportRequest;
 import me.bombom.openapi.model.ReadingCalendarDayResponse;
 import me.bombom.openapi.model.ReadingDashboardResponse;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/members/me/reading")
 public class MonthlyReportController implements MonthlyReportApi {
 
     private final MonthlyReportService monthlyReportService;
 
     @Override
+    @GetMapping("/calendar")
     public List<ReadingCalendarDayResponse> getReadingCalendar(
             @LoginMember Member member,
             @Valid @ModelAttribute MonthlyReportRequest request
@@ -29,6 +33,7 @@ public class MonthlyReportController implements MonthlyReportApi {
     }
 
     @Override
+    @GetMapping("/dashboard")
     public ReadingDashboardResponse getReadingDashboard(
             @LoginMember Member member,
             @Valid @ModelAttribute MonthlyReportDashboardRequest request

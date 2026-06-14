@@ -82,6 +82,7 @@ public class ReadingService {
     private final MonthlyRankingScheduleProperties scheduleProps;
     private final ContinueReadingRankingScheduleProperties continueReadingRankingScheduleProperties;
     private final BadgeService badgeService;
+    private final ContinueReadingShieldService continueReadingShieldService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final Clock clock;
 
@@ -89,6 +90,7 @@ public class ReadingService {
     public void initializeReadingInformation(Long memberId) {
         ContinueReadingRealtime newContinueReadingRealtime = ContinueReadingRealtime.create(memberId);
         continueReadingRepository.save(newContinueReadingRealtime);
+        continueReadingShieldService.initializeShield(memberId);
 
         continueReadingRankingSnapshotRepository.save(
             ContinueReadingSnapshot.create(
@@ -137,7 +139,7 @@ public class ReadingService {
         }
 
         todayReadingRepository.findTotalNonZeroAndReadZero()
-            .forEach(this::applyResetContinueReadingCount);
+            .forEach(todayReading -> applyResetContinueReadingCount(todayReading, targetDate));
     }
 
     @Transactional
@@ -383,6 +385,7 @@ public class ReadingService {
             monthlyReadingSnapshotRepository.deleteByMemberId(memberId);
             monthlyReadingRealtimeRepository.deleteByMemberId(memberId);
             yearlyReadingRepository.bulkDeleteByMemberId(memberId);
+            continueReadingShieldService.deleteByMemberId(memberId);
         } catch (Exception e) {
             log.error("회원 읽기 정보 삭제 실패. memberId = {}", memberId, e.getStackTrace());
         }
@@ -439,13 +442,19 @@ public class ReadingService {
         return lowestRankContinueReadingSnapshot.getRankOrder() + 1;
     }
 
-    private void applyResetContinueReadingCount(TodayReading todayReading) {
+    private void applyResetContinueReadingCount(TodayReading todayReading, LocalDate targetDate) {
         Long memberId = todayReading.getMemberId();
         ContinueReadingRealtime continueReading = continueReadingRepository.findByMemberId(memberId)
             .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                 .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingRealtime")
                 .addContext(ErrorContextKeys.OPERATION, "applyResetContinueReadingCount"));
+        if (!continueReading.hasActiveStreak()) {
+            return;
+        }
+        if (continueReadingShieldService.useShield(memberId, targetDate)) {
+            return;
+        }
         continueReading.resetDayCount();
     }
 

@@ -21,6 +21,8 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.ContinueReadingRankHistory;
+import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistoryReason;
+import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistoryType;
 import me.bombom.api.v1.reading.domain.ContinueReadingSnapshot;
 import me.bombom.api.v1.reading.domain.MonthlyReadingRankHistory;
 import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
@@ -35,6 +37,8 @@ import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingRankHistoryRepository;
+import me.bombom.api.v1.reading.repository.ContinueReadingShieldHistoryRepository;
+import me.bombom.api.v1.reading.repository.ContinueReadingShieldRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRankHistoryRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
@@ -66,6 +70,12 @@ class ReadingServiceTest {
 
     @Autowired
     private ContinueReadingRankHistoryRepository continueReadingRankHistoryRepository;
+
+    @Autowired
+    private ContinueReadingShieldRepository continueReadingShieldRepository;
+
+    @Autowired
+    private ContinueReadingShieldHistoryRepository continueReadingShieldHistoryRepository;
 
     @Autowired
     private TodayReadingRepository todayReadingRepository;
@@ -104,6 +114,8 @@ class ReadingServiceTest {
     void setUp() {
         // 기존 데이터 삭제
         badgeRepository.deleteAllInBatch();
+        continueReadingShieldHistoryRepository.deleteAllInBatch();
+        continueReadingShieldRepository.deleteAllInBatch();
         monthlyReadingRankHistoryRepository.deleteAllInBatch();
         continueReadingRankHistoryRepository.deleteAllInBatch();
         yearlyReadingRepository.deleteAllInBatch();
@@ -343,6 +355,14 @@ class ReadingServiceTest {
             softly.assertThat(result.data().get(1).nickname()).isEqualTo(newMember.getNickname());
             softly.assertThat(result.data().get(1).rank()).isEqualTo(2L);
             softly.assertThat(result.data().get(1).dayCount()).isEqualTo(0);
+            softly.assertThat(continueReadingShieldRepository.findByMemberId(newMember.getId()).orElseThrow()
+                    .getRemainingCount()).isEqualTo(1);
+            softly.assertThat(continueReadingShieldHistoryRepository.countByMemberIdAndTypeAndReasonAndEventDate(
+                    newMember.getId(),
+                    ContinueReadingShieldHistoryType.GRANT,
+                    ContinueReadingShieldHistoryReason.SIGNUP,
+                    LocalDate.now(clock)
+            )).isEqualTo(1L);
         });
     }
 

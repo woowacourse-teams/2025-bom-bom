@@ -33,11 +33,18 @@ def openApiDomainGroups = [
     [
         name       : "MyPage",
         packageName: "mypage",
-        apis       : "MonthlyReport,MyPage",
+        apis       : "MyPage",
+        models     : [
+            "MemberJoinDaysResponse",
+        ].join(","),
+    ],
+    [
+        name       : "MonthlyReport",
+        packageName: "monthlyreport",
+        apis       : "MonthlyReport",
         models     : [
             "ChangeDirection",
             "FrequentReadNewsletterResponse",
-            "MemberJoinDaysResponse",
             "MonthlyReportDashboardRequest",
             "MonthlyReportRequest",
             "ReadingCalendarDayResponse",

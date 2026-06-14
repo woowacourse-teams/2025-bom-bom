@@ -1,0 +1,36 @@
+/**
+ * {{#description}}{{description}}{{/description}}{{^description}}{{classname}}{{/description}}
+ */
+{{! OpenAPI Generator가 pojo.mustache 이름으로 직접 찾는 record 본문 템플릿 }}
+{{>generatedAnnotation}}
+public record {{classname}}(
+
+{{#vars}}
+{{! 필수 검증과 바인딩에 필요한 애노테이션만 줄 단위로 둔다 }}
+        {{#isModel}}@Valid
+        {{/isModel}}{{#isContainer}}{{#items.isModel}}@Valid
+        {{/items.isModel}}{{/isContainer}}{{#required}}{{^isNullable}}{{^isInteger}}{{^isFloat}}{{^isDouble}}{{^isBoolean}}{{#isLong}}{{^vendorExtensions.x-java-primitive}}@NotNull
+        {{/vendorExtensions.x-java-primitive}}{{/isLong}}{{^isLong}}@NotNull
+        {{/isLong}}{{/isBoolean}}{{/isDouble}}{{/isFloat}}{{/isInteger}}{{/isNullable}}{{/required}}{{#useBeanValidation}}{{#pattern}}{{^isByteArray}}@Pattern(regexp = "{{{pattern}}}"{{#vendorExtensions.x-pattern-message}}, message="{{vendorExtensions.x-pattern-message}}"{{/vendorExtensions.x-pattern-message}})
+        {{/isByteArray}}{{/pattern}}{{#minLength}}{{#maxLength}}@Size(min = {{minLength}}, max = {{maxLength}})
+        {{/maxLength}}{{/minLength}}{{#minLength}}{{^maxLength}}@Size(min = {{minLength}})
+        {{/maxLength}}{{/minLength}}{{^minLength}}{{#maxLength}}@Size(max = {{.}})
+        {{/maxLength}}{{/minLength}}{{#minItems}}{{#maxItems}}@Size(min = {{minItems}}, max = {{maxItems}})
+        {{/maxItems}}{{/minItems}}{{#minItems}}{{^maxItems}}@Size(min = {{minItems}})
+        {{/maxItems}}{{/minItems}}{{^minItems}}{{#maxItems}}@Size(max = {{.}})
+        {{/maxItems}}{{/minItems}}{{#isEmail}}@{{javaxPackage}}.validation.constraints.Email
+        {{/isEmail}}{{#isInteger}}{{#minimum}}@Min({{.}})
+        {{/minimum}}{{#maximum}}@Max({{.}})
+        {{/maximum}}{{/isInteger}}{{#isLong}}{{#minimum}}@Min({{.}}L)
+        {{/minimum}}{{#maximum}}@Max({{.}}L)
+        {{/maximum}}{{/isLong}}{{^isInteger}}{{^isLong}}{{#minimum}}@DecimalMin({{#exclusiveMinimum}}value = {{/exclusiveMinimum}}"{{minimum}}"{{#exclusiveMinimum}}, inclusive = false{{/exclusiveMinimum}})
+        {{/minimum}}{{#maximum}}@DecimalMax({{#exclusiveMaximum}}value = {{/exclusiveMaximum}}"{{maximum}}"{{#exclusiveMaximum}}, inclusive = false{{/exclusiveMaximum}})
+        {{/maximum}}{{/isLong}}{{/isInteger}}{{/useBeanValidation}}{{#isDateTime}}@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        {{/isDateTime}}{{#isDate}}@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        {{/isDate}}{{#description}}@Schema(description = "{{{description}}}"{{#required}}, requiredMode = REQUIRED{{/required}})
+        {{/description}}{{#required}}{{#isInteger}}{{#isNullable}}{{{dataType}}}{{/isNullable}}{{^isNullable}}int{{/isNullable}}{{/isInteger}}{{#isLong}}{{#isNullable}}{{{dataType}}}{{/isNullable}}{{^isNullable}}{{#vendorExtensions.x-java-primitive}}long{{/vendorExtensions.x-java-primitive}}{{^vendorExtensions.x-java-primitive}}{{{dataType}}}{{/vendorExtensions.x-java-primitive}}{{/isNullable}}{{/isLong}}{{#isFloat}}{{#isNullable}}{{{dataType}}}{{/isNullable}}{{^isNullable}}float{{/isNullable}}{{/isFloat}}{{#isDouble}}{{#isNullable}}{{{dataType}}}{{/isNullable}}{{^isNullable}}double{{/isNullable}}{{/isDouble}}{{#isBoolean}}{{#isNullable}}{{{dataType}}}{{/isNullable}}{{^isNullable}}boolean{{/isNullable}}{{/isBoolean}}{{^isInteger}}{{^isLong}}{{^isFloat}}{{^isDouble}}{{^isBoolean}}{{{dataType}}}{{/isBoolean}}{{/isDouble}}{{/isFloat}}{{/isLong}}{{/isInteger}}{{/required}}{{^required}}{{{dataType}}}{{/required}} {{name}}{{^-last}},
+{{/-last}}
+
+{{/vars}}
+) {
+}

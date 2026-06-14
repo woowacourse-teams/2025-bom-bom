@@ -1,0 +1,9 @@
+{{#vendorExtensions.x-needs-login-member}}
+@Parameter(hidden = true) @LoginMember{{#vendorExtensions.x-login-member-anonymous}}(anonymous = true{{#vendorExtensions.x-login-member-allow-invalid-token}}, allowInvalidToken = true{{/vendorExtensions.x-login-member-allow-invalid-token}}){{/vendorExtensions.x-login-member-anonymous}}{{^vendorExtensions.x-login-member-anonymous}}{{#vendorExtensions.x-login-member-allow-invalid-token}}(anonymous = true, allowInvalidToken = true){{/vendorExtensions.x-login-member-allow-invalid-token}}{{/vendorExtensions.x-login-member-anonymous}}
+{{#vendorExtensions.x-login-member-id}}
+Long memberId
+{{/vendorExtensions.x-login-member-id}}
+{{^vendorExtensions.x-login-member-id}}
+Member member
+{{/vendorExtensions.x-login-member-id}}
+{{/vendorExtensions.x-needs-login-member}}

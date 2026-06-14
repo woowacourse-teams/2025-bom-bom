@@ -26,6 +26,9 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
+### OpenAPI Generator ###
+/generated/openapi/.openapi-generator/
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/

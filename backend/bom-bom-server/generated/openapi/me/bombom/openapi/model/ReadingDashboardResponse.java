@@ -22,9 +22,8 @@ public record ReadingDashboardResponse(
         long readArticleCount,
 
         @Schema(description = "지난 달 대비 읽은 아티클 수 증감률 (%)", requiredMode = REQUIRED)
-        double readArticleChangeRate,
+        Double readArticleChangeRate,
 
-        @NotNull
         ChangeDirection readArticleChangeDirection,
 
         @Schema(description = "북마크 개수", requiredMode = REQUIRED)
@@ -38,7 +37,7 @@ public record ReadingDashboardResponse(
 
     public static ReadingDashboardResponse of(
             long readArticleCount,
-            double readArticleChangeRate,
+            Double readArticleChangeRate,
             ChangeDirection readArticleChangeDirection,
             long bookmarkCount,
             List<FrequentReadNewsletterResponse> frequentReadNewsletters

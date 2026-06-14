@@ -75,9 +75,9 @@ public class MonthlyReportResponseMapper {
         );
     }
 
-    private double calculateChangeRate(long currentReadCount, long previousReadCount) {
+    private Double calculateChangeRate(long currentReadCount, long previousReadCount) {
         if (previousReadCount == 0) {
-            return currentReadCount == 0 ? 0.0 : 100.0;
+            return null;
         }
 
         return BigDecimal.valueOf(currentReadCount - previousReadCount)
@@ -87,6 +87,10 @@ public class MonthlyReportResponseMapper {
     }
 
     private ChangeDirection resolveChangeDirection(long currentReadCount, long previousReadCount) {
+        if (previousReadCount == 0) {
+            return null;
+        }
+
         if (currentReadCount > previousReadCount) {
             return ChangeDirection.UP;
         } else if (currentReadCount < previousReadCount) {

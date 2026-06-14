@@ -19,7 +19,7 @@ public class ContinueReadingShieldService {
     private static final int INITIAL_GRANT_COUNT = 1;
     private static final int DEDUCT_COUNT = 1;
     private static final int MONTHLY_GRANT_COUNT = 1;
-    private static final int MONTHLY_SHIELD_GRANT_EVENT_DAY = 1;
+    private static final int MONTHLY_SHIELD_GRANT_DAY = 1;
 
     private final ContinueReadingShieldRepository continueReadingShieldRepository;
     private final ContinueReadingShieldHistoryRepository continueReadingShieldHistoryRepository;
@@ -64,10 +64,10 @@ public class ContinueReadingShieldService {
     @Transactional
     public void resetMonthlyShieldsIfFirstDay() {
         LocalDate today = currentDate();
-        if (today.getDayOfMonth() != MONTHLY_SHIELD_GRANT_EVENT_DAY) {
+        if (today.getDayOfMonth() != MONTHLY_SHIELD_GRANT_DAY) {
             return;
         }
-        LocalDate monthlyShieldGrantEventDate = today.withDayOfMonth(MONTHLY_SHIELD_GRANT_EVENT_DAY);
+        LocalDate monthlyShieldGrantEventDate = today.withDayOfMonth(MONTHLY_SHIELD_GRANT_DAY);
         continueReadingShieldRepository.bulkResetMonthlyIfNotGranted(
                 ContinueReadingShieldHistoryReason.MONTHLY_RESET.name(),
                 monthlyShieldGrantEventDate,
@@ -87,7 +87,7 @@ public class ContinueReadingShieldService {
     }
 
     private LocalDate currentMonthlyShieldGrantEventDate() {
-        return currentDate().withDayOfMonth(MONTHLY_SHIELD_GRANT_EVENT_DAY);
+        return currentDate().withDayOfMonth(MONTHLY_SHIELD_GRANT_DAY);
     }
 
     private LocalDate currentDate() {

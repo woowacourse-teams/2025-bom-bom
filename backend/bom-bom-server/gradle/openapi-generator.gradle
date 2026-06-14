@@ -2,6 +2,7 @@
 def openApiSpecFile = layout.projectDirectory.file("openapi-spec/openapi.yaml")
 // OpenAPI Generator가 Java 코드를 생성할 위치
 def generatedOpenApiDir = layout.projectDirectory.dir("generated/openapi")
+def openApiGeneratorTaskClass = tasks.named("openApiGenerate").get().class
 
 // 현재 서버 코드 스타일에 맞춘 OpenAPI Generator 옵션
 def openApiConfigOptions = [
@@ -21,13 +22,28 @@ def openApiConfigOptions = [
 
 // API/Model만 생성하고 문서/테스트/보조 파일은 만들지 않는다.
 def openApiGlobalProperties = [
-    apis           : "",
-    models         : "",
     supportingFiles: "false",
     apiDocs        : "false",
     modelDocs      : "false",
     apiTests       : "false",
     modelTests     : "false",
+]
+
+def openApiDomainGroups = [
+    [
+        name       : "MyPage",
+        packageName: "mypage",
+        apis       : "MonthlyReport,MyPage",
+        models     : [
+            "ChangeDirection",
+            "FrequentReadNewsletterResponse",
+            "MemberJoinDaysResponse",
+            "MonthlyReportDashboardRequest",
+            "MonthlyReportRequest",
+            "ReadingCalendarDayResponse",
+            "ReadingDashboardResponse",
+        ].join(","),
+    ],
 ]
 
 // submodule이 초기화되지 않은 상태에서 빌드가 진행되지 않도록 막는다.
@@ -42,24 +58,41 @@ tasks.register("verifyOpenApiSpec") {
     }
 }
 
-// OpenAPI 스펙으로부터 Spring 인터페이스와 모델을 생성한다.
+tasks.register("cleanGeneratedOpenApi", Delete) {
+    delete(generatedOpenApiDir)
+}
+
+def openApiDomainGenerateTasks = openApiDomainGroups.collect { domain ->
+    tasks.register("openApiGenerate${domain.name}", openApiGeneratorTaskClass) {
+        dependsOn("verifyOpenApiSpec")
+        mustRunAfter("cleanGeneratedOpenApi")
+        generatorName.set("spring")
+        inputSpec.set(openApiSpecFile.asFile.absolutePath)
+        outputDir.set(generatedOpenApiDir.asFile.absolutePath)
+        apiPackage.set("me.bombom.openapi.${domain.packageName}.api")
+        modelPackage.set("me.bombom.openapi.${domain.packageName}.model")
+        templateDir.set("$projectDir/src/main/resources/openapi-templates")
+        configOptions.set(openApiConfigOptions)
+        globalProperties.set(openApiGlobalProperties + [
+            apis  : domain.apis,
+            models: domain.models,
+        ])
+        // 기존 응답 포맷을 유지하기 위해 date-time은 LocalDateTime으로 고정한다.
+        typeMappings.set([
+            DateTime: "LocalDateTime",
+        ])
+        importMappings.set([
+            LocalDateTime: "java.time.LocalDateTime",
+        ])
+    }
+}
+
+// OpenAPI 스펙으로부터 Spring 인터페이스와 모델을 도메인별 패키지에 생성한다.
 tasks.named("openApiGenerate") {
     dependsOn("verifyOpenApiSpec")
-    generatorName.set("spring")
-    inputSpec.set(openApiSpecFile.asFile.absolutePath)
-    outputDir.set(generatedOpenApiDir.asFile.absolutePath)
-    apiPackage.set("me.bombom.openapi.api")
-    modelPackage.set("me.bombom.openapi.model")
-    templateDir.set("$projectDir/src/main/resources/openapi-templates")
-    configOptions.set(openApiConfigOptions)
-    globalProperties.set(openApiGlobalProperties)
-    // 기존 응답 포맷을 유지하기 위해 date-time은 LocalDateTime으로 고정한다.
-    typeMappings.set([
-        DateTime: "LocalDateTime",
-    ])
-    importMappings.set([
-        LocalDateTime: "java.time.LocalDateTime",
-    ])
+    dependsOn("cleanGeneratedOpenApi")
+    dependsOn(openApiDomainGenerateTasks)
+    onlyIf { false }
 }
 
 sourceSets {

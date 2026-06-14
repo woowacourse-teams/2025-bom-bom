@@ -1,5 +1,4 @@
 def generatedOpenApiJavaDir = layout.projectDirectory.dir("generated/openapi")
-def generatedOpenApiModelJavaDir = layout.projectDirectory.dir("generated/openapi/me/bombom/openapi/model")
 def lineSeparator = System.lineSeparator()
 def recordPattern = ~/(?s)public record (\w+)\(\R(.*?)\R\) \{\R/
 
@@ -128,16 +127,16 @@ def formatResponseModel = { File file ->
 
 tasks.register("addOpenApiResponseFactories") {
     dependsOn("openApiGenerate")
-    inputs.dir(generatedOpenApiModelJavaDir)
-    outputs.dir(generatedOpenApiModelJavaDir)
+    inputs.dir(generatedOpenApiJavaDir)
+    outputs.dir(generatedOpenApiJavaDir)
 
     doLast {
-        fileTree(generatedOpenApiModelJavaDir) {
-            include("**/*.java")
+        fileTree(generatedOpenApiJavaDir) {
+            include("**/model/**/*.java")
         }.each(normalizeRecordComponentBlankLines)
 
-        fileTree(generatedOpenApiModelJavaDir) {
-            include("**/*Response.java")
+        fileTree(generatedOpenApiJavaDir) {
+            include("**/model/**/*Response.java")
         }.each(formatResponseModel)
     }
 }
@@ -148,7 +147,7 @@ spotless {
         target(
             fileTree(generatedOpenApiJavaDir) {
                 include("**/*.java")
-                exclude("me/bombom/openapi/model/**/*.java")
+                exclude("**/model/**/*.java")
             }
         )
         // record 템플릿 기준으로 남는 불필요 import를 먼저 제거한다.
@@ -168,11 +167,11 @@ spotless {
     format("openApiModels") {
         // model 패키지 내부 참조는 import가 없어도 되므로 별도로 정리한다.
         target(
-            fileTree(generatedOpenApiModelJavaDir) {
-                include("**/*.java")
+            fileTree(generatedOpenApiJavaDir) {
+                include("**/model/**/*.java")
             }
         )
-        replaceRegex("remove same-package model imports", "(?m)^import me\\.bombom\\.openapi\\.model\\.[A-Za-z0-9_]+;\\R", "")
+        replaceRegex("remove same-package model imports", "(?m)^import me\\.bombom\\.openapi(?:\\.[A-Za-z0-9_]+)*\\.model\\.[A-Za-z0-9_]+;\\R", "")
         replaceRegex("remove duplicate DateTimeFormat import", "(?m)^(import org\\.springframework\\.format\\.annotation\\.DateTimeFormat;\\R)(?=.*^import org\\.springframework\\.format\\.annotation\\.DateTimeFormat;\\R)", "")
         replaceRegex("remove blank line after Generated annotation", "\\)\\R\\Rpublic record", ")" + System.lineSeparator() + "public record")
         replaceRegex("remove blank line after Generated annotation in enums", "\\)\\R\\Rpublic enum", ")" + System.lineSeparator() + "public enum")

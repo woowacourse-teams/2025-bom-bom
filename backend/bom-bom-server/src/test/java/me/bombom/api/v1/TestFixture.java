@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import me.bombom.api.v1.article.domain.Article;
+import me.bombom.api.v1.article.domain.ArticleReadHistory;
 import me.bombom.api.v1.article.domain.RecentArticle;
 import me.bombom.api.v1.blog.domain.BlogCategory;
 import me.bombom.api.v1.blog.domain.BlogHashtag;
@@ -14,6 +15,7 @@ import me.bombom.api.v1.blog.domain.BlogPost;
 import me.bombom.api.v1.blog.domain.BlogPostStatus;
 import me.bombom.api.v1.blog.domain.BlogPostTag;
 import me.bombom.api.v1.blog.domain.BlogPostVisibility;
+import me.bombom.api.v1.bookmark.domain.Bookmark;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.domain.ChallengeCommentReply;
@@ -295,6 +297,16 @@ public final class TestFixture {
     }
 
     /**
+     * Bookmark
+     */
+    public static Bookmark createBookmark(Member member, Long articleId) {
+        return Bookmark.builder()
+                .memberId(member.getId())
+                .articleId(articleId)
+                .build();
+    }
+
+    /**
      * Article 11 개
      */
     public static List<Article> createArticles(Member member, List<Newsletter> newsletters) {
@@ -325,6 +337,21 @@ public final class TestFixture {
                 .memberId(memberId)
                 .newsletterId(newsletterId)
                 .arrivedDateTime(arrivedTime)
+                .build();
+    }
+
+    public static ArticleReadHistory createArticleReadHistory(
+            Member member,
+            Long articleId,
+            Newsletter newsletter,
+            LocalDateTime readAt
+    ) {
+        return ArticleReadHistory.builder()
+                .memberId(member.getId())
+                .articleId(articleId)
+                .newsletterId(newsletter.getId())
+                .categoryId(newsletter.getCategoryId())
+                .readAt(readAt)
                 .build();
     }
 

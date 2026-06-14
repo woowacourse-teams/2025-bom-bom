@@ -89,6 +89,33 @@ def addResponseFactory = { File file ->
     file.setText(text.substring(0, insertIndex) + factory + text.substring(insertIndex), "UTF-8")
 }
 
+def normalizeRecordComponentBlankLines = { File file ->
+    String text = file.getText("UTF-8")
+    def matcher = text =~ recordPattern
+    if (!matcher.find()) {
+        return
+    }
+
+    String recordBody = matcher.group(2)
+    boolean hasAnnotatedComponent = recordBody.readLines()
+        .any { it.trim().startsWith("@") }
+    if (hasAnnotatedComponent) {
+        return
+    }
+
+    String normalizedBody = recordBody.replaceAll(/,\R\R(        )/) { ignored, indent ->
+        return "," + lineSeparator + indent
+    }
+    if (normalizedBody == recordBody) {
+        return
+    }
+
+    file.setText(
+        text.substring(0, matcher.start(2)) + normalizedBody + text.substring(matcher.end(2)),
+        "UTF-8"
+    )
+}
+
 def removeResponseContainerElementValidation = { File file ->
     String text = file.getText("UTF-8")
     file.setText(text.replaceAll(/List<@Valid /, "List<"), "UTF-8")
@@ -105,6 +132,10 @@ tasks.register("addOpenApiResponseFactories") {
     outputs.dir(generatedOpenApiModelJavaDir)
 
     doLast {
+        fileTree(generatedOpenApiModelJavaDir) {
+            include("**/*.java")
+        }.each(normalizeRecordComponentBlankLines)
+
         fileTree(generatedOpenApiModelJavaDir) {
             include("**/*Response.java")
         }.each(formatResponseModel)
@@ -144,7 +175,6 @@ spotless {
         replaceRegex("remove same-package model imports", "(?m)^import me\\.bombom\\.openapi\\.model\\.[A-Za-z0-9_]+;\\R", "")
         replaceRegex("remove duplicate DateTimeFormat import", "(?m)^(import org\\.springframework\\.format\\.annotation\\.DateTimeFormat;\\R)(?=.*^import org\\.springframework\\.format\\.annotation\\.DateTimeFormat;\\R)", "")
         replaceRegex("remove blank line after Generated annotation", "\\)\\R\\Rpublic record", ")" + System.lineSeparator() + "public record")
-        replaceRegex("remove blank line before unannotated record component", "(,\\R)\\R(        (?!@))", "\$1\$2")
         replaceRegex("remove blank line after Generated annotation in enums", "\\)\\R\\Rpublic enum", ")" + System.lineSeparator() + "public enum")
         replaceRegex("remove blank lines between enum values", "(?m)^(  [A-Z0-9_]+\\([^\\r\\n]+\\),)\\R\\R(?=  [A-Z0-9_]+\\()", "\$1" + System.lineSeparator())
         replaceRegex("collapse blank lines after final enum value", ";\\R\\R\\R  private final", ";" + System.lineSeparator() + System.lineSeparator() + "  private final")

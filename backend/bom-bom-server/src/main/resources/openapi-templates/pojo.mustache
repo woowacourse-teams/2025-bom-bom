@@ -9,9 +9,9 @@ public record {{classname}}(
 {{! 필수 검증과 바인딩에 필요한 애노테이션만 줄 단위로 둔다 }}
         {{#isModel}}@Valid
         {{/isModel}}{{#isContainer}}{{#items.isModel}}@Valid
-        {{/items.isModel}}{{/isContainer}}{{#required}}{{^isInteger}}{{^isFloat}}{{^isDouble}}{{^isBoolean}}{{#isLong}}{{^vendorExtensions.x-java-primitive}}@NotNull
+        {{/items.isModel}}{{/isContainer}}{{#required}}{{^isNullable}}{{^isInteger}}{{^isFloat}}{{^isDouble}}{{^isBoolean}}{{#isLong}}{{^vendorExtensions.x-java-primitive}}@NotNull
         {{/vendorExtensions.x-java-primitive}}{{/isLong}}{{^isLong}}@NotNull
-        {{/isLong}}{{/isBoolean}}{{/isDouble}}{{/isFloat}}{{/isInteger}}{{/required}}{{#useBeanValidation}}{{#pattern}}{{^isByteArray}}@Pattern(regexp = "{{{pattern}}}"{{#vendorExtensions.x-pattern-message}}, message="{{vendorExtensions.x-pattern-message}}"{{/vendorExtensions.x-pattern-message}})
+        {{/isLong}}{{/isBoolean}}{{/isDouble}}{{/isFloat}}{{/isInteger}}{{/isNullable}}{{/required}}{{#useBeanValidation}}{{#pattern}}{{^isByteArray}}@Pattern(regexp = "{{{pattern}}}"{{#vendorExtensions.x-pattern-message}}, message="{{vendorExtensions.x-pattern-message}}"{{/vendorExtensions.x-pattern-message}})
         {{/isByteArray}}{{/pattern}}{{#minLength}}{{#maxLength}}@Size(min = {{minLength}}, max = {{maxLength}})
         {{/maxLength}}{{/minLength}}{{#minLength}}{{^maxLength}}@Size(min = {{minLength}})
         {{/maxLength}}{{/minLength}}{{^minLength}}{{#maxLength}}@Size(max = {{.}})
@@ -28,7 +28,7 @@ public record {{classname}}(
         {{/maximum}}{{/isLong}}{{/isInteger}}{{/useBeanValidation}}{{#isDateTime}}@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
         {{/isDateTime}}{{#isDate}}@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
         {{/isDate}}{{#description}}@Schema(description = "{{{description}}}"{{#required}}, requiredMode = REQUIRED{{/required}})
-        {{/description}}{{#required}}{{#isInteger}}int{{/isInteger}}{{#isLong}}{{#vendorExtensions.x-java-primitive}}long{{/vendorExtensions.x-java-primitive}}{{^vendorExtensions.x-java-primitive}}{{{dataType}}}{{/vendorExtensions.x-java-primitive}}{{/isLong}}{{#isFloat}}float{{/isFloat}}{{#isDouble}}double{{/isDouble}}{{#isBoolean}}boolean{{/isBoolean}}{{^isInteger}}{{^isLong}}{{^isFloat}}{{^isDouble}}{{^isBoolean}}{{{dataType}}}{{/isBoolean}}{{/isDouble}}{{/isFloat}}{{/isLong}}{{/isInteger}}{{/required}}{{^required}}{{{dataType}}}{{/required}} {{name}}{{^-last}},
+        {{/description}}{{#required}}{{#isInteger}}{{#isNullable}}{{{dataType}}}{{/isNullable}}{{^isNullable}}int{{/isNullable}}{{/isInteger}}{{#isLong}}{{#isNullable}}{{{dataType}}}{{/isNullable}}{{^isNullable}}{{#vendorExtensions.x-java-primitive}}long{{/vendorExtensions.x-java-primitive}}{{^vendorExtensions.x-java-primitive}}{{{dataType}}}{{/vendorExtensions.x-java-primitive}}{{/isNullable}}{{/isLong}}{{#isFloat}}{{#isNullable}}{{{dataType}}}{{/isNullable}}{{^isNullable}}float{{/isNullable}}{{/isFloat}}{{#isDouble}}{{#isNullable}}{{{dataType}}}{{/isNullable}}{{^isNullable}}double{{/isNullable}}{{/isDouble}}{{#isBoolean}}{{#isNullable}}{{{dataType}}}{{/isNullable}}{{^isNullable}}boolean{{/isNullable}}{{/isBoolean}}{{^isInteger}}{{^isLong}}{{^isFloat}}{{^isDouble}}{{^isBoolean}}{{{dataType}}}{{/isBoolean}}{{/isDouble}}{{/isFloat}}{{/isLong}}{{/isInteger}}{{/required}}{{^required}}{{{dataType}}}{{/required}} {{name}}{{^-last}},
 {{/-last}}
 
 {{/vars}}

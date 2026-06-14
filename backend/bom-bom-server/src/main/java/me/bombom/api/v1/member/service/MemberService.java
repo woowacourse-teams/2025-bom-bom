@@ -22,7 +22,7 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.member.util.UserInfoValidator;
 import me.bombom.api.v1.withdraw.event.WithdrawEvent;
 import me.bombom.api.v1.withdraw.service.WithdrawService;
-import me.bombom.openapi.model.MemberJoinDaysResponse;
+import me.bombom.openapi.mypage.model.MemberJoinDaysResponse;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,4 +1,4 @@
-package me.bombom.openapi.model;
+package me.bombom.openapi.mypage.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;

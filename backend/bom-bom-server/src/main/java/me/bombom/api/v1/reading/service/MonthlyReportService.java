@@ -11,10 +11,10 @@ import me.bombom.api.v1.reading.dto.DailyReadCount;
 import me.bombom.api.v1.reading.dto.FrequentReadNewsletter;
 import me.bombom.api.v1.reading.dto.ReadCountComparison;
 import me.bombom.api.v1.reading.mapper.MonthlyReportResponseMapper;
-import me.bombom.openapi.mypage.model.MonthlyReportDashboardRequest;
-import me.bombom.openapi.mypage.model.MonthlyReportRequest;
-import me.bombom.openapi.mypage.model.ReadingCalendarDayResponse;
-import me.bombom.openapi.mypage.model.ReadingDashboardResponse;
+import me.bombom.openapi.monthlyreport.model.MonthlyReportDashboardRequest;
+import me.bombom.openapi.monthlyreport.model.MonthlyReportRequest;
+import me.bombom.openapi.monthlyreport.model.ReadingCalendarDayResponse;
+import me.bombom.openapi.monthlyreport.model.ReadingDashboardResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

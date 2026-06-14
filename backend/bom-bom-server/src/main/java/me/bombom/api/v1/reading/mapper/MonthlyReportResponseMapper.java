@@ -10,10 +10,10 @@ import java.util.stream.IntStream;
 import me.bombom.api.v1.reading.domain.MonthlyPeriod;
 import me.bombom.api.v1.reading.dto.DailyReadCount;
 import me.bombom.api.v1.reading.dto.FrequentReadNewsletter;
-import me.bombom.openapi.mypage.model.ChangeDirection;
-import me.bombom.openapi.mypage.model.FrequentReadNewsletterResponse;
-import me.bombom.openapi.mypage.model.ReadingCalendarDayResponse;
-import me.bombom.openapi.mypage.model.ReadingDashboardResponse;
+import me.bombom.openapi.monthlyreport.model.ChangeDirection;
+import me.bombom.openapi.monthlyreport.model.FrequentReadNewsletterResponse;
+import me.bombom.openapi.monthlyreport.model.ReadingCalendarDayResponse;
+import me.bombom.openapi.monthlyreport.model.ReadingDashboardResponse;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,4 +1,4 @@
-package me.bombom.openapi.mypage.model;
+package me.bombom.openapi.monthlyreport.model;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.validation.Valid;

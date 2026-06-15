@@ -86,10 +86,6 @@ public class ContinueReadingShieldService {
         continueReadingShieldRepository.deleteByMemberId(memberId);
     }
 
-    private LocalDate currentMonthlyShieldGrantEventDate() {
-        return currentDate().withDayOfMonth(MONTHLY_SHIELD_GRANT_DAY);
-    }
-
     private LocalDate currentDate() {
         return LocalDate.now(clock);
     }

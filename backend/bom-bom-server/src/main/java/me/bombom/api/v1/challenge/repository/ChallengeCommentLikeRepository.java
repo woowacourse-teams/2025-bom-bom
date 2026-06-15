@@ -9,10 +9,10 @@ public interface ChallengeCommentLikeRepository extends JpaRepository<ChallengeC
 
     @Modifying
     @Query(value = """
-                    INSERT IGNORE INTO challenge_comment_like (participant_id, comment_id)
-                    VALUES (:participantId, :commentId)
-            """, nativeQuery = true)
-    int insertIgnoreByParticipantIdAndCommentId(Long participantId, Long commentId);
+        INSERT IGNORE INTO challenge_comment_like (participant_id, comment_id)
+        VALUES (:participantId, :commentId)
+    """, nativeQuery = true)
+    int bulkInsertIgnoreByParticipantIdAndCommentId(Long participantId, Long commentId);
 
     boolean existsByParticipantIdAndCommentId(Long participantId, Long commentId);
 

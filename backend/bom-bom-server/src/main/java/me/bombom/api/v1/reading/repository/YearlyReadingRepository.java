@@ -1,6 +1,5 @@
 package me.bombom.api.v1.reading.repository;
 
-import java.util.List;
 import java.util.Optional;
 import me.bombom.api.v1.reading.domain.YearlyReading;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,9 +17,9 @@ public interface YearlyReadingRepository extends JpaRepository<YearlyReading, Lo
         SET yr.currentCount = yr.currentCount + :monthlyCount
         WHERE yr.memberId = :memberId AND yr.readingYear = :targetYear
     """)
-    int increaseMonthlyCountToYearly(@Param("memberId") Long memberId, @Param("monthlyCount") int monthlyCount, @Param("targetYear") int targetYear);
+    int bulkIncreaseMonthlyCountToYearly(@Param("memberId") Long memberId, @Param("monthlyCount") int monthlyCount, @Param("targetYear") int targetYear);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM YearlyReading y WHERE y.memberId = :memberId")
-    void deleteByMemberId(Long memberId);
+    void bulkDeleteByMemberId(Long memberId);
 }

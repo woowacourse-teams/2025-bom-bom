@@ -107,5 +107,5 @@ public interface PreviousArticleRepository extends JpaRepository<PreviousArticle
             WHERE keep_order > :keepCount
         )
     """, nativeQuery = true)
-    int cleanupOldPreviousArticles(@Param("keepCount") int keepCount);
+    int bulkCleanupOldPreviousArticles(@Param("keepCount") int keepCount);
 }

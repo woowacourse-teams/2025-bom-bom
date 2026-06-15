@@ -150,13 +150,13 @@ public class ChallengeCommentService {
         ChallengeParticipant participant = getChallengeParticipant(memberId, challengeId);
         validateComment(commentId);
 
-        int insertCount = challengeCommentLikeRepository.insertIgnoreByParticipantIdAndCommentId(
+        int insertCount = challengeCommentLikeRepository.bulkInsertIgnoreByParticipantIdAndCommentId(
                 participant.getId(),
                 commentId
         );
 
         if (insertCount == 1) {
-            challengeCommentRepository.incrementLikeCountNotBelowZero(commentId, 1);
+            challengeCommentRepository.bulkIncrementLikeCountNotBelowZero(commentId, 1);
         }
 
         return ChallengeCommentLikeResponse.from(challengeCommentRepository.findById(commentId).get());
@@ -173,7 +173,7 @@ public class ChallengeCommentService {
         );
 
         if (deleteCount == 1) {
-            challengeCommentRepository.incrementLikeCountNotBelowZero(commentId, -1);
+            challengeCommentRepository.bulkIncrementLikeCountNotBelowZero(commentId, -1);
         }
 
         return ChallengeCommentLikeResponse.from(challengeCommentRepository.findById(commentId).get());

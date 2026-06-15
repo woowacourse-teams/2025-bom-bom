@@ -65,6 +65,8 @@ class NewsletterServiceTest {
 
     @BeforeEach
     void setup() {
+        subscribeRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
         newsletterRepository.deleteAllInBatch();
         newsletterDetailRepository.deleteAllInBatch();
         categoryRepository.deleteAllInBatch();

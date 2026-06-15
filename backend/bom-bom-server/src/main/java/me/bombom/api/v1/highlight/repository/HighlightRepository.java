@@ -24,5 +24,5 @@ public interface HighlightRepository extends JpaRepository<Highlight, Long>, Cus
                 SET h.articleId = 0 
                 WHERE h.articleId IN :articleIds
             """)
-    void updateArticleDeleted(List<Long> articleIds);
+    void bulkUpdateArticleDeleted(List<Long> articleIds);
 }

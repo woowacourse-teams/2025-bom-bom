@@ -6,10 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
-import me.bombom.api.v1.bookmark.dto.response.BookmarkResponse;
-import me.bombom.api.v1.bookmark.dto.response.BookmarkStatusResponse;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkCountPerNewsletterResponse;
 import me.bombom.api.v1.bookmark.dto.response.BookmarkNewsletterStatisticsResponse;
+import me.bombom.api.v1.bookmark.dto.response.BookmarkResponse;
+import me.bombom.api.v1.bookmark.dto.response.BookmarkStatusResponse;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -88,7 +88,7 @@ public class BookmarkService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteAllByMemberId(Long memberId) {
-        bookmarkRepository.deleteAllByMemberId(memberId);
+        bookmarkRepository.bulkDeleteAllByMemberId(memberId);
     }
 
     private void validateArticleOwner(Long memberId, Article article) {

@@ -2,6 +2,8 @@ package me.bombom.api.v1.reading.service;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -39,6 +41,9 @@ class ReadingServiceResetContinueReadingCountTest {
     private HolidayRepository holidayRepository;
 
     @Mock
+    private ContinueReadingShieldService continueReadingShieldService;
+
+    @Mock
     private Clock clock;
 
     @Test
@@ -48,6 +53,7 @@ class ReadingServiceResetContinueReadingCountTest {
         readingService.resetContinueReadingCount();
 
         verify(todayReadingRepository, never()).findTotalNonZeroAndReadZero();
+        verify(continueReadingShieldService, never()).useShield(anyLong(), any());
     }
 
     @Test
@@ -57,6 +63,7 @@ class ReadingServiceResetContinueReadingCountTest {
         readingService.resetContinueReadingCount();
 
         verify(todayReadingRepository, never()).findTotalNonZeroAndReadZero();
+        verify(continueReadingShieldService, never()).useShield(anyLong(), any());
     }
 
     @Test
@@ -68,12 +75,14 @@ class ReadingServiceResetContinueReadingCountTest {
         readingService.resetContinueReadingCount();
 
         verify(todayReadingRepository, never()).findTotalNonZeroAndReadZero();
+        verify(continueReadingShieldService, never()).useShield(anyLong(), any());
     }
 
     @Test
-    void 어제가_평일이면_연속_읽기_횟수를_초기화하고_최대_스트릭은_유지한다() {
+    void 어제가_평일이고_보호막이_없으면_연속_읽기_횟수를_초기화하고_최대_스트릭은_유지한다() {
         fixClockTo(LocalDate.of(2026, 4, 28)); // Tuesday
-        given(holidayRepository.existsByDate(LocalDate.of(2026, 4, 27))).willReturn(false);
+        LocalDate targetDate = LocalDate.of(2026, 4, 27);
+        given(holidayRepository.existsByDate(targetDate)).willReturn(false);
         TodayReading todayReading = TodayReading.builder()
                 .memberId(1L)
                 .totalCount(3)
@@ -87,6 +96,7 @@ class ReadingServiceResetContinueReadingCountTest {
                 .build();
         given(todayReadingRepository.findTotalNonZeroAndReadZero()).willReturn(List.of(todayReading));
         given(continueReadingRepository.findByMemberId(1L)).willReturn(Optional.of(continueReading));
+        given(continueReadingShieldService.useShield(1L, targetDate)).willReturn(false);
 
         readingService.resetContinueReadingCount();
 
@@ -94,6 +104,62 @@ class ReadingServiceResetContinueReadingCountTest {
             softly.assertThat(continueReading.getDayCount()).isZero();
             softly.assertThat(continueReading.getMaxDayCount()).isEqualTo(15);
         });
+    }
+
+    @Test
+    void 어제가_평일이고_보호막이_있으면_연속_읽기_횟수를_유지한다() {
+        fixClockTo(LocalDate.of(2026, 4, 28)); // Tuesday
+        LocalDate targetDate = LocalDate.of(2026, 4, 27);
+        given(holidayRepository.existsByDate(targetDate)).willReturn(false);
+        TodayReading todayReading = TodayReading.builder()
+                .memberId(1L)
+                .totalCount(3)
+                .currentCount(0)
+                .readCount(0)
+                .build();
+        ContinueReadingRealtime continueReading = ContinueReadingRealtime.builder()
+                .memberId(1L)
+                .dayCount(10)
+                .maxDayCount(15)
+                .build();
+        given(todayReadingRepository.findTotalNonZeroAndReadZero()).willReturn(List.of(todayReading));
+        given(continueReadingRepository.findByMemberId(1L)).willReturn(Optional.of(continueReading));
+        given(continueReadingShieldService.useShield(1L, targetDate)).willReturn(true);
+
+        readingService.resetContinueReadingCount();
+
+        assertSoftly(softly -> {
+            softly.assertThat(continueReading.getDayCount()).isEqualTo(10);
+            softly.assertThat(continueReading.getMaxDayCount()).isEqualTo(15);
+        });
+    }
+
+    @Test
+    void 연속_읽기_횟수가_0이면_보호막을_차감하지_않는다() {
+        fixClockTo(LocalDate.of(2026, 4, 28)); // Tuesday
+        LocalDate targetDate = LocalDate.of(2026, 4, 27);
+        given(holidayRepository.existsByDate(targetDate)).willReturn(false);
+        TodayReading todayReading = TodayReading.builder()
+                .memberId(1L)
+                .totalCount(3)
+                .currentCount(0)
+                .readCount(0)
+                .build();
+        ContinueReadingRealtime continueReading = ContinueReadingRealtime.builder()
+                .memberId(1L)
+                .dayCount(0)
+                .maxDayCount(15)
+                .build();
+        given(todayReadingRepository.findTotalNonZeroAndReadZero()).willReturn(List.of(todayReading));
+        given(continueReadingRepository.findByMemberId(1L)).willReturn(Optional.of(continueReading));
+
+        readingService.resetContinueReadingCount();
+
+        assertSoftly(softly -> {
+            softly.assertThat(continueReading.getDayCount()).isZero();
+            softly.assertThat(continueReading.getMaxDayCount()).isEqualTo(15);
+        });
+        verify(continueReadingShieldService, never()).useShield(anyLong(), any());
     }
 
     @Test
@@ -105,6 +171,7 @@ class ReadingServiceResetContinueReadingCountTest {
         readingService.resetContinueReadingCount();
 
         verify(continueReadingRepository, never()).findByMemberId(1L);
+        verify(continueReadingShieldService, never()).useShield(anyLong(), any());
     }
 
     private void fixClockTo(LocalDate date) {

@@ -17,7 +17,7 @@ public interface TodayReadingRepository extends JpaRepository<TodayReading, Long
         SET currentCount = 0, totalCount = 0, readCount = 0
         WHERE currentCount != 0 OR totalCount != 0 OR readCount != 0
     """)
-    void resetCurrentCount();
+    void bulkResetCurrentCount();
 
     @Query("""
         SELECT tr

@@ -26,7 +26,7 @@ public class ReadingSnapshotMetaService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateSnapshotAt(ReadingSnapshotType snapshotType) {
-        int updated = readingSnapshotMetaRepository.updateSnapshotAt(snapshotType.name());
+        int updated = readingSnapshotMetaRepository.bulkUpdateSnapshotAt(snapshotType.name());
         if (updated == 0) {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND);
         }

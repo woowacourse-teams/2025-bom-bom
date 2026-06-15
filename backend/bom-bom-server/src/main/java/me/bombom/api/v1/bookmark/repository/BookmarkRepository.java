@@ -16,9 +16,9 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long>, Custo
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Bookmark b WHERE b.memberId = :memberId")
-    void deleteAllByMemberId(Long memberId);
+    void bulkDeleteAllByMemberId(Long memberId);
 
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM Bookmark b WHERE b.articleId IN (:articleIds)")
-    void deleteAllByArticleIds(List<Long> articleIds);
+    void bulkDeleteAllByArticleIds(List<Long> articleIds);
 }

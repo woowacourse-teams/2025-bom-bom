@@ -86,4 +86,32 @@ class NewsletterSubscriptionCountServiceTest {
             softly.assertThat(result.getAge30s()).isEqualTo(1);
         });
     }
+
+    @Test
+    void 구독_해지시_해당_연령대와_total이_감소한다() {
+        newsletterSubscriptionCountService.updateNewsletterSubscriptionCount(1L, AGE_20S_BIRTH_DATE);
+        newsletterSubscriptionCountService.updateNewsletterSubscriptionCount(1L, AGE_30S_BIRTH_DATE);
+
+        newsletterSubscriptionCountService.decreaseNewsletterSubscriptionCount(1L, AGE_20S_BIRTH_DATE);
+
+        NewsletterSubscriptionCount result = newsletterSubscriptionCountRepository.findAll().getFirst();
+        assertSoftly(softly -> {
+            softly.assertThat(result.getTotal()).isEqualTo(1);
+            softly.assertThat(result.getAge20s()).isZero();
+            softly.assertThat(result.getAge30s()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void 생년월일이_없으면_구독자_수를_감소하지_않는다() {
+        newsletterSubscriptionCountService.updateNewsletterSubscriptionCount(1L, AGE_20S_BIRTH_DATE);
+
+        newsletterSubscriptionCountService.decreaseNewsletterSubscriptionCount(1L, null);
+
+        NewsletterSubscriptionCount result = newsletterSubscriptionCountRepository.findAll().getFirst();
+        assertSoftly(softly -> {
+            softly.assertThat(result.getTotal()).isEqualTo(1);
+            softly.assertThat(result.getAge20s()).isEqualTo(1);
+        });
+    }
 }

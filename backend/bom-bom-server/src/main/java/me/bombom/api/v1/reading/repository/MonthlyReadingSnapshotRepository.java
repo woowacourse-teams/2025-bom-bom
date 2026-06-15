@@ -91,7 +91,7 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 			mrs.rank_order = ranks.calculated_rank,
 			mrs.next_rank_difference = ranks.next_diff
 	""", nativeQuery = true)
-	void updateMonthlyRanking();
+	void bulkUpdateMonthlyRanking();
 
 	@Query(value = """
 		SELECT
@@ -142,7 +142,7 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Query("UPDATE MonthlyReadingSnapshot mrs SET mrs.currentCount = 0")
-	void resetAllCurrentCount();
+	void bulkResetAllCurrentCount();
 
 	void deleteByMemberId(Long memberId);
 }

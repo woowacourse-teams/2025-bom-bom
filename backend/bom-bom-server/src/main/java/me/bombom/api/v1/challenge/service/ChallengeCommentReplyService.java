@@ -38,7 +38,7 @@ public class ChallengeCommentReplyService {
                         .isPrivate(request.isPrivate())
                         .build()
         );
-        challengeCommentRepository.updateReplyCount(commentId);
+        challengeCommentRepository.bulkUpdateReplyCount(commentId);
     }
 
     public Page<CommentReplyResponse> getCommentReplies(Long memberId, Long challengeId, Long commentId, Pageable pageable) {

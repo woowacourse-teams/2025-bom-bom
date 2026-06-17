@@ -36,9 +36,6 @@ def openApiDomainGroups = [
         apis       : "MyPage",
         models     : [
             "MemberJoinDaysResponse",
-            "RankCardResponse",
-            "RankHistoryResponse",
-            "RankSummaryResponse",
         ].join(","),
     ],
     [

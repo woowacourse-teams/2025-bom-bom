@@ -6,19 +6,16 @@ package me.bombom.openapi.mypage.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Generated;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.openapi.mypage.model.MemberJoinDaysResponse;
-import me.bombom.openapi.mypage.model.RankSummaryResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -56,48 +53,4 @@ public interface MyPageApi {
       produces = {"application/json"})
   @ResponseStatus(HttpStatus.OK)
   MemberJoinDaysResponse getMemberJoinDays(@Parameter(hidden = true) @LoginMember Member member);
-
-  /**
-   * GET /api/v1/members/me/rank : 마이페이지 랭킹 요약 조회 로그인한 회원의 마이페이지 랭킹 카드를 조회합니다. rankHistory와
-   * currentRank는 현재월을 제외한 이전달까지의 확정 랭킹을 기준으로 합니다. reading 카드의 value는 누적 읽은 아티클 수, streak 카드의 value는
-   * 현재 연속 읽기 일수입니다.
-   *
-   * @param type 랭킹 타입 (streak 또는 reading). 생략하면 모든 랭킹 카드를 반환합니다. (optional)
-   * @return 마이페이지 랭킹 요약 조회 성공 (status code 200) or 잘못된 랭킹 타입 요청 (status code 400) or 인증 실패 (status
-   *     code 401)
-   */
-  @Operation(
-      operationId = "getRankSummary",
-      summary = "마이페이지 랭킹 요약 조회",
-      description =
-          "로그인한 회원의 마이페이지 랭킹 카드를 조회합니다. rankHistory와 currentRank는 현재월을 제외한 이전달까지의 확정 랭킹을 기준으로 합니다. reading 카드의 value는 누적 읽은 아티클 수, streak 카드의 value는 현재 연속 읽기 일수입니다.",
-      tags = {"MyPage"},
-      responses = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "마이페이지 랭킹 요약 조회 성공",
-            content = {
-              @Content(
-                  mediaType = "application/json",
-                  schema = @Schema(implementation = RankSummaryResponse.class))
-            }),
-        @ApiResponse(responseCode = "400", description = "잘못된 랭킹 타입 요청"),
-        @ApiResponse(responseCode = "401", description = "인증 실패")
-      },
-      security = {@SecurityRequirement(name = "sessionCookie")})
-  @RequestMapping(
-      method = RequestMethod.GET,
-      value = "/api/v1/members/me/rank",
-      produces = {"application/json"})
-  @ResponseStatus(HttpStatus.OK)
-  RankSummaryResponse getRankSummary(
-      @Parameter(hidden = true) @LoginMember Member member,
-      @Parameter(
-              name = "type",
-              description = "랭킹 타입 (streak 또는 reading). 생략하면 모든 랭킹 카드를 반환합니다.",
-              in = ParameterIn.QUERY)
-          @Valid
-          @RequestParam(value = "type", required = false)
-          String type
-  );
 }

@@ -15,8 +15,11 @@ import me.bombom.api.v1.article.repository.ArticleReadHistoryRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.dto.response.CategoryStatsResponse;
 import me.bombom.api.v1.member.dto.response.RankSummaryResponse;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.domain.Category;
+import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.reading.domain.ContinueReadingRankHistory;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.MonthlyReadingRankHistory;
@@ -53,6 +56,9 @@ class MyPageServiceTest {
     private MemberRepository memberRepository;
 
     @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
     private MutableClock clock;
 
     private Member member;
@@ -64,6 +70,7 @@ class MyPageServiceTest {
         continueReadingRankHistoryRepository.deleteAllInBatch();
         continueReadingRealtimeRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+        categoryRepository.deleteAllInBatch();
 
         clock.setInstant(Instant.parse("2026-06-17T00:00:00Z"), SEOUL_ZONE);
 
@@ -160,14 +167,88 @@ class MyPageServiceTest {
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
     }
 
+    @Test
+    void yearMonth가_있으면_읽은_뉴스_카테고리_월간_통계를_조회한다() {
+        // given
+        Category selfImprovement = categoryRepository.save(Category.builder()
+                .name("자기계발")
+                .build());
+        Category economy = categoryRepository.save(Category.builder()
+                .name("경제")
+                .build());
+        articleReadHistoryRepository.saveAll(createArticleReadHistories(
+                selfImprovement.getId(),
+                12,
+                1,
+                LocalDateTime.of(2026, 5, 1, 0, 0)
+        ));
+        articleReadHistoryRepository.saveAll(createArticleReadHistories(
+                economy.getId(),
+                10,
+                100,
+                LocalDateTime.of(2026, 5, 2, 0, 0)
+        ));
+        articleReadHistoryRepository.save(ArticleReadHistory.builder()
+                .memberId(member.getId())
+                .articleId(1_000L)
+                .newsletterId(1L)
+                .categoryId(selfImprovement.getId())
+                .readAt(LocalDateTime.of(2026, 6, 1, 0, 0))
+                .build());
+
+        // when
+        CategoryStatsResponse response = myPageService.getCategoryStats(member, "2026-05");
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.total()).isEqualTo(22);
+            softly.assertThat(response.categories())
+                    .extracting("id", "name", "count", "percent")
+                    .containsExactly(
+                            org.assertj.core.groups.Tuple.tuple(selfImprovement.getId(), "자기계발", 12L, 55),
+                            org.assertj.core.groups.Tuple.tuple(economy.getId(), "경제", 10L, 45)
+                    );
+        });
+    }
+
+    @Test
+    void yearMonth_형식이_잘못되면_예외가_발생한다() {
+        // when & then
+        assertThatThrownBy(() -> myPageService.getCategoryStats(member, "2026-5"))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
+    }
+
+    @Test
+    void yearMonth가_없으면_예외가_발생한다() {
+        // when & then
+        assertThatThrownBy(() -> myPageService.getCategoryStats(member, null))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
+    }
+
     private List<ArticleReadHistory> createArticleReadHistories(int count) {
-        return LongStream.rangeClosed(1, count)
+        return createArticleReadHistories(
+                1L,
+                count,
+                1,
+                LocalDateTime.of(2026, 5, 1, 0, 0)
+        );
+    }
+
+    private List<ArticleReadHistory> createArticleReadHistories(
+            Long categoryId,
+            int count,
+            long startArticleId,
+            LocalDateTime readAt
+    ) {
+        return LongStream.range(startArticleId, startArticleId + count)
                 .mapToObj(articleId -> ArticleReadHistory.builder()
                         .memberId(member.getId())
                         .articleId(articleId)
                         .newsletterId(1L)
-                        .categoryId(1L)
-                        .readAt(LocalDateTime.of(2026, 5, 1, 0, 0))
+                        .categoryId(categoryId)
+                        .readAt(readAt)
                         .build())
                 .toList();
     }

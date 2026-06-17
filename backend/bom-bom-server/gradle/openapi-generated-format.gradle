@@ -1,0 +1,204 @@
+def generatedOpenApiJavaDir = layout.projectDirectory.dir("generated/openapi")
+def lineSeparator = System.lineSeparator()
+def recordPattern = ~/(?s)public record (\w+)\(\R(.*?)\R\) \{\R/
+
+def parseRecord = { String text ->
+    def matcher = text =~ recordPattern
+    if (!matcher.find()) {
+        return null
+    }
+
+    return [
+        className: matcher.group(1),
+        body     : matcher.group(2),
+    ]
+}
+
+def parseRecordComponents = { String recordBody ->
+    return recordBody.readLines()
+        .collect { it.trim() }
+        .findAll { it && !it.startsWith("@") }
+        .collect { it.replaceFirst(/,$/, "") }
+        .collect { component ->
+            int nameStart = component.lastIndexOf(" ")
+            if (nameStart <= 0) {
+                return null
+            }
+
+            return [
+                type: component.substring(0, nameStart),
+                name: component.substring(nameStart + 1),
+            ]
+        }
+        .findAll { it != null }
+}
+
+def hasFactoryMethod = { String text, String className ->
+    return text.contains("public static ${className} of(") ||
+        text.contains("public static ${className} from(")
+}
+
+def joinFactoryComponents = { List<Map<String, String>> components, String indent, Closure<String> formatter ->
+    return components.withIndex().collect { component, index ->
+        String delimiter = index < components.size() - 1 ? "," : ""
+        return "${indent}${formatter(component)}${delimiter}"
+    }.join(lineSeparator)
+}
+
+def createResponseFactory = { String className, List<Map<String, String>> components ->
+    String factoryName = components.size() == 1 ? "from" : "of"
+    String parameters = joinFactoryComponents(components, "            ") { component ->
+        "${component.type} ${component.name}"
+    }
+    String arguments = joinFactoryComponents(components, "                ") { component ->
+        component.name
+    }
+
+    return [
+        "",
+        "",
+        "    public static ${className} ${factoryName}(",
+        parameters,
+        "    ) {",
+        "        return new ${className}(",
+        arguments,
+        "        );",
+        "    }",
+    ].join(lineSeparator)
+}
+
+def addResponseFactory = { File file ->
+    String text = file.getText("UTF-8")
+    def record = parseRecord(text)
+    if (record == null || hasFactoryMethod(text, record.className)) {
+        return
+    }
+
+    List<Map<String, String>> components = parseRecordComponents(record.body)
+    if (components.isEmpty()) {
+        return
+    }
+
+    int insertIndex = text.lastIndexOf("${lineSeparator}}")
+    if (insertIndex < 0) {
+        return
+    }
+
+    String factory = createResponseFactory(record.className, components)
+    file.setText(text.substring(0, insertIndex) + factory + text.substring(insertIndex), "UTF-8")
+}
+
+def normalizeRecordComponentBlankLines = { File file ->
+    String text = file.getText("UTF-8")
+    def matcher = text =~ recordPattern
+    if (!matcher.find()) {
+        return
+    }
+
+    String recordBody = matcher.group(2)
+    boolean hasAnnotatedComponent = recordBody.readLines()
+        .any { it.trim().startsWith("@") }
+    if (hasAnnotatedComponent) {
+        return
+    }
+
+    String normalizedBody = recordBody.replaceAll(/,\R\R(        )/) { ignored, indent ->
+        return "," + lineSeparator + indent
+    }
+    if (normalizedBody == recordBody) {
+        return
+    }
+
+    file.setText(
+        text.substring(0, matcher.start(2)) + normalizedBody + text.substring(matcher.end(2)),
+        "UTF-8"
+    )
+}
+
+def removeResponseContainerElementValidation = { File file ->
+    String text = file.getText("UTF-8")
+    file.setText(text.replaceAll(/List<@Valid /, "List<"), "UTF-8")
+}
+
+def formatResponseModel = { File file ->
+    addResponseFactory(file)
+    removeResponseContainerElementValidation(file)
+}
+
+tasks.register("addOpenApiResponseFactories") {
+    dependsOn("openApiGenerate")
+    inputs.dir(generatedOpenApiJavaDir)
+    outputs.dir(generatedOpenApiJavaDir)
+
+    doLast {
+        fileTree(generatedOpenApiJavaDir) {
+            include("**/model/**/*.java")
+        }.each(normalizeRecordComponentBlankLines)
+
+        fileTree(generatedOpenApiJavaDir) {
+            include("**/model/**/*Response.java")
+        }.each(formatResponseModel)
+    }
+}
+
+spotless {
+    java {
+        // 생성된 OpenAPI Java 전체에 공통 포맷을 적용한다.
+        target(
+            fileTree(generatedOpenApiJavaDir) {
+                include("**/*.java")
+                exclude("**/model/**/*.java")
+            }
+        )
+        // record 템플릿 기준으로 남는 불필요 import를 먼저 제거한다.
+        replaceRegex("remove unused JsonCreator import", "(?m)^import com\\.fasterxml\\.jackson\\.annotation\\.JsonCreator;\\R", "")
+        replaceRegex("remove unused JsonProperty import", "(?m)^import com\\.fasterxml\\.jackson\\.annotation\\.JsonProperty;\\R", "")
+        replaceRegex("remove unused ArrayList import", "(?m)^import java\\.util\\.ArrayList;\\R", "")
+        replaceRegex("remove unused Arrays import", "(?m)^import java\\.util\\.Arrays;\\R", "")
+        replaceRegex("remove duplicate HttpStatus import", "(?m)^(import org\\.springframework\\.http\\.HttpStatus;\\R)(?=.*^import org\\.springframework\\.http\\.HttpStatus;\\R)", "")
+        replaceRegex("remove blank line after Generated annotation in api", "\\)\\R\\R@(Validated|Tag|Controller|RestController)", ''')
+@$1''')
+        removeUnusedImports()
+        googleJavaFormat()
+        replaceRegex("move closing paren to new line in api methods", '(?m)^(      .+)\\);$', '''$1
+  );''')
+    }
+
+    format("openApiModels") {
+        // model 패키지 내부 참조는 import가 없어도 되므로 별도로 정리한다.
+        target(
+            fileTree(generatedOpenApiJavaDir) {
+                include("**/model/**/*.java")
+            }
+        )
+        replaceRegex("remove same-package model imports", "(?m)^import me\\.bombom\\.openapi(?:\\.[A-Za-z0-9_]+)*\\.model\\.[A-Za-z0-9_]+;\\R", "")
+        replaceRegex("remove duplicate DateTimeFormat import", "(?m)^(import org\\.springframework\\.format\\.annotation\\.DateTimeFormat;\\R)(?=.*^import org\\.springframework\\.format\\.annotation\\.DateTimeFormat;\\R)", "")
+        replaceRegex("remove blank line after Generated annotation", "\\)\\R\\Rpublic record", ")" + System.lineSeparator() + "public record")
+        replaceRegex("remove blank line after Generated annotation in enums", "\\)\\R\\Rpublic enum", ")" + System.lineSeparator() + "public enum")
+        replaceRegex("remove blank lines between enum values", "(?m)^(  [A-Z0-9_]+\\([^\\r\\n]+\\),)\\R\\R(?=  [A-Z0-9_]+\\()", "\$1" + System.lineSeparator())
+        replaceRegex("collapse blank lines after final enum value", ";\\R\\R\\R  private final", ";" + System.lineSeparator() + System.lineSeparator() + "  private final")
+        replaceRegex("remove trailing blank line in models", "\\}\\R\\R\\z", "}" + System.lineSeparator())
+    }
+}
+
+// 코드 생성 이후에만 generated source 포맷 task가 돌도록 연결한다.
+tasks.named("spotlessJava") {
+    dependsOn("addOpenApiResponseFactories")
+}
+
+tasks.named("spotlessOpenApiModels") {
+    dependsOn("addOpenApiResponseFactories")
+}
+
+tasks.named("spotlessJavaApply") {
+    dependsOn("spotlessJava")
+}
+
+tasks.named("spotlessOpenApiModelsApply") {
+    dependsOn("spotlessOpenApiModels")
+}
+
+// 컴파일 전에는 생성 코드 포맷까지 끝난 상태를 보장한다.
+tasks.named("compileJava") {
+    dependsOn("spotlessJavaApply", "spotlessOpenApiModelsApply")
+}

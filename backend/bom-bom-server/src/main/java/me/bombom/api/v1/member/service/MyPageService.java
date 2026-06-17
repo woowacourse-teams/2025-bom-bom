@@ -2,6 +2,9 @@ package me.bombom.api.v1.member.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +13,8 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.dto.CategoryReadCount;
+import me.bombom.api.v1.member.dto.response.CategoryStatsResponse;
 import me.bombom.api.v1.member.dto.response.RankCardResponse;
 import me.bombom.api.v1.member.dto.response.RankHistoryResponse;
 import me.bombom.api.v1.member.dto.response.RankSummaryResponse;
@@ -47,6 +52,18 @@ public class MyPageService {
                 createRankCard(member.getId(), MyPageRankType.STREAK),
                 createRankCard(member.getId(), MyPageRankType.READING)
         ));
+    }
+
+    public CategoryStatsResponse getCategoryStats(Member member, String yearMonthValue) {
+        YearMonth yearMonth = parseYearMonth(yearMonthValue);
+        LocalDateTime start = yearMonth.atDay(1).atStartOfDay();
+        LocalDateTime end = yearMonth.plusMonths(1).atDay(1).atStartOfDay();
+        List<CategoryReadCount> categoryReadCounts = articleReadHistoryRepository.countReadsByCategory(
+                member.getId(),
+                start,
+                end
+        );
+        return CategoryStatsResponse.from(categoryReadCounts);
     }
 
     private RankCardResponse createRankCard(Long memberId, MyPageRankType rankType) {
@@ -111,6 +128,19 @@ public class MyPageService {
             return null;
         }
         return rankHistories.getLast().rank();
+    }
+
+    private YearMonth parseYearMonth(String yearMonth) {
+        if (yearMonth == null || yearMonth.isBlank()) {
+            throw new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION)
+                    .addContext("yearMonth", yearMonth);
+        }
+        try {
+            return YearMonth.parse(yearMonth);
+        } catch (DateTimeParseException e) {
+            throw new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION)
+                    .addContext("yearMonth", yearMonth);
+        }
     }
 
     private CIllegalArgumentException entityNotFound(Long memberId, String entityType) {

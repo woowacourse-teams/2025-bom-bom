@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import me.bombom.api.v1.article.domain.ArticleReadHistory;
+import me.bombom.api.v1.member.dto.CategoryReadCount;
 import me.bombom.api.v1.reading.dto.DailyReadCount;
 import me.bombom.api.v1.reading.dto.FrequentReadNewsletter;
 import me.bombom.api.v1.reading.dto.ReadCountComparison;
@@ -17,6 +18,26 @@ public interface ArticleReadHistoryRepository extends JpaRepository<ArticleReadH
     Optional<ArticleReadHistory> findByMemberIdAndArticleId(Long memberId, Long articleId);
 
     int countByMemberId(Long memberId);
+
+    @Query("""
+            SELECT new me.bombom.api.v1.member.dto.CategoryReadCount(
+                c.id,
+                c.name,
+                COUNT(h.id)
+            )
+            FROM ArticleReadHistory h
+            JOIN Category c ON c.id = h.categoryId
+            WHERE h.memberId = :memberId
+              AND h.readAt >= :start
+              AND h.readAt < :end
+            GROUP BY c.id, c.name
+            ORDER BY COUNT(h.id) DESC, c.id ASC
+            """)
+    List<CategoryReadCount> countReadsByCategory(
+            @Param("memberId") Long memberId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 
     @Query("""
             SELECT new me.bombom.api.v1.reading.dto.ReadCountComparison(

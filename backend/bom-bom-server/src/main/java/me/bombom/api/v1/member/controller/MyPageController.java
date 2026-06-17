@@ -3,6 +3,7 @@ package me.bombom.api.v1.member.controller;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.dto.response.CategoryStatsResponse;
 import me.bombom.api.v1.member.dto.response.RankSummaryResponse;
 import me.bombom.api.v1.member.service.MemberService;
 import me.bombom.api.v1.member.service.MyPageService;
@@ -37,5 +38,13 @@ public class MyPageController implements MyPageApi, MyPageControllerApi {
             return myPageService.getRankSummary(member);
         }
         return myPageService.getRankSummary(member, type);
+    }
+
+    @GetMapping("/category-stats")
+    public CategoryStatsResponse getCategoryStats(
+            @LoginMember Member member,
+            @RequestParam(required = false) String yearMonth
+    ) {
+        return myPageService.getCategoryStats(member, yearMonth);
     }
 }

@@ -16,6 +16,8 @@ public interface ArticleReadHistoryRepository extends JpaRepository<ArticleReadH
 
     Optional<ArticleReadHistory> findByMemberIdAndArticleId(Long memberId, Long articleId);
 
+    int countByMemberId(Long memberId);
+
     @Query("""
             SELECT new me.bombom.api.v1.reading.dto.ReadCountComparison(
                 COUNT(CASE WHEN h.readAt >= :thisMonthStart AND h.readAt < :thisMonthEnd THEN h.id ELSE NULL END),

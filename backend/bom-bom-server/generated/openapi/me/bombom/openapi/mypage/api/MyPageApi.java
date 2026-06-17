@@ -21,7 +21,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Validated
-@Tag(name = "MyPage", description = "the MyPage API")
+@Tag(name = "MyPage", description = "마이페이지 관련 API")
 @Generated("org.openapitools.codegen.languages.SpringCodegen")
 public interface MyPageApi {
 

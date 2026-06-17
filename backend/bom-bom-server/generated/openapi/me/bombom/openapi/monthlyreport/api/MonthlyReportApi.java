@@ -28,7 +28,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Validated
-@Tag(name = "MonthlyReport", description = "the MonthlyReport API")
+@Tag(name = "MonthlyReport", description = "월간 리포트 관련 API")
 @Generated("org.openapitools.codegen.languages.SpringCodegen")
 public interface MonthlyReportApi {
 
